@@ -1,0 +1,102 @@
+# Root .gitignore for microservices: Node/Next.js, .NET, Docker, IDEs
+
+# ------------------------------
+# General OS/Editor junk
+# ------------------------------
+.DS_Store
+Thumbs.db
+*.log
+logs/
+*.pid
+*.pid.lock
+*.seed
+*.tgz
+*.tmp
+*.swp
+*.swo
+*.orig
+
+# ------------------------------
+# Env and secrets (repo-wide)
+# ------------------------------
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.cert
+
+# ------------------------------
+# Node / JS / TS
+# ------------------------------
+**/node_modules/
+**/.pnp
+**/.pnp.*
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/versions
+**/.turbo
+**/.cache
+**/coverage/
+**/.nyc_output
+**/dist/
+**/build/
+**/out/
+**/*.tsbuildinfo
+
+# ------------------------------
+# Next.js
+# ------------------------------
+**/.next/
+**/next-env.d.ts
+.vercel/
+
+# ------------------------------
+# Package manager debug logs
+# ------------------------------
+.pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+
+# ------------------------------
+# .NET / C#
+# ------------------------------
+**/bin/
+**/obj/
+**/.vs/
+**/TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.csproj.user
+*.vcxproj.user
+*.cachefile
+
+# ------------------------------
+# IDEs and editors
+# ------------------------------
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ------------------------------
+# Docker (local overrides/artifacts)
+# ------------------------------
+.docker/
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# ------------------------------
+# Lockfiles (keep tracked) — intentionally NOT ignored
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
