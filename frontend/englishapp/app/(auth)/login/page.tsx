@@ -1,0 +1,97 @@
+"use client"
+
+import GoogleButton from "@/app/components/google-button";
+import { on } from "events";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react"
+import { Button, Card, Container, Form } from "react-bootstrap"
+import { da } from "zod/locales";
+
+type LoginSchema = { email: string, password: string };
+
+
+export default function LoginPage() {
+    const [data, setData] = useState<LoginSchema>({ email: "", password: "" })
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+
+
+
+    async function obSumbit(e: React.FormEvent<HTMLFormElement>) {
+
+        e.preventDefault();
+        setIsLoading(true);
+        setError(null);
+        try {
+            const upstream = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+            console.log("upstream", upstream)
+            const response = await upstream.json();
+            console.log("data", response)
+            if (upstream.ok && response?.ok) {
+                router.replace("/dashboard")
+            }
+        }
+        catch (e: any) {
+            setError(e?.message)
+        }
+        finally {
+            setIsLoading(false)
+        }
+    }
+    return (
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+            <Container >
+                <Card className="shadow-sm border-0 rounded-4 mx-auto max-w-110">
+                    <Card.Body className="p-4 p-md-5 max-w-2xl" >
+                        <h1 className="fs-4 fw-semibold text-center mb-4">Login</h1>
+                        <Form onSubmit={obSumbit} noValidate>
+                            <Form.Group className="mb-3">
+                                <Form.Label>
+                                    Email
+                                </Form.Label>
+                                <Form.Control type="email"
+                                    required
+                                    placeholder="you@example.com"
+                                    value={data.email}
+                                    onChange={(e) => setData((f) => ({ ...f, email: e.target.value }))}
+                                    autoComplete="email"
+                                >
+                                </Form.Control>
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>
+                                    Password
+                                </Form.Label>
+                                <Form.Control type="password"
+                                    required
+                                    placeholder="***"
+                                    value={data.password}
+                                    onChange={(e) => setData((f) => ({ ...f, password: e.target.value }))}
+                                >
+
+                                </Form.Control>
+                            </Form.Group>
+                            <Form.Group>
+                                <Button className="mt-3" type="submit" disabled={isLoading}>
+                                    {isLoading ? (<div>Logging</div>) : (<div>Log in</div>)}
+                                </Button>
+                            </Form.Group>
+                            <Form.Group>
+                                <div className="mt-3">
+                                    <GoogleButton />
+                                </div>
+                            </Form.Group>
+                        </Form>
+                    </Card.Body>
+                </Card>
+            </Container>
+
+
+        </div>
+    )
+}
