@@ -241,7 +241,7 @@ app.MapPost("/api/auth/login", async (
         ua: http.Request.Headers.UserAgent.ToString()
     );
 
-    await userManager.SetAuthenticationTokenAsync(user, "RefreshToken", jti, JsonSerializer.Serialize(rec));
+    await userManager.SetAuthenticationTokenAsync(user, "refresh_token", jti, JsonSerializer.Serialize(rec));
 
     http.Response.Cookies.Append("refresh_token", payload, new CookieOptions
     {
@@ -327,7 +327,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
         );
 
 
-        var saveToken = await userManager.SetAuthenticationTokenAsync(existedUser, "RefreshToken", jti, JsonSerializer.Serialize(rec));
+        var saveToken = await userManager.SetAuthenticationTokenAsync(existedUser, "refresh_token", jti, JsonSerializer.Serialize(rec));
         if (!saveToken.Succeeded) return Results.BadRequest(new ResultDto(false, string.Join("; ", saveToken.Errors.Select(e => e.Description)), null!));
         req.Response.Cookies.Append("refresh_token", refreshtoken, new CookieOptions()
         {
@@ -350,6 +350,109 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
 .Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest); ;
 
 
+
+app.MapPost("/api/auth/refresh", async (
+    UserManager<User> userManager,
+    IOptions<JwtSettings> jwtSettings,
+    HttpContext http
+) =>
+{
+    var payLoad = http.Request.Cookies["refresh_token"];
+    if (string.IsNullOrEmpty(payLoad)) return Results.BadRequest(new ResultDto(false, "refresh token is missing", null!));
+    var parts = payLoad.Split('.', 3);
+    var userId = parts[0];
+    var jti = parts[1];
+    var raw = parts[2];
+
+    var user = await userManager.FindByIdAsync(userId);
+    if (user == null) return Results.Unauthorized();
+    var json = await userManager.GetAuthenticationTokenAsync(user, "refresh_token", jti);
+
+    if (string.IsNullOrEmpty(json)) return Results.Unauthorized();
+    var rec = JsonSerializer.Deserialize<RefreshRecord>(json);
+    if (rec.revokedAt != null || rec.exp <= DateTime.UtcNow) return Results.Unauthorized();
+
+    if (!string.IsNullOrEmpty(rec.replacedByJti)) return Results.Unauthorized();
+
+    if (rec.hash != Hash(raw)) return Results.Unauthorized();
+
+
+    var roles = await userManager.GetRolesAsync(user);
+    var newAccessToken = CreateJwtToken(user, roles, jwtSettings.Value);
+
+
+    var (newPayload, newJti, newRaw) = BuildRefreshPayload(user.Id);
+    var newRec = new RefreshRecord(
+        hash: Hash(newRaw),
+        exp: DateTime.UtcNow.AddDays(30),
+        revokedAt: null,
+        replacedByJti: null,
+        deviceId: http.Request.Headers["X-Device-Id"].ToString(),
+        ua: http.Request.Headers.UserAgent.ToString(),
+        ip: http.Connection.RemoteIpAddress?.ToString()
+    );
+    await userManager.SetAuthenticationTokenAsync(user, "refresh_token", newJti, JsonSerializer.Serialize(newRec));
+    var oldRec = rec with { revokedAt = DateTime.UtcNow, replacedByJti = newJti };
+    await userManager.SetAuthenticationTokenAsync(user, "refresh_token", jti, JsonSerializer.Serialize(oldRec));
+
+
+    http.Response.Cookies.Append("refresh_token", newPayload, new CookieOptions
+    {
+        HttpOnly = true,
+        SameSite = SameSiteMode.Lax,
+        Secure = true,
+        Path = "/",
+        Expires = DateTime.UtcNow.AddDays(30),
+        IsEssential = true
+    });
+    return Results.Ok(new ResultDto(true, "Success", newAccessToken));
+
+}).Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
+
+
+
+app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userManager) =>
+{
+    var payLoad = http.Request.Cookies["refresh_token"];
+    if (!string.IsNullOrEmpty(payLoad))
+    {
+        var parts = payLoad.Split('.', 3);
+        if (parts.Length == 3)
+        {
+            var user = await userManager.FindByIdAsync(parts[0]);
+            if (user != null)
+            {
+                var jti = parts[1];
+                var json = await userManager.GetAuthenticationTokenAsync(user, "refresh_token", jti);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var rec = JsonSerializer.Deserialize<RefreshRecord>(json)! with { revokedAt = DateTime.UtcNow };
+                    await userManager.SetAuthenticationTokenAsync(user, "refresh_token", jti, JsonSerializer.Serialize(rec));
+                }
+            }
+        }
+        http.Response.Cookies.Append("refresh_token", "", new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = true,
+            Path = "/",
+            Expires = DateTimeOffset.UnixEpoch
+        });
+    }
+    return Results.Ok(new ResultDto(true, "Logout successfully", null!));
+});
+
+
+
+
+
+
+
+
+
+
+
 app.MapGet("/api/me", async (ClaimsPrincipal info) =>
 {
     var email = info.FindFirstValue(ClaimTypes.Email ?? JwtRegisteredClaimNames.Name);
@@ -357,6 +460,15 @@ app.MapGet("/api/me", async (ClaimsPrincipal info) =>
     var id = info.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
     return Results.Ok(new ResultDto(true, "Get information successfully", new { id, email }));
 }).RequireAuthorization().Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
+
+
+
+
+
+
+
+
+
 
 
 // MINIMAL API
