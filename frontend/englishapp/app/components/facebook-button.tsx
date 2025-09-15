@@ -69,7 +69,7 @@ export default function FacebookButton() {
 
     return (
         <>
-            // chưa dùng được do facebook yêu cầu https
+
             <Script src="https://connect.facebook.net/en_US/sdk.js"
                 strategy="afterInteractive"
                 onLoad={() => {

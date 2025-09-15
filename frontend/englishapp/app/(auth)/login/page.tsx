@@ -89,6 +89,10 @@ export default function LoginPage() {
                             <Form.Group>
                                 <div className="mt-3">
                                     <GoogleButton />
+
+
+
+                                    {/* yêu cầu https cho đăng nhập facebook */}
                                     <FacebookButton />
                                 </div>
                             </Form.Group>

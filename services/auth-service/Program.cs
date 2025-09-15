@@ -2,8 +2,10 @@ using System.Composition;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using auth_service.Models;
 using Google.Apis.Auth;
@@ -15,6 +17,33 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
+
+
+static string Base64Url(byte[] b) =>
+    Convert.ToBase64String(b).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+static byte[] Base64UrlDecode(string s)
+{
+    s = s.Replace('-', '+').Replace('_', '/');
+    switch (s.Length % 4) { case 2: s += "=="; break; case 3: s += "="; break; }
+    return Convert.FromBase64String(s);
+}
+
+static string NewRaw() => Base64Url(RandomNumberGenerator.GetBytes(64));
+
+static string Hash(string raw)
+{
+    using var sha = SHA256.Create();
+    return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
+}
+
+static (string token, string jti, string raw) BuildRefreshPayload(string userId)
+{
+    var raw = NewRaw();
+    var jti = Guid.NewGuid().ToString("N");
+    return ($"{userId}.{jti}.{raw}", jti, raw);
+}
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
@@ -131,12 +160,14 @@ static string CreateJwtToken(User user, IEnumerable<string> roles, JwtSettings j
         issuer: jwt.Issuer,
         audience: jwt.Audience,
         claims: claims,
-        expires: DateTime.UtcNow.AddHours(2),
-        signingCredentials: creds
+        expires: DateTime.UtcNow.AddMinutes(15),
+signingCredentials: creds
 
     );
     return new JwtSecurityTokenHandler().WriteToken(token).ToString();
 }
+
+
 
 
 // MINIMAL API
@@ -165,6 +196,17 @@ app.MapPost("/api/auth/register", async ([FromServices] UserManager<User> userMa
 .Produces(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status409Conflict);
 
+
+
+
+
+
+
+
+
+
+
+
 app.MapPost("/api/auth/login", async (
     [FromServices] UserManager<User> userManager,
     [FromServices] SignInManager<User> signInManger,
@@ -173,6 +215,7 @@ app.MapPost("/api/auth/login", async (
     HttpContext http
 ) =>
 {
+
     if (string.IsNullOrEmpty(dto.email) || string.IsNullOrEmpty(dto.password))
     {
         return Results.BadRequest(new ResultDto(false, "Email or password is missing", null!));
@@ -183,9 +226,24 @@ app.MapPost("/api/auth/login", async (
     if (!check.Succeeded) return Results.BadRequest(new ResultDto(false, "Password is incorrect", null!));
 
     var roles = await userManager.GetRolesAsync(user);
-    var token = CreateJwtToken(user, roles, jwt.Value);
+    var accessToken = CreateJwtToken(user, roles, jwt.Value);
 
-    http.Response.Cookies.Append("auth", token, new CookieOptions
+
+    var (payload, jti, raw) = BuildRefreshPayload(user.Id);
+    var rec = new RefreshRecord(
+        hash: Hash(raw),
+        exp: DateTime.UtcNow.AddDays(30),
+        revokedAt: null,
+        replacedByJti: null,
+
+        deviceId: http.Request.Headers["X-Device-Id"].ToString(),
+        ip: http.Connection.RemoteIpAddress?.ToString(),
+        ua: http.Request.Headers.UserAgent.ToString()
+    );
+
+    await userManager.SetAuthenticationTokenAsync(user, "RefreshToken", jti, JsonSerializer.Serialize(rec));
+
+    http.Response.Cookies.Append("refresh_token", payload, new CookieOptions
     {
         HttpOnly = true,
         SameSite = SameSiteMode.Lax,
@@ -196,8 +254,15 @@ app.MapPost("/api/auth/login", async (
 
 
 
-    return Results.Ok(new ResultDto(true, "Login successfully", null!));
+    return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
 }).AllowAnonymous().Produces(statusCode: StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
+
+
+
+
+
+
+
 
 app.MapPost("/api/auth/login-google", async (HttpContext req,
     [FromServices] UserManager<User> userManager,
@@ -216,24 +281,55 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
         if (!payLoad.EmailVerified)
             return Results.BadRequest(new ResultDto(false, "Email is not verified by Google", null!));
 
-        var existedUser = await userManager.FindByEmailAsync(payLoad.Email);
+        const string loginProvider = "Google";
+        var providerKey = payLoad.Subject;
+
+        var existedUser = await userManager.FindByLoginAsync(loginProvider, providerKey);
         if (existedUser == null)
         {
-            User newUser = new User()
+            existedUser = await userManager.FindByEmailAsync(payLoad.Email);
+            if (existedUser == null)
             {
-                Email = payLoad.Email,
-                UserName = payLoad.Email,
-                EmailConfirmed = true
-            };
-            var createUser = await userManager.CreateAsync(newUser);
-            if (!createUser.Succeeded) return Results.BadRequest(new ResultDto(false, "Error while creating new user ", null!));
-            existedUser = newUser;
+                existedUser = new User()
+                {
+                    Email = payLoad.Email,
+                    UserName = payLoad.Email,
+                    EmailConfirmed = true
+                };
+                var createUser = await userManager.CreateAsync(existedUser);
+                if (!createUser.Succeeded) return Results.BadRequest(new ResultDto(false, createUser.Errors.FirstOrDefault()!.Description, null!));
+
+            }
+            var info = new UserLoginInfo(loginProvider, providerKey, "Google");
+            var addLogin = await userManager.AddLoginAsync(existedUser, info);
+            if (!addLogin.Succeeded)
+            {
+                var already = addLogin.Errors.Any(e =>
+                    e.Code.Contains("LoginAlreadyAssociated", StringComparison.OrdinalIgnoreCase));
+                if (!already)
+                    return Results.BadRequest(new ResultDto(false, string.Join("; ", addLogin.Errors.Select(e => e.Description)), null!));
+            }
         }
+
         var roles = await userManager.GetRolesAsync(user: existedUser);
 
-        var token = CreateJwtToken(existedUser, roles, jwtSettings.Value);
+        var accessToken = CreateJwtToken(existedUser, roles, jwtSettings.Value);
 
-        req.Response.Cookies.Append("auth", token, new CookieOptions()
+        var (refreshtoken, jti, raw) = BuildRefreshPayload(userId: existedUser.Id);
+        var rec = new RefreshRecord(
+            hash: Hash(raw),
+            exp: DateTime.UtcNow.AddDays(30),
+            revokedAt: null,
+            replacedByJti: null,
+            deviceId: req.Request.Headers["X-Device-Id"].ToString(),
+            ip: req.Connection.RemoteIpAddress?.ToString(),
+            ua: req.Request.Headers.UserAgent.ToString()
+        );
+
+
+        var saveToken = await userManager.SetAuthenticationTokenAsync(existedUser, "RefreshToken", jti, JsonSerializer.Serialize(rec));
+        if (!saveToken.Succeeded) return Results.BadRequest(new ResultDto(false, string.Join("; ", saveToken.Errors.Select(e => e.Description)), null!));
+        req.Response.Cookies.Append("refresh_token", refreshtoken, new CookieOptions()
         {
             HttpOnly = true,
             SameSite = SameSiteMode.Lax,
@@ -243,7 +339,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
 
         });
 
-        return Results.Ok(new ResultDto(true, "Login successfully", token));
+        return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
     }
     catch (Exception e)
     {
@@ -251,9 +347,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
     }
 
 }).AllowAnonymous()
-.Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
-;
-
+.Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest); ;
 
 
 app.MapGet("/api/me", async (ClaimsPrincipal info) =>
@@ -282,6 +376,20 @@ public record LoginDto(string email, string password);
 
 public record ResultDto(bool isSuccess, string message, object data);
 
+public record RefreshTokenDto(string refreshToken);
+
+public record RevokeRefreshToken(string refreshToken);
+record RefreshRecord(
+    string hash,
+    DateTime exp,
+    DateTime? revokedAt,
+    string? replacedByJti,
+    string? deviceId,
+    string? ip,
+    string? ua
+);
+
+
 public class JwtSettings
 {
     public string Issuer { get; set; } = "";
@@ -290,3 +398,8 @@ public class JwtSettings
 }
 
 public record GoogleLoginRequest([property: JsonPropertyName("idToken")] string? idToken);
+
+public record FacebookLoginRequest([property: JsonPropertyName("idToken")] string? idToken);
+
+
+
