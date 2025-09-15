@@ -1,14 +1,15 @@
 "use client"
 
 import GoogleButton from "@/app/components/google-button";
-import { on } from "events";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react"
 import { Button, Card, Container, Form } from "react-bootstrap"
-import { da } from "zod/locales";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+if (!API_BASE) console.log("Missing NEXT_PUBLIC_API_BASE");
 
 type LoginSchema = { email: string, password: string };
-
+type LoginResponse = { isSuccess: boolean, message: string, data: any }
 
 export default function LoginPage() {
     const [data, setData] = useState<LoginSchema>({ email: "", password: "" })
@@ -16,25 +17,27 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
-
-
     async function obSumbit(e: React.FormEvent<HTMLFormElement>) {
 
         e.preventDefault();
         setIsLoading(true);
         setError(null);
         try {
-            const upstream = await fetch("/api/login", {
+            const upstream = await fetch(`${API_BASE}/api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: "include"
             })
             console.log("upstream", upstream)
-            const response = await upstream.json();
+            const response: LoginResponse = await upstream.json();
+
             console.log("data", response)
-            if (upstream.ok && response?.ok) {
-                router.replace("/dashboard")
+            if (!upstream.ok || !response?.isSuccess) {
+                setError(response?.message || "Login failed");
+                return;
             }
+            router.replace("/dashboard");
         }
         catch (e: any) {
             setError(e?.message)
@@ -80,6 +83,7 @@ export default function LoginPage() {
                                 <Button className="mt-3" type="submit" disabled={isLoading}>
                                     {isLoading ? (<div>Logging</div>) : (<div>Log in</div>)}
                                 </Button>
+                                {!!error && <div className="text-red-600 mt-2">{error}</div>}
                             </Form.Group>
                             <Form.Group>
                                 <div className="mt-3">

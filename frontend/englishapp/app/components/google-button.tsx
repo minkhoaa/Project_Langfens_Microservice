@@ -10,6 +10,7 @@ const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 const PUBLIC_API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 
+type LoginResponse = { isSuccess: boolean, message: string, data: any }
 
 export default function GoogleButton() {
 
@@ -31,16 +32,19 @@ export default function GoogleButton() {
                     console.log("Credentail", credential)
                     setLoading(true);
                     setErr(null);
-                    const res = await fetch(`${PUBLIC_API_BASE}/api/google`, {
+                    const res = await fetch(`${PUBLIC_API_BASE}/api/auth/login-google`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ credential })
+                        credentials: "include",
+                        body: JSON.stringify({ idToken: credential })
                     })
-                    if (!res.ok) {
-                        console.log("login failed");
+
+                    const response: LoginResponse = await res.json();
+                    if (!res.ok || !response.isSuccess) {
+                        console.log(response);
                         return;
                     }
-                    router.replace("/");
+                    router.replace("/dashboard");
                 }
                 catch (e: any) {
                     setErr(e.message ?? "Login failed");

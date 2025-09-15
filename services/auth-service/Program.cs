@@ -4,7 +4,9 @@ using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography.Xml;
 using System.Text;
+using System.Text.Json.Serialization;
 using auth_service.Models;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +24,8 @@ var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__DEF
                     ?? builder.Configuration.GetConnectionString("Default");
 
 
+var googleClientId = Environment.GetEnvironmentVariable("PUBLIC_GOOGLE_CLIENT_ID") ?? builder.Configuration["OAuth:PUBLIC_GOOGLE_CLIENT_ID"];
+
 
 
 builder.Services.AddDbContextPool<AppDbContext>(option =>
@@ -31,10 +35,15 @@ builder.Services.AddDbContextPool<AppDbContext>(option =>
 
 builder.Services.AddIdentityCore<User>().AddRoles<Role>().AddEntityFrameworkStores<AppDbContext>().AddSignInManager().AddDefaultTokenProviders();
 
+builder.Services.AddCors(c => c.AddPolicy("FE", p => p.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
+
+
 builder.Services.AddAuthentication(option =>
 {
-    option.DefaultAuthenticateScheme = BearerTokenDefaults.AuthenticationScheme;
+    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(option =>
 {
@@ -43,12 +52,24 @@ builder.Services.AddAuthentication(option =>
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateIssuerSigningKey = true,
-        ValidAudience = jwt.Audience,
+        ValidAudience = jwt!.Audience,
         ValidIssuer = jwt.Issuer,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SignKey)),
         ClockSkew = TimeSpan.Zero
 
 
+    };
+
+    option.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = (ctx) =>
+        {
+            if (string.IsNullOrEmpty(ctx.Token) && ctx.Request.Cookies.TryGetValue("auth", out var tokenFromCookie))
+            {
+                ctx.Token = tokenFromCookie.ToString();
+            }
+            return Task.CompletedTask;
+        }
     };
 }
 )
@@ -88,7 +109,7 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
+app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -99,9 +120,9 @@ static string CreateJwtToken(User user, IEnumerable<string> roles, JwtSettings j
 {
     var claims = new List<Claim>()
     {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-        new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? user.Email ?? "")
+       new(ClaimTypes.NameIdentifier, user.Id),
+        new(ClaimTypes.Email, user.Email ?? string.Empty),
+        new(ClaimTypes.Name, user.UserName ?? user.Email ?? string.Empty),
     };
     claims.AddRange(roles.Select(x => new Claim(ClaimTypes.Role, x)));
     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SignKey));
@@ -110,7 +131,7 @@ static string CreateJwtToken(User user, IEnumerable<string> roles, JwtSettings j
         issuer: jwt.Issuer,
         audience: jwt.Audience,
         claims: claims,
-        expires: DateTime.UtcNow.AddMinutes(5),
+        expires: DateTime.UtcNow.AddHours(2),
         signingCredentials: creds
 
     );
@@ -148,7 +169,8 @@ app.MapPost("/api/auth/login", async (
     [FromServices] UserManager<User> userManager,
     [FromServices] SignInManager<User> signInManger,
     IOptions<JwtSettings> jwt,
-    [FromBody] LoginDto dto
+    [FromBody] LoginDto dto,
+    HttpContext http
 ) =>
 {
     if (string.IsNullOrEmpty(dto.email) || string.IsNullOrEmpty(dto.password))
@@ -162,18 +184,85 @@ app.MapPost("/api/auth/login", async (
 
     var roles = await userManager.GetRolesAsync(user);
     var token = CreateJwtToken(user, roles, jwt.Value);
-    return Results.Ok(new ResultDto(true, "Login successfully", token));
+
+    http.Response.Cookies.Append("auth", token, new CookieOptions
+    {
+        HttpOnly = true,
+        SameSite = SameSiteMode.Lax,
+        Secure = true,
+        Path = "/",
+        Expires = DateTime.UtcNow.AddHours(2)
+    });
+
+
+
+    return Results.Ok(new ResultDto(true, "Login successfully", null!));
 }).AllowAnonymous().Produces(statusCode: StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
+
+app.MapPost("/api/auth/login-google", async (HttpContext req,
+    [FromServices] UserManager<User> userManager,
+    IOptions<JwtSettings> jwtSettings,
+    [FromServices] RoleManager<Role> roleManager
+) =>
+{
+    var dto = await req.Request.ReadFromJsonAsync<GoogleLoginRequest>();
+    if (string.IsNullOrEmpty(dto.idToken)) return Results.BadRequest(new ResultDto(false, "Missing Idtoken", null!));
+    try
+    {
+        var payLoad = await GoogleJsonWebSignature.ValidateAsync(dto.idToken, new GoogleJsonWebSignature.ValidationSettings()
+        {
+            Audience = new[] { googleClientId }
+        });
+        if (!payLoad.EmailVerified)
+            return Results.BadRequest(new ResultDto(false, "Email is not verified by Google", null!));
+
+        var existedUser = await userManager.FindByEmailAsync(payLoad.Email);
+        if (existedUser == null)
+        {
+            User newUser = new User()
+            {
+                Email = payLoad.Email,
+                UserName = payLoad.Email,
+                EmailConfirmed = true
+            };
+            var createUser = await userManager.CreateAsync(newUser);
+            if (!createUser.Succeeded) return Results.BadRequest(new ResultDto(false, "Error while creating new user ", null!));
+            existedUser = newUser;
+        }
+        var roles = await userManager.GetRolesAsync(user: existedUser);
+
+        var token = CreateJwtToken(existedUser, roles, jwtSettings.Value);
+
+        req.Response.Cookies.Append("auth", token, new CookieOptions()
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = true,
+            Path = "/",
+            Expires = DateTime.UtcNow.AddDays(2),
+
+        });
+
+        return Results.Ok(new ResultDto(true, "Login successfully", token));
+    }
+    catch (Exception e)
+    {
+        return Results.BadRequest(new ResultDto(false, $"{e.Message}", null!));
+    }
+
+}).AllowAnonymous()
+.Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
+;
 
 
 
 app.MapGet("/api/me", async (ClaimsPrincipal info) =>
 {
-    var email = info.FindFirstValue(JwtRegisteredClaimNames.Email ?? JwtRegisteredClaimNames.Name);
+    var email = info.FindFirstValue(ClaimTypes.Email ?? JwtRegisteredClaimNames.Name);
     if (email == null || string.IsNullOrEmpty(email)) return Results.NotFound(new ResultDto(false, "Email is exist", null!));
-    var id = info.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? "";
+    var id = info.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
     return Results.Ok(new ResultDto(true, "Get information successfully", new { id, email }));
-}).AllowAnonymous().Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
+}).RequireAuthorization().Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
 
 
 // MINIMAL API
@@ -199,3 +288,5 @@ public class JwtSettings
     public string Audience { get; set; } = "";
     public string SignKey { get; set; } = "";
 }
+
+public record GoogleLoginRequest([property: JsonPropertyName("idToken")] string? idToken);
