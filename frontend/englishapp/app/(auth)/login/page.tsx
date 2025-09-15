@@ -1,5 +1,6 @@
 "use client"
 
+import FacebookButton from "@/app/components/facebook-button";
 import GoogleButton from "@/app/components/google-button";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react"
@@ -88,6 +89,7 @@ export default function LoginPage() {
                             <Form.Group>
                                 <div className="mt-3">
                                     <GoogleButton />
+                                    <FacebookButton />
                                 </div>
                             </Form.Group>
                         </Form>
