@@ -4,6 +4,7 @@ import { read } from "fs";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
+import { setAccessToken } from "@/app/lib/auth-client";
 import { any } from "zod";
 
 const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
@@ -32,7 +33,7 @@ export default function GoogleButton() {
                     console.log("Credentail", credential)
                     setLoading(true);
                     setErr(null);
-                    const res = await fetch(`${PUBLIC_API_BASE}/api/auth/login-google`, {
+                    const res = await fetch(`/api/auth/login-google`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include",
@@ -44,6 +45,8 @@ export default function GoogleButton() {
                         console.log(response);
                         return;
                     }
+                    // Lưu access token để dùng ngay
+                    setAccessToken(response.data);
                     router.replace("/dashboard");
                 }
                 catch (e: any) {

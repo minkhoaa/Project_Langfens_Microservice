@@ -8,6 +8,7 @@ services:
     environment:
       - CONNECTIONSTRING__DEFAULT=Host=database;Port=5432;Database=appdb;Username=appuser;Password=apppassword
       - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
+      - ASPNETCORE_ENVIRONMENT=Development
     networks: 
       - backend
     depends_on:

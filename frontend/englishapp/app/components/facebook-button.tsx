@@ -6,8 +6,9 @@ import Script from "next/script";
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
+import { setAccessToken } from "@/app/lib/auth-client";
 
-const NEXT_PUBLIC_FACEBOOK_CLIENT_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID!;
+const NEXT_PUBLIC_FACEBOOK_CLIENT_ID = process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_ID!;
 const PUBLIC_API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 
@@ -55,6 +56,7 @@ export default function FacebookButton() {
                     setLoading(false);
                     return;
                 }
+                setAccessToken(res.data);
                 router.replace('/dashboard')
             }
             catch (e: any) {

@@ -19,6 +19,44 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 
+static CookieOptions RtDel(string path) => new()
+{
+    HttpOnly = true,
+    SameSite = SameSiteMode.Lax,
+    Secure = false,                  // HTTP local
+    Path = path,
+    Expires = DateTimeOffset.UnixEpoch
+};
+
+static CookieOptions RtSet() => new()
+{
+    HttpOnly = true,
+    SameSite = SameSiteMode.Lax,       // same-site (localhost)
+    Secure = false,                  // HTTP local
+    Path = "/api/auth/refresh",    // CHỐT 1 PATH DUY NHẤT
+    Expires = DateTime.UtcNow.AddDays(30),
+    IsEssential = true
+};
+static void ClearRtCookies(HttpResponse res)
+{
+    res.Cookies.Append("refresh_token", "", RtDel("/"));
+    res.Cookies.Append("refresh_token", "", RtDel("/api/auth/refresh"));
+}
+
+// (an toàn khi đang chuyển đổi) lấy refresh_token cuối cùng trong header Cookie
+static string? GetLatestRefreshToken(HttpRequest req)
+{
+    var raw = req.Headers.Cookie.ToString();
+    if (string.IsNullOrEmpty(raw)) return null;
+    // lấy cái cuối cùng xuất hiện (thường là cái mới nhất)
+    return raw.Split(';')
+        .Select(s => s.Trim())
+        .Where(s => s.StartsWith("refresh_token="))
+        .Select(s => s["refresh_token=".Length..])
+        .LastOrDefault();
+}
+
+
 
 static string Base64Url(byte[] b) =>
     Convert.ToBase64String(b).TrimEnd('=').Replace('+', '-').Replace('/', '_');
@@ -64,7 +102,12 @@ builder.Services.AddDbContextPool<AppDbContext>(option =>
 
 builder.Services.AddIdentityCore<User>().AddRoles<Role>().AddEntityFrameworkStores<AppDbContext>().AddSignInManager().AddDefaultTokenProviders();
 
-builder.Services.AddCors(c => c.AddPolicy("FE", p => p.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+builder.Services.AddCors(c => c.AddPolicy("FE", p => p
+    .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+));
 
 
 
@@ -89,20 +132,9 @@ builder.Services.AddAuthentication(option =>
 
     };
 
-    option.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = (ctx) =>
-        {
-            if (string.IsNullOrEmpty(ctx.Token) && ctx.Request.Cookies.TryGetValue("auth", out var tokenFromCookie))
-            {
-                ctx.Token = tokenFromCookie.ToString();
-            }
-            return Task.CompletedTask;
-        }
-    };
+
 }
 )
-
 ;
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
@@ -139,6 +171,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("FE");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -242,15 +275,9 @@ app.MapPost("/api/auth/login", async (
     );
 
     await userManager.SetAuthenticationTokenAsync(user, "refresh_token", jti, JsonSerializer.Serialize(rec));
+    ClearRtCookies(http.Response);
 
-    http.Response.Cookies.Append("refresh_token", payload, new CookieOptions
-    {
-        HttpOnly = true,
-        SameSite = SameSiteMode.Lax,
-        Secure = true,
-        Path = "/",
-        Expires = DateTime.UtcNow.AddHours(2)
-    });
+    http.Response.Cookies.Append("refresh_token", payload, RtSet());
 
 
 
@@ -316,6 +343,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
         var accessToken = CreateJwtToken(existedUser, roles, jwtSettings.Value);
 
         var (refreshtoken, jti, raw) = BuildRefreshPayload(userId: existedUser.Id);
+
         var rec = new RefreshRecord(
             hash: Hash(raw),
             exp: DateTime.UtcNow.AddDays(30),
@@ -327,17 +355,12 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
         );
 
 
+
         var saveToken = await userManager.SetAuthenticationTokenAsync(existedUser, "refresh_token", jti, JsonSerializer.Serialize(rec));
         if (!saveToken.Succeeded) return Results.BadRequest(new ResultDto(false, string.Join("; ", saveToken.Errors.Select(e => e.Description)), null!));
-        req.Response.Cookies.Append("refresh_token", refreshtoken, new CookieOptions()
-        {
-            HttpOnly = true,
-            SameSite = SameSiteMode.Lax,
-            Secure = true,
-            Path = "/",
-            Expires = DateTime.UtcNow.AddDays(2),
+        ClearRtCookies(req.Response);
+        req.Response.Cookies.Append("refresh_token", refreshtoken, RtSet());
 
-        });
 
         return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
     }
@@ -357,12 +380,17 @@ app.MapPost("/api/auth/refresh", async (
     HttpContext http
 ) =>
 {
-    var payLoad = http.Request.Cookies["refresh_token"];
-    if (string.IsNullOrEmpty(payLoad)) return Results.BadRequest(new ResultDto(false, "refresh token is missing", null!));
-    var parts = payLoad.Split('.', 3);
+    // Ưu tiên bắt cái mới nhất trong header để tránh nhầm cái cũ
+    var payload = GetLatestRefreshToken(http.Request) ?? http.Request.Cookies["refresh_token"];
+    if (string.IsNullOrEmpty(payload))
+        return Results.BadRequest(new ResultDto(false, "refresh token is missing", null!));
+
+    var parts = payload.Split('.', 3);
+    if (parts.Length != 3) return Results.Unauthorized();
     var userId = parts[0];
     var jti = parts[1];
     var raw = parts[2];
+
 
     var user = await userManager.FindByIdAsync(userId);
     if (user == null) return Results.Unauthorized();
@@ -395,16 +423,9 @@ app.MapPost("/api/auth/refresh", async (
     var oldRec = rec with { revokedAt = DateTime.UtcNow, replacedByJti = newJti };
     await userManager.SetAuthenticationTokenAsync(user, "refresh_token", jti, JsonSerializer.Serialize(oldRec));
 
+    ClearRtCookies(http.Response);
+    http.Response.Cookies.Append("refresh_token", newPayload, RtSet());
 
-    http.Response.Cookies.Append("refresh_token", newPayload, new CookieOptions
-    {
-        HttpOnly = true,
-        SameSite = SameSiteMode.Lax,
-        Secure = true,
-        Path = "/",
-        Expires = DateTime.UtcNow.AddDays(30),
-        IsEssential = true
-    });
     return Results.Ok(new ResultDto(true, "Success", newAccessToken));
 
 }).Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
@@ -431,16 +452,10 @@ app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userM
                 }
             }
         }
-        http.Response.Cookies.Append("refresh_token", "", new CookieOptions
-        {
-            HttpOnly = true,
-            SameSite = SameSiteMode.Lax,
-            Secure = true,
-            Path = "/",
-            Expires = DateTimeOffset.UnixEpoch
-        });
     }
+    ClearRtCookies(http.Response);
     return Results.Ok(new ResultDto(true, "Logout successfully", null!));
+
 });
 
 
@@ -453,10 +468,10 @@ app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userM
 
 
 
-app.MapGet("/api/me", async (ClaimsPrincipal info) =>
+app.MapGet("/api/auth/me", async (ClaimsPrincipal info) =>
 {
     var email = info.FindFirstValue(ClaimTypes.Email ?? JwtRegisteredClaimNames.Name);
-    if (email == null || string.IsNullOrEmpty(email)) return Results.NotFound(new ResultDto(false, "Email is exist", null!));
+    if (email == null || string.IsNullOrEmpty(email)) return Results.NotFound(new ResultDto(false, "Email is not exist", null!));
     var id = info.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
     return Results.Ok(new ResultDto(true, "Get information successfully", new { id, email }));
 }).RequireAuthorization().Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
@@ -512,6 +527,4 @@ public class JwtSettings
 public record GoogleLoginRequest([property: JsonPropertyName("idToken")] string? idToken);
 
 public record FacebookLoginRequest([property: JsonPropertyName("idToken")] string? idToken);
-
-
 

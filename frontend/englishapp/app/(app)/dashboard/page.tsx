@@ -1,5 +1,6 @@
 "use client"
 
+import { FetchHelper, getAccessToken } from "@/app/lib/auth-client";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { ReactFormState } from "react-dom/client";
@@ -38,12 +39,40 @@ export default function DashboardPage() {
         }
     }
 
+    const onGetMe = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const upstream = await FetchHelper(`api/auth/me`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include"
+            });
+
+            const data: LoginResponse = await upstream.json();
+            if (!upstream.ok || !data.isSuccess) {
+                setError(upstream.statusText ?? data?.message);
+                return;
+            }
+            console.log(data);
+        }
+        catch (e: any) {
+            console.log(e.message);
+        }
+        finally {
+            setIsLoading(false);
+        }
+    }
+
 
     return (
         <div>
             Dashboard
 
             <button className="flex border rounded-lg mt-2 text-sm" onClick={() => onLogout()}>Logout</button>
+            <button className="flex border rounded-lg mt-2 text-sm" onClick={() => onGetMe()}>Me</button>
+
+
         </div>
     )
 }
