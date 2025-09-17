@@ -1,4 +1,18 @@
 services:
+  frontend: 
+    build:
+      context: ../frontend/englishapp
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    env_file: 
+      - ./../frontend/englishapp/.env
+    networks:
+      - backend
+    depends_on:
+      - auth-service
+      - database
+
   auth-service:
     build:
       context: ../services/auth-service

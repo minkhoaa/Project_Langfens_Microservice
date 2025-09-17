@@ -23,7 +23,7 @@ static CookieOptions RtDel(string path) => new()
 {
     HttpOnly = true,
     SameSite = SameSiteMode.Lax,
-    Secure = false,                  // HTTP local
+    Secure = false,
     Path = path,
     Expires = DateTimeOffset.UnixEpoch
 };
@@ -31,9 +31,9 @@ static CookieOptions RtDel(string path) => new()
 static CookieOptions RtSet() => new()
 {
     HttpOnly = true,
-    SameSite = SameSiteMode.Lax,       // same-site (localhost)
-    Secure = false,                  // HTTP local
-    Path = "/api/auth/refresh",    // CHỐT 1 PATH DUY NHẤT
+    SameSite = SameSiteMode.Lax,
+    Secure = false,
+    Path = "/api/auth/refresh",
     Expires = DateTime.UtcNow.AddDays(30),
     IsEssential = true
 };
@@ -43,12 +43,10 @@ static void ClearRtCookies(HttpResponse res)
     res.Cookies.Append("refresh_token", "", RtDel("/api/auth/refresh"));
 }
 
-// (an toàn khi đang chuyển đổi) lấy refresh_token cuối cùng trong header Cookie
 static string? GetLatestRefreshToken(HttpRequest req)
 {
     var raw = req.Headers.Cookie.ToString();
     if (string.IsNullOrEmpty(raw)) return null;
-    // lấy cái cuối cùng xuất hiện (thường là cái mới nhất)
     return raw.Split(';')
         .Select(s => s.Trim())
         .Where(s => s.StartsWith("refresh_token="))
@@ -238,8 +236,6 @@ app.MapPost("/api/auth/register", async ([FromServices] UserManager<User> userMa
 
 
 
-
-
 app.MapPost("/api/auth/login", async (
     [FromServices] UserManager<User> userManager,
     [FromServices] SignInManager<User> signInManger,
@@ -380,7 +376,6 @@ app.MapPost("/api/auth/refresh", async (
     HttpContext http
 ) =>
 {
-    // Ưu tiên bắt cái mới nhất trong header để tránh nhầm cái cũ
     var payload = GetLatestRefreshToken(http.Request) ?? http.Request.Cookies["refresh_token"];
     if (string.IsNullOrEmpty(payload))
         return Results.BadRequest(new ResultDto(false, "refresh token is missing", null!));
