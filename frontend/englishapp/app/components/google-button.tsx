@@ -4,7 +4,7 @@ import { read } from "fs";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
-import { setAccessToken } from "@/app/lib/auth-client";
+import { FetchHelper, setAccessToken } from "@/app/lib/auth-client";
 import { any } from "zod";
 
 const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
@@ -33,7 +33,7 @@ export default function GoogleButton() {
                     console.log("Credentail", credential)
                     setLoading(true);
                     setErr(null);
-                    const res = await fetch(`/api/auth/login-google`, {
+                    const res = await FetchHelper(`api/auth/login-google`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include",

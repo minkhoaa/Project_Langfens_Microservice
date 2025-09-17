@@ -4,7 +4,7 @@ import FacebookButton from "@/app/components/facebook-button";
 import GoogleButton from "@/app/components/google-button";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react"
-import { setAccessToken } from "@/app/lib/auth-client";
+import { FetchHelper, setAccessToken } from "@/app/lib/auth-client";
 import { Button, Card, Container, Form } from "react-bootstrap"
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
@@ -25,7 +25,7 @@ export default function LoginPage() {
         setIsLoading(true);
         setError(null);
         try {
-            const upstream = await fetch(`/api/auth/login`, {
+            const upstream = await FetchHelper(`api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),

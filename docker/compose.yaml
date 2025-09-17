@@ -1,18 +1,4 @@
 services:
-  frontend: 
-    build:
-      context: ../frontend/englishapp
-      dockerfile: Dockerfile
-    ports:
-      - 3000:3000
-    env_file: 
-      - ./../frontend/englishapp/.env
-    networks:
-      - backend
-    depends_on:
-      - auth-service
-      - database
-
   auth-service:
     build:
       context: ../services/auth-service
@@ -23,6 +9,7 @@ services:
       - CONNECTIONSTRING__DEFAULT=Host=database;Port=5432;Database=appdb;Username=appuser;Password=apppassword
       - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
       - ASPNETCORE_ENVIRONMENT=Development
+      - CONNECTIONSTRING__REDIS=redis:6379, abortConnect=false
     networks: 
       - backend
     depends_on:
@@ -53,6 +40,8 @@ services:
       ]
     ports:
       - "6379:6379"  
+    networks:
+      - backend
     tmpfs:
       - /data:size=64m
     restart: unless-stopped

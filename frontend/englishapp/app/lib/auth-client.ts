@@ -32,9 +32,8 @@ export function RefreshAccessToken() {
 export async function FetchHelper(path: string, init: RequestInit = {}) {
     const doFetch = async () => {
         const headers = new Headers(init.headers || {});
-        if (getAccessToken()) headers.set(`Authorization`, `Bearer ${getAccessToken()}`);
         console.log(init.credentials);
-
+        headers.set("Authorization", `Bearer ${accessToken}`);
         console.log(getAccessToken());
         return fetch(`${API_BASE}/${path}`, {
             ...init,

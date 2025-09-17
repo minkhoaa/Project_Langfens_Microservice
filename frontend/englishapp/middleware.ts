@@ -16,11 +16,12 @@ export function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    const refresh_token = req.cookies.get(`refresh_token`)?.value;
+    const sid = req.cookies.get(`sid`)?.value;
 
-    if (refresh_token) {
+    if (sid) {
 
-        NextResponse.next();
+        return NextResponse.next();
+
 
     }
     const loginUrl = new URL('/login', req.url);
