@@ -39,6 +39,28 @@ services:
       - backend
     volumes: ["pgdata:/var/lib/postgresql/data"]
 
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    command: [
+      "redis-server",
+      "--save", "",                 # tắt RDB
+      "--appendonly", "no",         # tắt AOF
+      "--maxmemory", "128mb",       # giới hạn bộ nhớ Redis
+      "--maxmemory-policy", "allkeys-lru",
+      "--databases", "1",           # 1 DB là đủ cho hầu hết case
+      "--port", "6379"
+      ]
+    ports:
+      - "6379:6379"  
+    tmpfs:
+      - /data:size=64m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 2s
+      retries: 5
 
 networks:
   backend:
