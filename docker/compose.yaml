@@ -3,6 +3,7 @@ services:
     build:
       context: ../services/auth-service
       dockerfile: Dockerfile
+    container_name: auth-service
     ports:
       - 8080:8080
     environment:
@@ -15,8 +16,50 @@ services:
     depends_on:
       - database
 
+  email-service:
+    build: 
+      context: ./../services/email-sender-nest/
+      dockerfile: Dockerfile
+    container_name: email-service
+    env_file:
+      - ./../services/email-sender-nest/.env
+    environment:
+      - MAIL_DRIVER=gmail
+      - GMAIL_USER=23520757@gm.uit.edu.vn
+      - GMAIL_APP_PASS=pupw pcwd wavu tihh
+      - MAIL_FROM="SmartWay-English-Helper <23520757@gm.uit.edu.vn>"
+      - RABBIT_URI=amqp://guest:guest@rabbitmq-service:5672
+    ports:
+      - 8081:3000
+    depends_on:
+      rabbitmq-service:
+        condition: service_healthy
+    networks:
+      - backend
+
+  rabbitmq-service:
+    image: rabbitmq:3-management
+    container_name:  rabbitmq-service
+    hostname: rabbitmq-service
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq  
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - backend
+
   database:
     image: postgres:16-alpine
+    container_name: postgres-service
     environment:
       POSTGRES_DB: appdb
       POSTGRES_USER: appuser
@@ -28,7 +71,7 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    container_name: redis
+    container_name: redis-service
     command: [
       "redis-server",
       "--save", "",                 # tắt RDB
@@ -57,3 +100,4 @@ networks:
 
 volumes:
   pgdata:
+  rabbitmq_data:

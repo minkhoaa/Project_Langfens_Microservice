@@ -103,3 +103,4 @@ docker-compose.override.yaml
 
 
 .fake
+services/email-sender-nest/.prettierrc

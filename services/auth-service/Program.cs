@@ -116,8 +116,6 @@ builder.Services.AddCors(c => c.AddPolicy("FE", p => p
     .AllowCredentials()
 ));
 
-
-
 builder.Services.AddAuthentication(option =>
 {
     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -142,8 +140,7 @@ builder.Services.AddAuthentication(option =>
 
 
 }
-)
-;
+);
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -243,7 +240,17 @@ app.MapPost("/api/auth/register", async ([FromServices] UserManager<User> userMa
 
 
 
-
+/// <summary>
+/// LOGIN SERVICE
+/// </summary>
+/// <param name="userManager"></param>
+/// <param name="signInManger"></param>
+/// <param name="jwt"></param>
+/// <param name="dto"></param>
+/// <param name="redis"></param>
+/// <param name="http"></param>
+/// <param name="configuration"></param>
+/// <returns></returns>
 
 
 app.MapPost("/api/auth/login", async (
@@ -276,7 +283,6 @@ app.MapPost("/api/auth/login", async (
         exp: DateTime.UtcNow.AddDays(30),
         revokedAt: null,
         replacedByJti: null,
-
         deviceId: http.Request.Headers["X-Device-Id"].ToString(),
         ip: http.Connection.RemoteIpAddress?.ToString(),
         ua: http.Request.Headers.UserAgent.ToString()
@@ -307,7 +313,16 @@ app.MapPost("/api/auth/login", async (
 
 
 
-
+/// <summary>
+/// LOGIN GOOGLE
+/// </summary>
+/// <param name="req"></param>
+/// <param name="userManager"></param>
+/// <param name="jwtSettings"></param>
+/// <param name="roleManager"></param>
+/// <param name="redis"></param>
+/// <param name="cfg"></param>
+/// <returns></returns>
 
 
 app.MapPost("/api/auth/login-google", async (HttpContext req,
@@ -407,7 +422,9 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
 }).AllowAnonymous()
 .Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest); ;
 
-
+// COOKIE set trong redis có id là KeySession(sid) với body là SessionRecord
+// COOKIE set trong Frontend thì có id là sid 
+// mỗi refresh_token có khóa ngoại liên kết với jti (mã jwt của session cookie)
 
 app.MapPost("/api/auth/refresh", async (
     UserManager<User> userManager,
@@ -516,9 +533,6 @@ app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userM
 
 
 
-
-
-
 app.MapGet("/api/auth/me", async (ClaimsPrincipal info) =>
 {
     var email = info.FindFirstValue(ClaimTypes.Email ?? JwtRegisteredClaimNames.Name);
@@ -526,10 +540,6 @@ app.MapGet("/api/auth/me", async (ClaimsPrincipal info) =>
     var id = info.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
     return Results.Ok(new ResultDto(true, "Get information successfully", new { id, email }));
 }).RequireAuthorization().Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
-
-
-
-
 
 
 
