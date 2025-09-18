@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using auth_service.Data;
+using auth_service.Migrations;
 using auth_service.Models;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication.BearerToken;
@@ -22,10 +23,73 @@ using Microsoft.OpenApi.Writers;
 using StackExchange.Redis;
 
 
+
+// HELPER
+
+// sid: 1 phiên = 1 sid.
+
+
 static string KeySession(string sid) => $"session:{sid}";
-static string KeyRefresh(string userId, string jti) => $"refresh:{userId}:{jti}";
+
+// devKey: giữ sid hiện hành của 1 thiết bị → phục vụ “mỗi device chỉ 1 phiên” và đá phiên cũ cùng device.
+
+static string KeyUserDevSid(string userId, string deviceId) => $"user:{userId}:device:{deviceId}:sid";
+
+// zKey: giữ tất cả sid của user → phục vụ giới hạn tổng số phiên/user & theo dõi hoạt động.
+static string KeyUserSessions(string userId) => $"user:{userId}:sessions";
 
 
+
+static string Base64Url(byte[] b) =>
+    Convert.ToBase64String(b).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+static string NewRaw() => Base64Url(RandomNumberGenerator.GetBytes(64));
+static (string token, string jti, string raw) BuildRefreshPayload(string userId)
+{
+    var raw = NewRaw();
+    var jti = Guid.NewGuid().ToString("N");
+    return ($"{userId}.{jti}.{raw}", jti, raw);
+}
+
+// gắn index khi có session mới, phiên của user kèm device cụ thể
+static async Task AddSessionIndicesAsync(IDatabase redis, SessionRec ss, TimeSpan time)
+{
+    var devKey = KeyUserDevSid(ss.UserId, ss.DeviceId!);
+    var zKey = KeyUserSessions(ss.UserId);
+    var oldSid = await redis.StringGetAsync(devKey);
+    if (!oldSid.IsNullOrEmpty)
+    {
+        await redis.KeyDeleteAsync(KeySession(oldSid!));
+        await redis.SortedSetRemoveAsync(zKey, oldSid);
+    }
+    await redis.StringSetAsync(devKey, ss.Sid, time);
+    await redis.SortedSetAddAsync(zKey, ss.Sid, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+}
+
+// giới hạn số lương phiên của 1 user, 
+static async Task CapUserSessionsAsync(IDatabase redis, string userId, int maxSession)
+{
+    if (maxSession <= 0) return;
+    var zKey = KeyUserSessions(userId);
+    var count = await redis.SortedSetLengthAsync(zKey);
+    if (count > maxSession)
+    {
+        var toRemove = await redis.SortedSetRangeByRankAsync(zKey, 0, (long)(count - maxSession - 1));
+        foreach (var c in toRemove)
+        {
+            await redis.KeyDeleteAsync(KeySession(c!));
+        }
+        await redis.SortedSetRemoveRangeByRankAsync(zKey, 0, (long)(count - maxSession - 1));
+    }
+}
+static async Task RemoveSessionAsync(IDatabase redis, SessionRec ss)
+{
+    await redis.KeyDeleteAsync(KeySession(ss.Sid));
+    await redis.SortedSetRemoveAsync(KeyUserSessions(ss.UserId), ss.Sid);
+    if (!string.IsNullOrEmpty(ss.DeviceId))
+    {
+        await redis.KeyDeleteAsync(KeyUserDevSid(ss.UserId, ss.DeviceId));
+    }
+}
 
 static CookieOptions SidSet(IConfiguration cfg) => new()
 {
@@ -52,20 +116,7 @@ static CookieOptions SidDel(IConfiguration cfg) => new()
 
 
 
-static string Base64Url(byte[] b) =>
-    Convert.ToBase64String(b).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
-
-static string NewRaw() => Base64Url(RandomNumberGenerator.GetBytes(64));
-
-
-
-static (string token, string jti, string raw) BuildRefreshPayload(string userId)
-{
-    var raw = NewRaw();
-    var jti = Guid.NewGuid().ToString("N");
-    return ($"{userId}.{jti}.{raw}", jti, raw);
-}
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
@@ -307,6 +358,11 @@ app.MapPost("/api/auth/login", async (
     await redis.StringSetAsync(KeySession(sid), JsonSerializer.Serialize(ss), TimeSpan.FromDays(30));
     http.Response.Cookies.Append("sid", sid, SidSet(cfg: configuration));
 
+    var ttl = ss.Exp > DateTime.UtcNow ? ss.Exp - DateTime.UtcNow : TimeSpan.FromSeconds(1);
+    await AddSessionIndicesAsync(redis, ss, ttl);     // đá phiên cũ cùng device nếu có
+    const int K = 5;                                  // tuỳ bạn, 0 = không giới hạn
+    await CapUserSessionsAsync(redis, ss.UserId, K);
+
     return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
 }).AllowAnonymous().Produces(statusCode: StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
 
@@ -432,6 +488,10 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
         await redis.StringSetAsync(KeySession(sid), JsonSerializer.Serialize(ss), TimeSpan.FromDays(30));
         req.Response.Cookies.Append("sid", sid, SidSet(cfg));
 
+        var ttl = ss.Exp > DateTime.UtcNow ? ss.Exp - DateTime.UtcNow : TimeSpan.FromSeconds(1);
+        await AddSessionIndicesAsync(redis, ss, ttl);
+        const int K = 5;
+        await CapUserSessionsAsync(redis, ss.UserId, K);
         return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
     }
     catch (Exception e)
@@ -529,10 +589,18 @@ app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userM
                 dbSession.RevokedAt = DateTime.UtcNow;
                 await db.SaveChangesAsync();
             }
+            await redis.SortedSetRemoveAsync($"user:{session.UserId}:sessions", sid);
+            if (!string.IsNullOrEmpty(deviceId))
+                await redis.KeyDeleteAsync($"user:{session.UserId}:device:{deviceId}:sid");
+            await redis.KeyDeleteAsync(KeySession(sid));
+
         }
-        await redis.KeyDeleteAsync(KeySession(sid));
+
+
     }
     http.Response.Cookies.Append("sid", "", SidDel(configuration));
+
+
     return Results.Ok(new ResultDto(true, "Logout successfully", null!));
 
 });
