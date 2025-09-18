@@ -1,4 +1,15 @@
 services:
+
+  gateway-service:
+    build:
+      context: ../gateway/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - 5000:8080
+    networks: 
+      - backend
+    depends_on:
+      - database
   auth-service:
     build:
       context: ../services/auth-service

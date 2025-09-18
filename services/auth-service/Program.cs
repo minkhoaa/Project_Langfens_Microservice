@@ -27,12 +27,9 @@ using StackExchange.Redis;
 // HELPER
 
 // sid: 1 phiên = 1 sid.
-
-
 static string KeySession(string sid) => $"session:{sid}";
 
 // devKey: giữ sid hiện hành của 1 thiết bị → phục vụ “mỗi device chỉ 1 phiên” và đá phiên cũ cùng device.
-
 static string KeyUserDevSid(string userId, string deviceId) => $"user:{userId}:device:{deviceId}:sid";
 
 // zKey: giữ tất cả sid của user → phục vụ giới hạn tổng số phiên/user & theo dõi hoạt động.
@@ -318,8 +315,10 @@ app.MapPost("/api/auth/login", async (
     var ua = http.Request.Headers.UserAgent.ToString();
 
 
-    var sid = Guid.NewGuid().ToString("N");
 
+
+
+    var sid = Guid.NewGuid().ToString("N");
     var newSession = new SessionEntity()
     {
         UserId = user.Id,
@@ -332,6 +331,11 @@ app.MapPost("/api/auth/login", async (
         PrevJti = null,
         RevokedAt = null,
     };
+
+
+
+    // lưu databsase
+
     var existedSession = await context.Sessions.FindAsync(newSession.UserId, newSession.DeviceId);
     if (existedSession == null)
     {
@@ -351,16 +355,23 @@ app.MapPost("/api/auth/login", async (
     }
     await context.SaveChangesAsync();
 
+
+
+    // lưu sid redis
     var ss = new SessionRec(
         sid, user.Id, jti, DateTime.UtcNow.AddDays(30), deviceId, ua, ip
     );
-
     await redis.StringSetAsync(KeySession(sid), JsonSerializer.Serialize(ss), TimeSpan.FromDays(30));
+
+    // add Cookie
     http.Response.Cookies.Append("sid", sid, SidSet(cfg: configuration));
 
+
+    // lưu device trỏ đến sid ( 1 device - 1 sid(lần user đăng nhập))
     var ttl = ss.Exp > DateTime.UtcNow ? ss.Exp - DateTime.UtcNow : TimeSpan.FromSeconds(1);
     await AddSessionIndicesAsync(redis, ss, ttl);     // đá phiên cũ cùng device nếu có
     const int K = 5;                                  // tuỳ bạn, 0 = không giới hạn
+    // lưu list số lượng sid của một userId đã đăng nhập (giới hannj là 5 sid cho một userId )
     await CapUserSessionsAsync(redis, ss.UserId, K);
 
     return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
