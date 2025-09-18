@@ -24,3 +24,7 @@
 **/Migrations
 LICENSE
 README.md
+tests
+/tests
+**/*.test.*
+**/__tests__

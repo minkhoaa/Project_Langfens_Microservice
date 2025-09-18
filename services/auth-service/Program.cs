@@ -7,6 +7,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using auth_service.Data;
 using auth_service.Models;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication.BearerToken;
@@ -23,6 +24,8 @@ using StackExchange.Redis;
 
 static string KeySession(string sid) => $"session:{sid}";
 static string KeyRefresh(string userId, string jti) => $"refresh:{userId}:{jti}";
+
+
 
 static CookieOptions SidSet(IConfiguration cfg) => new()
 {
@@ -47,36 +50,15 @@ static CookieOptions SidDel(IConfiguration cfg) => new()
     IsEssential = true
 };
 
-static string? GetLatestRefreshToken(HttpRequest req)
-{
-    var raw = req.Headers.Cookie.ToString();
-    if (string.IsNullOrEmpty(raw)) return null;
-    return raw.Split(';')
-        .Select(s => s.Trim())
-        .Where(s => s.StartsWith("refresh_token="))
-        .Select(s => s["refresh_token=".Length..])
-        .LastOrDefault();
-}
-
 
 
 static string Base64Url(byte[] b) =>
     Convert.ToBase64String(b).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
-static byte[] Base64UrlDecode(string s)
-{
-    s = s.Replace('-', '+').Replace('_', '/');
-    switch (s.Length % 4) { case 2: s += "=="; break; case 3: s += "="; break; }
-    return Convert.FromBase64String(s);
-}
 
 static string NewRaw() => Base64Url(RandomNumberGenerator.GetBytes(64));
 
-static string Hash(string raw)
-{
-    using var sha = SHA256.Create();
-    return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
-}
+
 
 static (string token, string jti, string raw) BuildRefreshPayload(string userId)
 {
@@ -260,7 +242,8 @@ app.MapPost("/api/auth/login", async (
     [FromBody] LoginDto dto,
     [FromServices] IDatabase redis,
     HttpContext http,
-    IConfiguration configuration
+    IConfiguration configuration,
+    AppDbContext context
 ) =>
 {
 
@@ -278,33 +261,51 @@ app.MapPost("/api/auth/login", async (
 
 
     var (payload, jti, raw) = BuildRefreshPayload(user.Id);
-    var rec = new RefreshRecord(
-        hash: Hash(raw),
-        exp: DateTime.UtcNow.AddDays(30),
-        revokedAt: null,
-        replacedByJti: null,
-        deviceId: http.Request.Headers["X-Device-Id"].ToString(),
-        ip: http.Connection.RemoteIpAddress?.ToString(),
-        ua: http.Request.Headers.UserAgent.ToString()
-    );
 
-    await userManager.SetAuthenticationTokenAsync(user, "refresh_token", jti, JsonSerializer.Serialize(rec));
+    var deviceId = http.Request.Headers["X-Device-Id"].ToString();
+    var ip = http.Connection.RemoteIpAddress?.ToString();
+    var ua = http.Request.Headers.UserAgent.ToString();
+
 
     var sid = Guid.NewGuid().ToString("N");
 
-    var session = new SessionRec(
-        sid,
-        user.Id,
-        jti,
-        DateTime.UtcNow.AddDays(30),
-        DeviceId: http.Request.Headers["X-Device-Id"].ToString(),
-        Ua: http.Request.Headers.UserAgent.ToString(),
-        Ip: http.Connection.RemoteIpAddress?.ToString()
-        );
+    var newSession = new SessionEntity()
+    {
+        UserId = user.Id,
+        DeviceId = deviceId,
+        Jti = jti,
+        Exp = DateTime.UtcNow.AddDays(30),
+        Ua = ua,
+        Ip = ip,
+        LastSeen = DateTime.UtcNow,
+        PrevJti = null,
+        RevokedAt = null,
+    };
+    var existedSession = await context.Sessions.FindAsync(newSession.UserId, newSession.DeviceId);
+    if (existedSession == null)
+    {
+        await context.Sessions.AddAsync(newSession);
 
-    await redis.StringSetAsync(KeySession(sid), JsonSerializer.Serialize(session), TimeSpan.FromDays(30));
+    }
+    else
+    {
+        existedSession.PrevJti = existedSession.Jti;
+        existedSession.Jti = newSession.Jti;
+        existedSession.Exp = newSession.Exp;
+        existedSession.LastSeen = DateTime.UtcNow;
+        existedSession.Ua = newSession.Ua;
+        existedSession.Ip = newSession.Ip;
+        existedSession.RevokedAt = null;
+        context.Sessions.Update(existedSession);
+    }
+    await context.SaveChangesAsync();
+
+    var ss = new SessionRec(
+        sid, user.Id, jti, DateTime.UtcNow.AddDays(30), deviceId, ua, ip
+    );
+
+    await redis.StringSetAsync(KeySession(sid), JsonSerializer.Serialize(ss), TimeSpan.FromDays(30));
     http.Response.Cookies.Append("sid", sid, SidSet(cfg: configuration));
-
 
     return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
 }).AllowAnonymous().Produces(statusCode: StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
@@ -330,11 +331,14 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
     IOptions<JwtSettings> jwtSettings,
     [FromServices] RoleManager<auth_service.Models.Role> roleManager,
     IDatabase redis,
-    IConfiguration cfg
+    IConfiguration cfg,
+    AppDbContext db
 ) =>
 {
     var dto = await req.Request.ReadFromJsonAsync<GoogleLoginRequest>();
-    if (string.IsNullOrEmpty(dto.idToken)) return Results.BadRequest(new ResultDto(false, "Missing Idtoken", null!));
+    if (dto == null || string.IsNullOrEmpty(dto.idToken))
+        return Results.BadRequest(new ResultDto(false, "Missing Idtoken", null!));
+
     try
     {
         var payLoad = await GoogleJsonWebSignature.ValidateAsync(dto.idToken, new GoogleJsonWebSignature.ValidationSettings()
@@ -381,35 +385,51 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
         var accessToken = CreateJwtToken(existedUser, roles, jwtSettings.Value);
 
         var (refreshtoken, jti, raw) = BuildRefreshPayload(userId: existedUser.Id);
-
-        var rec = new RefreshRecord(
-            hash: Hash(raw),
-            exp: DateTime.UtcNow.AddDays(30),
-            revokedAt: null,
-            replacedByJti: null,
-            deviceId: req.Request.Headers["X-Device-Id"].ToString(),
-            ip: req.Connection.RemoteIpAddress?.ToString(),
-            ua: req.Request.Headers.UserAgent.ToString()
-        );
+        var deviceId = req.Request.Headers["X-Device-Id"].ToString();
+        var ua = req.Request.Headers.UserAgent.ToString();
+        var ip = req.Connection.RemoteIpAddress?.ToString();
 
 
+        var newSession = new SessionEntity
+        {
+            UserId = existedUser.Id,
+            DeviceId = deviceId,
+            Jti = jti,
+            Exp = DateTime.UtcNow.AddDays(30),
+            Ip = ip,
+            LastSeen = DateTime.UtcNow,
+            PrevJti = null,
+            RevokedAt = null,
+            Ua = ua,
+        };
+        var existedSession = await db.Sessions.FindAsync(newSession.UserId, deviceId);
+        if (existedSession == null) await db.Sessions.AddAsync(newSession);
+        else
+        {
+            existedSession.PrevJti = existedSession.Jti;
+            existedSession.Jti = newSession.Jti;
+            existedSession.Exp = DateTime.UtcNow.AddDays(30);
+            existedSession.LastSeen = DateTime.UtcNow;
+            existedSession.Ua = ua;
+            existedSession.Ip = ip;
+            db.Sessions.Update(existedSession);
+        }
+        await db.SaveChangesAsync();
 
-        var saveToken = await userManager.SetAuthenticationTokenAsync(existedUser, "refresh_token", jti, JsonSerializer.Serialize(rec));
-        if (!saveToken.Succeeded) return Results.BadRequest(new ResultDto(false, string.Join("; ", saveToken.Errors.Select(e => e.Description)), null!));
 
         var sid = Guid.NewGuid().ToString("N");
-        var session = new SessionRec(
+        var ss = new SessionRec(
             Sid: sid,
             UserId: existedUser.Id,
             Jti: jti,                             // liên kết tới refresh hiện hành
             Exp: DateTime.UtcNow.AddDays(30),
-            DeviceId: rec.deviceId,
-            Ua: rec.ua,
-            Ip: rec.ip
+            DeviceId: deviceId,
+            Ua: ua,
+            Ip: ip
         );
 
 
-        await redis.StringSetAsync(KeySession(sid), JsonSerializer.Serialize(session), TimeSpan.FromDays(30));
+        await redis.StringSetAsync(KeySession(sid), JsonSerializer.Serialize(ss), TimeSpan.FromDays(30));
         req.Response.Cookies.Append("sid", sid, SidSet(cfg));
 
         return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
@@ -430,10 +450,10 @@ app.MapPost("/api/auth/refresh", async (
     UserManager<User> userManager,
     IOptions<JwtSettings> jwtSettings,
     HttpContext http,
-    IDatabase redis
+    IDatabase redis,
+    AppDbContext db
 ) =>
 {
-
 
     var sid = http.Request.Cookies["sid"];
     if (string.IsNullOrEmpty(sid)) return Results.Unauthorized();
@@ -447,48 +467,42 @@ app.MapPost("/api/auth/refresh", async (
     var user = await userManager.FindByIdAsync(session.UserId);
     if (user == null) return Results.Unauthorized();
 
+    var deviceId = session.DeviceId ?? http.Request.Headers["X-Device-Id"].ToString();
+    var ua = session.Ua ?? http.Request.Headers.UserAgent.ToString();
+    var ip = session.Ip ?? http.Connection.RemoteIpAddress?.ToString();
 
-    var json = await userManager.GetAuthenticationTokenAsync(user, "refresh_token", session.Jti);
-    if (string.IsNullOrEmpty(json)) return Results.Unauthorized();
-
-
-    var rec = JsonSerializer.Deserialize<RefreshRecord>(json)!;
-    if (rec.revokedAt != null || rec.exp <= DateTime.UtcNow) return Results.Unauthorized();
-
-    if (!string.IsNullOrEmpty(rec.replacedByJti)) return Results.Unauthorized();
-
-
+    var dbSession = await db.Sessions.FindAsync(user.Id, deviceId);
+    if (dbSession == null || dbSession.RevokedAt != null || dbSession.Jti != session.Jti ||
+        dbSession.Exp <= DateTime.UtcNow) return Results.Unauthorized();
 
     var roles = await userManager.GetRolesAsync(user);
     var newAccessToken = CreateJwtToken(user, roles, jwtSettings.Value);
     var now = DateTime.UtcNow;
-    var rotate = (rec.exp - now) < TimeSpan.FromDays(3);
+    var rotate = (dbSession.Exp - now) < TimeSpan.FromDays(3);
     if (rotate)
     {
         var (newPayload, newJti, newRaw) = BuildRefreshPayload(user.Id);
-        var newRec = new RefreshRecord(
-            hash: Hash(newRaw),
-            exp: DateTime.UtcNow.AddDays(30),
-            revokedAt: null,
-            replacedByJti: null,
-            deviceId: http.Request.Headers["X-Device-Id"].ToString(),
-            ua: http.Request.Headers.UserAgent.ToString(),
-            ip: http.Connection.RemoteIpAddress?.ToString()
-        );
-        await userManager.SetAuthenticationTokenAsync(user, "refresh_token", newJti, JsonSerializer.Serialize(newRec));
-        var oldRec = rec with { revokedAt = now, replacedByJti = newJti };
-        await userManager.SetAuthenticationTokenAsync(user, "refresh_token", session.Jti, JsonSerializer.Serialize(oldRec));
+
+        dbSession.PrevJti = dbSession.Jti;
+        dbSession.Jti = newJti;
+        dbSession.Exp = DateTime.UtcNow.AddDays(30);
+        dbSession.LastSeen = DateTime.UtcNow;
+        dbSession.RevokedAt = null;
+
+        db.Sessions.Update(dbSession);
 
         var updated = session with { Jti = newJti, Exp = now.AddDays(30) };
         await redis.StringSetAsync(KeySession(sid), JsonSerializer.Serialize(updated), TimeSpan.FromDays(30));
-
     }
 
     else
     {
-        // SLIDING: user hoạt động -> gia hạn TTL phiên 30 ngày
         await redis.KeyExpireAsync(KeySession(sid), TimeSpan.FromDays(30));
+        dbSession.LastSeen = now;
+        db.Sessions.Update(dbSession);
     }
+    await db.SaveChangesAsync();
+
 
 
     return Results.Ok(new ResultDto(true, "Success", newAccessToken));
@@ -498,7 +512,7 @@ app.MapPost("/api/auth/refresh", async (
 
 
 app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userManager,
-    IDatabase redis, IConfiguration configuration
+    IDatabase redis, IConfiguration configuration, AppDbContext db
 ) =>
 {
     var sid = http.Request.Cookies["sid"];
@@ -508,15 +522,12 @@ app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userM
         if (!raw.IsNullOrEmpty)
         {
             var session = JsonSerializer.Deserialize<SessionRec>(raw!)!;
-            var user = await userManager.FindByIdAsync(session.UserId);
-            if (user != null)
+            var deviceId = session.DeviceId ?? http.Request.Headers["X-Device-Id"].ToString();
+            var dbSession = await db.Sessions.FindAsync(session.UserId, deviceId);
+            if (dbSession != null)
             {
-                var json = await userManager.GetAuthenticationTokenAsync(user, "refresh_token", session.Jti);
-                if (!string.IsNullOrEmpty(json))
-                {
-                    var newRec = JsonSerializer.Deserialize<RefreshRecord>(json!)! with { revokedAt = DateTime.UtcNow };
-                    await userManager.SetAuthenticationTokenAsync(user, "refresh_token", session.Jti, JsonSerializer.Serialize(newRec));
-                }
+                dbSession.RevokedAt = DateTime.UtcNow;
+                await db.SaveChangesAsync();
             }
         }
         await redis.KeyDeleteAsync(KeySession(sid));

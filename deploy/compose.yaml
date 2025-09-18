@@ -3,7 +3,6 @@ services:
     build:
       context: ../services/auth-service
       dockerfile: Dockerfile
-    container_name: auth-service
     ports:
       - 8080:8080
     environment:
@@ -20,7 +19,6 @@ services:
     build: 
       context: ./../services/email-sender-nest/
       dockerfile: Dockerfile
-    container_name: email-service
     env_file:
       - ./../services/email-sender-nest/.env
     environment:
@@ -39,8 +37,6 @@ services:
 
   rabbitmq-service:
     image: rabbitmq:3-management
-    container_name:  rabbitmq-service
-    hostname: rabbitmq-service
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq  
     environment:
@@ -59,7 +55,6 @@ services:
 
   database:
     image: postgres:16-alpine
-    container_name: postgres-service
     environment:
       POSTGRES_DB: appdb
       POSTGRES_USER: appuser
@@ -71,7 +66,6 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    container_name: redis-service
     command: [
       "redis-server",
       "--save", "",                 # tắt RDB

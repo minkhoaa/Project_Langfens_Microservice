@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using auth_service.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,22 @@ namespace auth_service.Models
             mb.Entity<IdentityRoleClaim<string>>().ToTable("role_claims");
             mb.Entity<IdentityUserToken<string>>().ToTable("user_tokens");
 
+            mb.Entity<SessionEntity>().ToTable("sessions");
+
+            mb.Entity<SessionEntity>(e =>
+            {
+                e.HasKey(x => new { x.UserId, x.DeviceId });
+                e.HasIndex(x => x.UserId);
+                e.HasIndex(x => x.DeviceId);
+                e.HasIndex(x => new { x.UserId, x.DeviceId });
+                e.HasOne(x => x.user)
+                    .WithMany()
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
         }
+
+        public DbSet<SessionEntity> Sessions { get; set; }
     }
 }

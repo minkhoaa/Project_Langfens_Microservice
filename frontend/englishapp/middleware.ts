@@ -9,6 +9,7 @@ export function middleware(req: NextRequest) {
         pathname.startsWith("/favicon") ||
         pathname === "/sitemap.xml" ||
         pathname === "/robots.txt" ||
+
         pathname.startsWith("/login") ||
         pathname.startsWith("/register") ||
         pathname.startsWith("/forgot-password")
