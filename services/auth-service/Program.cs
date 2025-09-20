@@ -1,6 +1,8 @@
 using System.Composition;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;
@@ -11,10 +13,12 @@ using auth_service.Data;
 using auth_service.Migrations;
 using auth_service.Models;
 using Google.Apis.Auth;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -34,6 +38,28 @@ static string KeyUserDevSid(string userId, string deviceId) => $"user:{userId}:d
 
 // zKey: giữ tất cả sid của user → phục vụ giới hạn tổng số phiên/user & theo dõi hoạt động.
 static string KeyUserSessions(string userId) => $"user:{userId}:sessions";
+
+static bool IsValidEmail(string? email)
+{
+    if (string.IsNullOrWhiteSpace(email)) return false;
+    var trimmed = email.Trim();
+    var at = trimmed.LastIndexOf('@');
+    if (at <= 0 || at == trimmed.Length - 1) return false;
+    var local = trimmed[..at];
+    var domain = trimmed[(at + 1)..];
+    try
+    {
+        domain = new IdnMapping().GetAscii(domain);
+
+    }
+    catch
+    {
+        return false; 
+    }
+    var candidate = $"{local}@{domain}";
+    return MailAddress.TryCreate(candidate, out var address) && address.Address == candidate;
+
+}
 
 
 
@@ -58,6 +84,7 @@ static async Task AddSessionIndicesAsync(IDatabase redis, SessionRec ss, TimeSpa
         await redis.KeyDeleteAsync(KeySession(oldSid!));
         await redis.SortedSetRemoveAsync(zKey, oldSid);
     }
+
     await redis.StringSetAsync(devKey, ss.Sid, time);
     await redis.SortedSetAddAsync(zKey, ss.Sid, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 }
@@ -119,25 +146,31 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 var jwt = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__DEFAULT")
-                    ?? builder.Configuration.GetConnectionString("Default");
-
+var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__AUTH");
 
 var redis = Environment.GetEnvironmentVariable("CONNECTIONSTRING__REDIS")
                     ?? builder.Configuration.GetConnectionString("Redis");
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(p => ConnectionMultiplexer.Connect(redis!));
 builder.Services.AddSingleton(c => c.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
-var googleClientId = Environment.GetEnvironmentVariable("PUBLIC_GOOGLE_CLIENT_ID") ?? builder.Configuration["OAuth:PUBLIC_GOOGLE_CLIENT_ID"];
+var googleClientId = Environment.GetEnvironmentVariable("PUBLIC_GOOGLE_CLIENT_ID") ??
+                     builder.Configuration["OAuth:PUBLIC_GOOGLE_CLIENT_ID"];
+builder.Services.AddMassTransit(busConfigurator =>
+{
+    busConfigurator.SetKebabCaseEndpointNameFormatter();
+    busConfigurator.UsingInMemory((context, config) =>
+    {
+        config.ConfigureEndpoints(context);
+    });
+});
 
 
-
-builder.Services.AddDbContextPool<AppDbContext>(option =>
+builder.Services.AddDbContextPool<AuthDbContext>(option =>
 {
     option.UseNpgsql(connectionString);
 });
 
-builder.Services.AddIdentityCore<User>().AddRoles<auth_service.Models.Role>().AddEntityFrameworkStores<AppDbContext>().AddSignInManager().AddDefaultTokenProviders();
+builder.Services.AddIdentityCore<User>().AddRoles<auth_service.Models.Role>().AddEntityFrameworkStores<AuthDbContext>().AddSignInManager().AddDefaultTokenProviders();
 
 builder.Services.AddCors(c => c.AddPolicy("FE", p => p
     .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
@@ -199,7 +232,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     await db.Database.MigrateAsync();
 }
 app.UseSwagger();
@@ -209,7 +242,6 @@ app.UseCors("FE");
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 
 
@@ -230,7 +262,6 @@ static string CreateJwtToken(User user, IEnumerable<string> roles, JwtSettings j
         claims: claims,
         expires: DateTime.UtcNow.AddSeconds(15),
 signingCredentials: creds
-
     );
     return new JwtSecurityTokenHandler().WriteToken(token).ToString();
 }
@@ -241,11 +272,13 @@ signingCredentials: creds
 // MINIMAL API
 
 app.MapPost("/api/auth/register", async ([FromServices] UserManager<User> userManagers, [FromBody] RegisterDto dto) =>
-{
-    if (string.IsNullOrEmpty(dto.email) || string.IsNullOrEmpty(dto.password))
     {
-        return Results.BadRequest(new { isSuccess = false, message = "Email and password is missing" });
-    }
+
+        if (IsValidEmail(dto.email))
+            return Results.BadRequest(new ResultDto(false, "Email format is not valid", null!));
+
+        if (string.IsNullOrEmpty(dto.email) || string.IsNullOrEmpty(dto.password))
+            return Results.BadRequest(new ResultDto(false, "Email or password is missed", null!));
     var existed = await userManagers.FindByEmailAsync(dto.email);
     if (existed != null)
     {
@@ -291,7 +324,7 @@ app.MapPost("/api/auth/login", async (
     [FromServices] IDatabase redis,
     HttpContext http,
     IConfiguration configuration,
-    AppDbContext context
+    AuthDbContext context
 ) =>
 {
 
@@ -314,10 +347,7 @@ app.MapPost("/api/auth/login", async (
     var ip = http.Connection.RemoteIpAddress?.ToString();
     var ua = http.Request.Headers.UserAgent.ToString();
 
-
-
-
-
+    
     var sid = Guid.NewGuid().ToString("N");
     var newSession = new SessionEntity()
     {
@@ -399,7 +429,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
     [FromServices] RoleManager<auth_service.Models.Role> roleManager,
     IDatabase redis,
     IConfiguration cfg,
-    AppDbContext db
+    AuthDbContext db
 ) =>
 {
     var dto = await req.Request.ReadFromJsonAsync<GoogleLoginRequest>();
@@ -522,7 +552,7 @@ app.MapPost("/api/auth/refresh", async (
     IOptions<JwtSettings> jwtSettings,
     HttpContext http,
     IDatabase redis,
-    AppDbContext db
+    AuthDbContext db
 ) =>
 {
 
@@ -583,7 +613,7 @@ app.MapPost("/api/auth/refresh", async (
 
 
 app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userManager,
-    IDatabase redis, IConfiguration configuration, AppDbContext db
+    IDatabase redis, IConfiguration configuration, AuthDbContext db
 ) =>
 {
     var sid = http.Request.Cookies["sid"];

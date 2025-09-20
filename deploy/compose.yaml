@@ -1,15 +1,20 @@
-services:
-
+﻿services:
   gateway-service:
     build:
       context: ../gateway/api-gateway
       dockerfile: Dockerfile
     ports:
       - 5000:8080
-    networks: 
+    networks:
       - backend
     depends_on:
-      - database
+      - auth-service
+      - attempt-service
+      - exam-service
+      - course-service
+
+  
+  
   auth-service:
     build:
       context: ../services/auth-service
@@ -17,17 +22,51 @@ services:
     ports:
       - 8080:8080
     environment:
-      - CONNECTIONSTRING__DEFAULT=Host=database;Port=5432;Database=appdb;Username=appuser;Password=apppassword
+      - CONNECTIONSTRING__AUTH=Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth
       - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
       - ASPNETCORE_ENVIRONMENT=Development
       - CONNECTIONSTRING__REDIS=redis:6379, abortConnect=false
-    networks: 
+    networks:
       - backend
     depends_on:
-      - database
+      - auth-database
+  
+  
+  attempt-service:
+    image: attempt-service
+    build:
+      context: ../services/attempt-service
+      dockerfile: Dockerfile
+    ports:
+      - 8081:8080
+    networks:
+      - backend
 
+  exam-service:
+    image: exam-service
+    environment:
+      - CONNECTIONSTRING__EXAM=Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam
+
+    build:
+      context: ../services/exam-service
+      dockerfile: Dockerfile
+    ports:
+      - 8082:8080
+    networks:
+      - backend
+  
+  course-service:
+    image: course-service
+    build:
+      context: ../services/course-service
+      dockerfile: Dockerfile
+    ports:
+      - 8083:8080
+    networks:
+      - backend
+  
   email-service:
-    build: 
+    build:
       context: ./../services/email-sender-nest/
       dockerfile: Dockerfile
     env_file:
@@ -39,17 +78,19 @@ services:
       - MAIL_FROM="SmartWay-English-Helper <23520757@gm.uit.edu.vn>"
       - RABBIT_URI=amqp://guest:guest@rabbitmq-service:5672
     ports:
-      - 8081:3000
+      - 8084:3000
     depends_on:
       rabbitmq-service:
         condition: service_healthy
     networks:
       - backend
 
+
+
   rabbitmq-service:
     image: rabbitmq:3-management
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq  
+      - rabbitmq_data:/var/lib/rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
@@ -63,18 +104,34 @@ services:
       retries: 20
     networks:
       - backend
-
-  database:
+  
+  
+  
+  auth-database:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: appdb
-      POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: apppassword
+      POSTGRES_DB: auth-db
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
     ports: ["5432:5432"]
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/data"]
-
+    volumes: ["pgdata:/var/lib/postgresql/auth-data"]
+  
+  exam-database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: exam-db
+      POSTGRES_USER: exam
+      POSTGRES_PASSWORD: exam
+    ports: [ "5433:5432" ]
+    networks:
+      - backend
+    volumes: [ "pgdata:/var/lib/postgresql/exam-data" ]
+  
+  
+  
+  
   redis:
     image: redis:7.4-alpine
     command: [
@@ -85,9 +142,9 @@ services:
       "--maxmemory-policy", "allkeys-lru",
       "--databases", "1",           # 1 DB là đủ cho hầu hết case
       "--port", "6379"
-      ]
+    ]
     ports:
-      - "6379:6379"  
+      - "6379:6379"
     networks:
       - backend
     tmpfs:

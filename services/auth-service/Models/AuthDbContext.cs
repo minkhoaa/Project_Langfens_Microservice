@@ -11,9 +11,9 @@ namespace auth_service.Models
 {
     public class User : IdentityUser { }
     public class Role : IdentityRole { }
-    public class AppDbContext : IdentityDbContext<User, Role, string>
+    public class AuthDbContext : IdentityDbContext<User, Role, string>
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder mb)
         {
