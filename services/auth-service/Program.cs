@@ -275,7 +275,7 @@ signingCredentials: creds
 app.MapPost("/api/auth/register", async ([FromServices] UserManager<User> userManagers, [FromBody] RegisterDto dto) =>
     {
 
-        if (IsValidEmail(dto.email))
+        if (!IsValidEmail(dto.email))
             return Results.BadRequest(new ApiResultDto(false, "Email format is not valid", null!));
 
         if (string.IsNullOrEmpty(dto.email) || string.IsNullOrEmpty(dto.password))

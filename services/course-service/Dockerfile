@@ -1,15 +1,20 @@
 ﻿# Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY *.csproj ./
-RUN dotnet restore
+COPY services/course-service/course-service.csproj services/course-service/
+COPY services/_shared/Shared.Contracts/Shared.Contracts.csproj services/_shared/Shared.Contracts/
+
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+    dotnet restore services/course-service/course-service.csproj
+
+# copy toàn bộ source sau khi restore
 COPY . .
+WORKDIR /src/services/course-service
 RUN dotnet publish -c Release -o /out \
     -r linux-musl-x64 \
     --self-contained true \
     /p:PublishSingleFile=true \
     /p:EnableCompressionInSingleFile=true \
-    /p:AssemblyName=app \
     /p:DebugType=none
 
 # Runtime siêu gọn
@@ -20,4 +25,4 @@ ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
     Swagger__Enabled=true
 COPY --from=build /out /app
 EXPOSE 8080
-ENTRYPOINT ["./app"]
+ENTRYPOINT ["./course-service"]   

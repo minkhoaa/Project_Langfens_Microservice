@@ -1,7 +1,7 @@
 ﻿services:
   gateway-service:
     build:
-      context: ../gateway/api-gateway
+      context: ../gateway/api-gateway/
       dockerfile: Dockerfile
     ports:
       - 5000:8080
@@ -14,15 +14,14 @@
       - course-service
 
   
-  
   auth-service:
     build:
-      context: ../services/auth-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: services/auth-service/Dockerfile
     ports:
       - 8080:8080
     environment:
-      - CONNECTIONSTRING__AUTH=Host=auth-database;Port=5434;Database=auth-db;Username=auth;Password=auth
+      - CONNECTIONSTRING__AUTH=Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth
       - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
       - ASPNETCORE_ENVIRONMENT=Development
       - CONNECTIONSTRING__REDIS=redis:6379, abortConnect=false
@@ -38,8 +37,8 @@
   attempt-service:
     image: attempt-service
     build:
-      context: ../services/attempt-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: services/attempt-service/Dockerfile
     ports:
       - 8081:8080
     networks:
@@ -50,8 +49,8 @@
     environment:
       - CONNECTIONSTRING__EXAM=Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam
     build:
-      context: ../services/exam-service/
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: services/exam-service/Dockerfile
     ports:
       - 8082:8080
     depends_on:
@@ -63,8 +62,8 @@
   course-service:
     image: course-service
     build:
-      context: ../services/course-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: services/course-service/Dockerfile
     ports:
       - 8083:8080
     networks:
