@@ -11,9 +11,9 @@ using auth_service.Models;
 
 namespace auth_service.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20250918052221_session2")]
-    partial class session2
+    [DbContext(typeof(AuthDbContext))]
+    [Migration("20250921042333_initAuthDb")]
+    partial class initAuthDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

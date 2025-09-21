@@ -7,14 +7,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-var connectionString = builder.Configuration.GetConnectionString("Exam_DB") ?? Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM");
-builder.Services.AddDbContextPool<ExamDbContext>(option => option.UseNpgsql(connectionString));
+builder.Services.AddDbContextPool<ExamDbContext>(option => option.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
+                                                                            ?? builder.Configuration.GetConnectionString("Exam_DB")));
 
 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 
 

@@ -22,4 +22,4 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 LICENSE
-README.md
+README.md/services/exam-service/Migrations/20250920202150_exam-init.cs

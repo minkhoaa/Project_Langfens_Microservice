@@ -10,7 +10,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using auth_service.Data;
-using auth_service.Migrations;
 using auth_service.Models;
 using Google.Apis.Auth;
 using MassTransit;

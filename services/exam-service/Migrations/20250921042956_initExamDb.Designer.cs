@@ -12,8 +12,8 @@ using exam_service.Data;
 namespace exam_service.Migrations
 {
     [DbContext(typeof(ExamDbContext))]
-    [Migration("20250920202150_exam-init")]
-    partial class examinit
+    [Migration("20250921042956_initExamDb")]
+    partial class initExamDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

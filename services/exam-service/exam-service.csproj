@@ -28,6 +28,10 @@
   <ItemGroup>
     <Folder Include="bin\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Migrations\20250921042956_initExamDb.Designer.cs" />
+  </ItemGroup>
     
 
 </Project>
