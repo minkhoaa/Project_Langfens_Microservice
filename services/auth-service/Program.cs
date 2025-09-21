@@ -518,7 +518,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
         var ss = new SessionRec(
             Sid: sid,
             UserId: existedUser.Id,
-            Jti: jti,                             // liên kết tới refresh hiện hành
+            Jti: jti,                            
             Exp: DateTime.UtcNow.AddDays(30),
             DeviceId: deviceId,
             Ua: ua,

@@ -22,7 +22,7 @@
     ports:
       - 8080:8080
     environment:
-      - CONNECTIONSTRING__AUTH=Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth
+      - CONNECTIONSTRING__AUTH=Host=auth-database;Port=5434;Database=auth-db;Username=auth;Password=auth
       - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
       - ASPNETCORE_ENVIRONMENT=Development
       - CONNECTIONSTRING__REDIS=redis:6379, abortConnect=false
@@ -118,7 +118,7 @@
       POSTGRES_DB: auth-db
       POSTGRES_USER: auth
       POSTGRES_PASSWORD: auth
-    ports: ["5432:5432"]
+    ports: ["5434:5432"]
     networks:
       - backend
     volumes: ["pgdata:/var/lib/postgresql/auth-data"]
