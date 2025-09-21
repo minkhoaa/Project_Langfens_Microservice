@@ -12,7 +12,7 @@ using exam_service.Data;
 namespace exam_service.Migrations
 {
     [DbContext(typeof(ExamDbContext))]
-    [Migration("20250921042956_initExamDb")]
+    [Migration("20250921051536_initExamDb")]
     partial class initExamDb
     {
         /// <inheritdoc />

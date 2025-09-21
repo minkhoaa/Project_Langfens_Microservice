@@ -31,6 +31,8 @@
     depends_on:
       auth-database:
         condition: 'service_healthy'
+      redis:
+        condition: 'service_healthy'
   
   
   attempt-service:
@@ -48,7 +50,7 @@
     environment:
       - CONNECTIONSTRING__EXAM=Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam
     build:
-      context: ../services/exam-service
+      context: ../services/exam-service/
       dockerfile: Dockerfile
     ports:
       - 8082:8080
@@ -120,6 +122,12 @@
     networks:
       - backend
     volumes: ["pgdata:/var/lib/postgresql/auth-data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth-db -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
   
   exam-database:
     image: postgres:16-alpine
@@ -131,6 +139,12 @@
     networks:
       - backend
     volumes: [ "pgdata:/var/lib/postgresql/exam-data" ]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U exam -d exam-db -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
   
   
   

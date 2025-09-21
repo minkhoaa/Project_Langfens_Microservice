@@ -22,7 +22,6 @@ export default function GoogleButton() {
     const [err, setErr] = useState<string | null>(null);
     useEffect(() => {
         if (!ready || !window.google) return;
-
         window.google.accounts.id.initialize({
             client_id: clientId,
             ux_mode: "popup",
@@ -39,7 +38,6 @@ export default function GoogleButton() {
                         credentials: "include",
                         body: JSON.stringify({ idToken: credential })
                     })
-
                     const response: LoginResponse = await res.json();
                     if (!res.ok || !response.isSuccess) {
                         console.log(response);

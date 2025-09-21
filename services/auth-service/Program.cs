@@ -23,6 +23,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
+using Shared.Contracts.Contracts;
 using StackExchange.Redis;
 
 
@@ -274,14 +275,14 @@ app.MapPost("/api/auth/register", async ([FromServices] UserManager<User> userMa
     {
 
         if (IsValidEmail(dto.email))
-            return Results.BadRequest(new ResultDto(false, "Email format is not valid", null!));
+            return Results.BadRequest(new ApiResultDto(false, "Email format is not valid", null!));
 
         if (string.IsNullOrEmpty(dto.email) || string.IsNullOrEmpty(dto.password))
-            return Results.BadRequest(new ResultDto(false, "Email or password is missed", null!));
+            return Results.BadRequest(new ApiResultDto(false, "Email or password is missed", null!));
     var existed = await userManagers.FindByEmailAsync(dto.email);
     if (existed != null)
     {
-        return Results.BadRequest(new ResultDto(false, "Email is used", null!));
+        return Results.BadRequest(new ApiResultDto(false, "Email is used", null!));
     }
     var user = new User()
     {
@@ -289,8 +290,8 @@ app.MapPost("/api/auth/register", async ([FromServices] UserManager<User> userMa
         UserName = dto.email
     };
     var result = await userManagers.CreateAsync(user, dto.password);
-    if (!result.Succeeded) return Results.BadRequest(new ResultDto(false, result.Errors.Select(x => x.Description).FirstOrDefault()!.ToString(), null!));
-    return Results.Ok(new ResultDto(true, "User is created successfully", new { id = user.Id, email = user.Email }));
+    if (!result.Succeeded) return Results.BadRequest(new ApiResultDto(false, result.Errors.Select(x => x.Description).FirstOrDefault()!.ToString(), null!));
+    return Results.Ok(new ApiResultDto(true, "User is created successfully", new { id = user.Id, email = user.Email }));
 }).AllowAnonymous()
 .Produces(StatusCodes.Status201Created)
 .Produces(StatusCodes.Status400BadRequest)
@@ -329,12 +330,12 @@ app.MapPost("/api/auth/login", async (
 
     if (string.IsNullOrEmpty(dto.email) || string.IsNullOrEmpty(dto.password))
     {
-        return Results.BadRequest(new ResultDto(false, "Email or password is missing", null!));
+        return Results.BadRequest(new ApiResultDto(false, "Email or password is missing", null!));
     }
     var user = await userManager.FindByEmailAsync(dto.email);
-    if (user == null) return Results.BadRequest(new ResultDto(false, "User is not existed", null!));
+    if (user == null) return Results.BadRequest(new ApiResultDto(false, "User is not existed", null!));
     var check = await signInManger.CheckPasswordSignInAsync(user, dto.password, true);
-    if (!check.Succeeded) return Results.BadRequest(new ResultDto(false, "Password is incorrect", null!));
+    if (!check.Succeeded) return Results.BadRequest(new ApiResultDto(false, "Password is incorrect", null!));
 
     var roles = await userManager.GetRolesAsync(user);
     var accessToken = CreateJwtToken(user, roles, jwt.Value);
@@ -403,7 +404,7 @@ app.MapPost("/api/auth/login", async (
     // lưu list số lượng sid của một userId đã đăng nhập (giới hannj là 5 sid cho một userId )
     await CapUserSessionsAsync(redis, ss.UserId, K);
 
-    return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
+    return Results.Ok(new ApiResultDto(true, "Login successfully", accessToken));
 }).AllowAnonymous().Produces(statusCode: StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
 
 
@@ -433,7 +434,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
 {
     var dto = await req.Request.ReadFromJsonAsync<GoogleLoginRequest>();
     if (dto == null || string.IsNullOrEmpty(dto.idToken))
-        return Results.BadRequest(new ResultDto(false, "Missing Idtoken", null!));
+        return Results.BadRequest(new ApiResultDto(false, "Missing Idtoken", null!));
 
     try
     {
@@ -442,7 +443,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
             Audience = new[] { googleClientId }
         });
         if (!payLoad.EmailVerified)
-            return Results.BadRequest(new ResultDto(false, "Email is not verified by Google", null!));
+            return Results.BadRequest(new ApiResultDto(false, "Email is not verified by Google", null!));
 
         const string loginProvider = "Google";
         var providerKey = payLoad.Subject;
@@ -460,7 +461,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
                     EmailConfirmed = true
                 };
                 var createUser = await userManager.CreateAsync(existedUser);
-                if (!createUser.Succeeded) return Results.BadRequest(new ResultDto(false, createUser.Errors.FirstOrDefault()!.Description, null!));
+                if (!createUser.Succeeded) return Results.BadRequest(new ApiResultDto(false, createUser.Errors.FirstOrDefault()!.Description, null!));
 
             }
             var info = new UserLoginInfo(loginProvider, providerKey, "Google");
@@ -470,7 +471,7 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
                 var already = addLogin.Errors.Any(e =>
                     e.Code.Contains("LoginAlreadyAssociated", StringComparison.OrdinalIgnoreCase));
                 if (!already)
-                    return Results.BadRequest(new ResultDto(false, string.Join("; ", addLogin.Errors.Select(e => e.Description)), null!));
+                    return Results.BadRequest(new ApiResultDto(false, string.Join("; ", addLogin.Errors.Select(e => e.Description)), null!));
             }
         }
 
@@ -532,11 +533,11 @@ app.MapPost("/api/auth/login-google", async (HttpContext req,
         await AddSessionIndicesAsync(redis, ss, ttl);
         const int K = 5;
         await CapUserSessionsAsync(redis, ss.UserId, K);
-        return Results.Ok(new ResultDto(true, "Login successfully", accessToken));
+        return Results.Ok(new ApiResultDto(true, "Login successfully", accessToken));
     }
     catch (Exception e)
     {
-        return Results.BadRequest(new ResultDto(false, $"{e.Message}", null!));
+        return Results.BadRequest(new ApiResultDto(false, $"{e.Message}", null!));
     }
 
 }).AllowAnonymous()
@@ -605,7 +606,7 @@ app.MapPost("/api/auth/refresh", async (
 
 
 
-    return Results.Ok(new ResultDto(true, "Success", newAccessToken));
+    return Results.Ok(new ApiResultDto(true, "Success", newAccessToken));
 
 }).Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
 
@@ -641,7 +642,7 @@ app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userM
     http.Response.Cookies.Append("sid", "", SidDel(configuration));
 
 
-    return Results.Ok(new ResultDto(true, "Logout successfully", null!));
+    return Results.Ok(new ApiResultDto(true, "Logout successfully", null!));
 
 });
 
@@ -655,9 +656,9 @@ app.MapPost("/api/auth/logout", async (HttpContext http, UserManager<User> userM
 app.MapGet("/api/auth/me", async (ClaimsPrincipal info) =>
 {
     var email = info.FindFirstValue(ClaimTypes.Email ?? JwtRegisteredClaimNames.Name);
-    if (email == null || string.IsNullOrEmpty(email)) return Results.NotFound(new ResultDto(false, "Email is not exist", null!));
+    if (email == null || string.IsNullOrEmpty(email)) return Results.NotFound(new ApiResultDto(false, "Email is not exist", null!));
     var id = info.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-    return Results.Ok(new ResultDto(true, "Get information successfully", new { id, email }));
+    return Results.Ok(new ApiResultDto(true, "Get information successfully", new { id, email }));
 }).RequireAuthorization().Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status401Unauthorized);
 
 
@@ -680,8 +681,6 @@ app.Run();
 
 public record RegisterDto(string email, string password);
 public record LoginDto(string email, string password);
-
-public record ResultDto(bool isSuccess, string message, object data);
 
 public record RefreshTokenDto(string refreshToken);
 

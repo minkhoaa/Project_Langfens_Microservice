@@ -8,7 +8,6 @@ RUN dotnet publish -c Release -o /out \
     -r linux-musl-x64 \
     --self-contained true \
     /p:PublishSingleFile=true \
-    /p:TrimMode=link \
     /p:EnableCompressionInSingleFile=true \
     /p:AssemblyName=app \
     /p:DebugType=none
