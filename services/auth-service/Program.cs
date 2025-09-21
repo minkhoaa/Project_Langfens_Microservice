@@ -146,7 +146,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 var jwt = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__AUTH");
+var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__AUTH") 
+                       ?? builder.Configuration.GetConnectionString("Default");
 
 var redis = Environment.GetEnvironmentVariable("CONNECTIONSTRING__REDIS")
                     ?? builder.Configuration.GetConnectionString("Redis");
