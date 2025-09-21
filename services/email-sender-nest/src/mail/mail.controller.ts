@@ -22,7 +22,7 @@ class SendEmailDto {
 }
 
 @ApiTags('Email')
-@Controller('emailcontroller')
+@Controller('/api/email')
 export class MailController {
   constructor(private readonly mail: MailService) { }
 
