@@ -1,8 +1,8 @@
-using System.Text.Json;
+using exam_service.Data.Entities;
+using exam_service.Domains.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace exam_service.Data;
+namespace exam_service.Infrastructure.Persistence;
 
 public class ExamDbContext : DbContext
 {
@@ -10,7 +10,6 @@ public class ExamDbContext : DbContext
     {
     }
     
-
     protected override void OnModelCreating(ModelBuilder mb)
     {
         base.OnModelCreating(mb);

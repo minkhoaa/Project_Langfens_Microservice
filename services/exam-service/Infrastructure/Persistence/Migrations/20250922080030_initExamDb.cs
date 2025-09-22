@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace exam_service.Migrations
+namespace exam_service.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class initExamDb : Migration

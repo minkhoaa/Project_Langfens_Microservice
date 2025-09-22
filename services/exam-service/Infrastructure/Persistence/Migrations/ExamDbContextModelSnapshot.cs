@@ -8,7 +8,7 @@ using exam_service.Data;
 
 #nullable disable
 
-namespace exam_service.Migrations
+namespace exam_service.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ExamDbContext))]
     partial class ExamDbContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,7 @@ namespace exam_service.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("exam_service.Data.Exam", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.Exam", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -72,7 +72,7 @@ namespace exam_service.Migrations
                     b.ToTable("exams", (string)null);
                 });
 
-            modelBuilder.Entity("exam_service.Data.ExamOption", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.ExamOption", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -100,7 +100,7 @@ namespace exam_service.Migrations
                     b.ToTable("exam_options", (string)null);
                 });
 
-            modelBuilder.Entity("exam_service.Data.ExamQuestion", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.ExamQuestion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -139,7 +139,7 @@ namespace exam_service.Migrations
                     b.ToTable("exam_questions", (string)null);
                 });
 
-            modelBuilder.Entity("exam_service.Data.ExamSection", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.ExamSection", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -167,9 +167,9 @@ namespace exam_service.Migrations
                     b.ToTable("exam_sections", (string)null);
                 });
 
-            modelBuilder.Entity("exam_service.Data.ExamOption", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.ExamOption", b =>
                 {
-                    b.HasOne("exam_service.Data.ExamQuestion", "Question")
+                    b.HasOne("exam_service.Data.Entities.ExamQuestion", "Question")
                         .WithMany("Options")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -178,9 +178,9 @@ namespace exam_service.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("exam_service.Data.ExamQuestion", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.ExamQuestion", b =>
                 {
-                    b.HasOne("exam_service.Data.ExamSection", "Section")
+                    b.HasOne("exam_service.Data.Entities.ExamSection", "Section")
                         .WithMany("Questions")
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -189,9 +189,9 @@ namespace exam_service.Migrations
                     b.Navigation("Section");
                 });
 
-            modelBuilder.Entity("exam_service.Data.ExamSection", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.ExamSection", b =>
                 {
-                    b.HasOne("exam_service.Data.Exam", "Exam")
+                    b.HasOne("exam_service.Data.Entities.Exam", "Exam")
                         .WithMany("Sections")
                         .HasForeignKey("ExamId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -200,17 +200,17 @@ namespace exam_service.Migrations
                     b.Navigation("Exam");
                 });
 
-            modelBuilder.Entity("exam_service.Data.Exam", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.Exam", b =>
                 {
                     b.Navigation("Sections");
                 });
 
-            modelBuilder.Entity("exam_service.Data.ExamQuestion", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.ExamQuestion", b =>
                 {
                     b.Navigation("Options");
                 });
 
-            modelBuilder.Entity("exam_service.Data.ExamSection", b =>
+            modelBuilder.Entity("exam_service.Data.Entities.ExamSection", b =>
                 {
                     b.Navigation("Questions");
                 });

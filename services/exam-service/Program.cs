@@ -1,4 +1,9 @@
+using exam_service.Application.Exam;
 using exam_service.Data;
+using exam_service.Features.Exams;
+using exam_service.Features.Exams.AdminEndpoint;
+using exam_service.Features.Exams.PublicEndpoint;
+using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shared.Contracts.Contracts;
 
@@ -10,7 +15,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextPool<ExamDbContext>(option => option.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
                                                                             ?? builder.Configuration.GetConnectionString("Exam_DB")));
-
+builder.Services.AddScoped<IExamService, ExamService>(); 
 
 
 var app = builder.Build();
@@ -32,34 +37,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-
-// MINIMAL API
-app.MapGet("/api/all-exams", async (ExamDbContext context) =>
-{  
-    try {
-        var exams = await context.Exams.AsNoTracking().ToListAsync();
-        return Results.Ok(new ApiResultDto(true, "Success", data: exams));
-    }
-    catch (Exception e) 
-    {
-        return  Results.NotFound(e.Message ?? "Not found");
-    }
-    
-}).AllowAnonymous()
-    .Produces(StatusCodes.Status200OK)
-    .Produces(StatusCodes.Status404NotFound);
-
-
-
-
-
-
-
-
-
-
-
-
+app.MapPublicExamEndpoints();
+app.MapAdminExamEndpoint();
 
 app.Run();

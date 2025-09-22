@@ -69,25 +69,7 @@
     networks:
       - backend
   
-  email-service:
-    build:
-      context: ./../services/email-sender-nest/
-      dockerfile: Dockerfile
-    env_file:
-      - ./../services/email-sender-nest/.env
-    environment:
-      - MAIL_DRIVER=gmail
-      - GMAIL_USER=23520757@gm.uit.edu.vn
-      - GMAIL_APP_PASS=pupw pcwd wavu tihh
-      - MAIL_FROM="SmartWay-English-Helper <23520757@gm.uit.edu.vn>"
-      - RABBIT_URI=amqp://guest:guest@rabbitmq-service:5672
-    ports:
-      - 8084:3000
-    depends_on:
-      rabbitmq-service:
-        condition: service_healthy
-    networks:
-      - backend
+
 
 
 

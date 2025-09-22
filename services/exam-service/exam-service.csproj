@@ -23,6 +23,11 @@
     <ProjectReference Include="..\_shared\Shared.Contracts\Shared.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Exams\InternalEndpoint\" />
+    <Folder Include="Infrastructure\Persistence\Migrations\" />
+  </ItemGroup>
+
 
 
 </Project>
