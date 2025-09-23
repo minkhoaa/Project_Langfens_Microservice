@@ -1,57 +1,49 @@
 using exam_service.Application.Common;
-using exam_service.Application.Exam;
 using exam_service.Contracts.Exams;
-using exam_service.Data;
-using exam_service.Data.Entities;
 using exam_service.Domains.Entities;
 using exam_service.Domains.Enums;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Scaffolding;
 using Shared.Contracts.Contracts;
 
-namespace exam_service.Features.Exams.AdminEndpoint;
+namespace exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 
 public static class AdminExamSubEndpoint
 {   
-    public static RouteHandlerBuilder MapAddExamEndpoint(this RouteGroupBuilder app)
+    public static async Task<IResult> AddExamHandler([FromBody] DtoAdmin.AdminExamCreate dto,
+        CancellationToken token, 
+        [FromServices] ExamDbContext context)
     {
-        return app.MapPost("/addexam", async ([FromBody] DtoAdmin.AdminExamCreate dto,
-                CancellationToken token, 
-                [FromServices] ExamDbContext context
-                ) =>
-        {
-            if (string.IsNullOrWhiteSpace(dto.Title)) 
-                return Results.BadRequest(new ApiResultDto(false, "Title is required", null!));
+        if (string.IsNullOrWhiteSpace(dto.Title)) 
+            return Results.BadRequest(new ApiResultDto(false, "Title is required", null!));
             
-            var baseSlug = !string.IsNullOrWhiteSpace(dto.Slug)
-                ? SlugHelper.ToSlug(dto.Slug)
-                : SlugHelper.ToSlug(dto.Title);
+        var baseSlug = !string.IsNullOrWhiteSpace(dto.Slug)
+            ? SlugHelper.ToSlug(dto.Slug)
+            : SlugHelper.ToSlug(dto.Title);
 
-            if (string.IsNullOrWhiteSpace(baseSlug)) 
-                return Results.BadRequest(new ApiResultDto(false, "Cannot generate slug", null!));
-            var uniqueSlug = await SlugHelper.MakeUniqueSlugAsync(context, baseSlug, token); 
-            var newExam = new Exam()
-            {
-                Slug = uniqueSlug, 
-                Category = dto.Category,
-                Title = dto.Title,
-                DescriptionMd = dto.DescriptionMd,
-                Level = dto.Level,
-                Status = ExamStatus.Draft,
-                DurationMin = dto.DurationMin, 
-                CreatedAt = DateTimeOffset.UtcNow,
-                UpdatedAt = DateTimeOffset.UtcNow
-            };
-            context.Exams.Add(newExam);
-            await context.SaveChangesAsync(token);
-            return Results.Ok(new ApiResultDto(true, "Create successfully", newExam));
-        }).AllowAnonymous()
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status200OK);
+        if (string.IsNullOrWhiteSpace(baseSlug)) 
+            return Results.BadRequest(new ApiResultDto(false, "Cannot generate slug", null!));
+        var uniqueSlug = await SlugHelper.MakeUniqueSlugAsync(context, baseSlug, token); 
+        var newExam = new Exam()
+        {
+            Slug = uniqueSlug, 
+            Category = dto.Category,
+            Title = dto.Title,
+            DescriptionMd = dto.DescriptionMd,
+            Level = dto.Level,
+            Status = ExamStatus.Draft,
+            DurationMin = dto.DurationMin, 
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        context.Exams.Add(newExam);
+        await context.SaveChangesAsync(token);
+        return Results.Ok(new ApiResultDto(true, "Create successfully", newExam));
     }
-    public static RouteHandlerBuilder MapUpdateExamEndpoint(this RouteGroupBuilder app)
+    
+    
+    public static RouteHandlerBuilder UpdateExamEndpoint(this RouteGroupBuilder app)
     {
         return app.MapPut("/update{id}", async ([FromRoute] int id,
                 [FromServices] ExamDbContext context,
@@ -77,7 +69,7 @@ public static class AdminExamSubEndpoint
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status400BadRequest);
     }
-    public static RouteHandlerBuilder MapDeleteExamEndpoint(this RouteGroupBuilder app)
+    public static RouteHandlerBuilder DeleteExamEndpoint(this RouteGroupBuilder app)
     {
         return app.MapDelete("/delete{id}", async ([FromRoute] int id,
                 [FromServices] ExamDbContext context) =>
