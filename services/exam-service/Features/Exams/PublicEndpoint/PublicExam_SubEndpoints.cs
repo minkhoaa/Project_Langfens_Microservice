@@ -5,7 +5,7 @@ namespace exam_service.Features.Exams.PublicEndpoint;
 
 public static class PublicExamSubEndpoints
 {
-    public static RouteHandlerBuilder MapGetExamBySlugEndpoint(this RouteGroupBuilder app)
+    public static RouteHandlerBuilder GetExamBySlugEndpoint(this RouteGroupBuilder app)
     {
         return app.MapGet("/{slug}", async ( string slug, CancellationToken token, IExamService service) =>
             {
@@ -15,7 +15,7 @@ public static class PublicExamSubEndpoints
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }
-    public static RouteHandlerBuilder MapGetAllPublishedExamEndpoint(this RouteGroupBuilder app)
+    public static RouteHandlerBuilder GetAllPublishedExamEndpoint(this RouteGroupBuilder app)
     {
         return app.MapGet("/getallpublishedexam", async (
                 string? category,

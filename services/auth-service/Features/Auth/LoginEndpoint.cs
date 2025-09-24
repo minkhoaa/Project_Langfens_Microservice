@@ -24,11 +24,9 @@ public static class LoginEndpoint
         var requestContext = RequestContext.FromHttpContext(httpContext);
         var result = await authService.PasswordLoginAsync(dto, requestContext, ct);
 
-        if (result.SessionTicket is SessionTicket ticket)
-        {
-            var options = cookieService.CreateSessionCookie(ticket.ExpiresAt);
-            httpContext.Response.Cookies.Append("sid", ticket.SessionId, options);
-        }
+        if (result.SessionTicket is not { } ticket) return result.ToHttpResult();
+        var options = cookieService.CreateSessionCookie(ticket.ExpiresAt);
+        httpContext.Response.Cookies.Append("sid", ticket.SessionId, options);
 
         return result.ToHttpResult();
     }

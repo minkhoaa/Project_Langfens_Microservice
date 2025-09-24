@@ -1,0 +1,17 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="18px">Xin chào {{fullName}},</mj-text>
+        <mj-text>Nhấn nút bên dưới để xác nhận email.</mj-text>
+        <mj-button href="{{verifyUrl}}" font-size="16px">
+          Xác nhận email
+        </mj-button>
+        <mj-text font-size="12px" color="#666">
+          Nếu nút không hoạt động, sao chép đường dẫn sau và mở trong trình duyệt:<br/>
+          {{verifyUrl}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using exam_service.Domains.Entities;
 
 namespace exam_service.Data.Entities;
 
@@ -25,7 +26,7 @@ public class ExamQuestion
     public int Difficulty { get; set; } = 1;
 
     [Required]
-    public string PromptMd { get; set; } = default!;
+    public string? PromptMd { get; set; } = default!;
 
     public string? ExplanationMd { get; set; }
 

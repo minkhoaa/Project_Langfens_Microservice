@@ -1,21 +1,20 @@
 using exam_service.Contracts.Exams;
 using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.Contracts.Contracts;
 
 namespace exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
 
-public static class AdminSectionSubEndpoint
+public static class AdminSectionHandler
 {
-    public static RouteHandlerBuilder AddSectionSubEndpoint(this RouteGroupBuilder app)
-    {
-        return app.MapPost("/add", async (
+    public static async Task<IResult> AddSectionHandler(
                 [FromServices] ExamDbContext context, 
                 [FromBody] DtoAdmin.AdminSectionUpsert dto,
                 CancellationToken token
-                ) => 
+                ) 
         {
             var existedExam = context.Exams.AsNoTracking().FirstOrDefault(exam => exam.Id == dto.ExamId); 
             if (existedExam == null) return Results.NotFound(new ApiResultDto(false, "Not found", null!));
@@ -46,20 +45,36 @@ public static class AdminSectionSubEndpoint
                         token);
                 await context.SaveChangesAsync(token); 
                 await transaction.CommitAsync(token);
-                return Results.Ok(new ApiResultDto(true, "Added successfully", null!)); 
+                return Results.Ok(new ApiResultDto(true, "Added successfully", sec)); 
             }
             catch (Exception e)
             {
                 await transaction.RollbackAsync(token);
                 return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
             }
-        }).AllowAnonymous()
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound);  
-     
-    }
-    public static RouteHandlerBuilder UpdateSectionSubEndpoint(this RouteGroupBuilder app)
+        }
+    public static async Task<IResult> UpdateSectionHandler(
+            [FromServices] ExamDbContext context, 
+            [FromBody] DtoAdmin.AdminSectionUpdate dto, 
+            [FromRoute] int id, 
+            CancellationToken token
+        )
     {
-        
+        try
+        {
+            var effectedRow = await context.ExamSections.Where(section => section.Id == id)
+                .ExecuteUpdateAsync(section => section
+                    .SetProperty(s => s.ExamId,dto.ExamId)
+                    .SetProperty(s => s.Idx,dto.Idx)
+                    .SetProperty(s => s.Title,dto.Title)
+                    .SetProperty(s => s.InstructionsMd,dto.InstructionsMd), token 
+                    );
+            
+            return Results.Ok(new ApiResultDto(true, $"Update {effectedRow}", null!)); 
+        }
+        catch (Exception e)
+        {
+            return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
+        }
     }
 }

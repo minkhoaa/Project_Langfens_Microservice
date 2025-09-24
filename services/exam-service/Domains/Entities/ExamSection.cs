@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using exam_service.Domains.Entities;
+using exam_service.Data.Entities;
 
-namespace exam_service.Data.Entities;
+namespace exam_service.Domains.Entities;
 
 
 public class ExamSection

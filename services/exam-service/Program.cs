@@ -1,11 +1,8 @@
 using exam_service.Application.Exam;
-using exam_service.Data;
-using exam_service.Features.Exams;
 using exam_service.Features.Exams.AdminEndpoint;
 using exam_service.Features.Exams.PublicEndpoint;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Shared.Contracts.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,11 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContextPool<ExamDbContext>(option => option.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
-                                                                            ?? builder.Configuration.GetConnectionString("Exam_DB")));
+builder.Services.AddDbContextPool<ExamDbContext>(option => 
+    option.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
+        ?? builder.Configuration.GetConnectionString("Exam_DB")));
 builder.Services.AddScoped<IExamService, ExamService>(); 
-
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -34,10 +30,15 @@ await using (var scope = app.Services.CreateAsyncScope())
 }
 
 
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapPublicExamEndpoints();
+
 app.MapAdminExamEndpoint();
+app.MapAdminSectionEndpoint();
+app.MapAdminQuestionEndpoint();
+
 
 app.Run();

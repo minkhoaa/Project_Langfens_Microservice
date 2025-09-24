@@ -1,42 +1,54 @@
+using EmailService;
+using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Email Service",
+        Version = "v1",
+        Description = "Minimal API for sending templated emails"
+    });
+});
+
+builder.Services.AddSingleton(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    return EmailSettings.FromConfiguration(configuration);
+});
+
+builder.Services.AddSingleton<EmailTemplateRenderer>();
+builder.Services.AddSingleton<SmtpEmailSender>();
+builder.Services.AddSingleton<TemplatedEmailService>();
+builder.Services.AddHostedService<RabbitMqMailConsumer>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-var summaries = new[]
+app.MapPost("/api/email/send", async Task<IResult> (SendEmailRequest request, TemplatedEmailService mailService, CancellationToken cancellationToken) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    if (!request.TryValidate(out var errors))
+    {
+        return Results.ValidationProblem(errors);
+    }
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    var command = request.ToEmailCommand();
+    await mailService.SendAsync(command, cancellationToken);
+
+    return Results.Ok(new { ok = true });
 })
-.WithName("GetWeatherForecast")
+.WithName("SendEmail")
 .WithOpenApi();
 
-app.Run();
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+   .WithName("HealthCheck");
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+app.Run();

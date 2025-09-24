@@ -1,21 +1,20 @@
 using exam_service.Contracts.Exams;
 using exam_service.Data.Entities;
 using exam_service.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.Contracts.Contracts;
 
-namespace exam_service.Features.Exams.AdminEndpoint;
+namespace exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 
-public static class AdminQuestionSubEndpoint
+public static class AdminQuestionHandler
 {
-    public static RouteHandlerBuilder MapAddQuestionEndpoint(this RouteGroupBuilder app)
-    {
-        return app.MapPost("/add", async (
+    public static async Task<IResult> AddQuestionHandler(
                 [FromServices] ExamDbContext context, 
                 CancellationToken token,
                 [FromBody] DtoAdmin.AdminQuestionUpsert dto
-                ) =>
+                ) 
         {
             var existedSection = context.ExamSections.AsNoTracking().FirstOrDefault(section => section.Id==dto.SectionId);
             if (existedSection == null) return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
@@ -46,7 +45,7 @@ public static class AdminQuestionSubEndpoint
                 
                 await context.SaveChangesAsync(token);
                 await transaction.CommitAsync(token);
-                return Results.Ok(new ApiResultDto(true, "Created question successfully", null!)); 
+                return Results.Ok(new ApiResultDto(true, "Created question successfully", ques)); 
             }
             catch ( Exception e)
             {
@@ -55,7 +54,31 @@ public static class AdminQuestionSubEndpoint
             }
                                  
             
-        }).AllowAnonymous()
-        .Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest); 
+        }
+    public static async Task<IResult> UpdateQuestionHandler(
+            [FromServices] ExamDbContext context,
+            CancellationToken token, 
+            [FromBody] DtoAdmin.AdminQuestionUpdate dto, 
+            [FromRoute] int id
+        )
+    {    
+        try
+        {
+            var affectedRow = await context.ExamQuestions.Where(x=>x.Id == id)
+                .ExecuteUpdateAsync( question => question
+                    .SetProperty(x=>x.SectionId, dto.SectionId)
+                    .SetProperty(x=>x.Idx,dto.Idx)
+                    .SetProperty(x=>x.Type,dto.Type)
+                    .SetProperty(x=>x.Skill,dto.Skill)
+                    .SetProperty(x=>x.Difficulty,dto.Difficulty)
+                    .SetProperty(x=>x.PromptMd,dto.PromptMd)
+                    .SetProperty(x=>x.ExplanationMd,dto.ExplanationMd)
+                    ,token);
+            return Results.Ok(new ApiResultDto(true, $"Updated {affectedRow} row", null!));
+        }
+        catch (Exception e)
+        {
+            return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
+        }
     }
 }

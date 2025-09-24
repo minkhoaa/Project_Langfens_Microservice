@@ -8,8 +8,8 @@ public static class PublicExamEndpoint
         // api public
         var groupPublic = app.MapGroup("/api/exam");
         groupPublic.WithTags("Exams");
-        groupPublic.MapGetAllPublishedExamEndpoint();
-        groupPublic.MapGetExamBySlugEndpoint();
+        groupPublic.GetAllPublishedExamEndpoint();
+        groupPublic.GetExamBySlugEndpoint();
         
     }
 }
