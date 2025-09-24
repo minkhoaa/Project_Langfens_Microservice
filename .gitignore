@@ -20,7 +20,10 @@ logs/
 # ------------------------------
 # Env and secrets (repo-wide)
 # ------------------------------
-
+.env
+.env.*
+**/.env
+**/.env.*
 *.pem
 *.key
 *.cert
