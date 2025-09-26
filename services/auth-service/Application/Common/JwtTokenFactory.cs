@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace auth_service.Application.Common;
+
 public interface IJwtTokenFactory
 {
     Task<string> CreateTokenAsync(User user, IEnumerable<string> roles, CancellationToken ct);

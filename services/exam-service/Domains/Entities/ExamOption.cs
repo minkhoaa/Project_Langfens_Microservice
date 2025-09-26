@@ -14,8 +14,7 @@ public class ExamOption
 
     public int Idx { get; set; }
 
-    [Required]
-    public string ContentMd { get; set; } = default!;
+    [Required] public string ContentMd { get; set; } = default!;
 
     public bool IsCorrect { get; set; }
 }

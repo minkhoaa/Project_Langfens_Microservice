@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Builder;
-
 namespace auth_service.Features.Auth;
 
 public static class AuthEndpoints

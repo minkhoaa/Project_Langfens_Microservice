@@ -8,6 +8,4 @@ public static class ExamLevel
     public static string B2 = "B2";
     public static string C1 = "C1";
     public static string C2 = "C2";
-
-
 }

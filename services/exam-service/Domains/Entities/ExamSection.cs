@@ -4,7 +4,6 @@ using exam_service.Data.Entities;
 
 namespace exam_service.Domains.Entities;
 
-
 public class ExamSection
 {
     [Key]
@@ -16,8 +15,7 @@ public class ExamSection
 
     public int Idx { get; set; } // thứ tự trong đề
 
-    [Required]
-    public string Title { get; set; } = default!;
+    [Required] public string Title { get; set; } = default!;
 
     public string? InstructionsMd { get; set; }
 

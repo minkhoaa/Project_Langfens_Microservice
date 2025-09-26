@@ -6,17 +6,19 @@ using auth_service.Infrastructure.Persistence;
 using auth_service.Infrastructure.Redis;
 using auth_service.Models;
 using Google.Apis.Auth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Shared.Contracts.Contracts;
 
 namespace auth_service.Application.Auth;
+
 public interface IAuthService
 {
     Task<AuthOperationResult> RegisterAsync(RegisterDto dto, CancellationToken ct);
     Task<AuthOperationResult> PasswordLoginAsync(LoginDto dto, RequestContext context, CancellationToken ct);
-    Task<AuthOperationResult> GoogleLoginAsync(GoogleLoginRequest request, RequestContext context, CancellationToken ct);
+
+    Task<AuthOperationResult>
+        GoogleLoginAsync(GoogleLoginRequest request, RequestContext context, CancellationToken ct);
+
     Task<AuthOperationResult> RefreshAsync(RequestContext context, CancellationToken ct);
     Task<AuthOperationResult> LogoutAsync(RequestContext context, CancellationToken ct);
     Task<AuthOperationResult> GetCurrentUserAsync(ClaimsPrincipal principal);
@@ -24,27 +26,27 @@ public interface IAuthService
 
 public class AuthService : IAuthService
 {
+    private const int MaxSessionsPerUser = 5;
     private static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(30);
     private static readonly TimeSpan RotationThreshold = TimeSpan.FromDays(3);
-    private const int MaxSessionsPerUser = 5;
-
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
-    private readonly IJwtTokenFactory _jwtTokenFactory;
     private readonly IEmailValidator _emailValidator;
+    private readonly IGoogleTokenVerifier _googleTokenVerifier;
+    private readonly IJwtTokenFactory _jwtTokenFactory;
+    private readonly ILogger<AuthService> _logger;
     private readonly ISessionRepository _sessionRepository;
     private readonly ISessionStore _sessionStore;
-    private readonly IGoogleTokenVerifier _googleTokenVerifier;
-    private readonly ILogger<AuthService> _logger;
+    private readonly SignInManager<User> _signInManager;
+
+    private readonly UserManager<User> _userManager;
 
     public AuthService(UserManager<User> userManager,
-                       SignInManager<User> signInManager,
-                       IJwtTokenFactory jwtTokenFactory,
-                       IEmailValidator emailValidator,
-                       ISessionRepository sessionRepository,
-                       ISessionStore sessionStore,
-                       IGoogleTokenVerifier googleTokenVerifier,
-                       ILogger<AuthService> logger)
+        SignInManager<User> signInManager,
+        IJwtTokenFactory jwtTokenFactory,
+        IEmailValidator emailValidator,
+        ISessionRepository sessionRepository,
+        ISessionStore sessionStore,
+        IGoogleTokenVerifier googleTokenVerifier,
+        ILogger<AuthService> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -60,18 +62,21 @@ public class AuthService : IAuthService
     {
         if (!_emailValidator.IsValid(dto.Email))
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "Email format is not valid", null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, "Email format is not valid", null!),
+                StatusCodes.Status400BadRequest);
         }
 
         if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "Email or password is missed", null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, "Email or password is missed", null!),
+                StatusCodes.Status400BadRequest);
         }
 
         var existed = await _userManager.FindByEmailAsync(dto.Email);
         if (existed is not null)
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "Email is used", null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, "Email is used", null!),
+                StatusCodes.Status400BadRequest);
         }
 
         var user = new User
@@ -84,30 +89,35 @@ public class AuthService : IAuthService
         if (!result.Succeeded)
         {
             var message = result.Errors.Select(x => x.Description).FirstOrDefault() ?? "Unable to create user";
-            return AuthOperationResult.Failure(new ApiResultDto(false, message, null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, message, null!),
+                StatusCodes.Status400BadRequest);
         }
 
         var payload = new { id = user.Id, email = user.Email };
         return AuthOperationResult.Success(new ApiResultDto(true, "User is created successfully", payload));
     }
 
-    public async Task<AuthOperationResult> PasswordLoginAsync(LoginDto dto, RequestContext context, CancellationToken ct)
+    public async Task<AuthOperationResult> PasswordLoginAsync(LoginDto dto, RequestContext context,
+        CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "Email or password is missing", null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, "Email or password is missing", null!),
+                StatusCodes.Status400BadRequest);
         }
 
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user is null)
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "User is not existed", null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, "User is not existed", null!),
+                StatusCodes.Status400BadRequest);
         }
 
         var check = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, true);
         if (!check.Succeeded)
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "Password is incorrect", null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, "Password is incorrect", null!),
+                StatusCodes.Status400BadRequest);
         }
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -117,11 +127,13 @@ public class AuthService : IAuthService
         return AuthOperationResult.Success(new ApiResultDto(true, "Login successfully", accessToken), sessionTicket);
     }
 
-    public async Task<AuthOperationResult> GoogleLoginAsync(GoogleLoginRequest request, RequestContext context, CancellationToken ct)
+    public async Task<AuthOperationResult> GoogleLoginAsync(GoogleLoginRequest request, RequestContext context,
+        CancellationToken ct)
     {
         if (request.IdToken is null || string.IsNullOrWhiteSpace(request.IdToken))
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "Missing Idtoken", null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, "Missing Idtoken", null!),
+                StatusCodes.Status400BadRequest);
         }
 
         GoogleJsonWebSignature.Payload payload;
@@ -132,12 +144,14 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to verify Google idToken");
-            return AuthOperationResult.Failure(new ApiResultDto(false, ex.Message, null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, ex.Message, null!),
+                StatusCodes.Status400BadRequest);
         }
 
         if (!payload.EmailVerified)
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "Email is not verified by Google", null!), StatusCodes.Status400BadRequest);
+            return AuthOperationResult.Failure(new ApiResultDto(false, "Email is not verified by Google", null!),
+                StatusCodes.Status400BadRequest);
         }
 
         const string loginProvider = "Google";
@@ -160,7 +174,8 @@ public class AuthService : IAuthService
                 if (!createUser.Succeeded)
                 {
                     var message = createUser.Errors.FirstOrDefault()?.Description ?? "Unable to create user";
-                    return AuthOperationResult.Failure(new ApiResultDto(false, message, null!), StatusCodes.Status400BadRequest);
+                    return AuthOperationResult.Failure(new ApiResultDto(false, message, null!),
+                        StatusCodes.Status400BadRequest);
                 }
             }
 
@@ -173,7 +188,8 @@ public class AuthService : IAuthService
                 if (!alreadyAssociated)
                 {
                     var message = string.Join("; ", addLogin.Errors.Select(e => e.Description));
-                    return AuthOperationResult.Failure(new ApiResultDto(false, message, null!), StatusCodes.Status400BadRequest);
+                    return AuthOperationResult.Failure(new ApiResultDto(false, message, null!),
+                        StatusCodes.Status400BadRequest);
                 }
             }
         }
@@ -205,7 +221,9 @@ public class AuthService : IAuthService
 
         var deviceId = !string.IsNullOrWhiteSpace(session.DeviceId)
             ? session.DeviceId
-            : (!string.IsNullOrWhiteSpace(context.DeviceId) ? context.DeviceId : null);
+            : !string.IsNullOrWhiteSpace(context.DeviceId)
+                ? context.DeviceId
+                : null;
 
         if (string.IsNullOrWhiteSpace(deviceId))
         {
@@ -213,7 +231,8 @@ public class AuthService : IAuthService
         }
 
         var dbSession = await _sessionRepository.FindAsync(user.Id, deviceId!, ct);
-        if (dbSession is null || dbSession.RevokedAt is not null || dbSession.Jti != session.Jti || dbSession.Exp <= DateTime.UtcNow)
+        if (dbSession is null || dbSession.RevokedAt is not null || dbSession.Jti != session.Jti ||
+            dbSession.Exp <= DateTime.UtcNow)
         {
             return AuthOperationResult.Unauthorized();
         }
@@ -222,7 +241,7 @@ public class AuthService : IAuthService
         var newAccessToken = await _jwtTokenFactory.CreateTokenAsync(user, roles, ct);
 
         var now = DateTime.UtcNow;
-        var rotate = (dbSession.Exp - now) < RotationThreshold;
+        var rotate = dbSession.Exp - now < RotationThreshold;
         if (rotate)
         {
             var newJti = GenerateIdentifier();
@@ -297,7 +316,8 @@ public class AuthService : IAuthService
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            return Task.FromResult(AuthOperationResult.Failure(new ApiResultDto(false, "Email is not exist", null!), StatusCodes.Status404NotFound));
+            return Task.FromResult(AuthOperationResult.Failure(new ApiResultDto(false, "Email is not exist", null!),
+                StatusCodes.Status404NotFound));
         }
 
         var id = principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -305,7 +325,8 @@ public class AuthService : IAuthService
         return Task.FromResult(AuthOperationResult.Success(payload));
     }
 
-    private async Task<SessionTicket> CreateOrUpdateSessionAsync(User user, RequestContext context, CancellationToken ct)
+    private async Task<SessionTicket> CreateOrUpdateSessionAsync(User user, RequestContext context,
+        CancellationToken ct)
     {
         var deviceId = NormalizeDeviceId(context.DeviceId);
         var now = DateTime.UtcNow;
@@ -329,7 +350,8 @@ public class AuthService : IAuthService
         await _sessionRepository.UpsertAsync(sessionEntity, ct);
         await _sessionRepository.SaveChangesAsync(ct);
 
-        var sessionRecord = new SessionRecord(sid, user.Id, jti, expiration, deviceId, context.UserAgent, context.IpAddress);
+        var sessionRecord =
+            new SessionRecord(sid, user.Id, jti, expiration, deviceId, context.UserAgent, context.IpAddress);
         await _sessionStore.StoreSessionAsync(sessionRecord, SessionLifetime, ct);
         await _sessionStore.SetDeviceSessionAsync(sessionRecord, SessionLifetime, ct);
         await _sessionStore.EnsureSessionLimitAsync(user.Id, MaxSessionsPerUser, ct);

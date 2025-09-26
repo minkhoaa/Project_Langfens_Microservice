@@ -1,6 +1,4 @@
 using auth_service.Application.Auth;
-using auth_service.Features.Auth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace auth_service.Features.Auth;
@@ -10,14 +8,14 @@ public static class RegisterEndpoint
     public static RouteHandlerBuilder MapRegisterEndpoint(this RouteGroupBuilder group)
     {
         return group.MapPost("/register", RegisterAsync)
-                    .AllowAnonymous()
-                    .Produces(StatusCodes.Status200OK)
-                    .Produces(StatusCodes.Status400BadRequest);
+            .AllowAnonymous()
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> RegisterAsync([FromServices] IAuthService authService,
-                                                     [FromBody] RegisterDto dto,
-                                                     CancellationToken ct)
+        [FromBody] RegisterDto dto,
+        CancellationToken ct)
     {
         var result = await authService.RegisterAsync(dto, ct);
         return result.ToHttpResult();

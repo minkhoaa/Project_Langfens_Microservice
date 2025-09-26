@@ -3,7 +3,6 @@ using System.Net.Mail;
 
 namespace auth_service.Application.Common;
 
-
 public interface IEmailValidator
 {
     bool IsValid(string? email);

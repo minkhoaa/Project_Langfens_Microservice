@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-
 namespace auth_service.Application.Common;
 
 public record RequestContext(string? DeviceId, string? UserAgent, string? IpAddress, string? SessionId)

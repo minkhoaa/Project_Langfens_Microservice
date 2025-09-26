@@ -18,13 +18,12 @@ builder.Services.AddAuthentication(option =>
     option.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(option =>
 {
-
-    option.TokenValidationParameters = new TokenValidationParameters()
+    option.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,  
-        ValidateAudience = true, 
-        ValidateIssuerSigningKey = true, 
-        ValidIssuer = jwt!.Issuer, 
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwt!.Issuer,
         ValidAudience = jwt.Audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt!.SignKey))
     };
@@ -51,4 +50,3 @@ public class JwtSettings
     public string Audience { get; set; } = "";
     public string SignKey { get; set; } = "";
 }
-

@@ -16,17 +16,14 @@ public class ExamQuestion
     public int Idx { get; set; }
 
     // ví dụ: MULTIPLE_CHOICE_SINGLE, TRUE_FALSE_NOT_GIVEN...
-    [Required]
-    public string Type { get; set; } = default!;
+    [Required] public string Type { get; set; } = default!;
 
     // READING/LISTENING/WRITING/SPEAKING
-    [Required]
-    public string Skill { get; set; } = default!;
+    [Required] public string Skill { get; set; } = default!;
 
     public int Difficulty { get; set; } = 1;
 
-    [Required]
-    public string? PromptMd { get; set; } = default!;
+    [Required] public string? PromptMd { get; set; } = default!;
 
     public string? ExplanationMd { get; set; }
 

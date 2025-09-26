@@ -1,7 +1,7 @@
 using Google.Apis.Auth;
-using Microsoft.Extensions.Configuration;
 
 namespace auth_service.Application.Common;
+
 public interface IGoogleTokenVerifier
 {
     Task<GoogleJsonWebSignature.Payload> VerifyAsync(string idToken, CancellationToken ct);

@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text;
-using exam_service.Data;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +11,7 @@ public static class SlugHelper
     {
         if (string.IsNullOrWhiteSpace(input)) return "";
         var s = input.Trim().ToLowerInvariant()
-            .Replace('đ','d').Replace('ð','d'); 
+            .Replace('đ', 'd').Replace('ð', 'd');
         var norm = s.Normalize(NormalizationForm.FormD);
         var sb = new StringBuilder(capacity: norm.Length);
 
@@ -22,11 +21,11 @@ public static class SlugHelper
             if (uc == UnicodeCategory.NonSpacingMark) continue;
             sb.Append(ch);
         }
+
         var noMarks = sb.ToString();
         var outSb = new StringBuilder(noMarks.Length);
-        bool prevDash = false;
+        var prevDash = false;
         foreach (var c in noMarks)
-        {
             if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
             {
                 outSb.Append(c);
@@ -34,9 +33,13 @@ public static class SlugHelper
             }
             else
             {
-                if (!prevDash) { outSb.Append('-'); prevDash = true; }
+                if (!prevDash)
+                {
+                    outSb.Append('-');
+                    prevDash = true;
+                }
             }
-        }
+
         var slug = outSb.ToString().Trim('-');
         if (slug.Length > maxLen)
             slug = slug[..maxLen].Trim('-');
@@ -44,6 +47,7 @@ public static class SlugHelper
             slug = "exam-" + Guid.NewGuid().ToString("N")[..6];
         return slug;
     }
+
     public static async Task<string> MakeUniqueSlugAsync(ExamDbContext db, string baseSlug, CancellationToken ct)
     {
         var slug = baseSlug;
@@ -57,6 +61,7 @@ public static class SlugHelper
             slug = $"{trimmed}{suffix}";
             if (i > 1000) throw new InvalidOperationException("Cannot generate unique slug");
         }
+
         return slug;
     }
 }

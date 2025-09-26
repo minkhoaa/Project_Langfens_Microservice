@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
+using Role = auth_service.Models.Role;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +29,7 @@ var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__AUT
                        ?? builder.Configuration.GetConnectionString("Default");
 
 var redisConnection = Environment.GetEnvironmentVariable("CONNECTIONSTRING__REDIS")
-                          ?? builder.Configuration.GetConnectionString("Redis");
+                      ?? builder.Configuration.GetConnectionString("Redis");
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnection!));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
@@ -39,13 +40,10 @@ builder.Services.AddMassTransit(busConfigurator =>
     busConfigurator.UsingInMemory((context, config) => { config.ConfigureEndpoints(context); });
 });
 
-builder.Services.AddDbContextPool<AuthDbContext>(options =>
-{
-    options.UseNpgsql(connectionString);
-});
+builder.Services.AddDbContextPool<AuthDbContext>(options => { options.UseNpgsql(connectionString); });
 
 builder.Services.AddIdentityCore<User>()
-    .AddRoles<auth_service.Models.Role>()
+    .AddRoles<Role>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddSignInManager<SignInManager<User>>()
     .AddDefaultTokenProviders();
@@ -69,25 +67,25 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateIssuerSigningKey = true,
-        ValidateLifetime = true,
-        ValidAudience = jwtSettings.Audience,
-        ValidIssuer = jwtSettings.Issuer,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey)),
-        ClockSkew = TimeSpan.Zero
-    };
-});
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidAudience = jwtSettings.Audience,
+            ValidIssuer = jwtSettings.Issuer,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();

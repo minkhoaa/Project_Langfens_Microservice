@@ -1,5 +1,4 @@
 using auth_service.Application.Auth;
-using Microsoft.AspNetCore.Http;
 
 namespace auth_service.Features.Auth;
 

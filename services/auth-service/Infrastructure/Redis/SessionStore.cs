@@ -1,8 +1,8 @@
-using System;
 using System.Text.Json;
 using StackExchange.Redis;
 
 namespace auth_service.Infrastructure.Redis;
+
 public interface ISessionStore
 {
     Task StoreSessionAsync(SessionRecord record, TimeSpan ttl, CancellationToken ct);
@@ -65,6 +65,7 @@ public class SessionStore : ISessionStore
             {
                 await _database.KeyDeleteAsync(SessionKeys.Session(oldSid!));
             }
+
             await _database.SortedSetRemoveAsync(SessionKeys.UserSessions(record.UserId), oldSid!);
         }
 

@@ -1,14 +1,14 @@
-using Microsoft.AspNetCore.Http;
 using Shared.Contracts.Contracts;
 
 namespace auth_service.Application.Auth;
 
 public record SessionTicket(string SessionId, DateTimeOffset ExpiresAt);
 
-public record AuthOperationResult(ApiResultDto Response,
-                                  int StatusCode,
-                                  SessionTicket? SessionTicket = null,
-                                  bool ShouldClearSessionCookie = false)
+public record AuthOperationResult(
+    ApiResultDto Response,
+    int StatusCode,
+    SessionTicket? SessionTicket = null,
+    bool ShouldClearSessionCookie = false)
 {
     public static AuthOperationResult Success(ApiResultDto response, SessionTicket? sessionTicket = null) =>
         new(response, StatusCodes.Status200OK, sessionTicket);
