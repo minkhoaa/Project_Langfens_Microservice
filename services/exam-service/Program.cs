@@ -3,6 +3,7 @@ using exam_service.Features.Exams.AdminEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
+using exam_service.Features.Exams.InternalEndpoint;
 using exam_service.Features.Exams.PublicEndpoint;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,7 @@ builder.Services.AddScoped<IExamService, ExamService>();
 builder.Services.AddScoped<IAdminExamService, AdminExamService>();
 builder.Services.AddScoped<IAdminOptionService, AdminOptionService>();
 builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
-
+builder.Services.AddScoped<IInternalExamService, InternalExamService>(); 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -44,10 +45,9 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapPublicExamEndpoints();
-
 app.MapAdminExamEndpoint();
 app.MapAdminSectionEndpoint();
 app.MapAdminQuestionEndpoint();
 app.MapAdminOptionEndpoint();
-
+app.MapInternalExamEndpoint();
 app.Run();
