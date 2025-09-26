@@ -20,8 +20,8 @@ internal class SeedHelper
             Level       = ExamLevel.B1!,
             Status      = ExamStatus.Draft,
             DurationMin = 60,
-            CreatedAt   = DateTimeOffset.UtcNow,
-            UpdatedAt   = DateTimeOffset.UtcNow
+            CreatedAt   = DateTime.UtcNow,
+            UpdatedAt   = DateTime.UtcNow
         };
 
         ctx.Exams.Add(exam);

@@ -9,7 +9,7 @@ public class Dto_Public
         string Category,
         string Level,
         int DurationMin,
-        DateTimeOffset? updateAt);
+        DateTime? updateAt);
 
     public record PubLicExamDetailRecord(
         int Id,

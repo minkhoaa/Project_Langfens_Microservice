@@ -1,12 +1,13 @@
 using exam_service.Contracts.Exams;
 using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
+using ExamService.UnitTest.Admin;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Contracts.Contracts;
 
 namespace ExamService.UnitTest;
 
-public class AdminSection_UnitTest
+public class AdminSectionUnitTest
 {
     [Fact]
     public async Task AddSection_Should_Return_404_When_Exam_NotFound()

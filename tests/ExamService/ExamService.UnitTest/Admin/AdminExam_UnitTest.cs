@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shared.Contracts.Contracts;
 
-namespace ExamService.UnitTest;
+namespace ExamService.UnitTest.Admin;
 
 // Helper: lấy Status + payload từ IResult (không cần HttpContext/DI)
 internal static class ResultHelpers

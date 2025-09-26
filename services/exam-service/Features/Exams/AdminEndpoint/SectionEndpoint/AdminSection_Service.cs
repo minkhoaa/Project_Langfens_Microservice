@@ -47,7 +47,7 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                 Title = dto.Title
             };
             context.ExamSections.Add(sec);
-            var now = DateTimeOffset.UtcNow;
+            var now = DateTime.UtcNow;
             await context.Exams.Where(x => x.Id == dto.ExamId)
                 .ExecuteUpdateAsync(
                     s => s.SetProperty(e => e.UpdatedAt, now),

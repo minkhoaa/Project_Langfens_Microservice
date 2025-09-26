@@ -27,7 +27,7 @@ public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
             return Results.BadRequest(new ApiResultDto(false, "Cannot generate slug", null!));
 
         var slug = await SlugHelper.MakeUniqueSlugAsync(db, baseSlug, ct);
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.UtcNow;
 
         var exam = new Exam
         {
@@ -50,7 +50,7 @@ public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
             .SetProperty(e => e.Level, dto.Level)
             .SetProperty(e => e.DurationMin, dto.DurationMin)
             .SetProperty(e => e.Status, dto.Status)
-            .SetProperty(e => e.UpdatedAt, DateTimeOffset.UtcNow), ct);
+            .SetProperty(e => e.UpdatedAt, DateTime.UtcNow), ct);
 
         return Results.Ok(new ApiResultDto(true, $"Affected {affected} rows", null!));
     }

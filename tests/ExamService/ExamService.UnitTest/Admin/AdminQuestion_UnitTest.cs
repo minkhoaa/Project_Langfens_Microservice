@@ -1,11 +1,12 @@
 // tests/ExamService.UnitTest/AdminQuestion_UnitTest.cs
+
 using exam_service.Contracts.Exams;
 using exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Contracts.Contracts;
 
-namespace ExamService.UnitTest;
+namespace ExamService.UnitTest.Admin;
 
 public class AdminQuestion_UnitTest
 {

@@ -10,12 +10,14 @@ public interface IInternalExamService
     public Task<IResult> GetByExamIdAsync(int examId, CancellationToken token, bool showAnswer);
 }
 
-public class InternalExamService(ExamDbContext context) : IInternalExamService
+public class InternalExamService : IInternalExamService
 {
+    private readonly ExamDbContext _context;
+    public InternalExamService(ExamDbContext context) => _context = context;
     public async Task<IResult> GetByExamIdAsync(int examId, CancellationToken token, bool showAnswer)
     {
         try {
-         var paper = await context.Exams.AsNoTracking()
+         var paper = await _context.Exams.AsNoTracking()
              .Where(x=> x.Id == examId)
              .Select(exam => new DtoInternal.InternalDeliveryExam(
                  examId, 

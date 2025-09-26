@@ -27,8 +27,8 @@ public class Exam
 
     public int DurationMin { get; set; } = 60;
 
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset? UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 
     public List<ExamSection> Sections { get; set; } = new();
 }

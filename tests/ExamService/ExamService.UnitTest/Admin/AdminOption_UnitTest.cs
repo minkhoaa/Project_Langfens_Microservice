@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Contracts.Contracts;
 
-namespace ExamService.UnitTest;
+namespace ExamService.UnitTest.Admin;
 
-public class AdminOption_UnitTest
+public class AdminOptionUnitTest
 {
 
     // ===== Local seed helpers cho Option tests =====
