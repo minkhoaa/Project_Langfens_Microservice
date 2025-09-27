@@ -39,10 +39,14 @@
     build:
       context: ..
       dockerfile: services/attempt-service/Dockerfile
+    environment:
+      - CONNECTIONSTRING__ATTEMPT=Host=attempt-database;Port=5432;Database=attempt-db;Username=attempt;Password=attempt
     ports:
       - 8081:8080
     networks:
       - backend
+    depends_on:
+      - attempt-database
 
   exam-service:
     image: exam-service
@@ -126,6 +130,25 @@
       timeout: 5s
       retries: 20
       start_period: 10s
+      
+      
+  attempt-database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: attempt-db
+      POSTGRES_USER: attempt
+      POSTGRES_PASSWORD: attempt
+    ports: [ "5435:5432" ]
+    networks:
+      - backend
+    volumes: [ "pgdata:/var/lib/postgresql/attempt-data" ]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U attempt -d attempt-db -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+  
   
   
   

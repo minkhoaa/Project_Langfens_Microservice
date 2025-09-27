@@ -40,7 +40,19 @@ await using (var scope = app.Services.CreateAsyncScope())
     await db.Database.MigrateAsync();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+    await db.Database.MigrateAsync();
+}
 
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+    var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+    Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
+    await db.Database.MigrateAsync();
+}
 app.UseSwagger();
 app.UseSwaggerUI();
 
