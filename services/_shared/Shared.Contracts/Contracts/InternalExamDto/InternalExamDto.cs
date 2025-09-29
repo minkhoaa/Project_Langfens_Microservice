@@ -1,0 +1,60 @@
+namespace Shared.Contracts.Contracts.InternalExamDto;
+using System.Text.Json.Serialization;
+
+public class InternalExamDto
+{
+    public record InternalDeliveryExam
+    {
+        [JsonPropertyName("id")]           public int Id { get; init; }
+        [JsonPropertyName("slug")]         public string Slug { get; init; } = "";
+        [JsonPropertyName("title")]        public string Title { get; init; } = "";
+        [JsonPropertyName("descriptionMd")]public string? DescriptionMd { get; init; }
+        [JsonPropertyName("category")]     public string Category { get; init; } = "";
+        [JsonPropertyName("level")]        public string Level { get; init; } = "";
+        [JsonPropertyName("durationMin")]  public int DurationMin { get; init; }
+        [JsonPropertyName("sections")]     public IReadOnlyList<InternalDeliverySection> Sections { get; init; }
+            = Array.Empty<InternalDeliverySection>();
+    }
+
+    public record InternalDeliverySection
+    {
+        [JsonPropertyName("idx")]           public int Idx { get; init; }
+        [JsonPropertyName("title")]         public string Title { get; init; } = "";
+        [JsonPropertyName("instructionsMd")]public string? InstructionsMd { get; init; }
+        [JsonPropertyName("questions")]     public IReadOnlyList<InternalDeliveryQuestion> Questions { get; init; }
+            = Array.Empty<InternalDeliveryQuestion>();
+    }
+
+    public record InternalDeliveryQuestion
+    {
+        [JsonPropertyName("idx")]           public int Idx { get; init; }
+        [JsonPropertyName("type")]          public string Type { get; init; } = "";
+        [JsonPropertyName("skill")]         public string Skill { get; init; } = "";
+        [JsonPropertyName("difficulty")]    public int Difficulty { get; init; }
+        [JsonPropertyName("promptMd")]      public string? PromptMd { get; init; }
+        [JsonPropertyName("explanationMd")] public string? ExplanationMd { get; init; }
+        [JsonPropertyName("options")]       public IReadOnlyList<InternalDeliveryOption> Options { get; init; }
+            = Array.Empty<InternalDeliveryOption>();
+    }
+
+    public record InternalDeliveryOption
+    {
+        [JsonPropertyName("idx")]        public int Idx { get; init; }
+        [JsonPropertyName("contentMd")]  public string ContentMd { get; init; } = "";
+        [JsonPropertyName("isCorrect")]  public bool? IsCorrect { get; init; }
+    }
+
+    public static class SnapshotSanitizer
+    {
+        public static InternalDeliveryExam Sanitize(InternalDeliveryExam exam) => exam with
+        {
+            Sections = exam.Sections.Select(sec => sec with
+            {
+                Questions = sec.Questions.Select(q => q with
+                {
+                    Options = q.Options.Select(o => o with { IsCorrect = null }).ToList()
+                }).ToList()
+            }).ToList()
+        };
+    }
+}

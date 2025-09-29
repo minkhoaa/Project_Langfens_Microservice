@@ -14,8 +14,8 @@ using attempt_service.Infrastructure.Persistence;
 namespace attempt_service.Migrations
 {
     [DbContext(typeof(AttemptDbContext))]
-    [Migration("20250927121724_initdb")]
-    partial class initdb
+    [Migration("20250929104814_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace attempt_service.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("DurationSec")
                         .HasColumnType("integer");
@@ -45,7 +45,7 @@ namespace attempt_service.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("GradedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<JsonDocument>("PaperJson")
                         .HasColumnType("jsonb");
@@ -59,7 +59,7 @@ namespace attempt_service.Migrations
                         .HasColumnType("numeric(6,2)");
 
                     b.Property<DateTime>("StartedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -68,10 +68,10 @@ namespace attempt_service.Migrations
                         .HasColumnName("status");
 
                     b.Property<DateTime?>("SubmittedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");

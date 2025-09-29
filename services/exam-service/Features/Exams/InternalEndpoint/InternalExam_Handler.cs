@@ -6,7 +6,7 @@ public static class InternalExamHandler
 {
     public static Task<IResult> GetByExamIdHandler(
         [FromRoute] int id, 
-        bool showAnswer,
+        [FromQuery(Name = "showAnswers")] bool showAnswer ,
         CancellationToken token,
         [FromServices] IInternalExamService service
         ) => service.GetByExamIdAsync(id, token, showAnswer);

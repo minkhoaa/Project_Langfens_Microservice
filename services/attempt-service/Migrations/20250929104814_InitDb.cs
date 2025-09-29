@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace attempt_service.Migrations
 {
     /// <inheritdoc />
-    public partial class initdb : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,15 +23,15 @@ namespace attempt_service.Migrations
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     ExamId = table.Column<int>(type: "integer", nullable: false),
                     status = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
-                    StartedAt = table.Column<DateTime>(type: "timestamp", nullable: false),
-                    SubmittedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    GradedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    SubmittedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    GradedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DurationSec = table.Column<int>(type: "integer", nullable: false),
                     RawScore = table.Column<decimal>(type: "numeric(6,2)", precision: 6, scale: 2, nullable: true),
                     ScaledScore = table.Column<decimal>(type: "numeric(6,2)", precision: 6, scale: 2, nullable: true),
                     PaperJson = table.Column<JsonDocument>(type: "jsonb", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

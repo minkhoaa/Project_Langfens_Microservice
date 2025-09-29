@@ -10,7 +10,7 @@ using Shared.Contracts.Contracts;
 
 namespace ExamService.UnitTest.Public;
 
-public class PublicExam_UnitTest
+public class PublicExamUnitTest
 {
     [Fact]
     public async Task ListPublished_Should_Filter_By_Category_Level_And_Paginate_OrderBy_UpdatedAt_Desc()

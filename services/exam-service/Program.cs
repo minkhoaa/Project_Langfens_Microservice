@@ -2,6 +2,7 @@ using exam_service.Application.Exam;
 using exam_service.Features.Exams.AdminEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
+using exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
 using exam_service.Features.Exams.InternalEndpoint;
 using exam_service.Features.Exams.PublicEndpoint;
@@ -23,7 +24,8 @@ builder.Services.AddScoped<IExamService, ExamService>();
 builder.Services.AddScoped<IAdminExamService, AdminExamService>();
 builder.Services.AddScoped<IAdminOptionService, AdminOptionService>();
 builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
-builder.Services.AddScoped<IInternalExamService, InternalExamService>(); 
+builder.Services.AddScoped<IInternalExamService, InternalExamService>();
+builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

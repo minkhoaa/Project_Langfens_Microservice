@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react"
 import { FetchHelper, setAccessToken } from "@/app/lib/auth-client";
 import { Button, Card, Container, Form } from "react-bootstrap"
+import { tr } from "zod/locales";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 if (!API_BASE) console.log("Missing NEXT_PUBLIC_API_BASE");
@@ -20,7 +21,7 @@ export default function LoginPage() {
     const router = useRouter();
 
     async function obSumbit(e: React.FormEvent<HTMLFormElement>) {
-
+        e.preventDefault();
         e.preventDefault();
         setIsLoading(true);
         setError(null);
@@ -39,7 +40,6 @@ export default function LoginPage() {
                 setError(response?.message || "Login failed");
                 return;
             }
-            // Lưu access token vào bộ nhớ tạm để call API ngay
             setAccessToken(response.data);
             router.replace("/dashboard");
         }
@@ -80,7 +80,6 @@ export default function LoginPage() {
                                     value={data.password}
                                     onChange={(e) => setData((f) => ({ ...f, password: e.target.value }))}
                                 >
-
                                 </Form.Control>
                             </Form.Group>
                             <Form.Group>

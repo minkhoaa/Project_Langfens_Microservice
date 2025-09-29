@@ -41,6 +41,8 @@
       dockerfile: services/attempt-service/Dockerfile
     environment:
       - CONNECTIONSTRING__ATTEMPT=Host=attempt-database;Port=5432;Database=attempt-db;Username=attempt;Password=attempt
+      - EXAMSERVICE__EXAM__ADDRESS=http://exam-service:8080
+      - EXAMSERVICE__INTERNAL__API__KEY=internal-get-exam-snapshot
     ports:
       - 8081:8080
     networks:
@@ -138,6 +140,8 @@
       POSTGRES_DB: attempt-db
       POSTGRES_USER: attempt
       POSTGRES_PASSWORD: attempt
+
+      
     ports: [ "5435:5432" ]
     networks:
       - backend

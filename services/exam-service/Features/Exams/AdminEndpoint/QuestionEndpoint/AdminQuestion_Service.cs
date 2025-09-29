@@ -7,7 +7,23 @@ using Shared.Contracts.Contracts;
 
 namespace exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 
-public class AdminQuestionService
+public interface IAdminQuestionService
+{
+    public Task<IResult> AddAsync(
+        CancellationToken token,
+        [FromBody] DtoAdmin.AdminQuestionUpsert dto
+    );
+    public Task<IResult> UpdateAsync(
+        CancellationToken token,
+        [FromBody] DtoAdmin.AdminQuestionUpdate dto,
+        [FromRoute] int id
+    );
+    public Task<IResult> DeleteAsync(
+        CancellationToken token,
+        [FromRoute] int id);
+}
+
+public class AdminQuestionService : IAdminQuestionService
 {
     private readonly ExamDbContext _context;
     public AdminQuestionService(ExamDbContext context) => _context = context;

@@ -6,7 +6,6 @@ using attempt_service.Domain.Enums;
 
 namespace attempt_service.Domain.Entities;
 
-
     public class Attempt
     {
         [Key]
@@ -28,7 +27,7 @@ namespace attempt_service.Domain.Entities;
 
         public decimal? RawScore { get; set; }
         public decimal? ScaledScore { get; set; }
-
+        // snapshot
         public JsonDocument? PaperJson { get; set; }
 
         [Required] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

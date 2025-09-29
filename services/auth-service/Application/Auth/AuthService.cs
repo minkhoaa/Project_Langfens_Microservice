@@ -60,19 +60,21 @@ public class AuthService : IAuthService
 
     public async Task<AuthOperationResult> RegisterAsync(RegisterDto dto, CancellationToken ct)
     {
-        if (!_emailValidator.IsValid(dto.Email))
+        var email = dto.Email?.Trim();
+        var password = dto.Password?.Trim();
+        if (!_emailValidator.IsValid(email))
         {
             return AuthOperationResult.Failure(new ApiResultDto(false, "Email format is not valid", null!),
                 StatusCodes.Status400BadRequest);
         }
 
-        if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             return AuthOperationResult.Failure(new ApiResultDto(false, "Email or password is missed", null!),
                 StatusCodes.Status400BadRequest);
         }
 
-        var existed = await _userManager.FindByEmailAsync(dto.Email);
+        var existed = await _userManager.FindByEmailAsync(email);
         if (existed is not null)
         {
             return AuthOperationResult.Failure(new ApiResultDto(false, "Email is used", null!),
@@ -81,11 +83,11 @@ public class AuthService : IAuthService
 
         var user = new User
         {
-            Email = dto.Email,
-            UserName = dto.Email
+            Email = email,
+            UserName = password
         };
 
-        var result = await _userManager.CreateAsync(user, dto.Password);
+        var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
         {
             var message = result.Errors.Select(x => x.Description).FirstOrDefault() ?? "Unable to create user";
@@ -100,20 +102,22 @@ public class AuthService : IAuthService
     public async Task<AuthOperationResult> PasswordLoginAsync(LoginDto dto, RequestContext context,
         CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+        var email = dto.Email?.Trim();
+        var password = dto.Password?.Trim();
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             return AuthOperationResult.Failure(new ApiResultDto(false, "Email or password is missing", null!),
                 StatusCodes.Status400BadRequest);
         }
 
-        var user = await _userManager.FindByEmailAsync(dto.Email);
+        var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
         {
             return AuthOperationResult.Failure(new ApiResultDto(false, "User is not existed", null!),
                 StatusCodes.Status400BadRequest);
         }
 
-        var check = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, true);
+        var check = await _signInManager.CheckPasswordSignInAsync(user, password, true);
         if (!check.Succeeded)
         {
             return AuthOperationResult.Failure(new ApiResultDto(false, "Password is incorrect", null!),
@@ -132,7 +136,7 @@ public class AuthService : IAuthService
     {
         if (request.IdToken is null || string.IsNullOrWhiteSpace(request.IdToken))
         {
-            return AuthOperationResult.Failure(new ApiResultDto(false, "Missing Idtoken", null!),
+            return AuthOperationResult.Failure(new ApiResultDto(false, "Missing Token", null!),
                 StatusCodes.Status400BadRequest);
         }
 

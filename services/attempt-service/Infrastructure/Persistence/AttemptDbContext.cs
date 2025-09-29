@@ -25,13 +25,6 @@ public class AttemptDbContext : DbContext
             a.Property(x => x.RawScore).HasPrecision(6, 2);
             a.Property(x => x.ScaledScore).HasPrecision(6, 2);
 
-            // DateTime dùng UTC nhưng map về Postgres 'timestamp' (no tz)
-            a.Property(x => x.StartedAt).HasColumnType("timestamp");
-            a.Property(x => x.SubmittedAt).HasColumnType("timestamp");
-            a.Property(x => x.GradedAt).HasColumnType("timestamp");
-            a.Property(x => x.CreatedAt).HasColumnType("timestamp");
-            a.Property(x => x.UpdatedAt).HasColumnType("timestamp");
-
             // Indexes
             a.HasIndex(x => new { x.UserId, x.Status }).HasDatabaseName("idx_attempt_user_status");
             a.HasIndex(x => new { x.ExamId, x.Status }).HasDatabaseName("idx_attempt_exam_status");

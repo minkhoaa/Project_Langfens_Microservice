@@ -42,7 +42,13 @@ builder.Services.AddMassTransit(busConfigurator =>
 
 builder.Services.AddDbContextPool<AuthDbContext>(options => { options.UseNpgsql(connectionString); });
 
-builder.Services.AddIdentityCore<User>()
+builder.Services.AddIdentityCore<User>(option =>
+    {
+        option.User.RequireUniqueEmail = true;
+        option.Password.RequireDigit = true;
+        option.Password.RequireUppercase = true;
+        option.Password.RequireLowercase = true; 
+    })
     .AddRoles<Role>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddSignInManager<SignInManager<User>>()
@@ -51,6 +57,7 @@ builder.Services.AddIdentityCore<User>()
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ISessionStore, SessionStore>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 
 builder.Services.AddSingleton<IEmailValidator, EmailValidator>();
 builder.Services.AddSingleton<ICookieService, CookieService>();
