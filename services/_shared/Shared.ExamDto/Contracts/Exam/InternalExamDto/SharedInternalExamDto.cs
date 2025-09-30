@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using exam_service.Domains.Enums;
 
-namespace Shared.Contracts.Contracts.Exam.InternalExamDto;
+namespace Shared.ExamDto.Contracts.Exam.InternalExamDto;
 
 public class InternalExamDto
 {

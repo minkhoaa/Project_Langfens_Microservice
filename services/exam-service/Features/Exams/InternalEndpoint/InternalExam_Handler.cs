@@ -11,5 +11,5 @@ public static class InternalExamHandler
         [FromServices] IInternalExamService service
         ) => service.GetByExamIdAsync(id, token, showAnswer);
     
-    
+        
 }

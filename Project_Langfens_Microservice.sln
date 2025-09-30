@@ -19,13 +19,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "api-gateway", "gateway\api-
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_shared", "_shared", "{56FD8193-AB4B-4C09-A5C8-E8B0FDD91423}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Contracts", "services\_shared\Shared.Contracts\Shared.Contracts.csproj", "{54383DF9-7C4A-439E-9B69-87C3FE713CB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.ExamDto", "services\_shared\Shared.ExamDto\Shared.ExamDto.csproj", "{54383DF9-7C4A-439E-9B69-87C3FE713CB3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7FA53CBB-B983-4204-8D05-A50F25EC3FBD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExamService", "ExamService", "{F1C7084E-9E2D-4432-877F-DC5661796DA1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamService.UnitTest", "tests\ExamService\ExamService.UnitTest\ExamService.UnitTest.csproj", "{C80980A5-102E-4934-A08C-3F839F8A0A1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Grpc", "services\_shared\Shared.Grpc\Shared.Grpc.csproj", "{E1220F21-7097-4B57-A1B0-93E7C4E052AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{C80980A5-102E-4934-A08C-3F839F8A0A1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C80980A5-102E-4934-A08C-3F839F8A0A1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C80980A5-102E-4934-A08C-3F839F8A0A1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1220F21-7097-4B57-A1B0-93E7C4E052AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1220F21-7097-4B57-A1B0-93E7C4E052AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1220F21-7097-4B57-A1B0-93E7C4E052AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1220F21-7097-4B57-A1B0-93E7C4E052AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DDC09CC0-AF1F-471D-BDE5-A6926774B203} = {427B6B5D-B9A5-421A-B557-1CBDF96FE3CC}
@@ -75,5 +81,6 @@ Global
 		{54383DF9-7C4A-439E-9B69-87C3FE713CB3} = {56FD8193-AB4B-4C09-A5C8-E8B0FDD91423}
 		{F1C7084E-9E2D-4432-877F-DC5661796DA1} = {7FA53CBB-B983-4204-8D05-A50F25EC3FBD}
 		{C80980A5-102E-4934-A08C-3F839F8A0A1D} = {F1C7084E-9E2D-4432-877F-DC5661796DA1}
+		{E1220F21-7097-4B57-A1B0-93E7C4E052AB} = {56FD8193-AB4B-4C09-A5C8-E8B0FDD91423}
 	EndGlobalSection
 EndGlobal

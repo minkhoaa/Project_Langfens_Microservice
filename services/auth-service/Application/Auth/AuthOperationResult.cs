@@ -1,4 +1,4 @@
-using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts;
 
 namespace auth_service.Application.Auth;
 

@@ -19,7 +19,6 @@ builder.Services.AddDbContextPool<ExamDbContext>(option =>
     option.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
                      ?? builder.Configuration.GetConnectionString("Exam_DB")));
 
-
 builder.Services.AddScoped<IExamService, ExamService>();
 builder.Services.AddScoped<IAdminExamService, AdminExamService>();
 builder.Services.AddScoped<IAdminOptionService, AdminOptionService>();

@@ -1,3 +1,3 @@
-namespace Shared.Contracts.Contracts;
+namespace Shared.ExamDto.Contracts;
 
 public sealed record ApiResultDto(bool isSuccess, string message, object data);

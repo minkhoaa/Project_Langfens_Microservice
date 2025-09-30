@@ -3,10 +3,11 @@ using attempt_service.Contracts.Attempt;
 using attempt_service.Domain.Entities;
 using attempt_service.Domain.Enums;
 using attempt_service.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Shared.Contracts.Contracts;
-using Shared.Contracts.Contracts.Exam.InternalExamDto;
+using Shared.ExamDto.Contracts;
+using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 

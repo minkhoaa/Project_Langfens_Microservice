@@ -1,9 +1,8 @@
 using exam_service.Contracts.Exams;
 using exam_service.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Shared.Contracts.Contracts;
-using Shared.Contracts.Contracts.InternalExamDto;
+using Shared.ExamDto.Contracts;
+
 
 namespace exam_service.Features.Exams.InternalEndpoint;
 public interface IInternalExamService

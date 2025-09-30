@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\_shared\Shared.Contracts\Shared.Contracts.csproj"/>
+        <ProjectReference Include="..\_shared\Shared.ExamDto\Shared.ExamDto.csproj" />
     </ItemGroup>
 
 </Project>

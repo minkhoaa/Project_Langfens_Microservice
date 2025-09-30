@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package exam.v1;
+
+// Namespace C# sinh ra
+option csharp_namespace = "Shared.Grpc.ExamInternal";
+
+// ------------ Messages ------------
+
+message InternalDeliveryExam {
+  int32 id = 1;
+  string slug = 2;
+  string title = 3;
+  string description_md = 4; // proto3 mặc định "không set" nếu rỗng (có thể để optional cũng được)
+  string category = 5;
+  string level = 6;
+  int32 duration_min = 7;
+  repeated InternalDeliverySection sections = 8; // <-- thêm tên field
+}
+
+message InternalDeliverySection {
+  int32 id = 1;               // <-- thêm id để map AttemptAnswer.SectionId
+  int32 idx = 2;
+  string title = 3;
+  string instructions_md = 4;
+  repeated InternalDeliveryQuestion questions = 5;
+}
+
+message InternalDeliveryQuestion {
+  int32 id = 1;               // <-- thêm id để map AttemptAnswer.QuestionId
+  int32 idx = 2;
+  string type = 3;
+  string skill = 4;
+  int32 difficulty = 5;
+  string prompt_md = 6;
+  string explanation_md = 7;
+  repeated InternalDeliveryOption options = 8;
+}
+
+message InternalDeliveryOption {
+  int32 id = 1;               // <-- thêm id để map MCQ option
+  int32 idx = 2;
+  string content_md = 3;
+
+  // proto3 optional: có cờ hiện diện (HasIsCorrect). Khi sanitize thì *unset* (ClearIsCorrect).
+  optional bool is_correct = 4;
+}
+
+// ------------ RPC ------------
+
+message GetInternalExamRequest {
+  oneof key {
+    int32 id = 1;
+    string slug = 2;
+  }
+  bool sanitize = 3; // true = ẩn đáp án (unset is_correct)
+}
+
+service ExamInternal {
+  rpc GetInternalExam (GetInternalExamRequest) returns (InternalDeliveryExam);
+}

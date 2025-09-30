@@ -2,7 +2,7 @@ using exam_service.Contracts.Exams;
 using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts;
 
 namespace exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
 

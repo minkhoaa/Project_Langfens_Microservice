@@ -7,7 +7,7 @@ using auth_service.Infrastructure.Redis;
 using auth_service.Models;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
-using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts;
 
 namespace auth_service.Application.Auth;
 
