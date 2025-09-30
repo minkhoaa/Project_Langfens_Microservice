@@ -7,7 +7,6 @@ using attempt_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using EnvironmentName = Microsoft.AspNetCore.Hosting.EnvironmentName;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
@@ -35,7 +34,7 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
     http.BaseAddress = new Uri(baseExamAddress);
     http.DefaultRequestHeaders.Add("X-Internal-Key", internalApiKey);
 });
-builder.Services.AddScoped<IAttemptService, AttemptService>();
+builder.Services.AddScoped<IAttemptService, AttemptService>(); 
 builder.Services.ConfigureHttpJsonOptions(option =>
 {
     option.SerializerOptions.PropertyNameCaseInsensitive = true;

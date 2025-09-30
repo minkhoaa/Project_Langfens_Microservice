@@ -1,11 +1,12 @@
 using System.Text.Json;
 using attempt_service.Contracts.Attempt;
+using attempt_service.Domain.Entities;
 using attempt_service.Domain.Enums;
 using attempt_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.Contracts.Contracts;
-using Shared.Contracts.Contracts.InternalExamDto;
+using Shared.Contracts.Contracts.Exam.InternalExamDto;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
@@ -18,26 +19,19 @@ public interface IAttemptService
     );
 }
 
-public class AttemptService : IAttemptService
+public class AttemptService(
+    AttemptDbContext context,
+    IHttpClientFactory client) : IAttemptService
 {
-    private readonly AttemptDbContext _context;
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = client.CreateClient("ExamServiceInternal");
     
-
-    public AttemptService(AttemptDbContext context,
-        IHttpClientFactory client)
-    {
-        _context = context;
-        _client = client.CreateClient("ExamServiceInternal");
-    }
-
     public async Task<IResult> StartAttempt(
         AttemptStartRequest request,
         CancellationToken token,
         int userId
         )
     {
-        var existedStartedAttempt = await _context.Attempts.AsNoTracking().Where(attempt =>
+        var existedStartedAttempt = await context.Attempts.AsNoTracking().Where(attempt =>
             attempt.ExamId == request.ExamId
             && attempt.Status == AttemptStatus.Started
             && attempt.UserId == userId).FirstOrDefaultAsync(token);
@@ -60,7 +54,6 @@ public class AttemptService : IAttemptService
                     existedStartedAttempt.DurationSec)
             ));
         }
-
         var url = $"/api/internal/exams/{request.ExamId}/delivery?showAnswers=true";
         using var doc = await _client.GetFromJsonAsync<JsonDocument>(url, token);
         if (doc is null || !doc.RootElement.TryGetProperty("data", out var dataEl))
@@ -78,8 +71,8 @@ public class AttemptService : IAttemptService
             DurationSec = snapShot.DurationMin * 60,
             PaperJson = JsonSerializer.SerializeToDocument(snapShot)
         };
-        _context.Attempts.Add(attempt);
-        await _context.SaveChangesAsync(token);
+        context.Attempts.Add(attempt);
+        await context.SaveChangesAsync(token);
         var sanitizeDoc = JsonSerializer.SerializeToDocument(InternalExamDto.SnapshotSanitizer.Sanitize(snapShot));
         return Results.Ok(new ApiResultDto(
             true, "Success", 

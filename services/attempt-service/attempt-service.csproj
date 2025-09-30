@@ -34,9 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\" />
       <Folder Include="Contracts\Exam\" />
-      <Folder Include="Feature\" />
     </ItemGroup>
 
 </Project>
