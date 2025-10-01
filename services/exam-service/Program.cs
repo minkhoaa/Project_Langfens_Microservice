@@ -25,6 +25,8 @@ builder.Services.AddScoped<IAdminOptionService, AdminOptionService>();
 builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
+builder.Services.AddScoped<ExamInternalGrpcService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -56,6 +58,9 @@ await using (var scope = app.Services.CreateAsyncScope())
 }
 app.UseSwagger();
 app.UseSwaggerUI();
+
+
+
 
 app.MapPublicExamEndpoints();
 app.MapAdminExamEndpoint();

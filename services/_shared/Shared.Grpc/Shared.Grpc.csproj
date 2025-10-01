@@ -19,6 +19,8 @@
   <ItemGroup>
     <!-- SINH CẢ client + server từ service ExamInternal -->
     <Protobuf Include="Contracts/exam_internal.proto"
-              GrpcServices="Both" />
+              GrpcServices="Both"
+              CompileOutputs="true"
+    />
   </ItemGroup>
 </Project>

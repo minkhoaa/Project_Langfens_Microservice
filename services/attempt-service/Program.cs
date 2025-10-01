@@ -7,10 +7,16 @@ using attempt_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Grpc.ExamInternal;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddGrpcClient<ExamInternal.ExamInternalClient>(option =>
+{
+    option.Address = new Uri("http://exam-service:8080");
+});
 
 builder.Services.Configure<JwtSettings>
     (builder.Configuration.GetSection("JwtSettings"));
@@ -31,7 +37,16 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
     http.BaseAddress = new Uri(baseExamAddress);
     http.DefaultRequestHeaders.Add("X-Internal-Key", internalApiKey);
 });
-builder.Services.AddScoped<IAttemptService, AttemptService>(); 
+
+
+
+
+// DI
+builder.Services.AddScoped<IAttemptService, AttemptService>();
+builder.Services.AddScoped<IExamGateway, ExamGateway>();
+
+
+
 builder.Services.ConfigureHttpJsonOptions(option =>
 {
     option.SerializerOptions.PropertyNameCaseInsensitive = true;
@@ -58,6 +73,10 @@ builder.Services.AddAuthentication(option =>
     };
     options.MapInboundClaims = false;
 });
+
+
+
+
 builder.Services.AddAuthorization();
 
 

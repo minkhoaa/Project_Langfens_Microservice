@@ -11,11 +11,11 @@ public class ExamSection
     public int Id { get; set; }
 
     public int ExamId { get; set; }
-    public Exam Exam { get; set; } = default!;
+    public Exam Exam { get; set; } = null!;
 
     public int Idx { get; set; } // thứ tự trong đề
 
-    [Required] public string Title { get; set; } = default!;
+    [Required] public string Title { get; set; } = string.Empty!;
 
     public string? InstructionsMd { get; set; }
 

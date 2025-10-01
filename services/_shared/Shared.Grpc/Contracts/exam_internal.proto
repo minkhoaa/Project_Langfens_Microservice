@@ -50,10 +50,9 @@ message InternalDeliveryOption {
 
 message GetInternalExamRequest {
   oneof key {
-    int32 id = 1;
-    string slug = 2;
+    int32 examId = 1;
   }
-  bool sanitize = 3; // true = ẩn đáp án (unset is_correct)
+  bool showAnswers = 2; // true = ẩn đáp án (unset is_correct)
 }
 
 service ExamInternal {
