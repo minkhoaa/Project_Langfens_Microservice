@@ -59,6 +59,8 @@
       dockerfile: services/exam-service/Dockerfile
     ports:
       - 8082:8080
+    expose:
+      - "8081"
     depends_on:
       exam-database:
         condition: "service_healthy"
@@ -123,6 +125,7 @@
       POSTGRES_USER: exam
       POSTGRES_PASSWORD: exam
     ports: [ "5433:5432" ]
+    
     networks:
       - backend
     volumes: [ "pgdata:/var/lib/postgresql/exam-data" ]

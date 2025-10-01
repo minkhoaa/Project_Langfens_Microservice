@@ -1,13 +1,10 @@
 using System.Text.Json;
 using attempt_service.Contracts.Attempt;
-using attempt_service.Domain.Entities;
 using attempt_service.Domain.Enums;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Google.Protobuf;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 using Shared.Grpc.ExamInternal;
@@ -48,18 +45,40 @@ public class AttemptService(
                 return Results.BadRequest(
                     new ApiResultDto(false, "Stored snapshot is empty", null!)
                 );
-            var sanitizeFromSnapshot = JsonSerializer.SerializeToDocument(
-                InternalExamDto.SnapshotSanitizer.Sanitize(
-                    existedStartedAttempt.PaperJson?.RootElement
-                        .Deserialize<InternalExamDto.InternalDeliveryExam>()!
-                )
-            );
-            return Results.Ok(new ApiResultDto(
-                true, "Continue your previous attempt",
-                new AttemptStartResponse(existedStartedAttempt.Id,
-                    sanitizeFromSnapshot.RootElement, existedStartedAttempt.StartedAt,
-                    existedStartedAttempt.DurationSec)
-            ));
+            try
+            {
+                var parser = new JsonParser(JsonParser.Settings.Default.WithIgnoreUnknownFields(true));
+                var parsed =
+                    parser.Parse<InternalDeliveryExam>(existedStartedAttempt.PaperJson.RootElement.GetRawText());
+                var safeJson = JsonFormatter.Default.Format(GrpcSnapshotSanitizer.Sanitize(parsed!));
+                var safeEl = JsonDocument.Parse(safeJson).RootElement.Clone();
+                return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
+                    new AttemptStartResponse(existedStartedAttempt.Id, safeEl,
+                        existedStartedAttempt.StartedAt, existedStartedAttempt.DurationSec)
+                ));
+                
+            }
+            catch 
+            {
+                try
+                {
+                    var dto = existedStartedAttempt.PaperJson.RootElement
+                        .Deserialize<InternalExamDto.InternalDeliveryExam>();
+                    var dtoSafeDoc =
+                        JsonSerializer.SerializeToDocument(InternalExamDto.SnapshotSanitizer.Sanitize(dto));
+                    var safeEl = dtoSafeDoc.RootElement.Clone();
+                    return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
+                        new AttemptStartResponse(existedStartedAttempt.Id, safeEl,
+                            existedStartedAttempt.StartedAt, existedStartedAttempt.DurationSec)
+                    ));
+                }
+                catch
+                {
+                    return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
+                        existedStartedAttempt.PaperJson.RootElement.Clone()));
+                }
+            }
+
         }
         // var url = $"/api/internal/exams/{request.ExamId}/delivery?showAnswers=true";
         // using var doc = await _client.GetFromJsonAsync<JsonDocument>(url, token);
@@ -69,9 +88,9 @@ public class AttemptService(
         // if (snapShot is null) 
         //     return Results.BadRequest(new ApiResultDto(false, "Invalid data", null!));
         var snapShot = await _gateway.GetExamSnapshotAsync(request.ExamId, token);
-        var sanitizedSnapshot = GrpcSnapshotSanitizer.Sanitize(snapShot);
-        var json = JsonFormatter.Default.Format(sanitizedSnapshot);
-        using var doc = JsonDocument.Parse(json);
+        var json = JsonFormatter.Default.Format(GrpcSnapshotSanitizer.Sanitize(snapShot));
+        using var doc = JsonDocument.Parse(json!);
+        var safeElement = doc.RootElement.Clone();
         var attempt = new Domain.Entities.Attempt
         {
             UserId = userId,
@@ -86,7 +105,7 @@ public class AttemptService(
         
         return Results.Ok(new ApiResultDto(
             true, "Success", 
-            new AttemptStartResponse(attempt.Id, doc.RootElement,
+            new AttemptStartResponse(attempt.Id, safeElement,
                 attempt.StartedAt, attempt.DurationSec)));
     }
 

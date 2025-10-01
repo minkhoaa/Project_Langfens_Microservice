@@ -7,6 +7,7 @@ using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
 using exam_service.Features.Exams.InternalEndpoint;
 using exam_service.Features.Exams.PublicEndpoint;
 using exam_service.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,7 +26,19 @@ builder.Services.AddScoped<IAdminOptionService, AdminOptionService>();
 builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
-builder.Services.AddScoped<ExamInternalGrpcService>();
+
+int GrpcPort = 8081;
+int HttpPort = 8080;
+builder.WebHost.ConfigureKestrel(o =>
+{
+    o.ListenAnyIP(HttpPort, lo => lo.Protocols = HttpProtocols.Http1);
+    // lắng nghe 8080 với HTTP/2 (h2c)
+    o.ListenAnyIP(GrpcPort, lo => lo.Protocols = HttpProtocols.Http2);
+    
+});
+builder.Services.AddGrpc();
+
+
 
 var app = builder.Build();
 
@@ -60,6 +73,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 
+app.MapGrpcService<ExamInternalGrpcService>().RequireHost($"*:{GrpcPort}");
 
 
 app.MapPublicExamEndpoints();

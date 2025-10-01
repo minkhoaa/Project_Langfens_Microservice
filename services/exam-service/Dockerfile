@@ -2,7 +2,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY services/exam-service/exam-service.csproj services/exam-service/
-COPY services/_shared/Shared.Contracts/Shared.Contracts.csproj services/_shared/Shared.Contracts/
+COPY services/_shared/Shared.ExamDto/Shared.ExamDto.csproj services/_shared/Shared.ExamDto/
+COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
 
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet restore services/exam-service/exam-service.csproj
@@ -20,9 +21,9 @@ RUN dotnet publish -c Release -o /out \
 # Runtime siêu gọn
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine
 WORKDIR /app
-ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080;http://+:8081 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
     Swagger__Enabled=true
 COPY --from=build /out /app
-EXPOSE 8080
+EXPOSE 8080 8081
 ENTRYPOINT ["./exam-service"]   

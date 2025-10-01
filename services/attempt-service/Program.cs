@@ -5,6 +5,7 @@ using attempt_service.Features.Attempt.AttemptEndpoint;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Grpc.ExamInternal;
@@ -13,10 +14,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddGrpcClient<ExamInternal.ExamInternalClient>(option =>
-{
-    option.Address = new Uri("http://exam-service:8080");
-});
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+builder.Services
+    .AddGrpcClient<ExamInternal.ExamInternalClient>(o =>
+    {
+        o.Address = new Uri("http://exam-service:8081"); // h2c
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+    {
+        EnableMultipleHttp2Connections = true
+    });
 
 builder.Services.Configure<JwtSettings>
     (builder.Configuration.GetSection("JwtSettings"));
@@ -86,7 +94,6 @@ var app = builder.Build();
 
 
 
-
 using (var scope = app.Services.CreateScope())
 {
     var db      = scope.ServiceProvider.GetRequiredService<AttemptDbContext>();
@@ -104,8 +111,6 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapAttemptEndpoint();
-
-app.UseHttpsRedirection();
 
 app.Run();
 

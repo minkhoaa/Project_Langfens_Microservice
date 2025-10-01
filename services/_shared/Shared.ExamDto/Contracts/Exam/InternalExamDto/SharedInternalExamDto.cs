@@ -56,8 +56,5 @@ public class InternalExamDto
             }).ToList()
         };
     }
-    public static class GrpcSnapshotSanitizer 
-    {
-        public static 
-    }
+
 }

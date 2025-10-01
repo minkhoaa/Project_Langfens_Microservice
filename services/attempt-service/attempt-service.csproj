@@ -33,14 +33,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\tests\ExamService\ExamService.UnitTest\ExamService.UnitTest.csproj" />
         <ProjectReference Include="..\_shared\Shared.ExamDto\Shared.ExamDto.csproj" />
         <ProjectReference Include="..\_shared\Shared.Grpc\Shared.Grpc.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Protobuf Include="..\_shared\Shared.Grpc\Protos\exam_internal.proto"
-                  GrpcServices="Client"
-                  Link="Protos\exam_internal.proto" />
     </ItemGroup>
     <ItemGroup>
         <Content Include="..\..\.dockerignore">

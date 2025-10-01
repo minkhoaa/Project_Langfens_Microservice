@@ -4,8 +4,8 @@ WORKDIR /src
 
 
 COPY services/auth-service/auth-service.csproj services/auth-service/
-COPY services/_shared/Shared.Contracts/Shared.Contracts.csproj services/_shared/Shared.Contracts/
-
+COPY services/_shared/Shared.ExamDto/Shared.ExamDto.csproj services/_shared/Shared.ExamDto/
+COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet restore services/auth-service/auth-service.csproj
 
