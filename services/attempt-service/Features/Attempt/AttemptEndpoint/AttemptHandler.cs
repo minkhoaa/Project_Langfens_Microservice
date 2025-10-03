@@ -18,4 +18,12 @@ public static class AttemptHandler
         CancellationToken token,
         [FromServices] IAttemptService service
     ) => service.GetAttemptById(new AttemptGetRequest(attemptId, userId), token);
+
+    public static Task<IResult> AttemptAutoSave(
+        [FromRoute] int attemptId,
+        [FromRoute] int userId,
+        AutosaveRequest req,
+        CancellationToken token,
+        IAttemptService service
+    ) => service.Autosave(attemptId, userId, req, token);
 }

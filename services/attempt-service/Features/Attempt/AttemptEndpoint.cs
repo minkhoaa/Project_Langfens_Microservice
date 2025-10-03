@@ -9,5 +9,6 @@ public static class AttemptEndpointMapping
         app.MapGroup("/api/attempt");
         app.MapPost("/attempts:start", AttemptHandler.AttemptStartHandler);
         app.MapGet("/attempts/{userId:int}/{attemptId:int}", AttemptHandler.AttemptGetByIdHandler);
+        app.MapPost("/attempt/autosave/{userId:int}/{attemptId:int}", AttemptHandler.AttemptAutoSave);
     }
 }

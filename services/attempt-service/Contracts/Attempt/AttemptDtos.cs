@@ -1,3 +1,4 @@
+
 using System.Text.Json;
 
 namespace attempt_service.Contracts.Attempt;

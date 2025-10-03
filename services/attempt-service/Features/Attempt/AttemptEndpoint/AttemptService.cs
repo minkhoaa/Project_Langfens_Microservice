@@ -1,5 +1,8 @@
+using System.Collections.Immutable;
+using System.Formats.Asn1;
 using System.Text.Json;
 using attempt_service.Contracts.Attempt;
+using attempt_service.Domain.Entities;
 using attempt_service.Domain.Enums;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
@@ -10,6 +13,8 @@ using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 using Shared.Grpc.ExamInternal;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
+
+
 
 public interface IAttemptService
 {
@@ -32,7 +37,6 @@ public class AttemptService(
         int userId
     )
     {
-
         // using GRPC for internal communication
         var existedStartedAttempt = await context.Attempts.AsNoTracking().Where(attempt =>
             attempt.ExamId == request.ExamId
@@ -181,13 +185,118 @@ public class AttemptService(
         }
     }
 
-    public Task<IResult> Autosave(int attemptId, int userId, AutosaveRequest req, CancellationToken token)
+    public async Task<IResult> Autosave(int attemptId, int userId, AutosaveRequest req, CancellationToken token)
     {
-        throw new NotImplementedException();
+        var record = await context.Attempts
+            .FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
+        if (record is null)
+            return Results.NotFound(new ApiResultDto(false, "Not found", null!));
+        var deadline = record.StartedAt.AddSeconds(record.DurationSec);
+        var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
+        if (timeLeft <= 0)
+        {
+            if (record.Status is AttemptStatus.Started or AttemptStatus.InProgress)
+            {
+                record.Status = AttemptStatus.Expired;
+                await context.SaveChangesAsync(token);
+            }
+            return Results.Conflict(new ApiResultDto(false, "Attempt expired", null!));
+        }
+        if (record.Status == AttemptStatus.Submitted || record.Status == AttemptStatus.Graded)
+            return Results.Conflict(new ApiResultDto(false, "Attempt is already submitted", null!));
+        if (record.PaperJson is null)
+            return Results.Problem("Snapshot missing", statusCode: 500);
+
+        var index = QuestionIndex.Build(record.PaperJson);
+        var incoming = req.Answers ?? new List<AnswerItem>();
+        if (incoming.Count == 0) return Results.Ok(new ApiResultDto(true, "No changes", null!));
+        var rejected = new List<string>();
+        foreach (var answerItem in incoming) 
+        {
+            if (!index.TryGetValue(answerItem.QuestionId, out var meta))
+            {
+                rejected.Add($"Unknown question {answerItem.QuestionId}");
+                continue;
+            }
+
+            if (answerItem.SelectedOptionIds is not null)
+            {
+                if (answerItem.SelectedOptionIds.Any(x => !meta.OptionIds.Contains(x))) 
+                    rejected.Add($"Invalid option for Q{answerItem.QuestionId}");
+                if (meta.Type == "SINGLE" && answerItem.SelectedOptionIds.Count > 1)
+                    rejected.Add($"Too many options for single-choice Q{answerItem.QuestionId}");
+            }
+        }
+
+        if (rejected.Count > 0) return Results.UnprocessableEntity(new ApiResultDto(false, "Invalid payload", null!));
+        var ids = incoming.Select(x => x.QuestionId).Distinct().ToArray();
+        var rows = await context.AttemptAnswers
+            .Where(x => x.AttemptId == attemptId && ids.Contains(x.QuestionId))
+            .ToDictionaryAsync(x=>x.QuestionId, token);
+        var saved = 0;
+        var skipped = 0;
+        foreach (var answer in incoming)
+        {
+            var meta = index[answer.QuestionId];
+            if (!rows.TryGetValue(answer.QuestionId, out var row))
+            {
+                row = new AttemptAnswer()
+                {
+                    AttemptId = attemptId,
+                    QuestionId = answer.QuestionId,
+                    SectionId = meta.SectionId,
+                    SelectedOptionIds = null!,
+                    TextAnswer = null!
+                };
+                context.AttemptAnswers.Add(row);
+                rows[answer.QuestionId] = row; 
+            }
+
+            bool changed = false;
+            if (answer.SelectedOptionIds is not null)
+            {
+                row.SelectedOptionIds = answer.SelectedOptionIds.Count == 0
+                    ? new List<int>()
+                    : answer.SelectedOptionIds.ToList();
+                changed = true;
+            }
+
+            if (answer.TextAnswer is not null)
+            {
+                row.TextAnswer = answer.TextAnswer;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                row.IsCorrect = null!;
+                row.AwardedPoints = null!;
+                saved++;
+            }
+            else
+            {
+                skipped++; 
+            }
+        }
+
+        if (record.Status == AttemptStatus.Started) 
+            record.Status = AttemptStatus.InProgress;
+        await context.SaveChangesAsync(token);
+        timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
+        return Results.Ok(new ApiResultDto(true, "Autosaved", new {
+            saved,
+            skipped,
+            rejected = Array.Empty<string>(),
+            timeLeftSec = timeLeft
+        }));
     }
 
     public Task<IResult> Submit(int attemptId, int userId, CancellationToken token)
     {
         throw new NotImplementedException();
     }
+    
+    
+    
 }
+

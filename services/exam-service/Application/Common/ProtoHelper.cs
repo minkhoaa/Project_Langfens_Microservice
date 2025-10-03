@@ -5,52 +5,63 @@ namespace exam_service.Application.Common;
 public static class ProtoHelper
 {
     public static InternalDeliveryExam MapToProto(Domains.Entities.Exam exam, bool showAnswers)
+{
+    var proto = new InternalDeliveryExam
     {
-        var exams = new InternalDeliveryExam()
+        Id = exam.Id,
+        Category = exam.Category,
+        DescriptionMd = exam.DescriptionMd ?? string.Empty,
+        Level = exam.Level,
+        Slug = exam.Slug,
+        Title = exam.Title,
+        // Nếu proto có DurationMin/DurationSec, nhớ map luôn:
+        DurationMin = exam.DurationMin // ví dụ, tùy schema của bạn
+    };
+
+    // Duyệt TỪ domain -> TỚI proto
+    foreach (var sec in exam.Sections.OrderBy(s => s.Idx))
+    {
+        var pSec = new InternalDeliverySection
         {
-            Id = exam.Id,
-            Category = exam.Category,
-            DescriptionMd = exam.DescriptionMd ?? string.Empty,
-            Level = exam.Level,
-            Slug = exam.Slug,
-            Title = exam.Title
+            Id = sec.Id,
+            InstructionsMd = sec.InstructionsMd ?? string.Empty,
+            Idx = sec.Idx,
+            Title = sec.Title ?? string.Empty,
         };
-        foreach (var section in exams.Sections)
+
+        foreach (var q in sec.Questions.OrderBy(q => q.Idx))
         {
-            var sections = new InternalDeliverySection()
+            var pQ = new InternalDeliveryQuestion
             {
-                Id = section.Id,
-                InstructionsMd = section.InstructionsMd ?? string.Empty,
-                Idx = section.Idx,
-                Title = section.Title ?? string.Empty,
+                Id = q.Id,
+                Idx = q.Idx,
+                ExplanationMd = showAnswers ? (q.ExplanationMd ?? string.Empty) : string.Empty,
+                Difficulty = q.Difficulty,
+                PromptMd = q.PromptMd ?? string.Empty,
+                Skill = q.Skill ?? string.Empty,
+                Type = q.Type ?? string.Empty
             };
-            foreach (var question in section.Questions)
+
+            foreach (var opt in q.Options.OrderBy(o => o.Idx))
             {
-                var questions = new InternalDeliveryQuestion()
+                var pOpt = new InternalDeliveryOption
                 {
-                    Id = question.Id,
-                    Idx = question.Idx,
-                    ExplanationMd = question.ExplanationMd ?? string.Empty,
-                    Difficulty = question.Difficulty,
-                    PromptMd = question.PromptMd ?? string.Empty,
-                    Skill = question.Skill ?? string.Empty,
-                    Type = question.Type ?? string.Empty
+                    Id = opt.Id,
+                    Idx = opt.Idx,
+                    ContentMd = opt.ContentMd ?? string.Empty,
+                    // Nếu schema có cờ đáp án đúng và bạn muốn ẩn khi !showAnswers:
+                    // IsCorrect = showAnswers ? opt.IsCorrect : false
                 };
-                foreach (var option in question.Options)
-                {
-                    var options = new InternalDeliveryOption()
-                    {
-                        Id = option.Id,
-                        Idx = option.Idx,
-                        ContentMd = option.ContentMd ?? string.Empty,
-                    };
-                    question.Options.Add(options);
-                    
-                }
-                section.Questions.Add(questions);
+                pQ.Options.Add(pOpt);     // ✅ add vào proto-question
             }
-            exams.Sections.Add(sections);
+
+            pSec.Questions.Add(pQ);       // ✅ add vào proto-section
         }
-        return exams;
+
+        proto.Sections.Add(pSec);         // ✅ add vào proto-exam
     }
+
+    return proto;
+}
+
 }
