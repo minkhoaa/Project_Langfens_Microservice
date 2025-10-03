@@ -1,4 +1,5 @@
 using attempt_service.Contracts.Attempt;
+using Microsoft.AspNetCore.Mvc;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
@@ -10,4 +11,11 @@ public static class AttemptHandler
         CancellationToken token,
         int userId
     ) => service.StartAttempt(request, token, userId);
+
+    public static Task<IResult> AttemptGetByIdHandler(
+        [FromRoute] int userId,
+        [FromRoute] int attemptId,
+        CancellationToken token,
+        [FromServices] IAttemptService service
+    ) => service.GetAttemptById(new AttemptGetRequest(attemptId, userId), token);
 }

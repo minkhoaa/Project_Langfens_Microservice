@@ -49,5 +49,5 @@ public class AttemptDbContext : DbContext
         } );
     }
     public DbSet<Attempt> Attempts {get; set; } 
-    public DbSet<Attempt> AttemptAnswer {get; set; } 
+    public DbSet<AttemptAnswer> AttemptAnswers {get; set; } 
 }
