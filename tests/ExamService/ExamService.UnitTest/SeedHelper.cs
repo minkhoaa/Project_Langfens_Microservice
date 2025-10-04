@@ -1,8 +1,8 @@
 // tests/ExamService.UnitTest/SeedHelper.cs
 using exam_service.Domains.Entities;
-using exam_service.Domains.Enums;
 using exam_service.Infrastructure.Persistence;
-using exam_service.Data.Entities; // ExamQuestion, ExamOption
+using exam_service.Data.Entities;
+using Shared.ExamDto.Contracts.Exam.Enums; // ExamQuestion, ExamOption
 
 namespace ExamService.UnitTest;
 

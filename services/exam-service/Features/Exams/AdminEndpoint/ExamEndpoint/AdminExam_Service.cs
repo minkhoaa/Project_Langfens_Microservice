@@ -1,10 +1,10 @@
 using exam_service.Application.Common;
 using exam_service.Contracts.Exams;
 using exam_service.Domains.Entities;
-using exam_service.Domains.Enums;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
+using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 

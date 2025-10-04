@@ -1,9 +1,9 @@
 using exam_service.Contracts.Exams;
-using exam_service.Domains.Enums;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
+using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace exam_service.Application.Exam;
 

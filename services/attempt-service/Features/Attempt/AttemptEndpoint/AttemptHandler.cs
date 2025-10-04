@@ -1,5 +1,6 @@
 using attempt_service.Contracts.Attempt;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
@@ -26,4 +27,11 @@ public static class AttemptHandler
         CancellationToken token,
         IAttemptService service
     ) => service.Autosave(attemptId, userId, req, token);
+
+    public static Task<IResult> AttemptSubmit(
+        [FromRoute] int userId,
+        [FromRoute] int attemptId,
+        CancellationToken token,
+        IAttemptService service)
+        => service.Submit(attemptId, userId, token);
 }

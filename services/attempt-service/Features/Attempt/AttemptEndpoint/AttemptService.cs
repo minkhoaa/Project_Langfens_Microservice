@@ -114,7 +114,9 @@ public class AttemptService(
 
     
     
-    public async Task<IResult> GetAttemptById(AttemptGetRequest request, CancellationToken token)
+    public async Task<IResult> GetAttemptById(
+        AttemptGetRequest request,
+        CancellationToken token)
     {
         var attempts = await context.Attempts.AsNoTracking()
             .Where(x => x.Id == request.AttemptId && x.UserId == request.UserId)
@@ -184,7 +186,11 @@ public class AttemptService(
         }
     }
 
-    public async Task<IResult> Autosave(int attemptId, int userId, AutosaveRequest req, CancellationToken token)
+    public async Task<IResult> Autosave(
+        int attemptId, 
+        int userId, 
+        AutosaveRequest req, 
+        CancellationToken token)
     {
         var attemptRecord = await context.Attempts
             .FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
@@ -203,7 +209,7 @@ public class AttemptService(
             return Results.Conflict(new ApiResultDto(false, "Expired", null!));
         }
 
-        if (attemptRecord.Status == AttemptStatus.Submitted || attemptRecord.Status == AttemptStatus.Graded)
+        if (attemptRecord.Status is AttemptStatus.Submitted or AttemptStatus.Graded)
             return Results.Conflict(new ApiResultDto(false, "Already submitted", null!));
         if (attemptRecord.PaperJson is null)
             return Results.NotFound(new ApiResultDto(false, "Snapshot missing", null!));
@@ -292,6 +298,7 @@ public class AttemptService(
         // set status
         if (attemptRecord.Status == AttemptStatus.Started)
             attemptRecord.Status = AttemptStatus.InProgress;
+        attemptRecord.UpdatedAt = DateTime.UtcNow;
         await context.SaveChangesAsync(token);
         timeLeftSecond = (int)Math.Max(0, (deadLine - DateTime.UtcNow).TotalSeconds);
         return Results.Ok(new ApiResultDto(true, "Autosaved",
@@ -300,14 +307,58 @@ public class AttemptService(
                 savedItem,
                 skippedItem,
                 rejected = rejectedAnswer,
-                timeLeftSec = timeLeftSecond
+                timeLeftSec = timeLeftSecond,
+                updateAt = attemptRecord.UpdatedAt
             }
         ));
     }
 
-    public Task<IResult> Submit(int attemptId, int userId, CancellationToken token)
+    public async Task<IResult> Submit(int attemptId, int userId, CancellationToken token)
     {
-        throw new NotImplementedException();
+        var existedAttempt =
+            await context.Attempts.FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
+        if (existedAttempt == null)
+            return Results.NotFound(new ApiResultDto(false, "Not found existed attempt", null!));
+        if (existedAttempt.PaperJson is null)
+            return Results.Problem("Snapshot is missing", statusCode:StatusCodes.Status500InternalServerError);
+        var deadline = existedAttempt.StartedAt.AddSeconds(existedAttempt.DurationSec);
+        var timeLeftSec = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
+        if (timeLeftSec <= 0)
+        {
+            if (existedAttempt.Status is AttemptStatus.Started or AttemptStatus.InProgress)
+            {
+                existedAttempt.Status = AttemptStatus.Expired;
+                await context.SaveChangesAsync(token);
+            }
+
+            return Results.Conflict(new ApiResultDto(false, "Attempt is expired", null!));
+        }
+
+        if (existedAttempt.Status is AttemptStatus.Submitted or AttemptStatus.Graded)
+        {
+            return Results.Ok(new ApiResultDto(true, "Already submitted", new
+            {
+                attemptId = existedAttempt.Id,
+                status = existedAttempt.Status,
+                finishedAt = existedAttempt.SubmittedAt
+            }));
+        }
+
+        existedAttempt.Status = AttemptStatus.Submitted;
+        existedAttempt.SubmittedAt = DateTime.UtcNow;
+        await context.SaveChangesAsync(token);
+        // thêm hàm chầm điểm chỗ này 
+
+        deadline = existedAttempt.StartedAt.AddSeconds(existedAttempt.DurationSec);
+        timeLeftSec = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
+        return Results.Ok(new ApiResultDto(true, "Submitted", new
+        {
+            attemptId = existedAttempt.Id,
+            status = existedAttempt.Status,
+            finishedAt = existedAttempt.SubmittedAt,
+            timeUsedSec = existedAttempt.SubmittedAt,
+            timeLeftSec
+        }));
     }
     
     

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using exam_service.Domains.Enums;
+using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace exam_service.Domains.Entities;
 

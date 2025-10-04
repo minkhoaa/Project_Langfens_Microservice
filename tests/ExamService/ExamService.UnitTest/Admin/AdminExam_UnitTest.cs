@@ -1,11 +1,11 @@
 using exam_service.Contracts.Exams;
-using exam_service.Domains.Enums;
 using exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace ExamService.UnitTest.Admin;
 

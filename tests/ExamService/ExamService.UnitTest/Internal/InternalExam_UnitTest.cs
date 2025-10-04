@@ -1,10 +1,10 @@
 using exam_service.Contracts.Exams;
 using exam_service.Data.Entities;
-using exam_service.Domains.Enums;
 using exam_service.Features.Exams.InternalEndpoint;
 using ExamService.UnitTest.Admin;
 using Microsoft.AspNetCore.Http;
 using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace ExamService.UnitTest.Internal;
 

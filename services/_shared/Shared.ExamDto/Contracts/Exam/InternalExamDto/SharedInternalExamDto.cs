@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using exam_service.Domains.Enums;
+using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace Shared.ExamDto.Contracts.Exam.InternalExamDto;
 
