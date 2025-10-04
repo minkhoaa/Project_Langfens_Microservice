@@ -1,11 +1,10 @@
 using exam_service.Contracts.Exams;
 using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
-using ExamService.UnitTest.Admin;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts;
 
-namespace ExamService.UnitTest;
+namespace ExamService.UnitTest.Admin;
 
 public class AdminSectionUnitTest
 {

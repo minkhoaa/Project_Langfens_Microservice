@@ -3,7 +3,7 @@ using exam_service.Data.Entities;
 using exam_service.Features.Exams.InternalEndpoint;
 using ExamService.UnitTest.Admin;
 using Microsoft.AspNetCore.Http;
-using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace ExamService.UnitTest.Internal;
@@ -70,7 +70,7 @@ public class InternalExam_UnitTest
             Assert.Equal(StatusCodes.Status200OK, status);
             Assert.True(api!.isSuccess);
 
-            var paper = api.data as DtoInternal.InternalDeliveryExam;
+            var paper = api.data as InternalExamDto.InternalDeliveryExam;
             Assert.NotNull(paper);
             Assert.Equal(examId, paper!.Id);
             Assert.Single(paper.Sections);
@@ -124,7 +124,7 @@ public class InternalExam_UnitTest
             Assert.Equal(StatusCodes.Status200OK, status);
             Assert.True(api!.isSuccess);
 
-            var paper = api.data as DtoInternal.InternalDeliveryExam;
+            var paper = api.data as InternalExamDto.InternalDeliveryExam;
             Assert.NotNull(paper);
             Assert.Single(paper!.Sections);
 

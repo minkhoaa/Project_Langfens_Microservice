@@ -4,7 +4,7 @@ using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace ExamService.UnitTest.Admin;

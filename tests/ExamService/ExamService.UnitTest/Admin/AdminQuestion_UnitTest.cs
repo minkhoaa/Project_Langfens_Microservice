@@ -4,11 +4,11 @@ using exam_service.Contracts.Exams;
 using exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts;
 
 namespace ExamService.UnitTest.Admin;
 
-public class AdminQuestion_UnitTest
+public class AdminQuestionUnitTest
 {
     [Fact]
     public async Task AddQuestion_Should_Return_400_When_Section_NotFound()

@@ -5,7 +5,7 @@ using exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Contracts.Contracts;
+using Shared.ExamDto.Contracts;
 
 namespace ExamService.UnitTest.Admin;
 
