@@ -8,6 +8,7 @@ using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.Ini;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 using Shared.Grpc.ExamInternal;
@@ -66,7 +67,6 @@ public class AttemptService(
             {
                 try
                 {
-                    
                     var dto = existedStartedAttempt.PaperJson.RootElement
                         .Deserialize<InternalExamDto.InternalDeliveryExam>(new JsonSerializerOptions
                             {PropertyNameCaseInsensitive = true}) ;
@@ -88,9 +88,7 @@ public class AttemptService(
                         existedStartedAttempt.PaperJson.RootElement.Clone()));
                 }
             }
-
         }
-
         var snapShot = await gateway.GetExamSnapshotAsync(request.ExamId, token);
         var json = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(snapShot));
         using var doc = JsonDocument.Parse(json!);
@@ -114,12 +112,14 @@ public class AttemptService(
                 )));
     }
 
+    
+    
     public async Task<IResult> GetAttemptById(AttemptGetRequest request, CancellationToken token)
     {
         var attempts = await context.Attempts.AsNoTracking()
             .Where(x => x.Id == request.AttemptId && x.UserId == request.UserId)
             .FirstOrDefaultAsync(token);
-
+        // validate attempt
         if (attempts == null)
             return Results.NotFound(new ApiResultDto(false, "Not found", null!));
         if (attempts.PaperJson is null)
@@ -157,7 +157,6 @@ public class AttemptService(
         {
             try
             {
-                
                 var elements = gateway.GetExamSnapshotAsync(attempts.ExamId, token);
                 var answers = context.AttemptAnswers.AsNoTracking().Where(x => x.AttemptId == attempts.Id)
                     .Select(answer =>
@@ -187,108 +186,123 @@ public class AttemptService(
 
     public async Task<IResult> Autosave(int attemptId, int userId, AutosaveRequest req, CancellationToken token)
     {
-        var record = await context.Attempts
+        var attemptRecord = await context.Attempts
             .FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
-        if (record is null)
-            return Results.NotFound(new ApiResultDto(false, "Not found", null!));
-        var deadline = record.StartedAt.AddSeconds(record.DurationSec);
-        var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
-        if (timeLeft <= 0)
+        // validate attempt
+        if (attemptRecord is null)
+            return Results.NotFound(new ApiResultDto(false, "Not found attempt record", null!));
+        var deadLine = attemptRecord.StartedAt.AddSeconds(attemptRecord.DurationSec);
+        var timeLeftSecond = (int)Math.Max(0, (deadLine - DateTime.UtcNow).TotalSeconds);
+        if (timeLeftSecond <= 0)
         {
-            if (record.Status is AttemptStatus.Started or AttemptStatus.InProgress)
+            if (attemptRecord.Status is AttemptStatus.Started or AttemptStatus.InProgress)
             {
-                record.Status = AttemptStatus.Expired;
+                attemptRecord.Status = AttemptStatus.Expired;
                 await context.SaveChangesAsync(token);
             }
-            return Results.Conflict(new ApiResultDto(false, "Attempt expired", null!));
+            return Results.Conflict(new ApiResultDto(false, "Expired", null!));
         }
-        if (record.Status == AttemptStatus.Submitted || record.Status == AttemptStatus.Graded)
-            return Results.Conflict(new ApiResultDto(false, "Attempt is already submitted", null!));
-        if (record.PaperJson is null)
-            return Results.Problem("Snapshot missing", statusCode: 500);
 
-        var index = QuestionIndex.Build(record.PaperJson);
-        var incoming = req.Answers ?? new List<AnswerItem>();
-        if (incoming.Count == 0) return Results.Ok(new ApiResultDto(true, "No changes", null!));
-        var rejected = new List<string>();
-        foreach (var answerItem in incoming) 
+        if (attemptRecord.Status == AttemptStatus.Submitted || attemptRecord.Status == AttemptStatus.Graded)
+            return Results.Conflict(new ApiResultDto(false, "Already submitted", null!));
+        if (attemptRecord.PaperJson is null)
+            return Results.NotFound(new ApiResultDto(false, "Snapshot missing", null!));
+        
+        // lay hashset question id cua snapshot, 
+        var snapshotQuestionId = QuestionIndex.Build(attemptRecord.PaperJson);
+        
+        // lay list answer cua incoming request
+        var incomingAnswer = req.Answers ?? new List<AnswerItem>();
+        var rejectedAnswer = new List<string>();
+        // validate incoming request
+        if (incomingAnswer.Count == 0)
+            return Results.Ok(new ApiResultDto(true, "No changes", null!));
+        
+        // check tung item trong answer co vi pham dieu dieu kien khong
+        foreach (var item in incomingAnswer)
         {
-            if (!index.TryGetValue(answerItem.QuestionId, out var meta))
+            if (!snapshotQuestionId.TryGetValue(item.QuestionId, out var value))
             {
-                rejected.Add($"Unknown question {answerItem.QuestionId}");
+                rejectedAnswer.Add($"Unknown question {item.QuestionId}");
                 continue;
             }
-
-            if (answerItem.SelectedOptionIds is not null)
+            if (item.SelectedOptionIds is not null)
             {
-                if (answerItem.SelectedOptionIds.Any(x => !meta.OptionIds.Contains(x))) 
-                    rejected.Add($"Invalid option for Q{answerItem.QuestionId}");
-                if (meta.Type == "SINGLE" && answerItem.SelectedOptionIds.Count > 1)
-                    rejected.Add($"Too many options for single-choice Q{answerItem.QuestionId}");
+                if (item.SelectedOptionIds.Any(x=> !value.OptionIds.Contains(x))) 
+                    rejectedAnswer.Add($"Invalid option for Q{item.QuestionId}");
+                if (value.Type == "SINGLE" && item.SelectedOptionIds.Count > 1)
+                    rejectedAnswer.Add($"Too many options for single-choice Q{item.QuestionId}");
             }
         }
 
-        if (rejected.Count > 0) return Results.UnprocessableEntity(new ApiResultDto(false, "Invalid payload", null!));
-        var ids = incoming.Select(x => x.QuestionId).Distinct().ToArray();
-        var rows = await context.AttemptAnswers
-            .Where(x => x.AttemptId == attemptId && ids.Contains(x.QuestionId))
-            .ToDictionaryAsync(x=>x.QuestionId, token);
-        var saved = 0;
-        var skipped = 0;
-        foreach (var answer in incoming)
+        if (rejectedAnswer.Count > 0)
+            return Results.UnprocessableEntity(new ApiResultDto(false, "Invalid payload", rejectedAnswer));
+        
+        // build list incoming question id
+        var incomingQuestionId = incomingAnswer.Select(x => x.QuestionId).Distinct().ToList();
+        
+        // full info for incoming question id 
+        var answerExistedInDatabase = await context.AttemptAnswers
+            .Where(x => x.AttemptId == attemptId && incomingQuestionId.Contains(x.QuestionId))
+            .ToDictionaryAsync(x => x.QuestionId, token);
+        int savedItem = 0, skippedItem = 0;
+
+        foreach (var incomingItem in incomingAnswer)
         {
-            var meta = index[answer.QuestionId];
-            if (!rows.TryGetValue(answer.QuestionId, out var row))
+            var meta = snapshotQuestionId[incomingItem.QuestionId];
+            // neu chua ton tai, tao moi
+            if (!answerExistedInDatabase.TryGetValue(incomingItem.QuestionId, out var existedAnswer))
             {
-                row = new AttemptAnswer()
+                existedAnswer = new AttemptAnswer()
                 {
                     AttemptId = attemptId,
-                    QuestionId = answer.QuestionId,
                     SectionId = meta.SectionId,
-                    SelectedOptionIds = null!,
-                    TextAnswer = null!
+                    AwardedPoints = null,
+                    TextAnswer = null,
+                    QuestionId = incomingItem.QuestionId
                 };
-                context.AttemptAnswers.Add(row);
-                rows[answer.QuestionId] = row; 
+                context.AttemptAnswers.Add(existedAnswer);
+                answerExistedInDatabase[incomingItem.QuestionId] = existedAnswer; 
             }
-
-            bool changed = false;
-            if (answer.SelectedOptionIds is not null)
+            // apply changes
+            var changed = false;
+            if (incomingItem.SelectedOptionIds is not null)
             {
-                row.SelectedOptionIds = answer.SelectedOptionIds.Count == 0
-                    ? new List<int>()
-                    : answer.SelectedOptionIds.ToList();
+                existedAnswer.SelectedOptionIds =
+                    incomingItem.SelectedOptionIds.Count == 0
+                        ? new List<int>()
+                        : incomingItem.SelectedOptionIds.ToList();
                 changed = true;
             }
-
-            if (answer.TextAnswer is not null)
+            if (incomingItem.TextAnswer is not null)
             {
-                row.TextAnswer = answer.TextAnswer;
+                existedAnswer.TextAnswer = incomingItem.TextAnswer;
                 changed = true;
-            }
 
+            }
             if (changed)
             {
-                row.IsCorrect = null!;
-                row.AwardedPoints = null!;
-                saved++;
+                existedAnswer.IsCorrect = null;
+                existedAnswer.SectionId = meta.SectionId;
+                existedAnswer.AwardedPoints = null;
+                savedItem++;
             }
-            else
-            {
-                skipped++; 
-            }
+            else skippedItem++; 
         }
-
-        if (record.Status == AttemptStatus.Started) 
-            record.Status = AttemptStatus.InProgress;
+        // set status
+        if (attemptRecord.Status == AttemptStatus.Started)
+            attemptRecord.Status = AttemptStatus.InProgress;
         await context.SaveChangesAsync(token);
-        timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
-        return Results.Ok(new ApiResultDto(true, "Autosaved", new {
-            saved,
-            skipped,
-            rejected = Array.Empty<string>(),
-            timeLeftSec = timeLeft
-        }));
+        timeLeftSecond = (int)Math.Max(0, (deadLine - DateTime.UtcNow).TotalSeconds);
+        return Results.Ok(new ApiResultDto(true, "Autosaved",
+            new
+            {
+                savedItem,
+                skippedItem,
+                rejected = rejectedAnswer,
+                timeLeftSec = timeLeftSecond
+            }
+        ));
     }
 
     public Task<IResult> Submit(int attemptId, int userId, CancellationToken token)
