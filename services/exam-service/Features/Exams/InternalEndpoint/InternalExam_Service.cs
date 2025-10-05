@@ -45,6 +45,7 @@ public class InternalExamService : IInternalExamService
                                  question.ExplanationMd,
                                  question.Options.Where(d => d.QuestionId == question.Id)
                                      .Select(option => new InternalExamDto.InternalDeliveryOption(
+                                         option.Id,
                                          option.Idx, 
                                          option.ContentMd,
                                          (showAnswer) ?  option.IsCorrect : null!

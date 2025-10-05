@@ -16,7 +16,7 @@ public sealed record QuestionKey (
     // Matching: leftKey -> accepted right values
     Dictionary<string, string[]?>MatchPairs = null!,
     // Flow chart / ordering:
-    string[] OrderCorrects = null!
+    List<string> OrderCorrects = null!
     ) ;
 public sealed record GradeResult(double AwardedPoints, bool? IsCorrect, bool NeedsManualReview = false, string? Feedback = null);
 
@@ -34,4 +34,5 @@ static class TextNorm {
         return Regex.Replace(noDia, "\\s+", " ").Trim();
     }
 }
+
 

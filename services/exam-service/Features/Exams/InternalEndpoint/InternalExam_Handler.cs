@@ -10,6 +10,4 @@ public static class InternalExamHandler
         CancellationToken token,
         [FromServices] IInternalExamService service
         ) => service.GetByExamIdAsync(id, token, showAnswer);
-    
-        
 }

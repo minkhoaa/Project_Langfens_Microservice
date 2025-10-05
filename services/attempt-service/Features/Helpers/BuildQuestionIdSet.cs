@@ -1,4 +1,10 @@
+using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Xml.Serialization;
+using Google.Protobuf.Collections;
+using Shared.ExamDto.Contracts.Exam.Enums;
+using Shared.ExamDto.Contracts.Exam.InternalExamDto;
+using Shared.Grpc.ExamInternal;
 
 namespace attempt_service.Features.Helpers;
 
@@ -37,4 +43,48 @@ public static class QuestionIndex {
         }
         return map;
     }
+}
+
+public static class BuildIndex
+{
+    public sealed record QMeta(int SectionId, string Type, HashSet<int> OptionIds);
+
+    // validate question type
+    public static bool IsSingleChoice(string? type) {
+        var t = (type ?? "").ToUpperInvariant();
+        return t is QuestionType.MultipleChoiceSingle 
+            or QuestionType.TrueFalseNotGiven 
+            or QuestionType.YesNoNotGiven 
+            or QuestionType.MultipleChoiceSingleImage;
+    }
+    public static Dictionary<int, QMeta> BuildIndexFromProto(InternalDeliveryExam exam)
+    {
+        var map = new Dictionary<int, QMeta>();
+        foreach (var section in exam.Sections ?? new RepeatedField<InternalDeliverySection>())
+        {
+            foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+            {
+                var optionIds = question.Options!.Select(x => x.Id).ToHashSet() ?? [];
+                map[question.Id] = new QMeta(section.Id, question.Type ?? string.Empty, optionIds);
+            }
+        }
+
+        return map;
+    }
+
+    public static Dictionary<int, QMeta> BuildIndexFromDto(InternalExamDto.InternalDeliveryExam exam)
+    {
+        var map = new Dictionary<int, QMeta>();
+        foreach (var section in exam.Sections) 
+        {
+            foreach (var question in section.Questions)
+            {
+                var optionIds = (question.Options ?? []).Select(x => x.Id).ToHashSet() ?? [];
+                map[question.Id] = new QMeta(section.Id, question.Type ?? string.Empty, optionIds);
+            }
+        }
+
+        return map;
+    }
+
 }

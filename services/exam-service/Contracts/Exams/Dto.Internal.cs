@@ -27,7 +27,7 @@ public class InternalExamDto
         string? ExplanationMd,
         IReadOnlyList<InternalDeliveryOption> Options);
 
-    public record InternalDeliveryOption(int Idx, string ContentMd, bool? IsCorrect);
+    public record InternalDeliveryOption(int Id ,int Idx, string ContentMd, bool? IsCorrect);
     public static class SnapshotSanitizer
     {
         public static InternalDeliveryExam Sanitize(InternalDeliveryExam exam) => exam with
