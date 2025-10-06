@@ -18,9 +18,8 @@ public static class SqlTestHelper
             .Options;
 
         var ctx = new ExamDbContext(options);
-        ctx.Database.EnsureCreated(); 
+        ctx.Database.EnsureCreated();
 
         return (ctx, conn);
     }
-
 }

@@ -3,10 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace attempt_service.Domain.Entities;
 
-public class AttemptAnswer {
-    [Key] 
+public class AttemptAnswer
+{
+    [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }                  
+    public int Id { get; set; }
 
     [Required] public int AttemptId { get; set; }
     public Attempt Attempt { get; set; } = null!;
@@ -16,8 +17,8 @@ public class AttemptAnswer {
 
     public List<int>? SelectedOptionIds { get; set; }
 
-    public string? TextAnswer { get; set; } = string.Empty; 
+    public string? TextAnswer { get; set; } = string.Empty;
 
     public bool? IsCorrect { get; set; }
-    public decimal? AwardedPoints { get; set; }
+    public double? AwardedPoints { get; set; }
 }

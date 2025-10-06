@@ -2,19 +2,23 @@ using exam_service.Application.Common;
 using exam_service.Infrastructure.Persistence;
 using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Shared.Grpc.ExamInternal;
+
 namespace exam_service.Features.Exams.InternalEndpoint;
+
 public class ExamInternalGrpcService : ExamInternal.ExamInternalBase
 {
-    private readonly ExamDbContext _context;
     private readonly IConfiguration _configuration;
-    public ExamInternalGrpcService(ExamDbContext context, IConfiguration configuration) 
+    private readonly ExamDbContext _context;
+
+    public ExamInternalGrpcService(ExamDbContext context, IConfiguration configuration)
     {
         _configuration = configuration;
         _context = context;
     }
-    public override async Task<InternalDeliveryExam> GetInternalExam(GetInternalExamRequest request, ServerCallContext context)
+
+    public override async Task<InternalDeliveryExam> GetInternalExam(GetInternalExamRequest request,
+        ServerCallContext context)
     {
         var exams = await _context.Exams.AsNoTracking()
             .Where(x => x.Id == request.ExamId)

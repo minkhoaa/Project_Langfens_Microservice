@@ -39,6 +39,7 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                 await context.ExamSections.Where(x => x.ExamId == dto.ExamId && x.Idx >= desired)
                     .ExecuteUpdateAsync(x => x.SetProperty(section => section.Idx, section => section.Idx + 1), token);
             }
+
             var sec = new ExamSection
             {
                 ExamId = dto.ExamId,
@@ -80,7 +81,7 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                         .SetProperty(s => s.Title, dto.Title)
                         .SetProperty(s => s.InstructionsMd, dto.InstructionsMd),
                     token);
-            
+
             return Results.Ok(new ApiResultDto(true, $"Update {effectedRow}", null!));
         }
         catch (Exception e)

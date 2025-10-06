@@ -1,5 +1,4 @@
 using exam_service.Contracts.Exams;
-using exam_service.Data.Entities;
 using exam_service.Domains.Entities;
 using exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
 using exam_service.Infrastructure.Persistence;
@@ -11,7 +10,6 @@ namespace ExamService.UnitTest.Admin;
 
 public class AdminOptionUnitTest
 {
-
     // ===== Local seed helpers cho Option tests =====
     private static async Task<int> SeedQuestionAsync(ExamDbContext ctx, int examId)
     {
@@ -32,7 +30,7 @@ public class AdminOptionUnitTest
             SectionId = sec.Id,
             Idx = 1,
             PromptMd = "Q1",
-            Type = "single",       // string cho nhẹ, tránh lệ thuộc enum
+            Type = "single", // string cho nhẹ, tránh lệ thuộc enum
             Skill = "reading",
             Difficulty = 1,
             ExplanationMd = null
@@ -60,6 +58,7 @@ public class AdminOptionUnitTest
             list.Add(op);
             ctx.ExamOptions.Add(op);
         }
+
         await ctx.SaveChangesAsync();
         return list;
     }
@@ -87,7 +86,11 @@ public class AdminOptionUnitTest
             Assert.False(api!.isSuccess);
             Assert.Contains("Question not found", api.message);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -97,7 +100,7 @@ public class AdminOptionUnitTest
         try
         {
             var examId = await SeedHelper.SeedExamAsync(ctx);
-            var qId    = await SeedQuestionAsync(ctx, examId);
+            var qId = await SeedQuestionAsync(ctx, examId);
 
             // đã có 2 option idx 1,2
             await SeedOptionsAsync(ctx, qId, (1, "A", false), (2, "B", true));
@@ -122,7 +125,11 @@ public class AdminOptionUnitTest
                 .OrderBy(x => x.Idx).Select(x => x.Idx).ToListAsync();
             Assert.Equal(new[] { 1, 2, 3 }, order);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -132,7 +139,7 @@ public class AdminOptionUnitTest
         try
         {
             var examId = await SeedHelper.SeedExamAsync(ctx);
-            var qId    = await SeedQuestionAsync(ctx, examId);
+            var qId = await SeedQuestionAsync(ctx, examId);
 
             await SeedOptionsAsync(ctx, qId, (1, "A", false), (2, "B", true), (3, "C", false));
 
@@ -157,7 +164,11 @@ public class AdminOptionUnitTest
 
             Assert.Equal(new[] { "A", "X", "B", "C" }, contentsByIdx);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -167,7 +178,7 @@ public class AdminOptionUnitTest
         try
         {
             var examId = await SeedHelper.SeedExamAsync(ctx);
-            var qId    = await SeedQuestionAsync(ctx, examId);
+            var qId = await SeedQuestionAsync(ctx, examId);
 
             var options = await SeedOptionsAsync(ctx, qId, (1, "A", false));
             var id = options[0].Id;
@@ -193,7 +204,11 @@ public class AdminOptionUnitTest
             Assert.Equal("A-Updated", updated.ContentMd);
             Assert.True(updated.IsCorrect);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -203,7 +218,7 @@ public class AdminOptionUnitTest
         try
         {
             var examId = await SeedHelper.SeedExamAsync(ctx);
-            var qId    = await SeedQuestionAsync(ctx, examId);
+            var qId = await SeedQuestionAsync(ctx, examId);
 
             var options = await SeedOptionsAsync(ctx, qId, (1, "A", false));
             var id = options[0].Id;
@@ -218,7 +233,11 @@ public class AdminOptionUnitTest
 
             Assert.Equal(0, await ctx.ExamOptions.CountAsync());
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -235,6 +254,10 @@ public class AdminOptionUnitTest
             Assert.True(api!.isSuccess);
             Assert.Contains("Deleted 0", api.message);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 }

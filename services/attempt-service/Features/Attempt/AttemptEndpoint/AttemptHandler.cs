@@ -1,6 +1,5 @@
 using attempt_service.Contracts.Attempt;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 

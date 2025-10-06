@@ -1,4 +1,3 @@
-using exam_service.Data.Entities;
 using exam_service.Domains.Entities;
 using Microsoft.EntityFrameworkCore;
 

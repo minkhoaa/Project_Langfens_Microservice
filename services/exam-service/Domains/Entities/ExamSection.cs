@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using exam_service.Data.Entities;
 
 namespace exam_service.Domains.Entities;
 

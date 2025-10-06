@@ -1,8 +1,10 @@
 // tests/ExamService.UnitTest/SeedHelper.cs
+
 using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
-using exam_service.Data.Entities;
-using Shared.ExamDto.Contracts.Exam.Enums; // ExamQuestion, ExamOption
+using Shared.ExamDto.Contracts.Exam.Enums;
+
+// ExamQuestion, ExamOption
 
 namespace ExamService.UnitTest;
 
@@ -14,14 +16,14 @@ internal class SeedHelper
 
         var exam = new Exam
         {
-            Title       = title,
-            Slug        = $"{Slugify(title)}-{Guid.NewGuid():N}", // LUÔN unique
-            Category    = ExamCategory.IELTS!,
-            Level       = ExamLevel.B1!,
-            Status      = ExamStatus.Draft,
+            Title = title,
+            Slug = $"{Slugify(title)}-{Guid.NewGuid():N}", // LUÔN unique
+            Category = ExamCategory.IELTS!,
+            Level = ExamLevel.B1!,
+            Status = ExamStatus.Draft,
             DurationMin = 60,
-            CreatedAt   = DateTime.UtcNow,
-            UpdatedAt   = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         ctx.Exams.Add(exam);
@@ -37,10 +39,10 @@ internal class SeedHelper
         {
             var sec = new ExamSection
             {
-                ExamId        = examId,
-                Idx           = idx,
-                Title         = title,
-                InstructionsMd= ""
+                ExamId = examId,
+                Idx = idx,
+                Title = title,
+                InstructionsMd = ""
             };
             list.Add(sec);
             ctx.ExamSections.Add(sec);
@@ -63,12 +65,12 @@ internal class SeedHelper
     {
         var q = new ExamQuestion
         {
-            SectionId     = sectionId,
-            Idx           = idx,
-            Type          = type,
-            Skill         = skill,
-            Difficulty    = difficulty,
-            PromptMd      = prompt ?? $"Q{idx}",
+            SectionId = sectionId,
+            Idx = idx,
+            Type = type,
+            Skill = skill,
+            Difficulty = difficulty,
+            PromptMd = prompt ?? $"Q{idx}",
             ExplanationMd = ""
         };
         ctx.ExamQuestions.Add(q);
@@ -87,13 +89,14 @@ internal class SeedHelper
             var opt = new ExamOption
             {
                 QuestionId = questionId,
-                Idx        = idx,
-                ContentMd  = content,
-                IsCorrect  = isCorrect
+                Idx = idx,
+                ContentMd = content,
+                IsCorrect = isCorrect
             };
             list.Add(opt);
             ctx.ExamOptions.Add(opt);
         }
+
         await ctx.SaveChangesAsync();
         return list;
     }

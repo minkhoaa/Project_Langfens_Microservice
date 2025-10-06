@@ -1,21 +1,25 @@
-using System.Security.Cryptography.X509Certificates;
 using attempt_service.Domain.Entities;
-using attempt_service.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace attempt_service.Infrastructure.Persistence;
 
 public class AttemptDbContext : DbContext
 {
-    public AttemptDbContext(DbContextOptions<AttemptDbContext> options) : base(options) {}
+    public AttemptDbContext(DbContextOptions<AttemptDbContext> options) : base(options)
+    {
+    }
+
+    public DbSet<Attempt> Attempts { get; set; }
+    public DbSet<AttemptAnswer> AttemptAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder app)
     {
-        base.OnModelCreating(app); 
-        
-        app.Entity<Attempt>(a => {
+        base.OnModelCreating(app);
+
+        app.Entity<Attempt>(a =>
+        {
             a.ToTable("attempts");
-            a.Property(x=>x.Status)
+            a.Property(x => x.Status)
                 .HasColumnName("status")
                 .HasMaxLength(16)
                 .IsRequired();
@@ -28,10 +32,9 @@ public class AttemptDbContext : DbContext
             // Indexes
             a.HasIndex(x => new { x.UserId, x.Status }).HasDatabaseName("idx_attempt_user_status");
             a.HasIndex(x => new { x.ExamId, x.Status }).HasDatabaseName("idx_attempt_exam_status");
+        });
 
-        }); 
-        
-        app.Entity<AttemptAnswer>( aa =>
+        app.Entity<AttemptAnswer>(aa =>
         {
             aa.ToTable("attempt_answer");
             aa.HasOne(x => x.Attempt)
@@ -46,8 +49,6 @@ public class AttemptDbContext : DbContext
             aa.HasIndex(x => new { x.AttemptId, x.QuestionId })
                 .IsUnique()
                 .HasDatabaseName("uq_attempt_answer_attempt_question");
-        } );
+        });
     }
-    public DbSet<Attempt> Attempts {get; set; } 
-    public DbSet<AttemptAnswer> AttemptAnswers {get; set; } 
 }

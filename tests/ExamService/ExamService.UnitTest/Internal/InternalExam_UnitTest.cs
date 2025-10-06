@@ -1,5 +1,5 @@
 using exam_service.Contracts.Exams;
-using exam_service.Data.Entities;
+using exam_service.Domains.Entities;
 using exam_service.Features.Exams.InternalEndpoint;
 using ExamService.UnitTest.Admin;
 using Microsoft.AspNetCore.Http;
@@ -25,7 +25,11 @@ public class InternalExam_UnitTest
             Assert.False(api!.isSuccess);
             Assert.Contains("Not found", api.message);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -56,10 +60,10 @@ public class InternalExam_UnitTest
 
             ctx.ExamOptions.AddRange(
                 new ExamOption { QuestionId = q1.Id, Idx = 1, IsCorrect = false, ContentMd = "A1" },
-                new ExamOption { QuestionId = q1.Id, Idx = 2, IsCorrect = true , ContentMd = "A2" },
+                new ExamOption { QuestionId = q1.Id, Idx = 2, IsCorrect = true, ContentMd = "A2" },
                 new ExamOption { QuestionId = q1.Id, Idx = 3, IsCorrect = false, ContentMd = "A3" },
                 new ExamOption { QuestionId = q2.Id, Idx = 1, IsCorrect = false, ContentMd = "B1" },
-                new ExamOption { QuestionId = q2.Id, Idx = 2, IsCorrect = true , ContentMd = "B2" }
+                new ExamOption { QuestionId = q2.Id, Idx = 2, IsCorrect = true, ContentMd = "B2" }
             );
             await ctx.SaveChangesAsync();
 
@@ -89,7 +93,11 @@ public class InternalExam_UnitTest
             Assert.Equal(3, q1Dto.Options.Count);
             Assert.Equal(2, q2Dto.Options.Count);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -113,7 +121,7 @@ public class InternalExam_UnitTest
 
             ctx.ExamOptions.AddRange(
                 new ExamOption { QuestionId = q.Id, Idx = 1, IsCorrect = false, ContentMd = "O1" },
-                new ExamOption { QuestionId = q.Id, Idx = 2, IsCorrect = true , ContentMd = "O2" }
+                new ExamOption { QuestionId = q.Id, Idx = 2, IsCorrect = true, ContentMd = "O2" }
             );
             await ctx.SaveChangesAsync();
 
@@ -135,8 +143,12 @@ public class InternalExam_UnitTest
             var opts = qDto.Options.OrderBy(x => x.Idx).ToList();
             Assert.Equal(2, opts.Count);
             Assert.False(opts[0].IsCorrect!.Value);
-            Assert.True (opts[1].IsCorrect!.Value);
+            Assert.True(opts[1].IsCorrect!.Value);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 }

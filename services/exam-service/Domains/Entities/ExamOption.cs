@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace exam_service.Data.Entities;
+namespace exam_service.Domains.Entities;
 
 public class ExamOption
 {

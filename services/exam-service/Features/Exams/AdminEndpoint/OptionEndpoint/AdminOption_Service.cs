@@ -1,5 +1,5 @@
 using exam_service.Contracts.Exams;
-using exam_service.Data.Entities;
+using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;

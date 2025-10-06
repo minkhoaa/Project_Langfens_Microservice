@@ -1,5 +1,5 @@
 using exam_service.Contracts.Exams;
-using exam_service.Data.Entities;
+using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +13,13 @@ public interface IAdminQuestionService
         CancellationToken token,
         [FromBody] DtoAdmin.AdminQuestionUpsert dto
     );
+
     public Task<IResult> UpdateAsync(
         CancellationToken token,
         [FromBody] DtoAdmin.AdminQuestionUpdate dto,
         [FromRoute] int id
     );
+
     public Task<IResult> DeleteAsync(
         CancellationToken token,
         [FromRoute] int id);

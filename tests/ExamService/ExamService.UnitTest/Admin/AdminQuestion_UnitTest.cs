@@ -18,7 +18,7 @@ public class AdminQuestionUnitTest
         {
             var svc = new AdminQuestionService(ctx);
             var dto = new DtoAdmin.AdminQuestionUpsert(
-                SectionId: 999_999,      // không tồn tại
+                SectionId: 999_999, // không tồn tại
                 Idx: null,
                 Type: "Single",
                 Skill: "Reading",
@@ -34,7 +34,11 @@ public class AdminQuestionUnitTest
             Assert.False(api!.isSuccess);
             Assert.Contains("Not found section", api.message);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -54,7 +58,7 @@ public class AdminQuestionUnitTest
             var svc = new AdminQuestionService(ctx);
             var dto = new DtoAdmin.AdminQuestionUpsert(
                 SectionId: sectionId,
-                Idx: null,                // append về cuối
+                Idx: null, // append về cuối
                 Type: "Single",
                 Skill: "Reading",
                 Difficulty: 1,
@@ -78,7 +82,11 @@ public class AdminQuestionUnitTest
 
             Assert.Equal(new[] { 1, 2, 3 }, order);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -97,7 +105,7 @@ public class AdminQuestionUnitTest
             var svc = new AdminQuestionService(ctx);
             var dto = new DtoAdmin.AdminQuestionUpsert(
                 SectionId: sectionId,
-                Idx: 1,                   // chèn vào giữa => Q1->2, Q2->3
+                Idx: 1, // chèn vào giữa => Q1->2, Q2->3
                 Type: "Single",
                 Skill: "Reading",
                 Difficulty: 1,
@@ -123,7 +131,11 @@ public class AdminQuestionUnitTest
                 s => Assert.StartsWith("Q1:2", s),
                 s => Assert.StartsWith("Q2:3", s));
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -155,9 +167,9 @@ public class AdminQuestionUnitTest
             var (status, api) = ResultHelpers.Extract<ApiResultDto>(result);
             Assert.Equal(StatusCodes.Status200OK, status);
             Assert.True(api!.isSuccess);
-            Assert.Contains("Updated 1", api.message);  
-            
-            
+            Assert.Contains("Updated 1", api.message);
+
+
             ctx.ChangeTracker.Clear();
             var updated = await ctx.ExamQuestions.AsNoTracking().FirstAsync(x => x.Id == qId);
             Assert.Equal(5, updated.Idx);
@@ -167,7 +179,11 @@ public class AdminQuestionUnitTest
             Assert.Equal("NewPrompt", updated.PromptMd);
             Assert.Equal("NewExp", updated.ExplanationMd);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -193,7 +209,11 @@ public class AdminQuestionUnitTest
 
             Assert.Equal(0, await ctx.ExamQuestions.CountAsync());
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -211,6 +231,10 @@ public class AdminQuestionUnitTest
             Assert.True(api!.isSuccess);
             Assert.Contains("Deleted 0", api.message);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 }

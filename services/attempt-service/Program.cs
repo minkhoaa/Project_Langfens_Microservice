@@ -5,7 +5,6 @@ using attempt_service.Features.Attempt.AttemptEndpoint;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Grpc.ExamInternal;
@@ -47,12 +46,9 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 });
 
 
-
-
 // DI
 builder.Services.AddScoped<IAttemptService, AttemptService>();
 builder.Services.AddScoped<IExamGateway, ExamGateway>();
-
 
 
 builder.Services.ConfigureHttpJsonOptions(option =>
@@ -83,21 +79,16 @@ builder.Services.AddAuthentication(option =>
 });
 
 
-
-
 builder.Services.AddAuthorization();
-
 
 
 var app = builder.Build();
 
 
-
-
 using (var scope = app.Services.CreateScope())
 {
-    var db      = scope.ServiceProvider.GetRequiredService<AttemptDbContext>();
-    var all     = (db.Database.GetMigrations()).ToList();
+    var db = scope.ServiceProvider.GetRequiredService<AttemptDbContext>();
+    var all = db.Database.GetMigrations().ToList();
     var applied = (await db.Database.GetAppliedMigrationsAsync()).ToList();
     var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
     Console.WriteLine($"[EF] All:     {string.Join(", ", all)}");
@@ -107,12 +98,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapAttemptEndpoint();
 
 app.Run();
-
-
-

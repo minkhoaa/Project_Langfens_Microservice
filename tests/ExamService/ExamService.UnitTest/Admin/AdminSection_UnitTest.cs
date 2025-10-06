@@ -42,7 +42,7 @@ public class AdminSectionUnitTest
             var svc = new AdminSectionService(ctx);
             var dto = new DtoAdmin.AdminSectionUpsert(
                 ExamId: examId,
-                Idx: 1,             // append cuối
+                Idx: 1, // append cuối
                 Title: "C",
                 InstructionsMd: "Null"
             );
@@ -91,7 +91,6 @@ public class AdminSectionUnitTest
             Assert.Equal(StatusCodes.Status200OK, status);
             Assert.True(api!.isSuccess);
             Assert.Contains("Update 1", api.message);
-            
         }
         finally
         {

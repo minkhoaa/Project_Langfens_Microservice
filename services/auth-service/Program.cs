@@ -47,7 +47,7 @@ builder.Services.AddIdentityCore<User>(option =>
         option.User.RequireUniqueEmail = true;
         option.Password.RequireDigit = true;
         option.Password.RequireUppercase = true;
-        option.Password.RequireLowercase = true; 
+        option.Password.RequireLowercase = true;
     })
     .AddRoles<Role>()
     .AddEntityFrameworkStores<AuthDbContext>()

@@ -25,9 +25,8 @@ public static class GraderRegistry
         // Ghép tiêu đề
         [QuestionType.MatchingHeading] = new MatchingHeadingGrader(),
 
-        
+
         // Thứ tự/flow
         [QuestionType.FlowChart] = new FlowChartGrader()
     };
-
 }

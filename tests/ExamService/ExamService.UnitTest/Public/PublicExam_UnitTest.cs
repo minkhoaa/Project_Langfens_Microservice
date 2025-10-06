@@ -1,7 +1,4 @@
-
-
 using exam_service.Contracts.Exams;
-using exam_service.Data.Entities;
 using exam_service.Domains.Entities;
 using ExamService.UnitTest.Admin;
 using Microsoft.AspNetCore.Http;
@@ -18,30 +15,52 @@ public class PublicExamUnitTest
         var (ctx, conn) = SqlTestHelper.CreateInMemory();
         try
         {
-            var e1 = new Exam { Title = "E1", Slug = "e1", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!, Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow.AddMinutes(-30) };
-            var e2 = new Exam { Title = "E2", Slug = "e2", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!, Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow.AddMinutes(-10) };
-            var e3 = new Exam { Title = "E3", Slug = "e3", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!, Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow.AddMinutes(-20) };
-            var e4 = new Exam { Title = "E4", Slug = "e4", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!, Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow.AddMinutes(-40) };
-            
-            var draft = new Exam { Title = "D1", Slug = "d1", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!, Status = ExamStatus.Draft, UpdatedAt = DateTime.UtcNow };
+            var e1 = new Exam
+            {
+                Title = "E1", Slug = "e1", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!,
+                Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow.AddMinutes(-30)
+            };
+            var e2 = new Exam
+            {
+                Title = "E2", Slug = "e2", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!,
+                Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow.AddMinutes(-10)
+            };
+            var e3 = new Exam
+            {
+                Title = "E3", Slug = "e3", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!,
+                Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow.AddMinutes(-20)
+            };
+            var e4 = new Exam
+            {
+                Title = "E4", Slug = "e4", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!,
+                Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow.AddMinutes(-40)
+            };
+
+            var draft = new Exam
+            {
+                Title = "D1", Slug = "d1", Category = ExamCategory.IELTS!, Level = ExamLevel.B1!,
+                Status = ExamStatus.Draft, UpdatedAt = DateTime.UtcNow
+            };
 
             ctx.Exams.AddRange(e1, e2, e3, e4, draft);
             await ctx.SaveChangesAsync();
 
             var svc = new exam_service.Application.Exam.ExamService(ctx);
-            
-            var r1 = await svc.ListPublishedAsync(ExamCategory.IELTS, ExamLevel.B1, page: 1, pageSize: 2, CancellationToken.None);
+
+            var r1 = await svc.ListPublishedAsync(ExamCategory.IELTS, ExamLevel.B1, page: 1, pageSize: 2,
+                CancellationToken.None);
             var (st1, api1) = ResultHelpers.Extract<ApiResultDto>(r1);
             Assert.Equal(StatusCodes.Status200OK, st1);
 
             var list1 = api1!.data as List<Dto_Public.PublicExamRecord>;
             Assert.NotNull(list1);
             Assert.Equal(2, list1!.Count);
-            
+
             Assert.Equal("e2", list1[0].Slug);
             Assert.Equal("e3", list1[1].Slug);
-            
-            var r2 = await svc.ListPublishedAsync(ExamCategory.IELTS, ExamLevel.B1, page: 2, pageSize: 2, CancellationToken.None);
+
+            var r2 = await svc.ListPublishedAsync(ExamCategory.IELTS, ExamLevel.B1, page: 2, pageSize: 2,
+                CancellationToken.None);
             var (_, api2) = ResultHelpers.Extract<ApiResultDto>(r2);
             var list2 = api2!.data as List<Dto_Public.PublicExamRecord>;
             Assert.NotNull(list2);
@@ -49,7 +68,11 @@ public class PublicExamUnitTest
             Assert.Equal("e1", list2[0].Slug);
             Assert.Equal("e4", list2[1].Slug);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -59,7 +82,8 @@ public class PublicExamUnitTest
         try
         {
             // Seed 1 exam Published nhưng category khác
-            ctx.Exams.Add(new Exam {
+            ctx.Exams.Add(new Exam
+            {
                 Title = "Toeic A", Slug = "toeic-a",
                 Category = ExamCategory.TOEIC!, Level = ExamLevel.B1!,
                 Status = ExamStatus.Published, UpdatedAt = DateTime.UtcNow
@@ -69,7 +93,8 @@ public class PublicExamUnitTest
             var svc = new exam_service.Application.Exam.ExamService(ctx);
 
             // Lọc IELTS+B2 => không khớp
-            var r = await svc.ListPublishedAsync(ExamCategory.IELTS, ExamLevel.B2, page: 1, pageSize: 10, CancellationToken.None);
+            var r = await svc.ListPublishedAsync(ExamCategory.IELTS, ExamLevel.B2, page: 1, pageSize: 10,
+                CancellationToken.None);
             var (st, api) = ResultHelpers.Extract<ApiResultDto>(r);
 
             // Code trong service luôn Ok nếu .ToListAsync() (không bao giờ null)
@@ -79,7 +104,11 @@ public class PublicExamUnitTest
             Assert.NotNull(list);
             Assert.Empty(list!);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -96,7 +125,11 @@ public class PublicExamUnitTest
             Assert.False(api!.isSuccess);
             Assert.Contains("Not found", api.message);
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -125,8 +158,10 @@ public class PublicExamUnitTest
             await ctx.SaveChangesAsync();
 
             // Question trong S1: Idx 2 rồi 1 (để test order)
-            var q2 = new ExamQuestion { SectionId = s1.Id, Idx = 2, Type = "MCQ", Skill = "R", Difficulty = 2, PromptMd = "Q-2" };
-            var q1 = new ExamQuestion { SectionId = s1.Id, Idx = 1, Type = "MCQ", Skill = "R", Difficulty = 1, PromptMd = "Q-1" };
+            var q2 = new ExamQuestion
+                { SectionId = s1.Id, Idx = 2, Type = "MCQ", Skill = "R", Difficulty = 2, PromptMd = "Q-2" };
+            var q1 = new ExamQuestion
+                { SectionId = s1.Id, Idx = 1, Type = "MCQ", Skill = "R", Difficulty = 1, PromptMd = "Q-1" };
             ctx.ExamQuestions.AddRange(q2, q1);
             await ctx.SaveChangesAsync();
 
@@ -167,6 +202,10 @@ public class PublicExamUnitTest
             Assert.Equal(new[] { 1, 2, 3 }, q1Dto.Options.Select(o => o.idx).ToArray());
             Assert.Equal(new[] { "O1", "O2", "O3" }, q1Dto.Options.Select(o => o.ContentMd).ToArray());
         }
-        finally { await conn.DisposeAsync(); await ctx.DisposeAsync(); }
+        finally
+        {
+            await conn.DisposeAsync();
+            await ctx.DisposeAsync();
+        }
     }
 }

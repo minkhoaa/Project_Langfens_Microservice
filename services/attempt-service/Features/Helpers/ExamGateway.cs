@@ -18,10 +18,10 @@ public class ExamGateway : IExamGateway
         var req = new GetInternalExamRequest { ExamId = examId, ShowAnswers = true };
         // có thể set deadline nếu muốn:
         var callOptions = new CallOptions(deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: ct);
-        return await _client.GetInternalExamAsync(req, callOptions)!; 
+        return await _client.GetInternalExamAsync(req, callOptions)!;
     }
-
 }
+
 public static class GrpcSnapshotSanitizer
 {
     public static InternalDeliveryExam Sanitize(InternalDeliveryExam exam)
@@ -30,7 +30,8 @@ public static class GrpcSnapshotSanitizer
         foreach (var sec in clone.Sections)
         foreach (var q in sec.Questions)
         foreach (var o in q.Options)
-            if (o.HasIsCorrect) o.ClearIsCorrect(); // unset optional bool
+            if (o.HasIsCorrect)
+                o.ClearIsCorrect(); // unset optional bool
         return clone;
     }
 }

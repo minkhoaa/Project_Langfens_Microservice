@@ -27,17 +27,15 @@ builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 
-int GrpcPort = 8081;
-int HttpPort = 8080;
+var GrpcPort = 8081;
+var HttpPort = 8080;
 builder.WebHost.ConfigureKestrel(o =>
 {
     o.ListenAnyIP(HttpPort, lo => lo.Protocols = HttpProtocols.Http1);
     // lắng nghe 8080 với HTTP/2 (h2c)
     o.ListenAnyIP(GrpcPort, lo => lo.Protocols = HttpProtocols.Http2);
-    
 });
 builder.Services.AddGrpc();
-
 
 
 var app = builder.Build();
@@ -69,6 +67,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
     await db.Database.MigrateAsync();
 }
+
 app.UseSwagger();
 app.UseSwaggerUI();
 

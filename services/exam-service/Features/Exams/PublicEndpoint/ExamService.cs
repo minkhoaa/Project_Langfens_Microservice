@@ -1,6 +1,5 @@
 using exam_service.Contracts.Exams;
 using exam_service.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.Enums;
@@ -28,7 +27,8 @@ public class ExamService : IExamService
     public async Task<IResult> ListPublishedAsync(string? category, string? level, int page, int pageSize,
         CancellationToken cancellationToken)
     {
-        try {
+        try
+        {
             var exams = _context.Exams.AsNoTracking().Where(x => x.Status == ExamStatus.Published);
             if (!string.IsNullOrWhiteSpace(category))
                 exams = exams.Where(x => x.Category == category);
@@ -42,8 +42,10 @@ public class ExamService : IExamService
                         x.Id, x.Slug, x.Title, x.Category, x.Level, x.DurationMin, x.UpdatedAt
                     ))
                 .ToListAsync(cancellationToken: cancellationToken);
-        
-            return (items != null) ?  Results.Ok(new ApiResultDto(true, "Success", items)) : Results.NotFound(new ApiResultDto(false, "Not found", null!));
+
+            return items != null
+                ? Results.Ok(new ApiResultDto(true, "Success", items))
+                : Results.NotFound(new ApiResultDto(false, "Not found", null!));
         }
         catch (Exception e)
         {
@@ -77,7 +79,8 @@ public class ExamService : IExamService
                                     )).ToList()
                         )).ToList()
                 )).FirstOrDefaultAsync(cancellationToken);
-            return (exams == null) ? Results.NotFound( new ApiResultDto(false, "Not found", null!)) 
+            return exams == null
+                ? Results.NotFound(new ApiResultDto(false, "Not found", null!))
                 : Results.Ok(new ApiResultDto(true, "Success", exams));
         }
         catch (Exception e)
