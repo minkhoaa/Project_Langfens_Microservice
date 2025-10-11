@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Text.Json;
 using attempt_service.Contracts.Attempt;
 using attempt_service.Domain.Entities;
@@ -8,6 +9,8 @@ using attempt_service.Infrastructure.Persistence;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
+using Npgsql.Replication;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 using Shared.Grpc.ExamInternal;
@@ -21,6 +24,7 @@ public interface IAttemptService
     Task<IResult> Autosave(int attemptId, int userId, AutosaveRequest req, CancellationToken token);
     Task<IResult> Submit(int attemptId, int userId, CancellationToken token);
     Task<IResult> GetResult(int attemptId, int userId, CancellationToken token);
+    Task<IResult> GetAttemptList(int userId, int page, int pageSize, string? status, int? examId, CancellationToken token);
 }
 
 public class AttemptService(
@@ -390,8 +394,8 @@ public class AttemptService(
         }
         else
         {
-            index = IndexBuilder.BuildIndexFromDto(dto);
-            compiled = AnswerKeyBuilder.FromDto(dto);
+            index = IndexBuilder.BuildIndexFromDto(dto!);
+            compiled = AnswerKeyBuilder.FromDto(dto!);
         }
 
         if (index.Count == 0 || compiled.Keys.Count == 0)
@@ -527,5 +531,63 @@ public class AttemptService(
                         new AnswerItem(x.QuestionId, x.SectionId, x.SelectedOptionIds, x.TextAnswer)).ToList())
             )
         );
+    }
+
+    public async Task<IResult> GetAttemptList(int userId, int page, int pageSize, string? status, int? examId, CancellationToken token)
+    {
+        page = page <= 0 ? 1 : page;
+        pageSize = pageSize <= 0 ? 10 : Math.Min(pageSize, 100);
+        var listAttempt = context.Attempts.AsNoTracking()
+                            .Where(x => x.UserId == userId);
+        if (!string.IsNullOrEmpty(status))
+        {
+            var s = status.Trim().ToUpperInvariant();
+            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                AttemptStatus.Started,
+                AttemptStatus.InProgress,
+                AttemptStatus.Submitted,
+                AttemptStatus.Graded,
+                AttemptStatus.Expired,
+                AttemptStatus.Cancelled
+            };
+            if (!allowed.Contains(s))
+                return Results.BadRequest(new ApiResultDto(false, $"Invalid status '{status}'", null!));
+            listAttempt.Where(x => x.Status == s);
+        }
+        if (examId.HasValue && examId.Value > 0)
+            listAttempt.Where(x => x.ExamId == examId);
+
+        var total = await listAttempt.CountAsync(token);
+        var rows = await listAttempt.OrderByDescending(x => x.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                     .Select(x => new // project tối thiểu, tính TimeLeft sau
+                     {
+                         x.Id,
+                         x.ExamId,
+                         x.Status,
+                         x.StartedAt,
+                         x.SubmittedAt,
+                         x.GradedAt,
+                         x.DurationSec,
+                         x.RawScore,    
+                         x.ScaledScore  
+                     })
+                    .ToListAsync(token);
+        var now = DateTime.UtcNow;
+        var items = rows.Select(x =>
+        {
+            int? timeLeft = null;
+            if (x.Status is AttemptStatus.Started or AttemptStatus.InProgress)
+            {
+                var deadline = x.StartedAt.AddSeconds(x.DurationSec);
+                timeLeft = (int)Math.Max(0, (deadline - now).TotalSeconds);
+            }
+            return new AttemptListItem(x.Id, x.ExamId, x.Status, x.StartedAt, x.SubmittedAt, x.ScaledScore);
+        }).ToList();
+
+        return Results.Ok(new ApiResultDto(true, "Success", items));
+
     }
 }

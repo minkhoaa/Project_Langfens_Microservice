@@ -68,6 +68,9 @@
   
   course-service:
     image: course-service
+    environment:
+      - CONNECTIONSTRING__COURSE=Host=course-database;Port=5432;Database=course-db;Username=course;Password=course
+
     build:
       context: ..
       dockerfile: services/course-service/Dockerfile
@@ -96,24 +99,7 @@
     networks:
       - backend
   
-  
-  
-  auth-database:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: auth-db
-      POSTGRES_USER: auth
-      POSTGRES_PASSWORD: auth
-    ports: ["5434:5432"]
-    networks:
-      - backend
-    volumes: ["pgdata:/var/lib/postgresql/auth-data"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U auth -d auth-db -h 127.0.0.1"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 10s
+
   
   exam-database:
     image: postgres:16-alpine
@@ -132,16 +118,29 @@
       timeout: 5s
       retries: 20
       start_period: 10s
-      
-      
+
+  auth-database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: auth-db
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+    ports: ["5434:5432"]
+    networks:
+      - backend
+    volumes: ["pgdata:/var/lib/postgresql/auth-data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth-db -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
   attempt-database:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: attempt-db
       POSTGRES_USER: attempt
-      POSTGRES_PASSWORD: attempt
-
-      
+      POSTGRES_PASSWORD: attempt      
     ports: [ "5435:5432" ]
     networks:
       - backend
@@ -153,7 +152,23 @@
       retries: 20
       start_period: 10s
   
-  
+  course-database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: course-db
+      POSTGRES_USER: course
+      POSTGRES_PASSWORD: course
+    ports: [ "5436:5432" ]
+    networks:
+      - backend
+    volumes: [ "pgdata:/var/lib/postgresql/course-data" ]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U course -d course-db -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s 
+      
   
   
   

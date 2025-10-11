@@ -40,4 +40,14 @@ public static class AttemptHandler
         CancellationToken token,
         IAttemptService service
     ) => service.GetResult(attemptId, userId, token);
+
+    public static Task<IResult> GetAttemptList(
+        int userId,
+        int page,
+        int pageSize,
+        string? status,
+        int? examId,
+        CancellationToken token,
+        IAttemptService service
+    ) => service.GetAttemptList(userId, page, pageSize, status, examId, token);
 }

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 
 namespace attempt_service.Contracts.Attempt;
@@ -31,8 +32,8 @@ public record AttemptResultResponse(
     decimal ScorePct,
     int Correct,
     int Total,
-    JsonElement PaperWithAnswers,      
-    List<AnswerItem> Answers           
+    JsonElement PaperWithAnswers,
+    List<AnswerItem> Answers
 );
 public record AttemptListItem(
     int AttemptId,
@@ -40,7 +41,7 @@ public record AttemptListItem(
     string Status,
     DateTime StartedAt,
     DateTime? SubmittedAt,
-    double? ScorePct
+    decimal? ScorePct
 );
 
 public record AttemptListResponse(
