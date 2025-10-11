@@ -11,5 +11,6 @@ public static class AttemptEndpointMapping
         app.MapGet("/attempts/{userId:int}/{attemptId:int}", AttemptHandler.AttemptGetByIdHandler);
         app.MapPost("/attempt/autosave/{userId:int}/{attemptId:int}", AttemptHandler.AttemptAutoSave);
         app.MapPost("/attempt/submit/{userId:int}/{attemptId:int}", AttemptHandler.AttemptSubmit);
+        app.MapGet("/attempt/getresult/{userId:int}/{attemptId:int}", AttemptHandler.AttemptGetResult);
     }
 }

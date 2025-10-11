@@ -1,4 +1,3 @@
-using exam_service.Application.Exam;
 using Microsoft.AspNetCore.Mvc;
 
 namespace exam_service.Features.Exams.PublicEndpoint;

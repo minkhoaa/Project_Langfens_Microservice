@@ -33,4 +33,11 @@ public static class AttemptHandler
         CancellationToken token,
         IAttemptService service)
         => service.Submit(attemptId, userId, token);
+
+    public static Task<IResult> AttemptGetResult(
+        [FromRoute] int attemptId,
+        [FromRoute] int userId,
+        CancellationToken token,
+        IAttemptService service
+    ) => service.GetResult(attemptId, userId, token);
 }

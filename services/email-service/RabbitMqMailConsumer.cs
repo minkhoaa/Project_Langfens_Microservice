@@ -58,7 +58,6 @@ public sealed class RabbitMqMailConsumer : BackgroundService
             }
         }
     }
-
     public override void Dispose()
     {
         base.Dispose();
@@ -99,7 +98,7 @@ public sealed class RabbitMqMailConsumer : BackgroundService
 
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
-
+        _channel = 
         _channel.ExchangeDeclare(exchange: ExchangeName, type: ExchangeType.Topic, durable: true, autoDelete: false);
         _channel.QueueDeclare(queue: QueueName, durable: true, exclusive: false, autoDelete: false);
         _channel.QueueBind(queue: QueueName, exchange: ExchangeName, routingKey: RoutingKey);

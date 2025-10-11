@@ -13,7 +13,6 @@
       - exam-service
       - course-service
 
-  
   auth-service:
     build:
       context: ..
@@ -25,6 +24,7 @@
       - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
       - ASPNETCORE_ENVIRONMENT=Development
       - CONNECTIONSTRING__REDIS=redis:6379, abortConnect=false
+
     networks:
       - backend
     depends_on:
@@ -32,8 +32,7 @@
         condition: 'service_healthy'
       redis:
         condition: 'service_healthy'
-  
-  
+      
   attempt-service:
     image: attempt-service
     build:
@@ -77,8 +76,6 @@
     networks:
       - backend
   
-
-
 
 
   rabbitmq-service:

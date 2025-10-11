@@ -45,7 +45,6 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
     http.DefaultRequestHeaders.Add("X-Internal-Key", internalApiKey);
 });
 
-
 // DI
 builder.Services.AddScoped<IAttemptService, AttemptService>();
 builder.Services.AddScoped<IExamGateway, ExamGateway>();

@@ -5,7 +5,7 @@ using attempt_service.Domain.Entities;
 namespace attempt_service.Features.Helpers;
 
 public sealed record GradeResult(
-    double AwardedPoints,
+    decimal AwardedPoints,
     bool? IsCorrect,
     bool NeedsManualReview = false,
     string? Feedback = null);
@@ -22,7 +22,7 @@ public sealed class SingleChoiceGrader : IQuestionGrader
         var selection = (answer.SelectedOptionIds ?? new List<int>()).ToHashSet();
         var correct = key.CorrectOptionIds ?? new HashSet<int>();
         var ok = selection.Count == 1 && correct.Contains(selection.First());
-        return new GradeResult(ok ? key.QuestionPoints : 0, ok);
+        return new GradeResult(ok ? key.QuestionPoints : 0m, ok);
     }
 }
 
@@ -45,7 +45,7 @@ public sealed class CompletionGrader : IQuestionGrader
             return new GradeResult(0, false, Feedback: "Malformed completion payload");
         }
 
-        double get = 0, total = 0;
+        decimal get = 0, total = 0;
         var texts = key.BlankAcceptTexts ?? new Dictionary<string, string[]?>();
         var regs = key.BlankAcceptRegex ?? new Dictionary<string, string[]?>();
         foreach (var blankId in texts.Keys.Union(regs.Keys))
@@ -84,7 +84,7 @@ public sealed class CompletionGrader : IQuestionGrader
         }
 
         var score = (total > 0 ? get / total : 0) * key.QuestionPoints;
-        return new GradeResult(score, score >= key.QuestionPoints - 1e-9);
+        return new GradeResult(score, score >= key.QuestionPoints);
     }
 }
 
@@ -117,7 +117,7 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
         var pairs = key.MatchPairs ??
                     new Dictionary<string, string[]?>(StringComparer.OrdinalIgnoreCase);
         if (pairs.Count == 0) return new GradeResult(0, false, Feedback: "No answer key");
-        double got = 0, total = pairs.Count;
+        decimal got = 0, total = pairs.Count;
         foreach (var (left, right) in pairs)
         {
             map.TryGetValue(left, out var userRight);
@@ -127,7 +127,7 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
         }
 
         var score = got / total * key.QuestionPoints;
-        return new GradeResult(score, score >= key.QuestionPoints - 1e-9);
+        return new GradeResult(score, score >= key.QuestionPoints);
     }
 }
 
@@ -136,23 +136,32 @@ public sealed class FlowChartGrader : IQuestionGrader
     public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
     {
         List<string> userSeq;
+
         if (answer.SelectedOptionIds is { Count: > 0 })
+        {
             userSeq = answer.SelectedOptionIds.ConvertAll(i => i.ToString());
+        }
         else
+        {
             try
             {
                 userSeq = JsonSerializer.Deserialize<List<string>>(answer.TextAnswer ?? "[]") ?? new List<string>();
             }
             catch
             {
-                return new GradeResult(0, false, Feedback: "Malformed sequence payload");
+                return new GradeResult(0m, false, false, "Malformed sequence payload");
             }
+        }
 
         var correct = key.OrderCorrects ?? new List<string>();
-        if (correct.Count == 0) return new GradeResult(0, false, Feedback: "No answer key");
+        if (correct.Count == 0)
+            return new GradeResult(0m, null, true, "No answer key");
+
         var lcs = LCS(userSeq, correct);
-        var score = (double)lcs / correct.Count * key.QuestionPoints;
-        return new GradeResult(score, score >= key.QuestionPoints - 1e-9);
+        var score = correct.Count > 0 ? (decimal)lcs / correct.Count * key.QuestionPoints : 0m;
+        var full  = score >= key.QuestionPoints;
+
+        return new GradeResult(score, full, false);
     }
 
     private static int LCS(IList<string> a, IList<string> b)

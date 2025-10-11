@@ -63,7 +63,6 @@ public static class IndexBuilder
                 .Select(x => x.Id).ToHashSet() ?? [];
             map[question.Id] = new QMeta(section.Id, question.Type ?? string.Empty, optionIds);
         }
-
         return map;
     }
 
@@ -87,12 +86,12 @@ public static class AnswerKeyBuilder
 {
     public sealed record AnswerKeyCompiled(
         Dictionary<int, QuestionKey> Keys,
-        double TotalPoints
+        decimal TotalPoints
     );
     public static AnswerKeyCompiled FromProto(InternalDeliveryExam exam)
     {
         var map = new Dictionary<int, QuestionKey>();
-        double total = 0;
+        decimal total = 0;
         foreach (var section in exam.Sections ?? new RepeatedField<InternalDeliverySection>())
         {
             foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
@@ -101,8 +100,9 @@ public static class AnswerKeyBuilder
                 HashSet<int>? correct = null;
                 if (AnswerValidator.IsSingleChoice(type))
                     correct = (question.Options ?? [])
-                        .Where(x => x.IsCorrect == true)
-                        .Select(o => o.Id).ToHashSet();
+                        .Where(x => x.HasIsCorrect && x.IsCorrect)
+                        .Select(x => x.Id)
+                        .ToHashSet();
 
                 var points = 1;
                 total += points;
@@ -116,7 +116,7 @@ public static class AnswerKeyBuilder
     public static AnswerKeyCompiled FromDto(InternalExamDto.InternalDeliveryExam exam)
     {
         var keys = new Dictionary<int, QuestionKey>();
-        double total = 0;
+        decimal total = 0m;
         foreach (var section in exam.Sections ?? []) 
         {
             foreach (var question in section.Questions ?? [])
@@ -128,14 +128,13 @@ public static class AnswerKeyBuilder
                         .Where(x => x.IsCorrect == true)
                         .Select(x => x.Id)
                         .ToHashSet();
-                int points = 1;
+                var points = 1m;
                 total += points;
                 keys[question.Id] = new QuestionKey(
                     question.Id,type,points, correct);
                 
             }
         }
-
         return new AnswerKeyCompiled(keys, total);
     }
 

@@ -9,7 +9,7 @@ namespace attempt_service.Features.Helpers;
 public sealed record QuestionKey(
     int QuestionId,
     string QuestionType,
-    double QuestionPoints = 1,
+    decimal QuestionPoints = 1,
     HashSet<int>? CorrectOptionIds = null, // MC/TF/YN
     Dictionary<string, string[]?> BlankAcceptTexts = null!,
     Dictionary<string, string[]?> BlankAcceptRegex = null!,

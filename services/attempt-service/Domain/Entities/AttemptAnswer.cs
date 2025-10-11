@@ -20,5 +20,5 @@ public class AttemptAnswer
     public string? TextAnswer { get; set; } = string.Empty;
 
     public bool? IsCorrect { get; set; }
-    public double? AwardedPoints { get; set; }
+    public decimal? AwardedPoints { get; set; }
 }

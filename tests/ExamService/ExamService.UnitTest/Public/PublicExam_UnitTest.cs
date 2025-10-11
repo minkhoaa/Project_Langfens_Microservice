@@ -45,7 +45,7 @@ public class PublicExamUnitTest
             ctx.Exams.AddRange(e1, e2, e3, e4, draft);
             await ctx.SaveChangesAsync();
 
-            var svc = new exam_service.Application.Exam.ExamService(ctx);
+            var svc = new exam_service.Features.Exams.PublicEndpoint.ExamService(ctx);
 
             var r1 = await svc.ListPublishedAsync(ExamCategory.IELTS, ExamLevel.B1, page: 1, pageSize: 2,
                 CancellationToken.None);
@@ -90,7 +90,7 @@ public class PublicExamUnitTest
             });
             await ctx.SaveChangesAsync();
 
-            var svc = new exam_service.Application.Exam.ExamService(ctx);
+            var svc = new exam_service.Features.Exams.PublicEndpoint.ExamService(ctx);
 
             // Lọc IELTS+B2 => không khớp
             var r = await svc.ListPublishedAsync(ExamCategory.IELTS, ExamLevel.B2, page: 1, pageSize: 10,
@@ -117,7 +117,7 @@ public class PublicExamUnitTest
         var (ctx, conn) = SqlTestHelper.CreateInMemory();
         try
         {
-            var svc = new exam_service.Application.Exam.ExamService(ctx);
+            var svc = new exam_service.Features.Exams.PublicEndpoint.ExamService(ctx);
             var r = await svc.GetBySlugAsync("no-exist-slug", CancellationToken.None);
 
             var (st, api) = ResultHelpers.Extract<ApiResultDto>(r);
@@ -173,7 +173,7 @@ public class PublicExamUnitTest
             );
             await ctx.SaveChangesAsync();
 
-            var svc = new exam_service.Application.Exam.ExamService(ctx);
+            var svc = new exam_service.Features.Exams.PublicEndpoint.ExamService(ctx);
             var r = await svc.GetBySlugAsync("detail-slug", CancellationToken.None);
 
             var (st, api) = ResultHelpers.Extract<ApiResultDto>(r);

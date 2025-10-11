@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.Enums;
 
-namespace exam_service.Application.Exam;
+namespace exam_service.Features.Exams.PublicEndpoint;
 
 public interface IExamService
 {

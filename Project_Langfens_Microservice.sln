@@ -4,6 +4,24 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{427B6B5D-B9A5-421A-B557-1CBDF96FE3CC}"
+	ProjectSection(SolutionItems) = preProject
+		services\email-service\EmailCommand.cs = services\email-service\EmailCommand.cs
+		services\email-service\Program.cs = services\email-service\Program.cs
+		services\email-service\Properties\launchSettings.json = services\email-service\Properties\launchSettings.json
+		services\email-service\TemplatedEmailService.cs = services\email-service\TemplatedEmailService.cs
+		services\email-service\SendEmailRequest.cs = services\email-service\SendEmailRequest.cs
+		services\email-service\SmtpEmailSender.cs = services\email-service\SmtpEmailSender.cs
+		services\email-service\RabbitMqMailConsumer.cs = services\email-service\RabbitMqMailConsumer.cs
+		services\email-service\appsettings.json = services\email-service\appsettings.json
+		services\email-service\email-service.http = services\email-service\email-service.http
+		services\email-service\EmailTemplateRenderer.cs = services\email-service\EmailTemplateRenderer.cs
+		services\email-service\templates\verify-email.mjml = services\email-service\templates\verify-email.mjml
+		services\email-service\templates\new-content.mjml = services\email-service\templates\new-content.mjml
+		services\email-service\appsettings.Development.json = services\email-service\appsettings.Development.json
+		services\email-service\JsonValueConverter.cs = services\email-service\JsonValueConverter.cs
+		services\email-service\EmailSettings.cs = services\email-service\EmailSettings.cs
+		services\email-service\email-service.csproj = services\email-service\email-service.csproj
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "attempt-service", "services\attempt-service\attempt-service.csproj", "{DDC09CC0-AF1F-471D-BDE5-A6926774B203}"
 EndProject
