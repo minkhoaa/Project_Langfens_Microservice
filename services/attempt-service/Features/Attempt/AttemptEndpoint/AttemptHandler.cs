@@ -9,44 +9,44 @@ public static class AttemptHandler
         IAttemptService service,
         AttemptStartRequest request,
         CancellationToken token,
-        int userId
+        Guid userId
     ) => service.StartAttempt(request, token, userId);
 
     public static Task<IResult> AttemptGetByIdHandler(
-        [FromRoute] int userId,
-        [FromRoute] int attemptId,
+        [FromRoute] Guid userId,
+        [FromRoute] Guid attemptId,
         CancellationToken token,
         [FromServices] IAttemptService service
     ) => service.GetAttemptById(new AttemptGetRequest(attemptId, userId), token);
 
     public static Task<IResult> AttemptAutoSave(
-        [FromRoute] int attemptId,
-        [FromRoute] int userId,
+        [FromRoute] Guid attemptId,
+        [FromRoute] Guid userId,
         AutosaveRequest req,
         CancellationToken token,
         IAttemptService service
     ) => service.Autosave(attemptId, userId, req, token);
 
     public static Task<IResult> AttemptSubmit(
-        [FromRoute] int userId,
-        [FromRoute] int attemptId,
+        [FromRoute] Guid userId,
+        [FromRoute] Guid attemptId,
         CancellationToken token,
         IAttemptService service)
         => service.Submit(attemptId, userId, token);
 
     public static Task<IResult> AttemptGetResult(
-        [FromRoute] int attemptId,
-        [FromRoute] int userId,
+        [FromRoute] Guid attemptId,
+        [FromRoute] Guid userId,
         CancellationToken token,
         IAttemptService service
     ) => service.GetResult(attemptId, userId, token);
 
     public static Task<IResult> GetAttemptList(
-        int userId,
+        Guid userId,
         int page,
         int pageSize,
         string? status,
-        int? examId,
+        Guid? examId,
         CancellationToken token,
         IAttemptService service
     ) => service.GetAttemptList(userId, page, pageSize, status, examId, token);

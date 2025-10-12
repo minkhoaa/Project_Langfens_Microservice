@@ -18,7 +18,7 @@ public class AdminQuestionUnitTest
         {
             var svc = new AdminQuestionService(ctx);
             var dto = new DtoAdmin.AdminQuestionUpsert(
-                SectionId: 999_999, // không tồn tại
+                SectionId: Guid.NewGuid(), // không tồn tại
                 Idx: null,
                 Type: "Single",
                 Skill: "Reading",
@@ -224,7 +224,7 @@ public class AdminQuestionUnitTest
         {
             var svc = new AdminQuestionService(ctx);
 
-            var result = await svc.DeleteAsync(CancellationToken.None, 123456);
+            var result = await svc.DeleteAsync(CancellationToken.None, Guid.NewGuid());
 
             var (status, api) = ResultHelpers.Extract<ApiResultDto>(result);
             Assert.Equal(StatusCodes.Status200OK, status);

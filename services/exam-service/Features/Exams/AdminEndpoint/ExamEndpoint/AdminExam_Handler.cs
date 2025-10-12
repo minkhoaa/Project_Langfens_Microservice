@@ -13,14 +13,14 @@ public static class AdminExamHandler
         => service.AddAsync(dto, token);
 
     public static Task<IResult> UpdateExamHandler(
-        [FromRoute] int id,
+        [FromRoute] Guid id,
         [FromServices] IAdminExamService service,
         [FromBody] DtoAdmin.AdminExamUpdate update,
         CancellationToken token)
         => service.UpdateAsync(id, update, token);
 
     public static Task<IResult> DeleteExamHandler(
-        [FromRoute] int id,
+        [FromRoute] Guid id,
         [FromServices] IAdminExamService service,
         CancellationToken token)
         => service.DeleteAsync(id, token);

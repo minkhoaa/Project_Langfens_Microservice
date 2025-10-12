@@ -45,7 +45,7 @@ public class AdminExamHandlerUnitTests
     public async Task AddExam_Should_Proxy_200_From_Service()
     {
         var dto = new DtoAdmin.AdminExamCreate("IELTS Reading 1", "noslug-2", "desc", "IELTS", "B1", 60);
-        var ok = Results.Ok(new ApiResultDto(true, "Create isSuccessfully", new { Id = 1 }));
+        var ok = Results.Ok(new ApiResultDto(true, "Create isSuccessfully", new { Id = Guid.NewGuid() }));
 
         var svc = new Mock<IAdminExamService>();
         svc.Setup(s => s.AddAsync(dto, It.IsAny<CancellationToken>())).ReturnsAsync(ok);
@@ -61,7 +61,7 @@ public class AdminExamHandlerUnitTests
     [Fact]
     public async Task UpdateExam_Should_Call_Service_And_Return_200()
     {
-        var id = 123;
+        var id = Guid.NewGuid();
         var update = new DtoAdmin.AdminExamUpdate("New", "D", "IELTS", "B2", 50,
             ExamStatus.Published);
 
@@ -80,7 +80,7 @@ public class AdminExamHandlerUnitTests
     [Fact]
     public async Task DeleteExam_Should_Call_Service_And_Return_200()
     {
-        var id = 999;
+        var id = Guid.NewGuid();
         var ok = Results.Ok(new ApiResultDto(true, "Deleted 1", null!));
         var svc = new Mock<IAdminExamService>();
         svc.Setup(s => s.DeleteAsync(id, It.IsAny<CancellationToken>())).ReturnsAsync(ok);

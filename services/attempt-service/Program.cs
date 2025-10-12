@@ -55,7 +55,6 @@ builder.Services.ConfigureHttpJsonOptions(option =>
     option.SerializerOptions.PropertyNameCaseInsensitive = true;
     option.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
-
 builder.Services.AddAuthentication(option =>
 {
     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

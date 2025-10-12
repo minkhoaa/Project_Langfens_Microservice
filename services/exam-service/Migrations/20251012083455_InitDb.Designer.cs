@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using exam_service.Data;
+using exam_service.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace exam_service.Infrastructure.Persistence.Migrations
+namespace exam_service.Migrations
 {
     [DbContext(typeof(ExamDbContext))]
-    [Migration("20250922080030_initExamDb")]
-    partial class initExamDb
+    [Migration("20251012083455_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,19 +25,17 @@ namespace exam_service.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("exam_service.Data.Entities.Exam", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.Exam", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
@@ -64,7 +62,7 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -75,13 +73,11 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     b.ToTable("exams", (string)null);
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.ExamOption", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamOption", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ContentMd")
                         .IsRequired()
@@ -93,8 +89,8 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -103,13 +99,11 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     b.ToTable("exam_options", (string)null);
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.ExamQuestion", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamQuestion", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Difficulty")
                         .HasColumnType("integer");
@@ -124,8 +118,8 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("SectionId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SectionId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Skill")
                         .IsRequired()
@@ -142,16 +136,14 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     b.ToTable("exam_questions", (string)null);
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.ExamSection", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamSection", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ExamId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ExamId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Idx")
                         .HasColumnType("integer");
@@ -170,9 +162,9 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     b.ToTable("exam_sections", (string)null);
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.ExamOption", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamOption", b =>
                 {
-                    b.HasOne("exam_service.Data.Entities.ExamQuestion", "Question")
+                    b.HasOne("exam_service.Domains.Entities.ExamQuestion", "Question")
                         .WithMany("Options")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -181,9 +173,9 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.ExamQuestion", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamQuestion", b =>
                 {
-                    b.HasOne("exam_service.Data.Entities.ExamSection", "Section")
+                    b.HasOne("exam_service.Domains.Entities.ExamSection", "Section")
                         .WithMany("Questions")
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -192,9 +184,9 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     b.Navigation("Section");
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.ExamSection", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamSection", b =>
                 {
-                    b.HasOne("exam_service.Data.Entities.Exam", "Exam")
+                    b.HasOne("exam_service.Domains.Entities.Exam", "Exam")
                         .WithMany("Sections")
                         .HasForeignKey("ExamId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -203,17 +195,17 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     b.Navigation("Exam");
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.Exam", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.Exam", b =>
                 {
                     b.Navigation("Sections");
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.ExamQuestion", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamQuestion", b =>
                 {
                     b.Navigation("Options");
                 });
 
-            modelBuilder.Entity("exam_service.Data.Entities.ExamSection", b =>
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamSection", b =>
                 {
                     b.Navigation("Questions");
                 });

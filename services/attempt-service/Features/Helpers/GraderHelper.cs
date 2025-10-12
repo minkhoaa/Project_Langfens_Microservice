@@ -7,10 +7,10 @@ using Shared.ExamDto.Contracts.Exam.Enums;
 namespace attempt_service.Features.Helpers;
 
 public sealed record QuestionKey(
-    int QuestionId,
+    Guid QuestionId,
     string QuestionType,
     decimal QuestionPoints = 1,
-    HashSet<int>? CorrectOptionIds = null, // MC/TF/YN
+    HashSet<Guid>? CorrectOptionIds = null, // MC/TF/YN
     Dictionary<string, string[]?> BlankAcceptTexts = null!,
     Dictionary<string, string[]?> BlankAcceptRegex = null!,
     // Matching: leftKey -> accepted right values
@@ -39,14 +39,14 @@ internal static class TextNorm
     }
 }
 public static class AnswerValidator {
-    public static string? Validate(AnswerItem answerItem, Dictionary<int, IndexBuilder.QMeta> idx)
+    public static string? Validate(AnswerItem answerItem, Dictionary<Guid, IndexBuilder.QMeta> idx)
     {
         if (!idx.TryGetValue(answerItem.QuestionId, out var meta))
             return $"Unknown question {answerItem.QuestionId}";
         if (answerItem.SelectedOptionIds is { Count: > 0 })
         {
             var normalized = answerItem.SelectedOptionIds.Distinct().OrderBy(x => x).ToList() 
-                             ?? new List<int>();
+                             ?? new List<Guid>();
             if (normalized.Any(x => !meta.OptionIds.Contains(x)))
                 return $"Invalid option for Q{answerItem.QuestionId}";
             if (IsSingleChoice(meta.Type) && normalized.Count() > 1)

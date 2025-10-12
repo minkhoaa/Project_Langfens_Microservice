@@ -18,12 +18,12 @@ public class DtoAdmin
         int DurationMin,
         string Status);
 
-    public record AdminSectionUpsert(int ExamId, int? Idx, string Title, string? InstructionsMd);
+    public record AdminSectionUpsert(Guid ExamId, int? Idx, string Title, string? InstructionsMd);
 
-    public record AdminSectionUpdate(int ExamId, int? Idx, string Title, string? InstructionsMd);
+    public record AdminSectionUpdate(Guid ExamId, int? Idx, string Title, string? InstructionsMd);
 
     public record AdminQuestionUpsert(
-        int SectionId,
+        Guid SectionId,
         int? Idx,
         string Type,
         string Skill,
@@ -32,7 +32,7 @@ public class DtoAdmin
         string? ExplanationMd);
 
     public record AdminQuestionUpdate(
-        int SectionId,
+        Guid SectionId,
         int? Idx,
         string Type,
         string Skill,
@@ -41,7 +41,7 @@ public class DtoAdmin
         string? ExplanationMd);
 
 
-    public record AdminOptionUpsert(int QuestionId, int? Idx, string ContentMd, bool IsCorrect);
+    public record AdminOptionUpsert(Guid QuestionId, int? Idx, string ContentMd, bool IsCorrect);
 
-    public record AdminOptionUpdate(int QuestionId, int? Idx, string ContentMd, bool IsCorrect);
+    public record AdminOptionUpdate(Guid QuestionId, int? Idx, string ContentMd, bool IsCorrect);
 }

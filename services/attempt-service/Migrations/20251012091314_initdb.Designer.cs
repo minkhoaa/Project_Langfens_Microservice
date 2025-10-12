@@ -14,8 +14,8 @@ using attempt_service.Infrastructure.Persistence;
 namespace attempt_service.Migrations
 {
     [DbContext(typeof(AttemptDbContext))]
-    [Migration("20250929104814_InitDb")]
-    partial class InitDb
+    [Migration("20251012091314_initdb")]
+    partial class initdb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,11 +29,9 @@ namespace attempt_service.Migrations
 
             modelBuilder.Entity("attempt_service.Domain.Entities.Attempt", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -41,8 +39,8 @@ namespace attempt_service.Migrations
                     b.Property<int>("DurationSec")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ExamId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ExamId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("GradedAt")
                         .HasColumnType("timestamp with time zone");
@@ -73,8 +71,8 @@ namespace attempt_service.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -89,14 +87,12 @@ namespace attempt_service.Migrations
 
             modelBuilder.Entity("attempt_service.Domain.Entities.AttemptAnswer", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AttemptId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("AttemptId")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal?>("AwardedPoints")
                         .HasPrecision(6, 2)
@@ -105,14 +101,14 @@ namespace attempt_service.Migrations
                     b.Property<bool?>("IsCorrect")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("SectionId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SectionId")
+                        .HasColumnType("uuid");
 
-                    b.Property<List<int>>("SelectedOptionIds")
-                        .HasColumnType("integer[]");
+                    b.Property<List<Guid>>("SelectedOptionIds")
+                        .HasColumnType("uuid[]");
 
                     b.Property<string>("TextAnswer")
                         .HasColumnType("text");

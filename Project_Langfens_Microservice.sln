@@ -37,7 +37,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "api-gateway", "gateway\api-
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_shared", "_shared", "{56FD8193-AB4B-4C09-A5C8-E8B0FDD91423}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.ExamDto", "services\_shared\Shared.ExamDto\Shared.ExamDto.csproj", "{54383DF9-7C4A-439E-9B69-87C3FE713CB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.PublicContracts", "services\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj", "{54383DF9-7C4A-439E-9B69-87C3FE713CB3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7FA53CBB-B983-4204-8D05-A50F25EC3FBD}"
 EndProject

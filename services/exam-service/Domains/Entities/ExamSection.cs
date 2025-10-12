@@ -7,9 +7,9 @@ public class ExamSection
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public int ExamId { get; set; }
+    public Guid ExamId { get; set; }
     public Exam Exam { get; set; } = null!;
 
     public int Idx { get; set; } // thứ tự trong đề

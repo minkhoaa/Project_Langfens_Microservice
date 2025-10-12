@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY services/exam-service/exam-service.csproj services/exam-service/
-COPY services/_shared/Shared.ExamDto/Shared.ExamDto.csproj services/_shared/Shared.ExamDto/
+COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
 
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \

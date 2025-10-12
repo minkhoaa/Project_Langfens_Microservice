@@ -11,8 +11,8 @@ namespace exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 public interface IAdminExamService
 {
     public Task<IResult> AddAsync(DtoAdmin.AdminExamCreate dto, CancellationToken ct = default);
-    public Task<IResult> UpdateAsync(int id, DtoAdmin.AdminExamUpdate dto, CancellationToken ct = default);
-    public Task<IResult> DeleteAsync(int id, CancellationToken ct = default);
+    public Task<IResult> UpdateAsync(Guid id, DtoAdmin.AdminExamUpdate dto, CancellationToken ct = default);
+    public Task<IResult> DeleteAsync(Guid id, CancellationToken ct = default);
 }
 
 public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
@@ -31,9 +31,15 @@ public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
 
         var exam = new Exam
         {
-            Slug = slug, Title = dto.Title, DescriptionMd = dto.DescriptionMd,
-            Category = dto.Category, Level = dto.Level, Status = ExamStatus.Draft,
-            DurationMin = dto.DurationMin, CreatedAt = now, UpdatedAt = now
+            Slug = slug,
+            Title = dto.Title,
+            DescriptionMd = dto.DescriptionMd,
+            Category = dto.Category,
+            Level = dto.Level,
+            Status = ExamStatus.Draft,
+            DurationMin = dto.DurationMin,
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         db.Exams.Add(exam);
@@ -41,7 +47,7 @@ public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
         return Results.Ok(new ApiResultDto(true, "Create successfully", exam));
     }
 
-    public async Task<IResult> UpdateAsync(int id, DtoAdmin.AdminExamUpdate dto, CancellationToken ct = default)
+    public async Task<IResult> UpdateAsync(Guid id, DtoAdmin.AdminExamUpdate dto, CancellationToken ct = default)
     {
         var affected = await db.Exams.Where(x => x.Id == id).ExecuteUpdateAsync(x => x
             .SetProperty(e => e.Title, dto.Title)
@@ -55,7 +61,7 @@ public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
         return Results.Ok(new ApiResultDto(true, $"Affected {affected} rows", null!));
     }
 
-    public async Task<IResult> DeleteAsync(int id, CancellationToken ct = default)
+    public async Task<IResult> DeleteAsync(Guid id, CancellationToken ct = default)
     {
         var affected = await db.Exams.Where(e => e.Id == id).ExecuteDeleteAsync(ct);
         return Results.Ok(new ApiResultDto(true, $"Deleted {affected}", null!));

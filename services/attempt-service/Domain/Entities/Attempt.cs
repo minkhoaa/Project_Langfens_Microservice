@@ -9,10 +9,10 @@ public class Attempt
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    [Required] public int UserId { get; set; }
-    [Required] public int ExamId { get; set; }
+    [Required] public Guid UserId { get; set; }
+    [Required] public Guid ExamId { get; set; }
 
     [Required] [Column("status")] public string Status { get; set; } = AttemptStatus.Started;
 

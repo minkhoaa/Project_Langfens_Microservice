@@ -3,7 +3,7 @@ namespace exam_service.Contracts.Exams;
 public class InternalExamDto
 {
     public record InternalDeliveryExam(
-        int Id,
+        Guid Id,
         string Slug,
         string Title,
         string? DescriptionMd,
@@ -27,7 +27,7 @@ public class InternalExamDto
         string? ExplanationMd,
         IReadOnlyList<InternalDeliveryOption> Options);
 
-    public record InternalDeliveryOption(int Id, int Idx, string ContentMd, bool? IsCorrect);
+    public record InternalDeliveryOption(Guid Id, int Idx, string ContentMd, bool? IsCorrect);
 
     public static class SnapshotSanitizer
     {

@@ -10,7 +10,7 @@ namespace ExamService.UnitTest;
 
 internal class SeedHelper
 {
-    public static async Task<int> SeedExamAsync(ExamDbContext ctx, string title = "Exam A")
+    public static async Task<Guid> SeedExamAsync(ExamDbContext ctx, string title = "Exam A")
     {
         string Slugify(string s) => s.ToLower().Replace(' ', '-');
 
@@ -32,7 +32,7 @@ internal class SeedHelper
     }
 
     public static async Task<List<ExamSection>> SeedSectionsAsync(
-        ExamDbContext ctx, int examId, params (int idx, string title)[] items)
+        ExamDbContext ctx, Guid examId, params (int idx, string title)[] items)
     {
         var list = new List<ExamSection>();
         foreach (var (idx, title) in items)
@@ -54,9 +54,9 @@ internal class SeedHelper
 
     // ---- Thêm mới cho test Option/Question ----
 
-    public static async Task<int> SeedQuestionAsync(
+    public static async Task<Guid> SeedQuestionAsync(
         ExamDbContext ctx,
-        int sectionId,
+        Guid sectionId,
         int idx = 1,
         string? prompt = null,
         string type = "Single",
@@ -80,7 +80,7 @@ internal class SeedHelper
 
     public static async Task<List<ExamOption>> SeedOptionsAsync(
         ExamDbContext ctx,
-        int questionId,
+        Guid questionId,
         params (int idx, string content, bool isCorrect)[] items)
     {
         var list = new List<ExamOption>();

@@ -17,12 +17,12 @@ public interface IAdminQuestionService
     public Task<IResult> UpdateAsync(
         CancellationToken token,
         [FromBody] DtoAdmin.AdminQuestionUpdate dto,
-        [FromRoute] int id
+        [FromRoute] Guid id
     );
 
     public Task<IResult> DeleteAsync(
         CancellationToken token,
-        [FromRoute] int id);
+        [FromRoute] Guid id);
 }
 
 public class AdminQuestionService : IAdminQuestionService
@@ -77,7 +77,7 @@ public class AdminQuestionService : IAdminQuestionService
     public async Task<IResult> UpdateAsync(
         CancellationToken token,
         [FromBody] DtoAdmin.AdminQuestionUpdate dto,
-        [FromRoute] int id
+        [FromRoute] Guid id
     )
     {
         try
@@ -102,7 +102,7 @@ public class AdminQuestionService : IAdminQuestionService
 
     public async Task<IResult> DeleteAsync(
         CancellationToken token,
-        [FromRoute] int id)
+        [FromRoute] Guid id)
     {
         try
         {

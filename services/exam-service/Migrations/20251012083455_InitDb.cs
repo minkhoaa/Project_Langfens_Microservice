@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace exam_service.Infrastructure.Persistence.Migrations
+namespace exam_service.Migrations
 {
     /// <inheritdoc />
-    public partial class initExamDb : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,8 +15,7 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                 name: "exams",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Slug = table.Column<string>(type: "text", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     DescriptionMd = table.Column<string>(type: "text", nullable: true),
@@ -25,8 +23,8 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                     Level = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     DurationMin = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -37,9 +35,8 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                 name: "exam_sections",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ExamId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExamId = table.Column<Guid>(type: "uuid", nullable: false),
                     Idx = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     InstructionsMd = table.Column<string>(type: "text", nullable: true)
@@ -59,9 +56,8 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                 name: "exam_questions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SectionId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SectionId = table.Column<Guid>(type: "uuid", nullable: false),
                     Idx = table.Column<int>(type: "integer", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
                     Skill = table.Column<string>(type: "text", nullable: false),
@@ -84,9 +80,8 @@ namespace exam_service.Infrastructure.Persistence.Migrations
                 name: "exam_options",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    QuestionId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uuid", nullable: false),
                     Idx = table.Column<int>(type: "integer", nullable: false),
                     ContentMd = table.Column<string>(type: "text", nullable: false),
                     IsCorrect = table.Column<bool>(type: "boolean", nullable: false)

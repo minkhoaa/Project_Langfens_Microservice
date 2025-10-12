@@ -19,12 +19,12 @@ namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
 public interface IAttemptService
 {
-    Task<IResult> StartAttempt(AttemptStartRequest request, CancellationToken token, int userId);
+    Task<IResult> StartAttempt(AttemptStartRequest request, CancellationToken token, Guid userId);
     Task<IResult> GetAttemptById(AttemptGetRequest request, CancellationToken token);
-    Task<IResult> Autosave(int attemptId, int userId, AutosaveRequest req, CancellationToken token);
-    Task<IResult> Submit(int attemptId, int userId, CancellationToken token);
-    Task<IResult> GetResult(int attemptId, int userId, CancellationToken token);
-    Task<IResult> GetAttemptList(int userId, int page, int pageSize, string? status, int? examId, CancellationToken token);
+    Task<IResult> Autosave(Guid attemptId, Guid userId, AutosaveRequest req, CancellationToken token);
+    Task<IResult> Submit(Guid attemptId, Guid userId, CancellationToken token);
+    Task<IResult> GetResult(Guid attemptId, Guid userId, CancellationToken token);
+    Task<IResult> GetAttemptList(Guid userId, int page, int pageSize, string? status, Guid? examId, CancellationToken token);
 }
 
 public class AttemptService(
@@ -35,7 +35,7 @@ public class AttemptService(
     public async Task<IResult> StartAttempt(
         AttemptStartRequest request,
         CancellationToken token,
-        int userId
+        Guid userId
     )
     {
         // using GRPC for internal communication
@@ -194,8 +194,8 @@ public class AttemptService(
     }
 
     public async Task<IResult> Autosave(
-        int attemptId,
-        int userId,
+        Guid attemptId,
+        Guid userId,
         AutosaveRequest req,
         CancellationToken token)
     {
@@ -222,7 +222,7 @@ public class AttemptService(
             return Results.Problem("Snapshot missing", statusCode: StatusCodes.Status500InternalServerError);
 
         //parse ra dto tiện cho việc autosave 
-        Dictionary<int, IndexBuilder.QMeta> index;
+        Dictionary<Guid, IndexBuilder.QMeta> index;
         try
         {
             var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
@@ -285,10 +285,10 @@ public class AttemptService(
             if (eachIncomingAnswer.SelectedOptionIds is not null)
             {
                 var newList = eachIncomingAnswer.SelectedOptionIds.Count == 0
-                    ? new List<int>()
+                    ? new List<Guid>()
                     : eachIncomingAnswer.SelectedOptionIds.Distinct().OrderBy(x => x).ToList();
                 var oldList = (eachExistedAnswer.SelectedOptionIds
-                               ?? new List<int>()).OrderBy(x => x).ToList();
+                               ?? new List<Guid>()).OrderBy(x => x).ToList();
                 if (!oldList.SequenceEqual(newList))
                 {
                     eachExistedAnswer.SelectedOptionIds = newList;
@@ -335,7 +335,7 @@ public class AttemptService(
 
     }
 
-    public async Task<IResult> Submit(int attemptId, int userId, CancellationToken token)
+    public async Task<IResult> Submit(Guid attemptId, Guid userId, CancellationToken token)
     {
         var existedAttempt =
             await context.Attempts.FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
@@ -385,7 +385,7 @@ public class AttemptService(
                     statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        Dictionary<int, IndexBuilder.QMeta> index;
+        Dictionary<Guid, IndexBuilder.QMeta> index;
         AnswerKeyBuilder.AnswerKeyCompiled compiled;
         if (proto is not null)
         {
@@ -468,7 +468,7 @@ public class AttemptService(
         }
     }
 
-    public async Task<IResult> GetResult(int attemptId, int userId, CancellationToken token)
+    public async Task<IResult> GetResult(Guid attemptId, Guid userId, CancellationToken token)
     {
         var existedAttempt = await context.Attempts.AsNoTracking()
             .Include(attempt => attempt.Answers)
@@ -533,7 +533,7 @@ public class AttemptService(
         );
     }
 
-    public async Task<IResult> GetAttemptList(int userId, int page, int pageSize, string? status, int? examId, CancellationToken token)
+    public async Task<IResult> GetAttemptList(Guid userId, int page, int pageSize, string? status, Guid? examId, CancellationToken token)
     {
         page = page <= 0 ? 1 : page;
         pageSize = pageSize <= 0 ? 10 : Math.Min(pageSize, 100);
@@ -555,8 +555,8 @@ public class AttemptService(
                 return Results.BadRequest(new ApiResultDto(false, $"Invalid status '{status}'", null!));
             listAttempt.Where(x => x.Status == s);
         }
-        if (examId.HasValue && examId.Value > 0)
-            listAttempt.Where(x => x.ExamId == examId);
+        if (examId.HasValue)
+            listAttempt.Where(x => x.ExamId == examId.Value);
 
         var total = await listAttempt.CountAsync(token);
         var rows = await listAttempt.OrderByDescending(x => x.CreatedAt)

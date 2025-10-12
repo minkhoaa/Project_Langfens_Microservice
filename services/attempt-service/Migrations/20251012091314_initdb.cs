@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace attempt_service.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class initdb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,10 +17,9 @@ namespace attempt_service.Migrations
                 name: "attempts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    ExamId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExamId = table.Column<Guid>(type: "uuid", nullable: false),
                     status = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
                     StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     SubmittedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -42,12 +40,11 @@ namespace attempt_service.Migrations
                 name: "attempt_answer",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AttemptId = table.Column<int>(type: "integer", nullable: false),
-                    SectionId = table.Column<int>(type: "integer", nullable: false),
-                    QuestionId = table.Column<int>(type: "integer", nullable: false),
-                    SelectedOptionIds = table.Column<List<int>>(type: "integer[]", nullable: true),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    AttemptId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SectionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SelectedOptionIds = table.Column<List<Guid>>(type: "uuid[]", nullable: true),
                     TextAnswer = table.Column<string>(type: "text", nullable: true),
                     IsCorrect = table.Column<bool>(type: "boolean", nullable: true),
                     AwardedPoints = table.Column<decimal>(type: "numeric(6,2)", precision: 6, scale: 2, nullable: true)

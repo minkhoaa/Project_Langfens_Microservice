@@ -18,7 +18,7 @@ public class InternalExam_UnitTest
         {
             var svc = new InternalExamService(ctx);
 
-            var result = await svc.GetByExamIdAsync(999999, CancellationToken.None, showAnswer: false);
+            var result = await svc.GetByExamIdAsync(Guid.NewGuid(), CancellationToken.None, showAnswer: false);
 
             var (status, api) = ResultHelpers.Extract<ApiResultDto>(result);
             Assert.Equal(StatusCodes.Status404NotFound, status);

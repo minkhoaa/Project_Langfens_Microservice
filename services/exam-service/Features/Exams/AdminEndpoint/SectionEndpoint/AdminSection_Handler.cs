@@ -13,13 +13,13 @@ public static class AdminSectionHandler
 
     public static Task<IResult> UpdateSectionHandler(
         [FromBody] DtoAdmin.AdminSectionUpdate dto,
-        [FromRoute] int id,
+        [FromRoute] Guid id,
         CancellationToken token,
         [FromServices] IAdminSectionService service
     ) => service.UpdateAync(dto, id, token);
 
     public static Task<IResult> DeleteSectionHandler(
-        [FromRoute] int id,
+        [FromRoute] Guid id,
         CancellationToken token,
         [FromServices] IAdminSectionService service
     ) => service.DeleteAsync(id, token);

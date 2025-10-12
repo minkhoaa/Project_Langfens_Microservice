@@ -3,7 +3,7 @@ namespace exam_service.Contracts.Exams;
 public class Dto_Public
 {
     public record PublicExamRecord(
-        int Id,
+        Guid Id,
         string Slug,
         string Title,
         string Category,
@@ -12,7 +12,7 @@ public class Dto_Public
         DateTime? updateAt);
 
     public record PubLicExamDetailRecord(
-        int Id,
+        Guid Id,
         string Slug,
         string Title,
         string? DescriptionMd,

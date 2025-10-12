@@ -5,7 +5,7 @@ namespace exam_service.Features.Exams.InternalEndpoint;
 public static class InternalExamHandler
 {
     public static Task<IResult> GetByExamIdHandler(
-        [FromRoute] int id,
+        [FromRoute] Guid id,
         [FromQuery(Name = "showAnswers")] bool showAnswer,
         CancellationToken token,
         [FromServices] IInternalExamService service

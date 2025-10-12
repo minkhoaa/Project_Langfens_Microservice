@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\_shared\Shared.ExamDto\Shared.ExamDto.csproj"/>
+        <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
         <ProjectReference Include="..\_shared\Shared.Grpc\Shared.Grpc.csproj"/>
     </ItemGroup>
 

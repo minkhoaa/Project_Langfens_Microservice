@@ -1,7 +1,13 @@
-namespace course_service.Domains.Enums
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Shared.ExamDto.Contracts.Course.Enums
 {
-    public static class EnrollmentStatus
+    public class EnrollmentStatus
     {
+
         // ACTIVE|CANCELLED|COMPLETED
         public static string Active { get; set; } = "ACTIVE";
         public static string Cancelled { get; set; } = "CANCELLED";
@@ -17,5 +23,6 @@ namespace course_service.Domains.Enums
 
         public static bool IsValid(string? code) =>
             !string.IsNullOrWhiteSpace(code) && _set.Contains(code);
+
     }
 }

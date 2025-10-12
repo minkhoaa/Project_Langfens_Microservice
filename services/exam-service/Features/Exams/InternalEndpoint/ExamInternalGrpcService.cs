@@ -21,7 +21,7 @@ public class ExamInternalGrpcService : ExamInternal.ExamInternalBase
         ServerCallContext context)
     {
         var exams = await _context.Exams.AsNoTracking()
-            .Where(x => x.Id == request.ExamId)
+            .Where(x => x.Id.ToString() == request.ExamId)
             .Include(x => x.Sections).ThenInclude(x => x.Questions).ThenInclude(x => x.Options)
             .FirstOrDefaultAsync(context.CancellationToken);
         if (exams == null) return null!;

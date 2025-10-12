@@ -7,15 +7,15 @@ public class AttemptAnswer
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    [Required] public int AttemptId { get; set; }
+    [Required] public Guid AttemptId { get; set; }
     public Attempt Attempt { get; set; } = null!;
 
-    [Required] public int SectionId { get; set; }
-    [Required] public int QuestionId { get; set; }
+    [Required] public Guid SectionId { get; set; }
+    [Required] public Guid QuestionId { get; set; }
 
-    public List<int>? SelectedOptionIds { get; set; }
+    public List<Guid>? SelectedOptionIds { get; set; }
 
     public string? TextAnswer { get; set; } = string.Empty;
 

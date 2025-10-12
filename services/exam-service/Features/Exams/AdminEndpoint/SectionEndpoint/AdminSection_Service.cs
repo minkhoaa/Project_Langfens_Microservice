@@ -13,10 +13,10 @@ public interface IAdminSectionService
         CancellationToken token);
 
     public Task<IResult> UpdateAync(
-        DtoAdmin.AdminSectionUpdate dto, int id,
+        DtoAdmin.AdminSectionUpdate dto, Guid id,
         CancellationToken token);
 
-    public Task<IResult> DeleteAsync(int id, CancellationToken token);
+    public Task<IResult> DeleteAsync(Guid id, CancellationToken token);
 }
 
 public class AdminSectionService(ExamDbContext context) : IAdminSectionService
@@ -64,7 +64,7 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
         }
     }
 
-    public async Task<IResult> UpdateAync(DtoAdmin.AdminSectionUpdate dto, int id, CancellationToken token)
+    public async Task<IResult> UpdateAync(DtoAdmin.AdminSectionUpdate dto, Guid id, CancellationToken token)
     {
         try
         {
@@ -90,7 +90,7 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
         }
     }
 
-    public async Task<IResult> DeleteAsync(int id, CancellationToken token)
+    public async Task<IResult> DeleteAsync(Guid id, CancellationToken token)
     {
         try
         {

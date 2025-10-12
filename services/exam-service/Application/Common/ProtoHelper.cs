@@ -8,7 +8,7 @@ public static class ProtoHelper
     {
         var proto = new InternalDeliveryExam
         {
-            Id = exam.Id,
+            Id = exam.Id.ToString(),
             Category = exam.Category,
             DescriptionMd = exam.DescriptionMd ?? string.Empty,
             Level = exam.Level,
@@ -23,7 +23,7 @@ public static class ProtoHelper
         {
             var pSec = new InternalDeliverySection
             {
-                Id = sec.Id,
+                Id = sec.Id.ToString(),
                 InstructionsMd = sec.InstructionsMd ?? string.Empty,
                 Idx = sec.Idx,
                 Title = sec.Title ?? string.Empty
@@ -33,7 +33,7 @@ public static class ProtoHelper
             {
                 var pQ = new InternalDeliveryQuestion
                 {
-                    Id = q.Id,
+                    Id = q.Id.ToString(),
                     Idx = q.Idx,
                     ExplanationMd = showAnswers ? q.ExplanationMd ?? string.Empty : string.Empty,
                     Difficulty = q.Difficulty,
@@ -46,7 +46,7 @@ public static class ProtoHelper
                 {
                     var pOpt = new InternalDeliveryOption
                     {
-                        Id = opt.Id,
+                        Id = opt.Id.ToString(),
                         Idx = opt.Idx,
                         ContentMd = opt.ContentMd ?? string.Empty
                     };

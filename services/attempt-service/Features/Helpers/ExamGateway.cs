@@ -5,7 +5,7 @@ namespace attempt_service.Features.Helpers;
 
 public interface IExamGateway
 {
-    Task<InternalDeliveryExam> GetExamSnapshotAsync(int examId, CancellationToken ct);
+    Task<InternalDeliveryExam> GetExamSnapshotAsync(Guid examId, CancellationToken ct);
 }
 
 public class ExamGateway : IExamGateway
@@ -13,9 +13,9 @@ public class ExamGateway : IExamGateway
     private readonly ExamInternal.ExamInternalClient _client;
     public ExamGateway(ExamInternal.ExamInternalClient client) => _client = client;
 
-    public async Task<InternalDeliveryExam> GetExamSnapshotAsync(int examId, CancellationToken ct)
+    public async Task<InternalDeliveryExam> GetExamSnapshotAsync(Guid examId, CancellationToken ct)
     {
-        var req = new GetInternalExamRequest { ExamId = examId, ShowAnswers = true };
+        var req = new GetInternalExamRequest { ExamId = examId.ToString(), ShowAnswers = true };
         // có thể set deadline nếu muốn:
         var callOptions = new CallOptions(deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: ct);
         return await _client.GetInternalExamAsync(req, callOptions)!;

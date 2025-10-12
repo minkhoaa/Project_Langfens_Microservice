@@ -7,7 +7,7 @@ namespace exam_service.Features.Exams.InternalEndpoint;
 
 public interface IInternalExamService
 {
-    public Task<IResult> GetByExamIdAsync(int examId, CancellationToken token, bool showAnswer);
+    public Task<IResult> GetByExamIdAsync(Guid examId, CancellationToken token, bool showAnswer);
 }
 
 public class InternalExamService : IInternalExamService
@@ -16,7 +16,7 @@ public class InternalExamService : IInternalExamService
     public InternalExamService(ExamDbContext context) => _context = context;
 
     public async Task<IResult> GetByExamIdAsync(
-        int examId,
+        Guid examId,
         CancellationToken token,
         bool showAnswer)
     {

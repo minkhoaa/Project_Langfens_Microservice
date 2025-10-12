@@ -3,28 +3,28 @@ using System.Text.Json;
 
 namespace attempt_service.Contracts.Attempt;
 
-public record AttemptStartRequest(int ExamId);
+public record AttemptStartRequest(Guid ExamId);
 
-public record AttemptStartResponse(int AttemptId, JsonElement Paper, DateTime StartedAt, int DurationSec, int timeLeft);
+public record AttemptStartResponse(Guid AttemptId, JsonElement Paper, DateTime StartedAt, int DurationSec, int timeLeft);
 
-public record AttemptGetRequest(int AttemptId, int UserId);
+public record AttemptGetRequest(Guid AttemptId, Guid UserId);
 
 public record AttemptGetResponse(
-    int AttemptId,
+    Guid AttemptId,
     string Status,
     JsonElement Paper,
     List<AnswerItem> Answers,
     DateTime StartedAt,
     int TimeLeftSec);
 
-public record AnswerItem(int QuestionId, int? SectionId, List<int>? SelectedOptionIds, string? TextAnswer);
+public record AnswerItem(Guid QuestionId, Guid? SectionId, List<Guid>? SelectedOptionIds, string? TextAnswer);
 
 public record AutosaveRequest(List<AnswerItem> Answers, long? ClientRevision);
 
-public record SubmitResponse(int AttemptId, string Status, decimal ScoreRaw, decimal ScorePct, int Correct, int Total);
+public record SubmitResponse(Guid AttemptId, string Status, decimal ScoreRaw, decimal ScorePct, int Correct, int Total);
 
 public record AttemptResultResponse(
-    int AttemptId,
+    Guid AttemptId,
     string Status,
     DateTime? SubmittedAt,
     DateTime? GradedAt,
@@ -36,8 +36,8 @@ public record AttemptResultResponse(
     List<AnswerItem> Answers
 );
 public record AttemptListItem(
-    int AttemptId,
-    int ExamId,
+    Guid AttemptId,
+    Guid ExamId,
     string Status,
     DateTime StartedAt,
     DateTime? SubmittedAt,

@@ -15,7 +15,7 @@ public class AdminSectionUnitTest
         try
         {
             var svc = new AdminSectionService(ctx);
-            var dto = new DtoAdmin.AdminSectionUpsert(1011, null, "Sec 1", "No content");
+            var dto = new DtoAdmin.AdminSectionUpsert(Guid.NewGuid(), null, "Sec 1", "No content");
 
             var result = await AdminSectionHandler.AddSectionHandler(svc, dto, CancellationToken.None);
 
@@ -133,7 +133,7 @@ public class AdminSectionUnitTest
         try
         {
             var svc = new AdminSectionService(ctx);
-            var result = await svc.DeleteAsync(123456, CancellationToken.None);
+            var result = await svc.DeleteAsync(Guid.NewGuid(), CancellationToken.None);
 
             var (status, api) = ResultHelpers.Extract<ApiResultDto>(result);
             Assert.Equal(StatusCodes.Status200OK, status);

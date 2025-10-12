@@ -8,9 +8,11 @@ public static class AttemptEndpointMapping
     {
         app.MapGroup("/api/attempt");
         app.MapPost("/attempts:start", AttemptHandler.AttemptStartHandler);
-        app.MapGet("/attempts/{userId:int}/{attemptId:int}", AttemptHandler.AttemptGetByIdHandler);
-        app.MapPost("/attempt/autosave/{userId:int}/{attemptId:int}", AttemptHandler.AttemptAutoSave);
-        app.MapPost("/attempt/submit/{userId:int}/{attemptId:int}", AttemptHandler.AttemptSubmit);
-        app.MapGet("/attempt/getresult/{userId:int}/{attemptId:int}", AttemptHandler.AttemptGetResult);
+        app.MapGet("/attempts/{userId:guid}/{attemptId:guid}", AttemptHandler.AttemptGetByIdHandler);
+        app.MapPost("/attempt/autosave/{userId:guid}/{attemptId:guid}", AttemptHandler.AttemptAutoSave);
+        app.MapPost("/attempt/submit/{userId:guid}/{attemptId:guid}", AttemptHandler.AttemptSubmit);
+        app.MapGet("/attempt/getresult/{userId:guid}/{attemptId:guid}", AttemptHandler.AttemptGetResult);
+
+
     }
 }

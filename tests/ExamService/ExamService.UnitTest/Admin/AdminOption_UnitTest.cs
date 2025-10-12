@@ -11,7 +11,7 @@ namespace ExamService.UnitTest.Admin;
 public class AdminOptionUnitTest
 {
     // ===== Local seed helpers cho Option tests =====
-    private static async Task<int> SeedQuestionAsync(ExamDbContext ctx, int examId)
+    private static async Task<Guid> SeedQuestionAsync(ExamDbContext ctx, Guid examId)
     {
         // Tạo 1 Section
         var sec = new ExamSection
@@ -42,7 +42,7 @@ public class AdminOptionUnitTest
     }
 
     private static async Task<List<ExamOption>> SeedOptionsAsync(
-        ExamDbContext ctx, int questionId,
+        ExamDbContext ctx, Guid questionId,
         params (int idx, string content, bool isCorrect)[] opts)
     {
         var list = new List<ExamOption>();
@@ -73,7 +73,7 @@ public class AdminOptionUnitTest
         {
             var svc = new AdminOptionService(ctx);
             var dto = new DtoAdmin.AdminOptionUpsert(
-                QuestionId: 999_999, // không tồn tại
+                QuestionId: Guid.NewGuid(), // không tồn tại
                 Idx: null,
                 ContentMd: "A",
                 IsCorrect: false
@@ -247,7 +247,7 @@ public class AdminOptionUnitTest
         try
         {
             var svc = new AdminOptionService(ctx);
-            var result = await svc.DeleteAsync(123456, CancellationToken.None);
+            var result = await svc.DeleteAsync(Guid.NewGuid(), CancellationToken.None);
 
             var (status, api) = ResultHelpers.Extract<ApiResultDto>(result);
             Assert.Equal(StatusCodes.Status200OK, status);

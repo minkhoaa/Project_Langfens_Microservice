@@ -15,12 +15,12 @@ public static class AdminQuestionHandler
         [FromServices] IAdminQuestionService service,
         CancellationToken token,
         [FromBody] DtoAdmin.AdminQuestionUpdate dto,
-        [FromRoute] int id
+        [FromRoute] Guid id
     ) => service.UpdateAsync(token, dto, id);
 
     public static Task<IResult> DeleteQuestionHandler(
         [FromServices] IAdminQuestionService service,
         CancellationToken token,
-        [FromRoute] int id
+        [FromRoute] Guid id
     ) => service.DeleteAsync(token, id);
 }

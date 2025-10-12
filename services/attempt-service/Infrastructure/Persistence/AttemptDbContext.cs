@@ -42,7 +42,7 @@ public class AttemptDbContext : DbContext
                 .HasForeignKey(x => x.AttemptId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            aa.Property(x => x.SelectedOptionIds).HasColumnType("integer[]");
+            aa.Property(x => x.SelectedOptionIds).HasColumnType("uuid[]");
             aa.Property(x => x.AwardedPoints).HasPrecision(6, 2);
 
             // Đảm bảo 1 câu hỏi chỉ có 1 dòng answer/attempt (UPSERT autosave dễ)

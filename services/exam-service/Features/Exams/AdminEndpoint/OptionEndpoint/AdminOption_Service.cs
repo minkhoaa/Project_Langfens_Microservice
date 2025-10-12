@@ -9,8 +9,8 @@ namespace exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
 public interface IAdminOptionService
 {
     public Task<IResult> AddAsync(DtoAdmin.AdminOptionUpsert dto, CancellationToken token);
-    public Task<IResult> UpdateAsync(int id, DtoAdmin.AdminOptionUpdate dto, CancellationToken token);
-    public Task<IResult> DeleteAsync(int id, CancellationToken token);
+    public Task<IResult> UpdateAsync(Guid id, DtoAdmin.AdminOptionUpdate dto, CancellationToken token);
+    public Task<IResult> DeleteAsync(Guid id, CancellationToken token);
 }
 
 public class AdminOptionService(ExamDbContext db) : IAdminOptionService
@@ -64,7 +64,7 @@ public class AdminOptionService(ExamDbContext db) : IAdminOptionService
         }
     }
 
-    public async Task<IResult> UpdateAsync(int id, DtoAdmin.AdminOptionUpdate dto, CancellationToken token)
+    public async Task<IResult> UpdateAsync(Guid id, DtoAdmin.AdminOptionUpdate dto, CancellationToken token)
     {
         try
         {
@@ -84,7 +84,7 @@ public class AdminOptionService(ExamDbContext db) : IAdminOptionService
         }
     }
 
-    public async Task<IResult> DeleteAsync(int id, CancellationToken token)
+    public async Task<IResult> DeleteAsync(Guid id, CancellationToken token)
     {
         try
         {

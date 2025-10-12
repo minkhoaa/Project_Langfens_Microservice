@@ -1,6 +1,9 @@
-using System.Runtime.InteropServices.Marshalling;
+using course_service.Features.PublicEndpoint;
 using course_service.Infrastructure;
+using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.Replication.PgOutput.Messages;
+using Shared.ExamDto.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +19,8 @@ var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__COU
                         ?? "Host=localhost;Port=5436;Database=course-db;Username=course;Password=course";
 builder.Services.AddDbContext<CourseDbContext>(option => option.UseNpgsql(connectionString));
 
-
 // DI
+builder.Services.AddScoped<IPublicEndpointService, PublicEndpointService>();
 
 
 
@@ -34,8 +37,11 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-
-app.MapGet("/", () => { return "Hello world"; });
+app.MapGet("/", () =>
+{
+    {
+        return new ApiResultDto(true, "Ok", null!);
+    }
+});
 
 app.Run();

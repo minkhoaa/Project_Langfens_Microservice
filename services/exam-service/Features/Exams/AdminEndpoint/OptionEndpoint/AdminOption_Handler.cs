@@ -14,12 +14,12 @@ public static class AdminOptionHandler
     public static Task<IResult> UpdateOptionHandler(
         [FromBody] DtoAdmin.AdminOptionUpdate dto,
         CancellationToken token,
-        [FromRoute] int id,
+        [FromRoute] Guid id,
         [FromServices] IAdminOptionService service)
         => service.UpdateAsync(id, dto, token);
 
     public static Task<IResult> DeleteOptionHandler(
-        [FromRoute] int id,
+        [FromRoute] Guid id,
         CancellationToken token,
         [FromServices] IAdminOptionService service)
         => service.DeleteAsync(id, token);

@@ -8,7 +8,7 @@ public class Exam
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [Required] public string Slug { get; set; } = default!;
 

@@ -1,14 +1,16 @@
-namespace course_service.Domains.Enums
+using Microsoft.EntityFrameworkCore.Diagnostics;
+
+namespace Shared.ExamDto.Contracts.Course.Enums
 {
-    public static class EnrollmentStatus
+    public class CourseStatus
     {
-        // ACTIVE|CANCELLED|COMPLETED
-        public static string Active { get; set; } = "ACTIVE";
-        public static string Cancelled { get; set; } = "CANCELLED";
-        public static string Completed { get; set; } = "COMPLETED";
+        public static string Draft { get; set; } = "DRAFT";
+        public static string Published { get; set; } = "PUBLISHED";
+
+
         public static readonly string[] All = new[]
         {
-            Active, Cancelled, Completed
+        Draft, Published
         };
 
         // Fast validation set (O(1))

@@ -14,10 +14,10 @@ public static class AdminExamEndpoint
         adminGroup.MapPost("/addexam", AdminExamHandler.AddExamHandler).AllowAnonymous()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
-        adminGroup.MapPut("/update/{id:int}", AdminExamHandler.UpdateExamHandler).AllowAnonymous()
+        adminGroup.MapPut("/update/{id}", AdminExamHandler.UpdateExamHandler).AllowAnonymous()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
-        adminGroup.MapDelete("/delete/{id:int}", AdminExamHandler.DeleteExamHandler).AllowAnonymous()
+        adminGroup.MapDelete("/delete/{id}", AdminExamHandler.DeleteExamHandler).AllowAnonymous()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
     }
@@ -30,9 +30,9 @@ public static class AdminExamEndpoint
             .AllowAnonymous()
             .Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
 
-        adminSection.MapPut("/update/{id:int}", AdminSectionHandler.UpdateSectionHandler)
+        adminSection.MapPut("/update/{id}", AdminSectionHandler.UpdateSectionHandler)
             .AllowAnonymous();
-        adminSection.MapDelete("/delete/{id:int}", AdminSectionHandler.DeleteSectionHandler)
+        adminSection.MapDelete("/delete/{id}", AdminSectionHandler.DeleteSectionHandler)
             .AllowAnonymous()
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
@@ -43,8 +43,8 @@ public static class AdminExamEndpoint
     {
         var adminQuestion = app.MapGroup("/api/admin/question/");
         adminQuestion.MapPost("/add", AdminQuestionHandler.AddQuestionHandler).AllowAnonymous();
-        adminQuestion.MapPut("/update/{id:int}", AdminQuestionHandler.UpdateQuestionHandler).AllowAnonymous();
-        adminQuestion.MapDelete("/delete/{id:int}", AdminQuestionHandler.DeleteQuestionHandler).AllowAnonymous();
+        adminQuestion.MapPut("/update/{id}", AdminQuestionHandler.UpdateQuestionHandler).AllowAnonymous();
+        adminQuestion.MapDelete("/delete/{id}", AdminQuestionHandler.DeleteQuestionHandler).AllowAnonymous();
     }
 
     //option
@@ -52,7 +52,7 @@ public static class AdminExamEndpoint
     {
         var adminOption = app.MapGroup("/api/admin/option/");
         adminOption.MapPost("/add", AdminOptionHandler.AddOptionHandler);
-        adminOption.MapPut("/update/{id:int}", AdminOptionHandler.UpdateOptionHandler);
-        adminOption.MapDelete("/delete/{id:int}", AdminOptionHandler.DeleteOptionHandler);
+        adminOption.MapPut("/update/{id}", AdminOptionHandler.UpdateOptionHandler);
+        adminOption.MapDelete("/delete/{id}", AdminOptionHandler.DeleteOptionHandler);
     }
 }
