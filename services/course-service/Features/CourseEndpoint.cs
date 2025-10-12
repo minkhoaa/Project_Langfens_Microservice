@@ -17,6 +17,7 @@ namespace course_service.Features
         {
             app.MapGroup("/api/lesson");
             app.MapPost("/{userId}/{lessonId}:complete", UserEndpointHandler.CompeteCourseHandler);
+            app.MapPost("/{userId}/progress", UserEndpointHandler.GetMyProgressHandler);
 
         }
     }

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using course_service.Contracts;
 using course_service.Domains.Entities;
+using course_service.Features.UserEndpoint;
 using course_service.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
@@ -26,11 +27,8 @@ namespace course_service.Features.PublicEndpoint
             string slug,
             CancellationToken token
         );
+
     }
-
-
-
-
     public class PublicEndpointService(CourseDbContext context) : IPublicEndpointService
     {
         public async Task<IResult> GetCourseBySlug(string slug, CancellationToken token)

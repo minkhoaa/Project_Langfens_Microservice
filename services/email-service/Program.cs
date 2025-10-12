@@ -19,7 +19,6 @@ builder.Services.AddSingleton(provider =>
     var configuration = provider.GetRequiredService<IConfiguration>();
     return EmailSettings.FromConfiguration(configuration);
 });
-
 builder.Services.AddSingleton<EmailTemplateRenderer>();
 builder.Services.AddSingleton<SmtpEmailSender>();
 builder.Services.AddSingleton<TemplatedEmailService>();

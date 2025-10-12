@@ -2,10 +2,7 @@ using course_service.Features;
 using course_service.Features.PublicEndpoint;
 using course_service.Features.UserEndpoint;
 using course_service.Infrastructure;
-using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.Replication.PgOutput.Messages;
-using Shared.ExamDto.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 

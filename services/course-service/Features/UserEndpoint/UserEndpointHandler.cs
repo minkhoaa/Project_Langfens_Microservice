@@ -9,12 +9,17 @@ namespace course_service.Features.UserEndpoint
         [FromRoute] Guid userId,
         CancellationToken token,
         [FromServices] IUserEndpointService service
-        ) => service.GetEnrollById(token, courseId, userId);
+        ) => service.EnrollCourse(token, courseId, userId);
         public static Task<IResult> CompeteCourseHandler(
             [FromRoute] Guid lessonId,
             [FromRoute] Guid userId,
             CancellationToken token,
             IUserEndpointService service
-        ) => service.CompleteCouse(token, lessonId, userId);
+        ) => service.CompleteCourse(token, lessonId, userId);
+        public static Task<IResult> GetMyProgressHandler(
+           [FromRoute] Guid userId,
+           CancellationToken token,
+           IUserEndpointService service
+       ) => service.GetMyProgress(userId, token);
     }
 }
