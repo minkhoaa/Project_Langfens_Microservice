@@ -1,4 +1,6 @@
+using course_service.Features;
 using course_service.Features.PublicEndpoint;
+using course_service.Features.UserEndpoint;
 using course_service.Infrastructure;
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +23,7 @@ builder.Services.AddDbContext<CourseDbContext>(option => option.UseNpgsql(connec
 
 // DI
 builder.Services.AddScoped<IPublicEndpointService, PublicEndpointService>();
-
+builder.Services.AddScoped<IUserEndpointService, UserEndpointService>();
 
 
 var app = builder.Build();
@@ -37,11 +39,10 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/", () =>
-{
-    {
-        return new ApiResultDto(true, "Ok", null!);
-    }
-});
+
+
+app.MapCourseEndpoint();
+app.MapLessonEndpoint();
+
 
 app.Run();

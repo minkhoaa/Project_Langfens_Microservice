@@ -12,8 +12,8 @@ using course_service.Infrastructure;
 namespace course_service.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20251011214938_InitDb")]
-    partial class InitDb
+    [Migration("20251012100250_initdb")]
+    partial class initdb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

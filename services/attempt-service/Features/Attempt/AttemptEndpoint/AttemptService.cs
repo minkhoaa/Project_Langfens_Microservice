@@ -38,6 +38,7 @@ public class AttemptService(
         Guid userId
     )
     {
+
         // using GRPC for internal communication
         var existedStartedAttempt = await context.Attempts.AsNoTracking().Where(attempt =>
             attempt.ExamId == request.ExamId
@@ -571,8 +572,8 @@ public class AttemptService(
                          x.SubmittedAt,
                          x.GradedAt,
                          x.DurationSec,
-                         x.RawScore,    
-                         x.ScaledScore  
+                         x.RawScore,
+                         x.ScaledScore
                      })
                     .ToListAsync(token);
         var now = DateTime.UtcNow;

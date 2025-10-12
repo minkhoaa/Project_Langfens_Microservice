@@ -12,7 +12,7 @@ public static class AttemptEndpointMapping
         app.MapPost("/attempt/autosave/{userId:guid}/{attemptId:guid}", AttemptHandler.AttemptAutoSave);
         app.MapPost("/attempt/submit/{userId:guid}/{attemptId:guid}", AttemptHandler.AttemptSubmit);
         app.MapGet("/attempt/getresult/{userId:guid}/{attemptId:guid}", AttemptHandler.AttemptGetResult);
-
-
+        app.MapGet("/attempt/getlistattempt/{userId:guid}", AttemptHandler.GetAttemptList);
+        
     }
 }

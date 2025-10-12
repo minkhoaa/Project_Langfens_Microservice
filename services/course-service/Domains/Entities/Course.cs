@@ -1,12 +1,14 @@
 using System.ComponentModel.DataAnnotations;
-using course_service.Domains.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 using Shared.ExamDto.Contracts.Course.Enums;
 
 namespace course_service.Domains.Entities
 {
     public class Course
     {
-        [Key] public int Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
         [Required, MaxLength(255)] public string Slug { get; set; } = default!;
         [Required] public string Title { get; set; } = default!;
         public string? DescriptionMd { get; set; }
