@@ -1,5 +1,7 @@
+using course_service.Features.AdminEndpoint;
 using course_service.Features.PublicEndpoint;
 using course_service.Features.UserEndpoint;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace course_service.Features
 {
@@ -18,6 +20,13 @@ namespace course_service.Features
             app.MapGroup("/api/lesson");
             app.MapPost("/{userId}/{lessonId}:complete", UserEndpointHandler.CompeteCourseHandler);
             app.MapPost("/{userId}/progress", UserEndpointHandler.GetMyProgressHandler);
+
+        }
+        public static void MapAdminEndpoint(this IEndpointRouteBuilder app)
+        {
+            app.MapGroup("/api/admin/course");
+            app.MapPost("/create", AdminEndpointHandler.CreateCourseHandler);
+
 
         }
     }

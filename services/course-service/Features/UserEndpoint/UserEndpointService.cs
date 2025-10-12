@@ -60,52 +60,6 @@ namespace course_service.Features.UserEndpoint
             return Results.Ok(new ApiResultDto(true, "Success",
                 new CompleteResponse(record.Id, record.CompletedAt)));
         }
-
-        public async Task<IResult> EnrollCourse(
-                                CancellationToken token,
-                                Guid courseId,
-                                Guid userId
-                                )
-        {
-            var existedCourse = await context.Courses.AsNoTracking()
-                            .AnyAsync(x => x.Id == courseId, token);
-            if (!existedCourse)
-                return Results.NotFound(new ApiResultDto(false, "Course not found", null!));
-            var enrollment = await context.Enrollments
-                            .FirstOrDefaultAsync(x => x.UserId == userId && x.CourseId == courseId, token);
-            if (enrollment is null)
-            {
-                enrollment = new Enrollment
-                {
-                    Id = Guid.NewGuid(),
-                    CourseId = courseId,
-                    EnrolledAt = DateTime.UtcNow,
-                    UserId = userId,
-                    Status = EnrollmentStatus.Active,
-                };
-                context.Enrollments.Add(enrollment);
-            }
-            else
-            {
-                if (enrollment.Status != EnrollmentStatus.Active)
-                    enrollment.Status = EnrollmentStatus.Active;
-            }
-            try
-            {
-                await context.SaveChangesAsync(token);
-            }
-            catch (DbUpdateException)
-            {
-                var again = await context.Enrollments.AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.UserId == userId && x.CourseId == courseId, token);
-                if (again is not null)
-                    return Results.Ok(new
-                        ApiResultDto(true, "Success", new EnrollResponse(again.Id, again.Status)));
-            }
-            return Results.Ok(new ApiResultDto(true, "Success",
-                new EnrollResponse(enrollment.Id, enrollment.Status)));
-        }
-
         public async Task<IResult> GetMyProgress(Guid userId, CancellationToken token)
         {
             var existedEnrollmentIds = await context.Enrollments.AsNoTracking()
@@ -160,5 +114,52 @@ namespace course_service.Features.UserEndpoint
             .ToList();
             return Results.Ok(new ApiResultDto(true, "Success", items));
         }
+
+        public async Task<IResult> EnrollCourse(
+                                CancellationToken token,
+                                Guid courseId,
+                                Guid userId
+                                )
+        {
+            var existedCourse = await context.Courses.AsNoTracking()
+                            .AnyAsync(x => x.Id == courseId, token);
+            if (!existedCourse)
+                return Results.NotFound(new ApiResultDto(false, "Course not found", null!));
+            var enrollment = await context.Enrollments
+                            .FirstOrDefaultAsync(x => x.UserId == userId && x.CourseId == courseId, token);
+            if (enrollment is null)
+            {
+                enrollment = new Enrollment
+                {
+                    Id = Guid.NewGuid(),
+                    CourseId = courseId,
+                    EnrolledAt = DateTime.UtcNow,
+                    UserId = userId,
+                    Status = EnrollmentStatus.Active,
+                };
+                context.Enrollments.Add(enrollment);
+            }
+            else
+            {
+                if (enrollment.Status != EnrollmentStatus.Active)
+                    enrollment.Status = EnrollmentStatus.Active;
+            }
+            try
+            {
+                await context.SaveChangesAsync(token);
+            }
+            catch (DbUpdateException)
+            {
+                var again = await context.Enrollments.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.UserId == userId && x.CourseId == courseId, token);
+                if (again is not null)
+                    return Results.Ok(new
+                        ApiResultDto(true, "Success", new EnrollResponse(again.Id, again.Status)));
+            }
+            return Results.Ok(new ApiResultDto(true, "Success",
+                new EnrollResponse(enrollment.Id, enrollment.Status)));
+        }
+
+
     }
 }

@@ -1,4 +1,5 @@
 using course_service.Features;
+using course_service.Features.AdminEndpoint;
 using course_service.Features.PublicEndpoint;
 using course_service.Features.UserEndpoint;
 using course_service.Infrastructure;
@@ -21,6 +22,9 @@ builder.Services.AddDbContext<CourseDbContext>(option => option.UseNpgsql(connec
 // DI
 builder.Services.AddScoped<IPublicEndpointService, PublicEndpointService>();
 builder.Services.AddScoped<IUserEndpointService, UserEndpointService>();
+builder.Services.AddScoped<IAdminEndpointService, AdminEndpointService>();
+
+
 
 
 var app = builder.Build();
@@ -40,6 +44,6 @@ app.UseSwaggerUI();
 
 app.MapCourseEndpoint();
 app.MapLessonEndpoint();
-
+app.MapAdminEndpoint();
 
 app.Run();

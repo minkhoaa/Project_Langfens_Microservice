@@ -23,4 +23,17 @@ namespace course_service.Contracts
         double Percent
         );
     public record MyProgressDto(IReadOnlyList<CourseProgressItem> Courses);
+
+
+    public record CreateCourseRequest(
+        string Slug,
+        string Title,
+        string? DescriptionMd,
+        string? Category,
+        string? Level,
+        string? Status
+        );
+
+
+    public record CourseCreatedDto(Guid Id, string Slug);
 }
