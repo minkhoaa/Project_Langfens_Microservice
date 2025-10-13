@@ -25,8 +25,6 @@ builder.Services.AddScoped<IUserEndpointService, UserEndpointService>();
 builder.Services.AddScoped<IAdminEndpointService, AdminEndpointService>();
 
 
-
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

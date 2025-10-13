@@ -26,7 +26,6 @@ builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 
-
 var GrpcPort = 8081;
 var HttpPort = 8080;
 builder.WebHost.ConfigureKestrel(o =>

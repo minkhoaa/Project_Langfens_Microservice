@@ -1,7 +1,6 @@
 using course_service.Features.AdminEndpoint;
 using course_service.Features.PublicEndpoint;
 using course_service.Features.UserEndpoint;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace course_service.Features
 {
@@ -26,8 +25,7 @@ namespace course_service.Features
         {
             app.MapGroup("/api/admin/course");
             app.MapPost("/create", AdminEndpointHandler.CreateCourseHandler);
-
-
+            
         }
     }
 }

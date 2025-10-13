@@ -9,5 +9,6 @@ namespace course_service.Features.AdminEndpoint
             CancellationToken token,
             IAdminEndpointService service
             ) => service.CreateCourse(request, token);
+
     }
 }
