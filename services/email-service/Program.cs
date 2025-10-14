@@ -61,7 +61,7 @@ builder.Services.AddMassTransit(configurator =>
             }
         });
         // Configure endpoints automatically for registered consumers.
-        config.ReceiveEndpoint("email-service", e => e.ConfigureConsumer<TestpingConsumer>(context));
+        config.ReceiveEndpoint("email-queue", e => e.ConfigureConsumer<TestpingConsumer>(context));
     });
 });
 var app = builder.Build();

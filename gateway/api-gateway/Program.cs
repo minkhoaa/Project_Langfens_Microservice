@@ -25,7 +25,7 @@ builder.Services.AddAuthentication(option =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwt!.Issuer,
         ValidAudience = jwt.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt!.SignKey))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SignKey))
     };
 });
 builder.Services.AddCors(c => c.AddPolicy("FE", p => p

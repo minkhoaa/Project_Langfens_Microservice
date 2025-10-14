@@ -20,32 +20,25 @@ using Role = auth_service.Models.Role;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtSection = builder.Configuration.GetSection("JwtSettings");
-builder.Services.Configure<JwtSettings>(jwtSection);
-var jwtSettings = jwtSection.Get<JwtSettings>() ?? new JwtSettings();
-
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
 builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq")); 
 
 if (string.IsNullOrWhiteSpace(jwtSettings.SignKey))
 {
     throw new InvalidOperationException("JwtSettings:SignKey is not configured.");
 }
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__AUTH")
-                       ?? builder.Configuration.GetConnectionString("Default");
 
-var redisConnection = Environment.GetEnvironmentVariable("CONNECTIONSTRING__REDIS")
-                      ?? builder.Configuration.GetConnectionString("Redis");
-
-
-
-builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnection!));
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(
+    Environment.GetEnvironmentVariable("CONNECTIONSTRING__REDIS")
+    ?? builder.Configuration.GetConnectionString("Redis") 
+    ?? "localhost:6379"));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 builder.Services.AddMassTransit(configurator =>
 {
     // Use unique endpoint names per service so fan-out works (no competing consumers)
     configurator.SetKebabCaseEndpointNameFormatter();
     configurator.AddConsumer<TestpingConsumer>();
-
     RabbitMqConfig prodRabbitEnvironment;
     try
     {
@@ -88,10 +81,15 @@ builder.Services.AddMassTransit(configurator =>
             }
         });
         // Configure endpoints automatically for registered consumers.
-        config.ReceiveEndpoint("auth-service", e => e.ConfigureConsumer<TestpingConsumer>(context));
+        config.ReceiveEndpoint("auth-email", e => e.ConfigureConsumer<TestpingConsumer>(context));
     });
 });
-builder.Services.AddDbContextPool<AuthDbContext>(options => { options.UseNpgsql(connectionString); });
+builder.Services.AddDbContextPool<AuthDbContext>(options =>
+{
+    options.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTIONSTRING__AUTH")
+                      ?? builder.Configuration.GetConnectionString("Default")
+                      ?? "Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth");
+});
 builder.Services.AddIdentityCore<User>(option =>
     {
         option.User.RequireUniqueEmail = true;

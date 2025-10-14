@@ -25,6 +25,10 @@ namespace course_service.Features
         {
             app.MapGroup("/api/admin/course");
             app.MapPost("/create", AdminEndpointHandler.CreateCourseHandler);
+            app.MapPut("/update/{courseId}", AdminEndpointHandler.UpdateCourseHandler);
+            app.MapDelete("/delete/{courseId}", AdminEndpointHandler.DeleteCourseHandler);
+            app.MapPost("/{courseId}/lesson/create", AdminEndpointHandler.CreateLessonHandler);
+            
             
         }
     }
