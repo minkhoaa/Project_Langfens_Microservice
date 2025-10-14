@@ -1,8 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
 using course_service.Contracts;
 using course_service.Domains.Entities;
 using course_service.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Course.Enums;
 
@@ -15,6 +15,8 @@ namespace course_service.Features.AdminEndpoint
         public Task<IResult> UpdateCourse(UpdateCourseRequest request, Guid courseId , CancellationToken token);
         public Task<IResult> DeleteCourse(Guid courseId, CancellationToken token);
         public Task<IResult> AddLesson(CreateLessonRequest request, Guid courseId, CancellationToken token);
+        public Task<IResult> UpdateLesson(UpdateLessonRequest request, Guid lessonId, CancellationToken token);
+        public Task<IResult> DeleteLesson(Guid lessonId, CancellationToken token);
     }
     public class AdminEndpointService(CourseDbContext context) : IAdminEndpointService
     {
@@ -132,22 +134,78 @@ namespace course_service.Features.AdminEndpoint
                 .FirstOrDefaultAsync(x => x.Id == courseId, token);
             if (course == null)
                 return Results.BadRequest(new ApiResultDto(false, "Not found course", null!));
-            var maxIndex = await context.Lessons.AsNoTracking()
-                .Where(l => l.CourseId == courseId)
-                .Select(l => (int?)l.Idx)
-                .MaxAsync(token) ?? 0;
-            int insert = maxIndex + 1;
-            var newLesson = new Lesson()
+            await using var transaction = await context.Database.BeginTransactionAsync(token);
+            try
             {
-                CourseId = courseId,
-                ContentMd = request.ContentMd,
-                DurationMin = request.DurationMin,
-                Idx = insert
-            };
-            context.Lessons.Add(newLesson);
-            await context.SaveChangesAsync(token);
-            return Results.Ok(new ApiResultDto(true, "Create lesson successfully", 
-                new LessonCreatedDto(newLesson.Id, newLesson.Idx)));
+                var maxIndex = await context.Lessons.AsNoTracking()
+                    .Where(l => l.CourseId == courseId)
+                    .Select(l => (int?)l.Idx)
+                    .MaxAsync(token) ?? 0;
+                int insertIdx;
+                if (!request.Idx.HasValue) insertIdx = maxIndex + 1;
+                else if (request.Idx.Value <= 0) insertIdx = 1;
+                else if (request.Idx.Value > maxIndex + 1) insertIdx = maxIndex + 1;
+                else insertIdx = request.Idx.Value;
+
+                if (insertIdx <= maxIndex)
+                {
+                    await context.Lessons
+                        .Where(x => x.CourseId == courseId && x.Idx >= insertIdx)
+                        .ExecuteUpdateAsync(setters => setters.SetProperty(a => a.Idx, a => a.Idx + 1), token);
+                }
+
+                var newLesson = new Lesson
+                {
+                    Id = Guid.NewGuid(),
+                    CourseId = courseId,
+                    Title = request.Title,
+                    ContentMd = request.ContentMd,
+                    DurationMin = request.DurationMin,
+                    Idx = insertIdx
+                };
+
+                context.Lessons.Add(newLesson);
+                await context.SaveChangesAsync(token);
+                return Results.Ok(new ApiResultDto(true, "Create lesson successfully",
+                    new LessonCreatedDto(newLesson.Id, newLesson.Idx)));
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync(token);
+                return Results.Problem("Fail while creating new lesson" + e.Message,
+                    statusCode: StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public async Task<IResult> UpdateLesson(UpdateLessonRequest request, Guid lessonId, CancellationToken token)
+        {
+            var existedLesson = await context.Lessons.AsNoTracking().AnyAsync(x => x.Id == lessonId, token);
+            if (!existedLesson)
+                return Results.NotFound(new ApiResultDto(false, "Not found lesson", null!));
+            await using var transaction = await context.Database.BeginTransactionAsync(token);
+            try
+            {
+                var affectedRows = await context.Lessons.AsNoTracking()
+                    .Where(x => x.Id == lessonId)
+                    .ExecuteUpdateAsync(x => x
+                            .SetProperty(x => x.Title, request.Title)
+                            .SetProperty(x => x.ContentMd, request.ContentMd)
+                            .SetProperty(x => x.DurationMin, request.DurationMin)
+                            .SetProperty(x => x.Idx, request.Idx)
+                        , token);
+                await transaction.CommitAsync(token);
+                return Results.Ok(new ApiResultDto(true, $"Updated {affectedRows} rows", null!));
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync(token);
+                return Results.BadRequest(new ApiResultDto(false, "Error while updating" + e.Message, null!));
+            }
+        }
+
+        public Task<IResult> DeleteLesson(Guid lessonId, CancellationToken token)
+        {
+            throw new NotImplementedException();
         }
     }
 }

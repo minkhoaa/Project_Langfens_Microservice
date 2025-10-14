@@ -36,5 +36,10 @@ public record CreateLessonRequest(
     int? DurationMin
 );
 
-
+public record UpdateLessonRequest(
+    string? Title,
+    string? ContentMd,
+    int? DurationMin,
+    int? Idx 
+);
 public record LessonCreatedDto(Guid Id, int Idx);

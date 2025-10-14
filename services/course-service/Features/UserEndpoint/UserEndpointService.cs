@@ -156,7 +156,7 @@ namespace course_service.Features.UserEndpoint
                     return Results.Ok(new
                         ApiResultDto(true, "Success", new EnrollResponse(again.Id, again.Status)));
             }
-            return Results.Ok(new ApiResultDto(true, "Success",
+            return Results.Ok(new ApiResultDto(true, "Enroll successfully",
                 new EnrollResponse(enrollment.Id, enrollment.Status)));
         }
 
