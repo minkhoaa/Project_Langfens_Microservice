@@ -1,10 +1,14 @@
+using System.Security.Authentication;
 using System.Text;
 using auth_service.Application.Auth;
 using auth_service.Application.Common;
+using auth_service.Contracts;
 using auth_service.Features.Auth;
+using auth_service.Features.RabbitMq;
 using auth_service.Infrastructure.Persistence;
 using auth_service.Infrastructure.Redis;
 using auth_service.Models;
+using Google.Apis.Util;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -20,28 +24,74 @@ var jwtSection = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSection);
 var jwtSettings = jwtSection.Get<JwtSettings>() ?? new JwtSettings();
 
+builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq")); 
+
 if (string.IsNullOrWhiteSpace(jwtSettings.SignKey))
 {
     throw new InvalidOperationException("JwtSettings:SignKey is not configured.");
 }
-
 var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__AUTH")
                        ?? builder.Configuration.GetConnectionString("Default");
 
 var redisConnection = Environment.GetEnvironmentVariable("CONNECTIONSTRING__REDIS")
                       ?? builder.Configuration.GetConnectionString("Redis");
 
+
+
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnection!));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
-
-builder.Services.AddMassTransit(busConfigurator =>
+builder.Services.AddMassTransit(configurator =>
 {
-    busConfigurator.SetKebabCaseEndpointNameFormatter();
-    busConfigurator.UsingInMemory((context, config) => { config.ConfigureEndpoints(context); });
+    // Use unique endpoint names per service so fan-out works (no competing consumers)
+    configurator.SetKebabCaseEndpointNameFormatter();
+    configurator.AddConsumer<TestpingConsumer>();
+
+    RabbitMqConfig prodRabbitEnvironment;
+    try
+    {
+        prodRabbitEnvironment = new RabbitMqConfig
+        {
+            Host = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ??
+                                        builder.Configuration["RabbitMq:Host"] ?? "localhost",
+            Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ??
+                       builder.Configuration["RabbitMq:Username"] ?? "guest",
+            Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ??
+                       builder.Configuration["RabbitMq:Password"] ?? "guest",
+            VirtualHost = builder.Configuration["RabbitMq:VirtualHost"] ??
+                          Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/",
+            Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a :
+                bool.TryParse(builder.Configuration["RabbitMq:UseSsl"], out var useSsl) && useSsl ? (ushort)5671 :
+                (ushort)5672,
+            UseSsl = bool.TryParse(Environment.GetEnvironmentVariable(""), out var proSsl) && proSsl
+        };
+    }
+    catch
+    {
+        prodRabbitEnvironment =
+            builder.Configuration.GetSection("RabbitMq").Get<RabbitMqConfig>()
+            ?? throw new Exception("Rabbitmq config is missing") ;
+
+    }
+    
+    configurator.UsingRabbitMq((context, config) =>
+    {
+        config.Host(prodRabbitEnvironment.Host, prodRabbitEnvironment.Port ,prodRabbitEnvironment.VirtualHost, h =>
+        {
+            h.Username(prodRabbitEnvironment.Username);
+            h.Password(prodRabbitEnvironment.Password);
+            if (prodRabbitEnvironment.UseSsl)
+            {
+                h.UseSsl(a =>
+                {
+                    a.Protocol = SslProtocols.Tls12;
+                });
+            }
+        });
+        // Configure endpoints automatically for registered consumers.
+        config.ReceiveEndpoint("auth-service", e => e.ConfigureConsumer<TestpingConsumer>(context));
+    });
 });
-
 builder.Services.AddDbContextPool<AuthDbContext>(options => { options.UseNpgsql(connectionString); });
-
 builder.Services.AddIdentityCore<User>(option =>
     {
         option.User.RequireUniqueEmail = true;
@@ -54,15 +104,8 @@ builder.Services.AddIdentityCore<User>(option =>
     .AddSignInManager<SignInManager<User>>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<ISessionRepository, SessionRepository>();
-builder.Services.AddScoped<ISessionStore, SessionStore>();
-builder.Services.AddScoped<IAuthService, AuthService>();
 
 
-builder.Services.AddSingleton<IEmailValidator, EmailValidator>();
-builder.Services.AddSingleton<ICookieService, CookieService>();
-builder.Services.AddSingleton<IJwtTokenFactory, JwtTokenFactory>();
-builder.Services.AddSingleton<IGoogleTokenVerifier, GoogleTokenVerifier>();
 
 builder.Services.AddCors(options =>
 {
@@ -124,6 +167,20 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
+
+
+
+// DI
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<ISessionStore, SessionStore>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+builder.Services.AddSingleton<IEmailValidator, EmailValidator>();
+builder.Services.AddSingleton<ICookieService, CookieService>();
+builder.Services.AddSingleton<IJwtTokenFactory, JwtTokenFactory>();
+builder.Services.AddSingleton<IGoogleTokenVerifier, GoogleTokenVerifier>();
+
 
 var app = builder.Build();
 

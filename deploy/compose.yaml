@@ -24,12 +24,19 @@
       - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
       - ASPNETCORE_ENVIRONMENT=Development
       - CONNECTIONSTRING__REDIS=redis:6379, abortConnect=false
-
+      - RABBITMQ__HOST=rabbitmq-service
+      - RABBITMQ__USERNAME=appuser
+      - RABBITMQ__PASSWORD=apppassword
+      - RABBITMQ__VHOST=/
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USESSL=false
     networks:
       - backend
     depends_on:
       auth-database:
         condition: 'service_healthy'
+      rabbitmq-service:
+        condition: service_healthy
       redis:
         condition: 'service_healthy'
       
@@ -70,7 +77,6 @@
     image: course-service
     environment:
       - CONNECTIONSTRING__COURSE=Host=course-database;Port=5432;Database=course-db;Username=course;Password=course
-
     build:
       context: ..
       dockerfile: services/course-service/Dockerfile
@@ -78,7 +84,46 @@
       - 8083:8080
     networks:
       - backend
+    depends_on:
+      course-database:
+        condition: service_healthy
+    
   
+  vocabulary-service:
+    image: vocabulary-service
+    environment:
+      - CONNECTIONSTRING__COURSE=Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary
+    build:
+      context: ..
+      dockerfile: services/vocabulary-service/Dockerfile
+    ports:
+      - 8087:8080
+    networks:
+      - backend
+    depends_on:
+      vocabulary-database:
+        condition: service_healthy
+      
+  email-service:
+    image: email-service
+    environment:
+      - RABBITMQ__HOST=rabbitmq-service
+      - RABBITMQ__USERNAME=appuser
+      - RABBITMQ__PASSWORD=apppassword
+      - RABBITMQ__VHOST=/
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USESSL=false
+    build:
+      context: ..
+      dockerfile: services/email-service/Dockerfile
+    ports:
+      - 8089:8080
+    networks:
+      - backend
+    depends_on:
+      rabbitmq-service:
+        condition: service_healthy
+
 
 
   rabbitmq-service:
@@ -86,8 +131,8 @@
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER=appuser
+      - RABBITMQ_DEFAULT_PASS=apppassword
     ports:
       - 5672:5672
       - 15672:15672
@@ -99,8 +144,11 @@
     networks:
       - backend
   
-
   
+  
+  
+  
+
   exam-database:
     image: postgres:16-alpine
     environment:
@@ -108,7 +156,6 @@
       POSTGRES_USER: exam
       POSTGRES_PASSWORD: exam
     ports: [ "5433:5432" ]
-    
     networks:
       - backend
     volumes: [ "pgdata:/var/lib/postgresql/exam-data" ]
@@ -169,6 +216,24 @@
       retries: 20
       start_period: 10s 
       
+  
+  vocabulary-database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: vocabulary-db
+      POSTGRES_USER: vocabulary
+      POSTGRES_PASSWORD: vocabulary
+    ports: [ "5437:5432" ]
+
+    networks:
+      - backend
+    volumes: [ "pgdata:/var/lib/postgresql/vocabulary-data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U vocabulary -d vocabulary-db -h 127.0.0.1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
   
   
   

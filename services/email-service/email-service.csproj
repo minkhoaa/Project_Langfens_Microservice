@@ -9,8 +9,13 @@
 
   <ItemGroup>
     <PackageReference Include="MailKit" Version="4.14.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.5-develop.2378" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
   </ItemGroup>
 
 </Project>
