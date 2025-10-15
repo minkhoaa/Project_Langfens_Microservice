@@ -13,25 +13,19 @@ public interface ISessionStore
     Task RefreshSessionTtlAsync(string sid, TimeSpan ttl, CancellationToken ct);
 }
 
-public class SessionStore : ISessionStore
+public class SessionStore(IDatabase database) : ISessionStore
 {
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
-    private readonly IDatabase _database;
-
-    public SessionStore(IDatabase database)
-    {
-        _database = database;
-    }
 
     public Task StoreSessionAsync(SessionRecord record, TimeSpan ttl, CancellationToken ct)
     {
         var value = JsonSerializer.Serialize(record, SerializerOptions);
-        return _database.StringSetAsync(SessionKeys.Session(record.Sid), value, ttl);
+        return database.StringSetAsync(SessionKeys.Session(record.Sid), value, ttl);
     }
 
     public async Task<SessionRecord?> GetSessionAsync(string sid, CancellationToken ct)
     {
-        var value = await _database.StringGetAsync(SessionKeys.Session(sid));
+        var value = await database.StringGetAsync(SessionKeys.Session(sid));
         if (value.IsNullOrEmpty)
         {
             return null;
@@ -42,11 +36,11 @@ public class SessionStore : ISessionStore
 
     public async Task RemoveSessionAsync(SessionRecord record, CancellationToken ct)
     {
-        await _database.KeyDeleteAsync(SessionKeys.Session(record.Sid));
-        await _database.SortedSetRemoveAsync(SessionKeys.UserSessions(record.UserId), record.Sid);
+        await database.KeyDeleteAsync(SessionKeys.Session(record.Sid));
+        await database.SortedSetRemoveAsync(SessionKeys.UserSessions(record.UserId), record.Sid);
         if (!string.IsNullOrWhiteSpace(record.DeviceId))
         {
-            await _database.KeyDeleteAsync(SessionKeys.UserDevice(record.UserId, record.DeviceId!));
+            await database.KeyDeleteAsync(SessionKeys.UserDevice(record.UserId, record.DeviceId!));
         }
     }
 
@@ -58,19 +52,19 @@ public class SessionStore : ISessionStore
         }
 
         var deviceKey = SessionKeys.UserDevice(record.UserId, record.DeviceId!);
-        var oldSid = await _database.StringGetAsync(deviceKey);
+        var oldSid = await database.StringGetAsync(deviceKey);
         if (!oldSid.IsNullOrEmpty)
         {
             if (!string.Equals(oldSid!, record.Sid, StringComparison.Ordinal))
             {
-                await _database.KeyDeleteAsync(SessionKeys.Session(oldSid!));
+                await database.KeyDeleteAsync(SessionKeys.Session(oldSid!));
             }
 
-            await _database.SortedSetRemoveAsync(SessionKeys.UserSessions(record.UserId), oldSid!);
+            await database.SortedSetRemoveAsync(SessionKeys.UserSessions(record.UserId), oldSid!);
         }
 
-        await _database.StringSetAsync(deviceKey, record.Sid, ttl);
-        await _database.SortedSetAddAsync(SessionKeys.UserSessions(record.UserId), record.Sid,
+        await database.StringSetAsync(deviceKey, record.Sid, ttl);
+        await database.SortedSetAddAsync(SessionKeys.UserSessions(record.UserId), record.Sid,
             DateTimeOffset.UtcNow.ToUnixTimeSeconds());
     }
 
@@ -82,26 +76,26 @@ public class SessionStore : ISessionStore
         }
 
         var zKey = SessionKeys.UserSessions(userId);
-        var count = await _database.SortedSetLengthAsync(zKey);
+        var count = await database.SortedSetLengthAsync(zKey);
         if (count <= maxSessions)
         {
             return;
         }
 
-        var toRemove = await _database.SortedSetRangeByRankAsync(zKey, 0, count - maxSessions - 1);
+        var toRemove = await database.SortedSetRangeByRankAsync(zKey, 0, count - maxSessions - 1);
         foreach (var entry in toRemove)
         {
             if (!entry.IsNullOrEmpty)
             {
-                await _database.KeyDeleteAsync(SessionKeys.Session(entry!));
+                await database.KeyDeleteAsync(SessionKeys.Session(entry!));
             }
         }
 
-        await _database.SortedSetRemoveRangeByRankAsync(zKey, 0, count - maxSessions - 1);
+        await database.SortedSetRemoveRangeByRankAsync(zKey, 0, count - maxSessions - 1);
     }
 
     public Task RefreshSessionTtlAsync(string sid, TimeSpan ttl, CancellationToken ct)
     {
-        return _database.KeyExpireAsync(SessionKeys.Session(sid), ttl);
+        return database.KeyExpireAsync(SessionKeys.Session(sid), ttl);
     }
 }

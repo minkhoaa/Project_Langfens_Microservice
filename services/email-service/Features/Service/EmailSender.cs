@@ -1,8 +1,12 @@
+using System.Net;
+using System.Text.Json;
 using email_service.Contracts;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Shared.ExamDto.Contracts;
 
 namespace email_service.Features.Service;
 
@@ -10,14 +14,13 @@ public interface IEmailSender
 {
     Task SendOtpAsync(string toEmail, string otp, long ttlSeconds, CancellationToken token);
     Task SendAsync(string toEmail, string subject, string html, string? plain = null, CancellationToken token = default);
+    Task<IResult> VerifyOtpAsync(string email, string otp, CancellationToken token);
+
 }
-public class EmailSender : IEmailSender
+public class EmailSender(IOptions<SmtpOptions> options, IHttpClientFactory httpClient, ILogger<string> logger) : IEmailSender
 {
-    private readonly SmtpOptions _smtpOptions;
-    public EmailSender(IOptions<SmtpOptions> options)
-    {
-        _smtpOptions = options.Value;
-    }
+    private readonly SmtpOptions _smtpOptions = options.Value;
+
 
     public async Task SendAsync(string toEmail, string subject, string html, string? plain = null,
         CancellationToken token = default)
@@ -29,7 +32,7 @@ public class EmailSender : IEmailSender
         var body = new BodyBuilder()
         {
             HtmlBody = html,
-            TextBody = plain,
+            TextBody = plain ?? "",
 
         }.ToMessageBody();
         msg.Body = body;
@@ -40,16 +43,17 @@ public class EmailSender : IEmailSender
         {
             // 587: STARTTLS, 465: SSL on connect
             var secure = _smtpOptions.Port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
-            await client.ConnectAsync(_smtpOptions.Host, _smtpOptions.Port, secure, token);
+            await client.ConnectAsync(_smtpOptions.Host, _smtpOptions.Port, secure, token)!;
             if (!string.IsNullOrEmpty(_smtpOptions.User))
-                await client.AuthenticateAsync(_smtpOptions.User, _smtpOptions.Pass, token);
-            await client.SendAsync(msg, token);
+                await client.AuthenticateAsync(_smtpOptions.User, _smtpOptions.Pass, token)!;
+            await client.SendAsync(msg, token)!;
             Console.WriteLine($"Sent to {toEmail}");
-            await client.DisconnectAsync(true, token);
+            await client.DisconnectAsync(true, token)!;
         }
         catch (Exception e)
         {
             Console.WriteLine($"Failed while sending email to {toEmail}", e.Message);
+            logger.LogInformation($"Failed while sending email to {toEmail}", e.Message);
         }
     }
 
@@ -60,10 +64,37 @@ public class EmailSender : IEmailSender
         var subject = $"Your verification code is: {otp}";
         await SendAsync(toEmail, subject, html, plain, token);
     }
+
+    public async Task<IResult> VerifyOtpAsync(string email, string otp, CancellationToken token)
+    {
+        if (string.IsNullOrWhiteSpace(_smtpOptions.VerifyUrlTemplate))
+            throw new InvalidOperationException("AuthConfirmEndpoint is not configured.");
+
+        var http = httpClient.CreateClient("auth-confirm");
+        var uri = QueryHelpers.AddQueryString(
+            _smtpOptions.VerifyUrlTemplate,
+            new Dictionary<string, string?> { ["email"] = email, ["otp"] = otp });
+
+        using var resp = await http.GetAsync(uri, token);
+        var body = await resp.Content.ReadAsStringAsync(token);
+
+        logger.LogInformation("Confirm call => {Url} | {Status} | {Body}", uri, (int)resp.StatusCode, body);
+
+        try
+        {
+            var dto = JsonSerializer.Deserialize<ApiResultDto>(body, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            return Results.Json(dto, statusCode: (int)resp.StatusCode);
+        }
+        catch
+        {
+            var contentType = resp.Content.Headers.ContentType?.ToString() ?? "application/json";
+            return Results.Content(body, contentType: contentType, statusCode: (int)resp.StatusCode);
+        }
+    }
     private static string BuildOtpPlain(string email, string otp, long ttl, SmtpOptions o)
     {
         var minutes = Math.Max(1, ttl / 60);
-        var link = RenderUrl(o.VerifyUrlTemplate, email, otp);
+        var link = RenderUrl(email, otp, o);
         return $"Hello {email},\nYour verification code is: {otp}\n" +
                $"This code will expire in {minutes} minute(s).\n" +
                (string.IsNullOrWhiteSpace(link) ? "" : $"Verify link: {link}\n") +
@@ -73,7 +104,7 @@ public class EmailSender : IEmailSender
     private static string BuildOtpHtml(string email, string otp, long ttl, SmtpOptions o)
     {
         var minutes = Math.Max(1, ttl / 60);
-        var link = RenderUrl(o.VerifyUrlTemplate, email, otp);
+        var link = RenderUrl(email, otp, o);
         var button = string.IsNullOrWhiteSpace(link) ? "" :
             $@"<a href=""{link}"" style=""display:inline-block;padding:12px 20px;border-radius:8px;
             background:#4F46E5;color:#fff;text-decoration:none;font-weight:600"">Verify Account</a>";
@@ -113,9 +144,11 @@ public class EmailSender : IEmailSender
                 </html>
                 """;
     }
-    private static string RenderUrl(string template, string email, string otp)
-        => string.IsNullOrWhiteSpace(template)
+    private static string RenderUrl(string email, string otp, SmtpOptions options)
+        => string.IsNullOrWhiteSpace(options.RedirectUrl)
             ? ""
-            : template.Replace("{email}", Uri.EscapeDataString(email))
-                .Replace("{otp}", Uri.EscapeDataString(otp));
+            :   QueryHelpers.AddQueryString(
+        options.RedirectUrl,
+     new Dictionary<string, string?> { ["email"] = email, ["otp"] = otp });
+
 }

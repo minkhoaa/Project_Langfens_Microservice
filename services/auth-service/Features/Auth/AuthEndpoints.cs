@@ -12,5 +12,6 @@ public static class AuthEndpoints
         group.MapRefreshEndpoint();
         group.MapLogoutEndpoint();
         group.MapMeEndpoint();
+        group.MapEmailConfirmEndpoint();
     }
 }

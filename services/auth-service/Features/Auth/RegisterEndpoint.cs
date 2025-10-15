@@ -12,12 +12,26 @@ public static class RegisterEndpoint
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }
-
+    public static RouteHandlerBuilder MapEmailConfirmEndpoint(this RouteGroupBuilder group)
+    {
+        return group.MapGet("/verify", ConfirmEmail)
+            .AllowAnonymous()
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
+    }
     private static async Task<IResult> RegisterAsync([FromServices] IAuthService authService,
         [FromBody] RegisterDto dto,
         CancellationToken ct)
     {
         var result = await authService.RegisterAsync(dto, ct);
         return result.ToHttpResult();
+    }
+    private static async Task<IResult> ConfirmEmail([FromServices] IAuthService authService,
+        [FromQuery] string email,
+        [FromQuery] string otp,
+        CancellationToken ct)
+    {
+        var result = await authService.ConfirmEmail(email, otp, ct);
+        return result;
     }
 }

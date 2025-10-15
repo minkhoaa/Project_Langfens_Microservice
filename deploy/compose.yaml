@@ -113,6 +113,17 @@
       - RABBITMQ__VHOST=/
       - RABBITMQ__PORT=5672
       - RABBITMQ__USESSL=false
+        
+
+      - SMTP__HOST=smtp.gmail.com
+      - SMTP__PORT=587
+      - SMTP__PASS=zwco qbvh nyuw xape
+      - SMTP__USER=23520757@gm.uit.edu.vn
+      - SMTP__FROM=Langfens English<no-reply@langfens-english.com>
+      - SMTP__BRAND=Langfens English
+      - SMTP__SUPPORT=support@langfens-english.com
+      - SMTP__VERIFYURLTEMPLATE=http://auth-service:8080/api/auth/verify
+      - SMTP__REDIRECTURL=http://localhost:8080/api/auth/verify
     build:
       context: ..
       dockerfile: services/email-service/Dockerfile

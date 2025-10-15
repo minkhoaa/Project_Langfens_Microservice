@@ -15,3 +15,5 @@ public record LoginDto(
 public record GoogleLoginRequest(
     [property: JsonPropertyName("idToken")]
     string? IdToken);
+
+public record VerifyOtpDto(string Email, string Otp);  

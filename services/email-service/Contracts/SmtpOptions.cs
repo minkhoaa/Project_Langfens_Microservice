@@ -7,13 +7,15 @@ namespace email_service.Contracts
 {
     public sealed record SmtpOptions
     {
-        public string Host { get; init; } = "";
-        public int Port { get; init; } = 587;
-        public string User { get; init; } = "";
-        public string Pass { get; init; } = "";
-        public string From { get; init; } = "Langfens <no-reply@langfens.com>";
-        public string Brand { get; init; } = "Langfens English";
-        public string Support { get; init; } = "support@langfens.com";
-        public string VerifyUrlTemplate { get; init; } = "";
+        public string Host { get; set; } = "";
+        public int Port { get; set; } = 587;
+        public string User { get; set; } = "";
+        public string Pass { get; set; } = "";
+        public string From { get; set; } = "Langfens <no-reply@langfens.com>";
+        public string Brand { get; set; } = "Langfens English";
+        public string Support { get; set; } = "support@langfens.com";
+        public string VerifyUrlTemplate { get; set; } = "";
+        public string RedirectUrl { get; set; } = "";
+        
     }
 }

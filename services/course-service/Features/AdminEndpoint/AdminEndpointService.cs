@@ -188,10 +188,10 @@ namespace course_service.Features.AdminEndpoint
                 var affectedRows = await context.Lessons.AsNoTracking()
                     .Where(x => x.Id == lessonId)
                     .ExecuteUpdateAsync(x => x
-                            .SetProperty(x => x.Title, request.Title)
-                            .SetProperty(x => x.ContentMd, request.ContentMd)
-                            .SetProperty(x => x.DurationMin, request.DurationMin)
-                            .SetProperty(x => x.Idx, request.Idx)
+                            .SetProperty(a => a.Title, request.Title)
+                            .SetProperty(a => a.ContentMd, request.ContentMd)
+                            .SetProperty(a => a.DurationMin, request.DurationMin)
+                            .SetProperty(a => a.Idx, request.Idx)
                         , token);
                 await transaction.CommitAsync(token);
                 return Results.Ok(new ApiResultDto(true, $"Updated {affectedRows} rows", null!));

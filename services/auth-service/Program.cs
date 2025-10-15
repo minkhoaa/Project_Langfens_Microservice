@@ -8,7 +8,6 @@ using auth_service.Features.RabbitMq;
 using auth_service.Infrastructure.Persistence;
 using auth_service.Infrastructure.Redis;
 using auth_service.Models;
-using Google.Apis.Util;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -37,8 +36,7 @@ builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer
 builder.Services.AddMassTransit(configurator =>
 {
     // Use unique endpoint names per service so fan-out works (no competing consumers)
-    configurator.SetKebabCaseEndpointNameFormatter();
-    configurator.AddConsumer<TestpingConsumer>();
+    configurator.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("user-registered", includeNamespace:false));
     RabbitMqConfig prodRabbitEnvironment;
     try
     {
@@ -81,7 +79,7 @@ builder.Services.AddMassTransit(configurator =>
             }
         });
         // Configure endpoints automatically for registered consumers.
-        config.ReceiveEndpoint("auth-email", e => e.ConfigureConsumer<TestpingConsumer>(context));
+        config.ConfigureEndpoints(context);
     });
 });
 builder.Services.AddDbContextPool<AuthDbContext>(options =>
@@ -172,8 +170,9 @@ builder.Services.AddSwaggerGen(option =>
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ISessionStore, SessionStore>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-
+builder.Services.AddScoped<IOtpGenerator, OtpGenerator>();
+builder.Services.AddScoped<IOtpStore, RedisOtpStore>();
+builder.Services.AddScoped<IPasswordHasher<string>, PasswordHasher<string>>();
 builder.Services.AddSingleton<IEmailValidator, EmailValidator>();
 builder.Services.AddSingleton<ICookieService, CookieService>();
 builder.Services.AddSingleton<IJwtTokenFactory, JwtTokenFactory>();
