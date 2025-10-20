@@ -26,13 +26,13 @@ builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 
-var GrpcPort = 8081;
-var HttpPort = 8080;
+int grpcPort = 8081;
+int httpPort = 8080;
 builder.WebHost.ConfigureKestrel(o =>
 {
-    o.ListenAnyIP(HttpPort, lo => lo.Protocols = HttpProtocols.Http1);
+    o.ListenAnyIP(httpPort, lo => lo.Protocols = HttpProtocols.Http1);
     // lắng nghe 8080 với HTTP/2 (h2c)
-    o.ListenAnyIP(GrpcPort, lo => lo.Protocols = HttpProtocols.Http2);
+    o.ListenAnyIP(grpcPort, lo => lo.Protocols = HttpProtocols.Http2);
 });
 builder.Services.AddGrpc();
 
@@ -71,7 +71,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 
-app.MapGrpcService<ExamInternalGrpcService>().RequireHost($"*:{GrpcPort}");
+app.MapGrpcService<ExamInternalGrpcService>().RequireHost($"*:{grpcPort}");
 
 
 app.MapPublicExamEndpoints();
