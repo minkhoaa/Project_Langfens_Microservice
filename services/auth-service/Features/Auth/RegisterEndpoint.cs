@@ -19,6 +19,13 @@ public static class RegisterEndpoint
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }
+    public static RouteHandlerBuilder MapResendOtpEndpoint(this RouteGroupBuilder group)
+    {
+        return group.MapPost("/resend-otp", ResendEmailHandler)
+            .AllowAnonymous()
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
+    }
     private static async Task<IResult> RegisterAsync([FromServices] IAuthService authService,
         [FromBody] RegisterDto dto,
         CancellationToken ct)
@@ -32,6 +39,13 @@ public static class RegisterEndpoint
         CancellationToken ct)
     {
         var result = await authService.ConfirmEmail(email, otp, ct);
+        return result;
+    }
+    private static async Task<IResult> ResendEmailHandler([FromServices] IAuthService authService,
+        [FromQuery] string email,
+        CancellationToken ct)
+    {
+        var result = await authService.ResendEmail(email, ct);
         return result;
     }
 }

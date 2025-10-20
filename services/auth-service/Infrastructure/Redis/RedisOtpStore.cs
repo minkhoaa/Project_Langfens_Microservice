@@ -11,6 +11,8 @@ public interface IOtpStore
     Task<bool> IsBlocked(string email);
     Task<bool> Verify(string email, string rawOtp, int maxAttempts, TimeSpan blockSeconds);
     Task Clear(string email);
+    Task<TimeSpan> GetResendCooldownRemaining(string email);
+
 }
 
 public sealed class RedisOtpStore(IConnectionMultiplexer redis, IPasswordHasher<string> hasher)
@@ -85,5 +87,12 @@ public sealed class RedisOtpStore(IConnectionMultiplexer redis, IPasswordHasher<
             KeyOtp(email), 
             KeyTry(email), 
             KeyBlock(email)]);
+    }
+
+    public async Task<TimeSpan> GetResendCooldownRemaining(string email)
+    {
+        email = Normalize(email);
+        var ttl = await _redis.KeyTimeToLiveAsync(KeyCool(email));
+        return ttl.HasValue && ttl.Value > TimeSpan.Zero ? ttl.Value : TimeSpan.Zero;
     }
 }

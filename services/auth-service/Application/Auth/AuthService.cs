@@ -8,6 +8,7 @@ using auth_service.Models;
 using Google.Apis.Auth;
 using MassTransit;
 using MassTransit.Initializers;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Shared.ExamDto.Contracts;
@@ -27,7 +28,7 @@ public interface IAuthService
     Task<AuthOperationResult> LogoutAsync(RequestContext context, CancellationToken ct);
     Task<AuthOperationResult> GetCurrentUserAsync(ClaimsPrincipal principal);
     Task<IResult> ConfirmEmail(string email, string otp, CancellationToken ct);
-
+    Task<IResult> ResendEmail(string toEmail, CancellationToken token);
 }
 
 public class AuthService(
@@ -52,6 +53,9 @@ public class AuthService(
     private static readonly TimeSpan BlockSeconds = TimeSpan.FromSeconds(300);
     private static readonly TimeSpan TouchCooldowns = TimeSpan.FromSeconds(30);
     private static readonly int MaxAttempts = 5;
+    private static readonly TimeSpan OtpTtl = TimeSpan.FromMinutes(3);         // 180s
+    private static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(30);
+
 
     public async Task<AuthOperationResult> RegisterAsync(RegisterDto dto, CancellationToken ct)
     {
@@ -107,6 +111,33 @@ public class AuthService(
                 new ApiResultDto(false, $"Failed to send verification email. Please try again + {e.Message}", null!),
                 StatusCodes.Status502BadGateway);        }
     }
+    public async Task<IResult> ResendEmail(string toEmail, CancellationToken token)
+    {
+        var email = toEmail?.Trim().ToLowerInvariant();
+        if (string.IsNullOrEmpty(email))
+            return Results.BadRequest(new ApiResultDto(false, "Email is missing", null!));
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+            return Results.Ok(new ApiResultDto(true, "Verification code was sent", null!));
+        
+        if (user.EmailConfirmed)
+            return Results.Conflict(new ApiResultDto(false, "Email is verified", null!));
+        if (!await redisOtpStore.CanResend(email, ResendCooldown))
+        {
+            var remaining = await redisOtpStore.GetResendCooldownRemaining(email);
+            var secs = Math.Max(1, (int)Math.Ceiling(remaining.TotalSeconds));
+            return Results.BadRequest(new ApiResultDto(false, $"Please wait {secs}s before retrying",
+                new { retryAfter = secs }));
+        }
+
+        var newOtp = otpGenerator.Generate();
+        await redisOtpStore.PutOtp(email, newOtp, OtpTtl);
+        await redisOtpStore.TouchResendCooldown(email, TouchCooldowns);
+        await publish.Publish(new UserRegisteredSendOtp(email, newOtp, (long)OtpTtl.TotalSeconds), token);
+        return Results.Ok(new ApiResultDto(true, "Resend otp successfully", null!));
+
+    }
+    
     public async Task<IResult> ConfirmEmail(string email, string otp, CancellationToken ct)
     {
         var existedUser = await userManager.FindByEmailAsync(email);
@@ -129,6 +160,8 @@ public class AuthService(
         }
         return Results.Ok(new ApiResultDto(true, $"Verified user {email} successfully", null!));
     }
+
+   
 
     public async Task<AuthOperationResult> PasswordLoginAsync(LoginDto dto, RequestContext context,
         CancellationToken ct)
