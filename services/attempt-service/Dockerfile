@@ -4,7 +4,9 @@ WORKDIR /src
 COPY services/attempt-service/attempt-service.csproj services/attempt-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
-RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+
+ARG NUGET_CACHE_ID=nuget-attempt
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages,sharing=locked,id=${NUGET_CACHE_ID} \
     dotnet restore services/attempt-service/attempt-service.csproj
 
 # copy toàn bộ source sau khi restore

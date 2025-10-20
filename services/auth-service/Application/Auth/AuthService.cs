@@ -7,7 +7,9 @@ using auth_service.Infrastructure.Redis;
 using auth_service.Models;
 using Google.Apis.Auth;
 using MassTransit;
+using MassTransit.Initializers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Auth_Email;
 
@@ -123,7 +125,7 @@ public class AuthService(
         if (!update.Succeeded)
         {
             var msg = update.Errors.Select(x => x.Description).FirstOrDefault() ?? "Unable to update user";
-            return Results.Problem(update.Errors.ToString());
+            return Results.Problem(update.Errors.ToString() ?? msg);
         }
         return Results.Ok(new ApiResultDto(true, $"Verified user {email} successfully", null!));
     }
@@ -346,21 +348,23 @@ public class AuthService(
 
         var email = principal.FindFirstValue(ClaimTypes.Email) ??
                     principal.FindFirstValue(JwtRegisteredClaimNames.Email);
-
         if (string.IsNullOrWhiteSpace(email))
         {
             return Task.FromResult(AuthOperationResult.Failure(new ApiResultDto(false, "Email is not exist", null!),
                 StatusCodes.Status404NotFound));
         }
 
+        var emailConfirm = userManager.FindByEmailAsync(email).Select(x=>x is { EmailConfirmed: true });
+        if (emailConfirm is null)
+            return Task.FromResult(AuthOperationResult.Unauthorized());
         var id = principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        var payload = new ApiResultDto(true, "Get information successfully", new { id, email });
+        var payload = new ApiResultDto(true, "Get information successfully", new { id, email, emailConfirmed = emailConfirm.Result });
         return Task.FromResult(AuthOperationResult.Success(payload));
     }
-
-
-
- 
+    
+    
+    
+    
     private async Task<SessionTicket> CreateOrUpdateSessionAsync(User user, RequestContext context,
         CancellationToken ct)
     {

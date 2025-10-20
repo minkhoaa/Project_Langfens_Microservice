@@ -135,8 +135,6 @@
       rabbitmq-service:
         condition: service_healthy
 
-
-
   rabbitmq-service:
     image: rabbitmq:3-management
     volumes:

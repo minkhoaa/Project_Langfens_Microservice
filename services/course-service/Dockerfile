@@ -4,7 +4,8 @@ WORKDIR /src
 COPY services/course-service/course-service.csproj services/course-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
-RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+ARG NUGET_CACHE_ID=nuget-course
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages,sharing=locked,id=${NUGET_CACHE_ID} \
     dotnet restore services/course-service/course-service.csproj
 
 # copy toàn bộ source sau khi restore

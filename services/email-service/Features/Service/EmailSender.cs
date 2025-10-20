@@ -132,7 +132,6 @@ public class EmailSender(IOptions<SmtpOptions> options, IHttpClientFactory httpC
                         <p style="margin:0 0 16px 0;color:#374151">
                           This code will expire in <b>{minutes} minute(s)</b>.
                         </p>
-                        {button}
                         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
                         <p style="margin:0;color:#6B7280;font-size:12px">
                           If you didn’t request this, please ignore this email or contact us at {o.Support}.
