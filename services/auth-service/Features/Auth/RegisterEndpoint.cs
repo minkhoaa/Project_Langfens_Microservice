@@ -26,6 +26,27 @@ public static class RegisterEndpoint
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }
+    public static RouteHandlerBuilder MapForgotPasswordEndpoint(this RouteGroupBuilder group)
+    {
+        return group.MapPost("/forgot-password", ForgotPasswordHandler)
+            .AllowAnonymous()
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
+    }
+    public static RouteHandlerBuilder MapResendForgotPasswordEndpoint(this RouteGroupBuilder group)
+    {
+        return group.MapPost("/resend-otp-reset-password", ResendForgotPasswordHandler)
+            .AllowAnonymous()
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
+    }
+    public static RouteHandlerBuilder MapConfirmForgotPasswordEndpoint(this RouteGroupBuilder group)
+    {
+        return group.MapPost("/confirm-otp-reset-password", ConfirmForgotPasswordHandler)
+            .AllowAnonymous()
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
+    }
     private static async Task<IResult> RegisterAsync([FromServices] IAuthService authService,
         [FromBody] RegisterDto dto,
         CancellationToken ct)
@@ -48,4 +69,28 @@ public static class RegisterEndpoint
         var result = await authService.ResendEmail(email, ct);
         return result;
     }
+    private static async Task<IResult> ForgotPasswordHandler([FromServices] IAuthService authService,
+        [FromQuery] string email,
+        CancellationToken ct)
+    {
+        var result = await authService.ForgotPasswordRequestAsync(email, ct);
+        return result;
+    }
+    private static async Task<IResult> ResendForgotPasswordHandler([FromServices] IAuthService authService,
+        [FromQuery] string email,
+        CancellationToken ct)
+    {
+        var result = await authService.ResendForgotPasswordAsync(email, ct);
+        return result;
+    }
+    private static async Task<IResult> ConfirmForgotPasswordHandler([FromServices] IAuthService authService,
+        [FromQuery] string email,
+        string otp,
+        string newPassword,
+        CancellationToken ct)
+    {
+        var result = await authService.ConfirmResetPasswordAsync(email,otp, newPassword, ct);
+        return result;
+    }
+    
 }
