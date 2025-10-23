@@ -219,7 +219,6 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
         var msg = string.Join("; ", res.Errors.Select(e => e.Description));
         return Results.BadRequest(new ApiResultDto(false, msg, null!));
     }
-
     return Results.Ok(new ApiResultDto(true, "Reset password successfully", null!));
 }
 

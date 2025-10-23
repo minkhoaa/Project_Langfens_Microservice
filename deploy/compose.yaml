@@ -92,7 +92,7 @@
   vocabulary-service:
     image: vocabulary-service
     environment:
-      - CONNECTIONSTRING__COURSE=Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary
+      - CONNECTIONSTRING__VOCABULARY=Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary
     build:
       context: ..
       dockerfile: services/vocabulary-service/Dockerfile
