@@ -3,8 +3,8 @@ namespace exam_service.Contracts.Exams;
 public class DtoAdmin
 {
     public record AdminExamCreate(
-        string Slug,
         string Title,
+        string Slug,
         string? DescriptionMd,
         string Category,
         string Level,

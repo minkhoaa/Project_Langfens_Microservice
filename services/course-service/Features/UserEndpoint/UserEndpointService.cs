@@ -42,7 +42,7 @@ namespace course_service.Features.UserEndpoint
                                && x.Status == EnrollmentStatus.Active, token
                             );
             if (!enrolled)
-                return Results.Forbid();
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
             var existed = await context.LessonCompletions.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == userId && x.LessonId == lessonId, token);
             if (existed != null)
@@ -112,7 +112,7 @@ namespace course_service.Features.UserEndpoint
             })
             .OrderBy(x => x.Title)
             .ToList();
-            return Results.Ok(new ApiResultDto(true, "Success", items));
+            return Results.Ok(new ApiResultDto(true, "Success", new MyProgressDto(items)));
         }
 
         public async Task<IResult> EnrollCourse(

@@ -49,11 +49,11 @@ public class UserProgressTests
         var (status, payload) = ResultAssert.Api(
             await service.GetMyProgress(userId, CancellationToken.None));
 
-        status.Should().Be(StatusCodes.Status200OK);
-        var dto = payload.data.Should().BeOfType<MyProgressDto>().Subject;
+        status.Should()?.Be(StatusCodes.Status200OK);
+        var dto = payload.data.Should()?.BeOfType<MyProgressDto>()?.Subject;
         dto.Courses.Should().HaveCount(1);
-        dto.Courses[0].TotalLessons.Should().Be(3);
-        dto.Courses[0].CompletedLessons.Should().Be(1);
-        dto.Courses[0].Percent.Should().BeApproximately(33.33, 0.01);
+        dto.Courses[0].TotalLessons.Should()?.Be(3);
+        dto.Courses[0].CompletedLessons.Should()?.Be(1);
+        (dto.Courses[0].Percent.Should() ?? throw new InvalidOperationException()).BeApproximately(33.33, 0.01);
     }
 }

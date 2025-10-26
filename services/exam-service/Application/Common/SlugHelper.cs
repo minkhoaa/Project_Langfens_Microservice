@@ -9,8 +9,8 @@ public static class SlugHelper
 {
     public static string ToSlug(string? input, int maxLen = 120)
     {
-        if (string.IsNullOrWhiteSpace(input)) return "";
-        var s = input.Trim().ToLowerInvariant()
+        // Treat null/whitespace as empty and let fallback handle it
+        var s = (input ?? string.Empty).Trim().ToLowerInvariant()
             .Replace('đ', 'd').Replace('ð', 'd');
         var norm = s.Normalize(NormalizationForm.FormD);
         var sb = new StringBuilder(capacity: norm.Length);

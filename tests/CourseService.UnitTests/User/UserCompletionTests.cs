@@ -13,8 +13,8 @@ public class UserCompletionTests
         var (status, payload) = ResultAssert.Api(
             await service.CompleteCourse(CancellationToken.None, Guid.NewGuid(), userId));
 
-        status.Should().Be(StatusCodes.Status404NotFound);
-        payload.message.Should().Contain("Lesson not found");
+        status.Should()?.Be(StatusCodes.Status404NotFound);
+        payload.message.Should()?.Contain("Lesson not found");
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class UserCompletionTests
         var result = await service.CompleteCourse(CancellationToken.None, lesson.Id, userId);
 
         var statusCode = (result as IStatusCodeHttpResult)?.StatusCode ?? 0;
-        statusCode.Should().Be(StatusCodes.Status403Forbidden);
+        statusCode.Should()?.Be(StatusCodes.Status403Forbidden);
     }
 
     [Fact]
