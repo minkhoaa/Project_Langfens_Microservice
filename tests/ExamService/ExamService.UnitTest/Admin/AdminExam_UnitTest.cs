@@ -1,4 +1,5 @@
 using exam_service.Contracts.Exams;
+using exam_service.Domains.Entities;
 using exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
@@ -117,5 +118,35 @@ public class AdminExamService_UnitTests_Validation
         Assert.Equal(StatusCodes.Status400BadRequest, status);
         Assert.False(api!.isSuccess);
         Assert.Contains("Title is required", api.message);
+    }
+
+    [Fact]
+    public async Task AddAsync_Should_Generate_Slug_From_Title_And_Make_Unique()
+    {
+        var (ctx, conn) = SqlTestHelper.CreateInMemory();
+        await using var _ = conn;
+        await using var __ = ctx;
+
+        ctx.Exams.Add(new Exam
+        {
+            Title = "IELTS Doc 1",
+            Slug = "ielts-doc-1",
+            Category = ExamCategory.IELTS!,
+            Level = ExamLevel.B1!,
+            DurationMin = 60,
+            Status = ExamStatus.Draft,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await ctx.SaveChangesAsync();
+
+        var svc = new AdminExamService(ctx);
+        var dto = new DtoAdmin.AdminExamCreate("IELTS Đọc 1", null, null, ExamCategory.IELTS!, ExamLevel.B1!, 60);
+        var (status, api) = ResultHelpers.Extract<ApiResultDto>(await svc.AddAsync(dto, CancellationToken.None));
+
+        Assert.Equal(StatusCodes.Status200OK, status);
+        Assert.True(api!.isSuccess);
+        var created = await ctx.Exams.OrderByDescending(e => e.CreatedAt).FirstAsync();
+        Assert.Equal("ielts-doc-1-2", created.Slug);
     }
 }

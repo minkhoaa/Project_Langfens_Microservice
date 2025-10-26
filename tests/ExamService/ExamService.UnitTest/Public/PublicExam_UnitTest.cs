@@ -208,4 +208,19 @@ public class PublicExamUnitTest
             await ctx.DisposeAsync();
         }
     }
+
+    [Fact]
+    public async Task ListPublished_Should_Return_BadRequest_When_Db_Throws()
+    {
+        var (ctx, conn) = SqlTestHelper.CreateInMemory();
+        var svc = new exam_service.Features.Exams.PublicEndpoint.ExamService(ctx);
+        await conn.DisposeAsync();
+        await ctx.DisposeAsync();
+
+        var result = await svc.ListPublishedAsync(null, null, 1, 10, CancellationToken.None);
+
+        var (status, api) = ResultHelpers.Extract<ApiResultDto>(result);
+        Assert.Equal(StatusCodes.Status400BadRequest, status);
+        Assert.False(api!.isSuccess);
+    }
 }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using vocabulary_service.Features;
 using vocabulary_service.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,4 +21,5 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<CardDbContext>();
     await db.Database.MigrateAsync();
 }
+app.MapVocabularyEndpoints();
 app.Run();
