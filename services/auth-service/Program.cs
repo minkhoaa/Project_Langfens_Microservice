@@ -106,7 +106,7 @@ builder.Services.AddIdentityCore<User>(option =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FE", policy => policy
-        .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+        .AllowAnyOrigin()
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials());

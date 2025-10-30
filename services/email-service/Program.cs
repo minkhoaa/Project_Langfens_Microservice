@@ -7,7 +7,16 @@ using MassTransit;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts.Auth_Email;
 
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FE", policy => policy
+        .AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
+});
 
 var smtpHost   = Environment.GetEnvironmentVariable("SMTP__HOST")   
                  ?? builder.Configuration["Smtp:Host"]   ?? "smtp.gmail.com";
@@ -103,6 +112,7 @@ builder.Services.AddMassTransit(configurator =>
 var app = builder.Build();
 
 
+app.UseCors("FE");
 
 app.UseSwagger();
 app.UseSwaggerUI();

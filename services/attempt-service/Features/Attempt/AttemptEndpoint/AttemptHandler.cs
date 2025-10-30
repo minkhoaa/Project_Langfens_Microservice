@@ -6,7 +6,7 @@ namespace attempt_service.Features.Attempt.AttemptEndpoint;
 public static class AttemptHandler
 {
     public static Task<IResult> AttemptStartHandler(
-        IAttemptService service,
+        IAttemptService service, 
         AttemptStartRequest request,
         CancellationToken token,
         Guid userId

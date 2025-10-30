@@ -10,6 +10,14 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FE", policy => policy
+        .AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
+});
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -69,6 +77,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors("FE");
 
 
 app.MapGrpcService<ExamInternalGrpcService>().RequireHost($"*:{grpcPort}");
