@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using vocabulary_service.Features;
+using vocabulary_service.Features.Public;
 using vocabulary_service.Features.User;
 using vocabulary_service.Infrastructure.Persistence;
 
@@ -21,6 +22,7 @@ builder.Services.AddDbContext<VocabularyDbContext>(option => option.UseNpgsql(
     "Host=localhost;Port=5437;Database=vocabulary-db;Username=vocabulary;Password=vocabulary"
 ));
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPublicService, PublicService>();
 var app = builder.Build();
 
 app.UseSwagger();
@@ -32,5 +34,6 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<VocabularyDbContext>();
     await db.Database.MigrateAsync();
 }
-app.MapVocabularyEndpoints();
+app.MapPublicVocabularyEndpoints();
+app.MapUserVocabularyEndpoints(); 
 app.Run();

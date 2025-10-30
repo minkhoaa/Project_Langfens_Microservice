@@ -42,4 +42,8 @@
     <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\Admin\" />
+  </ItemGroup>
+
 </Project>

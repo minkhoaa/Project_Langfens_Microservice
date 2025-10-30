@@ -14,3 +14,13 @@ public class DeckDto
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
  
 }
+public record DeckListItemDto(Guid Id, string Slug, string Title, string? Category, string Status);
+public record CardItemDto(Guid Id, int Idx, string FrontMd, string BackMd, string? HintMd);
+public record DeckDetailDto(
+    Guid Id,
+    string Slug,
+    string Title,
+    string? DescriptionMd,
+    string? Category,
+    string Status
+);
