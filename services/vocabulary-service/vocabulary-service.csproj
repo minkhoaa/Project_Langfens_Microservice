@@ -38,10 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\_shared\Shared.Grpc\Shared.Grpc.csproj" />
     <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
   </ItemGroup>

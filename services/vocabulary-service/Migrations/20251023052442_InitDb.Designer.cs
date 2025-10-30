@@ -11,7 +11,7 @@ using vocabulary_service.Infrastructure.Persistence;
 
 namespace vocabulary_service.Migrations
 {
-    [DbContext(typeof(CardDbContext))]
+    [DbContext(typeof(VocabularyDbContext))]
     [Migration("20251023052442_InitDb")]
     partial class InitDb
     {

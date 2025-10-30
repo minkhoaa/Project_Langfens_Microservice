@@ -10,7 +10,7 @@ using vocabulary_service.Infrastructure.Persistence;
 
 namespace vocabulary_service.Migrations
 {
-    [DbContext(typeof(CardDbContext))]
+    [DbContext(typeof(VocabularyDbContext))]
     partial class CardDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

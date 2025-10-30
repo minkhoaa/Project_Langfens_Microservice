@@ -3,7 +3,7 @@ using vocabulary_service.Domains.Entities;
 
 namespace vocabulary_service.Infrastructure.Persistence;
 
-public class CardDbContext(DbContextOptions<CardDbContext> options) : DbContext(options)
+public class VocabularyDbContext(DbContextOptions<VocabularyDbContext> options) : DbContext(options)
 {
     protected override void OnModelCreating(ModelBuilder app)
     { 
@@ -49,5 +49,11 @@ public class CardDbContext(DbContextOptions<CardDbContext> options) : DbContext(
             e.HasIndex(x => new { x.UserId, x.CardId, x.ReviewedAt });
         });
     }
+
+    public DbSet<Card> Cards { get; set; }
+    public DbSet<Deck> Decks { get; set; }
+    public DbSet<ReviewLog> ReviewLogs { get; set; }
+    public DbSet<UserCardReview> UserCardReviews { get; set; }
+    public DbSet<UserDeck> UserDecks { get; set; }
 }
 
