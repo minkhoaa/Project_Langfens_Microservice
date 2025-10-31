@@ -11,7 +11,7 @@ public interface IPublicService
     Task<IResult> GetAllPublished(string? status, string? category, CancellationToken token, int page, int? pageSize = 5);
     Task<IResult> GetBySlug(string slug, CancellationToken token);
     Task<IResult> GetCardsBySlug(string slug, CancellationToken token);
-
+    Task<IResult> GetCardsByDeckId(Guid deckId, CancellationToken token);
 
 }
 public class PublicService(VocabularyDbContext context) : IPublicService
@@ -44,6 +44,21 @@ public class PublicService(VocabularyDbContext context) : IPublicService
     {
         var deckId = await context.Decks.AsNoTracking()
             .Where(d => d.Slug == slug)
+            .Select(d => d.Id)
+            .FirstOrDefaultAsync(token);
+        if (deckId == Guid.Empty) return Results.NotFound("Not found deck slug");
+        var cards = await context.Cards.AsNoTracking()
+            .Where(c => c.DeckId == deckId)
+            .OrderBy(c => c.Idx)
+            .Select(c => new CardItemDto(c.Id, c.Idx, c.FrontMd, c.BackMd, c.HintMd))
+            .ToListAsync(token);
+        return Results.Ok(cards);
+    }
+
+    public async Task<IResult> GetCardsByDeckId(Guid id, CancellationToken token)
+    {
+        var deckId = await context.Decks.AsNoTracking()
+            .Where(d => d.Id == id)
             .Select(d => d.Id)
             .FirstOrDefaultAsync(token);
         if (deckId == Guid.Empty) return Results.NotFound("Not found deck slug");

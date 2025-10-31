@@ -1,22 +1,27 @@
-using vocabulary_service.Features.User;
+using Microsoft.AspNetCore.Mvc;
 
 namespace vocabulary_service.Features.Public;
 
 public static class PublicHandler
 {
     public static Task<IResult> GetAllPublishedHandler(
-        string? status, string? category,
+        [FromQuery] string? status,[FromQuery] string? category,
         CancellationToken token, int page, int? pageSize,
-        IPublicService service
+        [FromServices] IPublicService service
     ) => service.GetAllPublished(status, category, token, page, pageSize);
 
     public static Task<IResult> GetBySlugHandler(
-        string slug, CancellationToken token, IPublicService service)
+        [FromRoute] string slug, CancellationToken token,
+        [FromServices] IPublicService service)
         => service.GetBySlug(slug, token);
 
+    
     public static Task<IResult> GetCardsBySlugHandler(
-        string slug, CancellationToken token,
+        [FromRoute] string slug, CancellationToken token,
         IPublicService service
     ) => service.GetCardsBySlug(slug, token);
-
+    public static Task<IResult> GetCardsByDeckIdHandler(
+        [FromRoute] Guid deckId, CancellationToken token,
+        IPublicService service
+    ) => service.GetCardsByDeckId(deckId, token);
 }
