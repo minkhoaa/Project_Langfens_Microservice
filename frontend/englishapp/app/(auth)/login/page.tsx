@@ -1,8 +1,9 @@
 "use client";
 
-import FacebookButton from "@/app/components/facebook-button";
-import GoogleButton from "@/app/components/google-button";
-import { FetchHelper, setAccessToken } from "@/app/lib/auth-client";
+
+import FacebookButton from "app/components/facebook-button";
+import GoogleButton from "app/components/google-button";
+import { FetchHelper, setAccessToken } from "app/lib/auth-client";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Button, Card, Container, Form } from "react-bootstrap";

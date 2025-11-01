@@ -113,8 +113,6 @@
       - RABBITMQ__VHOST=/
       - RABBITMQ__PORT=5672
       - RABBITMQ__USESSL=false
-        
-
       - SMTP__HOST=smtp.gmail.com
       - SMTP__PORT=587
       - SMTP__PASS=zwco qbvh nyuw xape

@@ -1,5 +1,3 @@
-import Head from "next/head";
-import { setPriority } from "os";
 let accessToken: string | null = null;
 let refreshPromise: Promise<void> | null = null;
 

@@ -1,10 +1,9 @@
 
 "use client"
+import { FetchHelper, setAccessToken } from "app/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
-import { FetchHelper, setAccessToken } from "@/app/lib/auth-client";
-
 const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 const PUBLIC_API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
