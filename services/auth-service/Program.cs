@@ -7,15 +7,15 @@ using auth_service.Features.Auth;
 using auth_service.Features.RabbitMq;
 using auth_service.Infrastructure.Persistence;
 using auth_service.Infrastructure.Redis;
-using auth_service.Models;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shared.Security.Roles;
 using StackExchange.Redis;
-using Role = auth_service.Models.Role;
+using Role = auth_service.Infrastructure.Persistence.Role;
 
 var builder = WebApplication.CreateBuilder(args);
 

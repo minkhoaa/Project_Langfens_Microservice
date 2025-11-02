@@ -1,23 +1,32 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
-
+﻿# Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["services/vocabulary-service/vocabulary-service.csproj", "services/vocabulary-service/"]
-RUN dotnet restore "services/vocabulary-service/vocabulary-service.csproj"
+COPY services/vocabulary-service/vocabulary-service.csproj services/vocabulary-service/
+COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
+COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
+COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
+
+
+ARG NUGET_CACHE_ID=nuget-vocabulary
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages,sharing=locked,id=${NUGET_CACHE_ID} \
+    dotnet restore services/vocabulary-service/vocabulary-service.csproj
+
+# copy toàn bộ source sau khi restore
 COPY . .
-WORKDIR "/src/services/vocabulary-service"
-RUN dotnet build "./vocabulary-service.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR /src/services/vocabulary-service
+RUN dotnet publish -c Release -o /out \
+    -r linux-musl-x64 \
+    --self-contained true \
+    /p:PublishSingleFile=true \
+    /p:EnableCompressionInSingleFile=true \
+    /p:DebugType=none
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./vocabulary-service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
+# Runtime siêu gọn
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "vocabulary-service.dll"]
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080;http://+:8081 \
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
+    Swagger__Enabled=true
+COPY --from=build /out /app
+EXPOSE 8080 8081
+ENTRYPOINT ["./vocabulary-service"]   

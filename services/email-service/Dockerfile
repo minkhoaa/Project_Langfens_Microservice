@@ -4,6 +4,10 @@ WORKDIR /src
 COPY services/email-service/email-service.csproj services/email-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
+COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
+
+
+
 ARG NUGET_CACHE_ID=nuget-email
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages,sharing=locked,id=${NUGET_CACHE_ID} \
     dotnet restore services/email-service/email-service.csproj

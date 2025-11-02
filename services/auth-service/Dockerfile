@@ -6,6 +6,8 @@ WORKDIR /src
 COPY services/auth-service/auth-service.csproj services/auth-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
+COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
+
 ARG NUGET_CACHE_ID=nuget-auth
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages,sharing=locked,id=${NUGET_CACHE_ID} \
     dotnet restore services/auth-service/auth-service.csproj

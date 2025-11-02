@@ -1,6 +1,6 @@
 namespace Shared.Security.Scopes;
 
-public class EmailScope
+public static class EmailScope
 {
-    
+    public const string EmailSend     = "email.send"; 
 }

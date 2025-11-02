@@ -1,3 +1,4 @@
+using Shared.Security.Scopes;
 using vocabulary_service.Features.Admin;
 using vocabulary_service.Features.Public;
 using vocabulary_service.Features.User;
@@ -8,7 +9,7 @@ public static class VocabularyEndpoint
 {
     public static void MapPublicVocabularyEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGroup("/api/decks");
+        app.MapGroup("/api/decks").AllowAnonymous();
         // public
         app.MapGet("/", PublicHandler.GetAllPublishedHandler);
         app.MapGet("/{slug}", PublicHandler.GetBySlugHandler);
@@ -20,7 +21,7 @@ public static class VocabularyEndpoint
     }
     public static void MapUserVocabularyEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGroup("/api/users/");
+        app.MapGroup("/api/users/").RequireAuthorization(VocabScope.VocabRead);
         // public
         app.MapPost("/{userId}/subscribe/{deckId}", UserHandler.SubscribeDecksHandler);
         app.MapGet("/{userId}/flashcard/due", UserHandler.GetDueFlashcardHandler);
@@ -29,7 +30,7 @@ public static class VocabularyEndpoint
     }
     public static void MapAdminVocabularyEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGroup("/api/admin/");
+        app.MapGroup("/api/admin/").RequireAuthorization(VocabScope.VocabManage);
         app.MapPost("/deck/", AdminHandler.CreateDeckHandler);
         app.MapPut("/deck/{deckId}", AdminHandler.UpdateDeckHandler);
         app.MapDelete("/deck/{deckId}", AdminHandler.DeleteDeckHandler);

@@ -21,6 +21,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\services\_shared\Shared.Security\Shared.Security.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Remove="obj\**"/>
     </ItemGroup>
 
@@ -35,5 +39,6 @@
     <ItemGroup>
         <None Remove="obj\**"/>
     </ItemGroup>
+
 
 </Project>

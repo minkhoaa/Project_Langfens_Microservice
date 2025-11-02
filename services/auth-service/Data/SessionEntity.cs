@@ -1,4 +1,4 @@
-using auth_service.Models;
+using auth_service.Infrastructure.Persistence;
 
 namespace auth_service.Data;
 

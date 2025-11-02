@@ -15,6 +15,15 @@ internal sealed class AuthServiceTestBuilder
     public Mock<IPublishEndpoint> PublishEndpoint { get; } = new();
     public Mock<ILogger<string>> Logger { get; } = new();
     public Mock<IOtpGenerator> OtpGenerator { get; } = new();
+    public IOptions<JwtSettings> JwtSettings { get; } = Options.Create(new JwtSettings
+    {
+        Issuer = "test-issuer",
+        Audience = "test-audience",
+        SignKey = "0123456789abcdef0123456789abcdef",
+        RsaPrivateKeyPem = "-----BEGIN PRIVATE KEY-----\nMIIBOgIBAAJBfakekey\n-----END PRIVATE KEY-----",
+        KeyId = "test-key",
+        AccessTokenLifetimeSeconds = 900
+    });
 
     public AuthServiceTestBuilder()
     {
@@ -47,5 +56,6 @@ internal sealed class AuthServiceTestBuilder
         OtpStore.Object,
         PublishEndpoint.Object,
         Logger.Object,
-        OtpGenerator.Object);
+        OtpGenerator.Object,
+        JwtSettings);
 }

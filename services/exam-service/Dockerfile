@@ -4,6 +4,8 @@ WORKDIR /src
 COPY services/exam-service/exam-service.csproj services/exam-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
+COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
+
 
 ARG NUGET_CACHE_ID=nuget-exam
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages,sharing=locked,id=${NUGET_CACHE_ID} \

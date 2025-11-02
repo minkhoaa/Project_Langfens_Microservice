@@ -2,6 +2,7 @@ using exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
+using Shared.Security.Scopes;
 
 namespace exam_service.Features.Exams.AdminEndpoint;
 
@@ -11,13 +12,13 @@ public static class AdminExamEndpoint
     public static void MapAdminExamEndpoint(this IEndpointRouteBuilder app)
     {
         var adminGroup = app.MapGroup("/api/admin/exam/");
-        adminGroup.MapPost("/addexam", AdminExamHandler.AddExamHandler).AllowAnonymous()
+        adminGroup.MapPost("/addexam", AdminExamHandler.AddExamHandler).RequireAuthorization("AdminOnly")
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
-        adminGroup.MapPut("/update/{id}", AdminExamHandler.UpdateExamHandler).AllowAnonymous()
+        adminGroup.MapPut("/update/{id}", AdminExamHandler.UpdateExamHandler).RequireAuthorization("AdminOnly")
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
-        adminGroup.MapDelete("/delete/{id}", AdminExamHandler.DeleteExamHandler).AllowAnonymous()
+        adminGroup.MapDelete("/delete/{id}", AdminExamHandler.DeleteExamHandler).RequireAuthorization("AdminOnly")
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
     }
@@ -25,15 +26,13 @@ public static class AdminExamEndpoint
     //section
     public static void MapAdminSectionEndpoint(this IEndpointRouteBuilder app)
     {
-        var adminSection = app.MapGroup("/api/admin/section");
+        var adminSection = app.MapGroup("/api/admin/section").RequireAuthorization(ExamScope.ExamManage);
         adminSection.MapPost("/add", AdminSectionHandler.AddSectionHandler)
-            .AllowAnonymous()
             .Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
 
-        adminSection.MapPut("/update/{id}", AdminSectionHandler.UpdateSectionHandler)
-            .AllowAnonymous();
+        adminSection.MapPut("/update/{id}", AdminSectionHandler.UpdateSectionHandler);
         adminSection.MapDelete("/delete/{id}", AdminSectionHandler.DeleteSectionHandler)
-            .AllowAnonymous()
+         
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }
@@ -42,17 +41,23 @@ public static class AdminExamEndpoint
     public static void MapAdminQuestionEndpoint(this IEndpointRouteBuilder app)
     {
         var adminQuestion = app.MapGroup("/api/admin/question/");
-        adminQuestion.MapPost("/add", AdminQuestionHandler.AddQuestionHandler).AllowAnonymous();
-        adminQuestion.MapPut("/update/{id}", AdminQuestionHandler.UpdateQuestionHandler).AllowAnonymous();
-        adminQuestion.MapDelete("/delete/{id}", AdminQuestionHandler.DeleteQuestionHandler).AllowAnonymous();
+        adminQuestion.MapPost("/add", AdminQuestionHandler.AddQuestionHandler)
+            .RequireAuthorization("AdminOnly");
+        adminQuestion.MapPut("/update/{id}", AdminQuestionHandler.UpdateQuestionHandler)
+            .RequireAuthorization("AdminOnly");
+        adminQuestion.MapDelete("/delete/{id}", AdminQuestionHandler.DeleteQuestionHandler)
+            .RequireAuthorization("AdminOnly");
     }
 
     //option
     public static void MapAdminOptionEndpoint(this IEndpointRouteBuilder app)
     {
         var adminOption = app.MapGroup("/api/admin/option/");
-        adminOption.MapPost("/add", AdminOptionHandler.AddOptionHandler);
-        adminOption.MapPut("/update/{id}", AdminOptionHandler.UpdateOptionHandler);
-        adminOption.MapDelete("/delete/{id}", AdminOptionHandler.DeleteOptionHandler);
+        adminOption.MapPost("/add", AdminOptionHandler.AddOptionHandler)
+            .RequireAuthorization("AdminOnly");
+        adminOption.MapPut("/update/{id}", AdminOptionHandler.UpdateOptionHandler)
+            .RequireAuthorization("AdminOnly");
+        adminOption.MapDelete("/delete/{id}", AdminOptionHandler.DeleteOptionHandler).
+            RequireAuthorization("AdminOnly");
     }
 }

@@ -4,7 +4,6 @@ global using auth_service.Application.Common;
 global using auth_service.Data;
 global using auth_service.Infrastructure.Persistence;
 global using auth_service.Infrastructure.Redis;
-global using auth_service.Models;
 global using Microsoft.AspNetCore.Http;
 global using FluentAssertions;
 global using MassTransit;

@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
 using attempt_service.Features.Attempt;
@@ -5,13 +6,49 @@ using attempt_service.Features.Attempt.AttemptEndpoint;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Shared.Grpc.ExamInternal;
+using Shared.Security.Claims;
+using Shared.Security.Helper;
+using Shared.Security.Roles;
+using Shared.Security.Scopes;
 
 var builder = WebApplication.CreateBuilder(args);
+JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(option =>
+{
+    option.SwaggerDoc("v1", new OpenApiInfo()
+    {
+        Title = "Attempt-service"
+    });
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        Description = "Enter token"
+    });
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    { 
+        {
+            new OpenApiSecurityScheme()
+            {
+                Reference = new OpenApiReference()
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+            },
+            Array.Empty<string>()
+        }
+    }); 
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FE", policy => policy
@@ -80,9 +117,27 @@ builder.Services.AddAuthentication(option =>
         ValidAudience = jwtSettings!.Audience,
         ValidIssuer = jwtSettings.Issuer,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey)),
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        RoleClaimType = CustomClaims.Roles, 
+        NameClaimType = CustomClaims.Sub
     };
     options.MapInboundClaims = false;
+});
+builder.Services.AddAuthorization(option =>
+{
+    option.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+    option.AddPolicy(Roles.User, a => a.RequireRole(Roles.User));
+    option.AddPolicy(Roles.Admin, a => a.RequireRole(Roles.Admin));
+
+    option.AddPolicy(AttemptScope.AttemptStart, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptStart)
+                                                                   || c.User.IsInRole(Roles.User)));
+    option.AddPolicy(AttemptScope.AttemptSubmit, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptSubmit)
+                                                                   || c.User.IsInRole(Roles.User))); 
+    option.AddPolicy(AttemptScope.AttemptReadOwn, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptReadOwn)
+                                                                   || c.User.IsInRole(Roles.User)));
+    option.AddPolicy(AttemptScope.AttemptReadAny, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptReadAny)
+                                                                    || c.User.IsInRole(Roles.User)));
+    
 });
 
 
@@ -108,6 +163,8 @@ app.UseCors("FE");
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapAttemptEndpoint();
 
 app.Run();

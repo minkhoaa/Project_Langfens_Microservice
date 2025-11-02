@@ -1,6 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,8 +27,11 @@ builder.Services.AddAuthentication(option =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwt!.Issuer,
         ValidAudience = jwt.Audience,
+        NameClaimType = CustomClaims.Sub,
+        RoleClaimType = CustomClaims.Roles,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SignKey))
     };
+    JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 });
 builder.Services.AddCors(c => c.AddPolicy("FE", p => p
     .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")

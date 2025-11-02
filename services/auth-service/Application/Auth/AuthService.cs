@@ -4,13 +4,15 @@ using auth_service.Application.Common;
 using auth_service.Data;
 using auth_service.Infrastructure.Persistence;
 using auth_service.Infrastructure.Redis;
-using auth_service.Models;
 using Google.Apis.Auth;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Auth_Email;
+using Shared.Security.Roles;
+using Shared.Security.Scopes;
 
 namespace auth_service.Application.Auth;
 
@@ -30,11 +32,13 @@ public interface IAuthService
     Task<IResult> ForgotPasswordRequestAsync(string email, CancellationToken ct);
     Task<IResult> ResendForgotPasswordAsync(string email, CancellationToken ct);
     Task<IResult> ConfirmResetPasswordAsync(string email, string otp, string newPassword, CancellationToken ct);
+    
 
 }
 
 public class AuthService(
     UserManager<User> userManager,
+    RoleManager<Role> roleManager,
     SignInManager<User> signInManager,
     IJwtTokenFactory jwtTokenFactory,
     IEmailValidator emailValidator,
@@ -44,10 +48,12 @@ public class AuthService(
     IOtpStore redisOtpStore,
     IPublishEndpoint publish,
     ILogger<string> logger,
-    IOtpGenerator otpGenerator
-    )
+    IOtpGenerator otpGenerator,
+    IOptions<JwtSettings> jwtSetttings)
     : IAuthService
 {
+    private JwtSettings _jwtSettings = jwtSetttings.Value;
+    
     private const int MaxSessionsPerUser = 5;
     private static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(30);
     private static readonly TimeSpan RotationThreshold = TimeSpan.FromDays(3);
@@ -64,6 +70,10 @@ public class AuthService(
     private static readonly TimeSpan PwResetBlock = TimeSpan.FromMinutes(5);
 
     private static string PwResetKey(string email) => $"pwreset::{email}";
+
+    
+    private string[] _userScopes = RoleBasedScopeProvider.CustomRoleOptions["USER"];
+    private string[] _adminScopes = RoleBasedScopeProvider.CustomRoleOptions["ADMIN"];
 
 
     public async Task<AuthOperationResult> RegisterAsync(RegisterDto dto, CancellationToken ct)
@@ -95,13 +105,23 @@ public class AuthService(
             UserName = email, 
             EmailConfirmed = false
         };
-
+        
         var result = await userManager.CreateAsync(user, password);
         if (!result.Succeeded)
         {
             var message = result.Errors.Select(x => x.Description).FirstOrDefault() ?? "Unable to create user";
             return AuthOperationResult.Failure(new ApiResultDto(false, message, null!),
                 StatusCodes.Status400BadRequest);
+        }
+
+        if (!await roleManager.RoleExistsAsync(Roles.User))
+        {
+            await roleManager.CreateAsync(new Role { Name = Roles.User });
+        }
+
+        if (!await userManager.IsInRoleAsync(user, Roles.User))
+        {
+            await userManager.AddToRoleAsync(user, Roles.User);
         }
 
         try
@@ -275,9 +295,9 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
         }
 
         var roles = await userManager.GetRolesAsync(user);
-        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, ct);
-
+        var userScopes = RoleBasedScopeProvider.CustomRoleOptions["USER"];
         var sessionTicket = await CreateOrUpdateSessionAsync(user, context, ct);
+        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, userScopes,sessionTicket.SessionId , ct);
         return AuthOperationResult.Success(new ApiResultDto(true, "Login successfully", accessToken), sessionTicket);
     }
 
@@ -347,10 +367,10 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
                 }
             }
         }
-
+    
         var roles = await userManager.GetRolesAsync(user);
-        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, ct);
         var sessionTicket = await CreateOrUpdateSessionAsync(user, context, ct);
+        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, _userScopes,sessionTicket.SessionId , ct);
         return AuthOperationResult.Success(new ApiResultDto(true, "Login successfully", accessToken), sessionTicket);
     }
 
@@ -384,16 +404,13 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
             return AuthOperationResult.Unauthorized();
         }
 
-        var dbSession = await sessionRepository.FindAsync(user.Id, deviceId!, ct);
+        var dbSession = await sessionRepository.FindAsync(user.Id, deviceId, ct);
         if (dbSession is null || dbSession.RevokedAt is not null || dbSession.Jti != session.Jti ||
             dbSession.Exp <= DateTime.UtcNow)
         {
             return AuthOperationResult.Unauthorized();
         }
-
-        var roles = await userManager.GetRolesAsync(user);
-        var newAccessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, ct);
-
+        
         var now = DateTime.UtcNow;
         var rotate = dbSession.Exp - now < RotationThreshold;
         if (rotate)
@@ -416,6 +433,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
                 Ua = context.UserAgent ?? session.Ua,
                 Ip = context.IpAddress ?? session.Ip
             };
+      
 
             await sessionStore.StoreSessionAsync(updatedSession, SessionLifetime, ct);
             await sessionStore.SetDeviceSessionAsync(updatedSession, SessionLifetime, ct);
@@ -425,6 +443,8 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
             dbSession.LastSeen = now;
             await sessionStore.RefreshSessionTtlAsync(session.Sid, SessionLifetime, ct);
         }
+        var roles = await userManager.GetRolesAsync(user);
+        var newAccessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, _userScopes, session.Sid, ct);
 
         await sessionRepository.SaveChangesAsync(ct);
         return AuthOperationResult.Success(new ApiResultDto(true, "Success", newAccessToken));

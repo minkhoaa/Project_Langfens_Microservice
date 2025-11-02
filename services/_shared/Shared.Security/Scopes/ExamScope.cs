@@ -1,6 +1,7 @@
-namespace Shared.Security.Contracts;
+namespace Shared.Security.Scopes;
 
-public class ExamScope
+public static class ExamScope
 {
-    
+    public const string ExamRead      = "exam.read";
+    public const string ExamManage    = "exam.manage";
 }

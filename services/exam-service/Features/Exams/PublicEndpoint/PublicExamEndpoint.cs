@@ -6,7 +6,7 @@ public static class PublicExamEndpoint
     {
         // api public
         var groupPublic = app.MapGroup("/api/public/exam");
-        groupPublic.MapGet("/getall", PublicExamHandler.ListPublishedExam);
-        groupPublic.MapGet("/getby/{slug:int}", PublicExamHandler.GetBySlug);
+        groupPublic.MapGet("/getall", PublicExamHandler.ListPublishedExam).AllowAnonymous();
+        groupPublic.MapGet("/getby/{slug:int}", PublicExamHandler.GetBySlug).AllowAnonymous();
     }
 }

@@ -11,7 +11,12 @@ public class AuthAuthenticationFlowTests
         builder.SignInManager.Setup(m => m.CheckPasswordSignInAsync(user, "Pass123!", true))
             .ReturnsAsync(SignInResult.Success);
         builder.UserManager.Setup(m => m.GetRolesAsync(user)).ReturnsAsync(new List<string> { "User" });
-        builder.JwtTokenFactory.Setup(f => f.CreateTokenAsync(user, It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+        builder.JwtTokenFactory.Setup(f => f.CreateTokenAsync(
+                user,
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync("jwt-token");
         var service = builder.Build();
 
@@ -76,7 +81,12 @@ public class AuthAuthenticationFlowTests
                 Exp = now.AddHours(1)
             });
         builder.UserManager.Setup(m => m.GetRolesAsync(user)).ReturnsAsync(Array.Empty<string>());
-        builder.JwtTokenFactory.Setup(f => f.CreateTokenAsync(user, It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+        builder.JwtTokenFactory.Setup(f => f.CreateTokenAsync(
+                user,
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync("new-jwt");
         var service = builder.Build();
 

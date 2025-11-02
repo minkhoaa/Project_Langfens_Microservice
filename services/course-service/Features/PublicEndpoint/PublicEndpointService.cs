@@ -1,7 +1,5 @@
-using System.Security.Cryptography;
 using course_service.Contracts;
 using course_service.Domains.Entities;
-using course_service.Features.UserEndpoint;
 using course_service.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
@@ -80,21 +78,14 @@ namespace course_service.Features.PublicEndpoint
             int page = 1,
             int pageSize = 20)
         {
-            if (!CourseCategories.IsValid(category))
-                return Results.BadRequest(new ApiResultDto(false, "Invalid category", null!));
-            if (!CourseLevel.IsValid(level))
-                return Results.BadRequest(new ApiResultDto(false, "Invalid level", null!));
-            if (!CourseStatus.IsValid(status))
-                return Results.BadRequest(new ApiResultDto(false, "Invalid status", null!));
-
             IQueryable<Course> courseList = context.Courses.AsNoTracking();
 
             // lọc theo trường tồn tại
-            if (!string.IsNullOrEmpty(category))
+            if (!string.IsNullOrEmpty(category) && CourseCategories.IsValid(category))
                 courseList = courseList.Where(x => x.Category == category);
-            if (!string.IsNullOrEmpty(level))
+            if (!string.IsNullOrEmpty(level) && CourseLevel.IsValid(level))
                 courseList = courseList.Where(x => x.Level == level);
-            if (!string.IsNullOrEmpty(status))
+            if (!string.IsNullOrEmpty(status) && CourseStatus.IsValid(status) )
                 courseList = courseList.Where(a => a.Status == status);
 
             page = Math.Max(1, page);

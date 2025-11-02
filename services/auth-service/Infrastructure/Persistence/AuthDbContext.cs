@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace auth_service.Models;
+namespace auth_service.Infrastructure.Persistence;
 
 public class User : IdentityUser
 {
