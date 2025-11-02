@@ -1,8 +1,8 @@
 ﻿services:
   gateway-service:
     build:
-      context: ../gateway/api-gateway/
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: gateway/api-gateway/Dockerfile
     ports:
       - 5000:8080
     networks:

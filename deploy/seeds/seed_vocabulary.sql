@@ -7,13 +7,13 @@ DELETE FROM card WHERE "DeckId" IN (
 );
 DELETE FROM deck WHERE "Slug" LIKE 'ielts-reading-vocab-%';
 
--- Generate 5 decks x 20 cards = 100 cards
+-- Generate 50 decks x 20 cards = 1000 cards
 DO $$
 DECLARE
   i int; j int;
   deck_id uuid;
 BEGIN
-  FOR i IN 1..5 LOOP
+  FOR i IN 1..50 LOOP
     deck_id := gen_random_uuid();
     INSERT INTO deck ("Id","Slug","Title","DescriptionMd","Category","Status","CreatedAt","UpdatedAt") VALUES (
       deck_id,

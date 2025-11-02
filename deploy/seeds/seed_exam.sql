@@ -15,7 +15,7 @@ DELETE FROM exam_sections USING exams e
 WHERE exam_sections."ExamId" = e."Id" AND e."Slug" LIKE 'ielts-reading-sample-%';
 DELETE FROM exams WHERE "Slug" LIKE 'ielts-reading-sample-%';
 
--- Generate 10 complete IELTS Reading exams, each with 3 sections and 14 questions
+-- Generate 100 complete IELTS Reading exams, each with 3 sections and 14 questions
 DO $$
 DECLARE
   i int;
@@ -26,7 +26,7 @@ DECLARE
   qid uuid;
   oid uuid;
 BEGIN
-  FOR i IN 1..10 LOOP
+  FOR i IN 1..100 LOOP
     exam_id := gen_random_uuid();
     INSERT INTO exams ("Id","Slug","Title","DescriptionMd","Category","Level","Status","DurationMin","UpdatedAt")
     VALUES (

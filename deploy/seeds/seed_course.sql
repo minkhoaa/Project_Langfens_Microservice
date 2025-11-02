@@ -14,7 +14,7 @@ DELETE FROM lesson WHERE "CourseId" IN (
 );
 DELETE FROM course WHERE "Slug" LIKE 'intro-ielts-reading-%';
 
--- Generate 10 courses, each 6 lessons (total 60+ rows)
+-- Generate 50 courses, each 6 lessons (total 300+ rows)
 DO $$
 DECLARE
   i int;
@@ -22,7 +22,7 @@ DECLARE
   lesson_id uuid;
   user_id uuid := '22222222-2222-2222-2222-222222222222';
 BEGIN
-  FOR i IN 1..10 LOOP
+  FOR i IN 1..50 LOOP
     course_id := gen_random_uuid();
     INSERT INTO course ("Id","Slug","Title","DescriptionMd","Category","Level","Status","CreatedAt","UpdatedAt") VALUES (
       course_id,
