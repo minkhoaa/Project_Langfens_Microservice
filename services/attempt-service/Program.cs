@@ -19,6 +19,7 @@ using Shared.Security.Scopes;
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddResponseCompression(); 
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo()
@@ -159,6 +160,7 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 }
 
+app.UseResponseCompression();
 app.UseCors("FE");
 
 app.UseSwagger();

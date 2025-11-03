@@ -19,7 +19,7 @@ public static class AttemptEndpointMapping
         app.MapGet("/attempt/getresult/{attemptId:guid}", AttemptHandler.AttemptGetResult)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         app.MapGet("/attempt/getlistattempt", AttemptHandler.GetAttemptList)
-            .RequireAuthorization(AttemptScope.AttemptReadAny);
+            .RequireAuthorization(AttemptScope.AttemptReadOwn);
         
     }
 }
