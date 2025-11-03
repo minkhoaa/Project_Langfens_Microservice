@@ -495,7 +495,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
         if (info is null)
             return Task.FromResult(AuthOperationResult.Unauthorized());
         var id = principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        var payload = new ApiResultDto(true, "Get information successfully", new { id,info.Result.Email  , emailConfirmed = info.Result.EmailConfirmed });
+        var payload = new ApiResultDto(true, "Get information successfully", new { sub, info.Result.Email  , emailConfirmed = info.Result.EmailConfirmed });
         return Task.FromResult(AuthOperationResult.Success(payload));
     }
     
