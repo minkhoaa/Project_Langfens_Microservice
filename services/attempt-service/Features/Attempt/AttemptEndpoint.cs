@@ -20,6 +20,5 @@ public static class AttemptEndpointMapping
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         app.MapGet("/attempt/getlistattempt", AttemptHandler.GetAttemptList)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
-        
     }
 }
