@@ -11,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shared.Security.Claims;
-using Shared.Security.Contracts;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;

@@ -2,7 +2,7 @@ using course_service.Domains.Entities;
 using course_service.Features.AdminEndpoint;
 using course_service.Features.PublicEndpoint;
 using course_service.Features.UserEndpoint;
-using Shared.Security.Contracts;
+using Shared.Security.Scopes;
 
 namespace course_service.Features
 {

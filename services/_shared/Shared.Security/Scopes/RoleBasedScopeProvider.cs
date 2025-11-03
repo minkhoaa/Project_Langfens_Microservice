@@ -1,5 +1,3 @@
-using Shared.Security.Contracts;
-
 namespace Shared.Security.Scopes;
 
 public static class RoleBasedScopeProvider 

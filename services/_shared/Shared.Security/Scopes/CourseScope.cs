@@ -1,4 +1,4 @@
-namespace Shared.Security.Contracts;
+namespace Shared.Security.Scopes;
 
 public static class CourseScope
 {
