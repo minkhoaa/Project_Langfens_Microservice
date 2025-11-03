@@ -158,6 +158,7 @@ app.UseAuthorization();
 app.MapGrpcService<ExamInternalGrpcService>().RequireHost($"*:{grpcPort}").AllowAnonymous();
 
 
+
 app.MapPublicExamEndpoints();
 app.MapAdminExamEndpoint();
 app.MapAdminSectionEndpoint();

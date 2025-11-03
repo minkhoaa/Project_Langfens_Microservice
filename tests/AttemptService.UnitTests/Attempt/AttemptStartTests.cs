@@ -24,7 +24,7 @@ public class AttemptStartTests
         var service = new AttemptServiceImpl(ctx, gateway.Object);
 
         var (status, payload) = ResultAssert.Api(
-            await service.StartAttempt(new AttemptStartRequest(examId), CancellationToken.None, userId));
+            await service.StartAttempt(new AttemptStartRequest(examId), CancellationToken.None, userId, TODO));
 
         status.Should().Be(StatusCodes.Status200OK);
         payload.message.Should().Contain("previous attempt");
@@ -48,7 +48,7 @@ public class AttemptStartTests
         var service = new AttemptServiceImpl(ctx, gateway.Object);
 
         var (status, payload) = ResultAssert.Api(
-            await service.StartAttempt(new AttemptStartRequest(examId), CancellationToken.None, userId));
+            await service.StartAttempt(new AttemptStartRequest(examId), CancellationToken.None, userId, TODO));
 
         status.Should().Be(StatusCodes.Status200OK);
         var response = payload.data as AttemptStartResponse;

@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json;
 using attempt_service.Contracts.Attempt;
@@ -14,17 +15,18 @@ using Npgsql.Replication;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 using Shared.Grpc.ExamInternal;
+using Shared.Security.Claims;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
 public interface IAttemptService
 {
-    Task<IResult> StartAttempt(AttemptStartRequest request, CancellationToken token, Guid userId);
+    Task<IResult> StartAttempt(AttemptStartRequest request, CancellationToken token, ClaimsPrincipal user);
     Task<IResult> GetAttemptById(AttemptGetRequest request, CancellationToken token);
-    Task<IResult> Autosave(Guid attemptId, Guid userId, AutosaveRequest req, CancellationToken token);
-    Task<IResult> Submit(Guid attemptId, Guid userId, CancellationToken token);
-    Task<IResult> GetResult(Guid attemptId, Guid userId, CancellationToken token);
-    Task<IResult> GetAttemptList(Guid userId, int page, int pageSize, string? status, Guid? examId, CancellationToken token);
+    Task<IResult> Autosave(Guid attemptId, ClaimsPrincipal user, AutosaveRequest req, CancellationToken token);
+    Task<IResult> Submit(Guid attemptId,  ClaimsPrincipal user, CancellationToken token);
+    Task<IResult> GetResult(Guid attemptId, ClaimsPrincipal user, CancellationToken token);
+    Task<IResult> GetAttemptList(ClaimsPrincipal user, int page, int pageSize, string? status, Guid? examId, CancellationToken token);
 }
 
 public class AttemptService(
@@ -35,10 +37,11 @@ public class AttemptService(
     public async Task<IResult> StartAttempt(
         AttemptStartRequest request,
         CancellationToken token,
-        Guid userId
+        ClaimsPrincipal user
     )
-    {
-
+    { 
+        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value 
+        ?? throw new Exception("User id is missing"));
         // using GRPC for internal communication
         var existedStartedAttempt = await context.Attempts.AsNoTracking().Where(attempt =>
             attempt.ExamId == request.ExamId
@@ -130,8 +133,10 @@ public class AttemptService(
         AttemptGetRequest request,
         CancellationToken token)
     {
+        var userId = Guid.Parse(request.user.FindFirst(CustomClaims.Sub)!.Value ??
+                                throw new Exception("User id is missing"));
         var attempts = await context.Attempts.AsNoTracking()
-            .Where(x => x.Id == request.AttemptId && x.UserId == request.UserId)
+            .Where(x => x.Id == request.AttemptId && x.UserId == userId)
             .FirstOrDefaultAsync(token);
         // validate attempt
         if (attempts == null)
@@ -196,10 +201,11 @@ public class AttemptService(
 
     public async Task<IResult> Autosave(
         Guid attemptId,
-        Guid userId,
+        ClaimsPrincipal user,
         AutosaveRequest req,
         CancellationToken token)
     {
+        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
         var attempt = await context.Attempts.FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId,
             cancellationToken: token);
         if (attempt == null)
@@ -336,8 +342,9 @@ public class AttemptService(
 
     }
 
-    public async Task<IResult> Submit(Guid attemptId, Guid userId, CancellationToken token)
+    public async Task<IResult> Submit(Guid attemptId, ClaimsPrincipal user, CancellationToken token)
     {
+        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
         var existedAttempt =
             await context.Attempts.FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
         if (existedAttempt == null)
@@ -469,8 +476,10 @@ public class AttemptService(
         }
     }
 
-    public async Task<IResult> GetResult(Guid attemptId, Guid userId, CancellationToken token)
+    public async Task<IResult> GetResult(Guid attemptId, ClaimsPrincipal user, CancellationToken token)
     {
+        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
+
         var existedAttempt = await context.Attempts.AsNoTracking()
             .Include(attempt => attempt.Answers)
             .FirstOrDefaultAsync(attempt => attempt.Id == attemptId && attempt.UserId == userId, token);
@@ -534,8 +543,9 @@ public class AttemptService(
         );
     }
 
-    public async Task<IResult> GetAttemptList(Guid userId, int page, int pageSize, string? status, Guid? examId, CancellationToken token)
+    public async Task<IResult> GetAttemptList(ClaimsPrincipal user, int page, int pageSize, string? status, Guid? examId, CancellationToken token)
     {
+        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
         page = page <= 0 ? 1 : page;
         pageSize = pageSize <= 0 ? 10 : Math.Min(pageSize, 100);
         var listAttempt = context.Attempts.AsNoTracking()

@@ -8,9 +8,11 @@ using Google.Apis.Auth;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Auth_Email;
+using Shared.Security.Claims;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
 
@@ -485,19 +487,15 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
             return Task.FromResult(AuthOperationResult.Unauthorized());
         }
 
-        var email = principal.FindFirstValue(ClaimTypes.Email) ??
-                    principal.FindFirstValue(JwtRegisteredClaimNames.Email);
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return Task.FromResult(AuthOperationResult.Failure(new ApiResultDto(false, "Email is not exist", null!),
-                StatusCodes.Status404NotFound));
-        }
+        var sub = principal.FindFirst(CustomClaims.Sub)!.Value ??
+                  throw new Exception("Please login");
 
-        var emailConfirm = userManager.FindByEmailAsync(email).Select(x=>x is { EmailConfirmed: true });
-        if (emailConfirm is null)
+        var info = userManager.FindByIdAsync(sub).Select(x=> new
+        { x.Email,  x.EmailConfirmed});
+        if (info is null)
             return Task.FromResult(AuthOperationResult.Unauthorized());
         var id = principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        var payload = new ApiResultDto(true, "Get information successfully", new { id, email, emailConfirmed = emailConfirm.Result });
+        var payload = new ApiResultDto(true, "Get information successfully", new { id,info.Result.Email  , emailConfirmed = info.Result.EmailConfirmed });
         return Task.FromResult(AuthOperationResult.Success(payload));
     }
     

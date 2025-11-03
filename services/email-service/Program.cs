@@ -12,8 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FE", policy => policy

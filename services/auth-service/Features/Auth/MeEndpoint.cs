@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using auth_service.Application.Auth;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Security.Roles;
 
 namespace auth_service.Features.Auth;
 
@@ -9,7 +10,7 @@ public static class MeEndpoint
     public static RouteHandlerBuilder MapMeEndpoint(this RouteGroupBuilder group)
     {
         return group.MapGet("/me", MeAsync)
-            .RequireAuthorization()
+            .RequireAuthorization(Roles.User)
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
     }

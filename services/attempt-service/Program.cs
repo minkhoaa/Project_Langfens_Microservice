@@ -136,7 +136,7 @@ builder.Services.AddAuthorization(option =>
     option.AddPolicy(AttemptScope.AttemptReadOwn, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptReadOwn)
                                                                    || c.User.IsInRole(Roles.User)));
     option.AddPolicy(AttemptScope.AttemptReadAny, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptReadAny)
-                                                                    || c.User.IsInRole(Roles.User)));
+                                                                    || c.User.IsInRole(Roles.Admin)));
     
 });
 

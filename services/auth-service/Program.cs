@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shared.Security.Claims;
 using Shared.Security.Roles;
 using StackExchange.Redis;
 using Role = auth_service.Infrastructure.Persistence.Role;
@@ -120,6 +121,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -129,11 +131,17 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = jwtSettings.Audience,
             ValidIssuer = jwtSettings.Issuer,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey)),
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            NameClaimType = CustomClaims.Sub,
+            RoleClaimType = CustomClaims.Roles
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
+    options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
+});
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>

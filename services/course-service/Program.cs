@@ -16,7 +16,7 @@ using Shared.Security.Roles;
 using Shared.Security.Scopes;
 
 var builder = WebApplication.CreateBuilder(args);
-
+JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -116,6 +116,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
 
 app.UseCors("FE");
 app.UseAuthentication();
