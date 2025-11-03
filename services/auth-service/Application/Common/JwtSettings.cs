@@ -7,5 +7,5 @@ public class JwtSettings
     public string SignKey { get; set; } = string.Empty;
     public string RsaPrivateKeyPem { get; set; } = null!; // lấy từ secret store
     public string KeyId { get; set; } = "key-2025-11";
-    public int AccessTokenLifetimeSeconds { get; set; } = 450;
+    public int AccessTokenLifetimeSeconds { get; set; } = 3600;
 }
