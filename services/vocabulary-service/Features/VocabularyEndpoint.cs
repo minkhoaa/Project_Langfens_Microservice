@@ -1,3 +1,4 @@
+using Shared.Security.Roles;
 using Shared.Security.Scopes;
 using vocabulary_service.Features.Admin;
 using vocabulary_service.Features.Public;
@@ -16,8 +17,6 @@ public static class VocabularyEndpoint
         app.MapGet("/slug:{slug}/cards", PublicHandler.GetCardsBySlugHandler);
         app.MapGet("/deck:{deckId}/cards", PublicHandler.GetCardsByDeckIdHandler);
         
-        
-        
     }
     public static void MapUserVocabularyEndpoints(this IEndpointRouteBuilder app)
     {
@@ -30,13 +29,14 @@ public static class VocabularyEndpoint
     }
     public static void MapAdminVocabularyEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGroup("/api/admin/").RequireAuthorization(VocabScope.VocabManage);
+        app.MapGroup("/api/admin/").RequireAuthorization(Roles.User);
         app.MapPost("/deck/", AdminHandler.CreateDeckHandler);
         app.MapPut("/deck/{deckId}", AdminHandler.UpdateDeckHandler);
         app.MapDelete("/deck/{deckId}", AdminHandler.DeleteDeckHandler);
         app.MapPost("/deck/{deckId}/card", AdminHandler.CreateCardHandler);
         app.MapPut("/deck/card/{cardId}", AdminHandler.UpdateCardHandler);
         app.MapDelete("/deck/card/{cardId}", AdminHandler.DeleteCardHandler);
+        app.MapDelete("/deck/{deckId}/publish", AdminHandler.PublishDeckHandler);
         
     }
 }

@@ -33,5 +33,8 @@ public static class AdminHandler
     public static Task<IResult> DeleteCardHandler(Guid cardId,
         CancellationToken token, IAdminService service)
         => service.DeleteCards(cardId, token);
-    
+    public static Task<IResult> PublishDeckHandler(
+        Guid deckId, CancellationToken token,
+        IAdminService service
+    ) => service.MakeDeckPublic(deckId, token);
 }

@@ -2,6 +2,7 @@ using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Deck;
+using Shared.ExamDto.Contracts.FlashCard;
 using vocabulary_service.Application.Helper;
 using vocabulary_service.Contracts.Admin;
 using vocabulary_service.Domains.Entities;
@@ -14,7 +15,7 @@ public interface IAdminService
     Task<IResult> CreateDeck(CreateDeckRequest dto, CancellationToken token);
     Task<IResult> UpdateDeck(UpdateDeckRequest dto, Guid deckId , CancellationToken token);
     Task<IResult> DeleteDeck(Guid deckId , CancellationToken token);
-
+    Task<IResult> MakeDeckPublic(Guid deckId, CancellationToken token); 
     Task<IResult> CreateCards(Guid deckId, CreateCardRequest request, CancellationToken token);
     Task<IResult> UpdateCards(Guid cardId, UpdateCardRequest request, CancellationToken token);
     Task<IResult> DeleteCards(Guid cardId, CancellationToken token); 
@@ -80,6 +81,20 @@ public class AdminService(VocabularyDbContext context) : IAdminService
         catch (Exception e)
         {
             return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
+        }
+    }
+
+    public async Task<IResult> MakeDeckPublic(Guid deckId, CancellationToken token)
+    {
+        try
+        {
+            await context.Decks.Where(x => x.Id == deckId)
+                .ExecuteUpdateAsync(x => x.SetProperty(a => a.Status, FlashCardStatus.Published), token);
+            return Results.NoContent();
+        }
+        catch (Exception e)
+        {
+            return Results.BadRequest(e.Message);
         }
     }
 
