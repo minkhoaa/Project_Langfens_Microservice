@@ -53,7 +53,8 @@ public record AttemptListItem(
     string Status,
     DateTime StartedAt,
     DateTime? SubmittedAt,
-    decimal? ScorePct
+    decimal? ScorePct,
+    string? Title
 );
 
 public record AttemptListResponse(

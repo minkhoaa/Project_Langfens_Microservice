@@ -633,10 +633,12 @@ public class AttemptService(
                          x.GradedAt,
                          x.DurationSec,
                          x.RawScore,
-                         x.ScaledScore
+                         x.ScaledScore,
+                         x.PaperJson
                      })
                     .ToListAsync(token);
         var now = DateTime.UtcNow;
+        
         var items = rows.Select(x =>
         {
             int? timeLeft = null;
@@ -645,7 +647,14 @@ public class AttemptService(
                 var deadline = x.StartedAt.AddSeconds(x.DurationSec);
                 timeLeft = (int)Math.Max(0, (deadline - now).TotalSeconds);
             }
-            return new AttemptListItem(x.Id, x.ExamId, x.Status, x.StartedAt, x.SubmittedAt, x.ScaledScore);
+            string? title = null;
+            try
+            {
+                if (x.PaperJson != null && x.PaperJson.RootElement.TryGetProperty("title", out var t))
+                    title = t.GetString();
+            }
+            catch { }
+            return new AttemptListItem(x.Id, x.ExamId, x.Status, x.StartedAt, x.SubmittedAt, x.ScaledScore, title);
         }).ToList();
 
         return Results.Ok(new ApiResultDto(true, "Success", items));
