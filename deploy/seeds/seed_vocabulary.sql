@@ -12,15 +12,17 @@ DO $$
 DECLARE
   i int; j int;
   deck_id uuid;
+  owner_id uuid;
 BEGIN
   FOR i IN 1..50 LOOP
     deck_id := gen_random_uuid();
-    INSERT INTO deck ("Id","Slug","Title","DescriptionMd","Category","Status","CreatedAt","UpdatedAt") VALUES (
+    owner_id := gen_random_uuid();
+    INSERT INTO deck ("Id","Slug","Title","DescriptionMd","Category","Status","CreatedAt","UpdatedAt","UserId") VALUES (
       deck_id,
       'ielts-reading-vocab-'||i,
       'IELTS Reading — Core Vocabulary '||i,
       'Auto-generated deck #'||i||' with 20 cards.',
-      'IELTS','PUBLISHED', now() - (i||' days')::interval, now()
+      'IELTS','PUBLISHED', now() - (i||' days')::interval, now(), owner_id
     );
 
     FOR j IN 1..20 LOOP

@@ -33,6 +33,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
             Category = dto.Category,
             DescriptionMd = dto.DescriptionMd,
             Title = dto.Title,
+            UserId = dto.UserId,
             Status = DeckStatus.Draft,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -94,11 +95,10 @@ public class AdminService(VocabularyDbContext context) : IAdminService
             return Results.NoContent();
         }
         catch (Exception e)
-        {
-            return Results.BadRequest(e.Message);
-        }
+    {
+        return Results.BadRequest(e.Message);
     }
-
+}
 
 
     public async Task<IResult> CreateCards(Guid deckId, CreateCardRequest request, CancellationToken token)

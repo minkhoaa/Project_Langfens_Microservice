@@ -4,7 +4,8 @@ public record CreateDeckRequest(
     string Title,
     string? DescriptionMd,
     string? Category,
-    string? Status 
+    string? Status,
+    Guid UserId
 );
 
 

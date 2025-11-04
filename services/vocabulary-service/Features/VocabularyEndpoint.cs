@@ -23,6 +23,10 @@ public static class VocabularyEndpoint
         app.MapGroup("/api/users/").RequireAuthorization(VocabScope.VocabRead);
         // public
         app.MapPost("/{userId}/subscribe/{deckId}", UserHandler.SubscribeDecksHandler);
+        app.MapGet("/{userId}/subscribe", UserHandler.GetSubscribedDecksHandler);
+        app.MapGet("/{userId}/own", UserHandler.GetUserDecksHandler);
+        
+        
         app.MapGet("/{userId}/flashcard/due", UserHandler.GetDueFlashcardHandler);
         app.MapPost("/{userId}/flashcard/{cardId}/review", UserHandler.ReviewFlashcardHandler);
         app.MapGet("/{userId}/flashcard/progress", UserHandler.GetFlashcardProgressHandler);

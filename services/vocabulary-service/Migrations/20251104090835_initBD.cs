@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace vocabulary_service.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class initBD : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,6 +17,7 @@ namespace vocabulary_service.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Slug = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     DescriptionMd = table.Column<string>(type: "text", nullable: true),
                     Category = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
@@ -136,6 +137,16 @@ namespace vocabulary_service.Migrations
                 name: "IX_deck_Status_Category",
                 table: "deck",
                 columns: new[] { "Status", "Category" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_deck_UserId",
+                table: "deck",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_deck_UserId_Status",
+                table: "deck",
+                columns: new[] { "UserId", "Status" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_review_log_CardId",

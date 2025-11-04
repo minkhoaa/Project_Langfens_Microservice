@@ -12,7 +12,8 @@ public interface IUserService
 {
     Task<IResult> SubscribeDecks(Guid deckId, Guid userId, CancellationToken token);
     Task<IResult> GetSubscribedDeck(Guid userId, CancellationToken token);
-
+    Task<IResult> GetUserDeck(Guid userId, CancellationToken token);
+    
     Task<IResult> GetDueFlashcard(Guid userId, CancellationToken token, int limit = 20);
 
     Task<IResult> ReviewFlashcard(Guid userId, Guid cardId, ReviewRequest request, CancellationToken token);
@@ -49,8 +50,51 @@ public class UserService(VocabularyDbContext context) : IUserService
 
     public async Task<IResult> GetSubscribedDeck(Guid userId, CancellationToken token)
     {
-        throw new Exception();
+        try
+        {
+            var subscribedDeck = await context.UserDecks.AsNoTracking().Where(x => x.UserId == userId)
+                .Select(x =>
+                    new
+                    {
+                        x.Id,
+                        x.Status,
+                        x.DeckId,
+                        x.SubscribeAt,
+                    }).ToListAsync(token);
+            return Results.Ok(new ApiResultDto(true, "Success", subscribedDeck));
+        }
+        catch (Exception e)
+        {
+            return Results.BadRequest(e.Message);
+        }
     }
+
+    public async Task<IResult> GetUserDeck(Guid userId, CancellationToken token)
+    {
+        try
+        {
+            var userDecks = await context.Decks.AsNoTracking()
+                .Where(x => x.UserId == userId)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.UserId,
+                    x.Title,
+                    x.Slug,
+                    x.DescriptionMd,
+                    x.Status,
+                    x.Category,
+                    x.CreatedAt,
+                    x.UpdatedAt,
+                }).ToListAsync(token);
+            return Results.Ok(new ApiResultDto(true, "Success", userDecks));
+        }
+        catch (Exception e)
+        {
+            return Results.BadRequest(e.Message);
+        }
+    }
+
 
     public async Task<IResult> GetDueFlashcard(Guid userId, CancellationToken token, int limit = 20)
     {

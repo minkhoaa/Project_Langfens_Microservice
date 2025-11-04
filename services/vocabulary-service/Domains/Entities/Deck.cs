@@ -11,6 +11,7 @@ public class Deck
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
     [Required, MaxLength(255)] public string Slug { get; set; } = null!; 
+    [Required] public Guid UserId { get; set; }
     [Required] public string Title { get; set; } = null!;
     public string? DescriptionMd { get; set; } 
     [MaxLength(100)] public string? Category { get; set; } 

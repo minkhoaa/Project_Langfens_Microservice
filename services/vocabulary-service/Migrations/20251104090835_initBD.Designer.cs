@@ -12,8 +12,8 @@ using vocabulary_service.Infrastructure.Persistence;
 namespace vocabulary_service.Migrations
 {
     [DbContext(typeof(VocabularyDbContext))]
-    [Migration("20251023052442_InitDb")]
-    partial class InitDb
+    [Migration("20251104090835_initBD")]
+    partial class initBD
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -89,11 +89,18 @@ namespace vocabulary_service.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Slug");
 
+                    b.HasIndex("UserId");
+
                     b.HasIndex("Status", "Category");
+
+                    b.HasIndex("UserId", "Status");
 
                     b.ToTable("deck", (string)null);
                 });

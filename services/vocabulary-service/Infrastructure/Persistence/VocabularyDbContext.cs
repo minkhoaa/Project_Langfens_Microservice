@@ -14,6 +14,8 @@ public class VocabularyDbContext(DbContextOptions<VocabularyDbContext> options) 
             e.HasKey(x => x.Id);
             e.HasIndex(x => x.Slug);
             e.HasIndex(x => new { x.Status, x.Category });
+            e.HasIndex(x => x.UserId);
+            e.HasIndex(x => new { x.UserId, x.Status });
         });
         app.Entity<Card>(e =>
         {
@@ -56,4 +58,3 @@ public class VocabularyDbContext(DbContextOptions<VocabularyDbContext> options) 
     public DbSet<UserCardReview> UserCardReviews { get; set; }
     public DbSet<UserDeck> UserDecks { get; set; }
 }
-

@@ -10,6 +10,14 @@ public static class UserHandler
         IUserService service)
         => service.SubscribeDecks(deckId, userId, token);
     
+    public static Task<IResult> GetSubscribedDecksHandler(Guid userId, CancellationToken token,
+        IUserService service)
+        => service.GetSubscribedDeck(userId, token);
+    
+    public static Task<IResult> GetUserDecksHandler(Guid userId, CancellationToken token,
+        IUserService service)
+        => service.GetUserDeck(userId, token);
+    
     public static Task<IResult> GetDueFlashcardHandler([FromRoute] Guid userId, CancellationToken token,
         IUserService service,
         int limit = 20) => service.GetDueFlashcard(userId, token, limit);

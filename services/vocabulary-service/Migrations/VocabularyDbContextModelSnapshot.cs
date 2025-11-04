@@ -11,7 +11,7 @@ using vocabulary_service.Infrastructure.Persistence;
 namespace vocabulary_service.Migrations
 {
     [DbContext(typeof(VocabularyDbContext))]
-    partial class CardDbContextModelSnapshot : ModelSnapshot
+    partial class VocabularyDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -86,11 +86,18 @@ namespace vocabulary_service.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Slug");
 
+                    b.HasIndex("UserId");
+
                     b.HasIndex("Status", "Category");
+
+                    b.HasIndex("UserId", "Status");
 
                     b.ToTable("deck", (string)null);
                 });
