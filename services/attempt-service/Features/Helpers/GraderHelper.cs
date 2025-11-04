@@ -10,7 +10,7 @@ public sealed record QuestionKey(
     Guid QuestionId,
     string QuestionType,
     decimal QuestionPoints = 1,
-    HashSet<Guid>? CorrectOptionIds = null, // MC/TF/YN
+    HashSet<(Guid id, string content)>? CorrectOptionIds = null, // MC/TF/YN
     Dictionary<string, string[]?> BlankAcceptTexts = null!,
     Dictionary<string, string[]?> BlankAcceptRegex = null!,
     // Matching: leftKey -> accepted right values
@@ -47,7 +47,8 @@ public static class AnswerValidator {
         {
             var normalized = answerItem.SelectedOptionIds.Distinct().OrderBy(x => x).ToList() 
                              ?? new List<Guid>();
-            if (normalized.Any(x => !meta.OptionIds.Contains(x)))
+            var allowedIds = meta.OptionIds.Select(t => t.id).ToHashSet();
+            if (normalized.Any(x => !allowedIds.Contains(x)))
                 return $"Invalid option for Q{answerItem.QuestionId}";
             if (IsSingleChoice(meta.Type) && normalized.Count() > 1)
                 return $"Too many options for single-choice Q{answerItem.QuestionId}";

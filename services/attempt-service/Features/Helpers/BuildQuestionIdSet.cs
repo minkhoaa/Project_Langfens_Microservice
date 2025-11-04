@@ -60,8 +60,13 @@ public static class IndexBuilder
         foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
         {
             var optionIds = (question.Options ?? new RepeatedField<InternalDeliveryOption>())
-                .Select(x => Guid.Parse(x.Id)).ToHashSet() ?? [];
-            map[Guid.Parse(question.Id)] = new QMeta(Guid.Parse(section.Id), question.Type ?? string.Empty, optionIds);
+                .Select(x => (Guid.Parse(x.Id), x.ContentMd ?? string.Empty))
+                .ToHashSet();
+            map[Guid.Parse(question.Id)] = new QMeta(
+                Guid.Parse(section.Id),
+                question.Type ?? string.Empty,
+                optionIds
+            );
         }
         return map;
     }
@@ -72,14 +77,24 @@ public static class IndexBuilder
         foreach (var section in exam.Sections)
         foreach (var question in section.Questions)
         {
-            var optionIds = (question.Options ?? []).Select(x => x.Id).ToHashSet() ?? [];
-            map[question.Id] = new QMeta(section.Id, question.Type ?? string.Empty, optionIds);
+            var optionIds = (question.Options ?? [])
+                .Select(x => (x.Id, x.ContentMd ?? string.Empty))
+                .ToHashSet();
+            map[question.Id] = new QMeta(
+                section.Id,
+                question.Type ?? string.Empty,
+                optionIds
+            );
         }
 
         return map;
     }
 
-    public sealed record QMeta(Guid SectionId, string Type, HashSet<Guid> OptionIds);
+    public sealed record QMeta(
+        Guid SectionId,
+        string Type,
+        HashSet<(Guid id, string content)> OptionIds
+    );
 }
 
 public static class AnswerKeyBuilder
@@ -97,18 +112,18 @@ public static class AnswerKeyBuilder
             foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
             {
                 var type = question.Type ?? string.Empty;
-                HashSet<Guid>? correct = null;
+                HashSet<(Guid id, string content)>? correct = null;
                 if (AnswerValidator.IsSingleChoice(type))
                     correct = (question.Options ?? [])
                         .Where(x => x.HasIsCorrect && x.IsCorrect)
-                        .Select(x => Guid.Parse(x.Id))
+                        .Select(x => (Guid.Parse(x.Id), x.ContentMd ?? string.Empty))
                         .ToHashSet();
 
                 var points = 1;
                 total += points;
                 var qid = Guid.Parse(question.Id);
-                map[qid] = new  QuestionKey(
-                    qid,type,points, correct);
+                map[qid] = new QuestionKey(
+                    qid, type, points, correct);
             }
         }
         return new AnswerKeyCompiled(map, total);
@@ -123,16 +138,16 @@ public static class AnswerKeyBuilder
             foreach (var question in section.Questions ?? [])
             {
                 var type = question.Type ?? string.Empty;
-                HashSet<Guid>? correct = null!;
+                HashSet<(Guid id, string content)>? correct = null;
                 if (AnswerValidator.IsSingleChoice(type))
                     correct = (question.Options ?? [])
                         .Where(x => x.IsCorrect == true)
-                        .Select(x => x.Id)
+                        .Select(x => (x.Id, x.ContentMd ?? string.Empty))
                         .ToHashSet();
                 var points = 1m;
                 total += points;
                 keys[question.Id] = new QuestionKey(
-                    question.Id,type,points, correct);
+                    question.Id, type, points, correct);
                 
             }
         }

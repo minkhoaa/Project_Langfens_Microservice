@@ -15,7 +15,8 @@ public interface IAdminService
     Task<IResult> CreateDeck(CreateDeckRequest dto, CancellationToken token);
     Task<IResult> UpdateDeck(UpdateDeckRequest dto, Guid deckId , CancellationToken token);
     Task<IResult> DeleteDeck(Guid deckId , CancellationToken token);
-    Task<IResult> MakeDeckPublic(Guid deckId, CancellationToken token); 
+    Task<IResult> MakeDeckPublic(Guid deckId, CancellationToken token);
+    
     Task<IResult> CreateCards(Guid deckId, CreateCardRequest request, CancellationToken token);
     Task<IResult> UpdateCards(Guid cardId, UpdateCardRequest request, CancellationToken token);
     Task<IResult> DeleteCards(Guid cardId, CancellationToken token); 
@@ -97,6 +98,8 @@ public class AdminService(VocabularyDbContext context) : IAdminService
             return Results.BadRequest(e.Message);
         }
     }
+
+
 
     public async Task<IResult> CreateCards(Guid deckId, CreateCardRequest request, CancellationToken token)
     {

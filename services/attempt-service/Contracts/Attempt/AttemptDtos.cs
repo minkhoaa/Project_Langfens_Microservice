@@ -19,6 +19,15 @@ public record AttemptGetResponse(
     int TimeLeftSec);
 
 public record AnswerItem(Guid QuestionId, Guid? SectionId, List<Guid>? SelectedOptionIds, string? TextAnswer);
+public record ResultAnswerItem(
+    Guid QuestionId,
+    Guid? SectionId,
+    List<Guid>? SelectedOptionIds, 
+    string? TextAnswer,
+    bool? IsCorrect,
+    string? SelectedAnswerText,
+    string? CorrectAnswerText
+);
 
 public record AutosaveRequest(List<AnswerItem> Answers, long? ClientRevision);
 
@@ -28,13 +37,15 @@ public record AttemptResultResponse(
     Guid AttemptId,
     string Status,
     DateTime? SubmittedAt,
+    TimeSpan? TotalTime,
     DateTime? GradedAt,
     decimal ScoreRaw,
     decimal ScorePct,
     int Correct,
     int Total,
     JsonElement PaperWithAnswers,
-    List<AnswerItem> Answers
+    List<ResultAnswerItem> Answers,
+    decimal? IeltsBand
 );
 public record AttemptListItem(
     Guid AttemptId,

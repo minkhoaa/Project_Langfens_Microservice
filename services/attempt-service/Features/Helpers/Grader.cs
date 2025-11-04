@@ -20,8 +20,10 @@ public sealed class SingleChoiceGrader : IQuestionGrader
     public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
     {
         var selection = (answer.SelectedOptionIds ?? new List<Guid>()).ToHashSet();
-        var correct = key.CorrectOptionIds ?? new HashSet<Guid>();
-        var ok = selection.Count == 1 && correct.Contains(selection.First());
+        var correctIds = (key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>())
+            .Select(t => t.id)
+            .ToHashSet();
+        var ok = selection.Count == 1 && correctIds.Contains(selection.First());
         return new GradeResult(ok ? key.QuestionPoints : 0m, ok);
     }
 }

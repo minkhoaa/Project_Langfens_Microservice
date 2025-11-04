@@ -1,0 +1,81 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class __EFMigrationsHistory {
+   ProductVersion: varchar(32)
+   MigrationId: varchar(150)
+}
+class role_claims {
+   RoleId: text
+   ClaimType: text
+   ClaimValue: text
+   Id: integer
+}
+class roles {
+   Name: varchar(256)
+   NormalizedName: varchar(256)
+   ConcurrencyStamp: text
+   Id: text
+}
+class sessions {
+   Jti: text
+   Exp: timestamp with time zone
+   LastSeen: timestamp with time zone
+   Ua: text
+   Ip: text
+   PrevJti: text
+   RevokedAt: timestamp with time zone
+   UserId: text
+   DeviceId: text
+}
+class user_claims {
+   UserId: text
+   ClaimType: text
+   ClaimValue: text
+   Id: integer
+}
+class user_logins {
+   ProviderDisplayName: text
+   UserId: text
+   LoginProvider: text
+   ProviderKey: text
+}
+class user_roles {
+   UserId: text
+   RoleId: text
+}
+class user_tokens {
+   Value: text
+   UserId: text
+   LoginProvider: text
+   Name: text
+}
+class users {
+   UserName: varchar(256)
+   NormalizedUserName: varchar(256)
+   Email: varchar(256)
+   NormalizedEmail: varchar(256)
+   EmailConfirmed: boolean
+   PasswordHash: text
+   SecurityStamp: text
+   ConcurrencyStamp: text
+   PhoneNumber: text
+   PhoneNumberConfirmed: boolean
+   TwoFactorEnabled: boolean
+   LockoutEnd: timestamp with time zone
+   LockoutEnabled: boolean
+   AccessFailedCount: integer
+   Id: text
+}
+
+role_claims            -[#595959,plain]-^  roles                 : "RoleId:Id"
+sessions               -[#595959,plain]-^  users                 : "UserId:Id"
+user_claims            -[#595959,plain]-^  users                 : "UserId:Id"
+user_logins            -[#595959,plain]-^  users                 : "UserId:Id"
+user_roles             -[#595959,plain]-^  roles                 : "RoleId:Id"
+user_roles             -[#595959,plain]-^  users                 : "UserId:Id"
+user_tokens            -[#595959,plain]-^  users                 : "UserId:Id"
+@enduml

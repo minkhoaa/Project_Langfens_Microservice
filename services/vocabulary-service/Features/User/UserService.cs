@@ -11,6 +11,8 @@ namespace vocabulary_service.Features.User;
 public interface IUserService
 {
     Task<IResult> SubscribeDecks(Guid deckId, Guid userId, CancellationToken token);
+    Task<IResult> GetSubscribedDeck(Guid userId, CancellationToken token);
+
     Task<IResult> GetDueFlashcard(Guid userId, CancellationToken token, int limit = 20);
 
     Task<IResult> ReviewFlashcard(Guid userId, Guid cardId, ReviewRequest request, CancellationToken token);
@@ -43,6 +45,11 @@ public class UserService(VocabularyDbContext context) : IUserService
         }
         await context.SaveChangesAsync(token);
         return Results.Ok(new SubscribeResponse(sub.Id, sub.Status));
+    }
+
+    public async Task<IResult> GetSubscribedDeck(Guid userId, CancellationToken token)
+    {
+        throw new Exception();
     }
 
     public async Task<IResult> GetDueFlashcard(Guid userId, CancellationToken token, int limit = 20)

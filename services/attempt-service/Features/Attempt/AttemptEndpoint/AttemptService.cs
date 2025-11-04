@@ -451,6 +451,10 @@ public class AttemptService(
             existedAttempt.SubmittedAt = DateTime.UtcNow;
             existedAttempt.GradedAt = (manualCount == 0) ? DateTime.UtcNow : existedAttempt.GradedAt;
             existedAttempt.RawScore = awardedTotal;
+            // persist scaled percentage (0..100 with 2 decimals) for consistency
+            existedAttempt.ScaledScore = compiled.TotalPoints <= 0
+                ? 0m
+                : Math.Round((awardedTotal / compiled.TotalPoints) * 100m, 2);
             await context.SaveChangesAsync(token);
             await transaction.CommitAsync(token);
             deadline = existedAttempt.StartedAt.AddSeconds(existedAttempt.DurationSec);
@@ -510,12 +514,16 @@ public class AttemptService(
             using var fullDoc = JsonSerializer.SerializeToDocument(dto);
             fullSnapshot = fullDoc.RootElement.Clone();
         }
-
-
+        
         // build lại theo question id và thông tin trong snapshot 
         var compiled = proto is not null
             ? AnswerKeyBuilder.FromProto(proto)
             : AnswerKeyBuilder.FromDto(dto!);
+
+        // Build per-question index (with option content) for rendering selected answer texts
+        var index = proto is not null
+            ? IndexBuilder.BuildIndexFromProto(proto)
+            : IndexBuilder.BuildIndexFromDto(dto!);
 
 
         // lấy thông tin, số lượng câu hỏi, câu trả lời 
@@ -523,22 +531,64 @@ public class AttemptService(
         var correctCount = existedAttempt.Answers.Count(x => x.IsCorrect == true);
         var totalScore = compiled.TotalPoints;
         var totalQuestion = compiled.Keys.Count;
-
-        var averageScore = compiled.TotalPoints <= 0 ? 0m : Math.Round(awardedPoints / totalScore);
+        var totalTime = existedAttempt.SubmittedAt - existedAttempt.StartedAt;
+        var ieltsBand = IeltsBandConverter.FromAcademicReadingScaled(correctCount, totalQuestion);
+        // Use stored ScaledScore if available; otherwise compute percentage (0..100)
+        var scorePct = existedAttempt.ScaledScore ??
+                       (totalScore <= 0 ? 0m : Math.Round((awardedPoints / totalScore) * 100m, 2));
 
         return Results.Ok(new ApiResultDto(true, "Success",
                 new AttemptResultResponse(
                     attemptId,
                     existedAttempt.Status,
                     existedAttempt.SubmittedAt,
+                    totalTime,
                     existedAttempt.GradedAt,
                     existedAttempt.RawScore ?? 0m,
-                    averageScore,
+                    scorePct,
                     correctCount,
                     totalQuestion,
                     fullSnapshot,
                     existedAttempt.Answers.Select(x =>
-                        new AnswerItem(x.QuestionId, x.SectionId, x.SelectedOptionIds, x.TextAnswer)).ToList())
+                    {
+                        string? selectedText;
+                        string? correctText = null; 
+
+                        if (x.SelectedOptionIds is { Count: > 0 } && index.TryGetValue(x.QuestionId, out var meta))
+                        {
+                            var lookup = meta.OptionIds.ToDictionary(t => t.id, t => t.content);
+                            var selectedTexts = x.SelectedOptionIds
+                                .Where(id => lookup.ContainsKey(id))
+                                .Select(id => lookup[id])
+                                .ToList();
+                            selectedText = selectedTexts.Count > 0 ? string.Join(", ", selectedTexts) : null;
+
+                            if (compiled.Keys.TryGetValue(x.QuestionId, out var qkey) &&
+                                qkey.CorrectOptionIds is { Count: > 0 })
+                            {
+                                var correctTexts = qkey.CorrectOptionIds
+                                    .Select(t => t.content)
+                                    .ToList();
+                                correctText = correctTexts.Count > 0 ? string.Join(", ", correctTexts) : null;
+                            }
+                        }
+                        else
+                        {
+                            selectedText = x.TextAnswer;
+                            correctText = null;
+                        }
+
+                        return new ResultAnswerItem(
+                            x.QuestionId,
+                            x.SectionId,
+                            x.SelectedOptionIds,
+                            x.TextAnswer,
+                            x.IsCorrect,
+                            selectedText,
+                            correctText 
+                        );
+                    }).ToList(),
+                    ieltsBand)
             )
         );
     }
