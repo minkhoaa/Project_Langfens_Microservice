@@ -1,6 +1,6 @@
 namespace vocabulary_service.Contracts.User;
 
-public record SubscribeResponse(Guid SubscriptionId, string Status);
+public record SubscribeResponse(Guid SubscriptionId, Guid deckId, string title , string Status);
 public record DueCardDto(
     Guid CardId,
     Guid DeckId,

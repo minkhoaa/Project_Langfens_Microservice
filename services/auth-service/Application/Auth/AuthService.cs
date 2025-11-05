@@ -353,6 +353,15 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
                     return AuthOperationResult.Failure(new ApiResultDto(false, message, null!),
                         StatusCodes.Status400BadRequest);
                 }
+                if (!await roleManager.RoleExistsAsync(Roles.User))
+                {
+                    await roleManager.CreateAsync(new Role { Name = Roles.User });
+                }
+
+                if (!await userManager.IsInRoleAsync(user, Roles.User))
+                {
+                    await userManager.AddToRoleAsync(user, Roles.User);
+                }
             }
 
             var info = new UserLoginInfo(loginProvider, providerKey, "Google");

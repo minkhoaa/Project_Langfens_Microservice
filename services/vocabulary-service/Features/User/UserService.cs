@@ -25,8 +25,9 @@ public class UserService(VocabularyDbContext context) : IUserService
     
     public async Task<IResult> SubscribeDecks(Guid deckId, Guid userId, CancellationToken token)
     {
-        var exists = await context.Decks.AsNoTracking().AnyAsync(d => d.Id == deckId, token);
-        if (!exists) return Results.NotFound();
+        var exists = await context.Decks.AsNoTracking().Where(a => a.Id == deckId)
+            .Select(x => new { x.Id, x.Title, x.DescriptionMd }).FirstOrDefaultAsync(token);
+        if (exists == null) return Results.NotFound();
         var sub = await context.UserDecks.FirstOrDefaultAsync(x => x.UserId == userId && x.DeckId == deckId, token);
         if (sub is null)
         {
@@ -45,7 +46,7 @@ public class UserService(VocabularyDbContext context) : IUserService
             sub.Status = "ACTIVE";
         }
         await context.SaveChangesAsync(token);
-        return Results.Ok(new SubscribeResponse(sub.Id, sub.Status));
+        return Results.Ok(new SubscribeResponse(sub.Id, sub.DeckId, exists.Title, sub.Status));
     }
 
     public async Task<IResult> GetSubscribedDeck(Guid userId, CancellationToken token)
