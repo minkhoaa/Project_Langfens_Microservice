@@ -54,14 +54,16 @@ public class UserService(VocabularyDbContext context) : IUserService
         try
         {
             var subscribedDeck = await context.UserDecks.AsNoTracking().Where(x => x.UserId == userId)
-                .Select(x =>
-                    new
-                    {
-                        x.Id,
-                        x.Status,
-                        x.DeckId,
-                        x.SubscribeAt,
-                    }).ToListAsync(token);
+                .Include(x=>x.Deck)
+                .Select(x => new 
+                {
+                    SubscriptionId = x.Id,
+                    deckId = x.DeckId, 
+                    title = x.Deck.Title,
+                    x.Status,
+                    x.SubscribeAt
+                    
+                }).ToListAsync(token);
             return Results.Ok(new ApiResultDto(true, "Success", subscribedDeck));
         }
         catch (Exception e)
