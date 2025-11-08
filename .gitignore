@@ -104,3 +104,4 @@ docker-compose.override.yaml
 
 .fake
 services/email-sender-nest/.prettierrc
+services/speaking-service/Helper/whisper/models/*.bin
