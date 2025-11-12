@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 namespace AttemptService.UnitTests.Attempt;
 
 public class AttemptQueryTests
@@ -8,8 +10,9 @@ public class AttemptQueryTests
         await using var ctx = AttemptDbContextFactory.Create();
         var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
 
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", Guid.NewGuid().ToString()) }));
         var (status, payload) = ResultAssert.Api(await service.GetAttemptById(
-            new AttemptGetRequest(Guid.NewGuid(), Guid.NewGuid()), CancellationToken.None));
+            new AttemptGetRequest(Guid.NewGuid(), principal), CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status404NotFound);
         payload.message.Should().Contain("Not found");
@@ -47,8 +50,9 @@ public class AttemptQueryTests
         await ctx.SaveChangesAsync();
 
         var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
         var (status, payload) = ResultAssert.Api(await service.GetAttemptById(
-            new AttemptGetRequest(attemptId, userId), CancellationToken.None));
+            new AttemptGetRequest(attemptId, principal), CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status200OK);
         var response = payload.data as AttemptGetResponse;

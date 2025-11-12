@@ -47,6 +47,12 @@ public class ExamDbContext : DbContext
             e.Property(x => x.Type).IsRequired();
             e.Property(x => x.Skill).IsRequired();
             e.Property(x => x.PromptMd).IsRequired();
+            e.Property(x => x.BlankAcceptTexts).HasColumnType("jsonb");
+            e.Property(x => x.BlankAcceptRegex).HasColumnType("jsonb");
+            e.Property(x => x.MatchPairs).HasColumnType("jsonb");
+            e.Property(x => x.OrderCorrects).HasColumnType("text[]");
+            e.Property(x => x.ShortAnswerAcceptTexts).HasColumnType("text[]");
+            e.Property(x => x.ShortAnswerAcceptRegex).HasColumnType("text[]");
 
             e.HasIndex(x => new { x.SectionId, x.Idx });
 

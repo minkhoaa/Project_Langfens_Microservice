@@ -26,5 +26,23 @@ public class ExamQuestion
 
     public string? ExplanationMd { get; set; }
 
+    [Column(TypeName = "jsonb")]
+    public Dictionary<string, string[]?>? BlankAcceptTexts { get; set; }
+
+    [Column(TypeName = "jsonb")]
+    public Dictionary<string, string[]?>? BlankAcceptRegex { get; set; }
+
+    [Column(TypeName = "jsonb")]
+    public Dictionary<string, string[]?>? MatchPairs { get; set; }
+
+    [Column(TypeName = "text[]")]
+    public List<string>? OrderCorrects { get; set; }
+
+    [Column(TypeName = "text[]")]
+    public List<string>? ShortAnswerAcceptTexts { get; set; }
+
+    [Column(TypeName = "text[]")]
+    public List<string>? ShortAnswerAcceptRegex { get; set; }
+
     public List<ExamOption> Options { get; set; } = new();
 }

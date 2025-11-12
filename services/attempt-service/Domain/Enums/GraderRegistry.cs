@@ -17,16 +17,22 @@ public static class GraderRegistry
         [QuestionType.SummaryCompletion] = new CompletionGrader(),
         [QuestionType.TableCompletion] = new CompletionGrader(),
         [QuestionType.NoteCompletion] = new CompletionGrader(),
+        [QuestionType.FormCompletion] = new CompletionGrader(),
+        [QuestionType.SentenceCompletion] = new CompletionGrader(),
 
         // Dán nhãn
         [QuestionType.DiagramLabel] = new LabelGrader(),
         [QuestionType.MapLabel] = new LabelGrader(),
 
-        // Ghép tiêu đề
+        // Ghép/matching
         [QuestionType.MatchingHeading] = new MatchingHeadingGrader(),
+        [QuestionType.MatchingInformation] = new MatchingHeadingGrader(),
+        [QuestionType.MatchingFeatures] = new MatchingHeadingGrader(),
+        [QuestionType.MatchingEndings] = new MatchingHeadingGrader(),
+        [QuestionType.Classification] = new MatchingHeadingGrader(),
 
-
-        // Thứ tự/flow
-        [QuestionType.FlowChart] = new FlowChartGrader()
+        // Thứ tự/flow / short answer
+        [QuestionType.FlowChart] = new FlowChartGrader(),
+        [QuestionType.ShortAnswer] = new ShortAnswerGrader()
     };
 }

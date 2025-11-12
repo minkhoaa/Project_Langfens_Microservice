@@ -119,11 +119,43 @@ public static class AnswerKeyBuilder
                         .Select(x => (Guid.Parse(x.Id), x.ContentMd ?? string.Empty))
                         .ToHashSet();
 
+                var blankTexts = new Dictionary<string, string[]?>(StringComparer.OrdinalIgnoreCase);
+                var blankRegex = new Dictionary<string, string[]?>(StringComparer.OrdinalIgnoreCase);
+                foreach (var accept in question.CompletionAccepts ?? new RepeatedField<InternalCompletionAccept>())
+                {
+                    if (string.IsNullOrWhiteSpace(accept.BlankId)) continue;
+                    if (accept.AcceptedTexts.Count > 0)
+                        blankTexts[accept.BlankId] = accept.AcceptedTexts.ToArray();
+                    if (accept.AcceptedRegex.Count > 0)
+                        blankRegex[accept.BlankId] = accept.AcceptedRegex.ToArray();
+                }
+
+                var matchPairs = new Dictionary<string, string[]?>(StringComparer.OrdinalIgnoreCase);
+                foreach (var pair in question.MatchPairs ?? new RepeatedField<InternalMatchPair>())
+                {
+                    if (string.IsNullOrWhiteSpace(pair.PromptKey)) continue;
+                    if (pair.AcceptedValues.Count > 0)
+                        matchPairs[pair.PromptKey] = pair.AcceptedValues.ToArray();
+                }
+
+                var order = question.OrderCorrects?.ToList() ?? new List<string>();
+                var shortTexts = question.ShortAnswerAcceptTexts?.ToList() ?? new List<string>();
+                var shortRegex = question.ShortAnswerAcceptRegex?.ToList() ?? new List<string>();
+
                 var points = 1;
                 total += points;
                 var qid = Guid.Parse(question.Id);
                 map[qid] = new QuestionKey(
-                    qid, type, points, correct);
+                    qid,
+                    type,
+                    points,
+                    correct,
+                    blankTexts.Count > 0 ? blankTexts : null,
+                    blankRegex.Count > 0 ? blankRegex : null,
+                    matchPairs.Count > 0 ? matchPairs : null,
+                    order.Count > 0 ? order : null,
+                    shortTexts.Count > 0 ? shortTexts : null,
+                    shortRegex.Count > 0 ? shortRegex : null);
             }
         }
         return new AnswerKeyCompiled(map, total);
@@ -144,10 +176,34 @@ public static class AnswerKeyBuilder
                         .Where(x => x.IsCorrect == true)
                         .Select(x => (x.Id, x.ContentMd ?? string.Empty))
                         .ToHashSet();
+                var blankTexts = (question.BlankAcceptTexts ?? new Dictionary<string, string[]?>())
+                    .Where(x => x.Value is { Length: > 0 })
+                    .ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
+                var blankRegex = (question.BlankAcceptRegex ?? new Dictionary<string, string[]?>())
+                    .Where(x => x.Value is { Length: > 0 })
+                    .ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
+                var matchPairs = (question.MatchPairs ?? new Dictionary<string, string[]?>())
+                    .Where(x => x.Value is { Length: > 0 })
+                    .ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
+                var order = (question.OrderCorrects ?? Array.Empty<string>()).Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+                var shortTexts = (question.ShortAnswerAcceptTexts ?? Array.Empty<string>())
+                    .Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                var shortRegex = (question.ShortAnswerAcceptRegex ?? Array.Empty<string>())
+                    .Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
                 var points = 1m;
                 total += points;
                 keys[question.Id] = new QuestionKey(
-                    question.Id, type, points, correct);
+                    question.Id,
+                    type,
+                    points,
+                    correct,
+                    blankTexts.Count > 0 ? blankTexts : null,
+                    blankRegex.Count > 0 ? blankRegex : null,
+                    matchPairs.Count > 0 ? matchPairs : null,
+                    order.Count > 0 ? order : null,
+                    shortTexts.Count > 0 ? shortTexts : null,
+                    shortRegex.Count > 0 ? shortRegex : null);
                 
             }
         }

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 namespace AttemptService.UnitTests.Attempt;
 
 public class AttemptAutosaveTests
@@ -22,8 +24,8 @@ public class AttemptAutosaveTests
         await ctx.SaveChangesAsync();
 
         var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
-
-        var result = await service.Autosave(attemptId, userId,
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
+        var result = await service.Autosave(attemptId, principal,
             new AutosaveRequest(new List<AnswerItem>(), null), CancellationToken.None);
 
         var (status, payload) = ResultAssert.Api(result);
@@ -60,8 +62,9 @@ public class AttemptAutosaveTests
                 new(questionId, null, new List<Guid> { Guid.NewGuid() }, null)
             }, null);
 
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
         var (status, payload) = ResultAssert.Api(
-            await service.Autosave(attemptId, userId, req, CancellationToken.None));
+            await service.Autosave(attemptId, principal, req, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status422UnprocessableEntity);
         payload.data.Should().NotBeNull();
@@ -98,8 +101,9 @@ public class AttemptAutosaveTests
                 new(questionId, null, new List<Guid> { optionId }, null)
             }, null);
 
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
         var (status, payload) = ResultAssert.Api(
-            await service.Autosave(attemptId, userId, req, CancellationToken.None));
+            await service.Autosave(attemptId, principal, req, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status200OK);
         payload.message.Should().Contain("Autosaved");

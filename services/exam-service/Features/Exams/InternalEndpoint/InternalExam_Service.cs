@@ -51,7 +51,13 @@ public class InternalExamService : IInternalExamService
                                             option.Idx,
                                             option.ContentMd,
                                             showAnswer ? option.IsCorrect : null!
-                                        )).ToList()
+                                        )).ToList(),
+                                    showAnswer ? question.BlankAcceptTexts : null,
+                                    showAnswer ? question.BlankAcceptRegex : null,
+                                    showAnswer ? question.MatchPairs : null,
+                                    showAnswer ? question.OrderCorrects : null,
+                                    showAnswer ? question.ShortAnswerAcceptTexts : null,
+                                    showAnswer ? question.ShortAnswerAcceptRegex : null
                                 )).ToList()
                         )).ToList()
                 )).FirstOrDefaultAsync(token);

@@ -11,12 +11,14 @@ public sealed record QuestionKey(
     string QuestionType,
     decimal QuestionPoints = 1,
     HashSet<(Guid id, string content)>? CorrectOptionIds = null, // MC/TF/YN
-    Dictionary<string, string[]?> BlankAcceptTexts = null!,
-    Dictionary<string, string[]?> BlankAcceptRegex = null!,
+    Dictionary<string, string[]?>? BlankAcceptTexts = null,
+    Dictionary<string, string[]?>? BlankAcceptRegex = null,
     // Matching: leftKey -> accepted right values
-    Dictionary<string, string[]?> MatchPairs = null!,
+    Dictionary<string, string[]?>? MatchPairs = null,
     // Flow chart / ordering:
-    List<string> OrderCorrects = null!
+    List<string>? OrderCorrects = null,
+    IReadOnlyList<string>? ShortAnswerAcceptTexts = null,
+    IReadOnlyList<string>? ShortAnswerAcceptRegex = null
 );
 
 

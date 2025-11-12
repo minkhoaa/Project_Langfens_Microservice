@@ -32,6 +32,15 @@ public static class GrpcSnapshotSanitizer
         foreach (var o in q.Options)
             if (o.HasIsCorrect)
                 o.ClearIsCorrect(); // unset optional bool
+        foreach (var sec in clone.Sections)
+        foreach (var q in sec.Questions)
+        {
+            q.CompletionAccepts.Clear();
+            q.MatchPairs.Clear();
+            q.OrderCorrects.Clear();
+            q.ShortAnswerAcceptTexts.Clear();
+            q.ShortAnswerAcceptRegex.Clear();
+        }
         return clone;
     }
 }

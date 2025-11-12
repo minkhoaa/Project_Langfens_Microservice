@@ -177,3 +177,39 @@ public sealed class FlowChartGrader : IQuestionGrader
         return dp[a.Count, b.Count];
     }
 }
+
+public sealed class ShortAnswerGrader : IQuestionGrader
+{
+    public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
+    {
+        var input = answer.TextAnswer ?? string.Empty;
+        var normalized = TextNorm.Normalize(input);
+        var accepts = key.ShortAnswerAcceptTexts ?? Array.Empty<string>();
+        var regexes = key.ShortAnswerAcceptRegex ?? Array.Empty<string>();
+
+        var matched = accepts.Any(x => TextNorm.Normalize(x) == normalized);
+
+        if (!matched)
+        {
+            foreach (var rx in regexes)
+            {
+                if (string.IsNullOrWhiteSpace(rx)) continue;
+                try
+                {
+                    var pat = rx.StartsWith('^') || rx.EndsWith('$') ? rx : $"^{rx}$";
+                    if (Regex.IsMatch(input, pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                    {
+                        matched = true;
+                        break;
+                    }
+                }
+                catch
+                {
+                    // ignore malformed regex
+                }
+            }
+        }
+
+        return new GradeResult(matched ? key.QuestionPoints : 0m, matched);
+    }
+}

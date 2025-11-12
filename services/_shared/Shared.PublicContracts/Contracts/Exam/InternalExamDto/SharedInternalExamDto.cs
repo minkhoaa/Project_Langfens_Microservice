@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Shared.ExamDto.Contracts.Exam.Enums;
 
@@ -36,6 +38,12 @@ public class InternalExamDto
         [JsonPropertyName("promptMd")] public string? PromptMd { get; init; }
         [JsonPropertyName("explanationMd")] public string? ExplanationMd { get; init; }
         [JsonPropertyName("options")] public IReadOnlyList<InternalDeliveryOption> Options { get; init; } = [];
+        [JsonPropertyName("blankAcceptTexts")] public IReadOnlyDictionary<string, string[]?> BlankAcceptTexts { get; init; } = new Dictionary<string, string[]?>();
+        [JsonPropertyName("blankAcceptRegex")] public IReadOnlyDictionary<string, string[]?> BlankAcceptRegex { get; init; } = new Dictionary<string, string[]?>();
+        [JsonPropertyName("matchPairs")] public IReadOnlyDictionary<string, string[]?> MatchPairs { get; init; } = new Dictionary<string, string[]?>();
+        [JsonPropertyName("orderCorrects")] public IReadOnlyList<string> OrderCorrects { get; init; } = Array.Empty<string>();
+        [JsonPropertyName("shortAnswerAcceptTexts")] public IReadOnlyList<string> ShortAnswerAcceptTexts { get; init; } = Array.Empty<string>();
+        [JsonPropertyName("shortAnswerAcceptRegex")] public IReadOnlyList<string> ShortAnswerAcceptRegex { get; init; } = Array.Empty<string>();
     }
 
     public record InternalDeliveryOption
@@ -54,7 +62,13 @@ public class InternalExamDto
             {
                 Questions = sec.Questions.Select(q => q with
                 {
-                    Options = q.Options.Select(o => o with { IsCorrect = null }).ToList()
+                    Options = q.Options.Select(o => o with { IsCorrect = null }).ToList(),
+                    BlankAcceptTexts = new Dictionary<string, string[]?>(),
+                    BlankAcceptRegex = new Dictionary<string, string[]?>(),
+                    MatchPairs = new Dictionary<string, string[]?>(),
+                    OrderCorrects = Array.Empty<string>(),
+                    ShortAnswerAcceptTexts = Array.Empty<string>(),
+                    ShortAnswerAcceptRegex = Array.Empty<string>()
                 }).ToList()
             }).ToList()
         };

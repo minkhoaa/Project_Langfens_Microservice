@@ -35,6 +35,11 @@ message InternalDeliveryQuestion {
   string prompt_md = 6;
   string explanation_md = 7;
   repeated InternalDeliveryOption options = 8;
+  repeated InternalCompletionAccept completion_accepts = 9;
+  repeated InternalMatchPair match_pairs = 10;
+  repeated string order_corrects = 11;
+  repeated string short_answer_accept_texts = 12;
+  repeated string short_answer_accept_regex = 13;
 }
 
 message InternalDeliveryOption {
@@ -44,6 +49,17 @@ message InternalDeliveryOption {
 
   // proto3 optional: có cờ hiện diện (HasIsCorrect). Khi sanitize thì *unset* (ClearIsCorrect).
   optional bool is_correct = 4;
+}
+
+message InternalCompletionAccept {
+  string blank_id = 1;
+  repeated string accepted_texts = 2;
+  repeated string accepted_regex = 3;
+}
+
+message InternalMatchPair {
+  string prompt_key = 1;
+  repeated string accepted_values = 2;
 }
 
 // ------------ RPC ------------

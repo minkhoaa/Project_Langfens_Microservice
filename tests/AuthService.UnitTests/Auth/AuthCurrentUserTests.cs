@@ -1,3 +1,5 @@
+using Shared.Security.Claims;
+
 namespace AuthService.UnitTests.Auth;
 
 public class AuthCurrentUserTests
@@ -18,10 +20,11 @@ public class AuthCurrentUserTests
     public async Task GetCurrentUserAsync_Should_Return_NotFound_When_EmailMissing()
     {
         var builder = new AuthServiceTestBuilder();
+        builder.UserManager.Setup(m => m.FindByIdAsync("user-1")).ReturnsAsync((User?)null);
         var service = builder.Build();
         var identity = new ClaimsIdentity(new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, "user-1")
+            new Claim(CustomClaims.Sub, "user-1")
         }, authenticationType: "pwd");
         var principal = new ClaimsPrincipal(identity);
 
@@ -34,14 +37,14 @@ public class AuthCurrentUserTests
     public async Task GetCurrentUserAsync_Should_Return_Profile_When_EmailConfirmed()
     {
         var builder = new AuthServiceTestBuilder();
-        builder.UserManager.Setup(m => m.FindByEmailAsync("user@example.com"))
-            .ReturnsAsync(new User { Email = "user@example.com", EmailConfirmed = true, Id = "user-1" });
+        var user = new User { Email = "user@example.com", EmailConfirmed = true, Id = "user-1" };
+        builder.UserManager.Setup(m => m.FindByIdAsync("user-1")).ReturnsAsync(user);
         var service = builder.Build();
 
         var identity = new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.Email, "user@example.com"),
-            new Claim(ClaimTypes.NameIdentifier, "user-1")
+            new Claim(CustomClaims.Sub, "user-1")
         }, authenticationType: "pwd");
         var principal = new ClaimsPrincipal(identity);
 

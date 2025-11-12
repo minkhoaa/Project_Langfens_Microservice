@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace exam_service.Contracts.Exams;
 
 public class DtoAdmin
@@ -29,7 +31,13 @@ public class DtoAdmin
         string Skill,
         int Difficulty,
         string? PromptMd,
-        string? ExplanationMd);
+        string? ExplanationMd,
+        Dictionary<string, string[]?>? BlankAcceptTexts,
+        Dictionary<string, string[]?>? BlankAcceptRegex,
+        Dictionary<string, string[]?>? MatchPairs,
+        IEnumerable<string>? OrderCorrects,
+        IEnumerable<string>? ShortAnswerAcceptTexts,
+        IEnumerable<string>? ShortAnswerAcceptRegex);
 
     public record AdminQuestionUpdate(
         Guid SectionId,
@@ -38,7 +46,13 @@ public class DtoAdmin
         string Skill,
         int Difficulty,
         string? PromptMd,
-        string? ExplanationMd);
+        string? ExplanationMd,
+        Dictionary<string, string[]?>? BlankAcceptTexts,
+        Dictionary<string, string[]?>? BlankAcceptRegex,
+        Dictionary<string, string[]?>? MatchPairs,
+        IEnumerable<string>? OrderCorrects,
+        IEnumerable<string>? ShortAnswerAcceptTexts,
+        IEnumerable<string>? ShortAnswerAcceptRegex);
 
 
     public record AdminOptionUpsert(Guid QuestionId, int? Idx, string ContentMd, bool IsCorrect);

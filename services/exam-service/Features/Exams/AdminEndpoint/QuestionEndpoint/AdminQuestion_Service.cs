@@ -41,6 +41,9 @@ public class AdminQuestionService : IAdminQuestionService
         await using var transaction = await _context.Database.BeginTransactionAsync(token);
         try
         {
+            var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var maxIdx = await _context.ExamQuestions.AsNoTracking()
                 .Where(question => question.SectionId == dto.SectionId)
                 .Select(a => (int?)a.Idx).MaxAsync(token) ?? 0;
@@ -59,7 +62,13 @@ public class AdminQuestionService : IAdminQuestionService
                 SectionId = dto.SectionId,
                 Type = dto.Type,
                 Skill = dto.Skill,
-                PromptMd = dto.PromptMd
+                PromptMd = dto.PromptMd,
+                BlankAcceptTexts = dto.BlankAcceptTexts,
+                BlankAcceptRegex = dto.BlankAcceptRegex,
+                MatchPairs = dto.MatchPairs,
+                OrderCorrects = orderCorrects,
+                ShortAnswerAcceptTexts = shortTexts,
+                ShortAnswerAcceptRegex = shortRegex
             };
             _context.ExamQuestions.Add(ques);
 
@@ -82,6 +91,9 @@ public class AdminQuestionService : IAdminQuestionService
     {
         try
         {
+            var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var affectedRow = await _context.ExamQuestions.Where(x => x.Id == id)
                 .ExecuteUpdateAsync(question => question
                         .SetProperty(x => x.SectionId, dto.SectionId)
@@ -91,6 +103,12 @@ public class AdminQuestionService : IAdminQuestionService
                         .SetProperty(x => x.Difficulty, dto.Difficulty)
                         .SetProperty(x => x.PromptMd, dto.PromptMd)
                         .SetProperty(x => x.ExplanationMd, dto.ExplanationMd)
+                        .SetProperty(x => x.BlankAcceptTexts, dto.BlankAcceptTexts)
+                        .SetProperty(x => x.BlankAcceptRegex, dto.BlankAcceptRegex)
+                        .SetProperty(x => x.MatchPairs, dto.MatchPairs)
+                        .SetProperty(x => x.OrderCorrects, orderCorrects)
+                        .SetProperty(x => x.ShortAnswerAcceptTexts, shortTexts)
+                        .SetProperty(x => x.ShortAnswerAcceptRegex, shortRegex)
                     , token);
             return Results.Ok(new ApiResultDto(true, $"Updated {affectedRow} row", null!));
         }

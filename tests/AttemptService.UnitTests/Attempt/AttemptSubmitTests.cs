@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 namespace AttemptService.UnitTests.Attempt;
 
 public class AttemptSubmitTests
@@ -8,8 +10,9 @@ public class AttemptSubmitTests
         await using var ctx = AttemptDbContextFactory.Create();
         var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
 
+        var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", Guid.NewGuid().ToString())]));
         var (status, payload) = ResultAssert.Api(
-            await service.Submit(Guid.NewGuid(), Guid.NewGuid(), CancellationToken.None));
+            await service.Submit(Guid.NewGuid(), principal, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status404NotFound);
         payload.message.Should().Contain("Not found");
@@ -51,8 +54,9 @@ public class AttemptSubmitTests
 
         var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
 
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
         var (status, payload) = ResultAssert.Api(
-            await service.Submit(attemptId, userId, CancellationToken.None));
+            await service.Submit(attemptId, principal, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status200OK);
         payload.message.Should().Contain("Submitted");

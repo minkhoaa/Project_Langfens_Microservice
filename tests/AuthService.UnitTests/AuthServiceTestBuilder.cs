@@ -5,6 +5,7 @@ namespace AuthService.UnitTests;
 internal sealed class AuthServiceTestBuilder
 {
     public Mock<UserManager<User>> UserManager { get; } = IdentityMocks.CreateUserManager();
+    public Mock<RoleManager<Role>> RoleManager { get; }
     public Mock<SignInManager<User>> SignInManager { get; }
     public Mock<IJwtTokenFactory> JwtTokenFactory { get; } = new();
     public Mock<IEmailValidator> EmailValidator { get; } = new();
@@ -28,6 +29,7 @@ internal sealed class AuthServiceTestBuilder
     public AuthServiceTestBuilder()
     {
         SignInManager = IdentityMocks.CreateSignInManager(UserManager.Object);
+        RoleManager = IdentityMocks.CreateRoleManager();
         SessionRepository.Setup(r => r.UpsertAsync(It.IsAny<SessionEntity>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((SessionEntity entity, CancellationToken _) => entity);
         SessionRepository.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -47,6 +49,7 @@ internal sealed class AuthServiceTestBuilder
 
     public auth_service.Application.Auth.AuthService Build() => new(
         UserManager.Object,
+        RoleManager.Object,
         SignInManager.Object,
         JwtTokenFactory.Object,
         EmailValidator.Object,

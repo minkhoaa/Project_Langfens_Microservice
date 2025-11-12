@@ -1,5 +1,7 @@
 namespace exam_service.Contracts.Exams;
 
+using System.Collections.Generic;
+
 public class InternalExamDto
 {
     public record InternalDeliveryExam(
@@ -25,7 +27,13 @@ public class InternalExamDto
         int Difficulty,
         string? PromptMd,
         string? ExplanationMd,
-        IReadOnlyList<InternalDeliveryOption> Options);
+        IReadOnlyList<InternalDeliveryOption> Options,
+        IReadOnlyDictionary<string, string[]?>? BlankAcceptTexts,
+        IReadOnlyDictionary<string, string[]?>? BlankAcceptRegex,
+        IReadOnlyDictionary<string, string[]?>? MatchPairs,
+        IReadOnlyList<string>? OrderCorrects,
+        IReadOnlyList<string>? ShortAnswerAcceptTexts,
+        IReadOnlyList<string>? ShortAnswerAcceptRegex);
 
     public record InternalDeliveryOption(Guid Id, int Idx, string ContentMd, bool? IsCorrect);
 

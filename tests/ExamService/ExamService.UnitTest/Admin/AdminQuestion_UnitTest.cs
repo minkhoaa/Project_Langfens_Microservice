@@ -24,7 +24,13 @@ public class AdminQuestionUnitTest
                 Skill: "Reading",
                 Difficulty: 1,
                 PromptMd: "Q1",
-                ExplanationMd: "E1"
+                ExplanationMd: "E1",
+                BlankAcceptTexts: null,
+                BlankAcceptRegex: null,
+                MatchPairs: null,
+                OrderCorrects: null,
+                ShortAnswerAcceptTexts: null,
+                ShortAnswerAcceptRegex: null
             );
 
             var result = await svc.AddAsync(CancellationToken.None, dto);
@@ -63,7 +69,13 @@ public class AdminQuestionUnitTest
                 Skill: "Reading",
                 Difficulty: 1,
                 PromptMd: "Q3",
-                ExplanationMd: "E3"
+                ExplanationMd: "E3",
+                BlankAcceptTexts: null,
+                BlankAcceptRegex: null,
+                MatchPairs: null,
+                OrderCorrects: null,
+                ShortAnswerAcceptTexts: null,
+                ShortAnswerAcceptRegex: null
             );
 
             // Act
@@ -110,7 +122,13 @@ public class AdminQuestionUnitTest
                 Skill: "Reading",
                 Difficulty: 1,
                 PromptMd: "Q-New",
-                ExplanationMd: "E-New"
+                ExplanationMd: "E-New",
+                BlankAcceptTexts: null,
+                BlankAcceptRegex: null,
+                MatchPairs: null,
+                OrderCorrects: null,
+                ShortAnswerAcceptTexts: null,
+                ShortAnswerAcceptRegex: null
             );
 
             var result = await svc.AddAsync(CancellationToken.None, dto);
@@ -157,7 +175,13 @@ public class AdminQuestionUnitTest
                 Skill: "Listening",
                 Difficulty: 2,
                 PromptMd: "NewPrompt",
-                ExplanationMd: "NewExp"
+                ExplanationMd: "NewExp",
+                BlankAcceptTexts: null,
+                BlankAcceptRegex: null,
+                MatchPairs: null,
+                OrderCorrects: null,
+                ShortAnswerAcceptTexts: null,
+                ShortAnswerAcceptRegex: null
             );
 
             var svc = new AdminQuestionService(ctx);

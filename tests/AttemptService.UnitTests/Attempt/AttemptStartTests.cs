@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 namespace AttemptService.UnitTests.Attempt;
 
 public class AttemptStartTests
@@ -23,8 +25,9 @@ public class AttemptStartTests
         var gateway = new Mock<IExamGateway>(MockBehavior.Strict);
         var service = new AttemptServiceImpl(ctx, gateway.Object);
 
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
         var (status, payload) = ResultAssert.Api(
-            await service.StartAttempt(new AttemptStartRequest(examId), CancellationToken.None, userId, TODO));
+            await service.StartAttempt(new AttemptStartRequest(examId), CancellationToken.None, principal));
 
         status.Should().Be(StatusCodes.Status200OK);
         payload.message.Should().Contain("previous attempt");
@@ -47,8 +50,9 @@ public class AttemptStartTests
 
         var service = new AttemptServiceImpl(ctx, gateway.Object);
 
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
         var (status, payload) = ResultAssert.Api(
-            await service.StartAttempt(new AttemptStartRequest(examId), CancellationToken.None, userId, TODO));
+            await service.StartAttempt(new AttemptStartRequest(examId), CancellationToken.None, principal));
 
         status.Should().Be(StatusCodes.Status200OK);
         var response = payload.data as AttemptStartResponse;

@@ -489,22 +489,27 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
         return AuthOperationResult.Success(result).WithClearCookie();
     }
 
-    public Task<AuthOperationResult> GetCurrentUserAsync(ClaimsPrincipal principal)
+    public async Task<AuthOperationResult> GetCurrentUserAsync(ClaimsPrincipal principal)
     {
         if (principal.Identity is null || !principal.Identity.IsAuthenticated)
         {
-            return Task.FromResult(AuthOperationResult.Unauthorized());
+            return AuthOperationResult.Unauthorized();
         }
 
-        var sub = principal.FindFirst(CustomClaims.Sub)!.Value ??
-                  throw new Exception("Please login");
+        var sub = principal.FindFirst(CustomClaims.Sub)?.Value;
+        if (sub is null)
+        {
+            return AuthOperationResult.Unauthorized();
+        }
 
-        var info = userManager.FindByIdAsync(sub).Select(x=> new
-        { x.Email,  x.EmailConfirmed});
-        if (info is null)
-            return Task.FromResult(AuthOperationResult.Unauthorized());
-        var payload = new ApiResultDto(true, "Get information successfully", new { id = sub, info.Result.Email, emailConfirmed = info.Result.EmailConfirmed });
-        return Task.FromResult(AuthOperationResult.Success(payload)); 
+        var user = await userManager.FindByIdAsync(sub);
+        if (user is null)
+        {
+            return AuthOperationResult.Failure(new ApiResultDto(false, "User not found", null), StatusCodes.Status404NotFound);
+        }
+
+        var payload = new ApiResultDto(true, "Get information successfully", new { id = sub, user.Email, emailConfirmed = user.EmailConfirmed });
+        return AuthOperationResult.Success(payload);
     }
     
     

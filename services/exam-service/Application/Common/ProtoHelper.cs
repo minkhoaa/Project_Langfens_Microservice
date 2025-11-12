@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Shared.Grpc.ExamInternal;
 
 namespace exam_service.Application.Common;
@@ -52,6 +54,36 @@ public static class ProtoHelper
                     };
                     if (showAnswers) pOpt.IsCorrect = opt.IsCorrect;
                     pQ.Options.Add(pOpt); // ✅ add vào proto-question
+                }
+                if (showAnswers)
+                {
+                    var textMap = q.BlankAcceptTexts ?? new Dictionary<string, string[]?>();
+                    var regexMap = q.BlankAcceptRegex ?? new Dictionary<string, string[]?>();
+                    foreach (var blank in textMap.Keys.Union(regexMap.Keys, StringComparer.OrdinalIgnoreCase))
+                    {
+                        var accept = new InternalCompletionAccept { BlankId = blank };
+                        if (textMap.TryGetValue(blank, out var texts) && texts is { Length: > 0 })
+                            accept.AcceptedTexts.AddRange(texts);
+                        if (regexMap.TryGetValue(blank, out var regs) && regs is { Length: > 0 })
+                            accept.AcceptedRegex.AddRange(regs);
+                        if (accept.AcceptedTexts.Count > 0 || accept.AcceptedRegex.Count > 0)
+                            pQ.CompletionAccepts.Add(accept);
+                    }
+
+                    foreach (var pair in q.MatchPairs ?? new Dictionary<string, string[]?>())
+                    {
+                        if (string.IsNullOrWhiteSpace(pair.Key) || pair.Value is not { Length: > 0 }) continue;
+                        var mp = new InternalMatchPair { PromptKey = pair.Key };
+                        mp.AcceptedValues.AddRange(pair.Value);
+                        pQ.MatchPairs.Add(mp);
+                    }
+
+                    if (q.OrderCorrects is { Count: > 0 })
+                        pQ.OrderCorrects.AddRange(q.OrderCorrects.Where(x => !string.IsNullOrWhiteSpace(x)));
+                    if (q.ShortAnswerAcceptTexts is { Count: > 0 })
+                        pQ.ShortAnswerAcceptTexts.AddRange(q.ShortAnswerAcceptTexts.Where(x => !string.IsNullOrWhiteSpace(x)));
+                    if (q.ShortAnswerAcceptRegex is { Count: > 0 })
+                        pQ.ShortAnswerAcceptRegex.AddRange(q.ShortAnswerAcceptRegex.Where(x => !string.IsNullOrWhiteSpace(x)));
                 }
 
                 pSec.Questions.Add(pQ); // ✅ add vào proto-section

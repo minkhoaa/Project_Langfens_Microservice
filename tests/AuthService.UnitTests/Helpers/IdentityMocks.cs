@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using auth_service.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuthService.UnitTests.Helpers;
 
@@ -38,5 +40,16 @@ internal static class IdentityMocks
             Mock.Of<ILogger<SignInManager<User>>>(),
             Mock.Of<IAuthenticationSchemeProvider>(),
             Mock.Of<IUserConfirmation<User>>());
+    }
+    
+    public static Mock<RoleManager<Role>> CreateRoleManager()
+    {
+        var store = new Mock<IRoleStore<Role>>();
+        return new Mock<RoleManager<Role>>(
+            store.Object,
+            Array.Empty<IRoleValidator<Role>>(),
+            Mock.Of<ILookupNormalizer>(),
+            new IdentityErrorDescriber(),
+            Mock.Of<ILogger<RoleManager<Role>>>());
     }
 }
