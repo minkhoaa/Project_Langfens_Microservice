@@ -12,8 +12,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Npgsql;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
@@ -98,9 +102,12 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
-builder.Services.AddDbContextPool<ExamDbContext>(option =>
-    option.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
-                     ?? builder.Configuration.GetConnectionString("Exam_DB")));
+var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
+                       ?? builder.Configuration.GetConnectionString("Exam_DB");
+var datasourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+datasourceBuilder.EnableDynamicJson();
+builder.Services.AddDbContextPool<ExamDbContext>(options =>
+    options.UseNpgsql(datasourceBuilder.Build())); 
 
 builder.Services.AddScoped<IExamService, ExamService>();
 builder.Services.AddScoped<IAdminExamService, AdminExamService>();
