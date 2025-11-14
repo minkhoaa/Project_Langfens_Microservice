@@ -57,7 +57,7 @@ export async function resendEmail(email: string) {
 
 export async function startAttempt(userId: string, examId: string) {
   const res = await apisAttempt.post(
-    "/attempts:start",
+    "/attempt/attempts:start",
     { examId },
     {
       params: { userId },
