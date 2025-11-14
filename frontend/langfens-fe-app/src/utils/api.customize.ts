@@ -2,11 +2,25 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 
 type ServiceKey = "auth" | "exam" | "attempt" | "vocabulary";
 
+const trimTrailingSlash = (url?: string | null) =>
+  url?.replace(/\/+$/, "");
+
+const gatewayBase = trimTrailingSlash(process.env.NEXT_PUBLIC_GATEWAY_URL);
+const fallbackGateway = "http://localhost:5000";
+
+const resolveBase = (envValue: string | undefined, localDefault?: string) => {
+  const trimmed = trimTrailingSlash(envValue);
+  if (trimmed) return trimmed;
+  if (gatewayBase) return gatewayBase;
+  if (localDefault) return localDefault;
+  return fallbackGateway;
+};
+
 const BASE_URL: Record<ServiceKey, string> = {
-  auth: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
-  exam: process.env.NEXT_PUBLIC_EXAM_URL || "http://localhost:8082",
-  attempt: process.env.NEXT_PUBLIC_ATTEMPT_URL || "http://localhost:8083",
-  vocabulary: process.env.NEXT_PUBLIC_VOCABULARY_URL || "http://localhost:8087",
+  auth: resolveBase(process.env.NEXT_PUBLIC_API_URL),
+  exam: resolveBase(process.env.NEXT_PUBLIC_EXAM_URL),
+  attempt: resolveBase(process.env.NEXT_PUBLIC_ATTEMPT_URL),
+  vocabulary: resolveBase(process.env.NEXT_PUBLIC_VOCABULARY_URL),
 };
 
 const getToken = () =>

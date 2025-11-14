@@ -3,8 +3,11 @@
     build:
       context: ..
       dockerfile: gateway/api-gateway/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
     ports:
       - 5000:8080
+    restart: unless-stopped
     networks:
       - backend
     depends_on:
@@ -19,12 +22,11 @@
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://gateway-service:8080
-      - NEXT_PUBLIC_EXAM_URL=http://exam-service:8080
-      - NEXT_PUBLIC_ATTEMPT_URL=http://attempt-service:8080
-      - NEXT_PUBLIC_VOCABULARY_URL=http://vocabulary-service:8080
+      - NEXT_PUBLIC_GATEWAY_URL=http://localhost:5000
+      - NEXT_PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
     ports:
       - 3000:3000
+    restart: unless-stopped
     networks:
       - backend
     depends_on:
@@ -34,12 +36,10 @@
     build:
       context: ..
       dockerfile: services/auth-service/Dockerfile
-    ports:
-      - 8080:8080
     environment:
       - CONNECTIONSTRING__AUTH=Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth
       - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - CONNECTIONSTRING__REDIS=redis:6379, abortConnect=false
       - RABBITMQ__HOST=rabbitmq-service
       - RABBITMQ__USERNAME=appuser
@@ -47,6 +47,9 @@
       - RABBITMQ__VHOST=/
       - RABBITMQ__PORT=5672
       - RABBITMQ__USESSL=false
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
     networks:
       - backend
     depends_on:
@@ -66,8 +69,10 @@
       - CONNECTIONSTRING__ATTEMPT=Host=attempt-database;Port=5432;Database=attempt-db;Username=attempt;Password=attempt
       - EXAMSERVICE__EXAM__ADDRESS=http://exam-service:8080
       - EXAMSERVICE__INTERNAL__API__KEY=internal-get-exam-snapshot
-    ports:
-      - 8081:8080
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    expose:
+      - "8080"
     networks:
       - backend
     depends_on:
@@ -75,15 +80,16 @@
 
   exam-service:
     image: exam-service
-    environment:
-      - CONNECTIONSTRING__EXAM=Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam
     build:
       context: ..
       dockerfile: services/exam-service/Dockerfile
-    ports:
-      - 8082:8080
+    environment:
+      - CONNECTIONSTRING__EXAM=Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam
+      - ASPNETCORE_ENVIRONMENT=Production
     expose:
+      - "8080"
       - "8081"
+    restart: unless-stopped
     depends_on:
       exam-database:
         condition: "service_healthy"
@@ -92,13 +98,15 @@
   
   course-service:
     image: course-service
-    environment:
-      - CONNECTIONSTRING__COURSE=Host=course-database;Port=5432;Database=course-db;Username=course;Password=course
     build:
       context: ..
       dockerfile: services/course-service/Dockerfile
-    ports:
-      - 8083:8080
+    environment:
+      - CONNECTIONSTRING__COURSE=Host=course-database;Port=5432;Database=course-db;Username=course;Password=course
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    expose:
+      - "8080"
     networks:
       - backend
     depends_on:
@@ -108,13 +116,15 @@
   
   vocabulary-service:
     image: vocabulary-service
-    environment:
-      - CONNECTIONSTRING__VOCABULARY=Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary
     build:
       context: ..
       dockerfile: services/vocabulary-service/Dockerfile
-    ports:
-      - 8087:8080
+    environment:
+      - CONNECTIONSTRING__VOCABULARY=Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    expose:
+      - "8080"
     networks:
       - backend
     depends_on:
@@ -137,13 +147,15 @@
       - SMTP__FROM=Langfens English<no-reply@langfens-english.com>
       - SMTP__BRAND=Langfens English
       - SMTP__SUPPORT=support@langfens-english.com
-      - SMTP__VERIFYURLTEMPLATE=http://auth-service:8080/api/auth/verify
-      - SMTP__REDIRECTURL=http://localhost:8080/api/auth/verify
+      - SMTP__VERIFYURLTEMPLATE=http://localhost:5000/api-auth/auth/verify
+      - SMTP__REDIRECTURL=http://localhost:5000/api-auth/auth/verify
+      - ASPNETCORE_ENVIRONMENT=Production
     build:
       context: ..
       dockerfile: services/email-service/Dockerfile
-    ports:
-      - 8089:8080
+    restart: unless-stopped
+    expose:
+      - "8080"
     networks:
       - backend
     depends_on:
@@ -157,9 +169,7 @@
     environment:
       - RABBITMQ_DEFAULT_USER=appuser
       - RABBITMQ_DEFAULT_PASS=apppassword
-    ports:
-      - 5672:5672
-      - 15672:15672
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
@@ -179,7 +189,6 @@
       POSTGRES_DB: exam-db
       POSTGRES_USER: exam
       POSTGRES_PASSWORD: exam
-    ports: [ "5433:5432" ]
     networks:
       - backend
     volumes: [ "pgdata:/var/lib/postgresql/exam-data" ]
@@ -189,6 +198,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s
+    restart: unless-stopped
 
   auth-database:
     image: postgres:16-alpine
@@ -196,7 +206,6 @@
       POSTGRES_DB: auth-db
       POSTGRES_USER: auth
       POSTGRES_PASSWORD: auth
-    ports: ["5434:5432"]
     networks:
       - backend
     volumes: ["pgdata:/var/lib/postgresql/auth-data"]
@@ -206,13 +215,13 @@
       timeout: 5s
       retries: 20
       start_period: 10s
+    restart: unless-stopped
   attempt-database:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: attempt-db
       POSTGRES_USER: attempt
       POSTGRES_PASSWORD: attempt      
-    ports: [ "5435:5432" ]
     networks:
       - backend
     volumes: [ "pgdata:/var/lib/postgresql/attempt-data" ]
@@ -222,14 +231,14 @@
       timeout: 5s
       retries: 20
       start_period: 10s
-  
+    restart: unless-stopped
+
   course-database:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: course-db
       POSTGRES_USER: course
       POSTGRES_PASSWORD: course
-    ports: [ "5436:5432" ]
     networks:
       - backend
     volumes: [ "pgdata:/var/lib/postgresql/course-data" ]
@@ -239,6 +248,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s 
+    restart: unless-stopped
       
   
   vocabulary-database:
@@ -247,7 +257,6 @@
       POSTGRES_DB: vocabulary-db
       POSTGRES_USER: vocabulary
       POSTGRES_PASSWORD: vocabulary
-    ports: [ "5437:5432" ]
 
     networks:
       - backend
@@ -258,6 +267,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s
+    restart: unless-stopped
   
   
   
@@ -272,8 +282,6 @@
       "--databases", "1",           # 1 DB là đủ cho hầu hết case
       "--port", "6379"
     ]
-    ports:
-      - "6379:6379"
     networks:
       - backend
     tmpfs:
