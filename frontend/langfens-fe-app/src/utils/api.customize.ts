@@ -1,26 +1,15 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 
 type ServiceKey = "auth" | "exam" | "attempt" | "vocabulary";
-
-const trimTrailingSlash = (url?: string | null) =>
-  url?.replace(/\/+$/, "");
-
-const gatewayBase = trimTrailingSlash(process.env.NEXT_PUBLIC_GATEWAY_URL);
-const fallbackGateway = "http://localhost:5000";
-
-const resolveBase = (envValue: string | undefined, localDefault?: string) => {
-  const trimmed = trimTrailingSlash(envValue);
-  if (trimmed) return trimmed;
-  if (gatewayBase) return gatewayBase;
-  if (localDefault) return localDefault;
-  return fallbackGateway;
-};
+const GATEWAY_BASE = process.env.NEXT_PUBLIC_GATEWAY_URL || ""; 
+const buildBase = (suffix: string) =>
+  GATEWAY_BASE ? `${GATEWAY_BASE}${suffix}` : suffix;
 
 const BASE_URL: Record<ServiceKey, string> = {
-  auth: resolveBase(process.env.NEXT_PUBLIC_API_URL),
-  exam: resolveBase(process.env.NEXT_PUBLIC_EXAM_URL),
-  attempt: resolveBase(process.env.NEXT_PUBLIC_ATTEMPT_URL),
-  vocabulary: resolveBase(process.env.NEXT_PUBLIC_VOCABULARY_URL),
+  auth: buildBase("/api-auth"),
+  exam: buildBase("/api-exams"),
+  attempt: buildBase("/api-attempts"),
+  vocabulary: buildBase("/api-vocabulary"),
 };
 
 const getToken = () =>
@@ -48,7 +37,7 @@ const apis = Object.fromEntries(
       }
       return config;
     });
-
+    console.log(GATEWAY_BASE);
     api.interceptors.response.use(
       (res) => res,
       async (err: AxiosError) => {
@@ -59,7 +48,7 @@ const apis = Object.fromEntries(
         if (err.response?.status === 401 && original && !original._retry) {
           original._retry = true;
           try {
-            const r = await apisAuth.post("/api/auth/refresh", undefined, {
+            const r = await apisAuth.post("/auth/refresh", undefined, {
               withCredentials: true,
             });
             const newToken = (r.data as any)?.accessToken ?? null;
