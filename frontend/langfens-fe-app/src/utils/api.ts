@@ -132,7 +132,7 @@ export async function createDeck(payload: {
   status: "draft" | "published";
   userId: string;
 }) {
-  const res = await apisVocabulary.post("/deck", payload);
+  const res = await apisVocabulary.post("/admin/deck", payload);
   return res;
 }
 export async function createDeckCard(
@@ -143,7 +143,10 @@ export async function createDeckCard(
     hintMd?: string;
   }
 ) {
-  const res = await apisVocabulary.post(`/deck/${deckId}/card`, payload);
+  const res = await apisVocabulary.post(
+    `/admin/deck/${deckId}/card`,
+    payload
+  );
   return res;
 }
 export async function updateDeck(
@@ -156,7 +159,7 @@ export async function updateDeck(
     status: "draft" | "published";
   }
 ) {
-  const res = await apisVocabulary.put(`/deck/${deckId}`, payload);
+  const res = await apisVocabulary.put(`/admin/deck/${deckId}`, payload);
   return res;
 }
 export async function updateCard(
@@ -167,20 +170,20 @@ export async function updateCard(
     hintMd: string;
   }
 ) {
-  const res = await apisVocabulary.put(`/deck/card/${cardId}`, payload);
+  const res = await apisVocabulary.put(`/admin/deck/card/${cardId}`, payload);
   return res;
 }
 
 export async function getOwnDecks(userId: string) {
-  const res = await apisVocabulary.get(`/${userId}/own`);
+  const res = await apisVocabulary.get(`/users/${userId}/own`);
   return res;
 }
 export async function getDeckCards(deckId: string) {
-  const res = await apisVocabulary.get(`/deck:${deckId}/cards`);
+  const res = await apisVocabulary.get(`/decks/deck:${deckId}/cards`);
   return res;
 }
 export async function getDueFlashcards(userId: string, limit: number = 20) {
-  const res = await apisVocabulary.get(`/${userId}/flashcard/due`, {
+  const res = await apisVocabulary.get(`/users/${userId}/flashcard/due`, {
     params: { limit },
   });
   return res;
@@ -191,7 +194,7 @@ export async function reviewFlashcard(
   grade: number
 ) {
   const res = await apisVocabulary.post(
-    `/${userId}/flashcard/${cardId}/review`,
+    `/users/${userId}/flashcard/${cardId}/review`,
     {
       grade,
     }
@@ -199,7 +202,7 @@ export async function reviewFlashcard(
   return res;
 }
 export async function getFlashcardProgress(userId: string) {
-  const res = await apisVocabulary.get(`/${userId}/flashcard/progress`);
+  const res = await apisVocabulary.get(`/users/${userId}/flashcard/progress`);
   return res;
 }
 export async function getPublicHandler(params?: {
@@ -208,7 +211,7 @@ export async function getPublicHandler(params?: {
   page?: number;
   pageSize?: number;
 }) {
-  const res = await apisVocabulary.get("/", {
+  const res = await apisVocabulary.get("/decks", {
     params: {
       status: params?.status ?? "",
       category: params?.category ?? "",
@@ -219,10 +222,12 @@ export async function getPublicHandler(params?: {
   return res;
 }
 export async function subscribeDeck(userId: string, deckId: string) {
-  const res = await apisVocabulary.post(`/${userId}/subscribe/${deckId}`);
+  const res = await apisVocabulary.post(
+    `/users/${userId}/subscribe/${deckId}`
+  );
   return res;
 }
 export async function getUserSubscriptions(userId: string) {
-  const res = await apisVocabulary.get(`/${userId}/subscribe`);
+  const res = await apisVocabulary.get(`/users/${userId}/subscribe`);
   return res;
 }
