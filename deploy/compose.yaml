@@ -132,6 +132,28 @@
       vocabulary-database:
         condition: service_healthy
       
+  speaking-service:
+    image: speaking-service
+    build:
+      context: ..
+      dockerfile: services/speaking-service/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    expose:
+      - "8080"
+    ports:
+      - "8090:8080"
+    restart: unless-stopped
+    networks:
+      - backend
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+      
   email-service:
     image: email-service
     environment:
