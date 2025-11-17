@@ -21,7 +21,9 @@ internal static class SnapshotFactory
             Id = sectionId.ToString(),
             Title = "Section 1",
             InstructionsMd = "Do it",
-            Idx = 1
+            Idx = 1,
+            AudioUrl = "https://example.com/audio.mp3",
+            TranscriptMd = "Transcript"
         };
 
         var question = new InternalDeliveryQuestion
@@ -76,6 +78,8 @@ internal static class SnapshotFactory
                     Idx = 1,
                     Title = "Section DTO",
                     InstructionsMd = "Read carefully",
+                    AudioUrl = "https://example.com/audio.mp3",
+                    TranscriptMd = "Transcript",
                     Questions = new List<InternalExamDto.InternalDeliveryQuestion>
                     {
                         new InternalExamDto.InternalDeliveryQuestion

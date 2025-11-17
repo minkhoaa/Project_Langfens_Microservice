@@ -27,6 +27,8 @@ public static class ProtoHelper
             {
                 Id = sec.Id.ToString(),
                 InstructionsMd = sec.InstructionsMd ?? string.Empty,
+                AudioUrl = sec.AudioUrl ?? string.Empty,
+                TranscriptMd = sec.TranscriptMd ?? string.Empty,
                 Idx = sec.Idx,
                 Title = sec.Title ?? string.Empty
             };

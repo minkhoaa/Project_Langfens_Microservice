@@ -15,7 +15,7 @@ public class AdminSectionUnitTest
         try
         {
             var svc = new AdminSectionService(ctx);
-            var dto = new DtoAdmin.AdminSectionUpsert(Guid.NewGuid(), null, "Sec 1", "No content");
+            var dto = new DtoAdmin.AdminSectionUpsert(Guid.NewGuid(), null, "Sec 1", "No content", null, null);
 
             var result = await AdminSectionHandler.AddSectionHandler(svc, dto, CancellationToken.None);
 
@@ -44,7 +44,9 @@ public class AdminSectionUnitTest
                 ExamId: examId,
                 Idx: 1, // append cuối
                 Title: "C",
-                InstructionsMd: "Null"
+                InstructionsMd: "Null",
+                AudioUrl: "https://example.com/audio.mp3",
+                TranscriptMd: "Transcript"
             );
 
             var result = await svc.AddAsync(dto, CancellationToken.None);
@@ -82,7 +84,9 @@ public class AdminSectionUnitTest
                 ExamId: examId,
                 Idx: 5,
                 Title: "A-Updated",
-                InstructionsMd: "MD"
+                InstructionsMd: "MD",
+                AudioUrl: "https://example.com/audio.mp3",
+                TranscriptMd: "Script"
             );
             var svc = new AdminSectionService(ctx);
             var result = await svc.UpdateAync(dto, id, CancellationToken.None);

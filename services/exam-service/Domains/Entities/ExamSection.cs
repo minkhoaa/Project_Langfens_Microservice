@@ -17,6 +17,8 @@ public class ExamSection
     [Required] public string Title { get; set; } = string.Empty!;
 
     public string? InstructionsMd { get; set; }
+    public string? AudioUrl { get; set; }
+    public string? TranscriptMd { get; set; }
 
     public List<ExamQuestion> Questions { get; set; } = new();
 }

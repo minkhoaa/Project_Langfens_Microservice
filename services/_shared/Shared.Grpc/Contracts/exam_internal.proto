@@ -24,6 +24,8 @@ message InternalDeliverySection {
   string title = 3;
   string instructions_md = 4;
   repeated InternalDeliveryQuestion questions = 5;
+  string audio_url = 6;
+  string transcript_md = 7;
 }
 
 message InternalDeliveryQuestion {

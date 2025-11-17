@@ -1,6 +1,7 @@
 namespace exam_service.Contracts.Exams;
 
 using System.Collections.Generic;
+using System.Linq;
 
 public class InternalExamDto
 {
@@ -18,6 +19,8 @@ public class InternalExamDto
         int Idx,
         string Title,
         string? InstructionsMd,
+        string? AudioUrl,
+        string? TranscriptMd,
         IReadOnlyList<InternalDeliveryQuestion> Questions);
 
     public record InternalDeliveryQuestion(

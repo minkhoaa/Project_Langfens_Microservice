@@ -45,7 +45,9 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                 ExamId = dto.ExamId,
                 Idx = desired,
                 InstructionsMd = dto.InstructionsMd,
-                Title = dto.Title
+                Title = dto.Title,
+                AudioUrl = dto.AudioUrl,
+                TranscriptMd = dto.TranscriptMd
             };
             context.ExamSections.Add(sec);
             var now = DateTime.UtcNow;
@@ -79,7 +81,9 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                         .SetProperty(s => s.ExamId, dto.ExamId)
                         .SetProperty(s => s.Idx, dto.Idx)
                         .SetProperty(s => s.Title, dto.Title)
-                        .SetProperty(s => s.InstructionsMd, dto.InstructionsMd),
+                        .SetProperty(s => s.InstructionsMd, dto.InstructionsMd)
+                        .SetProperty(s => s.AudioUrl, dto.AudioUrl)
+                        .SetProperty(s => s.TranscriptMd, dto.TranscriptMd),
                     token);
 
             return Results.Ok(new ApiResultDto(true, $"Update {effectedRow}", null!));

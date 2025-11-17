@@ -65,6 +65,8 @@ public class ExamService : IExamService
                         .OrderBy(s => s.Idx)
                         .Select(section => new Dto_Public.PublicSectionRecord(
                             section.Idx, section.Title, section.InstructionsMd,
+                            section.AudioUrl,
+                            section.TranscriptMd,
                             section.Questions
                                 .OrderBy(d => d.Idx)
                                 .Select(question =>

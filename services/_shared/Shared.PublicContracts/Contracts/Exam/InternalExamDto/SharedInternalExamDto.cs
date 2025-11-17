@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using Shared.ExamDto.Contracts.Exam.Enums;
 
@@ -25,6 +26,8 @@ public class InternalExamDto
         [JsonPropertyName("idx")] public int Idx { get; init; }
         [JsonPropertyName("title")] public string Title { get; init; } = string.Empty;
         [JsonPropertyName("instructionsMd")] public string? InstructionsMd { get; init; }
+        [JsonPropertyName("audioUrl")] public string? AudioUrl { get; init; }
+        [JsonPropertyName("transcriptMd")] public string? TranscriptMd { get; init; }
         [JsonPropertyName("questions")] public IReadOnlyList<InternalDeliveryQuestion> Questions { get; init; } = [];
     }
 

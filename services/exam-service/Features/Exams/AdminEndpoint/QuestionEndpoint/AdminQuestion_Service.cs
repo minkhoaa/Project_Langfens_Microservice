@@ -1,9 +1,11 @@
+using System;
 using exam_service.Contracts.Exams;
 using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
+using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 
@@ -41,6 +43,10 @@ public class AdminQuestionService : IAdminQuestionService
         await using var transaction = await _context.Database.BeginTransactionAsync(token);
         try
         {
+            var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
+            if (requiresAudio && string.IsNullOrWhiteSpace(existedSection.AudioUrl))
+                return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
+
             var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
@@ -91,6 +97,19 @@ public class AdminQuestionService : IAdminQuestionService
     {
         try
         {
+            var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
+            if (requiresAudio)
+            {
+                var section = await _context.ExamSections.AsNoTracking()
+                    .Where(x => x.Id == dto.SectionId)
+                    .Select(x => new { x.AudioUrl })
+                    .FirstOrDefaultAsync(token);
+                if (section == null)
+                    return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
+                if (string.IsNullOrWhiteSpace(section.AudioUrl))
+                    return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
+            }
+
             var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();

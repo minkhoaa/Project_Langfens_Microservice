@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using exam_service.Infrastructure.Persistence;
@@ -12,9 +13,11 @@ using exam_service.Infrastructure.Persistence;
 namespace exam_service.Migrations
 {
     [DbContext(typeof(ExamDbContext))]
-    partial class ExamDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251119090000_AddSectionAudioFields")]
+    partial class AddSectionAudioFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -118,15 +121,15 @@ namespace exam_service.Migrations
                     b.Property<int>("Idx")
                         .HasColumnType("integer");
 
-                    b.Property<string>("PromptMd")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<Dictionary<string, string[]?>>("MatchPairs")
                         .HasColumnType("jsonb");
 
                     b.Property<List<string>>("OrderCorrects")
                         .HasColumnType("text[]");
+
+                    b.Property<string>("PromptMd")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uuid");

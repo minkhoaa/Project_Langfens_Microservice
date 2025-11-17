@@ -20,9 +20,21 @@ public class DtoAdmin
         int DurationMin,
         string Status);
 
-    public record AdminSectionUpsert(Guid ExamId, int? Idx, string Title, string? InstructionsMd);
+    public record AdminSectionUpsert(
+        Guid ExamId,
+        int? Idx,
+        string Title,
+        string? InstructionsMd,
+        string? AudioUrl,
+        string? TranscriptMd);
 
-    public record AdminSectionUpdate(Guid ExamId, int? Idx, string Title, string? InstructionsMd);
+    public record AdminSectionUpdate(
+        Guid ExamId,
+        int? Idx,
+        string Title,
+        string? InstructionsMd,
+        string? AudioUrl,
+        string? TranscriptMd);
 
     public record AdminQuestionUpsert(
         Guid SectionId,

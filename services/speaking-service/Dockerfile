@@ -31,6 +31,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         libstdc++6 \
         libgomp1 && \
+        ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \

@@ -168,6 +168,12 @@ public class AdminQuestionUnitTest
 
             var qId = await SeedHelper.SeedQuestionAsync(ctx, sectionId, idx: 1, prompt: "OldPrompt");
 
+            await ctx.ExamSections.Where(s => s.Id == sectionId)
+                .ExecuteUpdateAsync(s => s
+                        .SetProperty(x => x.AudioUrl, "https://example.com/audio.mp3")
+                        .SetProperty(x => x.TranscriptMd, "Transcript"),
+                    CancellationToken.None);
+
             var dto = new DtoAdmin.AdminQuestionUpdate(
                 SectionId: sectionId,
                 Idx: 5,

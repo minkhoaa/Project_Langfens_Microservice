@@ -37,6 +37,8 @@ public class InternalExamService : IInternalExamService
                             section.Idx,
                             section.Title,
                             section.InstructionsMd,
+                            section.AudioUrl,
+                            section.TranscriptMd,
                             section.Questions.Where(a => a.SectionId == section.Id)
                                 .Select(question => new InternalExamDto.InternalDeliveryQuestion(
                                     question.Idx,
