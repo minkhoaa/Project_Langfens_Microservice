@@ -10,15 +10,15 @@ public static class AttemptEndpointMapping
         var group = app.MapGroup("/api/attempt");
         group.MapPost("/attempts:start", AttemptHandler.AttemptStartHandler)
             .RequireAuthorization(AttemptScope.AttemptStart);
-        group.MapGet("/attempts/{attemptId:guid}", AttemptHandler.AttemptGetByIdHandler)
+        group.MapGet("/{attemptId:guid}", AttemptHandler.AttemptGetByIdHandler)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
-        group.MapPost("/attempt/autosave/{attemptId:guid}", AttemptHandler.AttemptAutoSave)
+        group.MapPost("/autosave/{attemptId:guid}", AttemptHandler.AttemptAutoSave)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
-        group.MapPost("/attempt/submit/{attemptId:guid}", AttemptHandler.AttemptSubmit)
+        group.MapPost("/submit/{attemptId:guid}", AttemptHandler.AttemptSubmit)
             .RequireAuthorization(AttemptScope.AttemptSubmit);
-        group.MapGet("/attempt/getresult/{attemptId:guid}", AttemptHandler.AttemptGetResult)
+        group.MapGet("/getresult/{attemptId:guid}", AttemptHandler.AttemptGetResult)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
-        group.MapGet("/attempt/getlistattempt", AttemptHandler.GetAttemptList)
+        group.MapGet("/getlistattempt", AttemptHandler.GetAttemptList)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
     }
 }
