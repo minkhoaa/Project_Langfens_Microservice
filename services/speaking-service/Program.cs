@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.Features;
 using speaking_service.Features;
 using speaking_service.Features.Helper;
 using speaking_service.Features.Services;
@@ -40,5 +39,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapSpeakingEndpoint();
+app.MapWebsocketSpeaking();
 app.UseWebSockets();
 app.Run();

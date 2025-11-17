@@ -10,4 +10,10 @@ public static class WhisperHandler
     public static Task<IResult> TranscriptHandler(
         IFormFile request, WhisperProcessor processor, IWhisperService service)
         => service.Transcript(request, processor);
+
+    public static Task HandleWebsocketAsync(
+        HttpContext context, WhisperProcessor processor,
+        CancellationToken token, IWhisperService service)
+        => service.HandleWebsocketAsync(context, processor, token);
+
 }
