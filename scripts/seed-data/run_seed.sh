@@ -12,99 +12,22 @@ fi
 
 seed_exams() {
   echo "Seeding exam data..."
-  docker compose -f "${COMPOSE_FILE}" exec -T exam-database \
-    psql -U exam -d exam-db <<'EXAM_SQL'
-\set ON_ERROR_STOP on
+  local seed_dir="${REPO_ROOT}/deploy/seeds"
+  local exam_seeds=(
+    "${seed_dir}/seed_exam_ielts_listening_mock.sql"
+    "${seed_dir}/seed_exam_ielts_reading_mock.sql"
+  )
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+  for seed_file in "${exam_seeds[@]}"; do
+    if [[ ! -f "${seed_file}" ]]; then
+      echo "Missing exam seed file: ${seed_file}" >&2
+      exit 1
+    fi
+  done
 
--- Clear previously generated demo exams so the script is idempotent.
-DELETE FROM exams WHERE "Slug" LIKE 'demo-exam-%';
-
-DO $$
-DECLARE
-    categories text[] := ARRAY['IELTS', 'TOEIC', 'VSTEP'];
-    levels text[] := ARRAY['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-    skills text[] := ARRAY['READING', 'LISTENING', 'WRITING', 'SPEAKING'];
-    question_types text[] := ARRAY[
-        'MULTIPLE_CHOICE_SINGLE',
-        'MULTIPLE_CHOICE_MULTI',
-        'TRUE_FALSE_NOT_GIVEN',
-        'SHORT_ANSWER'
-    ];
-    sections_per_exam int := 3;
-    questions_per_section int := 8;
-    exam_idx int;
-    section_idx int;
-    question_idx int;
-    option_idx int;
-    exam_id uuid;
-    section_id uuid;
-    question_id uuid;
-    correct_option int;
-BEGIN
-    FOR exam_idx IN 1..50 LOOP
-        exam_id := uuid_generate_v4();
-        INSERT INTO exams ("Id", "Slug", "Title", "DescriptionMd", "Category", "Level", "Status", "DurationMin", "CreatedAt", "UpdatedAt")
-        VALUES (
-            exam_id,
-            format('demo-exam-%s', lpad(exam_idx::text, 3, '0')),
-            format('Demo Practice Exam #%s', exam_idx),
-            format('## Demo Exam %s%sThis mock dataset was generated for testing the exam service.', exam_idx, chr(10)),
-            categories[((exam_idx - 1) % array_length(categories, 1)) + 1],
-            levels[((exam_idx - 1) % array_length(levels, 1)) + 1],
-            CASE
-                WHEN exam_idx % 3 = 0 THEN 'PUBLISHED'
-                WHEN exam_idx % 3 = 1 THEN 'DRAFT'
-                ELSE 'ARCHIVED'
-            END,
-            60 + ((exam_idx - 1) % 4) * 15,
-            now() - make_interval(days => exam_idx),
-            now()
-        );
-
-        FOR section_idx IN 1..sections_per_exam LOOP
-            section_id := uuid_generate_v4();
-            INSERT INTO exam_sections ("Id", "ExamId", "Idx", "Title", "InstructionsMd")
-            VALUES (
-                section_id,
-                exam_id,
-                section_idx,
-                format('Section %s.%s', exam_idx, section_idx),
-                format('Answer every question for section %s focusing on academic reading/listening skills.', section_idx)
-            );
-
-            FOR question_idx IN 1..questions_per_section LOOP
-                question_id := uuid_generate_v4();
-                correct_option := ((question_idx + section_idx - 2) % 4) + 1;
-                INSERT INTO exam_questions ("Id", "SectionId", "Idx", "Type", "Skill", "Difficulty", "PromptMd", "ExplanationMd")
-                VALUES (
-                    question_id,
-                    section_id,
-                    question_idx,
-                    question_types[((exam_idx + question_idx - 2) % array_length(question_types, 1)) + 1],
-                    skills[((section_idx + question_idx - 2) % array_length(skills, 1)) + 1],
-                    1 + ((exam_idx + section_idx + question_idx) % 3),
-                    format('### Question %s.%s.%s%sRead the passage and choose the best answer.', exam_idx, section_idx, question_idx, chr(10)),
-                    format('This is a generated explanation for question %s.%s.%s.', exam_idx, section_idx, question_idx)
-                );
-
-                FOR option_idx IN 1..4 LOOP
-                    INSERT INTO exam_options ("Id", "QuestionId", "Idx", "ContentMd", "IsCorrect")
-                    VALUES (
-                        uuid_generate_v4(),
-                        question_id,
-                        option_idx,
-                        format('Option %s for question %s.%s.%s. Demo content for testing.', option_idx, exam_idx, section_idx, question_idx),
-                        option_idx = correct_option
-                    );
-                END LOOP;
-            END LOOP;
-        END LOOP;
-    END LOOP;
-END
-$$ LANGUAGE plpgsql;
-EXAM_SQL
+  # Combine both SQL files so they run as a single import stream.
+  cat "${exam_seeds[@]}" | docker compose -f "${COMPOSE_FILE}" exec -T exam-database \
+    psql -v ON_ERROR_STOP=1 -U exam -d exam-db
 }
 
 seed_vocabulary() {
