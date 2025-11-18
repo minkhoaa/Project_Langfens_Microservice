@@ -6,17 +6,22 @@ using Whisper.net.LibraryLoader;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<WhisperProcessor>( _ =>
+builder.Services.AddCors(option =>
+{
+    option.AddPolicy("FE", policy => policy
+        .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
+});
+builder.Services.AddSingleton<WhisperProcessor>(_ =>
 {
     RuntimeOptions.RuntimeLibraryOrder = [
-        RuntimeLibrary.Cuda,   
-        RuntimeLibrary.Cpu,      
+        RuntimeLibrary.Cuda,
+        RuntimeLibrary.Cpu,
         RuntimeLibrary.CpuNoAvx
     ];
     var modelPath = WhisperModelHelper.EnsureModelDownloadedAsync().GetAwaiter().GetResult();
@@ -37,7 +42,7 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseCors("FE");
 app.MapSpeakingEndpoint();
 app.MapWebsocketSpeaking();
 app.UseWebSockets();

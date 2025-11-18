@@ -37,7 +37,7 @@ public class WhisperService : IWhisperService
                 textBuilder.Append(segment.Text);
             }
 
-            return Results.Ok(textBuilder.ToString());
+            return Results.Ok(new { transcript = textBuilder.ToString() });
         }
         finally
         {
