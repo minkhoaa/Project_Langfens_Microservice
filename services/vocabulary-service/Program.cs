@@ -16,9 +16,11 @@ using vocabulary_service.Features.User;
 using vocabulary_service.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddCors(options =>
+
+
+builder.Services.AddCors(option =>
 {
-    options.AddPolicy("FE", policy => policy
+    option.AddPolicy("FE", policy => policy
         .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
         .AllowAnyHeader()
         .AllowAnyMethod()
@@ -31,14 +33,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         option.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"] 
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"]
                           ?? throw new Exception("valid issuer is missing"),
-            ValidAudience = builder.Configuration["JwtSettings:Audience"] 
+            ValidAudience = builder.Configuration["JwtSettings:Audience"]
                             ?? throw new Exception("valid issuer is missing"),
             ValidateAudience = true,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true, 
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SignKey"] 
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SignKey"]
                                                                                ?? throw new Exception("Signing key is missing"))),
             ClockSkew = TimeSpan.Zero,
             NameClaimType = CustomClaims.Sub,
@@ -51,10 +53,10 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser().Build();
     options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
     options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
-    
-    options.AddPolicy(VocabScope.VocabRead,  p => p.RequireAssertion(c =>
+
+    options.AddPolicy(VocabScope.VocabRead, p => p.RequireAssertion(c =>
         c.User.HasAnyScope(VocabScope.VocabRead) || c.User.IsInRole(Roles.User)));
-    options.AddPolicy(VocabScope.VocabManage,  p => p.RequireAssertion(c =>
+    options.AddPolicy(VocabScope.VocabManage, p => p.RequireAssertion(c =>
         c.User.HasAnyScope(VocabScope.VocabManage) || c.User.IsInRole(Roles.Admin)));
 
 });

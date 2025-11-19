@@ -31,7 +31,6 @@ builder.Services.AddSingleton<WhisperProcessor>(_ =>
 
 
 
-
 builder.Services.AddScoped<IWhisperService, WhisperService>();
 
 
