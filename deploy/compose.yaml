@@ -153,7 +153,25 @@
             - driver: nvidia
               count: all
               capabilities: [gpu]
-      
+              
+  writing-service:
+    image: writing-service
+    build:
+      context: ..
+      dockerfile: services/writing-service/Dockerfile
+    environment:
+      - CONNECTIONSTRING__WRITING=Host=writing-database;Port=5432;Database=writing-db;Username=writing;Password=writing
+    restart: unless-stopped
+    ports:
+      - "8091:8080"
+    networks:
+      - backend
+    depends_on:
+      writing-database:
+        condition: service_healthy
+  
+  
+  
   email-service:
     image: email-service
     environment:
@@ -300,7 +318,24 @@
       start_period: 10s
     restart: unless-stopped
   
-  
+  writing-database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: writing-db
+      POSTGRES_USER: writing
+      POSTGRES_PASSWORD: writing
+    ports:
+      - 5440:5432
+    networks:
+      - backend
+    volumes: [ "pgdata:/var/lib/postgresql/writing-data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U writing -d writing-db -h 127.0.0.1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
   
   redis:
     image: redis:7.4-alpine

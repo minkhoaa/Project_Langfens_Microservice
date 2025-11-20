@@ -11,15 +11,21 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(option =>
 {
-    option.AddPolicy("FE", policy => policy
-        .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
+    option.AddPolicy(
+        "FE",
+        policy =>
+            policy
+                .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+    );
 });
+
 builder.Services.AddSingleton<WhisperProcessor>(_ =>
 {
-    RuntimeOptions.RuntimeLibraryOrder = [
+    RuntimeOptions.RuntimeLibraryOrder =
+    [
         RuntimeLibrary.Cuda,
         RuntimeLibrary.Cpu,
         RuntimeLibrary.CpuNoAvx
@@ -29,16 +35,9 @@ builder.Services.AddSingleton<WhisperProcessor>(_ =>
     return factory.CreateBuilder().WithLanguage("en").Build();
 });
 
-
-
 builder.Services.AddScoped<IWhisperService, WhisperService>();
 
-
-
-
-
 var app = builder.Build();
-
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("FE");

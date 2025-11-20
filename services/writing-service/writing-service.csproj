@@ -4,27 +4,26 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>speaking_service</RootNamespace>
+    <RootNamespace>writing_service</RootNamespace>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-    <PackageReference Include="Whisper.net" Version="1.9.0-preview2" />
-    <PackageReference Include="Whisper.net.Runtime" Version="1.9.0-preview2" />
-    <PackageReference Include="Whisper.net.Runtime.Cuda" Version="1.9.0-preview2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts\" />
-    <Folder Include="Domains\" />
-    <Folder Include="Infrastructure\" />
+    <ProjectReference Include="..\_shared\Shared.Grpc\Shared.Grpc.csproj" />
+    <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
+    <ProjectReference Include="..\_shared\Shared.Security\Shared.Security.csproj" />
   </ItemGroup>
 
   <ItemGroup>

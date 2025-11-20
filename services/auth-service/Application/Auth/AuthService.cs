@@ -73,10 +73,6 @@ public class AuthService(
 
     private static string PwResetKey(string email) => $"pwreset::{email}";
 
-    
-    private string[] _userScopes = RoleBasedScopeProvider.CustomRoleOptions["USER"];
-    private string[] _adminScopes = RoleBasedScopeProvider.CustomRoleOptions["ADMIN"];
-
 
     public async Task<AuthOperationResult> RegisterAsync(RegisterDto dto, CancellationToken ct)
     {
@@ -297,7 +293,14 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
         }
 
         var roles = await userManager.GetRolesAsync(user);
-        var userScopes = RoleBasedScopeProvider.CustomRoleOptions["USER"];
+        var userScopes = new List<string>();
+        foreach (var role in roles)
+        {
+            if (RoleBasedScopeProvider.CustomRoleOptions.TryGetValue(role, out var scopes))
+            {
+                userScopes.AddRange(scopes);
+            }
+        }
         var sessionTicket = await CreateOrUpdateSessionAsync(user, context, ct);
         var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, userScopes,sessionTicket.SessionId , ct);
         return AuthOperationResult.Success(new ApiResultDto(true, "Login successfully", accessToken), sessionTicket);
@@ -380,8 +383,16 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
         }
     
         var roles = await userManager.GetRolesAsync(user);
+        var userScopes = new List<string>();
+        foreach (var role in roles)
+        {
+            if (RoleBasedScopeProvider.CustomRoleOptions.TryGetValue(role, out var scopes))
+            {
+                userScopes.AddRange(scopes);
+            }
+        }
         var sessionTicket = await CreateOrUpdateSessionAsync(user, context, ct);
-        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, _userScopes,sessionTicket.SessionId , ct);
+        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, userScopes.Distinct(),sessionTicket.SessionId , ct);
         return AuthOperationResult.Success(new ApiResultDto(true, "Login successfully", accessToken), sessionTicket);
     }
 
@@ -455,7 +466,15 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
             await sessionStore.RefreshSessionTtlAsync(session.Sid, SessionLifetime, ct);
         }
         var roles = await userManager.GetRolesAsync(user);
-        var newAccessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, _userScopes, session.Sid, ct);
+        var userScopes = new List<string>();
+        foreach (var role in roles)
+        {
+            if (RoleBasedScopeProvider.CustomRoleOptions.TryGetValue(role, out var scopes))
+            {
+                userScopes.AddRange(scopes);
+            }
+        }
+        var newAccessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, userScopes.Distinct(), session.Sid, ct);
 
         await sessionRepository.SaveChangesAsync(ct);
         return AuthOperationResult.Success(new ApiResultDto(true, "Success", newAccessToken));
