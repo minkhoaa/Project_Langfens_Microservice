@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace writing_service.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class InitWritingDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,6 +19,7 @@ namespace writing_service.Migrations
                     Title = table.Column<string>(type: "text", nullable: false),
                     TaskText = table.Column<string>(type: "text", nullable: false),
                     ExamType = table.Column<int>(type: "integer", nullable: false),
+                    Level = table.Column<string>(type: "text", nullable: true),
                     Tags = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false)

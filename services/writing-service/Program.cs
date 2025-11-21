@@ -12,6 +12,8 @@ using Shared.Security.Scopes;
 using writing_service.Contracts;
 using writing_service.Features;
 using writing_service.Features.Service;
+using writing_service.Features.Service.Admin;
+using writing_service.Features.Service.User;
 using writing_service.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +65,11 @@ builder.Services.AddCors(options =>
         .AllowCredentials());
 });
 builder.Services.AddScoped<IWritingService, WritingService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
     {
@@ -141,5 +148,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapWritingEndpoint();
+app.MapWritingAdminEndpoint();
 
 app.Run();

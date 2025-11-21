@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Shared.ExamDto.Contracts.Exam.Enums;
 using writing_service.Contracts;
 
 namespace writing_service.Domains.Entities;
@@ -14,9 +16,13 @@ public class WritingExam
 
     // IELTS_W1, IELTS_W2, TOEIC
     public WritingCategory ExamType { get; set; } = WritingCategory.TOEIC;
+    public string? Level { get; set; } = ExamLevel.B1;
+
     // "technology,education"
     public string? Tags { get; set; }           
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid CreatedBy { get; set; }
-    public ICollection<WritingSubmission> WritingSubmissions { get; set; }
+
+    [JsonIgnore]
+    public ICollection<WritingSubmission> WritingSubmissions { get; set; } = new List<WritingSubmission>();
 }

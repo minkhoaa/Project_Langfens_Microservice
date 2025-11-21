@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Shared.ExamDto.Contracts.Exam.Enums;
 using writing_service.Contracts;
 
@@ -24,7 +25,11 @@ public class WritingSubmission
     public int? TimeSpentSeconds { get; set; }
 
     public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
-    public WritingExam WritingExam { get; set; }
-    public ICollection<WritingEvaluation> WritingEvaluations { get; set; }
-    
+
+    [JsonIgnore]
+    public WritingExam WritingExam { get; set; } = null!;
+
+    [JsonIgnore]
+    public ICollection<WritingEvaluation> WritingEvaluations { get; set; } = new List<WritingEvaluation>();
+
 }

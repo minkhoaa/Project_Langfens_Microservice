@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace writing_service.Domains.Entities;
 
@@ -37,5 +38,6 @@ public class WritingEvaluation
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public WritingSubmission WritingSubmission { get; set; }
+    [JsonIgnore]
+    public WritingSubmission WritingSubmission { get; set; } = null!;
 }

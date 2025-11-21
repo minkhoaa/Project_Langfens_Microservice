@@ -12,8 +12,8 @@ using writing_service.Infrastructure.Persistence;
 namespace writing_service.Migrations
 {
     [DbContext(typeof(WritingDbContext))]
-    [Migration("20251120212440_InitDb")]
-    partial class InitDb
+    [Migration("20251121093611_InitWritingDb")]
+    partial class InitWritingDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -113,6 +113,9 @@ namespace writing_service.Migrations
 
                     b.Property<int>("ExamType")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Level")
+                        .HasColumnType("text");
 
                     b.Property<string>("Tags")
                         .HasColumnType("text");

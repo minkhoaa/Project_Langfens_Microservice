@@ -1,39 +1,86 @@
-using System.Security.Claims;
+using System.Formats.Asn1;
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
-using Shared.Security.Claims;
 using writing_service.Contracts;
+using writing_service.Domains.Entities;
 using writing_service.Features.Helper;
+using writing_service.Infrastructure.Persistence;
 
-namespace writing_service.Features.Service;
+namespace writing_service.Features.Service.User;
 
 public interface IWritingService
 {
-    Task<IResult> WritingGrader(ContentSubmission submission, CancellationToken token, ClaimsPrincipal user);
+    Task<IResult> WritingSubmit(WritingSubmissionRequest request, CancellationToken token);
+    Task<IResult> StartWritingExam(Guid examId, CancellationToken token);
+    
+    
+    
+    
 }
-
 
 public class WritingService : IWritingService
 {
     private readonly OpenRouterOptions _router;
     private readonly IHttpClientFactory _client;
+    private readonly IUserContext _user;
+    private readonly WritingDbContext _context;
 
-    public WritingService(IOptions<OpenRouterOptions> router, IHttpClientFactory client)
+    public WritingService(IOptions<OpenRouterOptions> router, 
+        IHttpClientFactory client,
+        IUserContext user,
+        WritingDbContext context
+        )
     {
         _client = client;
         _router = router.Value;
+        _user = user;
+        _context = context;
     }
-    public async Task<IResult> WritingGrader(ContentSubmission submission, CancellationToken token, ClaimsPrincipal user)
+    public async Task<IResult> WritingSubmit(WritingSubmissionRequest request,
+        CancellationToken token)
     {
-        var userId = Guid.Parse(user.FindFirstValue(CustomClaims.Sub)!);
-        Console.Write(userId);
-        var res = await WritingGraderHelper(submission, token);
         
+        var userId = _user.UserId;
+        var exam = await _context.WritingExams.AsNoTracking().Where(x => x.Id == request.ExamId).FirstOrDefaultAsync(token)
+                   ?? throw new Exception("Exam is not existed");
+      
+        var res = await WritingGraderHelper(new ContentSubmission{Answer = request.Answer, Task = exam.TaskText}, token);
+
+        var submission = new WritingSubmission
+        {
+            UserId = userId,
+            ExamId = request.ExamId,
+            TaskTextSnapshot = exam.TaskText,
+            EssayRaw = request.Answer,
+            EssayNormalized = request.Answer,
+            ExamType = exam.ExamType,
+            WordCount = res.WordCount,
+            Level = exam.Level,
+            TimeSpentSeconds = request.TimeSpentSeconds,
+            SubmittedAt = DateTime.UtcNow,
+        };
+        _context.WritingSubmissions.Add(submission);
+        await _context.SaveChangesAsync(token);
         
-        return Results.Ok(res);
+        return Results.Ok(new ApiResultDto(true, "Submitted", new {submission.Id, res}));
     }
+
+    public async Task<IResult> StartWritingExam(Guid examId, CancellationToken token)
+    {
+        var userId = _user.UserId;
+        var response = await _context.WritingExams.AsNoTracking()
+                              .Where(x => x.Id == examId)
+                              .Select(x =>
+                                  new StartWritingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.CreatedAt,
+                                      x.CreatedBy, userId))
+                              .FirstOrDefaultAsync(token)
+                          ?? throw new Exception("Exam id is not existed");
+        return Results.Ok(new ApiResultDto(true, "Start successfully", response));
+    }
+
     private async Task<WritingGradeResponse> WritingGraderHelper( ContentSubmission submission ,CancellationToken token)
     {
         var client = _client.CreateClient("openrouter");

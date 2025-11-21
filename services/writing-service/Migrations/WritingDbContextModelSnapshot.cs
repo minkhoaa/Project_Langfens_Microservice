@@ -111,6 +111,9 @@ namespace writing_service.Migrations
                     b.Property<int>("ExamType")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Level")
+                        .HasColumnType("text");
+
                     b.Property<string>("Tags")
                         .HasColumnType("text");
 
