@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Shared.Security.Claims;
 
-namespace writing_service.Features.Service.User;
+namespace writing_service.Features.Helper;
 
 public interface IUserContext
 {

@@ -63,6 +63,7 @@ public class WritingService : IWritingService
             SubmittedAt = DateTime.UtcNow,
         };
         _context.WritingSubmissions.Add(submission);
+        
         await _context.SaveChangesAsync(token);
         
         return Results.Ok(new ApiResultDto(true, "Submitted", new {submission.Id, res}));
@@ -129,13 +130,13 @@ public class WritingService : IWritingService
             throw new InvalidOperationException("Model returned empty content.");
         var trimmed = assistantContent.Trim();
 
-        // Nếu model trả về dạng ```json ... ```
+        
         if (trimmed.StartsWith("```"))
         {
             var firstNewLine = trimmed.IndexOf('\n');
             if (firstNewLine >= 0)
             {
-                trimmed = trimmed[(firstNewLine + 1)..]; // bỏ dòng ```json
+                trimmed = trimmed[(firstNewLine + 1)..]; 
                 var fenceIndex = trimmed.LastIndexOf("```", StringComparison.Ordinal);
                 if (fenceIndex >= 0)
                     trimmed = trimmed[..fenceIndex];
@@ -161,7 +162,36 @@ public class WritingService : IWritingService
         }
         if (jsonRes is null) throw new InvalidOperationException("Cannot convert into Object");
         var resp = LlmToResponseHelper.MapToResponse(submission, jsonRes);
+        var evaluation = MapToEvaluation(resp, jsonRes);
+        _context.WritingEvaluations.Add(evaluation);
+        await _context.SaveChangesAsync(token); 
         return resp;
+    }
+
+    private WritingEvaluation MapToEvaluation(WritingGradeResponse response, LlmWritingScoreCompact raw)
+    {
+        var evaluation = new WritingEvaluation
+        {
+            SubmissionId = response.SubmissionId,
+            OverallBand = response.OverallBand,
+            CoherenceAndCohesionBand = response.CoherenceAndCohesion.Band,
+            CoherenceAndCohesionComment = response.CoherenceAndCohesion.Comment,
+            GrammaticalRangeAndAccuracyBand = response.GrammaticalRangeAndAccuracy.Band,
+            GrammaticalRangeAndAccuracyComment = response.GrammaticalRangeAndAccuracy.Comment,
+            CreatedAt = DateTime.UtcNow,
+            LexicalResourceBand = response.LexicalResource.Band,
+            LexicalResourceComment = response.LexicalResource.Comment,
+            ImprovedParagraph = response.ImprovedParagraph,
+            Model = "OpenAI",
+            TaskResponseBand = response.TaskResponse.Band,
+            TaskResponseComment = response.TaskResponse.Comment,
+            Provider = "OpenAI",
+            SuggestionsJson = JsonSerializer.Serialize(response.Suggestions),
+            RawLlmJson = JsonSerializer.Serialize(raw),
+            PromptSchemaVersion = "v1"
+        };
+        return evaluation;
+
     }
     
 }
