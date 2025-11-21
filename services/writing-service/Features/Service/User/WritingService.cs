@@ -95,7 +95,7 @@ public class WritingService : IWritingService
             "ob=overall; ta,cc,lr,gr=criteria; s=suggestions; b=band; c=comment; p=improved paragraph.";
 
         var userContent = $"T:{submission.Task}\nE:{submission.Answer}";
-
+    
         var payload = new
         {
             model = _router.Model,
@@ -108,6 +108,7 @@ public class WritingService : IWritingService
             max_tokens = 800
         };
         var json = JsonSerializer.Serialize(payload);
+        
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await client.PostAsync("chat/completions", content, token);
         if (!response.IsSuccessStatusCode)
@@ -126,8 +127,38 @@ public class WritingService : IWritingService
         
         if (string.IsNullOrWhiteSpace(assistantContent))
             throw new InvalidOperationException("Model returned empty content.");
-        Console.Write(_router.BaseUrl);
-        var jsonRes = JsonSerializer.Deserialize<LlmWritingScoreCompact>(assistantContent);
+        var trimmed = assistantContent.Trim();
+
+        // Nếu model trả về dạng ```json ... ```
+        if (trimmed.StartsWith("```"))
+        {
+            var firstNewLine = trimmed.IndexOf('\n');
+            if (firstNewLine >= 0)
+            {
+                trimmed = trimmed[(firstNewLine + 1)..]; // bỏ dòng ```json
+                var fenceIndex = trimmed.LastIndexOf("```", StringComparison.Ordinal);
+                if (fenceIndex >= 0)
+                    trimmed = trimmed[..fenceIndex];
+            }
+            trimmed = trimmed.Trim();
+        }
+        if (!(trimmed.StartsWith("{") || trimmed.StartsWith("[")))
+        {
+            throw new InvalidOperationException(
+                $"Model did not return JSON. Starts with: {trimmed[..Math.Min(trimmed.Length, 50)]}");
+        }
+        LlmWritingScoreCompact jsonRes;
+        try
+        {
+            jsonRes = JsonSerializer.Deserialize<LlmWritingScoreCompact>(trimmed)
+                      ?? throw new InvalidOperationException("Cannot convert model JSON into object.");
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException(
+                $"Failed to parse model JSON. Content: {trimmed[..Math.Min(trimmed.Length, 200)]}",
+                ex);
+        }
         if (jsonRes is null) throw new InvalidOperationException("Cannot convert into Object");
         var resp = LlmToResponseHelper.MapToResponse(submission, jsonRes);
         return resp;

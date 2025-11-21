@@ -161,6 +161,7 @@
       dockerfile: services/writing-service/Dockerfile
     environment:
       - CONNECTIONSTRING__WRITING=Host=writing-database;Port=5432;Database=writing-db;Username=writing;Password=writing
+      - LLM__APIKEY=
     restart: unless-stopped
     ports:
       - "8091:8080"

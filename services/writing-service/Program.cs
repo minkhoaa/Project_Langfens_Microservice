@@ -11,7 +11,6 @@ using Shared.Security.Roles;
 using Shared.Security.Scopes;
 using writing_service.Contracts;
 using writing_service.Features;
-using writing_service.Features.Service;
 using writing_service.Features.Service.Admin;
 using writing_service.Features.Service.User;
 using writing_service.Infrastructure.Persistence;
@@ -119,10 +118,11 @@ builder.Services.AddAuthorization(option =>
 });
 builder.Services.Configure<OpenRouterOptions>(builder.Configuration.GetSection("OpenRouter"));
 var openRouterSettings = builder.Configuration.GetSection("OpenRouter").Get<OpenRouterOptions>();
+var apiKey = Environment.GetEnvironmentVariable("LLM__APIKEY") ?? openRouterSettings!.ApiKey ?? throw new Exception("LLM api key is missing");
 builder.Services.AddHttpClient("openrouter", client =>
 {
     client.BaseAddress = new Uri(openRouterSettings!.BaseUrl);
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", openRouterSettings.ApiKey);
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
     if (!string.IsNullOrWhiteSpace(openRouterSettings.Referer))
         client.DefaultRequestHeaders.Add("HTTP-Referer", openRouterSettings.Referer);
 
