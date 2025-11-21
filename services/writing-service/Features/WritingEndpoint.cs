@@ -13,7 +13,7 @@ public static class WritingEndpoint
     }
     public static void MapWritingAdminEndpoint(this IEndpointRouteBuilder route)
     {
-        var app = route.MapGroup("/api/admin");
+        var app = route.MapGroup("/api/admin/speaking");
         app.MapPost("/create", WritingHandler.CreateExamHandler);
 
     }

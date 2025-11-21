@@ -1,31 +1,25 @@
-using writing_service.Contracts;
+using speaking_service.Contracts;
 
-namespace writing_service.Features.Helper;
+namespace speaking_service.Features.Helper;
 
 public static class LlmToResponseHelper
 {
-    public static WritingGradeResponse MapToResponse(ContentSubmission submission, LlmWritingScoreCompact compact)
+    public static SpeakingGradeResponse MapToResponse(ContentSubmission submission, LlmSpeakingScoreCompact compact)
     {
-        var wordCount = CountWords(submission.Answer);
+        var wordCount = CountWords(submission.Transcript);
 
-        return new WritingGradeResponse
+        return new SpeakingGradeResponse
         {
-
+            SubmissionId = Guid.NewGuid(),
             TaskText = submission.Task,
-            EssayRaw = submission.Answer,
-            EssayNormalized = submission.Answer,
+            TranscriptRaw = submission.Transcript,
+            TranscriptNormalized = submission.Transcript,
             WordCount = wordCount,
             OverallBand = compact.OverallBand,
-
-            TaskResponse = new CriterionScore
+            FluencyAndCoherence = new CriterionScore
             {
-                Band = compact.TaskResponse.Band,
-                Comment = compact.TaskResponse.Comment
-            },
-            CoherenceAndCohesion = new CriterionScore
-            {
-                Band = compact.CoherenceAndCohesion.Band,
-                Comment = compact.CoherenceAndCohesion.Comment
+                Band = compact.FluencyAndCoherence.Band,
+                Comment = compact.FluencyAndCoherence.Comment
             },
             LexicalResource = new CriterionScore
             {
@@ -37,13 +31,17 @@ public static class LlmToResponseHelper
                 Band = compact.GrammaticalRangeAndAccuracy.Band,
                 Comment = compact.GrammaticalRangeAndAccuracy.Comment
             },
-
+            Pronunciation = new CriterionScore
+            {
+                Band = compact.Pronunciation.Band,
+                Comment = compact.Pronunciation.Comment
+            },
             Suggestions = compact.Suggestions,
-            ImprovedParagraph = compact.ImprovedParagraph,
+            ImprovedAnswer = compact.ImprovedAnswer,
             Model = Environment.GetEnvironmentVariable("OPENROUTER__MODEL") ?? "",
             ModelProvider = "LLM Provider",
             GradedAt = DateTimeOffset.UtcNow,
-            RawLlmJson = null 
+            RawLlmJson = null
         };
     }
 

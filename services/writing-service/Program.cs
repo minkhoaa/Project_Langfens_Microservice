@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Text;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,11 +17,10 @@ using writing_service.Features.Service.Admin;
 using writing_service.Features.Service.User;
 using writing_service.Infrastructure.Persistence;
 
+DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__WRITING") ??
                        builder.Configuration.GetConnectionString("Writing_DB");
@@ -118,11 +118,27 @@ builder.Services.AddAuthorization(option =>
              || o.User.HasAnyScope(WritingScope.WritingViewAny) || o.User.IsInRole(Roles.Admin)));
 });
 builder.Services.Configure<OpenRouterOptions>(builder.Configuration.GetSection("OpenRouter"));
-var openRouterSettings = builder.Configuration.GetSection("OpenRouter").Get<OpenRouterOptions>();
-var apiKey = Environment.GetEnvironmentVariable("LLM__APIKEY") ?? openRouterSettings!.ApiKey ?? throw new Exception("LLM api key is missing");
+var openRouterSettings = builder.Configuration.GetSection("OpenRouter").Get<OpenRouterOptions>() ?? new OpenRouterOptions();
+
+var envApiKey = Environment.GetEnvironmentVariable("LLM__APIKEY");
+var apiKey = string.IsNullOrWhiteSpace(envApiKey) 
+    ? openRouterSettings.ApiKey 
+    : envApiKey;
+
+var envBaseUrl = Environment.GetEnvironmentVariable("OPENROUTER__BASEURL");
+var baseUrl = string.IsNullOrWhiteSpace(envBaseUrl) ? openRouterSettings.BaseUrl : envBaseUrl;
+if (string.IsNullOrWhiteSpace(baseUrl))
+    throw new Exception("OpenRouter base url is missing");
+baseUrl = baseUrl.TrimEnd('/') + "/";
+
+var envModel = Environment.GetEnvironmentVariable("OPENROUTER__MODEL");
+var model = string.IsNullOrWhiteSpace(envModel) ? openRouterSettings.Model : envModel;
+
+if (string.IsNullOrWhiteSpace(apiKey))
+    throw new Exception("LLM api key is missing");
 builder.Services.AddHttpClient("openrouter", client =>
 {
-    client.BaseAddress = new Uri(openRouterSettings!.BaseUrl);
+    client.BaseAddress = new Uri(baseUrl);
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
     if (!string.IsNullOrWhiteSpace(openRouterSettings.Referer))
         client.DefaultRequestHeaders.Add("HTTP-Referer", openRouterSettings.Referer);

@@ -138,7 +138,8 @@
       context: ..
       dockerfile: services/speaking-service/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - CONNECTIONSTRING__SPEAKING=Host=speaking-database;Port=5432;Database=speaking-db;Username=speaking;Password=speaking
+      - LLM__APIKEY=
     expose:
       - "8080"
     ports:
@@ -332,6 +333,25 @@
     volumes: [ "pgdata:/var/lib/postgresql/writing-data" ]
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U writing -d writing-db -h 127.0.0.1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+    
+  speaking-database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: speaking-db
+      POSTGRES_USER: speaking
+      POSTGRES_PASSWORD: speaking
+    ports:
+      - 5441:5432
+    networks:
+      - backend
+    volumes: [ "pgdata:/var/lib/postgresql/speaking-data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U speaking -d speaking-db -h 127.0.0.1" ]
       interval: 5s
       timeout: 5s
       retries: 20

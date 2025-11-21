@@ -3,21 +3,31 @@ using System.Text;
 using speaking_service.Features.Helper;
 using Whisper.net;
 
-namespace speaking_service.Features.Services;
+namespace speaking_service.Features.Services.Helper;
 
 
 
 public interface IWhisperService
 {
-    Task<IResult> Transcript(IFormFile request, WhisperProcessor processor);
+    Task<string> Transcript(IFormFile request);
     Task HandleWebsocketAsync(HttpContext context, WhisperProcessor processor, CancellationToken token);
     
 }
 public class WhisperService : IWhisperService
 {
-    
-    public async Task<IResult> Transcript(IFormFile request, WhisperProcessor processor)
+    private readonly IHttpContextAccessor _http;
+    private readonly WhisperFactory _processorFactory;
+    public WhisperService(IHttpContextAccessor http, WhisperFactory processorFactory)
     {
+        _http = http;
+        _processorFactory = processorFactory; 
+    }
+    public async Task<string> Transcript(IFormFile request)
+    {
+        await using var processor = _processorFactory
+            .CreateBuilder()
+            .WithLanguage("en")
+            .Build();
         var tempInputPath = Path.GetTempFileName();
         string? tempNormalizedPath = null;
         try
@@ -37,7 +47,7 @@ public class WhisperService : IWhisperService
                 textBuilder.Append(segment.Text);
             }
 
-            return Results.Ok(new { transcript = textBuilder.ToString() });
+            return textBuilder.ToString();
         }
         finally
         {

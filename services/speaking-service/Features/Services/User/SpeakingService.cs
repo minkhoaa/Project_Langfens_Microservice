@@ -3,97 +3,102 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
-using writing_service.Contracts;
-using writing_service.Domains.Entities;
-using writing_service.Features.Helper;
-using writing_service.Infrastructure.Persistence;
+using speaking_service.Contracts;
+using speaking_service.Domains.Entities;
+using speaking_service.Features.Helper;
+using speaking_service.Features.Services.Helper;
+using speaking_service.Infrastructure.Persistence;
 
-namespace writing_service.Features.Service.User;
+namespace speaking_service.Features.Services.User;
 
-public interface IWritingService
+
+public interface ISpeakingService
 {
-    Task<IResult> WritingSubmit(WritingSubmissionRequest request, CancellationToken token);
-    Task<IResult> StartWritingExam(Guid examId, CancellationToken token);
-    
+    Task<IResult> SpeakingSubmit(SpeakingSubmitForm submitForm, CancellationToken token);
+    Task<IResult> StartSpeakingExam(Guid examId, CancellationToken token);
 }
 
-public class WritingService : IWritingService
+public class SpeakingService : ISpeakingService
 {
-    private readonly OpenRouterOptions _router;
-    private readonly IHttpClientFactory _client;
+    private readonly SpeakingDbContext _context;
     private readonly IUserContext _user;
-    private readonly WritingDbContext _context;
-
-    public WritingService(IOptions<OpenRouterOptions> router, 
-        IHttpClientFactory client,
-        IUserContext user,
-        WritingDbContext context
-        )
+    private readonly IHttpClientFactory _client;
+    private readonly OpenRouterOptions _router;
+    private readonly IWhisperService _whisper;
+    public SpeakingService(SpeakingDbContext context, IUserContext user, 
+        IOptions<OpenRouterOptions> router,
+        IWhisperService whisper,
+        IHttpClientFactory client)
     {
+        _whisper = whisper;
+        _context = context;
+        _user = user;
         _client = client;
         _router = router.Value;
-        _user = user;
-        _context = context;
     }
-    public async Task<IResult> WritingSubmit(WritingSubmissionRequest request,
-        CancellationToken token)
-    {
-        var userId = _user.UserId;
-        var exam = await _context.WritingExams.AsNoTracking().Where(x => x.Id == request.ExamId).FirstOrDefaultAsync(token)
-                   ?? throw new Exception("Exam is not existed");
-      
-        var (res, raw) = await WritingGraderHelper(new ContentSubmission{Answer = request.Answer, Task = exam.TaskText}, token);
 
-        var submission = new WritingSubmission
+    public async Task<IResult> SpeakingSubmit(SpeakingSubmitForm submitForm ,CancellationToken token)
+    {
+        var transcript = await _whisper.Transcript(submitForm.Speech);
+        var userId = _user.UserId;
+        var exam = await _context.SpeakingExams.AsNoTracking().Where(x => x.Id == submitForm.ExamId)
+            .FirstOrDefaultAsync(token) ?? throw new Exception("Exam is not existed");
+
+        var (res, raw) = await SpeakingGraderHelper(new ContentSubmission
+        {
+            Task = exam.TaskText,
+            Transcript = transcript
+        }, token);
+
+        var submission = new SpeakingSubmission()
         {
             UserId = userId,
-            ExamId = request.ExamId,
+            ExamId = submitForm.ExamId,
             TaskTextSnapshot = exam.TaskText,
-            EssayRaw = request.Answer,
-            EssayNormalized = request.Answer,
+            TranscriptRaw = transcript,
+            TranscriptNormalized = transcript,
             ExamType = exam.ExamType,
             WordCount = res.WordCount,
             Level = exam.Level,
-            TimeSpentSeconds = request.TimeSpentSeconds,
+            TimeSpentSeconds = submitForm.TimeSpentSeconds,
             SubmittedAt = DateTime.UtcNow,
         };
-        await _context.WritingSubmissions.AddAsync(submission, token);
-        
+        await _context.SpeakingSubmissions.AddAsync(submission, token);
         res.SubmissionId = submission.Id;
         var evaluation = MapToEvaluation(res, raw);
-        _context.WritingEvaluations.Add(evaluation);
+        _context.SpeakingEvaluations.Add(evaluation);
         await _context.SaveChangesAsync(token);
-        
         return Results.Ok(new ApiResultDto(true, "Submitted", new {submission.Id, res}));
+ 
     }
 
-    public async Task<IResult> StartWritingExam(Guid examId, CancellationToken token)
+    public async Task<IResult> StartSpeakingExam(Guid examId, CancellationToken token)
     {
         var userId = _user.UserId;
-        var response = await _context.WritingExams.AsNoTracking()
-                              .Where(x => x.Id == examId)
-                              .Select(x =>
-                                  new StartWritingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.CreatedAt,
-                                      x.CreatedBy, userId))
-                              .FirstOrDefaultAsync(token)
-                          ?? throw new Exception("Exam id is not existed");
+        var response = await _context.SpeakingExams.AsNoTracking()
+                           .Where(x => x.Id == examId)
+                           .Select(x =>
+                               new StartSpeakingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.CreatedAt,
+                                   x.CreatedBy, userId))
+                           .FirstOrDefaultAsync(token)
+                       ?? throw new Exception("Exam id is not existed");
         return Results.Ok(new ApiResultDto(true, "Start successfully", response));
     }
-
-    private async Task<(WritingGradeResponse, LlmWritingScoreCompact)> WritingGraderHelper( ContentSubmission submission ,CancellationToken token)
+    
+    
+    
+    
+    
+    private async Task<(SpeakingGradeResponse, LlmSpeakingScoreCompact)> SpeakingGraderHelper( ContentSubmission submission ,CancellationToken token)
     {
         var client = _client.CreateClient("openrouter");
         var systemPrompt =
-            "IELTS W2 examiner. Score essay 0-9. " +
-            "Reply ONLY JSON:{\"ob\":6.5," +
-            "\"ta\":{\"b\":6,\"c\":\"...\"}," +
-            "\"cc\":{\"b\":6,\"c\":\"...\"}," +
-            "\"lr\":{\"b\":7,\"c\":\"...\"}," +
-            "\"gr\":{\"b\":6,\"c\":\"...\"}," +
-            "\"s\":[\"...\"],\"p\":\"...\"}. " +
-            "ob=overall; ta,cc,lr,gr=criteria; s=suggestions; b=band; c=comment; p=improved paragraph.";
+            "IELTS speaking examiner. Score 0-9. Reply ONLY JSON:{\"ob\":6.5," +
+            "\"fc\":{\"b\":6,\"c\":\"...\"},\"lr\":{\"b\":7,\"c\":\"...\"}," +
+            "\"gr\":{\"b\":6,\"c\":\"...\"},\"pr\":{\"b\":6,\"c\":\"...\"}," +
+            "\"s\":[\"...\"],\"p\":\"...\"}. ob=overall; fc,lr,gr,pr=criteria; s=suggestions; b=band; c=comment; p=improved answer.";
 
-        var userContent = $"T:{submission.Task}\nE:{submission.Answer}";
+        var userContent = $"T:{submission.Task}\nE:{submission.Transcript}";
     
         var payload = new
         {
@@ -104,7 +109,8 @@ public class WritingService : IWritingService
                 new { role = "user", content = userContent }
             },
             temperature = 0.2,
-            max_tokens = 800
+            max_tokens = 800,
+            response_format = new { type = "json_object" }
         };
         var json = JsonSerializer.Serialize(payload);
         
@@ -117,6 +123,12 @@ public class WritingService : IWritingService
         }
 
         var responseText = await response.Content.ReadAsStringAsync(token);
+        var responseTrimmed = responseText.TrimStart();
+        if (!(responseTrimmed.StartsWith("{") || responseTrimmed.StartsWith("[")))
+        {
+            throw new InvalidOperationException(
+                $"OpenRouter returned non-JSON. Status {(int)response.StatusCode}. Starts with: {responseTrimmed[..Math.Min(responseTrimmed.Length, 120)]}");
+        }
         using var doc = JsonDocument.Parse(responseText);
         var assistantContent = doc.RootElement
             .GetProperty("choices")[0]
@@ -146,10 +158,10 @@ public class WritingService : IWritingService
             throw new InvalidOperationException(
                 $"Model did not return JSON. Starts with: {trimmed[..Math.Min(trimmed.Length, 50)]}");
         }
-        LlmWritingScoreCompact jsonRes;
+        LlmSpeakingScoreCompact jsonRes;
         try
         {
-            jsonRes = JsonSerializer.Deserialize<LlmWritingScoreCompact>(trimmed)
+            jsonRes = JsonSerializer.Deserialize<LlmSpeakingScoreCompact>(trimmed)
                       ?? throw new InvalidOperationException("Cannot convert model JSON into object.");
         }
         catch (JsonException ex)
@@ -163,23 +175,23 @@ public class WritingService : IWritingService
         return (resp, jsonRes);
     }
 
-    private WritingEvaluation MapToEvaluation(WritingGradeResponse response, LlmWritingScoreCompact raw)
+    private SpeakingEvaluation MapToEvaluation(SpeakingGradeResponse response, LlmSpeakingScoreCompact raw)
     {
-        var evaluation = new WritingEvaluation
+        var evaluation = new SpeakingEvaluation
         {
             SubmissionId = response.SubmissionId,
             OverallBand = response.OverallBand,
-            CoherenceAndCohesionBand = response.CoherenceAndCohesion.Band,
-            CoherenceAndCohesionComment = response.CoherenceAndCohesion.Comment,
+            FluencyAndCoherenceBand = response.FluencyAndCoherence.Band,
+            FluencyAndCoherenceComment = response.FluencyAndCoherence.Comment,
             GrammaticalRangeAndAccuracyBand = response.GrammaticalRangeAndAccuracy.Band,
             GrammaticalRangeAndAccuracyComment = response.GrammaticalRangeAndAccuracy.Comment,
             CreatedAt = DateTime.UtcNow,
             LexicalResourceBand = response.LexicalResource.Band,
             LexicalResourceComment = response.LexicalResource.Comment,
-            ImprovedParagraph = response.ImprovedParagraph,
+            ImprovedAnswer = response.ImprovedAnswer,
             Model = response.Model,
-            TaskResponseBand = response.TaskResponse.Band,
-            TaskResponseComment = response.TaskResponse.Comment,
+            PronunciationBand = response.Pronunciation.Band,
+            PronunciationComment = response.Pronunciation.Comment,
             Provider = "LLM Provider",
             SuggestionsJson = JsonSerializer.Serialize(response.Suggestions),
             RawLlmJson = JsonSerializer.Serialize(raw),
