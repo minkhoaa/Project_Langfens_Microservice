@@ -12,7 +12,6 @@ public static class SpeakingEndpoint
         app.MapPost("/grade", SpeakingHandler.SubmitHandler)
             .Accepts<SpeakingSubmitForm>("multipart/form-data")
             .DisableAntiforgery();
-
     }
 
     public static void MapWebsocketSpeaking(this IEndpointRouteBuilder route)
@@ -20,11 +19,10 @@ public static class SpeakingEndpoint
         var app = route.MapGroup("/ws/speaking");
         app.Map("/transcript", WhisperHandler.HandleWebsocketAsync);
     }
-  
+
     public static void MapSpeakingAdminEndpoint(this IEndpointRouteBuilder route)
     {
         var app = route.MapGroup("/api/admin/speaking");
         app.MapPost("/create", SpeakingHandler.CreateExamHandler);
-
     }
 }
