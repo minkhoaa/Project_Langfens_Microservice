@@ -17,7 +17,7 @@ using writing_service.Features.Service.Admin;
 using writing_service.Features.Service.User;
 using writing_service.Infrastructure.Persistence;
 
-DotNetEnv.Env.Load();
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 

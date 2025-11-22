@@ -1,4 +1,5 @@
 using System.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
 using speaking_service.Contracts;
@@ -11,7 +12,9 @@ namespace speaking_service.Features.Services.Admin;
 
 public interface IAdminService
 {
-    Task<IResult> CreateExam(CreateSpeakingExamRequest request, CancellationToken token); 
+    Task<IResult> CreateExam(CreateSpeakingExamRequest request, CancellationToken token);
+    Task<IResult> UpdateExam(Guid examId, UpdateSpeakingExamRequest request, CancellationToken token);
+    Task<IResult> DeleteExam(Guid examId, CancellationToken token);
 }
 
 public class AdminService : IAdminService
@@ -35,11 +38,7 @@ public class AdminService : IAdminService
 
     public async Task<IResult> CreateExam(CreateSpeakingExamRequest request, CancellationToken token)
     {
-        if (!(request.ExamType == SpeakingCategory.TOEIC
-              || request.ExamType == SpeakingCategory.SPEAKING_PART1
-              || request.ExamType == SpeakingCategory.SPEAKING_PART3
-              || request.ExamType == SpeakingCategory.SPEAKING_PART2))
-            throw new InvalidExpressionException("Exam type is 0, 1 ,2"); 
+        ValidateExamType(request.ExamType);
         var newExam = new SpeakingExam()
         {
             Title = request.Title,
@@ -54,5 +53,48 @@ public class AdminService : IAdminService
         await _context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Created exam successfully",
             new { newExam.Id, newExam.Title, newExam.CreatedBy }));
+    }
+
+    public async Task<IResult> UpdateExam(Guid examId, UpdateSpeakingExamRequest request, CancellationToken token)
+    {
+        ValidateExamType(request.ExamType);
+        var exam = await _context.SpeakingExams.FirstOrDefaultAsync(x => x.Id == examId, token);
+        if (exam is null)
+            return Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId }));
+
+        exam.Title = request.Title;
+        exam.TaskText = request.TaskText;
+        exam.ExamType = request.ExamType;
+        exam.Level = request.Level;
+        exam.Tags = request.Tag;
+
+        await _context.SaveChangesAsync(token);
+        return Results.Ok(new ApiResultDto(true, "Updated exam successfully", new { exam.Id, exam.Title }));
+    }
+
+    public async Task<IResult> DeleteExam(Guid examId, CancellationToken token)
+    {
+        var exam = await _context.SpeakingExams.FirstOrDefaultAsync(x => x.Id == examId, token);
+        if (exam is null)
+            return Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId }));
+
+        var hasSubmission = await _context.SpeakingSubmissions.AnyAsync(x => x.ExamId == examId, token);
+        if (hasSubmission)
+            return Results.BadRequest(new ApiResultDto(false, "Cannot delete exam with existing submissions",
+                new { examId }));
+
+        _context.SpeakingExams.Remove(exam);
+        await _context.SaveChangesAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Deleted exam successfully", new { exam.Id }));
+    }
+
+    private static void ValidateExamType(SpeakingCategory examType)
+    {
+        if (!(examType == SpeakingCategory.TOEIC
+              || examType == SpeakingCategory.SPEAKING_PART1
+              || examType == SpeakingCategory.SPEAKING_PART3
+              || examType == SpeakingCategory.SPEAKING_PART2))
+            throw new InvalidExpressionException("Exam type is 0, 1 ,2");
     }
 }

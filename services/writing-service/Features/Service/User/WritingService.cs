@@ -14,6 +14,9 @@ public interface IWritingService
 {
     Task<IResult> WritingSubmit(WritingSubmissionRequest request, CancellationToken token);
     Task<IResult> StartWritingExam(Guid examId, CancellationToken token);
+    Task<IResult> GetExam(Guid examId, CancellationToken token);
+    Task<IResult> GetExams(CancellationToken token);
+    Task<IResult> GetHistory(CancellationToken token);
     
 }
 
@@ -78,6 +81,57 @@ public class WritingService : IWritingService
                               .FirstOrDefaultAsync(token)
                           ?? throw new Exception("Exam id is not existed");
         return Results.Ok(new ApiResultDto(true, "Start successfully", response));
+    }
+
+    public async Task<IResult> GetExam(Guid examId, CancellationToken token)
+    {
+        var exam = await _context.WritingExams.AsNoTracking()
+            .Where(x => x.Id == examId)
+            .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
+                x.CreatedAt, x.CreatedBy))
+            .FirstOrDefaultAsync(token);
+
+        return exam is null
+            ? Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId }))
+            : Results.Ok(new ApiResultDto(true, "Fetched exam successfully", exam));
+    }
+
+    public async Task<IResult> GetExams(CancellationToken token)
+    {
+        var exams = await _context.WritingExams.AsNoTracking()
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
+                x.CreatedAt, x.CreatedBy))
+            .ToListAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Fetched exams successfully", exams));
+    }
+
+    public async Task<IResult> GetHistory(CancellationToken token)
+    {
+        var userId = _user.UserId;
+        var history = await _context.WritingSubmissions.AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.SubmittedAt)
+            .Select(x => new WritingHistoryItem(
+                x.Id,
+                x.ExamId,
+                x.WritingExam != null ? x.WritingExam.Title : x.TaskTextSnapshot,
+                x.TaskTextSnapshot,
+                x.ExamType,
+                x.Level,
+                x.WritingExam != null ? x.WritingExam.Tags : null,
+                x.TimeSpentSeconds,
+                x.SubmittedAt,
+                _context.WritingEvaluations
+                    .Where(e => e.SubmissionId == x.Id)
+                    .OrderByDescending(e => e.CreatedAt)
+                    .Select(e => e.OverallBand)
+                    .FirstOrDefault()
+            ))
+            .ToListAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Fetched writing history successfully", history));
     }
 
     private async Task<(WritingGradeResponse, LlmWritingScoreCompact)> WritingGraderHelper( ContentSubmission submission ,CancellationToken token)
