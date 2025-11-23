@@ -53,4 +53,13 @@ public static class AttemptHandler
         CancellationToken token,
         IAttemptService service
     ) => service.GetAttemptList(user, page, pageSize, status, examId, token);
+
+    public static Task<IResult> GetAttemptListAdmin(
+        int page,
+        int pageSize,
+        string? status,
+        Guid? examId,
+        CancellationToken token,
+        IAttemptService service
+    ) => service.GetAllAttempts(page, pageSize, status, examId, token);
 }

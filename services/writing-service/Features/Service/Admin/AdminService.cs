@@ -15,6 +15,7 @@ public interface IAdminService
     Task<IResult> CreateExam(CreateExamRequest request, CancellationToken token);
     Task<IResult> UpdateExam(Guid examId, UpdateExamRequest request, CancellationToken token);
     Task<IResult> DeleteExam(Guid examId, CancellationToken token);
+    Task<IResult> GetAllExams(CancellationToken token);
 }
 
 public class AdminService : IAdminService
@@ -70,6 +71,17 @@ public class AdminService : IAdminService
 
         await _context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Updated exam successfully", new { exam.Id, exam.Title }));
+    }
+
+    public async Task<IResult> GetAllExams(CancellationToken token)
+    {
+        var exams = await _context.WritingExams.AsNoTracking()
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
+                x.CreatedAt, x.CreatedBy))
+            .ToListAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Fetched all writing exams", exams));
     }
 
     public async Task<IResult> DeleteExam(Guid examId, CancellationToken token)

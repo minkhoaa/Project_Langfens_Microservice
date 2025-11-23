@@ -31,6 +31,9 @@ public static class WritingHandler
         IAdminService service
     ) => service.UpdateExam(examId, request, token);
 
+    public static Task<IResult> GetAdminExamsHandler(CancellationToken token, IAdminService service) =>
+        service.GetAllExams(token);
+
     public static Task<IResult> DeleteExamHandler(Guid examId, CancellationToken token, IAdminService service) =>
         service.DeleteExam(examId, token);
 }

@@ -17,6 +17,7 @@ public static class WritingEndpoint
     public static void MapWritingAdminEndpoint(this IEndpointRouteBuilder route)
     {
         var app = route.MapGroup("/api/admin/writing");
+        app.MapGet("/exams", WritingHandler.GetAdminExamsHandler).RequireAuthorization(Roles.Admin);
         app.MapPost("/create", WritingHandler.CreateExamHandler);
         app.MapPost("/exams", WritingHandler.CreateExamHandler);
         app.MapPut("/exams/{examId:guid}", WritingHandler.UpdateExamHandler);

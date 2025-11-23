@@ -16,6 +16,9 @@ public static class AdminExamEndpoint
         adminGroup.MapPost("/addexam", AdminExamHandler.AddExamHandler).RequireAuthorization(Roles.Admin)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
+        adminGroup.MapGet("/all", AdminExamHandler.GetAllExamHandler).RequireAuthorization(Roles.Admin)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status200OK);
         adminGroup.MapPut("/update/{id}", AdminExamHandler.UpdateExamHandler).RequireAuthorization(Roles.Admin)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);

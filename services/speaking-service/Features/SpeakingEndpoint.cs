@@ -27,6 +27,7 @@ public static class SpeakingEndpoint
     public static void MapSpeakingAdminEndpoint(this IEndpointRouteBuilder route)
     {
         var app = route.MapGroup("/api/admin/speaking");
+        app.MapGet("/exams", SpeakingHandler.GetAdminExamsHandler).RequireAuthorization(Roles.Admin);
         app.MapPost("/create", SpeakingHandler.CreateExamHandler);
         app.MapPost("/exams", SpeakingHandler.CreateExamHandler);
         app.MapPut("/exams/{examId:guid}", SpeakingHandler.UpdateExamHandler);
