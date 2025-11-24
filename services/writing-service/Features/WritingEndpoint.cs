@@ -10,6 +10,7 @@ public static class WritingEndpoint
         var app = route.MapGroup("/api/writing");
         app.MapPost("/grade", WritingHandler.SubmitHandler).RequireAuthorization(Roles.User);
         app.MapGet("/exams", WritingHandler.GetExamListHandler);
+        app.MapPost("/start/{examId}", WritingHandler.StartWritingExamHandler);
         app.MapGet("/exams/{examId:guid}", WritingHandler.GetExamHandler);
         app.MapGet("/history", WritingHandler.GetHistoryHandler).RequireAuthorization(Roles.User);
         

@@ -12,6 +12,11 @@ public static class WritingHandler
         return service.WritingSubmit(request, token);
     }
 
+    public static Task<IResult> StartWritingExamHandler(Guid examId, CancellationToken token,
+        IWritingService service
+    ) => service.StartWritingExam(examId, token);
+
+
     public static Task<IResult> GetExamHandler(Guid examId, CancellationToken token, IWritingService service) =>
         service.GetExam(examId, token);
 

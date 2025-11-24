@@ -12,7 +12,9 @@ public class SpeakingHandler
         CancellationToken token,
         ISpeakingService service)
         => service.SpeakingSubmit(submitForm, token);
-    
+
+    public static Task<IResult> StartSpeakingExamHandler(Guid examId, CancellationToken token, ISpeakingService service)
+        => service.StartSpeakingExam(examId, token);
 
     public static Task<IResult> GetExamHandler(Guid examId, CancellationToken token, ISpeakingService service) =>
         service.GetExam(examId, token);

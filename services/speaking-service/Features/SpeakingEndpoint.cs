@@ -16,6 +16,8 @@ public static class SpeakingEndpoint
         app.MapGet("/exams", SpeakingHandler.GetExamListHandler);
         app.MapGet("/exams/{examId:guid}", SpeakingHandler.GetExamHandler);
         app.MapGet("/history", SpeakingHandler.GetHistoryHandler).RequireAuthorization(Roles.User);
+        app.MapPost("/start/{examId}", SpeakingHandler.StartSpeakingExamHandler);
+
     }
 
     public static void MapWebsocketSpeaking(this IEndpointRouteBuilder route)
