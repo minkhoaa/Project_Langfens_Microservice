@@ -20,5 +20,9 @@ public static class AttemptEndpointMapping
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         group.MapGet("/getlistattempt", AttemptHandler.GetAttemptList)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
+
+        var admin = app.MapGroup("/api/admin/attempt")
+            .RequireAuthorization(AttemptScope.AttemptReadAny);
+        admin.MapGet("/", AttemptHandler.GetAttemptListAdmin);
     }
 }

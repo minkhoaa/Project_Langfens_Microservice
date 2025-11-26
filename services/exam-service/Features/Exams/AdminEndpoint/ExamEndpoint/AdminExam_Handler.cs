@@ -24,4 +24,9 @@ public static class AdminExamHandler
         [FromServices] IAdminExamService service,
         CancellationToken token)
         => service.DeleteAsync(id, token);
+
+    public static Task<IResult> GetAllExamHandler(
+        [FromServices] IAdminExamService service,
+        CancellationToken token)
+        => service.ListAllAsync(token);
 }

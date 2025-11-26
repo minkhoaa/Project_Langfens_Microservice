@@ -16,6 +16,9 @@ public interface ISpeakingService
 {
     Task<IResult> SpeakingSubmit(SpeakingSubmitForm submitForm, CancellationToken token);
     Task<IResult> StartSpeakingExam(Guid examId, CancellationToken token);
+    Task<IResult> GetExam(Guid examId, CancellationToken token);
+    Task<IResult> GetExams(CancellationToken token);
+    Task<IResult> GetHistory(CancellationToken token);
 }
 
 public class SpeakingService : ISpeakingService
@@ -83,6 +86,57 @@ public class SpeakingService : ISpeakingService
                            .FirstOrDefaultAsync(token)
                        ?? throw new Exception("Exam id is not existed");
         return Results.Ok(new ApiResultDto(true, "Start successfully", response));
+    }
+
+    public async Task<IResult> GetExam(Guid examId, CancellationToken token)
+    {
+        var exam = await _context.SpeakingExams.AsNoTracking()
+            .Where(x => x.Id == examId)
+            .Select(x => new SpeakingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
+                x.CreatedAt, x.CreatedBy))
+            .FirstOrDefaultAsync(token);
+
+        return exam is null
+            ? Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId }))
+            : Results.Ok(new ApiResultDto(true, "Fetched exam successfully", exam));
+    }
+
+    public async Task<IResult> GetExams(CancellationToken token)
+    {
+        var exams = await _context.SpeakingExams.AsNoTracking()
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new SpeakingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
+                x.CreatedAt, x.CreatedBy))
+            .ToListAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Fetched exams successfully", exams));
+    }
+
+    public async Task<IResult> GetHistory(CancellationToken token)
+    {
+        var userId = _user.UserId;
+        var history = await _context.SpeakingSubmissions.AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.SubmittedAt)
+            .Select(x => new SpeakingHistoryItem(
+                x.Id,
+                x.ExamId,
+                x.SpeakingExam != null ? x.SpeakingExam.Title : x.TaskTextSnapshot,
+                x.TaskTextSnapshot,
+                x.ExamType,
+                x.Level,
+                x.SpeakingExam != null ? x.SpeakingExam.Tags : null,
+                x.TimeSpentSeconds,
+                x.SubmittedAt,
+                _context.SpeakingEvaluations
+                    .Where(e => e.SubmissionId == x.Id)
+                    .OrderByDescending(e => e.CreatedAt)
+                    .Select(e => e.OverallBand)
+                    .FirstOrDefault()
+            ))
+            .ToListAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Fetched speaking history successfully", history));
     }
     
     

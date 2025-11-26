@@ -13,24 +13,23 @@ using Shared.Security.Scopes;
 using writing_service.Contracts;
 using writing_service.Features;
 using writing_service.Features.Helper;
+using writing_service.Features.Service;
 using writing_service.Features.Service.Admin;
 using writing_service.Features.Service.User;
 using writing_service.Infrastructure.Persistence;
 
-DotNetEnv.Env.Load();
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
+// Add services to the container.
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__WRITING") ??
-                       builder.Configuration.GetConnectionString("Writing_DB");
-
-builder.Services.AddDbContext<WritingDbContext>(option => option.UseNpgsql(connectionString));
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo()
     {
-        Title = "Attempt-service"
+        Title = "Writing-service"
     });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
@@ -64,11 +63,14 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod()
         .AllowCredentials());
 });
+builder.Services.AddHttpContextAccessor();
+var writingConnectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__WRITING")
+                             ?? builder.Configuration.GetConnectionString("Writing_DB");
+if (string.IsNullOrWhiteSpace(writingConnectionString))
+    throw new Exception("Connection string for writing DB is missing");
+builder.Services.AddDbContext<WritingDbContext>(option => option.UseNpgsql(writingConnectionString));
 builder.Services.AddScoped<IWritingService, WritingService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-
-
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
@@ -109,21 +111,13 @@ builder.Services.AddAuthorization(option =>
     option.AddPolicy(WritingScope.WritingViewAny, p => p.RequireAssertion(
         o => o.User.HasAnyScope(WritingScope.WritingViewAny) 
              || o.User.IsInRole(Roles.Admin)));
-    
-    option.AddPolicy("UserScope", p => p.RequireAssertion(
-        o => o.User.HasAnyScope(WritingScope.WritingStart) 
-             || o.User.HasAnyScope(WritingScope.WritingViewOwn) || o.User.IsInRole(Roles.User)));
-    option.AddPolicy("AdminScope", p => p.RequireAssertion(
-        o => o.User.HasAnyScope(WritingScope.WritingCreate) 
-             || o.User.HasAnyScope(WritingScope.WritingViewAny) || o.User.IsInRole(Roles.Admin)));
 });
 builder.Services.Configure<OpenRouterOptions>(builder.Configuration.GetSection("OpenRouter"));
 var openRouterSettings = builder.Configuration.GetSection("OpenRouter").Get<OpenRouterOptions>() ?? new OpenRouterOptions();
 
+// Prefer .env values when present
 var envApiKey = Environment.GetEnvironmentVariable("LLM__APIKEY");
-var apiKey = string.IsNullOrWhiteSpace(envApiKey) 
-    ? openRouterSettings.ApiKey 
-    : envApiKey;
+var apiKey = string.IsNullOrWhiteSpace(envApiKey) ? openRouterSettings.ApiKey : envApiKey;
 
 var envBaseUrl = Environment.GetEnvironmentVariable("OPENROUTER__BASEURL");
 var baseUrl = string.IsNullOrWhiteSpace(envBaseUrl) ? openRouterSettings.BaseUrl : envBaseUrl;
@@ -132,7 +126,8 @@ if (string.IsNullOrWhiteSpace(baseUrl))
 baseUrl = baseUrl.TrimEnd('/') + "/";
 
 var envModel = Environment.GetEnvironmentVariable("OPENROUTER__MODEL");
-var model = string.IsNullOrWhiteSpace(envModel) ? openRouterSettings.Model : envModel;
+if (!string.IsNullOrWhiteSpace(envModel))
+    openRouterSettings.Model = envModel;
 
 if (string.IsNullOrWhiteSpace(apiKey))
     throw new Exception("LLM api key is missing");
@@ -150,13 +145,6 @@ builder.Services.AddHttpClient("openrouter", client =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<WritingDbContext>();
-    await db.Database.MigrateAsync();
-}
-
-
 // Configure the HTTP request pipeline.
 
 app.UseSwagger();
@@ -166,5 +154,4 @@ app.UseAuthorization();
 
 app.MapWritingEndpoint();
 app.MapWritingAdminEndpoint();
-
 app.Run();
