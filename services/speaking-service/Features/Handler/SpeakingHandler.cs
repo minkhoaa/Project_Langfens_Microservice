@@ -11,12 +11,32 @@ public class SpeakingHandler
         [FromForm] SpeakingSubmitForm submitForm,
         CancellationToken token,
         ISpeakingService service)
-    {
-        return service.SpeakingSubmit(submitForm, token);
-    }
+        => service.SpeakingSubmit(submitForm, token);
+
+    public static Task<IResult> StartSpeakingExamHandler(Guid examId, CancellationToken token, ISpeakingService service)
+        => service.StartSpeakingExam(examId, token);
+
+    public static Task<IResult> GetExamHandler(Guid examId, CancellationToken token, ISpeakingService service) =>
+        service.GetExam(examId, token);
+
+    public static Task<IResult> GetExamListHandler(CancellationToken token, ISpeakingService service) =>
+        service.GetExams(token);
+
+    public static Task<IResult> GetHistoryHandler(CancellationToken token, ISpeakingService service) =>
+        service.GetHistory(token);
 
     public static Task<IResult> CreateExamHandler(CreateSpeakingExamRequest request,
         CancellationToken token,
          IAdminService service
     ) => service.CreateExam(request, token);
+
+    public static Task<IResult> UpdateExamHandler(Guid examId, UpdateSpeakingExamRequest request,
+        CancellationToken token,
+        IAdminService service) => service.UpdateExam(examId, request, token);
+
+    public static Task<IResult> GetAdminExamsHandler(CancellationToken token, IAdminService service) =>
+        service.GetAllExams(token);
+
+    public static Task<IResult> DeleteExamHandler(Guid examId, CancellationToken token, IAdminService service) =>
+        service.DeleteExam(examId, token);
 }

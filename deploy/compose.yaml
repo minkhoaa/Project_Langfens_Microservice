@@ -139,7 +139,8 @@
       dockerfile: services/speaking-service/Dockerfile
     environment:
       - CONNECTIONSTRING__SPEAKING=Host=speaking-database;Port=5432;Database=speaking-db;Username=speaking;Password=speaking
-      - LLM__APIKEY=
+    env_file:
+      - ../services/speaking-service/.env
     expose:
       - "8080"
     ports:
@@ -162,8 +163,10 @@
       dockerfile: services/writing-service/Dockerfile
     environment:
       - CONNECTIONSTRING__WRITING=Host=writing-database;Port=5432;Database=writing-db;Username=writing;Password=writing
-      - LLM__APIKEY=
+    env_file:
+      - ../services/writing-service/.env
     restart: unless-stopped
+    
     ports:
       - "8091:8080"
     networks:

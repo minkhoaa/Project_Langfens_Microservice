@@ -13,6 +13,7 @@ public interface IAdminExamService
     public Task<IResult> AddAsync(DtoAdmin.AdminExamCreate dto, CancellationToken ct = default);
     public Task<IResult> UpdateAsync(Guid id, DtoAdmin.AdminExamUpdate dto, CancellationToken ct = default);
     public Task<IResult> DeleteAsync(Guid id, CancellationToken ct = default);
+    public Task<IResult> ListAllAsync(CancellationToken ct = default);
 }
 
 public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
@@ -65,5 +66,26 @@ public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
     {
         var affected = await db.Exams.Where(e => e.Id == id).ExecuteDeleteAsync(ct);
         return Results.Ok(new ApiResultDto(true, $"Deleted {affected}", null!));
+    }
+
+    public async Task<IResult> ListAllAsync(CancellationToken ct = default)
+    {
+        var exams = await db.Exams.AsNoTracking()
+            .OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt)
+            .Select(x => new
+            {
+                x.Id,
+                x.Slug,
+                x.Title,
+                x.Category,
+                x.Level,
+                x.Status,
+                x.DurationMin,
+                x.CreatedAt,
+                x.UpdatedAt
+            })
+            .ToListAsync(ct);
+
+        return Results.Ok(new ApiResultDto(true, "Fetched all exams", exams));
     }
 }

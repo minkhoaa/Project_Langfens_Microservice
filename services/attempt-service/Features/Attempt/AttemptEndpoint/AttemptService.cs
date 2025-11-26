@@ -27,6 +27,7 @@ public interface IAttemptService
     Task<IResult> Submit(Guid attemptId,  ClaimsPrincipal user, CancellationToken token);
     Task<IResult> GetResult(Guid attemptId, ClaimsPrincipal user, CancellationToken token);
     Task<IResult> GetAttemptList(ClaimsPrincipal user, int page, int pageSize, string? status, Guid? examId, CancellationToken token);
+    Task<IResult> GetAllAttempts(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
 }
 
 public class AttemptService(
@@ -537,6 +538,72 @@ public class AttemptService(
         var scorePct = existedAttempt.ScaledScore ??
                        (totalScore <= 0 ? 0m : Math.Round((awardedPoints / totalScore) * 100m, 2));
 
+        static bool IsNotBlank(string? s) => !string.IsNullOrWhiteSpace(s);
+        string? BuildCorrectText(Guid questionId)
+        {
+            if (!compiled.Keys.TryGetValue(questionId, out var key)) return null;
+            if (key.CorrectOptionIds is { Count: > 0 })
+            {
+                var texts = key.CorrectOptionIds.Select(t => t.content)
+                    .Where(IsNotBlank)
+                    .ToList();
+                if (texts.Count > 0) return string.Join(", ", texts);
+            }
+
+            if (key.BlankAcceptTexts is { Count: > 0 } || key.BlankAcceptRegex is { Count: > 0 })
+            {
+                var blanks = new List<string>();
+                var blankIds = (key.BlankAcceptTexts?.Keys ?? Enumerable.Empty<string>())
+                    .Union(key.BlankAcceptRegex?.Keys ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+                foreach (var blankId in blankIds)
+                {
+                    string[]? acceptTexts = null;
+                    string[]? acceptRegex = null;
+                    if (key.BlankAcceptTexts != null)
+                        key.BlankAcceptTexts.TryGetValue(blankId, out acceptTexts);
+                    if (key.BlankAcceptRegex != null)
+                        key.BlankAcceptRegex.TryGetValue(blankId, out acceptRegex);
+                    var parts = new List<string>();
+                    if (acceptTexts is { Length: > 0 }) parts.AddRange(acceptTexts.Where(IsNotBlank));
+                    if (acceptRegex is { Length: > 0 })
+                        parts.AddRange(acceptRegex.Where(IsNotBlank).Select(r => $"/{r}/"));
+                    if (parts.Count > 0) blanks.Add($"{blankId}: {string.Join(" | ", parts)}");
+                }
+
+                if (blanks.Count > 0) return string.Join("; ", blanks);
+            }
+
+            if (key.MatchPairs is { Count: > 0 })
+            {
+                var pairs = key.MatchPairs
+                    .Where(p => p.Value is { Length: > 0 })
+                    .Select(p => $"{p.Key}: {string.Join(" / ", p.Value!.Where(IsNotBlank))}")
+                    .Where(IsNotBlank)
+                    .ToList();
+                if (pairs.Count > 0) return string.Join("; ", pairs);
+            }
+
+            if (key.OrderCorrects is { Count: > 0 })
+            {
+                var seq = key.OrderCorrects.Where(IsNotBlank).ToList();
+                if (seq.Count > 0) return string.Join(" -> ", seq);
+            }
+
+            if (key.ShortAnswerAcceptTexts is { Count: > 0 })
+            {
+                var texts = key.ShortAnswerAcceptTexts.Where(IsNotBlank).ToList();
+                if (texts.Count > 0) return string.Join(" / ", texts);
+            }
+
+            if (key.ShortAnswerAcceptRegex is { Count: > 0 })
+            {
+                var texts = key.ShortAnswerAcceptRegex.Where(IsNotBlank).Select(r => $"/{r}/").ToList();
+                if (texts.Count > 0) return string.Join(" / ", texts);
+            }
+
+            return null;
+        }
+
         return Results.Ok(new ApiResultDto(true, "Success",
                 new AttemptResultResponse(
                     attemptId,
@@ -552,7 +619,7 @@ public class AttemptService(
                     existedAttempt.Answers.Select(x =>
                     {
                         string? selectedText;
-                        string? correctText = null; 
+                        var correctText = BuildCorrectText(x.QuestionId);
 
                         if (x.SelectedOptionIds is { Count: > 0 } && index.TryGetValue(x.QuestionId, out var meta))
                         {
@@ -560,22 +627,13 @@ public class AttemptService(
                             var selectedTexts = x.SelectedOptionIds
                                 .Where(id => lookup.ContainsKey(id))
                                 .Select(id => lookup[id])
+                                .Where(IsNotBlank)
                                 .ToList();
                             selectedText = selectedTexts.Count > 0 ? string.Join(", ", selectedTexts) : null;
-
-                            if (compiled.Keys.TryGetValue(x.QuestionId, out var qkey) &&
-                                qkey.CorrectOptionIds is { Count: > 0 })
-                            {
-                                var correctTexts = qkey.CorrectOptionIds
-                                    .Select(t => t.content)
-                                    .ToList();
-                                correctText = correctTexts.Count > 0 ? string.Join(", ", correctTexts) : null;
-                            }
                         }
                         else
                         {
-                            selectedText = x.TextAnswer;
-                            correctText = null;
+                            selectedText = IsNotBlank(x.TextAnswer) ? x.TextAnswer : null;
                         }
 
                         return new ResultAnswerItem(
@@ -599,7 +657,33 @@ public class AttemptService(
         page = page <= 0 ? 1 : page;
         pageSize = pageSize <= 0 ? 10 : Math.Min(pageSize, 100);
         var listAttempt = context.Attempts.AsNoTracking()
-                            .Where(x => x.UserId == userId);
+            .Where(x => x.UserId == userId);
+        listAttempt = ApplyFilters(listAttempt, status, examId, out var statusError);
+        if (statusError != null)
+            return statusError;
+
+        return await BuildAttemptListResponse(listAttempt, page, pageSize, token, "Success");
+    }
+
+    public async Task<IResult> GetAllAttempts(int page, int pageSize, string? status, Guid? examId, CancellationToken token)
+    {
+        page = page <= 0 ? 1 : page;
+        pageSize = pageSize <= 0 ? 10 : Math.Min(pageSize, 100);
+        var listAttempt = context.Attempts.AsNoTracking();
+        listAttempt = ApplyFilters(listAttempt, status, examId, out var statusError);
+        if (statusError != null)
+            return statusError;
+
+        return await BuildAttemptListResponse(listAttempt, page, pageSize, token, "Fetched attempts");
+    }
+
+    private IQueryable<Domain.Entities.Attempt> ApplyFilters(
+        IQueryable<Domain.Entities.Attempt> query,
+        string? status,
+        Guid? examId,
+        out IResult? errorResult)
+    {
+        errorResult = null;
         if (!string.IsNullOrEmpty(status))
         {
             var s = status.Trim().ToUpperInvariant();
@@ -613,32 +697,45 @@ public class AttemptService(
                 AttemptStatus.Cancelled
             };
             if (!allowed.Contains(s))
-                return Results.BadRequest(new ApiResultDto(false, $"Invalid status '{status}'", null!));
-            listAttempt.Where(x => x.Status == s);
+            {
+                errorResult = Results.BadRequest(new ApiResultDto(false, $"Invalid status '{status}'", null!));
+                return query;
+            }
+            query = query.Where(x => x.Status == s);
         }
-        if (examId.HasValue)
-            listAttempt.Where(x => x.ExamId == examId.Value);
 
-        var total = await listAttempt.CountAsync(token);
-        var rows = await listAttempt.OrderByDescending(x => x.CreatedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                     .Select(x => new // project tối thiểu, tính TimeLeft sau
-                     {
-                         x.Id,
-                         x.ExamId,
-                         x.Status,
-                         x.StartedAt,
-                         x.SubmittedAt,
-                         x.GradedAt,
-                         x.DurationSec,
-                         x.RawScore,
-                         x.ScaledScore,
-                         x.PaperJson
-                     })
-                    .ToListAsync(token);
+        if (examId.HasValue)
+            query = query.Where(x => x.ExamId == examId.Value);
+
+        return query;
+    }
+
+    private async Task<IResult> BuildAttemptListResponse(
+        IQueryable<Domain.Entities.Attempt> query,
+        int page,
+        int pageSize,
+        CancellationToken token,
+        string successMessage)
+    {
+        var rows = await query.OrderByDescending(x => x.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => new
+            {
+                x.Id,
+                x.ExamId,
+                x.Status,
+                x.StartedAt,
+                x.SubmittedAt,
+                x.GradedAt,
+                x.DurationSec,
+                x.RawScore,
+                x.ScaledScore,
+                x.PaperJson
+            })
+            .ToListAsync(token);
         var now = DateTime.UtcNow;
-        
+
         var items = rows.Select(x =>
         {
             int? timeLeft = null;
@@ -657,7 +754,10 @@ public class AttemptService(
             return new AttemptListItem(x.Id, x.ExamId, x.Status, x.StartedAt, x.SubmittedAt, x.ScaledScore, title);
         }).ToList();
 
-        return Results.Ok(new ApiResultDto(true, "Success", items));
-
+        return Results.Ok(new ApiResultDto(true, successMessage, items));
     }
+
+
+
+    
 }
