@@ -538,6 +538,72 @@ public class AttemptService(
         var scorePct = existedAttempt.ScaledScore ??
                        (totalScore <= 0 ? 0m : Math.Round((awardedPoints / totalScore) * 100m, 2));
 
+        static bool IsNotBlank(string? s) => !string.IsNullOrWhiteSpace(s);
+        string? BuildCorrectText(Guid questionId)
+        {
+            if (!compiled.Keys.TryGetValue(questionId, out var key)) return null;
+            if (key.CorrectOptionIds is { Count: > 0 })
+            {
+                var texts = key.CorrectOptionIds.Select(t => t.content)
+                    .Where(IsNotBlank)
+                    .ToList();
+                if (texts.Count > 0) return string.Join(", ", texts);
+            }
+
+            if (key.BlankAcceptTexts is { Count: > 0 } || key.BlankAcceptRegex is { Count: > 0 })
+            {
+                var blanks = new List<string>();
+                var blankIds = (key.BlankAcceptTexts?.Keys ?? Enumerable.Empty<string>())
+                    .Union(key.BlankAcceptRegex?.Keys ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+                foreach (var blankId in blankIds)
+                {
+                    string[]? acceptTexts = null;
+                    string[]? acceptRegex = null;
+                    if (key.BlankAcceptTexts != null)
+                        key.BlankAcceptTexts.TryGetValue(blankId, out acceptTexts);
+                    if (key.BlankAcceptRegex != null)
+                        key.BlankAcceptRegex.TryGetValue(blankId, out acceptRegex);
+                    var parts = new List<string>();
+                    if (acceptTexts is { Length: > 0 }) parts.AddRange(acceptTexts.Where(IsNotBlank));
+                    if (acceptRegex is { Length: > 0 })
+                        parts.AddRange(acceptRegex.Where(IsNotBlank).Select(r => $"/{r}/"));
+                    if (parts.Count > 0) blanks.Add($"{blankId}: {string.Join(" | ", parts)}");
+                }
+
+                if (blanks.Count > 0) return string.Join("; ", blanks);
+            }
+
+            if (key.MatchPairs is { Count: > 0 })
+            {
+                var pairs = key.MatchPairs
+                    .Where(p => p.Value is { Length: > 0 })
+                    .Select(p => $"{p.Key}: {string.Join(" / ", p.Value!.Where(IsNotBlank))}")
+                    .Where(IsNotBlank)
+                    .ToList();
+                if (pairs.Count > 0) return string.Join("; ", pairs);
+            }
+
+            if (key.OrderCorrects is { Count: > 0 })
+            {
+                var seq = key.OrderCorrects.Where(IsNotBlank).ToList();
+                if (seq.Count > 0) return string.Join(" -> ", seq);
+            }
+
+            if (key.ShortAnswerAcceptTexts is { Count: > 0 })
+            {
+                var texts = key.ShortAnswerAcceptTexts.Where(IsNotBlank).ToList();
+                if (texts.Count > 0) return string.Join(" / ", texts);
+            }
+
+            if (key.ShortAnswerAcceptRegex is { Count: > 0 })
+            {
+                var texts = key.ShortAnswerAcceptRegex.Where(IsNotBlank).Select(r => $"/{r}/").ToList();
+                if (texts.Count > 0) return string.Join(" / ", texts);
+            }
+
+            return null;
+        }
+
         return Results.Ok(new ApiResultDto(true, "Success",
                 new AttemptResultResponse(
                     attemptId,
@@ -553,7 +619,7 @@ public class AttemptService(
                     existedAttempt.Answers.Select(x =>
                     {
                         string? selectedText;
-                        string? correctText = null; 
+                        var correctText = BuildCorrectText(x.QuestionId);
 
                         if (x.SelectedOptionIds is { Count: > 0 } && index.TryGetValue(x.QuestionId, out var meta))
                         {
@@ -561,22 +627,13 @@ public class AttemptService(
                             var selectedTexts = x.SelectedOptionIds
                                 .Where(id => lookup.ContainsKey(id))
                                 .Select(id => lookup[id])
+                                .Where(IsNotBlank)
                                 .ToList();
                             selectedText = selectedTexts.Count > 0 ? string.Join(", ", selectedTexts) : null;
-
-                            if (compiled.Keys.TryGetValue(x.QuestionId, out var qkey) &&
-                                qkey.CorrectOptionIds is { Count: > 0 })
-                            {
-                                var correctTexts = qkey.CorrectOptionIds
-                                    .Select(t => t.content)
-                                    .ToList();
-                                correctText = correctTexts.Count > 0 ? string.Join(", ", correctTexts) : null;
-                            }
                         }
                         else
                         {
-                            selectedText = x.TextAnswer;
-                            correctText = null;
+                            selectedText = IsNotBlank(x.TextAnswer) ? x.TextAnswer : null;
                         }
 
                         return new ResultAnswerItem(
@@ -699,4 +756,8 @@ public class AttemptService(
 
         return Results.Ok(new ApiResultDto(true, successMessage, items));
     }
+
+
+
+    
 }
