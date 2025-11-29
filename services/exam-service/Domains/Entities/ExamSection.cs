@@ -14,7 +14,7 @@ public class ExamSection
 
     public int Idx { get; set; } // thứ tự trong đề
 
-    [Required] public string Title { get; set; } = string.Empty!;
+    [Required] public string Title { get; set; } = string.Empty;
 
     public string? InstructionsMd { get; set; }
     public string? AudioUrl { get; set; }

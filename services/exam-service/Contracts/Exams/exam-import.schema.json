@@ -279,7 +279,8 @@
       "enum": [
         "IELTS",
         "TOEIC",
-        "VSTEP"
+        "VSTEP",
+        "PLACEMENT"
       ],
       "description": "Shared.ExamDto.Contracts.Exam.Enums.ExamCategory"
     },

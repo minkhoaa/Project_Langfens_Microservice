@@ -374,8 +374,7 @@ public class AttemptService(
                 finishedAt = existedAttempt.SubmittedAt
             }));
         }
-
-        // thêm hàm chầm điểm chỗ này 
+        
         InternalDeliveryExam? proto = null;
         InternalExamDto.InternalDeliveryExam? dto = null;
         try
@@ -388,7 +387,7 @@ public class AttemptService(
         {
             dto = existedAttempt.PaperJson.RootElement
                 .Deserialize<InternalExamDto.InternalDeliveryExam>(
-                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (dto is null)
                 return Results.Problem("Bad snapshot",
                     statusCode: StatusCodes.Status500InternalServerError);
@@ -509,7 +508,7 @@ public class AttemptService(
         catch
         {
             dto = existedAttempt.PaperJson.RootElement.Deserialize<InternalExamDto.InternalDeliveryExam>(
-                new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (dto == null)
                 return Results.Problem("Snapshot is bad", statusCode: StatusCodes.Status500InternalServerError);
             using var fullDoc = JsonSerializer.SerializeToDocument(dto);

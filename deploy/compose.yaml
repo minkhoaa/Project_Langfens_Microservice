@@ -7,7 +7,7 @@
       - ASPNETCORE_ENVIRONMENT=Production
     ports:
       - 5000:8080
-    restart: unless-stopped
+
     networks:
       - backend
     depends_on:
@@ -26,7 +26,7 @@
       - NEXT_PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
     expose:
       - "3000"
-    restart: unless-stopped
+
     networks:
       - backend
     depends_on:
@@ -47,7 +47,7 @@
       - RABBITMQ__VHOST=/
       - RABBITMQ__PORT=5672
       - RABBITMQ__USESSL=false
-    restart: unless-stopped
+
     ports:
       - "8080:8080"
     networks:
@@ -70,7 +70,7 @@
       - EXAMSERVICE__EXAM__ADDRESS=http://exam-service:8080
       - EXAMSERVICE__INTERNAL__API__KEY=internal-get-exam-snapshot
       - ASPNETCORE_ENVIRONMENT=Production
-    restart: unless-stopped
+
     ports:
       - "8081:8080"
     networks:
@@ -90,7 +90,7 @@
       - "8081"
     ports:
     - "8082:8080"
-    restart: unless-stopped
+
     depends_on:
       exam-database:
         condition: "service_healthy"
@@ -105,7 +105,7 @@
     environment:
       - CONNECTIONSTRING__COURSE=Host=course-database;Port=5432;Database=course-db;Username=course;Password=course
       - ASPNETCORE_ENVIRONMENT=Production
-    restart: unless-stopped
+
     expose:
       - "8080"
     networks:
@@ -123,7 +123,7 @@
     environment:
       - CONNECTIONSTRING__VOCABULARY=Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary
       - ASPNETCORE_ENVIRONMENT=Production
-    restart: unless-stopped
+
     expose:
       - "8080"
     networks:
@@ -145,7 +145,7 @@
       - "8080"
     ports:
       - "8090:8080"
-    restart: unless-stopped
+
     networks:
       - backend
     deploy:
@@ -165,7 +165,7 @@
       - CONNECTIONSTRING__WRITING=Host=writing-database;Port=5432;Database=writing-db;Username=writing;Password=writing
     env_file:
       - ../services/writing-service/.env
-    restart: unless-stopped
+
     
     ports:
       - "8091:8080"
@@ -199,7 +199,7 @@
     build:
       context: ..
       dockerfile: services/email-service/Dockerfile
-    restart: unless-stopped
+
     expose:
       - "8080"
     networks:
@@ -215,7 +215,7 @@
     environment:
       - RABBITMQ_DEFAULT_USER=appuser
       - RABBITMQ_DEFAULT_PASS=apppassword
-    restart: unless-stopped
+
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
@@ -247,7 +247,7 @@
     ports:
       - 5433:5432
 
-    restart: unless-stopped
+
 
   auth-database:
     image: postgres:16-alpine
@@ -264,7 +264,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s
-    restart: unless-stopped
+
     ports:
       - 5434:5432
     
@@ -283,7 +283,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s
-    restart: unless-stopped
+
     ports:
       - 5435:5432
 
@@ -302,7 +302,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s 
-    restart: unless-stopped
+
       
   
   vocabulary-database:
@@ -321,7 +321,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s
-    restart: unless-stopped
+
   
   writing-database:
     image: postgres:16-alpine
@@ -340,7 +340,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s
-    restart: unless-stopped
+
     
   speaking-database:
     image: postgres:16-alpine
@@ -359,7 +359,7 @@
       timeout: 5s
       retries: 20
       start_period: 10s
-    restart: unless-stopped
+
   
   redis:
     image: redis:7.4-alpine
@@ -376,7 +376,7 @@
       - backend
     tmpfs:
       - /data:size=64m
-    restart: unless-stopped
+
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

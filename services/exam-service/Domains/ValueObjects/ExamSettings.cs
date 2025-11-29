@@ -1,4 +1,4 @@
-namespace exam_service.Data.ValueObjects;
+namespace exam_service.Domains.ValueObjects;
 
 public sealed class ExamSettings
 {
