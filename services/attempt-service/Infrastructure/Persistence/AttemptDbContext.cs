@@ -1,4 +1,6 @@
+using System.Net;
 using attempt_service.Domain.Entities;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 
 namespace attempt_service.Infrastructure.Persistence;
@@ -11,6 +13,8 @@ public class AttemptDbContext : DbContext
 
     public DbSet<Attempt> Attempts { get; set; }
     public DbSet<AttemptAnswer> AttemptAnswers { get; set; }
+    public DbSet<PlacementResult> PlacementResults { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder app)
     {
@@ -50,5 +54,16 @@ public class AttemptDbContext : DbContext
                 .IsUnique()
                 .HasDatabaseName("uq_attempt_answer_attempt_question");
         });
+        app.Entity<PlacementResult>(a =>
+        {
+            a.ToTable("placement_result");
+            a.HasOne(k => k.Attempt)
+            .WithMany(k => k.PlacementResults)
+            .HasForeignKey(p => p.AttemptId);
+            a.HasIndex(k => new { k.UserId, k.CreatedAt });
+            a.HasIndex(k => k.ExamId);
+            a.HasIndex(k => k.AttemptId).IsUnique();
+        });
+
     }
 }

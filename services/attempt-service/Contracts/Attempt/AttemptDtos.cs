@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace attempt_service.Contracts.Attempt;
 
@@ -22,7 +23,7 @@ public record AnswerItem(Guid QuestionId, Guid? SectionId, List<Guid>? SelectedO
 public record ResultAnswerItem(
     Guid QuestionId,
     Guid? SectionId,
-    List<Guid>? SelectedOptionIds, 
+    List<Guid>? SelectedOptionIds,
     string? TextAnswer,
     bool? IsCorrect,
     string? SelectedAnswerText,
@@ -45,7 +46,12 @@ public record AttemptResultResponse(
     int Total,
     JsonElement PaperWithAnswers,
     List<ResultAnswerItem> Answers,
-    decimal? IeltsBand
+    decimal? IeltsBand,
+    string? PlacementLevel = null,
+    decimal? PlacementBand = null,
+    int? ReadingCorrect = null,
+    int? ListeningCorrect = null,
+    decimal? WritingBand = null
 );
 public record AttemptListItem(
     Guid AttemptId,
