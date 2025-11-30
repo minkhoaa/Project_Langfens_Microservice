@@ -41,7 +41,7 @@ builder.Services.AddSwaggerGen(option =>
         Description = "Enter token"
     });
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    { 
+    {
         {
             new OpenApiSecurityScheme()
             {
@@ -53,7 +53,7 @@ builder.Services.AddSwaggerGen(option =>
             },
             Array.Empty<string>()
         }
-    }); 
+    });
 });
 builder.Services.AddCors(options =>
 {
@@ -98,18 +98,18 @@ builder.Services.AddAuthorization(option =>
 {
     option.AddPolicy(Roles.User, o => o.RequireRole(Roles.User));
     option.AddPolicy(Roles.Admin, o => o.RequireRole(Roles.Admin));
-    
+
     option.AddPolicy(WritingScope.WritingCreate, p => p.RequireAssertion(
-        o => o.User.HasAnyScope(WritingScope.WritingCreate) 
+        o => o.User.HasAnyScope(WritingScope.WritingCreate)
              || o.User.IsInRole(Roles.Admin)));
     option.AddPolicy(WritingScope.WritingStart, p => p.RequireAssertion(
-        o => o.User.HasAnyScope(WritingScope.WritingStart) 
+        o => o.User.HasAnyScope(WritingScope.WritingStart)
              || o.User.IsInRole(Roles.User)));
     option.AddPolicy(WritingScope.WritingViewOwn, p => p.RequireAssertion(
-        o => o.User.HasAnyScope(WritingScope.WritingViewOwn) 
+        o => o.User.HasAnyScope(WritingScope.WritingViewOwn)
              || o.User.IsInRole(Roles.User)));
     option.AddPolicy(WritingScope.WritingViewAny, p => p.RequireAssertion(
-        o => o.User.HasAnyScope(WritingScope.WritingViewAny) 
+        o => o.User.HasAnyScope(WritingScope.WritingViewAny)
              || o.User.IsInRole(Roles.Admin)));
 });
 builder.Services.Configure<OpenRouterOptions>(builder.Configuration.GetSection("OpenRouter"));
@@ -141,7 +141,6 @@ builder.Services.AddHttpClient("openrouter", client =>
     if (!string.IsNullOrWhiteSpace(openRouterSettings.Title))
         client.DefaultRequestHeaders.Add("X-Title", openRouterSettings.Title);
 });
-
 
 var app = builder.Build();
 

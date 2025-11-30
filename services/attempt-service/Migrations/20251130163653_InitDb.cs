@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace attempt_service.Migrations
 {
     /// <inheritdoc />
-    public partial class initdb : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -60,6 +60,34 @@ namespace attempt_service.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "placement_result",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExamId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AttemptId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReadingCorrect = table.Column<int>(type: "integer", nullable: false),
+                    ListeningCorrect = table.Column<int>(type: "integer", nullable: false),
+                    WritingBand = table.Column<decimal>(type: "numeric", nullable: true),
+                    TotalCorrect = table.Column<int>(type: "integer", nullable: false),
+                    Level = table.Column<string>(type: "text", nullable: false),
+                    Band = table.Column<decimal>(type: "numeric", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_placement_result", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_placement_result_attempts_AttemptId",
+                        column: x => x.AttemptId,
+                        principalTable: "attempts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "uq_attempt_answer_attempt_question",
                 table: "attempt_answer",
@@ -75,6 +103,22 @@ namespace attempt_service.Migrations
                 name: "idx_attempt_user_status",
                 table: "attempts",
                 columns: new[] { "UserId", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_placement_result_AttemptId",
+                table: "placement_result",
+                column: "AttemptId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_placement_result_ExamId",
+                table: "placement_result",
+                column: "ExamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_placement_result_UserId_CreatedAt",
+                table: "placement_result",
+                columns: new[] { "UserId", "CreatedAt" });
         }
 
         /// <inheritdoc />
@@ -82,6 +126,9 @@ namespace attempt_service.Migrations
         {
             migrationBuilder.DropTable(
                 name: "attempt_answer");
+
+            migrationBuilder.DropTable(
+                name: "placement_result");
 
             migrationBuilder.DropTable(
                 name: "attempts");

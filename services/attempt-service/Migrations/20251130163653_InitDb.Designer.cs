@@ -14,8 +14,8 @@ using attempt_service.Infrastructure.Persistence;
 namespace attempt_service.Migrations
 {
     [DbContext(typeof(AttemptDbContext))]
-    [Migration("20251130111257_UpdatePlacemnetResult")]
-    partial class UpdatePlacemnetResult
+    [Migration("20251130163653_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

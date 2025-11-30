@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
-builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq")); 
+builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq"));
 
 if (string.IsNullOrWhiteSpace(jwtSettings.SignKey))
 {
@@ -31,13 +31,13 @@ if (string.IsNullOrWhiteSpace(jwtSettings.SignKey))
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(
     Environment.GetEnvironmentVariable("CONNECTIONSTRING__REDIS")
-    ?? builder.Configuration.GetConnectionString("Redis") 
+    ?? builder.Configuration.GetConnectionString("Redis")
     ?? "localhost:6379"));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 builder.Services.AddMassTransit(configurator =>
 {
     // Use unique endpoint names per service so fan-out works (no competing consumers)
-    configurator.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("user-registered", includeNamespace:false));
+    configurator.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("user-registered", includeNamespace: false));
     RabbitMqConfig prodRabbitEnvironment;
     try
     {
@@ -61,13 +61,13 @@ builder.Services.AddMassTransit(configurator =>
     {
         prodRabbitEnvironment =
             builder.Configuration.GetSection("RabbitMq").Get<RabbitMqConfig>()
-            ?? throw new Exception("Rabbitmq config is missing") ;
+            ?? throw new Exception("Rabbitmq config is missing");
 
     }
-    
+
     configurator.UsingRabbitMq((context, config) =>
     {
-        config.Host(prodRabbitEnvironment.Host, prodRabbitEnvironment.Port ,prodRabbitEnvironment.VirtualHost, h =>
+        config.Host(prodRabbitEnvironment.Host, prodRabbitEnvironment.Port, prodRabbitEnvironment.VirtualHost, h =>
         {
             h.Username(prodRabbitEnvironment.Username);
             h.Password(prodRabbitEnvironment.Password);
@@ -185,7 +185,6 @@ builder.Services.AddSingleton<IEmailValidator, EmailValidator>();
 builder.Services.AddSingleton<ICookieService, CookieService>();
 builder.Services.AddSingleton<IJwtTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IGoogleTokenVerifier, GoogleTokenVerifier>();
-
 
 var app = builder.Build();
 
