@@ -96,6 +96,7 @@ builder.Services.AddDbContext<VocabularyDbContext>(option => option.UseNpgsql(
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPublicService, PublicService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+
 var app = builder.Build();
 
 app.UseSwagger();
