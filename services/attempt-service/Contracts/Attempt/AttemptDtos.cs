@@ -9,7 +9,6 @@ public record AttemptStartRequest(Guid ExamId);
 
 public record AttemptStartResponse(Guid AttemptId, JsonElement Paper, DateTime StartedAt, int DurationSec, int timeLeft);
 
-public record AttemptGetRequest(Guid AttemptId, ClaimsPrincipal user);
 
 public record AttemptGetResponse(
     Guid AttemptId,
@@ -69,3 +68,16 @@ public record AttemptListResponse(
     int PageSize,
     List<AttemptListItem> Items
 );
+public record PlacementResultResponse(
+    Guid Id,
+    Guid UserId,
+    Guid ExamId,
+    Guid AttemptId,
+    int ReadingCorrect,
+    int ListeningCorrect,
+    decimal? WritingBand,
+    int TotalCorrect,
+    string Level,
+    decimal Band,
+    DateTime CreatedAt,
+    DateTime UpdatedAt);

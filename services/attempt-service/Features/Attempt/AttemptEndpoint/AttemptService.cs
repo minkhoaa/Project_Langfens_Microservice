@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
 using attempt_service.Contracts.Attempt;
@@ -18,28 +19,28 @@ namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
 public interface IAttemptService
 {
-    Task<IResult> StartAttempt(AttemptStartRequest request, CancellationToken token, ClaimsPrincipal user);
-    Task<IResult> GetAttemptById(AttemptGetRequest request, CancellationToken token);
-    Task<IResult> Autosave(Guid attemptId, ClaimsPrincipal user, AutosaveRequest req, CancellationToken token);
-    Task<IResult> Submit(Guid attemptId, ClaimsPrincipal user, CancellationToken token);
-    Task<IResult> GetResult(Guid attemptId, ClaimsPrincipal user, CancellationToken token);
-    Task<IResult> GetAttemptList(ClaimsPrincipal user, int page, int pageSize, string? status, Guid? examId, CancellationToken token);
+    Task<IResult> StartAttempt(AttemptStartRequest request, CancellationToken token);
+    Task<IResult> GetAttemptById(Guid attemptId, CancellationToken token);
+    Task<IResult> Autosave(Guid attemptId, AutosaveRequest req, CancellationToken token);
+    Task<IResult> Submit(Guid attemptId, CancellationToken token);
+    Task<IResult> GetResult(Guid attemptId, CancellationToken token);
+    Task<IResult> GetAttemptList(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
     Task<IResult> GetAllAttempts(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
+    Task<IResult> GetLatestPlacement(CancellationToken token);
 }
 
 public class AttemptService(
     AttemptDbContext context,
-    IExamGateway gateway
+    IExamGateway gateway,
+    IUserContext user
 ) : IAttemptService
 {
     public async Task<IResult> StartAttempt(
         AttemptStartRequest request,
-        CancellationToken token,
-        ClaimsPrincipal user
+        CancellationToken token
     )
     {
-        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value
-        ?? throw new Exception("User id is missing"));
+        var userId = user.UserId;
         // using GRPC for internal communication
         var existedStartedAttempt = await context.Attempts.AsNoTracking().Where(attempt =>
             attempt.ExamId == request.ExamId
@@ -128,13 +129,12 @@ public class AttemptService(
     }
 
     public async Task<IResult> GetAttemptById(
-        AttemptGetRequest request,
+        Guid attemptId,
         CancellationToken token)
     {
-        var userId = Guid.Parse(request.user.FindFirst(CustomClaims.Sub)!.Value ??
-                                throw new Exception("User id is missing"));
+        var userId = user.UserId;
         var attempts = await context.Attempts.AsNoTracking()
-            .Where(x => x.Id == request.AttemptId && x.UserId == userId)
+            .Where(x => x.Id == attemptId && x.UserId == userId)
             .FirstOrDefaultAsync(token);
         // validate attempt
         if (attempts == null)
@@ -199,11 +199,10 @@ public class AttemptService(
 
     public async Task<IResult> Autosave(
         Guid attemptId,
-        ClaimsPrincipal user,
         AutosaveRequest req,
         CancellationToken token)
     {
-        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
+        var userId = user.UserId;
         var attempt = await context.Attempts.FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId,
             cancellationToken: token);
         if (attempt == null)
@@ -340,9 +339,9 @@ public class AttemptService(
 
     }
 
-    public async Task<IResult> Submit(Guid attemptId, ClaimsPrincipal user, CancellationToken token)
+    public async Task<IResult> Submit(Guid attemptId, CancellationToken token)
     {
-        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
+        var userId = user.UserId;
         var existedAttempt =
             await context.Attempts.Include(a => a.Answers).FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
         if (existedAttempt == null)
@@ -545,9 +544,9 @@ public class AttemptService(
         }
     }
 
-    public async Task<IResult> GetResult(Guid attemptId, ClaimsPrincipal user, CancellationToken token)
+    public async Task<IResult> GetResult(Guid attemptId, CancellationToken token)
     {
-        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
+        var userId = user.UserId;
 
         var existedAttempt = await context.Attempts.AsNoTracking()
             .Include(attempt => attempt.Answers)
@@ -611,7 +610,8 @@ public class AttemptService(
                 .Where(x => x.AttemptId == attemptId)
                 .OrderByDescending(x => x.CreatedAt)
                 .FirstOrDefaultAsync(token);
-            if (placementResult == null) return Results.NotFound(new ApiResultDto(false, "Latest placement result not found", null!));
+            if (placementResult == null)
+                return Results.NotFound(new ApiResultDto(false, "Latest placement result not found", null!));
             placementLevel = placementResult.Level;
             placementBand = placementResult.Band;
             listeningCorrect = placementResult.ListeningCorrect;
@@ -743,9 +743,9 @@ public class AttemptService(
         );
     }
 
-    public async Task<IResult> GetAttemptList(ClaimsPrincipal user, int page, int pageSize, string? status, Guid? examId, CancellationToken token)
+    public async Task<IResult> GetAttemptList(int page, int pageSize, string? status, Guid? examId, CancellationToken token)
     {
-        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
+        var userId = user.UserId;
         page = page <= 0 ? 1 : page;
         pageSize = pageSize <= 0 ? 10 : Math.Min(pageSize, 100);
         var listAttempt = context.Attempts.AsNoTracking()
@@ -849,7 +849,17 @@ public class AttemptService(
         return Results.Ok(new ApiResultDto(true, successMessage, items));
     }
 
-
-
-
+    public async Task<IResult> GetLatestPlacement(CancellationToken token)
+    {
+        var userId = user.UserId;
+        var placement = await context.PlacementResults.AsNoTracking()
+        .Where(x => x.UserId == userId)
+        .OrderByDescending(k => k.UpdatedAt)
+        .Select(k => new PlacementResultResponse(
+            k.Id, k.UserId, k.ExamId, k.AttemptId, k.ReadingCorrect, k.ListeningCorrect,
+            k.WritingBand, k.TotalCorrect, k.Level, k.Band, k.CreatedAt, k.UpdatedAt
+        )).FirstOrDefaultAsync(token);
+        return (placement != null) ? Results.Ok(new ApiResultDto(true, "Latest placement evaluation", placement))
+        : Results.NotFound(new ApiResultDto(false, "Not found any placement", null!));
+    }
 }

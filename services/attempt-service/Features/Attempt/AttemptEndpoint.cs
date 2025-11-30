@@ -20,9 +20,14 @@ public static class AttemptEndpointMapping
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         group.MapGet("/getlistattempt", AttemptHandler.GetAttemptList)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
-
-        var admin = app.MapGroup("/api/admin/attempt")
-            .RequireAuthorization(AttemptScope.AttemptReadAny);
+        group.MapGet("/{userId}/placement", AttemptHandler.GetUserLatestPlacement)
+            .RequireAuthorization(AttemptScope.AttemptReadOwn);
+    }
+    public static void MapAdminEndpoint(this IEndpointRouteBuilder router)
+    {
+        var admin = router.MapGroup("/api/admin/attempt")
+          .RequireAuthorization(AttemptScope.AttemptReadAny);
         admin.MapGet("/", AttemptHandler.GetAttemptListAdmin);
+
     }
 }

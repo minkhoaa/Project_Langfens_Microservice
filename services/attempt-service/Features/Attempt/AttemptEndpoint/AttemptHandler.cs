@@ -1,26 +1,23 @@
 using System.Security.Claims;
 using attempt_service.Contracts.Attempt;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Security.Claims;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
 public static class AttemptHandler
 {
     public static Task<IResult> AttemptStartHandler(
-        IAttemptService service, 
+        IAttemptService service,
         AttemptStartRequest request,
-        CancellationToken token,
-        ClaimsPrincipal user
-    ) => service.StartAttempt(request, token, user);
+        CancellationToken token
+    ) => service.StartAttempt(request, token);
 
     public static Task<IResult> AttemptGetByIdHandler(
-        ClaimsPrincipal user, 
         [FromRoute] Guid attemptId,
         CancellationToken token,
         [FromServices] IAttemptService service
-    ) => service.GetAttemptById(new AttemptGetRequest(attemptId, user), token);
-    
+    ) => service.GetAttemptById(attemptId, token);
+
 
     public static Task<IResult> AttemptAutoSave(
         [FromRoute] Guid attemptId,
@@ -28,21 +25,19 @@ public static class AttemptHandler
         AutosaveRequest req,
         CancellationToken token,
         IAttemptService service
-    ) => service.Autosave(attemptId, user, req, token);
+    ) => service.Autosave(attemptId, req, token);
 
     public static Task<IResult> AttemptSubmit(
-        ClaimsPrincipal user,
         [FromRoute] Guid attemptId,
         CancellationToken token,
         IAttemptService service)
-        => service.Submit(attemptId, user, token);
+        => service.Submit(attemptId, token);
 
     public static Task<IResult> AttemptGetResult(
         [FromRoute] Guid attemptId,
-        ClaimsPrincipal user,
         CancellationToken token,
         IAttemptService service
-    ) => service.GetResult(attemptId, user, token);
+    ) => service.GetResult(attemptId, token);
 
     public static Task<IResult> GetAttemptList(
         ClaimsPrincipal user,
@@ -52,7 +47,7 @@ public static class AttemptHandler
         Guid? examId,
         CancellationToken token,
         IAttemptService service
-    ) => service.GetAttemptList(user, page, pageSize, status, examId, token);
+    ) => service.GetAttemptList(page, pageSize, status, examId, token);
 
     public static Task<IResult> GetAttemptListAdmin(
         int page,
@@ -62,4 +57,7 @@ public static class AttemptHandler
         CancellationToken token,
         IAttemptService service
     ) => service.GetAllAttempts(page, pageSize, status, examId, token);
+
+    public static Task<IResult> GetUserLatestPlacement(CancellationToken token, IAttemptService service)
+        => service.GetLatestPlacement(token);
 }
