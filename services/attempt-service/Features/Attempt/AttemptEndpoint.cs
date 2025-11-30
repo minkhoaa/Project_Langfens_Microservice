@@ -20,7 +20,7 @@ public static class AttemptEndpointMapping
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         group.MapGet("/getlistattempt", AttemptHandler.GetAttemptList)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
-        group.MapGet("/{userId}/placement", AttemptHandler.GetUserLatestPlacement)
+        group.MapGet("/placement", AttemptHandler.GetUserLatestPlacement)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
     }
     public static void MapAdminEndpoint(this IEndpointRouteBuilder router)
