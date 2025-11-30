@@ -19,7 +19,7 @@ using Shared.Security.Scopes;
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddResponseCompression(); 
+builder.Services.AddResponseCompression();
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo()
@@ -36,7 +36,7 @@ builder.Services.AddSwaggerGen(option =>
         Description = "Enter token"
     });
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    { 
+    {
         {
             new OpenApiSecurityScheme()
             {
@@ -48,7 +48,7 @@ builder.Services.AddSwaggerGen(option =>
             },
             Array.Empty<string>()
         }
-    }); 
+    });
 });
 builder.Services.AddCors(options =>
 {
@@ -95,7 +95,7 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 // DI
 builder.Services.AddScoped<IAttemptService, AttemptService>();
 builder.Services.AddScoped<IExamGateway, ExamGateway>();
-
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.ConfigureHttpJsonOptions(option =>
 {
@@ -119,7 +119,7 @@ builder.Services.AddAuthentication(option =>
         ValidIssuer = jwtSettings.Issuer,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey)),
         ClockSkew = TimeSpan.Zero,
-        RoleClaimType = CustomClaims.Roles, 
+        RoleClaimType = CustomClaims.Roles,
         NameClaimType = CustomClaims.Sub
     };
     options.MapInboundClaims = false;
@@ -133,17 +133,17 @@ builder.Services.AddAuthorization(option =>
     option.AddPolicy(AttemptScope.AttemptStart, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptStart)
                                                                    || c.User.IsInRole(Roles.User)));
     option.AddPolicy(AttemptScope.AttemptSubmit, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptSubmit)
-                                                                   || c.User.IsInRole(Roles.User))); 
+                                                                   || c.User.IsInRole(Roles.User)));
     option.AddPolicy(AttemptScope.AttemptReadOwn, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptReadOwn)
                                                                    || c.User.IsInRole(Roles.User)));
     option.AddPolicy(AttemptScope.AttemptReadAny, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptReadAny)
                                                                     || c.User.IsInRole(Roles.Admin)));
-    
+
 });
 
 
 builder.Services.AddAuthorization();
-
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -168,5 +168,6 @@ app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapAttemptEndpoint();
+app.MapAdminEndpoint();
 
 app.Run();
