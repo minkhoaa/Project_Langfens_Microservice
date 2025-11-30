@@ -60,7 +60,6 @@ builder.Services.AddAuthorization(options =>
         c.User.HasAnyScope(VocabScope.VocabManage) || c.User.IsInRole(Roles.Admin)));
 
 });
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
