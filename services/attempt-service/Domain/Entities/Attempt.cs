@@ -14,7 +14,7 @@ public class Attempt
     [Required] public Guid UserId { get; set; }
     [Required] public Guid ExamId { get; set; }
 
-    [Required] [Column("status")] public string Status { get; set; } = AttemptStatus.Started;
+    [Required][Column("status")] public string Status { get; set; } = AttemptStatus.Started;
 
     [Required] public DateTime StartedAt { get; set; } = DateTime.UtcNow;
     public DateTime? SubmittedAt { get; set; }
@@ -33,4 +33,5 @@ public class Attempt
     [Required] public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<AttemptAnswer> Answers { get; set; } = new List<AttemptAnswer>();
+    public ICollection<PlacementResult> PlacementResults { get; set; } = new List<PlacementResult>();
 }

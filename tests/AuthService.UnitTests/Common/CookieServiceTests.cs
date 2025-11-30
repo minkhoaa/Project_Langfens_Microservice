@@ -1,9 +1,5 @@
 using Bogus;
-using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using auth_service.Application.Common;
-using Xunit;
 
 namespace auth_service.Application.Common.UnitTests;
 

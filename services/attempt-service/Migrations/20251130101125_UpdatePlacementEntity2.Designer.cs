@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using attempt_service.Infrastructure.Persistence;
@@ -13,9 +14,11 @@ using attempt_service.Infrastructure.Persistence;
 namespace attempt_service.Migrations
 {
     [DbContext(typeof(AttemptDbContext))]
-    partial class AttemptDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251130101125_UpdatePlacementEntity2")]
+    partial class UpdatePlacementEntity2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -128,21 +131,22 @@ namespace attempt_service.Migrations
                     b.Property<Guid>("AttemptId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("Band")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ExamId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Level")
+                    b.Property<int>("ListeningCorrect")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PlacementBand")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ListeningCorrect")
-                        .HasColumnType("integer");
+                    b.Property<string>("PlacementLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("ReadingCorrect")
                         .HasColumnType("integer");
@@ -161,12 +165,12 @@ namespace attempt_service.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AttemptId")
-                        .IsUnique();
+                    b.HasIndex("AttemptId");
 
                     b.HasIndex("ExamId");
 
-                    b.HasIndex("UserId", "CreatedAt");
+                    b.HasIndex("UserId", "CreatedAt")
+                        .IsUnique();
 
                     b.ToTable("placement_result", (string)null);
                 });

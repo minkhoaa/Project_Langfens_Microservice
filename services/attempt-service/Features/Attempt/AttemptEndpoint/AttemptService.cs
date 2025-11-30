@@ -1,6 +1,4 @@
-using System.Numerics;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text.Json;
 using attempt_service.Contracts.Attempt;
 using attempt_service.Domain.Entities;
@@ -8,11 +6,10 @@ using attempt_service.Domain.Enums;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
+using Google.Protobuf.Collections;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using Npgsql.Replication;
 using Shared.ExamDto.Contracts;
+using Shared.ExamDto.Contracts.Exam.Enums;
 using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 using Shared.Grpc.ExamInternal;
 using Shared.Security.Claims;
@@ -24,7 +21,7 @@ public interface IAttemptService
     Task<IResult> StartAttempt(AttemptStartRequest request, CancellationToken token, ClaimsPrincipal user);
     Task<IResult> GetAttemptById(AttemptGetRequest request, CancellationToken token);
     Task<IResult> Autosave(Guid attemptId, ClaimsPrincipal user, AutosaveRequest req, CancellationToken token);
-    Task<IResult> Submit(Guid attemptId,  ClaimsPrincipal user, CancellationToken token);
+    Task<IResult> Submit(Guid attemptId, ClaimsPrincipal user, CancellationToken token);
     Task<IResult> GetResult(Guid attemptId, ClaimsPrincipal user, CancellationToken token);
     Task<IResult> GetAttemptList(ClaimsPrincipal user, int page, int pageSize, string? status, Guid? examId, CancellationToken token);
     Task<IResult> GetAllAttempts(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
@@ -40,8 +37,8 @@ public class AttemptService(
         CancellationToken token,
         ClaimsPrincipal user
     )
-    { 
-        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value 
+    {
+        var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value
         ?? throw new Exception("User id is missing"));
         // using GRPC for internal communication
         var existedStartedAttempt = await context.Attempts.AsNoTracking().Where(attempt =>
@@ -347,7 +344,7 @@ public class AttemptService(
     {
         var userId = Guid.Parse(user.FindFirst(CustomClaims.Sub)!.Value ?? throw new Exception("User id missing"));
         var existedAttempt =
-            await context.Attempts.FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
+            await context.Attempts.Include(a => a.Answers).FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
         if (existedAttempt == null)
             return Results.NotFound(new ApiResultDto(false, "Not found existed attempt", null!));
         if (existedAttempt.PaperJson is null)
@@ -374,7 +371,7 @@ public class AttemptService(
                 finishedAt = existedAttempt.SubmittedAt
             }));
         }
-        
+
         InternalDeliveryExam? proto = null;
         InternalExamDto.InternalDeliveryExam? dto = null;
         try
@@ -455,11 +452,79 @@ public class AttemptService(
             existedAttempt.ScaledScore = compiled.TotalPoints <= 0
                 ? 0m
                 : Math.Round((awardedTotal / compiled.TotalPoints) * 100m, 2);
+
+            var examCategory = proto?.Category ?? dto?.Category ?? "";
+            var isPlacement = string.Equals(examCategory, ExamCategory.PLACEMENT, StringComparison.OrdinalIgnoreCase);
+            var skillByQuestion = new Dictionary<Guid, string>();
+            if (proto != null)
+            {
+                foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
+                    foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+                        skillByQuestion[Guid.Parse(question.Id)] = question.Skill ?? "";
+            }
+            else if (dto != null)
+            {
+                foreach (var section in dto.Sections ?? Array.Empty<InternalExamDto.InternalDeliverySection>())
+                    foreach (var question in section.Questions ?? Array.Empty<InternalExamDto.InternalDeliveryQuestion>())
+                        skillByQuestion[question.Id] = question.Skill ?? "";
+            }
+            int CountCorrect(string skill) => existedAttempt.Answers.Count(a => a.IsCorrect == true
+                && skillByQuestion.TryGetValue(a.QuestionId, out var sk)
+                && string.Equals(skill, sk, StringComparison.OrdinalIgnoreCase)
+            );
+            var readingCorrect = CountCorrect(QuestionSkill.Reading);
+            var listeningCorrect = CountCorrect(QuestionSkill.Listening);
+            var totalCorrect = readingCorrect + listeningCorrect;
+            decimal? writingBand = null;
+            PlacementLevelMapper.PlacementLevel? placement = null;
+
+            if (isPlacement)
+            {
+                placement = PlacementLevelMapper.Map(
+                    new PlacementLevelMapper.PlacementScore(
+                    readingCorrect, listeningCorrect, writingBand));
+                var existedPlacement = await context.PlacementResults
+                    .Where(x => x.AttemptId == attemptId)
+                    .FirstOrDefaultAsync(token);
+                if (existedPlacement == null)
+                {
+                    var PlacementResult = new PlacementResult
+                    {
+                        AttemptId = attemptId,
+                        ExamId = existedAttempt.ExamId,
+                        UserId = existedAttempt.UserId,
+                        ListeningCorrect = listeningCorrect,
+                        ReadingCorrect = readingCorrect,
+                        WritingBand = writingBand,
+                        TotalCorrect = listeningCorrect + readingCorrect,
+                        Level = placement.Level,
+                        Band = placement.Band,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                    context.PlacementResults.Add(PlacementResult);
+                }
+                else
+                {
+                    existedPlacement.ListeningCorrect = listeningCorrect;
+                    existedPlacement.ReadingCorrect = readingCorrect;
+                    existedPlacement.WritingBand = writingBand;
+                    existedPlacement.TotalCorrect = totalCorrect;
+                    existedPlacement.Level = placement.Level;
+                    existedPlacement.Band = placement.Band;
+                    existedPlacement.UpdatedAt = DateTime.UtcNow;
+
+                }
+            }
+
             await context.SaveChangesAsync(token);
             await transaction.CommitAsync(token);
             deadline = existedAttempt.StartedAt.AddSeconds(existedAttempt.DurationSec);
             timeLeftSec = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
             var timeUsedSec = (int)(existedAttempt.SubmittedAt!.Value - existedAttempt.StartedAt).TotalSeconds;
+
+
+
             return Results.Ok(new ApiResultDto(true, "Submitted", new
             {
                 attemptId = existedAttempt.Id,
@@ -514,7 +579,7 @@ public class AttemptService(
             using var fullDoc = JsonSerializer.SerializeToDocument(dto);
             fullSnapshot = fullDoc.RootElement.Clone();
         }
-        
+
         // build lại theo question id và thông tin trong snapshot 
         var compiled = proto is not null
             ? AnswerKeyBuilder.FromProto(proto)
@@ -525,7 +590,6 @@ public class AttemptService(
             ? IndexBuilder.BuildIndexFromProto(proto)
             : IndexBuilder.BuildIndexFromDto(dto!);
 
-
         // lấy thông tin, số lượng câu hỏi, câu trả lời 
         var awardedPoints = existedAttempt.Answers.Sum(x => x.AwardedPoints ?? 0);
         var correctCount = existedAttempt.Answers.Count(x => x.IsCorrect == true);
@@ -533,6 +597,29 @@ public class AttemptService(
         var totalQuestion = compiled.Keys.Count;
         var totalTime = existedAttempt.SubmittedAt - existedAttempt.StartedAt;
         var ieltsBand = IeltsBandConverter.FromAcademicReadingScaled(correctCount, totalQuestion);
+        string examCategory = proto?.Category ?? dto?.Category ?? "";
+        bool isPlacement = string.Equals(examCategory, ExamCategory.PLACEMENT, StringComparison.OrdinalIgnoreCase);
+        PlacementResult? placementResult;
+        string? placementLevel = null;
+        decimal? placementBand = null;
+        int? listeningCorrect = null;
+        int? readingCorrect = null;
+        decimal? writingBand = null;
+        if (isPlacement)
+        {
+            placementResult = await context.PlacementResults.AsNoTracking()
+                .Where(x => x.AttemptId == attemptId)
+                .OrderByDescending(x => x.CreatedAt)
+                .FirstOrDefaultAsync(token);
+            if (placementResult == null) return Results.NotFound(new ApiResultDto(false, "Latest placement result not found", null!));
+            placementLevel = placementResult.Level;
+            placementBand = placementResult.Band;
+            listeningCorrect = placementResult.ListeningCorrect;
+            readingCorrect = placementResult.ReadingCorrect;
+            writingBand = placementResult.WritingBand;
+
+        }
+
         // Use stored ScaledScore if available; otherwise compute percentage (0..100)
         var scorePct = existedAttempt.ScaledScore ??
                        (totalScore <= 0 ? 0m : Math.Round((awardedPoints / totalScore) * 100m, 2));
@@ -642,10 +729,16 @@ public class AttemptService(
                             x.TextAnswer,
                             x.IsCorrect,
                             selectedText,
-                            correctText 
+                            correctText
                         );
                     }).ToList(),
-                    ieltsBand)
+                    ieltsBand,
+                    placementLevel,
+                    placementBand,
+                    readingCorrect,
+                    listeningCorrect,
+                    writingBand
+                    )
             )
         );
     }
@@ -758,5 +851,5 @@ public class AttemptService(
 
 
 
-    
+
 }
