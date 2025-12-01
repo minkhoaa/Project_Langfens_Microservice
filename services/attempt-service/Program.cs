@@ -96,7 +96,18 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 builder.Services.AddScoped<IAttemptService, AttemptService>();
 builder.Services.AddScoped<IExamGateway, ExamGateway>();
 builder.Services.AddScoped<IUserContext, UserContext>();
-
+builder.Services.AddSingleton<IAnswerKeyBuilder, AnswerKeyBuilder>();
+builder.Services.AddSingleton<IBuildQuestionIdSet, BuildQuestionIdSet>();
+builder.Services.AddSingleton<IQuestionIndex, QuestionIndex>();
+builder.Services.AddSingleton<IIndexBuilder, IndexBuilder>();
+builder.Services.AddSingleton<IAnswerValidator, AnswerValidator>();
+builder.Services.AddSingleton<SingleChoiceGrader>();
+builder.Services.AddSingleton<CompletionGrader>();
+builder.Services.AddSingleton<LabelGrader>();
+builder.Services.AddSingleton<MatchingHeadingGrader>();
+builder.Services.AddSingleton<FlowChartGrader>();
+builder.Services.AddSingleton<ShortAnswerGrader>();
+builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
 builder.Services.ConfigureHttpJsonOptions(option =>
 {
     option.SerializerOptions.PropertyNameCaseInsensitive = true;

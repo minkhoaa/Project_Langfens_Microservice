@@ -40,14 +40,21 @@ internal static class TextNorm
         return Regex.Replace(noDia, "\\s+", " ").Trim();
     }
 }
-public static class AnswerValidator {
-    public static string? Validate(AnswerItem answerItem, Dictionary<Guid, IndexBuilder.QMeta> idx)
+public interface IAnswerValidator
+{
+    string? Validate(AnswerItem answerItem, Dictionary<Guid, QMeta> idx);
+    bool IsSingleChoice(string? type);
+
+}
+public class AnswerValidator : IAnswerValidator
+{
+    public string? Validate(AnswerItem answerItem, Dictionary<Guid, QMeta> idx)
     {
         if (!idx.TryGetValue(answerItem.QuestionId, out var meta))
             return $"Unknown question {answerItem.QuestionId}";
         if (answerItem.SelectedOptionIds is { Count: > 0 })
         {
-            var normalized = answerItem.SelectedOptionIds.Distinct().OrderBy(x => x).ToList() 
+            var normalized = answerItem.SelectedOptionIds.Distinct().OrderBy(x => x).ToList()
                              ?? new List<Guid>();
             var allowedIds = meta.OptionIds.Select(t => t.id).ToHashSet();
             if (normalized.Any(x => !allowedIds.Contains(x)))
@@ -59,7 +66,7 @@ public static class AnswerValidator {
         return null!;
     }
     // validate answer type
-    public static bool IsSingleChoice(string? type)
+    public bool IsSingleChoice(string? type)
     {
         var t = (type ?? "").ToUpperInvariant();
         return t is QuestionType.MultipleChoiceSingle
