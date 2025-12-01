@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Security.Claims;
 using System.Text.Json;
 using attempt_service.Contracts.Attempt;
 using attempt_service.Domain.Entities;
@@ -13,7 +11,6 @@ using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.Enums;
 using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 using Shared.Grpc.ExamInternal;
-using Shared.Security.Claims;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
@@ -32,7 +29,14 @@ public interface IAttemptService
 public class AttemptService(
     AttemptDbContext context,
     IExamGateway gateway,
-    IUserContext user
+    IUserContext user,
+    IAnswerKeyBuilder answerKeyBuilder,
+    IIndexBuilder indexBuilder,
+    IBuildQuestionIdSet buildQuestionIdSet,
+    IQuestionIndex questionIndex,
+    IAnswerValidator answerValidator,
+
+IQuestionGraderFactory questionGraderFactory
 ) : IAttemptService
 {
     public async Task<IResult> StartAttempt(
@@ -226,13 +230,13 @@ public class AttemptService(
             return Results.Problem("Snapshot missing", statusCode: StatusCodes.Status500InternalServerError);
 
         //parse ra dto tiện cho việc autosave 
-        Dictionary<Guid, IndexBuilder.QMeta> index;
+        Dictionary<Guid, QMeta> index;
         try
         {
             var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
             var proto = parser.Parse<InternalDeliveryExam>(attempt.PaperJson.RootElement.GetRawText()) ??
                         new InternalDeliveryExam();
-            index = IndexBuilder.BuildIndexFromProto(proto);
+            index = indexBuilder.BuildIndexFromProto(proto);
         }
         catch
         {
@@ -240,7 +244,7 @@ public class AttemptService(
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (dto == null)
                 return Results.Problem("Bad snapshot scheme", statusCode: StatusCodes.Status500InternalServerError);
-            index = IndexBuilder.BuildIndexFromDto(dto);
+            index = indexBuilder.BuildIndexFromDto(dto);
         }
 
         // lay incoming answer
@@ -253,7 +257,7 @@ public class AttemptService(
             return Results.Problem("Snapshot index is empty", statusCode: StatusCodes.Status500InternalServerError);
         foreach (var ans in incoming)
         {
-            var err = AnswerValidator.Validate(ans, index);
+            var err = answerValidator.Validate(ans, index);
             if (err != null) rejected.Add(err);
         }
 
@@ -389,17 +393,17 @@ public class AttemptService(
                     statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        Dictionary<Guid, IndexBuilder.QMeta> index;
-        AnswerKeyBuilder.AnswerKeyCompiled compiled;
+        Dictionary<Guid, QMeta> index;
+        AnswerKeyCompiled compiled;
         if (proto is not null)
         {
-            index = IndexBuilder.BuildIndexFromProto(proto);
-            compiled = AnswerKeyBuilder.FromProto(proto);
+            index = indexBuilder.BuildIndexFromProto(proto);
+            compiled = answerKeyBuilder.FromProto(proto);
         }
         else
         {
-            index = IndexBuilder.BuildIndexFromDto(dto!);
-            compiled = AnswerKeyBuilder.FromDto(dto!);
+            index = indexBuilder.BuildIndexFromDto(dto!);
+            compiled = answerKeyBuilder.FromDto(dto!);
         }
 
         if (index.Count == 0 || compiled.Keys.Count == 0)
@@ -418,10 +422,14 @@ public class AttemptService(
             {
                 if (!index.TryGetValue(ans.QuestionId, out var meta)) continue;
                 if (!compiled.Keys.TryGetValue(ans.QuestionId, out var key)) continue;
-                if (!GraderRegistry.ByType.TryGetValue(meta.Type, out var grader))
+                IQuestionGrader grader;
+                try
                 {
-                    manualCount++;
-                    continue;
+                    grader = questionGraderFactory.Resolve(meta.Type);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception(e.Message);
                 }
                 var result = grader.Grade(ans, key);
                 ans.AwardedPoints = result.AwardedPoints;
@@ -581,13 +589,13 @@ public class AttemptService(
 
         // build lại theo question id và thông tin trong snapshot 
         var compiled = proto is not null
-            ? AnswerKeyBuilder.FromProto(proto)
-            : AnswerKeyBuilder.FromDto(dto!);
+            ? answerKeyBuilder.FromProto(proto)
+            : answerKeyBuilder.FromDto(dto!);
 
         // Build per-question index (with option content) for rendering selected answer texts
         var index = proto is not null
-            ? IndexBuilder.BuildIndexFromProto(proto)
-            : IndexBuilder.BuildIndexFromDto(dto!);
+            ? indexBuilder.BuildIndexFromProto(proto)
+            : indexBuilder.BuildIndexFromDto(dto!);
 
         // lấy thông tin, số lượng câu hỏi, câu trả lời 
         var awardedPoints = existedAttempt.Answers.Sum(x => x.AwardedPoints ?? 0);

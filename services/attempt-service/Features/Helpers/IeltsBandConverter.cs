@@ -2,6 +2,7 @@ using System;
 
 namespace attempt_service.Features.Helpers;
 
+
 public static class IeltsBandConverter
 {
     // Approximate Academic Reading conversion based on correct answers (0..40)
@@ -22,11 +23,11 @@ public static class IeltsBandConverter
             >= 15 => 5.0m,
             >= 13 => 4.5m,
             >= 10 => 4.0m,
-            >= 8  => 3.5m,
-            >= 6  => 3.0m,
-            >= 4  => 2.5m,
-            >= 2  => 2.0m,
-            >= 1  => 1.0m,
+            >= 8 => 3.5m,
+            >= 6 => 3.0m,
+            >= 4 => 2.5m,
+            >= 2 => 2.0m,
+            >= 1 => 1.0m,
             _ => 0.0m
         };
     }

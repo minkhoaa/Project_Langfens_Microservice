@@ -6,9 +6,14 @@ using Shared.Grpc.ExamInternal;
 
 namespace attempt_service.Features.Helpers;
 
-public static class BuildQuestionIdSet
+public interface IBuildQuestionIdSet
 {
-    public static HashSet<Guid> Build(JsonDocument paper)
+    HashSet<Guid> Build(JsonDocument paper);
+
+}
+public class BuildQuestionIdSet : IBuildQuestionIdSet
+{
+    public HashSet<Guid> Build(JsonDocument paper)
     {
         var set = new HashSet<Guid>();
         if (!paper.RootElement.TryGetProperty("sections", out var sections)) return set;
@@ -23,10 +28,14 @@ public static class BuildQuestionIdSet
         return set;
     }
 }
-
-public static class QuestionIndex
+public interface IQuestionIndex
 {
-    public static Dictionary<Guid, (Guid SectionId, string Type, HashSet<Guid> OptionIds)> Build(JsonDocument doc)
+    Dictionary<Guid, (Guid SectionId, string Type, HashSet<Guid> OptionIds)> Build(JsonDocument doc);
+
+}
+public class QuestionIndex : IQuestionIndex
+{
+    public Dictionary<Guid, (Guid SectionId, string Type, HashSet<Guid> OptionIds)> Build(JsonDocument doc)
     {
         var map = new Dictionary<Guid, (Guid, string, HashSet<Guid>)>();
         if (!doc.RootElement.TryGetProperty("sections", out var sections)) return map;
@@ -50,60 +59,75 @@ public static class QuestionIndex
         return map;
     }
 }
-
-public static class IndexBuilder
+public sealed record QMeta(
+    Guid SectionId,
+    string Type,
+    HashSet<(Guid id, string content)> OptionIds
+    );
+public interface IIndexBuilder
 {
-    public static Dictionary<Guid, QMeta> BuildIndexFromProto(InternalDeliveryExam exam)
+
+    Dictionary<Guid, QMeta> BuildIndexFromProto(InternalDeliveryExam exam);
+    Dictionary<Guid, QMeta> BuildIndexFromDto(InternalExamDto.InternalDeliveryExam exam);
+
+}
+
+public class IndexBuilder : IIndexBuilder
+{
+
+    public Dictionary<Guid, QMeta> BuildIndexFromProto(InternalDeliveryExam exam)
     {
         var map = new Dictionary<Guid, QMeta>();
         foreach (var section in exam.Sections ?? new RepeatedField<InternalDeliverySection>())
-        foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
-        {
-            var optionIds = (question.Options ?? new RepeatedField<InternalDeliveryOption>())
-                .Select(x => (Guid.Parse(x.Id), x.ContentMd ?? string.Empty))
-                .ToHashSet();
-            map[Guid.Parse(question.Id)] = new QMeta(
-                Guid.Parse(section.Id),
-                question.Type ?? string.Empty,
-                optionIds
-            );
-        }
+            foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+            {
+                var optionIds = (question.Options ?? new RepeatedField<InternalDeliveryOption>())
+                    .Select(x => (Guid.Parse(x.Id), x.ContentMd ?? string.Empty))
+                    .ToHashSet();
+                map[Guid.Parse(question.Id)] = new QMeta(
+                    Guid.Parse(section.Id),
+                    question.Type ?? string.Empty,
+                    optionIds
+                );
+            }
         return map;
     }
 
-    public static Dictionary<Guid, QMeta> BuildIndexFromDto(InternalExamDto.InternalDeliveryExam exam)
+    public Dictionary<Guid, QMeta> BuildIndexFromDto(InternalExamDto.InternalDeliveryExam exam)
     {
         var map = new Dictionary<Guid, QMeta>();
         foreach (var section in exam.Sections)
-        foreach (var question in section.Questions)
-        {
-            var optionIds = (question.Options ?? [])
-                .Select(x => (x.Id, x.ContentMd ?? string.Empty))
-                .ToHashSet();
-            map[question.Id] = new QMeta(
-                section.Id,
-                question.Type ?? string.Empty,
-                optionIds
-            );
-        }
+            foreach (var question in section.Questions)
+            {
+                var optionIds = (question.Options ?? [])
+                    .Select(x => (x.Id, x.ContentMd ?? string.Empty))
+                    .ToHashSet();
+                map[question.Id] = new QMeta(
+                    section.Id,
+                    question.Type ?? string.Empty,
+                    optionIds
+                );
+            }
 
         return map;
     }
 
-    public sealed record QMeta(
-        Guid SectionId,
-        string Type,
-        HashSet<(Guid id, string content)> OptionIds
-    );
-}
 
-public static class AnswerKeyBuilder
+
+}
+public sealed record AnswerKeyCompiled(
+    Dictionary<Guid, QuestionKey> Keys,
+    decimal TotalPoints
+);
+public interface IAnswerKeyBuilder
 {
-    public sealed record AnswerKeyCompiled(
-        Dictionary<Guid, QuestionKey> Keys,
-        decimal TotalPoints
-    );
-    public static AnswerKeyCompiled FromProto(InternalDeliveryExam exam)
+    AnswerKeyCompiled FromProto(InternalDeliveryExam exam);
+    AnswerKeyCompiled FromDto(InternalExamDto.InternalDeliveryExam exam);
+}
+public class AnswerKeyBuilder(IAnswerValidator answerValidator) : IAnswerKeyBuilder
+{
+
+    public AnswerKeyCompiled FromProto(InternalDeliveryExam exam)
     {
         var map = new Dictionary<Guid, QuestionKey>();
         decimal total = 0;
@@ -113,7 +137,7 @@ public static class AnswerKeyBuilder
             {
                 var type = question.Type ?? string.Empty;
                 HashSet<(Guid id, string content)>? correct = null;
-                if (AnswerValidator.IsSingleChoice(type))
+                if (answerValidator.IsSingleChoice(type))
                     correct = (question.Options ?? [])
                         .Where(x => x.HasIsCorrect && x.IsCorrect)
                         .Select(x => (Guid.Parse(x.Id), x.ContentMd ?? string.Empty))
@@ -161,17 +185,17 @@ public static class AnswerKeyBuilder
         return new AnswerKeyCompiled(map, total);
     }
 
-    public static AnswerKeyCompiled FromDto(InternalExamDto.InternalDeliveryExam exam)
+    public AnswerKeyCompiled FromDto(InternalExamDto.InternalDeliveryExam exam)
     {
         var keys = new Dictionary<Guid, QuestionKey>();
         decimal total = 0m;
-        foreach (var section in exam.Sections ?? []) 
+        foreach (var section in exam.Sections ?? [])
         {
             foreach (var question in section.Questions ?? [])
             {
                 var type = question.Type ?? string.Empty;
                 HashSet<(Guid id, string content)>? correct = null;
-                if (AnswerValidator.IsSingleChoice(type))
+                if (answerValidator.IsSingleChoice(type))
                     correct = (question.Options ?? [])
                         .Where(x => x.IsCorrect == true)
                         .Select(x => (x.Id, x.ContentMd ?? string.Empty))
@@ -204,7 +228,7 @@ public static class AnswerKeyBuilder
                     order.Count > 0 ? order : null,
                     shortTexts.Count > 0 ? shortTexts : null,
                     shortRegex.Count > 0 ? shortRegex : null);
-                
+
             }
         }
         return new AnswerKeyCompiled(keys, total);
