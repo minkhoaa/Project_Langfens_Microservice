@@ -10,53 +10,27 @@ namespace attempt_service.Features.Helpers
         IQuestionGrader Resolve(string questionType);
     }
 }
+
 public class QuestionGraderFactory : IQuestionGraderFactory
 {
-    private readonly IReadOnlyDictionary<string, IQuestionGrader> _byType;
+    private readonly IReadOnlyDictionary<string, IQuestionGraderRegistration> _map;
 
-    public QuestionGraderFactory(
-        SingleChoiceGrader singleChoiceGrader,
-        CompletionGrader completionGrader,
-        LabelGrader labelGrader,
-        MatchingHeadingGrader matchingHeadingGrader,
-        FlowChartGrader flowChartGrader,
-        ShortAnswerGrader shortAnswerGrader)
+    public QuestionGraderFactory(IEnumerable<IQuestionGraderRegistration> registrations)
     {
-        _byType = new Dictionary<string, IQuestionGrader>(StringComparer.OrdinalIgnoreCase)
-        {
-            // Chọn 1 đáp án (kể cả T/F/NG, Y/N/NG, có image)
-            [QuestionType.MultipleChoiceSingle] = singleChoiceGrader,
-            [QuestionType.MultipleChoiceSingleImage] = singleChoiceGrader,
-            [QuestionType.TrueFalseNotGiven] = singleChoiceGrader,
-            [QuestionType.YesNoNotGiven] = singleChoiceGrader,
-
-            // Hoàn thành/điền
-            [QuestionType.SummaryCompletion] = completionGrader,
-            [QuestionType.TableCompletion] = completionGrader,
-            [QuestionType.NoteCompletion] = completionGrader,
-            [QuestionType.FormCompletion] = completionGrader,
-            [QuestionType.SentenceCompletion] = completionGrader,
-
-            // Dán nhãn
-            [QuestionType.DiagramLabel] = labelGrader,
-            [QuestionType.MapLabel] = labelGrader,
-
-            // Ghép/matching
-            [QuestionType.MatchingHeading] = matchingHeadingGrader,
-            [QuestionType.MatchingInformation] = matchingHeadingGrader,
-            [QuestionType.MatchingFeatures] = matchingHeadingGrader,
-            [QuestionType.MatchingEndings] = matchingHeadingGrader,
-            [QuestionType.Classification] = matchingHeadingGrader,
-
-            // Thứ tự/flow / short answer
-            [QuestionType.FlowChart] = flowChartGrader,
-            [QuestionType.ShortAnswer] = shortAnswerGrader
-        };
+        if (registrations == null)
+            throw new ArgumentNullException(nameof(registrations));
+        _map = registrations.SelectMany(k => k.SupportedTypes.Select(t => (Type: t, Reg: k)))
+       .ToDictionary(
+                    x => x.Type,
+                    x => x.Reg,
+                    StringComparer.OrdinalIgnoreCase);
     }
     public IQuestionGrader Resolve(string questionType)
     {
-        if (_byType.TryGetValue(questionType, out var grader))
-            return grader;
-        throw new NotSupportedException($"Unsupported question type: {questionType}");
+        if (questionType == null)
+            throw new ArgumentNullException(nameof(questionType));
+        if (!_map.TryGetValue(questionType, out var grader))
+            throw new NotSupportedException($"Unsupported question type: {questionType}");
+        return grader.Create();
     }
 }

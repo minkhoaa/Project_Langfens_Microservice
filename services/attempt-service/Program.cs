@@ -101,12 +101,22 @@ builder.Services.AddSingleton<IBuildQuestionIdSet, BuildQuestionIdSet>();
 builder.Services.AddSingleton<IQuestionIndex, QuestionIndex>();
 builder.Services.AddSingleton<IIndexBuilder, IndexBuilder>();
 builder.Services.AddSingleton<IAnswerValidator, AnswerValidator>();
+
+
 builder.Services.AddSingleton<SingleChoiceGrader>();
 builder.Services.AddSingleton<CompletionGrader>();
 builder.Services.AddSingleton<LabelGrader>();
 builder.Services.AddSingleton<MatchingHeadingGrader>();
 builder.Services.AddSingleton<FlowChartGrader>();
 builder.Services.AddSingleton<ShortAnswerGrader>();
+
+builder.Services.AddSingleton<IQuestionGraderRegistration, SingleChoiceGraderRegistration>();
+builder.Services.AddSingleton<IQuestionGraderRegistration, CompletionGraderRegistration>();
+builder.Services.AddSingleton<IQuestionGraderRegistration, LabelGraderRegistration>();
+builder.Services.AddSingleton<IQuestionGraderRegistration, MatchingHeadingGraderRegistration>();
+builder.Services.AddSingleton<IQuestionGraderRegistration, FlowChartGraderRegistration>();
+builder.Services.AddSingleton<IQuestionGraderRegistration, ShortAnswerGraderRegistration>();
+
 builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
 builder.Services.ConfigureHttpJsonOptions(option =>
 {
