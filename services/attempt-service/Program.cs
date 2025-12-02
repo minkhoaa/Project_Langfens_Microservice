@@ -1,21 +1,23 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
 using attempt_service.Features.Attempt;
 using attempt_service.Features.Attempt.AttemptEndpoint;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shared.ExamDto.Contracts.Writing;
 using Shared.Grpc.ExamInternal;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
-using Writing.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
@@ -73,15 +75,6 @@ builder.Services
         EnableMultipleHttp2Connections = true
     })
     ;
-builder.Services.AddGrpcClient<WritingGradingServiceGrpc.WritingGradingServiceGrpcClient>(option =>
-{
-    option.Address = new Uri("http://writing-service:8081");
-})
-.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
-{
-    EnableMultipleHttp2Connections = true
-})
-;
 builder.Services.Configure<JwtSettings>
     (builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
@@ -102,6 +95,54 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
     http.DefaultRequestHeaders.Add("X-Internal-Key", internalApiKey);
 });
 
+builder.Services.AddMassTransit(configurator =>
+{
+
+    RabbitMqConfig prodRabbitEnvironment;
+    try
+    {
+        prodRabbitEnvironment = new RabbitMqConfig
+        {
+            Host = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ??
+                                        builder.Configuration["RabbitMq:Host"] ?? "localhost",
+            Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ??
+                       builder.Configuration["RabbitMq:Username"] ?? "guest",
+            Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ??
+                       builder.Configuration["RabbitMq:Password"] ?? "guest",
+            VirtualHost = builder.Configuration["RabbitMq:VirtualHost"] ??
+                          Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/",
+            Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a :
+                bool.TryParse(builder.Configuration["RabbitMq:UseSsl"], out var useSsl) && useSsl ? (ushort)5671 :
+                (ushort)5672,
+            UseSsl = bool.TryParse(Environment.GetEnvironmentVariable(""), out var proSsl) && proSsl
+        };
+    }
+    catch
+    {
+        prodRabbitEnvironment =
+            builder.Configuration.GetSection("RabbitMq").Get<RabbitMqConfig>()
+            ?? throw new Exception("Rabbitmq config is missing");
+
+    }
+    configurator.UsingRabbitMq((bus, config) =>
+    {
+        config.Host(prodRabbitEnvironment.Host, prodRabbitEnvironment.Port, prodRabbitEnvironment.VirtualHost,
+        h =>
+        {
+            h.Username(prodRabbitEnvironment.Username);
+            h.Password(prodRabbitEnvironment.Password);
+            if (prodRabbitEnvironment.UseSsl)
+            {
+                h.UseSsl(k => k.Protocol = SslProtocols.Tls12);
+            }
+
+        }
+        );
+    });
+
+
+
+});
 // DI
 builder.Services.AddScoped<IAttemptService, AttemptService>();
 builder.Services.AddScoped<IExamGateway, ExamGateway>();
@@ -126,8 +167,6 @@ builder.Services.AddSingleton<IQuestionGraderRegistration, LabelGraderRegistrati
 builder.Services.AddSingleton<IQuestionGraderRegistration, MatchingHeadingGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, FlowChartGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, ShortAnswerGraderRegistration>();
-
-builder.Services.AddSingleton<IWritingGrader, WritingGrader>();
 
 builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
 builder.Services.ConfigureHttpJsonOptions(option =>
@@ -203,10 +242,10 @@ app.UseAuthorization();
 app.MapAttemptEndpoint();
 app.MapAdminEndpoint();
 
-app.MapPost("/api/test-writing", async (string Task, string Answer, IWritingGrader grader) =>
+app.MapPost("/api/test-writing", async (WritingGradeRequestMessage request, IPublishEndpoint bus) =>
 {
-    var res = await grader.GradeAsync(Task, Answer);
-    return Results.Ok(res);
-});
+    await bus.Publish<WritingGradeRequestMessage>(request);
+    return Results.Ok();
+}).AllowAnonymous();
 
 app.Run();

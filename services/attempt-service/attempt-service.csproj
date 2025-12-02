@@ -9,14 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="3.32.1"/>
-        <!-- Client-side gRPC -->
-        <PackageReference Include="Grpc.Net.Client" Version="2.71.0"/>
-        <PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0"/>
-        <!-- DÙNG CHO SINH CODE TỪ .proto -->
-        <PackageReference Include="Grpc.Tools" Version="2.71.0">
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
+
+        <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.7" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.19"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0"/>
