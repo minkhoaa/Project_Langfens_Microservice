@@ -12,8 +12,8 @@ using writing_service.Infrastructure.Persistence;
 namespace writing_service.Migrations
 {
     [DbContext(typeof(WritingDbContext))]
-    [Migration("20251121093611_InitWritingDb")]
-    partial class InitWritingDb
+    [Migration("20251202104230_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

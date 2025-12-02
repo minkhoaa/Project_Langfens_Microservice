@@ -22,5 +22,8 @@
                   GrpcServices="Both"
                   CompileOutputs="true"
         />
-    </ItemGroup>
+        <Protobuf Include="Contracts/writing_internal.proto"
+                        GrpcServices="Both"
+                        CompileOutputs="true"
+                />    </ItemGroup>
 </Project>
