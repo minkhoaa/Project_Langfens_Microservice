@@ -3,7 +3,6 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY services/writing-service/writing-service.csproj services/writing-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
-COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
 COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
 
 
@@ -24,9 +23,9 @@ RUN dotnet publish -c Release -o /out \
 # Runtime siêu gọn
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine
 WORKDIR /app
-ENV ASPNETCORE_URLS=http://0.0.0.0:8080;http://+:8081 \
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
     Swagger__Enabled=true
 COPY --from=build /out /app
-EXPOSE 8080 8081
+EXPOSE 8080
 ENTRYPOINT ["./writing-service"]   
