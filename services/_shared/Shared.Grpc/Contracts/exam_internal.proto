@@ -29,7 +29,7 @@ message InternalDeliverySection {
 }
 
 message InternalDeliveryQuestion {
-  string id = 1;               // <-- thêm id để map AttemptAnswer.QuestionId
+  string id = 1;             
   int32 idx = 2;
   string type = 3;
   string skill = 4;
@@ -45,7 +45,7 @@ message InternalDeliveryQuestion {
 }
 
 message InternalDeliveryOption {
-  string id = 1;               // <-- thêm id để map MCQ option
+  string id = 1;              
   int32 idx = 2;
   string content_md = 3;
 

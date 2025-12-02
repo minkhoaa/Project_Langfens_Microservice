@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,6 +11,7 @@ using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
+using Writing.Internal;
 using writing_service.Contracts;
 using writing_service.Features;
 using writing_service.Features.Helper;
@@ -55,6 +57,7 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FE", policy => policy
@@ -72,6 +75,9 @@ builder.Services.AddDbContext<WritingDbContext>(option => option.UseNpgsql(writi
 builder.Services.AddScoped<IWritingService, WritingService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
+
+builder.Services.AddSingleton<IWritingGrader, WritingGrader>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
     {
@@ -141,16 +147,32 @@ builder.Services.AddHttpClient("openrouter", client =>
     if (!string.IsNullOrWhiteSpace(openRouterSettings.Title))
         client.DefaultRequestHeaders.Add("X-Title", openRouterSettings.Title);
 });
+const int GrpcPort = 8081, HttpPort = 8080;
+builder.WebHost.ConfigureKestrel(option =>
+{
+    option.ListenAnyIP(GrpcPort, k => k.Protocols = HttpProtocols.Http2);
+    option.ListenAnyIP(HttpPort, k => k.Protocols = HttpProtocols.Http1);
+
+});
+builder.Services.AddGrpc();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<WritingDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+app.MapGrpcService<WritingGrpcService>();
 app.MapWritingEndpoint();
 app.MapWritingAdminEndpoint();
 app.Run();

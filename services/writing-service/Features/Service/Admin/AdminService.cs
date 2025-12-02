@@ -25,7 +25,7 @@ public class AdminService : IAdminService
     private readonly IUserContext _user;
     private readonly WritingDbContext _context;
 
-    public AdminService(IOptions<OpenRouterOptions> router, 
+    public AdminService(IOptions<OpenRouterOptions> router,
         IHttpClientFactory client,
         IUserContext user,
         WritingDbContext context
@@ -48,7 +48,7 @@ public class AdminService : IAdminService
             Level = request.Level,
             CreatedAt = DateTime.UtcNow,
             Tags = request.Tag,
-            CreatedBy = request.CreatedBy,
+            CreatedBy = _user.UserId
         };
         _context.WritingExams.Add(newExam);
         await _context.SaveChangesAsync(token);

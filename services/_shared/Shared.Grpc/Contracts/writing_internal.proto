@@ -1,0 +1,20 @@
+syntax = "proto3";
+package writing.internal;
+message GradeEssayRequest {
+    string user_id = 1;
+    string exam_id = 2;
+    string question_id = 3;
+    string task_text = 4;
+    string answer_text = 5;
+}
+message GradeEssayResponse {
+    double band = 1;
+    double ta = 2;
+    double cc = 3;
+    double lr = 4;
+    double gr = 5;
+    string feedback = 6;
+}
+service WritingGradingServiceGrpc {
+    rpc GradeWriting(GradeEssayRequest) returns (GradeEssayResponse);
+}

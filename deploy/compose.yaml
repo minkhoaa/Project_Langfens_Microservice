@@ -169,6 +169,8 @@
     
     ports:
       - "8091:8080"
+    expose: 
+      - "8081"
     networks:
       - backend
     depends_on:

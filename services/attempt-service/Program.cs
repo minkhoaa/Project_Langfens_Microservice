@@ -15,6 +15,7 @@ using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
+using Writing.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
@@ -65,13 +66,22 @@ AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport
 builder.Services
     .AddGrpcClient<ExamInternal.ExamInternalClient>(o =>
     {
-        o.Address = new Uri("http://exam-service:8081"); // h2c
+        o.Address = new Uri("http://exam-service:8081");
     })
     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
     {
         EnableMultipleHttp2Connections = true
-    });
-
+    })
+    ;
+builder.Services.AddGrpcClient<WritingGradingServiceGrpc.WritingGradingServiceGrpcClient>(option =>
+{
+    option.Address = new Uri("http://writing-service:8081");
+})
+.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    EnableMultipleHttp2Connections = true
+})
+;
 builder.Services.Configure<JwtSettings>
     (builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
@@ -116,6 +126,8 @@ builder.Services.AddSingleton<IQuestionGraderRegistration, LabelGraderRegistrati
 builder.Services.AddSingleton<IQuestionGraderRegistration, MatchingHeadingGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, FlowChartGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, ShortAnswerGraderRegistration>();
+
+builder.Services.AddSingleton<IWritingGrader, WritingGrader>();
 
 builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
 builder.Services.ConfigureHttpJsonOptions(option =>
@@ -190,5 +202,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapAttemptEndpoint();
 app.MapAdminEndpoint();
+
+app.MapPost("/api/test-writing", async (string Task, string Answer, IWritingGrader grader) =>
+{
+    var res = await grader.GradeAsync(Task, Answer);
+    return Results.Ok(res);
+});
 
 app.Run();
