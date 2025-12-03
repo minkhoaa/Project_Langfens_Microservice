@@ -6,10 +6,13 @@ using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
+using Grpc.Core.Logging;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.Enums;
 using Shared.ExamDto.Contracts.Exam.InternalExamDto;
+using Shared.ExamDto.Contracts.Writing;
 using Shared.Grpc.ExamInternal;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
@@ -35,6 +38,7 @@ public class AttemptService(
     IBuildQuestionIdSet buildQuestionIdSet,
     IQuestionIndex questionIndex,
     IAnswerValidator answerValidator,
+    IPublishEndpoint bus,
 
 IQuestionGraderFactory questionGraderFactory
 ) : IAttemptService
@@ -463,22 +467,50 @@ IQuestionGraderFactory questionGraderFactory
             var examCategory = proto?.Category ?? dto?.Category ?? "";
             var isPlacement = string.Equals(examCategory, ExamCategory.PLACEMENT, StringComparison.OrdinalIgnoreCase);
             var skillByQuestion = new Dictionary<Guid, string>();
+            Guid? writingQid = null;
+            string? writingTask = null;
             if (proto != null)
             {
                 foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
                     foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
-                        skillByQuestion[Guid.Parse(question.Id)] = question.Skill ?? "";
+                    {
+                        var qid = Guid.Parse(question.Id);
+                        skillByQuestion[qid] = question.Skill ?? "";
+                        if (writingQid == null && string.Equals(question.Skill,
+                        QuestionSkill.Writing, StringComparison.OrdinalIgnoreCase))
+                        {
+                            writingQid = qid;
+                            writingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
+                                : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
+                        }
+                    }
+
             }
             else if (dto != null)
             {
                 foreach (var section in dto.Sections ?? Array.Empty<InternalExamDto.InternalDeliverySection>())
                     foreach (var question in section.Questions ?? Array.Empty<InternalExamDto.InternalDeliveryQuestion>())
+                    {
+                        var qid = question.Id;
                         skillByQuestion[question.Id] = question.Skill ?? "";
+                        if (writingQid == null && string.Equals(question.Skill,
+                        QuestionSkill.Writing, StringComparison.OrdinalIgnoreCase))
+                        {
+                            writingQid = qid;
+                            writingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
+                                : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
+                        }
+                    }
+
             }
             int CountCorrect(string skill) => existedAttempt.Answers.Count(a => a.IsCorrect == true
                 && skillByQuestion.TryGetValue(a.QuestionId, out var sk)
                 && string.Equals(skill, sk, StringComparison.OrdinalIgnoreCase)
             );
+            var writingAnswer = writingQid.HasValue ? existedAttempt.Answers
+                .Where(k => k.QuestionId == writingQid).Select(k => k.TextAnswer).FirstOrDefault()
+                        : null;
+
             var readingCorrect = CountCorrect(QuestionSkill.Reading);
             var listeningCorrect = CountCorrect(QuestionSkill.Listening);
             var totalCorrect = readingCorrect + listeningCorrect;
@@ -487,6 +519,11 @@ IQuestionGraderFactory questionGraderFactory
 
             if (isPlacement)
             {
+                var writingGradingRequest = new WritingGradeRequestMessage(
+                    existedAttempt.Id, existedAttempt.UserId, writingQid, QuestionSkill.Writing,
+                    writingTask, writingAnswer
+                );
+                await bus.Publish(writingGradingRequest, CancellationToken.None);
                 placement = PlacementLevelMapper.Map(
                     new PlacementLevelMapper.PlacementScore(
                     readingCorrect, listeningCorrect, writingBand));

@@ -5,6 +5,7 @@ using System.Text.Json;
 using attempt_service.Features.Attempt;
 using attempt_service.Features.Attempt.AttemptEndpoint;
 using attempt_service.Features.Helpers;
+using attempt_service.Features.RabbitMq;
 using attempt_service.Infrastructure.Persistence;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -97,7 +98,7 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 
 builder.Services.AddMassTransit(configurator =>
 {
-
+    configurator.AddConsumer<WritingGradedConsumer>();
     RabbitMqConfig prodRabbitEnvironment;
     try
     {
@@ -135,9 +136,9 @@ builder.Services.AddMassTransit(configurator =>
             {
                 h.UseSsl(k => k.Protocol = SslProtocols.Tls12);
             }
+        });
 
-        }
-        );
+        config.ReceiveEndpoint("writing-graded-response", k => k.ConfigureConsumer<WritingGradedConsumer>(bus));
     });
 
 

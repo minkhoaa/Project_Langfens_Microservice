@@ -1,8 +1,10 @@
+using Shared.ExamDto.Contracts.Writing;
+
 namespace writing_service.Contracts;
 
 public class WritingGradeResponse
 {
-    public Guid SubmissionId { get; set; } 
+    public Guid SubmissionId { get; set; }
 
     // Thông tin task
     public string TaskText { get; set; } = string.Empty;
@@ -31,9 +33,4 @@ public class WritingGradeResponse
     // Optional: lưu raw JSON để debug
     public string? RawLlmJson { get; set; }
 }
-public class CriterionScore
-{
-    public double Band { get; set; }
 
-    public string Comment { get; set; } = string.Empty;
-}

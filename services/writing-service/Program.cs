@@ -16,6 +16,7 @@ using Shared.Security.Scopes;
 using writing_service.Contracts;
 using writing_service.Features;
 using writing_service.Features.Helper;
+using writing_service.Features.RabbitMq;
 using writing_service.Features.Service.Admin;
 using writing_service.Features.Service.User;
 using writing_service.Infrastructure.Persistence;
@@ -214,6 +215,12 @@ app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+app.MapPost("/api/test-writing", async (WritingGradeResponseMessage request, IPublishEndpoint bus) =>
+{
+    await bus.Publish(request);
+    return Results.Ok(request);
+}).AllowAnonymous();
 
 app.MapWritingEndpoint();
 app.MapWritingAdminEndpoint();
