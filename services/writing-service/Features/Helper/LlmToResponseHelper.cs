@@ -1,3 +1,4 @@
+using Shared.ExamDto.Contracts.Writing;
 using writing_service.Contracts;
 
 namespace writing_service.Features.Helper;
@@ -43,7 +44,7 @@ public static class LlmToResponseHelper
             Model = Environment.GetEnvironmentVariable("OPENROUTER__MODEL") ?? "",
             ModelProvider = "LLM Provider",
             GradedAt = DateTimeOffset.UtcNow,
-            RawLlmJson = null 
+            RawLlmJson = null
         };
     }
 
