@@ -168,6 +168,9 @@ builder.Services.AddSingleton<IQuestionGraderRegistration, LabelGraderRegistrati
 builder.Services.AddSingleton<IQuestionGraderRegistration, MatchingHeadingGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, FlowChartGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, ShortAnswerGraderRegistration>();
+builder.Services.AddScoped<IPlacementWorkflow, PlacementWorkflow>();
+
+
 
 builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
 builder.Services.ConfigureHttpJsonOptions(option =>

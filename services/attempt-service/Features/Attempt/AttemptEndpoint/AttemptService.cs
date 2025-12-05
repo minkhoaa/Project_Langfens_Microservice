@@ -38,7 +38,7 @@ public class AttemptService(
     IBuildQuestionIdSet buildQuestionIdSet,
     IQuestionIndex questionIndex,
     IAnswerValidator answerValidator,
-    IPublishEndpoint bus,
+    IPlacementWorkflow placementWorkflow,
 
 IQuestionGraderFactory questionGraderFactory
 ) : IAttemptService
@@ -514,51 +514,18 @@ IQuestionGraderFactory questionGraderFactory
             var readingCorrect = CountCorrect(QuestionSkill.Reading);
             var listeningCorrect = CountCorrect(QuestionSkill.Listening);
             var totalCorrect = readingCorrect + listeningCorrect;
-            decimal? writingBand = null;
-            PlacementLevelMapper.PlacementLevel? placement = null;
 
             if (isPlacement)
             {
-                var writingGradingRequest = new WritingGradeRequestMessage(
-                    existedAttempt.Id, existedAttempt.UserId, writingQid, QuestionSkill.Writing,
-                    writingTask, writingAnswer
+                await placementWorkflow.OnSubmitAsync(
+                existedAttempt.Id,
+                writingQid,
+                listeningCorrect,
+                readingCorrect,
+                writingTask,
+                writingAnswer,
+                token
                 );
-                await bus.Publish(writingGradingRequest, CancellationToken.None);
-                placement = PlacementLevelMapper.Map(
-                    new PlacementLevelMapper.PlacementScore(
-                    readingCorrect, listeningCorrect, writingBand));
-                var existedPlacement = await context.PlacementResults
-                    .Where(x => x.AttemptId == attemptId)
-                    .FirstOrDefaultAsync(token);
-                if (existedPlacement == null)
-                {
-                    var PlacementResult = new PlacementResult
-                    {
-                        AttemptId = attemptId,
-                        ExamId = existedAttempt.ExamId,
-                        UserId = existedAttempt.UserId,
-                        ListeningCorrect = listeningCorrect,
-                        ReadingCorrect = readingCorrect,
-                        WritingBand = writingBand,
-                        TotalCorrect = listeningCorrect + readingCorrect,
-                        Level = placement.Level,
-                        Band = placement.Band,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    context.PlacementResults.Add(PlacementResult);
-                }
-                else
-                {
-                    existedPlacement.ListeningCorrect = listeningCorrect;
-                    existedPlacement.ReadingCorrect = readingCorrect;
-                    existedPlacement.WritingBand = writingBand;
-                    existedPlacement.TotalCorrect = totalCorrect;
-                    existedPlacement.Level = placement.Level;
-                    existedPlacement.Band = placement.Band;
-                    existedPlacement.UpdatedAt = DateTime.UtcNow;
-
-                }
             }
 
             await context.SaveChangesAsync(token);
