@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Validations.Rules;
 using writing_service.Contracts;
 using writing_service.Domains.Entities;
 using writing_service.Infrastructure.Persistence;
@@ -16,12 +17,16 @@ namespace writing_service.Features.Helper
     {
         private readonly OpenRouterOptions _router;
         private readonly IHttpClientFactory _client;
+        private readonly ILogger<WritingGrader> _logger;
         public WritingGrader(
         IOptions<OpenRouterOptions> router,
-        IHttpClientFactory client)
+        IHttpClientFactory client,
+        ILogger<WritingGrader> logger
+        )
         {
             _client = client;
             _router = router.Value;
+            _logger = logger;
         }
         public async Task<(WritingGradeResponse, LlmWritingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token)
         {
@@ -47,7 +52,7 @@ namespace writing_service.Features.Helper
                 new { role = "user", content = userContent }
             },
                 temperature = 0.2,
-                max_tokens = 800
+                max_tokens = 3000
             };
             var json = JsonSerializer.Serialize(payload);
 
@@ -61,15 +66,44 @@ namespace writing_service.Features.Helper
 
             var responseText = await response.Content.ReadAsStringAsync(token);
             using var doc = JsonDocument.Parse(responseText);
-            var assistantContent = doc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
+            var message = doc.RootElement.GetProperty("choices")[0].GetProperty("message");
+
+            string? assistantContent = null;
+            if (message.TryGetProperty("content", out var contentProp))
+            {
+                assistantContent = contentProp.ValueKind switch
+                {
+                    JsonValueKind.String => contentProp.GetString(),
+                    JsonValueKind.Array => string.Join("", contentProp.EnumerateArray()
+                        .Select(b => b.ValueKind == JsonValueKind.String
+                            ? b.GetString()
+                            : b.TryGetProperty("text", out var t) ? t.GetString() : null)
+                        .Where(s => !string.IsNullOrWhiteSpace(s))),
+                    _ => null
+                };
+            }
+            // Nếu content rỗng, thử lấy reasoning
+            if (string.IsNullOrWhiteSpace(assistantContent) &&
+                message.TryGetProperty("reasoning", out var reasoningProp))
+            {
+                assistantContent = reasoningProp.ValueKind switch
+                {
+                    JsonValueKind.String => reasoningProp.GetString(),
+                    JsonValueKind.Array => string.Join("", reasoningProp.EnumerateArray()
+                        .Select(b => b.ValueKind == JsonValueKind.String ? b.GetString() : null)
+                        .Where(s => !string.IsNullOrWhiteSpace(s))),
+                    _ => null
+                };
+            }
 
             if (string.IsNullOrWhiteSpace(assistantContent))
+            {
+                _logger.LogWarning("OpenRouter returned empty content. Body: {Body}", responseText);
                 throw new InvalidOperationException("Model returned empty content.");
+            }
+
             var trimmed = assistantContent.Trim();
+
 
 
             if (trimmed.StartsWith("```"))
