@@ -15,7 +15,9 @@ namespace attempt_service.Domain.Entities
 
 
         public int ReadingCorrect { get; set; }
+        public int ReadingTotal { get; set; }
         public int ListeningCorrect { get; set; }
+        public int ListeningTotal { get; set; }
         public decimal? WritingBand { get; set; }
         public int TotalCorrect { get; set; }
         public string Level { get; set; } = default!;
