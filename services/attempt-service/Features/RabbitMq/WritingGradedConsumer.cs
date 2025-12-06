@@ -18,7 +18,7 @@ namespace attempt_service.Features.RabbitMq
         {
             var res = context.Message;
             await _placementWorkflow.OnWritingGradedAsync(res, CancellationToken.None);
-            _logger.LogInformation("Placement writing graded for attempt {AttemptId} with payload:\n", context.Message);
+            _logger.LogInformation(JsonSerializer.Serialize(res));
         }
     }
 }

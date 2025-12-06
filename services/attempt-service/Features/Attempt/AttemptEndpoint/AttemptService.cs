@@ -513,19 +513,21 @@ IQuestionGraderFactory questionGraderFactory
 
             var readingCorrect = CountCorrect(QuestionSkill.Reading);
             var listeningCorrect = CountCorrect(QuestionSkill.Listening);
-            var totalCorrect = readingCorrect + listeningCorrect;
+            var totalReading = skillByQuestion.Count(k => k.Value.Equals(QuestionSkill.Reading, StringComparison.OrdinalIgnoreCase));
+            var totalListening = skillByQuestion.Count(k => k.Value.Equals(QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase));
 
             if (isPlacement)
             {
                 await placementWorkflow.OnSubmitAsync(
-                existedAttempt.Id,
-                writingQid,
-                listeningCorrect,
-                readingCorrect,
-                writingTask,
-                writingAnswer,
-                token
-                );
+               existedAttempt.Id,
+               writingQid,
+               listeningCorrect,
+               totalListening,
+               readingCorrect,
+               totalReading,
+               writingTask,
+               writingAnswer,
+               token);
             }
 
             await context.SaveChangesAsync(token);
@@ -601,36 +603,89 @@ IQuestionGraderFactory questionGraderFactory
             ? indexBuilder.BuildIndexFromProto(proto)
             : indexBuilder.BuildIndexFromDto(dto!);
 
-        // lấy thông tin, số lượng câu hỏi, câu trả lời 
+        // Build skill map cho từng câu hỏi (READING/LISTENING/WRITING/...)
+        var skillByQuestion = new Dictionary<Guid, string>();
+
+        if (proto is not null)
+        {
+            foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
+            {
+                foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+                {
+                    var qid = Guid.Parse(question.Id);
+                    skillByQuestion[qid] = question.Skill ?? "";
+                }
+            }
+        }
+        else if (dto is not null)
+        {
+            foreach (var section in dto.Sections ?? Array.Empty<InternalExamDto.InternalDeliverySection>())
+            {
+                foreach (var question in section.Questions ?? Array.Empty<InternalExamDto.InternalDeliveryQuestion>())
+                {
+                    skillByQuestion[question.Id] = question.Skill ?? "";
+                }
+            }
+        }
+
+
         var awardedPoints = existedAttempt.Answers.Sum(x => x.AwardedPoints ?? 0);
-        var correctCount = existedAttempt.Answers.Count(x => x.IsCorrect == true);
+        int correctCount = existedAttempt.Answers.Count(x => x.IsCorrect == true);
         var totalScore = compiled.TotalPoints;
-        var totalQuestion = compiled.Keys.Count;
+        int totalQuestion = compiled.Keys.Count;
         var totalTime = existedAttempt.SubmittedAt - existedAttempt.StartedAt;
-        var ieltsBand = IeltsBandConverter.FromAcademicReadingScaled(correctCount, totalQuestion);
+
+        // sẽ set sau tuỳ loại đề (placement / non-placement)
+        decimal? ieltsBand = null;
+
         string examCategory = proto?.Category ?? dto?.Category ?? "";
         bool isPlacement = string.Equals(examCategory, ExamCategory.PLACEMENT, StringComparison.OrdinalIgnoreCase);
+
+
         PlacementResult? placementResult;
         string? placementLevel = null;
         decimal? placementBand = null;
         int? listeningCorrect = null;
         int? readingCorrect = null;
         decimal? writingBand = null;
+
         if (isPlacement)
         {
             placementResult = await context.PlacementResults.AsNoTracking()
                 .Where(x => x.AttemptId == attemptId)
                 .OrderByDescending(x => x.CreatedAt)
                 .FirstOrDefaultAsync(token);
+
             if (placementResult == null)
                 return Results.NotFound(new ApiResultDto(false, "Latest placement result not found", null!));
+
             placementLevel = placementResult.Level;
             placementBand = placementResult.Band;
             listeningCorrect = placementResult.ListeningCorrect;
             readingCorrect = placementResult.ReadingCorrect;
             writingBand = placementResult.WritingBand;
 
+            correctCount = placementResult.TotalCorrect;
+            totalQuestion = placementResult.ReadingTotal + placementResult.ListeningTotal;
+
+            ieltsBand = placementBand;
         }
+        else
+        {
+            // Non-placement: tính band theo READING-only (nếu có reading)
+            int readingCorrectOnly = existedAttempt.Answers.Count(a =>
+                a.IsCorrect == true &&
+                skillByQuestion.TryGetValue(a.QuestionId, out var sk) &&
+                string.Equals(sk, QuestionSkill.Reading, StringComparison.OrdinalIgnoreCase));
+
+            int totalReadingOnly = skillByQuestion.Count(k =>
+                string.Equals(k.Value, QuestionSkill.Reading, StringComparison.OrdinalIgnoreCase));
+
+            ieltsBand = totalReadingOnly > 0
+                ? IeltsBandConverter.FromAcademicReadingScaled(readingCorrectOnly, totalReadingOnly)
+                : 0m;
+        }
+
 
         // Use stored ScaledScore if available; otherwise compute percentage (0..100)
         var scorePct = existedAttempt.ScaledScore ??
@@ -744,7 +799,7 @@ IQuestionGraderFactory questionGraderFactory
                             correctText
                         );
                     }).ToList(),
-                    ieltsBand,
+                    ieltsBand ?? 0m,
                     placementLevel,
                     placementBand,
                     readingCorrect,
