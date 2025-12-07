@@ -519,15 +519,15 @@ IQuestionGraderFactory questionGraderFactory
             if (isPlacement)
             {
                 await placementWorkflow.OnSubmitAsync(
-               existedAttempt.Id,
-               writingQid,
-               listeningCorrect,
-               totalListening,
-               readingCorrect,
-               totalReading,
-               writingTask,
-               writingAnswer,
-               token);
+                existedAttempt.Id,
+                writingQid,
+                listeningCorrect,
+                totalListening,
+                readingCorrect,
+                totalReading,
+                writingTask,
+                writingAnswer,
+                token);
             }
 
             await context.SaveChangesAsync(token);
