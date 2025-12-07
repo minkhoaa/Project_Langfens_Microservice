@@ -1,0 +1,43 @@
+{
+  "answers": [
+    {
+      "questionId": "00000000-0000-0000-0000-000000000001",
+      "sectionId": "00000000-0000-0000-0000-0000000000A1",
+
+      // Với câu chọn đáp án (MCQ / TRUE_FALSE / YES_NO...)
+      // - single choice: đúng 1 phần tử
+      // - multi choice: 0..N phần tử
+      "selectedOptionIds": [
+        "11111111-1111-1111-1111-111111111111"
+      ],
+
+      // Câu chọn đáp án: nên để null hoặc không gửi
+      "textAnswer": null
+    },
+    {
+      "questionId": "00000000-0000-0000-0000-000000000002",
+      "sectionId": "00000000-0000-0000-0000-0000000000A1",
+
+      // Câu completion / short answer / label / map...
+      "selectedOptionIds": null,
+      "textAnswer": "warehouse"
+    },
+    {
+      "questionId": "00000000-0000-0000-0000-000000000003",
+      "sectionId": "00000000-0000-0000-0000-0000000000A1",
+
+      // Câu completion nhiều blank
+      "selectedOptionIds": null,
+      "textAnswer": "{\"blank-q7\":\"warehouse\",\"blank-q8\":\"condensation\"}"
+    },
+    {
+      "questionId": "00000000-0000-0000-0000-000000000004",
+      "sectionId": "00000000-0000-0000-0000-0000000000A3",
+
+      // Câu flow chart
+      "selectedOptionIds": null,
+      "textAnswer": "[\"warm intake\",\"evaporator dome\",\"turbine hall\",\"condenser bay\",\"return line\"]"
+    }
+  ],
+  "clientRevision": 0
+}
