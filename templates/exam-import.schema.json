@@ -204,7 +204,7 @@
           "$ref": "#/$defs/textArrayMap"
         },
         "orderCorrects": {
-          "$ref": "#/$defs/stringArrayOrNull"
+          "$ref": "#/$defs/orderCorrectArray"
         },
         "shortAnswerAcceptTexts": {
           "$ref": "#/$defs/stringArrayOrNull"
@@ -255,7 +255,19 @@
         "type": "string"
       },
       "default": [],
-      "description": "Used for orderCorrects, shortAnswerAcceptTexts, shortAnswerAcceptRegex."
+      "description": "Used for shortAnswerAcceptTexts, shortAnswerAcceptRegex."
+    },
+    "orderCorrectArray": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      "default": [],
+      "description": "Used only for FLOW_CHART questions. Canonical node keys in correct order, from first to last. Each entry should be a slug-like lowercase key, e.g. \"warm-intake\", \"evaporator-dome\", \"turbine-hall\", \"condenser-bay\", \"return-line\". The grader will normalize these via NormNode."
     },
     "textArrayMap": {
       "type": [
