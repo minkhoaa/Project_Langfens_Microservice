@@ -36,6 +36,8 @@ internal static class SnapshotFactory
             Difficulty = 1
         };
 
+        question.FlowChartNodes.Add(new FlowChartNode { Key = "node-a", Label = "Node A" });
+
         question.Options.Add(new InternalDeliveryOption
         {
             Id = Guid.NewGuid().ToString(),
@@ -91,6 +93,10 @@ internal static class SnapshotFactory
                             Difficulty = 1,
                             PromptMd = "DTO Question",
                             ExplanationMd = "Explained",
+                            FlowChartNodes = new List<InternalExamDto.InternalFlowChartNode>
+                            {
+                                new("node-a", "Node A")
+                            },
                             Options = new List<InternalExamDto.InternalDeliveryOption>
                             {
                                 new InternalExamDto.InternalDeliveryOption

@@ -42,6 +42,7 @@ message InternalDeliveryQuestion {
   repeated string order_corrects = 11;
   repeated string short_answer_accept_texts = 12;
   repeated string short_answer_accept_regex = 13;
+  repeated FlowChartNode flow_chart_nodes = 14;
 }
 
 message InternalDeliveryOption {
@@ -62,6 +63,11 @@ message InternalCompletionAccept {
 message InternalMatchPair {
   string prompt_key = 1;
   repeated string accepted_values = 2;
+}
+
+message FlowChartNode {
+  string key = 1;
+  string label = 2;
 }
 
 // ------------ RPC ------------

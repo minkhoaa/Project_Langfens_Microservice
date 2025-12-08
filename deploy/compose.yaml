@@ -129,8 +129,8 @@
       - CONNECTIONSTRING__VOCABULARY=Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary
       - ASPNETCORE_ENVIRONMENT=Production
 
-    expose:
-      - "8080"
+    ports:
+      - "8093:8080"
     networks:
       - backend
     depends_on:
