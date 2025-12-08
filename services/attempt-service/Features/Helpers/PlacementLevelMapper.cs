@@ -5,7 +5,7 @@ namespace attempt_service.Features.Helpers
     public static class PlacementLevelMapper
     {
         // services/attempt-service/Features/Helpers/PlacementLevelMapper.cs
-        public sealed record PlacementScore(decimal ReadingPct, decimal ListeningPct, decimal? WritingBand);
+        public sealed record PlacementScore(decimal ReadingPct, decimal ListeningPct, decimal? WritingBand, decimal? SpeakingBand);
         public sealed record PlacementLevel(string Level, decimal Band);
         public static PlacementLevel Map(PlacementScore score)
         {

@@ -19,6 +19,7 @@ namespace attempt_service.Domain.Entities
         public int ListeningCorrect { get; set; }
         public int ListeningTotal { get; set; }
         public decimal? WritingBand { get; set; }
+        public decimal? SpeakingBand { get; set; }
         public int TotalCorrect { get; set; }
         public string Level { get; set; } = default!;
         public decimal Band { get; set; } = default!;
