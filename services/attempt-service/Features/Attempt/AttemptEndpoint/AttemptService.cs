@@ -35,8 +35,6 @@ public class AttemptService(
     IUserContext user,
     IAnswerKeyBuilder answerKeyBuilder,
     IIndexBuilder indexBuilder,
-    IBuildQuestionIdSet buildQuestionIdSet,
-    IQuestionIndex questionIndex,
     IAnswerValidator answerValidator,
     IPlacementWorkflow placementWorkflow,
 
@@ -469,6 +467,8 @@ IQuestionGraderFactory questionGraderFactory
             var skillByQuestion = new Dictionary<Guid, string>();
             Guid? writingQid = null;
             string? writingTask = null;
+            Guid? speakingQid = null;
+            string? speakingTask = null;
             if (proto != null)
             {
                 foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
@@ -482,6 +482,13 @@ IQuestionGraderFactory questionGraderFactory
                             writingQid = qid;
                             writingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
                                 : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
+                        }
+                        if (speakingQid == null && string.Equals(question.Skill, QuestionSkill.Speaking,
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            speakingQid = qid;
+                            speakingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
+                                    : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
                         }
                     }
 
@@ -500,6 +507,13 @@ IQuestionGraderFactory questionGraderFactory
                             writingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
                                 : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
                         }
+                        if (speakingQid == null && string.Equals(question.Skill, QuestionSkill.Speaking,
+                          StringComparison.OrdinalIgnoreCase))
+                        {
+                            speakingQid = qid;
+                            speakingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
+                                    : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
+                        }
                     }
 
             }
@@ -507,9 +521,23 @@ IQuestionGraderFactory questionGraderFactory
                 && skillByQuestion.TryGetValue(a.QuestionId, out var sk)
                 && string.Equals(skill, sk, StringComparison.OrdinalIgnoreCase)
             );
-            var writingAnswer = writingQid.HasValue ? existedAttempt.Answers
-                .Where(k => k.QuestionId == writingQid).Select(k => k.TextAnswer).FirstOrDefault()
-                        : null;
+            string? writingAnswer = null;
+            if (writingQid.HasValue)
+            {
+                writingAnswer = existedAttempt.Answers
+                    .Where(a => a.QuestionId == writingQid.Value)
+                    .Select(a => a.TextAnswer)
+                    .FirstOrDefault();
+            }
+
+            string? speakingAnswerJson = null;
+            if (speakingQid.HasValue)
+            {
+                speakingAnswerJson = existedAttempt.Answers
+                    .Where(a => a.QuestionId == speakingQid.Value)
+                    .Select(a => a.TextAnswer)
+                    .FirstOrDefault();
+            }
 
             var readingCorrect = CountCorrect(QuestionSkill.Reading);
             var listeningCorrect = CountCorrect(QuestionSkill.Listening);
@@ -519,15 +547,11 @@ IQuestionGraderFactory questionGraderFactory
             if (isPlacement)
             {
                 await placementWorkflow.OnSubmitAsync(
-                existedAttempt.Id,
-                writingQid,
-                listeningCorrect,
-                totalListening,
-                readingCorrect,
-                totalReading,
-                writingTask,
-                writingAnswer,
-                token);
+                    existedAttempt.Id,
+                    writingQid, writingTask,
+                    writingAnswer, speakingQid,
+                    speakingTask, speakingAnswerJson, listeningCorrect,
+                    totalListening, readingCorrect, totalReading, token);
             }
 
             await context.SaveChangesAsync(token);
@@ -551,10 +575,10 @@ IQuestionGraderFactory questionGraderFactory
                 needsManualReview = manualCount
             }));
         }
-        catch
+        catch (Exception e)
         {
             await transaction.RollbackAsync(token);
-            return Results.Problem("Errors while grading", statusCode: 500);
+            return Results.Problem($"Errors while grading: {e.Message}", statusCode: 500);
         }
     }
 

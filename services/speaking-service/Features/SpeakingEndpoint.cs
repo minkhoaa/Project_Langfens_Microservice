@@ -1,6 +1,8 @@
 using speaking_service.Contracts;
 using speaking_service.Features.Handler;
 using Shared.Security.Roles;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace speaking_service.Features;
 
@@ -18,6 +20,7 @@ public static class SpeakingEndpoint
         app.MapGet("/history", SpeakingHandler.GetHistoryHandler).RequireAuthorization(Roles.User);
         app.MapPost("/start/{examId}", SpeakingHandler.StartSpeakingExamHandler);
 
+
     }
 
     public static void MapWebsocketSpeaking(this IEndpointRouteBuilder route)
@@ -34,5 +37,10 @@ public static class SpeakingEndpoint
         app.MapPost("/exams", SpeakingHandler.CreateExamHandler);
         app.MapPut("/exams/{examId:guid}", SpeakingHandler.UpdateExamHandler);
         app.MapDelete("/exams/{examId:guid}", SpeakingHandler.DeleteExamHandler);
+    }
+    public static void MapUploadEndpoint(this IEndpointRouteBuilder route)
+    {
+        var app = route.MapGroup("/api/upload");
+        app.MapPost("/audio", UploadHandler.UploadAudioHandler).DisableAntiforgery();
     }
 }

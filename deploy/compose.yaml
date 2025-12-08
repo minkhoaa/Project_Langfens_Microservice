@@ -144,13 +144,23 @@
       dockerfile: services/speaking-service/Dockerfile
     environment:
       - CONNECTIONSTRING__SPEAKING=Host=speaking-database;Port=5432;Database=speaking-db;Username=speaking;Password=speaking
+      - RABBITMQ__HOST=rabbitmq-service
+      - RABBITMQ__USERNAME=appuser
+      - RABBITMQ__PASSWORD=apppassword
+      - RABBITMQ__VHOST=/
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USESSL=false
     env_file:
       - ../services/speaking-service/.env
     expose:
       - "8080"
     ports:
       - "8090:8080"
-
+    depends_on:
+      rabbitmq-service:
+        condition: service_healthy
+      speaking-database:
+        condition: service_healthy
     networks:
       - backend
     deploy:
@@ -183,6 +193,8 @@
       - backend
     depends_on:
       writing-database:
+        condition: service_healthy
+      rabbitmq-service:
         condition: service_healthy
 
   email-service:

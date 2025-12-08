@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shared.ExamDto.Contracts.Speaking;
 using Shared.ExamDto.Contracts.Writing;
 using Shared.Grpc.ExamInternal;
 using Shared.Security.Claims;
@@ -99,6 +100,7 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 builder.Services.AddMassTransit(configurator =>
 {
     configurator.AddConsumer<WritingGradedConsumer>();
+    configurator.AddConsumer<SpeakingGradedConsumer>();
     RabbitMqConfig prodRabbitEnvironment;
     try
     {
@@ -139,6 +141,7 @@ builder.Services.AddMassTransit(configurator =>
         });
 
         config.ReceiveEndpoint("writing-graded-response", k => k.ConfigureConsumer<WritingGradedConsumer>(bus));
+        config.ReceiveEndpoint("speaking-graded-response", k => k.ConfigureConsumer<SpeakingGradedConsumer>(bus));
     });
 
 
@@ -169,7 +172,6 @@ builder.Services.AddSingleton<IQuestionGraderRegistration, MatchingHeadingGrader
 builder.Services.AddSingleton<IQuestionGraderRegistration, FlowChartGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, ShortAnswerGraderRegistration>();
 builder.Services.AddScoped<IPlacementWorkflow, PlacementWorkflow>();
-
 
 
 builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
