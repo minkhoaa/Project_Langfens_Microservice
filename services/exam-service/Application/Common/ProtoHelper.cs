@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Shared.Grpc.ExamInternal;
@@ -45,6 +46,10 @@ public static class ProtoHelper
                     Skill = q.Skill ?? string.Empty,
                     Type = q.Type ?? string.Empty
                 };
+
+                var flowChartNodes = BuildFlowChartNodes(q.OrderCorrects);
+                if (flowChartNodes.Count > 0)
+                    pQ.FlowChartNodes.AddRange(flowChartNodes);
 
                 foreach (var opt in q.Options.OrderBy(o => o.Idx))
                 {
@@ -95,5 +100,22 @@ public static class ProtoHelper
         }
 
         return proto;
+    }
+
+    private static List<FlowChartNode> BuildFlowChartNodes(IReadOnlyCollection<string>? orderCorrects)
+    {
+        if (orderCorrects is not { Count: > 0 }) return new List<FlowChartNode>();
+
+        var nodes = orderCorrects
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(key => new FlowChartNode
+            {
+                Key = key,
+                Label = key.Replace("-", " ").Trim()
+            })
+            .ToList();
+
+        return nodes.OrderBy(_ => Guid.NewGuid()).ToList();
     }
 }

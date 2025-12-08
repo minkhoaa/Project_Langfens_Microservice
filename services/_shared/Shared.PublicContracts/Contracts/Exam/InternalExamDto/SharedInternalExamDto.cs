@@ -41,12 +41,20 @@ public class InternalExamDto
         [JsonPropertyName("promptMd")] public string? PromptMd { get; init; }
         [JsonPropertyName("explanationMd")] public string? ExplanationMd { get; init; }
         [JsonPropertyName("options")] public IReadOnlyList<InternalDeliveryOption> Options { get; init; } = [];
+        [JsonPropertyName("flowChartNodes")] public IReadOnlyList<InternalFlowChartNode>? FlowChartNodes { get; init; }
+            = null;
         [JsonPropertyName("blankAcceptTexts")] public IReadOnlyDictionary<string, string[]?> BlankAcceptTexts { get; init; } = new Dictionary<string, string[]?>();
         [JsonPropertyName("blankAcceptRegex")] public IReadOnlyDictionary<string, string[]?> BlankAcceptRegex { get; init; } = new Dictionary<string, string[]?>();
         [JsonPropertyName("matchPairs")] public IReadOnlyDictionary<string, string[]?> MatchPairs { get; init; } = new Dictionary<string, string[]?>();
         [JsonPropertyName("orderCorrects")] public IReadOnlyList<string> OrderCorrects { get; init; } = Array.Empty<string>();
         [JsonPropertyName("shortAnswerAcceptTexts")] public IReadOnlyList<string> ShortAnswerAcceptTexts { get; init; } = Array.Empty<string>();
         [JsonPropertyName("shortAnswerAcceptRegex")] public IReadOnlyList<string> ShortAnswerAcceptRegex { get; init; } = Array.Empty<string>();
+    }
+
+    public record InternalFlowChartNode
+    {
+        [JsonPropertyName("key")] public string Key { get; init; } = string.Empty;
+        [JsonPropertyName("label")] public string Label { get; init; } = string.Empty;
     }
 
     public record InternalDeliveryOption

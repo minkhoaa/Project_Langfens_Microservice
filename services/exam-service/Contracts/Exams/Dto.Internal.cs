@@ -31,6 +31,7 @@ public class InternalExamDto
         string? PromptMd,
         string? ExplanationMd,
         IReadOnlyList<InternalDeliveryOption> Options,
+        IReadOnlyList<InternalFlowChartNode>? FlowChartNodes,
         IReadOnlyDictionary<string, string[]?>? BlankAcceptTexts,
         IReadOnlyDictionary<string, string[]?>? BlankAcceptRegex,
         IReadOnlyDictionary<string, string[]?>? MatchPairs,
@@ -39,6 +40,8 @@ public class InternalExamDto
         IReadOnlyList<string>? ShortAnswerAcceptRegex);
 
     public record InternalDeliveryOption(Guid Id, int Idx, string ContentMd, bool? IsCorrect);
+
+    public record InternalFlowChartNode(string Key, string Label);
 
     public static class SnapshotSanitizer
     {
