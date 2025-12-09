@@ -38,5 +38,11 @@ public static class IeltsBandConverter
         var scaled = (int)Math.Round((decimal)correct / total * 40m, MidpointRounding.AwayFromZero);
         return FromAcademicReading(scaled);
     }
+    public static decimal FromAcademicListeningScaled(int correct, int total)
+    {
+        if (total <= 0) return 0m;
+        var scaled = (int)Math.Round((decimal)correct / total * 40m, MidpointRounding.AwayFromZero);
+        return FromAcademicReading(scaled);
+    }
 }
 

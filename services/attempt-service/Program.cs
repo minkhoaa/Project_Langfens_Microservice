@@ -248,10 +248,4 @@ app.UseAuthorization();
 app.MapAttemptEndpoint();
 app.MapAdminEndpoint();
 
-app.MapPost("/api/test-writing", async (WritingGradeRequestMessage request, IPublishEndpoint bus) =>
-{
-    await bus.Publish<WritingGradeRequestMessage>(request);
-    return Results.Ok();
-}).AllowAnonymous();
-
 app.Run();

@@ -13,7 +13,7 @@ namespace attempt_service.Features.Helpers
     public interface IPlacementWorkflow
     {
 
-        Task OnSubmitAsync(
+        Task OnPlacementSubmittedAsync(
                Guid attemptId,
                Guid? writingQuestionId,
                string? writingTask,
@@ -25,6 +25,7 @@ namespace attempt_service.Features.Helpers
                int readingCorrect, int readingTotal,
                CancellationToken token);
         Task OnWritingGradedAsync(WritingGradeResponseMessage msg, CancellationToken token);
+        Task OnSpeakingGradedAsync(SpeakingGradingResponseMessage msg, CancellationToken token);
     }
     public class PlacementWorkflow : IPlacementWorkflow
     {
@@ -37,7 +38,7 @@ namespace attempt_service.Features.Helpers
             _bus = bus;
             _logger = logger;
         }
-        public async Task OnSubmitAsync(
+        public async Task OnPlacementSubmittedAsync(
            Guid attemptId,
            Guid? writingQuestionId,
            string? writingTask,
@@ -60,23 +61,41 @@ namespace attempt_service.Features.Helpers
                         UserId = attempt.UserId,
                         CreatedAt = DateTime.UtcNow
                     };
+            decimal? readingBand = null;
+            if (readingTotal > 0)
+            {
+                readingBand = IeltsBandConverter.FromAcademicReadingScaled(
+                    readingCorrect, readingTotal);
+            }
 
-            var readingPct = readingTotal > 0 ? (decimal)readingCorrect / readingTotal : 0m;
-            var listeningPct = listeningTotal > 0 ? (decimal)listeningCorrect / listeningTotal : 0m;
-
-            var mapped = PlacementLevelMapper.Map(
-                new PlacementLevelMapper.PlacementScore(readingPct, listeningPct, null, null));
+            decimal? listeningBand = null;
+            if (listeningTotal > 0)
+            {
+                // nếu có hàm riêng cho listening thì dùng, không thì tự viết
+                listeningBand = IeltsBandConverter.FromAcademicListeningScaled(
+                    listeningCorrect, listeningTotal);
+            }
             placement.ReadingCorrect = readingCorrect;
             placement.ReadingTotal = readingTotal;
             placement.ListeningCorrect = listeningCorrect;
             placement.ListeningTotal = listeningTotal;
             placement.TotalCorrect = listeningCorrect + readingCorrect;
 
+            // Lúc submit lần đầu, chưa có Writing/Speaking
             placement.WritingBand = null;
             placement.SpeakingBand = null;
-            placement.Level = mapped.Level;
-            placement.Band = mapped.Band;
             placement.UpdatedAt = DateTime.UtcNow;
+            var mapped = PlacementLevelMapper.Map(
+                new PlacementLevelMapper.PlacementScore(
+                    readingBand,
+                    listeningBand,
+                    placement.WritingBand,
+                    placement.SpeakingBand
+                ));
+            placement.Level = mapped.Level;
+            placement.Band = mapped.Band;   // overall placementBand
+            placement.UpdatedAt = DateTime.UtcNow;
+
 
             if (_context.Entry(placement).State == EntityState.Detached)
                 _context.PlacementResults.Add(placement);
@@ -88,11 +107,11 @@ namespace attempt_service.Features.Helpers
                     !string.IsNullOrWhiteSpace(writingAnswer);
             if (hasWriting)
             {
-                var request = new WritingGradeRequestMessage
+                var writingRequest = new WritingGradeRequestMessage
                 (attemptId, attempt.UserId, writingQuestionId, QuestionSkill.Writing, writingTask, writingAnswer);
-                _logger.LogInformation(JsonSerializer.Serialize(request), token);
+                _logger.LogInformation(JsonSerializer.Serialize(writingRequest), token);
 
-                await _bus.Publish(request, token);
+                await _bus.Publish(writingRequest, token);
             }
             var hasSpeaking =
                 speakingQuestionId.HasValue &&
@@ -148,18 +167,28 @@ namespace attempt_service.Features.Helpers
             }
 
             placement.WritingBand = (decimal)response.OverallBand;
+            decimal? readingBand = null;
+            if (placement.ReadingTotal > 0)
+            {
+                readingBand = IeltsBandConverter.FromAcademicReadingScaled(
+                    placement.ReadingCorrect,
+                    placement.ReadingTotal);
+            }
 
-            var readingPct = placement.ReadingTotal > 0
-                ? (decimal)placement.ReadingCorrect / placement.ReadingTotal
-                : 0m;
-
-            var listeningPct = placement.ListeningTotal > 0
-                ? (decimal)placement.ListeningCorrect / placement.ListeningTotal
-                : 0m;
-
-
-            var mapped = PlacementLevelMapper.Map(new PlacementLevelMapper.PlacementScore
-                (readingPct, listeningPct, placement.WritingBand, placement.SpeakingBand));
+            decimal? listeningBand = null;
+            if (placement.ListeningTotal > 0)
+            {
+                listeningBand = IeltsBandConverter.FromAcademicListeningScaled(
+                    placement.ListeningCorrect,
+                    placement.ListeningTotal);
+            }
+            var mapped = PlacementLevelMapper.Map(
+                new PlacementLevelMapper.PlacementScore(
+                    readingBand,
+                    listeningBand,
+                    placement.WritingBand,
+                    placement.SpeakingBand // có thể null nếu chưa chấm Speaking
+                ));
             placement.Level = mapped.Level;
             placement.Band = mapped.Band;
             placement.UpdatedAt = DateTime.UtcNow;
@@ -175,5 +204,60 @@ namespace attempt_service.Features.Helpers
 
             await _context.SaveChangesAsync(token);
         }
+
+        public async Task OnSpeakingGradedAsync(SpeakingGradingResponseMessage response, CancellationToken token)
+        {
+            var placement = await _context.PlacementResults
+                .FirstOrDefaultAsync(k => k.AttemptId == response.AttemptId, token);
+
+            if (placement == null)
+            {
+                _logger.LogWarning("PlacementResult not found for attempt {AttemptId}", response.AttemptId);
+                return;
+            }
+
+            // 1. Cập nhật band speaking
+            placement.SpeakingBand = (decimal)response.OverallBand;
+
+            decimal? readingBand = null;
+            if (placement.ReadingTotal > 0)
+            {
+                readingBand = IeltsBandConverter.FromAcademicReadingScaled(
+                    placement.ReadingCorrect,
+                    placement.ReadingTotal);
+            }
+
+            decimal? listeningBand = null;
+            if (placement.ListeningTotal > 0)
+            {
+                listeningBand = IeltsBandConverter.FromAcademicListeningScaled(
+                    placement.ListeningCorrect,
+                    placement.ListeningTotal);
+            }
+            // 3. Map lại level/band với đủ info hiện có
+            var mapped = PlacementLevelMapper.Map(
+                new PlacementLevelMapper.PlacementScore(
+                    readingBand,
+                    listeningBand,
+                    placement.WritingBand,
+                    placement.SpeakingBand
+                ));
+            placement.Level = mapped.Level;
+            placement.Band = mapped.Band;
+            placement.UpdatedAt = DateTime.UtcNow;
+
+            _context.PlacementResults.Update(placement);
+
+            // 4. Option: đánh dấu attempt là Graded
+            await _context.Attempts
+                .Where(a => a.Id == response.AttemptId)
+                .ExecuteUpdateAsync(p => p
+                    .SetProperty(a => a.Status, AttemptStatus.Graded)
+                    .SetProperty(a => a.GradedAt, DateTime.UtcNow),
+                    token);
+
+            await _context.SaveChangesAsync(token);
+        }
+
     }
 }

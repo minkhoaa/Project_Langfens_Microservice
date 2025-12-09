@@ -546,7 +546,7 @@ IQuestionGraderFactory questionGraderFactory
 
             if (isPlacement)
             {
-                await placementWorkflow.OnSubmitAsync(
+                await placementWorkflow.OnPlacementSubmittedAsync(
                     existedAttempt.Id,
                     writingQid, writingTask,
                     writingAnswer, speakingQid,
@@ -672,7 +672,7 @@ IQuestionGraderFactory questionGraderFactory
         int? listeningCorrect = null;
         int? readingCorrect = null;
         decimal? writingBand = null;
-
+        decimal? speakingBand = null;
         if (isPlacement)
         {
             placementResult = await context.PlacementResults.AsNoTracking()
@@ -682,13 +682,12 @@ IQuestionGraderFactory questionGraderFactory
 
             if (placementResult == null)
                 return Results.NotFound(new ApiResultDto(false, "Latest placement result not found", null!));
-
             placementLevel = placementResult.Level;
             placementBand = placementResult.Band;
             listeningCorrect = placementResult.ListeningCorrect;
             readingCorrect = placementResult.ReadingCorrect;
             writingBand = placementResult.WritingBand;
-
+            speakingBand = placementResult.SpeakingBand;
             correctCount = placementResult.TotalCorrect;
             totalQuestion = placementResult.ReadingTotal + placementResult.ListeningTotal;
 
@@ -828,7 +827,8 @@ IQuestionGraderFactory questionGraderFactory
                     placementBand,
                     readingCorrect,
                     listeningCorrect,
-                    writingBand
+                    writingBand,
+                    speakingBand
                     )
             )
         );

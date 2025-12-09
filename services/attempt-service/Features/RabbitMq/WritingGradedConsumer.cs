@@ -8,17 +8,17 @@ namespace attempt_service.Features.RabbitMq
     public class WritingGradedConsumer : IConsumer<WritingGradeResponseMessage>
     {
         private readonly ILogger<WritingGradedConsumer> _logger;
-        private readonly IPlacementWorkflow _writingWorkflow;
-        public WritingGradedConsumer(ILogger<WritingGradedConsumer> logger, IPlacementWorkflow writingWorkflow)
+        private readonly IPlacementWorkflow _placementWorkflow;
+        public WritingGradedConsumer(ILogger<WritingGradedConsumer> logger, IPlacementWorkflow placementWorkflow)
         {
             _logger = logger;
-            _writingWorkflow = writingWorkflow;
+            _placementWorkflow = placementWorkflow;
         }
         public async Task Consume(ConsumeContext<WritingGradeResponseMessage> context)
         {
             var res = context.Message;
-            await _writingWorkflow.OnWritingGradedAsync(res, CancellationToken.None);
             _logger.LogInformation(JsonSerializer.Serialize(res));
+            await _placementWorkflow.OnWritingGradedAsync(res, CancellationToken.None);
         }
     }
 }

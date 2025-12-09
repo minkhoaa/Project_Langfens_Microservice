@@ -1,3 +1,5 @@
+using Shared.ExamDto.Contracts.Speaking;
+
 namespace speaking_service.Contracts;
 
 public class SpeakingGradeResponse
@@ -25,8 +27,3 @@ public class SpeakingGradeResponse
     public string? RawLlmJson { get; set; }
 }
 
-public class CriterionScore
-{
-    public double Band { get; set; }
-    public string Comment { get; set; } = string.Empty;
-}
