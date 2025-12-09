@@ -374,5 +374,15 @@ Write **120–150 words** describing:
 - two disadvantages of shopping online.
 
 Give reasons for your ideas and include examples from your own experience.', NULL, ARRAY['.*']);
+INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","ShortAnswerAcceptRegex")
+VALUES ('7e93e0f1-bed4-4f5a-9d3b-e8658f94f4b7', 'b1a5f019-d676-4a64-9a01-a2a504b110e0', 2, 'SHORT_ANSWER', 'SPEAKING', 4, '### Writing Task
+
+In many cities and towns, more people are buying things online instead of in traditional shops.
+
+Write **120–150 words** describing:
+- two advantages of shopping online, and  
+- two disadvantages of shopping online.
+
+Give reasons for your ideas and include examples from your own experience.', NULL, ARRAY['.*']);
 
 COMMIT;
