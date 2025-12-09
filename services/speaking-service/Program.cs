@@ -229,6 +229,7 @@ builder.Services.AddSingleton<WhisperFactory>(_ =>
 builder.Services.AddScoped<IWhisperService, WhisperService>();
 builder.Services.AddScoped<ISpeakingService, SpeakingService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddSingleton<ISpeakingGrader, SpeakingGrader>();
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 

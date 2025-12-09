@@ -112,5 +112,4 @@ using (var scope = app.Services.CreateScope())
 
 app.MapPublicVocabularyEndpoints();
 app.MapUserVocabularyEndpoints();
-app.MapAdminVocabularyEndpoints();
 app.Run();

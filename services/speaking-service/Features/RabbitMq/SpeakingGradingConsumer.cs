@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Text.Json;
 using MassTransit;
 using Shared.ExamDto.Contracts.Speaking;
@@ -15,7 +16,8 @@ namespace speaking_service.Features.RabbitMq
         }
         public Task Consume(ConsumeContext<SpeakingGradingRequestMessage> context)
         {
-            _logger.LogInformation(JsonSerializer.Serialize(context.Message));
+            var res = context.Message;
+            _logger.LogInformation(JsonSerializer.Serialize(res));
             return Task.CompletedTask;
         }
     }
