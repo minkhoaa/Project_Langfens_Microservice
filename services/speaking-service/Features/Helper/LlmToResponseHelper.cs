@@ -1,3 +1,4 @@
+using Shared.ExamDto.Contracts.Speaking;
 using speaking_service.Contracts;
 
 namespace speaking_service.Features.Helper;

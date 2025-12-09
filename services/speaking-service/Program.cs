@@ -226,10 +226,16 @@ builder.Services.AddSingleton<WhisperFactory>(_ =>
     var modelPath = WhisperModelHelper.EnsureModelDownloadedAsync().GetAwaiter().GetResult();
     return WhisperFactory.FromPath(modelPath);
 });
+
+
+builder.Services.AddHttpClient<IAudioDownloader, AudioDownloader>();
+
+
 builder.Services.AddScoped<IWhisperService, WhisperService>();
 builder.Services.AddScoped<ISpeakingService, SpeakingService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddSingleton<ISpeakingGrader, SpeakingGrader>();
+builder.Services.AddSingleton<IAudioDownloader, AudioDownloader>();
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 

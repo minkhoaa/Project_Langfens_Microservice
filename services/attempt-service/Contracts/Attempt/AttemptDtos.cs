@@ -50,7 +50,8 @@ public record AttemptResultResponse(
     decimal? PlacementBand = null,
     int? ReadingCorrect = null,
     int? ListeningCorrect = null,
-    decimal? WritingBand = null
+    decimal? WritingBand = null,
+    decimal? SpeakingBand = null
 );
 public record AttemptListItem(
     Guid AttemptId,
