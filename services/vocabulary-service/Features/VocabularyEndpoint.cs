@@ -21,7 +21,7 @@ public static class VocabularyEndpoint
     public static void MapUserVocabularyEndpoints(this IEndpointRouteBuilder app)
     {
         var users = app.MapGroup("/api/users")
-            .RequireAuthorization(VocabScope.VocabRead);
+            .RequireAuthorization(Roles.User);
 
         users.MapPost("/{userId}/subscribe/{deckId}", UserHandler.SubscribeDecksHandler);
         users.MapGet("/{userId}/subscribe", UserHandler.GetSubscribedDecksHandler);
@@ -29,19 +29,13 @@ public static class VocabularyEndpoint
         users.MapGet("/{userId}/flashcard/due", UserHandler.GetDueFlashcardHandler);
         users.MapPost("/{userId}/flashcard/{cardId}/review", UserHandler.ReviewFlashcardHandler);
         users.MapGet("/{userId}/flashcard/progress", UserHandler.GetFlashcardProgressHandler);
+        users.MapPost("/deck", AdminHandler.CreateDeckHandler);
+        users.MapPut("/deck/{deckId}", AdminHandler.UpdateDeckHandler);
+        users.MapDelete("/deck/{deckId}", AdminHandler.DeleteDeckHandler);
+        users.MapPost("/deck/{deckId}/card", AdminHandler.CreateCardHandler);
+        users.MapPut("/deck/card/{cardId}", AdminHandler.UpdateCardHandler);
+        users.MapDelete("/deck/card/{cardId}", AdminHandler.DeleteCardHandler);
+        users.MapDelete("/deck/{deckId}/publish", AdminHandler.PublishDeckHandler);
     }
 
-    public static void MapAdminVocabularyEndpoints(this IEndpointRouteBuilder app)
-    {
-        var admin = app.MapGroup("/api/admin")
-            .RequireAuthorization(Roles.User);
-
-        admin.MapPost("/deck", AdminHandler.CreateDeckHandler);
-        admin.MapPut("/deck/{deckId}", AdminHandler.UpdateDeckHandler);
-        admin.MapDelete("/deck/{deckId}", AdminHandler.DeleteDeckHandler);
-        admin.MapPost("/deck/{deckId}/card", AdminHandler.CreateCardHandler);
-        admin.MapPut("/deck/card/{cardId}", AdminHandler.UpdateCardHandler);
-        admin.MapDelete("/deck/card/{cardId}", AdminHandler.DeleteCardHandler);
-        admin.MapDelete("/deck/{deckId}/publish", AdminHandler.PublishDeckHandler);
-    }
 }

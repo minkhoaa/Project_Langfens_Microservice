@@ -1,5 +1,8 @@
+using System.ComponentModel;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
@@ -25,29 +28,29 @@ public class SpeakingService : ISpeakingService
 {
     private readonly SpeakingDbContext _context;
     private readonly IUserContext _user;
-    private readonly IHttpClientFactory _client;
-    private readonly OpenRouterOptions _router;
     private readonly IWhisperService _whisper;
-    public SpeakingService(SpeakingDbContext context, IUserContext user, 
-        IOptions<OpenRouterOptions> router,
-        IWhisperService whisper,
-        IHttpClientFactory client)
+    private readonly ISpeakingGrader _grader;
+    public SpeakingService(SpeakingDbContext context, IUserContext user,
+        ISpeakingGrader grader,
+        IWhisperService whisper)
     {
         _whisper = whisper;
         _context = context;
         _user = user;
-        _client = client;
-        _router = router.Value;
+
+        _grader = grader;
+
     }
 
-    public async Task<IResult> SpeakingSubmit(SpeakingSubmitForm submitForm ,CancellationToken token)
+    public async Task<IResult> SpeakingSubmit(SpeakingSubmitForm submitForm, CancellationToken token)
     {
+
         var transcript = await _whisper.Transcript(submitForm.Speech);
         var userId = _user.UserId;
         var exam = await _context.SpeakingExams.AsNoTracking().Where(x => x.Id == submitForm.ExamId)
             .FirstOrDefaultAsync(token) ?? throw new Exception("Exam is not existed");
 
-        var (res, raw) = await SpeakingGraderHelper(new ContentSubmission
+        var (res, raw) = await _grader.Grade(new ContentSubmission
         {
             Task = exam.TaskText,
             Transcript = transcript
@@ -71,8 +74,8 @@ public class SpeakingService : ISpeakingService
         var evaluation = MapToEvaluation(res, raw);
         _context.SpeakingEvaluations.Add(evaluation);
         await _context.SaveChangesAsync(token);
-        return Results.Ok(new ApiResultDto(true, "Submitted", new {submission.Id, res}));
- 
+        return Results.Ok(new ApiResultDto(true, "Submitted", new { submission.Id, res }));
+
     }
 
     public async Task<IResult> StartSpeakingExam(Guid examId, CancellationToken token)
@@ -138,96 +141,11 @@ public class SpeakingService : ISpeakingService
 
         return Results.Ok(new ApiResultDto(true, "Fetched speaking history successfully", history));
     }
-    
-    
-    
-    
-    
-    private async Task<(SpeakingGradeResponse, LlmSpeakingScoreCompact)> SpeakingGraderHelper( ContentSubmission submission ,CancellationToken token)
-    {
-        var client = _client.CreateClient("openrouter");
-        var systemPrompt =
-            "IELTS speaking examiner. Score 0-9. Reply ONLY JSON:{\"ob\":6.5," +
-            "\"fc\":{\"b\":6,\"c\":\"...\"},\"lr\":{\"b\":7,\"c\":\"...\"}," +
-            "\"gr\":{\"b\":6,\"c\":\"...\"},\"pr\":{\"b\":6,\"c\":\"...\"}," +
-            "\"s\":[\"...\"],\"p\":\"...\"}. ob=overall; fc,lr,gr,pr=criteria; s=suggestions; b=band; c=comment; p=improved answer.";
 
-        var userContent = $"T:{submission.Task}\nE:{submission.Transcript}";
-    
-        var payload = new
-        {
-            model = _router.Model,
-            messages = new[]
-            {
-                new { role = "system", content = systemPrompt },
-                new { role = "user", content = userContent }
-            },
-            temperature = 0.2,
-            max_tokens = 800,
-            response_format = new { type = "json_object" }
-        };
-        var json = JsonSerializer.Serialize(payload);
-        
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("chat/completions", content, token);
-        if (!response.IsSuccessStatusCode)
-        {
-            var err = await response.Content.ReadAsStringAsync(token);
-            throw new HttpRequestException($"OpenRouter error {(int)response.StatusCode}: {err}");
-        }
 
-        var responseText = await response.Content.ReadAsStringAsync(token);
-        var responseTrimmed = responseText.TrimStart();
-        if (!(responseTrimmed.StartsWith("{") || responseTrimmed.StartsWith("[")))
-        {
-            throw new InvalidOperationException(
-                $"OpenRouter returned non-JSON. Status {(int)response.StatusCode}. Starts with: {responseTrimmed[..Math.Min(responseTrimmed.Length, 120)]}");
-        }
-        using var doc = JsonDocument.Parse(responseText);
-        var assistantContent = doc.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content")
-            .GetString();
-        
-        if (string.IsNullOrWhiteSpace(assistantContent))
-            throw new InvalidOperationException("Model returned empty content.");
-        var trimmed = assistantContent.Trim();
 
-        
-        if (trimmed.StartsWith("```"))
-        {
-            var firstNewLine = trimmed.IndexOf('\n');
-            if (firstNewLine >= 0)
-            {
-                trimmed = trimmed[(firstNewLine + 1)..]; 
-                var fenceIndex = trimmed.LastIndexOf("```", StringComparison.Ordinal);
-                if (fenceIndex >= 0)
-                    trimmed = trimmed[..fenceIndex];
-            }
-            trimmed = trimmed.Trim();
-        }
-        if (!(trimmed.StartsWith("{") || trimmed.StartsWith("[")))
-        {
-            throw new InvalidOperationException(
-                $"Model did not return JSON. Starts with: {trimmed[..Math.Min(trimmed.Length, 50)]}");
-        }
-        LlmSpeakingScoreCompact jsonRes;
-        try
-        {
-            jsonRes = JsonSerializer.Deserialize<LlmSpeakingScoreCompact>(trimmed)
-                      ?? throw new InvalidOperationException("Cannot convert model JSON into object.");
-        }
-        catch (JsonException ex)
-        {
-            throw new InvalidOperationException(
-                $"Failed to parse model JSON. Content: {trimmed[..Math.Min(trimmed.Length, 200)]}",
-                ex);
-        }
-        if (jsonRes is null) throw new InvalidOperationException("Cannot convert into Object");
-        var resp = LlmToResponseHelper.MapToResponse(submission, jsonRes);
-        return (resp, jsonRes);
-    }
+
+
 
     private SpeakingEvaluation MapToEvaluation(SpeakingGradeResponse response, LlmSpeakingScoreCompact raw)
     {
@@ -254,5 +172,5 @@ public class SpeakingService : ISpeakingService
         return evaluation;
 
     }
-    
+
 }
