@@ -27,8 +27,7 @@ public class WritingService : IWritingService
     private readonly WritingDbContext _context;
     private readonly IWritingGrader _grader;
 
-    public WritingService(IOptions<OpenRouterOptions> router,
-        IHttpClientFactory client,
+    public WritingService(
         IUserContext user,
         WritingDbContext context,
         IWritingGrader grader

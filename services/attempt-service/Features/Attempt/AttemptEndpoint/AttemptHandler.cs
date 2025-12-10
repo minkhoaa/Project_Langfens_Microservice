@@ -60,4 +60,7 @@ public static class AttemptHandler
 
     public static Task<IResult> GetUserLatestPlacement(CancellationToken token, IAttemptService service)
         => service.GetLatestPlacement(token);
+
+    public static Task<IResult> GetPlacementCompletionStatus(CancellationToken token, IAttemptService service)
+        => service.GetPlacementCompletionStatus(token);
 }

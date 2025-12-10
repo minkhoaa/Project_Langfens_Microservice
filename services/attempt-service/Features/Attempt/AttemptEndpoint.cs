@@ -22,6 +22,8 @@ public static class AttemptEndpointMapping
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         group.MapGet("/placement", AttemptHandler.GetUserLatestPlacement)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
+        group.MapGet("/placement/status", AttemptHandler.GetPlacementCompletionStatus)
+            .RequireAuthorization(AttemptScope.AttemptReadOwn);
     }
     public static void MapAdminEndpoint(this IEndpointRouteBuilder router)
     {

@@ -71,7 +71,7 @@ public class SpeakingService : ISpeakingService
         };
         await _context.SpeakingSubmissions.AddAsync(submission, token);
         res.SubmissionId = submission.Id;
-        var evaluation = MapToEvaluation(res, raw);
+        var evaluation = _grader.MapToEvaluation(res, raw);
         _context.SpeakingEvaluations.Add(evaluation);
         await _context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Submitted", new { submission.Id, res }));
@@ -146,31 +146,5 @@ public class SpeakingService : ISpeakingService
 
 
 
-
-    private SpeakingEvaluation MapToEvaluation(SpeakingGradeResponse response, LlmSpeakingScoreCompact raw)
-    {
-        var evaluation = new SpeakingEvaluation
-        {
-            SubmissionId = response.SubmissionId,
-            OverallBand = response.OverallBand,
-            FluencyAndCoherenceBand = response.FluencyAndCoherence.Band,
-            FluencyAndCoherenceComment = response.FluencyAndCoherence.Comment,
-            GrammaticalRangeAndAccuracyBand = response.GrammaticalRangeAndAccuracy.Band,
-            GrammaticalRangeAndAccuracyComment = response.GrammaticalRangeAndAccuracy.Comment,
-            CreatedAt = DateTime.UtcNow,
-            LexicalResourceBand = response.LexicalResource.Band,
-            LexicalResourceComment = response.LexicalResource.Comment,
-            ImprovedAnswer = response.ImprovedAnswer,
-            Model = response.Model,
-            PronunciationBand = response.Pronunciation.Band,
-            PronunciationComment = response.Pronunciation.Comment,
-            Provider = "LLM Provider",
-            SuggestionsJson = JsonSerializer.Serialize(response.Suggestions),
-            RawLlmJson = JsonSerializer.Serialize(raw),
-            PromptSchemaVersion = "v1"
-        };
-        return evaluation;
-
-    }
 
 }

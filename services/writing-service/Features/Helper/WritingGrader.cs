@@ -2,6 +2,9 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Validations.Rules;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.Google;
 using writing_service.Contracts;
 using writing_service.Domains.Entities;
 using writing_service.Infrastructure.Persistence;
@@ -15,22 +18,20 @@ namespace writing_service.Features.Helper
     }
     public class WritingGrader : IWritingGrader
     {
-        private readonly OpenRouterOptions _router;
-        private readonly IHttpClientFactory _client;
+
         private readonly ILogger<WritingGrader> _logger;
+        private readonly IChatCompletionService _chat;
+        private readonly Kernel _kernel;
         public WritingGrader(
-        IOptions<OpenRouterOptions> router,
-        IHttpClientFactory client,
-        ILogger<WritingGrader> logger
+        ILogger<WritingGrader> logger, Kernel kernel, IChatCompletionService chat
         )
         {
-            _client = client;
-            _router = router.Value;
+            _chat = chat;
+            _kernel = kernel;
             _logger = logger;
         }
         public async Task<(WritingGradeResponse, LlmWritingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token)
         {
-            var client = _client.CreateClient("openrouter");
             var systemPrompt =
                 "IELTS W2 examiner. Score essay 0-9. " +
                 "Reply ONLY JSON:{\"ob\":6.5," +
@@ -42,87 +43,26 @@ namespace writing_service.Features.Helper
                 "ob=overall; ta,cc,lr,gr=criteria; s=suggestions; b=band; c=comment; p=improved paragraph.";
 
             var userContent = $"T:{submission.Task}\nE:{submission.Answer}";
-
-            var payload = new
+            var history = new ChatHistory();
+            history.AddSystemMessage(systemPrompt);
+            history.AddUserMessage(userContent);
+            var settings = new GeminiPromptExecutionSettings
             {
-                model = _router.Model,
-                messages = new[]
-                {
-                new { role = "system", content = systemPrompt },
-                new { role = "user", content = userContent }
-            },
-                temperature = 0.2,
-                max_tokens = 3000
+                Temperature = 0.2,
+                MaxTokens = 1200,
+                ResponseMimeType = "application/json",
+                ResponseSchema = typeof(LlmWritingScoreCompact)
             };
-            var json = JsonSerializer.Serialize(payload);
-
-            using var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("chat/completions", content, token);
-            if (!response.IsSuccessStatusCode)
+            var messages = await _chat.GetChatMessageContentsAsync(history, executionSettings: settings, kernel: _kernel, cancellationToken: token);
+            var content = messages.LastOrDefault()?.Content;
+            if (string.IsNullOrWhiteSpace(content))
             {
-                var err = await response.Content.ReadAsStringAsync(token);
-                throw new HttpRequestException($"OpenRouter error {(int)response.StatusCode}: {err}");
-            }
-
-            var responseText = await response.Content.ReadAsStringAsync(token);
-            using var doc = JsonDocument.Parse(responseText);
-            var message = doc.RootElement.GetProperty("choices")[0].GetProperty("message");
-
-            string? assistantContent = null;
-            if (message.TryGetProperty("content", out var contentProp))
-            {
-                assistantContent = contentProp.ValueKind switch
-                {
-                    JsonValueKind.String => contentProp.GetString(),
-                    JsonValueKind.Array => string.Join("", contentProp.EnumerateArray()
-                        .Select(b => b.ValueKind == JsonValueKind.String
-                            ? b.GetString()
-                            : b.TryGetProperty("text", out var t) ? t.GetString() : null)
-                        .Where(s => !string.IsNullOrWhiteSpace(s))),
-                    _ => null
-                };
-            }
-            // Nếu content rỗng, thử lấy reasoning
-            if (string.IsNullOrWhiteSpace(assistantContent) &&
-                message.TryGetProperty("reasoning", out var reasoningProp))
-            {
-                assistantContent = reasoningProp.ValueKind switch
-                {
-                    JsonValueKind.String => reasoningProp.GetString(),
-                    JsonValueKind.Array => string.Join("", reasoningProp.EnumerateArray()
-                        .Select(b => b.ValueKind == JsonValueKind.String ? b.GetString() : null)
-                        .Where(s => !string.IsNullOrWhiteSpace(s))),
-                    _ => null
-                };
-            }
-
-            if (string.IsNullOrWhiteSpace(assistantContent))
-            {
-                _logger.LogWarning("OpenRouter returned empty content. Body: {Body}", responseText);
+                _logger.LogWarning("Gemini returned empty content.");
                 throw new InvalidOperationException("Model returned empty content.");
             }
 
-            var trimmed = assistantContent.Trim();
-
-
-
-            if (trimmed.StartsWith("```"))
-            {
-                var firstNewLine = trimmed.IndexOf('\n');
-                if (firstNewLine >= 0)
-                {
-                    trimmed = trimmed[(firstNewLine + 1)..];
-                    var fenceIndex = trimmed.LastIndexOf("```", StringComparison.Ordinal);
-                    if (fenceIndex >= 0)
-                        trimmed = trimmed[..fenceIndex];
-                }
-                trimmed = trimmed.Trim();
-            }
-            if (!(trimmed.StartsWith("{") || trimmed.StartsWith("[")))
-            {
-                throw new InvalidOperationException(
-                    $"Model did not return JSON. Starts with: {trimmed[..Math.Min(trimmed.Length, 50)]}");
-            }
+            var trimmed = content.Trim();
+            trimmed = ExtractJsonObject.Extract(trimmed);
             LlmWritingScoreCompact jsonRes;
             try
             {
@@ -135,13 +75,15 @@ namespace writing_service.Features.Helper
                     $"Failed to parse model JSON. Content: {trimmed[..Math.Min(trimmed.Length, 200)]}",
                     ex);
             }
-            if (jsonRes is null) throw new InvalidOperationException("Cannot convert into Object");
+
             var resp = LlmToResponseHelper.MapToResponse(submission, jsonRes);
             return (resp, jsonRes);
         }
 
         public WritingEvaluation MapToEvaluation(WritingGradeResponse response, LlmWritingScoreCompact raw)
         {
+            var model = LlmToResponseHelper.ResolveModelName();
+            var provider = LlmToResponseHelper.ResolveProvider();
             var evaluation = new WritingEvaluation
             {
                 SubmissionId = response.SubmissionId,
@@ -154,10 +96,10 @@ namespace writing_service.Features.Helper
                 LexicalResourceBand = response.LexicalResource.Band,
                 LexicalResourceComment = response.LexicalResource.Comment,
                 ImprovedParagraph = response.ImprovedParagraph,
-                Model = response.Model,
+                Model = model,
                 TaskResponseBand = response.TaskResponse.Band,
                 TaskResponseComment = response.TaskResponse.Comment,
-                Provider = "LLM Provider",
+                Provider = provider,
                 SuggestionsJson = JsonSerializer.Serialize(response.Suggestions),
                 RawLlmJson = JsonSerializer.Serialize(raw),
                 PromptSchemaVersion = "v1"

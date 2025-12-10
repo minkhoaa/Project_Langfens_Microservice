@@ -30,7 +30,7 @@ public class SpeakingEvaluation
     public string ImprovedAnswer { get; set; } = string.Empty;
 
     public string Model { get; set; } = string.Empty;
-    public string Provider { get; set; } = "openrouter";
+    public string Provider { get; set; } = "gemini";
     public string PromptSchemaVersion { get; set; } = "v1";
 
     public string RawLlmJson { get; set; } = string.Empty;

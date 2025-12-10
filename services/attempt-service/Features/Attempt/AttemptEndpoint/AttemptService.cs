@@ -27,6 +27,7 @@ public interface IAttemptService
     Task<IResult> GetAttemptList(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
     Task<IResult> GetAllAttempts(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
     Task<IResult> GetLatestPlacement(CancellationToken token);
+    Task<IResult> GetPlacementCompletionStatus(CancellationToken token);
 }
 
 public class AttemptService(
@@ -940,6 +941,93 @@ IQuestionGraderFactory questionGraderFactory
         return Results.Ok(new ApiResultDto(true, successMessage, items));
     }
 
+    public async Task<IResult> GetPlacementCompletionStatus(CancellationToken token)
+    {
+        var userId = user.UserId;
+        var latestPlacement = await context.PlacementResults.AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(k => k.UpdatedAt)
+            .Select(k => new
+            {
+                k.Id,
+                k.UserId,
+                k.ExamId,
+                k.AttemptId,
+                k.Level,
+                k.Band,
+                k.CreatedAt,
+                k.UpdatedAt
+            }).FirstOrDefaultAsync(token);
+
+        if (latestPlacement != null)
+        {
+            var attempt = await context.Attempts.AsNoTracking()
+                .Where(a => a.Id == latestPlacement.AttemptId)
+                .Select(a => new
+                {
+                    a.Status,
+                    a.StartedAt,
+                    a.SubmittedAt,
+                    a.GradedAt
+                }).FirstOrDefaultAsync(token);
+
+            var completed = attempt?.Status is AttemptStatus.Submitted or AttemptStatus.Graded || attempt == null;
+            var response = new PlacementCompletionResponse(
+                completed,
+                latestPlacement.AttemptId,
+                latestPlacement.ExamId,
+                attempt?.Status,
+                attempt?.StartedAt,
+                attempt?.SubmittedAt,
+                attempt?.GradedAt,
+                latestPlacement.Level,
+                latestPlacement.Band,
+                latestPlacement.CreatedAt,
+                latestPlacement.UpdatedAt);
+            var message = completed ? "Placement test completed" : "Placement test not completed";
+            return Results.Ok(new ApiResultDto(true, message, response));
+        }
+
+        var submittedAttempts = await context.Attempts.AsNoTracking()
+            .Where(a => a.UserId == userId &&
+                        (a.Status == AttemptStatus.Submitted || a.Status == AttemptStatus.Graded))
+            .OrderByDescending(a => a.SubmittedAt ?? a.UpdatedAt)
+            .Select(a => new
+            {
+                a.Id,
+                a.ExamId,
+                a.Status,
+                a.StartedAt,
+                a.SubmittedAt,
+                a.GradedAt,
+                a.PaperJson
+            })
+            .ToListAsync(token);
+
+        foreach (var attempt in submittedAttempts)
+        {
+            var category = TryGetExamCategory(attempt.PaperJson);
+            if (!string.Equals(category, ExamCategory.PLACEMENT, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var response = new PlacementCompletionResponse(
+                true,
+                attempt.Id,
+                attempt.ExamId,
+                attempt.Status,
+                attempt.StartedAt,
+                attempt.SubmittedAt,
+                attempt.GradedAt,
+                null,
+                null,
+                attempt.SubmittedAt ?? attempt.StartedAt,
+                attempt.GradedAt ?? attempt.SubmittedAt ?? attempt.StartedAt);
+            return Results.Ok(new ApiResultDto(true, "Placement test completed", response));
+        }
+
+        return Results.Ok(new ApiResultDto(true, "Placement test not completed", null!));
+    }
+
     public async Task<IResult> GetLatestPlacement(CancellationToken token)
     {
         var userId = user.UserId;
@@ -952,5 +1040,30 @@ IQuestionGraderFactory questionGraderFactory
         )).FirstOrDefaultAsync(token);
         return (placement != null) ? Results.Ok(new ApiResultDto(true, "Latest placement evaluation", placement))
         : Results.NotFound(new ApiResultDto(false, "Not found any placement", null!));
+    }
+
+    private static string? TryGetExamCategory(JsonDocument? paperJson)
+    {
+        if (paperJson == null) return null;
+        try
+        {
+            var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
+            var proto = parser.Parse<InternalDeliveryExam>(paperJson.RootElement.GetRawText());
+            return proto?.Category;
+        }
+        catch
+        {
+            try
+            {
+                var dto = paperJson.RootElement.Deserialize<InternalExamDto.InternalDeliveryExam>(
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+                return dto?.Category;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

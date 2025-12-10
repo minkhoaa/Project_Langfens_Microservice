@@ -20,19 +20,15 @@ public interface IAdminService
 
 public class AdminService : IAdminService
 {
-    private readonly OpenRouterOptions _router;
-    private readonly IHttpClientFactory _client;
     private readonly IUserContext _user;
     private readonly WritingDbContext _context;
 
-    public AdminService(IOptions<OpenRouterOptions> router,
-        IHttpClientFactory client,
+    public AdminService(
         IUserContext user,
         WritingDbContext context
     )
     {
-        _client = client;
-        _router = router.Value;
+
         _user = user;
         _context = context;
     }
