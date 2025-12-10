@@ -69,6 +69,18 @@ public record AttemptListResponse(
     int PageSize,
     List<AttemptListItem> Items
 );
+public record PlacementCompletionResponse(
+    bool Completed,
+    Guid? AttemptId,
+    Guid? ExamId,
+    string? Status,
+    DateTime? StartedAt,
+    DateTime? SubmittedAt,
+    DateTime? GradedAt,
+    string? Level,
+    decimal? Band,
+    DateTime? CreatedAt,
+    DateTime? UpdatedAt);
 public record PlacementResultResponse(
     Guid Id,
     Guid UserId,

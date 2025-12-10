@@ -1,6 +1,5 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
 using speaking_service.Contracts;
 using speaking_service.Domains.Entities;
@@ -20,19 +19,14 @@ public interface IAdminService
 
 public class AdminService : IAdminService
 {
-    private readonly OpenRouterOptions _router;
-    private readonly IHttpClientFactory _client;
     private readonly IUserContext _user;
     private readonly SpeakingDbContext _context;
 
-    public AdminService(IOptions<OpenRouterOptions> router, 
-        IHttpClientFactory client,
+    public AdminService(
         IUserContext user,
         SpeakingDbContext context
     )
     {
-        _client = client;
-        _router = router.Value;
         _user = user;
         _context = context;
     }

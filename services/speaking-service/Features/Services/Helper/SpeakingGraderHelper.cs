@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.Google;
+using Microsoft.Extensions.Logging;
 using speaking_service.Contracts;
 using speaking_service.Domains.Entities;
 using speaking_service.Features.Helper;
@@ -15,20 +15,21 @@ namespace speaking_service.Features.Services.Helper
     public interface ISpeakingGrader
     {
         Task<(SpeakingGradeResponse, LlmSpeakingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token);
+        SpeakingEvaluation MapToEvaluation(SpeakingGradeResponse response, LlmSpeakingScoreCompact raw);
     }
     public class SpeakingGrader : ISpeakingGrader
     {
-        private readonly IHttpClientFactory _client;
-        private readonly OpenRouterOptions _router;
-        public SpeakingGrader(IHttpClientFactory client, IOptions<OpenRouterOptions> router
-)
+        private readonly ILogger<SpeakingGrader> _logger;
+        private readonly IChatCompletionService _chat;
+        private readonly Kernel _kernel;
+        public SpeakingGrader(ILogger<SpeakingGrader> logger, Kernel kernel, IChatCompletionService chat)
         {
-            _client = client;
-            _router = router.Value;
+            _logger = logger;
+            _kernel = kernel;
+            _chat = chat;
         }
         public async Task<(SpeakingGradeResponse, LlmSpeakingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token)
         {
-            var client = _client.CreateClient("openrouter");
             var systemPrompt =
                 "IELTS speaking examiner. Score 0-9. Reply ONLY JSON:{\"ob\":6.5," +
                 "\"fc\":{\"b\":6,\"c\":\"...\"},\"lr\":{\"b\":7,\"c\":\"...\"}," +
@@ -37,64 +38,32 @@ namespace speaking_service.Features.Services.Helper
 
             var userContent = $"T:{submission.Task}\nE:{submission.Transcript}";
 
-            var payload = new
+            var history = new ChatHistory();
+            history.AddSystemMessage(systemPrompt);
+            history.AddUserMessage(userContent);
+
+            var settings = new GeminiPromptExecutionSettings
             {
-                model = _router.Model,
-                messages = new[]
-                {
-                new { role = "system", content = systemPrompt },
-                new { role = "user", content = userContent }
-            },
-                temperature = 0.2,
-                max_tokens = 800,
-                response_format = new { type = "json_object" }
+                Temperature = 0.2,
+                MaxTokens = 1200,
+                ResponseMimeType = "application/json",
+                ResponseSchema = typeof(LlmSpeakingScoreCompact)
             };
-            var json = JsonSerializer.Serialize(payload);
 
-            using var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("chat/completions", content, token);
-            if (!response.IsSuccessStatusCode)
+            var messages = await _chat.GetChatMessageContentsAsync(
+                history,
+                executionSettings: settings,
+                kernel: _kernel,
+                cancellationToken: token);
+            var content = messages.LastOrDefault()?.Content;
+            if (string.IsNullOrWhiteSpace(content))
             {
-                var err = await response.Content.ReadAsStringAsync(token);
-                throw new HttpRequestException($"OpenRouter error {(int)response.StatusCode}: {err}");
-            }
-
-            var responseText = await response.Content.ReadAsStringAsync(token);
-            var responseTrimmed = responseText.TrimStart();
-            if (!(responseTrimmed.StartsWith("{") || responseTrimmed.StartsWith("[")))
-            {
-                throw new InvalidOperationException(
-                    $"OpenRouter returned non-JSON. Status {(int)response.StatusCode}. Starts with: {responseTrimmed[..Math.Min(responseTrimmed.Length, 120)]}");
-            }
-            using var doc = JsonDocument.Parse(responseText);
-            var assistantContent = doc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
-
-            if (string.IsNullOrWhiteSpace(assistantContent))
+                _logger.LogWarning("Gemini returned empty content for speaking submission.");
                 throw new InvalidOperationException("Model returned empty content.");
-            var trimmed = assistantContent.Trim();
-
-
-            if (trimmed.StartsWith("```"))
-            {
-                var firstNewLine = trimmed.IndexOf('\n');
-                if (firstNewLine >= 0)
-                {
-                    trimmed = trimmed[(firstNewLine + 1)..];
-                    var fenceIndex = trimmed.LastIndexOf("```", StringComparison.Ordinal);
-                    if (fenceIndex >= 0)
-                        trimmed = trimmed[..fenceIndex];
-                }
-                trimmed = trimmed.Trim();
             }
-            if (!(trimmed.StartsWith("{") || trimmed.StartsWith("[")))
-            {
-                throw new InvalidOperationException(
-                    $"Model did not return JSON. Starts with: {trimmed[..Math.Min(trimmed.Length, 50)]}");
-            }
+            var trimmed = content.Trim();
+            trimmed = ExtractJsonObject.Extract(trimmed);
+
             LlmSpeakingScoreCompact jsonRes;
             try
             {
@@ -112,7 +81,7 @@ namespace speaking_service.Features.Services.Helper
             return (resp, jsonRes);
         }
 
-        private SpeakingEvaluation MapToEvaluation(SpeakingGradeResponse response, LlmSpeakingScoreCompact raw)
+        public SpeakingEvaluation MapToEvaluation(SpeakingGradeResponse response, LlmSpeakingScoreCompact raw)
         {
             var evaluation = new SpeakingEvaluation
             {
@@ -129,7 +98,7 @@ namespace speaking_service.Features.Services.Helper
                 Model = response.Model,
                 PronunciationBand = response.Pronunciation.Band,
                 PronunciationComment = response.Pronunciation.Comment,
-                Provider = "LLM Provider",
+                Provider = response.ModelProvider ?? LlmToResponseHelper.ResolveProvider(),
                 SuggestionsJson = JsonSerializer.Serialize(response.Suggestions),
                 RawLlmJson = JsonSerializer.Serialize(raw),
                 PromptSchemaVersion = "v1"
@@ -139,4 +108,6 @@ namespace speaking_service.Features.Services.Helper
         }
     }
 
+
 }
+

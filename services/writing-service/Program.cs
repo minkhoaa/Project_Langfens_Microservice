@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.SemanticKernel;
 using Shared.ExamDto.Contracts.Writing;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
@@ -169,36 +170,19 @@ builder.Services.AddMassTransit(configurator =>
 
 
 });
+var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI__APIKEY")
+                  ?? builder.Configuration["GEMINI:APIKEY"]
+                  ?? throw new Exception("GEMINI__APIKEY invalid");
+var geminiModel = Environment.GetEnvironmentVariable("GEMINI__MODEL")
+                 ?? builder.Configuration["GEMINI:MODEL"]
+                 ?? "gemini-2.5-flash-lite";
+builder.Services.AddKernel().AddGoogleAIGeminiChatCompletion(
+    modelId: geminiModel,
+    apiKey: geminiApiKey,
+    apiVersion: Microsoft.SemanticKernel.Connectors.Google.GoogleAIVersion.V1_Beta
+);
 
-builder.Services.Configure<OpenRouterOptions>(builder.Configuration.GetSection("OpenRouter"));
-var openRouterSettings = builder.Configuration.GetSection("OpenRouter").Get<OpenRouterOptions>() ?? new OpenRouterOptions();
 
-// Prefer .env values when present
-var envApiKey = Environment.GetEnvironmentVariable("LLM__APIKEY");
-var apiKey = string.IsNullOrWhiteSpace(envApiKey) ? openRouterSettings.ApiKey : envApiKey;
-
-var envBaseUrl = Environment.GetEnvironmentVariable("OPENROUTER__BASEURL");
-var baseUrl = string.IsNullOrWhiteSpace(envBaseUrl) ? openRouterSettings.BaseUrl : envBaseUrl;
-if (string.IsNullOrWhiteSpace(baseUrl))
-    throw new Exception("OpenRouter base url is missing");
-baseUrl = baseUrl.TrimEnd('/') + "/";
-
-var envModel = Environment.GetEnvironmentVariable("OPENROUTER__MODEL");
-if (!string.IsNullOrWhiteSpace(envModel))
-    openRouterSettings.Model = envModel;
-
-if (string.IsNullOrWhiteSpace(apiKey))
-    throw new Exception("LLM api key is missing");
-builder.Services.AddHttpClient("openrouter", client =>
-{
-    client.BaseAddress = new Uri(baseUrl);
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-    if (!string.IsNullOrWhiteSpace(openRouterSettings.Referer))
-        client.DefaultRequestHeaders.Add("HTTP-Referer", openRouterSettings.Referer);
-
-    if (!string.IsNullOrWhiteSpace(openRouterSettings.Title))
-        client.DefaultRequestHeaders.Add("X-Title", openRouterSettings.Title);
-});
 
 var app = builder.Build();
 
@@ -216,11 +200,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-app.MapPost("/api/test-writing", async (WritingGradeResponseMessage request, IPublishEndpoint bus) =>
-{
-    await bus.Publish(request);
-    return Results.Ok(request);
-}).AllowAnonymous();
 
 app.MapWritingEndpoint();
 app.MapWritingAdminEndpoint();
