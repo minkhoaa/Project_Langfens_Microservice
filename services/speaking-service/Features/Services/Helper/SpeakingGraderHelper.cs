@@ -30,14 +30,11 @@ namespace speaking_service.Features.Services.Helper
         }
         public async Task<(SpeakingGradeResponse, LlmSpeakingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token)
         {
-            var systemPrompt =
-                "IELTS speaking examiner. Score 0-9. Reply ONLY JSON:{\"ob\":6.5," +
-                "\"fc\":{\"b\":6,\"c\":\"...\"},\"lr\":{\"b\":7,\"c\":\"...\"}," +
-                "\"gr\":{\"b\":6,\"c\":\"...\"},\"pr\":{\"b\":6,\"c\":\"...\"}," +
-                "\"s\":[\"...\"],\"p\":\"...\"}. ob=overall; fc,lr,gr,pr=criteria; s=suggestions; b=band; c=comment; p=improved answer.";
-
-            var userContent = $"T:{submission.Task}\nE:{submission.Transcript}";
-
+            string systemPrompt = SpeakingTemplate.SystemPrompt;
+            var userContent = $"""
+                            Q:{submission.Task}
+                            E:{submission.Transcript} 
+                            """;
             var history = new ChatHistory();
             history.AddSystemMessage(systemPrompt);
             history.AddUserMessage(userContent);
@@ -47,7 +44,6 @@ namespace speaking_service.Features.Services.Helper
                 Temperature = 0.2,
                 MaxTokens = 1200,
                 ResponseMimeType = "application/json",
-                ResponseSchema = typeof(LlmSpeakingScoreCompact)
             };
 
             var messages = await _chat.GetChatMessageContentsAsync(
