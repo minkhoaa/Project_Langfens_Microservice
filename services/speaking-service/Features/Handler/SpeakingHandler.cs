@@ -25,6 +25,10 @@ public class SpeakingHandler
     public static Task<IResult> GetHistoryHandler(CancellationToken token, ISpeakingService service) =>
         service.GetHistory(token);
 
+    public static Task<IResult> GetHistoryDetailHandler(Guid submissionId, Guid? evaluationId, CancellationToken token,
+        ISpeakingService service) =>
+        service.GetHistoryInDetail(submissionId, evaluationId, token);
+
     public static Task<IResult> CreateExamHandler(CreateSpeakingExamRequest request,
         CancellationToken token,
          IAdminService service

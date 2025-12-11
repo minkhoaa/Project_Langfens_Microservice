@@ -12,20 +12,14 @@ public class UserContext : IUserContext
 {
     public ClaimsPrincipal User { get; }
     public Guid UserId { get; }
-
     public UserContext(IHttpContextAccessor context)
     {
+
         User = context.HttpContext!.User ?? new ClaimsPrincipal(new ClaimsIdentity());
-        var idValue =
-            User.FindFirstValue(CustomClaims.Sub)
+        var idValue = User.FindFirstValue(CustomClaims.Sub)
             ?? User.FindFirst(CustomClaims.Sub)?.Value
             ?? User.FindFirst("uid")?.Value;
-
-        if (!string.IsNullOrWhiteSpace(idValue) &&
-            Guid.TryParse(idValue, out var guid))
-        {
+        if (!string.IsNullOrEmpty(idValue) && Guid.TryParse(idValue, out var guid))
             UserId = guid;
-        }
-        
     }
 }

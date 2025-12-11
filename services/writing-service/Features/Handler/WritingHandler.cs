@@ -26,6 +26,10 @@ public static class WritingHandler
     public static Task<IResult> GetHistoryHandler(CancellationToken token, IWritingService service) =>
         service.GetHistory(token);
 
+    public static Task<IResult> GetHistoryDetailHandler(Guid submissionId, Guid? evaluationId, CancellationToken token,
+        IWritingService service) =>
+        service.GetHistoryInDetail(submissionId, evaluationId, token);
+
     public static Task<IResult> CreateExamHandler(CreateExamRequest request,
         CancellationToken token,
         IAdminService service

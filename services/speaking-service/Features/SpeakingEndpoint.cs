@@ -18,6 +18,8 @@ public static class SpeakingEndpoint
         app.MapGet("/exams", SpeakingHandler.GetExamListHandler);
         app.MapGet("/exams/{examId:guid}", SpeakingHandler.GetExamHandler);
         app.MapGet("/history", SpeakingHandler.GetHistoryHandler).RequireAuthorization(Roles.User);
+        app.MapGet("/history/{submissionId:guid}", SpeakingHandler.GetHistoryDetailHandler)
+            .RequireAuthorization(Roles.User);
         app.MapPost("/start/{examId}", SpeakingHandler.StartSpeakingExamHandler);
 
 

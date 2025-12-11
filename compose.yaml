@@ -1,0 +1,44 @@
+﻿
+services:
+
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"        # API của Ollama
+    environment:
+      # Giữ model trong RAM 5 phút sau khi dùng, để máy 8GB đỡ bị đuối
+      - OLLAMA_KEEP_ALIVE=5m
+      # Chỉ xử lý 1 request song song, tránh ăn RAM quá mức trên server yếu
+      - OLLAMA_NUM_PARALLEL=1
+    volumes:
+      - ollama_data:/root/.ollama   # lưu model & cache
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      set -e
+
+      echo "[entrypoint] Starting ollama server..."
+      ollama serve &
+      SERVER_PID=$!
+
+      # Chờ server lên (không dùng curl vì image ollama không có sẵn curl) 
+      sleep 5
+
+      echo "[entrypoint] Pulling model qwen2.5:1.5b-instruct (if needed)..."
+      ollama pull qwen2.5:1.5b-instruct || true
+
+      echo "[entrypoint] Model ready, keeping server running."
+      wait $SERVER_PID
+
+
+
+  translator-api:
+    build:
+      context: .
+      dockerfile: services/chatbot-service/Dockerfile
+    ports:
+      - "8095:8080"
+volumes:
+  ollama_data:
