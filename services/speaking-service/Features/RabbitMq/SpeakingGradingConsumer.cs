@@ -62,8 +62,9 @@ namespace speaking_service.Features.RabbitMq
                 ImprovedAnswer = gradeResult.ImprovedAnswer
 
             };
-            await _bus.Publish(gradingResponse);
             _logger.LogInformation(JsonSerializer.Serialize(gradeResult));
+
+            await _bus.Publish(gradingResponse);
 
         }
     }

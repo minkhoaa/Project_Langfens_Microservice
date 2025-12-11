@@ -49,6 +49,7 @@ namespace writing_service.Features.RabbitMq
                 Suggestions = response.Suggestions,
                 ImprovedParagraph = response.ImprovedParagraph
             };
+            _logger.LogInformation(JsonSerializer.Serialize(response));
             await _bus.Publish(gradingResponse);
         }
     }

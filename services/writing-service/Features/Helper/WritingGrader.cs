@@ -1,13 +1,9 @@
-using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Validations.Rules;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Google;
 using writing_service.Contracts;
 using writing_service.Domains.Entities;
-using writing_service.Infrastructure.Persistence;
 
 namespace writing_service.Features.Helper
 {
@@ -32,26 +28,22 @@ namespace writing_service.Features.Helper
         }
         public async Task<(WritingGradeResponse, LlmWritingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token)
         {
-            var systemPrompt =
-                "IELTS W2 examiner. Score essay 0-9. " +
-                "Reply ONLY JSON:{\"ob\":6.5," +
-                "\"ta\":{\"b\":6,\"c\":\"...\"}," +
-                "\"cc\":{\"b\":6,\"c\":\"...\"}," +
-                "\"lr\":{\"b\":7,\"c\":\"...\"}," +
-                "\"gr\":{\"b\":6,\"c\":\"...\"}," +
-                "\"s\":[\"...\"],\"p\":\"...\"}. " +
-                "ob=overall; ta,cc,lr,gr=criteria; s=suggestions; b=band; c=comment; p=improved paragraph.";
+            string systemPrompt = WritingTemplate.SystemPrompt;
+            var wordCount = submission.Answer?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length ?? 0;
 
-            var userContent = $"T:{submission.Task}\nE:{submission.Answer}";
+            var userContent = $"""
+                            WC:{wordCount}
+                            T:{submission.Task}
+                            E:{submission.Answer}
+                            """;
             var history = new ChatHistory();
             history.AddSystemMessage(systemPrompt);
             history.AddUserMessage(userContent);
             var settings = new GeminiPromptExecutionSettings
             {
-                Temperature = 0.2,
+                Temperature = 0.1,
                 MaxTokens = 1200,
                 ResponseMimeType = "application/json",
-                ResponseSchema = typeof(LlmWritingScoreCompact)
             };
             var messages = await _chat.GetChatMessageContentsAsync(history, executionSettings: settings, kernel: _kernel, cancellationToken: token);
             var content = messages.LastOrDefault()?.Content;

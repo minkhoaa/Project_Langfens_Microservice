@@ -37,7 +37,6 @@ public class SpeakingService : ISpeakingService
         _whisper = whisper;
         _context = context;
         _user = user;
-
         _grader = grader;
 
     }
