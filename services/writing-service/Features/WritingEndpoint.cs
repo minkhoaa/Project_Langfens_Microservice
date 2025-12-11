@@ -13,16 +13,18 @@ public static class WritingEndpoint
         app.MapPost("/start/{examId}", WritingHandler.StartWritingExamHandler);
         app.MapGet("/exams/{examId:guid}", WritingHandler.GetExamHandler);
         app.MapGet("/history", WritingHandler.GetHistoryHandler).RequireAuthorization(Roles.User);
+        app.MapGet("/history/{submissionId:guid}", WritingHandler.GetHistoryDetailHandler)
+            .RequireAuthorization(Roles.User);
         
     }
     public static void MapWritingAdminEndpoint(this IEndpointRouteBuilder route)
     {
         var app = route.MapGroup("/api/admin/writing");
         app.MapGet("/exams", WritingHandler.GetAdminExamsHandler).RequireAuthorization(Roles.Admin);
-        app.MapPost("/create", WritingHandler.CreateExamHandler);
-        app.MapPost("/exams", WritingHandler.CreateExamHandler);
-        app.MapPut("/exams/{examId:guid}", WritingHandler.UpdateExamHandler);
-        app.MapDelete("/exams/{examId:guid}", WritingHandler.DeleteExamHandler);
+        app.MapPost("/create", WritingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
+        app.MapPost("/exams", WritingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
+        app.MapPut("/exams/{examId:guid}", WritingHandler.UpdateExamHandler).RequireAuthorization(Roles.Admin);
+        app.MapDelete("/exams/{examId:guid}", WritingHandler.DeleteExamHandler).RequireAuthorization(Roles.Admin);
 
     }
 }

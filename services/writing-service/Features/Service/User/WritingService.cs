@@ -1,8 +1,10 @@
 using System.Text;
 using System.Text.Json;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
+using Shared.ExamDto.Contracts.Writing;
 using writing_service.Contracts;
 using writing_service.Domains.Entities;
 using writing_service.Features.Helper;
@@ -17,6 +19,7 @@ public interface IWritingService
     Task<IResult> GetExam(Guid examId, CancellationToken token);
     Task<IResult> GetExams(CancellationToken token);
     Task<IResult> GetHistory(CancellationToken token);
+    Task<IResult> GetHistoryInDetail(Guid submissionId, Guid? evaluationId, CancellationToken token);
 
 }
 
@@ -67,7 +70,7 @@ public class WritingService : IWritingService
         _context.WritingEvaluations.Add(evaluation);
         await _context.SaveChangesAsync(token);
 
-        return Results.Ok(new ApiResultDto(true, "Submitted", new { submission.Id, res }));
+        return Results.Ok(new ApiResultDto(true, "Submitted", res));
     }
 
     public async Task<IResult> StartWritingExam(Guid examId, CancellationToken token)
@@ -134,5 +137,53 @@ public class WritingService : IWritingService
         return Results.Ok(new ApiResultDto(true, "Fetched writing history successfully", history));
     }
 
+    public async Task<IResult> GetHistoryInDetail(Guid submissionId, Guid? evaluationId, CancellationToken token)
+    {
+        var query = _context.WritingEvaluations.AsNoTracking()
+            .Include(k => k.WritingSubmission)
+            .Where(k => k.SubmissionId == submissionId);
+        if (evaluationId is not null)
+            query = query.Where(p => p.Id == evaluationId);
+        else
+            query = query.OrderByDescending(p => p.CreatedAt);
 
+        var evaluation = await query.FirstOrDefaultAsync(token);
+        if (evaluation is null)
+            return Results.NotFound(new ApiResultDto(false, "Evaluation not found", new { submissionId, evaluationId }));
+
+        var suggestions = new List<string>();
+        if (!string.IsNullOrWhiteSpace(evaluation.SuggestionsJson))
+        {
+            try
+            {
+                suggestions = JsonSerializer.Deserialize<List<string>>(evaluation.SuggestionsJson) ?? new List<string>();
+            }
+            catch (JsonException)
+            {
+                // If parsing fails, keep suggestions empty.
+            }
+        }
+
+        var result = new WritingGradeResponse
+        {
+            SubmissionId = evaluation.SubmissionId,
+            TaskText = evaluation.WritingSubmission.TaskTextSnapshot,
+            EssayRaw = evaluation.WritingSubmission.EssayRaw,
+            EssayNormalized = evaluation.WritingSubmission.EssayNormalized,
+            WordCount = evaluation.WritingSubmission.WordCount,
+            OverallBand = evaluation.OverallBand,
+            TaskResponse = new CriterionScore { Band = evaluation.TaskResponseBand, Comment = evaluation.TaskResponseComment },
+            CoherenceAndCohesion = new CriterionScore { Band = evaluation.CoherenceAndCohesionBand, Comment = evaluation.CoherenceAndCohesionComment },
+            LexicalResource = new CriterionScore { Band = evaluation.LexicalResourceBand, Comment = evaluation.LexicalResourceComment },
+            GrammaticalRangeAndAccuracy = new CriterionScore { Band = evaluation.GrammaticalRangeAndAccuracyBand, Comment = evaluation.GrammaticalRangeAndAccuracyComment },
+            Suggestions = suggestions,
+            ImprovedParagraph = evaluation.ImprovedParagraph,
+            Model = evaluation.Model,
+            ModelProvider = evaluation.Provider,
+            GradedAt = evaluation.CreatedAt,
+            RawLlmJson = evaluation.RawLlmJson
+        };
+
+        return Results.Ok(new ApiResultDto(true, "Fetched writing detail successfully", result));
+    }
 }

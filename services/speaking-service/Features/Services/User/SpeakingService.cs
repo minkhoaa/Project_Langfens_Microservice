@@ -6,6 +6,7 @@ using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
+using Shared.ExamDto.Contracts.Speaking;
 using speaking_service.Contracts;
 using speaking_service.Domains.Entities;
 using speaking_service.Features.Helper;
@@ -22,6 +23,7 @@ public interface ISpeakingService
     Task<IResult> GetExam(Guid examId, CancellationToken token);
     Task<IResult> GetExams(CancellationToken token);
     Task<IResult> GetHistory(CancellationToken token);
+    Task<IResult> GetHistoryInDetail(Guid submissionId, Guid? evaluationId, CancellationToken token);
 }
 
 public class SpeakingService : ISpeakingService
@@ -145,5 +147,72 @@ public class SpeakingService : ISpeakingService
 
 
 
+
+
+    public async Task<IResult> GetHistoryInDetail(Guid submissionId, Guid? evaluationId, CancellationToken token)
+    {
+        var query = _context.SpeakingEvaluations.AsNoTracking()
+            .Include(k => k.SpeakingSubmission)
+            .Where(k => k.SubmissionId == submissionId);
+        if (evaluationId is not null)
+            query = query.Where(p => p.Id == evaluationId);
+        else
+            query = query.OrderByDescending(p => p.CreatedAt);
+
+        var evaluation = await query.FirstOrDefaultAsync(token);
+        if (evaluation is null)
+            return Results.NotFound(new ApiResultDto(false, "Evaluation not found", new { submissionId, evaluationId }));
+
+        var suggestions = new List<string>();
+        if (!string.IsNullOrWhiteSpace(evaluation.SuggestionsJson))
+        {
+            try
+            {
+                suggestions = JsonSerializer.Deserialize<List<string>>(evaluation.SuggestionsJson) ?? new List<string>();
+            }
+            catch (JsonException)
+            {
+                // Keep suggestions empty if parsing fails.
+            }
+        }
+
+        var result = new SpeakingGradeResponse
+        {
+            SubmissionId = evaluation.SubmissionId,
+            TaskText = evaluation.SpeakingSubmission.TaskTextSnapshot,
+            TranscriptRaw = evaluation.SpeakingSubmission.TranscriptRaw,
+            TranscriptNormalized = evaluation.SpeakingSubmission.TranscriptNormalized,
+            WordCount = evaluation.SpeakingSubmission.WordCount,
+            OverallBand = evaluation.OverallBand,
+            FluencyAndCoherence = new CriterionScore
+            {
+                Band = evaluation.FluencyAndCoherenceBand,
+                Comment = evaluation.FluencyAndCoherenceComment
+            },
+            LexicalResource = new CriterionScore
+            {
+                Band = evaluation.LexicalResourceBand,
+                Comment = evaluation.LexicalResourceComment
+            },
+            GrammaticalRangeAndAccuracy = new CriterionScore
+            {
+                Band = evaluation.GrammaticalRangeAndAccuracyBand,
+                Comment = evaluation.GrammaticalRangeAndAccuracyComment
+            },
+            Pronunciation = new CriterionScore
+            {
+                Band = evaluation.PronunciationBand,
+                Comment = evaluation.PronunciationComment
+            },
+            Suggestions = suggestions,
+            ImprovedAnswer = evaluation.ImprovedAnswer,
+            Model = evaluation.Model,
+            ModelProvider = evaluation.Provider,
+            GradedAt = evaluation.CreatedAt,
+            RawLlmJson = evaluation.RawLlmJson
+        };
+
+        return Results.Ok(new ApiResultDto(true, "Fetched speaking detail successfully", result));
+    }
 
 }

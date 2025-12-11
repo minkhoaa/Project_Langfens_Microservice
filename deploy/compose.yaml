@@ -1,4 +1,5 @@
 ﻿services:
+
   gateway-service:
     build:
       context: ..
@@ -10,6 +11,7 @@
 
     networks:
       - backend
+        
     depends_on:
       - auth-service
       - attempt-service
@@ -47,18 +49,17 @@
       - RABBITMQ__VHOST=/
       - RABBITMQ__PORT=5672
       - RABBITMQ__USESSL=false
-
-    ports:
-      - "8080:8080"
-    networks:
-      - backend
     depends_on:
       auth-database:
-        condition: "service_healthy"
+        condition: service_healthy
       rabbitmq-service:
         condition: service_healthy
       redis:
-        condition: "service_healthy"
+        condition: service_healthy
+    networks:
+      - backend
+    ports:
+      - "8080:8080"
 
   attempt-service:
     image: attempt-service
@@ -228,6 +229,10 @@
       rabbitmq-service:
         condition: service_healthy
 
+
+
+
+
   rabbitmq-service:
     image: rabbitmq:3-management
     volumes:
@@ -243,6 +248,7 @@
       retries: 20
     networks:
       - backend
+
 
   exam-database:
     image: postgres:16-alpine
@@ -403,6 +409,37 @@
       interval: 10s
       timeout: 2s
       retries: 5
+      
+  chatbot-service:
+    build:
+      context: ..
+      dockerfile: services/chatbot-service/Dockerfile
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    ports:
+      - "8095:8080"
+    networks:
+      - backend
+    depends_on:
+      - ollama
+#docker exec -it ollama ollama pull qwen2.5:1.5b-instruct
+#docker exec -it ollama ollama run qwen2.5:1.5b-instruct
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_KEEP_ALIVE=5m
+      - OLLAMA_NUM_PARALLEL=1
+    networks:
+      - backend
+    volumes:
+      - ollama_data:/root/.ollama
+
+
 
 networks:
   backend:
@@ -411,3 +448,4 @@ networks:
 volumes:
   pgdata:
   rabbitmq_data:
+  ollama_data:
