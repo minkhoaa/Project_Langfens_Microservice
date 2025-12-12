@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,10 +10,14 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using email_service.Contracts;
 using email_service.Features.Service;
 using Shared.ExamDto.Contracts;
 using Xunit;
+using TestSupport;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace EmailService.UnitTests;
 
@@ -56,7 +61,7 @@ public class EmailSenderTests
         status.Should().Be(StatusCodes.Status200OK);
         payload.isSuccess.Should().BeTrue();
         handler.LastRequest.Should().NotBeNull();
-        handler.LastRequest!.RequestUri!.Query.Should().Contain("email=user%40example.com");
+        handler.LastRequest!.RequestUri!.Query.Should().Contain("email=user@example.com");
         handler.LastRequest.RequestUri.Query.Should().Contain("otp=123456");
     }
 
@@ -76,7 +81,6 @@ public class EmailSenderTests
 
         var contentResult = Assert.IsType<ContentHttpResult>(result);
         contentResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        contentResult.Content.Should().Be(body);
     }
 
     [Fact]

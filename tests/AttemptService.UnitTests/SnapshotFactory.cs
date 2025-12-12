@@ -95,7 +95,7 @@ internal static class SnapshotFactory
                             ExplanationMd = "Explained",
                             FlowChartNodes = new List<InternalExamDto.InternalFlowChartNode>
                             {
-                                new("node-a", "Node A")
+                                new InternalExamDto.InternalFlowChartNode { Key = "node-a", Label = "Node A" }
                             },
                             Options = new List<InternalExamDto.InternalDeliveryOption>
                             {

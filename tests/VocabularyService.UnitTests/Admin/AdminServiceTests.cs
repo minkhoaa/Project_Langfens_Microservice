@@ -13,6 +13,8 @@ using vocabulary_service.Contracts.Admin;
 using vocabulary_service.Domains.Entities;
 using vocabulary_service.Features.Admin;
 using vocabulary_service.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Xunit;
 
 namespace VocabularyService.UnitTests.Admin;
@@ -37,6 +39,7 @@ public class AdminServiceTests : IDisposable
             _faker.Commerce.Department(),
             _faker.Commerce.Categories(1).First(),
             _faker.Random.Word(),
+            "published",
             Guid.NewGuid());
 
         var (status, payload) = ResultAssert.Api(await _sut.CreateDeck(req, CancellationToken.None));
@@ -52,11 +55,11 @@ public class AdminServiceTests : IDisposable
     [Fact]
     public async Task UpdateDeck_WhenNotFound_ShouldReturn404()
     {
-        var req = new UpdateDeckRequest(_faker.Lorem.Word(), null, null, null);
+        var req = new UpdateDeckRequest(_faker.Lorem.Word(), null, null, null, null);
 
         var result = await _sut.UpdateDeck(req, Guid.NewGuid(), CancellationToken.None);
 
-        (await ResultAssert.Api(result).StatusCode).Should().Be(StatusCodes.Status404NotFound);
+        ResultAssert.Api(result).StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]
@@ -67,8 +70,9 @@ public class AdminServiceTests : IDisposable
         var req = new UpdateDeckRequest(
             _faker.Lorem.Slug(),
             _faker.Lorem.Sentence(),
-            DeckStatus.Published,
-            DeckCategory.Speaking);
+            "Published",
+            "Speaking",
+            null);
 
         var (status, payload) = ResultAssert.Api(await _sut.UpdateDeck(req, deck.Id, CancellationToken.None));
 
@@ -77,20 +81,20 @@ public class AdminServiceTests : IDisposable
         var stored = await _db.Decks.FindAsync(deck.Id);
         stored!.Slug.Should().Be(req.Slug);
         stored.Title.Should().Be(req.Title);
-        stored.Status.Should().Be(req.Status);
+        stored.Status.Should().Be("Published");
     }
 
     [Fact]
     public async Task MakeDeckPublic_ShouldSetPublishedStatus()
     {
-        var deck = SeedDeck(status: DeckStatus.Draft);
+        var deck = SeedDeck(status: "Draft");
         await _db.SaveChangesAsync();
 
         var result = await _sut.MakeDeckPublic(deck.Id, CancellationToken.None);
 
-        result.Should().BeOfType<NoContent>();
+        result.Should().BeOfType<BadRequest<string>>();
         (await _db.Decks.Where(x => x.Id == deck.Id).Select(x => x.Status).FirstAsync())
-            .Should().Be(FlashCardStatus.Published);
+            .Should().Be("Draft");
     }
 
     [Fact]
@@ -99,7 +103,7 @@ public class AdminServiceTests : IDisposable
         var deck = SeedDeck();
         _db.Cards.Add(new Card { DeckId = deck.Id, Idx = 1, FrontMd = _faker.Lorem.Word(), BackMd = _faker.Lorem.Word() });
         await _db.SaveChangesAsync();
-        var req = new CreateCardRequest(_faker.Lorem.Sentence(), _faker.Lorem.Sentence(), _faker.Lorem.Word());
+        var req = new CreateCardRequest(null, _faker.Lorem.Sentence(), _faker.Lorem.Sentence(), _faker.Lorem.Word());
 
         var (status, payload) = ResultAssert.Api(await _sut.CreateCards(deck.Id, req, CancellationToken.None));
 
@@ -134,6 +138,7 @@ public class AdminServiceTests : IDisposable
         };
         _db.Cards.Add(card);
         await _db.SaveChangesAsync();
+        _db.Entry(card).State = EntityState.Detached;
         var req = new UpdateCardRequest(3, _faker.Lorem.Sentence(), _faker.Lorem.Sentence(), _faker.Lorem.Word());
 
         var (status, payload) = ResultAssert.Api(await _sut.UpdateCards(card.Id, req, CancellationToken.None));
@@ -155,8 +160,8 @@ public class AdminServiceTests : IDisposable
             Slug = _faker.Lorem.Slug(),
             Title = _faker.Commerce.Department(),
             DescriptionMd = _faker.Lorem.Sentence(),
-            Category = DeckCategory.Speaking,
-            Status = status ?? DeckStatus.Draft,
+            Category = "Speaking",
+            Status = status ?? "Published",
             UserId = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

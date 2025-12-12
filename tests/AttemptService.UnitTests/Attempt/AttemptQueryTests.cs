@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 namespace AttemptService.UnitTests.Attempt;
 
 public class AttemptQueryTests
@@ -8,11 +6,11 @@ public class AttemptQueryTests
     public async Task GetAttemptById_Should_Return_NotFound_When_Attempt_Missing()
     {
         await using var ctx = AttemptDbContextFactory.Create();
-        var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
-
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", Guid.NewGuid().ToString()) }));
+        var userContextMock = new Mock<IUserContext>();
+        userContextMock.Setup(x => x.UserId).Returns(Guid.NewGuid());
+        var service = AttemptServiceFactory.Create(ctx, userContextMock.Object.UserId);
         var (status, payload) = ResultAssert.Api(await service.GetAttemptById(
-            new AttemptGetRequest(Guid.NewGuid(), principal), CancellationToken.None));
+            Guid.NewGuid(), CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status404NotFound);
         payload.message.Should().Contain("Not found");
@@ -49,10 +47,9 @@ public class AttemptQueryTests
         });
         await ctx.SaveChangesAsync();
 
-        var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
+        var service = AttemptServiceFactory.Create(ctx, userId);
         var (status, payload) = ResultAssert.Api(await service.GetAttemptById(
-            new AttemptGetRequest(attemptId, principal), CancellationToken.None));
+            attemptId, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status200OK);
         var response = payload.data as AttemptGetResponse;

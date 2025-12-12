@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 namespace AttemptService.UnitTests.Attempt;
 
 public class AttemptResultTests
@@ -23,10 +21,9 @@ public class AttemptResultTests
         });
         await ctx.SaveChangesAsync();
 
-        var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
+        var service = AttemptServiceFactory.Create(ctx, userId);
         var (status, payload) = ResultAssert.Api(
-            await service.GetResult(attemptId, principal, CancellationToken.None));
+            await service.GetResult(attemptId, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status409Conflict);
         payload.message.Should().Contain("not submitted");
@@ -66,10 +63,9 @@ public class AttemptResultTests
         });
         await ctx.SaveChangesAsync();
 
-        var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
+        var service = AttemptServiceFactory.Create(ctx, userId);
         var (status, payload) = ResultAssert.Api(
-            await service.GetResult(attemptId, principal, CancellationToken.None));
+            await service.GetResult(attemptId, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status200OK);
         var response = payload.data as AttemptResultResponse;
@@ -110,10 +106,9 @@ public class AttemptResultTests
         });
         await ctx.SaveChangesAsync();
 
-        var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
+        var service = AttemptServiceFactory.Create(ctx, userId);
         var (status, payload) = ResultAssert.Api(
-            await service.GetAttemptList(principal, page: 1, pageSize: 10, status: null, examId: null, CancellationToken.None));
+            await service.GetAttemptList(page: 1, pageSize: 10, status: null, examId: null, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status200OK);
         var items = payload.data as List<AttemptListItem>;
