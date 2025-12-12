@@ -123,7 +123,7 @@ public class ChatbotService : IChatbotService
 
     private static IEnumerable<object> BuildMessages(ChatRequest request)
     {
-        yield return new { role = "system", content = SystemPrompt };
+        yield return new { role = "system", content = "" };
 
         var messages = request.Messages ?? new List<ChatMessage>();
         foreach (var message in messages)
