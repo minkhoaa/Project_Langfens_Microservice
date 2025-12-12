@@ -13,6 +13,7 @@ using Moq;
 using Shared.ExamDto.Contracts;
 using TestSupport;
 using Xunit;
+using Shared;
 using writing_service.Contracts;
 using writing_service.Domains.Entities;
 using writing_service.Features.Helper;

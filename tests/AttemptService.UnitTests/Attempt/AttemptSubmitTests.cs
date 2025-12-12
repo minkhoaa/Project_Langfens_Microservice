@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 namespace AttemptService.UnitTests.Attempt;
 
 public class AttemptSubmitTests
@@ -8,11 +6,11 @@ public class AttemptSubmitTests
     public async Task Submit_Should_Return_NotFound_When_Attempt_Missing()
     {
         await using var ctx = AttemptDbContextFactory.Create();
-        var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
+        var userId = Guid.NewGuid();
+        var service = AttemptServiceFactory.Create(ctx, userId);
 
-        var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", Guid.NewGuid().ToString())]));
         var (status, payload) = ResultAssert.Api(
-            await service.Submit(Guid.NewGuid(), principal, CancellationToken.None));
+            await service.Submit(Guid.NewGuid(), CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status404NotFound);
         payload.message.Should().Contain("Not found");
@@ -52,11 +50,10 @@ public class AttemptSubmitTests
 
         await ctx.SaveChangesAsync();
 
-        var service = new AttemptServiceImpl(ctx, Mock.Of<IExamGateway>());
+        var service = AttemptServiceFactory.Create(ctx, userId);
 
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("sub", userId.ToString()) }));
         var (status, payload) = ResultAssert.Api(
-            await service.Submit(attemptId, principal, CancellationToken.None));
+            await service.Submit(attemptId, CancellationToken.None));
 
         status.Should().Be(StatusCodes.Status200OK);
         payload.message.Should().Contain("Submitted");

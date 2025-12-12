@@ -107,9 +107,14 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<VocabularyDbContext>();
-    await db.Database.MigrateAsync();
+    if (db.Database.IsRelational())
+    {
+        await db.Database.MigrateAsync();
+    }
 }
 
 app.MapPublicVocabularyEndpoints();
 app.MapUserVocabularyEndpoints();
 app.Run();
+
+public partial class Program { }

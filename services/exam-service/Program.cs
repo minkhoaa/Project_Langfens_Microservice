@@ -128,29 +128,12 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
-    await db.Database.MigrateAsync();
-}
-
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
-    var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
-    Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
-    await db.Database.MigrateAsync();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
-    await db.Database.MigrateAsync();
-}
-
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
-    var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
-    Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
-    await db.Database.MigrateAsync();
+    if (db.Database.IsRelational())
+    {
+        var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+        Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
+        await db.Database.MigrateAsync();
+    }
 }
 
 app.UseSwagger();
@@ -159,7 +142,11 @@ app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGrpcService<ExamInternalGrpcService>().RequireHost($"*:{grpcPort}").AllowAnonymous();
+var grpcEndpoint = app.MapGrpcService<ExamInternalGrpcService>().AllowAnonymous();
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    grpcEndpoint.RequireHost($"*:{grpcPort}");
+}
 
 
 
@@ -170,3 +157,5 @@ app.MapAdminQuestionEndpoint();
 app.MapAdminOptionEndpoint();
 app.MapInternalExamEndpoint();
 app.Run();
+
+public partial class Program { }

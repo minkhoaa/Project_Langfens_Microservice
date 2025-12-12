@@ -55,3 +55,5 @@ public class JwtSettings
     public string Audience { get; set; } = "";
     public string SignKey { get; set; } = "";
 }
+
+public partial class Program { }
