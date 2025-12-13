@@ -183,6 +183,22 @@
       rabbitmq-service:
         condition: service_healthy
 
+  dictionary-service:
+    image: dictionary-service
+    build:
+      context: ..
+      dockerfile: services/dictionary-service/Dockerfile
+    environment:
+      - CONNECTIONSTRING__DICTIONARY=Host=dictionary-database;Port=5432;Database=dictionary-db;Username=dictionary;Password=dictionary
+      - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+      - "8094:8080"
+    networks:
+      - backend
+    depends_on:
+      dictionary-database:
+        condition: service_healthy
+
   email-service:
     image: email-service
     environment:
@@ -367,6 +383,23 @@
       retries: 20
       start_period: 10s
 
+  dictionary-database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dictionary-db
+      POSTGRES_USER: dictionary
+      POSTGRES_PASSWORD: dictionary
+    ports:
+      - 5443:5432
+    networks:
+      - backend
+    volumes: ["pgdata:/var/lib/postgresql/dictionary-data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dictionary -d dictionary-db -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
   redis:
     image: redis:7.4-alpine
     command: [
