@@ -27,10 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TestSupport\TestSupport.csproj" />
-    <ProjectReference Include="..\..\services\vocabulary-service\vocabulary-service.csproj" Aliases="VocabService" />
-    <ProjectReference Include="..\..\services\exam-service\exam-service.csproj" Aliases="ExamService" />
-    <ProjectReference Include="..\..\gateway\api-gateway\api-gateway.csproj" Aliases="ApiGateway" />
+    <ProjectReference Include="..\..\TestSupport\TestSupport.csproj" />
+    <ProjectReference Include="..\..\..\services\vocabulary-service\vocabulary-service.csproj" Aliases="VocabService" />
+    <ProjectReference Include="..\..\..\services\exam-service\exam-service.csproj" Aliases="ExamService" />
+    <ProjectReference Include="..\..\..\gateway\api-gateway\api-gateway.csproj" Aliases="ApiGateway" />
   </ItemGroup>
 
 </Project>

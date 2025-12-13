@@ -1,4 +1,4 @@
-// tests/ExamService.UnitTest/SeedHelper.cs
+// tests/unit/ExamService.UnitTest/SeedHelper.cs
 
 using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
