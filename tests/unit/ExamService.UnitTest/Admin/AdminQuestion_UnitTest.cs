@@ -1,4 +1,4 @@
-// tests/ExamService.UnitTest/AdminQuestion_UnitTest.cs
+// tests/unit/ExamService.UnitTest/AdminQuestion_UnitTest.cs
 
 using exam_service.Contracts.Exams;
 using exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
