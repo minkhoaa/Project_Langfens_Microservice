@@ -4,10 +4,7 @@
   "title": "Langfens Exam Import File",
   "description": "Schema used to describe exam payloads that can be imported directly into the exam service. Data types and enums follow Shared.PublicContracts and exam-service contracts.",
   "type": "object",
-  "required": [
-    "schemaVersion",
-    "exams"
-  ],
+  "required": ["schemaVersion", "exams"],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -54,10 +51,7 @@
           "minLength": 1
         },
         "descriptionMd": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Optional Markdown instructions rendered to candidates."
         },
         "category": {
@@ -86,12 +80,7 @@
     },
     "section": {
       "type": "object",
-      "required": [
-        "id",
-        "idx",
-        "title",
-        "questions"
-      ],
+      "required": ["id", "idx", "title", "questions"],
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -107,24 +96,15 @@
           "minLength": 1
         },
         "instructionsMd": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Optional Markdown instructions for the whole section."
         },
         "audioUrl": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "URL bản audio dùng chung cho section Listening."
         },
         "transcriptMd": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Transcript Markdown cho file nghe."
         },
         "questions": {
@@ -180,10 +160,7 @@
           "description": "Markdown prompt shown to candidates."
         },
         "explanationMd": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Optional Markdown solution or rationale."
         },
         "options": {
@@ -216,12 +193,7 @@
     },
     "option": {
       "type": "object",
-      "required": [
-        "id",
-        "idx",
-        "contentMd",
-        "isCorrect"
-      ],
+      "required": ["id", "idx", "contentMd", "isCorrect"],
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -247,10 +219,7 @@
       "description": "Matches System.Guid identifiers used across exam entities."
     },
     "stringArrayOrNull": {
-      "type": [
-        "array",
-        "null"
-      ],
+      "type": ["array", "null"],
       "items": {
         "type": "string"
       },
@@ -258,10 +227,7 @@
       "description": "Used for shortAnswerAcceptTexts, shortAnswerAcceptRegex."
     },
     "orderCorrectArray": {
-      "type": [
-        "array",
-        "null"
-      ],
+      "type": ["array", "null"],
       "items": {
         "type": "string",
         "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -270,15 +236,9 @@
       "description": "Used only for FLOW_CHART questions. Canonical node keys in correct order, from first to last. Each entry should be a slug-like lowercase key, e.g. \"warm-intake\", \"evaporator-dome\", \"turbine-hall\", \"condenser-bay\", \"return-line\". The grader will normalize these via NormNode."
     },
     "textArrayMap": {
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "additionalProperties": {
-        "type": [
-          "array",
-          "null"
-        ],
+        "type": ["array", "null"],
         "items": {
           "type": "string"
         }
@@ -288,43 +248,22 @@
     },
     "examCategory": {
       "type": "string",
-      "enum": [
-        "IELTS",
-        "TOEIC",
-        "VSTEP",
-        "PLACEMENT"
-      ],
+      "enum": ["IELTS", "TOEIC", "VSTEP", "PLACEMENT"],
       "description": "Shared.ExamDto.Contracts.Exam.Enums.ExamCategory"
     },
     "examLevel": {
       "type": "string",
-      "enum": [
-        "A1",
-        "A2",
-        "B1",
-        "B2",
-        "C1",
-        "C2"
-      ],
+      "enum": ["A1", "A2", "B1", "B2", "C1", "C2"],
       "description": "Shared.ExamDto.Contracts.Exam.Enums.ExamLevel"
     },
     "examStatus": {
       "type": "string",
-      "enum": [
-        "DRAFT",
-        "PUBLISHED",
-        "ARCHIVED"
-      ],
+      "enum": ["DRAFT", "PUBLISHED", "ARCHIVED"],
       "description": "Shared.ExamDto.Contracts.Exam.Enums.ExamStatus"
     },
     "questionSkill": {
       "type": "string",
-      "enum": [
-        "SPEAKING",
-        "LISTENING",
-        "WRITING",
-        "READING"
-      ],
+      "enum": ["SPEAKING", "LISTENING", "WRITING", "READING"],
       "description": "Shared.ExamDto.Contracts.Exam.Enums.QuestionSkill"
     },
     "questionType": {
@@ -426,9 +365,7 @@
                     "renewable energy",
                     "clean energy"
                   ],
-                  "shortAnswerAcceptRegex": [
-                    ".*renewable.*energy.*"
-                  ]
+                  "shortAnswerAcceptRegex": [".*renewable.*energy.*"]
                 }
               ]
             }
