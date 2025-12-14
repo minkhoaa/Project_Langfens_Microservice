@@ -26,6 +26,8 @@ Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
+static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -59,7 +61,7 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
-builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq"));
+    // RabbitMQ config now pulled from environment
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FE", policy => policy
@@ -69,8 +71,8 @@ builder.Services.AddCors(options =>
         .AllowCredentials());
 });
 builder.Services.AddHttpContextAccessor();
-var writingConnectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__WRITING")
-                             ?? builder.Configuration.GetConnectionString("Writing_DB");
+var writingConnectionString = EnvOrDefault("CONNECTIONSTRING__WRITING",
+    "Host=writing-database;Port=5432;Database=writing-db;Username=writing;Password=writing");
 if (string.IsNullOrWhiteSpace(writingConnectionString))
     throw new Exception("Connection string for writing DB is missing");
 builder.Services.AddDbContext<WritingDbContext>(option => option.UseNpgsql(writingConnectionString));
@@ -79,6 +81,12 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddSingleton<IWritingGrader, WritingGrader>();
+var jwtSettings = new
+{
+    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
+    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
+    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ")
+};
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
@@ -87,14 +95,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         option.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"]
+            ValidIssuer = jwtSettings.Issuer
                           ?? throw new Exception("valid issuer is missing"),
-            ValidAudience = builder.Configuration["JwtSettings:Audience"]
+            ValidAudience = jwtSettings.Audience
                             ?? throw new Exception("valid issuer is missing"),
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SignKey"]
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey
                                                                                ?? throw new Exception("Signing key is missing"))),
             ClockSkew = TimeSpan.Zero,
             NameClaimType = CustomClaims.Sub,
@@ -121,35 +129,18 @@ builder.Services.AddAuthorization(option =>
              || o.User.IsInRole(Roles.Admin)));
 });
 builder.Services.AddMassTransit(configurator =>
-{
-
-    configurator.AddConsumer<WritingSubmittedConsumer>();
-    RabbitMqConfig prodRabbitEnvironment;
-    try
     {
-        prodRabbitEnvironment = new RabbitMqConfig
+
+        configurator.AddConsumer<WritingSubmittedConsumer>();
+        var prodRabbitEnvironment = new RabbitMqConfig
         {
-            Host = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ??
-                                        builder.Configuration["RabbitMq:Host"] ?? "localhost",
-            Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ??
-                       builder.Configuration["RabbitMq:Username"] ?? "guest",
-            Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ??
-                       builder.Configuration["RabbitMq:Password"] ?? "guest",
-            VirtualHost = builder.Configuration["RabbitMq:VirtualHost"] ??
-                          Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/",
-            Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a :
-                bool.TryParse(builder.Configuration["RabbitMq:UseSsl"], out var useSsl) && useSsl ? (ushort)5671 :
-                (ushort)5672,
-            UseSsl = bool.TryParse(Environment.GetEnvironmentVariable(""), out var proSsl) && proSsl
+            Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
+            Username = EnvOrDefault("RABBITMQ__USERNAME", "guest"),
+            Password = EnvOrDefault("RABBITMQ__PASSWORD", "guest"),
+            VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
+            Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a : (ushort)5672,
+            UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var proSsl) && proSsl
         };
-    }
-    catch
-    {
-        prodRabbitEnvironment =
-            builder.Configuration.GetSection("RabbitMq").Get<RabbitMqConfig>()
-            ?? throw new Exception("Rabbitmq config is missing");
-
-    }
     configurator.UsingRabbitMq((bus, config) =>
     {
         config.Host(prodRabbitEnvironment.Host, prodRabbitEnvironment.Port, prodRabbitEnvironment.VirtualHost,
@@ -169,13 +160,11 @@ builder.Services.AddMassTransit(configurator =>
 
 
 
-});
-var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI__APIKEY")
-                  ?? builder.Configuration["GEMINI:APIKEY"]
-                  ?? throw new Exception("GEMINI__APIKEY invalid");
-var geminiModel = Environment.GetEnvironmentVariable("GEMINI__MODEL")
-                 ?? builder.Configuration["GEMINI:MODEL"]
-                 ?? "gemini-2.5-flash-lite";
+    });
+    var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI__APIKEY")
+                      ?? throw new Exception("GEMINI__APIKEY invalid");
+    var geminiModel = Environment.GetEnvironmentVariable("GEMINI__MODEL")
+                     ?? "gemini-2.5-flash-lite";
 builder.Services.AddKernel().AddGoogleAIGeminiChatCompletion(
     modelId: geminiModel,
     apiKey: geminiApiKey,

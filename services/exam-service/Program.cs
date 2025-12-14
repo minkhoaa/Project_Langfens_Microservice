@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using Microsoft.Extensions.Options;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
@@ -26,20 +27,27 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
+var jwtSettings = new
+{
+    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
+    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
+    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ")
+};
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
     {
         option.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"] 
+            ValidIssuer = jwtSettings.Issuer 
                           ?? throw new Exception("valid issuer is missing"),
-            ValidAudience = builder.Configuration["JwtSettings:Audience"] 
+            ValidAudience = jwtSettings.Audience 
                             ?? throw new Exception("valid issuer is missing"),
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true, 
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SignKey"] 
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey 
             ?? throw new Exception("Signing key is missing"))),
             
             ClockSkew = TimeSpan.Zero,
@@ -98,9 +106,9 @@ builder.Services.AddSwaggerGen(option =>
             Array.Empty<string>()
         }
     });
-});
+    });
 var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
-                       ?? builder.Configuration.GetConnectionString("Exam_DB");
+                       ?? "Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam";
 var datasourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
 datasourceBuilder.EnableDynamicJson();
 builder.Services.AddDbContextPool<ExamDbContext>(options =>

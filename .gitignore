@@ -16,7 +16,7 @@ logs/
 *.swp
 *.swo
 *.orig
-
+deploy/envs/**
 # ------------------------------
 # Env and secrets (repo-wide)
 # ------------------------------

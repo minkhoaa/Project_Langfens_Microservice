@@ -8,17 +8,16 @@ using IDictionaryService = dictionary_service.Features.Service.IDictionaryServic
 
 var builder = WebApplication.CreateBuilder(args);
 
+static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__DICTIONARY")
-                        ?? builder.Configuration.GetConnectionString("Dictionary_DB")
-                        ?? "Host=localhost;Port=5443;Database=dictionary-db;Username=dictionary;Password=dictionary";
+var connectionString = EnvOrDefault("CONNECTIONSTRING__DICTIONARY",
+    "Host=dictionary-database;Port=5432;Database=dictionary-db;Username=dictionary;Password=dictionary");
 builder.Services.AddDbContext<DictionaryDbContext>(option => option.UseNpgsql(connectionString));
 builder.Services.AddSingleton(k =>
 {
-    var url = Environment.GetEnvironmentVariable("ELASTICSEARCH__URL") ?? builder.Configuration["Elasticsearch:Url"]
-            ?? throw new Exception("Elasticsearch url is missing");
+    var url = EnvOrDefault("ELASTICSEARCH__URL", "http://elasticsearch:9200");
     return new ElasticsearchClient(new ElasticsearchClientSettings(new Uri(url)));
 });
 builder.Services.AddScoped<ElasticIndexer>();
@@ -44,4 +43,3 @@ app.UseSwaggerUI();
 
 app.MapDictionaryEndpoint();
 app.Run();
-

@@ -8,6 +8,7 @@ using course_service.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shared.Security.Claims;
@@ -17,6 +18,14 @@ using Shared.Security.Scopes;
 
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
+
+var jwtSettings = new
+{
+    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
+    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
+    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ")
+};
 
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -25,14 +34,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         option.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"] 
+            ValidIssuer = jwtSettings.Issuer 
                           ?? throw new Exception("valid issuer is missing"),
-            ValidAudience = builder.Configuration["JwtSettings:Audience"] 
+            ValidAudience = jwtSettings.Audience 
                             ?? throw new Exception("valid issuer is missing"),
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true, 
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SignKey"] 
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey 
                                                                                ?? throw new Exception("Signing key is missing"))),
             ClockSkew = TimeSpan.Zero,
             NameClaimType = CustomClaims.Sub,
@@ -91,11 +100,10 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials());
-});
+    });
 
 // configure
 var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__COURSE")
-                        ?? builder.Configuration.GetConnectionString("Course_DB")
                         ?? "Host=localhost;Port=5436;Database=course-db;Username=course;Password=course";
 builder.Services.AddDbContext<CourseDbContext>(option => option.UseNpgsql(connectionString));
 
