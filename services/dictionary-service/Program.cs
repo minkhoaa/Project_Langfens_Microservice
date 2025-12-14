@@ -17,7 +17,8 @@ var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__DIC
 builder.Services.AddDbContext<DictionaryDbContext>(option => option.UseNpgsql(connectionString));
 builder.Services.AddSingleton(k =>
 {
-    var url = builder.Configuration["Elasticsearch:Url"]!;
+    var url = Environment.GetEnvironmentVariable("ELASTICSEARCH__URL") ?? builder.Configuration["Elasticsearch:Url"]
+            ?? throw new Exception("Elasticsearch url is missing");
     return new ElasticsearchClient(new ElasticsearchClientSettings(new Uri(url)));
 });
 builder.Services.AddScoped<ElasticIndexer>();

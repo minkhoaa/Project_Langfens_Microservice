@@ -194,12 +194,16 @@
     environment:
       - CONNECTIONSTRING__DICTIONARY=Host=dictionary-database;Port=5432;Database=dictionary-db;Username=dictionary;Password=dictionary
       - ASPNETCORE_ENVIRONMENT=Production
+      - ELASTICSEARCH__URL=http://elasticsearch:9200
+      - ELASTICSEARCH__INDEXALIAS=dictionary_current
     ports:
       - "8094:8080"
     networks:
       - backend
     depends_on:
       dictionary-database:
+        condition: service_healthy
+      elasticsearch: 
         condition: service_healthy
 
   email-service:
@@ -476,6 +480,8 @@
       interval: 5s
       timeout: 3s
       retries: 30
+    networks:
+      - backend
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.19.0
@@ -485,36 +491,7 @@
       - "5601:5601"
     depends_on:
       - elasticsearch
-  es-init:
-    image: curlimages/curl:8.5.0
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    volumes:
-      - ../services/elastic-service/elastic:/init:ro
-    entrypoint: ["/bin/sh", "-lc"]
-    command: >
-      '
-      echo "init index...";
-      if curl -s -o /dev/null -w "%{http_code}" -I http://elasticsearch:9200/dictionary_v1 | grep -q "^200$"; then
-        echo "index exists";
-      else
-        curl -s -X PUT http://elasticsearch:9200/dictionary_v1
-          -H "Content-Type: application/json"
-          --data-binary "@/init/index.dictionary_v1.json";
-      fi;
 
-      if curl -s -o /dev/null -w "%{http_code}" http://elasticsearch:9200/_alias/dictionary_current | grep -q "^200$"; then
-        echo "alias exists";
-      else
-        curl -s -X POST http://elasticsearch:9200/_aliases
-          -H "Content-Type: application/json"
-          -d "{\"actions\":[{\"add\":{\"index\":\"dictionary_v1\",\"alias\":\"dictionary_current\"}}]}";
-      fi;
-
-      echo "done";
-      '
-    restart: "no"
 
 
 networks:

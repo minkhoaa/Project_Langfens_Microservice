@@ -22,7 +22,7 @@ namespace dictionary_service.Features
         {
             _context = context;
             _elastic = elasticsearch;
-            _index = configuration["Elasticsearch:IndexAlias"]!;
+            _index = Environment.GetEnvironmentVariable("ELASTICSEARCH__INDEXALIAS") ?? configuration["Elasticsearch:IndexAlias"]!;
         }
         public async Task BulkReindexAsync(int batchSize = 1000, CancellationToken ct = default)
         {
