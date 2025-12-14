@@ -68,8 +68,10 @@
     networks:
       - backend
     depends_on:
-      - attempt-database
-      - rabbitmq-service
+      attempt-database:
+        condition: service_healthy
+      rabbitmq-service:
+        condition: service_healthy
 
   exam-service:
     image: exam-service
@@ -304,7 +306,6 @@
       timeout: 5s
       retries: 20
       start_period: 10s
-
     ports:
       - 5435:5432
 
