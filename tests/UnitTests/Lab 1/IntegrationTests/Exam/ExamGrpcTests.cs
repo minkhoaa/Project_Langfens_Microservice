@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
+using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
@@ -54,6 +55,20 @@ public class ExamGrpcTests : IClassFixture<ExamGrpcFactory>
         response.Id.Should().Be(exam.Id.ToString());
         response.Sections.Count.Should().Be(1);
         response.Sections.First().Questions.Count.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetInternalExam_Should_Return_Error_For_Unknown_Exam()
+    {
+        var client = CreateGrpcClient();
+        var act = async () => await client.GetInternalExamAsync(new GetInternalExamRequest
+        {
+            ExamId = Guid.NewGuid().ToString(),
+            ShowAnswers = false
+        });
+
+        var ex = await Assert.ThrowsAsync<RpcException>(act);
+        ex.StatusCode.Should().NotBe(StatusCode.OK);
     }
 
     private ExamInternal.ExamInternalClient CreateGrpcClient()

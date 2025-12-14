@@ -131,4 +131,74 @@ public class AuthOtpWorkflowTests
         builder.UserManager.Verify(m => m.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()),
             Times.Never);
     }
+
+    [Fact]
+    public async Task ForgotPasswordRequest_Should_Return_Ok_For_Unknown_Email()
+    {
+        var builder = new AuthServiceTestBuilder();
+        builder.UserManager.Setup(m => m.FindByEmailAsync("missing@example.com"))
+            .ReturnsAsync((User?)null);
+        var service = builder.Build();
+
+        var (status, payload) =
+            ResultAssert.Api(await service.ForgotPasswordRequestAsync("missing@example.com", CancellationToken.None));
+
+        status.Should().Be(StatusCodes.Status200OK);
+        payload.isSuccess.Should().BeTrue();
+        builder.OtpStore.Verify(s => s.PutOtp(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task ConfirmEmail_Should_Mark_User_Confirmed_When_Otp_Valid()
+    {
+        var builder = new AuthServiceTestBuilder();
+        var user = new User { Email = "user@example.com", EmailConfirmed = false };
+        builder.UserManager.Setup(m => m.FindByEmailAsync("user@example.com")).ReturnsAsync(user);
+        builder.OtpStore.Setup(s => s.Verify("user@example.com", "111222", It.IsAny<int>(), It.IsAny<TimeSpan>()))
+            .ReturnsAsync(true);
+        builder.UserManager.Setup(m => m.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+        var service = builder.Build();
+
+        var (status, payload) =
+            ResultAssert.Api(await service.ConfirmEmail("user@example.com", "111222", CancellationToken.None));
+
+        status.Should().Be(StatusCodes.Status200OK);
+        payload.isSuccess.Should().BeTrue();
+        user.EmailConfirmed.Should().BeTrue();
+        builder.UserManager.Verify(m => m.UpdateAsync(user), Times.Once);
+    }
+
+    [Fact]
+    public async Task ConfirmEmail_Should_Return_BadRequest_When_Otp_Invalid()
+    {
+        var builder = new AuthServiceTestBuilder();
+        var user = new User { Email = "user@example.com" };
+        builder.UserManager.Setup(m => m.FindByEmailAsync("user@example.com")).ReturnsAsync(user);
+        builder.OtpStore.Setup(s => s.Verify("user@example.com", "bad", It.IsAny<int>(), It.IsAny<TimeSpan>()))
+            .ReturnsAsync(false);
+        var service = builder.Build();
+
+        var (status, payload) =
+            ResultAssert.Api(await service.ConfirmEmail("user@example.com", "bad", CancellationToken.None));
+
+        status.Should().Be(StatusCodes.Status400BadRequest);
+        payload.message.Should().Contain("incorrect or expired");
+        builder.UserManager.Verify(m => m.UpdateAsync(It.IsAny<User>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConfirmEmail_Should_Return_NotFound_When_User_Missing()
+    {
+        var builder = new AuthServiceTestBuilder();
+        builder.UserManager.Setup(m => m.FindByEmailAsync("ghost@example.com"))
+            .ReturnsAsync((User?)null);
+        var service = builder.Build();
+
+        var (status, payload) =
+            ResultAssert.Api(await service.ConfirmEmail("ghost@example.com", "123456", CancellationToken.None));
+
+        status.Should().Be(StatusCodes.Status404NotFound);
+        payload.isSuccess.Should().BeFalse();
+    }
 }

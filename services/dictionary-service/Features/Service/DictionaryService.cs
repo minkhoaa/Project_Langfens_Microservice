@@ -42,8 +42,9 @@ namespace dictionary_service.Features.Service
             if (!resp.IsValidResponse || resp.Source is null)
                 return Results.NotFound(new { id });
 
-            var dto = _mapper.ToDetailsDto(resp.Source, maxSenses: 20, maxExamplesPerSense: 2);
+            var dto = await _mapper.ToDetailsDtoAsync(resp.Source, maxSenses: 10, maxExamplesPerSense: 2, token);
             return Results.Ok(dto);
+
         }
 
         public async Task<IResult> GetSuggests(string word, string? pos, CancellationToken token)

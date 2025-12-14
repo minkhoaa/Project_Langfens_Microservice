@@ -35,7 +35,7 @@ public class AttemptSubmitExpiredTests
             Mock.Of<IQuestionGraderFactory>());
 
         var result = await svc.Submit(attemptId, CancellationToken.None);
-        var (status, api) = ResultHelpers.Extract<ApiResultDto>(result);
+        var (status, api) = ResultAssert.Api(result);
 
         status.Should().Be(StatusCodes.Status409Conflict);
         api!.isSuccess.Should().BeFalse();
