@@ -1,6 +1,8 @@
 using System.IO.Compression;
 using System.Text.Json;
+using dictionary_service.Contracts;
 using dictionary_service.Domains.Entities;
+using dictionary_service.Features.Helper;
 using dictionary_service.Infrastructure.Persistence;
 using Elastic.Clients.Elasticsearch;
 
@@ -19,11 +21,14 @@ namespace dictionary_service.Features.Service
         private readonly ElasticsearchClient _elasticSearch;
         private readonly IConfiguration _configuration;
         private readonly DictionaryDbContext _context;
+        private readonly IDictionaryDtoMapper _mapper;
         private readonly string _index;
         public DictionaryService(ElasticsearchClient elasticsearch,
+        IDictionaryDtoMapper mapper,
         DictionaryDbContext context,
         IConfiguration configuration)
         {
+            _mapper = mapper;
             _context = context;
             _configuration = configuration;
             _elasticSearch = elasticsearch;
@@ -32,21 +37,13 @@ namespace dictionary_service.Features.Service
 
         public async Task<IResult> GetDetails(int id, CancellationToken token)
         {
-
             var resp = await _elasticSearch.GetAsync<DictionaryDoc>(id, g => g.Index(_index), token);
 
             if (!resp.IsValidResponse || resp.Source is null)
                 return Results.NotFound(new { id });
 
-            return Results.Ok(new
-            {
-                id = resp.Source.Id,
-                word = resp.Source.Word,
-                pos = resp.Source.Pos,
-                wordNorm = resp.Source.WordNorm,
-                importedAt = resp.Source.ImportedAt,
-                entry = resp.Source.Data    // full JSON: forms/senses/sounds/translations/...
-            });
+            var dto = _mapper.ToDetailsDto(resp.Source, maxSenses: 20, maxExamplesPerSense: 2);
+            return Results.Ok(dto);
         }
 
         public async Task<IResult> GetSuggests(string word, string? pos, CancellationToken token)

@@ -1,5 +1,6 @@
 using System.ComponentModel.Design;
 using dictionary_service.Features;
+using dictionary_service.Features.Helper;
 using dictionary_service.Features.Service;
 using dictionary_service.Infrastructure.Persistence;
 using Elastic.Clients.Elasticsearch;
@@ -22,6 +23,7 @@ builder.Services.AddSingleton(k =>
 });
 builder.Services.AddScoped<ElasticIndexer>();
 builder.Services.AddScoped<IDictionaryService, DictionaryService>();
+builder.Services.AddSingleton<IDictionaryDtoMapper, DictionaryDtoMapper>();
 var app = builder.Build();
 
 

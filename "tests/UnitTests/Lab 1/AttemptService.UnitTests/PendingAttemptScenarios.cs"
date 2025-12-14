@@ -1,0 +1,15 @@
+using Xunit;
+
+namespace AttemptService.UnitTests;
+
+public class PendingAttemptScenarios
+{
+    [Fact(Skip = "TODO: implement submit returns Expired when past deadline integration")]
+    public void Submit_Should_ReturnExpired_When_TimeOut() { }
+
+    [Fact(Skip = "TODO: implement admin attempt monitoring list API test")]
+    public void Admin_Should_List_Attempts_WithFilters() { }
+
+    [Fact(Skip = "TODO: implement internal snapshot missing/corrupt handling test")]
+    public void InternalSnapshot_Should_Handle_MissingPayload() { }
+}
