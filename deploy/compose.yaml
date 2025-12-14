@@ -69,6 +69,7 @@
       - backend
     depends_on:
       - attempt-database
+      - rabbitmq-service
 
   exam-service:
     image: exam-service
