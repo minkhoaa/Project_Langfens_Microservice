@@ -34,7 +34,7 @@ public class PublicCourseServiceTests
     }
 
     [Fact]
-    public async Task GetCourseBySlug_Should_Return_NotFound_When_Missing()
+    public async Task GetCourseBySlug_Should_Return_Empty_List_When_Missing()
     {
         await using var handle = SqliteInMemoryFactory.Create<CourseDbContext>();
         var svc = new PublicEndpointService(handle.Context);
@@ -43,7 +43,43 @@ public class PublicCourseServiceTests
         var status = (result as IStatusCodeHttpResult)?.StatusCode ?? StatusCodes.Status200OK;
         var api = (result as IValueHttpResult)?.Value as ApiResultDto;
 
-        status.Should().Be(StatusCodes.Status404NotFound);
-        api!.isSuccess.Should().BeFalse();
+        status.Should().Be(StatusCodes.Status200OK);
+        var data = api!.data.Should().BeAssignableTo<IReadOnlyList<CourseDetailDto>>().Subject;
+        data.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetCourseBySlug_Should_Return_Detail_With_Lessons()
+    {
+        await using var handle = SqliteInMemoryFactory.Create<CourseDbContext>();
+        var ctx = handle.Context;
+        var course = new Course
+        {
+            Id = Guid.NewGuid(),
+            Slug = "ielts-a",
+            Title = "IELTS A",
+            Status = CourseStatus.Published,
+            Category = CourseCategories.IELTS_ACADEMIC,
+            Level = CourseLevel.B1,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        ctx.Courses.Add(course);
+        ctx.Lessons.AddRange(
+            new Lesson { Id = Guid.NewGuid(), CourseId = course.Id, Idx = 2, Title = "L2", DurationMin = 10 },
+            new Lesson { Id = Guid.NewGuid(), CourseId = course.Id, Idx = 1, Title = "L1", DurationMin = 5 }
+        );
+        await ctx.SaveChangesAsync();
+
+        var svc = new PublicEndpointService(ctx);
+        var result = await svc.GetCourseBySlug("ielts-a", CancellationToken.None);
+
+        var status = (result as IStatusCodeHttpResult)?.StatusCode ?? StatusCodes.Status200OK;
+        var api = (result as IValueHttpResult)?.Value as ApiResultDto;
+        status.Should().Be(StatusCodes.Status200OK);
+        var list = api!.data.Should().BeAssignableTo<IReadOnlyList<CourseDetailDto>>().Subject.ToList();
+        list.Should().ContainSingle();
+        list[0].Slug.Should().Be("ielts-a");
+        list[0].Lessons.Select(l => l.Idx).Should().Equal(1, 2);
     }
 }

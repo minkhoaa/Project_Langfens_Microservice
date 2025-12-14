@@ -55,6 +55,25 @@ public class AuthAuthenticationFlowTests
     }
 
     [Fact]
+    public async Task PasswordLoginAsync_Should_Return_BadRequest_When_User_Not_Found()
+    {
+        var builder = new AuthServiceTestBuilder();
+        builder.UserManager.Setup(m => m.FindByEmailAsync("missing@example.com"))
+            .ReturnsAsync((User?)null);
+        var service = builder.Build();
+
+        var result = await service.PasswordLoginAsync(
+            new LoginDto("missing@example.com", "whatever"),
+            new RequestContext("device-1", "agent", "127.0.0.1", null),
+            CancellationToken.None);
+
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        result.Response.message.Should().Contain("not existed");
+        builder.SignInManager.Verify(m => m.CheckPasswordSignInAsync(It.IsAny<User>(), It.IsAny<string>(), true),
+            Times.Never);
+    }
+
+    [Fact]
     public async Task RefreshAsync_Should_Rotate_Session_When_Expiring()
     {
         var builder = new AuthServiceTestBuilder();

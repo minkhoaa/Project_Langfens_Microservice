@@ -60,6 +60,28 @@ public class UserServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetSubscribedDecks_Should_Return_Subscriptions()
+    {
+        var deck = SeedDeck();
+        var userId = Guid.NewGuid();
+        _db.UserDecks.Add(new UserDeck
+        {
+            Id = Guid.NewGuid(),
+            DeckId = deck.Id,
+            UserId = userId,
+            Status = UserDeckStatus.Active,
+            SubscribeAt = DateTime.UtcNow
+        });
+        await _db.SaveChangesAsync();
+
+        var (status, payload) = ResultAssert.Api(await _sut.GetSubscribedDeck(userId, CancellationToken.None));
+
+        status.Should().Be(StatusCodes.Status200OK);
+        var list = payload.data.Should().BeAssignableTo<IEnumerable<object>>().Subject.ToList();
+        list.Should().HaveCount(1);
+    }
+
+    [Fact]
     public async Task GetDueFlashcard_WhenNoDecks_ShouldReturnEmpty()
     {
         var (status, payload) = ResultAssert.Api(await _sut.GetDueFlashcard(Guid.NewGuid(), CancellationToken.None));
