@@ -27,7 +27,7 @@ namespace dictionary_service.Features.Service
             _context = context;
             _configuration = configuration;
             _elasticSearch = elasticsearch;
-            _index = configuration["Elasticsearch:IndexAlias"]!;
+            _index = Environment.GetEnvironmentVariable("ELASTICSEARCH__INDEXALIAS") ?? configuration["Elasticsearch:IndexAlias"]!;
         }
 
         public async Task<IResult> GetDetails(int id, CancellationToken token)
