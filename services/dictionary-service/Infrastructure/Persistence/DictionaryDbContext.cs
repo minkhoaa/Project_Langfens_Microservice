@@ -24,6 +24,7 @@ namespace dictionary_service.Infrastructure.Persistence
                 e.Property(x => x.Data).HasColumnType("jsonb");
                 e.HasIndex(x => x.WordNorm);
                 e.HasIndex(x => x.Pos);
+
             });
         }
     }
