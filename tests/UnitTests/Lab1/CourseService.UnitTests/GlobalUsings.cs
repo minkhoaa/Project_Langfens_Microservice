@@ -1,0 +1,14 @@
+global using course_service.Contracts;
+global using course_service.Domains.Entities;
+global using course_service.Features.UserEndpoint;
+global using course_service.Infrastructure;
+global using FluentAssertions;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Http.HttpResults;
+global using Microsoft.Data.Sqlite;
+global using Microsoft.EntityFrameworkCore;
+global using Shared.ExamDto.Contracts;
+global using Shared.ExamDto.Contracts.Course.Enums;
+global using TestSupport;
+global using System.Text.Json;
+global using Xunit;
