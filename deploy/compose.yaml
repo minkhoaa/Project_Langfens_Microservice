@@ -23,17 +23,8 @@
     build:
       context: ..
       dockerfile: services/auth-service/Dockerfile
-    environment:
-      - CONNECTIONSTRING__AUTH=Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth
-      - PUBLIC_GOOGLE_CLIENT_ID=806530195444-6jrbcfonq01nuk9k66rnc31fib6rqgt2.apps.googleusercontent.com
-      - ASPNETCORE_ENVIRONMENT=Production
-      - CONNECTIONSTRING__REDIS=redis:6379, abortConnect=false
-      - RABBITMQ__HOST=rabbitmq-service
-      - RABBITMQ__USERNAME=appuser
-      - RABBITMQ__PASSWORD=apppassword
-      - RABBITMQ__VHOST=/
-      - RABBITMQ__PORT=5672
-      - RABBITMQ__USESSL=false
+    env_file:
+      - ./envs/auth.env
     depends_on:
       auth-database:
         condition: service_healthy
@@ -51,17 +42,8 @@
     build:
       context: ..
       dockerfile: services/attempt-service/Dockerfile
-    environment:
-      - CONNECTIONSTRING__ATTEMPT=Host=attempt-database;Port=5432;Database=attempt-db;Username=attempt;Password=attempt
-      - EXAMSERVICE__EXAM__ADDRESS=http://exam-service:8080
-      - EXAMSERVICE__INTERNAL__API__KEY=internal-get-exam-snapshot
-      - ASPNETCORE_ENVIRONMENT=Production
-      - RABBITMQ__HOST=rabbitmq-service
-      - RABBITMQ__USERNAME=appuser
-      - RABBITMQ__PASSWORD=apppassword
-      - RABBITMQ__VHOST=/
-      - RABBITMQ__PORT=5672
-      - RABBITMQ__USESSL=false
+    env_file:
+      - ./envs/attempt.env
 
     ports:
       - "8081:8080"
@@ -78,9 +60,8 @@
     build:
       context: ..
       dockerfile: services/exam-service/Dockerfile
-    environment:
-      - CONNECTIONSTRING__EXAM=Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam
-      - ASPNETCORE_ENVIRONMENT=Production
+    env_file:
+      - ./envs/exam.env
     expose:
       - "8081"
     ports:
@@ -97,9 +78,8 @@
     build:
       context: ..
       dockerfile: services/course-service/Dockerfile
-    environment:
-      - CONNECTIONSTRING__COURSE=Host=course-database;Port=5432;Database=course-db;Username=course;Password=course
-      - ASPNETCORE_ENVIRONMENT=Production
+    env_file:
+      - ./envs/course.env
 
     expose:
       - "8080"
@@ -114,9 +94,8 @@
     build:
       context: ..
       dockerfile: services/vocabulary-service/Dockerfile
-    environment:
-      - CONNECTIONSTRING__VOCABULARY=Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary
-      - ASPNETCORE_ENVIRONMENT=Production
+    env_file:
+      - ./envs/vocabulary.env
 
     ports:
       - "8093:8080"
@@ -131,16 +110,8 @@
     build:
       context: ..
       dockerfile: services/speaking-service/Dockerfile
-    environment:
-      - CONNECTIONSTRING__SPEAKING=Host=speaking-database;Port=5432;Database=speaking-db;Username=speaking;Password=speaking
-      - RABBITMQ__HOST=rabbitmq-service
-      - RABBITMQ__USERNAME=appuser
-      - RABBITMQ__PASSWORD=apppassword
-      - RABBITMQ__VHOST=/
-      - RABBITMQ__PORT=5672
-      - RABBITMQ__USESSL=false
     env_file:
-      - ../services/speaking-service/.env
+      - ./envs/speaking.env
     expose:
       - "8080"
     ports:
@@ -165,16 +136,8 @@
     build:
       context: ..
       dockerfile: services/writing-service/Dockerfile
-    environment:
-      - CONNECTIONSTRING__WRITING=Host=writing-database;Port=5432;Database=writing-db;Username=writing;Password=writing
-      - RABBITMQ__HOST=rabbitmq-service
-      - RABBITMQ__USERNAME=appuser
-      - RABBITMQ__PASSWORD=apppassword
-      - RABBITMQ__VHOST=/
-      - RABBITMQ__PORT=5672
-      - RABBITMQ__USESSL=false
     env_file:
-      - ../services/writing-service/.env
+      - ./envs/writing.env
 
     ports:
       - "8091:8080"
@@ -191,11 +154,8 @@
     build:
       context: ..
       dockerfile: services/dictionary-service/Dockerfile
-    environment:
-      - CONNECTIONSTRING__DICTIONARY=Host=dictionary-database;Port=5432;Database=dictionary-db;Username=dictionary;Password=dictionary
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ELASTICSEARCH__URL=http://elasticsearch:9200
-      - ELASTICSEARCH__INDEXALIAS=dictionary_current
+    env_file:
+      - ./envs/dictionary.env
     ports:
       - "8094:8080"
     networks:
@@ -208,23 +168,8 @@
 
   email-service:
     image: email-service
-    environment:
-      - RABBITMQ__HOST=rabbitmq-service
-      - RABBITMQ__USERNAME=appuser
-      - RABBITMQ__PASSWORD=apppassword
-      - RABBITMQ__VHOST=/
-      - RABBITMQ__PORT=5672
-      - RABBITMQ__USESSL=false
-      - SMTP__HOST=smtp.gmail.com
-      - SMTP__PORT=587
-      - SMTP__PASS=zwco qbvh nyuw xape
-      - SMTP__USER=23520757@gm.uit.edu.vn
-      - SMTP__FROM=Langfens English<no-reply@langfens-english.com>
-      - SMTP__BRAND=Langfens English
-      - SMTP__SUPPORT=support@langfens-english.com
-      - SMTP__VERIFYURLTEMPLATE=http://localhost:5000/api-auth/auth/verify
-      - SMTP__REDIRECTURL=http://localhost:5000/api-auth/auth/verify
-      - ASPNETCORE_ENVIRONMENT=Production
+    env_file:
+      - ./envs/email.env
     build:
       context: ..
       dockerfile: services/email-service/Dockerfile

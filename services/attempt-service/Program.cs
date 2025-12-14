@@ -10,6 +10,7 @@ using attempt_service.Infrastructure.Persistence;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -25,6 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddResponseCompression();
+static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo()
@@ -77,22 +79,23 @@ builder.Services
         EnableMultipleHttp2Connections = true
     })
     ;
-builder.Services.Configure<JwtSettings>
-    (builder.Configuration.GetSection("JwtSettings"));
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+var jwtSettings = new JwtSettings
+{
+    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
+    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
+    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ"),
+    AccessTokenLifetimeSeconds = int.TryParse(Environment.GetEnvironmentVariable("JwtSettings__AccessTokenLifetimeSeconds"), out var lifetime)
+        ? lifetime
+        : 15
+};
+builder.Services.AddSingleton<IOptions<JwtSettings>>(Options.Create(jwtSettings));
 builder.Services.AddDbContext<AttemptDbContext>(option => option.UseNpgsql(
-    Environment.GetEnvironmentVariable("CONNECTIONSTRING__ATTEMPT")
-    ?? builder.Configuration.GetConnectionString("Attempt_DB")
+    EnvOrDefault("CONNECTIONSTRING__ATTEMPT", "Host=attempt-database;Port=5432;Database=attempt-db;Username=attempt;Password=attempt")
 ));
 builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 {
-    var cfg = sp.GetRequiredService<IConfiguration>();
-    var baseExamAddress = Environment.GetEnvironmentVariable("EXAMSERVICE__EXAM__ADDRESS")
-                          ?? cfg["ExamService:Exam_BaseAddress"]
-                          ?? "http://examservice:8080";
-    var internalApiKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")
-                         ?? cfg["ExamService:Exam_Internal_Api_Key"];
-    Console.Write(baseExamAddress + "  " + internalApiKey);
+    var baseExamAddress = EnvOrDefault("EXAMSERVICE__EXAM__ADDRESS", "http://exam-service:8080");
+    var internalApiKey = EnvOrDefault("EXAMSERVICE__INTERNAL__API__KEY", "internal-get-exam-snapshot");
     http.BaseAddress = new Uri(baseExamAddress);
     http.DefaultRequestHeaders.Add("X-Internal-Key", internalApiKey);
 });
@@ -101,32 +104,15 @@ builder.Services.AddMassTransit(configurator =>
 {
     configurator.AddConsumer<WritingGradedConsumer>();
     configurator.AddConsumer<SpeakingGradedConsumer>();
-    RabbitMqConfig prodRabbitEnvironment;
-    try
+    var prodRabbitEnvironment = new RabbitMqConfig
     {
-        prodRabbitEnvironment = new RabbitMqConfig
-        {
-            Host = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ??
-                                        builder.Configuration["RabbitMq:Host"] ?? "localhost",
-            Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ??
-                       builder.Configuration["RabbitMq:Username"] ?? "guest",
-            Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ??
-                       builder.Configuration["RabbitMq:Password"] ?? "guest",
-            VirtualHost = builder.Configuration["RabbitMq:VirtualHost"] ??
-                          Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/",
-            Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a :
-                bool.TryParse(builder.Configuration["RabbitMq:UseSsl"], out var useSsl) && useSsl ? (ushort)5671 :
-                (ushort)5672,
-            UseSsl = bool.TryParse(Environment.GetEnvironmentVariable(""), out var proSsl) && proSsl
-        };
-    }
-    catch
-    {
-        prodRabbitEnvironment =
-            builder.Configuration.GetSection("RabbitMq").Get<RabbitMqConfig>()
-            ?? throw new Exception("Rabbitmq config is missing");
-
-    }
+        Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
+        Username = EnvOrDefault("RABBITMQ__USERNAME", "guest"),
+        Password = EnvOrDefault("RABBITMQ__PASSWORD", "guest"),
+        VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
+        Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a : (ushort)5672,
+        UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var proSsl) && proSsl
+    };
     configurator.UsingRabbitMq((bus, config) =>
     {
         config.Host(prodRabbitEnvironment.Host, prodRabbitEnvironment.Port, prodRabbitEnvironment.VirtualHost,

@@ -7,10 +7,9 @@ using MassTransit;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts.Auth_Email;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-
+static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
 
 builder.Services.AddCors(options =>
 {
@@ -22,23 +21,23 @@ builder.Services.AddCors(options =>
 });
 
 var smtpHost   = Environment.GetEnvironmentVariable("SMTP__HOST")   
-                 ?? builder.Configuration["Smtp:Host"]   ?? "smtp.gmail.com";
+                 ?? "smtp.gmail.com";
 var smtpPort   = int.Parse(Environment.GetEnvironmentVariable("SMTP__PORT") 
-                           ?? (builder.Configuration["Smtp:Port"] ?? "587"));
+                           ?? "587");
 var smtpUser   = Environment.GetEnvironmentVariable("SMTP__USER")   
-                 ?? builder.Configuration["Smtp:User"]   ?? "";
+                 ?? "";
 var smtpPass   = Environment.GetEnvironmentVariable("SMTP__PASS")   
-                 ?? builder.Configuration["Smtp:Pass"]   ?? "";
+                 ?? "";
 var smtpFrom   = Environment.GetEnvironmentVariable("SMTP__FROM")   
-                 ?? builder.Configuration["Smtp:From"]   ?? "No-Reply <no-reply@example.com>";
+                 ?? "No-Reply <no-reply@example.com>";
 var smtpBrand  = Environment.GetEnvironmentVariable("SMTP__BRAND")  
-                 ?? builder.Configuration["Smtp:Brand"]  ?? "Langfens English";
+                 ?? "Langfens English";
 var smtpSupport= Environment.GetEnvironmentVariable("SMTP__SUPPORT")
-                 ?? builder.Configuration["Smtp:Support"]?? "support@langfens-english.com";
+                 ?? "support@langfens-english.com";
 var verifyTpl  = Environment.GetEnvironmentVariable("SMTP__VERIFYURLTEMPLATE") 
-                 ?? builder.Configuration["Smtp:VerifyUrlTemplate"] ?? "http://auth-service:8080/api/auth/verify";
+                 ?? "http://auth-service:8080/api/auth/verify";
 var redirectUrl = Environment.GetEnvironmentVariable("SMTP__REDIRECTURL") 
-                  ?? builder.Configuration["Smtp:RedirectUrl"] ?? "http://localhost:8080/api/auth/verify";
+                  ?? "http://localhost:8080/api/auth/verify";
 builder.Services.Configure<SmtpOptions>(o =>
 {
     o.Host = smtpHost;
@@ -52,7 +51,16 @@ builder.Services.Configure<SmtpOptions>(o =>
     o.RedirectUrl = redirectUrl;
 });
 
-builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq"));
+var rabbitConfig = new RabbitMqConfig
+{
+    Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
+    Username = EnvOrDefault("RABBITMQ__USERNAME", "guest"),
+    Password = EnvOrDefault("RABBITMQ__PASSWORD", "guest"),
+    VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
+    Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var parsedPort) ? parsedPort : (ushort)5672,
+    UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var proSsl) && proSsl
+};
+builder.Services.AddSingleton<IOptions<RabbitMqConfig>>(Options.Create(rabbitConfig));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
@@ -66,40 +74,14 @@ builder.Services.AddMassTransit(configurator =>
 
     configurator.AddConsumer<TestpingConsumer>();
     configurator.AddConsumer<UserRegisteredSendOtpConsumer>();
-    RabbitMqConfig prodRabbitEnvironment;
-    try
-    {
-        prodRabbitEnvironment = new RabbitMqConfig
-        {
-            Host = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ??
-                                        builder.Configuration["RabbitMq:Host"] ?? "localhost",
-            Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ??
-                       builder.Configuration["RabbitMq:Username"] ?? "guest",
-            Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ??
-                       builder.Configuration["RabbitMq:Password"] ?? "guest",
-            VirtualHost = builder.Configuration["RabbitMq:VirtualHost"] ??
-                          Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/",
-            Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a :
-                bool.TryParse(builder.Configuration["RabbitMq:UseSsl"], out var useSsl) && useSsl ? (ushort)5671 :
-                (ushort)5672,
-            UseSsl = bool.TryParse(Environment.GetEnvironmentVariable(""), out var proSsl) && proSsl
-        };
-    }
-    catch
-    {
-        prodRabbitEnvironment =
-            builder.Configuration.GetSection("RabbitMq").Get<RabbitMqConfig>()
-            ?? throw new Exception("Rabbitmq config is missing") ;
-
-    }
     
     configurator.UsingRabbitMq((context, config) =>
     {
-        config.Host(prodRabbitEnvironment.Host, prodRabbitEnvironment.Port ,prodRabbitEnvironment.VirtualHost, h =>
+        config.Host(rabbitConfig.Host, rabbitConfig.Port ,rabbitConfig.VirtualHost, h =>
         {
-            h.Username(prodRabbitEnvironment.Username);
-            h.Password(prodRabbitEnvironment.Password);
-            if (prodRabbitEnvironment.UseSsl)
+            h.Username(rabbitConfig.Username);
+            h.Password(rabbitConfig.Password);
+            if (rabbitConfig.UseSsl)
             {
                 h.UseSsl(a =>
                 {
