@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B24F5DF2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExamService", "ExamService", "{9CCDCC33-E657-41B7-9D32-99A8FE1F009A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamService.UnitTest", "tests\UnitTests\Lab 1\ExamService.UnitTest\ExamService.UnitTest.csproj", "{06E46606-0CEC-4EFA-A561-52817B338F95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamService.UnitTest", "tests\UnitTests\ExamService.UnitTest\ExamService.UnitTest.csproj", "{06E46606-0CEC-4EFA-A561-52817B338F95}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_shared", "_shared", "{2E06081D-E5F2-4A4A-B4E6-D123B60777C0}"
 EndProject
@@ -33,13 +33,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Grpc", "services\_sh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.PublicContracts", "services\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj", "{C3BA51F6-2E3B-4B53-855F-BEAF065FF3C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService.UnitTests", "tests\UnitTests\Lab 1\AuthService.UnitTests\AuthService.UnitTests.csproj", "{663D1BAF-676B-4627-B132-22F1A61D7A1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService.UnitTests", "tests\UnitTests\AuthService.UnitTests\AuthService.UnitTests.csproj", "{663D1BAF-676B-4627-B132-22F1A61D7A1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttemptService.UnitTests", "tests\UnitTests\Lab 1\AttemptService.UnitTests\AttemptService.UnitTests.csproj", "{E4A5AFCA-19B5-42A1-B7F7-3C948307071E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttemptService.UnitTests", "tests\UnitTests\AttemptService.UnitTests\AttemptService.UnitTests.csproj", "{E4A5AFCA-19B5-42A1-B7F7-3C948307071E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseService.UnitTests", "tests\UnitTests\Lab 1\CourseService.UnitTests\CourseService.UnitTests.csproj", "{07F4502C-0257-4621-9BAC-77DD9F7FFE34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseService.UnitTests", "tests\UnitTests\CourseService.UnitTests\CourseService.UnitTests.csproj", "{07F4502C-0257-4621-9BAC-77DD9F7FFE34}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSupport", "tests\UnitTests\Lab 1\TestSupport\TestSupport.csproj", "{4040CA0E-5227-4B7E-9C8C-1DF62C259BEA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSupport", "tests\TestHelper\TestSupport.csproj", "{4040CA0E-5227-4B7E-9C8C-1DF62C259BEA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Security", "services\_shared\Shared.Security\Shared.Security.csproj", "{79265882-D9AA-4705-8E67-1CDB05F2E91E}"
 EndProject
@@ -54,11 +54,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VocabularyService.UnitTests", "tests\UnitTests\Lab 1\VocabularyService.UnitTests\VocabularyService.UnitTests.csproj", "{661F2957-714D-4E3B-A581-2D2C1756BA1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VocabularyService.UnitTests", "tests\UnitTests\VocabularyService.UnitTests\VocabularyService.UnitTests.csproj", "{661F2957-714D-4E3B-A581-2D2C1756BA1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.UnitTests", "tests\UnitTests\Lab 1\EmailService.UnitTests\EmailService.UnitTests.csproj", "{89720BCD-D24D-4A6B-9E86-A2EDE276B085}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.UnitTests", "tests\UnitTests\EmailService.UnitTests\EmailService.UnitTests.csproj", "{89720BCD-D24D-4A6B-9E86-A2EDE276B085}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "tests\UnitTests\Lab 1\IntegrationTests\IntegrationTests.csproj", "{D558EB52-3626-457A-B63C-7ED711C0F4C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "tests\IntegrationTests\IntegrationTests\IntegrationTests.csproj", "{D558EB52-3626-457A-B63C-7ED711C0F4C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dictionary-service", "services\dictionary-service\dictionary-service.csproj", "{CBE6F43A-322C-4EBD-A876-AE5E9C5AD689}"
 EndProject
