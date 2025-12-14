@@ -1,0 +1,27 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "vi_fold": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": { "type": "long" },
+      "word": {
+        "type": "text",
+        "analyzer": "vi_fold",
+        "fields": { "keyword": { "type": "keyword" } }
+      },
+      "wordNorm": { "type": "search_as_you_type", "analyzer": "vi_fold" },
+      "pos": { "type": "keyword" },
+      "data": { "type": "flattened" },
+      "importedAt": { "type": "date" }
+    }
+  }
+}
