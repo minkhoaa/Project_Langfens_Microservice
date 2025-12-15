@@ -1,7 +1,10 @@
-﻿services:
+services:
 
   gateway-service:
     image: ${DOCKERHUB_USER}/langfens-gateway:${TAG}
+    build:
+      context: ..
+      dockerfile: gateway/api-gateway/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     ports:
@@ -19,6 +22,9 @@
 
   auth-service:
     image: ${DOCKERHUB_USER}/langfens-auth:${TAG}
+    build:
+      context: ..
+      dockerfile: services/auth-service/Dockerfile
     env_file:
       - ./envs/auth.env
     depends_on:
@@ -35,7 +41,9 @@
 
   attempt-service:
     image: ${DOCKERHUB_USER}/langfens-attempt:${TAG}
-
+    build:
+      context: ..
+      dockerfile: services/attempt-service/Dockerfile
     env_file:
       - ./envs/attempt.env
 
@@ -51,6 +59,9 @@
 
   exam-service:
     image: ${DOCKERHUB_USER}/langfens-exam:${TAG}
+    build:
+      context: ..
+      dockerfile: services/exam-service/Dockerfile
     env_file:
       - ./envs/exam.env
     expose:
@@ -66,6 +77,9 @@
 
   course-service:
     image: ${DOCKERHUB_USER}/langfens-course:${TAG}
+    build:
+      context: ..
+      dockerfile: services/course-service/Dockerfile
     env_file:
       - ./envs/course.env
 
@@ -79,6 +93,9 @@
 
   vocabulary-service:
     image: ${DOCKERHUB_USER}/langfens-vocabulary:${TAG}
+    build:
+      context: ..
+      dockerfile: services/vocabulary-service/Dockerfile
     env_file:
       - ./envs/vocabulary.env
 
@@ -92,6 +109,9 @@
 
   speaking-service:
     image: ${DOCKERHUB_USER}/langfens-speaking:${TAG}
+    build:
+      context: ..
+      dockerfile: services/speaking-service/Dockerfile
     env_file:
       - ./envs/speaking.env
     expose:
@@ -115,6 +135,9 @@
 
   writing-service:
     image: ${DOCKERHUB_USER}/langfens-writing:${TAG}
+    build:
+      context: ..
+      dockerfile: services/writing-service/Dockerfile
     env_file:
       - ./envs/writing.env
 
@@ -130,6 +153,9 @@
 
   dictionary-service:
     image: ${DOCKERHUB_USER}/langfens-dictionary:${TAG}
+    build:
+      context: ..
+      dockerfile: services/dictionary-service/Dockerfile
     env_file:
       - ./envs/dictionary.env
     ports:
@@ -146,6 +172,9 @@
     image: ${DOCKERHUB_USER}/langfens-email:${TAG}
     env_file:
       - ./envs/email.env
+    build:
+      context: ..
+      dockerfile: services/email-service/Dockerfile
 
     expose:
       - "8080"
@@ -354,6 +383,9 @@
       
   chatbot-service:
     image: ${DOCKERHUB_USER}/langfens-chatbot:${TAG}
+    build:
+      context: ..
+      dockerfile: services/chatbot-service/Dockerfile
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
     ports:
