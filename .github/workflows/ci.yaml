@@ -21,7 +21,7 @@ jobs:
         run: |
           export REGISTRY=${{ secrets.DOCKERHUB_USERNAME }}
           export TAG=${{ github.sha }}
-          docker compose -f deploy/compose.yaml -f .deploy/compose.override.yaml build --pull
+          docker compose -f deploy/compose.yaml -f deploy/compose.override.yaml build --pull
 
       - name: Push
         run: |
