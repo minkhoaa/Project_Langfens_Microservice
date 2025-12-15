@@ -27,7 +27,7 @@ This exam is designed to help estimate a learner''s level on the CEFR scale from
 2. Listening – 8 multiple-choice questions  
 3. Writing – 1 short essay task (optional)
 
-Difficulty increases gradually so you can separate lower-level and higher-level learners.', 'PLACEMENT', 'B1', 'DRAFT', 60, now());
+Difficulty increases gradually so you can separate lower-level and higher-level learners.', 'PLACEMENT', 'B1', 'PUBLISHED', 60, now());
 
 INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","AudioUrl","TranscriptMd")
 VALUES ('7fb25cae-8211-4baa-a93c-e14ec55160e7', 'c69a3e54-a7f1-40eb-ab69-1f50ca798267', 1, 'Reading – Multiple Choice', 'Read the texts and choose the best answer **A, B, C or D**.
