@@ -9,6 +9,7 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Auth_Email;
@@ -34,7 +35,8 @@ public interface IAuthService
     Task<IResult> ForgotPasswordRequestAsync(string email, CancellationToken ct);
     Task<IResult> ResendForgotPasswordAsync(string email, CancellationToken ct);
     Task<IResult> ConfirmResetPasswordAsync(string email, string otp, string newPassword, CancellationToken ct);
-    
+    Task<IResult> GetAllUsersAsync(CancellationToken ct);
+
 
 }
 
@@ -51,11 +53,12 @@ public class AuthService(
     IPublishEndpoint publish,
     ILogger<string> logger,
     IOtpGenerator otpGenerator,
-    IOptions<JwtSettings> jwtSetttings)
+    IOptions<JwtSettings> jwtSetttings,
+    AuthDbContext dbContext)
     : IAuthService
 {
     private JwtSettings _jwtSettings = jwtSetttings.Value;
-    
+
     private const int MaxSessionsPerUser = 5;
     private static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(30);
     private static readonly TimeSpan RotationThreshold = TimeSpan.FromDays(3);
@@ -63,10 +66,10 @@ public class AuthService(
     private static readonly TimeSpan BlockSeconds = TimeSpan.FromSeconds(300);
     private static readonly TimeSpan TouchCooldowns = TimeSpan.FromSeconds(30);
     private static readonly int MaxAttempts = 5;
-    private static readonly TimeSpan OtpTtl = TimeSpan.FromMinutes(3);       
+    private static readonly TimeSpan OtpTtl = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(30);
 
-    private static readonly TimeSpan PwResetTtl = TimeSpan.FromMinutes(10); 
+    private static readonly TimeSpan PwResetTtl = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan PwResetCooldown = TimeSpan.FromSeconds(30);
     private const int PwResetMaxAttempts = 5;
     private static readonly TimeSpan PwResetBlock = TimeSpan.FromMinutes(5);
@@ -82,7 +85,7 @@ public class AuthService(
         {
             return AuthOperationResult.Failure(new ApiResultDto(false, "Email or password is missed", null!),
                 StatusCodes.Status400BadRequest);
-        } 
+        }
         if (!emailValidator.IsValid(emailRaw))
         {
             return AuthOperationResult.Failure(new ApiResultDto(false, "Email format is not valid", null!),
@@ -100,10 +103,10 @@ public class AuthService(
         var user = new User
         {
             Email = email,
-            UserName = email, 
+            UserName = email,
             EmailConfirmed = false
         };
-        
+
         var result = await userManager.CreateAsync(user, password);
         if (!result.Succeeded)
         {
@@ -136,7 +139,8 @@ public class AuthService(
         {
             return AuthOperationResult.Failure(
                 new ApiResultDto(false, $"Failed to send verification email. Please try again + {e.Message}", null!),
-                StatusCodes.Status502BadGateway);        }
+                StatusCodes.Status502BadGateway);
+        }
     }
     public async Task<IResult> ResendEmail(string toEmail, CancellationToken token)
     {
@@ -146,7 +150,7 @@ public class AuthService(
         var user = await userManager.FindByEmailAsync(email);
         if (user == null)
             return Results.Ok(new ApiResultDto(true, "Verification code was sent", null!));
-        
+
         if (user.EmailConfirmed)
             return Results.Conflict(new ApiResultDto(false, "Email is verified", null!));
         if (!await redisOtpStore.CanResend(email, ResendCooldown))
@@ -188,57 +192,57 @@ public class AuthService(
         return Results.Ok(new ApiResultDto(true, "If the email exists, we've sent reset instructions", null!));
     }
 
-  public async Task<IResult> ResendForgotPasswordAsync(string email, CancellationToken ct)
-{
-    if (string.IsNullOrWhiteSpace(email))
-        return Results.BadRequest(new ApiResultDto(false, "Email is required", null!));
-    email = email.Trim().ToLowerInvariant();
-
-    var user = await userManager.FindByEmailAsync(email);
-    if (user == null || !user.EmailConfirmed)
-        return Results.Ok(new ApiResultDto(true, "If the email exists, we've re-sent the reset email", null!));
-
-    var key = PwResetKey(email);
-
-    if (!await redisOtpStore.CanResend(key, PwResetCooldown))
-        return Results.BadRequest(
-            new ApiResultDto(false, "Too many requests", new { retryAfter = (int)PwResetCooldown.TotalSeconds }));
-
-    var otp = otpGenerator.Generate();
-    await redisOtpStore.PutOtp(key, otp, PwResetTtl);
-    await redisOtpStore.TouchResendCooldown(key, PwResetCooldown);
-
-    await publish.Publish(new UserRegisteredSendOtp(email, otp, (long)PwResetTtl.TotalSeconds), ct);
-    return Results.Ok(new ApiResultDto(true, "If the email exists, we've re-sent the reset email", null!));
-}
-
-public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, string newPassword, CancellationToken ct)
-{
-    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otp) || string.IsNullOrWhiteSpace(newPassword))
-        return Results.BadRequest(new ApiResultDto(false, "Parameters are missing", null!));
-    email = email.Trim().ToLowerInvariant();
-
-    var user = await userManager.FindByEmailAsync(email);
-    if (user == null)
-        return Results.BadRequest(new ApiResultDto(false, "OTP is invalid or expired", null!));
-
-    var key = PwResetKey(email);
-    var ok = await redisOtpStore.Verify(key, otp, MaxAttempts, BlockSeconds);
-    if (!ok)
-        return Results.BadRequest(new ApiResultDto(false, "OTP is invalid or expired", null!));
-
-    var token = await userManager.GeneratePasswordResetTokenAsync(user);
-    var res = await userManager.ResetPasswordAsync(user, token, newPassword);
-
-    await redisOtpStore.Clear(key);
-
-    if (!res.Succeeded)
+    public async Task<IResult> ResendForgotPasswordAsync(string email, CancellationToken ct)
     {
-        var msg = string.Join("; ", res.Errors.Select(e => e.Description));
-        return Results.BadRequest(new ApiResultDto(false, msg, null!));
+        if (string.IsNullOrWhiteSpace(email))
+            return Results.BadRequest(new ApiResultDto(false, "Email is required", null!));
+        email = email.Trim().ToLowerInvariant();
+
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null || !user.EmailConfirmed)
+            return Results.Ok(new ApiResultDto(true, "If the email exists, we've re-sent the reset email", null!));
+
+        var key = PwResetKey(email);
+
+        if (!await redisOtpStore.CanResend(key, PwResetCooldown))
+            return Results.BadRequest(
+                new ApiResultDto(false, "Too many requests", new { retryAfter = (int)PwResetCooldown.TotalSeconds }));
+
+        var otp = otpGenerator.Generate();
+        await redisOtpStore.PutOtp(key, otp, PwResetTtl);
+        await redisOtpStore.TouchResendCooldown(key, PwResetCooldown);
+
+        await publish.Publish(new UserRegisteredSendOtp(email, otp, (long)PwResetTtl.TotalSeconds), ct);
+        return Results.Ok(new ApiResultDto(true, "If the email exists, we've re-sent the reset email", null!));
     }
-    return Results.Ok(new ApiResultDto(true, "Reset password successfully", null!));
-}
+
+    public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, string newPassword, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otp) || string.IsNullOrWhiteSpace(newPassword))
+            return Results.BadRequest(new ApiResultDto(false, "Parameters are missing", null!));
+        email = email.Trim().ToLowerInvariant();
+
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+            return Results.BadRequest(new ApiResultDto(false, "OTP is invalid or expired", null!));
+
+        var key = PwResetKey(email);
+        var ok = await redisOtpStore.Verify(key, otp, MaxAttempts, BlockSeconds);
+        if (!ok)
+            return Results.BadRequest(new ApiResultDto(false, "OTP is invalid or expired", null!));
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        var res = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+        await redisOtpStore.Clear(key);
+
+        if (!res.Succeeded)
+        {
+            var msg = string.Join("; ", res.Errors.Select(e => e.Description));
+            return Results.BadRequest(new ApiResultDto(false, msg, null!));
+        }
+        return Results.Ok(new ApiResultDto(true, "Reset password successfully", null!));
+    }
 
 
 
@@ -254,7 +258,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
 
         var result = await redisOtpStore.Verify(email, otp, MaxAttempts, BlockSeconds);
         if (!result)
-            return Results.BadRequest(new ApiResultDto(false, "Otp is incorrect or expired", null!));    
+            return Results.BadRequest(new ApiResultDto(false, "Otp is incorrect or expired", null!));
         existedUser.EmailConfirmed = true;
         var update = await userManager.UpdateAsync(existedUser);
         if (!update.Succeeded)
@@ -265,7 +269,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
         return Results.Ok(new ApiResultDto(true, $"Verified user {email} successfully", null!));
     }
 
-   
+
 
     public async Task<AuthOperationResult> PasswordLoginAsync(LoginDto dto, RequestContext context,
         CancellationToken ct)
@@ -302,7 +306,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
             }
         }
         var sessionTicket = await CreateOrUpdateSessionAsync(user, context, ct);
-        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, userScopes,sessionTicket.SessionId , ct);
+        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, userScopes, sessionTicket.SessionId, ct);
         return AuthOperationResult.Success(new ApiResultDto(true, "Login successfully", accessToken), sessionTicket);
     }
 
@@ -381,7 +385,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
                 }
             }
         }
-    
+
         var roles = await userManager.GetRolesAsync(user);
         var userScopes = new List<string>();
         foreach (var role in roles)
@@ -392,7 +396,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
             }
         }
         var sessionTicket = await CreateOrUpdateSessionAsync(user, context, ct);
-        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, userScopes.Distinct(),sessionTicket.SessionId , ct);
+        var accessToken = await jwtTokenFactory.CreateTokenAsync(user, roles, userScopes.Distinct(), sessionTicket.SessionId, ct);
         return AuthOperationResult.Success(new ApiResultDto(true, "Login successfully", accessToken), sessionTicket);
     }
 
@@ -432,7 +436,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
         {
             return AuthOperationResult.Unauthorized();
         }
-        
+
         var now = DateTime.UtcNow;
         var rotate = dbSession.Exp - now < RotationThreshold;
         if (rotate)
@@ -455,7 +459,7 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
                 Ua = context.UserAgent ?? session.Ua,
                 Ip = context.IpAddress ?? session.Ip
             };
-      
+
 
             await sessionStore.StoreSessionAsync(updatedSession, SessionLifetime, ct);
             await sessionStore.SetDeviceSessionAsync(updatedSession, SessionLifetime, ct);
@@ -527,13 +531,51 @@ public async Task<IResult> ConfirmResetPasswordAsync(string email, string otp, s
             return AuthOperationResult.Failure(new ApiResultDto(false, "User not found", null), StatusCodes.Status404NotFound);
         }
 
-        var payload = new ApiResultDto(true, "Get information successfully", new { id = sub, user.Email, emailConfirmed = user.EmailConfirmed });
+        var roles = await userManager.GetRolesAsync(user);
+        var payload = new ApiResultDto(true, "Get information successfully", new
+        {
+            id = sub,
+            user.Email,
+            emailConfirmed = user.EmailConfirmed,
+            roles
+        });
         return AuthOperationResult.Success(payload);
     }
-    
-    
-    
-    
+
+    public async Task<IResult> GetAllUsersAsync(CancellationToken ct)
+    {
+        var users = await dbContext.Users
+            .AsNoTracking()
+            .Select(u => new { u.Id, u.Email, u.EmailConfirmed })
+            .ToListAsync(ct);
+
+        var rolePairs = await dbContext.UserRoles
+            .AsNoTracking()
+            .Join(dbContext.Roles.AsNoTracking(), ur => ur.RoleId, r => r.Id,
+                (ur, r) => new { ur.UserId, RoleName = r.Name })
+            .ToListAsync(ct);
+
+        var rolesLookup = rolePairs
+            .GroupBy(x => x.UserId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(x => x.RoleName ?? string.Empty)
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray());
+
+        var payload = users
+            .Select(u =>
+            {
+                rolesLookup.TryGetValue(u.Id, out var roleNames);
+                return new UserSummaryDto(u.Id, u.Email ?? string.Empty, u.EmailConfirmed, roleNames ?? Array.Empty<string>());
+            })
+            .ToList();
+
+        return Results.Ok(new ApiResultDto(true, "Get users successfully", payload));
+    }
+
+
     private async Task<SessionTicket> CreateOrUpdateSessionAsync(User user, RequestContext context,
         CancellationToken ct)
     {

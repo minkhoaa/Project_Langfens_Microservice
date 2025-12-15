@@ -5,6 +5,7 @@ public static class RoleBasedScopeProvider
     public static readonly Dictionary<string, string[]> CustomRoleOptions = new(StringComparer.OrdinalIgnoreCase) {
         ["ADMIN"]  =
         [
+            UserScope.UserReadAny,
             CourseScope.CourseRead, CourseScope.CourseEnroll, CourseScope.CourseComplete, CourseScope.CourseManage,
             ExamScope.ExamRead,   ExamScope.ExamManage,
             AttemptScope.AttemptStart, AttemptScope.AttemptSubmit, AttemptScope.AttemptReadAny,

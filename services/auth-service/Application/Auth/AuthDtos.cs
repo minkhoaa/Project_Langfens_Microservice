@@ -17,3 +17,9 @@ public record GoogleLoginRequest(
     string? IdToken);
 
 public record VerifyOtpDto(string Email, string Otp);  
+
+public record UserSummaryDto(
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("email")] string Email,
+    [property: JsonPropertyName("emailConfirmed")] bool EmailConfirmed,
+    [property: JsonPropertyName("roles")] IReadOnlyCollection<string> Roles);
