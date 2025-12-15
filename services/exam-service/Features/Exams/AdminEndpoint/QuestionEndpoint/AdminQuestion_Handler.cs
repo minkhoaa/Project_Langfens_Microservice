@@ -23,4 +23,10 @@ public static class AdminQuestionHandler
         CancellationToken token,
         [FromRoute] Guid id
     ) => service.DeleteAsync(token, id);
+
+    public static Task<IResult> GetQuestionsBySectionHandler(
+        [FromRoute] Guid sectionId,
+        CancellationToken token,
+        [FromServices] IAdminQuestionService service
+    ) => service.GetBySectionIdAsync(sectionId, token);
 }

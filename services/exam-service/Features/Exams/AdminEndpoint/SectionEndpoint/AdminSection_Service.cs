@@ -17,6 +17,8 @@ public interface IAdminSectionService
         CancellationToken token);
 
     public Task<IResult> DeleteAsync(Guid id, CancellationToken token);
+
+    Task<IResult> GetByExamIdAsync(Guid examId, CancellationToken token);
 }
 
 public class AdminSectionService(ExamDbContext context) : IAdminSectionService
@@ -106,5 +108,25 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
         {
             return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
         }
+    }
+
+    public async Task<IResult> GetByExamIdAsync(Guid examId, CancellationToken token)
+    {
+        var sections = await context.ExamSections.AsNoTracking()
+            .Where(s => s.ExamId == examId)
+            .OrderBy(s => s.Idx)
+            .Select(s => new
+            {
+                s.Id,
+                s.ExamId,
+                s.Idx,
+                s.Title,
+                s.InstructionsMd,
+                s.AudioUrl,
+                s.TranscriptMd
+            })
+            .ToListAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Success", sections));
     }
 }

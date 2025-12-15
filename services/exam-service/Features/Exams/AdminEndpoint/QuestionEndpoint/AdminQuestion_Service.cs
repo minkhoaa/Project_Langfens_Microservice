@@ -25,6 +25,8 @@ public interface IAdminQuestionService
     public Task<IResult> DeleteAsync(
         CancellationToken token,
         [FromRoute] Guid id);
+
+    Task<IResult> GetBySectionIdAsync(Guid sectionId, CancellationToken token);
 }
 
 public class AdminQuestionService : IAdminQuestionService
@@ -151,5 +153,26 @@ public class AdminQuestionService : IAdminQuestionService
         {
             return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
         }
+    }
+
+    public async Task<IResult> GetBySectionIdAsync(Guid sectionId, CancellationToken token)
+    {
+        var questions = await _context.ExamQuestions.AsNoTracking()
+            .Where(q => q.SectionId == sectionId)
+            .OrderBy(q => q.Idx)
+            .Select(q => new
+            {
+                q.Id,
+                q.SectionId,
+                q.Idx,
+                q.Type,
+                q.Skill,
+                q.Difficulty,
+                q.PromptMd,
+                q.ExplanationMd
+            })
+            .ToListAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Success", questions));
     }
 }

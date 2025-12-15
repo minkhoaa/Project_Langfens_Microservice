@@ -39,6 +39,9 @@ public static class AdminExamEndpoint
          
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
+        adminSection.MapGet("/by-exam/{examId:guid}", AdminSectionHandler.GetSectionsByExamHandler)
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
     }
 
     //question
@@ -48,6 +51,9 @@ public static class AdminExamEndpoint
         adminQuestion.MapPost("/add", AdminQuestionHandler.AddQuestionHandler);
         adminQuestion.MapPut("/update/{id}", AdminQuestionHandler.UpdateQuestionHandler);
         adminQuestion.MapDelete("/delete/{id}", AdminQuestionHandler.DeleteQuestionHandler);
+        adminQuestion.MapGet("/by-section/{sectionId:guid}", AdminQuestionHandler.GetQuestionsBySectionHandler)
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
     }
 
     //option
@@ -57,5 +63,8 @@ public static class AdminExamEndpoint
         adminOption.MapPost("/add", AdminOptionHandler.AddOptionHandler);
         adminOption.MapPut("/update/{id}", AdminOptionHandler.UpdateOptionHandler);
         adminOption.MapDelete("/delete/{id}", AdminOptionHandler.DeleteOptionHandler);
+        adminOption.MapGet("/by-question/{questionId:guid}", AdminOptionHandler.GetOptionsByQuestionHandler)
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
     }
 }
