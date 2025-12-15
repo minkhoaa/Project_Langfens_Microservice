@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.5.1" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.11" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="Npgsql" Version="8.0.5" />
+    <PackageReference Include="Respawn" Version="7.0.0" />
+    <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
+    <PackageReference Include="Testcontainers" Version="4.9.0" />
+    <PackageReference Include="Testcontainers.RabbitMq" Version="4.9.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.9.0" />
+    <PackageReference Include="Testcontainers.Redis" Version="4.9.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\services\auth-service\auth-service.csproj">
+      <Aliases>authsvc</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\..\services\course-service\course-service.csproj">
+      <Aliases>coursesvc</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\..\services\vocabulary-service\vocabulary-service.csproj">
+      <Aliases>vocsvc</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\..\services\exam-service\exam-service.csproj">
+      <Aliases>examsvc</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\..\services\attempt-service\attempt-service.csproj">
+      <Aliases>attemptsvc</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\..\services\speaking-service\speaking-service.csproj">
+      <Aliases>speakingsvc</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\..\services\writing-service\writing-service.csproj">
+      <Aliases>writingsvc</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\..\gateway\api-gateway\api-gateway.csproj">
+      <Aliases>gatewaysvc</Aliases>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
