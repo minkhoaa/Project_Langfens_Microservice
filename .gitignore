@@ -87,14 +87,14 @@ npm-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
+tests
 # ------------------------------
 # Docker (local overrides/artifacts)
 # ------------------------------
 .docker/
 docker-compose.override.yml
 docker-compose.override.yaml
-
+frontend/**
 # ------------------------------
 # Lockfiles (keep tracked) — intentionally NOT ignored
 # package-lock.json
