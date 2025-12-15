@@ -17,5 +17,6 @@ public static class AuthEndpoints
         group.MapForgotPasswordEndpoint();
         group.MapResendForgotPasswordEndpoint();
         group.MapConfirmForgotPasswordEndpoint();
+        group.MapGetAllUsersEndpoint();
     }
 }

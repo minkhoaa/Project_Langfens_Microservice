@@ -16,7 +16,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
 using Shared.Security.Claims;
+using Shared.Security.Helper;
 using Shared.Security.Roles;
+using Shared.Security.Scopes;
 using StackExchange.Redis;
 using Role = auth_service.Infrastructure.Persistence.Role;
 
@@ -138,6 +140,9 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
     options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
+    options.AddPolicy(UserScope.UserReadAny,
+        p => p.RequireAssertion(ctx =>
+            ctx.User.HasAnyScope(UserScope.UserReadAny) || ctx.User.IsInRole(Roles.Admin)));
 });
 builder.Services.AddEndpointsApiExplorer();
 
