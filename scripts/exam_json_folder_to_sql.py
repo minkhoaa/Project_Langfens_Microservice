@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#python3 exam_json_folder_to_sql.py ./jsons --out ./sql \
+#  --category IELTS --level B2 --status DRAFT --duration-min 20
+
 """
 Convert a folder of exam JSON files into PostgreSQL seed .sql files.
 
