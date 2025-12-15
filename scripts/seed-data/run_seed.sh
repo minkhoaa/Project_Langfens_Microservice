@@ -13,11 +13,18 @@ fi
 seed_exams() {
   echo "Seeding exam data..."
   local seed_dir="${REPO_ROOT}/deploy/seeds"
-  local exam_seeds=(
-    "${seed_dir}/seed_exam_ielts_listening_mock.sql"
-    "${seed_dir}/seed_exam_ielts_reading_mock.sql"
-    "${seed_dir}/seed_exam_placement_a2_c1_sample.sql"
+
+  # Auto-discover exam seed files (stable order).
+  local -a exam_seeds=()
+  mapfile -t exam_seeds < <(
+    find "${seed_dir}" -maxdepth 1 -type f -name '*.sql' -print \
+      | LC_ALL=C sort
   )
+
+  if (( ${#exam_seeds[@]} == 0 )); then
+    echo "No exam seed files found in: ${seed_dir} (pattern: seed_exam_*.sql)" >&2
+    exit 1
+  fi
 
   for seed_file in "${exam_seeds[@]}"; do
     if [[ ! -f "${seed_file}" ]]; then
@@ -26,7 +33,7 @@ seed_exams() {
     fi
   done
 
-  # Combine both SQL files so they run as a single import stream.
+  # Combine all SQL files so they run as a single import stream.
   cat "${exam_seeds[@]}" | docker compose -f "${COMPOSE_FILE}" exec -T exam-database \
     psql -v ON_ERROR_STOP=1 -U exam -d exam-db
 }
