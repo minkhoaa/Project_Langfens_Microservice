@@ -60,5 +60,10 @@ jobs:
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USER }}" --password-stdin
 
             docker compose -f compose.yaml pull
-            docker compose -f compose.yaml up -d --remove-orphans
+
+            if ! docker compose -f compose.yaml up -d --remove-orphans; then
+                echo "Deploy failed due to network/conflict. Restarting stack..."
+                docker compose -f compose.yaml down
+                docker compose -f compose.yaml up -d --remove-orphans
+            fi
             docker image prune -f
