@@ -47,12 +47,12 @@ jobs:
           script: |
             set -euo pipefail
 
-            cd /opt/langfens
+            cd /home/azureuser/DeployProjects/Project_Langfens_Microservice
             git fetch --all
             git checkout master
             git reset --hard origin/master
 
-            cd /opt/langfens/deploy
+            cd /home/azureuser/DeployProjects/Project_Langfens_Microservice/deploy
 
             export DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}
             export TAG=${{ github.sha }}
