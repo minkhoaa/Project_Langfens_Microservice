@@ -5,11 +5,24 @@ using dictionary_service.Features.Service;
 using dictionary_service.Infrastructure.Persistence;
 using Elastic.Clients.Elasticsearch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.Features;
 using IDictionaryService = dictionary_service.Features.Service.IDictionaryService;
 
 var builder = WebApplication.CreateBuilder(args);
 
 static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = null; // allow large uploads for import
+});
+
+builder.Services.Configure<FormOptions>(opt =>
+{
+    opt.MultipartBodyLengthLimit = long.MaxValue;
+    opt.ValueLengthLimit = int.MaxValue;
+    opt.MultipartHeadersLengthLimit = int.MaxValue;
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

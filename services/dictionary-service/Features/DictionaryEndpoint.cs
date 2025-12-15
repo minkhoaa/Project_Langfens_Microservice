@@ -16,7 +16,7 @@ namespace dictionary_service.Features
             var app = router.MapGroup("/api/dictionary");
             app.MapGet("/suggest", DictionaryHandler.GetSuggestsHandler);
             app.MapGet("/details/{id}", DictionaryHandler.GetDetailsHandler);
-            app.MapPost("/import", DictionaryHandler.ImportHandler).DisableAntiforgery()
+            app.MapPost("/import", DictionaryHandler.ImportHandler).DisableAntiforgery().DisableRequestSizeLimit()
                .Accepts<IFormFile>("multipart/form-data")
                .WithMetadata(new ConsumesAttribute("multipart/form-data"));
             app.MapPost("/reindex", DictionaryHandler.ReindexHandler);
