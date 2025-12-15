@@ -19,20 +19,6 @@ services:
       - exam-service
       - course-service
 
-  frontend-service:
-    image: ${DOCKERHUB_USER}/langfens-frontend:${TAG}
-    build:
-      context: ../frontend/langfens-fe-app
-      dockerfile: Dockerfile
-    env_file:
-      - path: ./envs/frontend.env
-        required: false
-    environment:
-      - NODE_ENV=production
-    ports:
-      - "3000:3000"
-    networks:
-      - backend
 
 
   auth-service:
