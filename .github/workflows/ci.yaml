@@ -14,17 +14,17 @@ jobs:
       - name: Login Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build
         run: |
-          export REGISTRY=${{ secrets.DOCKERHUB_USERNAME }}
+          export REGISTRY=${{ secrets.DOCKERHUB_USER }}
           export TAG=${{ github.sha }}
           docker compose -f deploy/compose.yaml -f deploy/compose.override.yaml build --pull
 
       - name: Push
         run: |
-          export REGISTRY=${{ secrets.DOCKERHUB_USERNAME }}
+          export REGISTRY=${{ secrets.DOCKERHUB_USER }}
           export TAG=${{ github.sha }}
           docker compose -f deploy/compose.yaml -f deploy/compose.override.yaml push -q --include-deps
