@@ -17,6 +17,8 @@ seed_exams() {
     "${seed_dir}/seed_exam_ielts_listening_mock.sql"
     "${seed_dir}/seed_exam_ielts_reading_mock.sql"
     "${seed_dir}/seed_exam_placement_a2_c1_sample.sql"
+    "${seed_dir}/seed_exam_ielts_reading_agriculture_and_tourism_1270.sql"
+
   )
 
   for seed_file in "${exam_seeds[@]}"; do
