@@ -23,4 +23,10 @@ public static class AdminOptionHandler
         CancellationToken token,
         [FromServices] IAdminOptionService service)
         => service.DeleteAsync(id, token);
+
+    public static Task<IResult> GetOptionsByQuestionHandler(
+        [FromRoute] Guid questionId,
+        CancellationToken token,
+        [FromServices] IAdminOptionService service)
+        => service.GetByQuestionIdAsync(questionId, token);
 }

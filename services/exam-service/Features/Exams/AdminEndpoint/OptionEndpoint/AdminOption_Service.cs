@@ -11,6 +11,8 @@ public interface IAdminOptionService
     public Task<IResult> AddAsync(DtoAdmin.AdminOptionUpsert dto, CancellationToken token);
     public Task<IResult> UpdateAsync(Guid id, DtoAdmin.AdminOptionUpdate dto, CancellationToken token);
     public Task<IResult> DeleteAsync(Guid id, CancellationToken token);
+
+    Task<IResult> GetByQuestionIdAsync(Guid questionId, CancellationToken token);
 }
 
 public class AdminOptionService(ExamDbContext db) : IAdminOptionService
@@ -98,5 +100,23 @@ public class AdminOptionService(ExamDbContext db) : IAdminOptionService
         {
             return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
         }
+    }
+
+    public async Task<IResult> GetByQuestionIdAsync(Guid questionId, CancellationToken token)
+    {
+        var options = await db.ExamOptions.AsNoTracking()
+            .Where(o => o.QuestionId == questionId)
+            .OrderBy(o => o.Idx)
+            .Select(o => new
+            {
+                o.Id,
+                o.QuestionId,
+                o.Idx,
+                o.ContentMd,
+                o.IsCorrect
+            })
+            .ToListAsync(token);
+
+        return Results.Ok(new ApiResultDto(true, "Success", options));
     }
 }
