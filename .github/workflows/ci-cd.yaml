@@ -66,4 +66,5 @@ jobs:
                 docker compose -f compose.yaml down
                 docker compose -f compose.yaml up -d --remove-orphans
             fi
-            docker image prune -f
+            # Clean unused images/containers/networks to avoid disk bloat on the host
+            docker system prune -af
