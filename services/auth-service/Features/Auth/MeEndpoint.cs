@@ -10,7 +10,7 @@ public static class MeEndpoint
     public static RouteHandlerBuilder MapMeEndpoint(this RouteGroupBuilder group)
     {
         return group.MapGet("/me", MeAsync)
-            .RequireAuthorization(Roles.User, Roles.Admin)
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User, Roles.Admin))
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
     }
