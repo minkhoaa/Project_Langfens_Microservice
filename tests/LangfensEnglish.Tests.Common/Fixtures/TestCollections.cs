@@ -16,3 +16,10 @@ public class RedisCollection : ICollectionFixture<RedisContainerFixture>
 public class RabbitMqCollection : ICollectionFixture<RabbitMqContainerFixture>
 {
 }
+
+[CollectionDefinition(nameof(IntegrationTestCollection))]
+public class IntegrationTestCollection : ICollectionFixture<PostgresContainerFixture>,
+    ICollectionFixture<RedisContainerFixture>,
+    ICollectionFixture<RabbitMqContainerFixture>
+{
+}

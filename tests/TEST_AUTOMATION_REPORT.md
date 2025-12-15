@@ -12,11 +12,27 @@ api-gateway | reverse proxy | routes for auth/exam/attempt/course/vocabulary/spe
 speaking-service | `/api/speaking`, `/api/admin/speaking`, `/api/upload`, `/ws/speaking` | transcript, grade, exam list/detail, history/list/detail, start; admin exam list/create/update/delete; upload audio; websocket transcript | `CONNECTIONSTRING__SPEAKING`, `JwtSettings__*`, `RABBITMQ__*`, `GEMINI__APIKEY`, `GEMINI__MODEL`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_CLOUD_NAME` | JWT Bearer (user/admin scopes), some endpoints anonymous
 writing-service | `/api/writing`, `/api/admin/writing` | grade, exam list/start/detail, history list/detail; admin exam CRUD | `CONNECTIONSTRING__WRITING`, `JwtSettings__*`, `RABBITMQ__*`, `GEMINI__APIKEY`, `GEMINI__MODEL` | JWT Bearer (user/admin scopes)
 
+## Function-to-target mapping (automated)
+Function | Service | Target method | Notes
+--- | --- | --- | ---
+Browse exams list | exam-service | `exam_service.Features.Exams.PublicEndpoint.ExamService.ListPublishedAsync` | Covered with 10 unit test cases
+View exam detail (by slug/id) | exam-service | `exam_service.Features.Exams.PublicEndpoint.ExamService.GetBySlugAsync` | Covered with 10 unit test cases
+Search/filter exams (if available) | exam-service | `exam_service.Features.Exams.PublicEndpoint.ExamService.ListPublishedAsync` | Covered with 10 unit test cases (filter/paging variants)
+Browse courses list | course-service | `course_service.Features.PublicEndpoint.PublicEndpointService.GetPublicCourseService` | Covered with 10 unit test cases
+View course detail (by slug/id) | course-service | `course_service.Features.PublicEndpoint.PublicEndpointService.GetCourseBySlug` | Covered with 10 unit test cases
+
 ## How to run (target state)
 - Restore & build tests solution: `dotnet test tests/LangfensEnglish.Tests.sln`
 - Docker required for Postgres/Redis/RabbitMQ testcontainers.
 - Environment: no external network calls expected; all fakes/containers in test harness.
 
 ## Pending work
-- Seed data per service, integration test suites for 46 functions, UT targets, smoke coverage.
-- Update this report with final command, coverage numbers, and skip reasons once suites are implemented.
+- Seed data per service, implement integration test suites for 46 functions with ≥10 cases each, and UT targets.
+- Current tests are scaffolded and marked `[Skip]` until seeding/fakes are wired.
+- Update this report with final command, coverage numbers, and detailed skip reasons once suites are implemented.
+
+## Recent test execution
+- `dotnet test tests/ExamService.UnitTests/ExamService.UnitTests.csproj -v minimal`
+- `dotnet test tests/CourseService.UnitTests/CourseService.UnitTests.csproj -v minimal`
+
+Both suites pass (warnings for nullable analysis only).
