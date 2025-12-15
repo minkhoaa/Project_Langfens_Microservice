@@ -1,5 +1,4 @@
 ﻿services:
-
   gateway-service:
     image: ${DOCKERHUB_USER}/langfens-gateway:${TAG}
     environment:
@@ -110,13 +109,6 @@
         condition: service_healthy
     networks:
       - backend
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
 
   writing-service:
     image: ${DOCKERHUB_USER}/langfens-writing:${TAG}
