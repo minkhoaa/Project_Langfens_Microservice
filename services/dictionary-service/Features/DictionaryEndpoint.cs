@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using dictionary_service.Features.Handler;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 
 namespace dictionary_service.Features
 {
@@ -13,7 +16,9 @@ namespace dictionary_service.Features
             var app = router.MapGroup("/api/dictionary");
             app.MapGet("/suggest", DictionaryHandler.GetSuggestsHandler);
             app.MapGet("/details/{id}", DictionaryHandler.GetDetailsHandler);
-            app.MapPost("/import", DictionaryHandler.ImportHandler);
+            app.MapPost("/import", DictionaryHandler.ImportHandler).DisableAntiforgery()
+               .Accepts<IFormFile>("multipart/form-data")
+               .WithMetadata(new ConsumesAttribute("multipart/form-data"));
             app.MapPost("/reindex", DictionaryHandler.ReindexHandler);
         }
     }
