@@ -5,6 +5,7 @@ using dictionary_service.Domains.Entities;
 using dictionary_service.Features.Helper;
 using dictionary_service.Infrastructure.Persistence;
 using Elastic.Clients.Elasticsearch;
+using Microsoft.AspNetCore.Http;
 
 namespace dictionary_service.Features.Service
 {
@@ -13,7 +14,7 @@ namespace dictionary_service.Features.Service
         Task<IResult> GetSuggests(string word, string? pos, CancellationToken token);
         Task<IResult> GetDetails(int id, CancellationToken token);
         Task<IResult> Reindex(int? batchSize, ElasticIndexer indexer, CancellationToken ct);
-        Task<IResult> Import(ImportRequest req, CancellationToken ct);
+        Task<IResult> Import(IFormFile file, int? maxLines, CancellationToken ct);
 
     }
     public class DictionaryService : IDictionaryService
@@ -96,21 +97,28 @@ namespace dictionary_service.Features.Service
             return Results.Ok(new { ok = true });
         }
 
-        public async Task<IResult> Import(ImportRequest req, CancellationToken ct)
+        public async Task<IResult> Import(IFormFile file, int? maxLines, CancellationToken ct)
         {
-            if (string.IsNullOrWhiteSpace(req.Path) || !File.Exists(req.Path))
-                return Results.BadRequest("path not found");
+            if (file is null || file.Length == 0)
+                return Results.BadRequest("file is empty");
 
-            var isGz = req.Path.EndsWith(".gz", StringComparison.OrdinalIgnoreCase);
-            var maxLines = req.MaxLines;
-            var batchSize = 500;
+            // Giới hạn kích thước (tuỳ bạn)
+            // if (file.Length > 5L * 1024 * 1024 * 1024) return Results.BadRequest("file too large");
 
+            var isGz =
+                file.FileName.EndsWith(".gz", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(file.ContentType, "application/gzip", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(file.ContentType, "application/x-gzip", StringComparison.OrdinalIgnoreCase);
+
+            const int batchSize = 100; // << chunk 100 từ
             long read = 0, imported = 0, skipped = 0;
 
             _context.ChangeTracker.AutoDetectChangesEnabled = false;
 
-            Stream baseStream = File.OpenRead(req.Path);
-            if (isGz) baseStream = new GZipStream(baseStream, CompressionMode.Decompress);
+            await using var uploadStream = file.OpenReadStream(); // streaming, không load RAM
+            Stream baseStream = uploadStream;
+            if (isGz) baseStream = new GZipStream(uploadStream, CompressionMode.Decompress);
+
             using var sr = new StreamReader(baseStream);
 
             var batch = new List<DictionaryEntry>(batchSize);
@@ -122,29 +130,16 @@ namespace dictionary_service.Features.Service
                 var line = await sr.ReadLineAsync();
                 read++;
 
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    skipped++;
-                    continue;
-                }
+                if (string.IsNullOrWhiteSpace(line)) { skipped++; continue; }
 
                 try
                 {
                     using var doc = JsonDocument.Parse(line);
                     var root = doc.RootElement;
 
-                    if (!root.TryGetProperty("word", out var wProp))
-                    {
-                        skipped++;
-                        continue;
-                    }
-
+                    if (!root.TryGetProperty("word", out var wProp)) { skipped++; continue; }
                     var word = wProp.GetString();
-                    if (string.IsNullOrWhiteSpace(word))
-                    {
-                        skipped++;
-                        continue;
-                    }
+                    if (string.IsNullOrWhiteSpace(word)) { skipped++; continue; }
 
                     var pos = root.TryGetProperty("pos", out var pProp)
                         ? (pProp.GetString() ?? "unknown")
@@ -152,10 +147,10 @@ namespace dictionary_service.Features.Service
 
                     batch.Add(new DictionaryEntry
                     {
-                        Word = word,
-                        WordNorm = word.Trim().ToLowerInvariant(),
+                        Word = word!,
+                        WordNorm = word!.Trim().ToLowerInvariant(),
                         Pos = pos,
-                        Data = root.Clone(),
+                        Data = root.Clone(),                 // JsonElement clone OK
                         ImportedAt = DateTimeOffset.UtcNow
                     });
 
@@ -166,7 +161,7 @@ namespace dictionary_service.Features.Service
                         imported += batch.Count;
 
                         batch.Clear();
-                        _context.ChangeTracker.Clear(); // cực quan trọng để không ngốn RAM
+                        _context.ChangeTracker.Clear();      // cực quan trọng
                     }
                 }
                 catch
@@ -185,8 +180,7 @@ namespace dictionary_service.Features.Service
                 _context.ChangeTracker.Clear();
             }
 
-            return Results.Ok(new { read, imported, skipped, batchSize });
+            return Results.Ok(new { read, imported, skipped, batchSize, file = file.FileName, gzip = isGz });
         }
     }
 }
-public record ImportRequest(string Path, int? MaxLines);
