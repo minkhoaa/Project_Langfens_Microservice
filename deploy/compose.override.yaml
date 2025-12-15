@@ -26,7 +26,8 @@ services:
       context: ..
       dockerfile: services/auth-service/Dockerfile
     env_file:
-      - ./envs/auth.env
+      - path: ./envs/auth.env
+        required: false
     depends_on:
       auth-database:
         condition: service_healthy
@@ -45,7 +46,8 @@ services:
       context: ..
       dockerfile: services/attempt-service/Dockerfile
     env_file:
-      - ./envs/attempt.env
+      - path: ./envs/attempt.env
+        required: false
 
     ports:
       - "8081:8080"
@@ -63,7 +65,8 @@ services:
       context: ..
       dockerfile: services/exam-service/Dockerfile
     env_file:
-      - ./envs/exam.env
+      - path: ./envs/exam.env
+        required: false
     expose:
       - "8081"
     ports:
@@ -81,7 +84,8 @@ services:
       context: ..
       dockerfile: services/course-service/Dockerfile
     env_file:
-      - ./envs/course.env
+      - path: ./envs/course.env
+        required: false
 
     expose:
       - "8080"
@@ -97,7 +101,8 @@ services:
       context: ..
       dockerfile: services/vocabulary-service/Dockerfile
     env_file:
-      - ./envs/vocabulary.env
+      - path: ./envs/vocabulary.env
+        required: false
 
     ports:
       - "8093:8080"
@@ -113,7 +118,8 @@ services:
       context: ..
       dockerfile: services/speaking-service/Dockerfile
     env_file:
-      - ./envs/speaking.env
+      - path: ./envs/speaking.env
+        required: false
     expose:
       - "8080"
     ports:
@@ -139,7 +145,8 @@ services:
       context: ..
       dockerfile: services/writing-service/Dockerfile
     env_file:
-      - ./envs/writing.env
+      - path: ./envs/writing.env
+        required: false
 
     ports:
       - "8091:8080"
@@ -157,7 +164,8 @@ services:
       context: ..
       dockerfile: services/dictionary-service/Dockerfile
     env_file:
-      - ./envs/dictionary.env
+      - path: ./envs/dictionary.env
+        required: false
     ports:
       - "8094:8080"
     networks:
@@ -171,7 +179,8 @@ services:
   email-service:
     image: ${DOCKERHUB_USER}/langfens-email:${TAG}
     env_file:
-      - ./envs/email.env
+      - path: ./envs/email.env
+        required: false
     build:
       context: ..
       dockerfile: services/email-service/Dockerfile

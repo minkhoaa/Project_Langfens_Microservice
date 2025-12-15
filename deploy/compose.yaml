@@ -20,7 +20,8 @@
   auth-service:
     image: ${DOCKERHUB_USER}/langfens-auth:${TAG}
     env_file:
-      - ./envs/auth.env
+      - path: ./envs/auth.env
+        required: false
     depends_on:
       auth-database:
         condition: service_healthy
@@ -37,7 +38,8 @@
     image: ${DOCKERHUB_USER}/langfens-attempt:${TAG}
 
     env_file:
-      - ./envs/attempt.env
+      - path: ./envs/attempt.env
+        required: false
 
     ports:
       - "8081:8080"
@@ -52,7 +54,8 @@
   exam-service:
     image: ${DOCKERHUB_USER}/langfens-exam:${TAG}
     env_file:
-      - ./envs/exam.env
+      - path: ./envs/exam.env
+        required: false
     expose:
       - "8081"
     ports:
@@ -67,8 +70,8 @@
   course-service:
     image: ${DOCKERHUB_USER}/langfens-course:${TAG}
     env_file:
-      - ./envs/course.env
-
+      - path: ./envs/course.env
+        required: false
     expose:
       - "8080"
     networks:
@@ -80,8 +83,8 @@
   vocabulary-service:
     image: ${DOCKERHUB_USER}/langfens-vocabulary:${TAG}
     env_file:
-      - ./envs/vocabulary.env
-
+      - path: ./envs/vocabulary.env
+        required: false
     ports:
       - "8093:8080"
     networks:
@@ -93,7 +96,9 @@
   speaking-service:
     image: ${DOCKERHUB_USER}/langfens-speaking:${TAG}
     env_file:
-      - ./envs/speaking.env
+      - path: ./envs/speaking.env
+        required: false
+
     expose:
       - "8080"
     ports:
@@ -116,7 +121,8 @@
   writing-service:
     image: ${DOCKERHUB_USER}/langfens-writing:${TAG}
     env_file:
-      - ./envs/writing.env
+      - path: ./envs/writing.env
+        required: false
 
     ports:
       - "8091:8080"
@@ -131,7 +137,8 @@
   dictionary-service:
     image: ${DOCKERHUB_USER}/langfens-dictionary:${TAG}
     env_file:
-      - ./envs/dictionary.env
+      - path: ./envs/dictionary.env
+        required: false
     ports:
       - "8094:8080"
     networks:
@@ -145,7 +152,8 @@
   email-service:
     image: ${DOCKERHUB_USER}/langfens-email:${TAG}
     env_file:
-      - ./envs/email.env
+      - path: ./envs/email.env
+        required: false
 
     expose:
       - "8080"
