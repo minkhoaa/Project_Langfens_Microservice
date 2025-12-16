@@ -200,4 +200,7 @@ app.UseAuthorization();
 
 app.MapAuthEndpoints();
 
+// E2E Test Harness - only active in Testing environment
+auth_service.Extensions.TestEndpoints.MapTestEndpoints(app, app.Environment);
+
 app.Run();

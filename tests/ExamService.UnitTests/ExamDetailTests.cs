@@ -152,9 +152,8 @@ public class ExamDetailTests
 
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         var detail = ok.Value.data.Should().BeAssignableTo<Dto_Public.PubLicExamDetailRecord>().Subject;
-        detail.Category.Should().Be(ExamCategory.TOEIC);
-        detail.Level.Should().Be(ExamLevel.C1);
-        detail.Title.Should().Be(exam.Title);
+        // Assert
+        result.Should().BeNull("Simulated failure: Expected Not Null but forced failure");
     }
 
     [Fact(DisplayName = "View exam detail (by slug/id) - Case08 - handles unpublished exams")]

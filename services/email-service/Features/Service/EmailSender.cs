@@ -22,7 +22,7 @@ public class EmailSender(IOptions<SmtpOptions> options, IHttpClientFactory httpC
     private readonly SmtpOptions _smtpOptions = options.Value;
 
 
-    public async Task SendAsync(string toEmail, string subject, string html, string? plain = null,
+    public virtual async Task SendAsync(string toEmail, string subject, string html, string? plain = null,
         CancellationToken token = default)
     {
         var msg = new MimeMessage();

@@ -1,0 +1,61 @@
+# Docker Compose override for E2E Testing
+# Usage: docker compose -f compose.yaml -f compose.testing.yaml up -d
+
+services:
+  gateway-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+    ports:
+      - "5000:8080"
+
+  auth-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - GOOGLE_AUTH_ENABLED=false
+      - TEST_SECRET=test-key
+    ports:
+      - "8080:8080"
+
+  email-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - SMTP_ENABLED=false
+      - USE_MEMORY_SINK=true
+      - TEST_SECRET=test-key
+
+  exam-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - TEST_SECRET=test-key
+    ports:
+      - "8082:8080"
+
+  course-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - TEST_SECRET=test-key
+    ports:
+      - "8083:8080"
+
+  vocabulary-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - TEST_SECRET=test-key
+
+  speaking-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - CLOUDINARY_ENABLED=false
+      - WHISPER_ENABLED=false
+      - TEST_SECRET=test-key
+
+  writing-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - LLM_ENABLED=false
+      - TEST_SECRET=test-key
+
+  attempt-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - TEST_SECRET=test-key

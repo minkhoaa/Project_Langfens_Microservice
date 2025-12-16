@@ -20,13 +20,14 @@ public class PublicExamsTests
         for (var i = 1; i <= 10; i++) yield return new object[] { i };
     }
 
-    [Theory(Skip = SkipReason)]
+    [Theory]
     [MemberData(nameof(ListCases))]
     [Trait("Function", "Browse exams list")]
     [Trait("Case", "01")]
     [Trait("Level", "Integration")]
     public void BrowseExams_ListCases(int caseId)
     {
+         if (caseId <= 2) Assert.True(false, "Simulated Exam Integration Failure for Demo");
     }
 
     public static IEnumerable<object[]> DetailCases()

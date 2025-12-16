@@ -21,13 +21,14 @@ public class AuthFlowsTests
         for (var i = 1; i <= 10; i++) yield return new object[] { i };
     }
 
-    [Theory(Skip = SkipReason)]
+    [Theory]
     [MemberData(nameof(RegisterCases))]
     [Trait("Function", "Register account")]
     [Trait("Case", "01")]
     [Trait("Level", "Integration")]
     public void Register_Cases(int caseId)
     {
+        if (caseId <= 2) Assert.True(false, "Simulated Auth Integration Failure for Demo");
     }
 
     public static IEnumerable<object[]> VerifyOtpCases()

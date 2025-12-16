@@ -93,7 +93,6 @@ npm-debug.log*
 .docker/
 docker-compose.override.yml
 docker-compose.override.yaml
-frontend/**
 # ------------------------------
 # Lockfiles (keep tracked) — intentionally NOT ignored
 # package-lock.json

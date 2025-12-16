@@ -1,81 +1,75 @@
 extern alias examsvc;
 extern alias coursesvc;
-extern alias vocsvc;
 
-using examsvc::exam_service.Domains.Entities;
 using coursesvc::course_service.Domains.Entities;
-using vocsvc::vocabulary_service.Domains.Entities;
-using Shared.ExamDto.Contracts.Exam.Enums;
+using examsvc::exam_service.Domains.Entities;
 using Shared.ExamDto.Contracts.Course.Enums;
-using Shared.ExamDto.Contracts.FlashCard;
+using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace LangfensEnglish.Tests.Common.Builders;
 
-/// <summary>
-/// Lightweight factory helpers to build entities/requests for unit tests without duplicating boilerplate.
-/// </summary>
 public static class TestDataFactory
 {
     public static Exam CreateExam(
-        Guid? id = null,
         string? slug = null,
+        string? title = null,
         string? category = null,
         string? level = null,
         string status = ExamStatus.Published,
-        int sectionCount = 0,
-        int questionsPerSection = 0,
-        int optionsPerQuestion = 0)
+        int sectionCount = 1,
+        int questionsPerSection = 1,
+        int optionsPerQuestion = 1)
     {
-        var examId = id ?? Guid.NewGuid();
-        var generatedExamSlug = slug ?? $"exam-{Guid.NewGuid():N}".Substring(0, 8);
         var exam = new Exam
         {
-            Id = examId,
-            Slug = generatedExamSlug,
-            Title = "Sample Exam",
+            Id = Guid.NewGuid(),
+            Slug = slug ?? $"exam-{Guid.NewGuid():N}",
+            Title = title ?? "Sample Exam",
+            DescriptionMd = "Sample description",
             Category = category ?? ExamCategory.IELTS,
             Level = level ?? ExamLevel.B1,
             Status = status,
             DurationMin = 60,
+            CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
 
-        for (var si = 0; si < sectionCount; si++)
+        for (var s = 1; s <= sectionCount; s++)
         {
-            var sectionId = Guid.NewGuid();
             var section = new ExamSection
             {
-                Id = sectionId,
-                ExamId = examId,
-                Idx = si + 1,
-                Title = $"Section {si + 1}",
-                InstructionsMd = "Do it carefully",
-                Questions = new List<ExamQuestion>()
+                Id = Guid.NewGuid(),
+                ExamId = exam.Id,
+                Exam = exam,
+                Idx = s,
+                Title = $"Section {s}",
+                InstructionsMd = "Instructions"
             };
 
-            for (var qi = 0; qi < questionsPerSection; qi++)
+            for (var q = 1; q <= questionsPerSection; q++)
             {
-                var qId = Guid.NewGuid();
                 var question = new ExamQuestion
                 {
-                    Id = qId,
-                    SectionId = sectionId,
-                    Idx = qi + 1,
-                    Type = "multiple_choice",
-                    Skill = QuestionSkill.Listening,
-                    Difficulty = 2,
-                    PromptMd = $"Q{qi + 1}",
-                    Options = new List<ExamOption>()
+                    Id = Guid.NewGuid(),
+                    SectionId = section.Id,
+                    Section = section,
+                    Idx = q,
+                    Type = QuestionType.MultipleChoiceSingle,
+                    Skill = QuestionSkill.Reading,
+                    Difficulty = 1,
+                    PromptMd = $"Prompt {q}"
                 };
 
-                for (var oi = 0; oi < optionsPerQuestion; oi++)
+                for (var o = 1; o <= optionsPerQuestion; o++)
                 {
                     question.Options.Add(new ExamOption
                     {
                         Id = Guid.NewGuid(),
-                        QuestionId = qId,
-                        Idx = oi + 1,
-                        ContentMd = $"Option {oi + 1}"
+                        QuestionId = question.Id,
+                        Question = question,
+                        Idx = o,
+                        ContentMd = $"Option {o}",
+                        IsCorrect = o == 1
                     });
                 }
 
@@ -89,100 +83,39 @@ public static class TestDataFactory
     }
 
     public static Course CreateCourse(
-        Guid? id = null,
         string? slug = null,
+        string? title = null,
         string? category = null,
         string? level = null,
-        string status = "DRAFT",
-        int lessons = 0)
+        string? status = null,
+        int lessons = 1)
     {
-        var courseId = id ?? Guid.NewGuid();
-        var generatedCourseSlug = slug ?? $"course-{Guid.NewGuid():N}".Substring(0, 8);
         var course = new Course
         {
-            Id = courseId,
-            Slug = generatedCourseSlug,
-            Title = "Sample Course",
-            DescriptionMd = "Desc",
+            Id = Guid.NewGuid(),
+            Slug = slug ?? $"course-{Guid.NewGuid():N}",
+            Title = title ?? "Sample Course",
+            DescriptionMd = "Course description",
             Category = category ?? CourseCategories.GENERAL_ENGLISH,
             Level = level ?? CourseLevel.B1,
-            Status = status,
+            Status = status ?? CourseStatus.Published,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            Lessons = new List<Lesson>()
+            UpdatedAt = DateTime.UtcNow
         };
 
-        for (var i = 0; i < lessons; i++)
+        for (var i = 1; i <= lessons; i++)
         {
             course.Lessons.Add(new Lesson
             {
                 Id = Guid.NewGuid(),
-                CourseId = courseId,
-                Idx = i + 1,
-                Title = $"Lesson {i + 1}",
-                ContentMd = "Content",
-                DurationMin = 5
+                CourseId = course.Id,
+                Course = course,
+                Idx = i,
+                Title = $"Lesson {i}",
+                DurationMin = 30
             });
         }
 
         return course;
     }
-
-    public static Deck CreateDeck(
-        Guid? id = null,
-        string? slug = null,
-        string? status = "PUBLISHED",
-        string? category = "general",
-        int cards = 0)
-    {
-        var deckId = id ?? Guid.NewGuid();
-        var generatedDeckSlug = slug ?? $"deck-{Guid.NewGuid():N}".Substring(0, 8);
-        var deck = new Deck
-        {
-            Id = deckId,
-            Slug = generatedDeckSlug,
-            Title = "Deck title",
-            DescriptionMd = "Desc",
-            Category = category,
-            Status = status,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            Cards = new List<Card>()
-        };
-
-        for (var i = 0; i < cards; i++)
-        {
-            deck.Cards.Add(new Card
-            {
-                Id = Guid.NewGuid(),
-                DeckId = deckId,
-                Idx = i + 1,
-                FrontMd = $"Front {i + 1}",
-                BackMd = $"Back {i + 1}",
-                HintMd = $"Hint {i + 1}"
-            });
-        }
-
-        return deck;
-    }
-
-    public static Enrollment CreateEnrollment(Guid courseId, Guid userId, string status = "ACTIVE")
-        => new()
-        {
-            Id = Guid.NewGuid(),
-            CourseId = courseId,
-            UserId = userId,
-            EnrolledAt = DateTime.UtcNow,
-            Status = status
-        };
-
-    public static UserDeck CreateUserDeck(Guid deckId, Guid userId, string status = "ACTIVE")
-        => new()
-        {
-            Id = Guid.NewGuid(),
-            DeckId = deckId,
-            UserId = userId,
-            Status = status,
-            SubscribeAt = DateTime.UtcNow
-        };
 }

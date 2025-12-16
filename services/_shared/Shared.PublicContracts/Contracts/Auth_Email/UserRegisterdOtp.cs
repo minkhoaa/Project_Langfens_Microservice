@@ -5,7 +5,10 @@ public record UserRegisteredSendOtp
     string Email,
     string Otp,
     long TtlSeconds
-);
+)
+{
+    public UserRegisteredSendOtp() : this(default!, default!, default) { }
+}
 public record UserRegisteredConfirmOtp
 (
     string Email,

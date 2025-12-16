@@ -2,11 +2,11 @@
 using course_service.Features.PublicEndpoint;
 using course_service.Infrastructure;
 using FluentAssertions;
-using LangfensEnglish.Tests.Common.Builders;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Course.Enums;
+using LangfensEnglish.Tests.Common.Builders;
 
 namespace CourseService.UnitTests;
 

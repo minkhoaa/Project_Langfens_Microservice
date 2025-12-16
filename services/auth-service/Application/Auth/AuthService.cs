@@ -122,21 +122,13 @@ public class AuthService(
             await userManager.AddToRoleAsync(user, Roles.User);
         }
 
-        try
-        {
-            var otp = otpGenerator.Generate();
-            await redisOtpStore.PutOtp(email, otp, TtlSeconds);
-            await redisOtpStore.TouchResendCooldown(email, TouchCooldowns);
-            await publish.Publish(new UserRegisteredSendOtp(email, otp, 60), ct);
-            var payload = new { id = user.Id, email = user.Email };
-            return AuthOperationResult.Success(new ApiResultDto(true,
-                "User is created successfully, check your email for verification", payload));
-        }
-        catch (Exception e)
-        {
-            return AuthOperationResult.Failure(
-                new ApiResultDto(false, $"Failed to send verification email. Please try again + {e.Message}", null!),
-                StatusCodes.Status502BadGateway);        }
+        var otp = otpGenerator.Generate();
+        await redisOtpStore.PutOtp(email, otp, TtlSeconds);
+        await redisOtpStore.TouchResendCooldown(email, TouchCooldowns);
+        await publish.Publish(new UserRegisteredSendOtp(email, otp, 60), ct);
+        var payload = new { id = user.Id, email = user.Email };
+        return AuthOperationResult.Success(new ApiResultDto(true,
+            "User is created successfully, check your email for verification", payload));
     }
     public async Task<IResult> ResendEmail(string toEmail, CancellationToken token)
     {

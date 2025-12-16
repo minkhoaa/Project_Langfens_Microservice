@@ -5,7 +5,8 @@ services:
       context: ..
       dockerfile: gateway/api-gateway/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - TEST_SECRET=test-key
     ports:
       - 5000:8080
 
@@ -40,6 +41,9 @@ services:
     env_file:
       - path: ./envs/auth.env
         required: false
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - TEST_SECRET=test-key
     depends_on:
       auth-database:
         condition: service_healthy
@@ -77,6 +81,9 @@ services:
     env_file:
       - path: ./envs/exam.env
         required: false
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - TEST_SECRET=test-key
     expose:
       - "8081"
     ports:

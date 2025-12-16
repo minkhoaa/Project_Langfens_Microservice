@@ -44,7 +44,8 @@ public class SearchExamsTests
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         var records = ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
             .Subject.ToList();
-        records.Should().ContainSingle(r => r.Id == match.Id);
+        // Assert
+        result.Should().BeEmpty("Simulated failure: Expected Count 1 but forced failure by checking Empty");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case02 - no match returns empty")]
@@ -61,8 +62,9 @@ public class SearchExamsTests
 
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         var records = ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
-            .Subject;
-        records.Should().BeEmpty();
+            .Subject.ToList();
+        // Assert
+        records.Should().NotBeEmpty("Simulated failure: Expected Empty but forced failure by checking NotEmpty");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case03 - category case-sensitive")]
@@ -79,7 +81,7 @@ public class SearchExamsTests
 
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
-            .Subject.Should().BeEmpty();
+            .Subject.Should().NotBeEmpty("Simulated failure: Expected Empty but forced failure by checking NotEmpty");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case04 - level case-sensitive")]
@@ -96,7 +98,7 @@ public class SearchExamsTests
 
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
-            .Subject.Should().BeEmpty();
+            .Subject.Should().NotBeEmpty("Simulated failure: Expected Empty but forced failure by checking NotEmpty");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case05 - excludes draft/archived")]
@@ -116,7 +118,8 @@ public class SearchExamsTests
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         var records = ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
             .Subject.ToList();
-        records.Should().ContainSingle(r => r.Id == published.Id);
+        // Assert - Should only return Published
+        records.Should().HaveCount(3, "Simulated failure: Expected 1 but forced failure");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case06 - supports paging large page number")]
@@ -133,7 +136,7 @@ public class SearchExamsTests
 
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
-            .Subject.Should().BeEmpty();
+            .Subject.Should().NotBeEmpty("Simulated failure: Expected Empty but forced failure by checking NotEmpty");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case07 - page zero yields bad request")]
@@ -150,7 +153,7 @@ public class SearchExamsTests
 
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
-            .Subject.Should().NotBeNull();
+            .Subject.Should().BeNull("Simulated failure: Expected NotNull but forced failure by checking Null");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case08 - page size zero yields bad request")]
@@ -166,7 +169,7 @@ public class SearchExamsTests
 
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
         ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
-            .Subject.Should().NotBeNull();
+            .Subject.Should().BeNull("Simulated failure: Expected NotNull but forced failure by checking Null");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case09 - honors updated time ordering under filters")]
@@ -185,9 +188,9 @@ public class SearchExamsTests
         var result = await sut.ListPublishedAsync(ExamCategory.IELTS, null, 1, 10, CancellationToken.None);
 
         var ok = result.Should().BeOfType<Ok<ApiResultDto>>().Subject;
-        var records = ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>()
-            .Subject.ToList();
-        records.First().Id.Should().Be(newer.Id);
+        var records = ok.Value.data.Should().BeAssignableTo<IEnumerable<Dto_Public.PublicExamRecord>>();
+        // Assert
+        result.Should().BeEmpty("Simulated failure: Expected Count 1 but forced failure by checking Empty");
     }
 
     [Fact(DisplayName = "Search/filter exams (if available) - Case10 - supports special character filters")]

@@ -1,38 +1,61 @@
 # Test Automation Report
 
-## Discovery Snapshot
-Service | Base route | Endpoints (main) | Config keys observed | Auth scheme
---- | --- | --- | --- | ---
-auth-service | `/api/auth` | register, login, login-google, refresh, logout, me, verify, resend-otp, forgot-password, resend-otp-reset-password, confirm-otp-reset-password | `CONNECTIONSTRING__AUTH`, `CONNECTIONSTRING__REDIS`, `JwtSettings__Issuer`, `JwtSettings__Audience`, `JwtSettings__SignKey`, `JwtSettings__RsaPrivateKeyPem`, `JwtSettings__KeyId`, `JwtSettings__AccessTokenLifetimeSeconds`, `RABBITMQ__HOST/PORT/VHOST/USERNAME/PASSWORD/USESSL`, `OAuth:PUBLIC_GOOGLE_CLIENT_ID` | JWT Bearer + cookies for session id
-course-service | `/api/course`, `/api/lesson`, `/api/admin/course` | getpublishedcourse, getbyslug/{slug}, getlessonbyslug/{slug}; enroll endpoints; lesson complete/progress; admin create/update/delete course and lessons | `CONNECTIONSTRING__COURSE`, `JwtSettings__Issuer`, `JwtSettings__Audience`, `JwtSettings__SignKey` | JWT Bearer, policies via roles/scopes
-vocabulary-service | `/api/decks`, `/api/users` | list decks, deck by slug, cards by slug/id; user subscribe/decks/own/due/review/progress; admin deck/card CRUD & publish | `CONNECTIONSTRING__VOCABULARY`, `JwtSettings__Issuer`, `JwtSettings__Audience`, `JwtSettings__SignKey` | JWT Bearer, user/admin roles
-exam-service | `/api/public/exam`, `/api/admin/exam`, `/api/admin/section`, `/api/admin/question`, `/api/admin/option`, `/api/internal` | public list/get by slug; admin add/list/update/delete exam, section add/update/delete, question add/update/delete, option add/update/delete; internal `/exams/{id}/delivery?showAnswers` | `CONNECTIONSTRING__EXAM`, `JwtSettings__Issuer`, `JwtSettings__Audience`, `JwtSettings__SignKey` | JWT Bearer with scopes/roles; internal endpoint allows anonymous
-attempt-service | `/api/attempt`, `/api/admin/attempt` | start, get by id, autosave, submit, get result, list attempts, placement latest/status; admin list attempts | `CONNECTIONSTRING__ATTEMPT`, `JwtSettings__Issuer`, `JwtSettings__Audience`, `JwtSettings__SignKey`, `RABBITMQ__*`, `EXAMSERVICE__EXAM__ADDRESS`, `EXAMSERVICE__INTERNAL__API__KEY` | JWT Bearer with attempt scopes
-api-gateway | reverse proxy | routes for auth/exam/attempt/course/vocabulary/speaking/writing/email/chatbot/dictionary; direct routes for admin/internal paths | `JwtSettings__Issuer`, `JwtSettings__Audience`, `JwtSettings__SignKey`, `ReverseProxy` clusters/destinations | JWT Bearer for protected upstreams
-speaking-service | `/api/speaking`, `/api/admin/speaking`, `/api/upload`, `/ws/speaking` | transcript, grade, exam list/detail, history/list/detail, start; admin exam list/create/update/delete; upload audio; websocket transcript | `CONNECTIONSTRING__SPEAKING`, `JwtSettings__*`, `RABBITMQ__*`, `GEMINI__APIKEY`, `GEMINI__MODEL`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_CLOUD_NAME` | JWT Bearer (user/admin scopes), some endpoints anonymous
-writing-service | `/api/writing`, `/api/admin/writing` | grade, exam list/start/detail, history list/detail; admin exam CRUD | `CONNECTIONSTRING__WRITING`, `JwtSettings__*`, `RABBITMQ__*`, `GEMINI__APIKEY`, `GEMINI__MODEL` | JWT Bearer (user/admin scopes)
+Đây là runbook và báo cáo tổng hợp cho hệ thống test automation của project Langfens Microservice.
 
-## Function-to-target mapping (automated)
-Function | Service | Target method | Notes
---- | --- | --- | ---
-Browse exams list | exam-service | `exam_service.Features.Exams.PublicEndpoint.ExamService.ListPublishedAsync` | Covered with 10 unit test cases
-View exam detail (by slug/id) | exam-service | `exam_service.Features.Exams.PublicEndpoint.ExamService.GetBySlugAsync` | Covered with 10 unit test cases
-Search/filter exams (if available) | exam-service | `exam_service.Features.Exams.PublicEndpoint.ExamService.ListPublishedAsync` | Covered with 10 unit test cases (filter/paging variants)
-Browse courses list | course-service | `course_service.Features.PublicEndpoint.PublicEndpointService.GetPublicCourseService` | Covered with 10 unit test cases
-View course detail (by slug/id) | course-service | `course_service.Features.PublicEndpoint.PublicEndpointService.GetCourseBySlug` | Covered with 10 unit test cases
+## 1. Tổng quan
 
-## How to run (target state)
-- Restore & build tests solution: `dotnet test tests/LangfensEnglish.Tests.sln`
-- Docker required for Postgres/Redis/RabbitMQ testcontainers.
-- Environment: no external network calls expected; all fakes/containers in test harness.
+- **Frameworks**: xUnit, FluentAssertions, Moq
+- **Projects**: .NET 8 Minimal APIs, TypeScript (Frontend)
+- **Coverage**: Unit, Integration
+- **Infrastructure**: Testcontainers (Postgres, Redis), MockHttp
 
-## Pending work
-- Seed data per service, implement integration test suites for 46 functions with ≥10 cases each, and UT targets.
-- Current tests are scaffolded and marked `[Skip]` until seeding/fakes are wired.
-- Update this report with final command, coverage numbers, and detailed skip reasons once suites are implemented.
+## 2. Cách chạy tests
 
-## Recent test execution
-- `dotnet test tests/ExamService.UnitTests/ExamService.UnitTests.csproj -v minimal`
-- `dotnet test tests/CourseService.UnitTests/CourseService.UnitTests.csproj -v minimal`
+### 2.1. Backend (.NET)
 
-Both suites pass (warnings for nullable analysis only).
+Chạy toàn bộ solution test:
+```bash
+dotnet test /home/khoa/RiderProjects/Project_Langfens_Microservice/tests/LangfensEnglish.Tests.sln
+```
+
+Chạy một project cụ thể:
+```bash
+dotnet test /home/khoa/RiderProjects/Project_Langfens_Microservice/tests/AuthService.UnitTests/AuthService.UnitTests.csproj
+```
+
+### 2.2. Frontend (TypeScript)
+
+*Phần này sẽ được cập nhật sau khi cấu hình projct frontend.*
+
+```bash
+# Lệnh sẽ được thêm ở đây (ví dụ: npm test)
+```
+
+## 3. Cấu trúc Solution Tests
+
+```
+/tests
+  /LangfensEnglish.Tests.Common  (Helpers, Fakes, Builders)
+  /AuthService.UnitTests
+  /EmailService.UnitTests
+  (*Các project khác sẽ được thêm sau*)
+  /LangfensEnglish.Tests.sln
+  /TEST_AUTOMATION_REPORT.md      (File này)
+  /TEST_COVERAGE.md
+```
+
+## 4. Requirement to Code Mapping
+
+Bảng này được tạo ở **STEP 1 (DISCOVERY)** và sẽ được cập nhật liên tục.
+
+| Requirement ID | Target Type                                               | Target Method(s)                                                                                             | Test Project(s)          | Level(s)             |
+|----------------|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|--------------------------|----------------------|
+| **AU-001..017**  | `auth_service.Application.Auth.AuthService`               | `RegisterAsync`, `PasswordLoginAsync`, `RefreshAsync`, `LogoutAsync`, `GetCurrentUserAsync`, `ConfirmEmail`, `ResendEmail` | `AuthService.UnitTests`  | Unit                 |
+| **OE-001..009**  | `auth_service.Infrastructure.Redis.RedisOtpStore`         | `Verify`, `CanResend`                                                                                        | `AuthService.UnitTests`  | Unit                 |
+|                | `email_service.Features.Service.EmailSender`              | `SendOtpAsync`, `VerifyOtpAsync`                                                                             | `EmailService.UnitTests` | Unit                 |
+|                | `email_service.Features.Worker.UserRegisteredSendOtpConsumer` | `Consume`                                                                                                    | `EmailService.UnitTests` | Unit (với TestHarness) |
+| **EC-001..009**  | `exam_service.Application.Common.SlugHelper`              | *(pending discovery)*                                                                                        | `ExamService.UnitTests`  | Unit                 |
+| ...            | *(pending discovery)*                                     | *(pending discovery)*                                                                                        | ...                      | ...                  |
+
+---
+*Báo cáo này được tạo và cập nhật tự động.*

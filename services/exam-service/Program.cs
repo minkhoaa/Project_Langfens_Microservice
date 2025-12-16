@@ -164,6 +164,10 @@ app.MapAdminSectionEndpoint();
 app.MapAdminQuestionEndpoint();
 app.MapAdminOptionEndpoint();
 app.MapInternalExamEndpoint();
+
+// E2E Test Harness - only active in Testing environment
+exam_service.Extensions.TestEndpoints.MapTestEndpoints(app, app.Environment);
+
 app.Run();
 
 public partial class Program { }
