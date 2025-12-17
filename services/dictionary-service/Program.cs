@@ -36,6 +36,7 @@ builder.Services.AddSingleton(k =>
 });
 builder.Services.AddScoped<ElasticIndexer>();
 builder.Services.AddScoped<IDictionaryService, DictionaryService>();
+builder.Services.AddSingleton<IEnViTranslator, NullEnViTranslator>();
 builder.Services.AddSingleton<IDictionaryDtoMapper, DictionaryDtoMapper>();
 var app = builder.Build();
 
