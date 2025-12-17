@@ -1,9 +1,4 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using auth_service.Infrastructure.Persistence;
-using auth_service.Application.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -77,8 +72,7 @@ public static class TestEndpoints
                 {
                     return Results.Ok(new { message = "User already exists", userId = existing.Id });
                 }
-
-                var user = new User
+                var user = new User 
                 {
                     UserName = request.Email,
                     Email = request.Email,
