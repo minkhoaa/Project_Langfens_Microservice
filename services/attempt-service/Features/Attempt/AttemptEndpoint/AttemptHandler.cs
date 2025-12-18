@@ -18,6 +18,11 @@ public static class AttemptHandler
         [FromServices] IAttemptService service
     ) => service.GetAttemptById(attemptId, token);
 
+    public static Task<IResult> GetPreviousAttempt(
+            Guid examId,
+           CancellationToken token,
+           [FromServices] IAttemptService service
+       ) => service.GetPreviousTurn(examId, token);
 
     public static Task<IResult> AttemptAutoSave(
         [FromRoute] Guid attemptId,

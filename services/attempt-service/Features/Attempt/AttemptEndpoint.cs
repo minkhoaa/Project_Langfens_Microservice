@@ -10,6 +10,8 @@ public static class AttemptEndpointMapping
         var group = app.MapGroup("/api/attempt");
         group.MapPost("/attempts:start", AttemptHandler.AttemptStartHandler)
             .RequireAuthorization(AttemptScope.AttemptStart);
+        group.MapPost("/attempts:status", AttemptHandler.GetPreviousAttempt)
+.RequireAuthorization(AttemptScope.AttemptStart);
         group.MapGet("/{attemptId:guid}", AttemptHandler.AttemptGetByIdHandler)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         group.MapPost("/autosave/{attemptId:guid}", AttemptHandler.AttemptAutoSave)
@@ -24,6 +26,7 @@ public static class AttemptEndpointMapping
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         group.MapGet("/placement/status", AttemptHandler.GetPlacementCompletionStatus)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
+
     }
     public static void MapAdminEndpoint(this IEndpointRouteBuilder router)
     {

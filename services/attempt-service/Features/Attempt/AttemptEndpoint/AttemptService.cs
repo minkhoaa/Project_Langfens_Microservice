@@ -21,6 +21,7 @@ public interface IAttemptService
 {
     Task<IResult> StartAttempt(AttemptStartRequest request, CancellationToken token);
     Task<IResult> GetAttemptById(Guid attemptId, CancellationToken token);
+    Task<IResult> GetPreviousTurn(Guid examId, CancellationToken token);
     Task<IResult> Autosave(Guid attemptId, AutosaveRequest req, CancellationToken token);
     Task<IResult> Submit(Guid attemptId, CancellationToken token);
     Task<IResult> GetResult(Guid attemptId, CancellationToken token);
@@ -134,12 +135,23 @@ IQuestionGraderFactory questionGraderFactory
                 (int)Math.Max(0, (attempt.StartedAt.AddSeconds(attempt.DurationSec) - DateTime.UtcNow).TotalSeconds)
             )));
     }
-
+    public async Task<IResult> GetPreviousTurn(Guid examId, CancellationToken token)
+    {
+        var userId = user.UserId;
+        var previousTurn = await context.Attempts.AsNoTracking()
+                            .Where(k => k.UserId == userId && k.ExamId == examId
+                            && (k.Status == AttemptStatus.Started || k.Status == AttemptStatus.InProgress)
+                            ).Select(k => new { attemptId = k.Id, k.CreatedAt, k.Status }).FirstOrDefaultAsync(token);
+        if (previousTurn == null)
+            return Results.NotFound();
+        return Results.Ok(new ApiResultDto(true, "Continue your previous", previousTurn));
+    }
     public async Task<IResult> GetAttemptById(
         Guid attemptId,
         CancellationToken token)
     {
         var userId = user.UserId;
+
         var attempts = await context.Attempts.AsNoTracking()
             .Where(x => x.Id == attemptId && x.UserId == userId)
             .FirstOrDefaultAsync(token);
@@ -1066,4 +1078,5 @@ IQuestionGraderFactory questionGraderFactory
             }
         }
     }
+
 }
