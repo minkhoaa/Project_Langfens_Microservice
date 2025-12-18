@@ -1,0 +1,330 @@
+{
+  "schemaVersion": "1.0.0",
+  "exams": [
+    {
+      "id": "c425441f-871e-4870-bf41-9baef8239e51",
+      "slug": "ielts-reading-australian-parrots-and-their-adaptation-to-habitat-change",
+      "title": "Australian parrots and their adaptation to habitat change",
+      "descriptionMd": "IELTS Reading Practice Test about Australian parrots and their adaptation to habitat change.",
+      "category": "IELTS",
+      "level": "B2",
+      "status": "PUBLISHED",
+      "durationMin": 20,
+      "sections": [
+        {
+          "id": "2119a246-8268-407d-bb77-1d190c1d3df8",
+          "idx": 1,
+          "title": "Reading Passage - Australian Parrots",
+          "instructionsMd": "# Passage\n\n**Paragraph A**  \nParrots are found across the tropic and in all southern hemisphere continents except Antarctica, but nowhere do they display such a richness of diversity and form as in Australia. One-sixth of the world's 345 parrot species are found there, and Australia has long been renowned for the number and variety of its parrots.\n\n**Paragraph B**  \nIn the 16th century, the German cartographer Mercator made a world map that included a place, somewhere near present-day Australia, that he named Terra Psittacorum – the Land of Parrots – and the first European settlers in Australia often referred to the country as Parrot Land. In 1865, the celebrated British naturalist and wildlife artist John Gould said: \"No group of birds gives Australia so tropical and benign an air as the numerous species of this great family by which it is tenanted.\"\n\n**Paragraph C**  \nParrots are descendants of an ancient line. Due to their great diversity, and since most species inhabit Africa, Australia and South America, it seems almost certain that parrots originated millions of years ago on the ancient southern continent of Gondwana, before it broke up into the separate southern hemisphere continents we know today. Much of Gondwana comprised vast rainforests intersected by huge slow-flowing rivers and expansive lakes, but by eight million years ago, great changes were underway. The center of the continent of Australia had begun to dry out, and the rainforests that once covered it gradually contracted to the continental margins, where, to a limited extent, they still exist today.\n\n**Paragraph D**  \nThe creatures that remained in those shrinking rainforests had to adapt to the drier conditions or face extinction. Reacting to these desperate circumstances, the parrot family, typically found in jungles in other parts of the world, has populated some of Australia's harshest environments. The parrots spread from ancestral forests through eucalypt woodlands to colonise the central deserts of Australia, and as a consequence they diversified into a wide range of species with adaptations that reflect the many changes animals and plants had to make to survive in these areas.\n\n**Paragraph E**  \nThese evolutionary pressures helped mould keratin, the substance from which beaks are made into a range of tools capable of gathering the new food types favored by various species of parrot. The size of a parrot's short, blunt beak and the length of that beak's curved upper section are related to the type of food each species eats. Some have comparatively long beaks that are perfect for extracting seeds from fruit; others have broader and stronger beaks that are designed for cracking hard seeds.\n\n**Paragraph F**  \nDifferently shaped beaks are not the only adaptations that have been made during the developing relationship between parrots and their food plants. Like all of Australia's many honey eating birds, the rainbow-coloured lorikeets and the flowers on which they feed have long co-evolved with features such as the shape and colour of the flowers adapted to the bird's particular needs. For example, red is the most attractive colour to birds, and thus flowers which depend on birds for pollination are more often red, and lorikeets' tongues have bristles which help them to collect as much pollen as possible.\n\n**Paragraph G**  \nToday, most of Australia's parrots inhabit woodland and open forest, and their numbers decline towards both deserts and wetter areas. The majority are nomadic to some degree, moving around to take advantage of feeding and breeding places. Two of the dry country parrots, the pink and grey galah and the pink, white and yellow corella have expanded their ranges in recent years. They are among the species that have adapted well to the changes brought about by European settlement. Forest clearing created grasslands where galahs and corellas thrive.\n\n**Paragraph H**  \nBut other parrot species did not fare so well when their environments were altered. The clearing of large areas of rainforest is probably responsible for the disappearance of the double-eyed fig parrot, and numbers of ground parrots declined when a great part of their habitat was destroyed by the draining of coastal swamps. Even some parrot species that benefited from forest clearing at first are now confronted by a shortage of nesting sites due to further man-made changes.\n\n**Paragraph I**  \nNew conditions also sometimes favour an incoming species over one that originally inhabited the area. For example, after farmers cleared large areas of forest on Kangaroo Island off the coast of South Australia, the island was colonised by galahs. They were soon going down holes and destroying black cockatoo eggs in order to take the hole for their own use. Their success precipitated a partial collapse in the black cockatoo population when the later lost the struggle for scarce nesting hollows.\n\n**Paragraph J**  \nThere may be no final answer to ensuring an equitable balance between parrot species. Nest box programmes help ease the shortage of nesting sites in some places, but there are not enough, they are expensive and they are not an adequate substitute for large, old trees, such as the habitat they represent and nectar, pollen and seeds they provide. Competition between parrots for nest sites is a result of the changes we humans have made to the Earth. We are the most widespread and dangerous competitors that parrots have ever had to face, but we also have the knowledge and skill to maintain the wonderfully rich diversity of Australia's parrots. All we need is the will to do so.\n",
+          "audioUrl": null,
+          "transcriptMd": null,
+          "questions": [
+            {
+              "id": "26a3c55d-e4c3-4526-b8f4-a1f0db24e7a9",
+              "idx": 1,
+              "type": "MATCHING_INFORMATION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "An example of how one parrot species may survive at the expense of another",
+              "explanationMd": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.",
+              "options": [],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {
+                "info-q1": []
+              },
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "dc661360-5d9a-481a-a0bc-5dd41e42a623",
+              "idx": 2,
+              "type": "MATCHING_INFORMATION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "A description of how plants may adapt to attract birds",
+              "explanationMd": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.",
+              "options": [],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {
+                "info-q2": []
+              },
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "b3124d71-7f13-4548-8b0f-1f3cff9ddf62",
+              "idx": 3,
+              "type": "MATCHING_INFORMATION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Example of two parrot species which benefited from changes to the environment",
+              "explanationMd": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.",
+              "options": [],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {
+                "info-q3": []
+              },
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "edca0fb7-7329-444d-9250-70c4e3c5003a",
+              "idx": 4,
+              "type": "MATCHING_INFORMATION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "How the varied Australian landscape resulted in a great variety of parrot species",
+              "explanationMd": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.",
+              "options": [],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {
+                "info-q4": []
+              },
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "b67743f8-bd76-447f-b7d4-ad84270da11a",
+              "idx": 5,
+              "type": "MATCHING_INFORMATION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "A reason why most parrot species are native to the southern hemisphere",
+              "explanationMd": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.",
+              "options": [],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {
+                "info-q5": []
+              },
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "28e0d3b1-1474-4b07-b472-535435cdedf3",
+              "idx": 6,
+              "type": "MATCHING_INFORMATION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "An example of a parrot species which did not survive changes to its habitat",
+              "explanationMd": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.",
+              "options": [],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {
+                "info-q6": []
+              },
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "c5e7a1d5-7b33-4ad7-a3c2-55184a81ba86",
+              "idx": 7,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "The writer believes that most parrot species",
+              "explanationMd": "Choose the correct answer.",
+              "options": [
+                {
+                  "id": "5d720562-3144-4882-bed3-b3d2aa943251",
+                  "idx": 1,
+                  "contentMd": "Move from Africa and South America to Australia",
+                  "isCorrect": false
+                },
+                {
+                  "id": "13c57e04-d9a8-4c4b-b361-c43b34300b3d",
+                  "idx": 2,
+                  "contentMd": "Had ancestors in either Africa, Australia or South America",
+                  "isCorrect": false
+                },
+                {
+                  "id": "548d6974-b731-4403-9f97-133cc9c27e42",
+                  "idx": 3,
+                  "contentMd": "Had ancestors in a continent which later split up",
+                  "isCorrect": false
+                },
+                {
+                  "id": "45a0ebe1-97bb-4c04-90de-1fd89b81c7bf",
+                  "idx": 4,
+                  "contentMd": "Came from a continent now covered by water",
+                  "isCorrect": false
+                }
+              ],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {},
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "227f7aad-7b9a-428c-a58c-1cdabd5ef8c4",
+              "idx": 8,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "What does the Writer say about parrot's beak?",
+              "explanationMd": "Choose the correct answer.",
+              "options": [
+                {
+                  "id": "1b9ffda3-a0b5-4966-a911-8648179feaa2",
+                  "idx": 1,
+                  "contentMd": "They are longer than those of other birds",
+                  "isCorrect": false
+                },
+                {
+                  "id": "4098816a-7f5a-4f1f-a05a-be22c0975cd0",
+                  "idx": 2,
+                  "contentMd": "They are made of a unique material",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e6a43038-ffb3-45eb-893b-db905ea2720d",
+                  "idx": 3,
+                  "contentMd": "They are used more efficiently than those of other species",
+                  "isCorrect": false
+                },
+                {
+                  "id": "8cbae5a2-5f8a-4310-a694-4a9ae8d207e2",
+                  "idx": 4,
+                  "contentMd": "They are specially adapted to suit the diet",
+                  "isCorrect": false
+                }
+              ],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {},
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "eb5c256f-eb4b-495e-8225-b17c37deeafc",
+              "idx": 9,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Which of the following isNOTmentioned by the writer as a disadvantage of nesting boxes?",
+              "explanationMd": "Choose the correct answer.",
+              "options": [
+                {
+                  "id": "65a8cf2f-0c51-4a84-8848-94bc2fc0cf19",
+                  "idx": 1,
+                  "contentMd": "They cost too much",
+                  "isCorrect": false
+                },
+                {
+                  "id": "d8efeafb-af82-4eaa-aec3-8432cf72bee9",
+                  "idx": 2,
+                  "contentMd": "They need to be maintained",
+                  "isCorrect": false
+                },
+                {
+                  "id": "838a72fc-45d5-428b-a7b1-a2a36458dba2",
+                  "idx": 3,
+                  "contentMd": "They provide only shelter, not food",
+                  "isCorrect": false
+                },
+                {
+                  "id": "cad1f9b8-f073-4aea-aa9c-7d7c7e02b9ca",
+                  "idx": 4,
+                  "contentMd": "They are too few of them",
+                  "isCorrect": false
+                }
+              ],
+              "blankAcceptTexts": {},
+              "blankAcceptRegex": {},
+              "matchPairs": {},
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "10c0d06a-6231-4d2b-8182-d0fab95e9821",
+              "idx": 10,
+              "type": "SUMMARY_COMPLETION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Complete blank **10**: There are 345 varieties of parrot in existence and, of these, **[10]** live in Australia. As early as the (11) , the mapmaker (12) recognized that parrots lived in that part of the world. (13) , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.",
+              "explanationMd": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+              "options": [],
+              "blankAcceptTexts": {
+                "blank-q10": []
+              },
+              "blankAcceptRegex": {},
+              "matchPairs": {},
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "84787249-7432-4f9b-af7b-df7845e25876",
+              "idx": 11,
+              "type": "SUMMARY_COMPLETION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Complete blank **11**: There are 345 varieties of parrot in existence and, of these, (10) live in Australia. As early as the **[11]** , the mapmaker (12) recognized that parrots lived in that part of the world. (13) , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.",
+              "explanationMd": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+              "options": [],
+              "blankAcceptTexts": {
+                "blank-q11": []
+              },
+              "blankAcceptRegex": {},
+              "matchPairs": {},
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "1e90018b-728c-4e22-844f-b3eec760bc50",
+              "idx": 12,
+              "type": "SUMMARY_COMPLETION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Complete blank **12**: There are 345 varieties of parrot in existence and, of these, (10) live in Australia. As early as the (11) , the mapmaker **[12]** recognized that parrots lived in that part of the world. (13) , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.",
+              "explanationMd": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+              "options": [],
+              "blankAcceptTexts": {
+                "blank-q12": []
+              },
+              "blankAcceptRegex": {},
+              "matchPairs": {},
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            },
+            {
+              "id": "93b1c5c6-b06f-4b6c-9cba-c1031245dc6e",
+              "idx": 13,
+              "type": "SUMMARY_COMPLETION",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Complete blank **13**: There are 345 varieties of parrot in existence and, of these, (10) live in Australia. As early as the (11) , the mapmaker (12) recognized that parrots lived in that part of the world. **[13]** , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.",
+              "explanationMd": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+              "options": [],
+              "blankAcceptTexts": {
+                "blank-q13": []
+              },
+              "blankAcceptRegex": {},
+              "matchPairs": {},
+              "orderCorrects": [],
+              "shortAnswerAcceptTexts": [],
+              "shortAnswerAcceptRegex": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
