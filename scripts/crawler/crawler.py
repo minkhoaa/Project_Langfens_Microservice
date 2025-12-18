@@ -27,7 +27,21 @@ import jsonschema
 # CONFIGURATION
 # =============================================================================
 
-TARGET_URL = "https://mini-ielts.com/1537/reading/australian-parrots-and-their-adaptation-to-habitat-change"
+TARGET_URL = "https://mini-ielts.com/1518/reading/australian-artist-margaret-preston"
+
+# Auto-derive answer URL from target URL (pattern: /{id}/view-solution/reading/{slug})
+# Example: https://mini-ielts.com/1518/reading/slug -> https://mini-ielts.com/1518/view-solution/reading/slug
+def _derive_answer_url(target_url: str) -> str:
+    """Derive the solution/answer URL from the target exam URL."""
+    # Pattern: /1518/reading/slug -> /1518/view-solution/reading/slug
+    import re
+    match = re.match(r'(https://mini-ielts\.com/\d+)/reading/(.+)', target_url)
+    if match:
+        return f"{match.group(1)}/view-solution/reading/{match.group(2)}"
+    return ""
+
+ANSWER_URL = _derive_answer_url(TARGET_URL)  # Set to "" to skip auto-scraping
+
 SCHEMA_FILE = Path(__file__).parent / "exam-import.schema.json"
 OUTPUT_DIR = Path(__file__).parent
 REPO_ROOT = Path(__file__).parent.parent.parent  # scripts/crawler -> scripts -> repo root
@@ -49,6 +63,91 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+# Known answer keys for popular IELTS exams
+# These are verified answers that can be used when crawling specific exams
+# For MULTIPLE_CHOICE_MULTIPLE, use list of correct options
+KNOWN_ANSWERS = {
+    "william-gilbert-and-magnetism": {
+        1: "v", 2: "i", 3: "vi", 4: "x", 5: "ix", 6: "iv", 7: "ii",  # Matching Headings
+        8: "TRUE", 9: "TRUE", 10: "NOT GIVEN",  # True/False/Not Given
+        11: ["C", "D", "E"]  # Multiple Choice Multiple - Choose THREE
+    },
+    "australian-parrots": {
+        # Add answers when found - for now extraction will leave these blank
+    }
+}
+
+
+# =============================================================================
+# PHASE 0: SCRAPE ANSWERS FROM SOLUTION PAGE (OPTIONAL)
+# =============================================================================
+
+def scrape_answers_from_solution(answer_url: str) -> dict[int, str]:
+    """
+    Scrape correct answers from the solution/answer page.
+    
+    Parses HTML for patterns like "Answer: TRUE" or "8 Answer: symbols"
+    
+    Args:
+        answer_url: URL to the solution page
+        
+    Returns:
+        Dictionary mapping question index (1-based) to answer string
+    """
+    if not answer_url:
+        return {}
+    
+    logger.info(f"Phase 0: Scraping answers from {answer_url}")
+    answers = {}
+    
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        response = requests.get(answer_url, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Look for answer patterns in the page text
+        # Pattern 1: "Answer: VALUE" after question number
+        # Pattern 2: "Q1 Answer: VALUE"
+        page_text = soup.get_text()
+        
+        # Match patterns like: "1 TRUEFALSENOT GIVEN...Answer: TRUE" or "1 TRUEFALSENOT GIVENAnswer: TRUE"
+        import re
+        
+        # Pattern for TRUE/FALSE/NOT GIVEN questions
+        # HTML format: "1 TRUEFALSENOT GIVEN[question text]Answer: TRUE"
+        tfng_pattern = r'(\d+)\s*(?:TRUEFALSENOT\s*GIVEN|TRUE|FALSE|NOT\s*GIVEN)*[^A]*Answer:\s*(TRUE|FALSE|NOT\s*GIVEN)'
+        for match in re.finditer(tfng_pattern, page_text, re.IGNORECASE):
+            q_idx = int(match.group(1))
+            answer = match.group(2).upper().strip()
+            # Normalize NOT GIVEN
+            if 'NOT' in answer and 'GIVEN' in answer:
+                answer = 'NOT GIVEN'
+            answers[q_idx] = answer
+            logger.info(f"  Found Q{q_idx}: {answer}")
+        
+        # Pattern for completion/short answer questions (word answers)
+        # Match "8 Answer: symbols" - capture only the first word/number
+        completion_pattern = r'(\d+)\s*Answer:\s*([a-zA-Z0-9]+)'
+        for match in re.finditer(completion_pattern, page_text):
+            q_idx = int(match.group(1))
+            if q_idx not in answers:  # Don't override TFNG answers
+                answer = match.group(2).strip()
+                # Skip if it's TRUE/FALSE/NOT (already handled)
+                if answer.upper() not in ['TRUE', 'FALSE', 'NOT', 'GIVEN']:
+                    answers[q_idx] = answer
+                    logger.info(f"  Found Q{q_idx}: {answer}")
+        
+        logger.info(f"Phase 0 complete: Scraped {len(answers)} answers")
+        
+    except Exception as e:
+        logger.warning(f"Failed to scrape answers: {e}")
+    
+    return answers
 
 
 # =============================================================================
@@ -91,6 +190,54 @@ def extract_data(url: str) -> dict[str, Any]:
         
         # Extract questions (grouped by type) - pass meta info for type detection
         questions = _extract_questions(soup, meta_question_types)
+        
+        # Build answer key: scrape from solution page + merge with KNOWN_ANSWERS
+        slug = url.split('/')[-1] if '/' in url else url
+        
+        # Start with scraped answers from solution page
+        answer_key: dict[int, Any] = {}
+        if ANSWER_URL:
+            answer_key = scrape_answers_from_solution(ANSWER_URL)
+        
+        # Merge with KNOWN_ANSWERS (KNOWN_ANSWERS takes priority for already-verified answers)
+        if slug in KNOWN_ANSWERS:
+            for q_idx, ans in KNOWN_ANSWERS[slug].items():
+                if q_idx not in answer_key:
+                    answer_key[q_idx] = ans
+                    logger.info(f"Using KNOWN_ANSWERS for Q{q_idx}: {ans}")
+        
+        # Apply answers to questions
+        for q in questions:
+            q_idx = q.get('idx')
+            if q_idx in answer_key:
+                correct_ans = answer_key[q_idx]
+                q['correct_answer'] = correct_ans
+                logger.info(f"Applied answer for Q{q_idx}: {correct_ans}")
+                
+                # Mark correct options based on question type
+                q_type = q.get('type', '')
+                if q.get('options'):
+                    if q_type in ('MULTIPLE_CHOICE_SINGLE', 'TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN'):
+                        # Single correct answer
+                        for opt in q['options']:
+                            if opt.get('label', '').upper() == str(correct_ans).upper():
+                                opt['is_correct'] = True
+                                logger.info(f"  Marked option {opt.get('label')} as correct")
+                    elif q_type == 'MULTIPLE_CHOICE_MULTIPLE' and isinstance(correct_ans, list):
+                        # Multiple correct answers (list)
+                        correct_set = {ans.upper() for ans in correct_ans}
+                        for opt in q['options']:
+                            if opt.get('label', '').upper() in correct_set:
+                                opt['is_correct'] = True
+                                logger.info(f"  Marked option {opt.get('label')} as correct")
+                
+                # For completion questions, store accepted text
+                if q_type in ('SUMMARY_COMPLETION', 'NOTE_COMPLETION', 'TABLE_COMPLETION', 'SHORT_ANSWER') and isinstance(correct_ans, str):
+                    if 'blankAcceptTexts' not in q:
+                        q['blankAcceptTexts'] = {}
+                    # For single-blank questions, use blank_1 as the default
+                    blank_id = q.get('blank_id', 'blank_1')
+                    q['blankAcceptTexts'][blank_id] = [correct_ans.strip()]
         
         raw_data = {
             "url": url,
@@ -384,23 +531,22 @@ def _extract_questions(soup: BeautifulSoup, meta_question_types: dict = None) ->
             # Create context showing where each blank is
             for i, (q_idx, inp) in enumerate(inputs):
                 # Get text around this specific blank
-                # Find the context before and after this input
                 all_text = parent.get_text(separator=' ', strip=True)
                 
-                # Replace all blank numbers with markers, highlight current one
+                # Replace all blank numbers with clear markers
                 prompt_text = all_text
                 for j, (other_idx, _) in enumerate(inputs):
                     if other_idx == q_idx:
-                        # Current blank - highlight it
-                        prompt_text = re.sub(rf'\b{other_idx}\s*\b', f' **[{other_idx}]** ', prompt_text)
+                        # Current blank - use underscore placeholder
+                        prompt_text = re.sub(rf'\b{other_idx}\s*\b', ' _______ ', prompt_text)
                     else:
-                        # Other blanks - just mark them
-                        prompt_text = re.sub(rf'\b{other_idx}\s*\b', f' ({other_idx}) ', prompt_text)
+                        # Other blanks - remove numbers, they're not relevant
+                        prompt_text = re.sub(rf'\b{other_idx}\s*\b', ' (...) ', prompt_text)
                 
                 questions.append({
                     'idx': q_idx,
                     'type': 'SUMMARY_COMPLETION',
-                    'prompt': f"Complete blank **{q_idx}**:\n\n{prompt_text.strip()}",
+                    'prompt': prompt_text.strip(),
                     'correct_answers': [],
                     'explanation': _get_better_explanation('SUMMARY_COMPLETION')
                 })
@@ -592,19 +738,19 @@ def _extract_checkbox_questions(soup: BeautifulSoup, checkboxes, start_idx: int)
             num_to_choose = 2
             break
     
-    # Create multiple MULTIPLE_CHOICE_SINGLE questions (one for each answer needed)
-    # Schema doesn't support MULTIPLE_CHOICE_MULTIPLE, so we split into separate questions
+    # Create single MULTIPLE_CHOICE_MULTIPLE question with multiple correct answers
+    # User can select any num_to_choose options from the list, order doesn't matter
     q_idx = start_idx + 1
     for name, opts in checkbox_groups.items():
         if opts:
-            for i in range(num_to_choose):
-                questions.append({
-                    'idx': q_idx + i,
-                    'type': 'MULTIPLE_CHOICE_SINGLE',
-                    'prompt': f"{instruction} (Answer {i+1} of {num_to_choose})" if instruction else f"Choose the correct option {i+1}",
-                    'explanation': f"Select one of the correct options.",
-                    'options': opts
-                })
+            questions.append({
+                'idx': q_idx,
+                'type': 'MULTIPLE_CHOICE_MULTIPLE',
+                'prompt': instruction if instruction else f"Choose {num_to_choose} correct options.",
+                'explanation': f"Select {num_to_choose} correct options. Order doesn't matter.",
+                'options': opts,
+                'num_to_choose': num_to_choose  # metadata for reference
+            })
             break  # Usually one checkbox group per exam
     
     return questions
@@ -744,6 +890,10 @@ def _normalize_questions(questions: list[dict], section_id: str) -> list[dict]:
         elif q_type == "MULTIPLE_CHOICE_SINGLE":
             normalized_q["options"] = _normalize_options(q.get("options", []))
             
+        elif q_type == "MULTIPLE_CHOICE_MULTIPLE":
+            # Preserve options with isCorrect flags for multiple correct answers
+            normalized_q["options"] = _normalize_options(q.get("options", []))
+            
         elif q_type in ["MATCHING_INFORMATION", "MATCHING_HEADING", "MATCHING_FEATURES", 
                         "MATCHING_ENDINGS", "CLASSIFICATION"]:
             correct_answer = q.get("correct_answer", "")
@@ -789,10 +939,21 @@ def _normalize_options(options: list[dict]) -> list[dict]:
     
     for i, opt in enumerate(options, start=1):
         option_id = str(uuid.uuid4())
+        
+        # Build contentMd: include label prefix if available (e.g., "i. Early years...")
+        label = opt.get("label", "")
+        text = _clean_text(opt.get("text", ""))
+        if label and text:
+            content_md = f"{label}. {text}"
+        elif text:
+            content_md = text
+        else:
+            content_md = label
+        
         normalized_options.append({
             "id": option_id,
             "idx": i,
-            "contentMd": _clean_text(opt.get("text", "")),
+            "contentMd": content_md,
             "isCorrect": opt.get("is_correct", False)
         })
     
@@ -1080,6 +1241,23 @@ def _generate_question_insert_pg(question: dict, sec_idx: int) -> list[str]:
             f"    {_pg_escape(match_pairs)}",
             "  );",
         ])
+        
+        # Add options for MATCHING_HEADING (List of Headings)
+        if q_type == 'MATCHING_HEADING':
+            opts = question.get('options', [])
+            for opt_idx, opt in enumerate(opts, 1):
+                opt_content = opt.get('contentMd', '') if isinstance(opt, dict) else str(opt)
+                lines.append(f"  INSERT INTO exam_options (\"Id\",\"QuestionId\",\"Idx\",\"ContentMd\",\"IsCorrect\") VALUES")
+                lines.append(f"    (gen_random_uuid(), qid, {opt_idx}, {_pg_escape(opt_content)}, false);")
+        
+        # Add options for MULTIPLE_CHOICE_MULTIPLE (Choose THREE, etc.)
+        if q_type == 'MULTIPLE_CHOICE_MULTIPLE':
+            opts = question.get('options', [])
+            for opt_idx, opt in enumerate(opts, 1):
+                opt_content = opt.get('contentMd', '') if isinstance(opt, dict) else str(opt)
+                is_correct = opt.get('isCorrect', False) if isinstance(opt, dict) else False
+                lines.append(f"  INSERT INTO exam_options (\"Id\",\"QuestionId\",\"Idx\",\"ContentMd\",\"IsCorrect\") VALUES")
+                lines.append(f"    (gen_random_uuid(), qid, {opt_idx}, {_pg_escape(opt_content)}, {_pg_bool(is_correct)});")
         
     elif q_type == 'FLOW_CHART':
         # Questions with OrderCorrects

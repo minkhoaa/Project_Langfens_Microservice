@@ -14,8 +14,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Shared.ExamDto.Contracts.Speaking;
-using Shared.ExamDto.Contracts.Writing;
 using Shared.Grpc.ExamInternal;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
@@ -145,6 +143,7 @@ builder.Services.AddSingleton<IAnswerValidator, AnswerValidator>();
 
 
 builder.Services.AddSingleton<SingleChoiceGrader>();
+builder.Services.AddSingleton<MultipleChoiceGrader>();
 builder.Services.AddSingleton<CompletionGrader>();
 builder.Services.AddSingleton<LabelGrader>();
 builder.Services.AddSingleton<MatchingHeadingGrader>();
@@ -152,6 +151,7 @@ builder.Services.AddSingleton<FlowChartGrader>();
 builder.Services.AddSingleton<ShortAnswerGrader>();
 
 builder.Services.AddSingleton<IQuestionGraderRegistration, SingleChoiceGraderRegistration>();
+builder.Services.AddSingleton<IQuestionGraderRegistration, MultipleChoiceGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, CompletionGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, LabelGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, MatchingHeadingGraderRegistration>();

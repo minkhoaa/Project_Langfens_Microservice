@@ -104,4 +104,19 @@ namespace attempt_service.Features.Helpers
 
         public IQuestionGrader Create() => _instance;
     }
+    
+    public class MultipleChoiceGraderRegistration : IQuestionGraderRegistration
+    {
+        private readonly IQuestionGrader _instance;
+        public MultipleChoiceGraderRegistration(MultipleChoiceGrader instance)
+        {
+            _instance = instance;
+        }
+        public IEnumerable<string> SupportedTypes => new[]
+        {
+            QuestionType.MultipleChoiceMultiple
+        };
+
+        public IQuestionGrader Create() => _instance;
+    }
 }

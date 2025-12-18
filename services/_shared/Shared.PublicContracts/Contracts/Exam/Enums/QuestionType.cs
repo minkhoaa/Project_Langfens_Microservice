@@ -3,6 +3,7 @@ namespace Shared.ExamDto.Contracts.Exam.Enums;
 public static class QuestionType
 {
 	public const string MultipleChoiceSingle = "MULTIPLE_CHOICE_SINGLE";
+	public const string MultipleChoiceMultiple = "MULTIPLE_CHOICE_MULTIPLE";
 	public const string TrueFalseNotGiven = "TRUE_FALSE_NOT_GIVEN";
 	public const string YesNoNotGiven = "YES_NO_NOT_GIVEN";
 	public const string MultipleChoiceSingleImage = "MULTIPLE_CHOICE_SINGLE_IMAGE";

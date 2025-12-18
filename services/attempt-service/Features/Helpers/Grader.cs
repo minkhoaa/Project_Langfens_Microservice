@@ -1,10 +1,6 @@
-using System.Data.Common;
-using System.Formats.Asn1;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using attempt_service.Domain.Entities;
-using MassTransit.Middleware.Outbox;
-using Microsoft.AspNetCore.OutputCaching;
 
 namespace attempt_service.Features.Helpers;
 
@@ -29,6 +25,23 @@ public sealed class SingleChoiceGrader : IQuestionGrader
             .ToHashSet();
         var ok = selection.Count == 1 && correctIds.Contains(selection.First());
         return new GradeResult(ok ? key.QuestionPoints : 0m, ok);
+    }
+}
+
+// Multiple choice with multiple correct answers (e.g., "Choose THREE letters A-F")
+// Order doesn't matter - checks if selected set equals correct set
+public sealed class MultipleChoiceGrader : IQuestionGrader
+{
+    public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
+    {
+        var selection = (answer.SelectedOptionIds ?? new List<Guid>()).ToHashSet();
+        var correctIds = (key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>())
+            .Select(t => t.id)
+            .ToHashSet();
+        
+        // Set equality - order doesn't matter, just need to match all correct options
+        var isCorrect = selection.SetEquals(correctIds);
+        return new GradeResult(isCorrect ? key.QuestionPoints : 0m, isCorrect);
     }
 }
 
@@ -94,6 +107,7 @@ public sealed class CompletionGrader : IQuestionGrader
                         }
                         catch
                         {
+                            // ignored
                         }
                     }
 
@@ -139,6 +153,7 @@ public sealed class CompletionGrader : IQuestionGrader
                     }
                     catch
                     {
+                        // ignored
                     }
                 }
             }
@@ -240,7 +255,7 @@ public sealed class FlowChartGrader : IQuestionGrader
         var lcs = LCS(user, correct);
         var score = (decimal)lcs / correct.Count * key.QuestionPoints;
         var full = score >= key.QuestionPoints;
-        return new GradeResult(score, full, false);
+        return new GradeResult(score, full);
 
     }
     private static string NormNode(string? s)
@@ -265,7 +280,8 @@ public sealed class FlowChartGrader : IQuestionGrader
             return new List<string>();
         }
     }
-    private static int LCS(IList<string> a, IList<string> b)
+
+    public static int LCS(IList<string> a, IList<string> b)
     {
         var dp = new int[a.Count + 1, b.Count + 1];
         for (var i = 1; i <= a.Count; i++)

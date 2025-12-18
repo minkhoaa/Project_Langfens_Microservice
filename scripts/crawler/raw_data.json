@@ -1,7 +1,7 @@
 {
-  "url": "https://mini-ielts.com/1537/reading/australian-parrots-and-their-adaptation-to-habitat-change",
-  "crawled_at": "2025-12-18T15:25:15.455475",
-  "title": "Australian parrots and their adaptation to habitat change",
+  "url": "https://mini-ielts.com/1518/reading/australian-artist-margaret-preston",
+  "crawled_at": "2025-12-19T01:20:17.045619",
+  "title": "Australian artist Margaret Preston",
   "passage": [
     {
       "label": "A",
@@ -47,157 +47,130 @@
   "questions": [
     {
       "idx": 1,
-      "type": "MATCHING_INFORMATION",
-      "prompt": "An example of how one parrot species may survive at the expense of another",
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "Artists in the German aesthetic tradition portrayed nature realistically.",
       "correct_answer": "",
-      "explanation": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement."
+      "explanation": "Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage."
     },
     {
       "idx": 2,
-      "type": "MATCHING_INFORMATION",
-      "prompt": "A description of how plants may adapt to attract birds",
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "Margaret attended a famous art college in Paris.",
       "correct_answer": "",
-      "explanation": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement."
+      "explanation": "Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage."
     },
     {
       "idx": 3,
-      "type": "MATCHING_INFORMATION",
-      "prompt": "Example of two parrot species which benefited from changes to the environment",
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "Margaret met her husband William while teaching a craft at a rehabilitation unit.",
       "correct_answer": "",
-      "explanation": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement."
+      "explanation": "Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage."
     },
     {
       "idx": 4,
-      "type": "MATCHING_INFORMATION",
-      "prompt": "How the varied Australian landscape resulted in a great variety of parrot species",
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "Margaret Preston and Thea Proctor explored similar themes in their art.",
       "correct_answer": "",
-      "explanation": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement."
+      "explanation": "Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage."
     },
     {
       "idx": 5,
-      "type": "MATCHING_INFORMATION",
-      "prompt": "A reason why most parrot species are native to the southern hemisphere",
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "Margaret's 1925 artworks of Sydney Harbour were simpler than her previous ones.",
       "correct_answer": "",
-      "explanation": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement."
+      "explanation": "Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage."
     },
     {
       "idx": 6,
-      "type": "MATCHING_INFORMATION",
-      "prompt": "An example of a parrot species which did not survive changes to its habitat",
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "The colours in Margaret's Berowra prints were very bright.",
       "correct_answer": "",
-      "explanation": "Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement."
+      "explanation": "Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage."
     },
     {
       "idx": 7,
-      "type": "MULTIPLE_CHOICE_SINGLE",
-      "prompt": "The writer believes that most parrot species",
-      "explanation": "Choose the correct answer.",
-      "options": [
-        {
-          "label": "A",
-          "text": "Move from Africa and South America to Australia",
-          "is_correct": false
-        },
-        {
-          "label": "B",
-          "text": "Had ancestors in either Africa, Australia or South America",
-          "is_correct": false
-        },
-        {
-          "label": "C",
-          "text": "Had ancestors in a continent which later split up",
-          "is_correct": false
-        },
-        {
-          "label": "D",
-          "text": "Came from a continent now covered by water",
-          "is_correct": false
-        }
-      ]
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "When living in Berowra, Margaret painted flowers in their natural location.",
+      "correct_answer": "",
+      "explanation": "Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage."
     },
     {
       "idx": 8,
-      "type": "MULTIPLE_CHOICE_SINGLE",
-      "prompt": "What does the Writer say about parrot's beak?",
-      "explanation": "Choose the correct answer.",
-      "options": [
-        {
-          "label": "A",
-          "text": "They are longer than those of other birds",
-          "is_correct": false
-        },
-        {
-          "label": "B",
-          "text": "They are made of a unique material",
-          "is_correct": false
-        },
-        {
-          "label": "C",
-          "text": "They are used more efficiently than those of other species",
-          "is_correct": false
-        },
-        {
-          "label": "D",
-          "text": "They are specially adapted to suit the diet",
-          "is_correct": false
-        }
-      ]
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "Questions  _______  -  (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes  _______ - (...) on your answer sheet. Margaret Preston's later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated  _______ and colours from Aboriginal art in her own work often referred to Aboriginal sources in the  (...) she gave her artworks 1953 exhibition very old method of  (...) was used for some prints was inspired by  (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in  (...) and art worked for nearly six decades making more than  (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston's long career",
+      "correct_answers": [],
+      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+      "correct_answer": "symbols",
+      "blankAcceptTexts": {
+        "blank_1": [
+          "symbols"
+        ]
+      }
     },
     {
       "idx": 9,
-      "type": "MULTIPLE_CHOICE_SINGLE",
-      "prompt": "Which of the following isNOTmentioned by the writer as a disadvantage of nesting boxes?",
-      "explanation": "Choose the correct answer.",
-      "options": [
-        {
-          "label": "A",
-          "text": "They cost too much",
-          "is_correct": false
-        },
-        {
-          "label": "B",
-          "text": "They need to be maintained",
-          "is_correct": false
-        },
-        {
-          "label": "C",
-          "text": "They provide only shelter, not food",
-          "is_correct": false
-        },
-        {
-          "label": "D",
-          "text": "They are too few of them",
-          "is_correct": false
-        }
-      ]
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "Questions  (...)  -  (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes  (...) - (...) on your answer sheet. Margaret Preston's later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated  (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the  _______ she gave her artworks 1953 exhibition very old method of  (...) was used for some prints was inspired by  (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in  (...) and art worked for nearly six decades making more than  (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston's long career",
+      "correct_answers": [],
+      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+      "correct_answer": "titles",
+      "blankAcceptTexts": {
+        "blank_1": [
+          "titles"
+        ]
+      }
     },
     {
       "idx": 10,
       "type": "SUMMARY_COMPLETION",
-      "prompt": "Complete blank **10**:\n\nThere are 345 varieties of parrot in existence and, of these,  **[10]** live in Australia. As early as the  (11)  ,   the mapmaker  (12) recognized that parrots lived in that part of the world.  (13)  , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.",
+      "prompt": "Questions  (...)  -  (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes  (...) - (...) on your answer sheet. Margaret Preston's later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated  (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the  (...) she gave her artworks 1953 exhibition very old method of  _______ was used for some prints was inspired by  (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in  (...) and art worked for nearly six decades making more than  (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston's long career",
       "correct_answers": [],
-      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically."
+      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+      "correct_answer": "stenciling",
+      "blankAcceptTexts": {
+        "blank_1": [
+          "stenciling"
+        ]
+      }
     },
     {
       "idx": 11,
       "type": "SUMMARY_COMPLETION",
-      "prompt": "Complete blank **11**:\n\nThere are 345 varieties of parrot in existence and, of these,  (10) live in Australia. As early as the  **[11]**  ,   the mapmaker  (12) recognized that parrots lived in that part of the world.  (13)  , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.",
+      "prompt": "Questions  (...)  -  (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes  (...) - (...) on your answer sheet. Margaret Preston's later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated  (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the  (...) she gave her artworks 1953 exhibition very old method of  (...) was used for some prints was inspired by  _______ about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in  (...) and art worked for nearly six decades making more than  (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston's long career",
       "correct_answers": [],
-      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically."
+      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+      "correct_answer": "books",
+      "blankAcceptTexts": {
+        "blank_1": [
+          "books"
+        ]
+      }
     },
     {
       "idx": 12,
       "type": "SUMMARY_COMPLETION",
-      "prompt": "Complete blank **12**:\n\nThere are 345 varieties of parrot in existence and, of these,  (10) live in Australia. As early as the  (11)  ,   the mapmaker  **[12]** recognized that parrots lived in that part of the world.  (13)  , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.",
+      "prompt": "Questions  (...)  -  (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes  (...) - (...) on your answer sheet. Margaret Preston's later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated  (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the  (...) she gave her artworks 1953 exhibition very old method of  (...) was used for some prints was inspired by  (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in  _______ and art worked for nearly six decades making more than  (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston's long career",
       "correct_answers": [],
-      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically."
+      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+      "correct_answer": "painting",
+      "blankAcceptTexts": {
+        "blank_1": [
+          "painting"
+        ]
+      }
     },
     {
       "idx": 13,
       "type": "SUMMARY_COMPLETION",
-      "prompt": "Complete blank **13**:\n\nThere are 345 varieties of parrot in existence and, of these,  (10) live in Australia. As early as the  (11)  ,   the mapmaker  (12) recognized that parrots lived in that part of the world.  **[13]**  , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.",
+      "prompt": "Questions  (...)  -  _______ Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes  (...) - _______ on your answer sheet. Margaret Preston's later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated  (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the  (...) she gave her artworks 1953 exhibition very old method of  (...) was used for some prints was inspired by  (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in  (...) and art worked for nearly six decades making more than  _______ artworks dedicated n to Australian art and the originality of her work is seen in Preston's long career",
       "correct_answers": [],
-      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically."
+      "explanation": "Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.",
+      "correct_answer": "400",
+      "blankAcceptTexts": {
+        "blank_1": [
+          "400"
+        ]
+      }
     }
   ]
 }
