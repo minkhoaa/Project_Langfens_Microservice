@@ -99,12 +99,12 @@ public class IndexBuilder : IIndexBuilder
         foreach (var section in exam.Sections)
             foreach (var question in section.Questions)
             {
-                var optionIds = (question.Options ?? [])
-                    .Select(x => (x.Id, x.ContentMd ?? string.Empty))
+                var optionIds = (question.Options)
+                    .Select(x => (x.Id, x.ContentMd))
                     .ToHashSet();
                 map[question.Id] = new QMeta(
                     section.Id,
-                    question.Type ?? string.Empty,
+                    question.Type,
                     optionIds
                 );
             }
@@ -137,7 +137,8 @@ public class AnswerKeyBuilder(IAnswerValidator answerValidator) : IAnswerKeyBuil
             {
                 var type = question.Type ?? string.Empty;
                 HashSet<(Guid id, string content)>? correct = null;
-                if (answerValidator.IsSingleChoice(type))
+                // Include both single choice and multiple choice types
+                if (answerValidator.IsSingleChoice(type) || type == QuestionType.MultipleChoiceMultiple)
                     correct = (question.Options ?? [])
                         .Where(x => x.HasIsCorrect && x.IsCorrect)
                         .Select(x => (Guid.Parse(x.Id), x.ContentMd ?? string.Empty))
@@ -195,7 +196,8 @@ public class AnswerKeyBuilder(IAnswerValidator answerValidator) : IAnswerKeyBuil
             {
                 var type = question.Type ?? string.Empty;
                 HashSet<(Guid id, string content)>? correct = null;
-                if (answerValidator.IsSingleChoice(type))
+                // Include both single choice and multiple choice types
+                if (answerValidator.IsSingleChoice(type) || type == QuestionType.MultipleChoiceMultiple)
                     correct = (question.Options ?? [])
                         .Where(x => x.IsCorrect == true)
                         .Select(x => (x.Id, x.ContentMd ?? string.Empty))

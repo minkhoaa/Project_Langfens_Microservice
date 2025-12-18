@@ -1,28 +1,28 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-18T15:25:15.471453
+-- Generated: 2025-12-19T01:20:17.061169
 -- Target: Australian Parrots Reading Passage
 -- ============================================
 
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Cleanup existing data for slug: ielts-reading-australian-parrots-and-their-adaptation-to-habitat-change
+-- Cleanup existing data for slug: ielts-reading-australian-artist-margaret-preston
 DELETE FROM exam_options WHERE "QuestionId" IN (
   SELECT q."Id" FROM exam_questions q
   JOIN exam_sections s ON s."Id" = q."SectionId"
   JOIN exams e ON e."Id" = s."ExamId"
-  WHERE e."Slug" = 'ielts-reading-australian-parrots-and-their-adaptation-to-habitat-change'
+  WHERE e."Slug" = 'ielts-reading-australian-artist-margaret-preston'
 );
 DELETE FROM exam_questions USING exam_sections s, exams e
 WHERE exam_questions."SectionId" = s."Id"
   AND s."ExamId" = e."Id"
-  AND e."Slug" = 'ielts-reading-australian-parrots-and-their-adaptation-to-habitat-change';
+  AND e."Slug" = 'ielts-reading-australian-artist-margaret-preston';
 DELETE FROM exam_sections USING exams e
 WHERE exam_sections."ExamId" = e."Id"
-  AND e."Slug" = 'ielts-reading-australian-parrots-and-their-adaptation-to-habitat-change';
+  AND e."Slug" = 'ielts-reading-australian-artist-margaret-preston';
 DELETE FROM exams
-WHERE "Slug" = 'ielts-reading-australian-parrots-and-their-adaptation-to-habitat-change';
+WHERE "Slug" = 'ielts-reading-australian-artist-margaret-preston';
 
 DO $$
 DECLARE
@@ -34,8 +34,8 @@ BEGIN
   INSERT INTO exams ("Id","Slug","Title","DescriptionMd","Category","Level","Status","DurationMin","UpdatedAt")
   VALUES (
     exam_id,
-    'ielts-reading-australian-parrots-and-their-adaptation-to-habitat-change',
-    'Australian parrots and their adaptation to habitat change',
+    'ielts-reading-australian-artist-margaret-preston',
+    'Australian artist Margaret Preston',
     'IELTS Reading Practice Test about Australian parrots and their adaptation to habitat change.',
     'IELTS',
     'B2',
@@ -85,88 +85,118 @@ There may be no final answer to ensuring an equitable balance between parrot spe
   );
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
   VALUES (
     qid,
     sec1,
     1,
-    'MATCHING_INFORMATION',
+    'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'An example of how one parrot species may survive at the expense of another',
-    'Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.',
-    '{"info-q1": []}'::jsonb
+    'Artists in the German aesthetic tradition portrayed nature realistically.',
+    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 1, 'True', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 2, 'False', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
   VALUES (
     qid,
     sec1,
     2,
-    'MATCHING_INFORMATION',
+    'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'A description of how plants may adapt to attract birds',
-    'Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.',
-    '{"info-q2": []}'::jsonb
+    'Margaret attended a famous art college in Paris.',
+    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 1, 'True', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 2, 'False', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
   VALUES (
     qid,
     sec1,
     3,
-    'MATCHING_INFORMATION',
+    'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'Example of two parrot species which benefited from changes to the environment',
-    'Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.',
-    '{"info-q3": []}'::jsonb
+    'Margaret met her husband William while teaching a craft at a rehabilitation unit.',
+    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 1, 'True', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 2, 'False', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
   VALUES (
     qid,
     sec1,
     4,
-    'MATCHING_INFORMATION',
+    'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'How the varied Australian landscape resulted in a great variety of parrot species',
-    'Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.',
-    '{"info-q4": []}'::jsonb
+    'Margaret Preston and Thea Proctor explored similar themes in their art.',
+    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 1, 'True', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 2, 'False', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
   VALUES (
     qid,
     sec1,
     5,
-    'MATCHING_INFORMATION',
+    'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'A reason why most parrot species are native to the southern hemisphere',
-    'Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.',
-    '{"info-q5": []}'::jsonb
+    'Margaret''s 1925 artworks of Sydney Harbour were simpler than her previous ones.',
+    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 1, 'True', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 2, 'False', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
   VALUES (
     qid,
     sec1,
     6,
-    'MATCHING_INFORMATION',
+    'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'An example of a parrot species which did not survive changes to its habitat',
-    'Scan paragraphs A-J to find where this specific information is mentioned. Look for keywords related to the statement.',
-    '{"info-q6": []}'::jsonb
+    'The colours in Margaret''s Berowra prints were very bright.',
+    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 1, 'True', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 2, 'False', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
@@ -174,62 +204,46 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     qid,
     sec1,
     7,
-    'MULTIPLE_CHOICE_SINGLE',
+    'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'The writer believes that most parrot species',
-    'Choose the correct answer.'
+    'When living in Berowra, Margaret painted flowers in their natural location.',
+    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'Move from Africa and South America to Australia', false);
+    (gen_random_uuid(), qid, 1, 'True', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'Had ancestors in either Africa, Australia or South America', false);
+    (gen_random_uuid(), qid, 2, 'False', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Had ancestors in a continent which later split up', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 4, 'Came from a continent now covered by water', false);
+    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
   VALUES (
     qid,
     sec1,
     8,
-    'MULTIPLE_CHOICE_SINGLE',
+    'SUMMARY_COMPLETION',
     'READING',
     2,
-    'What does the Writer say about parrot''s beak?',
-    'Choose the correct answer.'
+    'Questions _______ - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes _______ - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated _______ and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
+    'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
+    '{"blank-q8": []}'::jsonb
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'They are longer than those of other birds', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'They are made of a unique material', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'They are used more efficiently than those of other species', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 4, 'They are specially adapted to suit the diet', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
   VALUES (
     qid,
     sec1,
     9,
-    'MULTIPLE_CHOICE_SINGLE',
+    'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Which of the following isNOTmentioned by the writer as a disadvantage of nesting boxes?',
-    'Choose the correct answer.'
+    'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the _______ she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
+    'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
+    '{"blank-q9": []}'::jsonb
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'They cost too much', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'They need to be maintained', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'They provide only shelter, not food', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 4, 'They are too few of them', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
@@ -240,7 +254,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete blank **10**: There are 345 varieties of parrot in existence and, of these, **[10]** live in Australia. As early as the (11) , the mapmaker (12) recognized that parrots lived in that part of the world. (13) , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.',
+    'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of _______ was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
     '{"blank-q10": []}'::jsonb
   );
@@ -254,7 +268,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete blank **11**: There are 345 varieties of parrot in existence and, of these, (10) live in Australia. As early as the **[11]** , the mapmaker (12) recognized that parrots lived in that part of the world. (13) , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.',
+    'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by _______ about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
     '{"blank-q11": []}'::jsonb
   );
@@ -268,7 +282,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete blank **12**: There are 345 varieties of parrot in existence and, of these, (10) live in Australia. As early as the (11) , the mapmaker **[12]** recognized that parrots lived in that part of the world. (13) , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.',
+    'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in _______ and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
     '{"blank-q12": []}'::jsonb
   );
@@ -282,7 +296,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete blank **13**: There are 345 varieties of parrot in existence and, of these, (10) live in Australia. As early as the (11) , the mapmaker (12) recognized that parrots lived in that part of the world. **[13]** , the famous painter of animals and birds, commented on the size and beauty of the Australian parrot family.',
+    'Questions (...) - _______ Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - _______ on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than _______ artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
     '{"blank-q13": []}'::jsonb
   );
