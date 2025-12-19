@@ -1,28 +1,28 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-19T09:16:22.313539
+-- Generated: 2025-12-19T11:23:56.800270
 -- Target: Australian Parrots Reading Passage
 -- ============================================
 
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Cleanup existing data for slug: ielts-reading-australian-artist-margaret-preston
+-- Cleanup existing data for slug: ielts-reading-the-importance-of-law
 DELETE FROM exam_options WHERE "QuestionId" IN (
   SELECT q."Id" FROM exam_questions q
   JOIN exam_sections s ON s."Id" = q."SectionId"
   JOIN exams e ON e."Id" = s."ExamId"
-  WHERE e."Slug" = 'ielts-reading-australian-artist-margaret-preston'
+  WHERE e."Slug" = 'ielts-reading-the-importance-of-law'
 );
 DELETE FROM exam_questions USING exam_sections s, exams e
 WHERE exam_questions."SectionId" = s."Id"
   AND s."ExamId" = e."Id"
-  AND e."Slug" = 'ielts-reading-australian-artist-margaret-preston';
+  AND e."Slug" = 'ielts-reading-the-importance-of-law';
 DELETE FROM exam_sections USING exams e
 WHERE exam_sections."ExamId" = e."Id"
-  AND e."Slug" = 'ielts-reading-australian-artist-margaret-preston';
+  AND e."Slug" = 'ielts-reading-the-importance-of-law';
 DELETE FROM exams
-WHERE "Slug" = 'ielts-reading-australian-artist-margaret-preston';
+WHERE "Slug" = 'ielts-reading-the-importance-of-law';
 
 DO $$
 DECLARE
@@ -34,9 +34,9 @@ BEGIN
   INSERT INTO exams ("Id","Slug","Title","DescriptionMd","Category","Level","Status","DurationMin","UpdatedAt")
   VALUES (
     exam_id,
-    'ielts-reading-australian-artist-margaret-preston',
-    'Australian artist Margaret Preston',
-    'IELTS Reading Practice Test: Australian artist Margaret Preston',
+    'ielts-reading-the-importance-of-law',
+    'The importance of law',
+    'IELTS Reading Practice Test: The importance of law',
     'IELTS',
     'B2',
     'PUBLISHED',
@@ -49,178 +49,115 @@ BEGIN
     sec1,
     exam_id,
     1,
-    'Reading Passage - Australian artist Margaret Preston',
+    'Reading Passage - The importance of law',
     E'# Passage
 
-Margaret Preston''s vibrant paintings and prints of Australian flowers, animals and landscapes have delighted the Australian public since the early 1920s.
+A The law influences all of us virtually all the time, it governs almost all aspects of our behavior, and even what happens to us when we are no longer alive. It affects us from the embryo onwards. It governs the air we breathe, the food and drink we consume, our travel, family relationships, and our property. It applies at the bottom of the ocean and in space.
 
-Margaret Preston was born Margaret Rose McPherson in Port Adelaide, South Australia in 1875, the daughter of David McPherson, a Scottish marine engineer and his wife Prudence Lyle. She and her sister were sent at first to a private school, but when family circumstances changed, her mother took the girls to Sydney where Margaret attended a public high school. She decided early in life to become an artist and took private art lessons. In 1888, she trained for several months with Sydney landscape painter William Lister, and in 1893 enrolled at the National Gallery of Victoria Art School, where she studied for just over four years.
+Each time we examine a label on a food product, engage in work as an employee or employer, travel on the roads, go to school to learn or to teach, stay in a hotel, borrow a library book, create or dissolve a commercial company, play sports, or engage the services of someone for anything from plumbing a sink to planning a city, we are in the world of law.
 
-In 1898, after her father died, Margaret returned to Adelaide to study and then teach at the Adelaide School of Design. Her early artwork was influenced by the German aesthetic tradition, in which subjects of the natural world were depicted in a true to life manner.
+B Law has also become much more widely recognised as the standard by which behavior needs to be judged. A very telling development in recent history is the way in which the idea of law has permeated all parts of social life. The universal standard of whether something is socially tolerated is progressively becoming whether it is legal, rather than something that has always been considered acceptable. In earlier times, most people were illiterate.
 
-Margaret''s first visit to Europe in 1904, and her studies in Paris, France had little impact on this naturalism that dominated her work from this early period. However some eight years later, after returning to Paris, she began to recognise the decorative possibilities of art.
+Today, by contrast, a vast number of people can read, and it is becoming easier for people to take an interest in law, and for the general population to help actually shape the law in many countries. However, law is a versatile instrument that can be used equally well for the improvement or the degradation of humanity.
 
-With the outbreak of the First World War, Margaret traveled to England, where she had exhibitions and continued her studies of art. She was a student of pottery, but at some time developed her interest in various techniques of printmaking and design. In England''s West Country, she taught basket weaving at a rehabilitation unit for servicemen. It was on board a boat returning to Australia that she met wealthy businessman William Preston, whom she married in 1919. Together Margaret and William settled in the Sydney harbourside suburb of Mosman. The most characteristic prints from her early years in Sydney are views of boats floating on Sydney Harbour and of houses clustered on foreshore hills. Although Sydney was their home, the couple traveled regularly, both overseas and within Australia.
+C This, of course, puts law in a very significant position. In our rapidly developing world, all sorts of skills and knowledge are valuable. Those people, for example, with knowledge of computers, the internet, and communications technology are relied upon by the rest of us.
 
-Her first major showing in Australia was with her friend Thea Proctor, in exhibitions in Melbourne and Sydney in 1925. Many of Preston''s prints were hand-coloured in rich scarlet reds, blues and greens, and all of them were set in Chinese red lacquer frames. Harbour views were again prominent, but in comparison with earlier artworks, they were compact and busy. using striking contrasts of black and white combined with elaborate patterns and repetitions. Other prints from this period featured native flora. It was with these still-life subjects that she convinced the public that Australian native flowers were equal in beauty to any exotic species.
+There is now someone with IT skills or an IT help desk in every UK school, every company, every hospital, every local and central government office. Without their knowledge, many parts of commercial and social life today would seize up in minutes. But legal understanding is just as vital and as universally needed. The American comedian Jerry Seinfeld put it like this, ''We are all throwing the dice, playing the game, moving our pieces around the board, but if there is a problem, the lawyer is the only person who has read the inside of the top of the box.'' In other words, the lawyer is the only person who has read and made sense of the rules.
 
-From 1932 to 1939, Preston moved away from Sydney and lived with her husband at Berowra, on the upper reaches of the Hawkesbury River. The area was one of rugged natural beauty, and for the first time Preston found herself living in a home surrounded bush. Prior to this, the native flowers that featured in her paintings and prints had been purchased from local florists; they now grew in abundance around her home. Preston''s prints became larger, less complex and less reliant on the use of bright colours. Flowers were no longer arranged in vases, and Preston began to concentrate instead on flowers that were growing wild.
+D The number of laws has never been greater. In the UK alone, about 35 new Acts of Parliament are produced every year, thereby delivering thousands of new rules. The legislative output of the British Parliament has more than doubled in recent times from 1,100 pages a year in the early 1970s,to over 2,500 pages a year today. Between 1997 and
 
-While living at Berowra, and undoubtedly prompted by the Aboriginal'' rock engravings found near her property, Preston also developed what was to he a lifelong interest in Aboriginal art. On returning to Sydney in 1939, she became a member of the Anthropological Society of New South Wales, and later visited many important Aboriginal sites throughout Australia. Preston believed that Aboriginal art provided the key to establishing a national body of art that reflected the vast and ancient continent of Australia.
+2006,the legislature passed 365 Acts of Parliament and more than 32,000 legally binding statutory instruments. In a system with so much law, lawyers do a great deal not just to vindicate the rights of citizens and organizations but also to help develop the law through legal arguments, some of which are adapted by judges to become laws. Law courts can and do produce new law and revise old law, but they do so having heard the arguments of lawyers.
 
-During the 1940s, symbols used by Aboriginal people, together with dried, burnt colours found in traditional Aboriginal paintings, became increasingly prominent in her prints. The artist''s titles from this period frequently acknowledge her sources, and reveal the extent to which she drew inspiration from traditional Aboriginal art to create her own art.
+E However, despite their important role in developing the rules, lawyers are not universally admired. Anti-lawyer jokes have a long history going back to the ancient Greeks.
 
-It was in 1953, at the age of 78, that Preston produced her most significant prints. The exhibition at Macquarie Galleries in Sydney included 29 prints made using the ancient technique known as stenciling. Many of the artworks in the exhibition incorporated her fusion of Aboriginal and Chinese concepts. Preston had admired Chinese art since 1915, when she acquired the first of her many books on the subject, and she had visited China on two occasions. Chinese elements may be found in several of her earlier paintings.
+More recently the son of a famous Hollywood actor was asked at his junior school what his father did for a living, to which he replied,''My daddy is a movie actor, and sometimes he plays the good guy, and sometimes he plays the lawyer. For balance, though, it Is worth remembering that there are and have been many heroic and revered lawyers such as the Roman philosopher and politician Cicero and Mahatma Gandi, the Indian campaigner for independence.
 
-However, in her prints of the 1950s, Preston combined Chinese ideas with her understanding of the Dreamtime'' creation stories of Aboriginal Australians. Preston did not let age alter her habit of working hard. As she got older, her love of painting, printmaking and travel continued. By the time of her death in 1963, when she was 88, she had produced over 400 paintings and prints. In a career spanning almost 60 years, she created a body of work that demonstrates her extraordinary originality and the intensity of her commitment to Australian art.
+F People sometimes make comments that characterise lawyers as professionals whose concerns put personal reward above truth, or who gain financially from misfortune. There are undoubtedly lawyers that would fit that bill, Just as there are some scientists, Journalists and others In that category, But, In general, it is no more Just to say that lawyers are bad because they make a living from people''s problems than it is to make the same accusation In respect of nurses or IT consultants, A great many lawyers are involved in public law work, such as that Involving civil liberties, housing and other Issues. Such work Is not lavishly remunerated and the quality of the service provided by these lawyers relies on considerable professional dedication, Moreover, much legal work has nothing to do with conflict or misfortune, but is primarily concerned with drafting documents, Another source of social disaffection for lawyers, and disaffection for the law, is a limited public understanding of how law works and how It could be changed. Greater clarity about these issues, maybe as a result of better public relations, would reduce many aspects of public dissatisfaction with the law.
 '
   );
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
   VALUES (
     qid,
     sec1,
     1,
-    'TRUE_FALSE_NOT_GIVEN',
+    'MATCHING_HEADING',
     'READING',
     2,
-    'Artists in the German aesthetic tradition portrayed nature realistically.',
-    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
+    'Paragraph A',
+    'Read Paragraph A carefully and identify its main idea. Match it with the most suitable heading from the list.',
+    '{"paragraph-q1": []}'::jsonb
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
   VALUES (
     qid,
     sec1,
     2,
-    'TRUE_FALSE_NOT_GIVEN',
+    'MATCHING_HEADING',
     'READING',
     2,
-    'Margaret attended a famous art college in Paris.',
-    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
+    'Paragraph B',
+    'Read Paragraph B carefully and identify its main idea. Match it with the most suitable heading from the list.',
+    '{"paragraph-q2": []}'::jsonb
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', true);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
   VALUES (
     qid,
     sec1,
     3,
-    'TRUE_FALSE_NOT_GIVEN',
+    'MATCHING_HEADING',
     'READING',
     2,
-    'Margaret met her husband William while teaching a craft at a rehabilitation unit.',
-    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
+    'Paragraph C',
+    'Read Paragraph C carefully and identify its main idea. Match it with the most suitable heading from the list.',
+    '{"paragraph-q3": []}'::jsonb
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', false);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
   VALUES (
     qid,
     sec1,
     4,
-    'TRUE_FALSE_NOT_GIVEN',
+    'MATCHING_HEADING',
     'READING',
     2,
-    'Margaret Preston and Thea Proctor explored similar themes in their art.',
-    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
+    'Paragraph D',
+    'Read Paragraph D carefully and identify its main idea. Match it with the most suitable heading from the list.',
+    '{"paragraph-q4": []}'::jsonb
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', true);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
   VALUES (
     qid,
     sec1,
     5,
-    'TRUE_FALSE_NOT_GIVEN',
+    'MATCHING_HEADING',
     'READING',
     2,
-    'Margaret''s 1925 artworks of Sydney Harbour were simpler than her previous ones.',
-    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
+    'Paragraph E',
+    'Read Paragraph E carefully and identify its main idea. Match it with the most suitable heading from the list.',
+    '{"paragraph-q5": []}'::jsonb
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', true);
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
   VALUES (
     qid,
     sec1,
     6,
-    'TRUE_FALSE_NOT_GIVEN',
+    'MATCHING_HEADING',
     'READING',
     2,
-    'The colours in Margaret''s Berowra prints were very bright.',
-    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
-  );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', false);
-
-  qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
-  VALUES (
-    qid,
-    sec1,
-    7,
-    'TRUE_FALSE_NOT_GIVEN',
-    'READING',
-    2,
-    'When living in Berowra, Margaret painted flowers in their natural location.',
-    'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
-  );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', false);
-
-  qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
-  VALUES (
-    qid,
-    sec1,
-    8,
-    'SUMMARY_COMPLETION',
-    'READING',
-    2,
-    'Questions _______ - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes _______ - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated _______ and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q8": ["symbols"]}'::jsonb
+    'Paragraph F',
+    'Read Paragraph F carefully and identify its main idea. Match it with the most suitable heading from the list.',
+    '{"paragraph-q6": []}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -232,9 +169,9 @@ However, in her prints of the 1950s, Preston combined Chinese ideas with her und
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the _______ she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
+    'Lawyers as professionals People sometimes say that _______ is of little interest to lawyers, who are more concerned with making money. This may well be the case with some individuals, in the same way that some (...) . or scientific experts may also be driven purely by financial greed. However, criticising lawyers because their work is concerned with people''s problems would be similar to attacking IT staff or (...) for the same reason. In fact, many lawyers focus on questions relating, for example, to housing or civil liberties, which requires them to have (...) to their work. What''s more, a lot of lawyers'' time is spent writing (...) rather than dealing with people''s misfortunes.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q9": ["titles"]}'::jsonb
+    '{"blank-q9": []}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -246,9 +183,9 @@ However, in her prints of the 1950s, Preston combined Chinese ideas with her und
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of _______ was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
+    'Lawyers as professionals People sometimes say that (...) is of little interest to lawyers, who are more concerned with making money. This may well be the case with some individuals, in the same way that some _______ . or scientific experts may also be driven purely by financial greed. However, criticising lawyers because their work is concerned with people''s problems would be similar to attacking IT staff or (...) for the same reason. In fact, many lawyers focus on questions relating, for example, to housing or civil liberties, which requires them to have (...) to their work. What''s more, a lot of lawyers'' time is spent writing (...) rather than dealing with people''s misfortunes.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q10": ["stenciling"]}'::jsonb
+    '{"blank-q10": []}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -260,9 +197,9 @@ However, in her prints of the 1950s, Preston combined Chinese ideas with her und
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by _______ about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
+    'Lawyers as professionals People sometimes say that (...) is of little interest to lawyers, who are more concerned with making money. This may well be the case with some individuals, in the same way that some (...) . or scientific experts may also be driven purely by financial greed. However, criticising lawyers because their work is concerned with people''s problems would be similar to attacking IT staff or _______ for the same reason. In fact, many lawyers focus on questions relating, for example, to housing or civil liberties, which requires them to have (...) to their work. What''s more, a lot of lawyers'' time is spent writing (...) rather than dealing with people''s misfortunes.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q11": ["books"]}'::jsonb
+    '{"blank-q11": []}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -274,10 +211,33 @@ However, in her prints of the 1950s, Preston combined Chinese ideas with her und
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in _______ and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
+    'Lawyers as professionals People sometimes say that (...) is of little interest to lawyers, who are more concerned with making money. This may well be the case with some individuals, in the same way that some (...) . or scientific experts may also be driven purely by financial greed. However, criticising lawyers because their work is concerned with people''s problems would be similar to attacking IT staff or (...) for the same reason. In fact, many lawyers focus on questions relating, for example, to housing or civil liberties, which requires them to have _______ to their work. What''s more, a lot of lawyers'' time is spent writing (...) rather than dealing with people''s misfortunes.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q12": ["painting"]}'::jsonb
+    '{"blank-q12": []}'::jsonb
   );
+
+  qid := gen_random_uuid();
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
+  VALUES (
+    qid,
+    sec1,
+    12,
+    'MULTIPLE_CHOICE_MULTIPLE',
+    'READING',
+    2,
+    'Choose TWO letters, A-E.',
+    'Select 2 correct options. Order doesn''t matter.'
+  );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 1, 'A. There should be a person with legal training in every hospital.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 2, 'B. Lawyers with experience in commercial law are the most in demand.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 3, 'C. Knowledge of the law is as important as having computer skills.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 4, 'D. Society could not function effectively without legal experts.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
+    (gen_random_uuid(), qid, 5, 'E. Schools should teach students about the law.', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
@@ -288,9 +248,9 @@ However, in her prints of the 1950s, Preston combined Chinese ideas with her und
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Questions (...) - _______ Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - _______ on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than _______ artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
+    'Lawyers as professionals People sometimes say that (...) is of little interest to lawyers, who are more concerned with making money. This may well be the case with some individuals, in the same way that some (...) . or scientific experts may also be driven purely by financial greed. However, criticising lawyers because their work is concerned with people''s problems would be similar to attacking IT staff or (...) for the same reason. In fact, many lawyers focus on questions relating, for example, to housing or civil liberties, which requires them to have (...) to their work. What''s more, a lot of lawyers'' time is spent writing _______ rather than dealing with people''s misfortunes.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q13": ["400"]}'::jsonb
+    '{"blank-q13": []}'::jsonb
   );
 
 END$$;

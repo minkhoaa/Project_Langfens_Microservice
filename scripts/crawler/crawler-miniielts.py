@@ -27,7 +27,7 @@ import jsonschema
 # CONFIGURATION
 # =============================================================================
 
-TARGET_URL = "https://mini-ielts.com/1518/reading/australian-artist-margaret-preston"
+TARGET_URL = "https://mini-ielts.com/1516/reading/the-importance-of-law"
 
 # Auto-derive answer URL from target URL (pattern: /{id}/view-solution/reading/{slug})
 # Example: https://mini-ielts.com/1518/reading/slug -> https://mini-ielts.com/1518/view-solution/reading/slug
