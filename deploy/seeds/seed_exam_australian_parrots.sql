@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-19T01:20:17.061169
+-- Generated: 2025-12-19T09:16:22.313539
 -- Target: Australian Parrots Reading Passage
 -- ============================================
 
@@ -36,7 +36,7 @@ BEGIN
     exam_id,
     'ielts-reading-australian-artist-margaret-preston',
     'Australian artist Margaret Preston',
-    'IELTS Reading Practice Test about Australian parrots and their adaptation to habitat change.',
+    'IELTS Reading Practice Test: Australian artist Margaret Preston',
     'IELTS',
     'B2',
     'PUBLISHED',
@@ -49,38 +49,30 @@ BEGIN
     sec1,
     exam_id,
     1,
-    'Reading Passage - Australian Parrots',
+    'Reading Passage - Australian artist Margaret Preston',
     E'# Passage
 
-**Paragraph A**  
-Parrots are found across the tropic and in all southern hemisphere continents except Antarctica, but nowhere do they display such a richness of diversity and form as in Australia. One-sixth of the world''s 345 parrot species are found there, and Australia has long been renowned for the number and variety of its parrots.
+Margaret Preston''s vibrant paintings and prints of Australian flowers, animals and landscapes have delighted the Australian public since the early 1920s.
 
-**Paragraph B**  
-In the 16th century, the German cartographer Mercator made a world map that included a place, somewhere near present-day Australia, that he named Terra Psittacorum – the Land of Parrots – and the first European settlers in Australia often referred to the country as Parrot Land. In 1865, the celebrated British naturalist and wildlife artist John Gould said: "No group of birds gives Australia so tropical and benign an air as the numerous species of this great family by which it is tenanted."
+Margaret Preston was born Margaret Rose McPherson in Port Adelaide, South Australia in 1875, the daughter of David McPherson, a Scottish marine engineer and his wife Prudence Lyle. She and her sister were sent at first to a private school, but when family circumstances changed, her mother took the girls to Sydney where Margaret attended a public high school. She decided early in life to become an artist and took private art lessons. In 1888, she trained for several months with Sydney landscape painter William Lister, and in 1893 enrolled at the National Gallery of Victoria Art School, where she studied for just over four years.
 
-**Paragraph C**  
-Parrots are descendants of an ancient line. Due to their great diversity, and since most species inhabit Africa, Australia and South America, it seems almost certain that parrots originated millions of years ago on the ancient southern continent of Gondwana, before it broke up into the separate southern hemisphere continents we know today. Much of Gondwana comprised vast rainforests intersected by huge slow-flowing rivers and expansive lakes, but by eight million years ago, great changes were underway. The center of the continent of Australia had begun to dry out, and the rainforests that once covered it gradually contracted to the continental margins, where, to a limited extent, they still exist today.
+In 1898, after her father died, Margaret returned to Adelaide to study and then teach at the Adelaide School of Design. Her early artwork was influenced by the German aesthetic tradition, in which subjects of the natural world were depicted in a true to life manner.
 
-**Paragraph D**  
-The creatures that remained in those shrinking rainforests had to adapt to the drier conditions or face extinction. Reacting to these desperate circumstances, the parrot family, typically found in jungles in other parts of the world, has populated some of Australia''s harshest environments. The parrots spread from ancestral forests through eucalypt woodlands to colonise the central deserts of Australia, and as a consequence they diversified into a wide range of species with adaptations that reflect the many changes animals and plants had to make to survive in these areas.
+Margaret''s first visit to Europe in 1904, and her studies in Paris, France had little impact on this naturalism that dominated her work from this early period. However some eight years later, after returning to Paris, she began to recognise the decorative possibilities of art.
 
-**Paragraph E**  
-These evolutionary pressures helped mould keratin, the substance from which beaks are made into a range of tools capable of gathering the new food types favored by various species of parrot. The size of a parrot''s short, blunt beak and the length of that beak''s curved upper section are related to the type of food each species eats. Some have comparatively long beaks that are perfect for extracting seeds from fruit; others have broader and stronger beaks that are designed for cracking hard seeds.
+With the outbreak of the First World War, Margaret traveled to England, where she had exhibitions and continued her studies of art. She was a student of pottery, but at some time developed her interest in various techniques of printmaking and design. In England''s West Country, she taught basket weaving at a rehabilitation unit for servicemen. It was on board a boat returning to Australia that she met wealthy businessman William Preston, whom she married in 1919. Together Margaret and William settled in the Sydney harbourside suburb of Mosman. The most characteristic prints from her early years in Sydney are views of boats floating on Sydney Harbour and of houses clustered on foreshore hills. Although Sydney was their home, the couple traveled regularly, both overseas and within Australia.
 
-**Paragraph F**  
-Differently shaped beaks are not the only adaptations that have been made during the developing relationship between parrots and their food plants. Like all of Australia''s many honey eating birds, the rainbow-coloured lorikeets and the flowers on which they feed have long co-evolved with features such as the shape and colour of the flowers adapted to the bird''s particular needs. For example, red is the most attractive colour to birds, and thus flowers which depend on birds for pollination are more often red, and lorikeets'' tongues have bristles which help them to collect as much pollen as possible.
+Her first major showing in Australia was with her friend Thea Proctor, in exhibitions in Melbourne and Sydney in 1925. Many of Preston''s prints were hand-coloured in rich scarlet reds, blues and greens, and all of them were set in Chinese red lacquer frames. Harbour views were again prominent, but in comparison with earlier artworks, they were compact and busy. using striking contrasts of black and white combined with elaborate patterns and repetitions. Other prints from this period featured native flora. It was with these still-life subjects that she convinced the public that Australian native flowers were equal in beauty to any exotic species.
 
-**Paragraph G**  
-Today, most of Australia''s parrots inhabit woodland and open forest, and their numbers decline towards both deserts and wetter areas. The majority are nomadic to some degree, moving around to take advantage of feeding and breeding places. Two of the dry country parrots, the pink and grey galah and the pink, white and yellow corella have expanded their ranges in recent years. They are among the species that have adapted well to the changes brought about by European settlement. Forest clearing created grasslands where galahs and corellas thrive.
+From 1932 to 1939, Preston moved away from Sydney and lived with her husband at Berowra, on the upper reaches of the Hawkesbury River. The area was one of rugged natural beauty, and for the first time Preston found herself living in a home surrounded bush. Prior to this, the native flowers that featured in her paintings and prints had been purchased from local florists; they now grew in abundance around her home. Preston''s prints became larger, less complex and less reliant on the use of bright colours. Flowers were no longer arranged in vases, and Preston began to concentrate instead on flowers that were growing wild.
 
-**Paragraph H**  
-But other parrot species did not fare so well when their environments were altered. The clearing of large areas of rainforest is probably responsible for the disappearance of the double-eyed fig parrot, and numbers of ground parrots declined when a great part of their habitat was destroyed by the draining of coastal swamps. Even some parrot species that benefited from forest clearing at first are now confronted by a shortage of nesting sites due to further man-made changes.
+While living at Berowra, and undoubtedly prompted by the Aboriginal'' rock engravings found near her property, Preston also developed what was to he a lifelong interest in Aboriginal art. On returning to Sydney in 1939, she became a member of the Anthropological Society of New South Wales, and later visited many important Aboriginal sites throughout Australia. Preston believed that Aboriginal art provided the key to establishing a national body of art that reflected the vast and ancient continent of Australia.
 
-**Paragraph I**  
-New conditions also sometimes favour an incoming species over one that originally inhabited the area. For example, after farmers cleared large areas of forest on Kangaroo Island off the coast of South Australia, the island was colonised by galahs. They were soon going down holes and destroying black cockatoo eggs in order to take the hole for their own use. Their success precipitated a partial collapse in the black cockatoo population when the later lost the struggle for scarce nesting hollows.
+During the 1940s, symbols used by Aboriginal people, together with dried, burnt colours found in traditional Aboriginal paintings, became increasingly prominent in her prints. The artist''s titles from this period frequently acknowledge her sources, and reveal the extent to which she drew inspiration from traditional Aboriginal art to create her own art.
 
-**Paragraph J**  
-There may be no final answer to ensuring an equitable balance between parrot species. Nest box programmes help ease the shortage of nesting sites in some places, but there are not enough, they are expensive and they are not an adequate substitute for large, old trees, such as the habitat they represent and nectar, pollen and seeds they provide. Competition between parrots for nest sites is a result of the changes we humans have made to the Earth. We are the most widespread and dangerous competitors that parrots have ever had to face, but we also have the knowledge and skill to maintain the wonderfully rich diversity of Australia''s parrots. All we need is the will to do so.
+It was in 1953, at the age of 78, that Preston produced her most significant prints. The exhibition at Macquarie Galleries in Sydney included 29 prints made using the ancient technique known as stenciling. Many of the artworks in the exhibition incorporated her fusion of Aboriginal and Chinese concepts. Preston had admired Chinese art since 1915, when she acquired the first of her many books on the subject, and she had visited China on two occasions. Chinese elements may be found in several of her earlier paintings.
+
+However, in her prints of the 1950s, Preston combined Chinese ideas with her understanding of the Dreamtime'' creation stories of Aboriginal Australians. Preston did not let age alter her habit of working hard. As she got older, her love of painting, printmaking and travel continued. By the time of her death in 1963, when she was 88, she had produced over 400 paintings and prints. In a career spanning almost 60 years, she created a body of work that demonstrates her extraordinary originality and the intensity of her commitment to Australian art.
 '
   );
 
@@ -97,7 +89,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', false);
+    (gen_random_uuid(), qid, 1, 'True', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 2, 'False', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
@@ -120,7 +112,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 2, 'False', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', false);
+    (gen_random_uuid(), qid, 3, 'Not Given', true);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
@@ -137,7 +129,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 1, 'True', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', false);
+    (gen_random_uuid(), qid, 2, 'False', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 3, 'Not Given', false);
 
@@ -158,7 +150,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 2, 'False', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', false);
+    (gen_random_uuid(), qid, 3, 'Not Given', true);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
@@ -177,7 +169,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 2, 'False', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 3, 'Not Given', false);
+    (gen_random_uuid(), qid, 3, 'Not Given', true);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
@@ -194,7 +186,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 1, 'True', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 2, 'False', false);
+    (gen_random_uuid(), qid, 2, 'False', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 3, 'Not Given', false);
 
@@ -211,7 +203,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     'Compare this statement with the passage. TRUE if it matches exactly, FALSE if it contradicts, NOT GIVEN if the information is not in the passage.'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
-    (gen_random_uuid(), qid, 1, 'True', false);
+    (gen_random_uuid(), qid, 1, 'True', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
     (gen_random_uuid(), qid, 2, 'False', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES
@@ -228,7 +220,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     2,
     'Questions _______ - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes _______ - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated _______ and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q8": []}'::jsonb
+    '{"blank-q8": ["symbols"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -242,7 +234,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     2,
     'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the _______ she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q9": []}'::jsonb
+    '{"blank-q9": ["titles"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -256,7 +248,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     2,
     'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of _______ was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q10": []}'::jsonb
+    '{"blank-q10": ["stenciling"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -270,7 +262,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     2,
     'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by _______ about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q11": []}'::jsonb
+    '{"blank-q11": ["books"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -284,7 +276,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     2,
     'Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in _______ and art worked for nearly six decades making more than (...) artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q12": []}'::jsonb
+    '{"blank-q12": ["painting"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -298,7 +290,7 @@ There may be no final answer to ensuring an equitable balance between parrot spe
     2,
     'Questions (...) - _______ Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - _______ on your answer sheet. Margaret Preston''s later life Aboriginal influence interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home incorporated (...) and colours from Aboriginal art in her own work often referred to Aboriginal sources in the (...) she gave her artworks 1953 exhibition very old method of (...) was used for some prints was inspired by (...) about Chinese art that she had started collecting in 1915 combination of Chinese and Aboriginal elements Old age still interested in (...) and art worked for nearly six decades making more than _______ artworks dedicated n to Australian art and the originality of her work is seen in Preston''s long career',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',
-    '{"blank-q13": []}'::jsonb
+    '{"blank-q13": ["400"]}'::jsonb
   );
 
 END$$;

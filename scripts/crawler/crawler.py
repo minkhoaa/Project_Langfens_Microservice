@@ -109,38 +109,42 @@ def scrape_answers_from_solution(answer_url: str) -> dict[int, str]:
         response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
+        html_text = response.text
         
-        # Look for answer patterns in the page text
-        # Pattern 1: "Answer: VALUE" after question number
-        # Pattern 2: "Q1 Answer: VALUE"
-        page_text = soup.get_text()
-        
-        # Match patterns like: "1 TRUEFALSENOT GIVEN...Answer: TRUE" or "1 TRUEFALSENOT GIVENAnswer: TRUE"
         import re
         
-        # Pattern for TRUE/FALSE/NOT GIVEN questions
-        # HTML format: "1 TRUEFALSENOT GIVEN[question text]Answer: TRUE"
-        tfng_pattern = r'(\d+)\s*(?:TRUEFALSENOT\s*GIVEN|TRUE|FALSE|NOT\s*GIVEN)*[^A]*Answer:\s*(TRUE|FALSE|NOT\s*GIVEN)'
-        for match in re.finditer(tfng_pattern, page_text, re.IGNORECASE):
-            q_idx = int(match.group(1))
-            answer = match.group(2).upper().strip()
-            # Normalize NOT GIVEN
-            if 'NOT' in answer and 'GIVEN' in answer:
-                answer = 'NOT GIVEN'
-            answers[q_idx] = answer
-            logger.info(f"  Found Q{q_idx}: {answer}")
+        # Strategy: Find all "Answer: VALUE" patterns in HTML order
+        # This works because answers appear sequentially in the solution page
         
-        # Pattern for completion/short answer questions (word answers)
-        # Match "8 Answer: symbols" - capture only the first word/number
-        completion_pattern = r'(\d+)\s*Answer:\s*([a-zA-Z0-9]+)'
-        for match in re.finditer(completion_pattern, page_text):
-            q_idx = int(match.group(1))
-            if q_idx not in answers:  # Don't override TFNG answers
-                answer = match.group(2).strip()
-                # Skip if it's TRUE/FALSE/NOT (already handled)
-                if answer.upper() not in ['TRUE', 'FALSE', 'NOT', 'GIVEN']:
-                    answers[q_idx] = answer
-                    logger.info(f"  Found Q{q_idx}: {answer}")
+        # Pattern for all answer types: Answer: TRUE/FALSE/NOT GIVEN or Answer: word/number
+        all_answers_pattern = r'Answer:\s*([A-Za-z0-9\s]+?)(?=<|Answer:|$)'
+        matches = re.findall(all_answers_pattern, html_text, re.IGNORECASE)
+        
+        if matches:
+            q_idx = 1
+            for raw_answer in matches:
+                answer = raw_answer.strip()
+                
+                # Clean up and normalize
+                if not answer:
+                    continue
+                    
+                # Handle TRUE/FALSE/NOT GIVEN
+                upper = answer.upper()
+                if upper.startswith('TRUE'):
+                    answer = 'TRUE'
+                elif upper.startswith('FALSE'):
+                    answer = 'FALSE'
+                elif 'NOT' in upper and 'GIVEN' in upper:
+                    answer = 'NOT GIVEN'
+                else:
+                    # For completion answers, take only first word
+                    first_word = answer.split()[0] if answer.split() else answer
+                    answer = first_word
+                
+                answers[q_idx] = answer
+                logger.info(f"  Found Q{q_idx}: {answer}")
+                q_idx += 1
         
         logger.info(f"Phase 0 complete: Scraped {len(answers)} answers")
         
@@ -314,13 +318,58 @@ def _extract_title(soup: BeautifulSoup) -> str:
 
 
 def _extract_passage(soup: BeautifulSoup) -> list[dict]:
-    """Extract the reading passage paragraphs.
+    """Extract the reading passage paragraphs from HTML.
     
-    Note: Always use hardcoded passage to avoid web scraping garbage.
-    The scraped HTML contains question text concatenated with passage.
+    Looks for passage content in the 'reading-text' or similar container.
+    Falls back to default passage if extraction fails.
     """
-    # Always use clean hardcoded passage to avoid garbage from web scraping
-    return _get_default_passage()
+    passage = []
+    
+    # Try to find the main passage container
+    # mini-ielts.com uses 'reading-text' or similar divs
+    passage_container = soup.find('div', class_='reading-text')
+    if not passage_container:
+        passage_container = soup.find('div', id='reading-text')
+    if not passage_container:
+        # Try to find by content area
+        passage_container = soup.find('div', class_='passage-content')
+    
+    if passage_container:
+        # Get paragraphs from the passage container
+        paragraphs = passage_container.find_all(['p', 'div'], recursive=False)
+        if not paragraphs:
+            paragraphs = passage_container.find_all('p')
+        
+        for para in paragraphs:
+            text = para.get_text(strip=True)
+            if text and len(text) > 50:  # Skip short/empty paragraphs
+                passage.append({"text": text})
+        
+        if passage:
+            logger.info(f"Extracted {len(passage)} passage paragraphs from HTML")
+            return passage
+    
+    # Fallback: Try to get all text from article content
+    article = soup.find('article') or soup.find('div', class_='content')
+    if article:
+        paragraphs = article.find_all('p')
+        for para in paragraphs:
+            text = para.get_text(strip=True)
+            # Skip if it looks like a question
+            if text and len(text) > 100 and not text.startswith('Question'):
+                passage.append({"text": text})
+        
+        if passage:
+            logger.info(f"Extracted {len(passage)} paragraphs from article")
+            return passage
+    
+    # Last resort: just get the page title text as single paragraph
+    title = soup.find('h1') or soup.find('h2')
+    if title:
+        passage.append({"text": f"Reading Passage: {title.get_text(strip=True)}"})
+    
+    logger.warning("Could not extract passage from HTML, returning minimal content")
+    return passage if passage else [{"text": "Passage content could not be extracted."}]
 
 
 def _get_default_passage() -> list[dict]:
@@ -769,6 +818,9 @@ def normalize_data(raw_data: dict[str, Any]) -> dict[str, Any]:
     exam_id = str(uuid.uuid4())
     section_id = str(uuid.uuid4())
     
+    # Get title from raw data
+    title = _clean_text(raw_data.get("title", "Reading Practice Test"))
+    
     passage_md = _create_passage_markdown(raw_data.get("passage", []))
     
     normalized = {
@@ -776,9 +828,9 @@ def normalize_data(raw_data: dict[str, Any]) -> dict[str, Any]:
         "exams": [
             {
                 "id": exam_id,
-                "slug": _create_slug(raw_data.get("title", "william-gilbert-and-magnetism")),
-                "title": _clean_text(raw_data.get("title", "Australian Parrots Reading Test")),
-                "descriptionMd": "IELTS Reading Practice Test about Australian parrots and their adaptation to habitat change.",
+                "slug": _create_slug(title),
+                "title": title,
+                "descriptionMd": f"IELTS Reading Practice Test: {title}",
                 "category": "IELTS",
                 "level": "B2",
                 "status": "PUBLISHED",
@@ -787,7 +839,7 @@ def normalize_data(raw_data: dict[str, Any]) -> dict[str, Any]:
                     {
                         "id": section_id,
                         "idx": 1,
-                        "title": "Reading Passage - Australian Parrots",
+                        "title": f"Reading Passage - {title}",
                         "instructionsMd": passage_md,
                         "audioUrl": None,
                         "transcriptMd": None,
@@ -834,11 +886,19 @@ def _create_passage_markdown(paragraphs: list[dict]) -> str:
         return ""
     
     lines = ["# Passage\n"]
-    for p in paragraphs:
+    for idx, p in enumerate(paragraphs, 1):
         label = p.get("label", "")
         text = _clean_text(p.get("text", ""))
-        if label and text:
+        
+        if not text:
+            continue
+            
+        if label:
+            # Labeled paragraph (e.g., Paragraph A, Paragraph B)
             lines.append(f"**Paragraph {label}**  \n{text}\n")
+        else:
+            # Unlabeled paragraph - just add the text
+            lines.append(f"{text}\n")
     
     return "\n".join(lines)
 
@@ -915,12 +975,21 @@ def _normalize_questions(questions: list[dict], section_id: str) -> list[dict]:
             
         elif q_type in ["SUMMARY_COMPLETION", "SENTENCE_COMPLETION", "NOTE_COMPLETION",
                         "FORM_COMPLETION", "TABLE_COMPLETION", "DIAGRAM_LABEL", "MAP_LABEL"]:
-            correct_answers = q.get("correct_answers", [])
             q_idx = q.get("idx", 1)
-            # Use unique key format: blank-qX (matching the working SQL format)
-            normalized_q["blankAcceptTexts"] = {
-                f"blank-q{q_idx}": correct_answers
-            }
+            # Get existing blankAcceptTexts from raw data (set in extract_data)
+            raw_blank_texts = q.get("blankAcceptTexts", {})
+            
+            if raw_blank_texts:
+                # Convert any key format to the expected blank-qX format
+                first_value = next(iter(raw_blank_texts.values()), [])
+                normalized_q["blankAcceptTexts"] = {
+                    f"blank-q{q_idx}": first_value
+                }
+            else:
+                # Fallback to empty
+                normalized_q["blankAcceptTexts"] = {
+                    f"blank-q{q_idx}": q.get("correct_answers", [])
+                }
             
         elif q_type == "SHORT_ANSWER":
             normalized_q["shortAnswerAcceptTexts"] = q.get("correct_answers", [])
