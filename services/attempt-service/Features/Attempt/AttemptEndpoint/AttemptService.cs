@@ -820,6 +820,20 @@ IQuestionGraderFactory questionGraderFactory
                                 .ToList();
                             selectedText = selectedTexts.Count > 0 ? string.Join(", ", selectedTexts) : null;
                         }
+                        else if (IsNotBlank(x.TextAnswer) && index.TryGetValue(x.QuestionId, out var questionMeta))
+                        {
+                            // For MATCHING_HEADING: TextAnswer is value like "i", "ii"
+                            // Try to find matching option content (e.g., "i. The beginning...")
+                            var textAnswer = x.TextAnswer!.Trim();
+                            var matchedOption = questionMeta.OptionIds
+                                .Select(opt => opt.content)
+                                .FirstOrDefault(content => 
+                                    !string.IsNullOrEmpty(content) &&
+                                    (content.StartsWith(textAnswer + ".", StringComparison.OrdinalIgnoreCase) ||
+                                     content.StartsWith(textAnswer + " ", StringComparison.OrdinalIgnoreCase) ||
+                                     content.Equals(textAnswer, StringComparison.OrdinalIgnoreCase)));
+                            selectedText = matchedOption ?? textAnswer;
+                        }
                         else
                         {
                             selectedText = IsNotBlank(x.TextAnswer) ? x.TextAnswer : null;

@@ -325,7 +325,7 @@
       "correct_answer": "V"
     },
     {
-      "idx": 6,
+      "idx": 7,
       "type": "MULTIPLE_CHOICE_SINGLE",
       "prompt": "Choose the correct letter,A, B, C or D.",
       "options": [
@@ -353,7 +353,7 @@
       "correct_answer": "B"
     },
     {
-      "idx": 7,
+      "idx": 8,
       "type": "MULTIPLE_CHOICE_SINGLE",
       "prompt": "Choose the correct letter,A, B, C or D.",
       "options": [
