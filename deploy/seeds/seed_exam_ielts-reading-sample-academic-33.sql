@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-19T16:49:31.808958
+-- Generated: 2025-12-19T17:22:45.872128
 -- Source: ielts-writing.info
 -- Title: IELTS Reading Sample (Academic) #33
 -- ============================================
@@ -65,7 +65,7 @@ BEGIN
     2,
     'Section A',
     'Choose the correct answer.',
-    '{"section-a-q1": ["ix"]}'
+    '{"section-a-q1": ["ix. Modern coin designs and their origin"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. The beginning of the Archaic period', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. The Athenian obol replaces the turtle', false);
@@ -88,7 +88,7 @@ BEGIN
     2,
     'Section B',
     'Choose the correct answer.',
-    '{"section-b-q2": ["iii"]}'
+    '{"section-b-q2": ["iii. How product exchange became insufficient"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. The beginning of the Archaic period', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. The Athenian obol replaces the turtle', false);
@@ -111,7 +111,7 @@ BEGIN
     2,
     'Section C',
     'Choose the correct answer.',
-    '{"section-c-q3": ["i"]}'
+    '{"section-c-q3": ["i. The beginning of the Archaic period"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. The beginning of the Archaic period', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. The Athenian obol replaces the turtle', false);
@@ -134,7 +134,7 @@ BEGIN
     2,
     'Section D',
     'Choose the correct answer.',
-    '{"section-d-q4": ["vii"]}'
+    '{"section-d-q4": ["vii. A precursor of the modern euro"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. The beginning of the Archaic period', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. The Athenian obol replaces the turtle', false);
@@ -157,7 +157,7 @@ BEGIN
     2,
     'Section E',
     'Choose the correct answer.',
-    '{"section-e-q5": ["vi"]}'
+    '{"section-e-q5": ["vi. New cities introduce new design rules"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. The beginning of the Archaic period', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. The Athenian obol replaces the turtle', false);
@@ -180,7 +180,7 @@ BEGIN
     2,
     'Section F',
     'Choose the correct answer.',
-    '{"section-f-q6": ["v"]}'
+    '{"section-f-q6": ["v. The relevance of ancient Greek coins today"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. The beginning of the Archaic period', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. The Athenian obol replaces the turtle', false);
@@ -197,7 +197,7 @@ BEGIN
   VALUES (
     qid,
     sec1,
-    6,
+    7,
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
@@ -215,7 +215,7 @@ BEGIN
   VALUES (
     qid,
     sec1,
-    7,
+    8,
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,

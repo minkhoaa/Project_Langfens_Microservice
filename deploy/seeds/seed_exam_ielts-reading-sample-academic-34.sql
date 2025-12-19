@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-19T16:40:40.064882
+-- Generated: 2025-12-19T16:56:49.246888
 -- Source: ielts-writing.info
 -- Title: IELTS Reading Sample (Academic) #34
 -- ============================================
@@ -65,7 +65,7 @@ BEGIN
     2,
     'Section B',
     'Choose the correct answer.',
-    '{"section-b-q1": ["vii"]}'
+    '{"section-b-q1": ["vii. Why attempt geoengineering?"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Shielding the earth from the atmosphere', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Bouncing back the sun’s rays from earth', false);
@@ -88,7 +88,7 @@ BEGIN
     2,
     'Section C',
     'Choose the correct answer.',
-    '{"section-c-q2": ["ii"]}'
+    '{"section-c-q2": ["ii. Bouncing back the sun’s rays from earth"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Shielding the earth from the atmosphere', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Bouncing back the sun’s rays from earth', true);
@@ -111,7 +111,7 @@ BEGIN
     2,
     'Section D',
     'Choose the correct answer.',
-    '{"section-d-q3": ["i"]}'
+    '{"section-d-q3": ["i. Shielding the earth from the atmosphere"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Shielding the earth from the atmosphere', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Bouncing back the sun’s rays from earth', false);
@@ -134,7 +134,7 @@ BEGIN
     2,
     'Section E',
     'Choose the correct answer.',
-    '{"section-e-q4": ["v"]}'
+    '{"section-e-q4": ["v. Trapping greenhouse gases"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Shielding the earth from the atmosphere', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Bouncing back the sun’s rays from earth', false);
@@ -157,7 +157,7 @@ BEGIN
     2,
     'Section F',
     'Choose the correct answer.',
-    '{"section-f-q5": ["iv"]}'
+    '{"section-f-q5": ["iv. Criticisms of geoengineering"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Shielding the earth from the atmosphere', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Bouncing back the sun’s rays from earth', false);

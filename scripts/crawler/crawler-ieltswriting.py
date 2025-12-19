@@ -10,36 +10,58 @@ Usage:
 Example:
     python crawler-ieltswriting.py https://www.ielts-writing.info/EXAM/ielts_reading/1224/
 
-STANDARDIZED QUESTION FORMATS (v2.0)
-====================================
+STANDARDIZED QUESTION FORMATS (v3.0) - LOCKED
+==============================================
+⚠️ DO NOT MODIFY BACKEND OR FRONTEND - ONLY DATA/SCRIPT CHANGES ALLOWED
 
 1. YES_NO_NOT_GIVEN / TRUE_FALSE_NOT_GIVEN:
-   - options: 3 fixed choices (YES/NO/NOT GIVEN or TRUE/FALSE/NOT GIVEN)
-   - correct_answer: string
+   - Type: YES_NO_NOT_GIVEN or TRUE_FALSE_NOT_GIVEN
+   - options: 3 fixed choices with IsCorrect flag
+   - correct_answer: string (YES/NO/NOT GIVEN or TRUE/FALSE/NOT GIVEN)
+   - MatchPairs: NULL
    - HTML: <p class="inline-question"> + <span data-answer='YES'>
 
 2. MULTIPLE_CHOICE_SINGLE:
-   - options: A-D with "A. " prefix in labels
+   - Type: MULTIPLE_CHOICE_SINGLE
+   - options: A-D with "A. " prefix in ContentMd labels, one IsCorrect=true
    - correct_answer: letter
+   - MatchPairs: NULL
    - HTML: <div class="mchq" data-answer="D">
 
-3. MATCHING_HEADING: ⭐ Requires MatchPairs
-   - options: roman numerals (i-x) from .lows-headers
+3. MATCHING_HEADING: ⭐ Requires MatchPairs with FULL LABEL
+   - Type: MATCHING_HEADING
+   - options: roman numerals (i-ix) with full label (e.g., "i. The beginning...")
    - correct_answer: roman numeral (lowercase)
-   - SQL MatchPairs: {"section-b-q1": ["vii"]}
+   - MatchPairs: {"section-a-q1": ["i. Full heading text here"]}
+     ⚠️ CRITICAL: MatchPairs MUST contain FULL LABEL, not just "i"
    - HTML: <p class="inline-question"> + <div class="lows-headers">
 
-4. MATCHING_FEATURES: ⭐ Requires MatchPairs
+4. MATCHING_FEATURES: ⭐ Requires MatchPairs with FULL LABEL  
+   - Type: MATCHING_FEATURES
    - options: A/B/C from data-items attribute
    - correct_answer: letter
-   - SQL MatchPairs: {"feature-q6": ["C"]}
+   - MatchPairs: {"feature-q6": ["C. Full option text"]}
+     ⚠️ CRITICAL: MatchPairs MUST contain FULL LABEL, not just "C"
    - HTML: <span data-items='A / B / C' data-answer='C'>
 
-5. MATCHING_INFORMATION (Summary Completion):
-   - prompt: includes numbered blanks ___[N] + Word List
-   - options: empty (user types letter)
+5. MATCHING_INFORMATION (Paragraph Matching):
+   - Type: MATCHING_INFORMATION
+   - options: empty (user types letter A-J)
    - correct_answer: letter A-J
+   - MatchPairs: {"paragraph": ["I"]} - contains paragraph letter
    - HTML: <p class="sq"> + <div class="lows-2">
+
+6. SUMMARY_COMPLETION (Fill-in-blank):
+   - Type: SUMMARY_COMPLETION
+   - options: empty
+   - correct_answer: word/phrase
+   - BlankAcceptTexts: {"blank1": ["accepted", "answers"]}
+   - HTML: gaps in text
+
+INDEXING RULES:
+===============
+- Idx starts at 1 and MUST be unique per exam (no duplicates)
+- MC questions start after dropdown questions (use max_dropdown_idx + 1)
 """
 
 import requests
@@ -232,8 +254,11 @@ def extract_questions(soup: BeautifulSoup) -> list[dict]:
     dropdown_questions = extract_dropdown_questions(soup)
     questions.extend(dropdown_questions)
     
+    # Calculate starting index for MC questions based on dropdown questions
+    max_dropdown_idx = max((q['idx'] for q in dropdown_questions), default=0)
+    
     # Pattern 2: Multiple choice questions from .mchq divs
-    mc_questions = extract_mchq_questions(soup)
+    mc_questions = extract_mchq_questions(soup, start_idx=max_dropdown_idx + 1)
     questions.extend(mc_questions)
     
     # Sort by question index
@@ -396,7 +421,7 @@ def extract_dropdown_questions(soup: BeautifulSoup) -> list[dict]:
     return questions
 
 
-def extract_mchq_questions(soup: BeautifulSoup) -> list[dict]:
+def extract_mchq_questions(soup: BeautifulSoup, start_idx: int = 7) -> list[dict]:
     """Extract multiple choice questions from .mchq containers."""
     questions = []
     
@@ -406,8 +431,8 @@ def extract_mchq_questions(soup: BeautifulSoup) -> list[dict]:
     for idx, div in enumerate(mchq_divs):
         correct_answer = div.get('data-answer', '').strip().upper()
         
-        # MC questions are Q6, Q7, Q8 (after 5 YES/NO/NOT GIVEN questions)
-        q_num = idx + 6  # Start at Q6
+        # MC questions start after dropdown questions (dynamic start_idx)
+        q_num = start_idx + idx
         
         # Find question stem - look for preceding paragraph or h4
         prompt = ""
@@ -561,13 +586,25 @@ def generate_sql(data: dict) -> str:
             # Build MatchPairs for MATCHING_HEADING type
             match_pairs_sql = 'NULL'
             if q_type == 'MATCHING_HEADING' and correct:
-                # Format: {"section-q1": ["vii"]} 
+                # Find the full label for correct answer (e.g., "vii. Why attempt geoengineering?")
+                correct_label = correct.lower()
+                for opt in options:
+                    if opt.get('value', '').lower() == correct.lower() or opt.get('is_correct'):
+                        correct_label = escape_sql(opt.get('label', correct.lower()))
+                        break
+                # Format: {"section-q1": ["vii. Full heading text"]} 
                 prompt_key = q_prompt.lower().replace(' ', '-') + f"-q{q_idx}"
-                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct.lower()}\"]}}'"
+                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct_label}\"]}}'"
             elif q_type == 'MATCHING_FEATURES' and correct:
+                # Find the full label for correct answer (e.g., "C. carbon capture")
+                correct_label = correct
+                for opt in options:
+                    if opt.get('value') == correct or opt.get('is_correct'):
+                        correct_label = escape_sql(opt.get('label', correct))
+                        break
                 # Format: {"feature-q6": ["C"]}
                 prompt_key = f"feature-q{q_idx}"
-                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct}\"]}}'"
+                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct_label}\"]}}'"
             
             sql_lines.extend([
                 f"  qid := gen_random_uuid();",
