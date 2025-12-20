@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-20T20:26:32.387909
+-- Generated: 2025-12-20T23:34:07.570355
 -- Source: ielts-mentor.com
 -- Title: GT Reading 39 Section 2 - Kenichi Software & Is Everyone Entitled to Paid Holidays?
 -- ============================================
@@ -60,7 +60,7 @@ BEGIN
     qid,
     sec1,
     15,
-    'SUMMARY_COMPLETION',
+    'SHORT_ANSWER',
     'READING',
     2,
     'If you see anything suspicious, you should report it to a _______ employee.',
@@ -79,7 +79,7 @@ BEGIN
     2,
     'If the company wants to stop you and _______ you, you have to agree to it.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q16": ["(to) search"]}'::jsonb
+    '{"blank-q16": ["search"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -88,7 +88,7 @@ BEGIN
     qid,
     sec1,
     17,
-    'SUMMARY_COMPLETION',
+    'SHORT_ANSWER',
     'READING',
     2,
     'If you take things belonging to the company without permission, you will face _______',
@@ -102,7 +102,7 @@ BEGIN
     qid,
     sec1,
     18,
-    'SUMMARY_COMPLETION',
+    'SHORT_ANSWER',
     'READING',
     2,
     'Staff, _______ and visitors must all wear a badge on company premises.',
@@ -116,7 +116,7 @@ BEGIN
     qid,
     sec1,
     19,
-    'SUMMARY_COMPLETION',
+    'SHORT_ANSWER',
     'READING',
     2,
     'You must not pass on confidential information to _______ .',
@@ -135,28 +135,22 @@ BEGIN
     2,
     'If you leave the company, you have to hand in any _______ you have made on matters concerning the company.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q20": ["If you leave the company"]}'::jsonb
+    '{"blank-q20": ["(private) notes"]}'::jsonb
   );
 
   qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
   VALUES (
     qid,
     sec1,
     21,
-    'MATCHING_INFORMATION',
+    'SHORT_ANSWER',
     'READING',
     2,
     'In what year were the regulations extended to cover most of the workers who were originally excluded?',
-    'Choose the correct answer.',
-    NULL
+    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    '{"blank-q21": ["2003"]}'::jsonb
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 6, 'F', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
@@ -178,12 +172,12 @@ BEGIN
     qid,
     sec1,
     23,
-    'SUMMARY_COMPLETION',
+    'SHORT_ANSWER',
     'READING',
     2,
     'During a worker''s first year of employment, what proportion of their annual holiday does a month''s work give? _______',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q23": ["one twelfth", "", "one-twelfth (of annual holiday(s))"]}'::jsonb
+    '{"blank-q23": ["one-twelfth"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -197,7 +191,7 @@ BEGIN
     2,
     'What can an employer give a worker to stop them taking holiday that they have requested?',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q24": ["(equal) counter-notice"]}'::jsonb
+    '{"blank-q24": ["counter-notice"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -211,7 +205,7 @@ BEGIN
     2,
     'What is given as a possible reason for an employee having to take a holiday at a certain time?',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q25": ["(the) (annual) shutdown"]}'::jsonb
+    '{"blank-q25": ["shutdown"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -225,7 +219,7 @@ BEGIN
     2,
     'When an employee leaves their job, what should be given in place of any holiday they have not taken?',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q26": ["When an employee leaves their job"]}'::jsonb
+    '{"blank-q26": ["payment"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -239,7 +233,7 @@ BEGIN
     2,
     'Apart from a contract, what type of document may set out an employee''s holiday rights?',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q27": ["Apart from a contract"]}'::jsonb
+    '{"blank-q27": ["collective agreement"]}'::jsonb
   );
 
 

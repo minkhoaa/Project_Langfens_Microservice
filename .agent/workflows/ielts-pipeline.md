@@ -9,6 +9,21 @@ description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 **QUALITY**: Production-ready, 100% verified
 **TOKEN BUDGET**: ~6600 tokens per exam | ~24 exams/session
 
+> [!CRITICAL]
+> ## 🔒 STRICT OUTPUT FORMAT - PHẢI TUÂN THỦ!
+> 
+> **Xem @[/ielts-data-format] để biết CHÍNH XÁC format JSON cho mỗi question type.**
+> 
+> **BLANK PATTERN**: Completion types PHẢI dùng `_{3,}` (3+ underscores) để frontend render input!
+> - ✅ `"pay _______ per week"` → Frontend renders input box
+> - ❌ `"pay ... per week"` → Frontend KHÔNG render input!
+> 
+> **TYPE-SPECIFIC RULES:**
+> - `TFNG/YNNG`: 3 options (TRUE/FALSE/NOT GIVEN hoặc YES/NO/NOT GIVEN)
+> - `MATCHING_HEADING`: options = all headings, matchPairs = answer
+> - `MATCHING_INFO/FEATURES`: options = [], matchPairs = answer letter
+> - `SHORT_ANSWER/SUMMARY_COMPLETION`: options = [], promptMd có `_______`
+
 ---
 
 ## TIER 1: RULE-BASED AUTO
@@ -56,6 +71,19 @@ end = re.search(r'Questions \d+-\d+', cleaned_text)
 full_passage = cleaned_text[start.start():end.start()].strip()
 ```
 
+**⚠️ MATCHING_HEADING RULE**: Tách Headings List khỏi Passage!
+- **Headings List (i-xi)**: Chỉ dùng cho `options` của MATCHING_HEADING questions
+- **Passage (A-H)**: Chỉ chứa nội dung sections, KHÔNG chứa headings list
+
+```
+❌ SAI (passage chứa cả headings):
+"i. Where to buy... ii. What contained... A. Back in the days..."
+
+✅ ĐÚNG (passage chỉ có sections):
+"**A.** Back in the days of America's Wild West..."
+"**B.** The remarkable thing about..."
+```
+
 #### Role 4: Prompt Extractor
 - Extract prompts VERBATIM từ source
 - NO paraphrase, NO bịa content
@@ -81,12 +109,18 @@ cat /home/khoa/RiderProjects/Project_Langfens_Microservice/data/normalized/ielts
 | "heading i-xi" | MATCHING_HEADING | roman numeral |
 | "Match people A-D" | MATCHING_FEATURES | letter with name |
 
-#### Role 6: Option Generator
-- MATCHING_INFORMATION: A-F (6 paras) hoặc A-I (9 paras)
-- MATCHING_HEADING: i-xi với heading text
-- MATCHING_FEATURES: A-D với people/features names
-- TFNG/YNNG: TRUE/FALSE/NOT GIVEN hoặc YES/NO/NOT GIVEN
-- SHORT_ANSWER: options = []
+#### Role 6: Option Generator ⚠️ STRICT FORMAT
+**Xem @[/ielts-data-format] cho exact schema!**
+
+| Type | Options | MatchPairs |
+|------|---------|------------|
+| TFNG/YNNG | 3 options: T/F/NG hoặc Y/N/NG | null |
+| MCQ_SINGLE | A./B./C./D. format | null |
+| SHORT_ANSWER | `[]` empty | null |
+| SUMMARY_COMPLETION | `[]` empty | null |
+| MATCHING_HEADING | All headings i-xi | `{key: [value, label]}` |
+| MATCHING_INFO | `[]` empty | `{key: [letter]}` |
+| MATCHING_FEATURES | `[]` empty | `{key: [label, letter]}` |
 
 ### PHASE 4: ANSWER VALIDATION
 
@@ -95,10 +129,13 @@ cat /home/khoa/RiderProjects/Project_Langfens_Microservice/data/normalized/ielts
 - Answers match source website
 - MATCHING: answer letter có trong options
 
-#### Role 8: Check JSON Format
-- Schema valid
-- Prompts start with capital
-- No placeholder prompts ("Question 1")
+#### Role 8: Check JSON Format ⚠️ STRICT
+**PHẢI VERIFY:**
+- [ ] `promptMd` không có số đầu (❌ "1. Question" → ✅ "Question")
+- [ ] Completion types có blank pattern `_{3,}` (3+ underscores)
+- [ ] `options` đúng format cho từng type (xem Role 6)
+- [ ] `matchPairs` đúng format cho MATCHING types
+- [ ] Đúng 1 option có `isCorrect: true` (trừ MCQ_MULTIPLE)
 
 ### PHASE 5: OUTPUT VALIDATION
 
