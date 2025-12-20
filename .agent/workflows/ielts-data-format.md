@@ -2,294 +2,1015 @@
 description: Quy tắc format dữ liệu IELTS questions - KHÔNG SỬA BACKEND/FRONTEND
 ---
 
-# /ielts-data-format - IELTS Data Formatting Rules
+# /ielts-data-format - STRICT LOCKED SCHEMAS
 
-**MỤC ĐÍCH**: Đảm bảo dữ liệu IELTS render đúng trên frontend.
-**LƯU Ý**: Chỉ fix DATA, KHÔNG sửa code backend/frontend.
+> [!CAUTION]
+> **STRICT SCHEMA**: Output JSON PHẢI EXACTLY match schema này.
+> - Vi phạm → Frontend KHÔNG render được
+> - Vi phạm → Backend KHÔNG chấm điểm được
 
 ---
 
-## 📝 TEXT FORMATTING RULES
+## 🎯 FRONTEND UI KINDS MAPPING
 
-### 1. CAPITALIZATION
-```
-❌ SAI: "what page would you turn to..."
-✅ ĐÚNG: "What page would you turn to..."
+```typescript
+// Frontend: mapApiQuestionToUi.ts
+type BackendType → uiKind:
 
-❌ SAI: "TRUE", "false", "Not Given"  
-✅ ĐÚNG: "TRUE", "FALSE", "NOT GIVEN" (all caps cho TFNG)
+"TRUE_FALSE_NOT_GIVEN"      → "choice_single"     // Radio buttons
+"YES_NO_NOT_GIVEN"          → "choice_single"     // Radio buttons
+"MULTIPLE_CHOICE_SINGLE"    → "choice_single"     // Radio buttons
+"MULTIPLE_CHOICE_SINGLE_IMAGE" → "choice_single"  // Radio buttons with images
+"CLASSIFICATION"            → "choice_single"     // Radio buttons
 
-❌ SAI: "a", "b", "c" (lowercase options)
-✅ ĐÚNG: "A", "B", "C" (uppercase options)
-```
+"MULTIPLE_CHOICE_MULTIPLE"  → "choice_multiple"   // Checkboxes
 
-### 2. WORD SPACING (chữ dính liền)
-```
-❌ SAI: "stone-polishing industry.Comfortable footwear"
-✅ ĐÚNG: "stone-polishing industry. Comfortable footwear"
+"FORM_COMPLETION"           → "completion"        // Text input(s)
+"NOTE_COMPLETION"           → "completion"        // Text input(s)
+"SENTENCE_COMPLETION"       → "completion"        // Text input(s)
+"SUMMARY_COMPLETION"        → "completion"        // Text input(s)
+"TABLE_COMPLETION"          → "completion"        // Text input(s)
+"SHORT_ANSWER"              → "completion"        // Text input
+"DIAGRAM_LABEL"             → "completion"        // Text input(s)
+"MAP_LABEL"                 → "completion"        // Text input(s)
 
-❌ SAI: "£2 per person.B Enjoy a film"
-✅ ĐÚNG: "£2 per person.\n\n**B.** Enjoy a film"
+"MATCHING_INFORMATION"      → "matching_letter"   // Single letter input (A-J)
+"MATCHING_FEATURES"         → "matching_letter"   // Single letter input (A-J)
+"MATCHING_ENDINGS"          → "matching_letter"   // Single letter input (A-J)
 
-❌ SAI: "Answer:1. A2. B"
-✅ ĐÚNG: "Answer: 1. A  2. B"
-```
+"MATCHING_HEADING"          → "matching_heading"  // Dropdown select
 
-### 3. LINE BREAKS (xuống dòng)
-```
-❌ SAI: "**A.** Para A **B.** Para B **C.** Para C"
-✅ ĐÚNG:
-"**A.** Para A
-
-**B.** Para B
-
-**C.** Para C"
-
-❌ SAI: Passage và questions liền nhau
-✅ ĐÚNG: Passage và questions cách nhau bằng "---" hoặc blank lines
-```
-
-### 4. PUNCTUATION
-```
-❌ SAI: "What is your name _______?"  (? sau blank)
-✅ ĐÚNG: "What is your name? _______" (? trước blank)
-
-❌ SAI: "Complete the sentence:_______"
-✅ ĐÚNG: "Complete the sentence: _______" (space trước blank)
-
-❌ SAI: "para A.para B"
-✅ ĐÚNG: "para A. Para B" hoặc line break
+"FLOW_CHART"                → "flow_chart"        // Drag & drop
 ```
 
 ---
 
-## 📄 PASSAGE FORMATTING
+## 🔒 BLANK PATTERN RULE
 
-### Paragraph Labels (A, B, C...)
-```markdown
-✅ CORRECT FORMAT:
-**A.** Content of paragraph A here. Multiple sentences
-can span across lines.
-
-**B.** Content of paragraph B here.
-
-**C.** Content of paragraph C here.
+```javascript
+// Frontend: SummaryCompletionCard.tsx
+const re = /_{3,}/g;  // 3+ underscores = blank input
 ```
 
-### Section Dividers
-```markdown
-✅ For multiple passages:
-**Passage 1: Title Here**
-
-Content...
+| Pattern | Valid? | Reason |
+|---------|--------|--------|
+| `_______` | ✅ | 7 underscores |
+| `___` | ✅ | 3 underscores |
+| `____` | ✅ | 4 underscores |
+| `...` | ❌ | Dots không được recognize |
+| `(...)` | ❌ | Không match regex |
+| `[blank]` | ❌ | Không match regex |
 
 ---
 
-**Passage 2: Second Title**
-
-Content...
-```
-
-### Lists in Passages
-```markdown
-✅ For bullet lists:
-- item one
-- item two
-- item three
-
-✅ For prevention/symptoms lists:
-**A. Prevention**
-- leave snakes alone
-- do not put hands in hollow logs
-- be noisy when walking
-```
+## 📋 TYPE-BY-TYPE STRICT SCHEMAS
 
 ---
 
-## ❓ QUESTION FORMATTING
+### 1️⃣ TRUE_FALSE_NOT_GIVEN
 
-### Prompt Text
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `SingleChoiceGrader` | |
+| UI | | `choice_single` (Radio) |
+| Options | `exam_options` table | Maps to choices |
+
+**STRICT JSON:**
+```json
+{
+  "idx": 34,
+  "type": "TRUE_FALSE_NOT_GIVEN",
+  "promptMd": "Statement text without number.",
+  "options": [
+    {"id": "uuid1", "idx": 1, "contentMd": "TRUE", "isCorrect": false},
+    {"id": "uuid2", "idx": 2, "contentMd": "FALSE", "isCorrect": true},
+    {"id": "uuid3", "idx": 3, "contentMd": "NOT GIVEN", "isCorrect": false}
+  ],
+  "matchPairs": null,
+  "blankAcceptTexts": null,
+  "shortAnswerAcceptTexts": null
+}
 ```
-✅ Full sentence, properly capitalized
-✅ Ends with blank marker for COMPLETION types
-✅ No trailing spaces
-✅ No HTML tags or entities
 
-❌ "Question 1" (placeholder)
-❌ "question text?" (missing capital)
-❌ "Text_______" (no space before blank)
-```
+**STRICT RULES:**
+- ✅ `options` PHẢI có CHÍNH XÁC 3 items: `TRUE`, `FALSE`, `NOT GIVEN`
+- ✅ `isCorrect: true` cho ĐÚNG 1 option
+- ✅ `promptMd` KHÔNG có số đầu (❌ "34. Statement" → ✅ "Statement")
+- ❌ KHÔNG dùng `matchPairs` cho type này
 
-### Blank Markers
-```
-✅ Standard: _______  (7 underscores)
-✅ With punctuation: "word? _______" or "word _______."
-✅ Multiple blanks: "_______ and _______"
-
-❌ "___" (too short)
-❌ "………" (ellipsis - convert to _______)
-❌ "____?" (? after blank)
-```
-
-### Option Labels
-```
-✅ MATCHING: "A", "B", "C", "D" (single letter)
-✅ HEADING: "i", "ii", "iii" + " - heading text"
-✅ MCQ: "A. Full option text here"
-✅ TFNG: "TRUE", "FALSE", "NOT GIVEN"
-
-❌ Full paragraphs as option labels
-❌ Lowercase letters for MATCHING
-❌ Mixed case for TFNG
+**SQL Output:**
+```sql
+INSERT INTO exam_options ("ContentMd", "IsCorrect") VALUES ('TRUE', false);
+INSERT INTO exam_options ("ContentMd", "IsCorrect") VALUES ('FALSE', true);
+INSERT INTO exam_options ("ContentMd", "IsCorrect") VALUES ('NOT GIVEN', false);
 ```
 
 ---
 
-## 🚫 NOISE PATTERNS TO REMOVE
+### 2️⃣ YES_NO_NOT_GIVEN
 
-### From Passages
-```
-❌ "Questions 1-8" (question numbers in passage)
-❌ "Write the correct letter" (instructions in passage)
-❌ "Answer: 1. A 2. B" (answers in passage)
-❌ Cookie/privacy notices
-❌ "Show/Hide Answers" buttons
-❌ Navigation links ("Prev | Next")
-❌ Social share buttons
-❌ Advertisement text
-```
-
-### From Questions
-```
-❌ "Choose ONE WORD ONLY" (instruction, not prompt)
-❌ "NB You may use..." (instruction)
-❌ "Write your answers in boxes..." (instruction)
-❌ Line numbers like "1.", "2." at start (handled by idx)
+**STRICT JSON:** (Same structure as TFNG)
+```json
+{
+  "type": "YES_NO_NOT_GIVEN",
+  "options": [
+    {"contentMd": "YES", "isCorrect": true},
+    {"contentMd": "NO", "isCorrect": false},
+    {"contentMd": "NOT GIVEN", "isCorrect": false}
+  ]
+}
 ```
 
 ---
 
-## 🔄 COMMON TRANSFORMATIONS
+### 3️⃣ MULTIPLE_CHOICE_SINGLE
 
-### Ellipsis to Blank
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `SingleChoiceGrader` | |
+| UI | | `choice_single` (Radio) |
+
+**STRICT JSON:**
+```json
+{
+  "idx": 28,
+  "type": "MULTIPLE_CHOICE_SINGLE",
+  "promptMd": "What is the main purpose of this passage?",
+  "options": [
+    {"id": "uuid1", "idx": 1, "contentMd": "A. To describe the history of...", "isCorrect": false},
+    {"id": "uuid2", "idx": 2, "contentMd": "B. To explain the process of...", "isCorrect": true},
+    {"id": "uuid3", "idx": 3, "contentMd": "C. To compare different...", "isCorrect": false},
+    {"id": "uuid4", "idx": 4, "contentMd": "D. To argue against...", "isCorrect": false}
+  ]
+}
+```
+
+**STRICT RULES:**
+- ✅ `options` có 3-5 items
+- ✅ `contentMd` format: `"A. Full text"` (letter + dot + space + text)
+- ✅ `isCorrect: true` cho ĐÚNG 1 option
+- ✅ `promptMd` KHÔNG chứa options (options riêng biệt)
+
+---
+
+### 4️⃣ MULTIPLE_CHOICE_MULTIPLE
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `MultipleChoiceGrader` | |
+| UI | | `choice_multiple` (Checkbox) |
+
+**STRICT JSON:**
+```json
+{
+  "type": "MULTIPLE_CHOICE_MULTIPLE",
+  "promptMd": "Which TWO of the following are mentioned?",
+  "options": [
+    {"contentMd": "A. Option one", "isCorrect": true},
+    {"contentMd": "B. Option two", "isCorrect": false},
+    {"contentMd": "C. Option three", "isCorrect": true},
+    {"contentMd": "D. Option four", "isCorrect": false}
+  ]
+}
+```
+
+**STRICT RULES:**
+- ✅ Có thể có 2+ options với `isCorrect: true`
+- ✅ Grading: User PHẢI chọn ĐÚNG TẤT CẢ correct options (set equality)
+
+---
+
+### 5️⃣ MULTIPLE_CHOICE_SINGLE_IMAGE
+
+**Same as MCQ_SINGLE** but `contentMd` có thể chứa image markdown.
+
+---
+
+### 6️⃣ CLASSIFICATION
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `MatchingHeadingGrader` | |
+| UI | | `choice_single` (Radio) |
+
+**STRICT JSON:**
+```json
+{
+  "type": "CLASSIFICATION",
+  "promptMd": "Statement to classify",
+  "options": [
+    {"contentMd": "A. Category One", "isCorrect": false},
+    {"contentMd": "B. Category Two", "isCorrect": true}
+  ],
+  "matchPairs": {"class-q20": ["B"]}
+}
+```
+
+---
+
+### 7️⃣ SHORT_ANSWER
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `ShortAnswerGrader` | |
+| UI | | `completion` (Text input) |
+| Blank regex | | `/_{3,}/g` |
+
+**STRICT JSON:**
+```json
+{
+  "idx": 27,
+  "type": "SHORT_ANSWER",
+  "promptMd": "When did Herschel begin astronomy? _______",
+  "options": [],
+  "matchPairs": null,
+  "shortAnswerAcceptTexts": ["1772", "seventeen seventy-two"],
+  "shortAnswerAcceptRegex": ["17\\d{2}"]
+}
+```
+
+**STRICT RULES:**
+- ✅ `promptMd` PHẢI có `_{3,}` (3+ underscores) cho blank
+- ✅ `options` = `[]` (empty array)
+- ✅ `shortAnswerAcceptTexts` = array các đáp án chấp nhận
+- ❌ KHÔNG dùng `blankAcceptTexts` cho SHORT_ANSWER
+
+**Examples:**
+```
+✅ "The year was _______"
+✅ "Answer: ____"
+❌ "The year was ..." (no underscore = no input rendered!)
+```
+
+---
+
+### 8️⃣ SUMMARY_COMPLETION / TABLE_COMPLETION / NOTE_COMPLETION / FORM_COMPLETION / SENTENCE_COMPLETION
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `CompletionGrader` | |
+| UI | | `completion` (Multiple text inputs) |
+| Blank regex | | `/_{3,}/g` |
+
+**STRICT JSON:**
+```json
+{
+  "idx": 10,
+  "type": "SUMMARY_COMPLETION",
+  "promptMd": "Complete the summary.\\n\\nThe student pays _______ per week. The rent includes _______.",
+  "options": [],
+  "matchPairs": null,
+  "blankAcceptTexts": {
+    "0": ["$68.50", "68.50", "$68.5"],
+    "1": ["utilities", "utility"]
+  },
+  "blankAcceptRegex": {
+    "0": ["\\$?68\\.?50?"]
+  }
+}
+```
+
+**STRICT RULES:**
+- ✅ `promptMd` có `_{3,}` cho MỖI blank
+- ✅ `options` = `[]`
+- ✅ `blankAcceptTexts` keys = blank index ("0", "1", "2"...)
+- ✅ Frontend tokenize by regex, mỗi blank = 1 input
+
+---
+
+### 9️⃣ DIAGRAM_LABEL / MAP_LABEL
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `LabelGrader` (uses CompletionGrader logic) | |
+| UI | | `completion` (Text inputs) |
+
+**STRICT JSON:**
+```json
+{
+  "type": "DIAGRAM_LABEL",
+  "promptMd": "Label the diagram.\\n\\n29. _______\\n30. _______\\n31. _______",
+  "options": [],
+  "blankAcceptTexts": {
+    "29": ["label1"],
+    "30": ["label2"],
+    "31": ["label3"]
+  }
+}
+```
+
+**RULES:** Same as SUMMARY_COMPLETION. Keys có thể là question numbers.
+
+---
+
+### 🔟 MATCHING_HEADING
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `MatchingHeadingGrader` | |
+| UI | | `matching_heading` (Dropdown) |
+| Options | Dùng để render dropdown | `value: opt.contentMd.split(".")[0]` |
+
+**STRICT JSON:**
+```json
+{
+  "idx": 28,
+  "type": "MATCHING_HEADING",
+  "promptMd": "Choose the correct heading for Section C",
+  "options": [
+    {"id": "uuid1", "idx": 1, "contentMd": "i. Where to buy the best Echinacea", "isCorrect": false},
+    {"id": "uuid2", "idx": 2, "contentMd": "ii. What snake oil contained", "isCorrect": false},
+    {"id": "uuid3", "idx": 3, "contentMd": "v. Earlier applications of Echinacea", "isCorrect": true}
+  ],
+  "matchPairs": {
+    "section-c": ["v", "v. Earlier applications of Echinacea"]
+  }
+}
+```
+
+**STRICT RULES:**
+- ✅ `options` = ALL headings (i, ii, iii... xi)
+- ✅ `contentMd` format: `"i. Full heading text"`
+- ✅ `matchPairs` = `{key: [value, fullLabel]}`
+- ✅ Frontend extracts value by `contentMd.split(".")[0].trim()`
+- ✅ `isCorrect: true` cho đúng 1 option
+
+**PASSAGE RULE:**
+```
+✅ Passage chỉ có sections: "**A.** Content..." "**B.** Content..."
+❌ Passage KHÔNG được chứa headings list (i-xi)
+```
+
+---
+
+### 1️⃣1️⃣ MATCHING_INFORMATION
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `MatchingHeadingGrader` | |
+| UI | | `matching_letter` (Text input A-J) |
+
+**STRICT JSON:**
+```json
+{
+  "idx": 1,
+  "type": "MATCHING_INFORMATION",
+  "promptMd": "Which paragraph mentions algae bioreactors?",
+  "options": [],
+  "matchPairs": {
+    "info-q1": ["E"]
+  }
+}
+```
+
+**STRICT RULES:**
+- ✅ `options` = `[]` (empty - user types letter)
+- ✅ `matchPairs` = `{key: [letter]}`
+- ✅ Frontend: Input allows A-J only
+
+---
+
+### 1️⃣2️⃣ MATCHING_FEATURES
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `MatchingHeadingGrader` | |
+| UI | | `matching_letter` (Text input) |
+
+**STRICT JSON:**
+```json
+{
+  "type": "MATCHING_FEATURES",
+  "promptMd": "Which person?\\nA. John Smith\\nB. Mary Jones\\nC. Peter Brown",
+  "options": [],
+  "matchPairs": {
+    "feature-q36": ["Mary Jones", "B"]
+  }
+}
+```
+
+**STRICT RULES:**
+- ✅ `promptMd` embed options (A. Name\\nB. Name...)
+- ✅ `options` = `[]`
+- ✅ `matchPairs` = `{key: [fullLabel, letter]}`
+
+---
+
+### 1️⃣3️⃣ MATCHING_ENDINGS
+
+**Same as MATCHING_FEATURES.**
+
+---
+
+### 1️⃣4️⃣ FLOW_CHART
+
+| Field | Backend | Frontend |
+|-------|---------|----------|
+| Grader | `FlowChartGrader` | |
+| UI | | `flow_chart` (Drag & drop) |
+
+**STRICT JSON:**
+```json
+{
+  "type": "FLOW_CHART",
+  "promptMd": "Arrange the steps in correct order.",
+  "options": [],
+  "orderCorrects": ["step1", "step2", "step3"],
+  "flowChartNodes": [
+    {"key": "step1", "label": "First step"},
+    {"key": "step2", "label": "Second step"},
+    {"key": "step3", "label": "Third step"}
+  ]
+}
+```
+
+---
+
+## 📊 COMPLETE REFERENCE TABLE
+
+| # | Type | Grader | Frontend UI | Options | MatchPairs | Blanks | Answer Field |
+|---|------|--------|-------------|---------|------------|--------|--------------|
+| 1 | TRUE_FALSE_NOT_GIVEN | SingleChoice | Radio (3) | ✅ T/F/NG | null | ❌ | SelectedOptionIds |
+| 2 | YES_NO_NOT_GIVEN | SingleChoice | Radio (3) | ✅ Y/N/NG | null | ❌ | SelectedOptionIds |
+| 3 | MULTIPLE_CHOICE_SINGLE | SingleChoice | Radio (4+) | ✅ A./B./C./D. | null | ❌ | SelectedOptionIds |
+| 4 | MULTIPLE_CHOICE_MULTIPLE | MultipleChoice | Checkbox | ✅ multi-correct | null | ❌ | SelectedOptionIds[] |
+| 5 | MULTIPLE_CHOICE_SINGLE_IMAGE | SingleChoice | Radio | ✅ with images | null | ❌ | SelectedOptionIds |
+| 6 | CLASSIFICATION | MatchingHeading | Radio | ✅ categories | ✅ | ❌ | SelectedOptionIds |
+| 7 | SHORT_ANSWER | ShortAnswer | Text input | `[]` | null | ✅ `_{3,}` | TextAnswer |
+| 8 | SUMMARY_COMPLETION | Completion | Multi-input | `[]` | null | ✅ `_{3,}` | TextAnswer (JSON) |
+| 9 | TABLE_COMPLETION | Completion | Multi-input | `[]` | null | ✅ `_{3,}` | TextAnswer (JSON) |
+| 10 | NOTE_COMPLETION | Completion | Multi-input | `[]` | null | ✅ `_{3,}` | TextAnswer (JSON) |
+| 11 | FORM_COMPLETION | Completion | Multi-input | `[]` | null | ✅ `_{3,}` | TextAnswer (JSON) |
+| 12 | SENTENCE_COMPLETION | Completion | Multi-input | `[]` | null | ✅ `_{3,}` | TextAnswer (JSON) |
+| 13 | DIAGRAM_LABEL | Label | Multi-input | `[]` | null | ✅ `_{3,}` | TextAnswer (JSON) |
+| 14 | MAP_LABEL | Label | Multi-input | `[]` | null | ✅ `_{3,}` | TextAnswer (JSON) |
+| 15 | MATCHING_HEADING | MatchingHeading | Dropdown | ✅ all headings | ✅ `[val,label]` | ❌ | TextAnswer |
+| 16 | MATCHING_INFORMATION | MatchingHeading | Letter input | `[]` | ✅ `[letter]` | ❌ | TextAnswer |
+| 17 | MATCHING_FEATURES | MatchingHeading | Letter input | `[]` | ✅ `[label,letter]` | ❌ | TextAnswer |
+| 18 | MATCHING_ENDINGS | MatchingHeading | Letter input | `[]` | ✅ `[letter]` | ❌ | TextAnswer |
+| 19 | FLOW_CHART | FlowChart | Drag & drop | `[]` | null | ❌ | TextAnswer (JSON array) |
+
+---
+
+## ✅ STRICT VALIDATION CHECKLIST
+
+### For ALL types:
+```
+[ ] type = EXACT string (case-sensitive)
+[ ] promptMd không có số đầu
+[ ] idx là integer
+```
+
+### choice_single (TFNG, YNNG, MCQ_SINGLE, MCQ_IMAGE, CLASSIFICATION):
+```
+[ ] options có >=2 items
+[ ] contentMd format "A. Text" hoặc "TRUE"/"FALSE"/"NOT GIVEN"
+[ ] ĐÚNG 1 option có isCorrect=true
+```
+
+### choice_multiple (MCQ_MULTIPLE):
+```
+[ ] options có items
+[ ] Có thể nhiều isCorrect=true
+```
+
+### completion (SHORT_ANSWER, *_COMPLETION, *_LABEL):
+```
+[ ] promptMd chứa _{3,} cho MỖI blank
+[ ] options = [] (empty)
+[ ] shortAnswerAcceptTexts (SHORT_ANSWER) hoặc blankAcceptTexts (others) có data
+```
+
+### matching_heading (MATCHING_HEADING):
+```
+[ ] options = ALL headings (i-xi)
+[ ] contentMd format "i. Heading text"
+[ ] matchPairs = {key: [value, fullLabel]}
+[ ] ĐÚNG 1 option có isCorrect=true
+```
+
+### matching_letter (MATCHING_INFO, FEATURES, ENDINGS):
+```
+[ ] options = [] (empty)
+[ ] matchPairs có đúng format
+```
+
+### flow_chart:
+```
+[ ] orderCorrects có sequence array
+[ ] flowChartNodes có key/label pairs
+```
+
+---
+
+## 🚨 ADDITIONAL STRICT RULES
+
+### 1. Answer Validation Rule
+**Answer PHẢI match với options!**
+
+```
+✅ MATCHING_HEADING: 
+   - answer = "v" 
+   - options PHẢI có contentMd bắt đầu bằng "v."
+   
+✅ MCQ/TFNG/YNNG:
+   - isCorrect=true option PHẢI tồn tại
+   - answer optionId PHẢI có trong options list
+
+❌ Answer không match → Backend grading FAIL
+❌ 0 options với isCorrect=true → Impossible to grade
+```
+
+---
+
+### 2. Slug/ID Format Rule
+**SQL seed file names và exam slugs:**
+
+```
+✅ VALID:
+   - "ielts-mentor-gt-reading-39-section-3-snake-oil"
+   - "3205-snake-oil" (item_id)
+   - lowercase, no spaces, use dashes
+
+❌ INVALID:
+   - "IELTS Mentor GT Reading" (uppercase, spaces)
+   - "snake_oil" (underscores - use dashes)
+   - "3205 snake oil" (spaces)
+```
+
+---
+
+### 3. Passage Section Labels Rule
+**Cho MATCHING_HEADING với sections A-H:**
+
+```
+✅ VALID (Bold labels):
+   **A.** Section A content...
+   **B.** Section B content...
+   
+❌ INVALID:
+   A. Section content (not bold - hard to read)
+   Section A: content (wrong format)
+```
+
+**Passage MUST NOT contain:**
+```
+❌ Headings list (i. First heading, ii. Second heading...)
+❌ Answer key
+❌ Question instructions ("Answer questions 1-7")
+```
+
+---
+
+### 4. Special Characters Escaping Rule
+
+**SQL:**
+```sql
+-- Single quotes MUST be doubled
+✅ 'snake''s oil'
+❌ 'snake's oil'  -- SQL syntax error!
+
+-- Backslash in strings
+✅ E'line1\\nline2'
+```
+
+**JSON:**
+```json
+// Newlines must be escaped
+✅ "Line 1\\nLine 2"
+❌ "Line 1
+Line 2"  // Invalid JSON!
+
+// Quotes must be escaped
+✅ "He said \"hello\""
+❌ "He said "hello""  // Invalid JSON!
+```
+
+---
+
+### 5. PromptMd Number Prefix Rule
+
+```
+✅ VALID:
+   "Statement text without number prefix."
+   "Which paragraph mentions..."
+   
+❌ INVALID:
+   "34. Statement text" (number duplicates question idx)
+   "Question 28: Which..." (redundant)
+```
+
+**Reason:** Frontend already displays question number from `idx` field.
+
+---
+
+### 6. isCorrect Count Rule
+
+| Type | Required isCorrect=true count |
+|------|-------------------------------|
+| TFNG, YNNG, MCQ_SINGLE, MCQ_IMAGE | Exactly 1 |
+| MCQ_MULTIPLE | 2 or more |
+| MATCHING_HEADING | Exactly 1 |
+| CLASSIFICATION | Exactly 1 |
+
+```
+❌ 0 isCorrect=true → Cannot determine correct answer
+❌ 2+ isCorrect=true for single-choice → Which one is correct?
+```
+
+---
+
+### 7. Options contentMd Format Rule
+
+| Type | Format | Example |
+|------|--------|---------|
+| TFNG | Plain text | `TRUE`, `FALSE`, `NOT GIVEN` |
+| YNNG | Plain text | `YES`, `NO`, `NOT GIVEN` |
+| MCQ_SINGLE | Letter + dot + space + text | `A. First option text` |
+| MATCHING_HEADING | Roman + dot + space + text | `i. First heading text` |
+
+```
+✅ "A. The history of astronomy"
+✅ "i. Where to find the best herbs"
+✅ "TRUE"
+
+❌ "A) The history" (parenthesis instead of dot)
+❌ "A The history" (missing dot)
+❌ "a. The history" (lowercase letter for MCQ)
+```
+
+---
+
+### 8. MatchPairs Key Format Rule
+
+**Key format:** `{type-identifier}-q{idx}` hoặc descriptive key
+
+```json
+// MATCHING_HEADING
+{"section-c": ["v", "v. Earlier applications"]}
+{"choose-heading-section-c-q28": ["v", "v. Earlier applications"]}
+
+// MATCHING_INFORMATION  
+{"info-q1": ["E"]}
+{"paragraph": ["E"]}
+
+// MATCHING_FEATURES
+{"feature-q36": ["William Herschel", "D"]}
+{"person": ["William Herschel", "D"]}
+```
+
+---
+
+### 9. Exam Title Format Rule
+
+```
+✅ VALID:
+   "GT Reading Test 39 Section 3 - Snake Oil"
+   "Academic Reading Test 5 Section 2 - Climate Change"
+   
+❌ INVALID:
+   "snake oil" (no context)
+   "Test 39" (too vague)
+```
+
+**Pattern:** `{Category} Test {N} Section {S} - {Title}`
+
+---
+
+### 10. Passage Word Count Rule
+
+```
+✅ Full passage: >= 500 words
+❌ Summary only: 100-200 words (WRONG!)
+```
+
+**Common Bug:** Crawler extracts summary completion text instead of full passage.
+
+**Fix:** Extract from cleaned text between title and "Questions X-Y".
+
+---
+
+### 11. Question Index Rule (from models.py)
+
 ```python
-text = text.replace('………', '_______')
-text = text.replace('...', '_______')
-text = text.replace('…', '_______')
+# Pydantic validation
+idx: int = Field(..., ge=1, le=50, description="Question number 1-50")
 ```
 
-### Fix Merged Words
-```python
-# Add space after period if missing
-text = re.sub(r'\.([A-Z])', r'. \1', text)
-
-# Add newline before paragraph labels
-text = re.sub(r'([.!?])\s*([A-H]\.)', r'\1\n\n**\2**', text)
 ```
-
-### Normalize Whitespace
-```python
-# Multiple spaces to single
-text = re.sub(r' +', ' ', text)
-
-# Multiple newlines to double
-text = re.sub(r'\n{3,}', '\n\n', text)
-
-# Trim lines
-text = '\n'.join(line.strip() for line in text.split('\n'))
-```
-
-### Fix Capitalization
-```python
-# Capitalize first letter of sentences
-text = re.sub(r'([.?!]\s+)([a-z])', lambda m: m.group(1) + m.group(2).upper(), text)
-
-# Capitalize first letter of prompt
-if text and text[0].islower():
-    text = text[0].upper() + text[1:]
+✅ VALID: idx = 1, 28, 40
+❌ INVALID: idx = 0 (ge=1)
+❌ INVALID: idx = 51+ (le=50)
+❌ INVALID: idx = "28" (must be integer)
 ```
 
 ---
 
-## ✅ VALIDATION CHECKLIST
+### 12. Option Count Minimums (from validate.py)
 
-Before finalizing data, check:
+| Type | Minimum Options |
+|------|-----------------|
+| SINGLE_CHOICE (TFNG, YNNG, MCQ_SINGLE) | >= 2 |
+| MULTIPLE_CHOICE (MCQ_MULTIPLE) | >= 3 |
+| MATCHING_HEADING | >= 5 (i, ii, iii, iv, v minimum) |
 
-### Passages
-- [ ] Every paragraph has **A.** **B.** labels (bold + period)
-- [ ] Line breaks between paragraphs
-- [ ] No questions/instructions embedded
-- [ ] No answer key embedded
-- [ ] No noise (ads, nav, cookies)
-- [ ] Proper sentence spacing
-
-### Questions
-- [ ] Prompts start with capital letter
-- [ ] Blank markers are `_______` (7 underscores)
-- [ ] Blanks have space before them
-- [ ] Question marks before blank (not after)
-- [ ] No placeholder text ("Question 1")
-
-### Options
-- [ ] MATCHING: Single uppercase letters
-- [ ] TFNG/YNNG: All caps
-- [ ] MCQ: "A. text" format
-- [ ] No duplicate options
-- [ ] Correct answer exists in options
-
-### Answers
-- [ ] Every question has correct_answers
-- [ ] Format matches source exactly
-- [ ] Multiple answers: "A, E" (with comma space)
+```
+❌ MCQ_SINGLE with 1 option → Error
+❌ MCQ_MULTIPLE with 2 options → Error (need 3+)
+❌ MATCHING_HEADING with 4 headings → Warning
+```
 
 ---
 
-## 📋 PYTHON CLEANUP TEMPLATE
+### 13. Question Sequence Gap Rule (from models.py)
 
 ```python
-import re
-import json
-from pathlib import Path
-
-def clean_text(text: str) -> str:
-    """Apply all text formatting rules."""
-    # Fix merged words
-    text = re.sub(r'\.([A-Z])', r'. \1', text)
-    
-    # Normalize whitespace
-    text = re.sub(r' +', ' ', text)
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    
-    # Capitalize first letter
-    if text and text[0].islower():
-        text = text[0].upper() + text[1:]
-    
-    # Convert ellipsis to blank
-    text = text.replace('………', '_______')
-    text = text.replace('...', '_______')
-    
-    return text.strip()
-
-def clean_prompt(prompt: str, q_type: str) -> str:
-    """Clean question prompt."""
-    prompt = clean_text(prompt)
-    
-    # Add blank for completion types
-    COMPLETION_TYPES = {'SHORT_ANSWER', 'SUMMARY_COMPLETION', 'SENTENCE_COMPLETION'}
-    if q_type in COMPLETION_TYPES:
-        if '_______' not in prompt:
-            if prompt.endswith('?'):
-                prompt = prompt + ' _______'
-            else:
-                prompt = prompt.rstrip('.') + ' _______.'
-    
-    return prompt
-
-def format_passage(passage: str) -> str:
-    """Format passage with paragraph labels."""
-    # Add bold labels
-    passage = re.sub(r'\n([A-H])\.\s+', r'\n\n**\1.** ', passage)
-    passage = re.sub(r'^([A-H])\.\s+', r'**\1.** ', passage)
-    
-    return passage.strip()
+# NormalizedExam validator
+gap = indices[i+1] - indices[i]
+if gap > 5:  # Allow small gaps (<=5) for section breaks
+    raise ValueError(f"Large gap in question sequence: Q{indices[i]} -> Q{indices[i+1]}")
 ```
+
+```
+✅ VALID: Q1, Q2, Q3, Q4, Q5 (consecutive)
+✅ VALID: Q1, Q2, Q7 (gap = 5, allowed for section break)
+❌ INVALID: Q1, Q2, Q20 (gap = 18, too large!)
+```
+
+---
+
+### 14. TFNG/YNNG Prompt Format Rule (from models.py)
+
+```python
+# Should not have options in prompt
+if q.type in {QuestionType.TRUE_FALSE_NOT_GIVEN, QuestionType.YES_NO_NOT_GIVEN}:
+    if 'A.' in q.prompt_md or 'B.' in q.prompt_md:
+        warnings.append(f"... should be statement only, not options")
+```
+
+```
+✅ VALID: "Scientists believe the universe is expanding."
+❌ INVALID: "A. Scientists believe the universe is expanding. B. Scientists doubt..."
+```
+
+---
+
+### 15. Completion Blank Marker Detection (from models.py)
+
+```python
+# Valid blank markers for frontend detection
+blank_markers = ['_______', '...', '____', '[blank]', '(blank)']
+```
+
+**BUT frontend only recognizes:**
+```javascript
+const re = /_{3,}/g;  // Only underscores!
+```
+
+```
+✅ Frontend renders: _______ (7 underscores)
+✅ Frontend renders: ____ (4 underscores) 
+❌ Frontend ignores: ... (dots)
+❌ Frontend ignores: [blank]
+❌ Frontend ignores: (blank)
+```
+
+**STRICT: Use only `_{3,}` for blanks!**
+
+---
+
+### 16. Passage Paragraph Marker Rule (from models.py)
+
+```python
+# For long passages, check for markers
+if len(section.passage_md) > 500:
+    has_markers = any(f"**{c}**" in section.passage_md or f"**{c}." in section.passage_md 
+                    for c in "ABCDEFGHIJ")
+    if not has_markers:
+        warnings.append("Long passage may need paragraph markers (A, B, C...)")
+```
+
+```
+✅ Long passage with markers:
+   **A.** First paragraph...
+   **B.** Second paragraph...
+   
+❌ Long passage without markers (hard for MATCHING to reference)
+```
+
+---
+
+### 17. Matching Heading Prompt Length Rule (from models.py)
+
+```python
+# MATCHING_HEADING prompt should be short
+if q.type == QuestionType.MATCHING_HEADING:
+    if len(q.prompt_md) > 100:
+        warnings.append("MATCHING_HEADING prompt should be short (Section A/B/C)")
+```
+
+```
+✅ VALID: "Choose the correct heading for Section C" (42 chars)
+✅ VALID: "Section D" (9 chars)
+❌ TOO LONG: Full paragraph explaining what heading to choose (150+ chars)
+```
+
+---
+
+## 📋 VALIDATION SUMMARY
+
+### From validate.py - Errors (will fail):
+- Missing required key: `exam`, `sections`, `questions`
+- `exam.title` is required
+- `exam.slug` is required
+- At least one section is required
+
+### From validate.py - Warnings:
+- `sections[i].passage_md` is very short (<50 chars)
+- `Q{idx}: {type} should have at least 2 options`
+- `Q{idx}: {type} should have exactly 1 correct`
+- `Q{idx}: {type} missing correct_answers`
+
+### From models.py - Strict Pydantic:
+- `idx` must be 1-50
+- `prompt_md` cannot be empty
+- Slug must match `^[a-z0-9-]+$`
+- Passage minimum 50 chars
+- Question sequence gap <= 5
+
+---
+
+## 🖥️ FRONTEND STRICT RULES
+
+### 18. HeadingDropdown Value Extraction (from HeadingDropdown.tsx)
+
+```tsx
+// How frontend extracts answer value from option
+value={opt.contentMd.split(".")[0].trim()}  // "i", "ii", "v"
+```
+
+**STRICT:**
+```
+✅ "i. Where to buy..." → value = "i"
+✅ "ii. What snake oil..." → value = "ii"
+❌ "Where to buy..." → value = "" (no dot to split!)
+❌ "i) Where to buy..." → value = "i)" (wrong format)
+```
+
+**contentMd PHẢI có format: `{roman}. {text}`**
+
+---
+
+### 19. MatchingLetterCard Input Validation (from MatchingLetterCard.tsx)
+
+```tsx
+// Only allows A-J letters
+if (!/^[A-J]$/.test(v)) return;
+```
+
+**STRICT:**
+```
+✅ User can input: A, B, C, D, E, F, G, H, I, J
+❌ Rejected: K, L, M... (beyond J)
+❌ Rejected: a, b, c (lowercase)
+❌ Rejected: 1, 2, 3 (numbers)
+```
+
+**MatchPairs answer PHẢI là A-J:**
+```json
+{"info-q1": ["E"]}  // ✅
+{"info-q1": ["K"]}  // ❌ Frontend won't accept user input "K"
+```
+
+---
+
+### 20. FlowChartCard Node Structure (from FlowChartCard.tsx)
+
+```tsx
+type FlowChartNode = {
+  key: string;    // Required
+  label: string;  // Required
+};
+
+// User answer = JSON array of labels in order
+onChange(JSON.stringify(arranged));  // ["step1", "step2", "step3"]
+```
+
+**STRICT:**
+```json
+{
+  "flowChartNodes": [
+    {"key": "step1", "label": "First step"},   // ✅
+    {"key": "step2", "label": "Second step"}   // ✅
+  ]
+}
+```
+
+```
+❌ Missing key: {"label": "Step"}
+❌ Missing label: {"key": "step1"}
+❌ Empty array: []
+```
+
+---
+
+### 21. QuestionCard Choice Structure (from QuestionCard.tsx)
+
+```tsx
+type Choice = string | { value: string; label: string };
+
+// Rendering
+const value = typeof c === "string" ? c : c.value;
+const label = typeof c === "string" ? c : c.label;
+```
+
+**STRICT: Options phải có value và label:**
+```json
+{
+  "options": [
+    {"value": "A", "label": "A. First option"},  // ✅
+    {"value": "TRUE", "label": "TRUE"}           // ✅
+  ]
+}
+```
+
+```
+❌ Missing value: {"label": "First option"}
+❌ Missing label: {"value": "A"}
+```
+
+---
+
+### 22. SummaryCompletionCard Instruction Split (from SummaryCompletionCard.tsx)
+
+```tsx
+// Splits at "answer sheet" to separate instruction from content
+const re = /answer sheet\.?/i;
+const m = re.exec(text);
+
+if (m) {
+  instruction = text.slice(0, cut);  // Before "answer sheet"
+  notes = text.slice(cut);           // After "answer sheet" (has blanks)
+}
+```
+
+**STRICT for completion prompts:**
+```
+✅ "Complete the summary. Write NO MORE THAN TWO WORDS from 
+   the passage for each answer. Write your answers on the 
+   answer sheet.
+
+   The student pays _______ per week."
+
+❌ Just blanks without context:
+   "_______ per week"
+```
+
+---
+
+### 23. Markdown Newline Handling (from all components)
+
+```tsx
+// All components replace escaped newlines
+const text = stem.replace(/\\n/g, "\n");
+```
+
+**STRICT:**
+```
+✅ In JSON: "Line 1\\nLine 2" → Renders as two lines
+❌ Raw newline in JSON: "Line 1\nLine 2" → Invalid JSON!
+```
+
+---
+
+### 24. ReactMarkdown Rendering (from QuestionCard.tsx)
+
+```tsx
+<ReactMarkdown
+  components={{
+    p: ({ node, ...props }) => (
+      <p className="whitespace-pre-wrap" {...props} />
+    ),
+  }}
+>
+  {text}
+</ReactMarkdown>
+```
+
+**Markdown syntax supported:**
+- `**bold**` → **bold**
+- `*italic*` → *italic*
+- `[link](url)` → hyperlink
+- Lists, headers, etc.
+
+**STRICT:**
+```
+✅ "The **Echinacea** plant..." → bold rendering
+❌ "The <b>Echinacea</b> plant..." → HTML tags may not render
+```
+
+---
+
+## 🔗 RELATED
+
+- @[/ielts-pipeline] - Pipeline workflow

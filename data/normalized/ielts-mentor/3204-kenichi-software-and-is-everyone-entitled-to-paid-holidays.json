@@ -16,7 +16,7 @@
   "questions": [
     {
       "idx": 15,
-      "type": "SUMMARY_COMPLETION",
+      "type": "SHORT_ANSWER",
       "prompt_md": "If you see anything suspicious, you should report it to a _______ employee.",
       "options": [],
       "correct_answers": [
@@ -29,12 +29,12 @@
       "prompt_md": "If the company wants to stop you and _______ you, you have to agree to it.",
       "options": [],
       "correct_answers": [
-        "(to) search"
+        "search"
       ]
     },
     {
       "idx": 17,
-      "type": "SUMMARY_COMPLETION",
+      "type": "SHORT_ANSWER",
       "prompt_md": "If you take things belonging to the company without permission, you will face _______",
       "options": [],
       "correct_answers": [
@@ -43,7 +43,7 @@
     },
     {
       "idx": 18,
-      "type": "SUMMARY_COMPLETION",
+      "type": "SHORT_ANSWER",
       "prompt_md": "Staff, _______ and visitors must all wear a badge on company premises.",
       "options": [],
       "correct_answers": [
@@ -52,7 +52,7 @@
     },
     {
       "idx": 19,
-      "type": "SUMMARY_COMPLETION",
+      "type": "SHORT_ANSWER",
       "prompt_md": "You must not pass on confidential information to _______ .",
       "options": [],
       "correct_answers": [
@@ -65,46 +65,17 @@
       "prompt_md": "If you leave the company, you have to hand in any _______ you have made on matters concerning the company.",
       "options": [],
       "correct_answers": [
-        "If you leave the company"
+        "(private) notes"
       ]
     },
     {
       "idx": 21,
-      "type": "MATCHING_INFORMATION",
+      "type": "SHORT_ANSWER",
       "prompt_md": "In what year were the regulations extended to cover most of the workers who were originally excluded?",
-      "options": [
-        {
-          "value": "A",
-          "label": "A",
-          "is_correct": false
-        },
-        {
-          "value": "B",
-          "label": "B",
-          "is_correct": false
-        },
-        {
-          "value": "C",
-          "label": "C",
-          "is_correct": false
-        },
-        {
-          "value": "D",
-          "label": "D",
-          "is_correct": false
-        },
-        {
-          "value": "E",
-          "label": "E",
-          "is_correct": false
-        },
-        {
-          "value": "F",
-          "label": "F",
-          "is_correct": false
-        }
-      ],
-      "correct_answers": []
+      "options": [],
+      "correct_answers": [
+        "2003"
+      ]
     },
     {
       "idx": 22,
@@ -117,11 +88,11 @@
     },
     {
       "idx": 23,
-      "type": "SUMMARY_COMPLETION",
+      "type": "SHORT_ANSWER",
       "prompt_md": "During a worker's first year of employment, what proportion of their annual holiday does a month's work give? _______",
       "options": [],
       "correct_answers": [
-        "one twelfth// one-twelfth (of annual holiday(s))"
+        "one-twelfth"
       ]
     },
     {
@@ -130,7 +101,7 @@
       "prompt_md": "What can an employer give a worker to stop them taking holiday that they have requested?",
       "options": [],
       "correct_answers": [
-        "(equal) counter-notice"
+        "counter-notice"
       ]
     },
     {
@@ -139,7 +110,7 @@
       "prompt_md": "What is given as a possible reason for an employee having to take a holiday at a certain time?",
       "options": [],
       "correct_answers": [
-        "(the) (annual) shutdown"
+        "shutdown"
       ]
     },
     {
@@ -148,7 +119,7 @@
       "prompt_md": "When an employee leaves their job, what should be given in place of any holiday they have not taken?",
       "options": [],
       "correct_answers": [
-        "When an employee leaves their job"
+        "payment"
       ]
     },
     {
@@ -157,7 +128,7 @@
       "prompt_md": "Apart from a contract, what type of document may set out an employee's holiday rights?",
       "options": [],
       "correct_answers": [
-        "Apart from a contract"
+        "collective agreement"
       ]
     }
   ],
