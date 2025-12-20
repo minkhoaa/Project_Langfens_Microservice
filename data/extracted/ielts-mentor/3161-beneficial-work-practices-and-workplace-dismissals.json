@@ -1,0 +1,479 @@
+{
+  "title": "GT Reading 25 Section 2 - Beneficial Work Practices & Workplace Dismissals",
+  "exam_id": "3161",
+  "passages": [
+    {
+      "text": "# Workplace Dismissals\n\nA. Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU). B. It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below. C. The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration. D. When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator. E. While keying, it is advisable to have frequent but short pauses of around thirty to sixty seconds to proofread. When doing this, relax your hands. After you have been keying for sixty minutes, you should have a ten-minute change of activity. During this spell, it is important that you do not remain seated but stand up or walk around. This period could be profitably used to do filing or collect and deliver documents. F. Generally, the best position for a VDU is at right angles to the window. If this is not possible then glare from the window can be controlled by blinds, curtains or movable screens. Keep the face of the VDU vertical to avoid glare from overhead lighting. G. Unsatisfactory work practices or working conditions may result in aches or pain. Symptoms should be reported to your supervisor early on so that the cause of the trouble can be corrected and the operator should seek medical attention.\n\ni. How can reflection problems be avoided? ii. How long should I work without a break? iii What if I experience any problems? iv. When is the best time to do filing chores? v. What makes a good seat? vi. What are the common health problems? vii. What is the best kind of lighting to have? viii. What are the roles of management and workers? ix. Why does a VDU create eye fatigue? x. Where should I place the documents? 15. Section A 16. Section B 17. Section C 18. Section D 19. Section E 20. Section F 21. Section G\n\nBefore the dismissal If an employer wants to dismiss an employee, there is a process to be followed. Instances of minor misconduct and poor performance must first be addressed through some preliminary steps. Firstly, you should be given an improvement note. This will explain the problem, outline any necessary changes and offer some assistance in correcting the situation. Then, if your employer does not think your performance has improved, you may be given a written warning. The last step is called a final written warning which will inform you that you will be dismissed unless there are improvements in performance. If there is no improvement, your employer can begin the dismissal procedure. The dismissal procedure begins with a letter from the employer setting out the charges made against the employee. The employee will be invited to a meeting to discuss these accusations. If the employee denies the charges, he is given the opportunity to appear at a formal appeal hearing in front of a different manager. After this, a decision is made as to whether the employee will be let go or not. Dismissals Of the various types of dismissal, a fair dismissal is the best kind if an employer wants an employee out of the workplace. A fair dismissal is legally and contractually strong and it means all the necessary procedures have been correctly followed. In cases where an employee’s misconduct has been very serious, however, an employer may not have to follow all of these procedures. If the employer can prove that the employee’s behaviour was illegal, dangerous or severely wrong, the employee can be dismissed immediately: a procedure known as summary dismissal. Sometimes a dismissal is not considered to have taken place fairly. One of these types is wrongful dismissal and involves a breach of contract by the employer. This could involve dismissing an employee without notice or without following proper disciplinary and dismissal procedures. Another type, unfair dismissal, is when an employee is sacked without good cause. There is another kind of dismissal, known as constructive dismissal, which is slightly peculiar because the employee is not actually openly dismissed by the employer. In this case, the employee is forced into resigning by an employer who tries to make significant changes to the original contract. This could mean an employee might have to work night shifts after originally signing on for day work, or he could be made to work in dangerous conditions."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 15,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "Section A",
+      "correct_answer": "VI",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 16,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "Section B",
+      "correct_answer": "VIII",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 17,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "Section C",
+      "correct_answer": "V",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 18,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "Section D",
+      "correct_answer": "X",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 19,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "Section E",
+      "correct_answer": "II",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 20,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "Section F",
+      "correct_answer": "I",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 21,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "Section G",
+      "correct_answer": "III",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 22,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "22. If an employee receives a ....................... , this means he will lose his job if his work does not get better.",
+      "correct_answer": "FINAL",
+      "options": []
+    },
+    {
+      "idx": 23,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "23. If an employee does not accept the reasons for his dismissal, a ....................... can be arranged.",
+      "correct_answer": "FORMAL",
+      "options": []
+    },
+    {
+      "idx": 24,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Question 24",
+      "correct_answer": "B",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 25,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Question 25",
+      "correct_answer": "E",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": true
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 26,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Question 26",
+      "correct_answer": "D",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 27,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Question 27",
+      "correct_answer": "C",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 28,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Question 28",
+      "correct_answer": "A",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    }
+  ],
+  "answers": {
+    "15": "VI",
+    "16": "VIII",
+    "17": "V",
+    "18": "X",
+    "19": "II",
+    "20": "I",
+    "21": "III",
+    "22": "FINAL",
+    "23": "FORMAL",
+    "24": "B",
+    "25": "E",
+    "26": "D",
+    "27": "C",
+    "28": "A"
+  },
+  "heading_options": [
+    {
+      "value": "i",
+      "label": "i. How can reflection problems be avoided?",
+      "is_correct": false
+    },
+    {
+      "value": "ii",
+      "label": "ii. How long should I work without a break?",
+      "is_correct": false
+    },
+    {
+      "value": "iv",
+      "label": "iv. When is the best time to do filing chores?",
+      "is_correct": false
+    },
+    {
+      "value": "v",
+      "label": "v. What makes a good seat?",
+      "is_correct": false
+    },
+    {
+      "value": "vi",
+      "label": "vi. What are the common health problems?",
+      "is_correct": false
+    },
+    {
+      "value": "vii",
+      "label": "vii. What is the best kind of lighting to have?",
+      "is_correct": false
+    },
+    {
+      "value": "viii",
+      "label": "viii. What are the roles of management and workers?",
+      "is_correct": false
+    },
+    {
+      "value": "ix",
+      "label": "ix. Why does a VDU create eye fatigue?",
+      "is_correct": false
+    },
+    {
+      "value": "x",
+      "label": "x. Where should I place the documents?",
+      "is_correct": false
+    }
+  ],
+  "source": "ielts-mentor",
+  "item_id": "3161-beneficial-work-practices-and-workplace-dismissals",
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3161-beneficial-work-practices-and-workplace-dismissals",
+  "_raw_text": "GT Reading Test 25 Section 2 - Beneficial Work Practices & Workplace Dismissals\nDetails\nGT Reading Mock Test 25:\n|\nSection 1\n|\nSection 2\n|\nSection 3\n|\nSection 2: Questions 15-28\nRead the text below and answers to the questions\n15-28\non your answer sheet.\nGT Reading:\n\"Beneficial Work Practices\" & \"Workplace Dismissals\"\nLook at the information about the '\nBeneficial work practices for the keyboard operator\n' and answer questions\n15-21\n.\nBENEFICIAL WORK PRACTICES FOR THE\nKEYBOARD OPERATOR\nA\n.\nSensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).\nB.\nIt is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.\nC.\nThe typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.\nD.\nWhen the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper – whichever the eyes are focused on for the majority of time should be put directly in front of the operator.\nE.\nWhile keying, it is advisable to have frequent but short pauses of around thirty to sixty seconds to proofread. When doing this, relax your hands. After you have been keying for sixty minutes, you should have a ten-minute change of activity. During this spell, it is important that you do not remain seated but stand up or walk around. This period could be profitably used to do filing or collect and deliver documents.\nF.\nGenerally, the best position for a VDU is at right angles to the window. If this is not possible then glare from the window can be controlled by blinds, curtains or movable screens. Keep the face of the VDU vertical to avoid glare from overhead lighting.\nG.\nUnsatisfactory work practices or working conditions may result in aches or pain. Symptoms should be reported to your supervisor early on so that the cause of the trouble can be corrected and the operator should seek medical attention.\nQuestions 15-21\nThe text on the next page has seven sections,\nA–G\n.\nChoose the correct heading for each section from the list of headings below.\nWrite the correct number,\ni–x\n, in boxes\n15–21\non your answer sheet.\nList of Headings\ni.  How can reflection problems be avoided?\nii.  How long should I work without a break?\niii  What if I experience any problems?\niv.  When is the best time to do filing chores?\nv.  What makes a good seat?\nvi. What are the common health problems?\nvii.  What is the best kind of lighting to have?\nviii.  What are the roles of management and workers?\nix.  Why does a VDU create eye fatigue?\nx.  Where should I place the documents?\n15.\nSection A\n16.\nSection B\n17.\nSection C\n18.\nSection D\n19.\nSection E\n20.\nSection F\n21.\nSection G\nLook at the information about \"\nWorkplace dismissals\n\". Then answer the\nquestions 22-28\nbelow.\nWorkplace Dismissals\nBefore the dismissal\nIf an employer wants to dismiss an employee, there is a process to be followed. Instances of minor misconduct and poor performance must first be addressed through some preliminary steps.\nFirstly, you should be given an improvement note. This will explain the problem, outline any necessary changes and offer some assistance in correcting the situation. Then, if your employer does not think your performance has improved, you may be given a written warning. The last step is called a final written warning which will inform you that you will be dismissed unless there are improvements in performance. If there is no improvement, your employer can begin the dismissal procedure.\nThe dismissal procedure begins with a letter from the employer setting out the charges made against the employee. The employee will be invited to a meeting to discuss these accusations. If the employee denies the charges, he is given the opportunity to appear at a formal appeal hearing in front of a different manager. After this, a decision is made as to whether the employee will be let go or not.\nDismissals\nOf the various types of dismissal, a fair dismissal is the best kind if an employer wants an employee out of the workplace. A fair dismissal is legally and contractually strong and it means all the necessary procedures have been correctly followed. In cases where an employee’s misconduct has been very serious, however, an employer may not have to follow all of these procedures. If the employer can prove that the employee’s behaviour was illegal, dangerous or severely wrong, the employee can be dismissed immediately: a procedure known as summary dismissal.\nSometimes a dismissal is not considered to have taken place fairly. One of these types is wrongful dismissal and involves a breach of contract by the employer. This could involve dismissing an employee without notice or without following proper disciplinary and dismissal procedures. Another type, unfair dismissal, is when an employee is sacked without good cause.\nThere is another kind of dismissal, known as constructive dismissal, which is slightly peculiar because the employee is not actually openly dismissed by the employer. In this case, the employee is forced into resigning by an employer who tries to make significant changes to the original contract. This could mean an employee might have to work night shifts after originally signing on for day work, or he could be made to work in dangerous conditions.\nQuestions 22 and 23\nComplete the sentences below.\nChoose\nNO MORE THAN THREE WORDS\nfrom the text for each answer.\nWrite your answers in boxes\n22–23\non your answer sheet.\n22. If an employee receives a ....................... , this means he will lose his job if his work does not get better.\n23. If an employee does not accept the reasons for his dismissal, a ....................... can be arranged.\nQuestions 24–28\nLook at the following descriptions (\nQuestions 24–28\n) and the list of terms in the box below.\nMatch each description with the correct term\nA–E\n.\nWrite the appropriate letter\nA–E\nin boxes\n24–28\non your answer sheet.\n24. An employee is asked to leave work straight away because he has done something really bad.\n25. An employee is pressured to leave his job unless he accepts conditions that are very different from those agreed to in the beginning.\n26. An employer gets rid of an employee without keeping to conditions in the contract.\n27. The reason for an employee’s dismissal is not considered good enough.\n28. The reasons for an employee’s dismissal are acceptable by law and the terms of the employment contract.\nA.  Fair dismissal\nB.  Summary dismissal\nC.  Unfair dismissal\nD.  Wrongful dismissal\nE.  Constructive dismissal\nAnswer:\n15. vi\n16. viii\n17. v\n18. x\n19. ii\n20. i\n21. iii\n22. final written warning\n23. formal appeal hearing\n24. B\n25. E\n26. D\n27. C\n28. A\nShow/ Hide Answers\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n\nGT Reading\nPrev\nNext",
+  "_raw_html": "<!DOCTYPE html>\n<html lang=\"en-gb\" dir=\"ltr\">\n\t<head>\n  <!-- Google tag (gtag.js) -->\n<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-CX3C0LGRYK\"></script>\n<script>\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n\n  gtag('config', 'G-CX3C0LGRYK');\n</script>\n  \n  <script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n  \n  <script type=\"text/javascript\">\n    (function(c,l,a,r,i,t,y){\n        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};\n        t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i;\n        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);\n    })(window, document, \"clarity\", \"script\", \"bv9m9rc1bk\");\n</script>\n  \n\t\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes\"/>\n\t\t<meta name=\"HandheldFriendly\" content=\"true\" />\n\t\t<meta name=\"apple-mobile-web-app-capable\" content=\"YES\" />\n\t\t<meta charset=\"utf-8\" />\n\t<base href=\"https://www.ielts-mentor.com/reading-sample/gt-reading/3161-beneficial-work-practices-and-workplace-dismissals\" />\n\t<meta name=\"keywords\" content=\"GT reading Sample, GT reading, IELTS General Training Reading\" />\n\t<meta name=\"rights\" content=\"Copyright © 2025 IELTS Mentor.\" />\n\t<meta name=\"author\" content=\"IELTS Mentor\" />\n\t<meta name=\"description\" content=\"IELTS exam preparation, IELTS sample answers, and tips to score a high band score in your IELTS test.\" />\n\t<meta name=\"generator\" content=\"Joomla! - Open Source Content Management\" />\n\t<title>GT Reading Test 25 Section 2 - Beneficial Work Practices &amp; Workplace Dismissals</title>\n\t<link href=\"https://www.ielts-mentor.com/reading-sample/gt-reading/3161-beneficial-work-practices-and-workplace-dismissals/amp\" rel=\"amphtml\" />\n\t<link href=\"/templates/beez3/favicon.ico\" rel=\"shortcut icon\" type=\"image/vnd.microsoft.icon\" />\n\t<link href=\"/plugins/content/extravote/assets/extravote.css\" rel=\"stylesheet\" />\n\t<link href=\"/media/com_rscomments/css/font-awesome.min.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/media/com_rscomments/css/site.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/media/jui/css/bootstrap-tooltip-extended.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/system/css/system.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/position.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/layout.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/print.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" media=\"print\" />\n\t<link href=\"/templates/beez3/css/general.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/turq.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<!--[if IE 7]><link href=\"/templates/beez3/css/ie7only.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" /><![endif]-->\n\t<script type=\"application/json\" class=\"joomla-script-options new\">{\"csrf.token\":\"3629a65a2061bcc80785189d9d8af5e2\",\"system.paths\":{\"root\":\"\",\"base\":\"\"},\"joomla.jtext\":{\"COM_RSCOMMENTS_HIDE_FORM\":\"Hide comment form\",\"COM_RSCOMMENTS_SHOW_FORM\":\"Show comment form\",\"TPL_BEEZ3_ALTOPEN\":\"is open\",\"TPL_BEEZ3_ALTCLOSE\":\"is closed\",\"TPL_BEEZ3_TEXTRIGHTOPEN\":\"Open info\",\"TPL_BEEZ3_TEXTRIGHTCLOSE\":\"Close info\",\"TPL_BEEZ3_FONTSIZE\":\"Font Size\",\"TPL_BEEZ3_BIGGER\":\"Bigger\",\"TPL_BEEZ3_RESET\":\"Reset\",\"TPL_BEEZ3_SMALLER\":\"Smaller\",\"TPL_BEEZ3_INCREASE_SIZE\":\"Increase size\",\"TPL_BEEZ3_REVERT_STYLES_TO_DEFAULT\":\"Revert styles to default\",\"TPL_BEEZ3_DECREASE_SIZE\":\"Decrease size\",\"TPL_BEEZ3_OPENMENU\":\"Open Menu\",\"TPL_BEEZ3_CLOSEMENU\":\"Close Menu\"}}</script>\n\t<script src=\"/plugins/content/extravote/assets/extravote.js\"></script>\n\t<script src=\"/media/jui/js/jquery.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/jquery-noconflict.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/jquery-migrate.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/bootstrap.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/core.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/com_rscomments/js/site.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/bootstrap-tooltip-extended.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/caption.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/mootools-core.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/mootools-more.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/md_stylechanger.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/hide.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/respond.src.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/template.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<!--[if lt IE 9]><script src=\"/media/jui/js/html5.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script><![endif]-->\n\t<script>\n\n\t\t\t\tvar ev_basefolder = '';\n\t\t\t\tvar extravote_text=Array('Your browser does not support AJAX!','Loading','Thank you for voting!','You need to login to rate this item.','You have already rated this item.','(%s Votes)','(%s Vote)','Rating %s ');\n\t\t\t\njQuery(function($){ initTooltips(); $(\"body\").on(\"subform-row-add\", initTooltips); function initTooltips (event, container) { container = container || document;$(container).find(\".hasTooltip\").tooltip({\"html\": true,\"container\": \"body\"});} });\nvar rsc_root = 'https://www.ielts-mentor.com/';\njQuery(document).ready(function($) {\n   $('#rscomments-report').on('show.bs.modal', function() {\n       $('body').addClass('modal-open');\n       var modalBody = $(this).find('.modal-body');\n       modalBody.find('iframe').remove();\n       modalBody.prepend('<iframe class=\"iframe jviewport-height70\" src=\"/component/rscomments/report\" name=\"Report\"></iframe>');\n   }).on('shown.bs.modal', function() {\n       var modalHeight = $('div.modal:visible').outerHeight(true),\n           modalHeaderHeight = $('div.modal-header:visible').outerHeight(true),\n           modalBodyHeightOuter = $('div.modal-body:visible').outerHeight(true),\n           modalBodyHeight = $('div.modal-body:visible').height(),\n           modalFooterHeight = $('div.modal-footer:visible').outerHeight(true),\n           padding = document.getElementById('rscomments-report').offsetTop,\n           maxModalHeight = ($(window).height()-(padding*2)),\n           modalBodyPadding = (modalBodyHeightOuter-modalBodyHeight),\n           maxModalBodyHeight = maxModalHeight-(modalHeaderHeight+modalFooterHeight+modalBodyPadding);\n       var iframeHeight = $('.iframe').height();\n       if (iframeHeight > maxModalBodyHeight){;\n           $('.modal-body').css({'max-height': maxModalBodyHeight, 'overflow-y': 'auto'});\n           $('.iframe').css('max-height', maxModalBodyHeight-modalBodyPadding);\n       }\n   }).on('hide.bs.modal', function () {\n       $('body').removeClass('modal-open');\n       $('.modal-body').css({'max-height': 'initial', 'overflow-y': 'initial'});\n       $('.modalTooltip').tooltip('destroy');\n   });\n});\njQuery(window).on('load',  function() {\n\t\t\t\tnew JCaption('img.caption');\n\t\t\t});\n\tvar big        = '75%';\n\tvar small      = '53%';\n\tvar bildauf    = '/templates/beez3/images/plus.png';\n\tvar bildzu     = '/templates/beez3/images/minus.png';\n\tvar rightopen  = 'Open info';\n\tvar rightclose = 'Close info';\n\tvar altopen    = 'is open';\n\tvar altclose   = 'is closed';\n\n\t</script>\n\n\t</head>\n\t<body id=\"shadow\">\n\t\t<div id=\"all\">\n\t\t\t<div id=\"back\">\n\t\t\t\t<header id=\"header\">\n\t\t\t\t\t<div class=\"logoheader\">\n\t\t\t\t\t\t<h1 id=\"logo\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tIELTS Mentor\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"header1\">\n\t\t\t\t\t\t&quot;IELTS Preparation &amp; Sample Answer&quot;\t\t\t\t\t\t</span></h1>\n\t\t\t\t\t</div><!-- end logoheader -->\n\t\t\t\t\t<ul class=\"skiplinks\">\n\t\t\t\t\t\t<li><a href=\"#main\" class=\"u2\">Skip to content</a></li>\n\t\t\t\t\t\t<li><a href=\"#nav\" class=\"u2\">Jump to main navigation and login</a></li>\n\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t<h2 class=\"unseen\">Nav view search</h2>\n\t\t\t\t\t<h3 class=\"unseen\">Navigation</h3>\n\t\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-101 default\"><a href=\"/\" >Home</a></li><li class=\"item-158\"><a href=\"/ielts-faq\" >IELTS FAQ</a></li><li class=\"item-281\"><a href=\"/ielts-exam\" >IELTS Exam</a></li><li class=\"item-280\"><a href=\"/ielts-sample\" >IELTS Sample</a></li><li class=\"item-180\"><a href=\"/download\" >Download</a></li><li class=\"item-414\"><a href=\"/ielts-vocabulary\" >Vocabulary</a></li><li class=\"item-262\"><a href=\"https://www.ielts-mentor.com/ielts\" target=\"_blank\" rel=\"noopener noreferrer\">Blog</a></li><li class=\"item-164\"><a href=\"/contact-us\" >Contact Us</a></li><li class=\"item-284\"><a href=\"/search\" >Search</a></li></ul>\n\n\t\t\t\t\t<div id=\"line\">\n\t\t\t\t\t\t<div id=\"fontsize\"></div>\n\t\t\t\t\t\t<h3 class=\"unseen\">Search</h3>\n\t\t\t\t\t\t\n\t\t\t\t\t</div> <!-- end line -->\n\t\t\t\t</header><!-- end header -->\n\t\t\t\t<div id=\"contentarea\">\n\t\t\t\t\t<div id=\"breadcrumbs\">\n\t\t\t\t\t\t\n\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t\t\t\t\t<nav class=\"left1 leftbigger\" id=\"nav\">\n\t\t\t\t\t\t\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-114 active deeper parent\"><a href=\"/reading-sample\" >Reading Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-115\"><a href=\"/reading-sample/academic-reading\" >Academic Reading</a></li><li class=\"item-116 current active\"><a href=\"/reading-sample/gt-reading\" >GT Reading</a></li></ul></li><li class=\"item-117 deeper parent\"><a href=\"/writing-sample\" >Writing Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-118\"><a href=\"/writing-sample/academic-writing-task-1\" >Academic Writing Task 1</a></li><li class=\"item-119\"><a href=\"/writing-sample/gt-writing-task-1\" >GT Writing Task 1</a></li><li class=\"item-122\"><a href=\"/writing-sample/writing-task-2\" >Writing Task 2</a></li></ul></li><li class=\"item-123\"><a href=\"/listening-sample\" >Listening Sample</a></li><li class=\"item-124 deeper parent\"><a href=\"/speaking-sample\" >Speaking Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-415\"><a href=\"/speaking-sample/speaking-part-1\" >Speaking part 1</a></li><li class=\"item-405\"><a href=\"/speaking-sample/speaking-part-3\" >Speaking part 3</a></li></ul></li><li class=\"item-125\"><a href=\"/cue-card-sample\" >Cue Card Sample</a></li><li class=\"item-481\"><a href=\"/speaking\" >Speaking</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Sponsored links</h3>\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive - left -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"4123738220\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n</div>\n\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-105 deeper parent\"><a href=\"/reading-preparation\" >Reading Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-106\"><a href=\"/reading-preparation/academic-reading\" >Academic Reading</a></li><li class=\"item-279\"><a href=\"/reading-preparation/gt-reading\" >GT Reading</a></li></ul></li><li class=\"item-107 deeper parent\"><a href=\"/writing-preparation\" >Writing Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-108 deeper parent\"><a href=\"/writing-preparation/academic-writing\" >Academic Writing</a><ul class=\"nav-child unstyled small\"><li class=\"item-109\"><a href=\"/writing-preparation/academic-writing/writing-task-1\" >Writing Task 1 </a></li><li class=\"item-111\"><a href=\"/writing-preparation/academic-writing/writing-task-2\" >Writing Task 2</a></li></ul></li><li class=\"item-110\"><a href=\"/writing-preparation/gt-writing\" >GT Writing</a></li></ul></li><li class=\"item-112\"><a href=\"/listening-preparation\" >Listening Preparation</a></li><li class=\"item-113 deeper parent\"><a href=\"/speaking-preparation\" >Speaking Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-287\"><a href=\"/speaking-preparation/find-a-speaking-partner\" >Find a Speaking Partner</a></li></ul></li><li class=\"item-288\"><a href=\"https://www.ielts-mentor.com/ielts/ielts-quiz\" >IELTS Mock Test</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-417\"><a href=\"/essay-vocabulary\" >Essay Vocabulary</a></li><li class=\"item-418\"><a href=\"/topics-related-vocabulary\" >Topics Related Vocabulary</a></li></ul>\n</div>\n\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t</nav><!-- end navi -->\n\t\t\t\t\t\n\t\t\t\t\t<div id=\"wrapper2\" >\n\t\t\t\t\t\t<div id=\"main\">\n\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t<div id=\"system-message-container\">\n\t</div>\n\n\t\t\t\t\t\t\t<div style=\"position:absolute;left:-7944px;width:1000px;\"><a href=\"https://bk8thai.co.com\" rel=\"dofollow\">bk8</a>\n<a href=\"https://bk8thai-official.com\" rel=\"dofollow\">bk8</a>\n<a href=\"https://bk8thaihub.online\" rel=\"dofollow\">bk8</a></div>\n<article class=\"item-page\">\n\t\t<h2>\n\t\t\tGT Reading Test 25 Section 2 - Beneficial Work Practices &amp; Workplace Dismissals\t\t</h2>\n\n<div class=\"pull-left\"></div>\n\n\n\t<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n\n <dl class=\"article-info\">\n <dt class=\"article-info-term\">Details</dt>\n\t\t<dd class=\"modified\">\n\t\tLast Updated: Wednesday, 18 May 2022 22:22\t\t</dd>\n\t<dd class=\"createdby\">\n\t\t\t\t\t\t\tWritten by IELTS Mentor\t\t\t</dd>\n\t\t<dd class=\"hits\">\n\t\tHits: 141554\t\t</dd>\n </dl>\n\n\t\n\n\t\t\t<div style=\"margin:1px 0px 6px 0px;\"><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div><div align=\"justify\">\n\t<h2 style=\"text-align: left;\">\n\t\t<span style=\"color:#339966;\">GT Reading Mock Test 25:</span></h2>\n\t<p style=\"text-align: left;\">\n\t\t|&nbsp; <a href=\"/reading-sample/gt-reading/3160-emergency-procedures-and-community-education\" title=\"GT Reading Test 25 Section 1 - Emergency Procedures &amp; Community Education\">Section 1</a>&nbsp; |&nbsp; <a href=\"/reading-sample/gt-reading/3161-beneficial-work-practices-and-workplace-dismissals\" title=\"GT Reading Test 25 Section 2 - Beneficial Work Practices &amp; Workplace Dismissals\">Section 2</a>&nbsp; |&nbsp; <a href=\"/reading-sample/gt-reading/3162-employment-in-japan\" title=\"GT Reading Test 25 Section 3 - Employment in Japan\">Section 3</a>&nbsp; |\n\t<h4>\n\t\t<span style=\"color:#000080;\">Section 2: Questions 15-28</span></h4>\n\t<p style=\"text-align: left;\">\n\t\tRead the text below and answers to the questions <strong>15-28</strong> on your answer sheet.\n\t<hr />\n\t<h3 style=\"text-align: left;\">\n\t\tGT Reading:<span style=\"color:#008080;\"> &quot;Beneficial Work Practices&quot; &amp; &quot;Workplace Dismissals&quot;</span></h3>\n\t<hr />\n</div>\n<p>\n\tLook at the information about the &#39;<strong>Beneficial work practices for the keyboard operator</strong>&#39; and answer questions <strong>15-21</strong>.\n<h3 style=\"text-align: center;\">\n\t<span style=\"color:#3366cc;\">BENEFICIAL WORK PRACTICES FOR THE </span></h3>\n<h3 style=\"text-align: center;\">\n\t<span style=\"color:#3366cc;\">KEYBOARD OPERATOR</span></h3>\n<p>\n\t<strong><span style=\"font-size:14px;\">A</span></strong><strong><span style=\"font-size:14px;\">.</span>&nbsp;</strong> Sensible work practices are an important factor in the prevention of muscular fatigue; discomfort or pain in the arms, neck, hands or back; or eye strain which can be associated with constant or regular work at a keyboard and visual display unit (VDU).<br />\n\t<br />\n\t<strong><span style=\"font-size:14px;\">B.</span>&nbsp;</strong> It is vital that the employer pays attention to the physical setting such as workplace design, the office environment, and placement of monitors as well as the organisation of the work and individual work habits. Operators must be able to recognise work-related health problems and be given the opportunity to participate in the management of these. Operators should take note of and follow the preventive measures outlined below.<br />\n\t<br />\n\t<strong><span style=\"font-size:14px;\">C.</span></strong>&nbsp; The typist must be comfortably accommodated in a chair that is adjustable for height with a backrest that is also easily adjustable both for angle and height. The backrest and sitting ledge (with a curved edge) should preferably be cloth-covered to avoid excessive perspiration.<br />\n\t<br />\n\t<strong><span style=\"font-size:14px;\">D.&nbsp;</span></strong> When the keyboard operator is working from a paper file or manuscript, it should be at the same distance from the eyes as the screen. The most convenient position can be found by using some sort of holder. Individual arrangements will vary according to whether the operator spends more time looking at the VDU or the paper &ndash; whichever the eyes are focused on for the majority of time should be put directly in front of the operator.<br />\n\t<br />\n\t<strong><span style=\"font-size:14px;\">E.&nbsp;</span></strong> While keying, it is advisable to have frequent but short pauses of around thirty to sixty seconds to proofread. When doing this, relax your hands. After you have been keying for sixty minutes, you should have a ten-minute change of activity. During this spell, it is important that you do not remain seated but stand up or walk around. This period could be profitably used to do filing or collect and deliver documents.<br />\n\t<br />\n\t<strong><span style=\"font-size:14px;\">F.&nbsp;</span></strong> Generally, the best position for a VDU is at right angles to the window. If this is not possible then glare from the window can be controlled by blinds, curtains or movable screens. Keep the face of the VDU vertical to avoid glare from overhead lighting.<br />\n\t<br />\n\t<strong><span style=\"font-size:14px;\">G.&nbsp;</span></strong> Unsatisfactory work practices or working conditions may result in aches or pain. Symptoms should be reported to your supervisor early on so that the cause of the trouble can be corrected and the operator should seek medical attention.\n<h4>\n\tQuestions 15-21</h4>\n<p>\n\tThe text on the next page has seven sections, <strong>A&ndash;G</strong>.<br />\n\t<br />\n\tChoose the correct heading for each section from the list of headings below.<br />\n\t<br />\n\tWrite the correct number,<strong> i&ndash;x</strong>, in boxes <strong>15&ndash;21</strong> on your answer sheet.<div style=\"margin:3px 0px 10px 0px;\"><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<ins class=\"adsbygoogle\"\n     style=\"display:block; text-align:center;\"\n     data-ad-layout=\"in-article\"\n     data-ad-format=\"fluid\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"1054007359\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n<p>\n\t<strong><span style=\"font-size:14px;\">List of Headings</span></strong>\n<p>\n\ti.&nbsp; How can reflection problems be avoided?<br />\n\tii.&nbsp; How long should I work without a break?<br />\n\tiii&nbsp; What if I experience any problems?<br />\n\tiv.&nbsp; When is the best time to do filing chores?<br />\n\tv.&nbsp; What makes a good seat?<br />\n\tvi. What are the common health problems?<br />\n\tvii.&nbsp; What is the best kind of lighting to have?<br />\n\tviii.&nbsp; What are the roles of management and workers?<br />\n\tix.&nbsp; Why does a VDU create eye fatigue?<br />\n\tx.&nbsp; Where should I place the documents?<br />\n\t<br />\n\t<strong>15.</strong>&nbsp; Section A<br />\n\t<strong>16.</strong>&nbsp; Section B<br />\n\t<strong>17.</strong>&nbsp; Section C<br />\n\t<strong>18.</strong>&nbsp; Section D<br />\n\t<strong>19.&nbsp; </strong>Section E<br />\n\t<strong>20.</strong>&nbsp; Section F<br />\n\t<strong>21.</strong>&nbsp; Section G\n<hr />\n<p>\n\tLook at the information about &quot;<strong>Workplace dismissals</strong>&quot;. Then answer the <strong>questions 22-28</strong> below.\n<h2 style=\"text-align: center;\">\n\t<span style=\"color:#006400;\">Workplace Dismissals</span></h2>\n<p>\n\t<span style=\"font-size:14px;\"><strong>Before the dismissal</strong></span><br />\n\tIf an employer wants to dismiss an employee, there is a process to be followed. Instances of minor misconduct and poor performance must first be addressed through some preliminary steps.<br />\n\t<br />\n\tFirstly, you should be given an improvement note. This will explain the problem, outline any necessary changes and offer some assistance in correcting the situation. Then, if your employer does not think your performance has improved, you may be given a written warning. The last step is called a final written warning which will inform you that you will be dismissed unless there are improvements in performance. If there is no improvement, your employer can begin the dismissal procedure.<br />\n\t<br />\n\tThe dismissal procedure begins with a letter from the employer setting out the charges made against the employee. The employee will be invited to a meeting to discuss these accusations. If the employee denies the charges, he is given the opportunity to appear at a formal appeal hearing in front of a different manager. After this, a decision is made as to whether the employee will be let go or not.<br />\n\t<br />\n\t<span style=\"font-size:14px;\"><strong>Dismissals</strong></span><br />\n\tOf the various types of dismissal, a fair dismissal is the best kind if an employer wants an employee out of the workplace. A fair dismissal is legally and contractually strong and it means all the necessary procedures have been correctly followed. In cases where an employee&rsquo;s misconduct has been very serious, however, an employer may not have to follow all of these procedures. If the employer can prove that the employee&rsquo;s behaviour was illegal, dangerous or severely wrong, the employee can be dismissed immediately: a procedure known as summary dismissal.<br />\n\t<br />\n\tSometimes a dismissal is not considered to have taken place fairly. One of these types is wrongful dismissal and involves a breach of contract by the employer. This could involve dismissing an employee without notice or without following proper disciplinary and dismissal procedures. Another type, unfair dismissal, is when an employee is sacked without good cause.<br />\n\t<br />\n\tThere is another kind of dismissal, known as constructive dismissal, which is slightly peculiar because the employee is not actually openly dismissed by the employer. In this case, the employee is forced into resigning by an employer who tries to make significant changes to the original contract. This could mean an employee might have to work night shifts after originally signing on for day work, or he could be made to work in dangerous conditions.\n<h4>\n\tQuestions 22 and 23</h4>\n<p>\n\tComplete the sentences below.<br />\n\t<br />\n\tChoose <strong>NO MORE THAN THREE WORDS</strong> from the text for each answer.<br />\n\t<br />\n\t<em>Write your answers in boxes <strong>22&ndash;23</strong> on your answer sheet.</em><br />\n\t<br />\n\t22. If an employee receives a ....................... , this means he will lose his job if his work does not get better.<br />\n\t23. If an employee does not accept the reasons for his dismissal, a ....................... can be arranged.\n<h4>\n\tQuestions 24&ndash;28</h4>\n<p>\n\tLook at the following descriptions (<strong>Questions 24&ndash;28</strong>) and the list of terms in the box below.<br />\n\t<br />\n\tMatch each description with the correct term <strong>A&ndash;E</strong>.<br />\n\t<br />\n\t<em>Write the appropriate letter <strong>A&ndash;E</strong> in boxes <strong>24&ndash;28</strong> on your answer sheet.</em><br />\n\t<br />\n\t24. An employee is asked to leave work straight away because he has done something really bad.<br />\n\t25. An employee is pressured to leave his job unless he accepts conditions that are very different from those agreed to in the beginning.<br />\n\t26. An employer gets rid of an employee without keeping to conditions in the contract.<br />\n\t27. The reason for an employee&rsquo;s dismissal is not considered good enough.<br />\n\t28. The reasons for an employee&rsquo;s dismissal are acceptable by law and the terms of the employment contract.\n<p>\n\t<br />\n\tA.&nbsp; Fair dismissal<br />\n\tB.&nbsp; Summary dismissal<br />\n\tC.&nbsp; Unfair dismissal<br />\n\tD.&nbsp; Wrongful dismissal<br />\n\tE.&nbsp; Constructive dismissal<br />\n\t&nbsp;\n<p>\n\t<strong>Click the button to Show/ Hide Answers</strong>\n<div id=\"spoiler\" style=\"display:none\">\n\t<strong>Answer:</strong><br />\n\t15. vi<br />\n\t16. viii<br />\n\t17. v<br />\n\t18. x<br />\n\t19. ii<br />\n\t20. i<br />\n\t21. iii<br />\n\t22. final written warning<br />\n\t23. formal appeal hearing<br />\n\t24. B<br />\n\t25. E<br />\n\t26. D<br />\n\t27. C<br />\n\t28. A</div>\n<p>\n\t<button onclick=\"if(document.getElementById('spoiler') .style.display=='none') {document.getElementById('spoiler') .style.display=''}else{document.getElementById('spoiler') .style.display='none'}\" title=\"Click to show/hide content\" type=\"button\">Show/ Hide Answers</button>\n<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-format=\"autorelaxed\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"2114159829\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n<div class=\"size-1 extravote\">\n  <span class=\"extravote-stars\">\n\t<span id=\"rating_3161_0\" class=\"current-rating\" style=\"width:54%;\"></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,0.5,40.5,15,'0',1,1,1);\" title=\"0.5 out of 5\" class=\"ev-5-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,1,40.5,15,'0',1,1,1);\" title=\"1 out of 5\" class=\"ev-10-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,1.5,40.5,15,'0',1,1,1);\" title=\"1.5 out of 5\" class=\"ev-15-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,2,40.5,15,'0',1,1,1);\" title=\"2 out of 5\" class=\"ev-20-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,2.5,40.5,15,'0',1,1,1);\" title=\"2.5 out of 5\" class=\"ev-25-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,3,40.5,15,'0',1,1,1);\" title=\"3 out of 5\" class=\"ev-30-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,3.5,40.5,15,'0',1,1,1);\" title=\"3.5 out of 5\" class=\"ev-35-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,4,40.5,15,'0',1,1,1);\" title=\"4 out of 5\" class=\"ev-40-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,4.5,40.5,15,'0',1,1,1);\" title=\"4.5 out of 5\" class=\"ev-45-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3161,5,40.5,15,'0',1,1,1);\" title=\"5 out of 5\" class=\"ev-50-stars\">1</a></span>\n  </span>\n  <span class=\"extravote-info\" id=\"extravote_3161_0\">Rating 2.70 (15 Votes)</span>\n</div>\t\t\t\t\t<ul class=\"tags inline\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li class=\"tag-37 tag-list0\" itemprop=\"keywords\">\n\t\t\t\t\t<a href=\"/component/tags/tag/gt-reading\" class=\"label label-info\">\n\t\t\t\t\t\tGT Reading\t\t\t\t\t</a>\n\t\t\t\t</li>\n\t\t\t\t\t\t</ul>\n\t\t<ul class=\"pager pagenav\">\n\t<li class=\"previous\">\n\t\t<a class=\"hasTooltip\" title=\"GT Reading Test 25 Section 3 - Employment in Japan\" aria-label=\"Previous article: GT Reading Test 25 Section 3 - Employment in Japan\" href=\"/reading-sample/gt-reading/3162-employment-in-japan\" rel=\"prev\">\n\t\t\t<span class=\"icon-chevron-left\" aria-hidden=\"true\"></span> <span aria-hidden=\"true\">Prev</span>\t\t</a>\n\t</li>\n\t<li class=\"next\">\n\t\t<a class=\"hasTooltip\" title=\"GT Reading Test 25 Section 1 - Emergency Procedures &amp; Community Education\" aria-label=\"Next article: GT Reading Test 25 Section 1 - Emergency Procedures &amp; Community Education\" href=\"/reading-sample/gt-reading/3160-emergency-procedures-and-community-education\" rel=\"next\">\n\t\t\t<span aria-hidden=\"true\">Next</span> <span class=\"icon-chevron-right\" aria-hidden=\"true\"></span>\t\t</a>\n\t</li>\n</ul>\n\t<div class=\"rscomments\" data-rsc-id=\"3161\" data-rsc-option=\"com_content\"><div class=\"rscomments-comment-form\">\n\n<div class=\"rscomment-form well rscomment-form-top\">\n\t<form action=\"javascript:void(0)\" data-rsc-task=\"form\">\n\t\t\t\t\n\t\t<div class=\"rscomments-form-message alert\" style=\"display: none;\"></div>\n\t\t\n\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"control-group span6\">\n\t\t\t\t\t\t\t\t<label class=\"control-label hasTooltip\" for=\"rsc_name3b4619771e994fcf6a6284c63d3bb7ac\" title=\"Please input your name.\">\n\t\t\t\t\tName\t\t\t\t</label>\n\t\t\t\t\t\t\t\t<div class=\"controls\">\n\t\t\t\t\t<input  type=\"text\" class=\"span11 required\" id=\"rsc_name3b4619771e994fcf6a6284c63d3bb7ac\" name=\"jform[name]\" value=\"\" size=\"45\"  />\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t\t\t\t\t\n\t\t\t\t\t</div>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t<div class=\"row-fluid\">\n\t\t\t<div class=\"rscomments-comment-area control-group\">\n\t\t\t\t<div class=\"controls\">\n\t\t\t\t\t<div class=\"rscomment-comment-area\">\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"rscomment-comment-area-actions\">\n\t\t\t\t\t\t\t<div class=\"btn-toolbar rscomments-action-btns\">\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<div class=\"btn-group\"><a href=\"javascript:void(0);\" data-rsc-task=\"preview\" class=\"btn btn-small hasTooltip\" title=\"Preview\"><i class=\"fa fa-search\"></i></a>\n</div>\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t<div class=\"btn-toolbar rscomments-close-preview\" style=\"display:none;\">\n\t\t\t\t\t\t\t\t<a href=\"javascript:void(0);\" data-rsc-task=\"closepreview\" class=\"btn btn-small hasTooltip\" title=\"Close preview\"><i class=\"fa fa-times\"></i></a>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t<textarea data-rsc-task=\"commentform\" class=\"input-block-level required\" name=\"jform[comment]\" rows=\"5\" maxlength=\"2500\" placeholder=\"Write your comment here ...\"></textarea>\n\t\t\t\t\t\t<div class=\"rscomments-preview-area\"></div>\n\t\t\t\t\t\t\n\t\t\t\t\t\t<div class=\"rscomments-remaining-chars\">\n\t\t\t\t\t\t\t<span class=\"rsc_loading_preview\" style=\"display:none;\">\n\t\t\t\t\t\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"clearfix\"></div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<hr>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t<div class=\"row-fluid\">\n\t\t\t<div class=\"control-group\">\n\t\t\t\t<div class=\"controls rsc-captcha-container\">\n\t\t\t\t\t\t\t\t\t\t<img src=\"/component/rscomments/captcha?type=form3b4619771e994fcf6a6284c63d3bb7ac&amp;sid=6946ed908ae23&amp;Itemid=116\" alt=\"\" height=\"80\" />\n\t\t\t\t\t\t<span class=\"hasTooltip\" title=\"Please click here to generate a new image if you cannot read the current CAPTCHA image.\">\n\t\t\t\t\t\t\t<a class=\"rscomments-refresh-captcha\" style=\"border-style: none\" href=\"javascript:void(0)\" onclick=\"RSComments.captcha(this, 'https://www.ielts-mentor.com/component/rscomments/captcha?type=form3b4619771e994fcf6a6284c63d3bb7ac&amp;Itemid=116');\">\n\t\t\t\t\t\t\t\t<i class=\"fa fa-refresh\"></i>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</span> <br />\n\t\t\t\t\t\t<input type=\"text\" name=\"jform[captcha]\" size=\"40\" value=\"\" class=\"span5 hasTooltip required\" title=\"The captcha code is case insensitive.\" />\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<div class=\"row-fluid\">\n\t\t\t<span class=\"rsc_loading_form\" style=\"display:none;\">\n\t\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t\t</span>\n\t\t\t\t\t\t<button type=\"button\" class=\"btn\" data-rsc-task=\"preview\">Preview</button>\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-primary\" data-rsc-task=\"validate\" data-rsc-upload=\"0\" data-rsc-captcha=\"/component/rscomments/captcha?Itemid=116\">Send</button>\n\t\t\t<button type=\"button\" class=\"btn\" data-rsc-task=\"reset\">Reset</button>\n\t\t\t<button type=\"button\" class=\"btn rsc_cancel_btn\" style=\"display:none;\">Cancel</button>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<input type=\"hidden\" name=\"jform[IdParent]\" value=\"0\" />\n\t\t<input type=\"hidden\" name=\"jform[obj_option]\" value=\"com_content\" />\n\t\t<input type=\"hidden\" name=\"jform[url]\" value=\"cmVhZGluZy1zYW1wbGUvZ3QtcmVhZGluZy8zMTYxLWJlbmVmaWNpYWwtd29yay1wcmFjdGljZXMtYW5kLXdvcmtwbGFjZS1kaXNtaXNzYWxz\" />\n\t\t<input type=\"hidden\" name=\"jform[obj_id]\" value=\"3161\" />\n\t\t<input type=\"hidden\" name=\"jform[IdComment]\" value=\"\" />\n\t\t<input type=\"hidden\" name=\"jform[override]\" value=\"0\" />\n\t\t<input type=\"hidden\" name=\"jform[coordinates]\" value=\"\" />\n\t</form>\n</div>\n</div>\n<div class=\"rscomments-top-alert alert alert-info\" style=\"display: none;\"></div>\n<div class=\"rscomment-top-actions\">\n\t<div class=\"pull-left\">\n\t\t<div class=\"rscomments-top-loader\" style=\"display:none;\">\n\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t</div>\n\t</div>\n\t<div class=\"pull-right\">\n\t\t\t\t\t\t<span class=\"rsc_rss\">\n\t\t\t\t<a class=\"hasTooltip\" href=\"/component/rscomments/rscomments?format=feed&amp;type=rss&amp;opt=com_content&amp;id=3161&amp;Itemid=116\" title=\"RSS\">\n\t\t\t\t\t<i class=\"fa fa-feed\"></i> RSS\t\t\t\t</a>\n\t\t\t</span>\n\t\t</div>\n\t<div class=\"clearfix\"></div>\n</div>\n\n<div class=\"rscomments-comments-list\">\n\t</div>\n\n\n<div id=\"rscomments-report\" tabindex=\"-1\" class=\"modal hide fade\">\n\t<div class=\"modal-header\">\n\t\t\t<button\n\t\t\ttype=\"button\"\n\t\t\tclass=\"close novalidate\"\n\t\t\tdata-dismiss=\"modal\"\n\t\t\taria-label=\"Close\"\n\t\t\t>\n\t\t\t<span aria-hidden=\"true\">&times;</span>\n\t\t</button>\n\t\t\t\t<h3>Report</h3>\n\t</div>\n<div class=\"modal-body jviewport-height70\">\n\t</div>\n<div class=\"modal-footer\">\n\t<button class=\"btn btn-primary\" type=\"button\" onclick=\"jQuery('#rscomments-report iframe').contents().find('#rscomm_report').click();\">Report</button><button type=\"button\" data-dismiss=\"modal\" class=\"btn\">Close</button></div>\n</div>\n<input type=\"hidden\" name=\"rscomments_comments\" value=\"/component/rscomments/mycomments\" /><input type=\"hidden\" name=\"rscomments_terms\" value=\"/component/rscomments/terms\" /><input type=\"hidden\" name=\"rscomments_subscribe\" value=\"/component/rscomments/subscribe\" /><input type=\"hidden\" name=\"rscomments_report\" value=\"/component/rscomments/report\" /><input type=\"hidden\" name=\"rscomments_id\" value=\"\" /><input type=\"hidden\" name=\"rscomments_option\" value=\"\" /><input type=\"hidden\" name=\"rscomments_cid\" value=\"\" />\n</div>\n<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div></article>\n\n\n\t\t\t\t\t\t</div><!-- end main -->\n\t\t\t\t\t</div><!-- end wrapper -->\n\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t<div class=\"wrap\"></div>\n\t\t\t\t</div> <!-- end contentarea -->\n\t\t\t</div><!-- back -->\n\t\t</div><!-- all -->\n\n\t\t<div id=\"footer-outer\">\n\t\t\t\t\t\t\t<div id=\"footer-inner\" >\n\n\t\t\t\t\t<div id=\"bottom\">\n\t\t\t\t\t\t<div class=\"box box1\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Materials</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-165\"><a href=\"/ielts-bar-graph\" >IELTS Bar Graph</a></li><li class=\"item-166\"><a href=\"/ielts-line-graph\" >IELTS Line Graph</a></li><li class=\"item-167\"><a href=\"/ielts-table-chart\" >IELTS Table Chart</a></li><li class=\"item-168\"><a href=\"/ielts-flow-chart\" >IELTS Flow Chart</a></li><li class=\"item-169\"><a href=\"/ielts-pie-chart\" >IELTS Pie Chart</a></li><li class=\"item-170\"><a href=\"/ielts-letter-writing\" >IELTS Letter Writing</a></li><li class=\"item-171\"><a href=\"/ielts-essay\" >IELTS Essay</a></li><li class=\"item-255\"><a href=\"/academic-reading-passages\" >Academic Reading</a></li><li class=\"item-259\"><a href=\"/gt-reading\" >GT Reading </a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Useful Links</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-134\"><a href=\"/know-ielts\" >Know IELTS</a></li><li class=\"item-175\"><a href=\"/cb-ielts\" >CB IELTS</a></li><li class=\"item-148\"><a href=\"/ielts-secrets\" >IELTS Secrets</a></li><li class=\"item-289\"><a href=\"/band-score-calculator\" >Band Score Calculator</a></li><li class=\"item-160\"><a href=\"/exam-specific-tips\" >Exam Specific Tips</a></li><li class=\"item-172\"><a href=\"/useful-websites\" >Useful Websites</a></li></ul>\n</div>\n\t</div>\n\t\t\t\t\t\t<div class=\"box box2\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Preparation Tips</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-126\"><a href=\"/ielts-preparation-tips\" >IELTS Preparation Tips</a></li><li class=\"item-127\"><a href=\"/academic-reading-tips\" >Academic Reading Tips</a></li><li class=\"item-129\"><a href=\"/academic-writing-tips\" >Academic Writing Tips</a></li><li class=\"item-130\"><a href=\"/gt-writing-tips\" >GT Writing Tips</a></li><li class=\"item-131\"><a href=\"/listening-tips\" >Listening Tips</a></li><li class=\"item-132\"><a href=\"/speaking-tips\" >Speaking Tips</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Help</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-222\"><a href=\"/ielts-grammar-review\" >IELTS Grammar Review</a></li><li class=\"item-225\"><a href=\"/ielts-vocabulary\" >IELTS Vocabulary</a></li><li class=\"item-285\"><a href=\"/ielts-cue-cards\" >IELTS Cue Cards</a></li><li class=\"item-342\"><a href=\"/ielts-life-skills\" >IELTS Life Skills</a></li><li class=\"item-509\"><a href=\"/letter-types\" >Letter Types</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- AMP Responsive Ads -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"7913500532\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n</div>\n\t</div>\n\t\t\t\t\t\t<div class=\"box box3\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Get Social</h3>\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<p>\n\t<a href=\"https://twitter.com/IELTSmentor\" target=\"_blank\"><img alt=\"IELTS Mentor - Follow Twitter\" src=\"/images/blog_images/ielts-mentor-twitter.png\" style=\"width: 180px; height: 39px;\" /></a></p>\n\n</div>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Privacy Policy</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-433\"><a href=\"/cookie-policy\" >Cookie Policy</a></li><li class=\"item-338\"><a href=\"/privacy-policy\" >Privacy Policy</a></li><li class=\"item-339\"><a href=\"/copyright-notice\" >Copyright Notice</a></li><li class=\"item-340\"><a href=\"/disclaimer\" >Disclaimer</a></li><li class=\"item-549\"><a href=\"/html-sitemap\" >HTML Sitemap</a></li></ul>\n</div>\n\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t</div>\n\t\t\t\n\t\t\t<div id=\"footer-sub\">\n\t\t\t\t<footer id=\"footer\">\n\t\t\t\t\t\n\n<div class=\"custom\"  >\n\t<p>\n\tCopyright <strong>&copy;</strong> 2013 - 2025 IELTS Mentor. All rights reserved. This website uses cookies to ensure that you get the best user experience on our website. By using our website and services, you agree to our use of cookies. Learn more about our <a href=\"/cookie-policy\" title=\"Cookie Policy\">Cookie Policy</a> &amp; <a href=\"/privacy-policy\" title=\"Privacy Policy\">Privacy Policy</a>.</p>\n</div>\n\n\t\t\t\t</footer><!-- end footer -->\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t</body>\n</html>\n\n"
+}

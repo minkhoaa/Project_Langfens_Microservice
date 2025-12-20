@@ -167,6 +167,126 @@ def check_passage_length(sections: list, result: InvariantResult) -> None:
             result.add_warning(f"Section {i+1}: Passage very long ({word_count} words)")
 
 
+def check_paragraph_labels(sections: list, result: InvariantResult) -> None:
+    """STRICT RULE 26/27: Check paragraph labels format **Paragraph A.**"""
+    import re
+    for i, section in enumerate(sections):
+        passage = section.get('passage_md', '')
+        
+        # Check if passage has raw labels that should be **Paragraph X.**
+        # Pattern 1: "A. The glow..." (letter + period + space + uppercase)
+        raw_labels_dot = re.findall(r'(?:^|\n)([A-H])\.\s+[A-Z]', passage)
+        # Pattern 2: "A The glow..." (letter + space + uppercase, no period)  
+        raw_labels_space = re.findall(r'(?:^|\n)([A-H])\s+[A-Z][a-z]', passage)
+        
+        proper_labels = re.findall(r'\*\*Paragraph [A-H]\.\*\*', passage)
+        
+        raw_labels = raw_labels_dot or raw_labels_space
+        if raw_labels and not proper_labels:
+            pattern = f"{raw_labels[0]}." if raw_labels_dot else f"{raw_labels_space[0]} "
+            result.add_violation(f"Section {i+1}: Missing **Paragraph X.** labels (found raw '{pattern}' format)")
+        
+        # Check if proper labels exist but wrong format (no newline after)
+        wrong_format = re.findall(r'\*\*Paragraph [A-H]\.\*\*(?!\n)', passage)
+        if wrong_format:
+            result.add_warning(f"Section {i+1}: Paragraph label missing newline after it")
+
+
+def check_instruction_format(sections: list, result: InvariantResult) -> None:
+    """STRICT RULE 28: Check instruction format **Questions X-Y:**"""
+    import re
+    for i, section in enumerate(sections):
+        instruction = section.get('instruction_md', '')
+        
+        if not instruction:
+            result.add_warning(f"Section {i+1}: Missing instruction_md field")
+            continue
+        
+        # Check bold question headers
+        if 'Questions' in instruction and '**Questions' not in instruction:
+            result.add_warning(f"Section {i+1}: Instruction should have **Questions X-Y:** format")
+
+
+def check_blank_patterns(questions: list, result: InvariantResult) -> None:
+    """STRICT RULE 48: Check completion types have _______ blank markers."""
+    import re
+    completion_values = {t.value for t in COMPLETION_TYPES}
+    
+    for q in questions:
+        q_type = q.get('type')
+        if q_type not in completion_values:
+            continue
+        
+        idx = q.get('idx')
+        prompt = q.get('prompt_md', '')
+        
+        # Check for blank pattern (3+ underscores)
+        if not re.search(r'_{3,}', prompt):
+            # Check if it has ... instead
+            if '...' in prompt or '…' in prompt:
+                result.add_violation(f"Q{idx}: Use _______ not ... for blank (frontend won't render)")
+            else:
+                result.add_warning(f"Q{idx}: {q_type} may need _______ blank marker in prompt")
+
+
+def check_prompt_numbering(questions: list, result: InvariantResult) -> None:
+    """STRICT RULE 25: Check prompts don't have leading numbers."""
+    import re
+    for q in questions:
+        idx = q.get('idx')
+        prompt = q.get('prompt_md', '')
+        
+        # Check for leading numbers like "1. Question" or "34. Statement"
+        if re.match(r'^\d+[\.\)]\s+', prompt):
+            result.add_violation(f"Q{idx}: promptMd has leading number (frontend will double it)")
+
+
+def check_matching_info_options(questions: list, result: InvariantResult) -> None:
+    """STRICT RULE: MATCHING_INFORMATION/ENDINGS should have empty options (not FEATURES)."""
+    for q in questions:
+        q_type = q.get('type')
+        # MATCHING_FEATURES needs options (person list), so exclude it
+        if q_type not in ['MATCHING_INFORMATION', 'MATCHING_ENDINGS']:
+            continue
+        
+        idx = q.get('idx')
+        options = q.get('options', [])
+        
+        if options and len(options) > 0:
+            result.add_warning(f"Q{idx}: {q_type} should have empty options[] (use matchPairs instead)")
+
+
+def check_mcq_multiple_detection(questions: list, result: InvariantResult) -> None:
+    """STRICT RULE: Detect potential MCQ_MULTIPLE from instruction patterns."""
+    import re
+    for q in questions:
+        q_type = q.get('type')
+        idx = q.get('idx')
+        prompt = q.get('prompt_md', '').lower()
+        
+        # Check if prompt/instruction suggests MCQ_MULTIPLE but wrong type
+        mcq_multiple_patterns = [
+            r'choose\s+two',
+            r'choose\s+three',
+            r'two\s+letters',
+            r'three\s+letters',
+            r'which\s+two',
+            r'which\s+three',
+        ]
+        
+        for pattern in mcq_multiple_patterns:
+            if re.search(pattern, prompt):
+                if q_type != 'MULTIPLE_CHOICE_MULTIPLE':
+                    result.add_violation(f"Q{idx}: Instruction says 'TWO/THREE' but type is {q_type} (should be MCQ_MULTIPLE)")
+                break
+        
+        # Check answers with comma (A, C) - likely MCQ_MULTIPLE
+        answers = q.get('correct_answers', [])
+        if answers and len(answers) == 1 and ',' in str(answers[0]):
+            if q_type != 'MULTIPLE_CHOICE_MULTIPLE':
+                result.add_warning(f"Q{idx}: Answer has comma '{answers[0]}' - may need MCQ_MULTIPLE")
+
+
 def check_no_duplicate_prompts(questions: list, result: InvariantResult) -> None:
     """Check for duplicate question prompts."""
     prompts = {}
@@ -182,13 +302,13 @@ def check_no_duplicate_prompts(questions: list, result: InvariantResult) -> None
 
 
 def check_invariants(data: dict) -> InvariantResult:
-    """Run all IELTS invariant checks."""
+    """Run all IELTS invariant checks (31 strict rules)."""
     result = InvariantResult()
     
     questions = data.get('questions', [])
     sections = data.get('sections', [])
     
-    # Run all checks
+    # === CORE CHECKS ===
     check_question_sequence(questions, result)
     check_single_choice_types(questions, result)
     check_multiple_choice_types(questions, result)
@@ -197,6 +317,14 @@ def check_invariants(data: dict) -> InvariantResult:
     check_completion_types(questions, result)
     check_passage_length(sections, result)
     check_no_duplicate_prompts(questions, result)
+    
+    # === STRICT RULE CHECKS (Industry Standards) ===
+    check_paragraph_labels(sections, result)      # Rule 26/27
+    check_instruction_format(sections, result)    # Rule 28
+    check_blank_patterns(questions, result)       # Rule 48 (blank markers)
+    check_prompt_numbering(questions, result)     # Rule 25
+    check_matching_info_options(questions, result)  # MATCHING_INFO options
+    check_mcq_multiple_detection(questions, result)  # MCQ_MULTIPLE from "Choose TWO"
     
     return result
 

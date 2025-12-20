@@ -66,34 +66,110 @@ IELTS_SCHEMA = """
 
 def clean_passage_text(text: str) -> str:
     """
-    Remove embedded questions from passage text.
+    Remove embedded questions and metadata garbage from passage text.
     Patterns to remove:
+    - Navigation: "|", "Section 1", "Section 2", etc.
+    - Metadata: "20", "28-40", "minutes on", etc.
     - "15. Which employees may choose..." (numbered questions)
     - "21. You and your employer will need to sign a ………………… before training starts."
     """
+    # === METADATA CLEANUP (navigation, section markers) ===
+    # Remove lines that are just pipes/bars
+    text = re.sub(r'^[\|\s]+$', '', text, flags=re.MULTILINE)
+    
+    # Remove common metadata patterns (full line patterns)
+    metadata_line_patterns = [
+        r'^GT Reading (?:Mock )?Test \d+.*$',  # GT Reading Test 6 Section 3 - Talking Point
+        r'^Section \d+.*$',  # Section 1 or Section 1: ...
+        r'^Details\s*$',  # Details
+        r'^Last Updated:.*$',  # Last Updated: Wednesday...
+        r'^Written by.*$',  # Written by IELTS Mentor
+        r'^Hits:.*$',  # Hits: 186294
+        r'^You should spend about.*$',  # You should spend about 20 minutes
+        r'^\d{1,3}\s*$',  # Just "20" or "1485"
+        r'^\d+-\s*\d+\s*$',  # 28- 40 or 28-40
+        r'^minutes on.*$',  # minutes on Questions
+        r'^GT Reading Sample:?.*$',  # GT Reading Sample:
+        r'^Read the text.*$',  # Read the text below and answer
+        r'^Questions?\s+\d+.*$',  # Questions 28-40
+        r'^\*\s*Maori:.*',  # * Maori: footnote
+        r'^[A-Za-z]+\s+Point\s*$',  # Talking Point (on its own line)
+        r'^\.$',  # Just a period
+        r'^[A-E]\s*$',  # Just a single letter
+        r'^List of People\s*$',  # List of People header
+        r'^NB\s*$',  # NB
+    ]
+    
+    for pattern in metadata_line_patterns:
+        text = re.sub(pattern, '', text, flags=re.MULTILINE | re.IGNORECASE)
+    
+    # Remove everything before the title line (if passage starts with garbage)
+    # Find first line that starts with uppercase word followed by actual content
+    lines = text.split('\n')
+    clean_lines = []
+    found_content = False
+    
+    for line in lines:
+        stripped = line.strip()
+        # Skip empty lines until we find content
+        if not stripped:
+            if found_content:
+                clean_lines.append('')
+            continue
+        
+        # Skip very short lines (likely garbage)
+        if len(stripped) < 5 and not found_content:
+            continue
+        
+        # Start collecting when we find a real sentence (15+ chars, contains words)
+        if not found_content:
+            if len(stripped) > 15 and re.search(r'[a-z]+\s+[a-z]+', stripped.lower()):
+                found_content = True
+                clean_lines.append(line)
+        else:
+            clean_lines.append(line)
+    
+    text = '\n'.join(clean_lines)
+    
+    # === PARAGRAPH LABEL FORMATTING ===
+    # Convert "A The glow..." to "**Paragraph A.**\nThe glow..."
+    # Match letter at start of line followed by space and uppercase word
+    text = re.sub(r'^([A-H])\s+([A-Z])', r'**Paragraph \1.**\n\2', text, flags=re.MULTILINE)
+    
+    # Also handle inline paragraph markers (within text)
+    # "...caves. B The fireflies..." → "...caves.\n\n**Paragraph B.**\nThe fireflies..."
+    text = re.sub(r'([.!?])\s+([A-H])\s+([A-Z][a-z])', r'\1\n\n**Paragraph \2.**\n\3', text)
+    
+    # === QUESTION CLEANUP ===
+    # Remove TFNG/YNNG instruction blocks that got embedded in passage
+    tfng_patterns = [
+        r'TRUE if the statement agrees with the information.*?NOT GIVEN if there is no information on this',
+        r'YES if the statement agrees with.*?NOT GIVEN if there is no information on this',
+        r'TRUE\s+FALSE\s+NOT GIVEN',
+        r'YES\s+NO\s+NOT GIVEN',
+    ]
+    for pattern in tfng_patterns:
+        text = re.sub(pattern, '', text, flags=re.IGNORECASE | re.DOTALL)
+    
     # Pattern 1: Question with blanks (………………… or _______)
-    # "25. You will be considered as a member of the ………………… during ..."
     text = re.sub(r'\b(1[5-9]|2[0-9]|3[0-9]|40)\.\s+[^.]*[…_]{3,}[^.]*\.?\s*', '', text)
     
     # Pattern 2: Questions ending with ? (all forms)
-    # "15. Which employees may choose not to work regular hours?"
     text = re.sub(r'\b(1[5-9]|2[0-9]|3[0-9]|40)\.\s+[^?]+\?\s*', '', text)
     
-    # Pattern 3: Sentences starting with question number (remaining)
-    # Cleanup any leftover numbered items
-    text = re.sub(r'\s+(1[5-9]|2[0-9]|3[0-9]|40)\.\s+[A-Z][^.!?]*[.!?]\s*', ' ', text)
+    # Pattern 3: Numbered questions/statements (35. The first fireflies...)
+    text = re.sub(r'\b(2[89]|3[0-9]|40)\.\s+[A-Z][^.]*\.', '', text)
     
     # Pattern 4: Cleanup orphaned blank patterns
     text = re.sub(r'[…_]{3,}', '', text)
     
     # Pattern 5: Remove orphaned sentences that look like incomplete questions
-    # "You will be considered as a member of the during the apprenticeship."
     text = re.sub(r'\n\s*[A-Z][^.!?\n]*\bthe\s+(?:during|before|after|for|and|or)\b[^.!?\n]*\.\s*', '\n', text)
     
-    # Pattern 6: Remove any sentence with " the the " or weird spacing (indicates missing blank)
+    # Pattern 6: Remove any sentence with "of the the" weirdness
     text = re.sub(r'\n\s*[^.\n]*\bof the\s+(?:during|before|after|and|or|for|by)\b[^.\n]*\.\s*', '\n', text)
     
-    # Clean up multiple whitespaces and newlines
+    # === FINAL CLEANUP ===
     text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
     text = re.sub(r'  +', ' ', text)
     text = re.sub(r'\n +', '\n', text)

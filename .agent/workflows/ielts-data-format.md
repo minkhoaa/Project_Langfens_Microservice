@@ -178,6 +178,26 @@ INSERT INTO exam_options ("ContentMd", "IsCorrect") VALUES ('NOT GIVEN', false);
 - ✅ Có thể có 2+ options với `isCorrect: true`
 - ✅ Grading: User PHẢI chọn ĐÚNG TẤT CẢ correct options (set equality)
 
+**⚠️ DETECTION RULE:**
+- Prompt chứa "**TWO**", "**THREE**", "choose more than one" → **MCQ_MULTIPLE**
+- Answer có dấu phẩy: "C, G" hoặc "A, B" → **MCQ_MULTIPLE**
+- KHÔNG phải MATCHING_INFORMATION dù hỏi về films/paragraphs
+
+**EXAMPLE - Film Selection:**
+```json
+{
+  "type": "MULTIPLE_CHOICE_MULTIPLE",
+  "promptMd": "These TWO films will best entertain a fun-loving audience.",
+  "options": [
+    {"contentMd": "A. Friends", "isCorrect": true},
+    {"contentMd": "B. The Submarine", "isCorrect": true},
+    {"contentMd": "C. Ghost Rider", "isCorrect": false},
+    {"contentMd": "D. The Promise", "isCorrect": false},
+    {"contentMd": "E. Scary Stuff", "isCorrect": false}
+  ],
+  "correct_answers": ["A", "B"]
+}
+
 ---
 
 ### 5️⃣ MULTIPLE_CHOICE_SINGLE_IMAGE
@@ -1011,6 +1031,171 @@ const text = stem.replace(/\\n/g, "\n");
 
 ---
 
+### 25. Question Number Display Rule
+
+**Frontend KHÔNG tự thêm số câu hỏi vào promptMd!**
+**Backend idx field quyết định số câu hỏi hiển thị.**
+
+```
+✅ Data:
+   {"idx": 15, "promptMd": "Which employees may choose not to work regular hours?"}
+   
+   Frontend hiển thị: "15. Which employees may choose not to work regular hours?"
+
+❌ SAI - KHÔNG double số:
+   {"idx": 15, "promptMd": "15. Which employees may choose not to work regular hours?"}
+   
+   Frontend hiển thị: "15. 15. Which employees..." (LỖI!)
+```
+
+**STRICT:**
+- `idx` field = số câu hỏi (15, 16, 17...)
+- `promptMd` KHÔNG chứa số đầu
+- Frontend tự render: `{idx}. {promptMd}`
+
+---
+
+### 26. Passage Paragraph Labels Rule ⚠️ BẮT BUỘC
+
+**Passage LUÔN CÓ paragraph labels (A, B, C...) cho MỌI question type!**
+
+**Lý do:**
+- Dễ đọc và reference
+- Consistent format cho tất cả bài
+- Hỗ trợ user locate thông tin
+
+**Format CHUẨN:**
+```markdown
+**Title**
+
+**Paragraph A.**
+The standard working week for full-time council employees is 35 hours...
+
+**Paragraph B.**
+Staff are entitled to 3 weeks per annum sick or carer's leave...
+
+**Paragraph C.**
+Our Financial Advice Program is conducted in partnership with...
+```
+
+**STRICT RULES:**
+- ✅ Label format: `**Paragraph A.**` + XUỐNG DÒNG + nội dung
+- ✅ Chữ cái đầu nội dung VIẾT HOA
+- ✅ Mỗi paragraph logic riêng biệt có 1 label
+- ✅ Thứ tự A, B, C, D, E, F... (uppercase)
+- ❌ KHÔNG dùng: `A.`, `A)`, `(A)`, `a.`
+- ❌ KHÔNG đặt nội dung cùng dòng với label
+
+---
+
 ## 🔗 RELATED
 
 - @[/ielts-pipeline] - Pipeline workflow
+
+---
+
+## 🌍 INDUSTRY STANDARDS (Based on British Council / IDP / Cambridge)
+
+> [!IMPORTANT]
+> **Standards researched from official IELTS providers:**
+> - British Council (takeielts.britishcouncil.org)
+> - IDP IELTS (ielts.idp.com)
+> - Cambridge English (cambridgeenglish.org)
+
+### 27. Paragraph Labeling Standard ⚠️ STRICT
+
+**Official Format (British Council):**
+- Labels: Bold uppercase letter **A**, **B**, **C**... 
+- Position: Left margin, vertically aligned with first line
+- Naming: Instructions refer to "paragraphs A-H"
+
+**Our Implementation:**
+```markdown
+**Paragraph A.**
+Content starts on new line...
+
+**Paragraph B.**
+Content starts on new line...
+```
+
+| Source Style | Our Equivalent | Notes |
+|--------------|----------------|-------|
+| `A` (margin) | `**Paragraph A.**\n` | We use inline bold with newline |
+| `paragraphs A–H` | `Paragraph A-H` | Same reference style |
+
+---
+
+### 28. Instruction Formatting Standard ⚠️ STRICT
+
+**Official Format (British Council):**
+- Question number range in bold: **Questions 1-6**
+- Key references bolded: **A-H**, **i-x**, **boxes 1-6**
+- Word limits bolded: **NO MORE THAN THREE WORDS**
+
+**Our Implementation:**
+```markdown
+**Questions 1-8:** Complete the sentences below.
+Choose **NO MORE THAN THREE WORDS** from the text for each answer.
+
+**Questions 9-14:** Do the following statements agree with the information given in the text?
+Write **TRUE** if the statement agrees with the information.
+Write **FALSE** if the statement contradicts the information.
+Write **NOT GIVEN** if there is no information on this.
+```
+
+**STRICT RULES:**
+- ✅ `**Questions X-Y:**` bold heading for each question group
+- ✅ Bold emphasis on ranges: **A-H**, **i-x**, **1-6**
+- ✅ Bold emphasis on word limits: **ONE WORD**, **THREE WORDS**
+- ✅ Line break between different question type instructions
+
+---
+
+### 29. Question Type Instruction Patterns ⚠️ REFERENCE
+
+| Question Type | Instruction Pattern |
+|---------------|---------------------|
+| TFNG | `Write **TRUE**, **FALSE** or **NOT GIVEN**.` |
+| YNNG | `Write **YES**, **NO** or **NOT GIVEN**.` |
+| MATCHING_HEADING | `Choose the correct heading from the list **i-x** below.` |
+| MATCHING_INFO | `Which paragraph contains the following information? Write **A-H**.` |
+| COMPLETION | `Complete the notes. Write **NO MORE THAN THREE WORDS**.` |
+| SHORT_ANSWER | `Answer with **ONE WORD AND/OR A NUMBER**.` |
+| MCQ_SINGLE | `Choose the correct letter, **A**, **B**, **C** or **D**.` |
+| MCQ_MULTIPLE | `Choose **TWO** letters, **A-E**.` |
+
+---
+
+### 30. Layout Structure Standard
+
+**Official British Council Layout:**
+1. **Section Header**: `Reading Passage 1 has eight paragraphs, **A–H**.`
+2. **Passage**: Full text with paragraph labels
+3. **Question Groups**: Separated by type with bold headings
+4. **Instructions**: Before each question group, not mixed with passage
+
+**Our Implementation:**
+```
+[instruction_md]
+  └── Questions 1-8: Instructions...
+  └── Questions 9-14: Instructions...
+  └── ---
+[passage_md]
+  └── # Title
+  └── **Paragraph A.** Content...
+  └── **Paragraph B.** Content...
+```
+
+---
+
+### 31. Formatting Quick Checklist
+
+```
+[ ] Paragraph labels: **Paragraph A.** + newline
+[ ] Instructions: **Questions X-Y:** format
+[ ] Word limits: **NO MORE THAN X WORDS** bold
+[ ] Ranges: **A-H**, **i-x** bold
+[ ] Question numbers: Frontend auto-adds from idx field
+[ ] Divider: --- between instruction and passage
+[ ] Headings: # for passage title, ## for sections
+```
