@@ -1,0 +1,358 @@
+#!/usr/bin/env python3
+"""
+Stage 4: Normalize (AI)
+Uses Gemini Flash Lite to normalize extracted data to JSON schema.
+Falls back to rule-based normalization if AI fails.
+"""
+import json
+import os
+import re
+from pathlib import Path
+from typing import Optional
+
+from config import EXTRACTED_DIR, get_logger
+
+logger = get_logger(__name__)
+
+# Directory for normalized output
+NORMALIZED_DIR = Path(__file__).parent.parent.parent / "data" / "normalized"
+NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
+
+# Load environment variables
+def load_env():
+    """Load environment variables from .env file."""
+    env_file = Path(__file__).parent / ".env"
+    if env_file.exists():
+        for line in env_file.read_text().splitlines():
+            if '=' in line and not line.startswith('#'):
+                key, value = line.split('=', 1)
+                os.environ[key.strip()] = value.strip()
+
+load_env()
+
+# Gemini API setup
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash-lite')  # Use 2.0 Flash Lite for better quality
+
+# Target JSON Schema for IELTS exam
+IELTS_SCHEMA = """
+{
+  "exam": {
+    "title": "string - exam title",
+    "slug": "string - URL-friendly slug",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "string - section title",
+      "passage_md": "string - passage text in markdown"
+    }
+  ],
+  "questions": [
+    {
+      "idx": "integer - question number 1-40",
+      "type": "TRUE_FALSE_NOT_GIVEN | YES_NO_NOT_GIVEN | MULTIPLE_CHOICE_SINGLE | MATCHING_HEADING | MATCHING_INFORMATION | MATCHING_FEATURES | SUMMARY_COMPLETION",
+      "prompt_md": "string - question prompt",
+      "options": [{"value": "A", "label": "A. option text", "is_correct": false}],
+      "correct_answers": ["string - correct answer(s)"]
+    }
+  ]
+}
+"""
+
+
+def clean_passage_text(text: str) -> str:
+    """
+    Remove embedded questions from passage text.
+    Patterns to remove:
+    - "15. Which employees may choose..." (numbered questions)
+    - "21. You and your employer will need to sign a ………………… before training starts."
+    """
+    # Pattern 1: Question with blanks (………………… or _______)
+    # "25. You will be considered as a member of the ………………… during ..."
+    text = re.sub(r'\b(1[5-9]|2[0-9]|3[0-9]|40)\.\s+[^.]*[…_]{3,}[^.]*\.?\s*', '', text)
+    
+    # Pattern 2: Questions ending with ? (all forms)
+    # "15. Which employees may choose not to work regular hours?"
+    text = re.sub(r'\b(1[5-9]|2[0-9]|3[0-9]|40)\.\s+[^?]+\?\s*', '', text)
+    
+    # Pattern 3: Sentences starting with question number (remaining)
+    # Cleanup any leftover numbered items
+    text = re.sub(r'\s+(1[5-9]|2[0-9]|3[0-9]|40)\.\s+[A-Z][^.!?]*[.!?]\s*', ' ', text)
+    
+    # Pattern 4: Cleanup orphaned blank patterns
+    text = re.sub(r'[…_]{3,}', '', text)
+    
+    # Pattern 5: Remove orphaned sentences that look like incomplete questions
+    # "You will be considered as a member of the during the apprenticeship."
+    text = re.sub(r'\n\s*[A-Z][^.!?\n]*\bthe\s+(?:during|before|after|for|and|or)\b[^.!?\n]*\.\s*', '\n', text)
+    
+    # Pattern 6: Remove any sentence with " the the " or weird spacing (indicates missing blank)
+    text = re.sub(r'\n\s*[^.\n]*\bof the\s+(?:during|before|after|and|or|for|by)\b[^.\n]*\.\s*', '\n', text)
+    
+    # Clean up multiple whitespaces and newlines
+    text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
+    text = re.sub(r'  +', ' ', text)
+    text = re.sub(r'\n +', '\n', text)
+    
+    return text.strip()
+
+
+
+
+def call_gemini(prompt: str) -> Optional[str]:
+    """Call Gemini Flash Lite API."""
+    if not GEMINI_API_KEY:
+        logger.warning("GEMINI_API_KEY not set, skipping AI normalize")
+        return None
+    
+    try:
+        import google.generativeai as genai
+        
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel(GEMINI_MODEL)
+        
+        logger.info(f"Using model: {GEMINI_MODEL}")
+        response = model.generate_content(prompt)
+        return response.text
+        
+    except ImportError:
+        logger.error("google-generativeai package not installed. Run: pip install google-generativeai")
+        return None
+    except Exception as e:
+        logger.error(f"Gemini API error: {e}")
+        return None
+
+
+def build_normalize_prompt(data: dict) -> str:
+    """Build COMPACT prompt for Gemini - optimized for minimal tokens."""
+    # Truncation but keep enough passage for answer extraction
+    passages_text = ""
+    for p in data.get('passages', [])[:1]:  # Only 1st passage
+        text = p.get('text', '')[:2500]  # Increase to 2500 for answer extraction
+        passages_text += text
+    
+    # Compact question format - only essential fields
+    questions_compact = []
+    for q in data.get('questions', [])[:20]:
+        questions_compact.append({
+            'idx': q.get('idx'),
+            'type': q.get('type'),
+            'prompt': q.get('prompt', '')[:100],  # Truncate prompts
+            'answer': q.get('correct_answer', ''),
+            'opts': len(q.get('options', [])),  # Just count, not full options
+        })
+    
+    questions_text = json.dumps(questions_compact, ensure_ascii=False)
+    
+    # COMPACT PROMPT - ~300 tokens instead of ~800
+    prompt = f"""IELTS exam normalizer. Output valid JSON only.
+
+SCHEMA: {{exam:{{title,slug,category:"IELTS",level:"B2",duration_min:20}},sections:[{{idx,title,passage_md}}],questions:[{{idx,type,prompt_md,options:[{{value,label,is_correct}}],correct_answers:[]}}]}}
+
+TYPES: TRUE_FALSE_NOT_GIVEN,YES_NO_NOT_GIVEN,MULTIPLE_CHOICE_SINGLE,MATCHING_HEADING,MATCHING_INFORMATION,MATCHING_FEATURES,SUMMARY_COMPLETION,TABLE_COMPLETION,NOTE_COMPLETION,SENTENCE_COMPLETION,SHORT_ANSWER
+
+DATA:
+Title: {data.get('title', '')[:80]}
+Passage: {passages_text[:1500]}...
+
+Questions: {questions_text}
+
+RULES:
+1. Fix question types based on content
+2. MULTIPLE_CHOICE: options A-F with is_correct=true for correct one
+3. MATCHING_HEADING: options i,ii,iii... 
+4. COMPLETION/SHORT_ANSWER: correct_answers=["answer"] - EXTRACT FROM PASSAGE
+5. IMPORTANT: If answer is empty but question is COMPLETION type, FIND ANSWER IN PASSAGE
+6. Add ai_review:{{issues_found:[],fixes_applied:[],quality_score:1-10}}
+
+JSON:"""
+    return prompt
+
+
+def normalize_with_ai(data: dict) -> Optional[dict]:
+    """
+    Normalize data using Gemini AI with type-safe parsing.
+    Uses Pydantic models for validation and better error messages.
+    """
+    from models import parse_normalized_exam, validate_for_render
+    
+    prompt = build_normalize_prompt(data)
+    
+    logger.info("Calling Gemini AI for normalization...")
+    response = call_gemini(prompt)
+    
+    if not response:
+        return None
+    
+    # Parse JSON from response
+    try:
+        # Try to extract JSON from response
+        json_match = re.search(r'\{[\s\S]*\}', response)
+        if not json_match:
+            logger.error("No JSON found in AI response")
+            return None
+        
+        raw_json = json.loads(json_match.group())
+        
+        # Type-safe parsing with Pydantic
+        parsed_exam, parse_errors = parse_normalized_exam(raw_json)
+        
+        if parse_errors:
+            logger.warning("Pydantic validation errors (attempting to continue):")
+            for err in parse_errors[:5]:  # Show first 5 errors
+                logger.warning(f"  - {err}")
+            # Return raw JSON if Pydantic fails but JSON is valid
+            logger.info("Falling back to raw JSON (Pydantic validation failed)")
+            return raw_json
+        
+        # Additional render validation
+        render_warnings = validate_for_render(parsed_exam)
+        if render_warnings:
+            logger.info("Render validation warnings:")
+            for warn in render_warnings[:5]:
+                logger.info(f"  ⚠ {warn}")
+        
+        logger.info("AI normalization successful with type-safe parsing")
+        return parsed_exam.model_dump()
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse AI response as JSON: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error during AI normalization: {e}")
+        return None
+
+
+def normalize_rule_based(data: dict) -> dict:
+    """Fallback rule-based normalization."""
+    logger.info("Using rule-based normalization (fallback)")
+    
+    title = data.get('title', 'IELTS Reading Test')
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    
+    # Build passage markdown - CLEAN embedded questions
+    passage_md = ""
+    for p in data.get('passages', []):
+        text = p.get('text', '')
+        # Remove embedded questions from passage
+        text = clean_passage_text(text)
+        if p.get('letter'):
+            passage_md += f"\n\n**{p['letter']}** {text}"
+        else:
+            passage_md += f"\n\n{text}"
+    
+    # Build questions
+    questions = []
+    for q in data.get('questions', []):
+        questions.append({
+            'idx': q.get('idx', 0),
+            'type': q.get('type', 'SUMMARY_COMPLETION'),
+            'prompt_md': q.get('prompt', f"Question {q.get('idx', 0)}"),
+            'options': q.get('options', []),
+            'correct_answers': [q.get('correct_answer', '')] if q.get('correct_answer') else [],
+        })
+    
+    return {
+        'exam': {
+            'title': title,
+            'slug': slug,
+            'category': 'IELTS',
+            'level': 'B2',
+            'duration_min': 20,
+        },
+        'sections': [
+            {
+                'idx': 1,
+                'title': title,
+                'passage_md': passage_md.strip(),
+            }
+        ],
+        'questions': questions,
+    }
+
+
+def load_extracted(source: str, item_id: str) -> Optional[dict]:
+    """Load extracted data from disk."""
+    source_dir = EXTRACTED_DIR / source
+    data_path = source_dir / f"{item_id}.json"
+    
+    if not data_path.exists():
+        logger.error(f"Extracted data not found: {data_path}")
+        return None
+    
+    return json.loads(data_path.read_text(encoding='utf-8'))
+
+
+def normalize(source: str, item_id: str, use_ai: bool = True) -> Optional[dict]:
+    """
+    Normalize extracted data to target JSON schema.
+    Uses AI if available, falls back to rule-based.
+    """
+    data = load_extracted(source, item_id)
+    if not data:
+        return None
+    
+    logger.info(f"Normalizing: {source}/{item_id}")
+    
+    normalized = None
+    
+    # Try AI normalization first
+    if use_ai and GEMINI_API_KEY:
+        normalized = normalize_with_ai(data)
+    
+    # Fallback to rule-based
+    if not normalized:
+        normalized = normalize_rule_based(data)
+    
+    # Add metadata
+    normalized['_metadata'] = {
+        'source': source,
+        'item_id': item_id,
+        'url': data.get('url', ''),
+        'normalized_by': 'ai' if (use_ai and GEMINI_API_KEY and normalized) else 'rule-based',
+    }
+    
+    return normalized
+
+
+def save_normalized(data: dict, source: str, item_id: str) -> Optional[Path]:
+    """Save normalized data to disk."""
+    source_dir = NORMALIZED_DIR / source
+    source_dir.mkdir(parents=True, exist_ok=True)
+    
+    output_path = source_dir / f"{item_id}.json"
+    output_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding='utf-8')
+    
+    logger.info(f"Saved normalized: {output_path}")
+    return output_path
+
+
+def normalize_and_save(source: str, item_id: str, use_ai: bool = True) -> Optional[dict]:
+    """Normalize data and save. Returns normalized data."""
+    data = normalize(source, item_id, use_ai)
+    if data:
+        save_normalized(data, source, item_id)
+    return data
+
+
+# CLI
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 3:
+        print("Usage: python normalize.py <source> <item_id> [--no-ai]")
+        sys.exit(1)
+    
+    source, item_id = sys.argv[1], sys.argv[2]
+    use_ai = '--no-ai' not in sys.argv
+    
+    result = normalize_and_save(source, item_id, use_ai)
+    if result:
+        method = result.get('_metadata', {}).get('normalized_by', 'unknown')
+        print(f"✓ Normalized ({method}): {len(result.get('questions', []))} questions")
+    else:
+        print("✗ Normalize failed")
+        sys.exit(1)

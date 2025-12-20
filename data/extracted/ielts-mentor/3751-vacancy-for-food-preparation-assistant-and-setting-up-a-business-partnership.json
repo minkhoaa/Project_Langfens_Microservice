@@ -1,0 +1,121 @@
+{
+  "title": "GT Reading 63 Section 2 - Vacancy for food preparation assistant & Setting up a business partnership",
+  "exam_id": "3751",
+  "passages": [
+    {
+      "text": "# Vacancy for food preparation assistant & Setting up a business partnership in the UK\n\nDurrant House plc runs restaurants and cafes as concessions in airports, train stations and other busy environments around the country. We currently have a vacancy for a food preparation assistant in our restaurant at Locksley Stadium, serving football fans and concert-goers before, during and after events. In addition, we cater for private parties several times a week. If you have relevant experience and a passion for preparing food to a very high standard, we’ll be delighted to hear from you. You must be able to multitask and to work in a fast-paced environment. It goes without saying that working as an effective and supportive member of a team is essential so you need to be happy in this type of work.\n\nThe role includes the usual responsibilities, such as treating hygiene as your number one priority, cleaning work areas, and doing whatever is required to provide food of excellent quality. The person appointed will carry out a range of tasks, including ensuring all raw food items are fresh, preparing vegetables to be cooked, making sure frozen food products are used in rotation, and throwing away any food products that are near or have passed their expiry date. He or she will be required to familiarise themselves with the storage system, so as to put food product supplies in the proper place and retrieve them in the right order. In particular; we are looking for someone with skill at baking, to play a large role in the production of pies and cakes.\n\nGiven the nature of the venue, working hours vary from week to week, depending on the events being held, and will often involve starting early in the morning or finishing late at night. You can expect to work an average of around 18 hours a week, although this cannot be guaranteed. You will also have the opportunity to work in another of our sites for one or two days a week, or for longer periods, and will be paid for ten days of holidays a year, Training will be provided in food safety.\n\nIf this sounds like the job for you, please contact Jo Simmons at This email address is being protected from spambots. You need JavaScript enabled to view it..\n\n• maintaining high standards of 17 .................. and quality • checking the freshness of raw food • ensuring no food is used after its expiry date • leaming the procedure for the 18 .................. of food • doing a considerable amount of the baking\n\nTwo or more people can go into business together by setting up either a limited company or a partnership. A partnership is the easier way to get started, and simply links two or more people together in a simple business structure. Unlike a limited company, a partnership doesn’t have a separate legal status. The partners are usually self-employed individuals, although a limited company counts as a ‘legal person’ and can also be a partner.\n\nIn a partnership, you and your partner or partners personally share responsibility for your business. This means, among other things, that if your business cannot afford to pay its debts, you must pay them yourselves. Again, this is not the case with a limited company. Partners share the business’s profits, and each partner pays tax on their share.\n\nWhen you set up a business partnership you need to choose a name. You can trade under your own names, for example, ‘Smith and Jones’, or you can choose another name for your business. You don’t need to register your name. However, you should register your name as a trademark if you want to stop people from trading under your business name.\n\nBusiness partnership names must not include ‘limited’, ‘Ltd’, ‘limited liability partnership’, ‘LLP’, ‘public limited company’ or ‘pic’, be offensive, or be the same as an existing trademark. Your name also can’t suggest a connection with government or local authorities, unless you get permission. There is no central database of partnership names in the UK, so to avoid using the same name as another business, it is advisable to search on the internet for the name you are considering.\n\nYou must include all the partners’ names and the business name (if you have one) on official paperwork, for example invoices. You must choose a ‘nominated partner’ who is responsible for registering your partnership with HM Revenue and Customs (HMRC), the government department responsible for the collection of taxes. This person is responsible for managing the partnership’s tax returns and keeping business records. Alternatively, you can appoint an agent to deal with HMRC on your behalf.\n\nAll partners need to register with HMRC separately and send their own tax returns as individuals. You must register by 5 October in your business’s second tax year, or you could be charged a penalty. You must also register for VAT if your VAT taxable turnover is more than £85,000. You can choose to register if it’s below this, for example to reclaim VAT on business supplies.\n\n20. A partnership is different from a limited company in not having its own .................. as a legal body. 21. The partners are personally responsible for paying all the partnership's .................. . 22. The partnership's .................. are divided between the partners. 23. Registering the partnership's name prevents others from using that name when .................. . 24. The best way to find out if a name is already in use is to use the .................. . 25. The names of the partners and the partnership must appear on .................. and other documents. 26. You must have a nominated partner, or someone to act as your .................. for all contact with HMRC. 27. You will have to pay a .................. if you miss the deadline for registering the partnership."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 15,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "_______ _______",
+      "correct_answer": "STADIUM",
+      "options": []
+    },
+    {
+      "idx": 16,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "_______ _______",
+      "correct_answer": "TEAM",
+      "options": []
+    },
+    {
+      "idx": 17,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "_______ _______ and quality",
+      "correct_answer": "HYGIENE",
+      "options": []
+    },
+    {
+      "idx": 18,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "_______ _______ of food",
+      "correct_answer": "STORAGE",
+      "options": []
+    },
+    {
+      "idx": 19,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "_______ _______",
+      "correct_answer": "GUARANTEED",
+      "options": []
+    },
+    {
+      "idx": 20,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "A partnership is different from a limited company in not having its own _______ as a legal body.",
+      "correct_answer": "STATUS",
+      "options": []
+    },
+    {
+      "idx": 21,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "The partners are personally responsible for paying all the partnership's _______ .",
+      "correct_answer": "DEBTS",
+      "options": []
+    },
+    {
+      "idx": 22,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "The partnership's _______ are divided between the partners.",
+      "correct_answer": "PROFITS",
+      "options": []
+    },
+    {
+      "idx": 23,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "Registering the partnership's name prevents others from using that name when _______ .",
+      "correct_answer": "TRADING",
+      "options": []
+    },
+    {
+      "idx": 24,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "The best way to find out if a name is already in use is to use the _______ .",
+      "correct_answer": "INTERNET",
+      "options": []
+    },
+    {
+      "idx": 25,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "The names of the partners and the partnership must appear on _______ and other documents.",
+      "correct_answer": "INVOICES",
+      "options": []
+    },
+    {
+      "idx": 26,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "You must have a nominated partner, or someone to act as your _______ for all contact with HMRC.",
+      "correct_answer": "AGENT",
+      "options": []
+    },
+    {
+      "idx": 27,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "You will have to pay a _______ if you miss the deadline for registering the partnership.",
+      "correct_answer": "PENALTY",
+      "options": []
+    }
+  ],
+  "answers": {
+    "15": "STADIUM",
+    "16": "TEAM",
+    "17": "HYGIENE",
+    "18": "STORAGE",
+    "19": "GUARANTEED",
+    "20": "STATUS",
+    "21": "DEBTS",
+    "22": "PROFITS",
+    "23": "TRADING",
+    "24": "INTERNET",
+    "25": "INVOICES",
+    "26": "AGENT",
+    "27": "PENALTY"
+  },
+  "heading_options": [],
+  "source": "ielts-mentor",
+  "item_id": "3751-vacancy-for-food-preparation-assistant-and-setting-up-a-business-partnership",
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3751-vacancy-for-food-preparation-assistant-and-setting-up-a-business-partnership"
+}
