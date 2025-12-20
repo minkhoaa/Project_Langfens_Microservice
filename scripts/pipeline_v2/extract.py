@@ -140,6 +140,15 @@ def extract(source: str, item_id: str) -> Optional[dict]:
     extracted['item_id'] = item_id
     extracted['url'] = url
     
+    # Add raw text for enhanced parsing (from cleaned file if exists)
+    cleaned_path = Path(__file__).parent.parent.parent / "data" / "cleaned" / source / f"{item_id}.txt"
+    if cleaned_path.exists():
+        extracted['_raw_text'] = cleaned_path.read_text(encoding='utf-8')
+        logger.info(f"Added _raw_text from cleaned file ({len(extracted['_raw_text'])} chars)")
+    
+    # Add raw HTML for answer extraction (cleaned text may strip answers)
+    extracted['_raw_html'] = html
+    
     return extracted
 
 

@@ -1,0 +1,30 @@
+{
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3194-young-persons-railcard-and-train-travel-information",
+  "source": "ielts-mentor",
+  "item_id": "3194-young-persons-railcard-and-train-travel-information",
+  "success": false,
+  "stage_failed": "INVARIANTS",
+  "sql_path": null,
+  "errors": [
+    "Q8: MULTIPLE_CHOICE_SINGLE should have 1 correct, found 0",
+    "Q10: MULTIPLE_CHOICE_SINGLE should have 1 correct, found 0",
+    "Q11: MULTIPLE_CHOICE_SINGLE should have 1 correct, found 0",
+    "[INVARIANTS] IELTS rules violated (after repair)"
+  ],
+  "warnings": [
+    "Q8: MULTIPLE_CHOICE_SINGLE should have exactly 1 correct, found 0",
+    "Q9: MULTIPLE_CHOICE_SINGLE should have exactly 1 correct, found 0",
+    "Q10: MULTIPLE_CHOICE_SINGLE should have exactly 1 correct, found 0",
+    "Q11: MULTIPLE_CHOICE_SINGLE should have exactly 1 correct, found 0",
+    "Q12: MULTIPLE_CHOICE_SINGLE should have exactly 1 correct, found 0",
+    "Q13: MULTIPLE_CHOICE_SINGLE should have exactly 1 correct, found 0",
+    "Q14: MULTIPLE_CHOICE_SINGLE should have exactly 1 correct, found 0"
+  ],
+  "repairs": [
+    "Q9: Added missing option Sales Department",
+    "Q12: Added missing option same day returns",
+    "Q13: Added missing option dates",
+    "Q14: Added missing option 2 minutes"
+  ],
+  "timestamp": "2025-12-20T19:38:39.695607"
+}

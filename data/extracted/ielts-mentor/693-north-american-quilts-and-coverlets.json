@@ -1,0 +1,552 @@
+{
+  "title": "GT Reading 9 Section 3 - North American Quilts and Coverlets",
+  "exam_id": "693",
+  "passages": [
+    {
+      "text": "# North American Quilts and Coverlets\n\ni. Methods of applying colour patterns to cloth ii. The origins and use of factory-made cloth iii. Specialist training for quilt and coverlet makers iv. Two types of quilt construction v. The production of rawmaterials vi. Dyeing techniques used in America vii. The rising price of manufactured textiles viii. Sources of natural dyes in America ix. The development of weaving techniques 28. Paragraph A ................... 29. Paragraph B ................... 30. Paragraph C ................... 31. Paragraph D ................... 32. Paragraph E ................... 33. Paragraph F ................... 34. Paragraph G ...................\n\nParagraph A: The craft traditions which early American colonists from Europe brought to the ‘New World’ centred primarily around the use of linen and wool. These familiar choices were then adapted to America, whose climate and environment enabled the introduction and raising of sheep for wool and, in some areas – though with less success – the growing of flax for linen. The cultivation of silk – an exotic fibre originally brought from China – was attempted for a short time only in the northern states, although by the nineteenth-century silk was being used extensively. Cotton thrived in the southern region, but was restricted to small-scale home production until the late eighteenth and early nineteenth centuries, when the invention of new mechanical equipment facilitated its harvesting, spinning, and weaving on a large scale. Paragraph B: Quilts and coverlets were created from both homemade and commercially produced cloth. During the early colonial period (seventeenth century) and into the new republic (1776 onwards), most commercial fabric was imported from England. Even goods that had been produced in other regions, such as the popular dye-printed calicoes from India and woven silks from China, were brought into America via English ships. These were used in making quilts and also influenced American quilt design. Eventually, by the mid-nineteenth century, most of the fabrics found in quilts were industrially produced, and reflected the taste and achievements of the American textile industry. Specialty fabrics, particularly silk ribbons, had become popular by the second half of the nineteenth century. Paragraph C: Prior to the development of synthetic dyes in the nineteenth century, early American dyers utilized substances obtained from a variety of plants and animals, to create a wide-ranging colour palette. Red colours ranged from the orange-red hue produced from the madder root to the brilliant scarlet made from cochineal, the scale insect that grows on the cactus from Central and South America. Most of the blue colours were from indigo leaves, and browns derived from a variety of sources, including substances called tannins found in oak trees. Paragraph D: Unwoven yarn or finished cloth was coloured by immersing it into containers of hot dye solution. Numerous shades of colour could be achieved, depending on the quality of the dyes, the purity of water, the type of utensils used (a copper kettle, for example, could affect the colour), and the addition of specific metallic salts to create a strong colour which would not fade in light. These salts, along with other additives such as vinegar or ash, were essential to the dyeing process. The dyeing of textiles with natural dyes was both an art and a science. Indigo blue, for example, with its complex chemistry, required a series of steps in order to produce a durable, lightfast blue colour. Turkey Red was another complicated dye process. Originating in India, it was a method that involved immersing the cloth several times into oils, milk fats or dung. Toward the end of the eighteenth century, books were published on the science and philosophy of dyes, thus heralding a period of experimentation, and the creation of a whole new category of synthetic dyes that flourished at the end of the nineteenth century, and continue to be used today. Paragraph E: Methods of applying designs onto the surface of fabrics ranged from hand painting and stencilling 2 to block and roller printing. Block printing involved the use of carved wooden blocks. The surfaces of the blocks were covered with the dye which were thickened with gum Arabic or other starchy substances, and pressed directly onto the cloth. Some quilts were made with floral designs from block-printed fabrics. Etched plates of copper were also used for printing, and in 1783 technological developments led to covering cylindrical rollers with etched copperplates for continuous printing, a process called roller printing. This new technology enabled printers to produce more yardage at a much faster rate. Paragraph F: The creation of complex quilts composed of many small pieces of cloth – known as patchwork – requires systematic organization. A template might be used for creating the basic design unit, such as a square, diamond, or hexagon. The template – sometimes a heavy card or paper – ensured an even, regular unit size, thus enabling the quilter to join together the many pieces of fabric, following an overall design arrangement. Appliquéd quilts, also made by using fabric pieces, were put together in a different manner. Appliqué is a versatile technique, enabling the sewer to compose visual patterns with multiple layers of single-colour and printed fabrics, creating depth in the overall composition. Paragraph G: For American woven blankets, simple weaves were woven on simple looms. Creating designs in geometric patterning resulted from a weaver’s meticulous attention to the loom’s operation, along with the artistic use of contrasting colours and materials to highlight the pattern effects. Floral and larger-scale pictorial images generally required more complex patterning mechanisms. For example, the Jacquard mechanism, developed by French weaver Joseph-Marie Jacquard in the late eighteenth century, used a series of cards with pre-punched holes that would control the threads as they were woven on the loom. An early forerunner of the computer, the Jacquard loom was introduced to American weavers by the 1820s, and used extensively to produce woven coverlets with both large- and small-scale designs."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 28,
+      "type": "MATCHING_HEADING",
+      "prompt": "Section 28",
+      "correct_answer": "V",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Methods of applying colour patterns to cloth",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. The origins and use of factory-made cloth",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Specialist training for quilt and coverlet makers",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Two types of quilt construction",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. The production of rawmaterials",
+          "is_correct": true
+        },
+        {
+          "value": "vi",
+          "label": "vi. Dyeing techniques used in America",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. The rising price of manufactured textiles",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Sources of natural dyes in America",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. The development of weaving techniques",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 29,
+      "type": "MATCHING_HEADING",
+      "prompt": "Section 29",
+      "correct_answer": "II",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Methods of applying colour patterns to cloth",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. The origins and use of factory-made cloth",
+          "is_correct": true
+        },
+        {
+          "value": "iii",
+          "label": "iii. Specialist training for quilt and coverlet makers",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Two types of quilt construction",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. The production of rawmaterials",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Dyeing techniques used in America",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. The rising price of manufactured textiles",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Sources of natural dyes in America",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. The development of weaving techniques",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 30,
+      "type": "MATCHING_HEADING",
+      "prompt": "Section 30",
+      "correct_answer": "VIII",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Methods of applying colour patterns to cloth",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. The origins and use of factory-made cloth",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Specialist training for quilt and coverlet makers",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Two types of quilt construction",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. The production of rawmaterials",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Dyeing techniques used in America",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. The rising price of manufactured textiles",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Sources of natural dyes in America",
+          "is_correct": true
+        },
+        {
+          "value": "ix",
+          "label": "ix. The development of weaving techniques",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 31,
+      "type": "MATCHING_HEADING",
+      "prompt": "Section 31",
+      "correct_answer": "VI",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Methods of applying colour patterns to cloth",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. The origins and use of factory-made cloth",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Specialist training for quilt and coverlet makers",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Two types of quilt construction",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. The production of rawmaterials",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Dyeing techniques used in America",
+          "is_correct": true
+        },
+        {
+          "value": "vii",
+          "label": "vii. The rising price of manufactured textiles",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Sources of natural dyes in America",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. The development of weaving techniques",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 32,
+      "type": "MATCHING_HEADING",
+      "prompt": "Section 32",
+      "correct_answer": "I",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Methods of applying colour patterns to cloth",
+          "is_correct": true
+        },
+        {
+          "value": "ii",
+          "label": "ii. The origins and use of factory-made cloth",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Specialist training for quilt and coverlet makers",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Two types of quilt construction",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. The production of rawmaterials",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Dyeing techniques used in America",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. The rising price of manufactured textiles",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Sources of natural dyes in America",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. The development of weaving techniques",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 33,
+      "type": "MATCHING_HEADING",
+      "prompt": "Section 33",
+      "correct_answer": "IV",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Methods of applying colour patterns to cloth",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. The origins and use of factory-made cloth",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Specialist training for quilt and coverlet makers",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Two types of quilt construction",
+          "is_correct": true
+        },
+        {
+          "value": "v",
+          "label": "v. The production of rawmaterials",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Dyeing techniques used in America",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. The rising price of manufactured textiles",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Sources of natural dyes in America",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. The development of weaving techniques",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 34,
+      "type": "MATCHING_HEADING",
+      "prompt": "Section 34",
+      "correct_answer": "IX",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Methods of applying colour patterns to cloth",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. The origins and use of factory-made cloth",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Specialist training for quilt and coverlet makers",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Two types of quilt construction",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. The production of rawmaterials",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Dyeing techniques used in America",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. The rising price of manufactured textiles",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Sources of natural dyes in America",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. The development of weaving techniques",
+          "is_correct": true
+        }
+      ]
+    },
+    {
+      "idx": 35,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "35. How suitable were various fibres for production by the first immigrants to America? A. Silk was produced in every geographical region. B. Cotton could be grown on large plantations. C. Wool presented no particular problems. D. Flax was the easiest fibre to cultivate.",
+      "correct_answer": "C",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Silk was produced in every geographical region.",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. Cotton could be grown on large plantations.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. Wool presented no particular problems.",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D. Flax was the easiest fibre to cultivate.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 36,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "36. What does the writer say about early cloth printing in America? A. Fabrics were printed using a variety of methods. B. The introduction of block printing speeded up the process. C. For a long time, flowers were the only image that was printed. D. Wooden printing equipment was quickly replaced by metal.",
+      "correct_answer": "A",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Fabrics were printed using a variety of methods.",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B. The introduction of block printing speeded up the process.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. For a long time, flowers were the only image that was printed.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. Wooden printing equipment was quickly replaced by metal.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 37,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "37. The technique of creating patterns in woven cloth A. required little skill on the part of a loom operator. B. was only possible after complex looms were invented. C. had originated in eighteenth-century France. D. involved combining different colours and materials.",
+      "correct_answer": "D",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. required little skill on the part of a loom operator.",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. was only possible after complex looms were invented.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. had originated in eighteenth-century France.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. involved combining different colours and materials.",
+          "is_correct": true
+        }
+      ]
+    },
+    {
+      "idx": 38,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "_______ was.",
+      "correct_answer": "WATER",
+      "options": []
+    },
+    {
+      "idx": 39,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "_______ _______.",
+      "correct_answer": "LIGHT",
+      "options": []
+    },
+    {
+      "idx": 40,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "_______ _______.",
+      "correct_answer": "SYNTHETIC",
+      "options": []
+    }
+  ],
+  "answers": {
+    "28": "V",
+    "29": "II",
+    "30": "VIII",
+    "31": "VI",
+    "32": "I",
+    "33": "IV",
+    "34": "IX",
+    "35": "C",
+    "36": "A",
+    "37": "D",
+    "38": "WATER",
+    "39": "LIGHT",
+    "40": "SYNTHETIC"
+  },
+  "heading_options": [
+    {
+      "value": "i",
+      "label": "i. Methods of applying colour patterns to cloth",
+      "is_correct": false
+    },
+    {
+      "value": "ii",
+      "label": "ii. The origins and use of factory-made cloth",
+      "is_correct": false
+    },
+    {
+      "value": "iii",
+      "label": "iii. Specialist training for quilt and coverlet makers",
+      "is_correct": false
+    },
+    {
+      "value": "iv",
+      "label": "iv. Two types of quilt construction",
+      "is_correct": false
+    },
+    {
+      "value": "v",
+      "label": "v. The production of rawmaterials",
+      "is_correct": false
+    },
+    {
+      "value": "vi",
+      "label": "vi. Dyeing techniques used in America",
+      "is_correct": false
+    },
+    {
+      "value": "vii",
+      "label": "vii. The rising price of manufactured textiles",
+      "is_correct": false
+    },
+    {
+      "value": "viii",
+      "label": "viii. Sources of natural dyes in America",
+      "is_correct": false
+    },
+    {
+      "value": "ix",
+      "label": "ix. The development of weaving techniques",
+      "is_correct": false
+    }
+  ],
+  "source": "ielts-mentor",
+  "item_id": "693-north-american-quilts-and-coverlets",
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/693-north-american-quilts-and-coverlets"
+}

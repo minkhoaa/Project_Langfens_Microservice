@@ -1,0 +1,384 @@
+{
+  "exam": {
+    "title": "GT Reading 15 Section 2 - Planning a Gap Year & Succeeding at Interviews",
+    "slug": "gt-reading-15-section-2-planning-a-gap-year-succeeding-at-interviews",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 15 Section 2 - Planning a Gap Year & Succeeding at Interviews",
+      "passage_md": "Suresh4 years 3 monthsQ.15 to 20: NG, NG, N, G, T, T, F.Q.21 to 27: E, A, H, F, B, G, D.ReplyQuote\n\nSuresh4 years 3 monthsQ.15 to 20: NG, NG, N, G, T, T, F.Q.21 to 27: E, A, H, F, B, G, D.ReplyQuote\n\nSuresh4 years 3 monthsQ.15 to 20: NG, NG, N, G, T, T, F.Q.21 to 27: E, A, H, F, B, G, D.ReplyQuote\n\nChandrra5 years 7 monthsFrom 15 - 20: f, f, ng, t, t, f.ReplyQuote\n\nChandrra5 years 7 monthsFrom 15 - 20: f, f, ng, t, t, f.ReplyQuote\n\nChandrra5 years 7 monthsFrom 15 - 20: f, f, ng, t, t, f.ReplyQuote\n\nShikha Sharma5 years 8 months15- NG,16- F,17- NG,18- NG,19- NG,20- F.ReplyQuote\n\nShikha Sharma5 years 8 months15- NG,16- F,17- NG,18- NG,19- NG,20- F.ReplyQuote\n\nShikha Sharma5 years 8 months15- NG,16- F,17- NG,18- NG,19- NG,20- F.ReplyQuote\n\nManpreet Kaur6 years 1 month15-FALSE, 16-FALSE, 17-NOT GIVEN, 18-TRUE, 19-TRUE, 20-FALSE.ReplyQuote"
+    }
+  ],
+  "questions": [
+    {
+      "idx": 15,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "For some young British people, the purpose of a gap year is to improve their academic qualifications.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 16,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Shooting Star finds employment for young people in the catering industry.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 17,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Training with Shooting Star can be expensive.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 18,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "New trainees find it easy to get the sort of work they want.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 19,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "New trainees who want work experience should check out vacancies before they depart.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 20,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Shooting Star helps with travel arrangements.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 21,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which paragraph contains the following information?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "F"
+      ]
+    },
+    {
+      "idx": 22,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which paragraph contains the following information?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 23,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which paragraph contains the following information?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "G"
+      ]
+    },
+    {
+      "idx": 24,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which paragraph contains the following information?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "H"
+      ]
+    },
+    {
+      "idx": 25,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which paragraph contains the following information?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 26,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which paragraph contains the following information?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "G"
+      ]
+    },
+    {
+      "idx": 27,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which paragraph contains the following information?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "898-new-staff-handbook-and-safety-and-hygiene-regulations",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/898-new-staff-handbook-and-safety-and-hygiene-regulations",
+    "normalized_by": "rule-based"
+  }
+}

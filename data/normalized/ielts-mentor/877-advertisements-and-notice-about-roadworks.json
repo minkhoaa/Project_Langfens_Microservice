@@ -1,0 +1,221 @@
+{
+  "exam": {
+    "title": "GT Reading 12 Section 1 - Advertisements & Notice about roadworks",
+    "slug": "gt-reading-12-section-1-advertisements-notice-about-roadworks",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 12 Section 1 - Advertisements & Notice about roadworks",
+      "passage_md": "# MAIN STREET, GATTON RE-DEVELOPMENT\n\nA. International Language Centre B. Global Language Learning Centre C. Tafe International D. Club Francais E. University of Canberra Which advertisement mentions:\n\n1. up-to-date teaching systems? 2. that the institution has been established for a significant time? 3. examination classes? 4. that arrangements can be made for activities outside class? 5. the availability of courses for school students? 6. language teaching for special purposes?\n\nROAD WIDENING TO AFFECT WEEKEND TRAFFIC AND BUS SERVICES TO THE UNIVERSITY CAMPUS The next stage in the re-development of the roads in the town of Gatton will mean that Main Street will be closed between Little and Denning Streets from 6.00 am on Saturday, 12 August to 6.00 pm on Sunday, 13 August. The intersections of these streets with Main Street will not be affected. We expect that the work will be completed at this time without further disruption to traffic. Motorists should note that Main Street will be closed over the weekend during the hours indicated. No university bus services will operate through the area between Little and Denning Streets. However, alternative services will operate on bus routes 566 and 45 between Gatton Road, the town centre and the university. The Transport and Roads Department apologises for any inconvenience caused while improvements are in progress."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 1,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "1. up-to-date teaching systems?",
+      "options": [],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 2,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "2. that the institution has been established for a significant time?",
+      "options": [],
+      "correct_answers": [
+        "E"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "3. examination classes?",
+      "options": [],
+      "correct_answers": [
+        "E"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "4. that arrangements can be made for activities outside class?",
+      "options": [],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 5,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "5. the availability of courses for school students?",
+      "options": [],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "6. language teaching for special purposes? Which TWO advertisement mentions:",
+      "options": [],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "7. a wide variety of language choices?",
+      "options": [],
+      "correct_answers": [
+        "IN"
+      ]
+    },
+    {
+      "idx": 8,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "8. evening classes?",
+      "options": [],
+      "correct_answers": [
+        "IN"
+      ]
+    },
+    {
+      "idx": 9,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n9. The road will be closed for two days and not re-opened until Monday.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 10,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n10. The road will be open as far as Little Street.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 11,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n11. Work on the road will continue each weekend for the next month.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 12,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n12. Temporary traffic lights will operate at intersections with Main Street.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 13,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n13. There will be bus services to the university throughout the weekend. MAIN STREET, GATTON RE-DEVELOPMENT ROAD WIDENING TO AFFECT WEEKEND TRAFFIC AND BUS SERVICES TO THE UNIVERSITY CAMPUS The next stage in the re-development of the roads in the town of Gatton will mean that Main Street will be closed between Little and Denning Streets from 6.00 am on Saturday, 12 August to 6.00 pm on Sunday, 13 August. The intersections of these streets with Main Street will not be affected. We expect that the work will be completed at this time without further disruption to traffic. Motorists should note that Main Street will be closed over the weekend during the hours indicated. No university bus services will operate through the area between Little and Denning Streets. However, alternative services will operate on bus routes 566 and 45 between Gatton Road, the town centre and the university. The Transport and Roads Department apologises for any inconvenience caused while improvements are in progress.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "877-advertisements-and-notice-about-roadworks",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/877-advertisements-and-notice-about-roadworks",
+    "normalized_by": "rule-based"
+  }
+}

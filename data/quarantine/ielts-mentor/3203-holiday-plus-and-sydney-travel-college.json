@@ -1,0 +1,39 @@
+{
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3203-holiday-plus-and-sydney-travel-college",
+  "source": "ielts-mentor",
+  "item_id": "3203-holiday-plus-and-sydney-travel-college",
+  "success": false,
+  "stage_failed": "INVARIANTS",
+  "sql_path": null,
+  "errors": [
+    "Q7: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q8: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q9: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q10: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q11: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q12: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q13: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q14: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "[INVARIANTS] IELTS rules violated (after repair)"
+  ],
+  "warnings": [
+    "Q7: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q8: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q9: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q10: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q11: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q12: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q13: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q14: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q4: MATCHING_INFORMATION missing correct_answers",
+    "Q6: MATCHING_INFORMATION missing correct_answers"
+  ],
+  "repairs": [
+    "Q4: Changed MATCHING_INFORMATION \u2192 SHORT_ANSWER (generic options, no answer)",
+    "Q6: Changed MATCHING_INFORMATION \u2192 SHORT_ANSWER (generic options, no answer)",
+    "Q4: Added blank marker to SHORT_ANSWER prompt",
+    "Q5: Added blank marker to SUMMARY_COMPLETION prompt",
+    "Q6: Added blank marker to SHORT_ANSWER prompt"
+  ],
+  "timestamp": "2025-12-20T18:28:41.780752"
+}

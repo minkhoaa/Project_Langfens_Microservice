@@ -1,0 +1,172 @@
+{
+  "exam": {
+    "title": "GT Reading 38 Section 3 - Making the Cut",
+    "slug": "gt-reading-38-section-3-making-the-cut",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 38 Section 3 - Making the Cut",
+      "passage_md": "# MAKING THE CUT\n\nWhen we talk about how films convey meaning we tend to refer to acting, music, dialogue, props and narrative developments, but often forgotten is the visual essence of a film itself, which is the cutting together of moving images – “motion pictures” – each one carefully tailored to meet a particular need or purpose. Most films and many important scenes within them open with an establishing shot. Typically this shot precedes our introduction to the main characters by presenting us with the locale in which the scene’s action or dialogue is about to occur. Occasionally, however, a director will use an establishing shot with another goal in mind. An opening view of a thousand soldiers parading in synchronized fashion might have little to reveal about the film’s geography, for example, but it does inform the audience that ideas about discipline and conformity are likely to arise in the material that follows. In this way, establishing shots can also introduce a film’s theme. After an establishing shot, most directors choose a long shot in order to progress the narrative. This type of shot displays the entire human physique in relation to its surroundings, so it is ideal for bridging the narrative divide between location and so it is ideal for bridging the narrative divide between location and individual activity. A long shot is therefore often used to centre on a pivotal character in the scene. A film might begin with an establishing shot of bleak, snowy mountains and then cut to a long shot of a lone skier, for example, or a sweeping panorama of a bustling metropolis could segue into a street view of someone entering a building. From here the door is wide open for directors to choose whichever shots will enhance the narration. Closeup shots are popular in suspense sequences – a handgun being loaded, a doorknob being turned, the startled expression of someone freshly roused from sleep. Confining the visual field in this way adds to the viewer’s apprehension. Dramatic films will probably want to emphasise character interaction. The third-person shot – in which a third of the frame consists of a rear view of a person’s upper torso and head – can be effectively utilised here. This shot encourages us to actually slip into the persona of that character, and vicariously live through their experiences. A number of special purpose shots are used quite rarely – once, if at all, in most films. One such type is the money shot. A money shot has no specific technical features or content, but is typically the most expensive element of a film’s production values and comes with a cost massively disproportionate to its screen time (which may be limited to just a brief glimpse). Because of its spectacular, extravagant nature, however, the money shot is a major revenue generator and is widely exploited for use in promotional materials. Money shots are most popular amongst – but not limited to – high visual impact genres such as action, war, thriller and disaster films. But more affordable shots can also add an interesting twist to the story. The Dutch tilt can depict a character in a state of psychological unease by shooting them from a jaunty angle. In this way, they appear literally and metaphorically unbalanced. A trunk shot often shows a small group of characters peering into the trunk of a vehicle. It is filmed from a perspective within the trunk itself, although frequently to avoid camera damage directors will simply place a detached piece of trunk door in the corner of the frame. This shot was a favourite of Quentin Tarantino and has been used in many crime and gangster films, often as a first-person shot through the eyes of someone who is tied up and lying inside the vehicle. A shot that has gained traction in avantgarde circles is the extreme closeup. This is when a single detail of the subject fills up the entire frame. Alfred Hitchcock famously used an extreme closeup in ‘Psycho’, when he merged a shot of a shower drain into a view of a victim’s eye. It has also been used in Westerns to depict tension between duelling gunmen eyeing each other up before a shoot out. Not all types of shots are used in order to enhance the narrative. Sometimes financial restrictions or technical limitations are a more pressing concern, especially for low-budget filmmakers. In the early murder mysteries of the 1920s and 1930s, the American shot – which acquired its name from French critics who referred to a “plan américain” – was used widely for its ability to present complex dialogue scenes without alterations in camera position. Using the American shot, directors have their cast assemble in single file while discussing key plot points. The result is an efficiently produced scene that conveys all relevant information, but the trade-off is a natural tone. Because few people in real life would ever associate in such an awkward manner, American shots tend to result in a hammy, stiff feel to the production.\n\nA. Trunk shot B. Dutch tilt C. Establishing shot D. Money shot E. American shot F. Long shot G. Extreme close-up H. Third-person shot I. First-person shot J. Close-up"
+    }
+  ],
+  "questions": [
+    {
+      "idx": 28,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "A group of people, full length body shot.",
+      "options": [],
+      "correct_answers": [
+        "A group of people"
+      ]
+    },
+    {
+      "idx": 29,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Two people, only one facing camera, head and shoulders shot.",
+      "options": [],
+      "correct_answers": [
+        "Two people"
+      ]
+    },
+    {
+      "idx": 30,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Distance shot of central city, from the air.",
+      "options": [],
+      "correct_answers": [
+        "Distance shot of central city"
+      ]
+    },
+    {
+      "idx": 31,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "A single person, head and shoulders, off-centre angle shot.",
+      "options": [],
+      "correct_answers": [
+        "A single person"
+      ]
+    },
+    {
+      "idx": 32,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Lone pedestrian, walking a city street.",
+      "options": [],
+      "correct_answers": [
+        "Lone pedestrian"
+      ]
+    },
+    {
+      "idx": 33,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "A flaming bus, about to crash.",
+      "options": [],
+      "correct_answers": [
+        "A flaming bus"
+      ]
+    },
+    {
+      "idx": 34,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Write the correct letter, A-F.\n\n34. Which TWO aspects of story can be shown with an establishing shot?",
+      "options": [],
+      "correct_answers": [
+        "(the) visual field"
+      ]
+    },
+    {
+      "idx": 35,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n35. What does a long shot focus our attention on?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "character interaction"
+      ]
+    },
+    {
+      "idx": 36,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Write the correct letter, A-F.\n\n36. What do closeups restrict in order to make audiences nervous?",
+      "options": [],
+      "correct_answers": [
+        "(the) visual field"
+      ]
+    },
+    {
+      "idx": 37,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Write the correct letter, A-F.\n\n37. What does a third-person shot place importance on?",
+      "options": [],
+      "correct_answers": [
+        "character interaction"
+      ]
+    },
+    {
+      "idx": 38,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "Complete the blank. _______ Question 38",
+      "options": [],
+      "correct_answers": [
+        "cost"
+      ]
+    },
+    {
+      "idx": 39,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "Complete the blank. _______ Question 39",
+      "options": [],
+      "correct_answers": [
+        "promotional materials"
+      ]
+    },
+    {
+      "idx": 40,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "Complete the blank. _______ Question 40",
+      "options": [],
+      "correct_answers": [
+        "unbalanced"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "3202-making-the-cut",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3202-making-the-cut",
+    "normalized_by": "rule-based"
+  }
+}

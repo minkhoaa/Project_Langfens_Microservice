@@ -1,0 +1,450 @@
+{
+  "exam": {
+    "title": "GT Reading 13 Section 1 - Why Magazine & First Aid for snake bites",
+    "slug": "gt-reading-13-section-1-why-magazine-first-aid-for-snake-bites",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 13 Section 1 - Why Magazine & First Aid for snake bites",
+      "passage_md": "**WHY MAGAZINE**\n\n**From the Editor**\nIn this issue we publish some of the many letters we received on the new Sports Stadium, our cover story last month. Your reactions were certainly mixed! Read our exclusive interview with film-star Mike Mikeson and his plans to start a fast-food chain. But there's so much more… enough to keep you going for the rest of the month.\nUntil next time, The Editor\n\n**COVER STORY 5**\nMike Mikeson: a new smash-hit movie, but plans for a dramatic career change\n\n**REGULAR FEATURES**\n- Film Review — 30\n- Crossword — 31\n- Letters to the Editor — 32\n- What's on Round Town — 33 (Art, Music, Theatre)\n- 12 Getaway Holidays\n- 18 Start Now: Marissa Brown of EastBank sets out a sound investment and savings plan for young professionals\n- 26 Best Wheels: Racing car driver Marco Leoni changes teams\n- 28 The Met: Metropolitan Art Museum hosts a new exhibition of post-modern paintings\n\n---\n\n**SYDNEY CONSERVATORIUM OF MUSIC CONCERTS - January 2001**\n\n**A.** Sydney Youth Orchestra\nConservatorium High School students play a selection of Mozart concertos.\nDate: Sat. 4th and 11th January, 8.00 pm. $10 and $5.\n\n**B.** Let's Sing Together\nAn afternoon for the young and the young-at-heart. Led by the Giggles Band, sing children's songs from your childhood and from all over the world. There will be a special appearance by Willy Wallaby, from the popular children's programme, Hoppy!\nDate: Sun. 5th January, 3.00 pm. $5.\n\n**C.** One Romantic Evening\nBring someone special with you and listen to some of the greatest love songs as you gaze at the stars together!\nDate: Sat. 25th January, 8.00 pm. $20 and $12.\nNote: This concert will be held in the Conservatorium Rose Garden, not in the Concert Hall.\n\n**D.** Rock n' Roll\nBop along 'til late to the rock hits of the last 10 years. Bands playing include The Hippies, The Hypers, and The Heroes. If you have a special request, write it down at the ticket counter when you come in.\nDate: Sat. 18th January, 8.00 pm. $10 and $5.\n\n**E.** Flamenco!\nWorld-famous classical guitarist Rodrigo Paras will play a selection of traditional Spanish Flamenco pieces.\nDate: Sun. 19th and 26th January, 7.30 pm. $20 and $12.\n\n---\n\n**FIRST AID FOR SNAKE BITES**\n\nSnakes are not normally aggressive and tend to bite only when they are threatened or mishandled. Some snakes, e.g. the carpet snake, are not poisonous. Others, e.g. the brown snake, tiger snake and taipan, are very poisonous.\n\n**A. Prevention**\n- leave snakes alone and do not collect snakes\n- do not put your hands in hollow logs, under piles of wood, or in rubbish\n- be noisy when walking in the bush\n- look carefully when walking through thick grass\n- use a torch around camps at night\n\n**B. Symptoms and signs**\nThese do not appear immediately, but from about 15 minutes to 2 hours after the casualty is bitten. There are often no visible symptoms or signs. Take seriously any information from a casualty concerning:\n- strong emotional reaction\n- headache or double vision\n- drowsiness, giddiness or faintness\n- nausea and/or vomiting and diarrhoea\n- puncture marks about 1 centimetre apart at the site of the bite\n- reddening, bruising, sweating\n- breathing difficulties\n\n**C. Management**\n- reassure the casualty\n- help the casualty to sit or lie down\n- apply a pressure immobilisation bandage over the bitten area and around the limb\n- seek medical aid urgently\n\n**D. Snakebite Warnings**\n- never wash the venom off the skin as this will help in later identification\n- never cut or squeeze the bitten area\n- never try to suck the venom out of the wound\n- do not try to catch the snake\n"
+    }
+  ],
+  "questions": [
+    {
+      "idx": 1,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "What page would you turn to for advice about money? _______",
+      "options": [],
+      "correct_answers": [
+        "18"
+      ]
+    },
+    {
+      "idx": 2,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "On what TWO pages can you read about art? _______",
+      "options": [],
+      "correct_answers": [
+        "28, 33"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "On what page is the new sports stadium discussed? _______",
+      "options": [],
+      "correct_answers": [
+        "32"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "How often does this magazine appear? _______",
+      "options": [],
+      "correct_answers": [
+        "MONTHLY"
+      ]
+    },
+    {
+      "idx": 5,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "At which concert will young performers play?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which concert will be held outdoors?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which concerts will happen more than once?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": true
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A, E"
+      ]
+    },
+    {
+      "idx": 8,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which concert will feature only one performer?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": true
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "E"
+      ]
+    },
+    {
+      "idx": 9,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Which concert is NOT being held at night?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 10,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "At which concert can the audience choose what will be performed?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 11,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "help the casualty to sit or lie down",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 12,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "wear stout shoes, walk-socks and jeans (or similar clothing) in areas where snakes could be present",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 13,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "pain or tightness in the chest or abdomen",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 14,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "do not try to catch the snake",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 15,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "swelling of the bitten area",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "882-why-magazine-and-first-aid-for-snake-bites",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/882-why-magazine-and-first-aid-for-snake-bites",
+    "normalized_by": "rule-based"
+  }
+}

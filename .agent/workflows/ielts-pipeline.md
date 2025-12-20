@@ -1,197 +1,228 @@
 ---
-description: Run IELTS pipeline and act as final validator for content and context
+description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 ---
 
-# /ielts-pipeline - IELTS Crawl + AI Final Validator Workflow
+# /ielts-pipeline - HYBRID 10-ROLE IELTS Pipeline
 
-**BẠN LÀ: "IELTS RECORD REPAIR AGENT"** - Agent parse, validate, và fix dữ liệu IELTS.
-**MỤC TIÊU**: Output chuẩn render frontend ĐÚNG TỪ source, KHÔNG paraphrase, KHÔNG bịa.
+**BẠN LÀ: "IELTS RECORD REPAIR AGENT"**
+**APPROACH**: Rule-Based Auto (Tier 1) + 10 AI Roles (Tier 2)
+**QUALITY**: Production-ready, 100% verified
+**TOKEN BUDGET**: ~6600 tokens per exam | ~24 exams/session
 
 ---
 
-## 📋 WORKFLOW STEPS
+## TIER 1: RULE-BASED AUTO
 
-### Bước 1: Chạy Pipeline V2
 ```bash
 // turbo
 cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python orchestrator.py "<URL>" 2>&1
 ```
 
-### Bước 2: Load dữ liệu đã parse
+---
+
+## TIER 2: AI 10-ROLE VALIDATION
+
+### PHASE 1: INPUT VALIDATION
+
+#### Role 1: Validate Input
+- Check raw HTML có đủ content (>5000 chars)
+- Check có markers: question, passage, answer
+
+#### Role 2: Duplicate Detector  
+- Check exam đã tồn tại trong DB chưa
+- Check trùng title/slug với exams khác
+
+### PHASE 2: CONTENT EXTRACTION
+
 ```bash
 // turbo
-cat /home/khoa/RiderProjects/Project_Langfens_Microservice/data/normalized/ielts-mentor/<ITEM_ID>.json
+cat /home/khoa/RiderProjects/Project_Langfens_Microservice/data/cleaned/ielts-mentor/<ITEM_ID>.txt | head -120
 ```
+
+#### Role 3: Passage Validator ⚠️ CRITICAL
+**PHẢI CHECK:**
+- [ ] Passage length >= 500 words (NOT summary!)
+- [ ] Passage chứa FULL article, không phải summary với blanks
+- [ ] Passage có format đúng với paragraph labels nếu cần
+
+**COMMON BUG**: Passage chỉ chứa SUMMARY COMPLETION text (100-200 words) thay vì FULL passage (1000-5000 words).
+
+**FIX**: Extract full passage từ cleaned text:
+```python
+import re
+# Find passage between title and "Questions X-Y"
+start = re.search(r'People have dreamt|The passage|Read the text', cleaned_text)
+end = re.search(r'Questions \d+-\d+', cleaned_text)
+full_passage = cleaned_text[start.start():end.start()].strip()
+```
+
+#### Role 4: Prompt Extractor
+- Extract prompts VERBATIM từ source
+- NO paraphrase, NO bịa content
+- Check blank markers `_______` cho COMPLETION types
+- **MCQ PROMPTS**: Tách options ra khỏi prompt! 
+  - ❌ SAI: `"What is X? A. option1 B. option2 C. option3"`
+  - ✅ ĐÚNG: `"What is X?"` (options riêng trong options array)
+
+### PHASE 3: STRUCTURE VALIDATION
 
 ```bash
-// turbo  
-cat /home/khoa/RiderProjects/Project_Langfens_Microservice/data/cleaned/ielts-mentor/<ITEM_ID>.txt | head -150
+// turbo
+cat /home/khoa/RiderProjects/Project_Langfens_Microservice/data/normalized/ielts-mentor/<ITEM_ID>.json | head -100
 ```
 
-### Bước 3: AI FINAL VALIDATION (BẮT BUỘC!)
+#### Role 5: Type Validator
+| Source Instruction | Type | Answer Format |
+|-------------------|------|---------------|
+| "ONE NUMBER/WORD" | SHORT_ANSWER | word/number |
+| "TRUE/FALSE/NOT GIVEN" | TRUE_FALSE_NOT_GIVEN | TRUE/FALSE/NG |
+| "YES/NO/NOT GIVEN" | YES_NO_NOT_GIVEN | YES/NO/NG |
+| "Choose A-F" | MATCHING_INFORMATION | letter |
+| "heading i-xi" | MATCHING_HEADING | roman numeral |
+| "Match people A-D" | MATCHING_FEATURES | letter with name |
 
-Bạn PHẢI kiểm tra từng item dưới đây:
+#### Role 6: Option Generator
+- MATCHING_INFORMATION: A-F (6 paras) hoặc A-I (9 paras)
+- MATCHING_HEADING: i-xi với heading text
+- MATCHING_FEATURES: A-D với people/features names
+- TFNG/YNNG: TRUE/FALSE/NOT GIVEN hoặc YES/NO/NOT GIVEN
+- SHORT_ANSWER: options = []
 
-#### 3.1 QUESTION TYPE VALIDATION
-| Type | Expected Format | Common Errors |
-|------|-----------------|---------------|
-| MATCHING_INFORMATION (A-Z) | Options: single letters A,B,C... | ❌ Full paragraphs as options |
-| MATCHING_HEADING (i-x) | Options: roman numerals + heading text | ❌ Missing heading text |
-| TRUE_FALSE_NOT_GIVEN | Options: TRUE, FALSE, NOT GIVEN | ❌ Wrong type (confused with MATCHING) |
-| YES_NO_NOT_GIVEN | Options: YES, NO, NOT GIVEN | ❌ Confused with TFNG |
-| SUMMARY_COMPLETION | Prompt has blank marker `_______` | ❌ Placeholder prompts like "Question 1" |
-| MULTIPLE_CHOICE_SINGLE | Options: A. text, B. text... | ❌ Missing option labels |
+### PHASE 4: ANSWER VALIDATION
 
-#### 3.2 PROMPT VALIDATION
-- [ ] Prompts có nội dung thực tế không? (không phải "Question 1", "Statement 9")
-- [ ] Prompts được trích NGUYÊN VĂN từ source?
-- [ ] COMPLETION types có blank marker `_______`?
-- [ ] Blank marker đúng vị trí? (`Question? _______` không phải `Question _______?`)
+#### Role 7: Answer Verifier
+- Tất cả questions có correct_answers
+- Answers match source website
+- MATCHING: answer letter có trong options
 
-#### 3.3 PASSAGE VALIDATION  
-- [ ] Passage có đủ nội dung?
-- [ ] MATCHING questions: Passage có paragraph labels (A, B, C...) với format:
-  ```markdown
-  **A.** Paragraph text...
-  
-  **B.** Paragraph text...
-  ```
-- [ ] Không có noise (questions, instructions lẫn trong passage)?
+#### Role 8: Check JSON Format
+- Schema valid
+- Prompts start with capital
+- No placeholder prompts ("Question 1")
 
-#### 3.4 ANSWER VALIDATION
-- [ ] Tất cả questions có `correct_answers`?
-- [ ] Answers khớp với source website?
-- [ ] MATCHING: Options có chứa correct answer? (VD: answer "G" thì options phải có G)
+### PHASE 5: OUTPUT VALIDATION
 
-### Bước 4: Apply Fixes (Python Script)
+#### Role 9: Validate SQL Output
+- SQL có INSERT statements
+- Không có empty strings
+- All question data complete
+
+#### Role 10: Ensure Production Quality
+- 0 missing answers
+- 0 placeholder prompts
+- 0 type mismatches
+- Options contain correct answer
+- **Passage >= 500 words**
+
+---
+
+## TIER 3: ONE-SHOT FIX
 
 ```python
 import json
+import re
 from pathlib import Path
 
-data_path = Path("/home/khoa/RiderProjects/Project_Langfens_Microservice/data/normalized/ielts-mentor/<ITEM_ID>.json")
+data_path = Path(".../normalized/ielts-mentor/<ITEM_ID>.json")
 data = json.loads(data_path.read_text())
+cleaned = Path(".../cleaned/ielts-mentor/<ITEM_ID>.txt").read_text()
 
-# Fix prompts - extract verbatim from source
-CORRECT_PROMPTS = {
-    1: "Actual question text from source...",
-    # ...
-}
+# ===== FIX PASSAGE (if < 500 words) =====
+current_passage = data['sections'][0].get('passage_md', '')
+if len(current_passage.split()) < 500:
+    # Extract full passage from cleaned text
+    start = re.search(r'(?:People|The|In|Back|During)', cleaned)
+    end = re.search(r'Questions \d+-\d+', cleaned)
+    if start and end:
+        full_passage = cleaned[start.start():end.start()].strip()
+        data['sections'][0]['passage_md'] = full_passage
 
-# Fix answers
-CORRECT_ANSWERS = {
-    1: "A", 2: "B",  # MATCHING
-    9: "TRUE", 10: "FALSE",  # TFNG
+# ===== FIX QUESTIONS =====
+FIXES = {
+    28: {"type": "SHORT_ANSWER", "prompt": "When was X?", "answer": "1638", "options": []},
+    36: {"type": "MATCHING_FEATURES", "prompt": "Statement...", "answer": "D", 
+         "options": [
+             {"value": "A", "label": "A. Person Name 1", "is_correct": False},
+             {"value": "B", "label": "B. Person Name 2", "is_correct": False},
+             {"value": "C", "label": "C. Person Name 3", "is_correct": False},
+             {"value": "D", "label": "D. Person Name 4", "is_correct": True},
+         ]},
 }
 
 for q in data['questions']:
-    idx = q['idx']
-    
-    # Fix prompt
-    if idx in CORRECT_PROMPTS:
-        q['prompt_md'] = CORRECT_PROMPTS[idx]
-    
-    # Fix type và options
-    if idx >= 9:  # TFNG section
-        q['type'] = 'TRUE_FALSE_NOT_GIVEN'
-        q['options'] = [
-            {"value": "TRUE", "label": "TRUE", "is_correct": CORRECT_ANSWERS[idx] == "TRUE"},
-            {"value": "FALSE", "label": "FALSE", "is_correct": CORRECT_ANSWERS[idx] == "FALSE"},
-            {"value": "NOT GIVEN", "label": "NOT GIVEN", "is_correct": CORRECT_ANSWERS[idx] == "NOT GIVEN"}
-        ]
-        q['correct_answers'] = [CORRECT_ANSWERS[idx]]
-
-# Fix passage format for MATCHING questions
-passage_formatted = """**Title**
-
-**A.** Paragraph A text...
-
-**B.** Paragraph B text...
-"""
-data['sections'][0]['passage_md'] = passage_formatted
+    if q['idx'] in FIXES:
+        fix = FIXES[q['idx']]
+        q['type'] = fix.get('type', q['type'])
+        q['prompt_md'] = fix.get('prompt', q['prompt_md'])
+        q['correct_answers'] = [fix['answer']] if 'answer' in fix else q['correct_answers']
+        if 'options' in fix:
+            q['options'] = fix['options']
 
 data_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
 ```
 
-### Bước 5: Re-export và Seed
+---
+
+## TIER 4: SEED + QA REPORT
+
 ```bash
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python export.py ielts-mentor <ITEM_ID>
+cd .../scripts/pipeline_v2 && python export.py ielts-mentor <ITEM_ID>
 ```
 
 ```bash
-PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "/home/khoa/RiderProjects/Project_Langfens_Microservice/deploy/seeds/seed_exam_<SLUG>.sql"
+PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f ".../seeds/seed_exam_<SLUG>.sql"
 ```
 
-### Bước 6: Output Report
+**QA Report:**
 ```json
 {
-  "status": "PASS",
-  "confidence": 1.0,
-  "questions_verified": 14,
-  "answers_verified": 14,
-  "issues_found": ["Q14 wrong type", "Q1-8 placeholder prompts"],
-  "fixes_applied": ["Fixed Q14 type", "Extracted actual prompts", "Formatted passage"]
+  "exam": "<TITLE>",
+  "questions": 13,
+  "passage_words": 1200,
+  "roles_passed": 10,
+  "tier1_fixes": 8,
+  "tier2_fixes": 5,
+  "status": "✅ PRODUCTION READY",
+  "confidence": 1.0
 }
 ```
 
 ---
 
-## ⚠️ COMMON ISSUES & FIXES
+## CHECKLIST (ALL 10 ROLES)
 
-### Issue 1: Placeholder Prompts
-**Symptom**: `"prompt_md": "Question 1"` hoặc `"Statement 9"`
-**Fix**: Extract actual question text từ source website
+### Input Phase
+- [ ] Role 1: HTML >5000 chars, có markers
+- [ ] Role 2: Không trùng exam trong DB
 
-### Issue 2: Wrong Question Type
-**Symptom**: Q9-14 là TFNG nhưng được parse thành MATCHING_INFORMATION
-**Fix**: Check source instructions ("TRUE/FALSE/NOT GIVEN" vs "Write correct letter A-H")
+### Content Phase  
+- [ ] Role 3: **Passage >= 500 words** (NOT summary!)
+- [ ] Role 4: Prompts verbatim, có blank markers
 
-### Issue 3: Paragraph Options (Noise)
-**Symptom**: MATCHING options chứa full paragraph text thay vì A/B/C
-**Fix**: Pipeline auto-repairs this, nhưng verify options are simple letters
+### Structure Phase
+- [ ] Role 5: Type khớp với answer format
+- [ ] Role 6: Options đúng cho mỗi type
 
-### Issue 4: Missing Paragraph Labels
-**Symptom**: Passage không có **A.** **B.** format
-**Fix**: Format passage với bold paragraph labels và line breaks
+### Answer Phase
+- [ ] Role 7: All answers filled, match source
+- [ ] Role 8: JSON schema valid, no placeholders
 
-### Issue 5: Missing Option
-**Symptom**: Answer là "G" nhưng options chỉ có A-F
-**Fix**: Add missing option G
-
-### Issue 6: Blank Marker Position
-**Symptom**: `"Question _______?"` (? sau blank)
-**Fix**: `"Question? _______"` (? trước blank)
+### Output Phase
+- [ ] Role 9: SQL complete, no empty strings
+- [ ] Role 10: Production ready (0 errors)
 
 ---
 
-## 🔒 QUY TẮC CỨNG
+## 🔒 RULES
 
-1. **KHÔNG bịa nội dung** - Chỉ trích từ source verbatim
+1. **KHÔNG bịa** - Chỉ trích từ source verbatim
 2. **KHÔNG paraphrase** - Giữ nguyên văn
-3. **PHẢI verify với source** - Check website gốc nếu không chắc
-4. **PHẢI check từng question type** - Dựa vào instructions trong passage
-5. **Confidence = 1.0** chỉ khi TẤT CẢ verified 100%
+3. **VERIFY với source** - Check website khi không chắc
+4. **Passage >= 500 words** - Nếu ngắn hơn, extract từ cleaned text
+5. **Confidence = 1.0** chỉ khi ALL 10 roles PASS
 
 ---
 
-## 📊 QUESTION TYPE REFERENCE
+## RELATED
 
-| Instructions Pattern | Type |
-|---------------------|------|
-| "Write the correct letter, A-H" | MATCHING_INFORMATION |
-| "TRUE/FALSE/NOT GIVEN" | TRUE_FALSE_NOT_GIVEN |
-| "YES/NO/NOT GIVEN" | YES_NO_NOT_GIVEN |
-| "Choose ONE WORD ONLY" | SUMMARY_COMPLETION |
-| "Complete the sentences" | SENTENCE_COMPLETION |
-| "Which paragraph contains..." | MATCHING_INFORMATION |
-| "List of headings" with i, ii, iii | MATCHING_HEADING |
-
----
-
-## 🗂️ FILE PATHS
-
-- Raw HTML: `/data/raw/ielts-mentor/<ITEM_ID>.html`
-- Cleaned text: `/data/cleaned/ielts-mentor/<ITEM_ID>.txt`
-- Extracted JSON: `/data/extracted/ielts-mentor/<ITEM_ID>.json`
-- Normalized JSON: `/data/normalized/ielts-mentor/<ITEM_ID>.json`
-- Output SQL: `/deploy/seeds/seed_exam_<SLUG>.sql`
+- @[/ielts-data-format] - Text formatting rules

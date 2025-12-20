@@ -1,0 +1,309 @@
+{
+  "exam": {
+    "title": "GT Reading 36 Section 3 - The Birdmen",
+    "slug": "gt-reading-36-section-3-the-birdmen",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 36 Section 3 - The Birdmen",
+      "passage_md": "# The Birdmen\n\n*Will people finally be able to fly long distances without a plane? John Andres investigates*\n\nPeople have dreamt of flying since written history began. In the 1400s, Leonardo da Vinci drew detailed plans for human flying machines. You might have thought the invention of mechanised flight would have put an end to such ideas. Far from it. For many enthusiasts, the ultimate flight fantasy is the jet pack, a small piece of equipment on your back which enables you to climb vertically into the air and fly forwards, backwards and turn. Eric Scott was a stuntman in Hollywood for about a decade and has strapped jet packs to his back more than 600 times and propelled himself hundreds of metres into the air. Now he works for an energy-drink company that pays him to travel around the world with his jet pack. As Scott says: 'I get to do what I love and wherever I go I advertise Go Fast drinks. Existing packs work for little more than 30 seconds, but people are working on designs which let you fly around for 20 minutes. 'That would be amazing,' says Scott.\nParamotoring is another way of getting into the air. It combines the sort of parachute used in paragliding with a small engine and propeller and is now becoming popular. Chris Clarke has been flying a paramotor for five years. 'Getting about is roughly comparable with driving a petrol-powered car in terms of expense. The trouble is that paramotoring is ill-suited to commuting because of the impossibility of taking off in strong winds,' says Clarke.\nAnother keen paramotorist recently experienced a close call when in the air. 'I started to get a warm feeling in my back,' says Patrick Vandenbulcke. I thought I was just sweating. But then I started to feel burning and I realized I had to get to the ground fast. After an inspection of the engine later, I noticed that the exhaust pipe had moved during the flight and the harness had started melting.' This hasn't put Vandenbulcke off, however, and he is enthusiastic about persuading others to take up paramotoring. However he warns: Although it seems cheaper to try to teach yourself, you will regret it later as you won't have a good technique.' A training course will cost over £1,000, while the equipment costs a few thousand pounds. You may pick up cheaper equipment secondhand, however. There was one pre-used kit advertised on a website, with a bit of damage to the cage and tips of the propellers due to a rough landing. 'Scared myself to death,' the seller reported, 'hence the reason for this sale.'\nFun though it is, paramotoring is not in the same league as the acrobatics demonstrated by Yves Rossy. He has always enjoyed being a daredevil showman. He once parachuted from a plane above Lake Geneva and, intentionally skimming the top of a fountain as he landed, he descended to the lake where he grabbed some water ski equipment and started waterskiing while the crowd watched open-mouthed.\nRossy, who has been labelled 'the Birdman', was born in 1959 in Switzerland. After flying planes for the air force from the ages of 20 to 28, he went on to do a job as a pilot with a commercial airline from 1988 to 2000. 'The cockpit of a plane is the most beautiful office in the world,' he says, 'but I didn't have any contact with the air around me. It was a bit like being in a box or a submarine under water.' From then on, he, therefore, concentrated on becoming the first jet-powered flying man.\nIn May 2008, he stepped out of an aircraft at about 3000 metres. Within seconds he was soaring and diving at over 290 kph, at one point reaching 300 kph, about 104 kph faster than the typical falling skydiver. His speed was monitored by a plane flying alongside. Rossy started his flight with a free fall, then he powered four jet turbines to keep him in the air before releasing a parachute which enabled him to float to the ground. The jet turbines are attached to special wings which he can unfold. The wings were manufactured by a German firm called JCT Composites. Initially he had approached a company called Jet-Kit which specialised in miniature planes, but the wings they made for him weren't rigid enough to support the weight of the engines. Rossy says he has become the first person to maintain a stable horizontal flight, thanks to aerodynamic carbon foldable wings.' Without these special wings, it is doubtful he would have managed to do this.\nRossy's ambitions include flying down the Grand Canyon. To do this, he will have to fit his wings with bigger, more powerful jets. The engines he currently uses already provide enough thrust to allow him to climb through the air, but then he needs the power to stay there. In terms of the physical strength involved, Rossy insists it's no more difficult than riding a motorbike. 'But even the slightest change in position can cause problems. I have to focus hard on relaxing in the air, because if you put tension in your body, you start to swing round.' If he makes it, other fliers will want to know whether they too will someday be able to soar. The answer is yes, possibly, but it is unlikely to be more than an expensive hobby."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 28,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "What information is given about Vandenbulcke in paragraph 3?",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. He narrowly avoided a dangerous situation.",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B. He did not understand the equipment he was using.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. He did not react fast enough to the situation.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. He was fortunate to get the help he needed.",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 29,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "When the writer refers to some second-hand paramotoring equipment which was for sale, he is emphasising that -",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. paramotoring equipment is in short supply.",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. paramotoring equipment needs to be carefully tested.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. paramotoring is a very expensive hobby.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. paramotoring can be a dangerous pastime.",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 30,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "The description of what happened at Lake Geneva is given to suggest that Rossy",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. frequently changes his plans.",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. likes to do what appears impossible.",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C. is an excellent overall sportsman.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. knows the area very thoroughly.",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 31,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "Yves Rossy was born in 1959. He worked as both a military and _______ pilot before focusing on his ambition of becoming a jet-powered flying man.",
+      "options": [],
+      "correct_answers": [
+        "commercial"
+      ]
+    },
+    {
+      "idx": 32,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "First he asked a firm which made _______ planes to construct some wings for him, but these proved unsuitable.",
+      "options": [],
+      "correct_answers": [
+        "miniature"
+      ]
+    },
+    {
+      "idx": 33,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "First he asked a firm which made miniature planes to construct some _______ for him, but these proved unsuitable.",
+      "options": [],
+      "correct_answers": [
+        "wings"
+      ]
+    },
+    {
+      "idx": 34,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "On a flight in May 2008, he managed to achieve a top speed of _______ easily exceeding the speed achieved by the average skydiver.",
+      "options": [],
+      "correct_answers": [
+        "300 kph"
+      ]
+    },
+    {
+      "idx": 35,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "On a flight in May 2008, he managed to achieve a top speed of 300 kph easily exceeding the speed achieved by the average _______.",
+      "options": [],
+      "correct_answers": [
+        "skydiver"
+      ]
+    },
+    {
+      "idx": 36,
+      "type": "MATCHING_FEATURES",
+      "prompt_md": "He acknowledges the role of his equipment in enabling him to set a flying record.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Eric Scott",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. Chris Clarke",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. Patrick Vandenbulcke",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. Yves Rossy",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 37,
+      "type": "MATCHING_FEATURES",
+      "prompt_md": "He explains how he uses his flying expertise to promote a product.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Eric Scott",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B. Chris Clarke",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. Patrick Vandenbulcke",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. Yves Rossy",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 38,
+      "type": "MATCHING_FEATURES",
+      "prompt_md": "He explains what led him to experiment with different ways of flying.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Eric Scott",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. Chris Clarke",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. Patrick Vandenbulcke",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. Yves Rossy",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 39,
+      "type": "MATCHING_FEATURES",
+      "prompt_md": "He describes a mistake some beginners might make.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Eric Scott",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. Chris Clarke",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. Patrick Vandenbulcke",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D. Yves Rossy",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 40,
+      "type": "MATCHING_FEATURES",
+      "prompt_md": "He mentions circumstances which prevent you from leaving the ground.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. Eric Scott",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. Chris Clarke",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C. Patrick Vandenbulcke",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. Yves Rossy",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "3196-the-birdmen",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3196-the-birdmen",
+    "normalized_by": "rule-based"
+  }
+}

@@ -366,27 +366,27 @@
     },
     {
       "idx": 35,
-      "type": "MULTIPLE_CHOICE_SINGLE",
+      "type": "MATCHING_INFORMATION",
       "prompt_md": "35. Boris Worm’s main concern is that A. marine ecosystems will completely break down. B. insufficient attention is being paid to fish numbers. C. there will no longer be enough seafood for people to eat. D. politicians will be unwilling to discuss marine resources.",
       "options": [
         {
           "value": "A",
-          "label": "A. marine ecosystems will completely break down.",
+          "label": "A",
           "is_correct": true
         },
         {
           "value": "B",
-          "label": "B. insufficient attention is being paid to fish numbers.",
+          "label": "B",
           "is_correct": false
         },
         {
           "value": "C",
-          "label": "C. there will no longer be enough seafood for people to eat.",
+          "label": "C",
           "is_correct": false
         },
         {
           "value": "D",
-          "label": "D. politicians will be unwilling to discuss marine resources.",
+          "label": "D",
           "is_correct": false
         }
       ],
@@ -396,27 +396,27 @@
     },
     {
       "idx": 36,
-      "type": "MULTIPLE_CHOICE_SINGLE",
+      "type": "MATCHING_INFORMATION",
       "prompt_md": "36. What point does John Shepherd make? A. Marine conservation areas are not high on the list of visitor attractions. B. People know very little about how different species actually live. C. The public are much less likely to help unattractive creatures D. The marine environment was better understood in the past.",
       "options": [
         {
           "value": "A",
-          "label": "A. Marine conservation areas are not high on the list of visitor attractions.",
+          "label": "A",
           "is_correct": false
         },
         {
           "value": "B",
-          "label": "B. People know very little about how different species actually live.",
+          "label": "B",
           "is_correct": false
         },
         {
           "value": "C",
-          "label": "C. The public are much less likely to help unattractive creatures",
+          "label": "C",
           "is_correct": true
         },
         {
           "value": "D",
-          "label": "D. The marine environment was better understood in the past.",
+          "label": "D",
           "is_correct": false
         }
       ],
@@ -426,27 +426,27 @@
     },
     {
       "idx": 37,
-      "type": "MULTIPLE_CHOICE_SINGLE",
+      "type": "MATCHING_INFORMATION",
       "prompt_md": "37. Which of the following best summarises the text as a whole? A. Scientists disagree about the state of the world’s oceans. B. A radical review of marine resource management is needed. C. The fishing industry is mainly responsible for today’s problems. D. The natural systems of our seas will not be able to repair themselves.",
       "options": [
         {
           "value": "A",
-          "label": "A. Scientists disagree about the state of the world’s oceans.",
+          "label": "A",
           "is_correct": false
         },
         {
           "value": "B",
-          "label": "B. A radical review of marine resource management is needed.",
+          "label": "B",
           "is_correct": true
         },
         {
           "value": "C",
-          "label": "C. The fishing industry is mainly responsible for today’s problems.",
+          "label": "C",
           "is_correct": false
         },
         {
           "value": "D",
-          "label": "D. The natural systems of our seas will not be able to repair themselves.",
+          "label": "D",
           "is_correct": false
         }
       ],

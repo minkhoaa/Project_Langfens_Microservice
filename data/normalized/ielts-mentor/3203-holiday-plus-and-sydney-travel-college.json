@@ -1,0 +1,440 @@
+{
+  "exam": {
+    "title": "GT Reading 39 Section 1 - Holiday Plus & Sydney Travel College",
+    "slug": "gt-reading-39-section-1-holiday-plus-sydney-travel-college",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 39 Section 1 - Holiday Plus & Sydney Travel College",
+      "passage_md": "# SYDNEY TRAVEL COLLEGE\n\nAt this College, we recommend the Multiplan policy. Travel insurance requirements As this course includes a total of three months' travel outside Australia, travel insurance is compulsory. If you are sick or have an accident in Australia, your medical bills will be fully covered - however, you cannot assume that everything will be covered overseas, so please read the following requirements carefully. 1. Medical Australia has reciprocal medical arrangements with the governments of the eight nations you will be visiting. This arrangement will cover all emergency hospital treatment. However, students will have to take out insurance such as Multiplan to cover the costs of all visits to doctors, and other non-emergency medical situations. If you have a serious accident or illness, Multiplan insurance will cover the cost of your flight back to Australia, if required. Depending on the circumstances, this may also pay for either medical personnel or a family member to accompany you home. Multiplan insurance may not cover all pre-existing medical conditions - so before you leave be sure to check with them about any long-term illnesses or disabilities that you have. If you do require medical treatment overseas, and you want to make a claim on your insurance, the claim will not be accepted unless you produce both your student card and your travel insurance card. 2. Belongings The Multiplan policy covers most student requirements. In particular, it provides students with luggage insurance. This covers any loss or theft of your everyday belongings. For example, this insurance covers: • the present value of items that are stolen, provided that you have purchase receipts for every item; if no receipts, no payment can be made • replacement value of your briefcase or backpack and study books • portable computers and CD players, if you specifically list them as items in the policy 3. Cancellation This insurance covers any non-refundable deposit and other costs you have paid if you have to cancel due to 'unforeseen or unforeseeable circumstances outside your control'. It does not provide cover if you change your study or travel plans for other reasons."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 1,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n1. This holiday doesn't cater for young children.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 2,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n2. This holiday provides a tour at no extra cost.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n3. This holiday involves most travel time from the airport.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Write the correct letter, A-F.\n\n4. When will one of the holiday locations not be open?",
+      "options": [],
+      "correct_answers": [
+        "(for/in) May"
+      ]
+    },
+    {
+      "idx": 5,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "5. Which two outdoor activities are provided at no extra cost at Mountain Lodge?",
+      "options": [],
+      "correct_answers": [
+        "canoeing (and)"
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n6. What is the fastest way to travel to Mountain Lodge? Read the text below and answer",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": []
+    },
+    {
+      "idx": 7,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "7. A student travelling overseas suddenly needs hospital treatment.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 8,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "8. A student consults a doctor regarding a minor problem while abroad.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 9,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "9. A parent goes overseas to bring an injured or sick student to Australia.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 10,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "10. A student is treated overseas for an illness he/she had before leaving Australia.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 11,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "11. A student who requires medical treatment has lost his/her travel insurance card.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 12,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "12. A student's study books are lost.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 13,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "13. A student's laptop is stolen.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 14,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "14. A student changes his/her mind about plans to study and decides not to take the booked flight.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "3203-holiday-plus-and-sydney-travel-college",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3203-holiday-plus-and-sydney-travel-college",
+    "normalized_by": "rule-based"
+  }
+}

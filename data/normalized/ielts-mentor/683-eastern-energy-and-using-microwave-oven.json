@@ -1,0 +1,619 @@
+{
+  "exam": {
+    "title": "GT Reading 8 Section 1 - Eastern Energy & Using Microwave Oven",
+    "slug": "gt-reading-8-section-1-eastern-energy-using-microwave-oven",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 8 Section 1 - Eastern Energy & Using Microwave Oven",
+      "passage_md": "**Passage 1: EASTERN ENERGY**\n\nWe are here to help and provide you with personal advice on any matters connected with your bill or any other queries regarding your gas and electricity supply.\n\n**Moving home**\nPlease give as much notice as possible if you are moving home, but at least 48 hours is required for us to make the necessary arrangements for your gas and electricity supply. Please telephone our 24-hour line on 01316 753219 with details of your move. In most cases, we are happy to accept your meter reading on the day you move. Tell the new occupant that Eastern Energy supplies the household, to ensure the service is not interrupted. Remember we can now supply electricity and gas at your new address, anywhere in the UK. If you do not contact us, you may be held responsible for the payment for electricity used after you have moved.\n\n**Meter reading**\nEastern Energy uses various types of meter ranging from the traditional dial meter to new technology digital display meters. Always read the meter from left to right, ignoring any red dials. If you require assistance, contact our 24-hour line on 0600 7310 310.\n\n**Energy Efficiency Line**\nIf you would like advice on the efficient use of energy, please call our Energy Efficiency Line on 0995 7626 513. Please do not use this number for any other enquiries.\n\n**Special services**\nPasswords - you can choose a password so that, whenever we visit you at home, you will know it is us. For more information, ring our helpline on 0995 7290 290.\n\n**Help and advice**\nIf you need help or advice with any issues, please contact us on 01316 440188.\n\n**Complaints**\nWe hope you will never have a problem or cause to complain, but, if you do, please contact our complaints handling team at PO Box 220, Stanfield, ST55 6GF or telephone us on 01316 753270.\n\n**Supply failure**\nIf you experience any problems with your electricity supply, please call free on 0600 7838 836, 24 hours a day, seven days a week.\n\n---\n\n**Passage 2: USING YOUR NEW MICROWAVE OVEN**\n\n**A.** As microwave cooking times are much shorter than other cooking times, it is essential that recommended cooking times are not exceeded without first checking the food.\n\n**B.** Take care when heating small amounts of food as these can easily burn, dry out or catch fire if cooked too long. Always set short cooking times and check the food frequently.\n\n**C.** Take care when heating 'dry' foods, e.g. bread items, chocolate and pastries. These can easily burn or catch fire if cooked too long.\n\n**D.** Some processed meats, such as sausages, have non-porous casings. These must be pierced by a fork before cooking, to prevent bursting. Whole fruit and vegetables should be similarly treated.\n\n**E.** When heating soup, sauces and beverages in your microwave oven, heating beyond the boiling point can occur without evidence of bubbling. Care should be taken not to overheat.\n\n**F.** When warming up food for a second time, it is essential that it is served 'piping hot', i.e. steam is being emitted from all parts and any sauce is bubbling. For foods that cannot be stirred, e.g. pizza, the centre should be cut with a knife to test it is well heated through.\n\n**G.** It is important for the safe operation of the oven that it is wiped out regularly. Use warm, soapy water, squeeze the cloth out well and use it to remove any grease or food from the interior. The oven should be unplugged during this process.\n"
+    }
+  ],
+  "questions": [
+    {
+      "idx": 1,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Customers should inform Eastern Energy of a change of address on arrival at their new home.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 2,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Customers are expected to read their own gas or electricity meters.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "It is now cheaper to use gas rather than electricity as a form of heating.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Eastern Energy supplies energy to households throughout the country.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 5,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "The Energy Efficiency Line also handles queries about energy supply.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "All complaints about energy supply should be made by phone.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Customers are not charged for the call when they report a fault in supply.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 8,
+      "type": "MATCHING_HEADING",
+      "prompt_md": "8. Section A",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Re-heating",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. Foods with skins",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Keeping your oven clean",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Standing time",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. Rapid cooking times",
+          "is_correct": true
+        },
+        {
+          "value": "vi",
+          "label": "vi. Using a thermometer",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. Small quantities of food",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Deep fat frying",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. Foods low in moisture",
+          "is_correct": false
+        },
+        {
+          "value": "x",
+          "label": "x. Liquids",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "V"
+      ]
+    },
+    {
+      "idx": 9,
+      "type": "MATCHING_HEADING",
+      "prompt_md": "9. Section B",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Re-heating",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. Foods with skins",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Keeping your oven clean",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Standing time",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. Rapid cooking times",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Using a thermometer",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. Small quantities of food",
+          "is_correct": true
+        },
+        {
+          "value": "viii",
+          "label": "viii. Deep fat frying",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. Foods low in moisture",
+          "is_correct": false
+        },
+        {
+          "value": "x",
+          "label": "x. Liquids",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "VII"
+      ]
+    },
+    {
+      "idx": 10,
+      "type": "MATCHING_HEADING",
+      "prompt_md": "10. Section C",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Re-heating",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. Foods with skins",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Keeping your oven clean",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Standing time",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. Rapid cooking times",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Using a thermometer",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. Small quantities of food",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Deep fat frying",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. Foods low in moisture",
+          "is_correct": true
+        },
+        {
+          "value": "x",
+          "label": "x. Liquids",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "IX"
+      ]
+    },
+    {
+      "idx": 11,
+      "type": "MATCHING_HEADING",
+      "prompt_md": "11. Section D",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Re-heating",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. Foods with skins",
+          "is_correct": true
+        },
+        {
+          "value": "iii",
+          "label": "iii. Keeping your oven clean",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Standing time",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. Rapid cooking times",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Using a thermometer",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. Small quantities of food",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Deep fat frying",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. Foods low in moisture",
+          "is_correct": false
+        },
+        {
+          "value": "x",
+          "label": "x. Liquids",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "II"
+      ]
+    },
+    {
+      "idx": 12,
+      "type": "MATCHING_HEADING",
+      "prompt_md": "12. Section E",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Re-heating",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. Foods with skins",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Keeping your oven clean",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Standing time",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. Rapid cooking times",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Using a thermometer",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. Small quantities of food",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Deep fat frying",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. Foods low in moisture",
+          "is_correct": false
+        },
+        {
+          "value": "x",
+          "label": "x. Liquids",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "X"
+      ]
+    },
+    {
+      "idx": 13,
+      "type": "MATCHING_HEADING",
+      "prompt_md": "13. Section F",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Re-heating",
+          "is_correct": true
+        },
+        {
+          "value": "ii",
+          "label": "ii. Foods with skins",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Keeping your oven clean",
+          "is_correct": false
+        },
+        {
+          "value": "iv",
+          "label": "iv. Standing time",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. Rapid cooking times",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Using a thermometer",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. Small quantities of food",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Deep fat frying",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. Foods low in moisture",
+          "is_correct": false
+        },
+        {
+          "value": "x",
+          "label": "x. Liquids",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "I"
+      ]
+    },
+    {
+      "idx": 14,
+      "type": "MATCHING_HEADING",
+      "prompt_md": "14. Section G",
+      "options": [
+        {
+          "value": "i",
+          "label": "i. Re-heating",
+          "is_correct": false
+        },
+        {
+          "value": "ii",
+          "label": "ii. Foods with skins",
+          "is_correct": false
+        },
+        {
+          "value": "iii",
+          "label": "iii. Keeping your oven clean",
+          "is_correct": true
+        },
+        {
+          "value": "iv",
+          "label": "iv. Standing time",
+          "is_correct": false
+        },
+        {
+          "value": "v",
+          "label": "v. Rapid cooking times",
+          "is_correct": false
+        },
+        {
+          "value": "vi",
+          "label": "vi. Using a thermometer",
+          "is_correct": false
+        },
+        {
+          "value": "vii",
+          "label": "vii. Small quantities of food",
+          "is_correct": false
+        },
+        {
+          "value": "viii",
+          "label": "viii. Deep fat frying",
+          "is_correct": false
+        },
+        {
+          "value": "ix",
+          "label": "ix. Foods low in moisture",
+          "is_correct": false
+        },
+        {
+          "value": "x",
+          "label": "x. Liquids",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "III"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "683-eastern-energy-and-using-microwave-oven",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/683-eastern-energy-and-using-microwave-oven",
+    "normalized_by": "rule-based"
+  }
+}

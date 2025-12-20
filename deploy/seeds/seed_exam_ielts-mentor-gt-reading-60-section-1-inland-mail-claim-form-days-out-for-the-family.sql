@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-20T15:12:41.980633
+-- Generated: 2025-12-20T19:40:53.360488
 -- Source: ielts-mentor.com
 -- Title: GT Reading 60: Section 1 - Inland Mail Claim Form & Days Out For The Family
 -- ============================================
@@ -65,7 +65,7 @@ BEGIN
     2,
     '_______ that contains the relevant information.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q1": ["BOOKLET"]}'::jsonb
+    '{"blank-q1": ["booklet"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -79,7 +79,7 @@ BEGIN
     2,
     '_______ to ensure all the relevant sections are completed.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q2": ["CHECKLIST"]}'::jsonb
+    '{"blank-q2": ["checklist"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -93,7 +93,7 @@ BEGIN
     2,
     '_______ to request action if you don’t have enough proof to make a claim).',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q3": ["WEBSITE"]}'::jsonb
+    '{"blank-q3": ["website"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -107,7 +107,7 @@ BEGIN
     2,
     'Complete the blank. _______ Question 4',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q4": ["VALUE"]}'::jsonb
+    '{"blank-q4": ["value"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -149,7 +149,7 @@ BEGIN
     2,
     '_______ , you must claim within three months of posting the package.',
     'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
-    '{"blank-q7": ["SENDER"]}'::jsonb
+    '{"blank-q7": ["sender"]}'::jsonb
   );
 
   qid := gen_random_uuid();

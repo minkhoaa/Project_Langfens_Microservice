@@ -1,0 +1,23 @@
+{
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/893-kormilda-college",
+  "source": "ielts-mentor",
+  "item_id": "893-kormilda-college",
+  "success": false,
+  "stage_failed": "INVARIANTS",
+  "sql_path": null,
+  "errors": [
+    "Section 1: Passage too short (32 words, need 100+)",
+    "[INVARIANTS] IELTS rules violated (after repair)"
+  ],
+  "warnings": [
+    "Q26: MATCHING_HEADING should have 5+ heading options (i, ii, iii...)",
+    "Q27: MATCHING_HEADING should have 5+ heading options (i, ii, iii...)",
+    "Q26: MATCHING_HEADING missing correct_answers",
+    "Q27: MATCHING_HEADING missing correct_answers"
+  ],
+  "repairs": [
+    "Q26: Changed MATCHING_HEADING \u2192 SUMMARY_COMPLETION (no heading options)",
+    "Q27: Changed MATCHING_HEADING \u2192 SUMMARY_COMPLETION (no heading options)"
+  ],
+  "timestamp": "2025-12-20T17:31:54.213174"
+}

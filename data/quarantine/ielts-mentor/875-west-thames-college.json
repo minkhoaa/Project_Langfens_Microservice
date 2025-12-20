@@ -1,0 +1,28 @@
+{
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/875-west-thames-college",
+  "source": "ielts-mentor",
+  "item_id": "875-west-thames-college",
+  "success": false,
+  "stage_failed": "INVARIANTS",
+  "sql_path": null,
+  "errors": [
+    "Q21: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q22: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q23: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q24: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "Q25: MULTIPLE_CHOICE_SINGLE has 0 options (need 2+)",
+    "[INVARIANTS] IELTS rules violated (after repair)"
+  ],
+  "warnings": [
+    "Q21: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q22: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q23: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q24: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q25: MULTIPLE_CHOICE_SINGLE should have at least 2 options",
+    "Q26: MULTIPLE_CHOICE_SINGLE should have exactly 1 correct, found 0"
+  ],
+  "repairs": [
+    "Q26: Cleaned paragraph options \u2192 simple A-D (MATCHING_INFORMATION)"
+  ],
+  "timestamp": "2025-12-20T17:47:23.955389"
+}
