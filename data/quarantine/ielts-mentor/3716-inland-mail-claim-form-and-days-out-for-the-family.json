@@ -1,0 +1,17 @@
+{
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3716-inland-mail-claim-form-and-days-out-for-the-family",
+  "source": "ielts-mentor",
+  "item_id": "3716-inland-mail-claim-form-and-days-out-for-the-family",
+  "success": false,
+  "stage_failed": "INVARIANTS",
+  "sql_path": null,
+  "errors": [
+    "Q9: MULTIPLE_CHOICE_SINGLE should have 1 correct, found 0",
+    "Q12: MULTIPLE_CHOICE_SINGLE should have 1 correct, found 0",
+    "Q14: MULTIPLE_CHOICE_SINGLE should have 1 correct, found 0",
+    "[INVARIANTS] IELTS rules violated"
+  ],
+  "warnings": [],
+  "repairs": [],
+  "timestamp": "2025-12-20T14:55:30.888930"
+}

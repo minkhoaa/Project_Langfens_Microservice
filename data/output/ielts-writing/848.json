@@ -1,0 +1,130 @@
+{
+  "exam": {
+    "id": "4caeabcf-376a-4fac-b564-1f8fdc810ca2",
+    "title": "IELTS Reading - 848",
+    "slug": "ielts-writing-ielts-reading-848",
+    "category": "IELTS",
+    "level": "B2",
+    "status": "DRAFT",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "id": "6ba5d9ec-56cf-4579-b0c0-814f38c6fc8e",
+      "idx": 1,
+      "title": "Reading Passage - IELTS Reading - 848",
+      "passage_md": "×\nSearch ielts-writing.info:\nIELTS Reading Sample (Academic) #10\nReading Tip\nSkip any questions you are not sure about, rather than wasting too much \n time on a particular question. You can come back to the missing answers \n later.\nRemember to answer all the questions using information from the passages. \n Whether or not you are knowledgeable about the topic should not make any \n difference to your answers.\nDo not leave answers blank if you run out of time: guess the answers where \n you can, as there is a chance you will get some right. This is especially \n true for multiple-choice questions, matching exercises and other questions \n where you have limited answer options.\nReading paper for this section"
+    }
+  ],
+  "questions": [
+    {
+      "id": "a0370ca2-bf6b-4b5b-8562-4deb22afb0c4",
+      "idx": 1,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "1. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "a16e4af2-b6c3-4812-9f7e-1b02e07570b1",
+      "idx": 2,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "2. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "d0359d5e-4814-486f-9712-2a35ce435473",
+      "idx": 3,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "3. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "31986652-c465-4208-9870-e626a6d4eae8",
+      "idx": 4,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "4. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "e107a5b1-5b9b-4b47-8025-d228e6e54fcd",
+      "idx": 5,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "5. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "d098559e-83ce-400f-96e6-e7e4ac89272b",
+      "idx": 6,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "6. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "2bf0da69-2b7d-4251-bda5-0c9558a8130d",
+      "idx": 7,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "7. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "8751c642-fb4f-424c-9acb-c82a323caef2",
+      "idx": 8,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "8. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "7b7dfa8c-a571-4aaa-9c05-839a55afe7ce",
+      "idx": 9,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "9. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "83539eb8-188c-4c8c-86d1-abc4a7b4ab31",
+      "idx": 10,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "10. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "35240f6b-daf0-4a78-917e-681500ea5ffd",
+      "idx": 11,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "11. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "671b3eb8-ed92-4823-9d98-5812b72a7dee",
+      "idx": 12,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "12. ",
+      "options": [],
+      "correct_answers": []
+    },
+    {
+      "id": "35336618-35d7-4e24-aa65-3af3874a17a3",
+      "idx": 13,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "13. ",
+      "options": [],
+      "correct_answers": []
+    }
+  ],
+  "metadata": {
+    "source": "ielts-writing",
+    "item_id": "848",
+    "normalized_at": "2025-12-20T14:15:34.054934"
+  }
+}

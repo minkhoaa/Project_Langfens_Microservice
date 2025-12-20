@@ -8,60 +8,79 @@ Usage:
     python crawler-ieltswriting.py [URL]
     
 Example:
-    python crawler-ieltswriting.py https://www.ielts-writing.info/EXAM/ielts_reading/1224/
+    python crawler-ieltswriting.py https://www.ielts-writing.info/EXAM/ielts_reading/1186/
 
-STANDARDIZED QUESTION FORMATS (v3.0) - LOCKED
+STANDARDIZED QUESTION FORMATS (v5.0) - LOCKED
 ==============================================
 ⚠️ DO NOT MODIFY BACKEND OR FRONTEND - ONLY DATA/SCRIPT CHANGES ALLOWED
 
 1. YES_NO_NOT_GIVEN / TRUE_FALSE_NOT_GIVEN:
-   - Type: YES_NO_NOT_GIVEN or TRUE_FALSE_NOT_GIVEN
-   - options: 3 fixed choices with IsCorrect flag
-   - correct_answer: string (YES/NO/NOT GIVEN or TRUE/FALSE/NOT GIVEN)
-   - MatchPairs: NULL
    - HTML: <p class="inline-question"> + <span data-answer='YES'>
+   - Options: 3 choices (YES/NO/NOT GIVEN), one IsCorrect=true
+   - MatchPairs: NULL
 
 2. MULTIPLE_CHOICE_SINGLE:
-   - Type: MULTIPLE_CHOICE_SINGLE
-   - options: A-D with "A. " prefix in ContentMd labels, one IsCorrect=true
-   - correct_answer: letter
+   - HTML: <div class="mchq" data-answer="D"> (single letter)
+   - Options: A-D with "A. Text" format, one IsCorrect=true
    - MatchPairs: NULL
-   - HTML: <div class="mchq" data-answer="D">
 
-3. MATCHING_HEADING: ⭐ Requires MatchPairs with FULL LABEL
-   - Type: MATCHING_HEADING
-   - options: roman numerals (i-ix) with full label (e.g., "i. The beginning...")
-   - correct_answer: roman numeral (lowercase)
-   - MatchPairs: {"section-a-q1": ["i. Full heading text here"]}
-     ⚠️ CRITICAL: MatchPairs MUST contain FULL LABEL, not just "i"
+3. MULTIPLE_CHOICE_MULTIPLE: ⭐
+   - Detection: "Choose TWO/THREE/FOUR" in prompt OR comma in data-answer (B,C,D,G)
+   - HTML: <div class="mchq" data-answer="B,C,D,G">
+   - Options: A-G with "A. Text" format, MULTIPLE IsCorrect=true
+   - MatchPairs: NULL
+
+4. MATCHING_HEADING:
    - HTML: <p class="inline-question"> + <div class="lows-headers">
+   - Options: roman numerals "i. Full heading text"
+   - MatchPairs: {"paragraph-a-q1": ["iii", "iii. Full text"]} (index 0=grading, 1=display)
 
-4. MATCHING_FEATURES: ⭐ Requires MatchPairs with FULL LABEL  
-   - Type: MATCHING_FEATURES
-   - options: A/B/C from data-items attribute
-   - correct_answer: letter
-   - MatchPairs: {"feature-q6": ["C. Full option text"]}
-     ⚠️ CRITICAL: MatchPairs MUST contain FULL LABEL, not just "C"
+5. MATCHING_FEATURES:
    - HTML: <span data-items='A / B / C' data-answer='C'>
+   - MatchPairs: {"feature-q6": ["C. FULL OPTION TEXT"]} ⚠️ NOT JUST "C"
 
-5. MATCHING_INFORMATION (Paragraph Matching):
-   - Type: MATCHING_INFORMATION
-   - options: empty (user types letter A-J)
-   - correct_answer: letter A-J
-   - MatchPairs: {"paragraph": ["I"]} - contains paragraph letter
-   - HTML: <p class="sq"> + <div class="lows-2">
+6. MATCHING_INFORMATION: ⭐ (LOCKED)
+   - HTML: <p class="sq"> + <span data-answer="E"> (single letter A-J)
+   - Answer: single letter representing paragraph
+   - BlankAcceptTexts: {"blank-q5": ["E"]}
+   - MatchPairs: NULL
 
-6. SUMMARY_COMPLETION (Fill-in-blank):
-   - Type: SUMMARY_COMPLETION
-   - options: empty
-   - correct_answer: word/phrase
-   - BlankAcceptTexts: {"blank1": ["accepted", "answers"]}
-   - HTML: gaps in text
+7. SUMMARY_COMPLETION: ⭐ (LOCKED FORMAT)
+   - HTML: <span data-answer="text answer"> in <p class="sq">
+   - Spans are EMPTY in raw HTML (no dots)
+   - Skip if answer is YES/NO/NOT GIVEN/TRUE/FALSE or single letter
+   
+   CRAWLER RULES:
+   1. Clone parent element
+   2. Compare data-answer to find CURRENT span → replace with _______
+   3. Replace OTHER spans with (...)
+   4. Add instruction header before content
+   5. Truncate to 800 chars (ensure all blanks included)
+   
+   PROMPTMD FORMAT (REQUIRED):
+   "Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER 
+   from the passage for each answer. [Content with _______ for current, (...) for others]"
+   
+   EXPLANATIONMD (FIXED):
+   "Use NO MORE THAN THREE WORDS from the passage to complete the blank."
+   
+   BLANKACCEPTTEXTS: {"blank-qN": ["answer"]}
 
-INDEXING RULES:
+INDEXING PIPELINE: ⭐
+====================
+1. Extract ALL questions (dropdown, MC, span completion)
+2. Sort by HTML position - ensure correct order in exam
+3. Reassign Idx from 1 - unique and sequential
+
+Example (Bài #30):
+  Q1-4: SUMMARY_COMPLETION (first in HTML)
+  Q5-9: MATCHING_INFORMATION
+  Q10-13: YES_NO_NOT_GIVEN (last in HTML)
+
+CAPITALIZATION:
 ===============
-- Idx starts at 1 and MUST be unique per exam (no duplicates)
-- MC questions start after dropdown questions (use max_dropdown_idx + 1)
+- PromptMd MUST have first letter capitalized
+- Options format: "A. Option text" (letter + dot + space + text)
 """
 
 import requests
@@ -153,6 +172,31 @@ def extract_passage(soup: BeautifulSoup, base_url: str) -> dict:
                 for tag in body.find_all(['script', 'style', 'nav', 'header', 'footer']):
                     tag.decompose()
                 passage_text = body.get_text(separator='\n', strip=True)
+                
+                # Clean up noise patterns
+                noise_patterns = [
+                    r'^×\s*$',                           # Close button
+                    r'^×$',                              # Just X
+                    r'^SHARE THIS PAGE.*$',              # Share section
+                    r'^CONTACT US.*$',                   # Contact section
+                    r'^IELTS QUESTIONS.*$',              # Navigation
+                    r'^LIFE IN THE UK TEST.*$',          # Navigation
+                    r'^The reading, writing and listening practice tests.*$',  # Disclaimer
+                    r'^While using this site.*$',        # Cookie notice
+                    r'^Dear readers,.*$',                # Domain message
+                    r'^This is to inform you.*$',        # Domain message
+                    r'^Our old domain.*$',               # Domain message
+                    r'^We look forward to.*$',           # Domain message
+                    r'^OK, I understand.*$',             # Button
+                    r'^https?://www\.ielts.*$',          # URL lines
+                ]
+                for pattern in noise_patterns:
+                    passage_text = re.sub(pattern, '', passage_text, flags=re.MULTILINE | re.IGNORECASE)
+                
+                # Remove multiple newlines
+                passage_text = re.sub(r'\n{3,}', '\n\n', passage_text)
+                passage_text = passage_text.strip()
+                
         except Exception as e:
             logger.warning(f"Failed to fetch passage: {e}")
     
@@ -246,23 +290,111 @@ def extract_heading_list(soup: BeautifulSoup) -> list[dict]:
     return headings
 
 
+def extract_phrase_list(soup: BeautifulSoup) -> list[dict]:
+    """Extract phrase list from 'List of Phrases' container.
+    
+    Returns list like [{'value': 'A', 'label': 'A. work in groups...'}, ...]
+    """
+    phrases = []
+    
+    # Find container with "List of Phrases" text
+    phrase_header = soup.find(string=re.compile(r'List of Phrases', re.IGNORECASE))
+    if not phrase_header:
+        return phrases
+    
+    # Get grandparent container (the phrase list is usually 2 levels up)
+    container = phrase_header.find_parent(['div', 'table'])
+    if container:
+        container = container.find_parent(['div', 'table']) or container
+    if not container:
+        return phrases
+    
+    # Extract phrases from divs that contain letter + phrase pattern
+    for item in container.find_all('div'):
+        spans = item.find_all('span', recursive=False)
+        if len(spans) >= 2:
+            letter = spans[0].get_text(strip=True).upper()
+            text = spans[1].get_text(strip=True)
+            if letter and len(letter) == 1 and letter.isalpha() and text and len(text) > 5:
+                # Avoid duplicates
+                if not any(p['value'] == letter for p in phrases):
+                    phrases.append({
+                        'value': letter,
+                        'label': f"{letter}. {text}",
+                        'is_correct': False
+                    })
+    
+    return phrases
+
+
 def extract_questions(soup: BeautifulSoup) -> list[dict]:
     """Extract all questions from the page using ielts-writing.info HTML structure."""
     questions = []
     
-    # Pattern 1: Extract YES/NO/NOT GIVEN and Summary Completion from .data-answer spans
-    dropdown_questions = extract_dropdown_questions(soup)
-    questions.extend(dropdown_questions)
+    # Get all spans with data-answer in order of appearance
+    all_spans = soup.find_all('span', attrs={'data-answer': True})
     
-    # Calculate starting index for MC questions based on dropdown questions
-    max_dropdown_idx = max((q['idx'] for q in dropdown_questions), default=0)
+    # Track which spans we've processed
+    processed_spans = set()
+    
+    # Pattern 1: Extract YES/NO/NOT GIVEN from inline-question paragraphs
+    dropdown_questions = extract_dropdown_questions(soup)
+    for q in dropdown_questions:
+        questions.append(q)
+    
+    # Track processed answers to avoid duplicates
+    processed_answers = set()
+    for q in dropdown_questions:
+        if q.get('correct_answer'):
+            processed_answers.add(q['correct_answer'].lower())
     
     # Pattern 2: Multiple choice questions from .mchq divs
-    mc_questions = extract_mchq_questions(soup, start_idx=max_dropdown_idx + 1)
+    mc_questions = extract_mchq_questions(soup, start_idx=1)  # Will be renumbered later
     questions.extend(mc_questions)
     
-    # Sort by question index
-    questions.sort(key=lambda q: q['idx'])
+    # Pattern 3: Summary Completion from span elements with data-answer (fill-in-blank text)
+    # Pass processed_answers to avoid duplicates
+    # Use high start_idx (1000) so they sort to end initially, then reassign
+    span_questions = extract_span_completion(soup, start_idx=1000, processed_answers=processed_answers)
+    questions.extend(span_questions)
+    
+    # Now sort all questions by their HTML position and reassign Idx
+    # For each question, find its position in the original soup
+    html_str = str(soup)
+    
+    def get_html_position(q):
+        answer = q.get('correct_answer', '')
+        
+        # Try to find exact data-answer attribute first
+        if answer:
+            # For answers with special chars, escape them
+            escaped_answer = answer.replace('"', '&quot;')
+            patterns = [
+                f'data-answer="{answer}"',
+                f"data-answer='{answer}'",
+                f'data-answer="{escaped_answer}"',
+            ]
+            for pattern in patterns:
+                pos = html_str.find(pattern)
+                if pos != -1:
+                    return pos
+        
+        # Fallback: try to find prompt text
+        prompt = q.get('prompt', '')[:50]
+        if prompt:
+            pos = html_str.find(prompt[:30])
+            if pos != -1:
+                return pos
+        
+        return 999999  # Default to end if not found
+    
+    # Sort by original idx from HTML (extracted from <strong> tags)
+    # This preserves the original question order as it appears on the page
+    questions.sort(key=lambda q: (q.get('idx', 999), get_html_position(q)))
+    
+    # Reassign Idx from 1 to ensure sequential numbering
+    for i, q in enumerate(questions):
+        q['idx'] = i + 1
     
     return questions
 
@@ -332,20 +464,35 @@ def extract_dropdown_questions(soup: BeautifulSoup) -> list[dict]:
                 {'label': item, 'value': item, 'is_correct': item == correct_answer}
                 for item in item_list
             ]
-        elif re.match(r'^[ivxIVX]+$', correct_answer.lower()):
-            # MATCHING_HEADING with roman numerals (i, ii, iii, iv, etc.)
-            q_type = 'MATCHING_HEADING'
-            # Get heading list from page
+        elif re.match(r'^(i{1,3}|iv|v|vi{1,3}|ix|x)$', correct_answer.lower()):
+            # MATCHING_HEADING with roman numerals (i, ii, iii, iv, v, vi, vii, viii, ix, x)
+            # Only treat as heading if we can find heading list on page
             heading_list = extract_heading_list(soup)
-            correct_lower = correct_answer.lower()
-            options = [
-                {'label': h['label'], 'value': h['value'], 'is_correct': h['value'] == correct_lower}
-                for h in heading_list
-            ]
+            if heading_list:
+                q_type = 'MATCHING_HEADING'
+                correct_lower = correct_answer.lower()
+                options = [
+                    {'label': h['label'], 'value': h['value'], 'is_correct': h['value'] == correct_lower}
+                    for h in heading_list
+                ]
+            else:
+                # No heading list found, treat as MATCHING_INFORMATION
+                q_type = 'MATCHING_INFORMATION'
+                options = []
         elif len(correct_answer) == 1 and correct_answer.isalpha():
-            # Single letter answer (A-Z) - MATCHING_INFORMATION
-            q_type = 'MATCHING_INFORMATION'
-            options = []
+            # Single letter answer (A-Z)
+            # Check if there's a phrase list - if so, it's MATCHING_FEATURES
+            phrase_list = extract_phrase_list(soup)
+            if phrase_list and correct_answer.upper() in [p['value'] for p in phrase_list]:
+                q_type = 'MATCHING_FEATURES'
+                options = [
+                    {'label': p['label'], 'value': p['value'], 'is_correct': p['value'] == correct_answer.upper()}
+                    for p in phrase_list
+                ]
+            else:
+                # No phrase list found, treat as MATCHING_INFORMATION
+                q_type = 'MATCHING_INFORMATION'
+                options = []
         else:
             continue  # Skip unknown types
         
@@ -363,60 +510,6 @@ def extract_dropdown_questions(soup: BeautifulSoup) -> list[dict]:
                 'correct_answer': correct_answer
             })
     
-    # Pattern 2: Summary Completion from p.sq with span[data-answer]
-    # First, extract word list from .lows-2 container
-    word_list = extract_word_list(soup)
-    word_list_text = "\n".join([f"{letter}. {word}" for letter, word in word_list.items()])
-    
-    sq_paragraphs = soup.find_all('p', class_='sq')
-    sq_question_idx = 8  # Summary questions start at Q9 (after 5 YNNG + 3 MC)
-    
-    # First pass: collect all blanks and their question numbers
-    all_blanks = []
-    for p in sq_paragraphs:
-        answer_spans = p.find_all('span', attrs={'data-answer': True})
-        for span in answer_spans:
-            correct_answer = span.get('data-answer', '').strip().upper()
-            if len(correct_answer) == 1 and correct_answer.isalpha():
-                sq_question_idx += 1
-                all_blanks.append({
-                    'paragraph': p,
-                    'span': span,
-                    'q_num': sq_question_idx,
-                    'correct_answer': correct_answer
-                })
-    
-    # Second pass: create questions with numbered blanks
-    for blank_info in all_blanks:
-        p = blank_info['paragraph']
-        current_q_num = blank_info['q_num']
-        correct_answer = blank_info['correct_answer']
-        
-        # Create a copy of the paragraph HTML
-        prompt_html = str(p)
-        
-        # Find all blanks in this paragraph and number them
-        blank_counter = [b for b in all_blanks if b['paragraph'] == p]
-        for b in blank_counter:
-            # Replace each span with numbered blank
-            span_pattern = re.escape(str(b['span']))
-            numbered_blank = f" ___[{b['q_num']}] "
-            prompt_html = prompt_html.replace(str(b['span']), numbered_blank, 1)
-        
-        prompt_soup = BeautifulSoup(prompt_html, 'html.parser')
-        prompt = prompt_soup.get_text(separator=' ', strip=True)
-        prompt = re.sub(r'\s+', ' ', prompt)[:400]
-        
-        # Build full prompt with word list
-        full_prompt = f"**Q{current_q_num}** - Fill in blank ___[{current_q_num}]:\n\n{prompt}\n\n**Word List:**\n{word_list_text}"
-        
-        questions.append({
-            'idx': current_q_num,
-            'type': 'MATCHING_INFORMATION',
-            'prompt': full_prompt,
-            'options': [],
-            'correct_answer': correct_answer
-        })
     
     return questions
 
@@ -431,20 +524,37 @@ def extract_mchq_questions(soup: BeautifulSoup, start_idx: int = 7) -> list[dict
     for idx, div in enumerate(mchq_divs):
         correct_answer = div.get('data-answer', '').strip().upper()
         
-        # MC questions start after dropdown questions (dynamic start_idx)
-        q_num = start_idx + idx
-        
-        # Find question stem - look for preceding paragraph or h4
+        # Find question stem - first look INSIDE the div, then look for preceding sibling
         prompt = ""
-        prev = div.find_previous_sibling(['p', 'h4'])
-        if prev:
-            text = prev.get_text(strip=True)
+        q_num = start_idx + idx # Initial assignment, will be overwritten if found in HTML
+        
+        # First try to find question inside div (p.inline-question)
+        inner_question = div.find('p', class_='inline-question')
+        if inner_question:
+            text = inner_question.get_text(strip=True)
             # Extract just the question part (after the number)
-            match = re.match(r'^\d+\s*(.+)', text)
+            match = re.match(r'^(\d+)\s*(.+)', text)
             if match:
-                prompt = match.group(1)
+                q_num = int(match.group(1))  # Use actual question number from HTML
+                prompt = match.group(2)
             else:
                 prompt = text
+        else:
+            # Fallback: look for preceding sibling
+            prev = div.find_previous_sibling(['p', 'h4'])
+            if prev:
+                text = prev.get_text(strip=True)
+                match = re.match(r'^(\d+)\s*(.+)', text)
+                if match:
+                    q_num = int(match.group(1))
+                    prompt = match.group(2)
+                else:
+                    prompt = text
+        
+        # Detect MULTIPLE_CHOICE_MULTIPLE by checking:
+        # 1. Prompt contains "Choose TWO/THREE/FOUR/FIVE" 
+        # 2. data-answer contains comma (multiple answers like "B,C,D,G")
+        is_multiple = bool(re.search(r'Choose\s*(TWO|THREE|FOUR|FIVE|SIX)', prompt, re.IGNORECASE)) or ',' in correct_answer
         
         # If prompt is still empty or too short, use a generic one
         if len(prompt) < 10:
@@ -454,25 +564,28 @@ def extract_mchq_questions(soup: BeautifulSoup, start_idx: int = 7) -> list[dict
         options = []
         option_labels = div.find_all('label', class_='custom-control-label')
         
+        # Parse correct answers (may be multiple like "B,C,D,G")
+        correct_answers = [a.strip().upper() for a in correct_answer.split(',')]
+        
         for label in option_labels:
             # Get the full option text
             opt_text = label.get_text(strip=True)
             
             # Extract option letter (A, B, C, D, etc.)
-            radio_input = label.find_previous_sibling('input', {'type': 'radio'})
+            radio_input = label.find_previous_sibling('input', {'type': ['radio', 'checkbox']})
             opt_value = radio_input.get('value', '').upper() if radio_input else ''
             
             # Clean up option text - add space after letter if missing
             # Pattern: "AThe means..." -> "A. The means..."
-            cleaned_text = re.sub(r'^([A-F])([A-Z])', r'\1. \2', opt_text)
+            cleaned_text = re.sub(r'^([A-G])([A-Z])', r'\1. \2', opt_text)
             
             if not opt_value:
                 # Try to extract from label text
-                letter_match = re.match(r'^([A-F])[\.\s]', cleaned_text)
+                letter_match = re.match(r'^([A-G])[\.\s]', cleaned_text)
                 if letter_match:
                     opt_value = letter_match.group(1)
             
-            is_correct = opt_value == correct_answer
+            is_correct = opt_value in correct_answers
             
             options.append({
                 'label': cleaned_text,
@@ -480,10 +593,17 @@ def extract_mchq_questions(soup: BeautifulSoup, start_idx: int = 7) -> list[dict
                 'is_correct': is_correct
             })
         
+        # Capitalize first letter of prompt
+        clean_prompt = prompt[:500] if prompt else f"Question {q_num}"
+        if clean_prompt and len(clean_prompt) > 0:
+            clean_prompt = clean_prompt[0].upper() + clean_prompt[1:]
+        
+        q_type = 'MULTIPLE_CHOICE_MULTIPLE' if is_multiple else 'MULTIPLE_CHOICE_SINGLE'
+        
         questions.append({
             'idx': q_num,
-            'type': 'MULTIPLE_CHOICE_SINGLE',
-            'prompt': prompt[:500] if prompt else f"Question {q_num}",
+            'type': q_type,
+            'prompt': clean_prompt,
             'options': options,
             'correct_answer': correct_answer
         })
@@ -491,10 +611,272 @@ def extract_mchq_questions(soup: BeautifulSoup, start_idx: int = 7) -> list[dict
     return questions
 
 
-def extract_blank_questions(soup: BeautifulSoup, start_idx: int) -> list[dict]:
-    """Extract fill-in-the-blank questions (legacy, not used for ielts-writing.info)."""
-    # This function is kept for compatibility but ielts-writing.info uses dropdowns
-    return []
+def extract_span_completion(soup: BeautifulSoup, start_idx: int, processed_answers: set = None) -> list[dict]:
+    """Extract Summary Completion questions from span elements with data-answer.
+    
+    These are fill-in-the-blank questions where the blank is represented as:
+    <span data-answer="regular income">..........</span>
+    """
+    if processed_answers is None:
+        processed_answers = set()
+    
+    questions = []
+    
+    # Find all spans with data-answer that contain placeholder dots (not dropdowns)
+    # These are typically in summary completion sections
+    spans = soup.find_all('span', attrs={'data-answer': True})
+    
+    q_num = start_idx
+    for span in spans:
+        answer = span.get('data-answer', '').strip()
+        
+        # Skip if already processed by dropdown extractor
+        if answer.lower() in processed_answers:
+            continue
+        
+        # Skip if already processed as dropdown (YES/NO/NOT GIVEN, etc.)
+        # These are characterized by having dropdown/select inside
+        if span.find('select') or span.find('input'):
+            continue
+        
+        # Skip YES/NO/NOT GIVEN/TRUE/FALSE answers (already handled by dropdown extractor)
+        if answer.upper() in ['YES', 'NO', 'NOT GIVEN', 'TRUE', 'FALSE']:
+            continue
+        
+        # Skip if answer looks like multiple choice (single letters or comma-separated)
+        if re.match(r'^[A-G](,[A-G])*$', answer.upper()):
+            continue
+        
+        # Skip if answer looks like a letter/roman numeral (handled by other extractors)
+        if re.match(r'^[A-Za-z]$', answer) or re.match(r'^(i|ii|iii|iv|v|vi|vii|viii|ix|x)$', answer.lower()):
+            continue
+        
+        # This is a text completion (fill-in-blank) question
+        if len(answer) > 1:  # Skip single characters
+            # Get surrounding context for the prompt
+            # First try to find the closest paragraph
+            parent = span.find_parent('p')
+            if not parent:
+                parent = span.find_parent(['td', 'li'])  # Try table cell or list item
+            if not parent:
+                parent = span.find_parent('div')  # Last resort: div
+            
+            if parent:
+                # Special handling for table cells (td)
+                if parent.name == 'td':
+                    # Get table header as context
+                    table = span.find_parent('table')
+                    if table:
+                        th = table.find('th')
+                        table_context = th.get_text(strip=True) if th else "Complete the table"
+                        
+                        # Get row context (first td in the row if exists and different from current)
+                        row = span.find_parent('tr')
+                        row_prefix = ""
+                        if row:
+                            # Get all tds in row
+                            all_tds = row.find_all('td')
+                            if len(all_tds) > 1:
+                                # There's a row header (first td)
+                                first_td = all_tds[0]
+                                if first_td != parent:
+                                    row_prefix = f"{first_td.get_text(strip=True)} - "
+                        
+                        # Get cell content and append blank (span is empty placeholder)
+                        cell_text = parent.get_text(strip=True)
+                        # Cell text typically is like "1)" so we append blank
+                        context_with_blanks = f"{table_context}: {row_prefix}{cell_text} _______"
+                    else:
+                        cell_text = parent.get_text(strip=True)
+                        context_with_blanks = f"Complete: {cell_text} _______"
+                else:
+                    # Non-table cell: use existing logic
+                    # Clone parent to manipulate
+                    from copy import copy
+                    parent_copy = BeautifulSoup(str(parent), 'html.parser')
+                    
+                    # Get raw text to check if we need cleanup
+                    raw_text = parent_copy.get_text(separator=' ', strip=True)
+                    
+                    # Check if parent contains too much noise (Reading Tips, etc.)
+                    needs_cleanup = (
+                        len(raw_text) > 400 or 
+                        'Reading Tip' in raw_text or 
+                        'IELTS Reading Sample' in raw_text or
+                        'Reading paper for this section' in raw_text
+                    )
+                    
+                    if needs_cleanup:
+                        # Extract only the specific sentence/row with the blank
+                        # Remove everything before "Reading paper for this section"
+                        if 'Reading paper for this section' in raw_text:
+                            parts = raw_text.split('Reading paper for this section')
+                            if len(parts) > 1:
+                                raw_text = parts[1].strip()
+                        
+                        # Remove Reading Tip content
+                        if 'Reading Tip' in raw_text:
+                            parts = raw_text.split('Reading Tip')
+                            raw_text = parts[0].strip() if parts else raw_text
+                        
+                        # Now replace answer in raw_text with blank marker
+                        if answer in raw_text:
+                            context_with_blanks = raw_text.replace(answer, '_______', 1)[:400]
+                        else:
+                            # Fallback - just use cleaned text with blank at end
+                            context_with_blanks = f"{raw_text[:300]} _______"
+                    else:
+                        # Parent is reasonably sized, use normal logic
+                        # Find all spans with data-answer in the copy
+                        all_spans_in_parent = parent_copy.find_all('span', attrs={'data-answer': True})
+                        
+                        # The current span's answer - use this to identify which blank to mark as _______
+                        current_answer = answer
+                        
+                        # Replace spans with markers
+                        for span_in_copy in all_spans_in_parent:
+                            span_answer = span_in_copy.get('data-answer', '')
+                            if span_answer.upper() in ['YES', 'NO', 'NOT GIVEN', 'TRUE', 'FALSE']:
+                                continue
+                            if len(span_answer) <= 1:
+                                continue
+                            
+                            if span_answer == current_answer:
+                                span_in_copy.replace_with('_______')
+                            else:
+                                span_in_copy.replace_with('(...)')
+                        
+                        context_with_blanks = parent_copy.get_text(separator=' ', strip=True)[:400]
+            else:
+                context_with_blanks = f"Complete the blank _______"
+            
+            # Add instruction header (IELTS standard format)
+            instruction_header = f"Questions (...) - (...) Complete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer. Write your answers in boxes (...) - (...) on your answer sheet."
+            prompt = f"{instruction_header}\n\n{context_with_blanks}"
+            
+            questions.append({
+                'idx': q_num,
+                'type': 'SUMMARY_COMPLETION',
+                'prompt': prompt,
+                'options': [],
+                'correct_answer': answer,
+                'blank_accepts': [answer]  # Accept texts for this blank
+            })
+            q_num += 1
+    
+    return questions
+
+
+def generate_exam_json(data: dict) -> dict:
+    """Generate exam data in exam-import.schema.json format.
+    
+    This is the standardized JSON format for validation and review.
+    """
+    import uuid as uuid_module
+    
+    title = data.get('title', 'IELTS Reading Test')
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    slug = f"ielts-reading-{slug}"
+    
+    passage = data.get('passage', {})
+    raw_questions = data.get('questions', [])
+    
+    # Transform questions to schema format
+    schema_questions = []
+    for q in raw_questions:
+        q_type = q.get('type', 'MULTIPLE_CHOICE_SINGLE')
+        q_idx = q.get('idx', 1)
+        prompt = q.get('prompt', '')
+        correct = q.get('correct_answer', '')
+        options = q.get('options', [])
+        
+        # Build schema question
+        schema_q = {
+            "id": str(uuid_module.uuid4()),
+            "idx": q_idx,
+            "type": q_type,
+            "skill": "READING",
+            "difficulty": 2,
+            "promptMd": prompt,
+            "explanationMd": None,
+            "options": [],
+            "blankAcceptTexts": {},
+            "blankAcceptRegex": {},
+            "matchPairs": {},
+            "orderCorrects": [],
+            "shortAnswerAcceptTexts": [],
+            "shortAnswerAcceptRegex": []
+        }
+        
+        # Handle different question types
+        if q_type in ['SUMMARY_COMPLETION', 'NOTE_COMPLETION', 'TABLE_COMPLETION', 'SENTENCE_COMPLETION', 'FORM_COMPLETION']:
+            if correct:
+                blank_key = f"blank-q{q_idx}"
+                # Handle multiple answers separated by /
+                answers = [a.strip() for a in str(correct).split('/')]
+                schema_q["blankAcceptTexts"] = {blank_key: answers}
+        
+        elif q_type.startswith('MATCHING_'):
+            if correct:
+                match_key = f"match-q{q_idx}"
+                # For MATCHING_HEADING: include both value and full label
+                if q_type == 'MATCHING_HEADING':
+                    correct_value = correct.lower()
+                    full_label = correct_value
+                    for opt in options:
+                        if opt.get('value', '').lower() == correct_value:
+                            full_label = opt.get('label', correct_value)
+                            break
+                    schema_q["matchPairs"] = {match_key: [correct_value, full_label]}
+                else:
+                    # For other MATCHING_* types
+                    correct_value = correct.upper() if q_type == 'MATCHING_FEATURES' else correct.lower()
+                    schema_q["matchPairs"] = {match_key: [correct_value]}
+        
+        elif q_type in ['MULTIPLE_CHOICE_SINGLE', 'MULTIPLE_CHOICE_MULTIPLE']:
+            for i, opt in enumerate(options, 1):
+                is_correct = opt.get('is_correct', False)
+                if not is_correct and correct:
+                    # Check if this option matches correct answer
+                    is_correct = opt.get('value') == correct or opt.get('label', '').startswith(correct)
+                
+                schema_q["options"].append({
+                    "id": str(uuid_module.uuid4()),
+                    "idx": i,
+                    "contentMd": opt.get('label', ''),
+                    "isCorrect": is_correct
+                })
+        
+        # TRUE_FALSE_NOT_GIVEN and YES_NO_NOT_GIVEN don't need special handling
+        # (they use matchPairs or options depending on frontend implementation)
+        
+        schema_questions.append(schema_q)
+    
+    # Build full exam structure
+    exam_json = {
+        "schemaVersion": "1.0.0",
+        "exams": [{
+            "id": str(uuid_module.uuid4()),
+            "slug": slug,
+            "title": title,
+            "descriptionMd": f"IELTS Reading Practice: {title}",
+            "category": "IELTS",
+            "level": "B2",
+            "status": "PUBLISHED",
+            "durationMin": 20,
+            "sections": [{
+                "id": str(uuid_module.uuid4()),
+                "idx": 1,
+                "title": f"Reading Passage - {title}",
+                "instructionsMd": passage.get('text', ''),
+                "audioUrl": None,
+                "transcriptMd": None,
+                "questions": schema_questions
+            }]
+        }]
+    }
+    
+    return exam_json
 
 
 def generate_sql(data: dict) -> str:
@@ -582,29 +964,44 @@ def generate_sql(data: dict) -> str:
         options = q.get('options', [])
         correct = q.get('correct_answer')
         
-        if q_type in ['TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN', 'MULTIPLE_CHOICE_SINGLE', 'MATCHING_HEADING', 'MATCHING_FEATURES']:
-            # Build MatchPairs for MATCHING_HEADING type
+        if q_type in ['TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN', 'MULTIPLE_CHOICE_SINGLE', 'MULTIPLE_CHOICE_MULTIPLE', 'MATCHING_HEADING', 'MATCHING_FEATURES', 'MATCHING_INFORMATION']:
+            # Build MatchPairs for MATCHING_* types
             match_pairs_sql = 'NULL'
             if q_type == 'MATCHING_HEADING' and correct:
-                # Find the full label for correct answer (e.g., "vii. Why attempt geoengineering?")
-                correct_label = correct.lower()
+                # Include BOTH roman numeral and full label in acceptedValues
+                # - Roman numeral for grading (what user sends)
+                # - Full label for display (correctAnswerText)
+                correct_value = correct.lower()  # e.g., "iii"
+                # Find full label from options
+                full_label = correct_value
                 for opt in options:
-                    if opt.get('value', '').lower() == correct.lower() or opt.get('is_correct'):
-                        correct_label = escape_sql(opt.get('label', correct.lower()))
+                    if opt.get('value', '').lower() == correct_value or opt.get('is_correct'):
+                        full_label = escape_sql(opt.get('label', correct_value))
                         break
-                # Format: {"section-q1": ["vii. Full heading text"]} 
+                # Format: {"paragraph-a-q1": ["iii", "iii. A new area of academic interest"]} 
                 prompt_key = q_prompt.lower().replace(' ', '-') + f"-q{q_idx}"
-                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct_label}\"]}}'"
+                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct_value}\", \"{full_label}\"]}}'"
             elif q_type == 'MATCHING_FEATURES' and correct:
-                # Find the full label for correct answer (e.g., "C. carbon capture")
-                correct_label = correct
+                # Include BOTH letter value and full label in acceptedValues
+                # - Letter value for grading (what user sends: "A", "B", etc.)
+                # - Full label for display (correctAnswerText)
+                correct_value = correct.upper()  # e.g., "A"
+                correct_label = correct_value
                 for opt in options:
-                    if opt.get('value') == correct or opt.get('is_correct'):
-                        correct_label = escape_sql(opt.get('label', correct))
+                    if opt.get('value') == correct_value or opt.get('is_correct'):
+                        correct_label = escape_sql(opt.get('label', correct_value))
                         break
-                # Format: {"feature-q6": ["C"]}
+                # Format: {"feature-q10": ["A", "A. work in groups..."]}
                 prompt_key = f"feature-q{q_idx}"
-                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct_label}\"]}}'"
+                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct_value}\", \"{correct_label}\"]}}'"
+            elif q_type == 'MATCHING_INFORMATION' and correct:
+                # MATCHING_INFORMATION: single letter answer (A-J)
+                # MatchingHeadingGrader expects MatchPairs format
+                correct_value = correct.upper()  # e.g., "A"
+                # Include both uppercase and lowercase for case-insensitive matching
+                # Format: {"info-q5": ["A", "a"]}
+                prompt_key = f"info-q{q_idx}"
+                match_pairs_sql = f"'{{\"{prompt_key}\": [\"{correct_value}\", \"{correct_value.lower()}\"]}}'"
             
             sql_lines.extend([
                 f"  qid := gen_random_uuid();",
@@ -631,9 +1028,25 @@ def generate_sql(data: dict) -> str:
                 )
             sql_lines.append("")
             
-        else:  # SUMMARY_COMPLETION
+        else:  # SUMMARY_COMPLETION, MATCHING_INFORMATION
             blank_key = f"blank-q{q_idx}"
-            answers = [correct] if correct else []
+            # For single letter answers (A-Z), include both cases
+            # This ensures grading works regardless of case user submits
+            answers = []
+            if correct:
+                # Split multiple answer variants (e.g., "outline / an outline / a brief outline" or "social life/academic life")
+                if ' / ' in correct:
+                    # Multiple variants with " / " separator (space-slash-space)
+                    answers = [v.strip() for v in correct.split(' / ')]
+                elif '/' in correct and len(correct) > 2:
+                    # Multiple variants with "/" separator (no space) - like "social life/academic life"
+                    answers = [v.strip() for v in correct.split('/')]
+                elif len(correct) == 1 and correct.isalpha():
+                    # Single letter - add both uppercase and lowercase
+                    answers = [correct.upper(), correct.lower()]
+                else:
+                    # Single answer
+                    answers.append(correct)
             sql_lines.extend([
                 f"  qid := gen_random_uuid();",
                 f"  INSERT INTO exam_questions (\"Id\",\"SectionId\",\"Idx\",\"Type\",\"Skill\",\"Difficulty\",\"PromptMd\",\"ExplanationMd\",\"BlankAcceptTexts\")",
@@ -645,7 +1058,7 @@ def generate_sql(data: dict) -> str:
                 f"    'READING',",
                 f"    2,",
                 f"    '{q_prompt}',",
-                f"    'Complete the blank with words from the passage.',",
+                f"    'Use NO MORE THAN THREE WORDS from the passage to complete the blank. The answer must fit grammatically.',",
                 f"    '{{\"{blank_key}\": {json.dumps(answers)}}}'::jsonb",
                 f"  );",
                 "",
@@ -715,17 +1128,43 @@ def main():
         json.dump(data, f, indent=2, ensure_ascii=False)
     logger.info(f"Raw data saved to: {raw_file}")
     
-    # Step 7: Generate SQL
-    logger.info("Phase 4: Generating SQL...")
-    sql = generate_sql(data)
+    # Check for --json flag
+    output_json = '--json' in sys.argv
     
-    # Step 8: Save SQL
-    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
-    sql_file = SEEDS_DIR / f"seed_exam_{slug[:50]}.sql"
-    SEEDS_DIR.mkdir(parents=True, exist_ok=True)
-    with open(sql_file, 'w', encoding='utf-8') as f:
-        f.write(sql)
-    logger.info(f"SQL saved to: {sql_file}")
+    if output_json:
+        # Generate validated JSON output
+        logger.info("Phase 4: Generating validated JSON...")
+        exam_json = generate_exam_json(data)
+        
+        # Save to output directory
+        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')[:50]
+        json_output_dir = OUTPUT_DIR / "output"
+        json_output_dir.mkdir(parents=True, exist_ok=True)
+        json_file = json_output_dir / f"{slug}.json"
+        
+        with open(json_file, 'w', encoding='utf-8') as f:
+            json.dump(exam_json, f, indent=2, ensure_ascii=False)
+        logger.info(f"JSON saved to: {json_file}")
+        
+        # Run validation
+        try:
+            from validate_exam import validate_exam_file
+            result = validate_exam_file(str(json_file))
+            print(result.summary())
+        except ImportError:
+            logger.warning("validate_exam module not found, skipping validation")
+    else:
+        # Generate SQL (legacy mode)
+        logger.info("Phase 4: Generating SQL...")
+        sql = generate_sql(data)
+        
+        # Step 8: Save SQL
+        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+        sql_file = SEEDS_DIR / f"seed_exam_{slug[:50]}.sql"
+        SEEDS_DIR.mkdir(parents=True, exist_ok=True)
+        with open(sql_file, 'w', encoding='utf-8') as f:
+            f.write(sql)
+        logger.info(f"SQL saved to: {sql_file}")
     
     logger.info("=" * 60)
     logger.info("IELTS Exam Crawler - Complete")
@@ -734,3 +1173,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
