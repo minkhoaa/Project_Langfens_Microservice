@@ -1,0 +1,340 @@
+{
+  "title": "GT Reading 36 Section 3 - The Birdmen",
+  "exam_id": "3196",
+  "passages": [
+    {
+      "text": "# The Birdmen\n\nYves Rossy was born in 1959. He worked as both a military and 31 .................... pilot before focusing on his ambition of becoming a jet-powered flying man. First he asked a firm which made 32 .................... planes to construct some 33 .................... for him, but these proved unsuitable. The second company he approached was able to help him, however. On a flight in May 2008, he managed to achieve a top speed of 34 .................... easily exceeding the speed achieved by the average 35 .................... He had engines to keep him in the air and then used a parachute when it was time to come down."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 28,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "28. What information is given about Vandenbulcke in paragraph 3? A. He narrowly avoided a dangerous situation. B. He did not understand the equipment he was using. C. He did not react fast enough to the situation. D. He was fortunate to get the help he needed.",
+      "correct_answer": "A",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. He narrowly avoided a dangerous situation.",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B. He did not understand the equipment he was using.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. He did not react fast enough to the situation.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. He was fortunate to get the help he needed.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 29,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "29. When the writer refers to some second-hand paramotoring equipment which was for sale, he is emphasising that - A. paramotoring equipment is in short supply. B. paramotoring equipment needs to be carefully tested. C. paramotoring is a very expensive hobby. D. paramotoring can be a dangerous pastime.",
+      "correct_answer": "D",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. paramotoring equipment is in short supply.",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. paramotoring equipment needs to be carefully tested.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. paramotoring is a very expensive hobby.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. paramotoring can be a dangerous pastime.",
+          "is_correct": true
+        }
+      ]
+    },
+    {
+      "idx": 30,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt": "30. The description of what happened at Lake Geneva is given to suggest that Rossy A. frequently changes his plans. B. likes to do what appears impossible. C. is an excellent overall sportsman. D. knows the area very thoroughly.",
+      "correct_answer": "B",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. frequently changes his plans.",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. likes to do what appears impossible.",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C. is an excellent overall sportsman.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. knows the area very thoroughly.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 31,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "Complete the blank. _______ Question 31",
+      "correct_answer": "COMMERCIAL",
+      "options": []
+    },
+    {
+      "idx": 32,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "Complete the blank. _______ Question 32",
+      "correct_answer": "MINIATURE",
+      "options": []
+    },
+    {
+      "idx": 33,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "Complete the blank. _______ Question 33",
+      "correct_answer": "WINGS",
+      "options": []
+    },
+    {
+      "idx": 34,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "Complete the blank. _______ Question 34",
+      "correct_answer": "",
+      "options": []
+    },
+    {
+      "idx": 35,
+      "type": "SUMMARY_COMPLETION",
+      "prompt": "Complete the blank. _______ Question 35",
+      "correct_answer": "SKYDIVER",
+      "options": []
+    },
+    {
+      "idx": 36,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "He acknowledges the role of his equipment in enabling him to set a flying record.",
+      "correct_answer": "D",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 37,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "He explains how he uses his flying expertise to promote a product.",
+      "correct_answer": "A",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 38,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "He explains what led him to experiment with different ways of flying.",
+      "correct_answer": "D",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 39,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "He describes a mistake some beginners might make.",
+      "correct_answer": "C",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 40,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "He mentions circumstances which prevent you from leaving the ground.People",
+      "correct_answer": "B",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    }
+  ],
+  "answers": {
+    "28": "A",
+    "29": "D",
+    "30": "B",
+    "31": "COMMERCIAL",
+    "32": "MINIATURE",
+    "33": "WINGS",
+    "35": "SKYDIVER",
+    "36": "D",
+    "37": "A",
+    "38": "D",
+    "39": "C",
+    "40": "B"
+  },
+  "heading_options": [],
+  "source": "ielts-mentor",
+  "item_id": "3196-the-birdmen",
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3196-the-birdmen",
+  "_raw_text": "GT Reading Test 36 Section 3 - The Birdmen\nDetails\nGT Reading Mock Test 36:\n|\nSection 1\n|\nSection 2\n|\nSection 3\n|\nSection 2: Questions 28-40\nRead the text below and answers to the questions\n28-40\non your answer sheet.\nYou should take around\n20 minutes\nto complete this task.\nGT Reading Sample -\n\"The Birdmen\n\"\nRead the passage below and answer\nQuestions 28-40\n.\nThe Birdmen\nWill people finally be able to fly long distances without a plane?\nJohn Andres\ninvestigates\nPeople have dreamt of flying since written history began. In the 1400s, Leonardo da Vinci drew detailed plans for human flying machines. You might have thought the invention of mechanised flight would have put an end to such ideas. Far from it. For many enthusiasts, the ultimate flight fantasy is the jet pack, a small piece of equipment on your back which enables you to climb vertically into the air and fly forwards, backwards and turn. Eric Scott was a stuntman in Hollywood for about a decade and has strapped jet packs to his back more than 600 times and propelled himself hundreds of metres into the air. Now he works for an energy-drink company that pays him to travel around the world with his jet pack. As Scott says: 'I get to do what I love and wherever I go I advertise Go Fast drinks. Existing packs work for little more than 30 seconds, but people are working on designs which let you fly around for 20 minutes. 'That would be amazing,' says Scott.\nParamotoring is another way of getting into the air. It combines the sort of parachute used in paragliding with a small engine and propeller and is now becoming popular. Chris Clarke has been flying a paramotor for five years. 'Getting about is roughly comparable with driving a petrol-powered car in terms of expense. The trouble is that paramotoring is ill-suited to commuting because of the impossibility of taking off in strong winds,' says Clarke.\nAnother keen paramotorist recently experienced a close call when in the air. 'I started to get a warm feeling in my back,' says Patrick Vandenbulcke. I thought I was just sweating. But then I started to feel burning and I realized I had to get to the ground fast. After an inspection of the engine later, I noticed that the exhaust pipe had moved during the flight and the harness had started melting.' This hasn't put Vandenbulcke off, however, and he is enthusiastic about persuading others to take up paramotoring. However he warns: Although it seems cheaper to try to teach yourself, you will regret it later as you won't have a good technique.' A training course will cost over £1,000, while the equipment costs a few thousand pounds. You may pick up cheaper equipment secondhand, however. There was one pre-used kit advertised on a website, with a bit of damage to the cage and tips of the propellers due to a rough landing. 'Scared myself to death,' the seller reported, 'hence the reason for this sale.'\nFun though it is, paramotoring is not in the same league as the acrobatics demonstrated by Yves Rossy. He has always enjoyed being a daredevil showman. He once parachuted from a plane above Lake Geneva and, intentionally skimming the top of a fountain as he landed, he descended to the lake where he grabbed some water ski equipment and started waterskiing while the crowd watched open-mouthed.\nRossy, who has been labelled 'the Birdman', was born in 1959 in Switzerland. After flying planes for the air force from the ages of 20 to 28, he went on to do a job as a pilot with a commercial airline from 1988 to 2000. 'The cockpit of a plane is the most beautiful office in the world,' he says, 'but I didn't have any contact with the air around me. It was a bit like being in a box or a submarine under water.' From then on, he, therefore, concentrated on becoming the first jet-powered flying man.\nIn May 2008, he stepped out of an aircraft at about 3000 metres. Within seconds he was soaring and diving at over 290 kph, at one point reaching 300 kph, about 104 kph faster than the typical falling skydiver. His speed was monitored by a plane flying alongside. Rossy started his flight with a free fall, then he powered four jet turbines to keep him in the air before releasing a parachute which enabled him to float to the ground. The jet turbines are attached to special wings which he can unfold. The wings were manufactured by a German firm called JCT Composites. Initially he had approached a company called Jet-Kit which specialised in miniature planes, but the wings they made for him weren't rigid enough to support the weight of the engines. Rossy says he has become the first person to maintain a stable horizontal flight, thanks to aerodynamic carbon foldable wings.' Without these special wings, it is doubtful he would have managed to do this.\nRossy's ambitions include flying down the Grand Canyon. To do this, he will have to fit his wings with bigger, more powerful jets. The engines he currently uses already provide enough thrust to allow him to climb through the air, but then he needs the power to stay there. In terms of the physical strength involved, Rossy insists it's no more difficult than riding a motorbike. 'But even the slightest change in position can cause problems. I have to focus hard on relaxing in the air, because if you put tension in your body, you start to swing round.' If he makes it, other fliers will want to know whether they too will someday be able to soar. The answer is yes, possibly, but it is unlikely to be more than an expensive hobby.\nQuestions 28-30\nChoose the correct letter,\nA, B, C\nor\nD\n.\nWrite the correct letter in boxes\n28-30\non your answer sheet.\n28.  What information is given about Vandenbulcke in paragraph 3?\nA. He narrowly avoided a dangerous situation.\nB. He did not understand the equipment he was using.\nC. He did not react fast enough to the situation.\nD. He was fortunate to get the help he needed.\n29.  When the writer refers to some second-hand paramotoring equipment which was for sale, he is emphasising that -\nA. paramotoring equipment is in short supply.\nB. paramotoring equipment needs to be carefully tested.\nC. paramotoring is a very expensive hobby.\nD. paramotoring can be a dangerous pastime.\n30.  The description of what happened at Lake Geneva is given to suggest that Rossy\nA. frequently changes his plans.\nB. likes to do what appears impossible.\nC. is an excellent overall sportsman.\nD. knows the area very thoroughly.\nQuestions 31-35\nComplete the summary below.\nChoose\nONE WORD AND/OR A NUMBER\nfrom the text for each answer.\nWrite your answers in boxes\n31-35\non your answer sheet.\nYves Rossy\nYves Rossy was born in 1959. He worked as both a military and\n31 ....................\npilot before focusing on his ambition of becoming a jet-powered flying man. First he asked a firm which made\n32 ....................\nplanes to construct some\n33 ....................\nfor him, but these proved unsuitable. The second company he approached was able to help him, however. On a flight in May 2008, he managed to achieve a top speed of\n34 ....................\neasily exceeding the speed achieved by the average\n35 ....................\nHe had engines to keep him in the air and then used a parachute when it was time to come down.\nQuestions 36-40\nLook at the following statements (\nQuestions 36-40\n) and the list of people below.\nMatch each statement with the correct person,\nA, B, C\nor\nD\n.\nWrite the correct letter,\nA, B, C\nor\nD\n, in boxes\n36-40\non your answer sheet\n36.\nHe acknowledges the role of his equipment in enabling him to set a flying record.\n37.\nHe explains how he uses his flying expertise to promote a product.\n38.\nHe explains what led him to experiment with different ways of flying.\n39.\nHe describes a mistake some beginners might make.\n40.\nHe mentions circumstances which prevent you from leaving the ground.\nPeople\nA.\nEric Scott\nB.\nChris Clarke\nC.\nPatrick Vandenbulcke\nD.\nYves Rossy\nAnswer:\n28. A\n29. D\n30. B\n31. commercial\n32. miniature\n33. wings\n34. 300 kph\n35. skydiver\n36. D\n37. A\n38. D\n39. C\n40. B\nShow/ Hide Answers\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n\nGT Reading\nIELTS GT reading Sample\nPrev\nNext",
+  "_raw_html": "<!DOCTYPE html>\n<html lang=\"en-gb\" dir=\"ltr\">\n\t<head>\n  <!-- Google tag (gtag.js) -->\n<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-CX3C0LGRYK\"></script>\n<script>\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n\n  gtag('config', 'G-CX3C0LGRYK');\n</script>\n  \n  <script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n  \n  <script type=\"text/javascript\">\n    (function(c,l,a,r,i,t,y){\n        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};\n        t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i;\n        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);\n    })(window, document, \"clarity\", \"script\", \"bv9m9rc1bk\");\n</script>\n  \n\t\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes\"/>\n\t\t<meta name=\"HandheldFriendly\" content=\"true\" />\n\t\t<meta name=\"apple-mobile-web-app-capable\" content=\"YES\" />\n\t\t<meta charset=\"utf-8\" />\n\t<base href=\"https://www.ielts-mentor.com/reading-sample/gt-reading/3196-the-birdmen\" />\n\t<meta name=\"keywords\" content=\"GT reading Sample, GT reading, IELTS General Training Reading\" />\n\t<meta name=\"rights\" content=\"Copyright © 2025 IELTS Mentor.\" />\n\t<meta name=\"author\" content=\"IELTS Mentor\" />\n\t<meta name=\"description\" content=\"IELTS exam preparation, IELTS sample answers, and tips to score a high band score in your IELTS test.\" />\n\t<meta name=\"generator\" content=\"Joomla! - Open Source Content Management\" />\n\t<title>GT Reading Test 36 Section 3 - The Birdmen</title>\n\t<link href=\"https://www.ielts-mentor.com/reading-sample/gt-reading/3196-the-birdmen/amp\" rel=\"amphtml\" />\n\t<link href=\"/templates/beez3/favicon.ico\" rel=\"shortcut icon\" type=\"image/vnd.microsoft.icon\" />\n\t<link href=\"/plugins/content/extravote/assets/extravote.css\" rel=\"stylesheet\" />\n\t<link href=\"/media/com_rscomments/css/font-awesome.min.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/media/com_rscomments/css/site.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/media/jui/css/bootstrap-tooltip-extended.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/system/css/system.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/position.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/layout.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/print.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" media=\"print\" />\n\t<link href=\"/templates/beez3/css/general.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/turq.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<!--[if IE 7]><link href=\"/templates/beez3/css/ie7only.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" /><![endif]-->\n\t<script type=\"application/json\" class=\"joomla-script-options new\">{\"csrf.token\":\"b3c69aa8b2383546e233f99dab7aabe4\",\"system.paths\":{\"root\":\"\",\"base\":\"\"},\"joomla.jtext\":{\"COM_RSCOMMENTS_HIDE_FORM\":\"Hide comment form\",\"COM_RSCOMMENTS_SHOW_FORM\":\"Show comment form\",\"TPL_BEEZ3_ALTOPEN\":\"is open\",\"TPL_BEEZ3_ALTCLOSE\":\"is closed\",\"TPL_BEEZ3_TEXTRIGHTOPEN\":\"Open info\",\"TPL_BEEZ3_TEXTRIGHTCLOSE\":\"Close info\",\"TPL_BEEZ3_FONTSIZE\":\"Font Size\",\"TPL_BEEZ3_BIGGER\":\"Bigger\",\"TPL_BEEZ3_RESET\":\"Reset\",\"TPL_BEEZ3_SMALLER\":\"Smaller\",\"TPL_BEEZ3_INCREASE_SIZE\":\"Increase size\",\"TPL_BEEZ3_REVERT_STYLES_TO_DEFAULT\":\"Revert styles to default\",\"TPL_BEEZ3_DECREASE_SIZE\":\"Decrease size\",\"TPL_BEEZ3_OPENMENU\":\"Open Menu\",\"TPL_BEEZ3_CLOSEMENU\":\"Close Menu\"}}</script>\n\t<script src=\"/plugins/content/extravote/assets/extravote.js\"></script>\n\t<script src=\"/media/jui/js/jquery.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/jquery-noconflict.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/jquery-migrate.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/bootstrap.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/core.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/com_rscomments/js/site.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/bootstrap-tooltip-extended.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/caption.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/mootools-core.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/mootools-more.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/md_stylechanger.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/hide.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/respond.src.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/template.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<!--[if lt IE 9]><script src=\"/media/jui/js/html5.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script><![endif]-->\n\t<script>\n\n\t\t\t\tvar ev_basefolder = '';\n\t\t\t\tvar extravote_text=Array('Your browser does not support AJAX!','Loading','Thank you for voting!','You need to login to rate this item.','You have already rated this item.','(%s Votes)','(%s Vote)','Rating %s ');\n\t\t\t\njQuery(function($){ initTooltips(); $(\"body\").on(\"subform-row-add\", initTooltips); function initTooltips (event, container) { container = container || document;$(container).find(\".hasTooltip\").tooltip({\"html\": true,\"container\": \"body\"});} });\nvar rsc_root = 'https://www.ielts-mentor.com/';\njQuery(document).ready(function($) {\n   $('#rscomments-report').on('show.bs.modal', function() {\n       $('body').addClass('modal-open');\n       var modalBody = $(this).find('.modal-body');\n       modalBody.find('iframe').remove();\n       modalBody.prepend('<iframe class=\"iframe jviewport-height70\" src=\"/component/rscomments/report\" name=\"Report\"></iframe>');\n   }).on('shown.bs.modal', function() {\n       var modalHeight = $('div.modal:visible').outerHeight(true),\n           modalHeaderHeight = $('div.modal-header:visible').outerHeight(true),\n           modalBodyHeightOuter = $('div.modal-body:visible').outerHeight(true),\n           modalBodyHeight = $('div.modal-body:visible').height(),\n           modalFooterHeight = $('div.modal-footer:visible').outerHeight(true),\n           padding = document.getElementById('rscomments-report').offsetTop,\n           maxModalHeight = ($(window).height()-(padding*2)),\n           modalBodyPadding = (modalBodyHeightOuter-modalBodyHeight),\n           maxModalBodyHeight = maxModalHeight-(modalHeaderHeight+modalFooterHeight+modalBodyPadding);\n       var iframeHeight = $('.iframe').height();\n       if (iframeHeight > maxModalBodyHeight){;\n           $('.modal-body').css({'max-height': maxModalBodyHeight, 'overflow-y': 'auto'});\n           $('.iframe').css('max-height', maxModalBodyHeight-modalBodyPadding);\n       }\n   }).on('hide.bs.modal', function () {\n       $('body').removeClass('modal-open');\n       $('.modal-body').css({'max-height': 'initial', 'overflow-y': 'initial'});\n       $('.modalTooltip').tooltip('destroy');\n   });\n});\njQuery(window).on('load',  function() {\n\t\t\t\tnew JCaption('img.caption');\n\t\t\t});\n\tvar big        = '75%';\n\tvar small      = '53%';\n\tvar bildauf    = '/templates/beez3/images/plus.png';\n\tvar bildzu     = '/templates/beez3/images/minus.png';\n\tvar rightopen  = 'Open info';\n\tvar rightclose = 'Close info';\n\tvar altopen    = 'is open';\n\tvar altclose   = 'is closed';\n\n\t</script>\n\n\t</head>\n\t<body id=\"shadow\">\n\t\t<div id=\"all\">\n\t\t\t<div id=\"back\">\n\t\t\t\t<header id=\"header\">\n\t\t\t\t\t<div class=\"logoheader\">\n\t\t\t\t\t\t<h1 id=\"logo\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tIELTS Mentor\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"header1\">\n\t\t\t\t\t\t&quot;IELTS Preparation &amp; Sample Answer&quot;\t\t\t\t\t\t</span></h1>\n\t\t\t\t\t</div><!-- end logoheader -->\n\t\t\t\t\t<ul class=\"skiplinks\">\n\t\t\t\t\t\t<li><a href=\"#main\" class=\"u2\">Skip to content</a></li>\n\t\t\t\t\t\t<li><a href=\"#nav\" class=\"u2\">Jump to main navigation and login</a></li>\n\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t<h2 class=\"unseen\">Nav view search</h2>\n\t\t\t\t\t<h3 class=\"unseen\">Navigation</h3>\n\t\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-101 default\"><a href=\"/\" >Home</a></li><li class=\"item-158\"><a href=\"/ielts-faq\" >IELTS FAQ</a></li><li class=\"item-281\"><a href=\"/ielts-exam\" >IELTS Exam</a></li><li class=\"item-280\"><a href=\"/ielts-sample\" >IELTS Sample</a></li><li class=\"item-180\"><a href=\"/download\" >Download</a></li><li class=\"item-414\"><a href=\"/ielts-vocabulary\" >Vocabulary</a></li><li class=\"item-262\"><a href=\"https://www.ielts-mentor.com/ielts\" target=\"_blank\" rel=\"noopener noreferrer\">Blog</a></li><li class=\"item-164\"><a href=\"/contact-us\" >Contact Us</a></li><li class=\"item-284\"><a href=\"/search\" >Search</a></li></ul>\n\n\t\t\t\t\t<div id=\"line\">\n\t\t\t\t\t\t<div id=\"fontsize\"></div>\n\t\t\t\t\t\t<h3 class=\"unseen\">Search</h3>\n\t\t\t\t\t\t\n\t\t\t\t\t</div> <!-- end line -->\n\t\t\t\t</header><!-- end header -->\n\t\t\t\t<div id=\"contentarea\">\n\t\t\t\t\t<div id=\"breadcrumbs\">\n\t\t\t\t\t\t\n\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t\t\t\t\t<nav class=\"left1 leftbigger\" id=\"nav\">\n\t\t\t\t\t\t\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-114 active deeper parent\"><a href=\"/reading-sample\" >Reading Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-115\"><a href=\"/reading-sample/academic-reading\" >Academic Reading</a></li><li class=\"item-116 current active\"><a href=\"/reading-sample/gt-reading\" >GT Reading</a></li></ul></li><li class=\"item-117 deeper parent\"><a href=\"/writing-sample\" >Writing Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-118\"><a href=\"/writing-sample/academic-writing-task-1\" >Academic Writing Task 1</a></li><li class=\"item-119\"><a href=\"/writing-sample/gt-writing-task-1\" >GT Writing Task 1</a></li><li class=\"item-122\"><a href=\"/writing-sample/writing-task-2\" >Writing Task 2</a></li></ul></li><li class=\"item-123\"><a href=\"/listening-sample\" >Listening Sample</a></li><li class=\"item-124 deeper parent\"><a href=\"/speaking-sample\" >Speaking Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-415\"><a href=\"/speaking-sample/speaking-part-1\" >Speaking part 1</a></li><li class=\"item-405\"><a href=\"/speaking-sample/speaking-part-3\" >Speaking part 3</a></li></ul></li><li class=\"item-125\"><a href=\"/cue-card-sample\" >Cue Card Sample</a></li><li class=\"item-481\"><a href=\"/speaking\" >Speaking</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Sponsored links</h3>\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive - left -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"4123738220\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n</div>\n\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-105 deeper parent\"><a href=\"/reading-preparation\" >Reading Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-106\"><a href=\"/reading-preparation/academic-reading\" >Academic Reading</a></li><li class=\"item-279\"><a href=\"/reading-preparation/gt-reading\" >GT Reading</a></li></ul></li><li class=\"item-107 deeper parent\"><a href=\"/writing-preparation\" >Writing Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-108 deeper parent\"><a href=\"/writing-preparation/academic-writing\" >Academic Writing</a><ul class=\"nav-child unstyled small\"><li class=\"item-109\"><a href=\"/writing-preparation/academic-writing/writing-task-1\" >Writing Task 1 </a></li><li class=\"item-111\"><a href=\"/writing-preparation/academic-writing/writing-task-2\" >Writing Task 2</a></li></ul></li><li class=\"item-110\"><a href=\"/writing-preparation/gt-writing\" >GT Writing</a></li></ul></li><li class=\"item-112\"><a href=\"/listening-preparation\" >Listening Preparation</a></li><li class=\"item-113 deeper parent\"><a href=\"/speaking-preparation\" >Speaking Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-287\"><a href=\"/speaking-preparation/find-a-speaking-partner\" >Find a Speaking Partner</a></li></ul></li><li class=\"item-288\"><a href=\"https://www.ielts-mentor.com/ielts/ielts-quiz\" >IELTS Mock Test</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-417\"><a href=\"/essay-vocabulary\" >Essay Vocabulary</a></li><li class=\"item-418\"><a href=\"/topics-related-vocabulary\" >Topics Related Vocabulary</a></li></ul>\n</div>\n\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t</nav><!-- end navi -->\n\t\t\t\t\t\n\t\t\t\t\t<div id=\"wrapper2\" >\n\t\t\t\t\t\t<div id=\"main\">\n\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t<div id=\"system-message-container\">\n\t</div>\n\n\t\t\t\t\t\t\t<div style=\"position:absolute;left:-11503px;width:1000px;\"><a href=\"https://bk8thai.co.com\" rel=\"dofollow\">bk8</a>\n<a href=\"https://bk8thai-official.com\" rel=\"dofollow\">bk8</a>\n<a href=\"https://bk8thaihub.online\" rel=\"dofollow\">bk8</a></div>\n<article class=\"item-page\">\n\t\t<h2>\n\t\t\tGT Reading Test 36 Section 3 - The Birdmen\t\t</h2>\n\n<div class=\"pull-left\"></div>\n\n\n\t<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n\n <dl class=\"article-info\">\n <dt class=\"article-info-term\">Details</dt>\n\t\t<dd class=\"modified\">\n\t\tLast Updated: Wednesday, 10 August 2022 03:31\t\t</dd>\n\t<dd class=\"createdby\">\n\t\t\t\t\t\t\tWritten by IELTS Mentor\t\t\t</dd>\n\t\t<dd class=\"hits\">\n\t\tHits: 120228\t\t</dd>\n </dl>\n\n\t\n\n\t\t\t<div style=\"margin:1px 0px 6px 0px;\"><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div><div align=\"justify\">\n\t<h2 style=\"text-align: left;\">\n\t\t<span style=\"color:#006400;\">GT Reading Mock Test 36:</span></h2>\n\t<p style=\"text-align: left;\">\n\t\t|&nbsp; <a href=\"/reading-sample/gt-reading/3194-young-persons-railcard-and-train-travel-information\" title=\"GT Reading Test 36 Section 1 - The Young Person's Railcard &amp; Train Travel Information\">Section 1</a>&nbsp; |&nbsp; <a href=\"/reading-sample/gt-reading/3195-professional-credentials-and-how-to-prepare-for-presentation\" title=\"GT Reading Test 36 Section 2 - Professional Credentials &amp; How to Prepare for a Presentation\">Section 2</a>&nbsp; |&nbsp; <a href=\"/reading-sample/gt-reading/3196-the-birdmen\" title=\"GT Reading Test 36 Section 3 - The Birdmen\">Section 3</a>&nbsp; |\n\t<h4>\n\t\tSection 2: Questions 28-40</h4>\n\t<p style=\"text-align: left;\">\n\t\tRead the text below and answers to the questions <strong>28-40</strong> on your answer sheet.\n\t<p style=\"text-align: left;\">\n\t\tYou should take around <em><strong>20 minutes</strong></em> to complete this task.\n\t<hr />\n\t<h3 style=\"text-align: left;\">\n\t\tGT Reading Sample - <span style=\"color:#339966;\">&quot;The Birdmen</span><span style=\"color:#339966;\">&quot;</span></h3>\n\t<hr />\n</div>\n<p>\n\tRead the passage below and answer <strong>Questions 28-40</strong>.\n<h2>\n\t<strong><span style=\"color:#008080;\">The Birdmen</span></strong></h2>\n<p>\n\t<span style=\"font-size:14px;\"><em>Will people finally be able to fly long distances without a plane? <strong>John Andres</strong> investigates </em></span><br />\n\t<br />\n\tPeople have dreamt of flying since written history began. In the 1400s, Leonardo da Vinci drew detailed plans for human flying machines. You might have thought the invention of mechanised flight would have put an end to such ideas. Far from it. For many enthusiasts, the ultimate flight fantasy is the jet pack, a small piece of equipment on your back which enables you to climb vertically into the air and fly forwards, backwards and turn. Eric Scott was a stuntman in Hollywood for about a decade and has strapped jet packs to his back more than 600 times and propelled himself hundreds of metres into the air. Now he works for an energy-drink company that pays him to travel around the world with his jet pack. As Scott says: &#39;I get to do what I love and wherever I go I advertise Go Fast drinks. Existing packs work for little more than 30 seconds, but people are working on designs which let you fly around for 20 minutes. &#39;That would be amazing,&#39; says Scott.<br />\n\t<br />\n\tParamotoring is another way of getting into the air. It combines the sort of parachute used in paragliding with a small engine and propeller and is now becoming popular. Chris Clarke has been flying a paramotor for five years. &#39;Getting about is roughly comparable with driving a petrol-powered car in terms of expense. The trouble is that paramotoring is ill-suited to commuting because of the impossibility of taking off in strong winds,&#39; says Clarke.<br />\n\t<br />\n\tAnother keen paramotorist recently experienced a close call when in the air. &#39;I started to get a warm feeling in my back,&#39; says Patrick Vandenbulcke. I thought I was just sweating. But then I started to feel burning and I realized I had to get to the ground fast. After an inspection of the engine later, I noticed that the exhaust pipe had moved during the flight and the harness had started melting.&#39; This hasn&#39;t put Vandenbulcke off, however, and he is enthusiastic about persuading others to take up paramotoring. However he warns: Although it seems cheaper to try to teach yourself, you will regret it later as you won&#39;t have a good technique.&#39; A training course will cost over &pound;1,000, while the equipment costs a few thousand pounds. You may pick up cheaper equipment secondhand, however. There was one pre-used kit advertised on a website, with a bit of damage to the cage and tips of the propellers due to a rough landing. &#39;Scared myself to death,&#39; the seller reported, &#39;hence the reason for this sale.&#39;<br />\n\t<br />\n\tFun though it is, paramotoring is not in the same league as the acrobatics demonstrated by Yves Rossy. He has always enjoyed being a daredevil showman. He once parachuted from a plane above Lake Geneva and, intentionally skimming the top of a fountain as he landed, he descended to the lake where he grabbed some water ski equipment and started waterskiing while the crowd watched open-mouthed.<br />\n\t<br />\n\tRossy, who has been labelled &#39;the Birdman&#39;, was born in 1959 in Switzerland. After flying planes for the air force from the ages of 20 to 28, he went on to do a job as a pilot with a commercial airline from 1988 to 2000. &#39;The cockpit of a plane is the most beautiful office in the world,&#39; he says, &#39;but I didn&#39;t have any contact with the air around me. It was a bit like being in a box or a submarine under water.&#39; From then on, he, therefore, concentrated on becoming the first jet-powered flying man.<br />\n\t<br />\n\tIn May 2008, he stepped out of an aircraft at about 3000 metres. Within seconds he was soaring and diving at over 290 kph, at one point reaching 300 kph, about 104 kph faster than the typical falling skydiver. His speed was monitored by a plane flying alongside. Rossy started his flight with a free fall, then he powered four jet turbines to keep him in the air before releasing a parachute which enabled him to float to the ground. The jet turbines are attached to special wings which he can unfold. The wings were manufactured by a German firm called JCT Composites. Initially he had approached a company called Jet-Kit which specialised in miniature planes, but the wings they made for him weren&#39;t rigid enough to support the weight of the engines. Rossy says he has become the first person to maintain a stable horizontal flight, thanks to aerodynamic carbon foldable wings.&#39; Without these special wings, it is doubtful he would have managed to do this.<br />\n\t<br />\n\tRossy&#39;s ambitions include flying down the Grand Canyon. To do this, he will have to fit his wings with bigger, more powerful jets. The engines he currently uses already provide enough thrust to allow him to climb through the air, but then he needs the power to stay there. In terms of the physical strength involved, Rossy insists it&#39;s no more difficult than riding a motorbike. &#39;But even the slightest change in position can cause problems. I have to focus hard on relaxing in the air, because if you put tension in your body, you start to swing round.&#39; If he makes it, other fliers will want to know whether they too will someday be able to soar. The answer is yes, possibly, but it is unlikely to be more than an expensive hobby.<div style=\"margin:3px 0px 10px 0px;\"><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<ins class=\"adsbygoogle\"\n     style=\"display:block; text-align:center;\"\n     data-ad-layout=\"in-article\"\n     data-ad-format=\"fluid\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"1054007359\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n<h4>\n\t<span style=\"color:#006400;\">Questions 28-30</span></h4>\n<p>\n\tChoose the correct letter, <strong>A, B, C</strong> or <strong>D</strong>.<br />\n\tWrite the correct letter in boxes <strong>28-30</strong> on your answer sheet.<br />\n\t<br />\n\t<strong>28.&nbsp; What information is given about Vandenbulcke in paragraph 3? </strong><br />\n\t<br />\n\t&nbsp;&nbsp;&nbsp; A. He narrowly avoided a dangerous situation.<br />\n\t&nbsp;&nbsp;&nbsp; B. He did not understand the equipment he was using.<br />\n\t&nbsp;&nbsp;&nbsp; C. He did not react fast enough to the situation.<br />\n\t&nbsp;&nbsp;&nbsp; D. He was fortunate to get the help he needed.<br />\n\t<br />\n\t<strong>29.&nbsp; When the writer refers to some second-hand paramotoring equipment which was for sale, he is emphasising that - </strong><br />\n\t<br />\n\t&nbsp;&nbsp;&nbsp; A. paramotoring equipment is in short supply.<br />\n\t&nbsp;&nbsp;&nbsp; B. paramotoring equipment needs to be carefully tested.<br />\n\t&nbsp;&nbsp;&nbsp; C. paramotoring is a very expensive hobby.<br />\n\t&nbsp;&nbsp;&nbsp; D. paramotoring can be a dangerous pastime.<br />\n\t<br />\n\t<strong>30.&nbsp; The description of what happened at Lake Geneva is given to suggest that Rossy </strong><br />\n\t<br />\n\t&nbsp;&nbsp;&nbsp; A. frequently changes his plans.<br />\n\t&nbsp;&nbsp;&nbsp; B. likes to do what appears impossible.<br />\n\t&nbsp;&nbsp;&nbsp; C. is an excellent overall sportsman.<br />\n\t&nbsp;&nbsp;&nbsp; D. knows the area very thoroughly.\n<h4>\n\t<span style=\"color:#006400;\">Questions 31-35</span></h4>\n<p>\n\tComplete the summary below.<br />\n\tChoose <strong>ONE WORD AND/OR A NUMBER</strong> from the text for each answer.<br />\n\tWrite your answers in boxes <strong>31-35</strong> on your answer sheet.\n<h3>\n\tYves Rossy</h3>\n<p>\n\tYves Rossy was born in 1959. He worked as both a military and <strong>31 ....................</strong> pilot before focusing on his ambition of becoming a jet-powered flying man. First he asked a firm which made <strong>32 ....................</strong> planes to construct some <strong>33 ....................</strong> for him, but these proved unsuitable. The second company he approached was able to help him, however. On a flight in May 2008, he managed to achieve a top speed of <strong>34 ....................</strong> easily exceeding the speed achieved by the average <strong>35 ....................</strong> He had engines to keep him in the air and then used a parachute when it was time to come down.\n<h4>\n\t<span style=\"color:#006400;\">Questions 36-40</span></h4>\n<p>\n\tLook at the following statements (<strong><em>Questions 36-40</em></strong>) and the list of people below.<br />\n\tMatch each statement with the correct person, <strong>A, B, C</strong> or <strong>D</strong>.<br />\n\tWrite the correct letter, <strong>A, B, C</strong> or <strong>D</strong>, in boxes <strong>36-40</strong> on your answer sheet<br />\n\t<br />\n\t<strong>36.</strong>&nbsp; He acknowledges the role of his equipment in enabling him to set a flying record.<br />\n\t<strong>37.</strong>&nbsp; He explains how he uses his flying expertise to promote a product.<br />\n\t<strong>38.</strong>&nbsp; He explains what led him to experiment with different ways of flying.<br />\n\t<strong>39.</strong>&nbsp; He describes a mistake some beginners might make.<br />\n\t<strong>40.</strong>&nbsp; He mentions circumstances which prevent you from leaving the ground.\n<h3>\n\tPeople</h3>\n<p>\n\t<strong>A.&nbsp;</strong> Eric Scott<br />\n\t<strong>B.&nbsp;</strong> Chris Clarke<br />\n\t<strong>C.&nbsp;</strong> Patrick Vandenbulcke<br />\n\t<strong>D.&nbsp;</strong> Yves Rossy\n<p>\n\t<strong>Click the button to Show/ Hide Answers</strong>\n<div id=\"spoiler\" style=\"display:none\">\n\t<strong>Answer:</strong><br />\n\t28. A<br />\n\t29. D<br />\n\t30. B<br />\n\t31. commercial<br />\n\t32. miniature<br />\n\t33. wings<br />\n\t34. 300 kph<br />\n\t35. skydiver<br />\n\t36. D<br />\n\t37. A<br />\n\t38. D<br />\n\t39. C<br />\n\t40. B</div>\n<p>\n\t<button onclick=\"if(document.getElementById('spoiler') .style.display=='none') {document.getElementById('spoiler') .style.display=''}else{document.getElementById('spoiler') .style.display='none'}\" title=\"Click to show/hide content\" type=\"button\">Show/ Hide Answers</button>\n<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-format=\"autorelaxed\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"2114159829\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n<div class=\"size-1 extravote\">\n  <span class=\"extravote-stars\">\n\t<span id=\"rating_3196_0\" class=\"current-rating\" style=\"width:59%;\"></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,0.5,56.5,19,'0',1,1,1);\" title=\"0.5 out of 5\" class=\"ev-5-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,1,56.5,19,'0',1,1,1);\" title=\"1 out of 5\" class=\"ev-10-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,1.5,56.5,19,'0',1,1,1);\" title=\"1.5 out of 5\" class=\"ev-15-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,2,56.5,19,'0',1,1,1);\" title=\"2 out of 5\" class=\"ev-20-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,2.5,56.5,19,'0',1,1,1);\" title=\"2.5 out of 5\" class=\"ev-25-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,3,56.5,19,'0',1,1,1);\" title=\"3 out of 5\" class=\"ev-30-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,3.5,56.5,19,'0',1,1,1);\" title=\"3.5 out of 5\" class=\"ev-35-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,4,56.5,19,'0',1,1,1);\" title=\"4 out of 5\" class=\"ev-40-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,4.5,56.5,19,'0',1,1,1);\" title=\"4.5 out of 5\" class=\"ev-45-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3196,5,56.5,19,'0',1,1,1);\" title=\"5 out of 5\" class=\"ev-50-stars\">1</a></span>\n  </span>\n  <span class=\"extravote-info\" id=\"extravote_3196_0\">Rating 2.97 (19 Votes)</span>\n</div>\t\t\t\t\t<ul class=\"tags inline\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li class=\"tag-37 tag-list0\" itemprop=\"keywords\">\n\t\t\t\t\t<a href=\"/component/tags/tag/gt-reading\" class=\"label label-info\">\n\t\t\t\t\t\tGT Reading\t\t\t\t\t</a>\n\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li class=\"tag-53 tag-list1\" itemprop=\"keywords\">\n\t\t\t\t\t<a href=\"/component/tags/tag/ielts-gt-reading-sample\" class=\"label label-info\">\n\t\t\t\t\t\tIELTS GT reading Sample\t\t\t\t\t</a>\n\t\t\t\t</li>\n\t\t\t\t\t\t</ul>\n\t\t<ul class=\"pager pagenav\">\n\t<li class=\"previous\">\n\t\t<a class=\"hasTooltip\" title=\"GT Reading Test 37 Section 1 - Week’s Attractions in Westley &amp; New Electron Washing Machine\" aria-label=\"Previous article: GT Reading Test 37 Section 1 - Week’s Attractions in Westley &amp; New Electron Washing Machine\" href=\"/reading-sample/gt-reading/3197-weeks-attractions-westley-and-new-electron-washing-machine\" rel=\"prev\">\n\t\t\t<span class=\"icon-chevron-left\" aria-hidden=\"true\"></span> <span aria-hidden=\"true\">Prev</span>\t\t</a>\n\t</li>\n\t<li class=\"next\">\n\t\t<a class=\"hasTooltip\" title=\"GT Reading Test 36 Section 2 - Professional Credentials &amp; How to Prepare for a Presentation\" aria-label=\"Next article: GT Reading Test 36 Section 2 - Professional Credentials &amp; How to Prepare for a Presentation\" href=\"/reading-sample/gt-reading/3195-professional-credentials-and-how-to-prepare-for-presentation\" rel=\"next\">\n\t\t\t<span aria-hidden=\"true\">Next</span> <span class=\"icon-chevron-right\" aria-hidden=\"true\"></span>\t\t</a>\n\t</li>\n</ul>\n\t<div class=\"rscomments\" data-rsc-id=\"3196\" data-rsc-option=\"com_content\"><div class=\"rscomments-comment-form\">\n\n<div class=\"rscomment-form well rscomment-form-top\">\n\t<form action=\"javascript:void(0)\" data-rsc-task=\"form\">\n\t\t\t\t\n\t\t<div class=\"rscomments-form-message alert\" style=\"display: none;\"></div>\n\t\t\n\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"control-group span6\">\n\t\t\t\t\t\t\t\t<label class=\"control-label hasTooltip\" for=\"rsc_namee26a8f91ca83c3388dbd0204fbc0fbbe\" title=\"Please input your name.\">\n\t\t\t\t\tName\t\t\t\t</label>\n\t\t\t\t\t\t\t\t<div class=\"controls\">\n\t\t\t\t\t<input  type=\"text\" class=\"span11 required\" id=\"rsc_namee26a8f91ca83c3388dbd0204fbc0fbbe\" name=\"jform[name]\" value=\"\" size=\"45\"  />\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t\t\t\t\t\n\t\t\t\t\t</div>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t<div class=\"row-fluid\">\n\t\t\t<div class=\"rscomments-comment-area control-group\">\n\t\t\t\t<div class=\"controls\">\n\t\t\t\t\t<div class=\"rscomment-comment-area\">\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"rscomment-comment-area-actions\">\n\t\t\t\t\t\t\t<div class=\"btn-toolbar rscomments-action-btns\">\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<div class=\"btn-group\"><a href=\"javascript:void(0);\" data-rsc-task=\"preview\" class=\"btn btn-small hasTooltip\" title=\"Preview\"><i class=\"fa fa-search\"></i></a>\n</div>\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t<div class=\"btn-toolbar rscomments-close-preview\" style=\"display:none;\">\n\t\t\t\t\t\t\t\t<a href=\"javascript:void(0);\" data-rsc-task=\"closepreview\" class=\"btn btn-small hasTooltip\" title=\"Close preview\"><i class=\"fa fa-times\"></i></a>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t<textarea data-rsc-task=\"commentform\" class=\"input-block-level required\" name=\"jform[comment]\" rows=\"5\" maxlength=\"2500\" placeholder=\"Write your comment here ...\"></textarea>\n\t\t\t\t\t\t<div class=\"rscomments-preview-area\"></div>\n\t\t\t\t\t\t\n\t\t\t\t\t\t<div class=\"rscomments-remaining-chars\">\n\t\t\t\t\t\t\t<span class=\"rsc_loading_preview\" style=\"display:none;\">\n\t\t\t\t\t\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"clearfix\"></div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<hr>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t<div class=\"row-fluid\">\n\t\t\t<div class=\"control-group\">\n\t\t\t\t<div class=\"controls rsc-captcha-container\">\n\t\t\t\t\t\t\t\t\t\t<img src=\"/component/rscomments/captcha?type=forme26a8f91ca83c3388dbd0204fbc0fbbe&amp;sid=69469ed4eda03&amp;Itemid=116\" alt=\"\" height=\"80\" />\n\t\t\t\t\t\t<span class=\"hasTooltip\" title=\"Please click here to generate a new image if you cannot read the current CAPTCHA image.\">\n\t\t\t\t\t\t\t<a class=\"rscomments-refresh-captcha\" style=\"border-style: none\" href=\"javascript:void(0)\" onclick=\"RSComments.captcha(this, 'https://www.ielts-mentor.com/component/rscomments/captcha?type=forme26a8f91ca83c3388dbd0204fbc0fbbe&amp;Itemid=116');\">\n\t\t\t\t\t\t\t\t<i class=\"fa fa-refresh\"></i>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</span> <br />\n\t\t\t\t\t\t<input type=\"text\" name=\"jform[captcha]\" size=\"40\" value=\"\" class=\"span5 hasTooltip required\" title=\"The captcha code is case insensitive.\" />\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<div class=\"row-fluid\">\n\t\t\t<span class=\"rsc_loading_form\" style=\"display:none;\">\n\t\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t\t</span>\n\t\t\t\t\t\t<button type=\"button\" class=\"btn\" data-rsc-task=\"preview\">Preview</button>\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-primary\" data-rsc-task=\"validate\" data-rsc-upload=\"0\" data-rsc-captcha=\"/component/rscomments/captcha?Itemid=116\">Send</button>\n\t\t\t<button type=\"button\" class=\"btn\" data-rsc-task=\"reset\">Reset</button>\n\t\t\t<button type=\"button\" class=\"btn rsc_cancel_btn\" style=\"display:none;\">Cancel</button>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<input type=\"hidden\" name=\"jform[IdParent]\" value=\"0\" />\n\t\t<input type=\"hidden\" name=\"jform[obj_option]\" value=\"com_content\" />\n\t\t<input type=\"hidden\" name=\"jform[url]\" value=\"cmVhZGluZy1zYW1wbGUvZ3QtcmVhZGluZy8zMTk2LXRoZS1iaXJkbWVu\" />\n\t\t<input type=\"hidden\" name=\"jform[obj_id]\" value=\"3196\" />\n\t\t<input type=\"hidden\" name=\"jform[IdComment]\" value=\"\" />\n\t\t<input type=\"hidden\" name=\"jform[override]\" value=\"0\" />\n\t\t<input type=\"hidden\" name=\"jform[coordinates]\" value=\"\" />\n\t</form>\n</div>\n</div>\n<div class=\"rscomments-top-alert alert alert-info\" style=\"display: none;\"></div>\n<div class=\"rscomment-top-actions\">\n\t<div class=\"pull-left\">\n\t\t<div class=\"rscomments-top-loader\" style=\"display:none;\">\n\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t</div>\n\t</div>\n\t<div class=\"pull-right\">\n\t\t\t\t\t\t<span class=\"rsc_rss\">\n\t\t\t\t<a class=\"hasTooltip\" href=\"/component/rscomments/rscomments?format=feed&amp;type=rss&amp;opt=com_content&amp;id=3196&amp;Itemid=116\" title=\"RSS\">\n\t\t\t\t\t<i class=\"fa fa-feed\"></i> RSS\t\t\t\t</a>\n\t\t\t</span>\n\t\t</div>\n\t<div class=\"clearfix\"></div>\n</div>\n\n<div class=\"rscomments-comments-list\">\n\t\n<div id=\"rscomment25175\" class=\"media rscomment rsc_comment_big_box0\"  itemprop=\"comment\" itemscope itemtype=\"http://schema.org/UserComments\" data-rsc-cid=\"25175\">\n\t\t\t\t\n\t<div class=\"rscomment-body\">\n\t\n\t\t\t\n\t\t<div class=\"media-body\">\n\t\t\t<div class=\"rscomm-header\">\n\t\t\t\t\n\t\t\t\t<span itemprop=\"creator\" itemscope itemtype=\"http://schema.org/Person\">\n\t\t\t\t<span itemprop=\"name\" class=\"rscomm-big\">\n\t\t\t\t\t\t\t\tMahesh Parmar\t\t\t\t\t\t\t\t</span>\n\t\t\t\t</span>\n\t\t\t\t\n\t\t\t\t<small class=\"rscomm-time muted hasTooltip\" title=\"11.04.2021 20:01\">\n\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-clock-o\"></i> <time itemprop=\"commentTime\" datetime=\"2021-04-11 20:01:44\">4 years 8 months</time>\n\t\t\t\t</small>\n\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t<span id=\"c25175\" class=\"rscomm-content\" itemprop=\"commentText\">\n\t\t\t\tI want to achieve an 8 overall band score in the GT IELTS test as I want to settle in Canada. Wish to get your help to achieve my target. your assistance would be highly appreciated. Mahesh Parmar (Email - maheshparmar16761@yahoo.co.in)\t\t\t</span>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t<hr />\n\t\t\t\n\t\t\t<div class=\"rscomm-meta\">\n\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-flag muted\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<a href=\"javascript:void(0)\" class=\"hasTooltip\" title=\"Report comment\" data-rsc-task=\"report\">\n\t\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-flag\"></i>\n\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-rate\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span id=\"rsc_voting25175\"><a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Good comment\" data-rsc-task=\"voteup\"><i class=\"rscomm-meta-icon fa fa-thumbs-up\"></i></a> <a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Bad comment\" data-rsc-task=\"votedown\"><i class=\"rscomm-meta-icon fa fa-thumbs-down\"></i></a></span>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-actions\">\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini btn-primary\" type=\"button\" data-rsc-commentid=\"25175\" data-rsc-task=\"reply\">Reply</button>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini\" type=\"button\" data-rsc-commentid=\"25175\" data-rsc-task=\"quote\" data-rsc-name=\"Mahesh Parmar\">Quote</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t<div id=\"rscomments-reply-25175\"></div>\n\t\t\t\n\t\t</div>\n\t</div>\n\t<div id=\"rscomment-comment-loader-25175\" class=\"rscomment-loader\" style=\"display: none;\">\n\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t</div>\n</div></div>\n\n\n<div id=\"rscomments-report\" tabindex=\"-1\" class=\"modal hide fade\">\n\t<div class=\"modal-header\">\n\t\t\t<button\n\t\t\ttype=\"button\"\n\t\t\tclass=\"close novalidate\"\n\t\t\tdata-dismiss=\"modal\"\n\t\t\taria-label=\"Close\"\n\t\t\t>\n\t\t\t<span aria-hidden=\"true\">&times;</span>\n\t\t</button>\n\t\t\t\t<h3>Report</h3>\n\t</div>\n<div class=\"modal-body jviewport-height70\">\n\t</div>\n<div class=\"modal-footer\">\n\t<button class=\"btn btn-primary\" type=\"button\" onclick=\"jQuery('#rscomments-report iframe').contents().find('#rscomm_report').click();\">Report</button><button type=\"button\" data-dismiss=\"modal\" class=\"btn\">Close</button></div>\n</div>\n<input type=\"hidden\" name=\"rscomments_comments\" value=\"/component/rscomments/mycomments\" /><input type=\"hidden\" name=\"rscomments_terms\" value=\"/component/rscomments/terms\" /><input type=\"hidden\" name=\"rscomments_subscribe\" value=\"/component/rscomments/subscribe\" /><input type=\"hidden\" name=\"rscomments_report\" value=\"/component/rscomments/report\" /><input type=\"hidden\" name=\"rscomments_id\" value=\"\" /><input type=\"hidden\" name=\"rscomments_option\" value=\"\" /><input type=\"hidden\" name=\"rscomments_cid\" value=\"\" />\n</div>\n<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div></article>\n\n\n\t\t\t\t\t\t</div><!-- end main -->\n\t\t\t\t\t</div><!-- end wrapper -->\n\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t<div class=\"wrap\"></div>\n\t\t\t\t</div> <!-- end contentarea -->\n\t\t\t</div><!-- back -->\n\t\t</div><!-- all -->\n\n\t\t<div id=\"footer-outer\">\n\t\t\t\t\t\t\t<div id=\"footer-inner\" >\n\n\t\t\t\t\t<div id=\"bottom\">\n\t\t\t\t\t\t<div class=\"box box1\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Materials</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-165\"><a href=\"/ielts-bar-graph\" >IELTS Bar Graph</a></li><li class=\"item-166\"><a href=\"/ielts-line-graph\" >IELTS Line Graph</a></li><li class=\"item-167\"><a href=\"/ielts-table-chart\" >IELTS Table Chart</a></li><li class=\"item-168\"><a href=\"/ielts-flow-chart\" >IELTS Flow Chart</a></li><li class=\"item-169\"><a href=\"/ielts-pie-chart\" >IELTS Pie Chart</a></li><li class=\"item-170\"><a href=\"/ielts-letter-writing\" >IELTS Letter Writing</a></li><li class=\"item-171\"><a href=\"/ielts-essay\" >IELTS Essay</a></li><li class=\"item-255\"><a href=\"/academic-reading-passages\" >Academic Reading</a></li><li class=\"item-259\"><a href=\"/gt-reading\" >GT Reading </a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Useful Links</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-134\"><a href=\"/know-ielts\" >Know IELTS</a></li><li class=\"item-175\"><a href=\"/cb-ielts\" >CB IELTS</a></li><li class=\"item-148\"><a href=\"/ielts-secrets\" >IELTS Secrets</a></li><li class=\"item-289\"><a href=\"/band-score-calculator\" >Band Score Calculator</a></li><li class=\"item-160\"><a href=\"/exam-specific-tips\" >Exam Specific Tips</a></li><li class=\"item-172\"><a href=\"/useful-websites\" >Useful Websites</a></li></ul>\n</div>\n\t</div>\n\t\t\t\t\t\t<div class=\"box box2\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Preparation Tips</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-126\"><a href=\"/ielts-preparation-tips\" >IELTS Preparation Tips</a></li><li class=\"item-127\"><a href=\"/academic-reading-tips\" >Academic Reading Tips</a></li><li class=\"item-129\"><a href=\"/academic-writing-tips\" >Academic Writing Tips</a></li><li class=\"item-130\"><a href=\"/gt-writing-tips\" >GT Writing Tips</a></li><li class=\"item-131\"><a href=\"/listening-tips\" >Listening Tips</a></li><li class=\"item-132\"><a href=\"/speaking-tips\" >Speaking Tips</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Help</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-222\"><a href=\"/ielts-grammar-review\" >IELTS Grammar Review</a></li><li class=\"item-225\"><a href=\"/ielts-vocabulary\" >IELTS Vocabulary</a></li><li class=\"item-285\"><a href=\"/ielts-cue-cards\" >IELTS Cue Cards</a></li><li class=\"item-342\"><a href=\"/ielts-life-skills\" >IELTS Life Skills</a></li><li class=\"item-509\"><a href=\"/letter-types\" >Letter Types</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- AMP Responsive Ads -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"7913500532\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n</div>\n\t</div>\n\t\t\t\t\t\t<div class=\"box box3\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Get Social</h3>\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<p>\n\t<a href=\"https://twitter.com/IELTSmentor\" target=\"_blank\"><img alt=\"IELTS Mentor - Follow Twitter\" src=\"/images/blog_images/ielts-mentor-twitter.png\" style=\"width: 180px; height: 39px;\" /></a></p>\n\n</div>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Privacy Policy</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-433\"><a href=\"/cookie-policy\" >Cookie Policy</a></li><li class=\"item-338\"><a href=\"/privacy-policy\" >Privacy Policy</a></li><li class=\"item-339\"><a href=\"/copyright-notice\" >Copyright Notice</a></li><li class=\"item-340\"><a href=\"/disclaimer\" >Disclaimer</a></li><li class=\"item-549\"><a href=\"/html-sitemap\" >HTML Sitemap</a></li></ul>\n</div>\n\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t</div>\n\t\t\t\n\t\t\t<div id=\"footer-sub\">\n\t\t\t\t<footer id=\"footer\">\n\t\t\t\t\t\n\n<div class=\"custom\"  >\n\t<p>\n\tCopyright <strong>&copy;</strong> 2013 - 2025 IELTS Mentor. All rights reserved. This website uses cookies to ensure that you get the best user experience on our website. By using our website and services, you agree to our use of cookies. Learn more about our <a href=\"/cookie-policy\" title=\"Cookie Policy\">Cookie Policy</a> &amp; <a href=\"/privacy-policy\" title=\"Privacy Policy\">Privacy Policy</a>.</p>\n</div>\n\n\t\t\t\t</footer><!-- end footer -->\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t</body>\n</html>\n\n"
+}

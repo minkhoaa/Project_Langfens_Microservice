@@ -5,6 +5,7 @@ Runs full pipeline:
 Fetch → Clean → Parse → Normalize → Validate → Invariants → Repair → Export/Quarantine
 
 Uses OLD CRAWLER functions for Parse and Export stages.
+Includes caching for incremental processing.
 """
 import json
 import sys
@@ -12,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from config import get_logger, detect_source, QUARANTINE_DIR
+from config import get_logger, detect_source, QUARANTINE_DIR, RAW_DIR
 
 logger = get_logger(__name__)
 
@@ -25,6 +26,9 @@ from validate import validate
 from invariants import check
 from repair import repair
 from export import export_sql
+
+# Import cache manager
+from cache_manager import is_cache_valid, update_cache, get_file_hash
 
 
 class PipelineResult:
@@ -71,7 +75,7 @@ def quarantine(result: PipelineResult) -> Path:
     return report_path
 
 
-def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False) -> PipelineResult:
+def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, use_cache: bool = True) -> PipelineResult:
     """
     Run full pipeline for a single URL.
     
@@ -84,21 +88,36 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False) -
     6. Invariants - IELTS rules gate
     7. Repair - Auto-fix minor issues
     8. Export - Generate SQL
+    
+    Args:
+        use_cache: If True, skip processing if valid cache exists
     """
     result = PipelineResult(url)
+    
+    # Detect source and item_id early for cache check
+    result.source = detect_source(url)
+    if result.source == 'unknown':
+        result.fail("DETECT", f"Unknown source for URL: {url}")
+        return result
+    
+    result.item_id = extract_id(url, result.source)
+    
+    # Check cache - skip if already processed and HTML unchanged
+    if use_cache:
+        raw_path = RAW_DIR / result.source / f"{result.item_id}.html"
+        if is_cache_valid(result.source, result.item_id, raw_path):
+            logger.info(f"⏭️ CACHED - Skipping: {result.item_id}")
+            # Load existing result
+            from export import OUTPUT_DIR
+            output_path = OUTPUT_DIR / result.source / f"{result.item_id}.json"
+            if output_path.exists():
+                result.success = True
+                result.sql_path = Path(__file__).parent.parent.parent / "deploy" / "seeds" / f"seed_exam_{result.item_id}.sql"
+                return result
     
     logger.info("=" * 60)
     logger.info(f"PIPELINE V2 COMPLETE START: {url}")
     logger.info("=" * 60)
-    
-    # Detect source
-    result.source = detect_source(url)
-    if result.source == 'unknown':
-        result.fail("DETECT", f"Unknown source for URL: {url}")
-        quarantine(result)
-        return result
-    
-    result.item_id = extract_id(url, result.source)
     logger.info(f"Source: {result.source}, Item ID: {result.item_id}")
     
     # === Stage 1: Fetch ===
@@ -108,6 +127,11 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False) -
         result.fail("FETCH", fetch_result.get('error', 'Unknown error'))
         quarantine(result)
         return result
+    
+    # Get HTML hash for cache
+    raw_path = RAW_DIR / result.source / f"{result.item_id}.html"
+    html_hash = get_file_hash(raw_path) if raw_path.exists() else None
+    update_cache(result.source, result.item_id, url, 'fetch', html_hash)
     logger.info("  ✓ Fetch complete")
     
     # === Stage 2: Clean ===
@@ -194,6 +218,14 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False) -
     
     result.success = True
     result.sql_path = sql_path
+    
+    # Update cache with all completed stages
+    update_cache(result.source, result.item_id, url, 'clean')
+    update_cache(result.source, result.item_id, url, 'extract')
+    update_cache(result.source, result.item_id, url, 'normalize')
+    update_cache(result.source, result.item_id, url, 'validate')
+    update_cache(result.source, result.item_id, url, 'repair')
+    update_cache(result.source, result.item_id, url, 'export')
     
     logger.info("=" * 60)
     logger.info(f"PIPELINE V2 SUCCESS: {url}")

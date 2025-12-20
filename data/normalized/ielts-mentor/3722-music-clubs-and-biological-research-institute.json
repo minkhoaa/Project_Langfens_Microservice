@@ -110,8 +110,33 @@
       "prompt_md": "It requires its members to have reached a certain level as performers.",
       "options": [
         {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
           "value": "D",
           "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
           "is_correct": false
         }
       ],

@@ -1,0 +1,141 @@
+{
+  "exam": {
+    "title": "GT Reading 38 Section 2 - Condition of Employment & Writing effective Emails",
+    "slug": "gt-reading-38-section-2-condition-of-employment-writing-effective-emails",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 38 Section 2 - Condition of Employment & Writing effective Emails",
+      "passage_md": "# CONDITIONS OF EMPLOYMENT & WRITING EFFECTIVE EMAILS\n\nWeekly hours of work – 40 hours per week at the ordinary hourly rate of pay for most full-time employees, plus reasonable additional hours (penalty rates apply). Part-time employees work a regular number of hours and days each week, but fewer hours than full-time workers. Casual employees are employed on an hourly or daily basis. Entitlements (full-time employees): Parental leave – up to 12 months’ unpaid leave for maternity, paternity and adoption related leave. Sick leave – up to 10 days’ paid sick leave per year; more than 4 continuous days requires a medical certificate. Annual leave – 4 weeks’ paid leave per annum, plus an additional week for shift workers. Public holidays – a paid day off on a public holiday, except where reasonably requested to work. Employees working on public holidays are entitled to 15% above their normal hourly rate. Notice of termination – 2 weeks’ notice of termination (3 weeks if the employee is more than 55 years old and has at least 2 years of continuous service) Note: The entitlements you receive will depend on whether you are employed on a full-time, part-time or casual basis. If you work part-time, you should receive all the entitlements of a full-time employee but on a prorata or proportional basis. If you are a casual worker, you do not have rights to any of the above entitlements nor penalty payments. Casual workers have no guarantee of hours to be worked and they do not have to be given advance notice of termination.\n\ni. Written communication ii. Clarity iii. Style iv. Research v. End of message vi. One point per email vii. Relevance viii. Specify the response you want ix. The subject line x. Internal emails\n\nFollow these simple rules to make a positive impression and get an appropriate response. A. Like a headline in a newspaper: it should grab the recipient’s attention and specify what the message is about – use a few well chosen words. If the email is one of a series e.g. a weekly newsletter, include the date in the subject line. Never leave it blank. B. If you need to email someone about several different issues, write a separate email for each subject. This allows the recipient to reply to each one individually in a timely manner. For instance, one subject might be dealt with quickly while another could involve some research. If you have several related points, put them all in the same email but present each point in a numbered or bulleted paragraph. C. Your email should be clear and concise. Sentences should be short and to the point. The purpose of the message should be outlined in the first paragraph and the body should contain all of the relevant information. D. Be sure to include a ‘call to action’ – a phone call or a follow-up appointment perhaps. To ensure a prompt reply, incorporate your contact information – name, title, company, phone/fax numbers or extensions, even your business address if necessary. Even internal messages must have contact information. E. Emails, even internal ones, should not be too informal – after all, they are written forms of communication. Use your spell-check and avoid slang. F. Only use this technique for very short messages or reminders where all the relevant information can fit in the subject line. Write EOM at the end of the line to indicate that the recipient doesn’t have to open the email."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 15,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Part-time workers are entitled to a higher rate of pay if they work more than their usual number of hours per week.",
+      "options": [],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 16,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Casual workers may be hired by the hour or by the day.",
+      "options": [],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 17,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "A full-timer who takes a year off to have a baby can return to the same employer.",
+      "options": [],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 18,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "A full-time worker needs a doctor’s note if he is sick for 4 days in a row.",
+      "options": [],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 19,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "A full-time night-shift worker is entitled to 5 weeks’ paid holiday each year.",
+      "options": [],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 20,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Any workers over 55 are entitled to 3 weeks’ notice of termination.",
+      "options": [],
+      "correct_answers": [
+        "minutes"
+      ]
+    },
+    {
+      "idx": 21,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Casual workers can be dismissed without notice.",
+      "options": [],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 22,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Section A",
+      "options": [],
+      "correct_answers": [
+        "ix"
+      ]
+    },
+    {
+      "idx": 23,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Section B",
+      "options": [],
+      "correct_answers": [
+        "vi"
+      ]
+    },
+    {
+      "idx": 24,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Section C",
+      "options": [],
+      "correct_answers": [
+        "ii"
+      ]
+    },
+    {
+      "idx": 25,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Section D",
+      "options": [],
+      "correct_answers": [
+        "viii"
+      ]
+    },
+    {
+      "idx": 26,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Section E",
+      "options": [],
+      "correct_answers": [
+        "iii"
+      ]
+    },
+    {
+      "idx": 27,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "Section F",
+      "options": [],
+      "correct_answers": [
+        "v.<br/><br/>Section 3: 28. E"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "3201-condition-of-employment-and-writing-effective-emails",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3201-condition-of-employment-and-writing-effective-emails",
+    "normalized_by": "rule-based"
+  }
+}

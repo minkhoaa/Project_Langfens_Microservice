@@ -431,14 +431,13 @@ def extract_question_texts(soup: BeautifulSoup) -> dict[int, str]:
 
 
 def extract_answers(soup: BeautifulSoup) -> dict[int, str]:
-    """Extract answers from div#spoiler or 'Answer: 1. C 2. E...' format."""
+    """Extract answers from div#spoiler, blockquote, or 'Answer: 1. C 2. E...' format."""
     answers = {}
     
     # Try to find div#spoiler first (hidden answers section)
     spoiler = soup.find('div', id='spoiler')
     if spoiler:
         spoiler_text = spoiler.get_text(separator=' ', strip=True)
-        # Parse: "Answer: 1. C 2. E 3. D..." or separate lines
         # Pattern: number + dot + answer (letter or TRUE/FALSE/NOT GIVEN)
         patterns = re.findall(r'(\d+)\.\s*([A-Z]+(?:\s+GIVEN)?)', spoiler_text, re.IGNORECASE)
         for num_str, ans in patterns:
@@ -447,19 +446,51 @@ def extract_answers(soup: BeautifulSoup) -> dict[int, str]:
         if answers:
             return answers
     
+    # Try blockquote (common format)
+    blockquote = soup.find('blockquote')
+    if blockquote:
+        bq_text = blockquote.get_text(separator=' ', strip=True)
+        # Pattern 1: "28. E, 29. H, 30. C"
+        for match in re.finditer(r'(\d+)\.\s*([A-Z]|TRUE|FALSE|NOT GIVEN|[^,]{2,40})(?:,|$)', bq_text, re.IGNORECASE):
+            num = int(match.group(1))
+            ans = match.group(2).strip()
+            if ans.upper() in ['TRUE', 'FALSE', 'NOT GIVEN', 'YES', 'NO']:
+                ans = ans.upper()
+            elif len(ans) == 1 and ans.isalpha():
+                ans = ans.upper()
+            if num not in answers:
+                answers[num] = ans
+        if answers:
+            return answers
+    
     # Fallback: search in full page text
     article = soup.find('article') or soup.find('div', class_='item-page') or soup
     full_text = article.get_text()
     
     # Look for answer pattern after "Answer:"
-    answer_match = re.search(r'Answer:\s*(.+?)(?=Show|\n\s*\n|\Z)', full_text, re.DOTALL)
+    answer_match = re.search(r'Answer:\s*(.+?)(?=Show|Hide|\n\s*\n|\Z)', full_text, re.DOTALL)
     if answer_match:
         answer_text = answer_match.group(1)
+        
         # Parse: "1. C 2. E 3. D" or "1. TRUE 2. FALSE 3. NOT GIVEN"
-        patterns = re.findall(r'(\d+)\.\s*([A-Z]+(?:\s+GIVEN)?)', answer_text, re.IGNORECASE)
-        for num_str, ans in patterns:
-            num = int(num_str)
-            answers[num] = ans.strip().upper()
+        for match in re.finditer(r'(\d+)\.\s*([A-Z]+(?:\s+GIVEN)?)', answer_text, re.IGNORECASE):
+            num = int(match.group(1))
+            if num not in answers:
+                answers[num] = match.group(2).strip().upper()
+        
+        # Also parse text answers: "15. senior" or "19. 3 years ago"
+        for match in re.finditer(r'(\d+)\.\s*([a-zA-Z][^.\n]{1,40}?)(?=\n|\d+\.|$)', answer_text):
+            num = int(match.group(1))
+            ans = match.group(2).strip()
+            if num not in answers and len(ans) > 1:
+                answers[num] = ans
+    
+    # Also check for slash patterns: "21. 3 months // three months"
+    full_html = str(soup)
+    for match in re.finditer(r'(\d+)\.\s*([^/\n<]{2,30})\s*//\s*([^\n<]{2,30})', full_html):
+        num = int(match.group(1))
+        if num not in answers:
+            answers[num] = match.group(2).strip()
     
     return answers
 

@@ -1,0 +1,409 @@
+{
+  "exam": {
+    "title": "GT Reading 15 Section 1 - Passport Application & Auckland International Airport Services",
+    "slug": "gt-reading-15-section-1-passport-application-auckland-international-airport-services",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 15 Section 1 - Passport Application & Auckland International Airport Services",
+      "passage_md": "You will need to fill in an application for a passport in the following circumstances: if you are applying for a passport for the first time, if you wish to replace your current passport, if your passport has expired, or if it has been lost or stolen. Your application form must be completed in your own handwriting. As proof of your citizenship and identity, you must enclose either your passport or your birth certificate. All documents must be originals; these will be returned with your passport. The standard time to process an application is up to 10 working days. The processing begins from when we have received the completed application form. Applicants should expect delays if the Passport Office receives a form with missing information. Extra time should be allowed for delivery to and from the Passport Office. Please provide two identical passport photos of yourself. Both photos must be the same in all respects and must be less than 12 months old. Ask someone who can identify you to fill in the ‘Proof of Identity’ information and identify one of your photos. This person will be called your witness and needs to meet the following requirements: a witness must be aged 1 6 years or over, be contactable by phone during normal office hours and be the holder of a valid passport. A witness should fill in the ‘Proof of Identity’ page in their own handwriting. A witness must also write the full name of the person applying for the passport on the back of one of the photos, sign their own name and date the back of the same photo. Photos with this identifying information written in the applicant’s own handwriting will not be accepted.\n\nA. The second floor of the international terminal offers a view of the airfield and all incoming and outgoing flights. There is a cafe situated here as well as a restaurant, which is available for all airport visitors to use. B. We are open for all international flights and provide a comprehensive service for visitors to the city. Brochures on a range of attractions are available, and we also offer a booking service for accommodation and transport. Shuttle buses into the city centre are provided at a competitive price.\n\nC. Passengers who require urgent medical attention should dial 9877 on any public telephone in the terminal. The airport pharmacy is located on the ground floor near the departure lounge, and stocks a comprehensive range of products. D. Departing passengers can completely seal their luggage or packages in recyclable polythene to protect them from damage. Luggage storage, charged at $10 per hour, is available on the first floor. Transit passengers have free access to storage facilities. E. Every international passenger, with the exception of children under 12 years of age and transit passengers in Auckland for less than 24 hours, is required to make a payment of $25 when leaving the country. This can be arranged at the National Bank on the ground floor. F. As Auckland International Airport has adopted the 'quiet airport' concept, there are usually no announcements made over the public address system. Details of all arrivals and departures are displayed on the monitors located in the terminal halls and lounge areas. G. The airport caters for the needs of business travellers and has several rooms available for seminars or business gatherings. These are located adjacent to the airport medical centre on the first floor. For information and bookings please contact the Airport Business Manager on extension 5294."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 1,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "A husband can fill in an application form for his wife.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 2,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Photocopies of documents are acceptable in some circumstances.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "An incomplete application will affect processing time.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "The passport photos included with your application must be in colour.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 5,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "A witness can be a relative of the applicant.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "Anyone acting as a witness must have a passport.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "The passport applicant must sign their name on the back of both photos.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 8,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "8. Section A",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "ii"
+      ]
+    },
+    {
+      "idx": 9,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "9. Section B",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "X"
+      ]
+    },
+    {
+      "idx": 10,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "10. Section C",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "V"
+      ]
+    },
+    {
+      "idx": 11,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "11. Section D",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "iii"
+      ]
+    },
+    {
+      "idx": 12,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "12. Section E",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "ix"
+      ]
+    },
+    {
+      "idx": 13,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "13. Section F",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "vi"
+      ]
+    },
+    {
+      "idx": 14,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "14. Section G List of Headings i. Departure procedures ii. Observation area iii. Baggage services iv. Meeting facilities v. Healthcare services vi. Flight information vii. Currency exchange viii. Health and safety advice ix. Departure fees x. Tourist travel centre Auckland International Airport Services A. The second floor of the international terminal offers a view of the airfield and all incoming and outgoing flights. There is a cafe situated here as well as a restaurant, which is available for all airport visitors to use. B. We are open for all international flights and provide a comprehensive service for visitors to the city. Brochures on a range of attractions are available, and we also offer a booking service for accommodation and transport. Shuttle buses into the city centre are provided at a competitive price. C. Passengers who require urgent medical attention should dial 9877 on any public telephone in the terminal. The airport pharmacy is located on the ground floor near the departure lounge, and stocks a comprehensive range of products. D. Departing passengers can completely seal their luggage or packages in recyclable polythene to protect them from damage. Luggage storage, charged at $10 per hour, is available on the first floor. Transit passengers have free access to storage facilities. E. Every international passenger, with the exception of children under 12 years of age and transit passengers in Auckland for less than 24 hours, is required to make a payment of $25 when leaving the country. This can be arranged at the National Bank on the ground floor. F. As Auckland International Airport has adopted the 'quiet airport' concept, there are usually no announcements made over the public address system. Details of all arrivals and departures are displayed on the monitors located in the terminal halls and lounge areas. G. The airport caters for the needs of business travellers and has several rooms available for seminars or business gatherings. These are located adjacent to the airport medical centre on the first floor. For information and bookings please contact the Airport Business Manager on extension 5294.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. The second floor of the international terminal offers a view of the airfield and all incoming and outgoing flights. There is a cafe situated here as well as a restaurant, which is available for all airport visitors to use.",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. We are open for all international flights and provide a comprehensive service for visitors to the city. Brochures on a range of attractions are available, and we also offer a booking service for accommodation and transport. Shuttle buses into the city centre are provided at a competitive price.",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. Passengers who require urgent medical attention should dial 9877 on any public telephone in the terminal. The airport pharmacy is located on the ground floor near the departure lounge, and stocks a comprehensive range of products.",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D. Departing passengers can completely seal their luggage or packages in recyclable polythene to protect them from damage. Luggage storage, charged at $10 per hour, is available on the first floor. Transit passengers have free access to storage facilities.",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "iv"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "897-learning-a-language-and-public-library",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/897-learning-a-language-and-public-library",
+    "normalized_by": "rule-based"
+  }
+}

@@ -1,0 +1,478 @@
+{
+  "exam": {
+    "title": "GT Reading 10 Section 1 - Causton Health Centre & Bentley Hospital Catering Service",
+    "slug": "gt-reading-10-section-1-causton-health-centre-bentley-hospital-catering-service",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 10 Section 1 - Causton Health Centre & Bentley Hospital Catering Service",
+      "passage_md": "# CAUSTON HEALTH CENTRE PATIENT INFORMATION LEAFLET\n\nYour section staffing board will show the times when these breaks are to be taken. Please note It is your responsibility to check that the total break time shown on the staffing sheets accurately reflects the breaks that you take. Any discrepancies should be raised with your Staff Co-ordinator immediately. SPECIAL REQUIREMENTS - FOOD HANDLERS Food handlers are those concerned with preparing and serving unwrapped food. Food handlers should report any instance of sickness, diarrhoea and/or stomach upset experienced either while at work or during a holiday to a member of the Personnel Management team. Any infections of ear, nose, throat, mouth, chest or skin should also be reported to a member of the Personnel Management team. Food handlers need to have an annual dental examination by the company dentist. Alternatively, a current certificate of dental fitness may be produced from their own dentist. This applies to all permanent staff who handle food."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 1,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n1. what to do if you need help outside normal working hours",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 2,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n2. who to speak to first for general information",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "F"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n3. what happens when you register with the Centre",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Write the correct letter, A-F.\n\n4. what to do if you need to cancel a doctor's appointment",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 5,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n5. You must always see the same doctor if you visit the Centre.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n6. If you want a repeat prescription you must make an appointment.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n7. Helen Stranger is the Head Nurse.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 8,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n8. It is possible that receptionists will ask you to explain your problem.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 9,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n9. You should give the Health Centre your new contact details if you move house. Read the text below and answer",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 10,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Temporary employees only working 3 hours should _______",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 11,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Employees who work 11 hours should _______",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 12,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "To find out when to have their breaks, employees should _______",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "F"
+      ]
+    },
+    {
+      "idx": 13,
+      "type": "MATCHING_HEADING",
+      "prompt_md": "Employees working with food must _______",
+      "options": [],
+      "correct_answers": [
+        "I"
+      ]
+    },
+    {
+      "idx": 14,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Food handlers who have been ill should _______",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "H"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "871-causton-health-centre-and-bentley-hospital-catering-service",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/871-causton-health-centre-and-bentley-hospital-catering-service",
+    "normalized_by": "rule-based"
+  }
+}

@@ -20,7 +20,7 @@
       "prompt_md": "_______ that contains the relevant information.",
       "options": [],
       "correct_answers": [
-        "BOOKLET"
+        "booklet"
       ]
     },
     {
@@ -29,7 +29,7 @@
       "prompt_md": "_______ to ensure all the relevant sections are completed.",
       "options": [],
       "correct_answers": [
-        "CHECKLIST"
+        "checklist"
       ]
     },
     {
@@ -38,7 +38,7 @@
       "prompt_md": "_______ to request action if you don’t have enough proof to make a claim).",
       "options": [],
       "correct_answers": [
-        "WEBSITE"
+        "website"
       ]
     },
     {
@@ -47,7 +47,7 @@
       "prompt_md": "Complete the blank. _______ Question 4",
       "options": [],
       "correct_answers": [
-        "VALUE"
+        "value"
       ]
     },
     {
@@ -55,14 +55,18 @@
       "type": "SUMMARY_COMPLETION",
       "prompt_md": "_______ showing the damage to the item.",
       "options": [],
-      "correct_answers": []
+      "correct_answers": [
+        "(provide) photograph(s) / photos"
+      ]
     },
     {
       "idx": 6,
       "type": "SUMMARY_COMPLETION",
       "prompt_md": "_______ that was used when the item was originally sent.",
       "options": [],
-      "correct_answers": []
+      "correct_answers": [
+        "(original) packaging"
+      ]
     },
     {
       "idx": 7,
@@ -70,7 +74,7 @@
       "prompt_md": "_______ , you must claim within three months of posting the package.",
       "options": [],
       "correct_answers": [
-        "SENDER"
+        "sender"
       ]
     },
     {
@@ -127,11 +131,6 @@
           "value": "D",
           "label": "D. Pickering Castle",
           "is_correct": false
-        },
-        {
-          "value": "F",
-          "label": "F. (Missing label)",
-          "is_correct": true
         }
       ],
       "correct_answers": [
@@ -222,11 +221,6 @@
           "value": "D",
           "label": "D. Pickering Castle",
           "is_correct": false
-        },
-        {
-          "value": "E",
-          "label": "E. (Missing label)",
-          "is_correct": true
         }
       ],
       "correct_answers": [
@@ -287,11 +281,6 @@
           "value": "D",
           "label": "D. Pickering Castle",
           "is_correct": false
-        },
-        {
-          "value": "E",
-          "label": "E. (Missing label)",
-          "is_correct": true
         }
       ],
       "correct_answers": [
@@ -303,6 +292,6 @@
     "source": "ielts-mentor",
     "item_id": "3716-inland-mail-claim-form-and-days-out-for-the-family",
     "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3716-inland-mail-claim-form-and-days-out-for-the-family",
-    "normalized_by": "ai"
+    "normalized_by": "rule-based"
   }
 }

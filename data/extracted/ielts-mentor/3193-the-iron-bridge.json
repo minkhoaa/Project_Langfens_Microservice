@@ -1,0 +1,447 @@
+{
+  "title": "GT Reading 35 Section 3 - The Iron Bridge",
+  "exam_id": "3193",
+  "passages": [
+    {
+      "text": "# THE IRON BRIDGE\n\n(A) The Iron Bridge crosses the River Severn in Coalbrookdale, in the west of England. It was the first cast-iron bridge to be successfully erected, and the first large cast-iron structure of the industrial age in Europe, although the Chinese were expert iron-casters many centuries earlier. (B) Rivers used to be the equivalent of today’s motorways, in that they were extensively used for transportation. The River Severn, which starts its life on the Welsh mountains and eventually enters the sea between Cardiff and Bristol, is the longest navigable river in Britain. It was ideal for transportation purposes, and special boats were built to navigate the waters. By the middle of the eighteenth century, the Severn was one of the busiest rivers in Europe. Local goods, including coal, iron products, wool, grain and cider, were sent by the river. Among the goods coming upstream were luxuries such as sugar, tea, coffee and wine. In places, the riverbanks were lined with wharves and the river was often crowded with boats loading or unloading. (C) In 1638, Basil Brooke patented a steel-making process and built a furnace at Coalbrookdale. This later became the property of Abraham Darby (referred to as Abraham Darby I to distinguish him from his son and grandson of the same name). After serving an apprenticeship in Birmingham, Darby had started a business in Bristol, but he moved to Coalbrookdale in 1710 with an idea that coke derived from coal could provide a more economical alternative to charcoal as a fuel for ironmaking. This led to cheaper, more efficient ironmaking from the abundant supplies of coal, iron and limestone in the area. (D) His son, Abraham Darby II, pioneered the manufacture of cast iron, and had the idea of building a bridge over the Severn, as ferrying stores of all kinds across the river, particularly the large quantities of fuel for the furnaces at Coalbrookdale and other surrounding ironworks, involved considerable expense and delay. However, it was his son Abraham Darby III (born in 1750) who, in 1775, organised a meeting to plan the building of a bridge. This was designed by a local architect, Thomas Pritchard, who had the idea of constructing it of iron. (E) Sections were cast during the winter of 1778-9 for a 7-metre-wide bridge with a span of 31 metres, 12 metres above the river. Construction took three months during the summer of 1779, and remarkably, nobody was injured during the construction process - a feat almost unheard of even in modern major civil engineering projects. Work on the approach roads continued for another two years, and the bridge was opened to traffic in 1781. Abraham Darby III funded the bridge by commissioning paintings and engravings, but he lost a lot on the project, which had cost nearly double the estimate, and he died leaving massive debts in 1789, aged only 39. The district did not flourish for much longer, and during the nineteenth and early twentieth centuries, factories closed down. Since 1934 the bridge has been open only to pedestrians. Universally recognised as the symbol of the Industrial Revolution, the Iron Bridge now stands at the heart of the Ironbridge Gorge World Heritage Site. (F) It has always been a mystery how the bridge was built. Despite its pioneering technology, no eye-witness accounts are known which describe the iron bridge being erected - and certainly, no plans have survived. However, recent discoveries, research and experiments have shed new light on exactly how it was built, challenging the assumptions of recent decades. In 1997 a small watercolour sketch by Elias Martin came to light in the Swedish capital, Stockholm. Although there is a wealth of early views of the bridge by numerous artists, this is the only one which actually shows it under construction. (G) Up until recently, it had been assumed that the bridge had been built from both banks, with the inner supports tilted across the river. This would have allowed river traffic to continue unimpeded during construction. But the picture clearly shows sections of the bridge being raised from a barge in the river. It contradicted everything historians had assumed about the bridge, and it was even considered that the picture could have been a fake as no other had come to light. So in 2001, a half-scale model of the bridge was built, in order to see if it could have been constructed in the way depicted in the watercolour. Meanwhile, a detailed archaeological, historical and photographic survey was done by the Ironbridge Gorge Museum Trust, along with a 3D CAD (computer-aided design) model by English Heritage. (H) The results tell us a lot more about how the bridge was built. We now know that all the large castings were made individually as they are all slightly different. The bridge wasn’t welded or bolted together as metal bridges are these days. Instead it was fitted together using a complex system of joints normally used for wood - but this was the traditional way in which iron structures were joined at the time. The construction of the model proved that the painting shows a very realistic method of constructing the bridge that could work and was in all probability the method used. (I) Now only one mystery remains in the Iron Bridge story. The Swedish watercolour sketch had apparently been torn from a book which would have contained similar sketches. It had been drawn by a Swedish artist who lived in London for 12 years and travelled Britain drawing what he saw. Nobody knows what has happened to the rest of the book, but perhaps the other sketches still exist somewhere. If they are ever found they could provide further valuable evidence of how the Iron Bridge was constructed."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 28,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Write the correct letter, A-F.\n\n28. When was the furnace bought by Darby originally constructed?",
+      "correct_answer": "",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 29,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Write the correct letter, A-F.\n\n29. When were the roads leading to the bridge completed?",
+      "correct_answer": "",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 30,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Write the correct letter, A-F.\n\n30. When was the bridge closed to traffic?",
+      "correct_answer": "",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 31,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Write the correct letter, A-F.\n\n31. When was a model of the bridge built?",
+      "correct_answer": "",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 32,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n32. There is no written evidence of how the original bridge was constructed.",
+      "correct_answer": "TRUE",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 33,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n33. The painting by Elias Martin is the only one of the bridge when it was new.",
+      "correct_answer": "FALSE",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 34,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n34. The painting shows that the bridge was constructed from the two banks.",
+      "correct_answer": "FALSE",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 35,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n35. The original bridge and the model took equally long to construct.",
+      "correct_answer": "NOT GIVEN",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ]
+    },
+    {
+      "idx": 36,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt": "TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n36. Elias Martin is thought to have made other paintings of the bridge.",
+      "correct_answer": "TRUE",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 37,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Write the correct letter, A-F.\n\n37. why a bridge was required across the River Severn",
+      "correct_answer": "D",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 38,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Write the correct letter, A-F.\n\n38. a method used to raise money for the bridge",
+      "correct_answer": "E",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": true
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 39,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Write the correct letter, A-F.\n\n39. why Coalbrookdale became attractive to iron makers",
+      "correct_answer": "C",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "idx": 40,
+      "type": "MATCHING_INFORMATION",
+      "prompt": "Write the correct letter, A-F.\n\n40. how the sections of the bridge were connected to each other",
+      "correct_answer": "H",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ]
+    }
+  ],
+  "answers": {
+    "32": "TRUE",
+    "33": "FALSE",
+    "34": "FALSE",
+    "35": "NOT GIVEN",
+    "36": "TRUE",
+    "37": "D",
+    "38": "E",
+    "39": "C",
+    "40": "H"
+  },
+  "heading_options": [],
+  "source": "ielts-mentor",
+  "item_id": "3193-the-iron-bridge",
+  "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3193-the-iron-bridge",
+  "_raw_text": "GT Reading Test 35 Section 3 - The Iron Bridge\nDetails\nGT Reading Mock Test 35:\n|\nSection 1\n|\nSection 2\n|\nSection 3\n|\nSection 3: Questions 28-40\nRead the text below and answers questions\n28-40\non your answer sheet.\nYou should take around\n20 minutes\nto complete this task.\nGT Reading Sample -\n\"The Iron Bridge\"\nRead the passage below and answer\nQuestions 28-40\n.\nTHE IRON BRIDGE\nThe Iron Bridge was the first of its kind in Europe and is universally recognised as a symbol of the Industrial Revolution.\n(A)\nThe Iron Bridge crosses the River Severn in Coalbrookdale, in the west of England. It was the first cast-iron bridge to be successfully erected, and the first large cast-iron structure of the industrial age in Europe, although the Chinese were expert iron-casters many centuries earlier.\n(B)\nRivers used to be the equivalent of today’s motorways, in that they were extensively used for transportation. The River Severn, which starts its life on the Welsh mountains and eventually enters the sea between Cardiff and Bristol, is the longest navigable river in Britain. It was ideal for transportation purposes, and special boats were built to navigate the waters. By the middle of the eighteenth century, the Severn was one of the busiest rivers in Europe. Local goods, including coal, iron products, wool, grain and cider, were sent by the river. Among the goods coming upstream were luxuries such as sugar, tea, coffee and wine. In places, the riverbanks were lined with wharves and the river was often crowded with boats loading or unloading.\n(C)\nIn 1638, Basil Brooke patented a steel-making process and built a furnace at Coalbrookdale. This later became the property of Abraham Darby (referred to as Abraham Darby I to distinguish him from his son and grandson of the same name). After serving an apprenticeship in Birmingham, Darby had started a business in Bristol, but he moved to Coalbrookdale in 1710 with an idea that coke derived from coal could provide a more economical alternative to charcoal as a fuel for ironmaking. This led to cheaper, more efficient ironmaking from the abundant supplies of coal, iron and limestone in the area.\n(D)\nHis son, Abraham Darby II, pioneered the manufacture of cast iron, and had the idea of building a bridge over the Severn, as ferrying stores of all kinds across the river, particularly the large quantities of fuel for the furnaces at Coalbrookdale and other surrounding ironworks, involved considerable expense and delay. However, it was his son Abraham Darby III (born in 1750) who, in 1775, organised a meeting to plan the building of a bridge. This was designed by a local architect, Thomas Pritchard, who had the idea of constructing it of iron.\n(E)\nSections were cast during the winter of 1778-9 for a 7-metre-wide bridge with a span of 31 metres, 12 metres above the river. Construction took three months during the summer of 1779, and remarkably, nobody was injured during the construction process - a feat almost unheard of even in modern major civil engineering projects. Work on the approach roads continued for another two years, and the bridge was opened to traffic in 1781. Abraham Darby III funded the bridge by commissioning paintings and engravings, but he lost a lot on the project, which had cost nearly double the estimate, and he died leaving massive debts in 1789, aged only 39. The district did not flourish for much longer, and during the nineteenth and early twentieth centuries, factories closed down. Since 1934 the bridge has been open only to pedestrians. Universally recognised as the symbol of the Industrial Revolution, the Iron Bridge now stands at the heart of the Ironbridge Gorge World Heritage Site.\n(F)\nIt has always been a mystery how the bridge was built. Despite its pioneering technology, no eye-witness accounts are known which describe the iron bridge being erected - and certainly, no plans have survived. However, recent discoveries, research and experiments have shed new light on exactly how it was built, challenging the assumptions of recent decades. In 1997 a small watercolour sketch by Elias Martin came to light in the Swedish capital, Stockholm. Although there is a wealth of early views of the bridge by numerous artists, this is the only one which actually shows it under construction.\n(G)\nUp until recently, it had been assumed that the bridge had been built from both banks, with the inner supports tilted across the river. This would have allowed river traffic to continue unimpeded during construction. But the picture clearly shows sections of the bridge being raised from a barge in the river. It contradicted everything historians had assumed about the bridge, and it was even considered that the picture could have been a fake as no other had come to light. So in 2001, a half-scale model of the bridge was built, in order to see if it could have been constructed in the way depicted in the watercolour. Meanwhile, a detailed archaeological, historical and photographic survey was done by the Ironbridge Gorge Museum Trust, along with a 3D CAD (computer-aided design) model by English Heritage.\n(H)\nThe results tell us a lot more about how the bridge was built. We now know that all the large castings were made individually as they are all slightly different. The bridge wasn’t welded or bolted together as metal bridges are these days. Instead it was fitted together using a complex system of joints normally used for wood - but this was the traditional way in which iron structures were joined at the time. The construction of the model proved that the painting shows a very realistic method of constructing the bridge that could work and was in all probability the method used.\n(I)\nNow only one mystery remains in the Iron Bridge story. The Swedish watercolour sketch had apparently been torn from a book which would have contained similar sketches. It had been drawn by a Swedish artist who lived in London for 12 years and travelled Britain drawing what he saw. Nobody knows what has happened to the rest of the book, but perhaps the other sketches still exist somewhere. If they are ever found they could provide further valuable evidence of how the Iron Bridge was constructed.\nQuestions 28-31\nAnswer the questions below.\nChoose\nONE NUMBER ONLY\nfrom the text for each answer.\nWrite your answers in boxes\n28-31\non your answer sheet.\n28.\nWhen was the furnace bought by Darby originally constructed?\n29.\nWhen were the roads leading to the bridge completed?\n30.\nWhen was the bridge closed to traffic?\n31.\nWhen was a model of the bridge built?\nQuestions 32-36\nDo the following statements agree with the information given in the text?\nIn boxes\n32-36\non your answer sheet, write\nTRUE\nif the statement agrees with the information\nFALSE\nif the statement contradicts the information\nNOT GIVEN\nif there is no information on this\n32.\nThere is no written evidence of how the original bridge was constructed.\n33.\nThe painting by Elias Martin is the only one of the bridge when it was new.\n34.\nThe painting shows that the bridge was constructed from the two banks.\n35.\nThe original bridge and the model took equally long to construct.\n36.\nElias Martin is thought to have made other paintings of the bridge.\nQuestions 37-40\nThe text has nine paragraphs,\nA-I\n.\nWhich paragraph contains the following information?\nWrite the correct letter,\nA-I\n, in boxes\n37-40\non your answer sheet.\n37.\nwhy a bridge was required across the River Severn\n38.\na method used to raise money for the bridge\n39.\nwhy Coalbrookdale became attractive to iron makers\n40.\nhow the sections of the bridge were connected to each other\nAnswer:\n28. 1638\n29. 1781\n30. 1934\n31. 2001\n32. TRUE\n33. FALSE\n34. FALSE\n35. NOT GIVEN\n36. TRUE\n37. D\n38. E\n39. C\n40. H\nShow/ Hide Answers\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n\nGT Reading\nIELTS GT reading Sample\nGeneral Training Reading\nGT Reading Passage\nPrev\nNext",
+  "_raw_html": "<!DOCTYPE html>\n<html lang=\"en-gb\" dir=\"ltr\">\n\t<head>\n  <!-- Google tag (gtag.js) -->\n<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-CX3C0LGRYK\"></script>\n<script>\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n\n  gtag('config', 'G-CX3C0LGRYK');\n</script>\n  \n  <script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n  \n  <script type=\"text/javascript\">\n    (function(c,l,a,r,i,t,y){\n        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};\n        t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i;\n        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);\n    })(window, document, \"clarity\", \"script\", \"bv9m9rc1bk\");\n</script>\n  \n\t\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes\"/>\n\t\t<meta name=\"HandheldFriendly\" content=\"true\" />\n\t\t<meta name=\"apple-mobile-web-app-capable\" content=\"YES\" />\n\t\t<meta charset=\"utf-8\" />\n\t<base href=\"https://www.ielts-mentor.com/reading-sample/gt-reading/3193-the-iron-bridge\" />\n\t<meta name=\"keywords\" content=\"GT reading Sample, GT reading, IELTS General Training Reading\" />\n\t<meta name=\"rights\" content=\"Copyright © 2025 IELTS Mentor.\" />\n\t<meta name=\"author\" content=\"IELTS Mentor\" />\n\t<meta name=\"description\" content=\"IELTS exam preparation, IELTS sample answers, and tips to score a high band score in your IELTS test.\" />\n\t<meta name=\"generator\" content=\"Joomla! - Open Source Content Management\" />\n\t<title>GT Reading Test 35 Section 3 - The Iron Bridge</title>\n\t<link href=\"https://www.ielts-mentor.com/reading-sample/gt-reading/3193-the-iron-bridge/amp\" rel=\"amphtml\" />\n\t<link href=\"/templates/beez3/favicon.ico\" rel=\"shortcut icon\" type=\"image/vnd.microsoft.icon\" />\n\t<link href=\"/plugins/content/extravote/assets/extravote.css\" rel=\"stylesheet\" />\n\t<link href=\"/media/com_rscomments/css/font-awesome.min.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/media/com_rscomments/css/site.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/media/jui/css/bootstrap-tooltip-extended.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/system/css/system.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/position.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/layout.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/print.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" media=\"print\" />\n\t<link href=\"/templates/beez3/css/general.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<link href=\"/templates/beez3/css/turq.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" />\n\t<!--[if IE 7]><link href=\"/templates/beez3/css/ie7only.css?6ad5bd2ba05a36f51c8a1f2db163c27d\" rel=\"stylesheet\" /><![endif]-->\n\t<script type=\"application/json\" class=\"joomla-script-options new\">{\"csrf.token\":\"b3c69aa8b2383546e233f99dab7aabe4\",\"system.paths\":{\"root\":\"\",\"base\":\"\"},\"joomla.jtext\":{\"COM_RSCOMMENTS_HIDE_FORM\":\"Hide comment form\",\"COM_RSCOMMENTS_SHOW_FORM\":\"Show comment form\",\"TPL_BEEZ3_ALTOPEN\":\"is open\",\"TPL_BEEZ3_ALTCLOSE\":\"is closed\",\"TPL_BEEZ3_TEXTRIGHTOPEN\":\"Open info\",\"TPL_BEEZ3_TEXTRIGHTCLOSE\":\"Close info\",\"TPL_BEEZ3_FONTSIZE\":\"Font Size\",\"TPL_BEEZ3_BIGGER\":\"Bigger\",\"TPL_BEEZ3_RESET\":\"Reset\",\"TPL_BEEZ3_SMALLER\":\"Smaller\",\"TPL_BEEZ3_INCREASE_SIZE\":\"Increase size\",\"TPL_BEEZ3_REVERT_STYLES_TO_DEFAULT\":\"Revert styles to default\",\"TPL_BEEZ3_DECREASE_SIZE\":\"Decrease size\",\"TPL_BEEZ3_OPENMENU\":\"Open Menu\",\"TPL_BEEZ3_CLOSEMENU\":\"Close Menu\"}}</script>\n\t<script src=\"/plugins/content/extravote/assets/extravote.js\"></script>\n\t<script src=\"/media/jui/js/jquery.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/jquery-noconflict.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/jquery-migrate.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/bootstrap.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/core.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/com_rscomments/js/site.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/jui/js/bootstrap-tooltip-extended.min.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/caption.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/mootools-core.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/media/system/js/mootools-more.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/md_stylechanger.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/hide.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/respond.src.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<script src=\"/templates/beez3/javascript/template.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script>\n\t<!--[if lt IE 9]><script src=\"/media/jui/js/html5.js?6ad5bd2ba05a36f51c8a1f2db163c27d\"></script><![endif]-->\n\t<script>\n\n\t\t\t\tvar ev_basefolder = '';\n\t\t\t\tvar extravote_text=Array('Your browser does not support AJAX!','Loading','Thank you for voting!','You need to login to rate this item.','You have already rated this item.','(%s Votes)','(%s Vote)','Rating %s ');\n\t\t\t\njQuery(function($){ initTooltips(); $(\"body\").on(\"subform-row-add\", initTooltips); function initTooltips (event, container) { container = container || document;$(container).find(\".hasTooltip\").tooltip({\"html\": true,\"container\": \"body\"});} });\nvar rsc_root = 'https://www.ielts-mentor.com/';\njQuery(document).ready(function($) {\n   $('#rscomments-report').on('show.bs.modal', function() {\n       $('body').addClass('modal-open');\n       var modalBody = $(this).find('.modal-body');\n       modalBody.find('iframe').remove();\n       modalBody.prepend('<iframe class=\"iframe jviewport-height70\" src=\"/component/rscomments/report\" name=\"Report\"></iframe>');\n   }).on('shown.bs.modal', function() {\n       var modalHeight = $('div.modal:visible').outerHeight(true),\n           modalHeaderHeight = $('div.modal-header:visible').outerHeight(true),\n           modalBodyHeightOuter = $('div.modal-body:visible').outerHeight(true),\n           modalBodyHeight = $('div.modal-body:visible').height(),\n           modalFooterHeight = $('div.modal-footer:visible').outerHeight(true),\n           padding = document.getElementById('rscomments-report').offsetTop,\n           maxModalHeight = ($(window).height()-(padding*2)),\n           modalBodyPadding = (modalBodyHeightOuter-modalBodyHeight),\n           maxModalBodyHeight = maxModalHeight-(modalHeaderHeight+modalFooterHeight+modalBodyPadding);\n       var iframeHeight = $('.iframe').height();\n       if (iframeHeight > maxModalBodyHeight){;\n           $('.modal-body').css({'max-height': maxModalBodyHeight, 'overflow-y': 'auto'});\n           $('.iframe').css('max-height', maxModalBodyHeight-modalBodyPadding);\n       }\n   }).on('hide.bs.modal', function () {\n       $('body').removeClass('modal-open');\n       $('.modal-body').css({'max-height': 'initial', 'overflow-y': 'initial'});\n       $('.modalTooltip').tooltip('destroy');\n   });\n});\njQuery(window).on('load',  function() {\n\t\t\t\tnew JCaption('img.caption');\n\t\t\t});\n\tvar big        = '75%';\n\tvar small      = '53%';\n\tvar bildauf    = '/templates/beez3/images/plus.png';\n\tvar bildzu     = '/templates/beez3/images/minus.png';\n\tvar rightopen  = 'Open info';\n\tvar rightclose = 'Close info';\n\tvar altopen    = 'is open';\n\tvar altclose   = 'is closed';\n\n\t</script>\n\n\t</head>\n\t<body id=\"shadow\">\n\t\t<div id=\"all\">\n\t\t\t<div id=\"back\">\n\t\t\t\t<header id=\"header\">\n\t\t\t\t\t<div class=\"logoheader\">\n\t\t\t\t\t\t<h1 id=\"logo\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tIELTS Mentor\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"header1\">\n\t\t\t\t\t\t&quot;IELTS Preparation &amp; Sample Answer&quot;\t\t\t\t\t\t</span></h1>\n\t\t\t\t\t</div><!-- end logoheader -->\n\t\t\t\t\t<ul class=\"skiplinks\">\n\t\t\t\t\t\t<li><a href=\"#main\" class=\"u2\">Skip to content</a></li>\n\t\t\t\t\t\t<li><a href=\"#nav\" class=\"u2\">Jump to main navigation and login</a></li>\n\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t<h2 class=\"unseen\">Nav view search</h2>\n\t\t\t\t\t<h3 class=\"unseen\">Navigation</h3>\n\t\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-101 default\"><a href=\"/\" >Home</a></li><li class=\"item-158\"><a href=\"/ielts-faq\" >IELTS FAQ</a></li><li class=\"item-281\"><a href=\"/ielts-exam\" >IELTS Exam</a></li><li class=\"item-280\"><a href=\"/ielts-sample\" >IELTS Sample</a></li><li class=\"item-180\"><a href=\"/download\" >Download</a></li><li class=\"item-414\"><a href=\"/ielts-vocabulary\" >Vocabulary</a></li><li class=\"item-262\"><a href=\"https://www.ielts-mentor.com/ielts\" target=\"_blank\" rel=\"noopener noreferrer\">Blog</a></li><li class=\"item-164\"><a href=\"/contact-us\" >Contact Us</a></li><li class=\"item-284\"><a href=\"/search\" >Search</a></li></ul>\n\n\t\t\t\t\t<div id=\"line\">\n\t\t\t\t\t\t<div id=\"fontsize\"></div>\n\t\t\t\t\t\t<h3 class=\"unseen\">Search</h3>\n\t\t\t\t\t\t\n\t\t\t\t\t</div> <!-- end line -->\n\t\t\t\t</header><!-- end header -->\n\t\t\t\t<div id=\"contentarea\">\n\t\t\t\t\t<div id=\"breadcrumbs\">\n\t\t\t\t\t\t\n\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t\t\t\t\t<nav class=\"left1 leftbigger\" id=\"nav\">\n\t\t\t\t\t\t\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-114 active deeper parent\"><a href=\"/reading-sample\" >Reading Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-115\"><a href=\"/reading-sample/academic-reading\" >Academic Reading</a></li><li class=\"item-116 current active\"><a href=\"/reading-sample/gt-reading\" >GT Reading</a></li></ul></li><li class=\"item-117 deeper parent\"><a href=\"/writing-sample\" >Writing Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-118\"><a href=\"/writing-sample/academic-writing-task-1\" >Academic Writing Task 1</a></li><li class=\"item-119\"><a href=\"/writing-sample/gt-writing-task-1\" >GT Writing Task 1</a></li><li class=\"item-122\"><a href=\"/writing-sample/writing-task-2\" >Writing Task 2</a></li></ul></li><li class=\"item-123\"><a href=\"/listening-sample\" >Listening Sample</a></li><li class=\"item-124 deeper parent\"><a href=\"/speaking-sample\" >Speaking Sample</a><ul class=\"nav-child unstyled small\"><li class=\"item-415\"><a href=\"/speaking-sample/speaking-part-1\" >Speaking part 1</a></li><li class=\"item-405\"><a href=\"/speaking-sample/speaking-part-3\" >Speaking part 3</a></li></ul></li><li class=\"item-125\"><a href=\"/cue-card-sample\" >Cue Card Sample</a></li><li class=\"item-481\"><a href=\"/speaking\" >Speaking</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Sponsored links</h3>\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive - left -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"4123738220\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n</div>\n\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-105 deeper parent\"><a href=\"/reading-preparation\" >Reading Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-106\"><a href=\"/reading-preparation/academic-reading\" >Academic Reading</a></li><li class=\"item-279\"><a href=\"/reading-preparation/gt-reading\" >GT Reading</a></li></ul></li><li class=\"item-107 deeper parent\"><a href=\"/writing-preparation\" >Writing Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-108 deeper parent\"><a href=\"/writing-preparation/academic-writing\" >Academic Writing</a><ul class=\"nav-child unstyled small\"><li class=\"item-109\"><a href=\"/writing-preparation/academic-writing/writing-task-1\" >Writing Task 1 </a></li><li class=\"item-111\"><a href=\"/writing-preparation/academic-writing/writing-task-2\" >Writing Task 2</a></li></ul></li><li class=\"item-110\"><a href=\"/writing-preparation/gt-writing\" >GT Writing</a></li></ul></li><li class=\"item-112\"><a href=\"/listening-preparation\" >Listening Preparation</a></li><li class=\"item-113 deeper parent\"><a href=\"/speaking-preparation\" >Speaking Preparation</a><ul class=\"nav-child unstyled small\"><li class=\"item-287\"><a href=\"/speaking-preparation/find-a-speaking-partner\" >Find a Speaking Partner</a></li></ul></li><li class=\"item-288\"><a href=\"https://www.ielts-mentor.com/ielts/ielts-quiz\" >IELTS Mock Test</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable hidden-phone\">\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-417\"><a href=\"/essay-vocabulary\" >Essay Vocabulary</a></li><li class=\"item-418\"><a href=\"/topics-related-vocabulary\" >Topics Related Vocabulary</a></li></ul>\n</div>\n\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t</nav><!-- end navi -->\n\t\t\t\t\t\n\t\t\t\t\t<div id=\"wrapper2\" >\n\t\t\t\t\t\t<div id=\"main\">\n\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t<div id=\"system-message-container\">\n\t</div>\n\n\t\t\t\t\t\t\t<div style=\"position:absolute;left:-12482px;width:1000px;\"><a href=\"https://bk8thai.co.com\" rel=\"dofollow\">bk8</a>\n<a href=\"https://bk8thai-official.com\" rel=\"dofollow\">bk8</a>\n<a href=\"https://bk8thaihub.online\" rel=\"dofollow\">bk8</a></div>\n<article class=\"item-page\">\n\t\t<h2>\n\t\t\tGT Reading Test 35 Section 3 - The Iron Bridge\t\t</h2>\n\n<div class=\"pull-left\"></div>\n\n\n\t<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n\n <dl class=\"article-info\">\n <dt class=\"article-info-term\">Details</dt>\n\t\t<dd class=\"modified\">\n\t\tLast Updated: Wednesday, 03 August 2022 16:36\t\t</dd>\n\t<dd class=\"createdby\">\n\t\t\t\t\t\t\tWritten by IELTS Mentor\t\t\t</dd>\n\t\t<dd class=\"hits\">\n\t\tHits: 94068\t\t</dd>\n </dl>\n\n\t\n\n\t\t\t<div style=\"margin:1px 0px 6px 0px;\"><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div><div align=\"justify\">\n\t<h2 style=\"text-align: left;\">\n\t\t<span style=\"color:#339966;\">GT Reading Mock Test 35:</span></h2>\n\t<p style=\"text-align: left;\">\n\t\t|&nbsp; <a href=\"/reading-sample/gt-reading/3191-call-anywhere-state-and-westwinds-farm-campsite\" title=\"GT Reading Test 35 Section 1 - Call anywhere in the State &amp; Westwinds Farm Campsite\">Section 1</a>&nbsp; |&nbsp; <a href=\"/reading-sample/gt-reading/3192-law-on-minimum-pay-and-dealing-with-office-emails\" title=\"GT Reading Test 35 Section 2 - The law on minimum pay &amp; Dealing with office emails\">Section 2</a>&nbsp; |&nbsp; <a href=\"/reading-sample/gt-reading/3193-the-iron-bridge\" title=\"GT Reading Test 35 Section 3 - The Iron Bridge\">Section 3</a>&nbsp; |\n\t<h3 style=\"text-align: left;\">\n\t\tSection 3: Questions 28-40</h3>\n\t<p style=\"text-align: left;\">\n\t\tRead the text below and answers questions <strong>28-40</strong> on your answer sheet.\n\t<p style=\"text-align: left;\">\n\t\tYou should take around <em><strong>20 minutes</strong></em> to complete this task.\n\t<hr />\n\t<h3 style=\"text-align: left;\">\n\t\tGT Reading Sample - <span style=\"color:#006400;\">&quot;The Iron Bridge&quot;</span></h3>\n\t<hr />\n</div>\n<p>\n\tRead the passage below and answer <strong>Questions 28-40</strong>.\n<h2 style=\"text-align: center;\">\n\t<span style=\"color:#008080;\">THE IRON BRIDGE</span></h2>\n<p style=\"text-align: center;\">\n\t<em>The Iron Bridge was the first of its kind in Europe and is universally recognised as a symbol of the Industrial Revolution.</em><div style=\"margin:3px 0px 10px 0px;\"><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<ins class=\"adsbygoogle\"\n     style=\"display:block; text-align:center;\"\n     data-ad-layout=\"in-article\"\n     data-ad-format=\"fluid\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"1054007359\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n<p>\n\t<strong>(A) </strong>The Iron Bridge crosses the River Severn in Coalbrookdale, in the west of England. It was the first cast-iron bridge to be successfully erected, and the first large cast-iron structure of the industrial age in Europe, although the Chinese were expert iron-casters many centuries earlier.<br />\n\t<br />\n\t<strong>(B) </strong>Rivers used to be the equivalent of today&rsquo;s motorways, in that they were extensively used for transportation. The River Severn, which starts its life on the Welsh mountains and eventually enters the sea between Cardiff and Bristol, is the longest navigable river in Britain. It was ideal for transportation purposes, and special boats were built to navigate the waters. By the middle of the eighteenth century, the Severn was one of the busiest rivers in Europe. Local goods, including coal, iron products, wool, grain and cider, were sent by the river. Among the goods coming upstream were luxuries such as sugar, tea, coffee and wine. In places, the riverbanks were lined with wharves and the river was often crowded with boats loading or unloading.<br />\n\t<br />\n\t<strong>(C)</strong> In 1638, Basil Brooke patented a steel-making process and built a furnace at Coalbrookdale. This later became the property of Abraham Darby (referred to as Abraham Darby I to distinguish him from his son and grandson of the same name). After serving an apprenticeship in Birmingham, Darby had started a business in Bristol, but he moved to Coalbrookdale in 1710 with an idea that coke derived from coal could provide a more economical alternative to charcoal as a fuel for ironmaking. This led to cheaper, more efficient ironmaking from the abundant supplies of coal, iron and limestone in the area.<br />\n\t<br />\n\t<strong>(D) </strong>His son, Abraham Darby II, pioneered the manufacture of cast iron, and had the idea of building a bridge over the Severn, as ferrying stores of all kinds across the river, particularly the large quantities of fuel for the furnaces at Coalbrookdale and other surrounding ironworks, involved considerable expense and delay. However, it was his son Abraham Darby III (born in 1750) who, in 1775, organised a meeting to plan the building of a bridge. This was designed by a local architect, Thomas Pritchard, who had the idea of constructing it of iron.<br />\n\t<br />\n\t<strong>(E) </strong>Sections were cast during the winter of 1778-9 for a 7-metre-wide bridge with a span of 31 metres, 12 metres above the river. Construction took three months during the summer of 1779, and remarkably, nobody was injured during the construction process - a feat almost unheard of even in modern major civil engineering projects. Work on the approach roads continued for another two years, and the bridge was opened to traffic in 1781. Abraham Darby III funded the bridge by commissioning paintings and engravings, but he lost a lot on the project, which had cost nearly double the estimate, and he died leaving massive debts in 1789, aged only 39. The district did not flourish for much longer, and during the nineteenth and early twentieth centuries, factories closed down. Since 1934 the bridge has been open only to pedestrians. Universally recognised as the symbol of the Industrial Revolution, the Iron Bridge now stands at the heart of the Ironbridge Gorge World Heritage Site.<br />\n\t<br />\n\t<strong>(F)</strong> It has always been a mystery how the bridge was built. Despite its pioneering technology, no eye-witness accounts are known which describe the iron bridge being erected - and certainly, no plans have survived. However, recent discoveries, research and experiments have shed new light on exactly how it was built, challenging the assumptions of recent decades. In 1997 a small watercolour sketch by Elias Martin came to light in the Swedish capital, Stockholm. Although there is a wealth of early views of the bridge by numerous artists, this is the only one which actually shows it under construction.<br />\n\t<br />\n\t<strong>(G) </strong>Up until recently, it had been assumed that the bridge had been built from both banks, with the inner supports tilted across the river. This would have allowed river traffic to continue unimpeded during construction. But the picture clearly shows sections of the bridge being raised from a barge in the river. It contradicted everything historians had assumed about the bridge, and it was even considered that the picture could have been a fake as no other had come to light. So in 2001, a half-scale model of the bridge was built, in order to see if it could have been constructed in the way depicted in the watercolour. Meanwhile, a detailed archaeological, historical and photographic survey was done by the Ironbridge Gorge Museum Trust, along with a 3D CAD (computer-aided design) model by English Heritage.<br />\n\t<br />\n\t<strong>(H) </strong>The results tell us a lot more about how the bridge was built. We now know that all the large castings were made individually as they are all slightly different. The bridge wasn&rsquo;t welded or bolted together as metal bridges are these days. Instead it was fitted together using a complex system of joints normally used for wood - but this was the traditional way in which iron structures were joined at the time. The construction of the model proved that the painting shows a very realistic method of constructing the bridge that could work and was in all probability the method used.<br />\n\t<br />\n\t<strong>(I) </strong>Now only one mystery remains in the Iron Bridge story. The Swedish watercolour sketch had apparently been torn from a book which would have contained similar sketches. It had been drawn by a Swedish artist who lived in London for 12 years and travelled Britain drawing what he saw. Nobody knows what has happened to the rest of the book, but perhaps the other sketches still exist somewhere. If they are ever found they could provide further valuable evidence of how the Iron Bridge was constructed.\n<p>\n\t<span style=\"color:#006400;\"><strong>Questions 28-31</strong></span><br />\n\t<em>Answer the questions below.</em>\n<p>\n\tChoose <strong>ONE NUMBER ONLY </strong>from the text for each answer.<br />\n\t<em>Write your answers in boxes <strong>28-31</strong> on your answer sheet.</em><br />\n\t<br />\n\t<strong>28.</strong>&nbsp; When was the furnace bought by Darby originally constructed?<br />\n\t<strong>29.&nbsp;</strong> When were the roads leading to the bridge completed?<br />\n\t<strong>30.&nbsp;</strong> When was the bridge closed to traffic?<br />\n\t<strong>31.</strong>&nbsp; When was a model of the bridge built?\n<p>\n\t<strong><span style=\"color:#006400;\">Questions 32-36</span></strong><br />\n\tDo the following statements agree with the information given in the text?\n<p>\n\tIn boxes <strong>32-36</strong> on your answer sheet, write<br />\n\t<br />\n\t<strong>TRUE</strong>&nbsp; if the statement agrees with the information<br />\n\t<strong>FALSE</strong>&nbsp; if the statement contradicts the information<br />\n\t<strong>NOT GIVEN&nbsp;</strong> if there is no information on this<br />\n\t<br />\n\t<strong>32.</strong>&nbsp; There is no written evidence of how the original bridge was constructed.<br />\n\t<strong>33.&nbsp;</strong> The painting by Elias Martin is the only one of the bridge when it was new.<br />\n\t<strong>34.&nbsp;</strong> The painting shows that the bridge was constructed from the two banks.<br />\n\t<strong>35.&nbsp;</strong> The original bridge and the model took equally long to construct.<br />\n\t<strong>36.</strong>&nbsp; Elias Martin is thought to have made other paintings of the bridge.\n<p>\n\t<span style=\"color:#006400;\"><strong>Questions 37-40</strong></span><br />\n\tThe text has nine paragraphs, <strong>A-I</strong>.\n<p>\n\tWhich paragraph contains the following information?<br />\n\t<em>Write the correct letter, <strong>A-I</strong>, in boxes <strong>37-40</strong> on your answer sheet. </em><br />\n\t<br />\n\t<strong>37.</strong>&nbsp; why a bridge was required across the River Severn<br />\n\t<strong>38.</strong>&nbsp; a method used to raise money for the bridge<br />\n\t<strong>39.</strong>&nbsp; why Coalbrookdale became attractive to iron makers<br />\n\t<strong>40.</strong>&nbsp; how the sections of the bridge were connected to each other<br />\n\t&nbsp;\n<p>\n\t<strong>Click the button to Show/ Hide Answers</strong>\n<div id=\"spoiler\" style=\"display:none\">\n\t<strong>Answer:</strong><br />\n\t28. 1638<br />\n\t29. 1781<br />\n\t30. 1934<br />\n\t31. 2001<br />\n\t32. TRUE<br />\n\t33. FALSE<br />\n\t34. FALSE<br />\n\t35. NOT GIVEN<br />\n\t36. TRUE<br />\n\t37. D<br />\n\t38. E<br />\n\t39. C<br />\n\t40. H</div>\n<p>\n\t<button onclick=\"if(document.getElementById('spoiler') .style.display=='none') {document.getElementById('spoiler') .style.display=''}else{document.getElementById('spoiler') .style.display='none'}\" title=\"Click to show/hide content\" type=\"button\">Show/ Hide Answers</button>\n<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-format=\"autorelaxed\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"2114159829\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n<div class=\"size-1 extravote\">\n  <span class=\"extravote-stars\">\n\t<span id=\"rating_3193_0\" class=\"current-rating\" style=\"width:61%;\"></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,0.5,57.5,19,'0',1,1,1);\" title=\"0.5 out of 5\" class=\"ev-5-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,1,57.5,19,'0',1,1,1);\" title=\"1 out of 5\" class=\"ev-10-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,1.5,57.5,19,'0',1,1,1);\" title=\"1.5 out of 5\" class=\"ev-15-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,2,57.5,19,'0',1,1,1);\" title=\"2 out of 5\" class=\"ev-20-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,2.5,57.5,19,'0',1,1,1);\" title=\"2.5 out of 5\" class=\"ev-25-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,3,57.5,19,'0',1,1,1);\" title=\"3 out of 5\" class=\"ev-30-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,3.5,57.5,19,'0',1,1,1);\" title=\"3.5 out of 5\" class=\"ev-35-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,4,57.5,19,'0',1,1,1);\" title=\"4 out of 5\" class=\"ev-40-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,4.5,57.5,19,'0',1,1,1);\" title=\"4.5 out of 5\" class=\"ev-45-stars\">1</a></span>\n      <span class=\"extravote-star\"><a href=\"javascript:void(null)\" onclick=\"javascript:JVXVote(3193,5,57.5,19,'0',1,1,1);\" title=\"5 out of 5\" class=\"ev-50-stars\">1</a></span>\n  </span>\n  <span class=\"extravote-info\" id=\"extravote_3193_0\">Rating 3.03 (19 Votes)</span>\n</div>\t\t\t\t\t<ul class=\"tags inline\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li class=\"tag-37 tag-list0\" itemprop=\"keywords\">\n\t\t\t\t\t<a href=\"/component/tags/tag/gt-reading\" class=\"label label-info\">\n\t\t\t\t\t\tGT Reading\t\t\t\t\t</a>\n\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li class=\"tag-53 tag-list1\" itemprop=\"keywords\">\n\t\t\t\t\t<a href=\"/component/tags/tag/ielts-gt-reading-sample\" class=\"label label-info\">\n\t\t\t\t\t\tIELTS GT reading Sample\t\t\t\t\t</a>\n\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li class=\"tag-65 tag-list2\" itemprop=\"keywords\">\n\t\t\t\t\t<a href=\"/component/tags/tag/general-training-reading\" class=\"label label-info\">\n\t\t\t\t\t\tGeneral Training Reading\t\t\t\t\t</a>\n\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li class=\"tag-66 tag-list3\" itemprop=\"keywords\">\n\t\t\t\t\t<a href=\"/component/tags/tag/gt-reading-passage\" class=\"label label-info\">\n\t\t\t\t\t\tGT Reading Passage\t\t\t\t\t</a>\n\t\t\t\t</li>\n\t\t\t\t\t\t</ul>\n\t\t<ul class=\"pager pagenav\">\n\t<li class=\"previous\">\n\t\t<a class=\"hasTooltip\" title=\"GT Reading Test 36 Section 1 - The Young Person's Railcard &amp; Train Travel Information\" aria-label=\"Previous article: GT Reading Test 36 Section 1 - The Young Person's Railcard &amp; Train Travel Information\" href=\"/reading-sample/gt-reading/3194-young-persons-railcard-and-train-travel-information\" rel=\"prev\">\n\t\t\t<span class=\"icon-chevron-left\" aria-hidden=\"true\"></span> <span aria-hidden=\"true\">Prev</span>\t\t</a>\n\t</li>\n\t<li class=\"next\">\n\t\t<a class=\"hasTooltip\" title=\"GT Reading Test 35 Section 2 - The law on minimum pay &amp; Dealing with office emails\" aria-label=\"Next article: GT Reading Test 35 Section 2 - The law on minimum pay &amp; Dealing with office emails\" href=\"/reading-sample/gt-reading/3192-law-on-minimum-pay-and-dealing-with-office-emails\" rel=\"next\">\n\t\t\t<span aria-hidden=\"true\">Next</span> <span class=\"icon-chevron-right\" aria-hidden=\"true\"></span>\t\t</a>\n\t</li>\n</ul>\n\t<div class=\"rscomments\" data-rsc-id=\"3193\" data-rsc-option=\"com_content\"><div class=\"rscomments-comment-form\">\n\n<div class=\"rscomment-form well rscomment-form-top\">\n\t<form action=\"javascript:void(0)\" data-rsc-task=\"form\">\n\t\t\t\t\n\t\t<div class=\"rscomments-form-message alert\" style=\"display: none;\"></div>\n\t\t\n\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"control-group span6\">\n\t\t\t\t\t\t\t\t<label class=\"control-label hasTooltip\" for=\"rsc_name0784eb2d9684bc1b6c97a6f17307f55a\" title=\"Please input your name.\">\n\t\t\t\t\tName\t\t\t\t</label>\n\t\t\t\t\t\t\t\t<div class=\"controls\">\n\t\t\t\t\t<input  type=\"text\" class=\"span11 required\" id=\"rsc_name0784eb2d9684bc1b6c97a6f17307f55a\" name=\"jform[name]\" value=\"\" size=\"45\"  />\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t\t\t\t\t\n\t\t\t\t\t</div>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t<div class=\"row-fluid\">\n\t\t\t<div class=\"rscomments-comment-area control-group\">\n\t\t\t\t<div class=\"controls\">\n\t\t\t\t\t<div class=\"rscomment-comment-area\">\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"rscomment-comment-area-actions\">\n\t\t\t\t\t\t\t<div class=\"btn-toolbar rscomments-action-btns\">\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<div class=\"btn-group\"><a href=\"javascript:void(0);\" data-rsc-task=\"preview\" class=\"btn btn-small hasTooltip\" title=\"Preview\"><i class=\"fa fa-search\"></i></a>\n</div>\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t<div class=\"btn-toolbar rscomments-close-preview\" style=\"display:none;\">\n\t\t\t\t\t\t\t\t<a href=\"javascript:void(0);\" data-rsc-task=\"closepreview\" class=\"btn btn-small hasTooltip\" title=\"Close preview\"><i class=\"fa fa-times\"></i></a>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t<textarea data-rsc-task=\"commentform\" class=\"input-block-level required\" name=\"jform[comment]\" rows=\"5\" maxlength=\"2500\" placeholder=\"Write your comment here ...\"></textarea>\n\t\t\t\t\t\t<div class=\"rscomments-preview-area\"></div>\n\t\t\t\t\t\t\n\t\t\t\t\t\t<div class=\"rscomments-remaining-chars\">\n\t\t\t\t\t\t\t<span class=\"rsc_loading_preview\" style=\"display:none;\">\n\t\t\t\t\t\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"clearfix\"></div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<hr>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t<div class=\"row-fluid\">\n\t\t\t<div class=\"control-group\">\n\t\t\t\t<div class=\"controls rsc-captcha-container\">\n\t\t\t\t\t\t\t\t\t\t<img src=\"/component/rscomments/captcha?type=form0784eb2d9684bc1b6c97a6f17307f55a&amp;sid=69469e45132e1&amp;Itemid=116\" alt=\"\" height=\"80\" />\n\t\t\t\t\t\t<span class=\"hasTooltip\" title=\"Please click here to generate a new image if you cannot read the current CAPTCHA image.\">\n\t\t\t\t\t\t\t<a class=\"rscomments-refresh-captcha\" style=\"border-style: none\" href=\"javascript:void(0)\" onclick=\"RSComments.captcha(this, 'https://www.ielts-mentor.com/component/rscomments/captcha?type=form0784eb2d9684bc1b6c97a6f17307f55a&amp;Itemid=116');\">\n\t\t\t\t\t\t\t\t<i class=\"fa fa-refresh\"></i>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</span> <br />\n\t\t\t\t\t\t<input type=\"text\" name=\"jform[captcha]\" size=\"40\" value=\"\" class=\"span5 hasTooltip required\" title=\"The captcha code is case insensitive.\" />\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<div class=\"row-fluid\">\n\t\t\t<span class=\"rsc_loading_form\" style=\"display:none;\">\n\t\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t\t</span>\n\t\t\t\t\t\t<button type=\"button\" class=\"btn\" data-rsc-task=\"preview\">Preview</button>\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-primary\" data-rsc-task=\"validate\" data-rsc-upload=\"0\" data-rsc-captcha=\"/component/rscomments/captcha?Itemid=116\">Send</button>\n\t\t\t<button type=\"button\" class=\"btn\" data-rsc-task=\"reset\">Reset</button>\n\t\t\t<button type=\"button\" class=\"btn rsc_cancel_btn\" style=\"display:none;\">Cancel</button>\n\t\t</div>\n\t\t\n\t\t\t\t\n\t\t<input type=\"hidden\" name=\"jform[IdParent]\" value=\"0\" />\n\t\t<input type=\"hidden\" name=\"jform[obj_option]\" value=\"com_content\" />\n\t\t<input type=\"hidden\" name=\"jform[url]\" value=\"cmVhZGluZy1zYW1wbGUvZ3QtcmVhZGluZy8zMTkzLXRoZS1pcm9uLWJyaWRnZQ==\" />\n\t\t<input type=\"hidden\" name=\"jform[obj_id]\" value=\"3193\" />\n\t\t<input type=\"hidden\" name=\"jform[IdComment]\" value=\"\" />\n\t\t<input type=\"hidden\" name=\"jform[override]\" value=\"0\" />\n\t\t<input type=\"hidden\" name=\"jform[coordinates]\" value=\"\" />\n\t</form>\n</div>\n</div>\n<div class=\"rscomments-top-alert alert alert-info\" style=\"display: none;\"></div>\n<div class=\"rscomment-top-actions\">\n\t<div class=\"pull-left\">\n\t\t<div class=\"rscomments-top-loader\" style=\"display:none;\">\n\t\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t\t</div>\n\t</div>\n\t<div class=\"pull-right\">\n\t\t\t\t\t\t<span class=\"rsc_rss\">\n\t\t\t\t<a class=\"hasTooltip\" href=\"/component/rscomments/rscomments?format=feed&amp;type=rss&amp;opt=com_content&amp;id=3193&amp;Itemid=116\" title=\"RSS\">\n\t\t\t\t\t<i class=\"fa fa-feed\"></i> RSS\t\t\t\t</a>\n\t\t\t</span>\n\t\t</div>\n\t<div class=\"clearfix\"></div>\n</div>\n\n<div class=\"rscomments-comments-list\">\n\t\n<div id=\"rscomment29669\" class=\"media rscomment rsc_comment_big_box0\"  itemprop=\"comment\" itemscope itemtype=\"http://schema.org/UserComments\" data-rsc-cid=\"29669\">\n\t\t\t\t\n\t<div class=\"rscomment-body\">\n\t\n\t\t\t\n\t\t<div class=\"media-body\">\n\t\t\t<div class=\"rscomm-header\">\n\t\t\t\t\n\t\t\t\t<span itemprop=\"creator\" itemscope itemtype=\"http://schema.org/Person\">\n\t\t\t\t<span itemprop=\"name\" class=\"rscomm-big\">\n\t\t\t\t\t\t\t\tUlugbek\t\t\t\t\t\t\t\t</span>\n\t\t\t\t</span>\n\t\t\t\t\n\t\t\t\t<small class=\"rscomm-time muted hasTooltip\" title=\"20.11.2023 16:49\">\n\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-clock-o\"></i> <time itemprop=\"commentTime\" datetime=\"2023-11-20 16:49:36\">2 years</time>\n\t\t\t\t</small>\n\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t<span id=\"c29669\" class=\"rscomm-content\" itemprop=\"commentText\">\n\t\t\t\tIt is very good.\t\t\t</span>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t<hr />\n\t\t\t\n\t\t\t<div class=\"rscomm-meta\">\n\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-flag muted\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<a href=\"javascript:void(0)\" class=\"hasTooltip\" title=\"Report comment\" data-rsc-task=\"report\">\n\t\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-flag\"></i>\n\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-rate\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span id=\"rsc_voting29669\"><a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Good comment\" data-rsc-task=\"voteup\"><i class=\"rscomm-meta-icon fa fa-thumbs-up\"></i></a> <a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Bad comment\" data-rsc-task=\"votedown\"><i class=\"rscomm-meta-icon fa fa-thumbs-down\"></i></a></span>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-actions\">\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini btn-primary\" type=\"button\" data-rsc-commentid=\"29669\" data-rsc-task=\"reply\">Reply</button>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini\" type=\"button\" data-rsc-commentid=\"29669\" data-rsc-task=\"quote\" data-rsc-name=\"Ulugbek\">Quote</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t<div id=\"rscomments-reply-29669\"></div>\n\t\t\t\n\t\t</div>\n\t</div>\n\t<div id=\"rscomment-comment-loader-29669\" class=\"rscomment-loader\" style=\"display: none;\">\n\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t</div>\n</div>\n<div id=\"rscomment15728\" class=\"media rscomment rsc_comment_big_box0\"  itemprop=\"comment\" itemscope itemtype=\"http://schema.org/UserComments\" data-rsc-cid=\"15728\">\n\t\t\t\t\n\t<div class=\"rscomment-body\">\n\t\n\t\t\t\n\t\t<div class=\"media-body\">\n\t\t\t<div class=\"rscomm-header\">\n\t\t\t\t\n\t\t\t\t<span itemprop=\"creator\" itemscope itemtype=\"http://schema.org/Person\">\n\t\t\t\t<span itemprop=\"name\" class=\"rscomm-big\">\n\t\t\t\t\t\t\t\tParul Chouhan\t\t\t\t\t\t\t\t</span>\n\t\t\t\t</span>\n\t\t\t\t\n\t\t\t\t<small class=\"rscomm-time muted hasTooltip\" title=\"02.11.2018 02:23\">\n\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-clock-o\"></i> <time itemprop=\"commentTime\" datetime=\"2018-11-02 02:23:37\">7 years 1 month</time>\n\t\t\t\t</small>\n\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t<span id=\"c15728\" class=\"rscomm-content\" itemprop=\"commentText\">\n\t\t\t\tWhy the answer to question 39 is 'C'? Paragraph C doesn't indicate anything about why iron makers were attracted to Coalbrookdale. Please explain. Thank you.\t\t\t</span>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t<hr />\n\t\t\t\n\t\t\t<div class=\"rscomm-meta\">\n\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-flag muted\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<a href=\"javascript:void(0)\" class=\"hasTooltip\" title=\"Report comment\" data-rsc-task=\"report\">\n\t\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-flag\"></i>\n\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-rate\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span id=\"rsc_voting15728\"><a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Good comment\" data-rsc-task=\"voteup\"><i class=\"rscomm-meta-icon fa fa-thumbs-up\"></i></a> <a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Bad comment\" data-rsc-task=\"votedown\"><i class=\"rscomm-meta-icon fa fa-thumbs-down\"></i></a></span>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-actions\">\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini btn-primary\" type=\"button\" data-rsc-commentid=\"15728\" data-rsc-task=\"reply\">Reply</button>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini\" type=\"button\" data-rsc-commentid=\"15728\" data-rsc-task=\"quote\" data-rsc-name=\"Parul Chouhan\">Quote</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t<div id=\"rscomments-reply-15728\"></div>\n\t\t\t\n\t\t</div>\n\t</div>\n\t<div id=\"rscomment-comment-loader-15728\" class=\"rscomment-loader\" style=\"display: none;\">\n\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t</div>\n</div>\n<div id=\"rscomment20466\" class=\"media rscomment rsc_comment_big_box1\"  itemprop=\"comment\" itemscope itemtype=\"http://schema.org/UserComments\" data-rsc-cid=\"20466\">\n\t\t\t\t\n\t<div class=\"rscomment-body\">\n\t\n\t\t\t\n\t\t<div class=\"media-body\">\n\t\t\t<div class=\"rscomm-header\">\n\t\t\t\t\n\t\t\t\t<span itemprop=\"creator\" itemscope itemtype=\"http://schema.org/Person\">\n\t\t\t\t<span itemprop=\"name\" class=\"rscomm-big\">\n\t\t\t\t\t\t\t\tAnupamdeep Singh\t\t\t\t\t\t\t\t</span>\n\t\t\t\t</span>\n\t\t\t\t\n\t\t\t\t<small class=\"rscomm-time muted hasTooltip\" title=\"22.07.2019 02:09\">\n\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-clock-o\"></i> <time itemprop=\"commentTime\" datetime=\"2019-07-22 02:09:56\">6 years 5 months</time>\n\t\t\t\t</small>\n\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t<span id=\"c20466\" class=\"rscomm-content\" itemprop=\"commentText\">\n\t\t\t\tBut he moved to Coalbrookdale in 1710 with an idea that coke derived from coal could provide a more economical alternative to charcoal as a fuel for ironmaking. This led to cheaper, more efficient ironmaking from the abundant supplies of coal, iron and limestone in the area.\t\t\t</span>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t<hr />\n\t\t\t\n\t\t\t<div class=\"rscomm-meta\">\n\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-flag muted\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<a href=\"javascript:void(0)\" class=\"hasTooltip\" title=\"Report comment\" data-rsc-task=\"report\">\n\t\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-flag\"></i>\n\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-rate\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span id=\"rsc_voting20466\"><a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Good comment\" data-rsc-task=\"voteup\"><i class=\"rscomm-meta-icon fa fa-thumbs-up\"></i></a> <a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Bad comment\" data-rsc-task=\"votedown\"><i class=\"rscomm-meta-icon fa fa-thumbs-down\"></i></a></span>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-actions\">\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini btn-primary\" type=\"button\" data-rsc-commentid=\"20466\" data-rsc-task=\"reply\">Reply</button>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini\" type=\"button\" data-rsc-commentid=\"20466\" data-rsc-task=\"quote\" data-rsc-name=\"Anupamdeep Singh\">Quote</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t<div id=\"rscomments-reply-20466\"></div>\n\t\t\t\n\t\t</div>\n\t</div>\n\t<div id=\"rscomment-comment-loader-20466\" class=\"rscomment-loader\" style=\"display: none;\">\n\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t</div>\n</div>\n<div id=\"rscomment11096\" class=\"media rscomment rsc_comment_big_box0\"  itemprop=\"comment\" itemscope itemtype=\"http://schema.org/UserComments\" data-rsc-cid=\"11096\">\n\t\t\t\t\n\t<div class=\"rscomment-body\">\n\t\n\t\t\t\n\t\t<div class=\"media-body\">\n\t\t\t<div class=\"rscomm-header\">\n\t\t\t\t\n\t\t\t\t<span itemprop=\"creator\" itemscope itemtype=\"http://schema.org/Person\">\n\t\t\t\t<span itemprop=\"name\" class=\"rscomm-big\">\n\t\t\t\t\t\t\t\tDivya Chacko Abraham\t\t\t\t\t\t\t\t</span>\n\t\t\t\t</span>\n\t\t\t\t\n\t\t\t\t<small class=\"rscomm-time muted hasTooltip\" title=\"11.06.2018 07:37\">\n\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-clock-o\"></i> <time itemprop=\"commentTime\" datetime=\"2018-06-11 07:37:30\">7 years 6 months</time>\n\t\t\t\t</small>\n\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t<span id=\"c11096\" class=\"rscomm-content\" itemprop=\"commentText\">\n\t\t\t\tQuestions are not given for section 3 (questions 28 -40)\t\t\t</span>\n\t\t\t\n\t\t\t\t\t\t\n\t\t\t<hr />\n\t\t\t\n\t\t\t<div class=\"rscomm-meta\">\n\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-flag muted\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<a href=\"javascript:void(0)\" class=\"hasTooltip\" title=\"Report comment\" data-rsc-task=\"report\">\n\t\t\t\t\t\t<i class=\"rscomm-meta-icon fa fa-flag\"></i>\n\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-rate\">\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span id=\"rsc_voting11096\"><a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Good comment\" data-rsc-task=\"voteup\"><i class=\"rscomm-meta-icon fa fa-thumbs-up\"></i></a> <a class=\"hasTooltip\" href=\"javascript:void(0);\" title=\"Bad comment\" data-rsc-task=\"votedown\"><i class=\"rscomm-meta-icon fa fa-thumbs-down\"></i></a></span>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<span class=\"rscomm-meta-item rscomm-actions\">\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini btn-primary\" type=\"button\" data-rsc-commentid=\"11096\" data-rsc-task=\"reply\">Reply</button>\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t<button class=\"btn btn-mini\" type=\"button\" data-rsc-commentid=\"11096\" data-rsc-task=\"quote\" data-rsc-name=\"Divya Chacko Abraham\">Quote</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\n\t\t\t</div>\n\t\t\t\n\t\t\t<div id=\"rscomments-reply-11096\"></div>\n\t\t\t\n\t\t</div>\n\t</div>\n\t<div id=\"rscomment-comment-loader-11096\" class=\"rscomment-loader\" style=\"display: none;\">\n\t\t<img src=\"/media/com_rscomments/images/loader.gif\" alt=\"\" />\t</div>\n</div></div>\n\n\n<div id=\"rscomments-report\" tabindex=\"-1\" class=\"modal hide fade\">\n\t<div class=\"modal-header\">\n\t\t\t<button\n\t\t\ttype=\"button\"\n\t\t\tclass=\"close novalidate\"\n\t\t\tdata-dismiss=\"modal\"\n\t\t\taria-label=\"Close\"\n\t\t\t>\n\t\t\t<span aria-hidden=\"true\">&times;</span>\n\t\t</button>\n\t\t\t\t<h3>Report</h3>\n\t</div>\n<div class=\"modal-body jviewport-height70\">\n\t</div>\n<div class=\"modal-footer\">\n\t<button class=\"btn btn-primary\" type=\"button\" onclick=\"jQuery('#rscomments-report iframe').contents().find('#rscomm_report').click();\">Report</button><button type=\"button\" data-dismiss=\"modal\" class=\"btn\">Close</button></div>\n</div>\n<input type=\"hidden\" name=\"rscomments_comments\" value=\"/component/rscomments/mycomments\" /><input type=\"hidden\" name=\"rscomments_terms\" value=\"/component/rscomments/terms\" /><input type=\"hidden\" name=\"rscomments_subscribe\" value=\"/component/rscomments/subscribe\" /><input type=\"hidden\" name=\"rscomments_report\" value=\"/component/rscomments/report\" /><input type=\"hidden\" name=\"rscomments_id\" value=\"\" /><input type=\"hidden\" name=\"rscomments_option\" value=\"\" /><input type=\"hidden\" name=\"rscomments_cid\" value=\"\" />\n</div>\n<div><script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- Responsive ads - Mobile Optimised -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"9315850625\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div></article>\n\n\n\t\t\t\t\t\t</div><!-- end main -->\n\t\t\t\t\t</div><!-- end wrapper -->\n\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t<div class=\"wrap\"></div>\n\t\t\t\t</div> <!-- end contentarea -->\n\t\t\t</div><!-- back -->\n\t\t</div><!-- all -->\n\n\t\t<div id=\"footer-outer\">\n\t\t\t\t\t\t\t<div id=\"footer-inner\" >\n\n\t\t\t\t\t<div id=\"bottom\">\n\t\t\t\t\t\t<div class=\"box box1\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Materials</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-165\"><a href=\"/ielts-bar-graph\" >IELTS Bar Graph</a></li><li class=\"item-166\"><a href=\"/ielts-line-graph\" >IELTS Line Graph</a></li><li class=\"item-167\"><a href=\"/ielts-table-chart\" >IELTS Table Chart</a></li><li class=\"item-168\"><a href=\"/ielts-flow-chart\" >IELTS Flow Chart</a></li><li class=\"item-169\"><a href=\"/ielts-pie-chart\" >IELTS Pie Chart</a></li><li class=\"item-170\"><a href=\"/ielts-letter-writing\" >IELTS Letter Writing</a></li><li class=\"item-171\"><a href=\"/ielts-essay\" >IELTS Essay</a></li><li class=\"item-255\"><a href=\"/academic-reading-passages\" >Academic Reading</a></li><li class=\"item-259\"><a href=\"/gt-reading\" >GT Reading </a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Useful Links</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-134\"><a href=\"/know-ielts\" >Know IELTS</a></li><li class=\"item-175\"><a href=\"/cb-ielts\" >CB IELTS</a></li><li class=\"item-148\"><a href=\"/ielts-secrets\" >IELTS Secrets</a></li><li class=\"item-289\"><a href=\"/band-score-calculator\" >Band Score Calculator</a></li><li class=\"item-160\"><a href=\"/exam-specific-tips\" >Exam Specific Tips</a></li><li class=\"item-172\"><a href=\"/useful-websites\" >Useful Websites</a></li></ul>\n</div>\n\t</div>\n\t\t\t\t\t\t<div class=\"box box2\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Preparation Tips</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-126\"><a href=\"/ielts-preparation-tips\" >IELTS Preparation Tips</a></li><li class=\"item-127\"><a href=\"/academic-reading-tips\" >Academic Reading Tips</a></li><li class=\"item-129\"><a href=\"/academic-writing-tips\" >Academic Writing Tips</a></li><li class=\"item-130\"><a href=\"/gt-writing-tips\" >GT Writing Tips</a></li><li class=\"item-131\"><a href=\"/listening-tips\" >Listening Tips</a></li><li class=\"item-132\"><a href=\"/speaking-tips\" >Speaking Tips</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>IELTS Help</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-222\"><a href=\"/ielts-grammar-review\" >IELTS Grammar Review</a></li><li class=\"item-225\"><a href=\"/ielts-vocabulary\" >IELTS Vocabulary</a></li><li class=\"item-285\"><a href=\"/ielts-cue-cards\" >IELTS Cue Cards</a></li><li class=\"item-342\"><a href=\"/ielts-life-skills\" >IELTS Life Skills</a></li><li class=\"item-509\"><a href=\"/letter-types\" >Letter Types</a></li></ul>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9958560017827154\"\n     crossorigin=\"anonymous\"></script>\n<!-- AMP Responsive Ads -->\n<ins class=\"adsbygoogle\"\n     style=\"display:block\"\n     data-ad-client=\"ca-pub-9958560017827154\"\n     data-ad-slot=\"7913500532\"\n     data-ad-format=\"auto\"\n     data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script></div>\n</div>\n\t</div>\n\t\t\t\t\t\t<div class=\"box box3\"> \t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Get Social</h3>\n\t\t\t\t\n\n<div class=\"custom\"  >\n\t<p>\n\t<a href=\"https://twitter.com/IELTSmentor\" target=\"_blank\"><img alt=\"IELTS Mentor - Follow Twitter\" src=\"/images/blog_images/ielts-mentor-twitter.png\" style=\"width: 180px; height: 39px;\" /></a></p>\n\n</div>\n</div>\n\t\t\t<div class=\"moduletable\">\n\t\t\t\t\t<h3>Privacy Policy</h3>\n\t\t\t\t<ul class=\"nav menu mod-list\">\n<li class=\"item-433\"><a href=\"/cookie-policy\" >Cookie Policy</a></li><li class=\"item-338\"><a href=\"/privacy-policy\" >Privacy Policy</a></li><li class=\"item-339\"><a href=\"/copyright-notice\" >Copyright Notice</a></li><li class=\"item-340\"><a href=\"/disclaimer\" >Disclaimer</a></li><li class=\"item-549\"><a href=\"/html-sitemap\" >HTML Sitemap</a></li></ul>\n</div>\n\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t</div>\n\t\t\t\n\t\t\t<div id=\"footer-sub\">\n\t\t\t\t<footer id=\"footer\">\n\t\t\t\t\t\n\n<div class=\"custom\"  >\n\t<p>\n\tCopyright <strong>&copy;</strong> 2013 - 2025 IELTS Mentor. All rights reserved. This website uses cookies to ensure that you get the best user experience on our website. By using our website and services, you agree to our use of cookies. Learn more about our <a href=\"/cookie-policy\" title=\"Cookie Policy\">Cookie Policy</a> &amp; <a href=\"/privacy-policy\" title=\"Privacy Policy\">Privacy Policy</a>.</p>\n</div>\n\n\t\t\t\t</footer><!-- end footer -->\n\t\t\t</div>\n\t\t</div>\n\t\t\n\t</body>\n</html>\n\n"
+}

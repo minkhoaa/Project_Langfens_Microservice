@@ -1,0 +1,178 @@
+{
+  "exam": {
+    "title": "GT Reading 13 Section 2 - Student Accommodation at Northside University",
+    "slug": "gt-reading-13-section-2-student-accommodation-at-northside-university",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 13 Section 2 - Student Accommodation at Northside University",
+      "passage_md": "**STUDENT ACCOMMODATION AT NORTHSIDE UNIVERSITY**\n\nSituated about 20km from the city centre, Northside University is not easy to get to by public transport. However, students have several different alternatives for accommodation on or near the University campus.\n\nFirstly, the University has several residential colleges; Burnside College, Boronia College and Helen Turner College. Each of these colleges provides a single fully furnished room with shared bathroom facilities, and meals. Burnside College is the most expensive, with 1996 fees ranging from $154 – $165 per week. However, each student room is equipped with a private telephone and voice-mailing facilities, and within the next few months, college students will have access to E-MAIL, On-Line library, INTERNET and AARNET via a network with the University. Boronia College has similar room facilities but does not offer the same computer access. It also offers only 17 meals per week, compared to Burnside's 21. Fees vary from $147- $ 157 per week. Helen Turner College is a college exclusively for women, with similar fees to Boronia College. To attend classes, students have a short walk from the residential Colleges to the main University campus.\n\nThe University also provides 23 self-contained furnished townhouses. These townhouses have either 3, 4 or 6 bedrooms each and student residents are expected to be studying full-time. Rents in 1996 ranged from $54 per week for a room in a six bedroom flat to $68.50 per week for a room in a three-bedroom house. Students wanting to live in university housing should apply to the university housing officer in August of the previous year, as it is in high demand. Smoking is banned in University housing.\n\nOff campus, there are many flats, townhouses and houses for rent in the local area. These can be found by looking in the local newspaper under ACCOMMODATION, or by checking notices pinned up on the boards around the university. There are always students advertising for housemates and you can even add a notice of your own to the board. However, even sharing accommodation with others can be expensive; tenants are usually required to pay a rental bond, rent in advance, and telephone/electricity/gas bills in addition to food bills. Be sure that you know what you will be required to pay before you enter into any written agreement.\n"
+    }
+  ],
+  "questions": [
+    {
+      "idx": 16,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "The University Residential Colleges provide",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. a place to live and regular classes",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. regular classes only",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. a place to live only",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 17,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "Smoking is",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. allowed in University housing",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. not allowed in University housing",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C. allowed only in certain areas in University housing",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 18,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "University townhouses are available for",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. full-time students only",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B. part-time students only",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C. all students",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 19,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "Accommodation in the area surrounding the university is",
+      "options": [
+        {
+          "value": "A",
+          "label": "A. scarce",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B. plentiful",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C. scarce and expensive",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 20,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "A student living in a 3-bedroom University townhouse would pay _______ per week for a room",
+      "options": [],
+      "correct_answers": [
+        "$68.50"
+      ]
+    },
+    {
+      "idx": 21,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "in comparison, the cheapest accommodation available at Burnside College is _______ per week",
+      "options": [],
+      "correct_answers": [
+        "$154"
+      ]
+    },
+    {
+      "idx": 22,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "The fee charged at Burnside College includes _______ meals per week",
+      "options": [],
+      "correct_answers": [
+        "21"
+      ]
+    },
+    {
+      "idx": 23,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "but at Boronia College only _______ meals per week are included in the fee",
+      "options": [],
+      "correct_answers": [
+        "17"
+      ]
+    },
+    {
+      "idx": 24,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "Helen Turner College has a similar fee structure to _______ College",
+      "options": [],
+      "correct_answers": [
+        "BORONIA"
+      ]
+    },
+    {
+      "idx": 25,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "but only _______ may live there",
+      "options": [],
+      "correct_answers": [
+        "WOMEN"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "883-student-accommodation-at-northside-university",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/883-student-accommodation-at-northside-university",
+    "normalized_by": "rule-based"
+  }
+}

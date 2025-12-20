@@ -1,0 +1,297 @@
+{
+  "exam": {
+    "title": "GT Reading 35 Section 2 - The law on minimum pay & Dealing with office emails",
+    "slug": "gt-reading-35-section-2-the-law-on-minimum-pay-dealing-with-office-emails",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 35 Section 2 - The law on minimum pay & Dealing with office emails",
+      "passage_md": "# The law on minimum pay & Dealing with your office emails\n\nWho is entitled to minimum pay? Nearly all workers aged 16 years and over, including part-time workers, are entitled to the National Minimum Wage. Amongst those to whom it does not apply are those engaged in unpaid work and family members employed by the family business. What is the minimum wage that I am entitled to? The National Wage Act specifies the minimum rates of pay applicable nationwide. Since 1 October 2007, the adult rate for workers aged 22 and over has been £5.25 per hour. The development rate for 18-21 year olds and for workers getting training in the first 6 months of a job is £4.60 per hour. The rate for 16-17 year olds starts at £3.40 an hour. There are special provisions for some workers, for example, those whose job includes accommodation. Pay means gross pay and includes any items paid through the payroll such as overtime, bonus payments, commission and tips and gratuities. I believe I'm being paid below the National Minimum Wage Rate. How can I complain? If you are being paid less than this, there are various steps you can take: • If you feel able, you should talk directly with your employer. This is a clear legal right, and employers can be fined for not paying the NMW. • If you are a trade union member, you should call in the union. • If neither of these is appropriate then you can email via the Revenue and Customs website or call their helpline for advice. You have the legal right to inspect your employer's pay records if you believe, on reasonable grounds, that you are being paid less than the NMW. Your employer is required to produce the records within 14 days, and must make them available at your place of work or at some other reasonable place. If your employer fails to produce the records, you may take the matter to an employment tribunal. You must make your complaint within three months of the ending of the 14-day notice period."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 15,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "The law on minimum pay doesn't cover you if you are working in your _______ or if you are a volunteer.",
+      "options": [],
+      "correct_answers": [
+        "family business"
+      ]
+    },
+    {
+      "idx": 16,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "You may be paid under £5 an hour if you are receiving _______ at the start of a job.",
+      "options": [],
+      "correct_answers": [
+        "training"
+      ]
+    },
+    {
+      "idx": 17,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "There are different rules for people who are provided with _______ with their jobs.",
+      "options": [],
+      "correct_answers": [
+        "accommodation"
+      ]
+    },
+    {
+      "idx": 18,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "If you earn extra money, for example, for working longer hours or in tips, this counts as part of your wage when you receive it via _______ .",
+      "options": [],
+      "correct_answers": [
+        "payroll// the payroll"
+      ]
+    },
+    {
+      "idx": 19,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "Anyone being paid below the National Minimum Wage should speak to their _______ if they can.",
+      "options": [],
+      "correct_answers": [
+        "employer// employers"
+      ]
+    },
+    {
+      "idx": 20,
+      "type": "SUMMARY_COMPLETION",
+      "prompt_md": "According to the law, you can ask to look at your boss's _______ .",
+      "options": [],
+      "correct_answers": [
+        "pay records"
+      ]
+    },
+    {
+      "idx": 21,
+      "type": "SHORT_ANSWER",
+      "prompt_md": "You have a period of _______ to complain if your boss does not co-operate within the specified period of time.Readthe text below and answerQuestions 22-27.Dealing with your office emailsEmail has...",
+      "options": [],
+      "correct_answers": [
+        "3 months"
+      ]
+    },
+    {
+      "idx": 22,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "Choose the correct letter, A, B, C or D.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "SPAM // OBVIOUS SPAM",
+          "label": "SPAM // OBVIOUS SPAM. (Missing label)",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "spam // obvious spam"
+      ]
+    },
+    {
+      "idx": 23,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "Choose the correct letter, A, B, C or D.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "MESSAGE TIME",
+          "label": "MESSAGE TIME. (Missing label)",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "message time"
+      ]
+    },
+    {
+      "idx": 24,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "Choose the correct letter, A, B, C or D.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "PROMPT ATTENTION",
+          "label": "PROMPT ATTENTION. (Missing label)",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "prompt attention"
+      ]
+    },
+    {
+      "idx": 25,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "Choose the correct letter, A, B, C or D.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "REPLY IMMEDIATELY",
+          "label": "REPLY IMMEDIATELY. (Missing label)",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "reply immediately"
+      ]
+    },
+    {
+      "idx": 26,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "Choose the correct letter, A, B, C or D.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "BRIEF ACKNOWLEDGEMENT",
+          "label": "BRIEF ACKNOWLEDGEMENT. (Missing label)",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "brief acknowledgement"
+      ]
+    },
+    {
+      "idx": 27,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "prompt_md": "Choose the correct letter, A, B, C or D.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "DATE // DEFINITE DATE",
+          "label": "DATE // DEFINITE DATE. (Missing label)",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "date // definite date"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "3192-law-on-minimum-pay-and-dealing-with-complaints",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3192-law-on-minimum-pay-and-dealing-with-complaints",
+    "normalized_by": "rule-based"
+  }
+}

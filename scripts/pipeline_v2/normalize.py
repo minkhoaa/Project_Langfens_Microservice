@@ -228,8 +228,21 @@ def normalize_with_ai(data: dict) -> Optional[dict]:
 
 
 def normalize_rule_based(data: dict) -> dict:
-    """Fallback rule-based normalization."""
-    logger.info("Using rule-based normalization (fallback)")
+    """Enhanced rule-based normalization with auto-detection."""
+    logger.info("Using enhanced rule-based normalization")
+    
+    # Import enhanced parser
+    try:
+        from enhanced_parser import (
+            detect_question_type, 
+            extract_question_range, 
+            extract_answers_from_text,
+            build_options
+        )
+        use_enhanced = True
+    except ImportError:
+        logger.warning("Enhanced parser not available, using basic mode")
+        use_enhanced = False
     
     title = data.get('title', 'IELTS Reading Test')
     slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
@@ -238,22 +251,63 @@ def normalize_rule_based(data: dict) -> dict:
     passage_md = ""
     for p in data.get('passages', []):
         text = p.get('text', '')
-        # Remove embedded questions from passage
         text = clean_passage_text(text)
         if p.get('letter'):
             passage_md += f"\n\n**{p['letter']}** {text}"
         else:
             passage_md += f"\n\n{text}"
     
-    # Build questions
+    # Get raw text for enhanced parsing
+    raw_text = data.get('_raw_text', '')
+    raw_html = data.get('_raw_html', '')
+    
+    # Try to extract answers from raw text first, then HTML as fallback
+    answers_map = {}
+    if use_enhanced:
+        if raw_text:
+            answers_map = extract_answers_from_text(raw_text)
+        # If few answers found, try extracting from HTML
+        if len(answers_map) < 5 and raw_html:
+            html_answers = extract_answers_from_text(raw_html)
+            # Merge, preferring HTML answers
+            for idx, ans in html_answers.items():
+                if idx not in answers_map:
+                    answers_map[idx] = ans
+        logger.info(f"Auto-extracted {len(answers_map)} answers from source")
+    
+    # Build questions with enhanced detection
     questions = []
     for q in data.get('questions', []):
+        idx = q.get('idx', 0)
+        original_type = q.get('type', 'SUMMARY_COMPLETION')
+        prompt = q.get('prompt', f"Question {idx}")
+        
+        # Auto-detect type from instruction if available
+        detected_type = original_type
+        instruction = q.get('instruction', '')
+        if use_enhanced and instruction:
+            detected_type = detect_question_type(instruction)
+            if detected_type != original_type:
+                logger.info(f"Q{idx}: Type corrected {original_type} -> {detected_type}")
+        
+        # Get answer from auto-extraction or original
+        correct_answer = ''
+        if idx in answers_map:
+            correct_answer = answers_map[idx]
+        elif q.get('correct_answer'):
+            correct_answer = q.get('correct_answer')
+        
+        # Build options based on type
+        options = q.get('options', [])
+        if use_enhanced and not options and detected_type:
+            options = build_options(detected_type, correct_answer)
+        
         questions.append({
-            'idx': q.get('idx', 0),
-            'type': q.get('type', 'SUMMARY_COMPLETION'),
-            'prompt_md': q.get('prompt', f"Question {q.get('idx', 0)}"),
-            'options': q.get('options', []),
-            'correct_answers': [q.get('correct_answer', '')] if q.get('correct_answer') else [],
+            'idx': idx,
+            'type': detected_type,
+            'prompt_md': prompt,
+            'options': options,
+            'correct_answers': [correct_answer] if correct_answer else [],
         })
     
     return {
@@ -273,6 +327,7 @@ def normalize_rule_based(data: dict) -> dict:
         ],
         'questions': questions,
     }
+
 
 
 def load_extracted(source: str, item_id: str) -> Optional[dict]:

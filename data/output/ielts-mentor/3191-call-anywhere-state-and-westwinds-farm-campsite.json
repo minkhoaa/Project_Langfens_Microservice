@@ -1,0 +1,479 @@
+{
+  "exam": {
+    "title": "GT Reading 35 Section 1 - Call anywhere in the State & Westwinds Farm Campsite",
+    "slug": "gt-reading-35-section-1-call-anywhere-in-the-state-westwinds-farm-campsite",
+    "category": "IELTS",
+    "level": "B2",
+    "duration_min": 20
+  },
+  "sections": [
+    {
+      "idx": 1,
+      "title": "GT Reading 35 Section 1 - Call anywhere in the State & Westwinds Farm Campsite",
+      "passage_md": "# Westwinds Farm Campsite\n\nYou have a choice of three Superfine Mobile Digital access plans: Leisure time, Executive and Highflier. They are designed to meet the needs of light, moderate and high-volume users. Calls in each plan are charged at only two rates - short-distance and long-distance. You enjoy big savings with off-peak calls. LEISURETIME: Your mobile phone is mainly for personal use. You use your phone to keep family and friends in touch. You - don't want to strain your budget. With this plan, you enjoy the lowest monthly access fee and extremely competitive costs for calls. However, a monthly minimum call charge applies. EXECUTIVE: You're in business and need to be able to call your office and your clients whenever the need arises. You value the convenience of a mobile phone but need to keep a close eye on overheads. For frequent users: the monthly access fee is slightly higher, but you enjoy the savings of a discounted call rate. HIGHFLIER: You are always on the move and communications are critical. You need to be able to call and be called wherever you are -- world-wide. As a high-volume user, you pay an access fee of just $60 a month but even lower call rates.\n\nPeak Time: 7 a.m. to 7 p.m. Monday-Saturday. Off-peak: all other times, including all day Sunday. Billing increments are in 30-second unit. Call charges are rounded up to the nearest cent. In off-peak periods, calls are subject to a minimum charge of two 30-second units. Once-Only Connection Fee: $30 plus additional $35 for your SmartCard.\n\nJim and Meg Oaks welcome you to the campsite. We hope you will enjoy your stay here. We ask all campers to show due care and consideration whilst staying here and to observe the following camp rules. • Keep the campsite clean and tidy - dispose of litter in the bins provided; - leave the showers, toilets and washing area in the same state as you found them; - ensure your site is clear of all litter when you leave it. • Don't obstruct rights of way. Keep cars, bikes, etc. off the road. • Let sleeping campers have some peace. Don't make any noise after 10 o'clock at night or before 7.30 in the morning. • Dogs must be kept on a lead. Owners of dogs that disturb other campers by barking through the night will be asked to leave. • Disorderlybehavior will not be tolerated. • The lighting of fires is strictly prohibited. • Ball games are not allowed on the campsite. There is plenty of room for ball games in the park opposite the campsite. • Radios, portable music equipment, etc. must not be played at high volume. The management reserves the right to refuse admittance."
+    }
+  ],
+  "questions": [
+    {
+      "idx": 1,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "The monthly access fee is the highest but the call rates are the lowest.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 2,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "Calls are charged at short-distance or long-distance rates.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "This plan is NOT primarily intended for people who need a mobile phone for their work.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "This plan is a cost-effective choice if you spend just over $100 a month on calls.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": true
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "B"
+      ]
+    },
+    {
+      "idx": 5,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "It costs 21 cents for a 30-second long distance call at 2 p.m.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": true
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "C"
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "The connection fee is $30.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": false
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": true
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "D"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "MATCHING_INFORMATION",
+      "prompt_md": "You will have to pay a minimum amount for calls each month.",
+      "options": [
+        {
+          "value": "A",
+          "label": "A",
+          "is_correct": true
+        },
+        {
+          "value": "B",
+          "label": "B",
+          "is_correct": false
+        },
+        {
+          "value": "C",
+          "label": "C",
+          "is_correct": false
+        },
+        {
+          "value": "D",
+          "label": "D",
+          "is_correct": false
+        },
+        {
+          "value": "E",
+          "label": "E",
+          "is_correct": false
+        },
+        {
+          "value": "F",
+          "label": "F",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "A"
+      ]
+    },
+    {
+      "idx": 8,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "The campsite is open all year round.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 9,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "You should book ahead for the busier times of the year.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 10,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "The minimum stay at the campsite is two nights.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 11,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "The entrance to the campsite is locked after 10 p.m.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": true
+        }
+      ],
+      "correct_answers": [
+        "NOT GIVEN"
+      ]
+    },
+    {
+      "idx": 12,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "No dogs are allowed on the campsite.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": false
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": true
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "FALSE"
+      ]
+    },
+    {
+      "idx": 13,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "You are not allowed to cook food on open fires.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    },
+    {
+      "idx": 14,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "prompt_md": "The owners of the campsite may not allow you to camp there.",
+      "options": [
+        {
+          "value": "TRUE",
+          "label": "TRUE",
+          "is_correct": true
+        },
+        {
+          "value": "FALSE",
+          "label": "FALSE",
+          "is_correct": false
+        },
+        {
+          "value": "NOT GIVEN",
+          "label": "NOT GIVEN",
+          "is_correct": false
+        }
+      ],
+      "correct_answers": [
+        "TRUE"
+      ]
+    }
+  ],
+  "_metadata": {
+    "source": "ielts-mentor",
+    "item_id": "3191-call-anywhere-state-and-westwinds-farm-campsite",
+    "url": "https://www.ielts-mentor.com/reading-sample/gt-reading/3191-call-anywhere-state-and-westwinds-farm-campsite",
+    "normalized_by": "rule-based"
+  }
+}
