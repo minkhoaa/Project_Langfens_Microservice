@@ -77,7 +77,8 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
         passages = []
         for section in sections:
             passages.append({
-                'text': section.get('passage_md', section.get('title', ''))
+                'text': section.get('passage_md', section.get('title', '')),
+                'instruction_md': section.get('instruction_md', '')
             })
         
         # Convert questions from normalized format (prompt_md, correct_answers)

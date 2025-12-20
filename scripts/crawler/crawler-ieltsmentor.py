@@ -913,6 +913,15 @@ def generate_sql(data: dict) -> str:
     
     # Insert section with passage
     passage_text = escape_sql(passages[0].get('text', '')[:8000]) if passages else ''
+    instruction_text = passages[0].get('instruction_md', '') if passages else ''
+    
+    # Combine instruction + passage (frontend reads from InstructionsMd)
+    if instruction_text:
+        instruction_escaped = escape_sql(instruction_text)
+        combined_content = f"{instruction_escaped}\\n\\n---\\n\\n{passage_text}"
+    else:
+        combined_content = f"# Passage\\n\\n{passage_text}"
+    
     sql_lines.extend([
         f"  INSERT INTO exam_sections (\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\")",
         "  VALUES (",
@@ -920,7 +929,7 @@ def generate_sql(data: dict) -> str:
         f"    exam_id,",
         f"    1,",
         f"    'Reading Passage - {escape_sql(title)}',",
-        f"    E'# Passage\\n\\n{passage_text}'",
+        f"    E'{combined_content}'",
         "  );",
         "",
     ])
