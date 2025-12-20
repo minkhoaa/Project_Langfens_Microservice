@@ -105,5 +105,25 @@ frontend/**
 .fake
 services/email-sender-nest/.prettierrc
 services/speaking-service/Helper/whisper/models/*.bin
-services/writing-service/appsettings.Development.json
-services/speaking-service/appsettings.Development.json
+# All appsettings.Development.json across the project
+**/appsettings.Development.json
+
+# Python virtual environments
+**/.venv/
+**/venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Log files
+**/logs/*.log
+**/*.log
+
+# Binary files
+**/*.bin
+
+# User-specific files
+**/*.DotSettings.user
+
+# Python environments and certificates (already have .pem but being explicit)
+**/cacert.pem
