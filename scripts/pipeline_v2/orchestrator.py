@@ -205,6 +205,44 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, u
         else:
             logger.info(f"  ✓ Invariants valid ({len(invariants_result.warnings)} warnings)")
             result.warnings.extend(invariants_result.warnings)
+        
+        # === Stage 6.5: Gemini QA (Optional Strict Gate) ===
+        try:
+            from gemini_qa import run_gemini_qa
+            logger.info("Stage 6.5: GEMINI_QA - AI strict validation...")
+            inv_dict = {
+                'is_valid': invariants_result.is_valid(),
+                'violations': invariants_result.violations,
+                'warnings': invariants_result.warnings
+            }
+            gemini_result = run_gemini_qa(result.source, result.item_id, inv_dict)
+            
+            # Ensure gemini_result is a dict
+            if not isinstance(gemini_result, dict):
+                logger.warning(f"  ⚠ Gemini QA returned invalid type: {type(gemini_result)}")
+            elif gemini_result.get('_fallback'):
+                logger.info("  ⚠ Gemini QA unavailable, using rule-based only")
+            elif gemini_result.get('decision') == 'FAIL':
+                issues = gemini_result.get('issues', [])
+                high_issues = [i for i in issues if isinstance(i, dict) and i.get('severity') == 'HIGH']
+                if high_issues and gemini_result.get('recommended_next_step') == 'QUARANTINE':
+                    result.errors.extend([f"[GEMINI] {i.get('message', 'Unknown')}" for i in high_issues])
+                    result.fail("GEMINI_QA", "Gemini QA failed with HIGH severity issues")
+                    quarantine(result)
+                    return result
+                else:
+                    # REPAIR route - add as warnings
+                    for i in issues:
+                        if isinstance(i, dict):
+                            result.warnings.append(f"[GEMINI-{i.get('severity', 'MED')}] {i.get('message', 'Unknown')}")
+                    logger.info(f"  ⚠ Gemini QA: {len(issues)} issues (non-blocking)")
+            else:
+                conf = gemini_result.get('confidence', 0.0)
+                logger.info(f"  ✓ Gemini QA: PASS (confidence: {conf:.0%})")
+        except ImportError:
+            logger.debug("Gemini QA module not available, skipping")
+        except Exception as e:
+            logger.warning(f"  ⚠ Gemini QA skipped: {e}")
     else:
         logger.info("Stage 5-7: SKIPPED (skip_validation=True)")
     
@@ -224,6 +262,7 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, u
     update_cache(result.source, result.item_id, url, 'extract')
     update_cache(result.source, result.item_id, url, 'normalize')
     update_cache(result.source, result.item_id, url, 'validate')
+    update_cache(result.source, result.item_id, url, 'gemini_qa')
     update_cache(result.source, result.item_id, url, 'repair')
     update_cache(result.source, result.item_id, url, 'export')
     

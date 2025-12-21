@@ -8,21 +8,85 @@ description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 
 | Key | Value |
 |-----|-------|
-| **Approach** | Rule-Based Auto (Tier 1) + AI Validation (Tier 2) |
+| **Approach** | Rule-Based (Tier 1) + 4 AI Phases (Gemini 2x + Claude 2x) |
 | **Quality** | Production-ready, 100% verified |
-| **Token Budget** | ~6600 tokens/exam · ~24 exams/session |
+| **Claude Work** | 90% - MAIN validator |
 
 ---
 
-## 📌 TABLE OF CONTENTS
+## 🚨 MANDATORY STRICT RULES (CHECK IN ALL 4 AI PHASES)
 
-1. [Quick Start](#-quick-start)
-2. [Strict Rules Summary](#-strict-rules-summary)
-3. [Automated Enforcement](#-automated-enforcement)
-4. [Pipeline Tiers](#-pipeline-tiers)
-5. [Validation Checklist](#-validation-checklist)
-6. [Bug Reference](#-bug-reference)
-7. [Auto-Fix Templates](#-auto-fix-templates)
+> [!CRITICAL]
+> **BẮT BUỘC check toàn bộ rules sau trong CẢ 4 phiên AI!**
+> VI PHẠM = FAIL output → Fix ngay!
+
+### ✅ Passage Rules:
+
+| Rule | Format | Violation |
+|------|--------|-----------|
+| **Paragraph Labels** | `**Paragraph A.**\n` | ❌ `A.`, `Step 1`, `1.` |
+| **No embedded questions** | Passage = text only | ❌ Q1-8 statements inside passage |
+| **Section separator** | `---` between passages | ❌ No separator |
+| **Passage length** | ≥100 words per passage | ❌ <100 words |
+
+### ✅ Question Rules:
+
+| Rule | Format | Violation |
+|------|--------|-----------|
+| **No leading numbers** | `Statement here` | ❌ `1. Statement` |
+| **Blank pattern** | `_______` (7 underscores) | ❌ `...`, `___` |
+| **instruction_md present** | `**Questions X-Y:**` | ❌ Missing |
+
+### ✅ Type-Specific Rules:
+
+| Type | Options | isCorrect |
+|------|---------|-----------|
+| TFNG/YNNG | 3 items (T/F/NG) | exactly 1 |
+| MCQ_SINGLE | 4+ items | exactly 1 |
+| MCQ_MULTIPLE | 5+ items | 2+ |
+| MATCHING_INFO | `[]` empty | - |
+| MATCHING_FEATURES | `[]` empty | - |
+| MATCHING_HEADING | 5+ headings | exactly 1 |
+
+---
+
+## 🔄 4 AI PHASES CHECKLIST
+
+### Phase 1: Gemini PRE-CHECK
+```
+[ ] Passage length OK
+[ ] No obvious encoding garbage
+[ ] Question count matches source
+```
+
+### Phase 2: ⭐ Claude CHECK #1 (CHÍNH)
+```
+MANDATORY:
+[ ] Verify source website
+[ ] Passage has **Paragraph A.** format
+[ ] No questions embedded in passage
+[ ] Question types match source instructions
+[ ] instruction_md present
+[ ] All prompts extracted correctly
+[ ] All options with correct is_correct
+```
+
+### Phase 3: Gemini POST-CHECK
+```
+[ ] Gemini returns PASS
+[ ] Confidence ≥80%
+[ ] No HIGH severity issues
+```
+
+### Phase 4: ⭐ Claude CHECK #2 + Seed
+```
+MANDATORY:
+[ ] Invariants: 0 violations
+[ ] Re-verify passage format
+[ ] Re-verify question types
+[ ] SQL exports without error
+[ ] Seed to DB: COMMIT
+```
 
 ---
 
@@ -33,110 +97,86 @@ description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python orchestrator.py "<URL>" 2>&1
 ```
 
-**After crawl:**
+**After all 4 phases pass:**
 ```bash
-cd .../scripts/pipeline_v2 && python export.py ielts-mentor <ITEM_ID>
-PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f ".../seeds/seed_exam_<SLUG>.sql"
+PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "seed_exam_*.sql"
 ```
 
 ---
 
-## 🔒 STRICT RULES SUMMARY
+## 🛡️ AUTOMATED INVARIANT CHECKS (14)
 
-> [!CRITICAL]
-> **VI PHẠM = Frontend KHÔNG render hoặc Backend KHÔNG grade được!**
+| # | Check | Severity |
+|---|-------|----------|
+| 1-8 | Core checks | VIOLATION |
+| 9-14 | Strict rule checks | WARNING |
 
-### Core Rules:
+**Violations = BLOCK** ❌ | **Warnings = Alert** ⚠️
 
-| Rule | Requirement | Example |
-|------|-------------|---------|
-| **Paragraph Labels** | `**Paragraph A.**\n` + content | ✅ `**Paragraph A.**\nText...` ❌ `A. Text` |
-| **Blank Pattern** | `_{3,}` (3+ underscores) | ✅ `pay _______` ❌ `pay ...` |
-| **Instruction Format** | `**Questions X-Y:**` bold | ✅ `**Questions 1-8:**` |
-| **Prompt Numbers** | NO leading numbers | ✅ `Statement` ❌ `1. Statement` |
-
-### Type-Specific Rules:
-
-| Type | Options | matchPairs | Blanks | isCorrect |
-|------|---------|------------|--------|-----------|
-| TFNG/YNNG | 3 (T/F/NG or Y/N/NG) | null | ❌ | exactly 1 |
-| MCQ_SINGLE | 4+ items | null | ❌ | exactly 1 |
-| MCQ_MULTIPLE | 5+ items | null | ❌ | 2+ |
-| SHORT_ANSWER | `[]` empty | null | ✅ `_______` | - |
-| SUMMARY_COMPLETION | `[]` empty | null | ✅ `_______` | - |
-| MATCHING_HEADING | 5+ headings | `{key: [val, label]}` | ❌ | exactly 1 |
-| MATCHING_INFO | `[]` empty | `{key: [letter]}` | ❌ | - |
-| MATCHING_FEATURES | `[]` empty | `{key: [label, letter]}` | ❌ | - |
-
-**Full details:** @[/ielts-data-format]
 
 ---
 
-## 🛡️ AUTOMATED ENFORCEMENT
+## 📊 PIPELINE FLOW (Claude = 90% work)
 
 > [!IMPORTANT]
-> **Invariant checks tự động chạy ở Stage 6 của pipeline.**
-> - Violations = BLOCK crawl ❌
-> - Warnings = proceed với alert ⚠️
+> **Claude BẮT BUỘC check sau MỖI phiên Gemini** - không phải chỉ khi fail!
 
-### 14 Invariant Checks:
+### Complete Flow:
 
-| # | Check | Rule | Violation Example |
-|---|-------|------|-------------------|
-| 1 | `check_question_sequence` | Core | Gap Q5 → Q15 |
-| 2 | `check_single_choice_types` | Core | TFNG có 0 isCorrect |
-| 3 | `check_multiple_choice_types` | Core | MCQ_MULTIPLE có <2 correct |
-| 4 | `check_matching_heading` | Core | MATCHING_HEADING có <4 options |
-| 5 | `check_matching_types` | Core | Missing correct_answers |
-| 6 | `check_completion_types` | Core | Missing answer for SHORT_ANSWER |
-| 7 | `check_passage_length` | Core | Passage <100 words |
-| 8 | `check_no_duplicate_prompts` | Core | Q5 = Q12 duplicated |
-| 9 | `check_paragraph_labels` | **Strict** | `A.` instead of `**Paragraph A.**` |
-| 10 | `check_instruction_format` | **Strict** | Missing `**Questions X-Y:**` |
-| 11 | `check_blank_patterns` | **Strict** | Using `...` not `_______` |
-| 12 | `check_prompt_numbering` | **Strict** | `"1. Question"` has leading number |
-| 13 | `check_matching_info_options` | **Strict** | MATCHING_INFO has options[] |
-| 14 | `check_mcq_multiple_detection` | **Strict** | "Choose TWO" but not MCQ_MULTIPLE |
-
----
-
-## 📊 PIPELINE TIERS
+```
+1. TIER 1: Rule-Based Auto (Python)
+       ↓
+2. Gemini PRE-CHECK
+       ↓
+3. ⭐ Claude CHECK #1 (bắt buộc)
+       ↓
+4. Gemini POST-CHECK
+       ↓
+5. ⭐ Claude CHECK #2 (bắt buộc) + Seed
+```
 
 ### TIER 1: Rule-Based Auto
-Runs automatically via orchestrator. Stages:
-1. FETCH → 2. CLEAN → 3. PARSE → 4. NORMALIZE → 5. VALIDATE → 6. INVARIANTS → 7. EXPORT
+```bash
+python orchestrator.py "<URL>"
+```
+Auto xử lý: Fetch → Clean → Parse → Normalize → Validate → Invariants → Export
 
-**Auto Features:**
-- ✅ **Passage cleanup**: Removes metadata garbage (GT Reading, Section markers, Details, Last Updated, Hits, etc.)
-- ✅ **MCQ_MULTIPLE detection**: Warns if answer has comma (A, C) but type is not MCQ_MULTIPLE
-- ✅ **Blank pattern check**: Flags `...` instead of `_______`
-- ✅ **Prompt numbering check**: Detects leading numbers in prompts
+### Gemini PRE-CHECK
+Quick scan: passage length, missing fields, encoding garbage.
 
-### TIER 2: AI 10-Role Validation
+### ⭐ Claude CHECK #1 (CHÍNH)
+**BẮT BUỘC sau Gemini PRE-CHECK.**
 
-| Phase | Roles | Key Checks |
-|-------|-------|------------|
-| **INPUT** | 1-2 | HTML >5000 chars, no duplicates |
-| **CONTENT** | 3-4 | Passage ≥500 words, prompts verbatim |
-| **STRUCTURE** | 5-6 | Type matches format, options correct |
-| **ANSWER** | 7-8 | Answers filled, JSON valid |
-| **OUTPUT** | 9-10 | SQL complete, production ready |
+**Checklist:**
+- [ ] Verify source website
+- [ ] Check question types match instructions
+- [ ] Fix options/prompts/answers
+- [ ] Add instruction_md
 
-**Role 3 Critical:** Passage MUST be full article (500+ words), NOT summary!
-
-**Role 5 Type Mapping:**
-| Source Instruction | Type |
-|-------------------|------|
-| "ONE NUMBER/WORD" | SHORT_ANSWER |
+**Key fixes:**
+| Source Instruction | Correct Type |
+|-------------------|--------------|
 | "TRUE/FALSE/NOT GIVEN" | TRUE_FALSE_NOT_GIVEN |
-| "Choose A-F" | MATCHING_INFORMATION |
+| "Choose A, B, C or D" | MULTIPLE_CHOICE_SINGLE |
+| "Which TWO" | MULTIPLE_CHOICE_MULTIPLE |
+| "Which paragraph" | MATCHING_INFORMATION |
 | "heading i-xi" | MATCHING_HEADING |
 
-### TIER 3: One-Shot Fix
-Manual fixes for complex issues - see [Auto-Fix Templates](#-auto-fix-templates)
+### Gemini POST-CHECK
+Verify Claude's fixes. Expect: PASS 80-100%.
 
-### TIER 4: Seed + QA
-Export SQL and seed to database, generate QA report.
+### ⭐ Claude CHECK #2 + Seed
+**BẮT BUỘC sau Gemini POST-CHECK.**
+
+**Final checklist:**
+- [ ] Invariants: 0 violations, 0 warnings
+- [ ] Export SQL
+- [ ] Seed to DB
+- [ ] (Optional) Test frontend
+
+```bash
+PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "seed_exam_*.sql"
+```
 
 ---
 
@@ -151,6 +191,7 @@ Export SQL and seed to database, generate QA report.
 [ ] Blanks use _______ not ...
 [ ] No leading numbers in prompts
 [ ] MATCHING_INFO has empty options[]
+[ ] Gemini v2 QA = PASS (Tier 2.5)
 [ ] SQL seeds without error
 ```
 
