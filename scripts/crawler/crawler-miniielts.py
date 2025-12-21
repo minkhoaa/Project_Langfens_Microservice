@@ -154,6 +154,29 @@ def scrape_answers_from_solution(answer_url: str) -> dict[int, str]:
     return answers
 
 
+def _extract_audio_url(soup: BeautifulSoup) -> str | None:
+    """Extract YouTube audio URL from iframe for listening exams.
+    
+    Returns the full embed URL or None if not found.
+    """
+    # Look for YouTube iframe
+    iframe = soup.find('iframe', src=re.compile(r'youtube\.com/embed'))
+    if iframe:
+        src = iframe.get('src', '')
+        # Clean up the URL (remove query params like enablejsapi)
+        if 'youtube.com/embed/' in src:
+            video_id = src.split('youtube.com/embed/')[1].split('?')[0]
+            return f"https://www.youtube.com/embed/{video_id}"
+    return None
+
+
+def _detect_exam_type(url: str) -> str:
+    """Detect if exam is reading or listening from URL."""
+    if '/listening/' in url:
+        return 'listening'
+    return 'reading'
+
+
 # =============================================================================
 # PHASE 1: EXTRACTION (CRAWLER)
 # =============================================================================
@@ -243,10 +266,16 @@ def extract_data(url: str) -> dict[str, Any]:
                     blank_id = q.get('blank_id', 'blank_1')
                     q['blankAcceptTexts'][blank_id] = [correct_ans.strip()]
         
+        # Detect exam type (reading vs listening) and extract audio if listening
+        exam_type = _detect_exam_type(url)
+        audio_url = _extract_audio_url(soup) if exam_type == 'listening' else None
+        
         raw_data = {
             "url": url,
             "crawled_at": datetime.now().isoformat(),
             "title": title,
+            "exam_type": exam_type,
+            "audio_url": audio_url,
             "passage": passage,
             "questions": questions
         }
@@ -255,7 +284,9 @@ def extract_data(url: str) -> dict[str, Any]:
         with open(RAW_DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump(raw_data, f, indent=2, ensure_ascii=False)
         
-        logger.info(f"Phase 1 complete: Extracted {len(questions)} questions")
+        logger.info(f"Phase 1 complete: Extracted {len(questions)} questions, type={exam_type}")
+        if audio_url:
+            logger.info(f"  Audio URL: {audio_url}")
         return raw_data
         
     except requests.RequestException as e:
