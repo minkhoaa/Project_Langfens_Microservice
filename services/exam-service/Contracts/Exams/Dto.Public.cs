@@ -25,6 +25,7 @@ public class Dto_Public
         int idx,
         string Title,
         string? InstructionMd,
+        string? PassageMd,
         string? AudioUrl,
         string? TranscriptMd,
         List<PublicQuestionRecord> Questions);

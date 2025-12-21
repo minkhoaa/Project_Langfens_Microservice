@@ -29,9 +29,9 @@ This exam is designed to help estimate a learner''s level on the CEFR scale from
 
 Difficulty increases gradually so you can separate lower-level and higher-level learners.', 'PLACEMENT', 'B1', 'PUBLISHED', 60, now());
 
-INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","AudioUrl","TranscriptMd")
+INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","PassageMd","AudioUrl","TranscriptMd")
 VALUES ('7fb25cae-8211-4baa-a93c-e14ec55160e7', 'c69a3e54-a7f1-40eb-ab69-1f50ca798267', 1, 'Reading – Multiple Choice', 'Read the texts and choose the best answer **A, B, C or D**.
-The questions become more difficult as you progress. Try to answer all 15 questions.', NULL, NULL);
+The questions become more difficult as you progress. Try to answer all 15 questions.', NULL, NULL, NULL);
 INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd")
 VALUES ('e781d97a-2e93-4268-9961-1d8c5ca8bc30', '7fb25cae-8211-4baa-a93c-e14ec55160e7', 1, 'MULTIPLE_CHOICE_SINGLE', 'READING', 1, '### Question 1
 You see this notice at your school:
@@ -258,10 +258,10 @@ VALUES ('aad9773c-78b2-4ff5-9e5b-4fd88e44f6b5', '9720f702-8261-40a2-880c-21c512b
 INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect")
 VALUES ('def6f9b1-32f4-4941-a4c5-f96c59b26ced', '9720f702-8261-40a2-880c-21c512b85ac5', 4, 'Do not study for more than ten minutes.', false);
 
-INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","AudioUrl","TranscriptMd")
+INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","PassageMd","AudioUrl","TranscriptMd")
 VALUES ('3a7d0a01-5bf7-4d86-8faa-d1e7864fd86d', 'c69a3e54-a7f1-40eb-ab69-1f50ca798267', 2, 'Listening – Multiple Choice', 'You will listen to a short conversation about choosing an online English course.
 Answer questions 1–8. For each question, choose the best answer **A, B, C or D**.
-You can read the questions before listening.', 'https://cdn.langfens.dev/audio/sample-placement-listening-01.mp3', 'Advisor: Good morning, LanguageHub support, this is Maria. How can I help you?
+You can read the questions before listening.', NULL, 'https://cdn.langfens.dev/audio/sample-placement-listening-01.mp3', 'Advisor: Good morning, LanguageHub support, this is Maria. How can I help you?
 Student: Hi, I''m interested in your online English course. I work full-time, so I need something flexible.
 Advisor: Sure. Our standard course has three video lessons per week. Each video is about ten minutes long, and you can watch them whenever you like.
 Student: That sounds good. How long does the whole course last?
@@ -361,9 +361,9 @@ VALUES ('01a3cd79-14bb-4f44-90eb-57c975080ea2', 'f1a9675b-9386-4f2d-9bfb-9f7dd6e
 INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect")
 VALUES ('1e645a06-72c3-42b4-ae6d-8e2bd9ade1c6', 'f1a9675b-9386-4f2d-9bfb-9f7dd6e6c8cb', 4, 'By visiting the office without an appointment', false);
 
-INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","AudioUrl","TranscriptMd")
+INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","PassageMd","AudioUrl","TranscriptMd")
 VALUES ('b1a5f019-d676-4a64-9a01-a2a504b110e0', 'c69a3e54-a7f1-40eb-ab69-1f50ca798267', 3, 'Writing – Short Essay (Optional)', 'This writing task is optional and can be used to check productive skills.
-Write your answer in the text box. Recommended time: **15–20 minutes**.', NULL, NULL);
+Write your answer in the text box. Recommended time: **15–20 minutes**.', NULL, NULL, NULL);
 INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","ShortAnswerAcceptRegex")
 VALUES ('4f7c3559-b77e-4d61-8b08-b9c5f8f769c3', 'b1a5f019-d676-4a64-9a01-a2a504b110e0', 1, 'SHORT_ANSWER', 'WRITING', 4, '### Writing Task
 

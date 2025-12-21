@@ -23,6 +23,7 @@ message InternalDeliverySection {
   int32 idx = 2;
   string title = 3;
   string instructions_md = 4;
+  string passage_md = 8;       // Reading passage text (separate from instructions)
   repeated InternalDeliveryQuestion questions = 5;
   string audio_url = 6;
   string transcript_md = 7;

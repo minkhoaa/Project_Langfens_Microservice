@@ -41,6 +41,7 @@ public class InternalExamService : IInternalExamService
                     section.Idx,
                     section.Title,
                     section.InstructionsMd,
+                    section.PassageMd,
                     section.AudioUrl,
                     section.TranscriptMd,
                     section.Questions

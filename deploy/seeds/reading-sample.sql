@@ -38,16 +38,17 @@ BEGIN
     now()
   );
 
-  INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd")
+  INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","PassageMd")
   VALUES (
     sec1,
     exam_id,
     1,
     'Reading Passage 1 - Vertical Farming Revolution',
+    E'',
     E'# Passage\n\n**Paragraph A**  \nThe city of Norchester converted a derelict textile warehouse near the freight canal into twelve stacked growing floors. Each tower now produces the same yield as forty hectares of conventional farmland while occupying the footprint of a supermarket car park.\n\n**Paragraph B**  \nInside, trays glide under custom LED ribbons that provide the full light spectrum, allowing plants to grow independent of daylight. A nutrient-film irrigation loop recirculates 95 percent of its water; most moisture is captured from indoor condensation rather than rainfall. Sensors report humidity, carbon dioxide, and nutrient flow to a central dashboard that agronomists tweak from a mobile app.\n\n**Paragraph C**  \nElectricity comes from rooftop solar canopies and a coffee-waste biogas plant, while a neighboring data center pipes surplus heat through the risers to stabilize the climate.\n\n**Paragraph D**  \nThe municipality funds paid apprenticeships for residents who calibrate the farm and earn food-handling certificates. Weekly harvests leave the elevator-sized modules every 18 days, supplying clinics with subscription produce boxes and cutting truck emissions on the delivery route by 42 percent.'
   );
 
-  INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd")
+  INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","PassageMd")
   VALUES (
     sec2,
     exam_id,
@@ -56,7 +57,7 @@ BEGIN
     E'# Passage\n\n**Paragraph A**  \nNorchester''s Circular Cities Playbook opens with a zero-packaging charter. Market stalls dispense soap, rice, and tea into containers that residents bring from home, and scanners log each refill to a shared ledger so inspectors can see how much waste is prevented in real time.\n\n**Paragraph B**  \nThe "Repair Commons" turns tram depots into public workbenches. Retired electricians and teenagers swap techniques as they strip appliances, 3D-print missing cogs, and return patched speakers to neighbors while buskers narrate every fix to passers-by.\n\n**Paragraph C**  \nAcross the river, a sunken plaza stores stormwater. Figure 2 in the playbook shows the "Infiltration Spine": porous pavers resting on a perforated geotextile cradle, rain gardens, and reed beds that slow runoff before the cleaned water feeds cooling loops for the library.\n\n**Paragraph D**  \nEvery beam, pane, and cable pulled from demolition sites receives a materials passport. QR tags record the alloy, stress tests, and the dates when a component can be reused again, prioritizing laminated timber and reversible fasteners so buildings can be unbolted rather than crushed. Developers unlock a reuse credit once they document that 60 percent of a new shell comes from catalogued salvage.\n\n**Paragraph E**  \nA civic data trust publishes the resource ledger each Friday and lets citizens vote on who can see it. Metro tunnels now host algae-fed bioreactors that scrub air blowing toward Harbor Loop. Three districts test circular features: Harbor Loop runs a tidal micro-grid, Midtown Weave hangs thermal battery balconies to store heat overnight, and Plateau Step stitches algae terraces onto concrete walls. Citizen measurement circles log temperature and air-quality data, and once a crew submits 30 hours each member receives a stipend. A mobile pyrolysis kiln turns food scraps into biochar for the hillside tree nursery.'
   );
 
-  INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd")
+  INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","PassageMd")
   VALUES (
     sec3,
     exam_id,
