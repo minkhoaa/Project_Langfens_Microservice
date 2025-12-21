@@ -287,6 +287,27 @@ def check_mcq_multiple_detection(questions: list, result: InvariantResult) -> No
                 result.add_warning(f"Q{idx}: Answer has comma '{answers[0]}' - may need MCQ_MULTIPLE")
 
 
+def check_embedded_questions(sections: list, questions: list, result: InvariantResult) -> None:
+    """STRICT RULE: Check passage doesn't contain embedded question statements."""
+    import re
+    
+    for s in sections:
+        passage = s.get('passage_md', '')
+        section_idx = s.get('idx', 1)
+        
+        # Check for numbered statements pattern (1. statement, 2. statement)
+        numbered_pattern = re.compile(r'(?:^|\n)\s*\d+\.\s+[A-Z][^.]+\.(?:\s+\d+\.|\s*$)', re.MULTILINE)
+        matches = numbered_pattern.findall(passage)
+        if len(matches) >= 3:  # Multiple numbered statements = likely embedded questions
+            result.add_warning(f"Section {section_idx}: Passage may contain embedded questions (found numbered statements)")
+        
+        # Check for TFNG statements inside passage by looking for patterns like "1. The ... 2. The..."
+        tfng_pattern = re.compile(r'\d+\.\s+(?:The|A|An|Most|Some|All|If|You)\s+\w+')
+        tfng_matches = tfng_pattern.findall(passage)
+        if len(tfng_matches) >= 5:  # 5+ matches is suspicious
+            result.add_warning(f"Section {section_idx}: Passage may contain embedded TFNG statements")
+
+
 def check_no_duplicate_prompts(questions: list, result: InvariantResult) -> None:
     """Check for duplicate question prompts."""
     prompts = {}
@@ -325,6 +346,7 @@ def check_invariants(data: dict) -> InvariantResult:
     check_prompt_numbering(questions, result)     # Rule 25
     check_matching_info_options(questions, result)  # MATCHING_INFO options
     check_mcq_multiple_detection(questions, result)  # MCQ_MULTIPLE from "Choose TWO"
+    check_embedded_questions(sections, questions, result)  # Embedded questions in passage
     
     return result
 
