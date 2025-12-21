@@ -33,6 +33,7 @@ def load_crawler_module(name: str, filename: str):
 
 crawler_ieltsmentor = load_crawler_module("crawler_ieltsmentor", "crawler-ieltsmentor.py")
 crawler_ieltswriting = load_crawler_module("crawler_ieltswriting", "crawler-ieltswriting.py")
+crawler_miniielts = load_crawler_module("crawler_miniielts", "crawler-miniielts.py")
 
 if crawler_ieltsmentor:
     logger.info("Successfully imported crawler-ieltsmentor.py")
@@ -127,6 +128,17 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
         title = sql_data['title']
         slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
         slug = f"ielts-writing-{slug}"
+    elif source == 'mini-ielts':
+        # Use ieltsmentor generate_sql (same format)
+        sql = crawler_ieltsmentor.generate_sql(sql_data)
+        title = sql_data['title']
+        base_slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+        # generate_sql creates ielts-mentor-{title}, we need mini-ielts-reading-{title}
+        old_slug = f"ielts-mentor-{base_slug}"
+        slug = f"mini-ielts-reading-{base_slug}"
+        # Replace slug in generated SQL
+        sql = sql.replace(old_slug, slug)
+        sql = sql.replace('ielts-mentor.com', 'mini-ielts.com')
     else:
         logger.error(f"Unknown source: {source}")
         return None

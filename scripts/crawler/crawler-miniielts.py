@@ -341,7 +341,10 @@ def _extract_passage(soup: BeautifulSoup) -> list[dict]:
             paragraphs = passage_container.find_all('p')
         
         for para in paragraphs:
-            text = para.get_text(strip=True)
+            # Use separator=' ' to ensure spaces between inline elements
+            text = para.get_text(separator=' ', strip=True)
+            # Clean up multiple spaces
+            text = re.sub(r'\s+', ' ', text).strip()
             if text and len(text) > 50:  # Skip short/empty paragraphs
                 passage.append({"text": text})
         
@@ -354,7 +357,8 @@ def _extract_passage(soup: BeautifulSoup) -> list[dict]:
     if article:
         paragraphs = article.find_all('p')
         for para in paragraphs:
-            text = para.get_text(strip=True)
+            text = para.get_text(separator=' ', strip=True)
+            text = re.sub(r'\s+', ' ', text).strip()
             # Skip if it looks like a question
             if text and len(text) > 100 and not text.startswith('Question'):
                 passage.append({"text": text})
@@ -439,6 +443,86 @@ def _get_better_explanation(q_type: str, prompt: str = "", para_letter: str = ""
         'SENTENCE_COMPLETION': "Complete the sentence using words from the passage. Make sure the completed sentence is grammatically correct."
     }
     return explanations.get(q_type, "Answer the question based on the passage.")
+
+
+def _extract_sentence_around_blank(text: str, target_idx: int, all_idxs: list[int]) -> str:
+    """Extract individual sentence/bullet containing the target blank.
+    
+    For notes/summary completion with multiple blanks, this extracts just the 
+    sentence containing the target blank number.
+    
+    Args:
+        text: Full paragraph text
+        target_idx: The question index we want to extract
+        all_idxs: List of all question indices in this paragraph
+    
+    Returns:
+        Individual sentence with _______ for the blank
+    """
+    import re
+    
+    # Try to split by common bullet/sentence patterns
+    # Pattern: look for text between question numbers
+    sorted_idxs = sorted(all_idxs)
+    target_pos = sorted_idxs.index(target_idx)
+    
+    # Define boundaries
+    start_pattern = rf'\b{target_idx}\b'
+    
+    # Find start position of this blank
+    match = re.search(start_pattern, text)
+    if not match:
+        return text  # Fallback to full text
+    
+    blank_pos = match.start()
+    
+    # Look backwards for sentence start (capital letter after . or beginning)
+    sentence_start = 0
+    for i in range(blank_pos - 1, -1, -1):
+        if text[i] in '.!?\n' and i + 1 < len(text):
+            # Check if next char is space then capital
+            remaining = text[i+1:blank_pos].lstrip()
+            if remaining and (remaining[0].isupper() or remaining[0].isdigit()):
+                sentence_start = i + 1
+                break
+        # Also break at other question numbers
+        for other_idx in sorted_idxs:
+            if other_idx != target_idx:
+                check_pattern = rf'\b{other_idx}\b'
+                check_match = re.search(check_pattern, text[max(0, i-2):i+3])
+                if check_match:
+                    sentence_start = i + len(str(other_idx)) + 1
+                    break
+    
+    # Look forward for sentence end
+    sentence_end = len(text)
+    for i in range(blank_pos + len(str(target_idx)), len(text)):
+        if text[i] in '.!?\n':
+            # Check if this is the end of our sentence
+            sentence_end = i + 1
+            break
+        # Also break at other question numbers
+        for other_idx in sorted_idxs:
+            if other_idx != target_idx and other_idx > target_idx:
+                check_pattern = rf'\b{other_idx}\b'
+                check_match = re.search(check_pattern, text[i:i+5])
+                if check_match:
+                    sentence_end = i
+                    break
+    
+    # Extract sentence and replace blank number with placeholder
+    sentence = text[sentence_start:sentence_end].strip()
+    sentence = re.sub(rf'\b{target_idx}\b', '_______', sentence)
+    
+    # Clean up any remaining question numbers
+    for other_idx in all_idxs:
+        if other_idx != target_idx:
+            sentence = re.sub(rf'\b{other_idx}\b', '', sentence)
+    
+    # Clean up extra spaces
+    sentence = re.sub(r'\s+', ' ', sentence).strip()
+    
+    return sentence
 
 
 def _extract_questions(soup: BeautifulSoup, meta_question_types: dict = None) -> list[dict]:
@@ -550,7 +634,8 @@ def _extract_questions(soup: BeautifulSoup, meta_question_types: dict = None) ->
         if any(q['idx'] == q_idx for q in questions):
             continue
         
-        parent = inp.find_parent('p') or inp.find_parent('div')
+        # Find parent element - try li first (common in mini-ielts notes), then p, then div
+        parent = inp.find_parent('li') or inp.find_parent('p') or inp.find_parent('div')
         if parent:
             parent_id = id(parent)
             if parent_id not in parent_inputs:
@@ -565,37 +650,41 @@ def _extract_questions(soup: BeautifulSoup, meta_question_types: dict = None) ->
         if len(inputs) == 1:
             # Single blank - use parent text as prompt
             q_idx = inputs[0][0]
-            prompt_text = parent.get_text(strip=True)
-            # Replace blank number with placeholder
-            prompt_text = re.sub(rf'\b{q_idx}\s*\b', ' _____ ', prompt_text)
+            
+            # Remove the question number (usually in <b> tag) and input element
+            # Clone parent to avoid modifying original
+            parent_copy = BeautifulSoup(str(parent), 'html.parser')
+            for b in parent_copy.find_all('b'):
+                b_text = b.get_text(strip=True)
+                if b_text.isdigit():
+                    b.decompose()
+            for inp_tag in parent_copy.find_all('input'):
+                inp_tag.replace_with(' _______ ')
+            
+            prompt_text = parent_copy.get_text(separator=' ', strip=True)
+            # Clean up extra spaces
+            prompt_text = re.sub(r'\s+', ' ', prompt_text).strip()
+            
             questions.append({
                 'idx': q_idx,
                 'type': 'SUMMARY_COMPLETION',
-                'prompt': prompt_text.strip() or f"Question {q_idx}",
+                'prompt': prompt_text or f"Question {q_idx}",
                 'correct_answers': [],
                 'explanation': _get_better_explanation('SUMMARY_COMPLETION')
             })
         else:
-            # Multiple blanks in same paragraph
-            # Create context showing where each blank is
+            # Multiple blanks in same paragraph - extract sentence around each blank
+            all_text = parent.get_text(separator=' ', strip=True)
+            
             for i, (q_idx, inp) in enumerate(inputs):
-                # Get text around this specific blank
-                all_text = parent.get_text(separator=' ', strip=True)
-                
-                # Replace all blank numbers with clear markers
-                prompt_text = all_text
-                for j, (other_idx, _) in enumerate(inputs):
-                    if other_idx == q_idx:
-                        # Current blank - use underscore placeholder
-                        prompt_text = re.sub(rf'\b{other_idx}\s*\b', ' _______ ', prompt_text)
-                    else:
-                        # Other blanks - remove numbers, they're not relevant
-                        prompt_text = re.sub(rf'\b{other_idx}\s*\b', ' (...) ', prompt_text)
+                # Try to extract individual sentence containing this blank
+                # Look for text between question numbers
+                prompt_text = _extract_sentence_around_blank(all_text, q_idx, [x[0] for x in inputs])
                 
                 questions.append({
                     'idx': q_idx,
                     'type': 'SUMMARY_COMPLETION',
-                    'prompt': prompt_text.strip(),
+                    'prompt': prompt_text.strip() or f"Question {q_idx}",
                     'correct_answers': [],
                     'explanation': _get_better_explanation('SUMMARY_COMPLETION')
                 })

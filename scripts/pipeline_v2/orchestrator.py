@@ -203,7 +203,15 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, u
                 quarantine(result)
                 return result
         else:
-            logger.info(f"  ✓ Invariants valid ({len(invariants_result.warnings)} warnings)")
+            # Invariants passed, but still run repair if there are warnings
+            if invariants_result.warnings:
+                logger.info(f"  ⚠ Invariants valid but has warnings, running repair...")
+                repaired_data, repair_result = repair(result.source, result.item_id)
+                result.repairs.extend(repair_result.repairs_made)
+                if repair_result.repairs_made:
+                    logger.info(f"  ✓ Repair fixed {len(repair_result.repairs_made)} issues")
+            else:
+                logger.info(f"  ✓ Invariants valid (no warnings)")
             result.warnings.extend(invariants_result.warnings)
         
         # === Stage 6.5: Gemini QA (Optional Strict Gate) ===

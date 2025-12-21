@@ -169,6 +169,12 @@ def clean_passage_text(text: str) -> str:
     # Pattern 6: Remove any sentence with "of the the" weirdness
     text = re.sub(r'\n\s*[^.\n]*\bof the\s+(?:during|before|after|and|or|for|by)\b[^.\n]*\.\s*', '\n', text)
     
+    # === MINI-IELTS SPECIFIC CLEANUP ===
+    # Remove newlines in middle of sentences (next char is lowercase)
+    text = re.sub(r'\n(?=[a-z])', ' ', text)
+    # Remove "Show workspace" at end
+    text = re.sub(r'Show workspace\s*$', '', text, flags=re.IGNORECASE)
+    
     # === FINAL CLEANUP ===
     text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
     text = re.sub(r'  +', ' ', text)
@@ -473,15 +479,27 @@ def normalize_rule_based(data: dict) -> dict:
     title = data.get('title', 'IELTS Reading Test')
     slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
     
-    # Build passage markdown - CLEAN embedded questions
+    # Build passage markdown - handle both 'passages' and 'passage' (mini-ielts)
     passage_md = ""
-    for p in data.get('passages', []):
+    passage_list = data.get('passages', []) or data.get('passage', [])
+    
+    # Auto-add paragraph labels (A, B, C, ...) if missing
+    labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    for i, p in enumerate(passage_list):
         text = p.get('text', '')
         text = clean_passage_text(text)
-        if p.get('letter'):
-            passage_md += f"\n\n**{p['letter']}** {text}"
+        if not text or len(text) < 30:
+            continue
+        
+        # Use existing label or auto-assign
+        label = p.get('label') or p.get('letter')
+        if not label and i < len(labels):
+            label = labels[i]
+        
+        if label:
+            passage_md += f"**Paragraph {label}.**\n{text}\n\n"
         else:
-            passage_md += f"\n\n{text}"
+            passage_md += f"{text}\n\n"
     
     # ========== AUTO-FIX: Paragraph Labels (Option 4) ==========
     # Convert "A. Text" or "Section A" to "**Paragraph A.**\n"
