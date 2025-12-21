@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-21T16:17:41.545483
+-- Generated: 2025-12-21T17:16:03.491591
 -- Source: mini-ielts.com
 -- Title: Water Hyacinth
 -- ============================================
@@ -37,7 +37,7 @@ BEGIN
     exam_id,
     'mini-ielts-listening-water-hyacinth',
     'Water Hyacinth',
-    'IELTS Listening Practice Test from mini-ielts.com',
+    'IELTS Reading Practice Test from IELTS Mentor',
     'IELTS',
     'B2',
     'PUBLISHED',
@@ -51,7 +51,7 @@ BEGIN
     exam_id,
     1,
     'Listening Test - Water Hyacinth',
-    E'**Questions 1-2:**\nChoose **TWO** letters, **A-E**. Which two problems are caused by water hyacinth?\n\n---\n\n**Questions 3-6:**\nChoose the correct letter, **A**, **B** or **C**.\n\n---\n\n**Questions 7-10:**  \nWhat is the benefit of the cut down water hyacinth to each of the following aspects?\nChoose **FOUR** answers from the box (**A-F**).\n\n**Benefits:**\n- **A** can reduce the effect of global warming\n- **B** can be used as alternative energy resource\n- **C** can make quick profits\n- **D** can produce materials for plants to grow in\n- **E** can be good for human health\n- **F** can produce fertilizer\n\n---\n\n# Listening Test - Water Hyacinth\n\nThis is a listening practice test about water hyacinth, an invasive aquatic plant that has become a major environmental problem in many tropical and subtropical regions around the world.\n\n**About the Audio:**\nYou will hear a discussion between a presenter and an environmental expert named John. They discuss the problems caused by water hyacinth, including its impact on fishing, electricity production, and local ecosystems. The conversation also covers potential solutions, including biological control methods, mechanical removal, and economic uses for the harvested plants.\n\n**Instructions:**\nListen carefully to the audio recording and answer the questions below. You will hear the recording ONCE only. The test includes multiple choice questions and matching questions about benefits of harvested water hyacinth.\n\n**Question Topics:**\n- Problems caused by water hyacinth (Questions 1-2)\n- Origins and environmental factors (Questions 3-6)  \n- Benefits of harvested water hyacinth (Questions 7-10)',
+    E'**Questions 1-2:**\nChoose **TWO** letters, **A-E**. Which two problems are caused by water hyacinth?\n\n---\n\n**Questions 3-6:**\nChoose the correct letter, **A**, **B** or **C**.\n\n---\n\n**Questions 7-10:**\nWhat is the benefit of the cut down water hyacinth?\nChoose **FOUR** answers from the box (**A-F**).\n\n**Benefits:**\n- **A** can reduce the effect of global warming\n- **B** can be used as alternative energy resource\n- **C** can make quick profits\n- **D** can produce materials for plants to grow in\n- **E** can be good for human health\n- **F** can produce fertilizer\n\n---\n\n# Listening Test - Water Hyacinth\n\nThis is a listening practice test about water hyacinth, an invasive aquatic plant that has become a major environmental problem in many tropical and subtropical regions around the world.\n\n**About the Audio:**\nYou will hear a discussion between a presenter and an environmental expert named John. They discuss the problems caused by water hyacinth, including its impact on fishing, electricity production, and local ecosystems. The conversation also covers potential solutions, including biological control methods, mechanical removal, and economic uses for the harvested plants.\n\n**Instructions:**\nListen carefully to the audio recording and answer the questions below. You will hear the recording ONCE only. The test includes multiple choice questions and matching questions about benefits of harvested water hyacinth.\n\n**Question Topics:**\n- Problems caused by water hyacinth (Questions 1-2)\n- Origins and environmental factors (Questions 3-6)\n- Benefits of harvested water hyacinth (Questions 7-10)',
     'https://www.youtube.com/embed/JdWLY889K2o'
   );
 

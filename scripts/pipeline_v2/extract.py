@@ -166,6 +166,11 @@ def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
     if iframe and 'youtube.com' in str(iframe.get('src', '')):
         audio_url = iframe.get('src')
     
+    # Detect exam type from URL or audio presence
+    exam_type = 'reading'
+    if '/listening/' in url or audio_url:
+        exam_type = 'listening'
+    
     return {
         "url": url,
         "title": title,
@@ -173,7 +178,8 @@ def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
         "questions": questions,
         "answers": answers,
         "transcript": transcript,
-        "audio_url": audio_url
+        "audio_url": audio_url,
+        "exam_type": exam_type
     }
 
 
