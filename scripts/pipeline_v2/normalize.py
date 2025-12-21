@@ -601,6 +601,7 @@ def normalize_rule_based(data: dict) -> dict:
             'category': 'IELTS',
             'level': 'B2',
             'duration_min': 20,
+            'audio_url': data.get('audio_url', ''),
         },
         'sections': [
             {
@@ -608,6 +609,7 @@ def normalize_rule_based(data: dict) -> dict:
                 'title': title,
                 'passage_md': passage_md.strip(),
                 'instruction_md': instruction_md,
+                'audio_url': data.get('audio_url', ''),
             }
         ],
         'questions': questions,

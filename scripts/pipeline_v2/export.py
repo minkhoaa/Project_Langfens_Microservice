@@ -79,7 +79,8 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
         for section in sections:
             passages.append({
                 'text': section.get('passage_md', section.get('title', '')),
-                'instruction_md': section.get('instruction_md', '')
+                'instruction_md': section.get('instruction_md', ''),
+                'audio_url': section.get('audio_url', ''),
             })
         
         # Convert questions from normalized format (prompt_md, correct_answers)
@@ -102,11 +103,17 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
             }
             converted_questions.append(converted_q)
         
+        # Detect exam type from metadata or exam object
+        exam_type = exam.get('category', 'IELTS')
+        is_listening = 'listen' in exam_type.lower() or exam.get('audio_url')
+        
         sql_data = {
             'title': exam.get('title', 'IELTS Reading Test'),
             'exam_id': data.get('_metadata', {}).get('item_id', item_id),
             'passages': passages,
             'questions': converted_questions,
+            'exam_type': 'listening' if is_listening else 'reading',
+            'audio_url': exam.get('audio_url', ''),
         }
     else:
         # Flat format (legacy)
@@ -133,12 +140,39 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
         sql = crawler_ieltsmentor.generate_sql(sql_data)
         title = sql_data['title']
         base_slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
-        # generate_sql creates ielts-mentor-{title}, we need mini-ielts-reading-{title}
+        
+        # Determine reading vs listening from exam_type
+        exam_type = sql_data.get('exam_type', 'reading')
         old_slug = f"ielts-mentor-{base_slug}"
-        slug = f"mini-ielts-reading-{base_slug}"
+        slug = f"mini-ielts-{exam_type}-{base_slug}"
+        
         # Replace slug in generated SQL
         sql = sql.replace(old_slug, slug)
         sql = sql.replace('ielts-mentor.com', 'mini-ielts.com')
+        
+        # For listening exams, fix Skill and add AudioUrl
+        if exam_type == 'listening':
+            sql = sql.replace("'READING'", "'LISTENING'")
+            sql = sql.replace("'Reading Passage -", "'Listening Test -")
+            
+            # Add AudioUrl to section if available
+            audio_url = sql_data.get('audio_url', '')
+            if not audio_url and sql_data.get('passages'):
+                audio_url = sql_data['passages'][0].get('audio_url', '')
+            
+            if audio_url:
+                # Insert AudioUrl into exam_sections INSERT
+                sql = sql.replace(
+                    '"Id","ExamId","Idx","Title","InstructionsMd")',
+                    '"Id","ExamId","Idx","Title","InstructionsMd","AudioUrl")'
+                )
+                # Add the audio_url value before the closing paren of section VALUES
+                # This is a bit hacky but works for the current SQL structure
+                import re as regex_module
+                section_pattern = r"(INSERT INTO exam_sections.*?VALUES\s*\([^)]+)(\);)"
+                def add_audio(match):
+                    return f"{match.group(1)},\n    '{audio_url}'{match.group(2)}"
+                sql = regex_module.sub(section_pattern, add_audio, sql, flags=regex_module.DOTALL)
     else:
         logger.error(f"Unknown source: {source}")
         return None
