@@ -37,7 +37,7 @@ BEGIN
     exam_id,
     'mini-ielts-listening-water-hyacinth',
     'Water Hyacinth',
-    'IELTS Reading Practice Test from IELTS Mentor',
+    'IELTS Listening Practice Test from mini-ielts.com',
     'IELTS',
     'B2',
     'PUBLISHED',
@@ -45,13 +45,14 @@ BEGIN
     now()
   );
 
-  INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd")
+  INSERT INTO exam_sections ("Id","ExamId","Idx","Title","InstructionsMd","AudioUrl")
   VALUES (
     sec1,
     exam_id,
     1,
-    'Reading Passage - Water Hyacinth',
-    E'**Questions 1-2:**\nChoose **TWO** letters, **A-E**. Which two problems are caused by water hyacinth?\n\n---\n\n**Questions 3-6:**\nChoose the correct letter, **A**, **B** or **C**.\n\n---\n\n**Questions 7-10:**  \nWhat is the benefit of the cut down water hyacinth to each of the following aspects?\nChoose **FOUR** answers from the box (**A-F**).\n\n**Benefits:**\n- **A** can reduce the effect of global warming\n- **B** can be used as alternative energy resource\n- **C** can make quick profits\n- **D** can produce materials for plants to grow in\n- **E** can be good for human health\n- **F** can produce fertilizer\n\n---\n\n# Listening Test - Water Hyacinth\n\nThis is a listening practice test about water hyacinth, an invasive aquatic plant that has become a major environmental problem in many tropical and subtropical regions around the world.\n\n**About the Audio:**\nYou will hear a discussion between a presenter and an environmental expert named John. They discuss the problems caused by water hyacinth, including its impact on fishing, electricity production, and local ecosystems. The conversation also covers potential solutions, including biological control methods, mechanical removal, and economic uses for the harvested plants.\n\n**Instructions:**\nListen carefully to the audio recording and answer the questions below. You will hear the recording ONCE only. The test includes multiple choice questions and matching questions about benefits of harvested water hyacinth.\n\n**Question Topics:**\n- Problems caused by water hyacinth (Questions 1-2)\n- Origins and environmental factors (Questions 3-6)  \n- Benefits of harvested water hyacinth (Questions 7-10)'
+    'Listening Test - Water Hyacinth',
+    E'**Questions 1-2:**\nChoose **TWO** letters, **A-E**. Which two problems are caused by water hyacinth?\n\n---\n\n**Questions 3-6:**\nChoose the correct letter, **A**, **B** or **C**.\n\n---\n\n**Questions 7-10:**  \nWhat is the benefit of the cut down water hyacinth to each of the following aspects?\nChoose **FOUR** answers from the box (**A-F**).\n\n**Benefits:**\n- **A** can reduce the effect of global warming\n- **B** can be used as alternative energy resource\n- **C** can make quick profits\n- **D** can produce materials for plants to grow in\n- **E** can be good for human health\n- **F** can produce fertilizer\n\n---\n\n# Listening Test - Water Hyacinth\n\nThis is a listening practice test about water hyacinth, an invasive aquatic plant that has become a major environmental problem in many tropical and subtropical regions around the world.\n\n**About the Audio:**\nYou will hear a discussion between a presenter and an environmental expert named John. They discuss the problems caused by water hyacinth, including its impact on fishing, electricity production, and local ecosystems. The conversation also covers potential solutions, including biological control methods, mechanical removal, and economic uses for the harvested plants.\n\n**Instructions:**\nListen carefully to the audio recording and answer the questions below. You will hear the recording ONCE only. The test includes multiple choice questions and matching questions about benefits of harvested water hyacinth.\n\n**Question Topics:**\n- Problems caused by water hyacinth (Questions 1-2)\n- Origins and environmental factors (Questions 3-6)  \n- Benefits of harvested water hyacinth (Questions 7-10)',
+    'https://www.youtube.com/embed/JdWLY889K2o'
   );
 
   qid := gen_random_uuid();
@@ -61,7 +62,7 @@ BEGIN
     sec1,
     1,
     'MULTIPLE_CHOICE_MULTIPLE',
-    'READING',
+    'LISTENING',
     2,
     'Which two problems are caused by water hyacinth? (Choose TWO)',
     'Choose the correct answer.',
@@ -80,7 +81,7 @@ BEGIN
     sec1,
     3,
     'MULTIPLE_CHOICE_SINGLE',
-    'READING',
+    'LISTENING',
     2,
     'Where was water hyacinth originally from?',
     'Choose the correct answer.',
@@ -97,7 +98,7 @@ BEGIN
     sec1,
     4,
     'MULTIPLE_CHOICE_SINGLE',
-    'READING',
+    'LISTENING',
     2,
     'What is the primary cause of the decrease in nutrients from the soil?',
     'Choose the correct answer.',
@@ -114,7 +115,7 @@ BEGIN
     sec1,
     5,
     'MULTIPLE_CHOICE_SINGLE',
-    'READING',
+    'LISTENING',
     2,
     'When will the biological solution bring risks to the environment?',
     'Choose the correct answer.',
@@ -131,7 +132,7 @@ BEGIN
     sec1,
     6,
     'MULTIPLE_CHOICE_SINGLE',
-    'READING',
+    'LISTENING',
     2,
     'What does John say about the mechanical solution?',
     'Choose the correct answer.',
@@ -148,7 +149,7 @@ BEGIN
     sec1,
     7,
     'MATCHING_FEATURES',
-    'READING',
+    'LISTENING',
     2,
     'dried water hyacinth',
     'Choose the correct answer.',
@@ -162,7 +163,7 @@ BEGIN
     sec1,
     8,
     'MATCHING_FEATURES',
-    'READING',
+    'LISTENING',
     2,
     'mushroom farmers',
     'Choose the correct answer.',
@@ -176,7 +177,7 @@ BEGIN
     sec1,
     9,
     'MATCHING_FEATURES',
-    'READING',
+    'LISTENING',
     2,
     'oyster and straw mushrooms',
     'Choose the correct answer.',
@@ -190,7 +191,7 @@ BEGIN
     sec1,
     10,
     'MATCHING_FEATURES',
-    'READING',
+    'LISTENING',
     2,
     'cows',
     'Choose the correct answer.',
