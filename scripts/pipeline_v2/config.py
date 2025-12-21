@@ -42,8 +42,19 @@ def detect_source(url: str) -> str:
         return 'ielts-mentor'
     elif 'ielts-writing.info' in url:
         return 'ielts-writing'
+    elif 'mini-ielts.com' in url:
+        return 'mini-ielts'
     else:
         return 'unknown'
+
+def detect_exam_type(url: str) -> str:
+    """Detect exam type (reading/listening) from URL."""
+    if '/listening/' in url or '/listening?' in url:
+        return 'listening'
+    elif '/reading/' in url or '/reading?' in url:
+        return 'reading'
+    else:
+        return 'reading'  # default
 
 # Logging
 import logging
