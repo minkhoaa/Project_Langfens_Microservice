@@ -994,10 +994,17 @@ def generate_sql(data: dict) -> str:
             # Output options for all types that need dropdown (including MATCHING_HEADING)
             for i, opt in enumerate(options):
                 is_correct = 'true' if opt.get('is_correct') else 'false'
-                opt_label = escape_sql(opt.get('label', opt.get('value', '')))
+                # Combine label + text for full option content
+                label = opt.get('label', opt.get('value', ''))
+                text = opt.get('text', '')
+                if text:
+                    opt_content = f"{label}. {text}"
+                else:
+                    opt_content = label
+                opt_content = escape_sql(opt_content)
                 sql_lines.append(
                     f"  INSERT INTO exam_options (\"Id\",\"QuestionId\",\"Idx\",\"ContentMd\",\"IsCorrect\") VALUES "
-                    f"(gen_random_uuid(), qid, {i+1}, '{opt_label}', {is_correct});"
+                    f"(gen_random_uuid(), qid, {i+1}, '{opt_content}', {is_correct});"
                 )
             sql_lines.append("")
             

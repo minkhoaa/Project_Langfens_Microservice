@@ -8,6 +8,10 @@ description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 
 > [!IMPORTANT]
 > Khi user gọi `/ielts-pipeline <URL>`, TỰ ĐỘNG chạy các bước sau KHÔNG cần hỏi.
+> 
+> **Supported Sources:**
+> - `ielts-mentor.com` → `<SOURCE>` = `ielts-mentor`
+> - `mini-ielts.com` → `<SOURCE>` = `mini-ielts`
 
 ---
 
@@ -32,13 +36,15 @@ cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 &&
 ```
 
 ### Step 2: Read Cleaned Text + Normalized JSON
+> **Note:** Replace `<SOURCE>` with detected source (`ielts-mentor` or `mini-ielts`)
+
 ```bash
 // turbo 
-cat data/cleaned/ielts-mentor/<ITEM_ID>.txt | head -150
+cat data/cleaned/<SOURCE>/<ITEM_ID>.txt | head -150
 ```
 ```bash
 // turbo
-cat data/normalized/ielts-mentor/<ITEM_ID>.json | head -100
+cat data/normalized/<SOURCE>/<ITEM_ID>.json | head -100
 ```
 
 ### Step 3: ⭐ Claude CHECK #1 - FIX STRICT RULES
@@ -67,20 +73,20 @@ from pathlib import Path
 ### Step 4: ⭐ Gemini POST-CHECK (MANDATORY)
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py ielts-mentor <ITEM_ID> 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py <SOURCE> <ITEM_ID> 2>&1
 ```
 **Record Gemini decision (PASS/FAIL) and issues for QA report.**
 
 ### Step 5: ⭐ Claude CHECK #2 - Final Verify
 ```bash
 // turbo
-python invariants.py ielts-mentor <ITEM_ID> 2>&1
+python invariants.py <SOURCE> <ITEM_ID> 2>&1
 ```
 **MUST show: `Valid: True`**
 
 ### Step 6: Export + Seed
 ```bash
-python export.py ielts-mentor <ITEM_ID>
+python export.py <SOURCE> <ITEM_ID>
 ```
 ```bash
 PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/seed_exam_*.sql"

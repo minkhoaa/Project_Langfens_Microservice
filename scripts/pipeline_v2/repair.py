@@ -160,27 +160,31 @@ def repair_mc_correct_option(data: dict, result: RepairResult) -> None:
         if not correct_answer or not options:
             continue
         
-        # Check if correct answer is in options
-        option_values = [opt.get('value', '').upper() for opt in options]
-        correct_upper = correct_answer.upper()
+        # Check if correct answer is in options (check both 'value' and first char of 'label')
+        correct_upper = correct_answer.upper().strip()
+        found_idx = -1
+        for i, opt in enumerate(options):
+            opt_value = opt.get('value', '').upper()
+            opt_label = opt.get('label', '').upper()
+            # Match by value, or by first char of label (e.g., "A" matches "A. option text")
+            if opt_value == correct_upper or opt_label == correct_upper or (opt_label and opt_label[0] == correct_upper):
+                found_idx = i
+                break
         
-        if correct_upper not in option_values:
-            # Correct answer missing from options - add it
-            # Common case: options A-D but correct is E/F
+        if found_idx >= 0:
+            # Mark the existing option as correct
+            correct_count = sum(1 for opt in options if opt.get('is_correct'))
+            if correct_count == 0:
+                options[found_idx]['is_correct'] = True
+                result.add_repair(f"Q{q.get('idx')}: Marked option {correct_answer} as correct")
+        else:
+            # Correct answer REALLY missing from options - add it (rare)
             q['options'].append({
                 'value': correct_answer.upper(),
                 'label': f"{correct_answer.upper()}. (Missing label)",
                 'is_correct': True
             })
             result.add_repair(f"Q{q.get('idx')}: Added missing option {correct_answer}")
-        else:
-            # Mark correct option
-            correct_count = sum(1 for opt in options if opt.get('is_correct'))
-            if correct_count == 0:
-                for opt in options:
-                    if opt.get('value', '').upper() == correct_upper:
-                        opt['is_correct'] = True
-                        result.add_repair(f"Q{q.get('idx')}: Marked option {correct_answer} as correct")
 
 
 def repair_incorrect_question_types(data: dict, result: RepairResult) -> None:
