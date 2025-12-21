@@ -40,32 +40,25 @@ def build_compact_payload(data: dict, invariant_result: dict) -> dict:
             type_ranges[qtype]['min'] = min(type_ranges[qtype]['min'], idx)
             type_ranges[qtype]['max'] = max(type_ranges[qtype]['max'], idx)
     
-    # Sample questions (first/last of each type)
-    samples = []
-    seen_types = set()
+    # FULL questions data (no preview - Gemini CLI local has no limits)
+    full_questions = []
     for q in questions:
-        qtype = q.get('type', 'UNKNOWN')
-        if qtype not in seen_types:
-            seen_types.add(qtype)
-            samples.append({
-                'idx': q.get('idx'),
-                'type': qtype,
-                'prompt_preview': q.get('prompt_md', '')[:100],
-                'options_count': len(q.get('options', [])),
-                'has_answer': bool(q.get('correct_answers')),
-            })
+        full_questions.append({
+            'idx': q.get('idx'),
+            'type': q.get('type'),
+            'prompt_md': q.get('prompt_md', ''),
+            'options': q.get('options', []),
+            'correct_answers': q.get('correct_answers', []),
+        })
     
-    # Section info
+    # FULL section info
     section_info = []
     for i, s in enumerate(sections):
-        passage = s.get('passage_md', '')
         section_info.append({
             'idx': i + 1,
             'title': s.get('title', ''),
-            'passage_words': len(passage.split()),
-            'passage_preview': passage[:200],
-            'has_instruction': bool(s.get('instruction_md')),
-            'instruction_preview': s.get('instruction_md', '')[:150] if s.get('instruction_md') else None,
+            'passage_md': s.get('passage_md', ''),
+            'instruction_md': s.get('instruction_md', ''),
         })
     
     return {
@@ -76,7 +69,7 @@ def build_compact_payload(data: dict, invariant_result: dict) -> dict:
         },
         'counts': type_counts,
         'type_ranges': type_ranges,
-        'samples': samples,
+        'questions': full_questions,
         'sections': section_info,
         'rule_based_results': {
             'is_valid': invariant_result.get('is_valid', True),

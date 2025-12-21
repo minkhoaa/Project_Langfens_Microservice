@@ -1001,7 +1001,37 @@ def generate_sql(data: dict) -> str:
                 )
             sql_lines.append("")
             
-        else:  # SUMMARY_COMPLETION
+        elif q_type == 'SHORT_ANSWER':
+            # SHORT_ANSWER uses ShortAnswerAcceptTexts (array of strings)
+            answers = []
+            if correct:
+                if isinstance(correct, list):
+                    answers = correct
+                elif ' / ' in correct:
+                    answers = [v.strip() for v in correct.split(' / ')]
+                elif '//' in correct:
+                    answers = [v.strip() for v in correct.split('//')]
+                else:
+                    answers.append(correct)
+            answers_sql = 'ARRAY[' + ', '.join([f"'{escape_sql(a)}'" for a in answers]) + ']::text[]' if answers else 'NULL'
+            sql_lines.extend([
+                f"  qid := gen_random_uuid();",
+                f"  INSERT INTO exam_questions (\"Id\",\"SectionId\",\"Idx\",\"Type\",\"Skill\",\"Difficulty\",\"PromptMd\",\"ExplanationMd\",\"ShortAnswerAcceptTexts\")",
+                f"  VALUES (",
+                f"    qid,",
+                f"    sec1,",
+                f"    {q_idx},",
+                f"    '{q_type}',",
+                f"    'READING',",
+                f"    2,",
+                f"    '{q_prompt}',",
+                f"    'Write the correct answer from the passage.',",
+                f"    {answers_sql}",
+                f"  );",
+                "",
+            ])
+            
+        else:  # SUMMARY_COMPLETION, SENTENCE_COMPLETION
             blank_key = f"blank-q{q_idx}"
             answers = []
             if correct:

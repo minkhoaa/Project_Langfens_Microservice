@@ -177,6 +177,156 @@ def clean_passage_text(text: str) -> str:
     return text.strip()
 
 
+def auto_fix_paragraph_labels(passage: str) -> str:
+    """
+    AUTO-FIX Option 4: Convert various paragraph label formats to strict format.
+    Converts: "A. Text", "Section A", "A Text", "Paragraph A" -> "**Paragraph A.**\n"
+    """
+    if not passage:
+        return passage
+    
+    # Pattern 1: "Section A" or "Section A:" -> "**Paragraph A.**\n"
+    passage = re.sub(
+        r'\n*Section\s+([A-L])\s*:?\s*\n*',
+        r'\n\n**Paragraph \1.**\n',
+        passage,
+        flags=re.IGNORECASE
+    )
+    
+    # Pattern 2: Single letter at start of line "A. " or "A " -> "**Paragraph A.**\n"
+    passage = re.sub(
+        r'(?:^|\n)([A-L])[\.\s]+(?=[A-Z])',
+        r'\n\n**Paragraph \1.**\n',
+        passage
+    )
+    
+    # Pattern 3: "Paragraph A" without proper formatting -> "**Paragraph A.**\n"
+    passage = re.sub(
+        r'(?:^|\n)\s*Paragraph\s+([A-L])\s*(?:\.|:)?\s*\n*',
+        r'\n\n**Paragraph \1.**\n',
+        passage,
+        flags=re.IGNORECASE
+    )
+    
+    # Clean up multiple newlines
+    passage = re.sub(r'\n{3,}', '\n\n', passage)
+    
+    return passage.strip()
+
+
+def auto_generate_instruction_md(questions: list) -> str:
+    """
+    AUTO-FIX Option 1: Generate instruction_md based on question types and ranges.
+    Groups questions by type and creates proper IELTS instruction format.
+    """
+    if not questions:
+        return ""
+    
+    # Group questions by type
+    type_groups = {}
+    for q in questions:
+        qtype = q.get('type', 'UNKNOWN')
+        idx = q.get('idx', 0)
+        if qtype not in type_groups:
+            type_groups[qtype] = {'min': idx, 'max': idx}
+        else:
+            type_groups[qtype]['min'] = min(type_groups[qtype]['min'], idx)
+            type_groups[qtype]['max'] = max(type_groups[qtype]['max'], idx)
+    
+    instruction_parts = []
+    
+    for qtype, range_info in type_groups.items():
+        min_idx, max_idx = range_info['min'], range_info['max']
+        
+        if qtype == 'TRUE_FALSE_NOT_GIVEN':
+            instruction_parts.append(f"""**Questions {min_idx}-{max_idx}:**
+Do the following statements agree with the information given in the text?
+
+Write
+- **TRUE** if the statement agrees with the information
+- **FALSE** if the statement contradicts the information
+- **NOT GIVEN** if there is no information on this""")
+        
+        elif qtype == 'YES_NO_NOT_GIVEN':
+            instruction_parts.append(f"""**Questions {min_idx}-{max_idx}:**
+Do the following statements agree with the claims of the writer?
+
+Write
+- **YES** if the statement agrees with the claims of the writer
+- **NO** if the statement contradicts the claims of the writer
+- **NOT GIVEN** if it is impossible to say what the writer thinks about this""")
+        
+        elif qtype == 'MULTIPLE_CHOICE_SINGLE':
+            instruction_parts.append(f"""**Questions {min_idx}-{max_idx}:**
+Choose the correct letter, **A**, **B**, **C** or **D**.""")
+        
+        elif qtype == 'MULTIPLE_CHOICE_MULTIPLE':
+            instruction_parts.append(f"""**Questions {min_idx}-{max_idx}:**
+Choose **TWO** letters, **A-E**.""")
+        
+        elif qtype == 'MATCHING_INFORMATION':
+            instruction_parts.append(f"""**Questions {min_idx}-{max_idx}:**
+Which section contains the following information?
+
+Write the correct letter, **A-L**.""")
+        
+        elif qtype == 'MATCHING_HEADING':
+            instruction_parts.append(f"""**Questions {min_idx}-{max_idx}:**
+Choose the correct heading for each section from the list of headings below.
+
+Write the correct number, **i-xi**.""")
+        
+        elif qtype in ['SHORT_ANSWER', 'SUMMARY_COMPLETION', 'SENTENCE_COMPLETION']:
+            instruction_parts.append(f"""**Questions {min_idx}-{max_idx}:**
+Complete the sentences below.
+
+Write **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.""")
+    
+    return "\n\n---\n\n".join(instruction_parts)
+
+
+def expand_optional_answers(answer: str) -> list:
+    """
+    AUTO-FIX: Expand answer formats with optional words or variants.
+    
+    Formats handled:
+    - "(optional) word" -> ["word", "optional word"]
+    - "word1// word2" -> ["word1", "word2"]
+    - "(optional1) (optional2) word" -> ["word", "optional1 word", "optional2 word", "optional1 optional2 word"]
+    - Simple answer -> ["answer"]
+    """
+    if not answer:
+        return []
+    
+    answer = answer.strip()
+    answers = []
+    
+    # Handle "word1// word2" format (alternative answers)
+    if '//' in answer:
+        parts = [p.strip() for p in answer.split('//')]
+        return parts
+    
+    # Handle "(optional) word" format
+    optional_pattern = r'\(([^)]+)\)'
+    optionals = re.findall(optional_pattern, answer)
+    
+    if optionals:
+        # Get the base word (remove all optional parts)
+        base = re.sub(optional_pattern, '', answer).strip()
+        base = re.sub(r'\s+', ' ', base)  # Clean up multiple spaces
+        answers.append(base)
+        
+        # Add version with optional word(s)
+        for opt in optionals:
+            full = f"{opt} {base}".strip()
+            full = re.sub(r'\s+', ' ', full)
+            if full not in answers:
+                answers.append(full)
+        
+        return answers
+    
+    # Simple answer
+    return [answer]
 
 
 def call_gemini(prompt: str) -> Optional[str]:
@@ -304,7 +454,7 @@ def normalize_with_ai(data: dict) -> Optional[dict]:
 
 
 def normalize_rule_based(data: dict) -> dict:
-    """Enhanced rule-based normalization with auto-detection."""
+    """Enhanced rule-based normalization with auto-detection and AUTO-FIX."""
     logger.info("Using enhanced rule-based normalization")
     
     # Import enhanced parser
@@ -332,6 +482,10 @@ def normalize_rule_based(data: dict) -> dict:
             passage_md += f"\n\n**{p['letter']}** {text}"
         else:
             passage_md += f"\n\n{text}"
+    
+    # ========== AUTO-FIX: Paragraph Labels (Option 4) ==========
+    # Convert "A. Text" or "Section A" to "**Paragraph A.**\n"
+    passage_md = auto_fix_paragraph_labels(passage_md)
     
     # Get raw text for enhanced parsing
     raw_text = data.get('_raw_text', '')
@@ -373,18 +527,54 @@ def normalize_rule_based(data: dict) -> dict:
         elif q.get('correct_answer'):
             correct_answer = q.get('correct_answer')
         
+        # ========== AUTO-FIX: Detect TFNG from answers (Option 1) ==========
+        if correct_answer in ['TRUE', 'FALSE', 'NOT GIVEN']:
+            if detected_type not in ['TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN']:
+                logger.info(f"Q{idx}: Auto-fixed type to TRUE_FALSE_NOT_GIVEN (answer={correct_answer})")
+                detected_type = 'TRUE_FALSE_NOT_GIVEN'
+        elif correct_answer in ['YES', 'NO', 'NOT GIVEN']:
+            if detected_type != 'YES_NO_NOT_GIVEN':
+                logger.info(f"Q{idx}: Auto-fixed type to YES_NO_NOT_GIVEN (answer={correct_answer})")
+                detected_type = 'YES_NO_NOT_GIVEN'
+        
         # Build options based on type
         options = q.get('options', [])
         if use_enhanced and not options and detected_type:
             options = build_options(detected_type, correct_answer)
+        
+        # ========== AUTO-FIX: TFNG/YNNG options with is_correct (Option 1) ==========
+        if detected_type == 'TRUE_FALSE_NOT_GIVEN':
+            options = [
+                {"value": "TRUE", "label": "TRUE", "is_correct": correct_answer == "TRUE"},
+                {"value": "FALSE", "label": "FALSE", "is_correct": correct_answer == "FALSE"},
+                {"value": "NOT GIVEN", "label": "NOT GIVEN", "is_correct": correct_answer == "NOT GIVEN"}
+            ]
+        elif detected_type == 'YES_NO_NOT_GIVEN':
+            options = [
+                {"value": "YES", "label": "YES", "is_correct": correct_answer == "YES"},
+                {"value": "NO", "label": "NO", "is_correct": correct_answer == "NO"},
+                {"value": "NOT GIVEN", "label": "NOT GIVEN", "is_correct": correct_answer == "NOT GIVEN"}
+            ]
+        
+        # ========== AUTO-FIX: MATCHING_INFO clear options (Option 1) ==========
+        if detected_type in ['MATCHING_INFORMATION', 'MATCHING_FEATURES', 'MATCHING_ENDINGS']:
+            if options and len(options) > 0:
+                logger.info(f"Q{idx}: Auto-cleared options for {detected_type}")
+            options = []  # MATCHING types should have empty options
+        
+        # ========== AUTO-FIX: Expand (optional) word answers (NEW STRICT RULE) ==========
+        correct_answers_list = expand_optional_answers(correct_answer) if correct_answer else []
         
         questions.append({
             'idx': idx,
             'type': detected_type,
             'prompt_md': prompt,
             'options': options,
-            'correct_answers': [correct_answer] if correct_answer else [],
+            'correct_answers': correct_answers_list,
         })
+    
+    # ========== AUTO-FIX: Generate instruction_md (Option 1) ==========
+    instruction_md = auto_generate_instruction_md(questions)
     
     return {
         'exam': {
@@ -399,6 +589,7 @@ def normalize_rule_based(data: dict) -> dict:
                 'idx': 1,
                 'title': title,
                 'passage_md': passage_md.strip(),
+                'instruction_md': instruction_md,
             }
         ],
         'questions': questions,

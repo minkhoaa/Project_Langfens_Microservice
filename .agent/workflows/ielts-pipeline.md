@@ -2,320 +2,235 @@
 description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 ---
 
-# /ielts-pipeline - IELTS Data Pipeline
+# /ielts-pipeline <URL> - AUTO EXECUTE FULL PIPELINE
 
 **BẠN LÀ: "IELTS RECORD REPAIR AGENT"**
 
-| Key | Value |
-|-----|-------|
-| **Approach** | Rule-Based (Tier 1) + 4 AI Phases (Gemini 2x + Claude 2x) |
-| **Quality** | Production-ready, 100% verified |
-| **Claude Work** | 90% - MAIN validator |
+> [!IMPORTANT]
+> Khi user gọi `/ielts-pipeline <URL>`, TỰ ĐỘNG chạy các bước sau KHÔNG cần hỏi.
 
 ---
 
-## 🚨 MANDATORY STRICT RULES (CHECK IN ALL 4 AI PHASES)
+## 🚀 AUTO EXECUTION STEPS (Follow in order!)
 
-> [!CRITICAL]
-> **BẮT BUỘC check toàn bộ rules sau trong CẢ 4 phiên AI!**
-> VI PHẠM = FAIL output → Fix ngay!
+> [!CAUTION]
+> **MANDATORY 4 AI CHECKS - KHÔNG ĐƯỢC BỎ QUA BẤT KỲ BƯỚC NÀO!**
+> 
+> | # | AI | Step | Action |
+> |---|-----|------|--------|
+> | 1 | Gemini | TIER 1 (orchestrator) | Auto-run in pipeline |
+> | 2 | Claude | CHECK #1 | **LUÔN check issues P-001 to S-003** |
+> | 3 | Gemini | POST-CHECK | **LUÔN chạy gemini_qa.py** |
+> | 4 | Claude | CHECK #2 | **LUÔN chạy invariants.py** |
+> 
+> **Cho dù TIER 1 SUCCESS, vẫn PHẢI chạy đủ 4 bước!**
 
-### ✅ Passage Rules:
-
-| Rule | Format | Violation |
-|------|--------|-----------|
-| **Paragraph Labels** | `**Paragraph A.**\n` | ❌ `A.`, `Step 1`, `1.` |
-| **No embedded questions** | Passage = text only | ❌ Q1-8 statements inside passage |
-| **Section separator** | `---` between passages | ❌ No separator |
-| **Passage length** | ≥100 words per passage | ❌ <100 words |
-
-### ✅ Question Rules:
-
-| Rule | Format | Violation |
-|------|--------|-----------|
-| **No leading numbers** | `Statement here` | ❌ `1. Statement` |
-| **Blank pattern** | `_______` (7 underscores) | ❌ `...`, `___` |
-| **instruction_md present** | `**Questions X-Y:**` | ❌ Missing |
-
-### ✅ Type-Specific Rules:
-
-| Type | Options | isCorrect |
-|------|---------|-----------|
-| TFNG/YNNG | 3 items (T/F/NG) | exactly 1 |
-| MCQ_SINGLE | 4+ items | exactly 1 |
-| MCQ_MULTIPLE | 5+ items | 2+ |
-| MATCHING_INFO | `[]` empty | - |
-| MATCHING_FEATURES | `[]` empty | - |
-| MATCHING_HEADING | 5+ headings | exactly 1 |
-
----
-
-## 🔄 4 AI PHASES CHECKLIST
-
-### Phase 1: Gemini PRE-CHECK
-```
-[ ] Passage length OK
-[ ] No obvious encoding garbage
-[ ] Question count matches source
-```
-
-### Phase 2: ⭐ Claude CHECK #1 (CHÍNH)
-```
-MANDATORY:
-[ ] Verify source website
-[ ] Passage has **Paragraph A.** format
-[ ] No questions embedded in passage
-[ ] Question types match source instructions
-[ ] instruction_md present
-[ ] All prompts extracted correctly
-[ ] All options with correct is_correct
-```
-
-### Phase 3: Gemini POST-CHECK
-```
-[ ] Gemini returns PASS
-[ ] Confidence ≥80%
-[ ] No HIGH severity issues
-```
-
-### Phase 4: ⭐ Claude CHECK #2 + Seed
-```
-MANDATORY:
-[ ] Invariants: 0 violations
-[ ] Re-verify passage format
-[ ] Re-verify question types
-[ ] SQL exports without error
-[ ] Seed to DB: COMMIT
-```
-
----
-
-## 🚀 QUICK START
-
+### Step 1: Run TIER 1 Rule-Based
 ```bash
 // turbo
 cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python orchestrator.py "<URL>" 2>&1
 ```
 
-**After all 4 phases pass:**
+### Step 2: Read Cleaned Text + Normalized JSON
 ```bash
-PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "seed_exam_*.sql"
+// turbo 
+cat data/cleaned/ielts-mentor/<ITEM_ID>.txt | head -150
 ```
-
----
-
-## 🛡️ AUTOMATED INVARIANT CHECKS (14)
-
-| # | Check | Severity |
-|---|-------|----------|
-| 1-8 | Core checks | VIOLATION |
-| 9-14 | Strict rule checks | WARNING |
-
-**Violations = BLOCK** ❌ | **Warnings = Alert** ⚠️
-
-
----
-
-## 📊 PIPELINE FLOW (Claude = 90% work)
-
-> [!IMPORTANT]
-> **Claude BẮT BUỘC check sau MỖI phiên Gemini** - không phải chỉ khi fail!
-
-### Complete Flow:
-
-```
-1. TIER 1: Rule-Based Auto (Python)
-       ↓
-2. Gemini PRE-CHECK
-       ↓
-3. ⭐ Claude CHECK #1 (bắt buộc)
-       ↓
-4. Gemini POST-CHECK
-       ↓
-5. ⭐ Claude CHECK #2 (bắt buộc) + Seed
-```
-
-### TIER 1: Rule-Based Auto
 ```bash
-python orchestrator.py "<URL>"
-```
-Auto xử lý: Fetch → Clean → Parse → Normalize → Validate → Invariants → Export
-
-### Gemini PRE-CHECK
-Quick scan: passage length, missing fields, encoding garbage.
-
-### ⭐ Claude CHECK #1 (CHÍNH)
-**BẮT BUỘC sau Gemini PRE-CHECK.**
-
-**Checklist:**
-- [ ] Verify source website
-- [ ] Check question types match instructions
-- [ ] Fix options/prompts/answers
-- [ ] Add instruction_md
-
-**Key fixes:**
-| Source Instruction | Correct Type |
-|-------------------|--------------|
-| "TRUE/FALSE/NOT GIVEN" | TRUE_FALSE_NOT_GIVEN |
-| "Choose A, B, C or D" | MULTIPLE_CHOICE_SINGLE |
-| "Which TWO" | MULTIPLE_CHOICE_MULTIPLE |
-| "Which paragraph" | MATCHING_INFORMATION |
-| "heading i-xi" | MATCHING_HEADING |
-
-### Gemini POST-CHECK
-Verify Claude's fixes. Expect: PASS 80-100%.
-
-### ⭐ Claude CHECK #2 + Seed
-**BẮT BUỘC sau Gemini POST-CHECK.**
-
-**Final checklist:**
-- [ ] Invariants: 0 violations, 0 warnings
-- [ ] Export SQL
-- [ ] Seed to DB
-- [ ] (Optional) Test frontend
-
-```bash
-PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "seed_exam_*.sql"
+// turbo
+cat data/normalized/ielts-mentor/<ITEM_ID>.json | head -100
 ```
 
----
+### Step 3: ⭐ Claude CHECK #1 - FIX STRICT RULES
+Check và FIX ngay nếu vi phạm:
 
-## ✅ VALIDATION CHECKLIST
+| Rule | Check | Fix |
+|------|-------|-----|
+| Passage garbage | Contains user comments | Extract full from cleaned text |
+| No paragraph labels | Missing `**Paragraph A.**` | Add proper format |
+| Embedded questions | Q1-8 in passage | Remove from passage |
+| Wrong type | MCQ_SINGLE ≠ source instruction | Change to correct type |
+| MATCHING_INFO options | Has options[] | Clear to `[]` |
+| Missing instruction_md | None | Add `**Questions X-Y:**` format |
+| Leading numbers | `1. Statement` | Remove number prefix |
+| **Multi-Passage** | 2+ distinct texts in 1 section | Split into 2+ sections |
+| **MATCHING_HEADING options** | Missing `i. ii. iii.` list | Add all heading options |
 
-### Per-Crawl Checklist:
-```
-[ ] Passage ≥ 500 words
-[ ] Paragraph labels: **Paragraph A.**\n format
-[ ] Instruction present: **Questions X-Y:**
-[ ] All answers filled
-[ ] Blanks use _______ not ...
-[ ] No leading numbers in prompts
-[ ] MATCHING_INFO has empty options[]
-[ ] Gemini v2 QA = PASS (Tier 2.5)
-[ ] SQL seeds without error
-```
-
-### 10-Role Summary:
-- [ ] Role 1-2: Input valid, no duplicates
-- [ ] Role 3-4: Passage full, prompts verbatim
-- [ ] Role 5-6: Types correct, options formatted
-- [ ] Role 7-8: Answers correct, JSON valid
-- [ ] Role 9-10: SQL complete, production ready
-
----
-
-## 🚨 BUG REFERENCE
-
-### 1. PASSAGE ISSUES
-| Bug | Fix |
-|-----|-----|
-| Passage <500 words | Extract full from cleaned text |
-| Missing paragraph labels | Add `**Paragraph A.**\n` format |
-| Contains headings list (i-xi) | Move to MATCHING_HEADING options |
-| Missing instruction_md | Add `**Questions X-Y:**` format |
-
-### 2. TYPE MISMATCH
-| Bug | Fix |
-|-----|-----|
-| "Complete sentences" → MCQ | Change to SHORT_ANSWER |
-| "Which paragraph" → SHORT_ANSWER | Change to MATCHING_INFO |
-| "These TWO films" → MATCHING_INFO | Change to MCQ_MULTIPLE |
-
-### 3. OPTIONS ISSUES
-| Bug | Fix |
-|-----|-----|
-| MATCHING_INFO has options | Clear to `[]` |
-| MATCHING_HEADING missing headings | Add all i-xi headings |
-| TFNG missing isCorrect | Set exactly 1 correct |
-
-### 4. PROMPT ISSUES
-| Bug | Fix |
-|-----|-----|
-| `"1. Question"` leading number | Remove number prefix |
-| `"pay ... week"` ellipsis | Replace with `_______` |
-| Contains options A/B/C | Move to options array |
-
-### 5. ENCODING ISSUES
-| Bug | Fix |
-|-----|-----|
-| Smart quotes `""` | Replace with `""` |
-| Ligatures `ﬁ ﬂ` | Replace with `fi fl` |
-| Em dash `—` | Replace with `--` |
-
----
-
-## 🔧 AUTO-FIX TEMPLATES
-
-### Quick Fix Template:
+**Create fix script if needed:**
 ```python
+# /tmp/fix_<ITEM_ID>.py
 import json, re
 from pathlib import Path
+# ... apply fixes ...
+```
 
-ITEM_ID = "<ITEM_ID>"
-data_path = Path(f"/home/khoa/RiderProjects/Project_Langfens_Microservice/data/normalized/ielts-mentor/{ITEM_ID}.json")
-data = json.loads(data_path.read_text())
+### Step 4: ⭐ Gemini POST-CHECK (MANDATORY)
+```bash
+// turbo
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py ielts-mentor <ITEM_ID> 2>&1
+```
+**Record Gemini decision (PASS/FAIL) and issues for QA report.**
 
-for q in data['questions']:
-    # Fix blank patterns
-    q['prompt_md'] = q.get('prompt_md', '').replace('...', '_______').replace('…', '_______')
-    # Fix leading numbers
-    q['prompt_md'] = re.sub(r'^\d+[\.\)]\s+', '', q['prompt_md'])
-    # Fix MATCHING_INFO options
-    if q['type'] in ['MATCHING_INFORMATION', 'MATCHING_FEATURES']:
-        q['options'] = []
+### Step 5: ⭐ Claude CHECK #2 - Final Verify
+```bash
+// turbo
+python invariants.py ielts-mentor <ITEM_ID> 2>&1
+```
+**MUST show: `Valid: True`**
 
-# Fix paragraph labels
-passage = data['sections'][0].get('passage_md', '')
-for letter in 'ABCDEFGH':
-    passage = re.sub(rf'(?:^|\n){letter}\.\s+', f'\n\n**Paragraph {letter}.**\n', passage)
+### Step 6: Export + Seed
+```bash
+python export.py ielts-mentor <ITEM_ID>
+```
+```bash
+PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/seed_exam_*.sql"
+```
+
+### Step 7: 📋 Full QA Report
+**MANDATORY** - Notify user với bảng chi tiết:
+
+```markdown
+## 📋 QA REPORT - Exam <ITEM_ID>
+
+### Pipeline Execution:
+| Stage | Phase | Status | Details |
+|-------|-------|--------|---------|
+| 1 | FETCH | ✅/❌ | words count |
+| 2 | CLEAN | ✅/❌ | words count |
+| 3 | PARSE | ✅/❌ | questions count |
+| 4 | NORMALIZE | ✅/❌ | auto-fixes applied |
+| 5 | VALIDATE | ✅/❌ | warnings count |
+| 6 | INVARIANTS | ✅/❌ | violations count |
+| 6.5 | **Gemini** | ✅/❌ | decision + confidence |
+| 7 | REPAIR | ✅/❌ | repairs count |
+| - | **Claude #1** | ✅/❌ | manual fixes |
+| - | **Claude #2** | ✅/❌ | Valid: True/False |
+| 8 | EXPORT+SEED | ✅/❌ | COMMIT/FAIL |
+
+### Auto-Fixes (TIER 1):
+| Fix | Description |
+|-----|-------------|
+| ... | ... |
+
+### Claude Fixes (Manual):
+| Item | Fix |
+|------|-----|
+| ... | ... |
+
+### Gemini QA Result:
+- Decision: PASS/FAIL
+- Confidence: XX%
+- Issues: [list]
+
+### Final Validation:
+- Invariants: Valid = True/False
+- SHORT_ANSWER answers: [table if applicable]
+
+### DB Status: COMMIT/FAIL
+```
+
+---
+
+## 🚨 STRICT RULES (MUST FOLLOW!)
+
+> **4 AI CHECK STEPS**: normalize.py → repair.py → Gemini POST → Claude CHECK
+
+### Passage:
+| Rule | Format |
+|------|--------|
+| Paragraph Labels | `**Paragraph A.**\n` |
+| No embedded questions | Passage = text only |
+| Section separator | `---` between passages |
+| Passage length | ≥100 words |
+
+### Multi-Passage Detection (NEW):
+| Check | Fix |
+|-------|-----|
+| Source has 2+ distinct texts | Create 2+ sections |
+| Passage contains Q1-7 statements | Remove → questions array |
+| Passage has "Paragraph A/B/C" refs | Separate passage for MATCHING_HEADING |
+| instruction_md mismatch | Match each section's question type |
+
+### Embedded Questions Detection (NEW):
+| Pattern | Action |
+|---------|--------|
+| `1. Statement...` in passage | Remove → Q array |
+| `Paragraph A. 8. ...` | Extract to MATCHING_HEADING |
+| Roman numerals `i. ii. iii.` | Extract to MATCHING_HEADING options |
+| `A. option B. option` inline | Extract to MCQ options |
+
+### Questions:
+| Rule | Format |
+|------|--------|
+| No leading numbers | `Statement` NOT `1. Statement` |
+| Blank pattern | `_______` NOT `...` |
+| instruction_md | `**Questions X-Y:**` |
+
+### Answers (SHORT_ANSWER):
+| Source Format | correct_answers |
+|---------------|-----------------|
+| `Treasury` | `["Treasury"]` |
+| `(commemorative) coin` | `["coin", "commemorative coin"]` |
+| `(ornamental) stars` | `["stars", "ornamental stars"]` |
+| `colour// color` | `["colour", "color"]` |
+
+> **MANDATORY**: Nếu answer có dạng `(optional) word`, PHẢI có 2 đáp án trong `correct_answers`!
+
+### Types:
+| Type | Options | isCorrect |
+|------|---------|-----------|
+| TFNG | 3 items | exactly 1 |
+| MCQ_SINGLE | 4+ items | exactly 1 |
+| MATCHING_INFO | `[]` empty | - |
+| MATCHING_HEADING | 5+ headings | exactly 1 |
+
+---
+
+## 🔧 FIX TEMPLATES
+
+### Passage Fix:
+```python
+passage = """# TITLE
+
+**Paragraph A.**
+Text paragraph A...
+
+**Paragraph B.**
+Text paragraph B..."""
 data['sections'][0]['passage_md'] = passage
-
-data_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
-print(f"✓ Fixed {ITEM_ID}")
 ```
 
-### Passage Extraction Template:
+### instruction_md Fix:
 ```python
-# If passage <500 words, extract from cleaned text
-cleaned = Path(f".../cleaned/ielts-mentor/{ITEM_ID}.txt").read_text()
-start = re.search(r'(?:People|The|In|Back)', cleaned)
-end = re.search(r'Questions \d+-\d+', cleaned)
-if start and end:
-    full_passage = cleaned[start.start():end.start()].strip()
-    data['sections'][0]['passage_md'] = full_passage
+data['sections'][0]['instruction_md'] = """**Questions 1-8:**
+Do the following statements agree with the information?
+
+Write
+- **TRUE** if the statement agrees
+- **FALSE** if it contradicts
+- **NOT GIVEN** if no information"""
 ```
 
-### MATCHING_HEADING Fix Template:
+### MATCHING_INFO Fix:
 ```python
-HEADINGS = [
-    {"value": "i", "label": "i. Heading text 1", "is_correct": False},
-    {"value": "ii", "label": "ii. Heading text 2", "is_correct": False},
-    # ... add all headings
-]
-
 for q in data['questions']:
-    if q['type'] == 'MATCHING_HEADING':
-        correct_ans = q['correct_answers'][0].lower()
-        opts = []
-        for h in HEADINGS:
-            opt = dict(h)
-            opt['is_correct'] = (opt['value'] == correct_ans)
-            opts.append(opt)
-        q['options'] = opts
+    if q['type'] == 'MATCHING_INFORMATION':
+        q['options'] = []
+        q['prompt_md'] = re.sub(r'^.*\d+\.\s*', '', q['prompt_md'])
 ```
 
 ---
 
 ## 🔒 GOLDEN RULES
 
-1. **KHÔNG bịa** - Chỉ trích từ source verbatim
-2. **KHÔNG paraphrase** - Giữ nguyên văn
-3. **VERIFY với source** - Check website khi không chắc
-4. **Passage ≥ 500 words** - Extract full nếu ngắn
-5. **Paragraph labels BẮT BUỘC** - `**Paragraph A.**\n`
+1. **KHÔNG bịa** - Chỉ trích từ source
+2. **KHÔNG paraphrase** - Giữ nguyên văn  
+3. **Paragraph labels BẮT BUỘC** - `**Paragraph A.**\n`
+4. **MATCHING_INFO options = []**
+5. **instruction_md BẮT BUỘC**
 
 ---
 
 ## 🔗 RELATED
 
-- @[/ielts-data-format] - Strict JSON schemas (31 rules)
+- @[/ielts-data-format] - Strict JSON schemas
