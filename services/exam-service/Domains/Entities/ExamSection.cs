@@ -17,6 +17,7 @@ public class ExamSection
     [Required] public string Title { get; set; } = string.Empty;
 
     public string? InstructionsMd { get; set; }
+    public string? PassageMd { get; set; }  // Reading passage text (separate from instructions)
     public string? AudioUrl { get; set; }
     public string? TranscriptMd { get; set; }
 

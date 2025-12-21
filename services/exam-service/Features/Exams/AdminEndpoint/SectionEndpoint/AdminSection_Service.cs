@@ -47,6 +47,7 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                 ExamId = dto.ExamId,
                 Idx = desired,
                 InstructionsMd = dto.InstructionsMd,
+                PassageMd = dto.PassageMd,
                 Title = dto.Title,
                 AudioUrl = dto.AudioUrl,
                 TranscriptMd = dto.TranscriptMd
@@ -84,6 +85,7 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                         .SetProperty(s => s.Idx, dto.Idx)
                         .SetProperty(s => s.Title, dto.Title)
                         .SetProperty(s => s.InstructionsMd, dto.InstructionsMd)
+                        .SetProperty(s => s.PassageMd, dto.PassageMd)
                         .SetProperty(s => s.AudioUrl, dto.AudioUrl)
                         .SetProperty(s => s.TranscriptMd, dto.TranscriptMd),
                     token);
@@ -122,6 +124,7 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                 s.Idx,
                 s.Title,
                 s.InstructionsMd,
+                s.PassageMd,
                 s.AudioUrl,
                 s.TranscriptMd
             })

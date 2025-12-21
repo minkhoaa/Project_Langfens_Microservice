@@ -1365,15 +1365,17 @@ def _generate_exam_insert_pg(exam: dict) -> list[str]:
 def _generate_section_insert_pg(section: dict, sec_idx: int) -> list[str]:
     """Generate PostgreSQL INSERT for exam_sections table."""
     instructions = section.get('instructionsMd', '')
+    passage = section.get('passageMd', '')
     
     return [
-        f"  INSERT INTO exam_sections (\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\")",
+        f"  INSERT INTO exam_sections (\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\",\"PassageMd\")",
         "  VALUES (",
         f"    sec{sec_idx},",
         "    exam_id,",
         f"    {section.get('idx', sec_idx)},",
         f"    {_pg_escape(section.get('title'))},",
-        f"    {_pg_escape(instructions, is_e_string=True)}",
+        f"    {_pg_escape(instructions, is_e_string=True)},",
+        f"    {_pg_escape(passage, is_e_string=True)}",
         "  );",
     ]
 

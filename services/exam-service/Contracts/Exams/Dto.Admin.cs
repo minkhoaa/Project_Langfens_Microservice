@@ -25,6 +25,7 @@ public class DtoAdmin
         int? Idx,
         string Title,
         string? InstructionsMd,
+        string? PassageMd,
         string? AudioUrl,
         string? TranscriptMd);
 
@@ -33,6 +34,7 @@ public class DtoAdmin
         int? Idx,
         string Title,
         string? InstructionsMd,
+        string? PassageMd,
         string? AudioUrl,
         string? TranscriptMd);
 

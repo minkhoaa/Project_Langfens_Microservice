@@ -150,15 +150,21 @@ def _generate_section_sql(section: dict, idx: int) -> list[str]:
     
     title = escape_sql(section.get('title', f'Section {idx}'))
     instructions = escape_sql(section.get('instructionsMd', ''))
+    passage = escape_sql(section.get('passageMd', ''))
+    
+    # PassageMd = actual reading passage content
+    # InstructionsMd = question instructions
+    passage_content = f"# Passage\\n\\n{passage}" if passage else ''
     
     lines.extend([
-        f"  INSERT INTO exam_sections (\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\")",
+        f"  INSERT INTO exam_sections (\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\",\"PassageMd\")",
         "  VALUES (",
         f"    sec{idx},",
         "    exam_id,",
         f"    {idx},",
         f"    E'{title}',",
-        f"    E'# Passage\\n\\n{instructions}'",
+        f"    E'{instructions}',",
+        f"    E'{passage_content}'",
         "  );",
         "",
     ])

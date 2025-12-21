@@ -19,6 +19,7 @@ public class InternalExamDto
         int Idx,
         string Title,
         string? InstructionsMd,
+        string? PassageMd,
         string? AudioUrl,
         string? TranscriptMd,
         IReadOnlyList<InternalDeliveryQuestion> Questions);

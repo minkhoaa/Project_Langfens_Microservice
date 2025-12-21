@@ -163,19 +163,29 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
             if audio_url:
                 # Insert AudioUrl into exam_sections INSERT
                 sql = sql.replace(
-                    '\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\")',
-                    '\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\",\"AudioUrl\")'
+                    '"Id","ExamId","Idx","Title","InstructionsMd","PassageMd")',
+                    '"Id","ExamId","Idx","Title","InstructionsMd","PassageMd","AudioUrl")'
                 )
-                # Find the section INSERT and add audio_url value
-                # The section VALUES ends before the first qid := gen_random_uuid();
-                marker = "  qid := gen_random_uuid();"
-                if marker in sql:
-                    parts = sql.split(marker, 1)
-                    # Find the last );' before the marker
-                    section_end = parts[0].rfind("\\n  );")
-                    if section_end > 0:
-                        parts[0] = parts[0][:section_end] + f",\\n    '{audio_url}'\\n  );" + parts[0][section_end+6:]
-                    sql = marker.join(parts)
+                # Find the section INSERT end marker and add audio_url value
+                # Section INSERT is the first occurrence after "INSERT INTO exam_sections"
+                # Look for the closing ");\\n" after section INSERT and add audio_url before
+                section_marker = 'INSERT INTO exam_sections'
+                if section_marker in sql:
+                    # Find the position after section marker
+                    section_start = sql.find(section_marker)
+                    # Find the first ");\\n" after section marker (end of VALUES(...))
+                    # This could be ");\\n\\n" or ");\\n  qid" etc.
+                    search_start = section_start + len(section_marker)
+                    # Find pattern ");\n" which ends the section INSERT
+                    end_marker = ");\n"
+                    end_pos = sql.find(end_marker, search_start)
+                    if end_pos > 0:
+                        # Insert audio_url value just before the );
+                        # Current: ...E'passage content')\n  );
+                        # Need: ...E'passage content',\n    'audio_url'\n  );
+                        # Find the last ')' before the ');'
+                        insert_pos = end_pos
+                        sql = sql[:insert_pos] + f",\n    '{audio_url}'" + sql[insert_pos:]
     else:
         logger.error(f"Unknown source: {source}")
         return None
