@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-20T19:40:28.782612
+-- Generated: 2025-12-21T13:18:12.098541
 -- Source: ielts-mentor.com
 -- Title: GT Reading 8 Section 3 - A very special Dog
 -- ============================================
@@ -51,7 +51,7 @@ BEGIN
     exam_id,
     1,
     'Reading Passage - GT Reading 8 Section 3 - A very special Dog',
-    E'# Passage\n\n# A VERY SPECIAL DOG\n\nIt is 8.15 a.m. A flight lands at Melbourne''s Tullamarine International Airport. Several hundred pieces of baggage are rushed from the plane onto a conveyor belt in the baggage reclaim annexe. Over the sound of roaring engines, rushing air vents and grinding generators, a dog barks. Florence, a sleek black labrador, wags her tail. Among the cavalcade of luggage passing beneath Florence''s all-smelling nose, is a nondescript hardback suitcase. Inside the case, within styrofoam casing, packed in loose pepper and coffee, wrapped in freezer paper and heat-sealed in plastic, are 18 kilograms of hashish. The cleverly concealed drugs don''t fool super-sniffer Florence, and her persistent scratching at the case alerts her handler. Florence is one of a truly new breed: the product of what is perhaps the only project in the world dedicated to breeding dogs solely to detect drugs. Ordinary dogs have a 0.1% chance of making it in drug detection. The new breeding programme, run by the Australian Customs, is so successful that more than 50% of its dogs make the grade. And what began as a wholly practical exercise in keeping illegal drugs out of Australia may end up playing a role in an entirely different sphere - the comparatively esoteric world of neurobiology. It turns out that it''s not Florence''s nose that makes her a top drug dog, but her unswerving concentration, plus a few other essential traits. Florence could help neurobiologists to understand both what they call ''attention processing'', the brain mechanisms that determine what a person pays attention to and for how long, and its flip side, problems such as Attention Deficit/Hyperactivity Disorder (ADHD). As many as 3 to 5% of children are thought to suffer from the condition in the US, where the incidence is highest, although diagnosis is often controversial. The Australian Customs has used dogs to find drugs since 1969. Traditionally, the animals came from pounds and private breeders. But, in 1993, fed up with the poor success rate of finding good dogs this way, John Vandeloo, senior instructor with the Detector Dog Unit, joined forces with Kath Champness, then a doctoral student at the University of Melbourne, and set up a breeding programme. Champness began by defining six essential traits that make a detector dog. First, every good detector dog must love praise because this is the only tool trainers have at their disposal, but the dog must still be able to work for long periods without it. Then it needs a strong hunting instinct and the stamina to keep sniffing at the taxing rate of around 300 times per minute. The ideal detector is also fearless enough to deal with jam-packed airport crowds and the roaring engine rooms of cargo ships. The remaining two traits are closely related and cognitive in nature. A good detector must be capable of focusing on the task of searching for drugs, despite the distractions in any airport or dockside. This is what neurobiologists call ''selective attention''. And finally, with potentially tens of thousands of hiding places for drugs, the dog must persevere and maintain focus for hours at a time. Neurobiologists call this ''sustained attention''. Vandeloo and Champness assess the dogs'' abilities to concentrate by marking them on a scale of between one and five according to how well they remain focused on a toy tossed into a patch of grass. Ivan scores a feeble one. He follows the toy, gets half-way there, then becomes distracted by places where the other dogs have been or by flowers in the paddock. Rowena, on the other hand, has phenomenal concentration; some might even consider her obsessive. When Vandeloo tosses the toy, nothing can distract her from the searching, not other dogs, not food. And even if no one is around to encourage her, she keeps looking just the same. Rowena gets a five. A person''s ability to pay attention, like a dog''s, depends on a number of overlapping cognitive behaviours, including memory and learning - the neurobiologist''s attention processing. Attention in humans can be tested by asking subjects to spot colours on a screen while ignoring shapes, or to spot sounds while ignoring visual cues, or to take a ''vigilance test''. Sitting a vigilance test is like being a military radar operator. Blips appear on a cluttered monitor infrequently and at irregular intervals. Rapid detection of all blips earns a high score. Five minutes into the test, one in ten subjects will start to miss the majority of the blips, one in ten will still be able to spot nearly all of them and the rest will come somewhere in between. Vigilance tasks provide signals that are infrequent and unpredictable - which is exactly what is expected of the dogs when they are asked to notice just a few odour molecules in the air, and then to home in on the source. During a routine mail screen that can take hours, the dogs stay so focused that not even a postcard lined with 0.5 grams of heroin and hidden in a bulging sack of letters escapes detection. With the current interest in attentional processing, as well as human conditions that have an attention deficit component, such as ADHD, it is predicted that it is only a matter of time before the super-sniffer dogs attract the attention of neurobiologists trying to cure these conditions.\n\nA. a good relationship with people B. a willingness to work in smelly conditions C. quick reflexes D. an ability to work in noisy conditions E. an ability to maintain concentration F. a willingness to work without constant encouragement G. the skill to find things inlong grass H. experience as hunters I. a desire for people’s approval J. the ability to search a large number of places rapidly'
+    E'**Questions 28-32:**\n\nChoose the correct letter, **A, B, C** or **D**.\n\n---\n\n**Questions 33-36:**\n\nChoose **FOUR** letters, **A-J**.\n\nThe writer mentions a number of important qualities that detector dogs must have. Which **FOUR** of the following qualities are mentioned by the writer of the text?\n\n---\n\n**Questions 37-40:**\n\nDo the following statements agree with the information given in the text?\n\nWrite\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this\n\n---\n\n# A VERY SPECIAL DOG\n\nFlorence is one of a new breed of dog who is making the work of the Australian Customs much easier.\n\n**Paragraph A.**\n\nIt is 8.15 a.m. A flight lands at Melbourne''s Tullamarine International Airport. Several hundred pieces of baggage are rushed from the plane onto a conveyor belt in the baggage reclaim annexe. Over the sound of roaring engines, rushing air vents and grinding generators, a dog barks. Florence, a sleek black labrador, wags her tail.\n\n**Paragraph B.**\n\nAmong the cavalcade of luggage passing beneath Florence''s all-smelling nose, is a nondescript hardback suitcase. Inside the case, within styrofoam casing, packed in loose pepper and coffee, wrapped in freezer paper and heat-sealed in plastic, are 18 kilograms of hashish.\n\n**Paragraph C.**\n\nThe cleverly concealed drugs don''t fool super-sniffer Florence, and her persistent scratching at the case alerts her handler. Florence is one of a truly new breed: the product of what is perhaps the only project in the world dedicated to breeding dogs solely to detect drugs. Ordinary dogs have a 0.1% chance of making it in drug detection. The new breeding programme, run by the Australian Customs, is so successful that more than 50% of its dogs make the grade.\n\n**Paragraph D.**\n\nAnd what began as a wholly practical exercise in keeping illegal drugs out of Australia may end up playing a role in an entirely different sphere - the comparatively esoteric world of neurobiology. It turns out that it''s not Florence''s nose that makes her a top drug dog, but her unswerving concentration, plus a few other essential traits. Florence could help neurobiologists to understand both what they call ''attention processing'', the brain mechanisms that determine what a person pays attention to and for how long, and its flip side, problems such as Attention Deficit/Hyperactivity Disorder (ADHD). As many as 3 to 5% of children are thought to suffer from the condition in the US, where the incidence is highest, although diagnosis is often controversial.\n\n**Paragraph E.**\n\nThe Australian Customs has used dogs to find drugs since 1969. Traditionally, the animals came from pounds and private breeders. But, in 1993, fed up with the poor success rate of finding good dogs this way, John Vandeloo, senior instructor with the Detector Dog Unit, joined forces with Kath Champness, then a doctoral student at the University of Melbourne, and set up a breeding programme.\n\n**Paragraph F.**\n\nChampness began by defining six essential traits that make a detector dog. First, every good detector dog must love praise because this is the only tool trainers have at their disposal, but the dog must still be able to work for long periods without it. Then it needs a strong hunting instinct and the stamina to keep sniffing at the taxing rate of around 300 times per minute. The ideal detector is also fearless enough to deal with jam-packed airport crowds and the roaring engine rooms of cargo ships.\n\n**Paragraph G.**\n\nThe remaining two traits are closely related and cognitive in nature. A good detector must be capable of focusing on the task of searching for drugs, despite the distractions in any airport or dockside. This is what neurobiologists call ''selective attention''. And finally, with potentially tens of thousands of hiding places for drugs, the dog must persevere and maintain focus for hours at a time. Neurobiologists call this ''sustained attention''.\n\n**Paragraph H.**\n\nVandeloo and Champness assess the dogs'' abilities to concentrate by marking them on a scale of between one and five according to how well they remain focused on a toy tossed into a patch of grass. Ivan scores a feeble one. He follows the toy, gets half-way there, then becomes distracted by places where the other dogs have been or by flowers in the paddock. Rowena, on the other hand, has phenomenal concentration; some might even consider her obsessive. When Vandeloo tosses the toy, nothing can distract her from the searching, not other dogs, not food. And even if no one is around to encourage her, she keeps looking just the same. Rowena gets a five.\n\n**Paragraph I.**\n\nA person''s ability to pay attention, like a dog''s, depends on a number of overlapping cognitive behaviours, including memory and learning - the neurobiologist''s attention processing. Attention in humans can be tested by asking subjects to spot colours on a screen while ignoring shapes, or to spot sounds while ignoring visual cues, or to take a ''vigilance test''. Sitting a vigilance test is like being a military radar operator. Blips appear on a cluttered monitor infrequently and at irregular intervals. Rapid detection of all blips earns a high score. Five minutes into the test, one in ten subjects will start to miss the majority of the blips, one in ten will still be able to spot nearly all of them and the rest will come somewhere in between.\n\n**Paragraph J.**\n\nVigilance tasks provide signals that are infrequent and unpredictable - which is exactly what is expected of the dogs when they are asked to notice just a few odour molecules in the air, and then to home in on the source. During a routine mail screen that can take hours, the dogs stay so focused that not even a postcard lined with 0.5 grams of heroin and hidden in a bulging sack of letters escapes detection.\n\n**Paragraph K.**\n\nWith the current interest in attentional processing, as well as human conditions that have an attention deficit component, such as ADHD, it is predicted that it is only a matter of time before the super-sniffer dogs attract the attention of neurobiologists trying to cure these conditions.'
   );
 
   qid := gen_random_uuid();
@@ -63,14 +63,14 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    '28. The drugs in the suitcase A were hidden inside the lining. B had pepper and coffee around them. C had previously been frozen. D had a special smell to repel dogs.',
+    'The drugs in the suitcase',
     'Choose the correct answer.',
     NULL
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. were hidden inside the lining.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. had pepper and coffee around them.', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. had previously been frozen.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. had a special smell to repel dogs.', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -81,14 +81,14 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    '29. Most dogs are not good at finding drugs because A they don’t work well with a handler. B they lack the right training. C the drugs are usually very well hidden. D they lack certain genetic qualities.',
+    'Most dogs are not good at finding drugs because',
     'Choose the correct answer.',
     NULL
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. they don''t work well with a handler.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. they lack the right training.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. the drugs are usually very well hidden.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. they lack certain genetic qualities.', true);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -99,14 +99,14 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    '30. Florence is a good drug detector because she A has a better sense of smell than other dogs. B is not easily distracted. C has been specially trained to work at airports. D enjoys what she is doing.',
+    'Florence is a good drug detector because she',
     'Choose the correct answer.',
     NULL
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. has a better sense of smell than other dogs.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. is not easily distracted.', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. has been specially trained to work at airports.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. enjoys what she is doing.', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -117,14 +117,14 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    '31. Dogs like Florence may help scientists understand A how human and dog brains differ. B how people can use both sides of their brain. C why some people have difficulty paying attention. D the best way for people to maintain their focus.',
+    'Dogs like Florence may help scientists understand',
     'Choose the correct answer.',
     NULL
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. how human and dog brains differ.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. how people can use both sides of their brain.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. why some people have difficulty paying attention.', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. the best way for people to maintain their focus.', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -135,14 +135,14 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    '32. In 1993, the Australian Customs A decided to use its own dogs again. B was successful in finding detector dogs. C changed the way it obtained dogs. D asked private breeders to provide more dogs.',
+    'In 1993, the Australian Customs',
     'Choose the correct answer.',
     NULL
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. decided to use its own dogs again.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. was successful in finding detector dogs.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. changed the way it obtained dogs.', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. asked private breeders to provide more dogs.', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -153,14 +153,20 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    'Question 33',
+    'Which quality is mentioned by the writer as important for detector dogs? (Answer 1 of 4)',
     'Choose the correct answer.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. a good relationship with people', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. a willingness to work in smelly conditions', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. quick reflexes', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. an ability to work in noisy conditions', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. an ability to work in noisy conditions', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. an ability to maintain concentration', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 6, 'F. a willingness to work without constant encouragement', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 7, 'G. the skill to find things in long grass', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 8, 'H. experience as hunters', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 9, 'I. a desire for people''s approval', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 10, 'J. the ability to search a large number of places rapidly', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -171,7 +177,7 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    'Question 34',
+    'Which quality is mentioned by the writer as important for detector dogs? (Answer 2 of 4)',
     'Choose the correct answer.',
     NULL
   );
@@ -179,6 +185,12 @@ BEGIN
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. a willingness to work in smelly conditions', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. quick reflexes', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. an ability to work in noisy conditions', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. an ability to maintain concentration', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 6, 'F. a willingness to work without constant encouragement', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 7, 'G. the skill to find things in long grass', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 8, 'H. experience as hunters', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 9, 'I. a desire for people''s approval', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 10, 'J. the ability to search a large number of places rapidly', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -189,7 +201,7 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    'Question 35',
+    'Which quality is mentioned by the writer as important for detector dogs? (Answer 3 of 4)',
     'Choose the correct answer.',
     NULL
   );
@@ -197,6 +209,12 @@ BEGIN
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. a willingness to work in smelly conditions', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. quick reflexes', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. an ability to work in noisy conditions', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. an ability to maintain concentration', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 6, 'F. a willingness to work without constant encouragement', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 7, 'G. the skill to find things in long grass', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 8, 'H. experience as hunters', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 9, 'I. a desire for people''s approval', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 10, 'J. the ability to search a large number of places rapidly', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -207,7 +225,7 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
-    'Question 36',
+    'Which quality is mentioned by the writer as important for detector dogs? (Answer 4 of 4)',
     'Choose the correct answer.',
     NULL
   );
@@ -215,6 +233,12 @@ BEGIN
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. a willingness to work in smelly conditions', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. quick reflexes', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. an ability to work in noisy conditions', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. an ability to maintain concentration', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 6, 'F. a willingness to work without constant encouragement', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 7, 'G. the skill to find things in long grass', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 8, 'H. experience as hunters', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 9, 'I. a desire for people''s approval', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 10, 'J. the ability to search a large number of places rapidly', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -225,7 +249,7 @@ BEGIN
     'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n37. Methods of determining if a child has ADHD are now widely accepted.',
+    'Methods of determining if a child has ADHD are now widely accepted.',
     'Choose the correct answer.',
     NULL
   );
@@ -242,7 +266,7 @@ BEGIN
     'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n38. After about five minutes of a vigilance test, some subjects will still notice some blips.',
+    'After about five minutes of a vigilance test, some subjects will still notice some blips.',
     'Choose the correct answer.',
     NULL
   );
@@ -259,7 +283,7 @@ BEGIN
     'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n39. Vigilance tests help improve concentration.',
+    'Vigilance tests help improve concentration.',
     'Choose the correct answer.',
     NULL
   );
@@ -276,7 +300,7 @@ BEGIN
     'TRUE_FALSE_NOT_GIVEN',
     'READING',
     2,
-    'TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n40. If a few grams of a drug are well concealed, even the best dogs will miss them.',
+    'If a few grams of a drug are well concealed, even the best dogs will miss them.',
     'Choose the correct answer.',
     NULL
   );

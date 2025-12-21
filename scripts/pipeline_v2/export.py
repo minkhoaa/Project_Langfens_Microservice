@@ -85,11 +85,18 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
         # to old crawler format (prompt, correct_answer)
         converted_questions = []
         for q in questions:
+            # For SHORT_ANSWER, pass full array as correct_answer for ShortAnswerAcceptTexts
+            correct_answers = q.get('correct_answers', [])
+            if q.get('type') == 'SHORT_ANSWER' and len(correct_answers) > 1:
+                correct_answer = correct_answers  # Pass full list
+            else:
+                correct_answer = correct_answers[0] if correct_answers else q.get('correct_answer', '')
+            
             converted_q = {
                 'idx': q.get('idx'),
                 'type': q.get('type'),
                 'prompt': q.get('prompt_md', q.get('prompt', '')),
-                'correct_answer': q.get('correct_answers', [''])[0] if q.get('correct_answers') else q.get('correct_answer', ''),
+                'correct_answer': correct_answer,
                 'options': q.get('options', []),
             }
             converted_questions.append(converted_q)

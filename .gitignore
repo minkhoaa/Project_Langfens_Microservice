@@ -127,3 +127,38 @@ services/speaking-service/Helper/whisper/models/*.bin
 
 # Python environments and certificates (already have .pem but being explicit)
 **/cacert.pem
+
+# ------------------------------
+# Pipeline V2 - Data directories
+# ------------------------------
+# Keep: deploy/seeds/*.sql (final output)
+# Keep: scripts/pipeline_v2/*.py (pipeline code)
+# Exclude: ALL data/ directories (can regenerate)
+
+# All data directories (regenerable)
+data/
+
+# Cleaned text (can regenerate)
+data/cleaned/
+
+# Extracted JSON (can regenerate)
+data/extracted/
+
+# Parsed data (can regenerate)
+data/parsed/
+
+# Normalized JSON (can regenerate from cleaned)
+data/normalized/
+
+# Output JSON (intermediate, SQL is final)
+data/output/
+
+# Quarantine (failed items, temp)
+data/quarantine/
+
+# Cache files
+data/.cache/
+
+# Temp fix scripts
+/tmp/fix_*.py
+scripts/pipeline_v2/fix_*.py

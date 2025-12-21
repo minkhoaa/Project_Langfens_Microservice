@@ -262,26 +262,10 @@ def repair_matching_paragraph_options(data: dict, result: RepairResult) -> None:
         avg_label_len = sum(len(opt.get('label', '')) for opt in options) / len(options)
         
         if avg_label_len > 50:  # Likely paragraph content
-            # This is a MATCHING question with A-D options, not full paragraph MCQ
-            # Convert to simple A/B/C/D format
-            
-            # Get unique option values (A, B, C, D...)
-            unique_values = sorted(set(opt.get('value', '').upper() for opt in options))
-            
-            # Rebuild options with simple labels
-            new_options = []
-            for val in unique_values:
-                if val and len(val) == 1 and val.isalpha():
-                    new_options.append({
-                        'value': val,
-                        'label': val,
-                        'is_correct': val == correct.upper() if correct else False
-                    })
-            
-            if new_options:
-                q['options'] = new_options
-                q['type'] = 'MATCHING_INFORMATION'
-                result.add_repair(f"Q{idx}: Cleaned paragraph options → simple A-D (MATCHING_INFORMATION)")
+            # This is a MATCHING question - clear options (MATCHING types should have empty options)
+            q['options'] = []  # MATCHING_INFORMATION/MATCHING_FEATURES use matchPairs, not options
+            q['type'] = 'MATCHING_INFORMATION'
+            result.add_repair(f"Q{idx}: Cleared paragraph options for MATCHING_INFORMATION")
 
 
 def repair_detect_question_type_from_instruction(data: dict, result: RepairResult) -> None:
@@ -530,16 +514,9 @@ def repair_add_options_from_answers(data: dict, result: RepairResult) -> None:
             result.add_repair(f"Q{idx}: Added YES/NO/NOT GIVEN options")
             continue
         
-        # MATCHING_INFORMATION - build A-F/H options
-        if q_type == 'MATCHING_INFORMATION' and len(options) < 4:
-            if len(answer) == 1 and answer in 'ABCDEFGH':
-                max_letter = max('F', answer)
-                new_options = []
-                for c in 'ABCDEFGH':
-                    if c <= max_letter:
-                        new_options.append({'value': c, 'label': c, 'is_correct': c == answer})
-                q['options'] = new_options
-                result.add_repair(f"Q{idx}: Added A-{max_letter} options for MATCHING_INFORMATION")
+        # MATCHING_INFORMATION - DO NOT add options here!
+        # normalize.py already clears options for MATCHING_INFORMATION/MATCHING_FEATURES
+        # Adding options here would conflict with that auto-fix
 
 
 def repair_smart_answer_fallback(data: dict, result: RepairResult) -> None:
