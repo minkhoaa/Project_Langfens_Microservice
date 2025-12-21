@@ -479,6 +479,12 @@ def normalize_rule_based(data: dict) -> dict:
     title = data.get('title', 'IELTS Reading Test')
     slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
     
+    # Detect exam type
+    exam_type = data.get('exam_type', 'reading')
+    audio_url = data.get('audio_url', '')
+    if audio_url and not exam_type == 'listening':
+        exam_type = 'listening'
+    
     # Build passage markdown - handle both 'passages' and 'passage' (mini-ielts)
     passage_md = ""
     passage_list = data.get('passages', []) or data.get('passage', [])
@@ -497,13 +503,31 @@ def normalize_rule_based(data: dict) -> dict:
             label = labels[i]
         
         if label:
-            passage_md += f"**Paragraph {label}.**\n{text}\n\n"
+            passage_md += f"**Paragraph {label}.**\\n{text}\\n\\n"
         else:
-            passage_md += f"{text}\n\n"
+            passage_md += f"{text}\\n\\n"
     
     # ========== AUTO-FIX: Paragraph Labels (Option 4) ==========
-    # Convert "A. Text" or "Section A" to "**Paragraph A.**\n"
+    # Convert "A. Text" or "Section A" to "**Paragraph A.**\\n"
     passage_md = auto_fix_paragraph_labels(passage_md)
+    
+    # ========== LISTENING EXAM: Generate context if passage too short ==========
+    if exam_type == 'listening' and len(passage_md.split()) < 100:
+        passage_md = f"""# Listening Test - {title}
+
+This is a listening practice test about {title.lower()}. Listen carefully to the audio recording and answer the questions below.
+
+**Instructions:**
+You will hear the recording ONCE only. Answer all questions based on what you hear in the audio.
+
+**About the Audio:**
+This test includes multiple choice questions and matching questions. Pay close attention to the speakers' discussions and take notes if needed.
+
+**Question Topics:**
+- Listen for key information and main ideas
+- Match features to correct categories
+- Identify specific details mentioned by speakers
+"""
     
     # Get raw text for enhanced parsing
     raw_text = data.get('_raw_text', '')

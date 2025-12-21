@@ -163,16 +163,19 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
             if audio_url:
                 # Insert AudioUrl into exam_sections INSERT
                 sql = sql.replace(
-                    '"Id","ExamId","Idx","Title","InstructionsMd")',
-                    '"Id","ExamId","Idx","Title","InstructionsMd","AudioUrl")'
+                    '\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\")',
+                    '\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\",\"AudioUrl\")'
                 )
-                # Add the audio_url value before the closing paren of section VALUES
-                # This is a bit hacky but works for the current SQL structure
-                import re as regex_module
-                section_pattern = r"(INSERT INTO exam_sections.*?VALUES\s*\([^)]+)(\);)"
-                def add_audio(match):
-                    return f"{match.group(1)},\n    '{audio_url}'{match.group(2)}"
-                sql = regex_module.sub(section_pattern, add_audio, sql, flags=regex_module.DOTALL)
+                # Find the section INSERT and add audio_url value
+                # The section VALUES ends before the first qid := gen_random_uuid();
+                marker = "  qid := gen_random_uuid();"
+                if marker in sql:
+                    parts = sql.split(marker, 1)
+                    # Find the last );' before the marker
+                    section_end = parts[0].rfind("\\n  );")
+                    if section_end > 0:
+                        parts[0] = parts[0][:section_end] + f",\\n    '{audio_url}'\\n  );" + parts[0][section_end+6:]
+                    sql = marker.join(parts)
     else:
         logger.error(f"Unknown source: {source}")
         return None
