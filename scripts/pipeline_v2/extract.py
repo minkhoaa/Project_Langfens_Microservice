@@ -32,11 +32,14 @@ def load_crawler_module(name: str, filename: str):
 
 crawler_ieltsmentor = load_crawler_module("crawler_ieltsmentor", "crawler-ieltsmentor.py")
 crawler_ieltswriting = load_crawler_module("crawler_ieltswriting", "crawler-ieltswriting.py")
+crawler_miniielts = load_crawler_module("crawler_miniielts", "crawler-miniielts.py")
 
 if crawler_ieltsmentor:
     logger.info("Successfully imported crawler-ieltsmentor.py")
 if crawler_ieltswriting:
     logger.info("Successfully imported crawler-ieltswriting.py")
+if crawler_miniielts:
+    logger.info("Successfully imported crawler-miniielts.py")
 
 
 def load_raw(source: str, item_id: str) -> Optional[dict]:
@@ -113,6 +116,34 @@ def extract_ielts_writing(html: str, url: str) -> dict:
     }
 
 
+def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
+    """
+    Extract data using mini-ielts crawler functions.
+    Supports both Reading and Listening.
+    """
+    c = crawler_miniielts  # alias
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    # Use extract_data from old crawler
+    raw_data = c.extract_data(url)
+    
+    # Get transcript from solution page if available
+    if solution_html:
+        solution_soup = BeautifulSoup(solution_html, 'html.parser')
+        transcript = ''
+        exam_review = solution_soup.find('div', class_='exam-review')
+        if exam_review:
+            transcript = exam_review.get_text(separator='\n', strip=True)
+        raw_data['transcript'] = transcript
+    
+    # Extract YouTube audio URL
+    iframe = soup.find('iframe')
+    if iframe and 'youtube.com' in str(iframe.get('src', '')):
+        raw_data['audio_url'] = iframe.get('src')
+    
+    return raw_data
+
+
 def extract(source: str, item_id: str) -> Optional[dict]:
     """
     Extract structured data from raw HTML.
@@ -131,6 +162,9 @@ def extract(source: str, item_id: str) -> Optional[dict]:
         extracted = extract_ielts_mentor(html, url)
     elif source == 'ielts-writing':
         extracted = extract_ielts_writing(html, url)
+    elif source == 'mini-ielts':
+        solution_html = raw.get('metadata', {}).get('solution_html', '')
+        extracted = extract_mini_ielts(html, url, solution_html)
     else:
         logger.error(f"Unknown source: {source}")
         return None
