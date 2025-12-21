@@ -117,31 +117,64 @@ def extract_ielts_writing(html: str, url: str) -> dict:
 
 
 def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
-    """
-    Extract data using mini-ielts crawler functions.
-    Supports both Reading and Listening.
-    """
-    c = crawler_miniielts  # alias
+    """Extract data using mini-ielts crawler functions."""
+    c = crawler_miniielts
     soup = BeautifulSoup(html, 'html.parser')
     
-    # Use extract_data from old crawler
-    raw_data = c.extract_data(url)
+    # Extract data directly from soup
+    meta_question_types = c._extract_meta_question_types(soup)
+    title = c._extract_title(soup)
+    passage = c._extract_passage(soup)
+    questions = c._extract_questions(soup, meta_question_types)
     
-    # Get transcript from solution page if available
+    # Get answers from solution page
+    answers = {}
+    transcript = ''
     if solution_html:
         solution_soup = BeautifulSoup(solution_html, 'html.parser')
-        transcript = ''
+        
+        # Extract answers from solution table
+        answer_table = solution_soup.find('table', class_='table-answer')
+        if not answer_table:
+            answer_table = solution_soup.find('table', class_='table-bordered')
+        
+        if answer_table:
+            for row in answer_table.find_all('tr'):
+                for cell in row.find_all('td'):
+                    text = cell.get_text(strip=True)
+                    match = re.match(r'^(\d+)[\.:\s]+(.+)$', text)
+                    if match:
+                        q_idx = int(match.group(1))
+                        answer = match.group(2).strip()
+                        answers[q_idx] = answer
+                        logger.info(f"  Extracted Q{q_idx}: {answer}")
+        
+        # Extract transcript
         exam_review = solution_soup.find('div', class_='exam-review')
         if exam_review:
             transcript = exam_review.get_text(separator='\n', strip=True)
-        raw_data['transcript'] = transcript
+    
+    # Apply answers to questions
+    for q in questions:
+        q_idx = q.get('idx')
+        if q_idx in answers:
+            q['correct_answer'] = answers[q_idx]
     
     # Extract YouTube audio URL
     iframe = soup.find('iframe')
+    audio_url = None
     if iframe and 'youtube.com' in str(iframe.get('src', '')):
-        raw_data['audio_url'] = iframe.get('src')
+        audio_url = iframe.get('src')
     
-    return raw_data
+    return {
+        "url": url,
+        "title": title,
+        "passage": passage,
+        "questions": questions,
+        "answers": answers,
+        "transcript": transcript,
+        "audio_url": audio_url
+    }
 
 
 def extract(source: str, item_id: str) -> Optional[dict]:
