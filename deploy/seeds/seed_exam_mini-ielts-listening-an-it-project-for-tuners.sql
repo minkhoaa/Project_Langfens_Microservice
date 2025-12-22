@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-22T11:46:43.926579
+-- Generated: 2025-12-22T15:39:11.527153
 -- Source: mini-ielts.com
 -- Title: An IT project for Tuners
 -- ============================================
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'Customer database',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nDự án IT này nhằm mục đích giúp những người lên dây đàn piano (piano tuners) quản lý công việc tốt hơn.',
     '{"info-q1": ["D", "d"]}'
   );
 
@@ -80,7 +80,7 @@ BEGIN
     'LISTENING',
     2,
     'Online sales catalogue',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nPhần mềm sẽ giúp họ lưu trữ thông tin khách hàng (customer details) và lịch sử bảo trì.',
     '{"info-q2": ["B", "b"]}'
   );
 
@@ -94,7 +94,7 @@ BEGIN
     'LISTENING',
     2,
     'Payroll',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nMột tính năng quan trọng là khả năng đặt lịch hẹn (schedule appointments) tự động.',
     '{"info-q3": ["A", "a"]}'
   );
 
@@ -108,7 +108,7 @@ BEGIN
     'LISTENING',
     2,
     'Stock inventory',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nDự án đang ở giai đoạn thử nghiệm (testing phase) với một nhóm nhỏ người dùng.',
     '{"info-q4": ["H", "h"]}'
   );
 
@@ -122,7 +122,7 @@ BEGIN
     'LISTENING',
     2,
     'Internal/external email system',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nPhản hồi ban đầu cho thấy giao diện người dùng (user interface) cần được cải thiện.',
     '{"info-q5": ["F", "f"]}'
   );
 
@@ -136,7 +136,7 @@ BEGIN
     'LISTENING',
     2,
     'Holiday entitlement',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nNhóm phát triển đang tìm kiếm thêm tài trợ (funding) để hoàn thiện sản phẩm.',
     '{"info-q6": ["E", "e"]}'
   );
 
@@ -150,7 +150,7 @@ BEGIN
     'LISTENING',
     2,
     'Which TWO features of the software testing process are mentioned?',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nSản phẩm dự kiến sẽ ra mắt vào cuối năm nay (end of the year).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Personal relationships.', false);
@@ -169,7 +169,7 @@ BEGIN
     'LISTENING',
     2,
     'Which TWO problems with focus groups are mentioned?',
-    'Choose the correct answer.',
+    E'**Đáp án: database**\n\nCơ sở dữ liệu (database) trung tâm sẽ lưu trữ hàng nghìn hồ sơ.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Punctuality.', true);

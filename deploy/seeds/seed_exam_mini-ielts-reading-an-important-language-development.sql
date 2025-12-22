@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-21T22:31:48.687554
+-- Generated: 2025-12-22T15:39:09.295287
 -- Source: mini-ielts.com
 -- Title: An important language development
 -- ============================================
@@ -65,7 +65,7 @@ BEGIN
     'READING',
     2,
     'Cuneiform tablets were produced in different shapes and sizes.',
-    'Choose the correct answer.',
+    E'**Đáp án: TRUE**\n\nCác phiến đất sét chữ hình nêm (Cuneiform tablets) được sản xuất với nhiều hình dạng và kích thước khác nhau. Thông tin này thường được nhắc đến đầu tiên về đặc điểm vật lý của chúng.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', true);
@@ -82,7 +82,7 @@ BEGIN
     'READING',
     2,
     'When Sumerian writers marked on the clay tablets, the tablets were dry',
-    'Choose the correct answer.',
+    E'**Đáp án: FALSE**\n\nKhi người Sumer viết lên phiến đất sét, phiến đá phải ẨM (wet/damp), không phải KHÔ (dry). Nếu đất sét khô thì không thể khắc chữ lên được. Do đó False.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', false);
@@ -99,7 +99,7 @@ BEGIN
     'READING',
     2,
     'Cuneiform was often difficult to read because of its size.',
-    'Choose the correct answer.',
+    E'**Đáp án: TRUE**\n\nChữ hình nêm thường khó đọc vì kích thước của chúng rất nhỏ hoặc do cách viết phức tạp. Điều này đúng với thực tế lịch sử.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', true);
@@ -116,7 +116,7 @@ BEGIN
     'READING',
     2,
     'A number of languages adopted cuneiform.',
-    'Choose the correct answer.',
+    E'**Đáp án: TRUE**\n\nNhiều ngôn ngữ khác nhau (như Akkadian, Hittite, Persian) đã chấp nhận và sử dụng hệ thống chữ viết hình nêm này. Đây là hệ thống viết phổ biến ở Trung Đông cổ đại.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', true);
@@ -133,7 +133,7 @@ BEGIN
     'READING',
     2,
     'Cuneiform signs, can be found in some modern alphabets.',
-    'Choose the correct answer.',
+    E'**Đáp án: NOT GIVEN**\n\nBài không đề cập thông tin liệu các ký tự hình nêm có được tìm thấy trong bảng chữ cái hiện đại hay không. Không có bằng chứng khẳng định hay phủ định.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', false);
@@ -150,7 +150,7 @@ BEGIN
     'READING',
     2,
     'tokens, for example, _______ were often used',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: stones**\n\nTokens, ví dụ như những viên đá (stones), thường được sử dụng để đếm hoặc ghi chép trước khi có chữ viết.',
     '{"blank-q6": ["stones"]}'::jsonb
   );
 
@@ -164,7 +164,7 @@ BEGIN
     'READING',
     2,
     'the first tokens were kept in containers made of _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: cloth**\n\nNhững tokens đầu tiên được giữ trong các túi làm bằng vải (cloth containers/bags).',
     '{"blank-q7": ["cloth"]}'::jsonb
   );
 
@@ -178,7 +178,7 @@ BEGIN
     'READING',
     2,
     'tokens were used as a _______ to give when selling something',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: receipt**\n\nTokens được sử dụng như một biên lai (receipt) để trao cho người mua khi bán một món hàng nào đó, xác nhận giao dịch.',
     '{"blank-q8": ["receipt"]}'::jsonb
   );
 
@@ -192,7 +192,7 @@ BEGIN
     'READING',
     2,
     'tokens were put in a container that looked like a clay _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: envelope**\n\nSau này, tokens được đặt trong một vật chứa bằng đất sét trông giống như một chiếc phong bì (envelope).',
     '{"blank-q9": ["envelope"]}'::jsonb
   );
 
@@ -206,7 +206,7 @@ BEGIN
     'READING',
     2,
     'at first, signs looked like what they indicated, e.g. _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: sheep**\n\nBan đầu, các ký hiệu trông giống vật chúng biểu thị (pictograms), ví dụ hình con cừu (sheep) để chỉ con cừu.',
     '{"blank-q10": ["sheep"]}'::jsonb
   );
 
@@ -220,7 +220,7 @@ BEGIN
     'READING',
     2,
     'eventually, cuneiform signs shaped like _______ were developed',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: triangles**\n\nCuối cùng, các ký tự hình nêm phát triển thành hình dạng giống tam giác (triangles) hoặc nêm (wedges) - do đó có tên gọi ''cuneiform'' (hình nêm/tam giác).',
     '{"blank-q11": ["triangles"]}'::jsonb
   );
 
@@ -234,7 +234,7 @@ BEGIN
     'READING',
     2,
     'according to experts, cuneiform was mainly used for _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: accounting**\n\nTheo các chuyên gia, chữ hình nêm chủ yếu được sử dụng cho mục đích kế toán (accounting) và ghi chép hành chính, thương mại.',
     '{"blank-q12": ["accounting"]}'::jsonb
   );
 
@@ -248,7 +248,7 @@ BEGIN
     'READING',
     2,
     'Rawlinson copied inscriptions onto _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: paper**\n\nRawlinson đã sao chép các văn khắc lên giấy (paper) để nghiên cứu và giải mã chúng.',
     '{"blank-q13": ["paper"]}'::jsonb
   );
 

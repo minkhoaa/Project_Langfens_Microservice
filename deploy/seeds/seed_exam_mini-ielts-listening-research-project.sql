@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-22T09:20:09.822669
+-- Generated: 2025-12-22T15:39:11.165326
 -- Source: mini-ielts.com
 -- Title: Research Project
 -- ============================================
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'How did John choose the topic of his research project?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nMục đích của dự án nghiên cứu là tìm hiểu thái độ (attitudes) của mọi người đối với việc tái chế.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. He thought the information would be useful for town planning.', false);
@@ -83,7 +83,7 @@ BEGIN
     'LISTENING',
     2,
     'During his research, John is expecting to find that',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nPhương pháp thu thập dữ liệu chính là phỏng vấn (interviews) trực tiếp.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. The use of public services has altered very little.', false);
@@ -100,7 +100,7 @@ BEGIN
     'LISTENING',
     2,
     'What is the problem with using official records?',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nKết quả cho thấy phần lớn người dân ủng hộ (supportive) các chương trình tái chế mới.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. They may be lacking in detail.', true);
@@ -117,7 +117,7 @@ BEGIN
     'LISTENING',
     2,
     'What does the tutor think about John using a questionnaire to get information?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nTuy nhiên, một rào cản lớn là thiếu thùng rác tái chế (recycling bins) ở nơi công cộng.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. He needs to do a course in questionnaire design first.', false);
@@ -134,7 +134,7 @@ BEGIN
     'LISTENING',
     2,
     'Which new variable does John agree to add to his investigation?',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nNhóm nghiên cứu đề xuất tăng cường giáo dục (education) về cách phân loại rác.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Occupation', false);
@@ -151,7 +151,7 @@ BEGIN
     'LISTENING',
     2,
     'How many questionnaires will John distribute?',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nĐối tượng nghiên cứu chính là các hộ gia đình (households) trong khu vực thành phố.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. The same number as in the previous study', false);
@@ -168,7 +168,7 @@ BEGIN
     'LISTENING',
     2,
     'Which strategies will John use to encourage people to fill out his questionnaire? (Answer 1 of 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nDữ liệu được phân tích bằng phần mềm thống kê (statistical software).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Using simple language', false);
@@ -187,7 +187,7 @@ BEGIN
     'LISTENING',
     2,
     'Which strategies will John use to encourage people to fill out his questionnaire? (Answer 2 of 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nBáo cáo cuối cùng sẽ được gửi cho hội đồng thành phố (city council).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Using simple language', false);
@@ -206,7 +206,7 @@ BEGIN
     'LISTENING',
     2,
     'Which advice does the tutor give John about his questionnaire? (Answer 1 of 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nNghiên cứu kéo dài trong khoảng 6 tháng (6 months).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. There should be a mixture of question types.', false);
@@ -225,7 +225,7 @@ BEGIN
     'LISTENING',
     2,
     'Which advice does the tutor give John about his questionnaire? (Answer 2 of 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nKinh phí nghiên cứu được tài trợ bởi một tổ chức môi trường (environmental organisation).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. There should be a mixture of question types.', false);

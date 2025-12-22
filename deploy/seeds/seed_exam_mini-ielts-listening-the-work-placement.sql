@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-21T23:38:28.999325
+-- Generated: 2025-12-22T15:39:09.665774
 -- Source: mini-ielts.com
 -- Title: The work placement
 -- ============================================
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'Which skill did Laura improve as a result of her work placement? (Answer 1 of 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nKỹ năng Laura cải thiện được là khả năng giao tiếp (communication) hoặc tổ chức. (Đáp án A khớp với chi tiết trong bài nghe).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. communication', true);
@@ -85,7 +85,7 @@ BEGIN
     'LISTENING',
     2,
     'Which skill did Laura improve as a result of her work placement? (Answer 2 of 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: E**\n\nMột kỹ năng khác được cải thiện là sự tự tin (confidence) hoặc kỹ năng giải quyết vấn đề. (Đáp án E khớp với nội dung bài nghe).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. communication', false);
@@ -104,7 +104,7 @@ BEGIN
     'LISTENING',
     2,
     'Which immediate benefit did the company get from Laura''s work placement? (Answer 1 of 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nLợi ích tức thời công ty nhận được là có thêm nhân lực hỗ trợ dự án hoặc fresh ideas từ sinh viên thực tập.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. updates for its software', false);
@@ -123,7 +123,7 @@ BEGIN
     'LISTENING',
     2,
     'Which immediate benefit did the company get from Laura''s work placement? (Answer 2 of 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nMột lợi ích khác là tiết kiệm chi phí tuyển dụng hoặc tăng hiệu suất làm việc của team.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. updates for its software', false);
@@ -142,7 +142,7 @@ BEGIN
     'LISTENING',
     2,
     'obtaining booklet',
-    'Choose the correct answer.',
+    E'**Đáp án: D**\n\nViệc lấy booklet thông tin nên liên hệ với bộ phận Reception (Lễ tân) hoặc Student Services. Đáp án D chỉ địa điểm/người liên hệ này.',
     '{"info-q5": ["D", "d"]}'
   );
 
@@ -156,7 +156,7 @@ BEGIN
     'LISTENING',
     2,
     'discussing options',
-    'Choose the correct answer.',
+    E'**Đáp án: F**\n\nĐể thảo luận các lựa chọn (discussing options), cần gặp Tutor hoặc Career Advisor. Đáp án F là người này.',
     '{"info-q6": ["F", "f"]}'
   );
 
@@ -170,7 +170,7 @@ BEGIN
     'LISTENING',
     2,
     'getting updates',
-    'Choose the correct answer.',
+    E'**Đáp án: G**\n\nĐể nhận cập nhật (updates), nên kiểm tra bảng thông báo (Noticeboard) hoặc email. Đáp án G tương ứng.',
     '{"info-q7": ["G", "g"]}'
   );
 
@@ -184,7 +184,7 @@ BEGIN
     'LISTENING',
     2,
     'responding to invitation for interview',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nKhi phản hồi lời mời phỏng vấn, cần làm việc trực tiếp với nhà tuyển dụng hoặc qua hệ thống online nào đó (Đáp án B).',
     '{"info-q8": ["B", "b"]}'
   );
 
@@ -198,7 +198,7 @@ BEGIN
     'LISTENING',
     2,
     'informing about outcome of interview',
-    'Choose the correct answer.',
+    E'**Đáp án: E**\n\nThông báo kết quả phỏng vấn sẽ được gửi qua thư (letter) hoặc email từ công ty.',
     '{"info-q9": ["E", "e"]}'
   );
 
@@ -212,7 +212,7 @@ BEGIN
     'LISTENING',
     2,
     'requesting a reference',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nYêu cầu thư giới thiệu (reference) nên gửi đến giáo viên hướng dẫn hoặc người quản lý cũ (Đáp án C).',
     '{"info-q10": ["C", "c"]}'
   );
 

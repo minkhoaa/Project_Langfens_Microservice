@@ -100,6 +100,7 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
                 'prompt': q.get('prompt_md', q.get('prompt', '')),
                 'correct_answer': correct_answer,
                 'options': q.get('options', []),
+                'explanation_md': q.get('explanation_md', ''),  # AI-generated explanation
             }
             
             # Add matchPairs for MATCHING_* question types

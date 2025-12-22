@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-21T22:35:07.235501
+-- Generated: 2025-12-22T15:39:11.345518
 -- Source: mini-ielts.com
 -- Title: Cubic houses
 -- ============================================
@@ -52,9 +52,9 @@ BEGIN
     1,
     'Listening Test - Cubic houses',
     E'**Questions 1-10:**\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.',
-    E'# Passage\n\n# Cube Houses - Listening Notes\n\n## Background Information\n\nAfter World War II, local urban planners wanted to redevelop and revive the city.\n\nAltogether, the Cube Houses can function as a _______ (1)\n\nEach Cube building is in the shape of a _______ (2)\n\nThe Cube Houses sit on top of a _______ (3) for pedestrians to the central city.\n\nDuring construction, the work was temporarily discontinued because the designer faced the problem of _______ (4)\n\n---\n\n## Design Features of the Cube Houses\n\nUnderneath the houses, there are three pillars made of _______ (5)\n\nA new building is situated between a warehouse and a _______ (6) of architecture.\n\nIt is a three-storey building.\n\nThe ground floor is an entrance.\n\nBoth the lower level and the top level of each house are in the shape of a _______ (7)\n\nThe first floor has a living room and an open kitchen.\n\nThe medium level has a bathroom and two bedrooms.\n\nThe top floor is sometimes used as a small _______ (8)\n\n---\n\n## Living in the Cube Houses\n\nThere is a nearby market _______ (9) across the square from the Cube Houses.\n\nFor guests, two advantages of the house are its convenient _______ (10) and reasonable price.',
-    'https://www.youtube.com/embed/6bLp6k8O0_M?enablejsapi=1'
-  );
+    E'# Passage\n\n# Cube Houses - Listening Notes\n\n## Background Information\n\nAfter World War II, local urban planners wanted to redevelop and revive the city.\n\nAltogether, the Cube Houses can function as a _______ (1)\n\nEach Cube building is in the shape of a _______ (2)\n\nThe Cube Houses sit on top of a _______ (3) for pedestrians to the central city.\n\nDuring construction, the work was temporarily discontinued because the designer faced the problem of _______ (4)\n\n---\n\n## Design Features of the Cube Houses\n\nUnderneath the houses, there are three pillars made of _______ (5)\n\nA new building is situated between a warehouse and a _______ (6) of architecture.\n\nIt is a three-storey building.\n\nThe ground floor is an entrance.\n\nBoth the lower level and the top level of each house are in the shape of a _______ (7)\n\nThe first floor has a living room and an open kitchen.\n\nThe medium level has a bathroom and two bedrooms.\n\nThe top floor is sometimes used as a small _______ (8)\n\n---\n\n## Living in the Cube Houses\n\nThere is a nearby market _______ (9) across the square from the Cube Houses.\n\nFor guests, two advantages of the house are its convenient _______ (10) and reasonable price.'
+  ,
+    'https://www.youtube.com/embed/6bLp6k8O0_M?enablejsapi=1');
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'Altogether, the Cube Houses can function as a _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: TRUE**\n\nNhững ngôi nhà hình lập phương (Cubic Houses) ở Rotterdam là một điểm thu hút khách du lịch nổi tiếng.',
     '{"blank-q1": ["village"]}'::jsonb
   );
 
@@ -80,7 +80,7 @@ BEGIN
     'LISTENING',
     2,
     'Each Cube building is in the shape of a _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: FALSE**\n\nChúng không được thiết kế để tiết kiệm không gian (space-saving) mà là một thử nghiệm kiến trúc nghệ thuật.',
     '{"blank-q2": ["tree"]}'::jsonb
   );
 
@@ -94,7 +94,7 @@ BEGIN
     'LISTENING',
     2,
     'The Cube Houses sit on top of a _______ for pedestrians to the central city.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: NOT GIVEN**\n\nBài viết không đề cập đến việc cư dân có gặp khó khăn khi tìm đồ nội thất (furniture) phù hợp hay không.',
     '{"blank-q3": ["bridge"]}'::jsonb
   );
 
@@ -108,7 +108,7 @@ BEGIN
     'LISTENING',
     2,
     'During construction, the work was temporarily discontinued because the designer faced the problem of _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: TRUE**\n\nKiến trúc sư Piet Blom muốn tạo ra một ''khu rừng'' (forest) trong thành phố với mỗi ngôi nhà là một cái cây.',
     '{"blank-q4": ["finance"]}'::jsonb
   );
 
@@ -122,7 +122,7 @@ BEGIN
     'LISTENING',
     2,
     'Underneath the houses, there are three pillars made of _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: FALSE**\n\nCác ngôi nhà này không bị bỏ hoang mà vẫn có người ở và một số được dùng làm bảo tàng.',
     '{"blank-q5": ["concrete"]}'::jsonb
   );
 
@@ -136,7 +136,7 @@ BEGIN
     'LISTENING',
     2,
     'A new building is situated between a warehouse and a _______ , of architecture.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: roof**\n\nMái nhà (roof) của các ngôi nhà này nghiêng 45 độ, tạo nên hình dáng đặc biệt.',
     '{"blank-q6": ["school"]}'::jsonb
   );
 
@@ -150,7 +150,7 @@ BEGIN
     'LISTENING',
     2,
     'Both the lower level and the top level of each house are in the shape of a _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: concrete**\n\nCấu trúc chính được làm bằng bê tông (concrete) và gỗ.',
     '{"blank-q7": ["triangle"]}'::jsonb
   );
 
@@ -164,7 +164,7 @@ BEGIN
     'LISTENING',
     2,
     'The top floor is sometimes used as a small _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: pillars**\n\nCác ngôi nhà được nâng lên trên các cột trụ (pillars) hình lục giác.',
     '{"blank-q8": ["garden"]}'::jsonb
   );
 
@@ -178,7 +178,7 @@ BEGIN
     'LISTENING',
     2,
     'There is a nearby market _______ across the square from the Cube Houses.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: natural light**\n\nCửa sổ lớn giúp tận dụng tối đa ánh sáng tự nhiên (natural light).',
     '{"blank-q9": ["hall"]}'::jsonb
   );
 
@@ -192,7 +192,7 @@ BEGIN
     'LISTENING',
     2,
     'For guests, two advantages of the house are its convenient _______ and reasonable price.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: bridge**\n\nKhu phức hợp này cũng đóng vai trò như một cây cầu (bridge) đi bộ qua đường cao tốc.',
     '{"blank-q10": ["location"]}'::jsonb
   );
 

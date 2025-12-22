@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-21T14:59:28.263665
+-- Generated: 2025-12-22T15:39:10.166530
 -- Source: mini-ielts.com
 -- Title: The Ecological Importance of Bees
 -- ============================================
@@ -51,8 +51,8 @@ BEGIN
     exam_id,
     1,
     'Reading Passage - The Ecological Importance of Bees',
-    E'**Questions 1-5:**\n\nThe Reading Passage has seven paragraphs, **A-G**.\n\nChoose the correct heading for paragraphs **A, B, D, E** and **F** from the list of headings below.\n\nWrite the correct number, **i-viii**.\n\n**List of Headings**\n- **i** Parallels between bee and human activities\n- **ii** An evolutionary turning point\n- **iii** A lack of total co-operation\n- **iv** The preservation of individual plant species\n- **v** The commercial value of bees\n- **vi** The structure of flowering plants\n- **vii** The pursuit of self-interest\n- **viii** The need for further research\n\n---\n\n**Questions 6-12:**\n\nComplete the sentences below.\n\nChoose **NO MORE THAN TWO WORDS AND/OR A NUMBER** from the passage for each answer.\n\n---\n\n**Question 13:**\n\nChoose the correct letter, **A, B, C** or **D**.\n\nWhich is the best title for Reading Passage?\n\n---',
-    E'**Paragraph A.**\nSometime in the early Cretaceous period of the Earth\'\'s history, hunting wasps of a certain type became bees by adopting a vegetarian diet: they began to rely more and more on the pollen of plants as a source of protein for themselves and their offspring, as an alternative to insects. In so doing, they accidentally transported pollen on their bodies to other plants of the same species, bringing about pollination. The stage was thus set for a succession of ever-closer mutual adaptations of bees and flowering plants. In particular, flowers began to reward bees for their unwitting role in their reproduction by providing richer sources of pollen and another source of nutrition, nectar.\n\n**Paragraph B.**\nToday about 15 per cent of our diet consists of crops which are pollinated by bees. The meat and other animal products we consume are ultimately derived from bee- pollinated forage crops, and account for another 15 per cent. It follows that around one third of our food is directly or indirectly dependent on the pollinating services of bees. On a global basis, the annual value of agricultural crops dependent on the pollination services of bees is estimated at £1,000 million (US$1,590 million). Much of this pollination is due to honey bees, and in monetary terms it exceeds the value of the annual honey crop by a factor of fifty.\n\n**Paragraph C.**\nBut the apparently harmonious relationship between bees and plants conceals a conflict of interests. Although flowers need bees and vice versa, it pays each partner to minimise its costs and maximise its profits. This may sound like an extreme case of attributing human qualities to non-human species, but using the marketplace and the principles of double-entry book keeping as metaphors may give US some insights into what is really going on between bees and flowering plants. In the real world, both flower and bee operate in a competitive marketplace. A community of retailers, the flowers, seek to attract more or less discriminating consumers, the bees. Each flower has to juggle the costs and benefits of investing in advertising, by colour and scent, and providing rewards, nectar and pollen, clearly a species which depends on cross-pollination is on a knife-edge: it must provide sufficient nectar to attract the interest of a bee, but not enough to satisfy all of its needs in one visit. A satiated bee would return to its nest rather than visit another flower. The bee, on the other hand, is out to get the maximum amount of pollen and nectar. It must assess the quality and quantity of rewards which are on offer and juggle its energy costs so that it makes a calorific profit on each foraging trip. The apparent harmony between plants and bees is therefore not all that it seems. Instead, it is an equilibrium based on compromises between the competing interests of the protagonists.\n\n**Paragraph D.**\nThis sounds remarkably like the ideas of the 18th-century economist Adam Smith. In his book, The Wealth of Nations, Smith postulated that in human society the competitive interactions of different ‘economic units\'\' eventually resulted in a balanced, or ‘harmonious’ society. One might predict, therefore, that economists would find the relationships between bees and plants of some interest. This is the case in Israel, where economists are collaborating with botanists and entomologists in a long-term study of the pollination biology of the native flora, in an attempt to understand the dynamics of the relationship between communities of bees and plants.\n\n**Paragraph E.**\nThis sort of study is of more than passing academic interest. It is important that authorities understand the dynamic relationships between plants and their pollinators. This is especially true when, say, devising conservation policies. A good example comes from the forests of tropical South America. Here, as in all rainforests, there is a high diversity of tree species. There may be more than 120 per acre, but in a given acre there may only be one or two individuals of any one species: These trees are pollinated by large, fast-flying bees. There is evidence that certain types of bees learn the distribution of these scattered trees and forage regularly along the same routes. This is called ‘trap-lining’ and the bees forage for up to 23 km from their nests. The bees are therefore acting as long distance pollinators.\n\n**Paragraph F.**\nAn issue of current concern in tropical forest conservation is that of trying to estimate the minimum sustainable size of islands\'\' of forest reserve in areas where large-scale felling is taking place. There is much discussion on seed dispersal distances. But this is only one half of the equation, so far as the reproduction of trees is concerned. There is another question that must be addressed in order to calculate whether proposed forest reserves are close enough to the nearest large tract of forest: ‘what is the flight range of these long-distance foragers?\'\' We need to know much more about bees and their relationships with plants before this question can be answered.\n\n**Paragraph G.**\nBees, then, are vital to our survival. Furthermore, much of the visual impact of human environments derives from vegetation, and most vegetation is dependent on bees for pollination. Thus, as pollinators of crops and natural vegetation, bees occupy key positions in the web of relationships which sustain the living architecture of our planet.'
+    E'**Questions 1-5:**\n\nThe Reading Passage has seven paragraphs, **A-G**.\n\nChoose the correct heading for paragraphs **A, B, D, E** and **F** from the list of headings below.\n\nWrite the correct number, **i-viii**.\n\n**List of Headings**\n- **i** Parallels between bee and human activities\n- **ii** An evolutionary turning point\n- **iii** A lack of total co-operation\n- **iv** The preservation of individual plant species\n- **v** The commercial value of bees\n- **vi** The structure of flowering plants\n- **vii** The pursuit of self-interest\n- **viii** The need for further research\n\n---\n\n**Questions 6-12:**\n\nComplete the sentences below.\n\nChoose **NO MORE THAN TWO WORDS AND/OR A NUMBER** from the passage for each answer.\n\n---\n\n**Question 13:**\n\nChoose the correct letter, **A, B, C** or **D**.\n\nWhich is the best title for Reading Passage?',
+    E'# Passage\n\n**Paragraph A.**\nSometime in the early Cretaceous period of the Earth''s history, hunting wasps of a certain type became bees by adopting a vegetarian diet: they began to rely more and more on the pollen of plants as a source of protein for themselves and their offspring, as an alternative to insects. In so doing, they accidentally transported pollen on their bodies to other plants of the same species, bringing about pollination. The stage was thus set for a succession of ever-closer mutual adaptations of bees and flowering plants. In particular, flowers began to reward bees for their unwitting role in their reproduction by providing richer sources of pollen and another source of nutrition, nectar.\n\n**Paragraph B.**\nToday about 15 per cent of our diet consists of crops which are pollinated by bees. The meat and other animal products we consume are ultimately derived from bee- pollinated forage crops, and account for another 15 per cent. It follows that around one third of our food is directly or indirectly dependent on the pollinating services of bees. On a global basis, the annual value of agricultural crops dependent on the pollination services of bees is estimated at £1,000 million (US$1,590 million). Much of this pollination is due to honey bees, and in monetary terms it exceeds the value of the annual honey crop by a factor of fifty.\n\n**Paragraph C.**\nBut the apparently harmonious relationship between bees and plants conceals a conflict of interests. Although flowers need bees and vice versa, it pays each partner to minimise its costs and maximise its profits. This may sound like an extreme case of attributing human qualities to non-human species, but using the marketplace and the principles of double-entry book keeping as metaphors may give US some insights into what is really going on between bees and flowering plants. In the real world, both flower and bee operate in a competitive marketplace. A community of retailers, the flowers, seek to attract more or less discriminating consumers, the bees. Each flower has to juggle the costs and benefits of investing in advertising, by colour and scent, and providing rewards, nectar and pollen, clearly a species which depends on cross-pollination is on a knife-edge: it must provide sufficient nectar to attract the interest of a bee, but not enough to satisfy all of its needs in one visit. A satiated bee would return to its nest rather than visit another flower. The bee, on the other hand, is out to get the maximum amount of pollen and nectar. It must assess the quality and quantity of rewards which are on offer and juggle its energy costs so that it makes a calorific profit on each foraging trip. The apparent harmony between plants and bees is therefore not all that it seems. Instead, it is an equilibrium based on compromises between the competing interests of the protagonists.\n\n**Paragraph D.**\nThis sounds remarkably like the ideas of the 18th-century economist Adam Smith. In his book, The Wealth of Nations, Smith postulated that in human society the competitive interactions of different ‘economic units'' eventually resulted in a balanced, or ‘harmonious’ society. One might predict, therefore, that economists would find the relationships between bees and plants of some interest. This is the case in Israel, where economists are collaborating with botanists and entomologists in a long-term study of the pollination biology of the native flora, in an attempt to understand the dynamics of the relationship between communities of bees and plants.\n\n**Paragraph E.**\nThis sort of study is of more than passing academic interest. It is important that authorities understand the dynamic relationships between plants and their pollinators. This is especially true when, say, devising conservation policies. A good example comes from the forests of tropical South America. Here, as in all rainforests, there is a high diversity of tree species. There may be more than 120 per acre, but in a given acre there may only be one or two individuals of any one species: These trees are pollinated by large, fast-flying bees. There is evidence that certain types of bees learn the distribution of these scattered trees and forage regularly along the same routes. This is called ‘trap-lining’ and the bees forage for up to 23 km from their nests. The bees are therefore acting as long distance pollinators.\n\n**Paragraph F.**\nAn issue of current concern in tropical forest conservation is that of trying to estimate the minimum sustainable size of islands'' of forest reserve in areas where large-scale felling is taking place. There is much discussion on seed dispersal distances. But this is only one half of the equation, so far as the reproduction of trees is concerned. There is another question that must be addressed in order to calculate whether proposed forest reserves are close enough to the nearest large tract of forest: ‘what is the flight range of these long-distance foragers?'' We need to know much more about bees and their relationships with plants before this question can be answered.\n\n**Paragraph G.**\nBees, then, are vital to our survival. Furthermore, much of the visual impact of human environments derives from vegetation, and most vegetation is dependent on bees for pollination. Thus, as pollinators of crops and natural vegetation, bees occupy key positions in the web of relationships which sustain the living architecture of our planet.'
   );
 
   qid := gen_random_uuid();
@@ -65,7 +65,7 @@ BEGIN
     'READING',
     2,
     'Paragraph A',
-    'Choose the correct answer.',
+    E'**Đáp án: ii**\n\nĐoạn A nói về sự quan trọng sinh thái của ong (Ecological importance). Các loài ong đóng vai trò then chốt trong hệ sinh thái.',
     '{"paragraph-a-q1": ["ii", "ii An evolutionary turning point"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i Parallels between bee and human activities', false);
@@ -87,7 +87,7 @@ BEGIN
     'READING',
     2,
     'Paragraph B',
-    'Choose the correct answer.',
+    E'**Đáp án: v**\n\nĐoạn B mô tả nguồn gốc tiến hóa của ong từ loài ong bắp cày (Evolution/Origins).',
     '{"paragraph-b-q2": ["v", "v The commercial value of bees"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i Parallels between bee and human activities', false);
@@ -109,7 +109,7 @@ BEGIN
     'READING',
     2,
     'Paragraph C',
-    'Choose the correct answer.',
+    E'**Đáp án: i**\n\nĐoạn C nói về mối quan hệ cộng sinh giữa ong và hoa (Symbiosis). Hoa cung cấp mật, ong giúp thụ phấn.',
     '{"paragraph-c-q3": ["i", "i Parallels between bee and human activities"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i Parallels between bee and human activities', true);
@@ -131,7 +131,7 @@ BEGIN
     'READING',
     2,
     'Paragraph D',
-    'Choose the correct answer.',
+    E'**Đáp án: iv**\n\nĐoạn D thảo luận về giá trị kinh tế của ong đối với nông nghiệp (Economic value).',
     '{"paragraph-d-q4": ["iv", "iv The preservation of individual plant species"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i Parallels between bee and human activities', false);
@@ -153,7 +153,7 @@ BEGIN
     'READING',
     2,
     'Paragraph E',
-    'Choose the correct answer.',
+    E'**Đáp án: viii**\n\nĐoạn E nói về hành vi tìm kiếm thức ăn và tối ưu năng lượng của ong (Foraging behavior).',
     '{"paragraph-e-q5": ["viii", "viii The need for further research"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i Parallels between bee and human activities', false);
@@ -175,7 +175,7 @@ BEGIN
     'READING',
     2,
     'Hunting wasps used to feed on other _______ , rather than on vegetation.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: insects**\n\nOng bắp cày săn mồi từng ăn các côn trùng khác (other insects) thay vì phấn hoa như ong hiện đại.',
     '{"blank-q6": ["insects"]}'::jsonb
   );
 
@@ -189,7 +189,7 @@ BEGIN
     'READING',
     2,
     'Flowering plants started to reward bees with rich pollen and an additional food in the form of _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: nectar**\n\nThực vật có hoa bắt đầu thưởng cho ong bằng phấn hoa giàu dinh dưỡng và mật hoa (nectar).',
     '{"blank-q7": ["nectar"]}'::jsonb
   );
 
@@ -203,7 +203,7 @@ BEGIN
     'READING',
     2,
     'Approximately _______ of human food production relies on the activity of bees.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: one third**\n\nKhoảng một phần ba (one third) sản lượng lương thực của con người phụ thuộc vào quá trình thụ phấn của ong.',
     '{"blank-q8": ["one third"]}'::jsonb
   );
 
@@ -217,7 +217,7 @@ BEGIN
     'READING',
     2,
     'If the process of _______ is to take place effectively, bees need to travel from one flower to another before going back to the nest.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: cross-pollination**\n\nĐể quá trình thụ phấn chéo (cross-pollination) diễn ra hiệu quả, ong cần di chuyển giữa các cây khác nhau cùng loài.',
     '{"blank-q9": ["cross-pollination"]}'::jsonb
   );
 
@@ -231,7 +231,7 @@ BEGIN
     'READING',
     2,
     'Bees need to balance the _______ of each trip against the calorific rewards they obtain.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: energy costs**\n\nOng cần cân bằng giữa chi phí năng lượng (energy costs) của mỗi chuyến đi và lượng calo thu được từ mật hoa.',
     '{"blank-q10": ["energy costs"]}'::jsonb
   );
 
@@ -245,7 +245,7 @@ BEGIN
     'READING',
     2,
     'There can be over 120 different _______ in. an acre of rainforest.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: tree species**\n\nCó thể có hơn 120 loài cây (tree species) khác nhau trong một mẫu rừng nhiệt đới.',
     '{"blank-q11": ["tree species"]}'::jsonb
   );
 
@@ -259,7 +259,7 @@ BEGIN
     'READING',
     2,
     'The bees that pollinate large forests regularly practise an activity known as _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: trap-lining**\n\nNhững con ong thụ phấn cho các khu rừng lớn thường thực hiện hành vi gọi là ''trap-lining'' - đi theo một lộ trình cố định hàng ngày.',
     '{"blank-q12": ["trap-lining"]}'::jsonb
   );
 
@@ -273,7 +273,7 @@ BEGIN
     'READING',
     2,
     'Choose the correct letter , A, B, C or D. Write the correct letter in box 13 on your  answer sheet. Which is the best title for Reading Passage ?',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nMục đích chính của bài viết là giải thích vai trò sinh thái quan trọng của loài ong (Đáp án A).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. The Ecological Importance of Bees', true);

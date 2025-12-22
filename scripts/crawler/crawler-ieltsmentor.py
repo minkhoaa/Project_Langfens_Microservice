@@ -939,6 +939,8 @@ def generate_sql(data: dict) -> str:
         q_idx = q.get('idx', 1)
         options = q.get('options', [])
         correct = q.get('correct_answer', '')
+        # Get AI-generated explanation or use default
+        explanation = escape_sql(q.get('explanation_md', ''))
         
         if q_type in ['TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN', 'MULTIPLE_CHOICE_SINGLE', 'MULTIPLE_CHOICE_MULTIPLE', 'MATCHING_HEADING', 'MATCHING_FEATURES', 'MATCHING_INFORMATION']:
             # Build MatchPairs for MATCHING_* types
@@ -984,7 +986,7 @@ def generate_sql(data: dict) -> str:
                 f"    'READING',",
                 f"    2,",
                 f"    '{q_prompt}',",
-                f"    'Choose the correct answer.',",
+                f"    E'{explanation}'," if explanation else f"    '',",
                 f"    {match_pairs_sql}",
                 f"  );",
             ])
@@ -1030,7 +1032,7 @@ def generate_sql(data: dict) -> str:
                 f"    'READING',",
                 f"    2,",
                 f"    '{q_prompt}',",
-                f"    'Write the correct answer from the passage.',",
+                f"    E'{explanation}'," if explanation else f"    '',",
                 f"    {answers_sql}",
                 f"  );",
                 "",
@@ -1060,7 +1062,7 @@ def generate_sql(data: dict) -> str:
                 f"    'READING',",
                 f"    2,",
                 f"    '{q_prompt}',",
-                f"    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',",
+                f"    E'{explanation}'," if explanation else f"    '',",
                 f"    '{{\"{blank_key}\": {json.dumps(answers)}}}'::jsonb",
                 f"  );",
                 "",

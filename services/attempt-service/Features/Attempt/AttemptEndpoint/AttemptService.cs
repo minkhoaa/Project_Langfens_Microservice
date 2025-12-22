@@ -369,16 +369,8 @@ IQuestionGraderFactory questionGraderFactory
             return Results.Problem("Snapshot is missing", statusCode: StatusCodes.Status500InternalServerError);
         var deadline = existedAttempt.StartedAt.AddSeconds(existedAttempt.DurationSec);
         var timeLeftSec = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
-        if (timeLeftSec <= 0)
-        {
-            if (existedAttempt.Status is AttemptStatus.Started or AttemptStatus.InProgress)
-            {
-                existedAttempt.Status = AttemptStatus.Expired;
-                await context.SaveChangesAsync(token);
-            }
-
-            return Results.Conflict(new ApiResultDto(false, "Attempt is expired", null!));
-        }
+        var isExpired = timeLeftSec <= 0;
+        
 
         if (existedAttempt.Status is AttemptStatus.Submitted or AttemptStatus.Graded)
         {
@@ -470,7 +462,6 @@ IQuestionGraderFactory questionGraderFactory
             existedAttempt.SubmittedAt = DateTime.UtcNow;
             existedAttempt.GradedAt = (manualCount == 0) ? DateTime.UtcNow : existedAttempt.GradedAt;
             existedAttempt.RawScore = awardedTotal;
-            // persist scaled percentage (0..100 with 2 decimals) for consistency
             existedAttempt.ScaledScore = compiled.TotalPoints <= 0
                 ? 0m
                 : Math.Round((awardedTotal / compiled.TotalPoints) * 100m, 2);
@@ -575,7 +566,8 @@ IQuestionGraderFactory questionGraderFactory
 
 
 
-            return Results.Ok(new ApiResultDto(true, "Submitted", new
+            var message = isExpired ? "Auto-submitted (time expired)" : "Submitted";
+            return Results.Ok(new ApiResultDto(true, message, new
             {
                 attemptId = existedAttempt.Id,
                 status = existedAttempt.Status,
@@ -585,8 +577,10 @@ IQuestionGraderFactory questionGraderFactory
                 awardedTotal,
                 correctCount,
                 totalPoints = compiled.TotalPoints,
-                needsManualReview = manualCount
+                needsManualReview = manualCount,
+                isExpired
             }));
+
         }
         catch (Exception e)
         {
@@ -708,7 +702,7 @@ IQuestionGraderFactory questionGraderFactory
         }
         else
         {
-            // Non-placement: tính band theo READING-only (nếu có reading)
+            // Non-placement: tính band theo READING-only hoặc LISTENING-only
             int readingCorrectOnly = existedAttempt.Answers.Count(a =>
                 a.IsCorrect == true &&
                 skillByQuestion.TryGetValue(a.QuestionId, out var sk) &&
@@ -717,10 +711,28 @@ IQuestionGraderFactory questionGraderFactory
             int totalReadingOnly = skillByQuestion.Count(k =>
                 string.Equals(k.Value, QuestionSkill.Reading, StringComparison.OrdinalIgnoreCase));
 
-            ieltsBand = totalReadingOnly > 0
-                ? IeltsBandConverter.FromAcademicReadingScaled(readingCorrectOnly, totalReadingOnly)
-                : 0m;
+            int listeningCorrectOnly = existedAttempt.Answers.Count(a =>
+                a.IsCorrect == true &&
+                skillByQuestion.TryGetValue(a.QuestionId, out var sk) &&
+                string.Equals(sk, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase));
+
+            int totalListeningOnly = skillByQuestion.Count(k =>
+                string.Equals(k.Value, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase));
+
+            if (totalReadingOnly > 0)
+            {
+                ieltsBand = IeltsBandConverter.FromAcademicReadingScaled(readingCorrectOnly, totalReadingOnly);
+            }
+            else if (totalListeningOnly > 0)
+            {
+                ieltsBand = IeltsBandConverter.FromAcademicListeningScaled(listeningCorrectOnly, totalListeningOnly);
+            }
+            else
+            {
+                ieltsBand = 0m;
+            }
         }
+
 
 
         // Use stored ScaledScore if available; otherwise compute percentage (0..100)
