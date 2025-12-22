@@ -101,6 +101,24 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
                 'correct_answer': correct_answer,
                 'options': q.get('options', []),
             }
+            
+            # Add matchPairs for MATCHING_* question types
+            q_type = q.get('type', '')
+            if q_type.startswith('MATCHING_'):
+                # Build matchPairs from correct_answers and prompt
+                prompt_key = q.get('prompt_md', q.get('prompt', '')).strip()[:50].lower().replace(' ', '-')
+                if not prompt_key:
+                    prompt_key = f"q{q.get('idx')}"
+                
+                # Get match_pairs if already present, otherwise build from correct_answers
+                match_pairs = q.get('match_pairs', {})
+                if not match_pairs and correct_answers:
+                    # Build matchPairs: {"prompt-key": ["answer", "answer-display"]}
+                    match_pairs = {prompt_key: [correct_answers[0], correct_answers[0]]}
+                
+                if match_pairs:
+                    converted_q['matchPairs'] = match_pairs
+            
             converted_questions.append(converted_q)
         
         # Detect exam type from metadata or exam object

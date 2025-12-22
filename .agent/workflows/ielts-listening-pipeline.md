@@ -13,16 +13,23 @@ description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 
 ## 🚀 AUTO EXECUTION STEPS (Follow in order!)
 
-> [!CAUTION] > **MANDATORY 4 AI CHECKS - KHÔNG ĐƯỢC BỎ QUA BẤT KỲ BƯỚC NÀO!**
+> [!CAUTION] > **MANDATORY 10-STEP PIPELINE V4 - KHÔNG ĐƯỢC BỎ QUA BẤT KỲ BƯỚC NÀO!**
 >
-> | #   | AI     | Step                  | Action                      |
-> | --- | ------ | --------------------- | --------------------------- |
-> | 1   | Gemini | TIER 1 (orchestrator) | Auto-run in pipeline        |
-> | 2   | Claude | CHECK #1              | **LUÔN check issues**       |
-> | 3   | Gemini | POST-CHECK            | **LUÔN chạy gemini_qa.py**  |
-> | 4   | Claude | CHECK #2              | **LUÔN chạy invariants.py** |
+> | #   | AI     | Step                  | Action                                |
+> | --- | ------ | --------------------- | ------------------------------------- |
+> | 1   | Rule   | TIER 1                | orchestrator.py (fetch→normalize)    |
+> | 2   | Gemini | PRE-CHECK             | gemini_qa.py --mode pre              |
+> | 3   | Codex  | PRE-CHECK             | codex_qa.py --mode pre               |
+> | 4   | Claude | PRE-FIX               | **Manual fix schema issues**         |
+> | 5   | Gemini | POST-CHECK            | gemini_qa.py --mode post             |
+> | 6   | Codex  | VALIDATE              | codex_qa.py --mode validate (CHỈ NHẬN XÉT) |
+> | 7   | Claude | FINAL-FIX             | **Manual fix based on Codex feedback** |
+> | 8   | Claude | INVARIANTS            | invariants.py                        |
+> | 9   | -      | SEED                  | psql -f seed.sql                     |
+> | 10  | -      | QA EXPORT             | Generate report                      |
 >
-> **Cho dù TIER 1 SUCCESS, vẫn PHẢI chạy đủ 4 bước!**
+> **Codex chỉ VALIDATE + nhận xét, CLAUDE fix tất cả!**
+
 
 ---
 
@@ -49,15 +56,17 @@ cat data/normalized/mini-ielts/<ITEM_ID>.json | head -100
 
 Check và FIX ngay nếu vi phạm:
 
-| Rule               | Check                 | Fix                         |
-| ------------------ | --------------------- | --------------------------- |
-| Missing audio_url  | No YouTube embed      | Extract from iframe src     |
-| Missing transcript | No Exam Review        | Fetch from solution page    |
-| Embedded questions | Q1-10 in passage      | Remove from passage         |
-| Wrong type         | MCQ vs Gap-fill       | Match source instruction    |
-| Missing answers    | Empty correct_answers | Extract from solution table |
-| Leading numbers    | `1. Statement`        | Remove number prefix        |
-| **4 Sections**     | Parts 1-4             | Create proper sections      |
+| Rule               | Check                     | Fix                                       |
+| ------------------ | ------------------------- | ----------------------------------------- |
+| Missing audio_url  | No YouTube embed          | Extract from iframe src                   |
+| Missing transcript | No Exam Review            | Fetch from solution page                  |
+| Embedded questions | Q1-10 in passage          | Remove from passage                       |
+| Wrong type         | MCQ vs Gap-fill           | Match source instruction                  |
+| Missing answers    | Empty correct_answers     | Extract from solution table               |
+| Leading numbers    | `1. Statement`            | Remove number prefix                      |
+| **MAP_LABEL**      | "Label the plan/diagram"  | **Convert to MATCHING_INFORMATION**       |
+| **Choose TWO**     | Q1-2 "Choose TWO letters" | **Split to 2 separate MCQ_SINGLE**        |
+| **Passage short**  | < 100 words               | Expand with listening notes from questions|
 
 **Create fix script if needed:**
 
@@ -77,7 +86,46 @@ cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 &&
 
 **Record Gemini decision (PASS/FAIL) and issues for QA report.**
 
-### Step 5: ⭐ Claude CHECK #2 - Final Verify
+### Step 4.5: ⭐ Codex VALIDATE (NEW - 3rd AI Layer)
+
+```bash
+// turbo
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py mini-ielts <ITEM_ID> --mode validate 2>&1
+```
+
+**Record Codex decision (PASS/FAIL) and confidence for QA report.**
+
+### Step 5: ⭐ Claude FINAL-FIX (Fix based on Codex feedback)
+
+**Dựa trên nhận xét của Codex VALIDATE, Claude fix các vấn đề sau:**
+
+| Codex Feedback | Claude Action |
+| -------------- | ------------- |
+| Wrong question type | Change `type` field to correct value |
+| Missing option text | Add proper text from HTML source |
+| Truncated prompt | Fix full text (e.g., "sia" → "Asia") |
+| Content completeness | Add missing context/options |
+| Answer mismatch | Verify and correct `correct_answers` |
+
+**Create fix script if Codex found issues:**
+
+```python
+# Fix based on Codex feedback
+import json
+from pathlib import Path
+
+NORMALIZED_PATH = Path("data/normalized/mini-ielts/<ITEM_ID>.json")
+with open(NORMALIZED_PATH) as f:
+    data = json.load(f)
+
+# Apply fixes based on Codex suggestions...
+# e.g., change type, add options, fix prompts
+
+with open(NORMALIZED_PATH, 'w') as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+```
+
+### Step 7: ⭐ Claude INVARIANTS - Final Verify
 
 ```bash
 // turbo
@@ -158,12 +206,22 @@ PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/se
 
 ### Question Types (Listening):
 
-| Type       | Description       | Options        |
-| ---------- | ----------------- | -------------- |
-| GAP_FILL   | Write word/number | `[]` empty     |
-| MCQ_SINGLE | Choose A/B/C      | 3-4 options    |
-| MATCHING   | Match A-F         | Letter input   |
-| MAP_LABEL  | Label diagram     | Position-based |
+| Type                 | Description              | Options     | Notes                            |
+| -------------------- | ------------------------ | ----------- | -------------------------------- |
+| SUMMARY_COMPLETION   | Gap-fill/Write word      | `[]` empty  | Dùng cho Q1-10 thường            |
+| MCQ_SINGLE           | Choose A/B/C             | 3-4 options | Choose ONE letter                |
+| MATCHING_INFORMATION | Match/Label diagram A-G  | `[]` empty  | **Dùng cho cả MAP_LABEL**        |
+
+> [!IMPORTANT]
+> **MAP_LABEL → MATCHING_INFORMATION**: Khi gặp "Label the plan/diagram", convert thành `MATCHING_INFORMATION`:
+> - `prompt_md`: tên vị trí (vd: "box office")
+> - `options`: `[]` (empty)
+> - `correct_answers`: `["G"]` (letter)
+
+> [!TIP]
+> **Choose TWO letters → 2 MCQ_SINGLE**: Khi gặp Q1-2 "Choose TWO", tách thành 2 câu MCQ_SINGLE riêng biệt:
+> - Q1: Answer 1 of 2 (correct: first answer)
+> - Q2: Answer 2 of 2 (correct: second answer)
 
 ### Sections:
 
@@ -206,6 +264,58 @@ for q in data['questions']:
     if q['type'] == 'GAP_FILL':
         q['correct_answers'] = [answer.strip()]
         q['options'] = []
+```
+
+### MAP_LABEL → MATCHING_INFORMATION Fix:
+
+```python
+# Convert "Label the plan/diagram" questions
+# Q7-10: answers G, D, B, F
+matching_answers = {
+    7: ("box office", "G"),
+    8: ("theatre manager's office", "D"),
+    9: ("lighting box", "B"),
+    10: ("artistic director's office", "F")
+}
+
+for idx, (prompt, answer) in matching_answers.items():
+    new_questions.append({
+        "idx": idx,
+        "type": "MATCHING_INFORMATION",  # NOT MAP_LABEL
+        "prompt_md": prompt,
+        "options": [],  # empty for matching
+        "correct_answers": [answer]
+    })
+```
+
+### Choose TWO → 2 MCQ_SINGLE Fix:
+
+```python
+# Split Q1-2 "Choose TWO letters A,E" into 2 separate questions
+# Answer 1 = A, Answer 2 = E
+new_questions.append({
+    "idx": 1,
+    "type": "MULTIPLE_CHOICE_SINGLE",
+    "prompt_md": "Which change during refurbishment? (Answer 1 of 2)",
+    "options": [
+        {"label": "A", "text": "Option A text", "is_correct": True},
+        {"label": "B", "text": "Option B text", "is_correct": False},
+        # ... other options
+    ],
+    "correct_answers": ["A"]
+})
+
+new_questions.append({
+    "idx": 2,
+    "type": "MULTIPLE_CHOICE_SINGLE",
+    "prompt_md": "Which change during refurbishment? (Answer 2 of 2)",
+    "options": [
+        {"label": "A", "text": "Option A text", "is_correct": False},
+        {"label": "E", "text": "Option E text", "is_correct": True},
+        # ... other options with E as correct
+    ],
+    "correct_answers": ["E"]
+})
 ```
 
 ---

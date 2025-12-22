@@ -220,6 +220,87 @@ def auto_fix_paragraph_labels(passage: str) -> str:
     return passage.strip()
 
 
+def merge_choose_two_questions(questions: list) -> list:
+    """
+    AUTO-FIX Option A: Merge 'Choose TWO' questions.
+    
+    Detects patterns like:
+    - "Question text (Answer 1 of 2)" + "Question text (Answer 2 of 2)"
+    - Consecutive MCQ_SINGLE with same base prompt
+    
+    Merges into single MULTIPLE_CHOICE_MULTIPLE with combined correct_answers.
+    """
+    if len(questions) < 2:
+        return questions
+    
+    merged = []
+    i = 0
+    
+    while i < len(questions):
+        q = questions[i]
+        prompt = q.get('prompt_md', '')
+        
+        # Pattern 1: Explicit "(Answer X of Y)" pattern
+        answer_of_match = re.search(r'\(Answer \d+ of (\d+)\)', prompt) 
+        
+        if answer_of_match:
+            total_answers = int(answer_of_match.group(1))
+            base_prompt = re.sub(r'\s*\(Answer \d+ of \d+\)\s*', '', prompt).strip()
+            
+            # Collect all related questions
+            related = [q]
+            j = i + 1
+            while j < len(questions) and len(related) < total_answers:
+                next_q = questions[j]
+                next_prompt = next_q.get('prompt_md', '')
+                next_base = re.sub(r'\s*\(Answer \d+ of \d+\)\s*', '', next_prompt).strip()
+                
+                if next_base == base_prompt:
+                    related.append(next_q)
+                    j += 1
+                else:
+                    break
+            
+            if len(related) >= 2:
+                # Merge into MULTIPLE_CHOICE_MULTIPLE
+                combined_answers = []
+                for r in related:
+                    combined_answers.extend(r.get('correct_answers', []))
+                
+                # Mark correct options
+                options = q.get('options', [])
+                for opt in options:
+                    opt['is_correct'] = opt.get('label', opt.get('value', '')) in combined_answers
+                
+                merged_q = {
+                    'idx': q.get('idx'),  # Use first question's idx
+                    'type': 'MULTIPLE_CHOICE_MULTIPLE',
+                    'prompt_md': f"{base_prompt} (Choose {total_answers})",
+                    'options': options,
+                    'correct_answers': combined_answers,
+                }
+                merged.append(merged_q)
+                logger.info(f"Q{q.get('idx')}: Merged {len(related)} questions into MULTIPLE_CHOICE_MULTIPLE → {combined_answers}")
+                i = j
+                continue
+        
+        # Pattern 2: "Choose TWO/THREE" in prompt without (Answer X of Y)
+        choose_match = re.search(r'Choose\s+(TWO|THREE|FOUR|2|3|4)', prompt, re.IGNORECASE)
+        if choose_match and q.get('type') == 'MULTIPLE_CHOICE_SINGLE':
+            # This should already be MCQ_MULTIPLE but isn't - fix it
+            q['type'] = 'MULTIPLE_CHOICE_MULTIPLE'
+            # Mark multiple correct options
+            correct = q.get('correct_answers', [])
+            for opt in q.get('options', []):
+                opt['is_correct'] = opt.get('label', opt.get('value', '')) in correct
+            logger.info(f"Q{q.get('idx')}: Fixed MCQ_SINGLE → MULTIPLE_CHOICE_MULTIPLE (Choose pattern)")
+        
+        merged.append(q)
+        i += 1
+    
+    return merged
+
+
 def auto_generate_instruction_md(questions: list) -> str:
     """
     AUTO-FIX Option 1: Generate instruction_md based on question types and ranges.
@@ -289,6 +370,48 @@ Complete the sentences below.
 Write **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.""")
     
     return "\n\n---\n\n".join(instruction_parts)
+
+
+def parse_mcq_answer(answer: str) -> list:
+    """
+    Parse MCQ answer formats into list of correct letters.
+    
+    Formats handled:
+    - "A, B" or "A,B" -> ["A", "B"]
+    - "A, B IN EITHER ORDER" -> ["A", "B"]
+    - "A and B" -> ["A", "B"]
+    - "C,E   IN EITHER ORDER" -> ["C", "E"]
+    - "A/B" -> ["A", "B"] (alternatives, both valid)
+    
+    Returns list of uppercase letters (A-H).
+    """
+    if not answer:
+        return []
+    
+    # Remove "IN EITHER ORDER" suffix
+    clean = re.sub(r'\s*IN\s+EITHER\s+ORDER\s*', '', answer, flags=re.I)
+    
+    # Find all uppercase letters A-H
+    letters = re.findall(r'[A-H]', clean.upper())
+    
+    return list(set(letters))  # Unique letters
+
+
+def mark_mcq_correct_options(options: list, correct_letters: list) -> list:
+    """
+    Mark is_correct=True for options matching correct letters.
+    
+    Args:
+        options: List of option dicts with 'label' or 'value' key
+        correct_letters: List of correct letters like ['A', 'B']
+    
+    Returns:
+        Updated options list with is_correct marked
+    """
+    for opt in options:
+        label = opt.get('label', opt.get('value', '')).upper()
+        opt['is_correct'] = label in correct_letters
+    return options
 
 
 def expand_optional_answers(answer: str) -> list:
@@ -599,6 +722,11 @@ This test includes multiple choice questions and matching questions. Pay close a
             ]
         
         # ========== AUTO-FIX: MATCHING_INFO clear options (Option 1) ==========
+        # Also convert MAP_LABEL → MATCHING_INFORMATION (same UI, letter input A-J)
+        if detected_type == 'MAP_LABEL':
+            logger.info(f"Q{idx}: Auto-converting MAP_LABEL → MATCHING_INFORMATION")
+            detected_type = 'MATCHING_INFORMATION'
+        
         if detected_type in ['MATCHING_INFORMATION', 'MATCHING_FEATURES', 'MATCHING_ENDINGS']:
             if options and len(options) > 0:
                 logger.info(f"Q{idx}: Auto-cleared options for {detected_type}")
@@ -607,6 +735,16 @@ This test includes multiple choice questions and matching questions. Pay close a
         # ========== AUTO-FIX: Expand (optional) word answers (NEW STRICT RULE) ==========
         correct_answers_list = expand_optional_answers(correct_answer) if correct_answer else []
         
+        # ========== AUTO-FIX: MCQ_MULTIPLE - parse answers and mark is_correct ==========
+        if detected_type == 'MULTIPLE_CHOICE_MULTIPLE':
+            # Parse "A, B IN EITHER ORDER" -> ["A", "B"]
+            mcq_correct_letters = parse_mcq_answer(correct_answer)
+            if mcq_correct_letters:
+                correct_answers_list = mcq_correct_letters
+                # Mark is_correct for matching options
+                options = mark_mcq_correct_options(options, mcq_correct_letters)
+                logger.info(f"Q{idx}: MCQ_MULTIPLE correct={mcq_correct_letters}")
+        
         questions.append({
             'idx': idx,
             'type': detected_type,
@@ -614,6 +752,11 @@ This test includes multiple choice questions and matching questions. Pay close a
             'options': options,
             'correct_answers': correct_answers_list,
         })
+    
+    # ========== AUTO-FIX: Merge "Choose TWO" questions (Option A) ==========
+    # Detect pattern: "Question text (Answer 1 of 2)" + "Question text (Answer 2 of 2)"
+    # Merge into single MULTIPLE_CHOICE_MULTIPLE with combined correct_answers
+    questions = merge_choose_two_questions(questions)
     
     # ========== AUTO-FIX: Generate instruction_md (Option 1) ==========
     instruction_md = auto_generate_instruction_md(questions)
