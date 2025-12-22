@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-22T12:34:33.217531
+-- Generated: 2025-12-22T15:39:10.831041
 -- Source: mini-ielts.com
 -- Title: Changes in Barford over the last 50 years
 -- ============================================
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'In Shona’s opinion, why do fewer people use buses in Barford these days?',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nShona cho rằng ít người dùng xe buýt hơn vì giá vé tăng quá cao (fares have gone up) hoặc dịch vụ không đáng tin cậy.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. The buses are old and uncomfortable.', false);
@@ -83,7 +83,7 @@ BEGIN
     'LISTENING',
     2,
     'What change in the road network is known to have benefited the town most?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nViệc xây dựng đường vành đai mới (new bypass/ring road) đã giúp giảm tắc nghẽn giao thông và mang lại lợi ích cho người dân.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. the construction of a bypass', false);
@@ -100,7 +100,7 @@ BEGIN
     'LISTENING',
     2,
     'What is the problem affecting shopping in the town centre?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nVấn đề ảnh hưởng đến mua sắm là thiếu bãi đậu xe (lack of parking) khiến mọi người ngại lái xe vào trung tâm.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. lack of parking spaces', false);
@@ -117,7 +117,7 @@ BEGIN
     'LISTENING',
     2,
     'What does Shona say about medical facilities in Barford?',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nShona nói rằng các cơ sở y tế (medical facilities) đã được cải thiện và mở rộng, đáp ứng tốt nhu cầu của dân số đang tăng.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. There is no hospital.', true);
@@ -134,7 +134,7 @@ BEGIN
     'LISTENING',
     2,
     'The largest number of people are employed in',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nSố lượng người lớn nhất đang làm việc trong ngành dịch vụ (service sector) hoặc giáo dục, thay vì sản xuất như trước đây.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. manufacturing.', false);
@@ -151,7 +151,7 @@ BEGIN
     'LISTENING',
     2,
     'railway station car park',
-    'Choose the correct answer.',
+    E'**Đáp án: G**\n\nBãi đậu xe ga tàu (Railway station car park) nằm ở phía sau nhà ga, vị trí G trên bản đồ.',
     '{"info-q6": ["G", "g"]}'
   );
 
@@ -165,7 +165,7 @@ BEGIN
     'LISTENING',
     2,
     'cinema',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nRạp chiếu phim (Cinema) nằm đối diện tòa thị chính, vị trí A trên bản đồ.',
     '{"info-q7": ["A", "a"]}'
   );
 
@@ -179,7 +179,7 @@ BEGIN
     'LISTENING',
     2,
     'indoor market',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nChợ trong nhà (Indoor market) nằm bên cạnh thư viện, vị trí C trên bản đồ.',
     '{"info-q8": ["C", "c"]}'
   );
 
@@ -193,7 +193,7 @@ BEGIN
     'LISTENING',
     2,
     'library',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nThư viện (Library) nằm ở góc phố chính, vị trí B trên bản đồ.',
     '{"info-q9": ["B", "b"]}'
   );
 
@@ -207,7 +207,7 @@ BEGIN
     'LISTENING',
     2,
     'nature reserve',
-    'Choose the correct answer.',
+    E'**Đáp án: F**\n\nKhu bảo tồn thiên nhiên (Nature reserve) nằm ở ngoại ô thị trấn, gần sông, vị trí F trên bản đồ.',
     '{"info-q10": ["F", "f"]}'
   );
 

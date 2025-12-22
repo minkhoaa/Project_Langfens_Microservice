@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-22T13:31:54.680215
+-- Generated: 2025-12-22T15:39:09.833373
 -- Source: mini-ielts.com
 -- Title: Benefits of student work placements
 -- ============================================
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'Why is Matthew considering a student work placement?',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nMatthew cân nhắc thực tập sinh viên vì anh ấy muốn có kinh nghiệm thực tế (get real experience) trước khi tốt nghiệp.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. He was informed about an interesting vacancy.', true);
@@ -83,7 +83,7 @@ BEGIN
     'LISTENING',
     2,
     'Which part of the application process did Linda find most interesting?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nLinda thấy phần khó nhất trong quy trình nộp đơn là phỏng vấn (interview) vì cô ấy chưa có kinh nghiệm trả lời các câu hỏi tình huống.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. The psychometric test.', false);
@@ -100,7 +100,7 @@ BEGIN
     'LISTENING',
     2,
     'During her work placement, Linda helped find ways to',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nTrong kỳ thực tập, Linda đã giúp tìm cách tiết kiệm năng lượng (save energy) cho công ty. Đây là đóng góp chính của cô.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. speed up car assembly.', true);
@@ -117,7 +117,7 @@ BEGIN
     'LISTENING',
     2,
     'Why did Linda find her work placement tiring?',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nLinda thấy mệt mỏi vì phải di chuyển xa (travelling/commute) mỗi ngày để đến chỗ làm.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. She wasn''t used to full-time work.', false);
@@ -134,7 +134,7 @@ BEGIN
     'LISTENING',
     2,
     'What did Linda''s employers give her formal feedback on?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nNhà tuyển dụng đã phản hồi chính thức về kỹ năng tổ chức (organisational skills) của Linda.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. engineering ability', false);
@@ -151,7 +151,7 @@ BEGIN
     'LISTENING',
     2,
     'What was the main benefit of Linda''s work placement?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nLợi ích chính của kỳ thực tập là giúp Linda tự tin hơn (confidence) vào khả năng của mình.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Improved academic skills.', false);
@@ -168,7 +168,7 @@ BEGIN
     'LISTENING',
     2,
     'The Science of Materials',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nMôn học ''The Science of Materials'' được đánh giá là hữu ích nhưng khó (useful but difficult).',
     '{"info-q7": ["B", "b"]}'
   );
 
@@ -182,7 +182,7 @@ BEGIN
     'LISTENING',
     2,
     'Materials Engineering',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nMôn ''Materials Engineering'' được đề xuất là rất thú vị và thực tế (interesting and practical).',
     '{"info-q8": ["A", "a"]}'
   );
 
@@ -196,7 +196,7 @@ BEGIN
     'LISTENING',
     2,
     'Engineering Basics',
-    'Choose the correct answer.',
+    E'**Đáp án: D**\n\nMôn ''Engineering Basics'' được coi là nền tảng cần thiết (essential foundation) cho mọi sinh viên.',
     '{"info-q9": ["D", "d"]}'
   );
 
@@ -210,7 +210,7 @@ BEGIN
     'LISTENING',
     2,
     'Evolution of Materials',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nMôn ''Evolution of Materials'' tập trung vào lịch sử phát triển vật liệu, được đánh giá là hơi lý thuyết (theoretical).',
     '{"info-q10": ["C", "c"]}'
   );
 

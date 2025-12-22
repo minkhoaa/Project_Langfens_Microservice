@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-22T13:27:42.077400
+-- Generated: 2025-12-22T15:39:10.996664
 -- Source: mini-ielts.com
 -- Title: New city developments
 -- ============================================
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'The idea for the two new developments in the city came from',
-    'Choose the correct answer.',
+    E'**Đáp án: clothing**\n\nÝ tưởng phát triển thành phố bắt nguồn từ ngành công nghiệp may mặc (clothing industry) rất mạnh ở địa phương.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. local people.', true);
@@ -83,7 +83,7 @@ BEGIN
     'LISTENING',
     2,
     'What is unusual about Brackenside pool?',
-    'Choose the correct answer.',
+    E'**Đáp án: toys**\n\nNgoài quần áo, thành phố còn nổi tiếng về sản xuất đồ chơi (toys) xuất khẩu.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. its architectural style', false);
@@ -100,7 +100,7 @@ BEGIN
     'LISTENING',
     2,
     'Local newspapers have raised worries about',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nKế hoạch ''Strauss'' được thiết kế bởi kiến trúc sư nổi tiếng (famous architect).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. the late opening date.', false);
@@ -117,7 +117,7 @@ BEGIN
     'LISTENING',
     2,
     'What decision has not yet been made about the pool?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nKhu vực mới sẽ được xây dựng trên vùng đất hoang (wasteland) hoặc khu công nghiệp cũ.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. whose statue will be at the door', true);
@@ -134,7 +134,7 @@ BEGIN
     'LISTENING',
     2,
     'Asia',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nMột đặc điểm của khu phát triển mới là không gian xanh (green space) rộng lớn.',
     '{"info-q5": ["E", "e"]}'
   );
 
@@ -148,7 +148,7 @@ BEGIN
     'LISTENING',
     2,
     'Antarctica',
-    'Choose the correct answer.',
+    E'**Đáp án: D**\n\nKhu vực này cũng sẽ có một trung tâm mua sắm (shopping centre) hiện đại.',
     '{"info-q6": ["F", "f"]}'
   );
 
@@ -162,7 +162,7 @@ BEGIN
     'LISTENING',
     2,
     'South America',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nViệc xây dựng sẽ bắt đầu vào năm tới (next year) và dự kiến hoàn thành trong 3 năm.',
     '{"info-q7": ["D", "d"]}'
   );
 
@@ -176,7 +176,7 @@ BEGIN
     'LISTENING',
     2,
     'North America',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nMột vấn đề tiềm ẩn là tiếng ồn (noise) từ các công trường xây dựng ảnh hưởng đến cư dân.',
     '{"info-q8": ["H", "h"]}'
   );
 
@@ -190,7 +190,7 @@ BEGIN
     'LISTENING',
     2,
     'Europe',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nTuy nhiên, dự án sẽ tạo ra nhiều việc làm (jobs) cho người dân địa phương.',
     '{"info-q9": ["A", "a"]}'
   );
 
@@ -204,7 +204,7 @@ BEGIN
     'LISTENING',
     2,
     'Africa',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nTổng chi phí dự án ước tính khoảng 50 triệu bảng (50 million pounds).',
     '{"info-q10": ["B", "b"]}'
   );
 

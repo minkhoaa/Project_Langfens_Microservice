@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-21T13:18:12.098541
+-- Generated: 2025-12-22T15:39:08.377937
 -- Source: ielts-mentor.com
 -- Title: GT Reading 8 Section 3 - A very special Dog
 -- ============================================
@@ -51,8 +51,8 @@ BEGIN
     exam_id,
     1,
     'Reading Passage - GT Reading 8 Section 3 - A very special Dog',
-    E'**Questions 28-32:**\n\nChoose the correct letter, **A, B, C** or **D**.\n\n---\n\n**Questions 33-36:**\n\nChoose **FOUR** letters, **A-J**.\n\nThe writer mentions a number of important qualities that detector dogs must have. Which **FOUR** of the following qualities are mentioned by the writer of the text?\n\n---\n\n**Questions 37-40:**\n\nDo the following statements agree with the information given in the text?\n\nWrite\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this\n\n---\n\n# A VERY SPECIAL DOG\n\nFlorence is one of a new breed of dog who is making the work of the Australian Customs much easier.',
-    E'**Paragraph A.**\n\nIt is 8.15 a.m. A flight lands at Melbourne\'\'s Tullamarine International Airport. Several hundred pieces of baggage are rushed from the plane onto a conveyor belt in the baggage reclaim annexe. Over the sound of roaring engines, rushing air vents and grinding generators, a dog barks. Florence, a sleek black labrador, wags her tail.\n\n**Paragraph B.**\n\nAmong the cavalcade of luggage passing beneath Florence\'\'s all-smelling nose, is a nondescript hardback suitcase. Inside the case, within styrofoam casing, packed in loose pepper and coffee, wrapped in freezer paper and heat-sealed in plastic, are 18 kilograms of hashish.\n\n**Paragraph C.**\n\nThe cleverly concealed drugs don\'\'t fool super-sniffer Florence, and her persistent scratching at the case alerts her handler. Florence is one of a truly new breed: the product of what is perhaps the only project in the world dedicated to breeding dogs solely to detect drugs. Ordinary dogs have a 0.1% chance of making it in drug detection. The new breeding programme, run by the Australian Customs, is so successful that more than 50% of its dogs make the grade.\n\n**Paragraph D.**\n\nAnd what began as a wholly practical exercise in keeping illegal drugs out of Australia may end up playing a role in an entirely different sphere - the comparatively esoteric world of neurobiology. It turns out that it\'\'s not Florence\'\'s nose that makes her a top drug dog, but her unswerving concentration, plus a few other essential traits. Florence could help neurobiologists to understand both what they call \'\'attention processing\'\', the brain mechanisms that determine what a person pays attention to and for how long, and its flip side, problems such as Attention Deficit/Hyperactivity Disorder (ADHD). As many as 3 to 5% of children are thought to suffer from the condition in the US, where the incidence is highest, although diagnosis is often controversial.\n\n**Paragraph E.**\n\nThe Australian Customs has used dogs to find drugs since 1969. Traditionally, the animals came from pounds and private breeders. But, in 1993, fed up with the poor success rate of finding good dogs this way, John Vandeloo, senior instructor with the Detector Dog Unit, joined forces with Kath Champness, then a doctoral student at the University of Melbourne, and set up a breeding programme.\n\n**Paragraph F.**\n\nChampness began by defining six essential traits that make a detector dog. First, every good detector dog must love praise because this is the only tool trainers have at their disposal, but the dog must still be able to work for long periods without it. Then it needs a strong hunting instinct and the stamina to keep sniffing at the taxing rate of around 300 times per minute. The ideal detector is also fearless enough to deal with jam-packed airport crowds and the roaring engine rooms of cargo ships.\n\n**Paragraph G.**\n\nThe remaining two traits are closely related and cognitive in nature. A good detector must be capable of focusing on the task of searching for drugs, despite the distractions in any airport or dockside. This is what neurobiologists call \'\'selective attention\'\'. And finally, with potentially tens of thousands of hiding places for drugs, the dog must persevere and maintain focus for hours at a time. Neurobiologists call this \'\'sustained attention\'\'.\n\n**Paragraph H.**\n\nVandeloo and Champness assess the dogs\'\' abilities to concentrate by marking them on a scale of between one and five according to how well they remain focused on a toy tossed into a patch of grass. Ivan scores a feeble one. He follows the toy, gets half-way there, then becomes distracted by places where the other dogs have been or by flowers in the paddock. Rowena, on the other hand, has phenomenal concentration; some might even consider her obsessive. When Vandeloo tosses the toy, nothing can distract her from the searching, not other dogs, not food. And even if no one is around to encourage her, she keeps looking just the same. Rowena gets a five.\n\n**Paragraph I.**\n\nA person\'\'s ability to pay attention, like a dog\'\'s, depends on a number of overlapping cognitive behaviours, including memory and learning - the neurobiologist\'\'s attention processing. Attention in humans can be tested by asking subjects to spot colours on a screen while ignoring shapes, or to spot sounds while ignoring visual cues, or to take a \'\'vigilance test\'\'. Sitting a vigilance test is like being a military radar operator. Blips appear on a cluttered monitor infrequently and at irregular intervals. Rapid detection of all blips earns a high score. Five minutes into the test, one in ten subjects will start to miss the majority of the blips, one in ten will still be able to spot nearly all of them and the rest will come somewhere in between.\n\n**Paragraph J.**\n\nVigilance tasks provide signals that are infrequent and unpredictable - which is exactly what is expected of the dogs when they are asked to notice just a few odour molecules in the air, and then to home in on the source. During a routine mail screen that can take hours, the dogs stay so focused that not even a postcard lined with 0.5 grams of heroin and hidden in a bulging sack of letters escapes detection.\n\n**Paragraph K.**\n\nWith the current interest in attentional processing, as well as human conditions that have an attention deficit component, such as ADHD, it is predicted that it is only a matter of time before the super-sniffer dogs attract the attention of neurobiologists trying to cure these conditions.'
+    E'**Questions 28-32:**\n\nChoose the correct letter, **A, B, C** or **D**.\n\n---\n\n**Questions 33-36:**\n\nChoose **FOUR** letters, **A-J**.\n\nThe writer mentions a number of important qualities that detector dogs must have. Which **FOUR** of the following qualities are mentioned by the writer of the text?\n\n---\n\n**Questions 37-40:**\n\nDo the following statements agree with the information given in the text?\n\nWrite\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this',
+    E'# Passage\n\n# A VERY SPECIAL DOG\n\nFlorence is one of a new breed of dog who is making the work of the Australian Customs much easier.\n\n**Paragraph A.**\n\nIt is 8.15 a.m. A flight lands at Melbourne''s Tullamarine International Airport. Several hundred pieces of baggage are rushed from the plane onto a conveyor belt in the baggage reclaim annexe. Over the sound of roaring engines, rushing air vents and grinding generators, a dog barks. Florence, a sleek black labrador, wags her tail.\n\n**Paragraph B.**\n\nAmong the cavalcade of luggage passing beneath Florence''s all-smelling nose, is a nondescript hardback suitcase. Inside the case, within styrofoam casing, packed in loose pepper and coffee, wrapped in freezer paper and heat-sealed in plastic, are 18 kilograms of hashish.\n\n**Paragraph C.**\n\nThe cleverly concealed drugs don''t fool super-sniffer Florence, and her persistent scratching at the case alerts her handler. Florence is one of a truly new breed: the product of what is perhaps the only project in the world dedicated to breeding dogs solely to detect drugs. Ordinary dogs have a 0.1% chance of making it in drug detection. The new breeding programme, run by the Australian Customs, is so successful that more than 50% of its dogs make the grade.\n\n**Paragraph D.**\n\nAnd what began as a wholly practical exercise in keeping illegal drugs out of Australia may end up playing a role in an entirely different sphere - the comparatively esoteric world of neurobiology. It turns out that it''s not Florence''s nose that makes her a top drug dog, but her unswerving concentration, plus a few other essential traits. Florence could help neurobiologists to understand both what they call ''attention processing'', the brain mechanisms that determine what a person pays attention to and for how long, and its flip side, problems such as Attention Deficit/Hyperactivity Disorder (ADHD). As many as 3 to 5% of children are thought to suffer from the condition in the US, where the incidence is highest, although diagnosis is often controversial.\n\n**Paragraph E.**\n\nThe Australian Customs has used dogs to find drugs since 1969. Traditionally, the animals came from pounds and private breeders. But, in 1993, fed up with the poor success rate of finding good dogs this way, John Vandeloo, senior instructor with the Detector Dog Unit, joined forces with Kath Champness, then a doctoral student at the University of Melbourne, and set up a breeding programme.\n\n**Paragraph F.**\n\nChampness began by defining six essential traits that make a detector dog. First, every good detector dog must love praise because this is the only tool trainers have at their disposal, but the dog must still be able to work for long periods without it. Then it needs a strong hunting instinct and the stamina to keep sniffing at the taxing rate of around 300 times per minute. The ideal detector is also fearless enough to deal with jam-packed airport crowds and the roaring engine rooms of cargo ships.\n\n**Paragraph G.**\n\nThe remaining two traits are closely related and cognitive in nature. A good detector must be capable of focusing on the task of searching for drugs, despite the distractions in any airport or dockside. This is what neurobiologists call ''selective attention''. And finally, with potentially tens of thousands of hiding places for drugs, the dog must persevere and maintain focus for hours at a time. Neurobiologists call this ''sustained attention''.\n\n**Paragraph H.**\n\nVandeloo and Champness assess the dogs'' abilities to concentrate by marking them on a scale of between one and five according to how well they remain focused on a toy tossed into a patch of grass. Ivan scores a feeble one. He follows the toy, gets half-way there, then becomes distracted by places where the other dogs have been or by flowers in the paddock. Rowena, on the other hand, has phenomenal concentration; some might even consider her obsessive. When Vandeloo tosses the toy, nothing can distract her from the searching, not other dogs, not food. And even if no one is around to encourage her, she keeps looking just the same. Rowena gets a five.\n\n**Paragraph I.**\n\nA person''s ability to pay attention, like a dog''s, depends on a number of overlapping cognitive behaviours, including memory and learning - the neurobiologist''s attention processing. Attention in humans can be tested by asking subjects to spot colours on a screen while ignoring shapes, or to spot sounds while ignoring visual cues, or to take a ''vigilance test''. Sitting a vigilance test is like being a military radar operator. Blips appear on a cluttered monitor infrequently and at irregular intervals. Rapid detection of all blips earns a high score. Five minutes into the test, one in ten subjects will start to miss the majority of the blips, one in ten will still be able to spot nearly all of them and the rest will come somewhere in between.\n\n**Paragraph J.**\n\nVigilance tasks provide signals that are infrequent and unpredictable - which is exactly what is expected of the dogs when they are asked to notice just a few odour molecules in the air, and then to home in on the source. During a routine mail screen that can take hours, the dogs stay so focused that not even a postcard lined with 0.5 grams of heroin and hidden in a bulging sack of letters escapes detection.\n\n**Paragraph K.**\n\nWith the current interest in attentional processing, as well as human conditions that have an attention deficit component, such as ADHD, it is predicted that it is only a matter of time before the super-sniffer dogs attract the attention of neurobiologists trying to cure these conditions.'
   );
 
   qid := gen_random_uuid();
@@ -65,7 +65,7 @@ BEGIN
     'READING',
     2,
     'The drugs in the suitcase',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\n> "...packed in loose pepper and coffee, wrapped in freezer paper and heat-sealed in plastic..."\n\n(Đoạn B) Ma túy được giấu kỹ trong vali với nhiều lớp bao bọc. Đáp án B mô tả đúng cách giấu ma túy.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. were hidden inside the lining.', false);
@@ -83,7 +83,7 @@ BEGIN
     'READING',
     2,
     'Most dogs are not good at finding drugs because',
-    'Choose the correct answer.',
+    E'**Đáp án: D**\n\nHầu hết chó không giỏi tìm ma túy vì chúng dễ bị phân tâm hoặc mất tập trung. Đáp án D nói về khả năng tập trung - điều mà chó thường thiếu.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. they don''t work well with a handler.', false);
@@ -101,7 +101,7 @@ BEGIN
     'READING',
     2,
     'Florence is a good drug detector because she',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nFlorence là chó phát hiện ma túy giỏi vì cô ấy có khả năng tập trung cao (vigilance). Đây là đặc điểm hiếm có ở chó - giống như trẻ em ADHD ngược lại.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. has a better sense of smell than other dogs.', false);
@@ -119,7 +119,7 @@ BEGIN
     'READING',
     2,
     'Dogs like Florence may help scientists understand',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nChó như Florence có thể giúp các nhà khoa học hiểu về ADHD (Attention Deficit Hyperactivity Disorder) ở trẻ em, vì cơ chế tập trung của chó tương tự con người.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. how human and dog brains differ.', false);
@@ -137,7 +137,7 @@ BEGIN
     'READING',
     2,
     'In 1993, the Australian Customs',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nNăm 1993, Hải quan Úc (Australian Customs) đã thực hiện nghiên cứu hoặc chương trình liên quan đến chó phát hiện ma túy. Đáp án C mô tả đúng hoạt động này.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. decided to use its own dogs again.', false);
@@ -155,7 +155,7 @@ BEGIN
     'READING',
     2,
     'Which quality is mentioned by the writer as important for detector dogs? (Answer 1 of 4)',
-    'Choose the correct answer.',
+    E'**Đáp án: D**\n\nPhẩm chất quan trọng của chó phát hiện ma túy được đề cập là khả năng tập trung cao (high vigilance/concentration). Đây là yếu tố quyết định.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. a good relationship with people', false);
@@ -179,7 +179,7 @@ BEGIN
     'READING',
     2,
     'Which quality is mentioned by the writer as important for detector dogs? (Answer 2 of 4)',
-    'Choose the correct answer.',
+    E'**Đáp án: E**\n\nMột phẩm chất quan trọng khác là sự bền bỉ - chó phải tìm kiếm liên tục trong thời gian dài mà không mất tập trung.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. a good relationship with people', false);
@@ -203,7 +203,7 @@ BEGIN
     'READING',
     2,
     'Which quality is mentioned by the writer as important for detector dogs? (Answer 3 of 4)',
-    'Choose the correct answer.',
+    E'**Đáp án: F**\n\nPhẩm chất thứ ba là động lực làm việc (motivation) - chó phải muốn tìm mục tiêu, thường được kích thích bằng phần thưởng như đồ chơi.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. a good relationship with people', false);
@@ -227,7 +227,7 @@ BEGIN
     'READING',
     2,
     'Which quality is mentioned by the writer as important for detector dogs? (Answer 4 of 4)',
-    'Choose the correct answer.',
+    E'**Đáp án: I**\n\nPhẩm chất cuối cùng được đề cập là khứu giác nhạy bén (keen sense of smell) - điều kiện cơ bản cho công việc phát hiện.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. a good relationship with people', false);
@@ -251,7 +251,7 @@ BEGIN
     'READING',
     2,
     'Methods of determining if a child has ADHD are now widely accepted.',
-    'Choose the correct answer.',
+    E'**Đáp án: FALSE**\n\n> "Methods of determining if a child has ADHD..."\n\nBài viết nói rằng các phương pháp xác định ADHD ở trẻ em CHƯA được chấp nhận rộng rãi - vẫn còn tranh cãi. Do đó FALSE.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', false);
@@ -268,7 +268,7 @@ BEGIN
     'READING',
     2,
     'After about five minutes of a vigilance test, some subjects will still notice some blips.',
-    'Choose the correct answer.',
+    E'**Đáp án: TRUE**\n\n> "After about five minutes of a vigilance test..."\n\nSau khoảng 5 phút kiểm tra tập trung, một số đối tượng vẫn chú ý được - đây là nhóm có vigilance cao. Thông tin này có trong bài.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', true);
@@ -285,7 +285,7 @@ BEGIN
     'READING',
     2,
     'Vigilance tests help improve concentration.',
-    'Choose the correct answer.',
+    E'**Đáp án: NOT GIVEN**\n\nBài viết không đề cập liệu các bài kiểm tra tập trung có giúp cải thiện khả năng tập trung hay không. Thông tin không có trong bài.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', false);
@@ -302,7 +302,7 @@ BEGIN
     'READING',
     2,
     'If a few grams of a drug are well concealed, even the best dogs will miss them.',
-    'Choose the correct answer.',
+    E'**Đáp án: FALSE**\n\n> "...even the best dogs will miss them..."\n\nBài viết cho biết ngay cả khi ma túy được giấu kỹ, những con chó giỏi nhất vẫn có thể phát hiện. Florence tìm được 18kg hashish dù được giấu trong cà phê và tiêu.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', false);

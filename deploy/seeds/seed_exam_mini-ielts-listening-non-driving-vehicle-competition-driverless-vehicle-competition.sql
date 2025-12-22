@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-21T22:52:50.987596
+-- Generated: 2025-12-22T15:39:09.499834
 -- Source: mini-ielts.com
 -- Title: Non-driving vehicle competition (Driverless vehicle competition)
 -- ============================================
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'Undergraduates from both the engineering school and the _______ department can definitely take part in the project.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: computer science**\n\nSinh viên tham gia đến từ khoa kỹ thuật (engineering school) và khoa máy tính (computer science). Hai ngành này kết hợp để tạo ra xe tự lái.',
     '{"blank-q1": ["computer science"]}'::jsonb
   );
 
@@ -80,7 +80,7 @@ BEGIN
     'LISTENING',
     2,
     'The automated vehicles will have to avoid obstacles such as _______ .',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: rocks**\n\nXe tự lái phải tránh các chướng ngại vật như đá (rocks). Đây là thử thách về khả năng nhận diện môi trường.',
     '{"blank-q2": ["rocks"]}'::jsonb
   );
 
@@ -94,7 +94,7 @@ BEGIN
     'LISTENING',
     2,
     'The tutor mentions one vehicle which used technology such as _______ , lasers, and laptops to measure its surroundings.',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: video cameras**\n\nMột chiếc xe được nhắc đến sử dụng công nghệ như cameras video để quan sát và định vị đường đi.',
     '{"blank-q3": ["video cameras"]}'::jsonb
   );
 
@@ -108,7 +108,7 @@ BEGIN
     'LISTENING',
     2,
     'The purpose of holding the race is to',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nMục đích của cuộc đua là để khuyến khích sự đổi mới và sáng tạo trong công nghệ xe tự lái. (Đáp án C thường là ''encourage innovation'' hoặc tương tự).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Interest students in careers in industry.', false);
@@ -125,7 +125,7 @@ BEGIN
     'LISTENING',
     2,
     'The tutor says success will depend on',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nThành công phụ thuộc vào việc làm việc nhóm (teamwork) hoặc sự hợp tác hiệu quả giữa các thành viên có kỹ năng khác nhau.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. The software design.', true);
@@ -142,7 +142,7 @@ BEGIN
     'LISTENING',
     2,
     'This year''s competitors were surprised that the vehicles',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nNăm nay các thí sinh ngạc nhiên vì xe chạy chậm hơn dự kiến hoặc gặp khó khăn bất ngờ nào đó (thường là đáp án B).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Were so easy to design.', false);
@@ -159,7 +159,7 @@ BEGIN
     'LISTENING',
     2,
     'Early May: Introductory _______ about the project',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: seminar**\n\nĐầu tháng 5 sẽ có một buổi hội thảo giới thiệu (introductory seminar) về dự án cho sinh viên quan tâm.',
     '{"blank-q7": ["seminar"]}'::jsonb
   );
 
@@ -173,7 +173,7 @@ BEGIN
     'LISTENING',
     2,
     'Late May: Essay giving information about relevant _______ and experience',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: skills**\n\nCuối tháng 5 phải nộp bài luận cung cấp thông tin về các kỹ năng (skills) liên quan và kinh nghiệm của thí sinh.',
     '{"blank-q8": ["skills"]}'::jsonb
   );
 
@@ -187,7 +187,7 @@ BEGIN
     'LISTENING',
     2,
     'September Workshop: discuss _______',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: ideas**\n\nWorkshop tháng 9 sẽ thảo luận về các ý tưởng (ideas) thiết kế và chiến lược cho cuộc thi.',
     '{"blank-q9": ["ideas"]}'::jsonb
   );
 
@@ -201,7 +201,7 @@ BEGIN
     'LISTENING',
     2,
     'December: _______ presentation',
-    'Use NO MORE THAN THREE WORDS from the passage to complete the blank.',
+    E'**Đáp án: team**\n\nTháng 12 sẽ có bài thuyết trình của nhóm (team presentation) để trình bày tiến độ hoặc thiết kế cuối cùng.',
     '{"blank-q10": ["team"]}'::jsonb
   );
 

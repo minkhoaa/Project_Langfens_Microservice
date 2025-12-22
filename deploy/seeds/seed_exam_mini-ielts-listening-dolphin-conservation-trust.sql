@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-22T11:15:35.129189
+-- Generated: 2025-12-22T15:39:10.663789
 -- Source: mini-ielts.com
 -- Title: Dolphin Conservation Trust
 -- ============================================
@@ -66,7 +66,7 @@ BEGIN
     'LISTENING',
     2,
     'Which one of the following things does Alice say about the Dolphin Conservation Trust? (Part 1)',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nAlice nói rằng Dolphin Conservation Trust đặc biệt vì nó tập trung vào giáo dục cộng đồng (community education/awareness) hơn là chỉ nghiên cứu khoa học.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Children make up most of the membership.', false);
@@ -85,7 +85,7 @@ BEGIN
     'LISTENING',
     2,
     'Which other thing does Alice say about the Dolphin Conservation Trust? (Part 2)',
-    'Choose the correct answer.',
+    E'**Đáp án: E**\n\nMột điểm đặc biệt khác là tổ chức này hoạt động dựa trên sự đóng góp của tình nguyện viên (volunteers) thay vì nhân viên trả lương.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Children make up most of the membership.', false);
@@ -104,7 +104,7 @@ BEGIN
     'LISTENING',
     2,
     'Why is Alice so pleased the Trust has won the Charity Commission award?',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nAlice vui mừng vì giải thưởng giúp nâng cao uy tín (profile/reputation) của tổ chức, từ đó thu hút thêm tài trợ.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. It has brought in extra money.', false);
@@ -121,7 +121,7 @@ BEGIN
     'LISTENING',
     2,
     'Alice says oil exploration causes problems to dolphins because of',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nThăm dò dầu khí gây ra tiếng ồn (noise) làm gián đoạn khả năng giao tiếp và định vị của cá heo.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. noise.', true);
@@ -138,7 +138,7 @@ BEGIN
     'LISTENING',
     2,
     'Alice became interested in dolphins when',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nAlice bắt đầu quan tâm đến cá heo khi cô ấy xem một bộ phim tài liệu (documentary) trên TV hồi nhỏ.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. she saw one swimming near her home.', false);
@@ -155,7 +155,7 @@ BEGIN
     'LISTENING',
     2,
     'It has not been seen this year',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\nCon cá heo B chưa được nhìn thấy trong năm nay (not seen this year), có thể nó đã di chuyển đến vùng khác.',
     '{"feature-q6": ["B", "B"]}'
   );
 
@@ -169,7 +169,7 @@ BEGIN
     'LISTENING',
     2,
     'It is photographed more than the others',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nCon cá heo C được chụp ảnh nhiều nhất (photographed more) vì nó hay bơi gần thuyền và rất dạn người.',
     '{"feature-q7": ["C", "C"]}'
   );
 
@@ -183,7 +183,7 @@ BEGIN
     'LISTENING',
     2,
     'It is always very energetic',
-    'Choose the correct answer.',
+    E'**Đáp án: D**\n\nCon cá heo D luôn rất năng động (very energetic), thường xuyên nhảy lên khỏi mặt nước.',
     '{"feature-q8": ["D", "D"]}'
   );
 
@@ -197,7 +197,7 @@ BEGIN
     'LISTENING',
     2,
     'It is the newest one in the scheme',
-    'Choose the correct answer.',
+    E'**Đáp án: D**\n\nCon cá heo D cũng là thành viên mới nhất (newest one) được đưa vào chương trình theo dõi.',
     '{"feature-q9": ["D", "D"]}'
   );
 
@@ -211,7 +211,7 @@ BEGIN
     'LISTENING',
     2,
     'It has an unusual shape',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nCon cá heo A có hình dạng vây lưng bất thường (unusual shape), giúp dễ dàng nhận diện nó.',
     '{"feature-q10": ["A", "A"]}'
   );
 

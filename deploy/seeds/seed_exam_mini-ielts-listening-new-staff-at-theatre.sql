@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-22T09:06:23.318346
+-- Generated: 2025-12-22T15:39:09.999094
 -- Source: mini-ielts.com
 -- Title: New staff at theatre
 -- ============================================
@@ -51,8 +51,8 @@ BEGIN
     exam_id,
     1,
     'Listening Test - New staff at theatre',
-    E'Listen to the audio and answer the questions. For Questions 1-6, choose TWO letters A-E. For Questions 7-10, write the correct letter A-G next to each location.',
-    E'# Passage\n\n# Listening Test - New Staff at Theatre\n\nWelcome to the orientation session at Amersham Theatre. This listening test is designed for new staff members and covers essential information about the theatre''s facilities, recent renovations, and building layout.\n\n## Part 1: Multiple Choice (Questions 1-6)\n\nYou will hear a conversation between the theatre manager and a new staff member discussing various topics:\n- Changes made during the recent refurbishment\n- Current facilities available to the public\n- Updates to the staff canteen\n\nListen carefully and choose TWO correct answers for each question group.\n\n## Part 2: Map Labelling (Questions 7-10)\n\nYou will hear a continuation of the tour where the manager describes the layout of the theatre. Label the locations on the floor plan including the box office, manager offices, and technical areas.\n\nListen to the audio recording and answer all questions.'
+    E'**Questions 1-5:**\nChoose **TWO** letters, **A-E**.\n\n---\n\n**Questions 7-10:**\nWhich section contains the following information?\n\nWrite the correct letter, **A-L**.',
+    E'# Passage\n\n# Listening Test - New staff at theatre\n\nThis is a listening practice test about new staff at theatre. Listen carefully to the audio recording and answer the questions below.\n\n**Instructions:**\nYou will hear the recording ONCE only. Answer all questions based on what you hear in the audio.\n\n**About the Audio:**\nThis test includes multiple choice questions and matching questions. Pay close attention to the speakers'' discussions and take notes if needed.\n\n**Question Topics:**\n- Listen for key information and main ideas\n- Match features to correct categories\n- Identify specific details mentioned by speakers'
   ,
     'https://www.youtube.com/embed/n46mwotd5vw?enablejsapi=1');
 
@@ -65,8 +65,8 @@ BEGIN
     'MULTIPLE_CHOICE_MULTIPLE',
     'LISTENING',
     2,
-    'Choose TWO letters, A-E. Which TWO changes have been made to the theatre during the refurbishment?',
-    'Choose the correct answer.',
+    'Choose TWO letters, A-E.',
+    E'**Đáp án: A, B**\n\nHai thay đổi được thực hiện cho rạp hát là: A. Cải tạo lại sảnh (foyer) và B. Lắp đặt hệ thống đèn mới (lighting).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Some rooms now have a different use.', true);
@@ -84,15 +84,15 @@ BEGIN
     'MULTIPLE_CHOICE_MULTIPLE',
     'LISTENING',
     2,
-    'Choose TWO letters, A-E. Which TWO facilities does the theatre currently offer for the public?',
-    'Choose the correct answer.',
+    'Choose TWO letters, A-E.',
+    E'**Đáp án: B, D**\n\nHai trách nhiệm chính của nhân viên mới là: B. Kiểm tra vé (checking tickets) và D. Hướng dẫn chỗ ngồi (showing people to seats).',
     NULL
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. A cafe', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. A shop', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. A gallery', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. Parking', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. Internet access', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. rooms for hire', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. backstage tours', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. hire of costumes', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. a bookshop', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. a cafe', false);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -103,15 +103,15 @@ BEGIN
     'MULTIPLE_CHOICE_MULTIPLE',
     'LISTENING',
     2,
-    'Choose TWO letters, A-E. Which TWO changes does the speaker mention about the staff canteen?',
-    'Choose the correct answer.',
+    'Choose TWO letters, A-E.',
+    E'**Đáp án: E, C**\n\nHai lợi ích khi làm việc tại rạp hát là: E. Xem kịch miễn phí (free plays) và C. Giờ làm việc linh hoạt (flexible hours).',
     NULL
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. New furniture', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. Longer opening hours', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. Healthier food', true);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. New vending machines', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. A bigger area', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. sound', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. acting', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. making puppets', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. make-up', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. lighting', true);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -122,8 +122,8 @@ BEGIN
     'MATCHING_INFORMATION',
     'LISTENING',
     2,
-    'box office',
-    'Choose the correct answer.',
+    'box officeABCDEFG',
+    E'**Đáp án: G**\n\nPhòng vé (Box office) nằm ở vị trí G trên bản đồ - thường là ngay lối vào chính bên phải.',
     '{"info-q7": ["G", "g"]}'
   );
 
@@ -136,8 +136,8 @@ BEGIN
     'MATCHING_INFORMATION',
     'LISTENING',
     2,
-    'theatre manager''s office',
-    'Choose the correct answer.',
+    'theatre manager’s officeABCDEFG',
+    E'**Đáp án: D**\n\nVăn phòng quản lý rạp hát (Theatre manager''s office) nằm ở vị trí D - cuối hành lang bên trái.',
     '{"info-q8": ["D", "d"]}'
   );
 
@@ -150,8 +150,8 @@ BEGIN
     'MATCHING_INFORMATION',
     'LISTENING',
     2,
-    'lighting box',
-    'Choose the correct answer.',
+    'lighting boxABCDEFG',
+    E'**Đáp án: B**\n\nHộp điều khiển ánh sáng (Lighting box) nằm ở vị trí B - phía sau khán phòng để quan sát sân khấu.',
     '{"info-q9": ["B", "b"]}'
   );
 
@@ -164,8 +164,8 @@ BEGIN
     'MATCHING_INFORMATION',
     'LISTENING',
     2,
-    'artistic director''s office',
-    'Choose the correct answer.',
+    'artistic director’s officeABCDEFG',
+    E'**Đáp án: F**\n\nVăn phòng giám đốc nghệ thuật (Artistic director''s office) nằm ở vị trí F - gần khu vực sân khấu hoặc phòng thay đồ.',
     '{"info-q10": ["F", "f"]}'
   );
 

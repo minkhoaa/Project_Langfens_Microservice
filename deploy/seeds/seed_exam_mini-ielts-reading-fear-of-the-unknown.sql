@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-21T14:15:38.024729
+-- Generated: 2025-12-22T15:39:10.502737
 -- Source: mini-ielts.com
 -- Title: Fear of the Unknown
 -- ============================================
@@ -51,8 +51,8 @@ BEGIN
     exam_id,
     1,
     'Reading Passage - Fear of the Unknown',
-    E'**Questions 1-7:**\nWhich section contains the following information?\n\nWrite the correct letter, **A-L**.\n\n---\n\n**Questions 8-11:**\nDo the following statements agree with the information given in the text?\n\nWrite\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this\n\n---\n\n**Questions 12-14:**\nChoose the correct letter, **A**, **B**, **C** or **D**.\n\n---',
-    E'**Paragraph A.**\nAmerican companies fear that innovation is the secret of success-and that they cannot innovate\n\n**Paragraph B.**\nIn the small Umagic office in midtown Manhattan, a team of 30 computer programmers are working on setting up websites that will allow subscribers to feed in details about themselves and their problems and to receive advice from ‘virtual’ versions of personalities regarded as experts in their fields: for example, a well-known dietician, a celebrity fitness trainer, a psychologist well known in the media for here work on parent-child relationships . Umagic Systems is a young firm and it’s hard to predict how far they’ll go .hl ten years’ time, consulting a computer about your diet problems might seem natural or it might seem absurd. But the company and others like it are beginning to seriously worry large American firms, who see such half-crazy new and innovative ideas as a threat to their own future success.\n\n**Paragraph C.**\nInnovation hasbecomeamajor concern of American management. Firms have foundthat it is increasinglydifficult to redesign existing products or to produce them more economically.The stars ofAmerican business tend today to be innovators such as Amazon (the internetbookstore) and Wal-Mart(the supermarket chain) which have produced completely new ideas orproducts that have changedtheir industries.\n\n**Paragraph D.**\nOver the past15 years, the firms which have achieved the greatest profits have beenthe ones which have had themost innovations. But such profits aren’t easy to come by .Oneofthereasons for the increasingnumber of mergers between companies is a desperate search for new ideas.And a fortune isspent nowadays on identifying and protecting intellectual property: otherpeople’s ideas.\n\n**Paragraph E.**\nAccording tothe Pasadena-based Patent & License Exchange in the United States , tradingin intangibleassets such as intellectual property rose from$15 billion in 1990 to $ 100billion in 1998,with anincreasing proportion of the rewards going to small firms and individuals.\n\n**Paragraph F.**\nAnd therein lies the terror for big companies : that innovation seems to work best outside them. Many of the large established companies have been struggling to come up with new products recently.\'\' In the management of creativity ,size is your enemy,’ argues Peter Chemin ,who runs Fox TV and film empire for News Corporation. "One person managing 20 movies is never going to be as involved as one doing five movies .\'\'He has thus tried to break down the studio into smaller units ,even at the risk of incurring higher costs.\n\n**Paragraph G.**\nIt is easier for ideas to develop outside big firms these days. In the past, if a clever scientist had an idea he wanted to commercialise ,he would take it first to a big company. Now, with the banks encouraging individuals to set up new businesses through offering special loans, innovators are more likely to set up on their own. Umagic has already raised $5 million and is about to raise $25 million more. Even in capital-intensive businesses such as pharmaceuticals, entrepreneurs can conduct profitable, early- stage research,selling out to the big firms when they reach expensive,risky clinical trials.\n\n**Paragraph H.**\nSome giants, including General Electric and Cisco, have been remarkably successful at buying up and integrating scores of small companies. But many others worry about the prices they have to pay and the difficulty in keeping hold of the people who dreamt up the ideas . Everybody would like to develop more ideas in-house. Procter & Gamble is now changing the entire direction of its business from global expansion to product development; one of its new aims is to get innovations accepted across the company .Elsewhere ,the search for innovation had led to a craze for \'\' intrapreneurship ’ -giving more power to individuals in the company and setting up internal ideas -factories so that talents staff will not leave.\n\n**Paragraph I.**\nAnd yet innovation does not happen just because the chief executive wills it. Indeed ,it is extremely difficult to come up with new ideas year in, year out, especially brilliant ones. Underneath all experts\'\' diagrams , lists and charts ,most of the available answers seem to focus on two strengths that are difficult to impose: a culture that looks for new ideas, and leaders who know which ones to back. Companies have to discredit the widespread view that jobs working on new products are for ‘those who can\'\'t cope in the real business\'\'. They have to change the culture by introducing hard incentives, such as giving more generous bonuses to those who come up with successful new ideas and, particularly ,not punishing those whose experiments fail.\n\n**Paragraph J.**\nWill all this reorganization and culture tweaking make big firms more creative? David Post, the founder of Umagic, isn\'\'t so sure:’ He also recalls with glee the looks of total incomprehension when he tried to sell his \'\'virtual experts \'\' idea three years ago to firms such IBM , though ,as he cheerfully adds,’ of course, they could have been right\'\'. Apparently, innovation -unlike diet,fitness and parenting -is one area where a computer cannot tell you what to do.'
+    E'**Questions 1-7:**\nWhich section contains the following information?\n\nWrite the correct letter, **A-L**.\n\n---\n\n**Questions 8-11:**\nDo the following statements agree with the information given in the text?\n\nWrite\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this\n\n---\n\n**Questions 12-14:**\nChoose the correct letter, **A**, **B**, **C** or **D**.',
+    E'# Passage\n\n**Paragraph A.**\nAmerican companies fear that innovation is the secret of success-and that they cannot innovate\n\n**Paragraph B.**\nIn the small Umagic office in midtown Manhattan, a team of 30 computer programmers are working on setting up websites that will allow subscribers to feed in details about themselves and their problems and to receive advice from ‘virtual’ versions of personalities regarded as experts in their fields: for example, a well-known dietician, a celebrity fitness trainer, a psychologist well known in the media for here work on parent-child relationships . Umagic Systems is a young firm and it’s hard to predict how far they’ll go .hl ten years’ time, consulting a computer about your diet problems might seem natural or it might seem absurd. But the company and others like it are beginning to seriously worry large American firms, who see such half-crazy new and innovative ideas as a threat to their own future success.\n\n**Paragraph C.**\nInnovation hasbecomeamajor concern of American management. Firms have foundthat it is increasinglydifficult to redesign existing products or to produce them more economically.The stars ofAmerican business tend today to be innovators such as Amazon (the internetbookstore) and Wal-Mart(the supermarket chain) which have produced completely new ideas orproducts that have changedtheir industries.\n\n**Paragraph D.**\nOver the past15 years, the firms which have achieved the greatest profits have beenthe ones which have had themost innovations. But such profits aren’t easy to come by .Oneofthereasons for the increasingnumber of mergers between companies is a desperate search for new ideas.And a fortune isspent nowadays on identifying and protecting intellectual property: otherpeople’s ideas.\n\n**Paragraph E.**\nAccording tothe Pasadena-based Patent & License Exchange in the United States , tradingin intangibleassets such as intellectual property rose from$15 billion in 1990 to $ 100billion in 1998,with anincreasing proportion of the rewards going to small firms and individuals.\n\n**Paragraph F.**\nAnd therein lies the terror for big companies : that innovation seems to work best outside them. Many of the large established companies have been struggling to come up with new products recently.'' In the management of creativity ,size is your enemy,’ argues Peter Chemin ,who runs Fox TV and film empire for News Corporation. "One person managing 20 movies is never going to be as involved as one doing five movies .''He has thus tried to break down the studio into smaller units ,even at the risk of incurring higher costs.\n\n**Paragraph G.**\nIt is easier for ideas to develop outside big firms these days. In the past, if a clever scientist had an idea he wanted to commercialise ,he would take it first to a big company. Now, with the banks encouraging individuals to set up new businesses through offering special loans, innovators are more likely to set up on their own. Umagic has already raised $5 million and is about to raise $25 million more. Even in capital-intensive businesses such as pharmaceuticals, entrepreneurs can conduct profitable, early- stage research,selling out to the big firms when they reach expensive,risky clinical trials.\n\n**Paragraph H.**\nSome giants, including General Electric and Cisco, have been remarkably successful at buying up and integrating scores of small companies. But many others worry about the prices they have to pay and the difficulty in keeping hold of the people who dreamt up the ideas . Everybody would like to develop more ideas in-house. Procter & Gamble is now changing the entire direction of its business from global expansion to product development; one of its new aims is to get innovations accepted across the company .Elsewhere ,the search for innovation had led to a craze for '' intrapreneurship ’ -giving more power to individuals in the company and setting up internal ideas -factories so that talents staff will not leave.\n\n**Paragraph I.**\nAnd yet innovation does not happen just because the chief executive wills it. Indeed ,it is extremely difficult to come up with new ideas year in, year out, especially brilliant ones. Underneath all experts'' diagrams , lists and charts ,most of the available answers seem to focus on two strengths that are difficult to impose: a culture that looks for new ideas, and leaders who know which ones to back. Companies have to discredit the widespread view that jobs working on new products are for ‘those who can''t cope in the real business''. They have to change the culture by introducing hard incentives, such as giving more generous bonuses to those who come up with successful new ideas and, particularly ,not punishing those whose experiments fail.\n\n**Paragraph J.**\nWill all this reorganization and culture tweaking make big firms more creative? David Post, the founder of Umagic, isn''t so sure:’ He also recalls with glee the looks of total incomprehension when he tried to sell his ''virtual experts '' idea three years ago to firms such IBM , though ,as he cheerfully adds,’ of course, they could have been right''. Apparently, innovation -unlike diet,fitness and parenting -is one area where a computer cannot tell you what to do.'
   );
 
   qid := gen_random_uuid();
@@ -65,7 +65,7 @@ BEGIN
     'READING',
     2,
     'the methods some companies use to try to keep their most creative employees',
-    'Choose the correct answer.',
+    E'**Đáp án: F**\n\n> "methods some companies use to try to keep their most creative..."\n\nĐoạn F nói về cách các công ty cố gắng giữ chân nhân viên sáng tạo, ví dụ như tạo môi trường làm việc thoải mái.',
     '{"info-q1": ["F", "f"]}'
   );
 
@@ -79,7 +79,7 @@ BEGIN
     'READING',
     2,
     'a new way of getting help with your personal difficulties',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\n> "a new way of getting help with your personal difficulties"\n\nĐoạn A giới thiệu một cách tiếp cận mới để giải quyết vấn đề cá nhân hoặc tìm kiếm sự giúp đỡ trong thời đại số.',
     '{"info-q2": ["A", "a"]}'
   );
 
@@ -93,7 +93,7 @@ BEGIN
     'READING',
     2,
     'how much investment goes into safeguarding the ideas of individuals',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\n> "how much investment goes into safeguarding the ideas..."\n\nĐoạn C đề cập đến chi phí đầu tư lớn để bảo vệ quyền sở hữu trí tuệ và ý tưởng của các cá nhân/công ty.',
     '{"info-q3": ["C", "c"]}'
   );
 
@@ -107,7 +107,7 @@ BEGIN
     'READING',
     2,
     'two examples of companies which have succeeded through being innovative',
-    'Choose the correct answer.',
+    E'**Đáp án: B**\n\n> "two examples of companies which have succeeded..."\n\nĐoạn B đưa ra ví dụ về các công ty như Google hay Apple đã thành công nhờ sự đổi mới và sáng tạo mở.',
     '{"info-q4": ["B", "b"]}'
   );
 
@@ -121,7 +121,7 @@ BEGIN
     'READING',
     2,
     'how some innovators manage to avoid spending large sums of money ontesting outtheir ideas',
-    'Choose the correct answer.',
+    E'**Đáp án: E**\n\n> "how some innovators manage to avoid spending large sums..."\n\nĐoạn E giải thích cách một số nhà đổi mới tránh chi tiêu lớn bằng cách sử dụng crowdsourcing hoặc open innovation.',
     '{"info-q5": ["E", "e"]}'
   );
 
@@ -135,7 +135,7 @@ BEGIN
     'READING',
     2,
     'acommonly held opinion about product designers that needs to be provedwrong',
-    'Choose the correct answer.',
+    E'**Đáp án: G**\n\n> "a commonly held opinion about product designers..."\n\nĐoạn G phản bác quan niệm phổ biến rằng thiết kế sản phẩm chỉ là công việc của các chuyên gia đơn độc.',
     '{"info-q6": ["G", "g"]}'
   );
 
@@ -149,7 +149,7 @@ BEGIN
     'READING',
     2,
     'thetargetofone large company that has changed its business focus',
-    'Choose the correct answer.',
+    E'**Đáp án: F**\n\n> "the target of one large company that has changed..."\n\nĐoạn F nói về mục tiêu của một công ty lớn (ví dụ P&G) đã thay đổi mô hình kinh doanh để đón nhận innovation từ bên ngoài.',
     '{"info-q7": ["F", "f"]}'
   );
 
@@ -163,7 +163,7 @@ BEGIN
     'READING',
     2,
     'UmagicSystems is an example of a new innovative company.',
-    'Choose the correct answer.',
+    E'**Đáp án: TRUE**\n\nUmagicSystems được đề cập trong bài là ví dụ điển hình cho một công ty đổi mới sáng tạo mới.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', true);
@@ -180,7 +180,7 @@ BEGIN
     'READING',
     2,
     'Amazonand Wal-Mart have exchangedsuccessfulideas on innovation.',
-    'Choose the correct answer.',
+    E'**Đáp án: NOT GIVEN**\n\nBài viết không đề cập việc Amazon và Wal-Mart trao đổi ý tưởng thành công với nhau.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', false);
@@ -197,7 +197,7 @@ BEGIN
     'READING',
     2,
     'Usingfinancial rewards to encourage innovation is an outdated practice.',
-    'Choose the correct answer.',
+    E'**Đáp án: FALSE**\n\nBài viết cho rằng sử dụng phần thưởng tài chính vẫn là một cách hiệu quả, không phải là lỗi thời (outdated).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', false);
@@ -214,7 +214,7 @@ BEGIN
     'READING',
     2,
     'M failed to understand David Post''s ''virtual experts’ idea.',
-    'Choose the correct answer.',
+    E'**Đáp án: TRUE**\n\nCác chuyên gia quản lý (management experts - M) đã không hiểu hoặc đánh giá thấp ý tưởng ''chuyên gia ảo'' của David Post.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'TRUE', true);
@@ -231,7 +231,7 @@ BEGIN
     'READING',
     2,
     'What point does the writer make about intellectual property?',
-    'Choose the correct answer.',
+    E'**Đáp án: C**\n\nTác giả cho rằng luật sở hữu trí tuệ đôi khi kìm hãm sự sáng tạo hơn là bảo vệ nó (Đáp án C).',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. It can be lost when firms merge.', false);
@@ -249,7 +249,7 @@ BEGIN
     'READING',
     2,
     'Peter Chemin is an example of someone who has realized that',
-    'Choose the correct answer.',
+    E'**Đáp án: A**\n\nPeter Chemin nhận ra rằng việc chia sẻ ý tưởng không nhất thiết dẫn đến mất lợi thế cạnh tranh.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. large companies are less innovative than small ones.', true);
@@ -267,7 +267,7 @@ BEGIN
     'READING',
     2,
     'In conclusion, the writer suggests that',
-    'Choose the correct answer.',
+    E'**Đáp án: D**\n\nKết luận: Tác giả gợi ý rằng các công ty nên cởi mở hơn (more open) với các ý tưởng từ bên ngoài thay vì khép kín.',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. computer-based industries cannot be innovative.', false);
