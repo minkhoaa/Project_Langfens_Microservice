@@ -18,16 +18,23 @@ description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 ## 🚀 AUTO EXECUTION STEPS (Follow in order!)
 
 > [!CAUTION]
-> **MANDATORY 4 AI CHECKS - KHÔNG ĐƯỢC BỎ QUA BẤT KỲ BƯỚC NÀO!**
+> **MANDATORY 10-STEP PIPELINE V3 - KHÔNG ĐƯỢC BỎ QUA BẤT KỲ BƯỚC NÀO!**
 > 
 > | # | AI | Step | Action |
 > |---|-----|------|--------|
-> | 1 | Gemini | TIER 1 (orchestrator) | Auto-run in pipeline |
-> | 2 | Claude | CHECK #1 | **LUÔN check issues P-001 to S-003** |
-> | 3 | Gemini | POST-CHECK | **LUÔN chạy gemini_qa.py** |
-> | 4 | Claude | CHECK #2 | **LUÔN chạy invariants.py** |
+> | 1 | Rule | TIER 1 | orchestrator.py (fetch→normalize) |
+> | 2 | Gemini | PRE-CHECK | gemini_qa.py --mode pre |
+> | 3 | Claude | PRE-FIX | **Manual fix schema issues** |
+> | 4 | Gemini | POST-CHECK | gemini_qa.py --mode post |
+> | 5 | Codex | VALIDATE | codex_qa.py --mode validate |
+> | 6 | Codex | FIX | codex_qa.py --mode fix |
+> | 7 | Claude | FINAL-FIX | **Manual fix remaining issues** |
+> | 8 | Claude | INVARIANTS | invariants.py |
+> | 9 | - | SEED | psql -f seed.sql |
+> | 10 | - | QA EXPORT | Generate report |
 > 
-> **Cho dù TIER 1 SUCCESS, vẫn PHẢI chạy đủ 4 bước!**
+> **Cho dù TIER 1 SUCCESS, vẫn PHẢI chạy đủ 10 bước!**
+
 
 ### Step 1: Run TIER 1 Rule-Based
 ```bash
@@ -77,14 +84,35 @@ cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 &&
 ```
 **Record Gemini decision (PASS/FAIL) and issues for QA report.**
 
-### Step 5: ⭐ Claude CHECK #2 - Final Verify
+### Step 4.5: ⭐ Codex VALIDATE (3rd AI Layer)
+```bash
+// turbo
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode validate 2>&1
+```
+**Record Codex decision (PASS/FAIL) and confidence for QA report.**
+
+### Step 5: ⭐ Codex FIX (Auto-fix content issues)
+```bash
+// turbo
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode fix 2>&1
+```
+**Codex will:**
+1. Validate to find issues
+2. Auto-fix what it can
+3. Re-validate to confirm fixes
+
+### Step 6: ⭐ Claude FINAL-FIX (Manual fix remaining)
+
+Check Codex output. If still issues remain, fix manually.
+
+### Step 7: ⭐ Claude INVARIANTS - Final Verify
 ```bash
 // turbo
 python invariants.py <SOURCE> <ITEM_ID> 2>&1
 ```
 **MUST show: `Valid: True`**
 
-### Step 6: Export + Seed
+### Step 8: Export + Seed
 ```bash
 python export.py <SOURCE> <ITEM_ID>
 ```

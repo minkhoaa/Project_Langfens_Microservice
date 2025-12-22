@@ -907,11 +907,14 @@ def _extract_checkbox_questions(soup: BeautifulSoup, checkboxes, start_idx: int)
             num_to_choose = 2
             break
     
-    # Create single MULTIPLE_CHOICE_MULTIPLE question with multiple correct answers
-    # User can select any num_to_choose options from the list, order doesn't matter
-    q_idx = start_idx + 1
+    # Create MULTIPLE_CHOICE_MULTIPLE question for each checkbox group
+    # Extract question idx from checkbox name (e.g., q1→1, q3→3, q5→5)
     for name, opts in checkbox_groups.items():
         if opts:
+            # Extract idx from name like "q1", "q3", "q5"
+            idx_match = re.match(r'q(\d+)', name)
+            q_idx = int(idx_match.group(1)) if idx_match else start_idx + 1
+            
             questions.append({
                 'idx': q_idx,
                 'type': 'MULTIPLE_CHOICE_MULTIPLE',
@@ -920,7 +923,6 @@ def _extract_checkbox_questions(soup: BeautifulSoup, checkboxes, start_idx: int)
                 'options': opts,
                 'num_to_choose': num_to_choose  # metadata for reference
             })
-            break  # Usually one checkbox group per exam
     
     return questions
 

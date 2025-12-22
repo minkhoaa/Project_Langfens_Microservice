@@ -42,6 +42,62 @@ if crawler_miniielts:
     logger.info("Successfully imported crawler-miniielts.py")
 
 
+def extract_audio_url(soup) -> Optional[str]:
+    """
+    Extract audio URL from HTML with multiple fallback patterns.
+    
+    Patterns checked (in order):
+    1. <iframe src="...youtube.com/embed/...">
+    2. <iframe data-src="...youtube.com/embed/...">
+    3. data-youtube-id attribute
+    4. Direct youtube.com/embed links in HTML text
+    5. youtu.be short links
+    """
+    if not soup:
+        return None
+    
+    # Pattern 1: Standard iframe with youtube.com
+    for iframe in soup.find_all('iframe'):
+        src = iframe.get('src') or iframe.get('data-src') or ''
+        if 'youtube.com' in src or 'youtu.be' in src:
+            return src
+    
+    # Pattern 2: data-youtube-id attribute
+    for elem in soup.find_all(attrs={'data-youtube-id': True}):
+        video_id = elem.get('data-youtube-id')
+        if video_id:
+            return f"https://www.youtube.com/embed/{video_id}"
+    
+    # Pattern 3: youtubeId or videoId in data attributes
+    for elem in soup.find_all(attrs={'data-video-id': True}):
+        video_id = elem.get('data-video-id')
+        if video_id:
+            return f"https://www.youtube.com/embed/{video_id}"
+    
+    # Pattern 4: YouTube embed URL in text/scripts
+    html_text = str(soup)
+    
+    # Match youtube.com/embed/VIDEO_ID
+    embed_match = re.search(r'youtube\.com/embed/([a-zA-Z0-9_-]{11})', html_text)
+    if embed_match:
+        video_id = embed_match.group(1)
+        return f"https://www.youtube.com/embed/{video_id}"
+    
+    # Match youtu.be/VIDEO_ID
+    short_match = re.search(r'youtu\.be/([a-zA-Z0-9_-]{11})', html_text)
+    if short_match:
+        video_id = short_match.group(1)
+        return f"https://www.youtube.com/embed/{video_id}"
+    
+    # Match youtube.com/watch?v=VIDEO_ID
+    watch_match = re.search(r'youtube\.com/watch\?v=([a-zA-Z0-9_-]{11})', html_text)
+    if watch_match:
+        video_id = watch_match.group(1)
+        return f"https://www.youtube.com/embed/{video_id}"
+    
+    return None
+
+
 def load_raw(source: str, item_id: str) -> Optional[dict]:
     """Load raw HTML from disk."""
     source_dir = RAW_DIR / source
@@ -160,11 +216,12 @@ def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
         if q_idx in answers:
             q['correct_answer'] = answers[q_idx]
     
-    # Extract YouTube audio URL
-    iframe = soup.find('iframe')
-    audio_url = None
-    if iframe and 'youtube.com' in str(iframe.get('src', '')):
-        audio_url = iframe.get('src')
+    # Extract YouTube audio URL - multiple patterns for robustness
+    audio_url = extract_audio_url(soup)
+    
+    # Also try from solution page
+    if not audio_url and solution_html:
+        audio_url = extract_audio_url(solution_soup)
     
     # Detect exam type from URL or audio presence
     exam_type = 'reading'

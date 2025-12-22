@@ -322,6 +322,83 @@ def check_no_duplicate_prompts(questions: list, result: InvariantResult) -> None
                 prompts[prompt] = idx
 
 
+def check_content_completeness(questions: list, sections: list, result: InvariantResult) -> None:
+    """CONTENT COMPLETENESS: Ensure users have enough info to answer questions."""
+    import re
+    
+    # Get instruction and passage text for context checking
+    all_instructions = ' '.join(s.get('instruction_md', '') for s in sections)
+    all_passages = ' '.join(s.get('passage_md', '') for s in sections)
+    context_text = all_instructions + all_passages
+    
+    # Check 1: MATCHING types need option explanations in instruction/passage
+    matching_types = ['MATCHING_INFORMATION', 'MATCHING_FEATURES', 'MATCHING_ENDINGS']
+    matching_questions = [q for q in questions if q.get('type') in matching_types]
+    
+    if matching_questions:
+        # Check if A-H options are explained (look for patterns like "A: text" or "**A** text")
+        option_patterns = [
+            r'[A-H]\s*[:\-]\s*\w+',  # A: text or A - text
+            r'\*\*[A-H]\*\*\s+\w+',  # **A** text
+            r'[A-H]\s+It\s+\w+',     # A It would be...
+        ]
+        has_options_explained = any(re.search(p, context_text) for p in option_patterns)
+        
+        if not has_options_explained:
+            result.add_violation(f"MATCHING questions (Q{matching_questions[0].get('idx')}-{matching_questions[-1].get('idx')}): instruction_md/passage_md missing option explanations (A-H meanings)")
+    
+    # Check 2: All questions should have meaningful prompt_md
+    for q in questions:
+        idx = q.get('idx')
+        prompt = q.get('prompt_md', '').strip()
+        q_type = q.get('type', '')
+        
+        # Skip completion types - they may have just blanks
+        if 'COMPLETION' in q_type:
+            continue
+        
+        # Check for empty or just-number prompts
+        if not prompt:
+            result.add_warning(f"Q{idx}: prompt_md is empty")
+        elif re.match(r'^\d+$', prompt):
+            result.add_warning(f"Q{idx}: prompt_md is just a number '{prompt}' (should describe the question)")
+        elif len(prompt) < 3:
+            result.add_warning(f"Q{idx}: prompt_md too short '{prompt}'")
+    
+    # Check 3: MCQ options should have meaningful text
+    mcq_types = ['MULTIPLE_CHOICE_SINGLE', 'MULTIPLE_CHOICE_MULTIPLE', 'TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN']
+    for q in questions:
+        if q.get('type') not in mcq_types:
+            continue
+        
+        idx = q.get('idx')
+        options = q.get('options', [])
+        
+        for opt in options:
+            text = opt.get('text', '').strip()
+            label = opt.get('label', '')
+            
+            # Check for placeholder or empty text
+            if not text:
+                result.add_warning(f"Q{idx}: option {label} has empty text")
+            elif text.lower() in ['option a', 'option b', 'option c', 'option d', 'option e']:
+                result.add_warning(f"Q{idx}: option {label} has placeholder text '{text}'")
+    
+    # Check 4: MATCHING_HEADING should have heading text in options
+    for q in questions:
+        if q.get('type') != 'MATCHING_HEADING':
+            continue
+        
+        idx = q.get('idx')
+        options = q.get('options', [])
+        
+        for opt in options:
+            text = opt.get('text', '').strip()
+            label = opt.get('label', '')
+            
+            if not text or len(text) < 5:
+                result.add_warning(f"Q{idx}: heading option {label} has no/short text (users can't see headings)")
+
 def check_invariants(data: dict) -> InvariantResult:
     """Run all IELTS invariant checks (31 strict rules)."""
     result = InvariantResult()
@@ -347,6 +424,9 @@ def check_invariants(data: dict) -> InvariantResult:
     check_matching_info_options(questions, result)  # MATCHING_INFO options
     check_mcq_multiple_detection(questions, result)  # MCQ_MULTIPLE from "Choose TWO"
     check_embedded_questions(sections, questions, result)  # Embedded questions in passage
+    
+    # === CONTENT COMPLETENESS CHECKS ===
+    check_content_completeness(questions, sections, result)  # Ensure users can answer
     
     return result
 

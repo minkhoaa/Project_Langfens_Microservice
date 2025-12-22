@@ -4,12 +4,77 @@ description: Quy tắc format dữ liệu IELTS questions - KHÔNG SỬA BACKEND
 
 # /ielts-data-format - STRICT LOCKED SCHEMAS
 
-> [!CAUTION] > **STRICT SCHEMA**: Output JSON PHẢI EXACTLY match schema này.
->
+> [!CAUTION]
+> **STRICT SCHEMA**: Output JSON PHẢI EXACTLY match schema này.
 > - Vi phạm → Frontend KHÔNG render được
 > - Vi phạm → Backend KHÔNG chấm điểm được
 
 ---
+
+# 🔍 SECTION 1: QUICK LOOKUP (AI Detection Reference)
+
+## Type → UI → Grader (Master Table)
+
+| Type | UI Kind | Grader | Options | MatchPairs | Blanks |
+|------|---------|--------|---------|------------|--------|
+| TRUE_FALSE_NOT_GIVEN | `choice_single` | SingleChoice | ✅ T/F/NG | ❌ | ❌ |
+| YES_NO_NOT_GIVEN | `choice_single` | SingleChoice | ✅ Y/N/NG | ❌ | ❌ |
+| MULTIPLE_CHOICE_SINGLE | `choice_single` | SingleChoice | ✅ A-D | ❌ | ❌ |
+| MULTIPLE_CHOICE_MULTIPLE | `choice_multiple` | MultipleChoice | ✅ multi | ❌ | ❌ |
+| CLASSIFICATION | `choice_single` | MatchingHeading | ✅ cats | ✅ | ❌ |
+| SHORT_ANSWER | `completion` | ShortAnswer | `[]` | ❌ | ✅ `_{3,}` |
+| SUMMARY_COMPLETION | `completion` | Completion | `[]` | ❌ | ✅ `_{3,}` |
+| TABLE_COMPLETION | `completion` | Completion | `[]` | ❌ | ✅ `_{3,}` |
+| NOTE_COMPLETION | `completion` | Completion | `[]` | ❌ | ✅ `_{3,}` |
+| FORM_COMPLETION | `completion` | Completion | `[]` | ❌ | ✅ `_{3,}` |
+| SENTENCE_COMPLETION | `completion` | Completion | `[]` | ❌ | ✅ `_{3,}` |
+| DIAGRAM_LABEL | `completion` | Label | `[]` | ❌ | ✅ `_{3,}` |
+| MAP_LABEL | `matching_letter` | MatchingHeading | `[]` | ✅ | ❌ |
+| MATCHING_HEADING | `matching_heading` | MatchingHeading | ✅ i-xi | ✅ | ❌ |
+| MATCHING_INFORMATION | `matching_letter` | MatchingHeading | `[]` | ✅ | ❌ |
+| MATCHING_FEATURES | `matching_letter` | MatchingHeading | `[]` | ✅ | ❌ |
+| MATCHING_ENDINGS | `matching_letter` | MatchingHeading | `[]` | ✅ | ❌ |
+| FLOW_CHART | `flow_chart` | FlowChart | `[]` | ❌ | ❌ |
+
+## Detection Patterns (for AI)
+
+```python
+# DETECTION RULES - Use these patterns to identify question type:
+
+# 1. TFNG vs YNNG
+if answer in ['TRUE', 'FALSE']: type = 'TRUE_FALSE_NOT_GIVEN'
+if answer in ['YES', 'NO']:     type = 'YES_NO_NOT_GIVEN'
+
+# 2. MCQ_SINGLE vs MCQ_MULTIPLE  
+if 'TWO' in prompt or 'THREE' in prompt: type = 'MULTIPLE_CHOICE_MULTIPLE'
+if answer has comma ('A, B'):            type = 'MULTIPLE_CHOICE_MULTIPLE'
+
+# 3. MATCHING_* types
+if prompt has 'paragraph' + answer is letter: type = 'MATCHING_INFORMATION'
+if prompt has 'heading' + answer is roman:    type = 'MATCHING_HEADING'
+if prompt has 'person/name' + answer letter:  type = 'MATCHING_FEATURES'
+
+# 4. COMPLETION types
+if prompt has '_______' (3+ underscores): type = '*_COMPLETION' or 'SHORT_ANSWER'
+if prompt has 'diagram/map/label':        type = 'DIAGRAM_LABEL' or 'MAP_LABEL'
+
+# 5. MAP_LABEL → MATCHING_INFORMATION (CONVERT)
+if type == 'MAP_LABEL' and answer is letter (A-J):
+    type = 'MATCHING_INFORMATION'  # Frontend renders same UI
+```
+
+## Required Fields by Type
+
+| Type Category | options | matchPairs | blankAcceptTexts | shortAnswerAcceptTexts |
+|---------------|---------|------------|------------------|------------------------|
+| Choice (TFNG, MCQ) | ✅ Required | ❌ null | ❌ null | ❌ null |
+| Completion (*_COMPLETION) | `[]` empty | ❌ null | ✅ Required | ❌ null |
+| SHORT_ANSWER | `[]` empty | ❌ null | ❌ null | ✅ Required |
+| Matching (MATCHING_*) | `[]` or ✅ | ✅ Required | ❌ null | ❌ null |
+
+---
+
+# 📋 SECTION 2: TYPE-BY-TYPE SCHEMAS
 
 ## 🎯 FRONTEND UI KINDS MAPPING
 
