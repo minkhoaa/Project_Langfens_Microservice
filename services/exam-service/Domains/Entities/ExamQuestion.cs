@@ -44,5 +44,12 @@ public class ExamQuestion
     [Column(TypeName = "text[]")]
     public List<string>? ShortAnswerAcceptRegex { get; set; }
 
+    /// <summary>
+    /// Model/sample answers for ESSAY/WRITING type questions.
+    /// Stored as JSONB array of strings.
+    /// </summary>
+    [Column(TypeName = "jsonb")]
+    public List<string>? ModelAnswers { get; set; }
+
     public List<ExamOption> Options { get; set; } = new();
 }

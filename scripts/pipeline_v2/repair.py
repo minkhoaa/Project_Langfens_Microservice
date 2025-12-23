@@ -474,9 +474,27 @@ def repair_type_from_answer_format(data: dict, result: RepairResult) -> None:
                 result.add_repair(f"Q{idx}: Type fixed to MATCHING_HEADING (answer: {answer})")
             continue
         
-        # Detect single letter A-H (MATCHING_INFORMATION)
-        if len(answer) == 1 and answer in 'ABCDEFGH':
-            if current_type not in ['MATCHING_INFORMATION', 'MULTIPLE_CHOICE_SINGLE', 'MATCHING_HEADING']:
+        # Detect single letter A-H (MATCHING_HEADING if "which paragraph" pattern, else MATCHING_INFORMATION)
+        if len(answer) == 1 and answer in 'ABCDEFGHIJ':
+            # Check if instruction mentions "which paragraph/section contains"
+            sections = data.get('sections', [])
+            instruction_text = ''
+            for sec in sections:
+                instruction_text += sec.get('instruction_md', '') + ' ' + sec.get('passage_md', '')
+            instruction_lower = instruction_text.lower()
+            
+            has_which_paragraph = any(p in instruction_lower for p in [
+                'which paragraph',
+                'which section contains',
+                'which section mentions',
+            ])
+            
+            if has_which_paragraph:
+                # "Which paragraph contains..." → MATCHING_HEADING with paragraph A-H options
+                if current_type != 'MATCHING_HEADING':
+                    q['type'] = 'MATCHING_HEADING'
+                    result.add_repair(f"Q{idx}: Type fixed to MATCHING_HEADING (which paragraph pattern, answer: {answer})")
+            elif current_type not in ['MATCHING_INFORMATION', 'MULTIPLE_CHOICE_SINGLE', 'MATCHING_HEADING']:
                 q['type'] = 'MATCHING_INFORMATION'
                 result.add_repair(f"Q{idx}: Type fixed to MATCHING_INFORMATION (answer: {answer})")
 
@@ -518,9 +536,28 @@ def repair_add_options_from_answers(data: dict, result: RepairResult) -> None:
             result.add_repair(f"Q{idx}: Added YES/NO/NOT GIVEN options")
             continue
         
-        # MATCHING_INFORMATION - DO NOT add options here!
-        # normalize.py already clears options for MATCHING_INFORMATION/MATCHING_FEATURES
-        # Adding options here would conflict with that auto-fix
+        # MATCHING_HEADING - add paragraph options A-H/A-J
+        if q_type == 'MATCHING_HEADING' and len(options) < 5:
+            # Detect max letter from passage
+            sections = data.get('sections', [])
+            passage_md = ''
+            for sec in sections:
+                passage_md += sec.get('passage_md', '')
+            
+            paragraph_labels = re.findall(r'\*\*Paragraph ([A-L])\.\*\*', passage_md)
+            max_letter = max(paragraph_labels) if paragraph_labels else 'H'
+            
+            # Generate paragraph options
+            q['options'] = []
+            for c in 'ABCDEFGHIJKL':
+                if c <= max_letter:
+                    q['options'].append({
+                        'value': c,
+                        'label': f'Paragraph {c}',
+                        'is_correct': (c == answer)
+                    })
+            result.add_repair(f"Q{idx}: Added {len(q['options'])} paragraph options (A-{max_letter}) for MATCHING_HEADING")
+            continue
 
 
 def repair_smart_answer_fallback(data: dict, result: RepairResult) -> None:
@@ -699,6 +736,19 @@ def repair_data(data: dict) -> RepairResult:
     # Phase 6: Fix prompts (IMPROVED)
     repair_placeholder_prompts(data, result)
     repair_mcq_prompt_options(data, result)  # NEW: Separate MCQ options from prompt
+    
+    # Phase 7: FINAL SCHEMA ENFORCEMENT (STRICT)
+    # Ensure all questions match their type's required schema
+    try:
+        from schema_enforcer import enforce_all_questions
+        instruction = ''
+        for sec in data.get('sections', []):
+            instruction += sec.get('instruction_md', '')
+        questions = enforce_all_questions(data.get('questions', []), instruction)
+        data['questions'] = questions
+        result.add_repair("Applied strict schema enforcement")
+    except ImportError as e:
+        pass  # Schema enforcer may not be available in all envs
     
     return result
 

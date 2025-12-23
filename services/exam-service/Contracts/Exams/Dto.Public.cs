@@ -9,7 +9,9 @@ public class Dto_Public
         string Category,
         string Level,
         int DurationMin,
-        DateTime? updateAt);
+        DateTime? updateAt,
+        string ImageUrl
+        );
 
     public record PubLicExamDetailRecord(
         Guid Id,
@@ -19,6 +21,7 @@ public class Dto_Public
         string Category,
         string Level,
         int DurationMin,
+        string ImageUrl,
         IReadOnlyList<PublicSectionRecord> sections);
 
     public record PublicSectionRecord(

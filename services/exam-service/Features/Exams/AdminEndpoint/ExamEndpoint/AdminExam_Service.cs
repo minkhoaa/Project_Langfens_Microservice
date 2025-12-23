@@ -40,7 +40,8 @@ public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
             Status = ExamStatus.Draft,
             DurationMin = dto.DurationMin,
             CreatedAt = now,
-            UpdatedAt = now
+            UpdatedAt = now,
+            ImageUrl = dto.ImageUrl
         };
 
         db.Exams.Add(exam);
@@ -57,6 +58,7 @@ public sealed class AdminExamService(ExamDbContext db) : IAdminExamService
             .SetProperty(e => e.Level, dto.Level)
             .SetProperty(e => e.DurationMin, dto.DurationMin)
             .SetProperty(e => e.Status, dto.Status)
+            .SetProperty(e => e.ImageUrl, dto.ImageUrl)
             .SetProperty(e => e.UpdatedAt, DateTime.UtcNow), ct);
 
         return Results.Ok(new ApiResultDto(true, $"Affected {affected} rows", null!));

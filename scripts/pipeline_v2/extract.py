@@ -98,6 +98,80 @@ def extract_audio_url(soup) -> Optional[str]:
     return None
 
 
+def extract_image_url(soup, base_url: str = '') -> Optional[str]:
+    """
+    Extract thumbnail/cover image URL from HTML.
+    
+    Patterns checked (in order):
+    1. Open Graph og:image meta tag (best for thumbnails)
+    2. twitter:image meta tag
+    3. First img with class containing 'thumb', 'cover', 'featured'
+    4. First img in .card, .thumbnail, .featured-image
+    5. First large img (width > 200 or no width specified)
+    """
+    if not soup:
+        return None
+    
+    # Pattern 1: Open Graph og:image
+    og_image = soup.find('meta', property='og:image')
+    if og_image and og_image.get('content'):
+        return og_image['content']
+    
+    # Pattern 2: twitter:image
+    twitter_image = soup.find('meta', {'name': 'twitter:image'})
+    if twitter_image and twitter_image.get('content'):
+        return twitter_image['content']
+    
+    # Pattern 3: img with thumbnail-like class
+    for img in soup.find_all('img'):
+        img_class = ' '.join(img.get('class', []))
+        if any(kw in img_class.lower() for kw in ['thumb', 'cover', 'featured', 'hero', 'banner']):
+            src = img.get('src') or img.get('data-src')
+            if src:
+                return make_absolute_url(src, base_url)
+    
+    # Pattern 4: img in specific containers
+    for container_class in ['.card-img', '.thumbnail', '.featured-image', '.post-image', '.exam-image']:
+        container = soup.select_one(container_class)
+        if container:
+            img = container.find('img') if container.name != 'img' else container
+            if img:
+                src = img.get('src') or img.get('data-src')
+                if src:
+                    return make_absolute_url(src, base_url)
+    
+    # Pattern 5: First content img (not icons/logos)
+    for img in soup.select('article img, .content img, .post img, main img'):
+        src = img.get('src') or img.get('data-src') or ''
+        width = img.get('width', '')
+        # Skip small icons and logos
+        if width and int(width) < 100:
+            continue
+        if any(skip in src.lower() for skip in ['icon', 'logo', 'avatar', 'emoji']):
+            continue
+        if src:
+            return make_absolute_url(src, base_url)
+    
+    return None
+
+
+def make_absolute_url(url: str, base_url: str) -> str:
+    """Convert relative URL to absolute."""
+    if not url:
+        return ''
+    if url.startswith('http://') or url.startswith('https://'):
+        return url
+    if url.startswith('//'):
+        return 'https:' + url
+    if url.startswith('/'):
+        # Extract domain from base_url
+        import re
+        match = re.match(r'(https?://[^/]+)', base_url)
+        if match:
+            return match.group(1) + url
+    return url
+
+
 def load_raw(source: str, item_id: str) -> Optional[dict]:
     """Load raw HTML from disk."""
     source_dir = RAW_DIR / source
@@ -228,6 +302,9 @@ def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
     if '/listening/' in url or audio_url:
         exam_type = 'listening'
     
+    # Extract thumbnail/cover image
+    image_url = extract_image_url(soup, url)
+    
     return {
         "url": url,
         "title": title,
@@ -236,6 +313,7 @@ def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
         "answers": answers,
         "transcript": transcript,
         "audio_url": audio_url,
+        "image_url": image_url,  # Thumbnail/cover image
         "exam_type": exam_type
     }
 

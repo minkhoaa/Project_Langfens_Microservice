@@ -133,6 +133,7 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
             'questions': converted_questions,
             'exam_type': 'listening' if is_listening else 'reading',
             'audio_url': exam.get('audio_url', ''),
+            'image_url': exam.get('image_url', ''),  # Thumbnail/cover image
         }
     else:
         # Flat format (legacy)

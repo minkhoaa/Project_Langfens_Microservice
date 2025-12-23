@@ -1,6 +1,6 @@
 -- ============================================
 -- IELTS Exam Data Import SQL
--- Generated: 2025-12-22T15:39:09.093750
+-- Generated: 2025-12-23T02:55:32.739749
 -- Source: mini-ielts.com
 -- Title: Water hyacinth
 -- ============================================
@@ -32,7 +32,7 @@ DECLARE
   qid uuid;
 BEGIN
 
-  INSERT INTO exams ("Id","Slug","Title","DescriptionMd","Category","Level","Status","DurationMin","UpdatedAt")
+  INSERT INTO exams ("Id","Slug","Title","DescriptionMd","Category","Level","Status","DurationMin","ImageUrl","UpdatedAt")
   VALUES (
     exam_id,
     'mini-ielts-listening-water-hyacinth',
@@ -42,6 +42,7 @@ BEGIN
     'B2',
     'PUBLISHED',
     20,
+    'https://pondinformer.com/wp-content/uploads/2019/08/water-hyacinth-care-facts-planting-1.jpg',
     now()
   );
 
@@ -51,10 +52,48 @@ BEGIN
     exam_id,
     1,
     'Listening Test - Water hyacinth',
-    E'**Questions 3-6:**\nChoose the correct letter, **A**, **B**, **C** or **D**.\n\n---\n\n**Questions 7-10:**\nWhich section contains the following information?\n\nWrite the correct letter, **A-L**.\n\n---\n\n**Questions 9-9:**\nChoose **TWO** letters, **A-E**.',
-    E'# Passage\n\n# Listening Test - Water hyacinth\n\nThis is a listening practice test about water hyacinth. Listen carefully to the audio recording and answer the questions below.\n\n**Instructions:**\nYou will hear the recording ONCE only. Answer all questions based on what you hear in the audio.\n\n**About the Audio:**\nThis test includes multiple choice questions and matching questions. Pay close attention to the speakers'' discussions and take notes if needed.\n\n**Question Topics:**\n- Listen for key information and main ideas\n- Match features to correct categories\n- Identify specific details mentioned by speakers'
+    E'**Questions 1-2:**\nChoose **TWO** letters, **A-E**.\n\nWhich two problems are caused by water hyacinth?\n\n---\n\n**Questions 3-6:**\nChoose the correct letter, **A**, **B** or **C**.\n\n---\n\n**Questions 7-10:**\nWhat is the benefit of the cut down water hyacinth to each of the following aspects?\n\nChoose **FOUR** answers from the box and write the correct letter, **A-F** next to Questions 7-10.\n\n**Benefits of the cut-down water hyacinth:**\n- A. can reduce the effect of global warming\n- B. can be used as alternative energy resource\n- C. can make quick profits\n- D. can produce materials for plants to grow in\n- E. can be good for human health\n- F. can produce fertilizer',
+    E'# Passage\n\n# Listening Test - Water Hyacinth\n\nThis is a listening practice test about the water hyacinth plant and its environmental impacts.\n\n**About the Audio:**\nThis test discusses the water hyacinth, an invasive aquatic plant originally from Latin America that has become a major problem in many waterways around the world.\n\n**Topics covered:**\n- Problems caused by water hyacinth (blocking waterways, affecting fishing and electricity)\n- Origin of water hyacinth and how it spread\n- Environmental impacts (nutrient loss, soil erosion)\n- Biological and mechanical solutions\n- Benefits of harvesting water hyacinth (alternative energy, plant materials, mushroom farming)\n\n**Instructions:**\nListen carefully to the audio recording and answer the questions below. The recording will only be played once.\n\n**Word Bank for Questions 7-10:**\nA. can reduce the effect of global warming\nB. can be used as alternative energy resource\nC. can make quick profits\nD. can produce materials for plants to grow in\nE. can be good for human health\nF. can produce fertilizer'
   ,
     'https://www.youtube.com/embed/JdWLY889K2o?enablejsapi=1');
+
+  qid := gen_random_uuid();
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  VALUES (
+    qid,
+    sec1,
+    1,
+    'MULTIPLE_CHOICE_SINGLE',
+    'LISTENING',
+    2,
+    'Problem caused by water hyacinth (1/2)',
+    '',
+    NULL
+  );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. plants and fish are poisoned', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. Farmers cannot fish', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. the dam''s structure is damaged', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. Electricity production is affected.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. electricity production is affected.', false);
+
+  qid := gen_random_uuid();
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  VALUES (
+    qid,
+    sec1,
+    2,
+    'MULTIPLE_CHOICE_SINGLE',
+    'LISTENING',
+    2,
+    'Problem caused by water hyacinth (2/2)',
+    '',
+    NULL
+  );
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. plants and fish are poisoned', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. Farmers cannot fish', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. the dam''s structure is damaged', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. Electricity production is affected.', false);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. electricity production is affected.', true);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -65,11 +104,11 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'LISTENING',
     2,
-    '3Where was water hyacinth originally from?',
-    E'**Đáp án: A**\n\nWater hyacinth có nguồn gốc từ Nam Mỹ (Latin America). Trong bài nghe, thông tin này thường được nhắc đến đầu tiên khi giới thiệu về loài cây này.',
+    'Where was water hyacinth originally from?',
+    '',
     NULL
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. latin America', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. Latin America', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. Africa', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. Europe', false);
 
@@ -82,13 +121,13 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'LISTENING',
     2,
-    '4What is the primary cause of the decrease in nutrients from the soil?',
-    E'**Đáp án: C**\n\nNguyên nhân chính làm giảm dưỡng chất là do xói mòn đất (soil erosion). Cây này hấp thụ mạnh dưỡng chất, làm đất bị xói mòn và mất chất.',
+    'What is the primary cause of the decrease in nutrients from the soil?',
+    '',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. soil erosion', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. a change of rainfall', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. loss or trees', true);
+  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. loss of trees', true);
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -99,8 +138,8 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'LISTENING',
     2,
-    '5When will the biological solution bring risks to the environment?',
-    E'**Đáp án: C**\n\nGiải pháp sinh học sẽ gây rủi ro khi loài thiên địch tấn công các loài thực vật khác (attack other plants). Đây là rủi ro phổ biến khi du nhập loài mới để kiểm soát sinh học.',
+    'When will the biological solution bring risks to the environment?',
+    '',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. immediately', false);
@@ -116,8 +155,8 @@ BEGIN
     'MULTIPLE_CHOICE_SINGLE',
     'LISTENING',
     2,
-    '6What does John say about the mechanical solution?',
-    E'**Đáp án: C**\n\nJohn nói rằng giải pháp cơ học (mechanical solution) là không hiệu quả (ineffective) vì cây phát triển lại quá nhanh sau khi bị cắt bỏ.',
+    'What does John say about the mechanical solution?',
+    '',
     NULL
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. ineffective', false);
@@ -130,12 +169,12 @@ BEGIN
     qid,
     sec1,
     7,
-    'MATCHING_INFORMATION',
+    'MATCHING_FEATURES',
     'LISTENING',
     2,
-    'dried water hyacinth',
-    E'**Đáp án: D**\n\nBèo tây khô (dried water hyacinth) có thể dùng làm nhiên liệu (fuel) hoặc chất đốt. Đây là một ứng dụng hữu ích của loài cây này.',
-    '{"info-q7": ["D", "d"]}'
+    'What is the benefit of the cut down water hyacinth to: dried water hyacinth',
+    '',
+    '{"feature-q7": ["D", "D"]}'
   );
 
   qid := gen_random_uuid();
@@ -144,46 +183,27 @@ BEGIN
     qid,
     sec1,
     8,
-    'MATCHING_INFORMATION',
+    'MATCHING_FEATURES',
     'LISTENING',
     2,
-    'mushroom farmers',
-    E'**Đáp án: C**\n\nNông dân trồng nấm (mushroom farmers) sử dụng bèo tây làm cơ chất trồng nấm. Điều này giúp tận dụng nguồn sinh khối lớn của loài cây này.',
-    '{"info-q8": ["C", "c"]}'
-  );
-
-  qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
-  VALUES (
-    qid,
-    sec1,
-    9,
-    'MATCHING_INFORMATION',
-    'LISTENING',
-    2,
-    'oyster and straw mushrooms',
-    E'**Đáp án: E**\n\nNấm rơm và nấm sò (oyster and straw mushrooms) phát triển tốt trên cơ chất bèo tây. Đây là các loại nấm cụ thể được nhắc đến.',
-    '{"info-q9": ["E", "e"]}'
-  );
-
-  qid := gen_random_uuid();
-  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
-  VALUES (
-    qid,
-    sec1,
-    9,
-    'MATCHING_INFORMATION',
-    'LISTENING',
-    2,
-    'Choose TWO letters, A-E',
+    'What is the benefit of the cut down water hyacinth to: mushroom farmers',
     '',
-    '{"info-q9": ["E", "e"]}'
+    '{"feature-q8": ["C", "C"]}'
   );
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'A. plants and fish are poisoned', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'B. Farmers cannot fish', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 3, 'C. the dam’s structure is damaged', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 4, 'D. Electricity production is affected.', false);
-  INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 5, 'E. electricity production is affected.', false);
+
+  qid := gen_random_uuid();
+  INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
+  VALUES (
+    qid,
+    sec1,
+    9,
+    'MATCHING_FEATURES',
+    'LISTENING',
+    2,
+    'What is the benefit of the cut down water hyacinth to: ?',
+    '',
+    '{"feature-q9": ["E", "E"]}'
+  );
 
   qid := gen_random_uuid();
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","MatchPairs")
@@ -191,12 +211,12 @@ BEGIN
     qid,
     sec1,
     10,
-    'MATCHING_INFORMATION',
+    'MATCHING_FEATURES',
     'LISTENING',
     2,
-    'cows',
-    E'**Đáp án: B**\n\nBò (cows) có thể ăn bèo tây, nhưng cần trộn với rơm khô để giảm hàm lượng nước. Bèo tây là nguồn thức ăn gia súc tiềm năng.',
-    '{"info-q10": ["B", "b"]}'
+    'What is the benefit of the cut down water hyacinth to: ?',
+    '',
+    '{"feature-q10": ["B", "B"]}'
   );
 
 

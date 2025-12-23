@@ -10,7 +10,9 @@ public class DtoAdmin
         string? DescriptionMd,
         string Category,
         string Level,
-        int DurationMin);
+        int DurationMin,
+        string? ImageUrl
+        );
 
     public record AdminExamUpdate(
         string Title,
@@ -18,6 +20,7 @@ public class DtoAdmin
         string Category,
         string Level,
         int DurationMin,
+        string? ImageUrl,
         string Status);
 
     public record AdminSectionUpsert(

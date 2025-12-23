@@ -154,7 +154,7 @@ def _generate_section_sql(section: dict, idx: int) -> list[str]:
     
     # PassageMd = actual reading passage content
     # InstructionsMd = question instructions
-    passage_content = f"# Passage\\n\\n{passage}" if passage else ''
+    passage_content = passage if passage else ''
     
     lines.extend([
         f"  INSERT INTO exam_sections (\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\",\"PassageMd\")",

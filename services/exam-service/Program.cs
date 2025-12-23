@@ -15,7 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
-using Microsoft.Extensions.Options;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;

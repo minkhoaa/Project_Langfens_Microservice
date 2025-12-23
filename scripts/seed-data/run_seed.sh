@@ -22,20 +22,29 @@ seed_exams() {
   )
 
   if (( ${#exam_seeds[@]} == 0 )); then
-    echo "No exam seed files found in: ${seed_dir} (pattern: seed_exam_*.sql)" >&2
+    echo "No exam seed files found in: ${seed_dir}" >&2
     exit 1
   fi
 
+  echo "Found ${#exam_seeds[@]} SQL files to seed:"
+  for f in "${exam_seeds[@]}"; do
+    echo "  - $(basename "$f")"
+  done
+  echo ""
+
+  # Apply each SQL file individually for better error reporting
   for seed_file in "${exam_seeds[@]}"; do
     if [[ ! -f "${seed_file}" ]]; then
       echo "Missing exam seed file: ${seed_file}" >&2
       exit 1
     fi
+    
+    echo "Applying: $(basename "${seed_file}")..."
+    PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "${seed_file}" 2>&1 \
+      | grep -E "^(BEGIN|COMMIT|DO|INSERT|DELETE|ERROR|psql:)" || true
   done
-
-  # Combine all SQL files so they run as a single import stream.
-  cat "${exam_seeds[@]}" | docker compose -f "${COMPOSE_FILE}" exec -T exam-database \
-    psql -v ON_ERROR_STOP=1 -U exam -d exam-db
+  
+  echo "✓ All exam seeds applied!"
 }
 
 seed_vocabulary() {

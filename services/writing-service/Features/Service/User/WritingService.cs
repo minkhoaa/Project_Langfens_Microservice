@@ -79,7 +79,7 @@ public class WritingService : IWritingService
         var response = await _context.WritingExams.AsNoTracking()
                               .Where(x => x.Id == examId)
                               .Select(x =>
-                                  new StartWritingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.CreatedAt,
+                                  new StartWritingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.ModelAnswers, x.CreatedAt,
                                       x.CreatedBy, userId))
                               .FirstOrDefaultAsync(token)
                           ?? throw new Exception("Exam id is not existed");
@@ -91,7 +91,7 @@ public class WritingService : IWritingService
         var exam = await _context.WritingExams.AsNoTracking()
             .Where(x => x.Id == examId)
             .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
-                x.CreatedAt, x.CreatedBy))
+                x.ModelAnswers, x.CreatedAt, x.CreatedBy))
             .FirstOrDefaultAsync(token);
 
         return exam is null
@@ -104,7 +104,7 @@ public class WritingService : IWritingService
         var exams = await _context.WritingExams.AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
-                x.CreatedAt, x.CreatedBy))
+                x.ModelAnswers, x.CreatedAt, x.CreatedBy))
             .ToListAsync(token);
 
         return Results.Ok(new ApiResultDto(true, "Fetched exams successfully", exams));

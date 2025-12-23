@@ -75,7 +75,13 @@ var writingConnectionString = EnvOrDefault("CONNECTIONSTRING__WRITING",
     "Host=writing-database;Port=5432;Database=writing-db;Username=writing;Password=writing");
 if (string.IsNullOrWhiteSpace(writingConnectionString))
     throw new Exception("Connection string for writing DB is missing");
-builder.Services.AddDbContext<WritingDbContext>(option => option.UseNpgsql(writingConnectionString));
+
+// Enable dynamic JSON for JSONB columns (required for List<string> mapping)
+var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(writingConnectionString);
+dataSourceBuilder.EnableDynamicJson();
+var dataSource = dataSourceBuilder.Build();
+
+builder.Services.AddDbContext<WritingDbContext>(option => option.UseNpgsql(dataSource));
 builder.Services.AddScoped<IWritingService, WritingService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
