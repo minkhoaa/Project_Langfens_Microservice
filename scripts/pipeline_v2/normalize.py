@@ -131,14 +131,9 @@ def clean_passage_text(text: str) -> str:
     
     text = '\n'.join(clean_lines)
     
-    # === PARAGRAPH LABEL FORMATTING ===
-    # Convert "A The glow..." to "**Paragraph A.**\nThe glow..."
-    # Match letter at start of line followed by space and uppercase word
-    text = re.sub(r'^([A-H])\s+([A-Z])', r'**Paragraph \1.**\n\2', text, flags=re.MULTILINE)
-    
-    # Also handle inline paragraph markers (within text)
-    # "...caves. B The fireflies..." → "...caves.\n\n**Paragraph B.**\nThe fireflies..."
-    text = re.sub(r'([.!?])\s+([A-H])\s+([A-Z][a-z])', r'\1\n\n**Paragraph \2.**\n\3', text)
+    # === PARAGRAPH LABEL - DO NOT AUTO-FORMAT HERE ===
+    # Note: Paragraph label formatting (A The... -> **Paragraph A.**) is now handled
+    # by normalize() function. Don't do it here to avoid duplicates.
     
     # === QUESTION CLEANUP ===
     # Remove TFNG/YNNG instruction blocks that got embedded in passage
@@ -191,6 +186,13 @@ def auto_fix_paragraph_labels(passage: str) -> str:
     if not passage:
         return passage
     
+    # ========== SKIP if passage already has properly formatted labels ==========
+    # If we already have **Paragraph A.** etc, don't try to auto-fix - it creates duplicates
+    if re.search(r'\*\*Paragraph [A-L]\.\*\*', passage):
+        # Clean up multiple newlines only
+        passage = re.sub(r'\n{3,}', '\n\n', passage)
+        return passage.strip()
+    
     # Pattern 1: "Section A" or "Section A:" -> "**Paragraph A.**\n"
     passage = re.sub(
         r'\n*Section\s+([A-L])\s*:?\s*\n*',
@@ -207,8 +209,9 @@ def auto_fix_paragraph_labels(passage: str) -> str:
     )
     
     # Pattern 3: "Paragraph A" without proper formatting -> "**Paragraph A.**\n"
+    # But SKIP already formatted "**Paragraph A.**" (negative lookbehind for **)
     passage = re.sub(
-        r'(?:^|\n)\s*Paragraph\s+([A-L])\s*(?:\.|:)?\s*\n*',
+        r'(?<!\*)(?:^|\n)\s*Paragraph\s+([A-L])\s*(?:\.|:)?\s*\n*',
         r'\n\n**Paragraph \1.**\n',
         passage,
         flags=re.IGNORECASE
@@ -216,6 +219,16 @@ def auto_fix_paragraph_labels(passage: str) -> str:
     
     # Clean up multiple newlines
     passage = re.sub(r'\n{3,}', '\n\n', passage)
+    
+    # ========== FINAL FIX: Remove duplicate consecutive paragraph labels ==========
+    # Pattern: **Paragraph X.**\n**Paragraph Y.** where Y comes BEFORE X alphabetically
+    # This means an embedded label from text was incorrectly converted - remove the second one
+    # Also remove any **Paragraph X.** immediately followed by another **Paragraph Y.**
+    passage = re.sub(
+        r'(\*\*Paragraph [A-L]\.\*\*)\s*\n+(\*\*Paragraph [A-L]\.\*\*)\s*\n*',
+        r'\1\n',
+        passage
+    )
     
     return passage.strip()
 
@@ -625,6 +638,18 @@ def normalize_rule_based(data: dict) -> dict:
         if not label and i < len(labels):
             label = labels[i]
         
+        # ========== FIX: Strip leading paragraph letter from text ==========
+        # Source sometimes has "A The development..." or "A\n The development..." or "Paragraph A..."
+        # Strip these before adding proper "**Paragraph A.**" prefix
+        if label:
+            text = text.strip()
+            # Strip leading single letter followed by whitespace/newline then uppercase
+            # But we need to check if text starts with ANY single letter (not necessarily matching current label)
+            # to handle cases where paragraph 2 has text "A The..." (previous paragraph's label embedded)
+            text = re.sub(r'^([A-L])\s*\n?\s*(?=[A-Z])', '', text, flags=re.MULTILINE)
+            # Pattern: "Paragraph A " at start of text
+            text = re.sub(r'^Paragraph\s+[A-L]\s*\.?\s*\n?\s*(?=[A-Z])', '', text.strip(), flags=re.IGNORECASE)
+        
         if label:
             passage_md += f"**Paragraph {label}.**\\n{text}\\n\\n"
         else:
@@ -727,24 +752,81 @@ This test includes multiple choice questions and matching questions. Pay close a
             logger.info(f"Q{idx}: Auto-converting MAP_LABEL → MATCHING_INFORMATION")
             detected_type = 'MATCHING_INFORMATION'
         
-        # ========== AUTO-FIX: MATCHING_HEADING - generate paragraph options A-H ==========
-        # "Which paragraph contains..." questions need paragraph letter options
+        # ========== AUTO-FIX: MATCHING_HEADING - detect answer type and generate appropriate options ==========
+        # Two variants:
+        # 1. Answer is roman numeral (i, ii, iii...) → options are headings i-viii with text
+        # 2. Answer is letter (A, B, C...) → options are paragraph labels A-G
         if detected_type == 'MATCHING_HEADING':
-            # Detect number of paragraphs from passage
-            paragraph_labels = re.findall(r'\*\*Paragraph ([A-L])\.\*\*', passage_md)
-            max_letter = max(paragraph_labels) if paragraph_labels else 'H'
+            answer_lower = correct_answer.lower() if correct_answer else ''
             
-            # Generate options A-H or A-J based on passage
-            options = []
-            for c in 'ABCDEFGHIJKL':
-                if c <= max_letter:
-                    options.append({
-                        'value': c,
-                        'label': f'Paragraph {c}',
-                        'is_correct': (c == correct_answer)
-                    })
-            if options:
+            # Roman numeral patterns
+            ROMAN_TO_INT = {'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7, 'viii': 8, 'ix': 9, 'x': 10}
+            
+            # Case 1: Answer is roman numeral - use heading options
+            if answer_lower in ROMAN_TO_INT:
+                # Try to extract headings from cleaned text
+                # Note: source/item_id are top-level fields in extracted data (not in _metadata)
+                source = data.get('source', data.get('_metadata', {}).get('source', ''))
+                item_id = data.get('item_id', data.get('_metadata', {}).get('item_id', ''))
+                
+                cleaned_path = Path(__file__).parent.parent.parent / "data" / "cleaned" / source / f"{item_id}.txt"
+                headings = []
+                if cleaned_path.exists():
+                    cleaned_text = cleaned_path.read_text(encoding='utf-8')
+                    # Extract headings from multi-line format (i\nText on next line)
+                    lines = cleaned_text.split('\n')
+                    for i, line in enumerate(lines):
+                        stripped = line.strip().lower()
+                        if stripped in ROMAN_TO_INT and i + 1 < len(lines):
+                            next_line = lines[i + 1].strip()
+                            if next_line and len(next_line) >= 5 and next_line[0].isupper():
+                                if '___' not in next_line and '?' not in next_line:
+                                    headings.append({"label": stripped, "text": next_line})
+                    # Sort by roman numeral order
+                    headings.sort(key=lambda h: ROMAN_TO_INT.get(h['label'], 99))
+                    # Deduplicate
+                    seen = set()
+                    headings = [h for h in headings if not (h['label'] in seen or seen.add(h['label']))]
+                
+                if headings and len(headings) >= 3:
+                    options = []
+                    for h in headings:
+                        options.append({
+                            'value': h['label'],
+                            'label': h['label'],
+                            'text': h['text'],
+                            'is_correct': h['label'] == answer_lower
+                        })
+                    logger.info(f"Q{idx}: Auto-generated {len(options)} heading options (i-{headings[-1]['label']}) for MATCHING_HEADING")
+                else:
+                    # Fallback: generate basic roman numeral options without text
+                    options = []
+                    for numeral in ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii']:
+                        options.append({
+                            'value': numeral,
+                            'label': numeral,
+                            'text': f'Heading {numeral}',
+                            'is_correct': numeral == answer_lower
+                        })
+                    logger.info(f"Q{idx}: Auto-generated 8 heading options (i-viii) for MATCHING_HEADING (no text)")
+            
+            # Case 2: Answer is letter - use paragraph options
+            else:
+                paragraph_labels = re.findall(r'\*\*Paragraph ([A-L])\.\*\*', passage_md)
+                max_letter = max(paragraph_labels) if paragraph_labels else 'H'
+                
+                options = []
+                for c in 'ABCDEFGHIJKL':
+                    if c <= max_letter:
+                        options.append({
+                            'value': c,
+                            'label': f'Paragraph {c}',
+                            'is_correct': (c == correct_answer)
+                        })
                 logger.info(f"Q{idx}: Auto-generated {len(options)} paragraph options for MATCHING_HEADING (A-{max_letter})")
+            
+            # NOTE: Do NOT modify correct_answer to add full text - it causes duplicates
+            # Frontend displays option text, so correct_answers should just be label (e.g., "ii")
         
         if detected_type in ['MATCHING_INFORMATION', 'MATCHING_FEATURES', 'MATCHING_ENDINGS']:
             if options and len(options) > 0:
@@ -803,7 +885,7 @@ This test includes multiple choice questions and matching questions. Pay close a
             {
                 'idx': 1,
                 'title': title,
-                'passage_md': passage_md.strip(),
+                'passage_md': embed_content_images_to_passage(passage_md.strip(), data.get('content_images', {}), questions, data.get('image_url', '')),
                 'instruction_md': instruction_md,
                 'audio_url': data.get('audio_url', ''),
             }
@@ -854,6 +936,8 @@ def normalize(source: str, item_id: str, use_ai: bool = True) -> Optional[dict]:
         'normalized_by': 'ai' if (use_ai and GEMINI_API_KEY and normalized) else 'rule-based',
     }
     
+    # Apply ||| delimiter format to prompts
+    # normalized = format_first_question_in_groups(normalized)  # DISABLED - frontend does not parse ||
     return normalized
 
 
@@ -894,3 +978,174 @@ if __name__ == "__main__":
     else:
         print("✗ Normalize failed")
         sys.exit(1)
+
+
+def embed_content_images_to_passage(passage_md: str, content_images: dict, questions: list, image_url: str = '') -> str:
+    """
+    Smart embed content images into passage_md based on classification.
+    
+    Args:
+        passage_md: Current passage markdown text
+        content_images: Dict from extract_content_images()
+        questions: List of questions to determine which images go where
+    
+    Returns:
+        Updated passage_md with embedded images
+    """
+    if not content_images:
+        return passage_md
+    
+    sections_to_add = []
+    
+    # Group questions by type to understand what images are needed
+    question_types = {}
+    for q in questions:
+        q_type = q.get('type', '')
+        q_idx = q.get('idx', 0)
+        if q_type not in question_types:
+            question_types[q_type] = []
+        question_types[q_type].append(q_idx)
+    
+    # Add question-specific images
+    question_images = content_images.get('question_images', {})
+    for q_range, urls in question_images.items():
+        if not urls:
+            continue
+        
+        # Format section header
+        sections_to_add.append(f"\n---\n\n## Images for Questions {q_range}\n")
+        for i, url in enumerate(urls):
+            sections_to_add.append(f"\n![Question {q_range} Option {chr(65+i)}]({url})\n")
+    
+    # Add diagram images if present and not already in question_images
+    diagram_images = content_images.get('diagram_images', [])
+    for url in diagram_images:
+        # Check if already added as question image
+        already_added = any(url in str(sections_to_add) for _ in [True])
+        if not already_added:
+            sections_to_add.append(f"\n---\n\n## Diagram\n\n![Diagram]({url})\n")
+    
+    # Add remaining passage images
+    passage_images = _filter_images(content_images.get('passage_images', []))
+    # Skip images that are already in image_url (cover image)
+    if image_url:
+        passage_images = [url for url in passage_images if url != image_url]
+    for url in passage_images:
+        already_added = any(url in str(sections_to_add) for _ in [True])
+        if not already_added:
+            sections_to_add.append(f"\n---\n\n![Passage Image]({url})\n")
+    
+    if sections_to_add:
+        return passage_md + '\n'.join(sections_to_add)
+    
+    return passage_md
+
+# Additional skip patterns for embedding
+_SKIP_IMAGE_PATTERNS = ['remove_format', 'Dictionary', 'highlight', 'favicon', 'icon', 'logo', 'avatar']
+
+def _filter_images(image_list):
+    """Filter out non-content images."""
+    return [url for url in image_list if not any(skip in url for skip in _SKIP_IMAGE_PATTERNS)]
+
+
+def apply_prompt_delimiter_format(questions: list, instruction_md: str) -> list:
+    """
+    Apply the ||| delimiter format to question prompts.
+    
+    Rules:
+    - First question in each group gets: "instruction ||| question"
+    - Subsequent questions in the group get: just "question"
+    
+    Groups are detected by:
+    1. Analyzing instruction_md for "Questions X-Y" patterns
+    2. Using question type changes as group boundaries
+    
+    Args:
+        questions: List of question dicts with 'idx', 'type', 'prompt_md'
+        instruction_md: The instruction markdown containing group info
+        
+    Returns:
+        Updated questions list with formatted prompt_md
+    """
+    if not questions or not instruction_md:
+        return questions
+    
+    # Parse groups from instruction_md
+    # Pattern: "Questions X-Y" or "**Questions X-Y**"
+    group_pattern = r'\*?\*?Questions?\s+(\d+)[-–](\d+)\*?\*?'
+    groups = []
+    
+    for match in re.finditer(group_pattern, instruction_md, re.IGNORECASE):
+        start = int(match.group(1))
+        end = int(match.group(2))
+        groups.append((start, end))
+    
+    # If no groups found, try to detect by type changes
+    if not groups:
+        current_type = None
+        group_start = None
+        for q in sorted(questions, key=lambda x: x.get('idx', 0)):
+            q_type = q.get('type', '')
+            idx = q.get('idx', 0)
+            
+            if q_type != current_type:
+                if group_start is not None:
+                    groups.append((group_start, idx - 1))
+                group_start = idx
+                current_type = q_type
+        
+        # Add last group
+        if group_start is not None and questions:
+            last_idx = max(q.get('idx', 0) for q in questions)
+            groups.append((group_start, last_idx))
+    
+    # Extract instruction text for each group from instruction_md
+    group_instructions = {}
+    
+    for start, end in groups:
+        # Find the instruction block for this group
+        pattern = rf'\*?\*?Questions?\s+{start}[-–]{end}\*?\*?[:\s]*(.+?)(?=\*?\*?Questions?\s+\d+|\Z)'
+        match = re.search(pattern, instruction_md, re.IGNORECASE | re.DOTALL)
+        
+        if match:
+            instruction_text = match.group(0).strip()
+            # Clean up the instruction
+            instruction_text = re.sub(r'\n{2,}', '\n', instruction_text)
+            instruction_text = instruction_text.strip()
+            group_instructions[(start, end)] = instruction_text
+    
+    # Apply format to questions
+    for q in questions:
+        idx = q.get('idx', 0)
+        prompt = q.get('prompt_md', '')
+        
+        # Skip if already has delimiter
+        if '|||' in prompt:
+            continue
+        
+        # Find which group this question belongs to
+        for start, end in groups:
+            if start <= idx <= end:
+                # First question in group - add instruction
+                if idx == start and (start, end) in group_instructions:
+                    instruction = group_instructions[(start, end)]
+                    q['prompt_md'] = f"{instruction} ||| {prompt}"
+                # Other questions - keep as is (no instruction)
+                break
+    
+    return questions
+
+
+def format_first_question_in_groups(data: dict) -> dict:
+    """
+    Post-process normalized data to apply ||| delimiter format.
+    Called after normalization to format prompts correctly.
+    """
+    questions = data.get('questions', [])
+    instruction_md = data.get('sections', [{}])[0].get('instruction_md', '')
+    
+    if questions and instruction_md:
+        data['questions'] = apply_prompt_delimiter_format(questions, instruction_md)
+        logger.info(f"Applied ||| delimiter format to {len(questions)} questions")
+    
+    return data

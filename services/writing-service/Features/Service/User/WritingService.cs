@@ -1,8 +1,5 @@
-using System.Text;
 using System.Text.Json;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Writing;
 using writing_service.Contracts;
@@ -79,7 +76,7 @@ public class WritingService : IWritingService
         var response = await _context.WritingExams.AsNoTracking()
                               .Where(x => x.Id == examId)
                               .Select(x =>
-                                  new StartWritingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.ModelAnswers, x.CreatedAt,
+                                  new StartWritingExamResponse(x.Id, x.Title, x.Slug,x.TaskText, x.Tags, x.ModelAnswers, x.ImageUrl ,x.CreatedAt,
                                       x.CreatedBy, userId))
                               .FirstOrDefaultAsync(token)
                           ?? throw new Exception("Exam id is not existed");
@@ -90,8 +87,8 @@ public class WritingService : IWritingService
     {
         var exam = await _context.WritingExams.AsNoTracking()
             .Where(x => x.Id == examId)
-            .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
-                x.ModelAnswers, x.CreatedAt, x.CreatedBy))
+            .Select(x => new WritingExamResponse(x.Id, x.Title, x.Slug, x.TaskText, x.ExamType, x.Level, x.Tags,
+                x.ModelAnswers, x.ImageUrl, x.CreatedAt, x.CreatedBy, x.SourceExamId, x.SourceSectionId))
             .FirstOrDefaultAsync(token);
 
         return exam is null
@@ -103,8 +100,8 @@ public class WritingService : IWritingService
     {
         var exams = await _context.WritingExams.AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
-            .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
-                x.ModelAnswers, x.CreatedAt, x.CreatedBy))
+            .Select(x => new ListWritingExamResponse(x.Id, x.Title, x.TaskText, x.Slug, x.ExamType, x.Level, x.Tags,
+                x.ImageUrl, x.CreatedAt, x.CreatedBy, x.SourceExamId))
             .ToListAsync(token);
 
         return Results.Ok(new ApiResultDto(true, "Fetched exams successfully", exams));

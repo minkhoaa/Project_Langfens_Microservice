@@ -70,7 +70,7 @@ cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 &&
 ### Step 7: CODEX PRE-CHECK
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode pre 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 600 python codex_qa.py <SOURCE> <ITEM_ID> --mode pre 2>&1
 ```
 **Purpose:** AI phát hiện issues chi tiết hơn → output cho Claude FIX
 
@@ -97,6 +97,13 @@ data = json.loads(json_path.read_text())
 json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
 ```
 
+**IMPORTANT: After applying any fix script, re-embed images:**
+```bash
+// turbo
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python reembed_images.py <SOURCE> <ITEM_ID>
+```
+> This ensures images extracted from source are not lost when passageMd is overwritten by fix scripts.
+
 ### Step 9: GEMINI POST-CHECK
 ```bash
 // turbo
@@ -107,7 +114,7 @@ cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 &&
 ### Step 10: CODEX VALIDATE
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode validate 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 600 python codex_qa.py <SOURCE> <ITEM_ID> --mode validate 2>&1
 ```
 **Purpose:** Final validation - có thể FAIL với minor issues
 
@@ -189,6 +196,85 @@ PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/se
 | Section separator | `---` between passages |
 | Passage length | ≥100 words |
 
+### 📸 passageMd với Diagrams/Images (QUAN TRỌNG):
+
+> [!IMPORTANT]
+> Với các bài có DIAGRAM_LABEL, FLOWCHART, MAP_LABEL, hoặc SUMMARY_COMPLETION có hình ảnh:
+> **PHẢI embed ảnh vào cuối passageMd** (giống Story of Coffee format)
+
+**Format chuẩn:**
+```markdown
+# Title
+
+**Paragraph A.**
+Text...
+
+**Paragraph B.**
+Text...
+
+---
+
+## Diagram: [Tên Diagram] (Questions X-Y)
+
+![Description](image_url)
+
+Complete the diagram:
+- **X** _______
+- **Y** _______
+
+---
+
+## Flowchart: [Tên Flowchart] (Questions Z-W)
+
+![Description](image_url)
+
+Complete the flowchart:
+- **Z** _______
+- **W** _______
+```
+
+**Quy tắc:**
+| Element | Format |
+|---------|--------|
+| Separator | `---` trước mỗi diagram/flowchart section |
+| Heading | `## Diagram: [Name] (Questions X-Y)` |
+| Image | `![Description](url)` |
+| Labels | `- **X** _______` cho mỗi blank |
+
+**Ví dụ thực tế (Story of Coffee):**
+```markdown
+---
+
+## Diagram: Structure of a Coffee Bean (Questions 7-9)
+
+![Coffee Bean Structure](http://images.mini-ielts.com/images/process.png)
+
+Complete the labels:
+- **7** _______
+- **8** _______  
+- **9** _______
+
+---
+
+## Flowchart: Coffee Production Process (Questions 10-13)
+
+![Coffee Production Process](http://images.mini-ielts.com/images/process2.png)
+
+Complete the flowchart:
+- **10** _______
+- **11** _______
+- **12** _______
+- **13** _______
+```
+
+### instructionMd:
+| Rule | Format |
+|------|--------|
+| Giữ nguyên | Copy từ source gốc (web) |
+| All groups | Chứa instructions cho TẤT CẢ các nhóm câu hỏi |
+| Separator | `---` giữa các nhóm |
+| Format | `**Questions X-Y:**` + instruction text |
+
 ### Questions:
 | Rule | Format |
 |------|--------|
@@ -264,3 +350,98 @@ Choose the correct letter..."""
 ## 🔗 RELATED
 
 - @[/ielts-data-format] - Strict JSON schemas
+
+---
+
+## 🔄 IMPORTANT PATTERNS (Updated 2024-12-24)
+
+### Pattern Rules for Frontend Display:
+
+| Question Type | Must Have | Frontend Display |
+|---------------|-----------|------------------|
+| `SUMMARY_COMPLETION` | `_______` in prompt_md | Text input field |
+| `MULTIPLE_CHOICE_SINGLE` | options array | Radio buttons |
+| `TRUE_FALSE_NOT_GIVEN` | 3 options | Radio buttons |
+| `YES_NO_NOT_GIVEN` | 3 options | Radio buttons |
+| `MATCHING_HEADING` | options array (i-xi) | Dropdown/Radio |
+| `MATCHING_INFORMATION` | options = [] | Text input (single letter) |
+| `MATCHING_FEATURES` | options array | Dropdown |
+
+### Gap-fill/Completion Questions:
+```python
+# Use SUMMARY_COMPLETION with _______ pattern
+{
+    "type": "SUMMARY_COMPLETION",
+    "prompt_md": "The first stage of the process involves _______",
+    "correct_answers": ["fermentation"]
+}
+```
+
+### Choose TWO → Split into 2 MCQ_SINGLE:
+```python
+# Q27-28 "Choose TWO letters A-E" with answers A, C
+# → Split into:
+q27 = {"idx": 27, "type": "MULTIPLE_CHOICE_SINGLE", "correct_answers": ["A"]}
+q28 = {"idx": 28, "type": "MULTIPLE_CHOICE_SINGLE", "correct_answers": ["C"]}
+```
+
+> [!CAUTION]
+
+### After Fix Scripts - Re-embed Images:
+```bash
+python reembed_images.py <SOURCE> <ITEM_ID>
+```
+
+### Choose TWO - Accept Both Answers in Any Order:
+> [!IMPORTANT]
+> For "Choose TWO" questions, BOTH split questions must accept ALL correct answers.
+> This allows users to select answers in any order.
+
+```python
+# Q27-28 "Choose TWO letters A-E" with answers A, C
+# → BOTH questions accept BOTH A and C:
+q27 = {
+    "options": [
+        {"label": "A", "text": "...", "is_correct": True},
+        {"label": "C", "text": "...", "is_correct": True}
+    ],
+    "correct_answers": ["A", "C"]  # Accept either
+}
+q28 = {
+    "options": [
+        {"label": "A", "text": "...", "is_correct": True},
+        {"label": "C", "text": "...", "is_correct": True}
+    ],
+    "correct_answers": ["A", "C"]  # Accept either
+}
+```
+
+---
+
+## �� UPDATED RULE: Choose TWO/THREE → MULTIPLE_CHOICE_MULTIPLE
+
+> [!IMPORTANT]  
+> **Backend và Frontend ĐÃ HỖ TRỢ `MULTIPLE_CHOICE_MULTIPLE`!**
+> 
+> Thay vì split thành nhiều câu, sử dụng type `MULTIPLE_CHOICE_MULTIPLE` với nhiều `is_correct: true`.
+
+```python
+# Q27-28 "Choose TWO letters A-E" with answers A, C
+# → 1 câu duy nhất với 2 correct answers:
+{
+    "idx": 27,
+    "type": "MULTIPLE_CHOICE_MULTIPLE",
+    "prompt_md": "Which TWO factors are mentioned?",
+    "options": [
+        {"label": "A", "text": "...", "is_correct": True},
+        {"label": "B", "text": "...", "is_correct": False},
+        {"label": "C", "text": "...", "is_correct": True},
+        {"label": "D", "text": "...", "is_correct": False},
+        {"label": "E", "text": "...", "is_correct": False}
+    ],
+    "correct_answers": ["A", "C"]
+}
+```
+
+**Frontend:** Hiển thị checkboxes (MultiCheckboxCard)
+**Backend:** So sánh array selected với array correct_answers

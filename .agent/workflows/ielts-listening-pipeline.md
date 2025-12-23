@@ -93,6 +93,13 @@ data = json.loads(json_path.read_text())
 json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
 ```
 
+**IMPORTANT: After applying any fix script, re-embed images:**
+```bash
+// turbo
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python reembed_images.py mini-ielts <ITEM_ID>
+```
+> This ensures images (diagrams, maps, etc.) extracted from source are not lost when passageMd is overwritten by fix scripts.
+
 ### Step 9: GEMINI POST-CHECK
 ```bash
 // turbo
@@ -192,8 +199,60 @@ PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/se
 | Rule | Format |
 |------|--------|
 | Source | Solution page → Exam Review |
-| Storage | `passage_md` in section (transcript as passage) |
+| Storage | `passage_md` in section (note-taking format) |
 | Min length | ≥100 words |
+
+### Passage Format (IMPORTANT):
+> [!CAUTION]
+> **passage_md PHẢI dùng BULLET LIST format, KHÔNG dùng markdown table!**
+> 
+> Markdown tables KHÔNG render đúng trong ReactMarkdown. Phải convert table → bullet list.
+
+**Format chuẩn cho COMPLETION questions:**
+```markdown
+# [Exam Title]
+
+## Questions 1-X: Complete the notes/table below
+
+### [Section/Category 1]
+- **Description:** [text]
+- **Advantages:**
+  - point 1 with blank **1** _______
+  - point 2
+- **Disadvantages:**
+  - point with blank **2** _______
+
+### [Section/Category 2]
+- **Description:** **3** _______ [text]
+- **Disadvantages:**
+  - point with blank **4** _______
+
+---
+
+## Questions X-Y: [Matching questions]
+
+**Options:**
+- **A** option text
+- **B** option text
+- **C** option text
+
+**Items:**
+- **7** item text → _______
+- **8** item text → _______
+```
+
+> [!TIP]
+> **Ví dụ: Supermarket Layout exam**
+> ```markdown
+> ### Grid Layout
+> - **Description:** parallel aisles
+> - **Advantages:**
+>   - efficient use of floor space
+>   - Controls **1** _______
+> - **Disadvantages:**
+>   - Uninteresting layout
+>   - Shoppers can **2** _______ through their shopping
+> ```
 
 ### Question Types (Listening):
 | Type | Description | Options | Notes |
@@ -288,3 +347,99 @@ data['exam']['audio_url'] = iframe_match.group(1) if iframe_match else None
 
 - @[/ielts-pipeline] - Reading pipeline
 - @[/ielts-data-format] - Strict JSON schemas
+---
+
+## 🔄 IMPORTANT PATTERNS (Updated 2024-12-24)
+
+### Pattern Rules for Frontend Display:
+
+| Question Type | Must Have | Frontend Display |
+|---------------|-----------|------------------|
+| `SUMMARY_COMPLETION` | `_______` in prompt_md | Text input field |
+| `MULTIPLE_CHOICE_SINGLE` | options array | Radio buttons |
+| `MATCHING_INFORMATION` | options = [] | Text input (single letter) |
+
+### Diagram/Label Questions (e.g., Debit Card, Map):
+```python
+# Use SUMMARY_COMPLETION with _______ pattern
+{
+    "type": "SUMMARY_COMPLETION",
+    "prompt_md": "Cardholder's identification image: _______",
+    "correct_answers": ["picture"]
+}
+```
+
+### Choose TWO → Split into 2 MCQ_SINGLE:
+```python
+# Q1-2 "Choose TWO letters A-E" with answers A, B
+# → Split into:
+q1 = {"idx": 1, "type": "MULTIPLE_CHOICE_SINGLE", "correct_answers": ["A"]}
+q2 = {"idx": 2, "type": "MULTIPLE_CHOICE_SINGLE", "correct_answers": ["B"]}
+```
+
+> [!CAUTION]
+
+### After Fix Scripts - Re-embed Images:
+```bash
+python reembed_images.py mini-ielts <ITEM_ID>
+```
+
+### Choose TWO - Accept Both Answers in Any Order:
+> [!IMPORTANT]
+> For "Choose TWO" questions, BOTH split questions must accept ALL correct answers.
+> This allows users to select answers in any order.
+
+```python
+# Q5-6 "Choose TWO letters A-E" with answers C, E
+# → BOTH questions accept BOTH C and E:
+q5 = {
+    "idx": 5,
+    "type": "MULTIPLE_CHOICE_SINGLE",
+    "prompt_md": "Which workshop does the theatre offer? (1 of 2)",
+    "options": [
+        {"label": "C", "text": "making puppets", "is_correct": True},  # Both marked correct
+        {"label": "E", "text": "lighting", "is_correct": True}         # Both marked correct
+    ],
+    "correct_answers": ["C", "E"]  # Accept either
+}
+q6 = {
+    "idx": 6,
+    "type": "MULTIPLE_CHOICE_SINGLE",
+    "prompt_md": "Which workshop does the theatre offer? (2 of 2)",
+    "options": [
+        {"label": "C", "text": "making puppets", "is_correct": True},  # Same
+        {"label": "E", "text": "lighting", "is_correct": True}         # Same
+    ],
+    "correct_answers": ["C", "E"]  # Accept either
+}
+```
+
+---
+
+## �� UPDATED RULE: Choose TWO/THREE → MULTIPLE_CHOICE_MULTIPLE
+
+> [!IMPORTANT]  
+> **Backend và Frontend ĐÃ HỖ TRỢ `MULTIPLE_CHOICE_MULTIPLE`!**
+> 
+> Thay vì split thành nhiều câu, sử dụng type `MULTIPLE_CHOICE_MULTIPLE` với nhiều `is_correct: true`.
+
+```python
+# Q1-2 "Choose TWO letters A-E" with answers A, B
+# → 1 câu duy nhất với 2 correct answers:
+{
+    "idx": 1,
+    "type": "MULTIPLE_CHOICE_MULTIPLE",
+    "prompt_md": "Which TWO changes have been made?",
+    "options": [
+        {"label": "A", "text": "...", "is_correct": True},
+        {"label": "B", "text": "...", "is_correct": True},
+        {"label": "C", "text": "...", "is_correct": False},
+        {"label": "D", "text": "...", "is_correct": False},
+        {"label": "E", "text": "...", "is_correct": False}
+    ],
+    "correct_answers": ["A", "B"]
+}
+```
+
+**Frontend:** Hiển thị checkboxes (MultiCheckboxCard)
+**Backend:** So sánh array selected với array correct_answers
