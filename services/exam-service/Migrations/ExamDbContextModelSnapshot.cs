@@ -44,6 +44,9 @@ namespace exam_service.Migrations
                     b.Property<int>("DurationMin")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("text");
@@ -119,6 +122,9 @@ namespace exam_service.Migrations
                         .HasColumnType("integer");
 
                     b.Property<Dictionary<string, string[]>>("MatchPairs")
+                        .HasColumnType("jsonb");
+
+                    b.Property<List<string>>("ModelAnswers")
                         .HasColumnType("jsonb");
 
                     b.Property<List<string>>("OrderCorrects")

@@ -85,6 +85,7 @@ public class InternalExamService : IInternalExamService
                 exam.Category,
                 exam.Level,
                 exam.DurationMin,
+                exam.ImageUrl,  // Thumbnail/cover image URL
                 sections);
 
             return paper != null

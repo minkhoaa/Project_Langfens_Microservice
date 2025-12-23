@@ -1,0 +1,38 @@
+-- ============================================
+-- IELTS Writing Task 1 Data Import (writing-service)
+-- Generated: 2025-12-23T15:48:59.577288
+-- Source: ielts-mentor.com
+-- Title: Friend Wants To Spend Holiday In Your Region
+-- ============================================
+
+BEGIN;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Cleanup existing data with same title
+DELETE FROM "writing_exams" WHERE "Title" = E'Friend Wants To Spend Holiday In Your Region';
+
+-- Insert into writing_exams table
+INSERT INTO "writing_exams" (
+  "Id",
+  "Title", 
+  "TaskText",
+  "ExamType",
+  "Level",
+  "Tags",
+  "ModelAnswers",
+  "CreatedAt",
+  "CreatedBy"
+)
+VALUES (
+  gen_random_uuid(),
+  E'Friend Wants To Spend Holiday In Your Region',
+  E'You should spend about\n20\nminutes on this task.\nAn English-speaking friend wants to spend a two-week holiday in your region and has written asking for information and advice.\nWrite a letter to your friend. In your letter,\noffer to find somewhere to stay\ngive advice about what to do\ngive information about what clothes to bring\nYou should write at least\n150\nwords.\nYou do\nNOT\nneed to write your own addresses.\nBegin your letter as follows:\nDear ...................,\nModel\nAnswer 1:\nDear Michael,\nYour sudden decision to visit Kuala Lumpur is a pleasant surprise to me and as always, your letter was amusing to read. I am glad that you have been able to manage a week-long vacation and I cannot wait to meet you.\nI would love to have you at my home for as long as you want. In fact, while you are in Kuala Lumpur, I would not let you stay at a hotel.\nI recommend you to visit the Bird Park, Aquaria KLCC, Genting Highlands, National Museum, Butterfly Park and China Town during your stay in the city. I will take you to the Petronas Towers, which was once the tallest building in the world. I also recommend you to try the street food and do some shopping at the Central Market. Life is so vibrant and diverse in this city and  I am sure you will enjoy it all.\nAfter you spend a few days in Kuala Lumpur, you should spend some time at Penang and Langkawi. While the formal is a state and known as the Pearl of the Orient and my personal favourite, the latter is a district and an archipelago of 104 islands in the Andaman Sea.\nWe have a hot and humid climate year-round, interspersed with tropical rain showers. The temperature is between 26-36-degree Celsius now and we have rains almost every day. Bring light dresses suitable for summer and a raincoat considering the regular rain.\nCannot wait any longer to meet you in person.\nWarm wishes,\nMahmud Riad',
+  1,
+  'B2',
+  'ielts,letter,task1,gt',
+  E'["Dear Julia,\\nIt is so good to hear from you again after such a long time. Besides, I am also very excited that you have decided to visit my country on a two-week holiday and I won''t miss the opportunity to meet you during that time.\\nWell, let me tell you what you should know before coming to my country. First of all, my country is never as cold as yours. So, you don’t really need to bring many winter clothes of yours. Besides, renting taxis in my country would be a bit too expensive for your liking, and therefore, it would be better for you to commute by public bus. Then, it would also be important for you to know that renting hotel rooms in my city would be a bit more expensive than usual since the demand for the hotel rooms would be too high at the time you arrive because of the holiday season. So, I have decided to book your room in a nice hostel for bachelor people where the cost is reasonable. I am sure you will like the accommodation arrangement and the surrounding views.\\nAnyway, I guess, I have given you all the necessary information for a comfortable holiday stay. But, if you need any more information, please feel free to ask anytime.\\nWarm wishes,\\nNatasha\\n1\\n1\\n1\\n1\\n1\\n1\\n1\\n1\\n1\\n1\\nRating 4.32 (11 Votes)\\nIELTS Letter Writing\\nGT Writing Task 1\\nInformal Letter\\nPersonal Letter\\nPrev\\nNext\\nName\\nPreview\\nSend\\nReset\\nCancel\\nRSS\\nMastak\\n6 years 3 months\\nVery good and it is very helpful. My son has improved a lot in writing.\\nReply\\nQuote\\n×\\nReport\\nReport\\nClose"]'::jsonb,
+  now(),
+  '00000000-0000-0000-0000-000000000000'
+);
+
+COMMIT;

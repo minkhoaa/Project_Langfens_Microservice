@@ -265,6 +265,21 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, u
     result.success = True
     result.sql_path = sql_path
     
+    # === Stage 8.5: Generate Explanations (Optional, Non-blocking) ===
+    try:
+        from generate_explanations import process_exam
+        logger.info("Stage 8.5: EXPLANATIONS - Generating AI explanations...")
+        # Use gemini by default, fall back to codex
+        explanation_success = process_exam(result.source, result.item_id, resume=True, provider='gemini')
+        if explanation_success:
+            logger.info("  ✓ Explanations generated")
+        else:
+            logger.warning("  ⚠ Explanation generation failed (non-blocking)")
+    except ImportError:
+        logger.debug("Explanation generator module not available, skipping")
+    except Exception as e:
+        logger.warning(f"  ⚠ Explanation generation skipped: {e}")
+    
     # Update cache with all completed stages
     update_cache(result.source, result.item_id, url, 'clean')
     update_cache(result.source, result.item_id, url, 'extract')
@@ -272,6 +287,7 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, u
     update_cache(result.source, result.item_id, url, 'validate')
     update_cache(result.source, result.item_id, url, 'gemini_qa')
     update_cache(result.source, result.item_id, url, 'repair')
+    update_cache(result.source, result.item_id, url, 'explanations')
     update_cache(result.source, result.item_id, url, 'export')
     
     logger.info("=" * 60)

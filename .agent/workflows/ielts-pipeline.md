@@ -15,36 +15,42 @@ description: Run IELTS pipeline (HYBRID) - Rule-based + AI Validator
 
 ---
 
-## 🚀 AUTO EXECUTION STEPS (Follow in order!)
+## 🚀 PIPELINE V5 - 15 STEPS (Clean Numbering)
 
 > [!CAUTION]
-> **MANDATORY 10-STEP PIPELINE V3 - KHÔNG ĐƯỢC BỎ QUA BẤT KỲ BƯỚC NÀO!**
-> 
-> | # | AI | Step | Action |
-> |---|-----|------|--------|
-> | 1 | Rule | TIER 1 | orchestrator.py (fetch→normalize) |
-> | 2 | Gemini | PRE-CHECK | gemini_qa.py --mode pre |
-> | 3 | Claude | PRE-FIX | **Manual fix schema issues** |
-> | 4 | Gemini | POST-CHECK | gemini_qa.py --mode post |
-> | 5 | Codex | VALIDATE | codex_qa.py --mode validate |
-> | 6 | Codex | FIX | codex_qa.py --mode fix |
-> | 7 | Claude | FINAL-FIX | **Manual fix remaining issues** |
-> | 8 | Claude | INVARIANTS | invariants.py |
-> | 9 | - | SEED | psql -f seed.sql |
-> | 10 | - | QA EXPORT | Generate report |
-> 
-> **Cho dù TIER 1 SUCCESS, vẫn PHẢI chạy đủ 10 bước!**
+> **MANDATORY 15-STEP PIPELINE - KHÔNG ĐƯỢC BỎ QUA BẤT KỲ BƯỚC NÀO!**
 
+| # | Type | Stage | Command/Action |
+|---|------|-------|----------------|
+| 1 | Auto | FETCH | orchestrator.py - download HTML |
+| 2 | Auto | CLEAN | orchestrator.py - rule-based extraction |
+| 3 | Auto | PARSE | orchestrator.py - extract questions |
+| 4 | Auto | NORMALIZE | orchestrator.py - convert to schema |
+| 5 | Auto | VALIDATE | orchestrator.py - schema check |
+| 6 | AI | GEMINI PRE | gemini_qa.py - find issues |
+| 7 | AI | CODEX PRE | codex_qa.py --mode pre - find issues |
+| 8 | AI | **CLAUDE FIX #1** | Manual fix from Gemini/Codex output |
+| 9 | AI | GEMINI POST | gemini_qa.py - verify fixes |
+| 10 | AI | CODEX VALIDATE | codex_qa.py --mode validate |
+| 11 | AI | **CLAUDE FIX #2** | Manual fix remaining (if any) |
+| 12 | Auto | INVARIANTS | invariants.py - IELTS rules gate |
+| 13 | Auto | EXPORT | export.py - generate SQL |
+| 13.5 | AI | EXPLANATIONS | generate_explanations.py - Vietnamese AI explanations |
+| 14 | Manual | SEED | psql - commit to DB |
 
-### Step 1: Run TIER 1 Rule-Based
+> **Cho dù Step 1-5 SUCCESS, vẫn PHẢI chạy đủ 15 bước!**
+
+---
+
+## 📋 STEP-BY-STEP EXECUTION
+
+### Step 1-5: TIER 1 Rule-Based (Auto)
 ```bash
 // turbo
 cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python orchestrator.py "<URL>" 2>&1
 ```
 
-### Step 2: Read Cleaned Text + Normalized JSON
-> **Note:** Replace `<SOURCE>` with detected source (`ielts-mentor` or `mini-ielts`)
-
+Read output để xác định `<SOURCE>` và `<ITEM_ID>`:
 ```bash
 // turbo 
 cat data/cleaned/<SOURCE>/<ITEM_ID>.txt | head -150
@@ -54,120 +60,126 @@ cat data/cleaned/<SOURCE>/<ITEM_ID>.txt | head -150
 cat data/normalized/<SOURCE>/<ITEM_ID>.json | head -100
 ```
 
-### Step 3: ⭐ Claude CHECK #1 - FIX STRICT RULES
-Check và FIX ngay nếu vi phạm:
-
-| Rule | Check | Fix |
-|------|-------|-----|
-| Passage garbage | Contains user comments | Extract full from cleaned text |
-| No paragraph labels | Missing `**Paragraph A.**` | Add proper format |
-| Embedded questions | Q1-8 in passage | Remove from passage |
-| Wrong type | MCQ_SINGLE ≠ source instruction | Change to correct type |
-| MATCHING_INFO options | Has options[] | Clear to `[]` |
-| Missing instruction_md | None | Add `**Questions X-Y:**` format |
-| Leading numbers | `1. Statement` | Remove number prefix |
-| **Multi-Passage** | 2+ distinct texts in 1 section | Split into 2+ sections |
-| **MATCHING_HEADING options** | Missing `i. ii. iii.` list | Add all heading options |
-
-**Create fix script if needed:**
-```python
-# /tmp/fix_<ITEM_ID>.py
-import json, re
-from pathlib import Path
-# ... apply fixes ...
-```
-
-### Step 4: ⭐ Gemini POST-CHECK (MANDATORY)
+### Step 6: GEMINI PRE-CHECK
 ```bash
 // turbo
 cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py <SOURCE> <ITEM_ID> 2>&1
 ```
-**Record Gemini decision (PASS/FAIL) and issues for QA report.**
+**Purpose:** AI phát hiện schema/content issues → output cho Claude FIX
 
-### Step 4.5: ⭐ Codex VALIDATE (3rd AI Layer)
+### Step 7: CODEX PRE-CHECK
+```bash
+// turbo
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode pre 2>&1
+```
+**Purpose:** AI phát hiện issues chi tiết hơn → output cho Claude FIX
+
+### Step 8: CLAUDE FIX #1 (Manual)
+Đọc output từ Step 6-7 và FIX:
+
+| Issue Pattern | Fix Action |
+|---------------|------------|
+| Type mismatch | Đổi `type` field |
+| Options concatenated | Extract lại từ source |
+| Wrong question type | Change to correct type |
+| MATCHING_INFO has options | Clear to `[]` |
+| Missing instruction_md | Add proper format |
+| Multi-passage | Split sections |
+
+**Create fix script:**
+```python
+#!/usr/bin/env python3
+import json
+from pathlib import Path
+json_path = Path("data/normalized/<SOURCE>/<ITEM_ID>.json")
+data = json.loads(json_path.read_text())
+# ... apply fixes ...
+json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+```
+
+### Step 9: GEMINI POST-CHECK
+```bash
+// turbo
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py <SOURCE> <ITEM_ID> 2>&1
+```
+**Expected:** PASS ✅ (nếu Claude FIX đúng)
+
+### Step 10: CODEX VALIDATE
 ```bash
 // turbo
 cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode validate 2>&1
 ```
-**Record Codex decision (PASS/FAIL) and confidence for QA report.**
+**Purpose:** Final validation - có thể FAIL với minor issues
 
-### Step 5: ⭐ Codex FIX (Auto-fix content issues)
+### Step 11: CLAUDE FIX #2 (If needed)
+Nếu Step 10 vẫn có issues, fix thêm. Nếu chỉ là typos từ source gốc → bỏ qua.
+
+### Step 12: INVARIANTS
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode fix 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python invariants.py <SOURCE> <ITEM_ID> 2>&1
 ```
-**Codex will:**
-1. Validate to find issues
-2. Auto-fix what it can
-3. Re-validate to confirm fixes
+**MUST show: `Valid: True`** (warnings OK)
 
-### Step 6: ⭐ Claude FINAL-FIX (Manual fix remaining)
+### Step 13: EXPORT
+```bash
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python export.py <SOURCE> <ITEM_ID>
+```
 
-Check Codex output. If still issues remain, fix manually.
-
-### Step 7: ⭐ Claude INVARIANTS - Final Verify
+### Step 13.5: EXPLANATIONS (AI - Optional)
 ```bash
 // turbo
-python invariants.py <SOURCE> <ITEM_ID> 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python generate_explanations.py <SOURCE> <ITEM_ID> --provider gemini 2>&1
 ```
-**MUST show: `Valid: True`**
+**Purpose:** Tạo giải thích tiếng Việt cho mỗi câu hỏi với:
+- Trích dẫn passage (blockquote)
+- Giải thích WHY đáp án đúng
+- Chỉ ra lỗi thường gặp
 
-### Step 8: Export + Seed
-```bash
-python export.py <SOURCE> <ITEM_ID>
-```
+> [!TIP]
+> Non-blocking step - nếu fail vẫn có thể SEED
+
+### Step 14: SEED
 ```bash
 PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/seed_exam_*.sql"
 ```
 
-### Step 7: 📋 Full QA Report
-**MANDATORY** - Notify user với bảng chi tiết:
+---
+
+## 📊 QA REPORT TEMPLATE
 
 ```markdown
 ## 📋 QA REPORT - Exam <ITEM_ID>
 
 ### Pipeline Execution:
-| Stage | Phase | Status | Details |
-|-------|-------|--------|---------|
-| 1 | FETCH | ✅/❌ | words count |
-| 2 | CLEAN | ✅/❌ | words count |
-| 3 | PARSE | ✅/❌ | questions count |
-| 4 | NORMALIZE | ✅/❌ | auto-fixes applied |
-| 5 | VALIDATE | ✅/❌ | warnings count |
-| 6 | INVARIANTS | ✅/❌ | violations count |
-| 6.5 | **Gemini** | ✅/❌ | decision + confidence |
-| 7 | REPAIR | ✅/❌ | repairs count |
-| - | **Claude #1** | ✅/❌ | manual fixes |
-| - | **Claude #2** | ✅/❌ | Valid: True/False |
-| 8 | EXPORT+SEED | ✅/❌ | COMMIT/FAIL |
+| # | Stage | Status | Details |
+|---|-------|--------|---------|
+| 1-5 | TIER 1 (Auto) | ✅/❌ | X questions, Y words |
+| 6 | Gemini PRE | ✅/❌ | PASS/FAIL + issues |
+| 7 | Codex PRE | ✅/❌ | PASS/FAIL + confidence |
+| 8 | Claude FIX #1 | ✅ | X fixes applied |
+| 9 | Gemini POST | ✅/❌ | PASS/FAIL |
+| 10 | Codex VALIDATE | ✅/❌ | PASS/FAIL + confidence |
+| 11 | Claude FIX #2 | ✅/- | X fixes or N/A |
+| 12 | Invariants | ✅/❌ | Valid: True/False |
+| 13 | Export | ✅ | SQL generated |
+| 14 | Seed | ✅ | COMMIT |
 
-### Auto-Fixes (TIER 1):
-| Fix | Description |
-|-----|-------------|
-| ... | ... |
+### Fixes Applied:
+| Step | Item | Fix |
+|------|------|-----|
+| 8 | Q5 | Changed type to X |
+| 8 | Q6-10 | Fixed options |
+| 11 | Q11-14 | Cleared options |
 
-### Claude Fixes (Manual):
-| Item | Fix |
-|------|-----|
-| ... | ... |
-
-### Gemini QA Result:
-- Decision: PASS/FAIL
-- Confidence: XX%
-- Issues: [list]
-
-### Final Validation:
-- Invariants: Valid = True/False
-- SHORT_ANSWER answers: [table if applicable]
-
-### DB Status: COMMIT/FAIL
+### Final Status:
+- **Invariants:** Valid = True ✅
+- **DB Status:** COMMIT ✅
 ```
 
 ---
 
-## 🚨 STRICT RULES (MUST FOLLOW!)
-
-> **4 AI CHECK STEPS**: normalize.py → repair.py → Gemini POST → Claude CHECK
+## 🚨 STRICT RULES
 
 ### Passage:
 | Rule | Format |
@@ -176,22 +188,6 @@ PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/se
 | No embedded questions | Passage = text only |
 | Section separator | `---` between passages |
 | Passage length | ≥100 words |
-
-### Multi-Passage Detection (NEW):
-| Check | Fix |
-|-------|-----|
-| Source has 2+ distinct texts | Create 2+ sections |
-| Passage contains Q1-7 statements | Remove → questions array |
-| Passage has "Paragraph A/B/C" refs | Separate passage for MATCHING_HEADING |
-| instruction_md mismatch | Match each section's question type |
-
-### Embedded Questions Detection (NEW):
-| Pattern | Action |
-|---------|--------|
-| `1. Statement...` in passage | Remove → Q array |
-| `Paragraph A. 8. ...` | Extract to MATCHING_HEADING |
-| Roman numerals `i. ii. iii.` | Extract to MATCHING_HEADING options |
-| `A. option B. option` inline | Extract to MCQ options |
 
 ### Questions:
 | Rule | Format |
@@ -205,52 +201,52 @@ PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/se
 |---------------|-----------------|
 | `Treasury` | `["Treasury"]` |
 | `(commemorative) coin` | `["coin", "commemorative coin"]` |
-| `(ornamental) stars` | `["stars", "ornamental stars"]` |
 | `colour// color` | `["colour", "color"]` |
-
-> **MANDATORY**: Nếu answer có dạng `(optional) word`, PHẢI có 2 đáp án trong `correct_answers`!
 
 ### Types:
 | Type | Options | isCorrect |
 |------|---------|-----------|
-| TFNG | 3 items | exactly 1 |
+| TFNG/YNNG | 3 items (value=label) | exactly 1 |
 | MCQ_SINGLE | 4+ items | exactly 1 |
 | MATCHING_INFO | `[]` empty | - |
+| MATCHING_FEATURES | `[]` empty | - |
 | MATCHING_HEADING | 5+ headings | exactly 1 |
 
 ---
 
 ## 🔧 FIX TEMPLATES
 
-### Passage Fix:
+### Type Fix:
 ```python
-passage = """# TITLE
+for q in data['questions']:
+    if q['idx'] == 5:
+        q['type'] = 'YES_NO_NOT_GIVEN'  # or correct type
+```
 
-**Paragraph A.**
-Text paragraph A...
+### MCQ Options Fix:
+```python
+q['options'] = [
+    {"label": "A", "text": "...", "is_correct": True},
+    {"label": "B", "text": "...", "is_correct": False},
+    {"label": "C", "text": "...", "is_correct": False},
+    {"label": "D", "text": "...", "is_correct": False},
+]
+```
 
-**Paragraph B.**
-Text paragraph B..."""
-data['sections'][0]['passage_md'] = passage
+### MATCHING Clear Options:
+```python
+for q in data['questions']:
+    if q['type'] in ['MATCHING_INFORMATION', 'MATCHING_FEATURES']:
+        q['options'] = []
 ```
 
 ### instruction_md Fix:
 ```python
-data['sections'][0]['instruction_md'] = """**Questions 1-8:**
-Do the following statements agree with the information?
+data['sections'][0]['instruction_md'] = """**Questions 1-5:**
+Do the following statements agree with...
 
-Write
-- **TRUE** if the statement agrees
-- **FALSE** if it contradicts
-- **NOT GIVEN** if no information"""
-```
-
-### MATCHING_INFO Fix:
-```python
-for q in data['questions']:
-    if q['type'] == 'MATCHING_INFORMATION':
-        q['options'] = []
-        q['prompt_md'] = re.sub(r'^.*\d+\.\s*', '', q['prompt_md'])
+**Questions 6-10:**
+Choose the correct letter..."""
 ```
 
 ---
@@ -260,7 +256,7 @@ for q in data['questions']:
 1. **KHÔNG bịa** - Chỉ trích từ source
 2. **KHÔNG paraphrase** - Giữ nguyên văn  
 3. **Paragraph labels BẮT BUỘC** - `**Paragraph A.**\n`
-4. **MATCHING_INFO options = []**
+4. **MATCHING_INFO/FEATURES options = []**
 5. **instruction_md BẮT BUỘC**
 
 ---

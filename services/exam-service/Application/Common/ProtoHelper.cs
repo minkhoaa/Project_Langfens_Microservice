@@ -18,7 +18,8 @@ public static class ProtoHelper
             Slug = exam.Slug,
             Title = exam.Title,
             // Nếu proto có DurationMin/DurationSec, nhớ map luôn:
-            DurationMin = exam.DurationMin // ví dụ, tùy schema của bạn
+            DurationMin = exam.DurationMin, // ví dụ, tùy schema của bạn
+            ImageUrl = exam.ImageUrl ?? string.Empty  // Thumbnail/cover image
         };
 
         // Duyệt TỪ domain -> TỚI proto

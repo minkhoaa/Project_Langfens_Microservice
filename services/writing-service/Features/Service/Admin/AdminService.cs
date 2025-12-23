@@ -44,6 +44,7 @@ public class AdminService : IAdminService
             Level = request.Level,
             CreatedAt = DateTime.UtcNow,
             Tags = request.Tag,
+            ModelAnswers = request.ModelAnswers,
             CreatedBy = _user.UserId
         };
         _context.WritingExams.Add(newExam);
@@ -64,6 +65,7 @@ public class AdminService : IAdminService
         exam.ExamType = request.ExamType;
         exam.Level = request.Level;
         exam.Tags = request.Tag;
+        exam.ModelAnswers = request.ModelAnswers;
 
         await _context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Updated exam successfully", new { exam.Id, exam.Title }));
@@ -74,7 +76,7 @@ public class AdminService : IAdminService
         var exams = await _context.WritingExams.AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
-                x.CreatedAt, x.CreatedBy))
+                x.ModelAnswers, x.CreatedAt, x.CreatedBy))
             .ToListAsync(token);
 
         return Results.Ok(new ApiResultDto(true, "Fetched all writing exams", exams));

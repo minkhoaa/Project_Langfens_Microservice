@@ -894,9 +894,12 @@ def generate_sql(data: dict) -> str:
         "",
     ]
     
+    # Get image_url from data if available
+    image_url = escape_sql(data.get('image_url', '') or '') if isinstance(data, dict) and data.get('image_url') else ''
+    
     # Insert exam
     sql_lines.extend([
-        f"  INSERT INTO exams (\"Id\",\"Slug\",\"Title\",\"DescriptionMd\",\"Category\",\"Level\",\"Status\",\"DurationMin\",\"UpdatedAt\")",
+        f"  INSERT INTO exams (\"Id\",\"Slug\",\"Title\",\"DescriptionMd\",\"Category\",\"Level\",\"Status\",\"DurationMin\",\"ImageUrl\",\"UpdatedAt\")",
         "  VALUES (",
         f"    exam_id,",
         f"    '{slug}',",
@@ -906,6 +909,7 @@ def generate_sql(data: dict) -> str:
         f"    'B2',",
         f"    'PUBLISHED',",
         f"    20,",
+        f"    '{image_url}'," if image_url else "    NULL,",
         f"    now()",
         "  );",
         "",
@@ -917,7 +921,7 @@ def generate_sql(data: dict) -> str:
     
     # PassageMd = actual reading passage content
     # InstructionsMd = question instructions (e.g. "Choose NO MORE THAN THREE WORDS")
-    passage_content = f"# Passage\\n\\n{passage_text}" if passage_text else ''
+    passage_content = passage_text if passage_text else ''
     
     sql_lines.extend([
         f"  INSERT INTO exam_sections (\"Id\",\"ExamId\",\"Idx\",\"Title\",\"InstructionsMd\",\"PassageMd\")",

@@ -26,6 +26,8 @@ public class Exam
     public string Status { get; set; } = ExamStatus.Draft;
 
     public int DurationMin { get; set; } = 60;
+    
+    public string? ImageUrl { get; set; }  // Thumbnail/cover image URL
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }

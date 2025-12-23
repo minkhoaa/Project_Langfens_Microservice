@@ -39,7 +39,7 @@ public class ExamService : IExamService
                 .Take(pageSize)
                 .Select(x =>
                     new Dto_Public.PublicExamRecord(
-                        x.Id, x.Slug, x.Title, x.Category, x.Level, x.DurationMin, x.UpdatedAt
+                        x.Id, x.Slug, x.Title, x.Category, x.Level, x.DurationMin, x.UpdatedAt, x.ImageUrl!
                     ))
                 .ToListAsync(cancellationToken: cancellationToken);
 
@@ -60,7 +60,7 @@ public class ExamService : IExamService
             var exams = await _context.Exams.AsNoTracking()
                 .Where(x => x.Slug == slug)
                 .Select(exam => new Dto_Public.PubLicExamDetailRecord(
-                    exam.Id, exam.Slug, exam.Title, exam.DescriptionMd, exam.Category, exam.Level, exam.DurationMin,
+                    exam.Id, exam.Slug, exam.Title, exam.DescriptionMd, exam.Category, exam.Level, exam.DurationMin, exam.ImageUrl!,
                     exam.Sections
                         .OrderBy(s => s.Idx)
                         .Select(section => new Dto_Public.PublicSectionRecord(

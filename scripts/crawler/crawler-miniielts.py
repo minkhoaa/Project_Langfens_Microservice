@@ -1007,7 +1007,7 @@ def _create_passage_markdown(paragraphs: list[dict]) -> str:
     if not paragraphs:
         return ""
     
-    lines = ["# Passage\n"]
+    lines = []
     for idx, p in enumerate(paragraphs, 1):
         label = p.get("label", "")
         text = _clean_text(p.get("text", ""))

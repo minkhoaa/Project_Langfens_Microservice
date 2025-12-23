@@ -19,7 +19,14 @@ public class WritingExam
     public string? Level { get; set; } = ExamLevel.B1;
 
     // "technology,education"
-    public string? Tags { get; set; }           
+    public string? Tags { get; set; }
+    
+    /// <summary>
+    /// Model/sample answers for this writing task. Stored as JSONB array.
+    /// </summary>
+    [Column(TypeName = "jsonb")]
+    public List<string>? ModelAnswers { get; set; }
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid CreatedBy { get; set; }
 

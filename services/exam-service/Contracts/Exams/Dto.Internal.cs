@@ -13,6 +13,7 @@ public class InternalExamDto
         string Category,
         string Level,
         int DurationMin,
+        string? ImageUrl,  // Thumbnail/cover image URL
         IReadOnlyList<InternalDeliverySection> Sections);
 
     public record InternalDeliverySection(

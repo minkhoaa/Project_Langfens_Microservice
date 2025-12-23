@@ -38,10 +38,12 @@ TYPE_PATTERNS = [
     (r'list\s+of\s+headings', 'MATCHING_HEADING'),
     (r'match.*heading', 'MATCHING_HEADING'),
     
-    # MATCHING INFORMATION
-    (r'which\s+(paragraph|section)\s+(contains|mentions)', 'MATCHING_INFORMATION'),
-    (r'choose.*letter.*A[-–].*[F-H]', 'MATCHING_INFORMATION'),
-    (r'write\s+the\s+correct\s+letter.*A[-–]', 'MATCHING_INFORMATION'),
+    # MATCHING HEADING (These are "which paragraph contains" questions - answer is A-H)
+    (r'which\s+(paragraph|section)\s+(contains|mentions)', 'MATCHING_HEADING'),
+    (r'choose.*letter.*A[-–].*[F-J].*paragraph', 'MATCHING_HEADING'),
+    (r'write\s+the\s+correct\s+letter.*A[-–].*paragraph', 'MATCHING_HEADING'),
+    
+    # MATCHING INFORMATION (classify/match statements to categories)
     (r'classify.*following', 'MATCHING_INFORMATION'),
     (r'match.*statement.*paragraph', 'MATCHING_INFORMATION'),
     
@@ -106,8 +108,9 @@ def detect_question_type(instruction: str) -> str:
         return 'YES_NO_NOT_GIVEN'
     if 'heading' in instruction_lower:
         return 'MATCHING_HEADING'
-    if 'paragraph' in instruction_lower or 'section' in instruction_lower:
-        return 'MATCHING_INFORMATION'
+    # "which paragraph/section contains" → MATCHING_HEADING
+    if ('paragraph' in instruction_lower or 'section' in instruction_lower) and 'contains' in instruction_lower:
+        return 'MATCHING_HEADING'
     if 'complete' in instruction_lower:
         return 'SUMMARY_COMPLETION'
     

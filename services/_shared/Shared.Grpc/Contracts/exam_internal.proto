@@ -16,6 +16,7 @@ message InternalDeliveryExam {
   string level = 6;
   int32 duration_min = 7;
   repeated InternalDeliverySection sections = 8; // <-- thêm tên field
+  string image_url = 9;  // Thumbnail/cover image URL
 }
 
 message InternalDeliverySection {

@@ -727,6 +727,25 @@ This test includes multiple choice questions and matching questions. Pay close a
             logger.info(f"Q{idx}: Auto-converting MAP_LABEL → MATCHING_INFORMATION")
             detected_type = 'MATCHING_INFORMATION'
         
+        # ========== AUTO-FIX: MATCHING_HEADING - generate paragraph options A-H ==========
+        # "Which paragraph contains..." questions need paragraph letter options
+        if detected_type == 'MATCHING_HEADING':
+            # Detect number of paragraphs from passage
+            paragraph_labels = re.findall(r'\*\*Paragraph ([A-L])\.\*\*', passage_md)
+            max_letter = max(paragraph_labels) if paragraph_labels else 'H'
+            
+            # Generate options A-H or A-J based on passage
+            options = []
+            for c in 'ABCDEFGHIJKL':
+                if c <= max_letter:
+                    options.append({
+                        'value': c,
+                        'label': f'Paragraph {c}',
+                        'is_correct': (c == correct_answer)
+                    })
+            if options:
+                logger.info(f"Q{idx}: Auto-generated {len(options)} paragraph options for MATCHING_HEADING (A-{max_letter})")
+        
         if detected_type in ['MATCHING_INFORMATION', 'MATCHING_FEATURES', 'MATCHING_ENDINGS']:
             if options and len(options) > 0:
                 logger.info(f"Q{idx}: Auto-cleared options for {detected_type}")
@@ -761,6 +780,15 @@ This test includes multiple choice questions and matching questions. Pay close a
     # ========== AUTO-FIX: Generate instruction_md (Option 1) ==========
     instruction_md = auto_generate_instruction_md(questions)
     
+    # ========== SCHEMA ENFORCEMENT (STRICT) ==========
+    # Apply strict schema rules per question type
+    try:
+        from schema_enforcer import enforce_all_questions
+        questions = enforce_all_questions(questions, instruction_md)
+        logger.info("Applied strict schema enforcement to all questions")
+    except ImportError as e:
+        logger.warning(f"Schema enforcer not available: {e}")
+    
     return {
         'exam': {
             'title': title,
@@ -769,6 +797,7 @@ This test includes multiple choice questions and matching questions. Pay close a
             'level': 'B2',
             'duration_min': 20,
             'audio_url': data.get('audio_url', ''),
+            'image_url': data.get('image_url', ''),  # Thumbnail/cover image
         },
         'sections': [
             {
