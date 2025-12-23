@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using writing_service.Infrastructure.Persistence;
@@ -12,9 +13,11 @@ using writing_service.Infrastructure.Persistence;
 namespace writing_service.Migrations
 {
     [DbContext(typeof(WritingDbContext))]
-    partial class WritingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251223160200_UpdateAddImageUrl")]
+    partial class UpdateAddImageUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,12 +128,6 @@ namespace writing_service.Migrations
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<Guid?>("SourceExamId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("SourceSectionId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Tags")
                         .HasColumnType("text");

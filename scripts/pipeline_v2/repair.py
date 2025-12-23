@@ -27,6 +27,68 @@ KNOWN_FIXES = {
     },
 }
 
+# Roman numeral mapping
+ROMAN_TO_INT = {'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7, 'viii': 8, 'ix': 9, 'x': 10}
+
+
+def extract_list_of_headings(cleaned_text: str) -> list:
+    """
+    Extract List of Headings (i-viii) from cleaned text.
+    
+    Handles TWO formats:
+    1. Same-line: "i An evolutionary turning point"
+    2. Multi-line: "i\nAn evolutionary turning point" (separate lines)
+    
+    Returns:
+        List of dicts: [{"label": "i", "text": "An evolutionary turning point"}, ...]
+    """
+    if not cleaned_text:
+        return []
+    
+    headings = []
+    lines = cleaned_text.split('\n')
+    
+    # Pattern 1: Multi-line format - roman numeral alone on one line, text on next
+    for i, line in enumerate(lines):
+        stripped = line.strip().lower()
+        # Check if line is just a roman numeral (i, ii, iii, iv, v, vi, vii, viii)
+        if stripped in ROMAN_TO_INT and i + 1 < len(lines):
+            next_line = lines[i + 1].strip()
+            # Next line should start with uppercase and be substantial
+            if next_line and len(next_line) >= 5 and next_line[0].isupper():
+                # Skip if it's question or noise
+                if '___' not in next_line and '?' not in next_line:
+                    headings.append({
+                        "label": stripped,
+                        "text": next_line
+                    })
+    
+    # Pattern 2: Same-line format - "i An evolutionary turning point"
+    if not headings:
+        pattern = r'^(i{1,3}|iv|v|vi{1,3}|ix|x)\s*\.?\s+([A-Z][^\n]+?)(?:\n|$)'
+        matches = re.findall(pattern, cleaned_text, flags=re.MULTILINE | re.IGNORECASE)
+        
+        for numeral, text in matches:
+            text = text.strip()
+            if len(text) >= 5 and '___' not in text and '?' not in text:
+                headings.append({
+                    "label": numeral.lower(),
+                    "text": text
+                })
+    
+    # Sort by roman numeral order
+    headings.sort(key=lambda h: ROMAN_TO_INT.get(h['label'], 99))
+    
+    # Deduplicate by label
+    seen = set()
+    unique_headings = []
+    for h in headings:
+        if h['label'] not in seen:
+            seen.add(h['label'])
+            unique_headings.append(h)
+    
+    return unique_headings
+
 
 class RepairResult:
     def __init__(self):
@@ -536,27 +598,65 @@ def repair_add_options_from_answers(data: dict, result: RepairResult) -> None:
             result.add_repair(f"Q{idx}: Added YES/NO/NOT GIVEN options")
             continue
         
-        # MATCHING_HEADING - add paragraph options A-H/A-J
+        # MATCHING_HEADING - detect if answer is roman numeral (i-viii) or letter (A-G)
         if q_type == 'MATCHING_HEADING' and len(options) < 5:
-            # Detect max letter from passage
-            sections = data.get('sections', [])
-            passage_md = ''
-            for sec in sections:
-                passage_md += sec.get('passage_md', '')
+            answer_lower = answer.lower() if answer else ''
             
-            paragraph_labels = re.findall(r'\*\*Paragraph ([A-L])\.\*\*', passage_md)
-            max_letter = max(paragraph_labels) if paragraph_labels else 'H'
+            # Case 1: Answer is roman numeral (i, ii, iii, etc.) - need heading options
+            if answer_lower in ROMAN_TO_INT:
+                # Try to extract headings from cleaned text
+                metadata = data.get('_metadata', {})
+                source = metadata.get('source', '')
+                item_id = metadata.get('item_id', '')
+                
+                cleaned_path = Path(__file__).parent.parent.parent / "data" / "cleaned" / source / f"{item_id}.txt"
+                headings = []
+                if cleaned_path.exists():
+                    cleaned_text = cleaned_path.read_text(encoding='utf-8')
+                    headings = extract_list_of_headings(cleaned_text)
+                
+                if headings and len(headings) >= 3:
+                    # Use extracted headings as options
+                    q['options'] = []
+                    for h in headings:
+                        q['options'].append({
+                            'value': h['label'],
+                            'label': h['label'],
+                            'text': h['text'],
+                            'is_correct': h['label'] == answer_lower
+                        })
+                    result.add_repair(f"Q{idx}: Added {len(q['options'])} heading options (i-{headings[-1]['label']}) for MATCHING_HEADING")
+                else:
+                    # Fallback: generate basic roman numeral options without text
+                    q['options'] = []
+                    for numeral in ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii']:
+                        q['options'].append({
+                            'value': numeral,
+                            'label': numeral,
+                            'text': f'Heading {numeral}',
+                            'is_correct': numeral == answer_lower
+                        })
+                    result.add_repair(f"Q{idx}: Added 8 heading options (i-viii) for MATCHING_HEADING (no text extracted)")
             
-            # Generate paragraph options
-            q['options'] = []
-            for c in 'ABCDEFGHIJKL':
-                if c <= max_letter:
-                    q['options'].append({
-                        'value': c,
-                        'label': f'Paragraph {c}',
-                        'is_correct': (c == answer)
-                    })
-            result.add_repair(f"Q{idx}: Added {len(q['options'])} paragraph options (A-{max_letter}) for MATCHING_HEADING")
+            # Case 2: Answer is letter (A, B, C, etc.) - paragraph options
+            else:
+                sections = data.get('sections', [])
+                passage_md = ''
+                for sec in sections:
+                    passage_md += sec.get('passage_md', '')
+                
+                paragraph_labels = re.findall(r'\*\*Paragraph ([A-L])\.\*\*', passage_md)
+                max_letter = max(paragraph_labels) if paragraph_labels else 'H'
+                
+                q['options'] = []
+                for c in 'ABCDEFGHIJKL':
+                    if c <= max_letter:
+                        q['options'].append({
+                            'value': c,
+                            'label': f'Paragraph {c}',
+                            'is_correct': (c == answer)
+                        })
+                result.add_repair(f"Q{idx}: Added {len(q['options'])} paragraph options (A-{max_letter}) for MATCHING_HEADING")
             continue
 
 

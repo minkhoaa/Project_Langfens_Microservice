@@ -12,6 +12,7 @@ public class WritingExam
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
     public string TaskText { get; set; } = string.Empty;
 
     // IELTS_W1, IELTS_W2, TOEIC
@@ -27,8 +28,21 @@ public class WritingExam
     [Column(TypeName = "jsonb")]
     public List<string>? ModelAnswers { get; set; }
     
+    /// <summary>
+    /// Reference to exam-service exam ID (for full test mode).
+    /// NULL = standalone writing exam.
+    /// </summary>
+    public Guid? SourceExamId { get; set; }
+    
+    /// <summary>
+    /// Reference to specific section ID in the full test (for full test mode).
+    /// NULL = standalone writing exam.
+    /// </summary>
+    public Guid? SourceSectionId { get; set; }
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid CreatedBy { get; set; }
+    public string ImageUrl { get; set; } = string.Empty;
 
     [JsonIgnore]
     public ICollection<WritingSubmission> WritingSubmissions { get; set; } = new List<WritingSubmission>();

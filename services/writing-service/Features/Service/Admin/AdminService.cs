@@ -40,17 +40,21 @@ public class AdminService : IAdminService
         {
             Title = request.Title,
             TaskText = request.TaskText,
+            Slug = request.Slug,
             ExamType = request.ExamType,
             Level = request.Level,
             CreatedAt = DateTime.UtcNow,
             Tags = request.Tag,
+            ImageUrl = request.ImageUrl,
             ModelAnswers = request.ModelAnswers,
-            CreatedBy = _user.UserId
+            CreatedBy = _user.UserId,
+            SourceExamId = request.SourceExamId,
+            SourceSectionId = request.SourceSectionId
         };
         _context.WritingExams.Add(newExam);
         await _context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Created exam successfully",
-            new { newExam.Id, newExam.Title, newExam.CreatedBy }));
+            new { newExam.Id, newExam.Title, newExam.CreatedBy, newExam.SourceExamId, newExam.SourceSectionId }));
     }
 
     public async Task<IResult> UpdateExam(Guid examId, UpdateExamRequest request, CancellationToken token)
@@ -61,22 +65,25 @@ public class AdminService : IAdminService
             return Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId }));
 
         exam.Title = request.Title;
+        exam.Slug = request.Slug;
         exam.TaskText = request.TaskText;
         exam.ExamType = request.ExamType;
         exam.Level = request.Level;
         exam.Tags = request.Tag;
         exam.ModelAnswers = request.ModelAnswers;
-
+        exam.ImageUrl = request.ImageUrl;
+        exam.SourceExamId = request.SourceExamId;
+        exam.SourceSectionId = request.SourceSectionId;
         await _context.SaveChangesAsync(token);
-        return Results.Ok(new ApiResultDto(true, "Updated exam successfully", new { exam.Id, exam.Title }));
+        return Results.Ok(new ApiResultDto(true, "Updated exam successfully", new { exam.Id, exam.Title, exam.SourceExamId }));
     }
 
     public async Task<IResult> GetAllExams(CancellationToken token)
     {
         var exams = await _context.WritingExams.AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
-            .Select(x => new WritingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
-                x.ModelAnswers, x.CreatedAt, x.CreatedBy))
+            .Select(x => new WritingExamResponse(x.Id, x.Title, x.Slug, x.TaskText, x.ExamType, x.Level, x.Tags,
+                x.ModelAnswers, x.ImageUrl, x.CreatedAt, x.CreatedBy, x.SourceExamId, x.SourceSectionId))
             .ToListAsync(token);
 
         return Results.Ok(new ApiResultDto(true, "Fetched all writing exams", exams));

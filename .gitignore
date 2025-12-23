@@ -160,5 +160,5 @@ data/quarantine/
 data/.cache/
 
 # Temp fix scripts
-/tmp/fix_*.py
-scripts/pipeline_v2/fix_*.py
+/tmp/
+scripts/

@@ -42,7 +42,7 @@ BEGIN
     'B2',
     'PUBLISHED',
     20,
-    'http://www.todayifoundout.com/wp-content/uploads/2014/01/salt3.jpg',
+    'https://res.cloudinary.com/df41zs8il/image/upload/v1766530877/ielts/salt3_4fdb5e0f2965.jpg',
     now()
   );
 

@@ -314,7 +314,8 @@ def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
         "transcript": transcript,
         "audio_url": audio_url,
         "image_url": image_url,  # Thumbnail/cover image
-        "exam_type": exam_type
+        "exam_type": exam_type,
+        "content_images": extract_content_images(soup, url)
     }
 
 
@@ -397,3 +398,112 @@ if __name__ == "__main__":
     else:
         print("✗ Extraction failed")
         sys.exit(1)
+
+
+def extract_content_images(soup, url: str = '') -> dict:
+    """
+    Smart extraction of content images with classification.
+    
+    Returns:
+        {
+            "passage_images": [url1, url2, ...],  # Images in passage text
+            "question_images": {
+                "11-13": [url1, url2, ...],  # MCQ options images
+                "5-8": [url1, ...],  # Diagram label images
+            },
+            "diagram_images": [url, ...],  # Diagrams, flowcharts
+        }
+    """
+    import re
+    result = {
+        "passage_images": [],
+        "question_images": {},
+        "diagram_images": [],
+        "all_images": []
+    }
+    
+    if not soup:
+        return result
+    
+    # Skip patterns for non-content images
+    skip_patterns = [
+        'icon', 'logo', 'avatar', 'emoji', 'highlight', 'favicon',
+        'Dictionary', 'remove_format', 'Images/', 'google', 'facebook', 'twitter', 'linkedin',
+        'wp-includes', 'plugins/', 'button', 'loading', 'spinner'
+    ]
+    
+    # Find all content images
+    all_imgs = []
+    for img in soup.find_all('img'):
+        src = img.get('src') or img.get('data-src') or ''
+        if not src:
+            continue
+        
+        # Skip non-content images
+        if any(skip in src.lower() for skip in skip_patterns):
+            continue
+        
+        # Make absolute URL
+        if src.startswith('//'):
+            src = 'https:' + src
+        elif src.startswith('/') and url:
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            src = f"{parsed.scheme}://{parsed.netloc}{src}"
+        
+        # Get context (parent elements)
+        context = {
+            'url': src,
+            'alt': img.get('alt', ''),
+            'parent_text': '',
+            'question_range': None
+        }
+        
+        # Check parent for question context
+        parent = img.parent
+        for _ in range(5):  # Check up to 5 levels
+            if not parent:
+                break
+            parent_text = parent.get_text(strip=True, separator=' ')[:200]
+            context['parent_text'] = parent_text
+            
+            # Try to detect question range (e.g., "Questions 11-13", "Q5-8")
+            q_match = re.search(r'[Qq]uestions?\s*(\d+)[-–to]+\s*(\d+)', parent_text)
+            if q_match:
+                context['question_range'] = f"{q_match.group(1)}-{q_match.group(2)}"
+                break
+            
+            # Single question match
+            q_single = re.search(r'[Qq]uestion\s*(\d+)', parent_text)
+            if q_single:
+                context['question_range'] = q_single.group(1)
+                break
+            
+            parent = parent.parent
+        
+        all_imgs.append(context)
+    
+    result['all_images'] = [img['url'] for img in all_imgs]
+    
+    # Classify images
+    for img in all_imgs:
+        url = img['url']
+        alt = img['alt'].lower()
+        q_range = img['question_range']
+        
+        # Check if it's a diagram/flowchart
+        is_diagram = any(kw in alt for kw in ['diagram', 'flowchart', 'chart', 'process', 'map'])
+        is_diagram = is_diagram or any(kw in url.lower() for kw in ['diagram', 'flowchart', 'process'])
+        
+        if q_range:
+            # Image associated with specific questions
+            if q_range not in result['question_images']:
+                result['question_images'][q_range] = []
+            result['question_images'][q_range].append(url)
+        elif is_diagram:
+            result['diagram_images'].append(url)
+        else:
+            # General passage image
+            result['passage_images'].append(url)
+    
+    return result
