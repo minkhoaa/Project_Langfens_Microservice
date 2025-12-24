@@ -319,7 +319,48 @@ def extract_mini_ielts(html: str, url: str, solution_html: str = None) -> dict:
     }
 
 
-def extract(source: str, item_id: str) -> Optional[dict]:
+
+
+def apply_question_type_hints(questions: list, hints: dict) -> list:
+    """
+    Apply user-provided type hints to questions.
+    
+    Args:
+        questions: List of extracted questions
+        hints: Dict mapping question ranges to types, e.g. {"Q1-2": "MCQ_MULTIPLE", "Q3-7": "SUMMARY_COMPLETION"}
+    
+    Returns:
+        Updated questions list with corrected types
+    """
+    if not hints:
+        return questions
+    
+    # Parse hints into individual question mappings
+    q_type_map = {}
+    for q_range, q_type in hints.items():
+        # Parse range like "Q1-2" or "1-2" or "Q5"
+        range_str = q_range.upper().replace('Q', '').strip()
+        if '-' in range_str:
+            start, end = range_str.split('-')
+            for i in range(int(start), int(end) + 1):
+                q_type_map[i] = q_type.upper()
+        else:
+            q_type_map[int(range_str)] = q_type.upper()
+    
+    # Apply type overrides
+    for q in questions:
+        idx = q.get('idx', 0)
+        if idx in q_type_map:
+            old_type = q.get('type', '')
+            new_type = q_type_map[idx]
+            if old_type != new_type:
+                logger.info(f"Q{idx}: Type override {old_type} -> {new_type} (from hints)")
+                q['type'] = new_type
+    
+    return questions
+
+
+def extract(source: str, item_id: str, hints: dict = None) -> Optional[dict]:
     """
     Extract structured data from raw HTML.
     Uses OLD CRAWLER extraction functions.
@@ -358,6 +399,11 @@ def extract(source: str, item_id: str) -> Optional[dict]:
     # Add raw HTML for answer extraction (cleaned text may strip answers)
     extracted['_raw_html'] = html
     
+    # Apply user-provided type hints if any
+    if hints and 'questions' in extracted:
+        extracted['questions'] = apply_question_type_hints(extracted['questions'], hints)
+        logger.info(f"Applied {len(hints)} type hints to questions")
+    
     return extracted
 
 
@@ -376,9 +422,9 @@ def save_extracted(data: dict) -> Optional[Path]:
     return output_path
 
 
-def extract_and_save(source: str, item_id: str) -> Optional[dict]:
+def extract_and_save(source: str, item_id: str, hints: dict = None) -> Optional[dict]:
     """Extract data and save to disk. Returns extracted data."""
-    data = extract(source, item_id)
+    data = extract(source, item_id, hints=hints)
     if data:
         save_extracted(data)
     return data

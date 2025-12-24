@@ -75,7 +75,7 @@ def quarantine(result: PipelineResult) -> Path:
     return report_path
 
 
-def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, use_cache: bool = True) -> PipelineResult:
+def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, use_cache: bool = True, hints: dict = None) -> PipelineResult:
     """
     Run full pipeline for a single URL.
     
@@ -92,6 +92,9 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, u
     Args:
         use_cache: If True, skip processing if valid cache exists
     """
+    if hints is None:
+        hints = {}
+    
     result = PipelineResult(url)
     
     # Detect source and item_id early for cache check
@@ -145,7 +148,7 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, u
     
     # === Stage 3: Parse (using old crawler) ===
     logger.info("Stage 3: PARSE - Extracting with old crawler...")
-    extract_result = extract_and_save(result.source, result.item_id)
+    extract_result = extract_and_save(result.source, result.item_id, hints=hints)
     if not extract_result:
         result.fail("PARSE", "Extraction failed")
         quarantine(result)
@@ -300,13 +303,65 @@ def run_pipeline(url: str, use_ai: bool = True, skip_validation: bool = False, u
 
 # CLI
 if __name__ == "__main__":
+    # Show help if requested
+    if len(sys.argv) >= 2 and sys.argv[1] in ['--help', '-h', 'help']:
+        print("""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    IELTS PIPELINE ORCHESTRATOR                                ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║ Usage:                                                                        ║
+║   python orchestrator.py <URL> [options]                                      ║
+║                                                                               ║
+║ Options:                                                                      ║
+║   --full              Run FULL pipeline (fetch→export→seed)                   ║
+║   --type listening    Process as listening exam                               ║
+║   --no-ai             Skip AI-based normalization                             ║
+║   --skip-validation   Skip validation steps                                   ║
+║   --hints="..."       Specify question types (see below)                      ║
+║                                                                               ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║ HINTS FORMAT: --hints="Q1-5:TYPE,Q6-10:TYPE,Q11-13:TYPE"                      ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║ Available Types:                                                              ║
+║   MCQ_SINGLE           Choose ONE letter (A/B/C/D)                            ║
+║   MCQ_MULTIPLE         Choose TWO/THREE letters                               ║
+║   SUMMARY_COMPLETION   Fill in gaps / Write words                             ║
+║   TABLE_COMPLETION     Complete a table                                       ║
+║   SHORT_ANSWER         Write short answer                                     ║
+║   MATCHING_HEADING     Match paragraphs with headings (i-x)                   ║
+║   MATCHING_FEATURES    Match features with names                              ║
+║   MATCHING_INFORMATION Match info / Label map or diagram                      ║
+║   TRUE_FALSE_NOT_GIVEN TRUE/FALSE/NOT GIVEN questions                         ║
+║   YES_NO_NOT_GIVEN     YES/NO/NOT GIVEN questions                             ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║ Examples:                                                                     ║
+║   python orchestrator.py "https://mini-ielts.com/123/reading/xxx"             ║
+║       --hints="Q1-6:MATCHING_HEADING,Q7-13:SUMMARY_COMPLETION"                ║
+║                                                                               ║
+║   python orchestrator.py "https://mini-ielts.com/456/listening/yyy"           ║
+║       --type listening --hints="Q1-2:MCQ_MULTIPLE,Q3-7:SUMMARY_COMPLETION"    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+        """)
+        sys.exit(0)
+
     if len(sys.argv) < 2:
-        print("Usage: python orchestrator.py <URL> [--no-ai] [--skip-validation]")
+        print("Usage: python orchestrator.py <URL> [--no-ai] [--skip-validation] [--hints='Q1-2:TYPE,Q3-7:TYPE']")
+        print("       Run 'python orchestrator.py --help' to see available types")
         print("       python orchestrator.py --batch <file.txt> [--no-ai] [--skip-validation]")
         sys.exit(1)
     
     use_ai = '--no-ai' not in sys.argv
     skip_validation = '--skip-validation' in sys.argv
+    
+    # Parse --hints param: "Q1-2:MCQ_MULTIPLE,Q3-7:SUMMARY_COMPLETION"
+    hints = {}
+    for arg in sys.argv:
+        if arg.startswith('--hints='):
+            hints_str = arg.split('=', 1)[1]
+            for hint in hints_str.split(','):
+                if ':' in hint:
+                    q_range, q_type = hint.split(':', 1)
+                    hints[q_range.strip()] = q_type.strip()
     
     if sys.argv[1] == '--batch':
         # Batch mode
@@ -319,7 +374,7 @@ if __name__ == "__main__":
         
         success = 0
         for url in urls:
-            result = run_pipeline(url, use_ai, skip_validation)
+            result = run_pipeline(url, use_ai, skip_validation, hints)
             if result.success:
                 success += 1
                 print(f"✓ {url}")
@@ -330,7 +385,7 @@ if __name__ == "__main__":
     else:
         # Single URL mode
         url = sys.argv[1]
-        result = run_pipeline(url, use_ai, skip_validation)
+        result = run_pipeline(url, use_ai, skip_validation, hints)
         
         if result.success:
             print(f"\n✓ Pipeline completed successfully!")
@@ -344,3 +399,90 @@ if __name__ == "__main__":
             for error in result.errors:
                 print(f"  • {error}")
             sys.exit(1)
+
+
+# ============ FULL PIPELINE MODE ============
+def run_full_pipeline(url: str, exam_type: str = 'reading', hints: dict = None):
+    """
+    Run FULL pipeline: orchestrator → cloudinary → export → seed
+    No manual intervention needed!
+    """
+    import subprocess
+    
+    result = run_pipeline(url, use_ai=True, skip_validation=False, hints=hints)
+    
+    if not result.success:
+        print(f"\\n✗ Pipeline failed at: {result.stage_failed}")
+        return False
+    
+    source = result.source
+    item_id = result.item_id
+    
+    print(f"\\n🔄 Running full pipeline for: {item_id}")
+    
+    # Step: Cloudinary upload
+    print("📸 Uploading images to Cloudinary...")
+    try:
+        subprocess.run(['python', 'upload_images.py', source, item_id], check=True, capture_output=True)
+        print("  ✓ Images uploaded")
+    except Exception as e:
+        print(f"  ⚠ Image upload failed (non-blocking): {e}")
+    
+    # Step: Export
+    print("📤 Exporting SQL...")
+    try:
+        subprocess.run(['python', 'export.py', source, item_id, '--type', exam_type], check=True, capture_output=True)
+        print("  ✓ SQL exported")
+    except Exception as e:
+        print(f"  ✗ Export failed: {e}")
+        return False
+    
+    # Find SQL file
+    from pathlib import Path
+    seeds_dir = Path(__file__).parent.parent.parent / "deploy" / "seeds"
+    slug = item_id.replace('/', '-').lstrip('-').rstrip('-')
+    sql_pattern = f"seed_exam_{source}-{exam_type}-{slug.split('-', 1)[1] if '-' in slug else slug}.sql"
+    
+    # Find matching SQL
+    sql_files = list(seeds_dir.glob(f"*{slug.split('-', 1)[1] if '-' in slug else slug}*.sql"))
+    if not sql_files:
+        sql_files = list(seeds_dir.glob(f"*{exam_type}*{slug.split('-')[-1]}*.sql"))
+    
+    if sql_files:
+        sql_path = sql_files[0]
+        print(f"💾 Seeding database: {sql_path.name}")
+        try:
+            import os
+            os.environ['PGPASSWORD'] = 'exam'
+            subprocess.run([
+                'psql', '-h', 'localhost', '-p', '5433', '-U', 'exam', '-d', 'exam-db',
+                '-f', str(sql_path)
+            ], check=True, capture_output=True)
+            print("  ✓ Database seeded")
+        except Exception as e:
+            print(f"  ✗ Seed failed: {e}")
+            return False
+    else:
+        print(f"  ⚠ No SQL file found for seeding")
+    
+    print(f"\\n✅ FULL PIPELINE COMPLETE: {item_id}")
+    return True
+
+
+# CLI extension for --full
+if '--full' in sys.argv:
+    url = [arg for arg in sys.argv[1:] if not arg.startswith('--')][0]
+    exam_type = 'listening' if '--type' in sys.argv and 'listening' in ' '.join(sys.argv) else 'reading'
+    
+    # Parse hints
+    hints = {}
+    for arg in sys.argv:
+        if arg.startswith('--hints='):
+            hints_str = arg.split('=', 1)[1]
+            for hint in hints_str.split(','):
+                if ':' in hint:
+                    q_range, q_type = hint.split(':', 1)
+                    hints[q_range.strip()] = q_type.strip()
+    
+    success = run_full_pipeline(url, exam_type, hints)
+    sys.exit(0 if success else 1)

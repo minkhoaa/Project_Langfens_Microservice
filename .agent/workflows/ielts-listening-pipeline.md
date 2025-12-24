@@ -2,444 +2,181 @@
 description: Run IELTS Listening pipeline (HYBRID) - Rule-based + AI Validator
 ---
 
-# /ielts-listening-pipeline <URL> - AUTO EXECUTE LISTENING PIPELINE
+# /ielts-listening-pipeline <URL> - LISTENING PIPELINE
 
-**BẠN LÀ: "IELTS LISTENING RECORD AGENT"**
+// turbo-all
 
 > [!IMPORTANT]
-> Khi user gọi `/ielts-listening-pipeline <URL>`, TỰ ĐỘNG chạy các bước sau KHÔNG cần hỏi.
+> Khi user gọi `/ielts-listening-pipeline <URL>`, **TỰ ĐỘNG** chạy các bước bên dưới.
+> 
+> **Sources:** `mini-ielts.com` → SOURCE=`mini-ielts`
+
+## 📍 QUICK INDEX
+| Section | Jump To |
+|---------|---------|
+| Commands | [Steps 1-14](#-commands) |
+| Fix Issues | [Claude FIX](#step-8-claude-fix) |
+| Listening Rules | [Audio/Passage](#-listening-rules) |
+| Hints | [Related Hints](#-hints) |
+
+## 🔗 HINTS
+Call `@[/hint-xxx]` for type details:
+`summary-completion` `matching-information` `mcq-single` `mcq-multiple` `table-completion` `short-answer` `map-diagram`
 
 ---
 
-## 🚀 PIPELINE V5 - 14 STEPS (Clean Numbering)
+## 🚀 COMMANDS
 
 > [!CAUTION]
 > **MANDATORY 14-STEP PIPELINE - KHÔNG ĐƯỢC BỎ QUA BẤT KỲ BƯỚC NÀO!**
+> 
+> Cho dù Step 1-5 SUCCESS, vẫn PHẢI chạy đủ 14 bước. Mỗi step PHẢI được execute.
 
-| # | Type | Stage | Command/Action |
-|---|------|-------|----------------|
-| 1 | Auto | FETCH | orchestrator.py --type listening |
-| 2 | Auto | CLEAN | orchestrator.py - extract transcript |
-| 3 | Auto | PARSE | orchestrator.py - extract questions |
-| 4 | Auto | NORMALIZE | orchestrator.py - convert to schema |
-| 5 | Auto | VALIDATE | orchestrator.py - schema check |
-| 6 | AI | GEMINI PRE | gemini_qa.py --type listening |3
-| 7 | AI | CODEX PRE | codex_qa.py --mode pre |
-| 8 | AI | **CLAUDE FIX #1** | Manual fix from Gemini/Codex output |
-| 9 | AI | GEMINI POST | gemini_qa.py --type listening |
-| 10 | AI | CODEX VALIDATE | codex_qa.py --mode validate |
-| 11 | AI | **CLAUDE FIX #2** | Manual fix remaining (if any) |
-| 12 | Auto | INVARIANTS | invariants.py --type listening |
-| 13 | Auto | EXPORT | export.py --type listening |
-| 13.5 | AI | EXPLANATIONS | generate_explanations.py - Vietnamese AI explanations |
-| 14 | Manual | SEED | psql - commit to DB |
-
-> **Cho dù Step 1-5 SUCCESS, vẫn PHẢI chạy đủ 15 bước!**
-
----
-
-## 📋 STEP-BY-STEP EXECUTION
-
-### Step 1-5: TIER 1 Rule-Based (Auto)
+### Step 1-5: Orchestrator
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python orchestrator.py "<URL>" --type listening 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python orchestrator.py "<URL>" --type listening --hints="<HINTS>" 2>&1
 ```
 
-Read output để xác định `<ITEM_ID>`:
+### Step 6: Gemini PRE
 ```bash
 // turbo
-cat data/cleaned/mini-ielts/<ITEM_ID>.txt | head -150
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py <SOURCE> <ITEM_ID> 2>&1
 ```
+
+### Step 7: Codex PRE
 ```bash
 // turbo
-cat data/normalized/mini-ielts/<ITEM_ID>.json | head -100
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode pre 2>&1
 ```
 
-### Step 6: GEMINI PRE-CHECK
-```bash
-// turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py mini-ielts <ITEM_ID> --type listening 2>&1
-```
-**Purpose:** AI phát hiện schema/content issues → output cho Claude FIX
-
-### Step 7: CODEX PRE-CHECK
-```bash
-// turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py mini-ielts <ITEM_ID> --mode pre 2>&1
-```
-**Purpose:** AI phát hiện issues chi tiết → output cho Claude FIX
-
-### Step 8: CLAUDE FIX #1 (Manual)
-Đọc output từ Step 6-7 và FIX:
-
-| Issue Pattern | Fix Action |
-|---------------|------------|
-| MAP_LABEL type | Convert to MATCHING_INFORMATION |
-| Choose TWO | Split to 2 MCQ_SINGLE |
-| Passage < 100 words | Use full transcript |
-| Missing audio_url | Extract from iframe |
-| Options concatenated | Extract lại từ source |
-| Wrong question type | Change to correct type |
-
-**Create fix script:**
+### Step 8: Claude FIX
 ```python
-#!/usr/bin/env python3
 import json
 from pathlib import Path
-json_path = Path("data/normalized/mini-ielts/<ITEM_ID>.json")
+json_path = Path("data/normalized/<SOURCE>/<ITEM_ID>.json")
 data = json.loads(json_path.read_text())
-# ... apply fixes ...
+# Fix issues from Step 6-7
 json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
 ```
 
-**IMPORTANT: After applying any fix script, re-embed images:**
+After fix: `python reembed_images.py <SOURCE> <ITEM_ID>`
+
+### Step 9: Gemini POST
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python reembed_images.py mini-ielts <ITEM_ID>
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py <SOURCE> <ITEM_ID> 2>&1
 ```
-> This ensures images (diagrams, maps, etc.) extracted from source are not lost when passageMd is overwritten by fix scripts.
 
-### Step 9: GEMINI POST-CHECK
+### Step 10: Codex VALIDATE
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 90 python gemini_qa.py mini-ielts <ITEM_ID> --type listening 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py <SOURCE> <ITEM_ID> --mode validate 2>&1
 ```
-**Expected:** PASS ✅ (nếu Claude FIX đúng)
 
-### Step 10: CODEX VALIDATE
+### Step 11: Claude FIX #2 (if needed)
+
+### Step 12: Invariants
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && timeout 300 python codex_qa.py mini-ielts <ITEM_ID> --mode validate 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python invariants.py <SOURCE> <ITEM_ID> --type listening 2>&1
 ```
-**Purpose:** Final validation - có thể FAIL với minor issues
 
-### Step 11: CLAUDE FIX #2 (If needed)
-Nếu Step 10 vẫn có issues, fix thêm. Nếu chỉ là typos từ source gốc → bỏ qua.
-
-### Step 12: INVARIANTS
+### Step 12.5: Cloudinary
 ```bash
 // turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python invariants.py mini-ielts <ITEM_ID> --type listening 2>&1
-```
-**MUST show: `Valid: True`** (warnings OK)
-
-### Step 13: EXPORT
-```bash
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python export.py mini-ielts <ITEM_ID> --type listening
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python upload_images.py <SOURCE> <ITEM_ID> 2>&1
 ```
 
-### Step 13.5: EXPLANATIONS (AI - Optional)
+### Step 13: Export
 ```bash
-// turbo
-cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python generate_explanations.py mini-ielts <ITEM_ID> --provider gemini 2>&1
+cd /home/khoa/RiderProjects/Project_Langfens_Microservice/scripts/pipeline_v2 && python export.py <SOURCE> <ITEM_ID> --type listening
 ```
-**Purpose:** Tạo giải thích tiếng Việt cho mỗi câu hỏi với:
-- Trích dẫn transcript (blockquote)
-- Giải thích WHY đáp án đúng
-- Chỉ ra lỗi thường gặp
 
-> [!TIP]
-> Non-blocking step - nếu fail vẫn có thể SEED
-
-### Step 14: SEED
+### Step 14: Seed
 ```bash
-PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/seed_listening_*.sql"
+PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/seed_exam_*.sql"
 ```
 
 ---
 
-## 📊 QA REPORT TEMPLATE
-
-```markdown
-## 📋 QA REPORT - Listening <ITEM_ID>
-
-### Pipeline Execution:
-| # | Stage | Status | Details |
-|---|-------|--------|---------|
-| 1-5 | TIER 1 (Auto) | ✅/❌ | X questions, Y words |
-| 6 | Gemini PRE | ✅/❌ | PASS/FAIL + issues |
-| 7 | Codex PRE | ✅/❌ | PASS/FAIL + confidence |
-| 8 | Claude FIX #1 | ✅ | X fixes applied |
-| 9 | Gemini POST | ✅/❌ | PASS/FAIL |
-| 10 | Codex VALIDATE | ✅/❌ | PASS/FAIL + confidence |
-| 11 | Claude FIX #2 | ✅/- | X fixes or N/A |
-| 12 | Invariants | ✅/❌ | Valid: True/False |
-| 13 | Export | ✅ | SQL generated |
-| 14 | Seed | ✅ | COMMIT |
-
-### Audio & Transcript:
-| Field | Status | Value |
-|-------|--------|-------|
-| Audio URL | ✅/❌ | YouTube embed URL |
-| Transcript | ✅/❌ | X words |
-
-### Fixes Applied:
-| Step | Item | Fix |
-|------|------|-----|
-| 8 | Q1-2 | Split Choose TWO → 2 MCQ_SINGLE |
-| 8 | Q7-10 | MAP_LABEL → MATCHING_INFORMATION |
-
-### Final Status:
-- **Invariants:** Valid = True ✅
-- **DB Status:** COMMIT ✅
-```
-
----
-
-## 🔊 LISTENING SPECIFIC RULES
+## 📋 LISTENING RULES
 
 ### Audio:
-| Rule | Format |
-|------|--------|
-| YouTube embed | `https://www.youtube.com/embed/VIDEO_ID` |
-| Audio field | `audio_url` in exam metadata |
+- Format: `https://www.youtube.com/embed/VIDEO_ID`
+- Field: `audio_url` in exam metadata (BẮT BUỘC)
 
-### Transcript:
-| Rule | Format |
-|------|--------|
-| Source | Solution page → Exam Review |
-| Storage | `passage_md` in section (note-taking format) |
-| Min length | ≥100 words |
-
-### Passage Format (IMPORTANT):
-> [!CAUTION]
-> **passage_md PHẢI dùng BULLET LIST format, KHÔNG dùng markdown table!**
-> 
-> Markdown tables KHÔNG render đúng trong ReactMarkdown. Phải convert table → bullet list.
-
-**Format chuẩn cho COMPLETION questions:**
+### passage_md Format (TRANSCRIPT/NOTES ONLY):
 ```markdown
-# [Exam Title]
+# Title
 
-## Questions 1-X: Complete the notes/table below
+**Section 1:** Transcript content...
 
-### [Section/Category 1]
-- **Description:** [text]
-- **Advantages:**
-  - point 1 with blank **1** _______
-  - point 2
-- **Disadvantages:**
-  - point with blank **2** _______
+**Section 2:** More content...
+```
 
-### [Section/Category 2]
-- **Description:** **3** _______ [text]
-- **Disadvantages:**
-  - point with blank **4** _______
+### instruction_md Format (FULL QUESTION DETAILS):
+```markdown
+## QUESTIONS 1-6
+
+Complete the notes below.
+Write **NO MORE THAN TWO WORDS** for each answer.
+
+**1.** Location: _______
+**2.** Name: _______
+**3.** Date: _______
 
 ---
 
-## Questions X-Y: [Matching questions]
+## QUESTIONS 7-10
 
-**Options:**
-- **A** option text
-- **B** option text
-- **C** option text
+Label the map below.
+Choose **FOUR** answers from the box.
 
-**Items:**
-- **7** item text → _______
-- **8** item text → _______
+![Map](https://cloudinary.com/xxx/map.jpg)
+
+### Options:
+- **A** bicycle parking
+- **B** drinks machine
+
+**7.** Location 7: _______
+**8.** Location 8: _______
 ```
 
-> [!TIP]
-> **Ví dụ: Supermarket Layout exam**
-> ```markdown
-> ### Grid Layout
-> - **Description:** parallel aisles
-> - **Advantages:**
->   - efficient use of floor space
->   - Controls **1** _______
-> - **Disadvantages:**
->   - Uninteresting layout
->   - Shoppers can **2** _______ through their shopping
-> ```
-
-### Question Types (Listening):
-| Type | Description | Options | Notes |
-|------|-------------|---------|-------|
-| SUMMARY_COMPLETION | Gap-fill/Write word | `[]` empty | Q1-10 typical |
-| SHORT_ANSWER | Write answer | `[]` empty | Similar to gap-fill |
-| MCQ_SINGLE | Choose A/B/C | 3-4 options | Choose ONE letter |
-| MATCHING_INFORMATION | Match/Label A-G | `[]` empty | **For MAP_LABEL too** |
-
-### Special Cases:
 > [!IMPORTANT]
-> **MAP_LABEL → MATCHING_INFORMATION**
-> ```python
-> q['type'] = 'MATCHING_INFORMATION'
-> q['options'] = []
-> q['correct_answers'] = ['G']  # letter only
-> ```
+> **KHÔNG merge instruction_md vào passage_md!**
+> 
+> - `passage_md`: Transcript/notes only
+> - `instruction_md`: Full question details với maps, diagrams, options
+> - Frontend hiển thị `instruction_md` (bên trái, sau passage)
 
-> [!TIP]
-> **Choose TWO → 2 MCQ_SINGLE**
-> ```python
-> # Split Q1-2 "Choose TWO letters A,E" into 2 separate questions
-> # Q1: correct = A, Q2: correct = E
-> ```
+### Key Rules:
+| Field | Content |
+|-------|---------|
+| `passage_md` | Transcript/notes only |
+| `instruction_md` | Full: headings, options, maps, diagrams |
+| `audio_url` | YouTube embed URL (BẮT BUỘC) |
+| Passage length | ≥ 100 words |
 
----
+### instruction_md MUST include:
+- Question group headings (`## QUESTIONS 1-6`)
+- Full instruction text (từ source)
+- Options list (A, B, C...) nếu có
+- Maps/diagrams nếu có (`![](cloudinary_url)`)
+- Blanks với số thứ tự
 
-## 🔧 FIX TEMPLATES
-
-### MAP_LABEL → MATCHING_INFORMATION:
-```python
-for q in data['questions']:
-    if 'MAP_LABEL' in q.get('type', ''):
-        q['type'] = 'MATCHING_INFORMATION'
-        q['options'] = []
-```
-
-### Choose TWO → 2 MCQ_SINGLE:
-```python
-# Original: Q1-2 "Choose TWO letters" with answers A, E
-new_q1 = {
-    "idx": 1,
-    "type": "MULTIPLE_CHOICE_SINGLE",
-    "prompt_md": "Which TWO changes? (Answer 1 of 2)",
-    "options": [...],  # mark A as correct
-    "correct_answers": ["A"]
-}
-new_q2 = {
-    "idx": 2,
-    "type": "MULTIPLE_CHOICE_SINGLE", 
-    "prompt_md": "Which TWO changes? (Answer 2 of 2)",
-    "options": [...],  # mark E as correct
-    "correct_answers": ["E"]
-}
-```
-
-### Passage Expansion (if < 100 words):
-```python
-# Use full transcript from solution page
-data['sections'][0]['passage_md'] = full_transcript
-```
-
-### Audio URL Fix:
-```python
-import re
-iframe_match = re.search(r'src="(https://www\.youtube\.com/embed/[^"]+)"', html)
-data['exam']['audio_url'] = iframe_match.group(1) if iframe_match else None
-```
-
----
-
-## 🔒 GOLDEN RULES
-
-1. **KHÔNG bịa** - Chỉ trích từ source
-2. **KHÔNG paraphrase** - Giữ nguyên văn
-3. **Passage ≥ 100 words** - Use full transcript if needed
-4. **MATCHING_INFORMATION options = []**
-5. **audio_url BẮT BUỘC** - Must have YouTube embed
-
----
-
-## 🔗 SOURCES
-
-| Source | URL Pattern | Status |
-|--------|-------------|--------|
-| mini-ielts.com | `mini-ielts.com/{id}/listening/{slug}` | ✅ Active |
-| ielts-mentor.com | `ielts-mentor.com/listening-sample` | 🔮 Future |
+### Common Fixes:
+| Issue | Fix |
+|-------|-----|
+| instruction_md quá ngắn | Extract đầy đủ từ source |
+| Missing map/diagram | Add `![](cloudinary_url)` |
+| MAP_LABEL type | Convert to `MATCHING_INFORMATION` |
+| Choose TWO | Use `MULTIPLE_CHOICE_MULTIPLE` |
+| Missing audio | Extract from iframe |
 
 ---
 
 ## 🔗 RELATED
+- `@[/ielts-data-format]` - Strict JSON schemas
+- `@[/hints]` - All question types reference
 
-- @[/ielts-pipeline] - Reading pipeline
-- @[/ielts-data-format] - Strict JSON schemas
----
-
-## 🔄 IMPORTANT PATTERNS (Updated 2024-12-24)
-
-### Pattern Rules for Frontend Display:
-
-| Question Type | Must Have | Frontend Display |
-|---------------|-----------|------------------|
-| `SUMMARY_COMPLETION` | `_______` in prompt_md | Text input field |
-| `MULTIPLE_CHOICE_SINGLE` | options array | Radio buttons |
-| `MATCHING_INFORMATION` | options = [] | Text input (single letter) |
-
-### Diagram/Label Questions (e.g., Debit Card, Map):
-```python
-# Use SUMMARY_COMPLETION with _______ pattern
-{
-    "type": "SUMMARY_COMPLETION",
-    "prompt_md": "Cardholder's identification image: _______",
-    "correct_answers": ["picture"]
-}
-```
-
-### Choose TWO → Split into 2 MCQ_SINGLE:
-```python
-# Q1-2 "Choose TWO letters A-E" with answers A, B
-# → Split into:
-q1 = {"idx": 1, "type": "MULTIPLE_CHOICE_SINGLE", "correct_answers": ["A"]}
-q2 = {"idx": 2, "type": "MULTIPLE_CHOICE_SINGLE", "correct_answers": ["B"]}
-```
-
-> [!CAUTION]
-
-### After Fix Scripts - Re-embed Images:
-```bash
-python reembed_images.py mini-ielts <ITEM_ID>
-```
-
-### Choose TWO - Accept Both Answers in Any Order:
-> [!IMPORTANT]
-> For "Choose TWO" questions, BOTH split questions must accept ALL correct answers.
-> This allows users to select answers in any order.
-
-```python
-# Q5-6 "Choose TWO letters A-E" with answers C, E
-# → BOTH questions accept BOTH C and E:
-q5 = {
-    "idx": 5,
-    "type": "MULTIPLE_CHOICE_SINGLE",
-    "prompt_md": "Which workshop does the theatre offer? (1 of 2)",
-    "options": [
-        {"label": "C", "text": "making puppets", "is_correct": True},  # Both marked correct
-        {"label": "E", "text": "lighting", "is_correct": True}         # Both marked correct
-    ],
-    "correct_answers": ["C", "E"]  # Accept either
-}
-q6 = {
-    "idx": 6,
-    "type": "MULTIPLE_CHOICE_SINGLE",
-    "prompt_md": "Which workshop does the theatre offer? (2 of 2)",
-    "options": [
-        {"label": "C", "text": "making puppets", "is_correct": True},  # Same
-        {"label": "E", "text": "lighting", "is_correct": True}         # Same
-    ],
-    "correct_answers": ["C", "E"]  # Accept either
-}
-```
-
----
-
-## �� UPDATED RULE: Choose TWO/THREE → MULTIPLE_CHOICE_MULTIPLE
-
-> [!IMPORTANT]  
-> **Backend và Frontend ĐÃ HỖ TRỢ `MULTIPLE_CHOICE_MULTIPLE`!**
-> 
-> Thay vì split thành nhiều câu, sử dụng type `MULTIPLE_CHOICE_MULTIPLE` với nhiều `is_correct: true`.
-
-```python
-# Q1-2 "Choose TWO letters A-E" with answers A, B
-# → 1 câu duy nhất với 2 correct answers:
-{
-    "idx": 1,
-    "type": "MULTIPLE_CHOICE_MULTIPLE",
-    "prompt_md": "Which TWO changes have been made?",
-    "options": [
-        {"label": "A", "text": "...", "is_correct": True},
-        {"label": "B", "text": "...", "is_correct": True},
-        {"label": "C", "text": "...", "is_correct": False},
-        {"label": "D", "text": "...", "is_correct": False},
-        {"label": "E", "text": "...", "is_correct": False}
-    ],
-    "correct_answers": ["A", "B"]
-}
-```
-
-**Frontend:** Hiển thị checkboxes (MultiCheckboxCard)
-**Backend:** So sánh array selected với array correct_answers
