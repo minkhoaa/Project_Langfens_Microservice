@@ -240,8 +240,15 @@ def main():
         else:
             print(f"❌ GEMINI QA: FAIL (confidence: {confidence:.1%})")
             for issue in issues:
-                sev = issue.get('severity', 'MED')
-                msg = issue.get('message', 'Unknown issue')
+                if isinstance(issue, dict):
+                    sev = issue.get('severity', 'MED')
+                    msg = issue.get('message', 'Unknown issue')
+                elif isinstance(issue, str):
+                    sev = 'MED'
+                    msg = issue
+                else:
+                    sev = 'MED'
+                    msg = str(issue)
                 print(f"  [{sev}] {msg}")
         
         print(f"→ Next step: {next_step}")

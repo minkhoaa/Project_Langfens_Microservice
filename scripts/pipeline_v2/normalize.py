@@ -597,20 +597,24 @@ def normalize_with_ai(data: dict) -> Optional[dict]:
 
 
 # ===== IMAGE EMBEDDING UTILITIES (moved before normalize_rule_based) =====
-def embed_content_images_to_passage(passage_md: str, content_images: dict, questions: list, image_url: str = '') -> str:
+def embed_content_images_to_instruction(instruction_md: str, content_images: dict, questions: list, image_url: str = '') -> str:
     """
-    Smart embed content images into passage_md based on classification.
+    Embed content images into instruction_md (NOT passage_md).
+    
+    Images for map labels, diagrams, etc. go in instruction_md.
+    passage_md should contain only the reading passage text.
     
     Args:
-        passage_md: Current passage markdown text
+        instruction_md: Current instruction markdown text
         content_images: Dict from extract_content_images()
         questions: List of questions to determine which images go where
+        image_url: Cover/thumbnail image URL (skip this)
     
     Returns:
-        Updated passage_md with embedded images
+        Updated instruction_md with embedded images
     """
     if not content_images:
-        return passage_md
+        return instruction_md
     
     sections_to_add = []
     
@@ -623,39 +627,32 @@ def embed_content_images_to_passage(passage_md: str, content_images: dict, quest
             question_types[q_type] = []
         question_types[q_type].append(q_idx)
     
-    # Add question-specific images
+    # Add question-specific images (map labels, diagrams for specific questions)
     question_images = content_images.get('question_images', {})
     for q_range, urls in question_images.items():
         if not urls:
             continue
         
         # Format section header
-        sections_to_add.append(f"\n---\n\n## Images for Questions {q_range}\n")
+        sections_to_add.append(f"\n---\n\n### Images for Questions {q_range}\n")
         for i, url in enumerate(urls):
             sections_to_add.append(f"\n![Question {q_range} Option {chr(65+i)}]({url})\n")
     
-    # Add diagram images if present and not already in question_images
+    # Add diagram images if present
     diagram_images = content_images.get('diagram_images', [])
     for url in diagram_images:
-        # Check if already added as question image
         already_added = any(url in str(sections_to_add) for _ in [True])
         if not already_added:
-            sections_to_add.append(f"\n---\n\n## Diagram\n\n![Diagram]({url})\n")
+            sections_to_add.append(f"\n---\n\n### Diagram\n\n![Diagram]({url})\n")
     
-    # Add remaining passage images
-    passage_images = _filter_images(content_images.get('passage_images', []))
-    # Skip images that are already in image_url (cover image)
-    if image_url:
-        passage_images = [url for url in passage_images if url != image_url]
-    for url in passage_images:
-        already_added = any(url in str(sections_to_add) for _ in [True])
-        if not already_added:
-            sections_to_add.append(f"\n---\n\n![Passage Image]({url})\n")
+    # Add other content images (but NOT passage images - those stay out)
+    # Passage images should NOT be in instruction_md either
+    # Only question-related images go in instruction_md
     
     if sections_to_add:
-        return passage_md + '\n'.join(sections_to_add)
+        return instruction_md + '\n'.join(sections_to_add)
     
-    return passage_md
+    return instruction_md
 
 # Additional skip patterns for embedding
 _SKIP_IMAGE_PATTERNS = ['remove_format', 'Dictionary', 'highlight', 'favicon', 'icon', 'logo', 'avatar']
@@ -941,6 +938,23 @@ This test includes multiple choice questions and matching questions. Pay close a
         logger.info("Applied strict schema enforcement to all questions")
     except ImportError as e:
         logger.warning(f"Schema enforcer not available: {e}")
+    # ========== AUTO-DETECT QUESTION GROUPS ==========
+    try:
+        from auto_question_groups import detect_question_groups
+        question_groups = detect_question_groups(questions, instruction_md)
+        logger.info(f"Auto-detected {len(question_groups)} question groups")
+    except Exception as e:
+        logger.warning(f"Failed to auto-detect question groups: {e}")
+        # Fallback: single group with all questions
+        if questions:
+            question_groups = [{
+                'idx': 1,
+                'start_idx': min(q.get('idx', 1) for q in questions),
+                'end_idx': max(q.get('idx', 1) for q in questions),
+                'instruction_md': instruction_md
+            }]
+        else:
+            question_groups = []
     
     return {
         'exam': {
@@ -956,9 +970,10 @@ This test includes multiple choice questions and matching questions. Pay close a
             {
                 'idx': 1,
                 'title': title,
-                'passage_md': embed_content_images_to_passage(passage_md.strip(), data.get('content_images', {}), questions, data.get('image_url', '')),
-                'instruction_md': instruction_md,
+                'passage_md': passage_md.strip(),  # Passage only - no images
+                'instruction_md': embed_content_images_to_instruction(instruction_md, data.get('content_images', {}), questions, data.get('image_url', '')),
                 'audio_url': data.get('audio_url', ''),
+                'question_groups': question_groups,  # AUTO-ADDED
             }
         ],
         'questions': questions,

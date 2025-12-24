@@ -399,6 +399,44 @@ def check_content_completeness(questions: list, sections: list, result: Invarian
             if not text or len(text) < 5:
                 result.add_warning(f"Q{idx}: heading option {label} has no/short text (users can't see headings)")
 
+def check_question_groups(sections: list, questions: list, result: InvariantResult) -> None:
+    """Check question_groups are valid: cover all questions, no gaps/overlaps."""
+    if not questions:
+        return
+    
+    q_indices = sorted(set(q.get('idx', 0) for q in questions))
+    
+    for s in sections:
+        section_idx = s.get('idx', 1)
+        groups = s.get('question_groups', [])
+        
+        if not groups:
+            result.add_warning(f"Section {section_idx}: No question_groups defined (frontend may not show instructions)")
+            continue
+        
+        covered = set()
+        for g in groups:
+            start = g.get('start_idx', 0)
+            end = g.get('end_idx', 0)
+            g_idx = g.get('idx', 0)
+            
+            if start > end:
+                result.add_violation(f"Section {section_idx} Group {g_idx}: start_idx ({start}) > end_idx ({end})")
+            
+            for i in range(start, end + 1):
+                if i in covered:
+                    result.add_warning(f"Section {section_idx}: Question {i} covered by multiple groups")
+                covered.add(i)
+            
+            if not g.get('instruction_md'):
+                result.add_warning(f"Section {section_idx} Group {g_idx}: missing instruction_md")
+        
+        # Check for gaps
+        for idx in q_indices:
+            if idx not in covered:
+                result.add_warning(f"Section {section_idx}: Question {idx} not covered by any question_group")
+
+
 def check_invariants(data: dict) -> InvariantResult:
     """Run all IELTS invariant checks (31 strict rules)."""
     result = InvariantResult()
@@ -415,6 +453,9 @@ def check_invariants(data: dict) -> InvariantResult:
     check_completion_types(questions, result)
     check_passage_length(sections, result)
     check_no_duplicate_prompts(questions, result)
+    
+    # === QUESTION GROUPS CHECK (New Schema) ===
+    check_question_groups(sections, questions, result)
     
     # === STRICT RULE CHECKS (Industry Standards) ===
     check_paragraph_labels(sections, result)      # Rule 26/27

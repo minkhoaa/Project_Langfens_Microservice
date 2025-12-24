@@ -79,7 +79,20 @@ public class ExamService : IExamService
                                             .Select(option =>
                                                 new Dto_Public.PublicOptionRecord(option.Idx, option.ContentMd))
                                             .ToList()
-                                    )).ToList()
+                                    )).ToList(),
+                            section.QuestionGroups
+                                .OrderBy(g => g.Idx)
+                                .Select(group => new Dto_Public.PublicQuestionGroupRecord(
+                                    group.Id, group.Idx, group.StartIdx, group.EndIdx, group.InstructionMd,
+                                    group.Questions
+                                        .OrderBy(q => q.Idx)
+                                        .Select(q => new Dto_Public.PublicQuestionRecord(
+                                            q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd,
+                                            q.Options.OrderBy(o => o.Idx)
+                                                .Select(o => new Dto_Public.PublicOptionRecord(o.Idx, o.ContentMd))
+                                                .ToList()
+                                        )).ToList()
+                                )).ToList()
                         )).ToList()
                 )).FirstOrDefaultAsync(cancellationToken);
             return exams == null

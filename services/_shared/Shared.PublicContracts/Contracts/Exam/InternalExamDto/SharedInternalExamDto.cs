@@ -26,8 +26,19 @@ public class InternalExamDto
         [JsonPropertyName("idx")] public int Idx { get; init; }
         [JsonPropertyName("title")] public string Title { get; init; } = string.Empty;
         [JsonPropertyName("instructionsMd")] public string? InstructionsMd { get; init; }
+        [JsonPropertyName("passageMd")] public string? PassageMd { get; init; }
         [JsonPropertyName("audioUrl")] public string? AudioUrl { get; init; }
         [JsonPropertyName("transcriptMd")] public string? TranscriptMd { get; init; }
+        [JsonPropertyName("questionGroups")] public IReadOnlyList<InternalDeliveryQuestionGroup> QuestionGroups { get; init; } = [];
+    }
+
+    public record InternalDeliveryQuestionGroup
+    {
+        [JsonPropertyName("id")] public Guid Id { get; init; }
+        [JsonPropertyName("idx")] public int Idx { get; init; }
+        [JsonPropertyName("startIdx")] public int StartIdx { get; init; }
+        [JsonPropertyName("endIdx")] public int EndIdx { get; init; }
+        [JsonPropertyName("instructionMd")] public string InstructionMd { get; init; } = string.Empty;
         [JsonPropertyName("questions")] public IReadOnlyList<InternalDeliveryQuestion> Questions { get; init; } = [];
     }
 
@@ -71,15 +82,18 @@ public class InternalExamDto
         {
             Sections = exam.Sections.Select(sec => sec with
             {
-                Questions = sec.Questions.Select(q => q with
+                QuestionGroups = sec.QuestionGroups.Select(grp => grp with
                 {
-                    Options = q.Options.Select(o => o with { IsCorrect = null }).ToList(),
-                    BlankAcceptTexts = new Dictionary<string, string[]?>(),
-                    BlankAcceptRegex = new Dictionary<string, string[]?>(),
-                    MatchPairs = new Dictionary<string, string[]?>(),
-                    OrderCorrects = Array.Empty<string>(),
-                    ShortAnswerAcceptTexts = Array.Empty<string>(),
-                    ShortAnswerAcceptRegex = Array.Empty<string>()
+                    Questions = grp.Questions.Select(q => q with
+                    {
+                        Options = q.Options.Select(o => o with { IsCorrect = null }).ToList(),
+                        BlankAcceptTexts = new Dictionary<string, string[]?>(),
+                        BlankAcceptRegex = new Dictionary<string, string[]?>(),
+                        MatchPairs = new Dictionary<string, string[]?>(),
+                        OrderCorrects = Array.Empty<string>(),
+                        ShortAnswerAcceptTexts = Array.Empty<string>(),
+                        ShortAnswerAcceptRegex = Array.Empty<string>()
+                    }).ToList()
                 }).ToList()
             }).ToList()
         };

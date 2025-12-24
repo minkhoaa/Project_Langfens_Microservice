@@ -21,5 +21,6 @@ public class ExamSection
     public string? AudioUrl { get; set; }
     public string? TranscriptMd { get; set; }
 
+    public List<ExamQuestionGroup> QuestionGroups { get; set; } = new();
     public List<ExamQuestion> Questions { get; set; } = new();
 }

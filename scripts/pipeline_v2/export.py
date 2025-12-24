@@ -53,6 +53,13 @@ def load_normalized(source: str, item_id: str) -> Optional[dict]:
     return json.loads(data_path.read_text(encoding='utf-8'))
 
 
+
+def escape_sql_text(text: str) -> str:
+    """Escape text for SQL E'' strings."""
+    if not text:
+        return ""
+    return text.replace("\\", "\\\\").replace("'", "''").replace("\n", "\\n")
+
 def export_sql(source: str, item_id: str) -> Optional[Path]:
     """
     Export NORMALIZED data to SQL using OLD CRAWLER generate_sql().
@@ -209,6 +216,38 @@ def export_sql(source: str, item_id: str) -> Optional[Path]:
     else:
         logger.error(f"Unknown source: {source}")
         return None
+    
+    # === ADD QUESTION_GROUPS SQL ===
+    # Get question_groups from normalized sections
+    question_groups = []
+    for section in sections:
+        grps = section.get('question_groups', [])
+        question_groups.extend(grps)
+    
+    if question_groups:
+        # Add DELETE and INSERT statements for exam_question_groups
+        # Insert before END$$; / COMMIT;
+        qg_sql_lines = []
+        qg_sql_lines.append("")
+        qg_sql_lines.append(f"  -- Delete old question groups for this exam")
+        qg_sql_lines.append(f"  DELETE FROM exam_question_groups WHERE \"SectionId\" = sec1;")
+        qg_sql_lines.append("")
+        qg_sql_lines.append(f"  -- Insert question groups")
+        
+        for grp in sorted(question_groups, key=lambda g: g.get('idx', 0)):
+            grp_idx = grp.get('idx', 1)
+            start_idx = grp.get('start_idx', 1)
+            end_idx = grp.get('end_idx', 1)
+            instruction = escape_sql_text(grp.get('instruction_md', ''))
+            
+            qg_sql_lines.append(f"  INSERT INTO exam_question_groups (\"Id\",\"SectionId\",\"Idx\",\"StartIdx\",\"EndIdx\",\"InstructionMd\")")
+            qg_sql_lines.append(f"  VALUES (gen_random_uuid(), sec1, {grp_idx}, {start_idx}, {end_idx}, E'{instruction}');")
+            qg_sql_lines.append("")
+        
+        qg_sql = "\n".join(qg_sql_lines)
+        
+        # Insert before END$$;
+        sql = sql.replace("END$$;", qg_sql + "\nEND$$;")
     
     # Save SQL to seeds directory
     sql_path = SEEDS_DIR / f"seed_exam_{slug}.sql"

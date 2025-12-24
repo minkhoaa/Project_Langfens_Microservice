@@ -23,6 +23,15 @@ public class InternalExamDto
         string? PassageMd,
         string? AudioUrl,
         string? TranscriptMd,
+        IReadOnlyList<InternalDeliveryQuestion> Questions,
+        IReadOnlyList<InternalDeliveryQuestionGroup>? QuestionGroups);
+
+    public record InternalDeliveryQuestionGroup(
+        Guid Id,
+        int Idx,
+        int StartIdx,
+        int EndIdx,
+        string InstructionMd,
         IReadOnlyList<InternalDeliveryQuestion> Questions);
 
     public record InternalDeliveryQuestion(

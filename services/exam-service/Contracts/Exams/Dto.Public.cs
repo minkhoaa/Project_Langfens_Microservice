@@ -31,6 +31,15 @@ public class Dto_Public
         string? PassageMd,
         string? AudioUrl,
         string? TranscriptMd,
+        List<PublicQuestionRecord> Questions,
+        List<PublicQuestionGroupRecord>? QuestionGroups);
+
+    public record PublicQuestionGroupRecord(
+        Guid Id,
+        int Idx,
+        int StartIdx,
+        int EndIdx,
+        string InstructionMd,
         List<PublicQuestionRecord> Questions);
 
     public record PublicQuestionRecord(
@@ -43,3 +52,4 @@ public class Dto_Public
 
     public record PublicOptionRecord(int idx, string ContentMd);
 }
+

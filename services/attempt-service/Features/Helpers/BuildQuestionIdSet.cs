@@ -19,10 +19,14 @@ public class BuildQuestionIdSet : IBuildQuestionIdSet
         if (!paper.RootElement.TryGetProperty("sections", out var sections)) return set;
         foreach (var s in sections.EnumerateArray())
         {
-            if (!s.TryGetProperty("questions", out var qs)) continue;
-            foreach (var q in qs.EnumerateArray())
-                if (q.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.String)
-                    set.Add(idProp.GetGuid());
+            if (!s.TryGetProperty("questionGroups", out var groups)) continue;
+            foreach (var g in groups.EnumerateArray())
+            {
+                if (!g.TryGetProperty("questions", out var qs)) continue;
+                foreach (var q in qs.EnumerateArray())
+                    if (q.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.String)
+                        set.Add(idProp.GetGuid());
+            }
         }
 
         return set;
@@ -42,17 +46,21 @@ public class QuestionIndex : IQuestionIndex
         foreach (var s in sections.EnumerateArray())
         {
             var sectionId = s.GetProperty("id").GetGuid();
-            if (!s.TryGetProperty("questions", out var qs)) continue;
-            foreach (var q in qs.EnumerateArray())
+            if (!s.TryGetProperty("questionGroups", out var groups)) continue;
+            foreach (var g in groups.EnumerateArray())
             {
-                var qid = q.GetProperty("id").GetGuid();
-                var type = q.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "";
-                var opts = new HashSet<Guid>();
-                if (q.TryGetProperty("options", out var os))
-                    foreach (var o in os.EnumerateArray())
-                        if (o.TryGetProperty("id", out var oid))
-                            opts.Add(oid.GetGuid());
-                map[qid] = (sectionId, type, opts);
+                if (!g.TryGetProperty("questions", out var qs)) continue;
+                foreach (var q in qs.EnumerateArray())
+                {
+                    var qid = q.GetProperty("id").GetGuid();
+                    var type = q.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "";
+                    var opts = new HashSet<Guid>();
+                    if (q.TryGetProperty("options", out var os))
+                        foreach (var o in os.EnumerateArray())
+                            if (o.TryGetProperty("id", out var oid))
+                                opts.Add(oid.GetGuid());
+                    map[qid] = (sectionId, type, opts);
+                }
             }
         }
 
@@ -79,7 +87,7 @@ public class IndexBuilder : IIndexBuilder
     {
         var map = new Dictionary<Guid, QMeta>();
         foreach (var section in exam.Sections ?? new RepeatedField<InternalDeliverySection>())
-            foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+            foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
             {
                 var optionIds = (question.Options ?? new RepeatedField<InternalDeliveryOption>())
                     .Select(x => (Guid.Parse(x.Id), x.ContentMd ?? string.Empty))
@@ -97,7 +105,7 @@ public class IndexBuilder : IIndexBuilder
     {
         var map = new Dictionary<Guid, QMeta>();
         foreach (var section in exam.Sections)
-            foreach (var question in section.Questions)
+            foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
             {
                 var optionIds = (question.Options)
                     .Select(x => (x.Id, x.ContentMd))
@@ -133,7 +141,7 @@ public class AnswerKeyBuilder(IAnswerValidator answerValidator) : IAnswerKeyBuil
         decimal total = 0;
         foreach (var section in exam.Sections ?? new RepeatedField<InternalDeliverySection>())
         {
-            foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+            foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
             {
                 var type = question.Type ?? string.Empty;
                 HashSet<(Guid id, string content)>? correct = null;
@@ -192,7 +200,7 @@ public class AnswerKeyBuilder(IAnswerValidator answerValidator) : IAnswerKeyBuil
         decimal total = 0m;
         foreach (var section in exam.Sections ?? [])
         {
-            foreach (var question in section.Questions ?? [])
+            foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
             {
                 var type = question.Type ?? string.Empty;
                 HashSet<(Guid id, string content)>? correct = null;

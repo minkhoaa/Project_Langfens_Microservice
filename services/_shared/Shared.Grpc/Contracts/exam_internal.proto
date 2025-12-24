@@ -24,10 +24,19 @@ message InternalDeliverySection {
   int32 idx = 2;
   string title = 3;
   string instructions_md = 4;
-  string passage_md = 8;       // Reading passage text (separate from instructions)
-  repeated InternalDeliveryQuestion questions = 5;
+  string passage_md = 5;       // Reading passage text (separate from instructions)
   string audio_url = 6;
   string transcript_md = 7;
+  repeated InternalDeliveryQuestionGroup question_groups = 8;  // Questions are inside groups now
+}
+
+message InternalDeliveryQuestionGroup {
+  string id = 1;
+  int32 idx = 2;
+  int32 start_idx = 3;         // First question index in this group
+  int32 end_idx = 4;           // Last question index in this group
+  string instruction_md = 5;   // Group-specific instruction
+  repeated InternalDeliveryQuestion questions = 6;
 }
 
 message InternalDeliveryQuestion {
