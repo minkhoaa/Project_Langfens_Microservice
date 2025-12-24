@@ -595,6 +595,77 @@ def normalize_with_ai(data: dict) -> Optional[dict]:
         return None
 
 
+
+# ===== IMAGE EMBEDDING UTILITIES (moved before normalize_rule_based) =====
+def embed_content_images_to_passage(passage_md: str, content_images: dict, questions: list, image_url: str = '') -> str:
+    """
+    Smart embed content images into passage_md based on classification.
+    
+    Args:
+        passage_md: Current passage markdown text
+        content_images: Dict from extract_content_images()
+        questions: List of questions to determine which images go where
+    
+    Returns:
+        Updated passage_md with embedded images
+    """
+    if not content_images:
+        return passage_md
+    
+    sections_to_add = []
+    
+    # Group questions by type to understand what images are needed
+    question_types = {}
+    for q in questions:
+        q_type = q.get('type', '')
+        q_idx = q.get('idx', 0)
+        if q_type not in question_types:
+            question_types[q_type] = []
+        question_types[q_type].append(q_idx)
+    
+    # Add question-specific images
+    question_images = content_images.get('question_images', {})
+    for q_range, urls in question_images.items():
+        if not urls:
+            continue
+        
+        # Format section header
+        sections_to_add.append(f"\n---\n\n## Images for Questions {q_range}\n")
+        for i, url in enumerate(urls):
+            sections_to_add.append(f"\n![Question {q_range} Option {chr(65+i)}]({url})\n")
+    
+    # Add diagram images if present and not already in question_images
+    diagram_images = content_images.get('diagram_images', [])
+    for url in diagram_images:
+        # Check if already added as question image
+        already_added = any(url in str(sections_to_add) for _ in [True])
+        if not already_added:
+            sections_to_add.append(f"\n---\n\n## Diagram\n\n![Diagram]({url})\n")
+    
+    # Add remaining passage images
+    passage_images = _filter_images(content_images.get('passage_images', []))
+    # Skip images that are already in image_url (cover image)
+    if image_url:
+        passage_images = [url for url in passage_images if url != image_url]
+    for url in passage_images:
+        already_added = any(url in str(sections_to_add) for _ in [True])
+        if not already_added:
+            sections_to_add.append(f"\n---\n\n![Passage Image]({url})\n")
+    
+    if sections_to_add:
+        return passage_md + '\n'.join(sections_to_add)
+    
+    return passage_md
+
+# Additional skip patterns for embedding
+_SKIP_IMAGE_PATTERNS = ['remove_format', 'Dictionary', 'highlight', 'favicon', 'icon', 'logo', 'avatar']
+
+def _filter_images(image_list):
+    """Filter out non-content images."""
+    return [url for url in image_list if not any(skip in url for skip in _SKIP_IMAGE_PATTERNS)]
+
+# ===== END IMAGE EMBEDDING UTILITIES =====
+
 def normalize_rule_based(data: dict) -> dict:
     """Enhanced rule-based normalization with auto-detection and AUTO-FIX."""
     logger.info("Using enhanced rule-based normalization")
@@ -979,73 +1050,6 @@ if __name__ == "__main__":
         print("✗ Normalize failed")
         sys.exit(1)
 
-
-def embed_content_images_to_passage(passage_md: str, content_images: dict, questions: list, image_url: str = '') -> str:
-    """
-    Smart embed content images into passage_md based on classification.
-    
-    Args:
-        passage_md: Current passage markdown text
-        content_images: Dict from extract_content_images()
-        questions: List of questions to determine which images go where
-    
-    Returns:
-        Updated passage_md with embedded images
-    """
-    if not content_images:
-        return passage_md
-    
-    sections_to_add = []
-    
-    # Group questions by type to understand what images are needed
-    question_types = {}
-    for q in questions:
-        q_type = q.get('type', '')
-        q_idx = q.get('idx', 0)
-        if q_type not in question_types:
-            question_types[q_type] = []
-        question_types[q_type].append(q_idx)
-    
-    # Add question-specific images
-    question_images = content_images.get('question_images', {})
-    for q_range, urls in question_images.items():
-        if not urls:
-            continue
-        
-        # Format section header
-        sections_to_add.append(f"\n---\n\n## Images for Questions {q_range}\n")
-        for i, url in enumerate(urls):
-            sections_to_add.append(f"\n![Question {q_range} Option {chr(65+i)}]({url})\n")
-    
-    # Add diagram images if present and not already in question_images
-    diagram_images = content_images.get('diagram_images', [])
-    for url in diagram_images:
-        # Check if already added as question image
-        already_added = any(url in str(sections_to_add) for _ in [True])
-        if not already_added:
-            sections_to_add.append(f"\n---\n\n## Diagram\n\n![Diagram]({url})\n")
-    
-    # Add remaining passage images
-    passage_images = _filter_images(content_images.get('passage_images', []))
-    # Skip images that are already in image_url (cover image)
-    if image_url:
-        passage_images = [url for url in passage_images if url != image_url]
-    for url in passage_images:
-        already_added = any(url in str(sections_to_add) for _ in [True])
-        if not already_added:
-            sections_to_add.append(f"\n---\n\n![Passage Image]({url})\n")
-    
-    if sections_to_add:
-        return passage_md + '\n'.join(sections_to_add)
-    
-    return passage_md
-
-# Additional skip patterns for embedding
-_SKIP_IMAGE_PATTERNS = ['remove_format', 'Dictionary', 'highlight', 'favicon', 'icon', 'logo', 'avatar']
-
-def _filter_images(image_list):
-    """Filter out non-content images."""
-    return [url for url in image_list if not any(skip in url for skip in _SKIP_IMAGE_PATTERNS)]
 
 
 def apply_prompt_delimiter_format(questions: list, instruction_md: str) -> list:
