@@ -12,6 +12,12 @@ public class ExamQuestion
     public Guid SectionId { get; set; }
     public ExamSection Section { get; set; } = default!;
 
+    /// <summary>
+    /// Optional reference to question group for grouped display.
+    /// </summary>
+    public Guid? GroupId { get; set; }
+    public ExamQuestionGroup? Group { get; set; }
+
     public int Idx { get; set; }
 
     // ví dụ: MULTIPLE_CHOICE_SINGLE, TRUE_FALSE_NOT_GIVEN...

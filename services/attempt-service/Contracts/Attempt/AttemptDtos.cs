@@ -22,6 +22,7 @@ public record AnswerItem(Guid QuestionId, Guid? SectionId, List<Guid>? SelectedO
 public record ResultAnswerItem(
     Guid QuestionId,
     Guid? SectionId,
+    int Idx,  // Question index for ordering
     List<Guid>? SelectedOptionIds,
     string? TextAnswer,
     bool? IsCorrect,

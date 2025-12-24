@@ -3,18 +3,21 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using exam_service.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace exam_service.Migrations
+namespace exam_service.Infrastructure.Migrations
 {
     [DbContext(typeof(ExamDbContext))]
-    partial class ExamDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251224070940_addquestiongroupLatest")]
+    partial class addquestiongroupLatest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

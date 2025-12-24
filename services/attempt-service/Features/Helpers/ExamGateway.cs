@@ -28,12 +28,14 @@ public static class GrpcSnapshotSanitizer
     {
         var clone = exam.Clone(); // protobuf có IDeepCloneable
         foreach (var sec in clone.Sections)
-        foreach (var q in sec.Questions)
+        foreach (var grp in sec.QuestionGroups)
+        foreach (var q in grp.Questions)
         foreach (var o in q.Options)
             if (o.HasIsCorrect)
                 o.ClearIsCorrect(); // unset optional bool
         foreach (var sec in clone.Sections)
-        foreach (var q in sec.Questions)
+        foreach (var grp in sec.QuestionGroups)
+        foreach (var q in grp.Questions)
         {
             q.CompletionAccepts.Clear();
             q.MatchPairs.Clear();

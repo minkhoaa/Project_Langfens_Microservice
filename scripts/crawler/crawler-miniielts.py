@@ -871,7 +871,17 @@ def _detect_type_from_options(options: list[str], select, q_idx: int, type_range
 
 
 def _extract_checkbox_questions(soup: BeautifulSoup, checkboxes, start_idx: int) -> list[dict]:
-    """Extract multiple choice multiple (checkbox) questions."""
+    """Extract multiple choice multiple (checkbox) questions.
+    
+    For "Choose TWO letters" with 5 options (A-E), this creates 2 separate questions
+    that share the same options.
+    
+    Logic:
+    - If instruction says "Choose TWO" → each checkbox group creates 2 questions
+    - If instruction says "Choose THREE" → each checkbox group creates 3 questions
+    - Checkbox name "q11" → creates Q11, Q12 for Choose TWO
+    - Checkbox name "q13" → creates Q13, Q14 for Choose TWO
+    """
     questions = []
     
     # Group checkboxes by name
@@ -893,35 +903,40 @@ def _extract_checkbox_questions(soup: BeautifulSoup, checkboxes, start_idx: int)
                     'is_correct': False
                 })
     
-    # Find the instruction for checkbox questions
-    instruction = ""
-    num_to_choose = 3  # Default
+    # Find instruction to determine num_to_choose
+    num_to_choose = 2  # Default
     for p in soup.find_all('p'):
         text = p.get_text()
         if 'Choose THREE' in text:
-            instruction = text
             num_to_choose = 3
             break
         elif 'Choose TWO' in text:
-            instruction = text
             num_to_choose = 2
             break
     
-    # Create MULTIPLE_CHOICE_MULTIPLE question for each checkbox group
-    # Extract question idx from checkbox name (e.g., q1→1, q3→3, q5→5)
+    # Create questions for each checkbox group
+    # For "q11" with Choose TWO → creates Q11 and Q12
+    # For "q13" with Choose TWO → creates Q13 and Q14
     for name, opts in checkbox_groups.items():
-        if opts:
-            # Extract idx from name like "q1", "q3", "q5"
-            idx_match = re.match(r'q(\d+)', name)
-            q_idx = int(idx_match.group(1)) if idx_match else start_idx + 1
+        if not opts:
+            continue
             
+        # Extract base idx from name like "q11"
+        idx_match = re.match(r'q(\d+)', name)
+        if not idx_match:
+            continue
+        base_idx = int(idx_match.group(1))
+        
+        # Create 'num_to_choose' questions starting from base_idx
+        for offset in range(num_to_choose):
+            q_idx = base_idx + offset
             questions.append({
                 'idx': q_idx,
                 'type': 'MULTIPLE_CHOICE_MULTIPLE',
-                'prompt': instruction if instruction else f"Choose {num_to_choose} correct options.",
+                'prompt': f"Choose {num_to_choose} correct options.",
                 'explanation': f"Select {num_to_choose} correct options. Order doesn't matter.",
-                'options': opts,
-                'num_to_choose': num_to_choose  # metadata for reference
+                'options': [dict(o) for o in opts],  # Copy options
+                'num_to_choose': num_to_choose
             })
     
     return questions

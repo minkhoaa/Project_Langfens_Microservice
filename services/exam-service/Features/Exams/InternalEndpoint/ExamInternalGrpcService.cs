@@ -23,6 +23,7 @@ public class ExamInternalGrpcService : ExamInternal.ExamInternalBase
         var exams = await _context.Exams.AsNoTracking()
             .Where(x => x.Id.ToString() == request.ExamId)
             .Include(x => x.Sections).ThenInclude(x => x.Questions).ThenInclude(x => x.Options)
+            .Include(x => x.Sections).ThenInclude(x => x.QuestionGroups)
             .FirstOrDefaultAsync(context.CancellationToken);
         if (exams == null) return null!;
         var res = ProtoHelper.MapToProto(exams, request.ShowAnswers);

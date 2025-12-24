@@ -476,7 +476,7 @@ IQuestionGraderFactory questionGraderFactory
             if (proto != null)
             {
                 foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
-                    foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+                    foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
                     {
                         var qid = Guid.Parse(question.Id);
                         skillByQuestion[qid] = question.Skill ?? "";
@@ -500,7 +500,7 @@ IQuestionGraderFactory questionGraderFactory
             else if (dto != null)
             {
                 foreach (var section in dto.Sections ?? Array.Empty<InternalExamDto.InternalDeliverySection>())
-                    foreach (var question in section.Questions ?? Array.Empty<InternalExamDto.InternalDeliveryQuestion>())
+                    foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
                     {
                         var qid = question.Id;
                         skillByQuestion[question.Id] = question.Skill ?? "";
@@ -636,15 +636,18 @@ IQuestionGraderFactory questionGraderFactory
 
         // Build skill map cho từng câu hỏi (READING/LISTENING/WRITING/...)
         var skillByQuestion = new Dictionary<Guid, string>();
+        // Build Idx map for ordering answers
+        var questionIdxMap = new Dictionary<Guid, int>();
 
         if (proto is not null)
         {
             foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
             {
-                foreach (var question in section.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+                foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
                 {
                     var qid = Guid.Parse(question.Id);
                     skillByQuestion[qid] = question.Skill ?? "";
+                    questionIdxMap[qid] = question.Idx;
                 }
             }
         }
@@ -652,9 +655,10 @@ IQuestionGraderFactory questionGraderFactory
         {
             foreach (var section in dto.Sections ?? Array.Empty<InternalExamDto.InternalDeliverySection>())
             {
-                foreach (var question in section.Questions ?? Array.Empty<InternalExamDto.InternalDeliveryQuestion>())
+                foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
                 {
                     skillByQuestion[question.Id] = question.Skill ?? "";
+                    questionIdxMap[question.Id] = question.Idx;
                 }
             }
         }
@@ -854,13 +858,16 @@ IQuestionGraderFactory questionGraderFactory
                         return new ResultAnswerItem(
                             x.QuestionId,
                             x.SectionId,
+                            questionIdxMap.TryGetValue(x.QuestionId, out var idx) ? idx : 0,
                             x.SelectedOptionIds,
                             x.TextAnswer,
                             x.IsCorrect,
                             selectedText,
                             correctText
                         );
-                    }).ToList(),
+                    })
+                    .OrderBy(a => a.Idx)
+                    .ToList(),
                     ieltsBand ?? 0m,
                     placementLevel,
                     placementBand,

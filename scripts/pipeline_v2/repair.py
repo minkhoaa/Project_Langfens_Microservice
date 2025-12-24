@@ -295,6 +295,36 @@ def repair_incorrect_question_types(data: dict, result: RepairResult) -> None:
             if '______' in prompt or '………' in prompt:
                 q['type'] = 'SUMMARY_COMPLETION'
                 result.add_repair(f"Q{idx}: Changed {q_type} → SUMMARY_COMPLETION (has blank, no options)")
+    
+    # Pattern 5: "Choose TWO/THREE letters" → MCQ_MULTIPLE
+    # Need to check instruction_md from section to detect this pattern
+    sections = data.get('sections', [])
+    instruction_md = ''
+    for sec in sections:
+        instruction_md += sec.get('instruction_md', '')
+        for g in sec.get('question_groups', []):
+            instruction_md += g.get('instruction_md', '')
+    
+    # Strip ** markdown for cleaner regex matching
+    import re
+    instruction_md_clean = re.sub(r'\*\*', '', instruction_md)
+    
+    for q in questions:
+        idx = q.get('idx')
+        q_type = q.get('type')
+        
+        # Check if this question is in a "Choose TWO/THREE" group
+        if q_type in ['MATCHING_INFORMATION', 'MULTIPLE_CHOICE_SINGLE']:
+            # Look for patterns like "Choose TWO letters" or "Choose THREE letters"
+            match = re.search(rf'Questions?\s+(\d+)-(\d+).*?Choose\s+(TWO|THREE|2|3)',
+                            instruction_md_clean, re.IGNORECASE | re.DOTALL)
+            if match:
+                start_q = int(match.group(1))
+                end_q = int(match.group(2))
+                if start_q <= idx <= end_q:
+                    if q_type != 'MULTIPLE_CHOICE_MULTIPLE':
+                        q['type'] = 'MULTIPLE_CHOICE_MULTIPLE'
+                        result.add_repair(f"Q{idx}: Changed {q_type} → MULTIPLE_CHOICE_MULTIPLE ('Choose TWO/THREE')")
 
 
 def repair_matching_paragraph_options(data: dict, result: RepairResult) -> None:
@@ -850,7 +880,508 @@ def repair_data(data: dict) -> RepairResult:
     except ImportError as e:
         pass  # Schema enforcer may not be available in all envs
     
+    # Phase 8: Add question_groups if missing (NEW SCHEMA)
+    repair_missing_question_groups(data, result)
+    
+    # Phase 9: Auto-extract images from raw HTML and embed in question groups
+    repair_extract_images_from_raw(data, result)
+    
+    # Phase 9.5: MCQ_MULTIPLE detection (must run AFTER schema enforcer!)
+    # "Choose TWO/THREE letters" questions should be MCQ_MULTIPLE
+    repair_mcq_multiple_from_instruction(data, result)
+    
+    # Phase 9.7: MATCHING_FEATURES detection from "List of People/Researchers"
+    repair_matching_features_type(data, result)
+    
+    # Phase 10: Clean garbled prompts (YESNONOT GIVEN, TRUEFALSENOT GIVEN prefixes)
+    repair_garbled_prompts(data, result)
+    
+    # Phase 11: Fix MATCHING_FEATURES instructions with list of features
+    repair_matching_features_instruction(data, result)
+    
+    # Phase 12: Normalize group types based on questions
+    repair_group_type_consistency(data, result)
+    
+    # Phase 13: Add sentences to SUMMARY/TABLE_COMPLETION instruction_md
+    repair_completion_instruction(data, result)
+    
     return result
+
+
+def repair_completion_instruction(data: dict, result: RepairResult) -> None:
+    """
+    For SUMMARY_COMPLETION and TABLE_COMPLETION questions,
+    add the full sentences with blanks to instruction_md.
+    """
+    import re
+    
+    sections = data.get('sections', [])
+    questions = data.get('questions', [])
+    
+    completion_types = {'SUMMARY_COMPLETION', 'TABLE_COMPLETION', 'SENTENCE_COMPLETION'}
+    
+    for sec in sections:
+        for g in sec.get('question_groups', []):
+            start_idx = g['start_idx']
+            end_idx = g['end_idx']
+            
+            # Get questions in this group
+            group_questions = [q for q in questions if start_idx <= q.get('idx', 0) <= end_idx]
+            
+            # Check if this is a completion type group
+            if not group_questions:
+                continue
+                
+            is_completion = any(q.get('type') in completion_types for q in group_questions)
+            
+            if not is_completion:
+                continue
+            
+            # Check if instruction_md already has sentences
+            inst = g.get('instruction_md', '')
+            
+            # If instruction already has numbered questions, skip
+            if re.search(r'\*\*\d+\.\*\*|\n\d+\.\s+', inst):
+                continue
+            
+            # Build sentences from prompts
+            sentences = []
+            for q in sorted(group_questions, key=lambda x: x.get('idx', 0)):
+                idx = q.get('idx')
+                prompt = q.get('prompt_md', '')
+                
+                if prompt:
+                    # Format: **10.** The boat crossed the lake _______.
+                    sentences.append(f"**{idx}.** {prompt}")
+            
+            if sentences:
+                # Add sentences to instruction_md
+                sentences_md = '\n\n'.join(sentences)
+                g['instruction_md'] = inst.rstrip() + f"\n\n{sentences_md}"
+                result.add_repair(f"Q{start_idx}-{end_idx}: Added {len(sentences)} sentences to instruction_md")
+
+
+def repair_garbled_prompts(data: dict, result: RepairResult) -> None:
+    """
+    Remove garbled type prefixes from prompts.
+    E.g., "YESNONOT GIVEN Statement..." → "Statement..."
+    """
+    import re
+    
+    garbled_patterns = [
+        r'^YESNONOT\s*GIVEN\s*',
+        r'^YES\s*NO\s*NOT\s*GIVEN\s*',
+        r'^TRUEFALSENOT\s*GIVEN\s*',
+        r'^TRUE\s*FALSE\s*NOT\s*GIVEN\s*',
+        r'^MATCHING\s*INFORMATION\s*',
+        r'^MATCHING\s*HEADING\s*',
+    ]
+    
+    questions = data.get('questions', [])
+    for q in questions:
+        prompt = q.get('prompt_md', '')
+        for pattern in garbled_patterns:
+            if re.match(pattern, prompt, re.IGNORECASE):
+                cleaned = re.sub(pattern, '', prompt, flags=re.IGNORECASE).strip()
+                q['prompt_md'] = cleaned
+                result.add_repair(f"Q{q['idx']}: Removed garbled prefix from prompt")
+                break
+
+
+def repair_matching_features_type(data: dict, result: RepairResult) -> None:
+    """
+    Detect MATCHING_FEATURES questions from 'List of People/Researchers' pattern.
+    Changes MATCHING_INFORMATION to MATCHING_FEATURES when appropriate.
+    """
+    import re
+    from pathlib import Path
+    
+    # Get source/item_id for cleaned text
+    source = data.get('source', data.get('_metadata', {}).get('source', ''))
+    item_id = data.get('item_id', data.get('_metadata', {}).get('item_id', ''))
+    
+    if not source or not item_id:
+        return
+    
+    cleaned_path = Path(__file__).parent.parent.parent / "data" / "cleaned" / source / f"{item_id}.txt"
+    if not cleaned_path.exists():
+        return
+    
+    cleaned_text = cleaned_path.read_text(encoding='utf-8', errors='ignore')
+    
+    # Check for "List of People/Researchers/Scientists" pattern
+    list_patterns = [
+        r'List of (People|Researchers|Scientists|Experts|Writers|Names)',
+        r'list of people below',
+    ]
+    
+    has_list_of_people = False
+    for pattern in list_patterns:
+        if re.search(pattern, cleaned_text, re.IGNORECASE):
+            has_list_of_people = True
+            break
+    
+    if not has_list_of_people:
+        return
+    
+    # Find question range by looking backwards from "Match each statement with the correct person"
+    match_stmt = re.search(r'Match each statement with the correct person', cleaned_text, re.IGNORECASE)
+    
+    start_q = None
+    end_q = None
+    
+    if match_stmt:
+        pos = match_stmt.start()
+        before_text = cleaned_text[max(0, pos-200):pos]
+        range_match = re.search(r'Questions?\s*(\d+)-(\d+)', before_text, re.IGNORECASE)
+        if range_match:
+            start_q = int(range_match.group(1))
+            end_q = int(range_match.group(2))
+    
+    if start_q is None or end_q is None:
+        # Fallback: assume last 5 questions
+        questions = data.get('questions', [])
+        if not questions:
+            return
+        max_idx = max(q.get('idx', 0) for q in questions)
+        start_q = max_idx - 4
+        end_q = max_idx
+    
+    # Change MATCHING_INFORMATION to MATCHING_FEATURES for these questions
+    questions = data.get('questions', [])
+    for q in questions:
+        idx = q.get('idx')
+        if start_q <= idx <= end_q:
+            old_type = q.get('type')
+            if old_type == 'MATCHING_INFORMATION':
+                q['type'] = 'MATCHING_FEATURES'
+                q['options'] = []  # Clear options, will be rebuilt
+                result.add_repair(f"Q{idx}: Changed MATCHING_INFORMATION → MATCHING_FEATURES (List of People)")
+
+
+def repair_matching_features_instruction(data: dict, result: RepairResult) -> None:
+    """
+    For MATCHING_FEATURES questions, ensure instruction_md has list of features.
+    Extract features from cleaned text file.
+    """
+    import re
+    from pathlib import Path
+    
+    # Check if we have MATCHING_FEATURES questions
+    questions = data.get('questions', [])
+    mf_questions = [q for q in questions if q.get('type') == 'MATCHING_FEATURES']
+    
+    if not mf_questions:
+        return
+    
+    # Get source/item_id for cleaned text
+    source = data.get('source', data.get('_metadata', {}).get('source', ''))
+    item_id = data.get('item_id', data.get('_metadata', {}).get('item_id', ''))
+    
+    if not source or not item_id:
+        return
+    
+    cleaned_path = Path(__file__).parent.parent.parent / "data" / "cleaned" / source / f"{item_id}.txt"
+    if not cleaned_path.exists():
+        return
+    
+    cleaned_text = cleaned_path.read_text(encoding='utf-8', errors='ignore')
+    
+    # Find "List of People" or similar section
+    list_patterns = [
+        r'List of People\s*\n(.*?)(?:---End|\Z)',
+        r'List of (People|Researchers|Scientists|Experts|Writers)\s*\n(.*?)(?:---End|\Z)',
+    ]
+    
+    features = {}
+    for pattern in list_patterns:
+        match = re.search(pattern, cleaned_text, re.DOTALL | re.IGNORECASE)
+        if match:
+            content = match.group(1) if match.lastindex == 1 else match.group(2)
+            
+            # Pattern: "A\nName\nB\nName2\n..."
+            lines = content.strip().split('\n')
+            current_letter = None
+            for line in lines:
+                line = line.strip()
+                if re.match(r'^[A-E]$', line):
+                    current_letter = line
+                elif current_letter and len(line) > 2 and line[0].isupper():
+                    # This is a name
+                    features[current_letter] = line
+                    current_letter = None
+            break
+    
+    if not features:
+        # Try alternative: look for pattern in entire text
+        # Pattern: single letter followed by name on next line within List of People section
+        lop_match = re.search(r'List of People.*?---End', cleaned_text, re.DOTALL | re.IGNORECASE)
+        if lop_match:
+            lop_content = lop_match.group(0)
+            for letter in 'ABCDE':
+                # Find "A\nName" pattern
+                name_match = re.search(rf'{letter}\s*\n\s*([A-Z][a-z][\w\s\.]+)', lop_content)
+                if name_match:
+                    name = name_match.group(1).strip().split('\n')[0]
+                    if len(name) > 2 and len(name) < 50:
+                        features[letter] = name
+    
+    if features and len(features) >= 3:
+        # Build instruction_md with features list
+        start_idx = min(q['idx'] for q in mf_questions)
+        end_idx = max(q['idx'] for q in mf_questions)
+        
+        sorted_features = sorted(features.items())
+        first_letter = sorted_features[0][0]
+        last_letter = sorted_features[-1][0]
+        feature_lines = '\n'.join([f"- **{k}** {v}" for k, v in sorted_features])
+        
+        new_instruction = f"""## Questions {start_idx}-{end_idx}
+
+Look at the following statements (Questions {start_idx}-{end_idx}) and the list of people below.
+
+Match each statement with the correct person, **{first_letter}-{last_letter}**.
+
+Write the correct letter **{first_letter}-{last_letter}**.
+
+**NB** You may use any letter more than once.
+
+### List of People:
+{feature_lines}
+"""
+        
+        # Update question group instruction
+        sections = data.get('sections', [])
+        for sec in sections:
+            for g in sec.get('question_groups', []):
+                if g['start_idx'] == start_idx:
+                    existing = g.get('instruction_md', '')
+                    # Always update for MATCHING_FEATURES if current instruction doesn't have list
+                    if '### List of' not in existing:
+                        g['instruction_md'] = new_instruction
+                        result.add_repair(f"Q{start_idx}-{end_idx}: Added list of people to instruction")
+
+
+def repair_group_type_consistency(data: dict, result: RepairResult) -> None:
+    """
+    Ensure all questions in a group have consistent type.
+    If instruction says YES_NO_NOT_GIVEN, all questions should match.
+    """
+    import re
+    
+    sections = data.get('sections', [])
+    questions = data.get('questions', [])
+    
+    for sec in sections:
+        instruction = sec.get('instruction_md', '')
+        for g in sec.get('question_groups', []):
+            g_inst = g.get('instruction_md', '')
+            combined = instruction + g_inst
+            
+            # Detect expected type from instruction
+            expected_type = None
+            if re.search(r'views?\s*of\s*the\s*writer|claims?\s*of\s*the\s*writer', combined, re.IGNORECASE):
+                expected_type = 'YES_NO_NOT_GIVEN'
+            elif re.search(r'agree\s*with\s*the\s*information', combined, re.IGNORECASE):
+                expected_type = 'TRUE_FALSE_NOT_GIVEN'
+            
+            if expected_type:
+                for q in questions:
+                    idx = q.get('idx')
+                    if g['start_idx'] <= idx <= g['end_idx']:
+                        old_type = q.get('type')
+                        if old_type != expected_type and old_type in ['TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN']:
+                            q['type'] = expected_type
+                            # Update options if needed
+                            if expected_type == 'YES_NO_NOT_GIVEN':
+                                q['options'] = [
+                                    {"id": "opt-yes", "idx": 1, "contentMd": "YES", "isCorrect": False},
+                                    {"id": "opt-no", "idx": 2, "contentMd": "NO", "isCorrect": False},
+                                    {"id": "opt-ng", "idx": 3, "contentMd": "NOT GIVEN", "isCorrect": False},
+                                ]
+                            else:
+                                q['options'] = [
+                                    {"id": "opt-true", "idx": 1, "contentMd": "TRUE", "isCorrect": False},
+                                    {"id": "opt-false", "idx": 2, "contentMd": "FALSE", "isCorrect": False},
+                                    {"id": "opt-ng", "idx": 3, "contentMd": "NOT GIVEN", "isCorrect": False},
+                                ]
+                            # Mark correct answer
+                            ans = q.get('correct_answers', [])
+                            if ans:
+                                for opt in q['options']:
+                                    if opt['contentMd'] == ans[0]:
+                                        opt['isCorrect'] = True
+                            result.add_repair(f"Q{idx}: Changed {old_type} → {expected_type}")
+
+
+def repair_mcq_multiple_from_instruction(data: dict, result: RepairResult) -> None:
+    """
+    Detect 'Choose TWO/THREE letters' questions and set type to MCQ_MULTIPLE.
+    Must run AFTER schema_enforcer to prevent type override.
+    """
+    import re
+    
+    questions = data.get('questions', [])
+    sections = data.get('sections', [])
+    
+    # Collect all instruction_md content
+    instruction_md = ''
+    for sec in sections:
+        instruction_md += sec.get('instruction_md', '')
+        for g in sec.get('question_groups', []):
+            instruction_md += g.get('instruction_md', '')
+    
+    # Strip ** markdown for cleaner regex matching
+    instruction_md_clean = re.sub(r'\*\*', '', instruction_md)
+    
+    # Find "Choose TWO/THREE" patterns - match only within same block (max 150 chars between header and Choose)
+    # This prevents matching Q1-4 header with Choose TWO from Q11-13
+    pattern = r'Questions?\s+(\d+)[-–](\d+)[^\n]{0,50}\n[^\n]{0,100}Choose\s+(TWO|THREE|2|3)'
+    
+    for match in re.finditer(pattern, instruction_md_clean, re.IGNORECASE):
+        start_q = int(match.group(1))
+        end_q = int(match.group(2))
+        
+        for q in questions:
+            idx = q.get('idx')
+            if start_q <= idx <= end_q:
+                old_type = q.get('type')
+                if old_type != 'MULTIPLE_CHOICE_MULTIPLE':
+                    q['type'] = 'MULTIPLE_CHOICE_MULTIPLE'
+                    result.add_repair(f"Q{idx}: {old_type} → MULTIPLE_CHOICE_MULTIPLE ('Choose TWO/THREE')")
+
+
+def repair_missing_question_groups(data: dict, result: RepairResult) -> None:
+    """
+    Add question_groups to sections if missing.
+    Uses auto_question_groups module for detection.
+    """
+    try:
+        from auto_question_groups import detect_question_groups
+    except ImportError:
+        return
+    
+    sections = data.get('sections', [])
+    questions = data.get('questions', [])
+    
+    for sec in sections:
+        if sec.get('question_groups'):
+            continue  # Already has groups
+        
+        instruction_md = sec.get('instruction_md', '')
+        groups = detect_question_groups(questions, instruction_md)
+        
+        if groups:
+            sec['question_groups'] = groups
+            result.add_repair(f"Added {len(groups)} question_groups to section")
+
+
+def repair_extract_images_from_raw(data: dict, result: RepairResult) -> None:
+    """
+    Auto-extract ALL images from raw HTML and embed in appropriate places.
+    
+    Improvements:
+    - Extract ALL mini-ielts.com images (not just diagrams)
+    - Add main exam image to section.image_url
+    - Embed relevant images in instruction_md
+    - Fix instruction_md format (Questions X-Y:** → ## Questions X-Y)
+    """
+    import re
+    
+    # Get source/item_id for finding raw HTML
+    source = data.get('source', data.get('_metadata', {}).get('source', ''))
+    item_id = data.get('item_id', data.get('_metadata', {}).get('item_id', ''))
+    
+    if not source or not item_id:
+        return
+    
+    # Find raw HTML
+    raw_path = Path(__file__).parent.parent.parent / "data" / "raw" / source / f"{item_id}.html"
+    if not raw_path.exists():
+        return
+    
+    raw_html = raw_path.read_text(encoding='utf-8', errors='ignore')
+    
+    # Extract ALL images from HTML (broader patterns)
+    image_patterns = [
+        r'src="(https?://images\.mini-ielts\.com/images/[^"]+)"',  # All mini-ielts images
+        r'src="(https?://[^"]+\.(?:png|jpg|jpeg|gif))"',           # Generic images
+    ]
+    
+    # Exclude patterns (toolbar icons, etc.) - be careful not to exclude legit content images
+    exclude_patterns = ['highlight', 'icon', 'favicon', 'Dictionary', 'remove_format', 
+                       'button', 'logo', 'banner', 'ad-', 'pagead', 'googlesyndication']
+    
+    all_images = []
+    for pattern in image_patterns:
+        matches = re.findall(pattern, raw_html, re.IGNORECASE)
+        for url in matches:
+            url = url if isinstance(url, str) else url[0]  # Handle tuple from groups
+            if not any(exc.lower() in url.lower() for exc in exclude_patterns):
+                if url not in all_images:
+                    all_images.append(url)
+    
+    if not all_images:
+        return
+    
+    logger.info(f"Found {len(all_images)} images in raw HTML: {[u[:40] for u in all_images[:3]]}")
+    
+    # Separate main image from content images
+    main_image = None
+    content_images = []
+    for img in all_images:
+        # Main image usually has exam ID or is first large image
+        if 'resized' in img.lower() or '_resized' in img or item_id.split('-')[0] in img:
+            main_image = img
+        else:
+            content_images.append(img)
+    
+    if not main_image and all_images:
+        main_image = all_images[0]
+        content_images = all_images[1:]
+    
+    # Add main image to section
+    sections = data.get('sections', [])
+    if main_image and sections:
+        for sec in sections:
+            if not sec.get('image_url'):
+                sec['image_url'] = main_image
+                result.add_repair(f"Added main image to section: {main_image[:50]}...")
+    
+    # Fix instruction_md format and embed images
+    for sec in sections:
+        for g in sec.get('question_groups', []):
+            inst = g.get('instruction_md', '')
+            
+            # Fix format: "Questions 1-4:**" → "## Questions 1-4"
+            inst = re.sub(r'Questions?\s+(\d+-\d+):\s*\*\*', r'## Questions \1\n', inst)
+            inst = re.sub(r'\*\*\s*$', '', inst)  # Remove trailing **
+            inst = re.sub(r'^Questions?\s+(\d+-\d+):', r'## Questions \1', inst, flags=re.MULTILINE)
+            
+            # If no ## heading, add one
+            if not inst.startswith('##') and not inst.startswith('#'):
+                inst = f"## Questions {g['start_idx']}-{g['end_idx']}\n\n{inst}"
+            
+            g['instruction_md'] = inst
+            
+            # Embed images for groups that need them
+            # Include COMPLETION groups as they often have diagrams/tables
+            needs_image = (
+                'diagram' in inst.lower() or 
+                'map' in inst.lower() or 
+                'flowchart' in inst.lower() or
+                'flow chart' in inst.lower() or
+                'label' in inst.lower() or
+                'picture' in inst.lower() or
+                'figure' in inst.lower() or
+                'complete the' in inst.lower()  # SUMMARY/SENTENCE COMPLETION often have diagrams
+            )
+            has_image = '![' in inst
+            
+            if needs_image and not has_image and content_images:
+                img_url = content_images.pop(0)
+                g['instruction_md'] = inst + f"\n\n![Diagram]({img_url})"
+                result.add_repair(f"Added diagram to Q{g['start_idx']}-{g['end_idx']}")
 
 
 def repair_placeholder_prompts(data: dict, result: RepairResult) -> None:

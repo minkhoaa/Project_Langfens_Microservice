@@ -36,72 +36,125 @@ public static class ProtoHelper
                 Title = sec.Title ?? string.Empty
             };
 
-            foreach (var q in sec.Questions.OrderBy(q => q.Idx))
+            // Map QuestionGroups (questions are only inside groups now)
+            if (sec.QuestionGroups != null && sec.QuestionGroups.Any())
             {
-                var pQ = new InternalDeliveryQuestion
+                foreach (var grp in sec.QuestionGroups.OrderBy(g => g.Idx))
                 {
-                    Id = q.Id.ToString(),
-                    Idx = q.Idx,
-                    ExplanationMd = showAnswers ? q.ExplanationMd ?? string.Empty : string.Empty,
-                    Difficulty = q.Difficulty,
-                    PromptMd = q.PromptMd ?? string.Empty,
-                    Skill = q.Skill ?? string.Empty,
-                    Type = q.Type ?? string.Empty
-                };
-
-                var flowChartNodes = BuildFlowChartNodes(q.OrderCorrects);
-                if (flowChartNodes.Count > 0)
-                    pQ.FlowChartNodes.AddRange(flowChartNodes);
-
-                foreach (var opt in q.Options.OrderBy(o => o.Idx))
-                {
-                    var pOpt = new InternalDeliveryOption
+                    var pGrp = new InternalDeliveryQuestionGroup
                     {
-                        Id = opt.Id.ToString(),
-                        Idx = opt.Idx,
-                        ContentMd = opt.ContentMd ?? string.Empty
+                        Id = grp.Id.ToString(),
+                        Idx = grp.Idx,
+                        StartIdx = grp.StartIdx,
+                        EndIdx = grp.EndIdx,
+                        InstructionMd = grp.InstructionMd ?? string.Empty
                     };
-                    if (showAnswers) pOpt.IsCorrect = opt.IsCorrect;
-                    pQ.Options.Add(pOpt); // ✅ add vào proto-question
+                    
+                    // Get questions for this group from section.Questions by Idx range
+                    var groupQuestions = sec.Questions
+                        .Where(q => q.Idx >= grp.StartIdx && q.Idx <= grp.EndIdx)
+                        .OrderBy(q => q.Idx);
+                    
+                    foreach (var q in groupQuestions)
+                    {
+                        var pQ = MapQuestionToProto(q, showAnswers);
+                        pGrp.Questions.Add(pQ);
+                    }
+                    
+                    pSec.QuestionGroups.Add(pGrp);
                 }
-                if (showAnswers)
+            }
+            else
+            {
+                // Fallback: If no QuestionGroups, create one default group with all questions
+                var defaultGrp = new InternalDeliveryQuestionGroup
                 {
-                    var textMap = q.BlankAcceptTexts ?? new Dictionary<string, string[]?>();
-                    var regexMap = q.BlankAcceptRegex ?? new Dictionary<string, string[]?>();
-                    foreach (var blank in textMap.Keys.Union(regexMap.Keys, StringComparer.OrdinalIgnoreCase))
-                    {
-                        var accept = new InternalCompletionAccept { BlankId = blank };
-                        if (textMap.TryGetValue(blank, out var texts) && texts is { Length: > 0 })
-                            accept.AcceptedTexts.AddRange(texts);
-                        if (regexMap.TryGetValue(blank, out var regs) && regs is { Length: > 0 })
-                            accept.AcceptedRegex.AddRange(regs);
-                        if (accept.AcceptedTexts.Count > 0 || accept.AcceptedRegex.Count > 0)
-                            pQ.CompletionAccepts.Add(accept);
-                    }
-
-                    foreach (var pair in q.MatchPairs ?? new Dictionary<string, string[]?>())
-                    {
-                        if (string.IsNullOrWhiteSpace(pair.Key) || pair.Value is not { Length: > 0 }) continue;
-                        var mp = new InternalMatchPair { PromptKey = pair.Key };
-                        mp.AcceptedValues.AddRange(pair.Value);
-                        pQ.MatchPairs.Add(mp);
-                    }
-
-                    if (q.OrderCorrects is { Count: > 0 })
-                        pQ.OrderCorrects.AddRange(q.OrderCorrects.Where(x => !string.IsNullOrWhiteSpace(x)));
-                    if (q.ShortAnswerAcceptTexts is { Count: > 0 })
-                        pQ.ShortAnswerAcceptTexts.AddRange(q.ShortAnswerAcceptTexts.Where(x => !string.IsNullOrWhiteSpace(x)));
-                    if (q.ShortAnswerAcceptRegex is { Count: > 0 })
-                        pQ.ShortAnswerAcceptRegex.AddRange(q.ShortAnswerAcceptRegex.Where(x => !string.IsNullOrWhiteSpace(x)));
+                    Id = Guid.NewGuid().ToString(),
+                    Idx = 1,
+                    StartIdx = 1,
+                    EndIdx = sec.Questions.Any() ? sec.Questions.Max(q => q.Idx) : 0,
+                    InstructionMd = sec.InstructionsMd ?? string.Empty
+                };
+                
+                foreach (var q in sec.Questions.OrderBy(q => q.Idx))
+                {
+                    var pQ = MapQuestionToProto(q, showAnswers);
+                    defaultGrp.Questions.Add(pQ);
                 }
-
-                pSec.Questions.Add(pQ); // ✅ add vào proto-section
+                
+                if (defaultGrp.Questions.Count > 0)
+                {
+                    pSec.QuestionGroups.Add(defaultGrp);
+                }
             }
 
             proto.Sections.Add(pSec); // ✅ add vào proto-exam
         }
 
         return proto;
+    }
+
+    private static InternalDeliveryQuestion MapQuestionToProto(Domains.Entities.ExamQuestion q, bool showAnswers)
+    {
+        var pQ = new InternalDeliveryQuestion
+        {
+            Id = q.Id.ToString(),
+            Idx = q.Idx,
+            ExplanationMd = showAnswers ? q.ExplanationMd ?? string.Empty : string.Empty,
+            Difficulty = q.Difficulty,
+            PromptMd = q.PromptMd ?? string.Empty,
+            Skill = q.Skill ?? string.Empty,
+            Type = q.Type ?? string.Empty
+        };
+
+        var flowChartNodes = BuildFlowChartNodes(q.OrderCorrects);
+        if (flowChartNodes.Count > 0)
+            pQ.FlowChartNodes.AddRange(flowChartNodes);
+
+        foreach (var opt in q.Options.OrderBy(o => o.Idx))
+        {
+            var pOpt = new InternalDeliveryOption
+            {
+                Id = opt.Id.ToString(),
+                Idx = opt.Idx,
+                ContentMd = opt.ContentMd ?? string.Empty
+            };
+            if (showAnswers) pOpt.IsCorrect = opt.IsCorrect;
+            pQ.Options.Add(pOpt);
+        }
+        
+        if (showAnswers)
+        {
+            var textMap = q.BlankAcceptTexts ?? new Dictionary<string, string[]?>();
+            var regexMap = q.BlankAcceptRegex ?? new Dictionary<string, string[]?>();
+            foreach (var blank in textMap.Keys.Union(regexMap.Keys, StringComparer.OrdinalIgnoreCase))
+            {
+                var accept = new InternalCompletionAccept { BlankId = blank };
+                if (textMap.TryGetValue(blank, out var texts) && texts is { Length: > 0 })
+                    accept.AcceptedTexts.AddRange(texts);
+                if (regexMap.TryGetValue(blank, out var regs) && regs is { Length: > 0 })
+                    accept.AcceptedRegex.AddRange(regs);
+                if (accept.AcceptedTexts.Count > 0 || accept.AcceptedRegex.Count > 0)
+                    pQ.CompletionAccepts.Add(accept);
+            }
+
+            foreach (var pair in q.MatchPairs ?? new Dictionary<string, string[]?>())
+            {
+                if (string.IsNullOrWhiteSpace(pair.Key) || pair.Value is not { Length: > 0 }) continue;
+                var mp = new InternalMatchPair { PromptKey = pair.Key };
+                mp.AcceptedValues.AddRange(pair.Value);
+                pQ.MatchPairs.Add(mp);
+            }
+
+            if (q.OrderCorrects is { Count: > 0 })
+                pQ.OrderCorrects.AddRange(q.OrderCorrects.Where(x => !string.IsNullOrWhiteSpace(x)));
+            if (q.ShortAnswerAcceptTexts is { Count: > 0 })
+                pQ.ShortAnswerAcceptTexts.AddRange(q.ShortAnswerAcceptTexts.Where(x => !string.IsNullOrWhiteSpace(x)));
+            if (q.ShortAnswerAcceptRegex is { Count: > 0 })
+                pQ.ShortAnswerAcceptRegex.AddRange(q.ShortAnswerAcceptRegex.Where(x => !string.IsNullOrWhiteSpace(x)));
+        }
+
+        return pQ;
     }
 
     private static List<FlowChartNode> BuildFlowChartNodes(IReadOnlyCollection<string>? orderCorrects)

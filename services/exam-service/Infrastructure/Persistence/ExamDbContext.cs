@@ -12,6 +12,7 @@ public class ExamDbContext : DbContext
     public DbSet<Exam> Exams => Set<Exam>();
     public DbSet<ExamSection> ExamSections => Set<ExamSection>();
     public DbSet<ExamQuestion> ExamQuestions => Set<ExamQuestion>();
+    public DbSet<ExamQuestionGroup> ExamQuestionGroups => Set<ExamQuestionGroup>();
     public DbSet<ExamOption> ExamOptions => Set<ExamOption>();
 
     protected override void OnModelCreating(ModelBuilder mb)
@@ -58,6 +59,25 @@ public class ExamDbContext : DbContext
 
             e.HasOne(x => x.Section)
                 .WithMany(x => x.Questions)
+                .HasForeignKey(x => x.SectionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+
+            e.HasOne(x => x.Group)
+                .WithMany(x => x.Questions)
+                .HasForeignKey(x => x.GroupId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+        });
+        mb.Entity<ExamQuestionGroup>(e =>
+        {
+            e.ToTable("exam_question_groups");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.InstructionMd).IsRequired();
+            e.HasIndex(x => new { x.SectionId, x.Idx });
+
+            e.HasOne(x => x.Section)
+                .WithMany(x => x.QuestionGroups)
                 .HasForeignKey(x => x.SectionId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
