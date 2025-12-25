@@ -32,7 +32,7 @@ seed_exams() {
   done
   echo ""
 
-  # Apply each SQL file individually for better error reporting
+  # Apply each SQL file using docker exec for cross-platform compatibility
   for seed_file in "${exam_seeds[@]}"; do
     if [[ ! -f "${seed_file}" ]]; then
       echo "Missing exam seed file: ${seed_file}" >&2
@@ -40,7 +40,9 @@ seed_exams() {
     fi
     
     echo "Applying: $(basename "${seed_file}")..."
-    PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "${seed_file}" 2>&1 \
+    # Use docker exec to run psql inside the container (works on Windows/Linux/Mac)
+    docker compose -f "${COMPOSE_FILE}" exec -T exam-database \
+      psql -U exam -d exam-db < "${seed_file}" 2>&1 \
       | grep -E "^(BEGIN|COMMIT|DO|INSERT|DELETE|ERROR|psql:)" || true
   done
   
