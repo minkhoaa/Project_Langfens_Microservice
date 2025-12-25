@@ -379,9 +379,15 @@ def check_content_completeness(questions: list, sections: list, result: Invarian
             label = opt.get('label', '')
             
             # Check for placeholder or empty text
-            if not text:
+            # SKIP check for YES/NO/NG and TRUE/FALSE/NG because label is the text
+            is_fixed_label = q.get('type') in ['TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN']
+            
+            if is_fixed_label and text:
+                 result.add_violation(f"Q{idx}: {q.get('type')} option {label} should NOT have 'text' field (causes duplicate display)")
+
+            if not text and not is_fixed_label:
                 result.add_warning(f"Q{idx}: option {label} has empty text")
-            elif text.lower() in ['option a', 'option b', 'option c', 'option d', 'option e']:
+            elif text and text.lower() in ['option a', 'option b', 'option c', 'option d', 'option e']:
                 result.add_warning(f"Q{idx}: option {label} has placeholder text '{text}'")
     
     # Check 4: MATCHING_HEADING should have heading text in options

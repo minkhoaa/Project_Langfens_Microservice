@@ -175,3 +175,60 @@ Choose **NO MORE THAN TWO WORDS** from the passage.
 - `@[/ielts-data-format]` - Strict JSON schemas
 - `@[/hints]` - All question types reference
 
+---
+
+## 📤 OUTPUT FORMAT (MANDATORY)
+
+> [!IMPORTANT]
+> Khi pipeline hoàn thành, **LUÔN** output theo format sau:
+
+### Completion Template:
+```markdown
+## ✅ Pipeline Complete: [EXAM_TITLE]
+
+**All 14 steps completed successfully!**
+
+### Summary
+- **URL:** [URL]
+- **Questions:** [COUNT] ([Question distribution])
+- **Database Slug:** [SLUG]
+
+### Key Fixes Applied
+1. [Fix 1]
+2. [Fix 2]
+3. [Fix 3]
+
+### Validation Results
+- ✅/❌ Gemini POST: [STATUS]
+- ✅/❌ Codex VALIDATE: [STATUS]
+- ✅/❌ Invariants: [STATUS]
+- ✅/❌ Database: [STATUS]
+
+Exam is now available in the database and ready for testing!
+```
+
+### Required Fields:
+| Field | Description |
+|-------|-------------|
+| `EXAM_TITLE` | Title từ URL (human readable) |
+| `URL` | Original URL |
+| `COUNT` | Total questions |
+| `Question distribution` | VD: "Q1-4 diagram, Q5-9 MCQ, Q10-13 summary" |
+| `SLUG` | Database slug (e.g. `mini-ielts-reading-xxx`) |
+| `Key Fixes` | List các fix đã apply (nếu không có fix thì ghi "No fixes needed") |
+| `Validation Results` | Status của 4 checks: Gemini, Codex, Invariants, Database |
+
+### Error Template (nếu pipeline fail):
+```markdown
+## ❌ Pipeline Failed: [EXAM_TITLE]
+
+**Failed at Step [N]:** [STEP_NAME]
+
+### Error Details
+[Error description]
+
+### Suggested Actions
+1. [Action 1]
+2. [Action 2]
+```
+

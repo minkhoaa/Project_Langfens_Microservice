@@ -113,9 +113,11 @@ def process_json(source: str, item_id: str):
                 section['image_url'] = new_url
                 changed = True
         
-        # Images in passage_md
-        if section.get('passage_md'):
-            passage = section['passage_md']
+        # Helper to replace images in any markdown text
+        def replace_images_in_text(text: str) -> str:
+            if not text:
+                return text
+            nonlocal changed
             img_pattern = r'!\[([^\]]*)\]\(([^)]+)\)'
             
             def replace_img(match):
@@ -127,7 +129,25 @@ def process_json(source: str, item_id: str):
                     changed = True
                 return f'![{alt}]({new_url})'
             
-            section['passage_md'] = re.sub(img_pattern, replace_img, passage)
+            return re.sub(img_pattern, replace_img, text)
+
+        # 1. Sections: passage_md, instruction_md, group instructions
+        if section.get('passage_md'):
+            section['passage_md'] = replace_images_in_text(section['passage_md'])
+            
+        if section.get('instruction_md'):
+            section['instruction_md'] = replace_images_in_text(section['instruction_md'])
+            
+        for group in section.get('question_groups', []):
+            if group.get('instruction_md'):
+                group['instruction_md'] = replace_images_in_text(group['instruction_md'])
+
+    # 3. Questions: prompt_md, explanation_md
+    for q in data.get('questions', []):
+        if q.get('prompt_md'):
+            q['prompt_md'] = replace_images_in_text(q['prompt_md'])
+        if q.get('explanation_md'):
+            q['explanation_md'] = replace_images_in_text(q['explanation_md'])
     
     if changed:
         json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))

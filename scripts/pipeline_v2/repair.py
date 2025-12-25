@@ -133,6 +133,34 @@ def repair_known_fixes(data: dict, result: RepairResult) -> None:
                 result.add_repair(f"Q{idx}: Applied known fix: {fixes[idx]}")
 
 
+def repair_remove_audio_for_reading(data: dict, result: RepairResult) -> None:
+    """
+    Remove audio_url from Reading exams to prevent misdetection as Listening.
+    
+    Mini-ielts pages sometimes have YouTube links for pronunciation guides
+    even for Reading exams. This causes export.py to generate 'listening' slug.
+    
+    Detection: If original URL contains '/reading/', remove audio_url.
+    """
+    metadata = data.get('_metadata', {})
+    url = metadata.get('url', '')
+    
+    # Only process if URL indicates this is a Reading exam
+    if '/reading/' not in url.lower():
+        return
+    
+    # Remove audio_url from exam
+    exam = data.get('exam', {})
+    if exam.get('audio_url'):
+        del exam['audio_url']
+        result.add_repair(f"Removed audio_url from Reading exam (detected from URL)")
+    
+    # Remove audio_url from sections
+    for sec in data.get('sections', []):
+        if sec.get('audio_url'):
+            del sec['audio_url']
+            result.add_repair(f"Removed audio_url from section (Reading exam)")
+
 def repair_missing_slug(data: dict, result: RepairResult) -> None:
     """Auto-generate slug if missing."""
     exam = data.get('exam', {})
@@ -834,6 +862,9 @@ def repair_passage_from_html(data: dict, result: RepairResult) -> None:
 def repair_data(data: dict) -> RepairResult:
     """Run all auto-repair functions."""
     result = RepairResult()
+    
+    # Phase 0: Fix skill detection - remove audio_url for Reading exams
+    repair_remove_audio_for_reading(data, result)
     
     # Phase 1: Structural repairs + known fixes
     repair_missing_slug(data, result)
