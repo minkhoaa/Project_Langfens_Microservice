@@ -102,81 +102,122 @@ PGPASSWORD=exam psql -h localhost -p 5433 -U exam -d exam-db -f "deploy/seeds/se
 
 ## 📋 LISTENING RULES
 
-### Audio:
-- Format: `https://www.youtube.com/embed/VIDEO_ID`
-- Field: `audio_url` in exam metadata (BẮT BUỘC)
-
-### passage_md Format (TRANSCRIPT/NOTES ONLY):
-```markdown
-# Title
-
-**Section 1:** Transcript content...
-
-**Section 2:** More content...
-```
-
-### instruction_md Format (FULL QUESTION DETAILS):
-```markdown
-## QUESTIONS 1-6
-
-Complete the notes below.
-Write **NO MORE THAN TWO WORDS** for each answer.
-
-**1.** Location: _______
-**2.** Name: _______
-**3.** Date: _______
-
----
-
-## QUESTIONS 7-10
-
-Label the map below.
-Choose **FOUR** answers from the box.
-
-![Map](https://cloudinary.com/xxx/map.jpg)
-
-### Options:
-- **A** bicycle parking
-- **B** drinks machine
-
-**7.** Location 7: _______
-**8.** Location 8: _______
-```
-
 > [!IMPORTANT]
-> **KHÔNG merge instruction_md vào passage_md!**
+> **Listening pipeline GIỐNG HỆT Reading pipeline, chỉ khác `audioUrl`!**
 > 
-> - `passage_md`: Transcript/notes only
-> - `instruction_md`: Full question details với maps, diagrams, options
-> - Frontend hiển thị `instruction_md` (bên trái, sau passage)
+> - Cùng database schema (`exams`, `exam_sections`, `exam_questions`, `exam_question_groups`)
+> - Cùng cách hiển thị `instructionMd` theo từng `questionGroup`
+> - Cùng format cho `passageMd`, `instructionMd`, `options`, `matchPairs`
 
-### Key Rules:
+### Audio (KHÁC Reading):
+- Format: `https://www.youtube.com/embed/VIDEO_ID`
+- Field: `audio_url` in section metadata (BẮT BUỘC)
+
+### Data Structure (GIỐNG Reading):
 | Field | Content |
 |-------|---------|
-| `passage_md` | Transcript/notes only |
-| `instruction_md` | Full: headings, options, maps, diagrams |
-| `audio_url` | YouTube embed URL (BẮT BUỘC) |
+| `passage_md` | Transcript/notes |
+| `instruction_md` | Full: headings, questions, options, maps |
+| `questionGroups` | Groups với `startIdx`, `endIdx`, `instructionMd` |
+| `audio_url` | YouTube embed URL (LISTENING ONLY) |
 | Passage length | ≥ 100 words |
 
 ### instruction_md MUST include:
 - Question group headings (`## QUESTIONS 1-6`)
 - Full instruction text (từ source)
 - Options list (A, B, C...) nếu có
-- Maps/diagrams nếu có (`![](cloudinary_url)`)
+- Maps/diagrams với Cloudinary URL (`![Map](cloudinary_url)`)
 - Blanks với số thứ tự
+
+### questionGroups Structure (CRITICAL):
+```json
+{
+  "idx": 1,
+  "start_idx": 1,
+  "end_idx": 4,
+  "instruction_md": "## Questions 1-4\n\n![Map](https://res.cloudinary.com/...)\n\n### Options:\n- **A** Location A\n..."
+}
+```
+
+> [!IMPORTANT]
+> **MỖI questionGroup PHẢI có đầy đủ:**
+> - `instruction_md` với full text
+> - Cloudinary images (NOT external URLs)
+> - Options list nếu là map/matching questions
 
 ### Common Fixes:
 | Issue | Fix |
 |-------|-----|
 | instruction_md quá ngắn | Extract đầy đủ từ source |
-| Missing map/diagram | Add `![](cloudinary_url)` |
+| Missing map in questionGroup | Add `![](cloudinary_url)` vào `question_groups[].instruction_md` |
+| External image URL (timeout) | Upload to Cloudinary, update URL |
 | MAP_LABEL type | Convert to `MATCHING_INFORMATION` |
 | Choose TWO | Use `MULTIPLE_CHOICE_MULTIPLE` |
 | Missing audio | Extract from iframe |
+| questionGroups missing images | Run Cloudinary upload AFTER questionGroups created |
 
 ---
 
 ## 🔗 RELATED
 - `@[/ielts-data-format]` - Strict JSON schemas
 - `@[/hints]` - All question types reference
+
+---
+
+## 📤 OUTPUT FORMAT (MANDATORY)
+
+> [!IMPORTANT]
+> Khi pipeline hoàn thành, **LUÔN** output theo format sau:
+
+### Completion Template:
+```markdown
+## ✅ Pipeline Complete: [EXAM_TITLE]
+
+**All 14 steps completed successfully!**
+
+### Summary
+- **URL:** [URL]
+- **Questions:** [COUNT] ([Question distribution])
+- **Audio:** [YouTube embed URL]
+- **Database Slug:** [SLUG]
+
+### Key Fixes Applied
+1. [Fix 1]
+2. [Fix 2]
+3. [Fix 3]
+
+### Validation Results
+- ✅/❌ Gemini POST: [STATUS]
+- ✅/❌ Codex VALIDATE: [STATUS]
+- ✅/❌ Invariants: [STATUS]
+- ✅/❌ Database: [STATUS]
+
+Exam is now available in the database and ready for testing!
+```
+
+### Required Fields:
+| Field | Description |
+|-------|-------------|
+| `EXAM_TITLE` | Title từ URL (human readable) |
+| `URL` | Original URL |
+| `COUNT` | Total questions |
+| `Question distribution` | VD: "Q1-6 notes, Q7-10 map, Q11-15 MCQ" |
+| `Audio` | YouTube embed URL |
+| `SLUG` | Database slug (e.g. `mini-ielts-listening-xxx`) |
+| `Key Fixes` | List các fix đã apply (nếu không có fix thì ghi "No fixes needed") |
+| `Validation Results` | Status của 4 checks: Gemini, Codex, Invariants, Database |
+
+### Error Template (nếu pipeline fail):
+```markdown
+## ❌ Pipeline Failed: [EXAM_TITLE]
+
+**Failed at Step [N]:** [STEP_NAME]
+
+### Error Details
+[Error description]
+
+### Suggested Actions
+1. [Action 1]
+2. [Action 2]
+```
 
