@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using attempt_service.Infrastructure.Persistence;
@@ -13,9 +14,11 @@ using attempt_service.Infrastructure.Persistence;
 namespace attempt_service.Migrations
 {
     [DbContext(typeof(AttemptDbContext))]
-    partial class AttemptDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251226141728_AddQuestionBookmarks")]
+    partial class AddQuestionBookmarks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,17 +242,8 @@ namespace attempt_service.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<string>("QuestionContent")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("QuestionType")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Skill")
-                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

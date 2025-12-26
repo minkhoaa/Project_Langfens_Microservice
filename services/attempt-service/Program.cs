@@ -5,6 +5,7 @@ using System.Text.Json;
 using attempt_service.Features.Analytics;
 using attempt_service.Features.Attempt;
 using attempt_service.Features.Attempt.AttemptEndpoint;
+using attempt_service.Features.Bookmarks;
 using attempt_service.Features.Helpers;
 using attempt_service.Features.RabbitMq;
 using attempt_service.Features.StudyPlan;
@@ -21,6 +22,7 @@ using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
+using Microsoft.SemanticKernel;
 
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
@@ -138,7 +140,10 @@ builder.Services.AddScoped<IAttemptService, AttemptService>();
 builder.Services.AddScoped<IExamGateway, ExamGateway>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<IBandPredictorService, BandPredictorService>();
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IStudyPlanService, StudyPlanService>();
+builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddSingleton<IAnswerKeyBuilder, AnswerKeyBuilder>();
 builder.Services.AddSingleton<IBuildQuestionIdSet, BuildQuestionIdSet>();
 builder.Services.AddSingleton<IQuestionIndex, QuestionIndex>();
@@ -213,6 +218,24 @@ builder.Services.AddAuthorization(option =>
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
+// Gemini AI for insights
+var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI__APIKEY");
+var geminiModel = EnvOrDefault("GEMINI__MODEL", "gemini-2.5-flash-lite");
+if (!string.IsNullOrEmpty(geminiApiKey))
+{
+    builder.Services.AddKernel().AddGoogleAIGeminiChatCompletion(
+        modelId: geminiModel,
+        apiKey: geminiApiKey,
+        apiVersion: Microsoft.SemanticKernel.Connectors.Google.GoogleAIVersion.V1_Beta
+    );
+    builder.Services.AddScoped<IAiInsightsService, AiInsightsService>();
+    Console.WriteLine($"[INFO] Gemini AI enabled with model: {geminiModel}");
+}
+else
+{
+    Console.WriteLine("[WARN] GEMINI__APIKEY not set, AI insights will be disabled");
+}
+
 var app = builder.Build();
 
 
@@ -239,5 +262,6 @@ app.MapAttemptEndpoint();
 app.MapAdminEndpoint();
 app.MapAnalyticsEndpoints();
 app.MapStudyPlanEndpoints();
+app.MapBookmarkEndpoints();
 
 app.Run();

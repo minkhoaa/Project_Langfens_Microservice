@@ -1,5 +1,6 @@
 using System.Net;
 using attempt_service.Domain.Entities;
+using attempt_service.Domains.Entities;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,7 @@ public class AttemptDbContext : DbContext
     public DbSet<AttemptAnswer> AttemptAnswers { get; set; }
     public DbSet<PlacementResult> PlacementResults { get; set; }
     public DbSet<StudyGoal> StudyGoals { get; set; }
+    public DbSet<QuestionBookmark> QuestionBookmarks { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder app)
@@ -72,6 +74,16 @@ public class AttemptDbContext : DbContext
             sg.Property(x => x.StudyHoursPerDay).HasPrecision(3, 1);
             sg.Property(x => x.FocusSkills).HasColumnType("text[]");
             sg.HasIndex(x => x.UserId).HasDatabaseName("idx_study_goal_user");
+        });
+
+        app.Entity<QuestionBookmark>(qb =>
+        {
+            qb.ToTable("question_bookmarks");
+            qb.HasIndex(x => new { x.UserId, x.QuestionId })
+                .IsUnique()
+                .HasDatabaseName("uq_bookmark_user_question");
+            qb.HasIndex(x => x.UserId).HasDatabaseName("idx_bookmark_user");
+            qb.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_bookmark_created");
         });
     }
 }

@@ -142,7 +142,7 @@ using (var scope = app.Services.CreateScope())
     await context.Database.MigrateAsync();
 }
 
-// Configure the HTTP request pipeline.
+
 
 app.UseSwagger();
 app.UseSwaggerUI();

@@ -42,3 +42,40 @@ public record RecentActivityDto(
 );
 
 public record RecentActivitiesDto(List<RecentActivityDto> Activities);
+
+// Wrong answers / Error review
+public record WrongAnswerDto(
+    Guid AnswerId,
+    Guid QuestionId,
+    string QuestionContent,
+    string QuestionType,
+    string Skill,
+    string SectionTitle,
+    string UserAnswer,
+    string CorrectAnswer,
+    string? Explanation,
+    DateTime AttemptDate,
+    Guid ExamId,
+    Guid AttemptId
+);
+
+public record WrongAnswersResultDto(
+    List<WrongAnswerDto> Items,
+    int Total,
+    int Page,
+    int PageSize,
+    Dictionary<string, int> StatsByType
+);
+
+// Band prediction
+public record PredictedBandDto(
+    decimal OverallBand,
+    string Confidence,
+    decimal? ReadingBand,
+    decimal? ListeningBand,
+    decimal? WritingBand,
+    decimal? SpeakingBand,
+    int SampleSize,
+    DateTime? LatestAttemptDate
+);
+
