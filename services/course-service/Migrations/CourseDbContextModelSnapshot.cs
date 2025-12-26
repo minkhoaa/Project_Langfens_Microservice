@@ -117,6 +117,9 @@ namespace course_service.Migrations
                     b.Property<int>("Idx")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("QuizExamId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");

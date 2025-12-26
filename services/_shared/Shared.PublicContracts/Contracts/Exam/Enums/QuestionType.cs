@@ -15,6 +15,7 @@ public static class QuestionType
 	public const string FormCompletion = "FORM_COMPLETION";
 	public const string SentenceCompletion = "SENTENCE_COMPLETION";
 	public const string ShortAnswer = "SHORT_ANSWER";
+	public const string AudioResponse = "AUDIO_RESPONSE";
 
 	public const string DiagramLabel = "DIAGRAM_LABEL";
 	public const string MapLabel = "MAP_LABEL";

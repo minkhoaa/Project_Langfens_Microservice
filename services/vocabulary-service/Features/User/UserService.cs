@@ -1,6 +1,8 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.FlashCard;
+using Shared.PublicContracts.Events;
 using vocabulary_service.Application.Helper;
 using vocabulary_service.Contracts.User;
 using vocabulary_service.Domains.Entities;
@@ -20,7 +22,7 @@ public interface IUserService
     Task<IResult> GetFlashcardProgress(Guid userId, CancellationToken token);
 }
 
-public class UserService(VocabularyDbContext context) : IUserService
+public class UserService(VocabularyDbContext context, IPublishEndpoint publishEndpoint) : IUserService
 {
     
     public async Task<IResult> SubscribeDecks(Guid deckId, Guid userId, CancellationToken token)
@@ -186,6 +188,16 @@ public class UserService(VocabularyDbContext context) : IUserService
             Repetition = rep
         });
         await context.SaveChangesAsync(token);
+        
+        // Publish gamification event
+        var isCorrect = grade >= 3; // SM-2: grade >= 3 means correct recall
+        await publishEndpoint.Publish(new CardReviewedEvent(
+            userId,
+            cardId,
+            grade,
+            isCorrect
+        ), token);
+        
         return Results.Ok(new ReviewResponse(cardId, st.Repetition, st.EaseFactor, st.IntervalDays, st.DueAt));
     }
 

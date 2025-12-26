@@ -1,5 +1,6 @@
 namespace course_service.Contracts;
-public record LessonItemDto(Guid Id, int Idx, string Title, int? DurationMin);
+public record LessonItemDto(Guid Id, int Idx, string Title, int? DurationMin, Guid? QuizExamId);
+public record LessonDetailDto(Guid Id, int Idx, string Title, string? ContentMd, int? DurationMin, Guid? QuizExamId, Guid CourseId);
 public record EnrollResponse(Guid EnrollmentId, string Status);
 public record CompleteResponse(Guid CompletionId, DateTime CompletedAt);
 public record CourseProgressItem(

@@ -9,7 +9,7 @@ namespace exam_service.Features.Exams.PublicEndpoint;
 public interface IExamService
 {
     // public
-    Task<IResult> ListPublishedAsync(string? category, string? level, int page, int pageSize,
+    Task<IResult> ListPublishedAsync(string? category, string? level, string? questionTypes, int page, int pageSize,
         CancellationToken cancellationToken);
 
     Task<IResult> GetBySlugAsync(string slug, CancellationToken cancellationToken);
@@ -24,22 +24,46 @@ public class ExamService : IExamService
         _context = context;
     }
 
-    public async Task<IResult> ListPublishedAsync(string? category, string? level, int page, int pageSize,
+    public async Task<IResult> ListPublishedAsync(
+        string? category, 
+        string? level, 
+        string? questionTypes,
+        int page, 
+        int pageSize,
         CancellationToken cancellationToken)
     {
         try
         {
-            var exams = _context.Exams.AsNoTracking().Where(x => x.Status == ExamStatus.Published);
+            var exams = _context.Exams.AsNoTracking()
+                .Where(x => x.Status == ExamStatus.Published);
+            
             if (!string.IsNullOrWhiteSpace(category))
                 exams = exams.Where(x => x.Category == category);
             if (!string.IsNullOrWhiteSpace(level))
                 exams = exams.Where(x => x.Level == level);
+            
+            // Filter by question types if provided (comma-separated)
+            if (!string.IsNullOrWhiteSpace(questionTypes))
+            {
+                var typeList = questionTypes.Split(',')
+                    .Select(t => t.Trim().ToUpper())
+                    .Where(t => !string.IsNullOrEmpty(t))
+                    .ToList();
+                
+                if (typeList.Count > 0)
+                {
+                    exams = exams.Where(e => 
+                        e.Sections.Any(s => s.Questions.Any(q => typeList.Contains(q.Type.ToUpper()))));
+                }
+            }
+            
             var items = await exams.OrderByDescending(x => x.UpdatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(x =>
                     new Dto_Public.PublicExamRecord(
-                        x.Id, x.Slug, x.Title, x.Category, x.Level, x.DurationMin, x.UpdatedAt, x.ImageUrl!
+                        x.Id, x.Slug, x.Title, x.Category, x.Level, x.DurationMin, 
+                        x.UpdatedAt, x.ImageUrl!
                     ))
                 .ToListAsync(cancellationToken: cancellationToken);
 

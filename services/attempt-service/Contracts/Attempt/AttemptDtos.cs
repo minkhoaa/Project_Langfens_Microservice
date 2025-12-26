@@ -52,7 +52,9 @@ public record AttemptResultResponse(
     int? ReadingCorrect = null,
     int? ListeningCorrect = null,
     decimal? WritingBand = null,
-    decimal? SpeakingBand = null
+    decimal? SpeakingBand = null,
+    WritingGradeDto? WritingGrade = null,
+    SpeakingGradeDto? SpeakingGrade = null
 );
 public record AttemptListItem(
     Guid AttemptId,
@@ -88,10 +90,38 @@ public record PlacementResultResponse(
     Guid ExamId,
     Guid AttemptId,
     int ReadingCorrect,
+    int ReadingTotal,
     int ListeningCorrect,
+    int ListeningTotal,
     decimal? WritingBand,
+    decimal? SpeakingBand,
     int TotalCorrect,
     string Level,
     decimal Band,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    WritingGradeDto? WritingGrade = null,
+    SpeakingGradeDto? SpeakingGrade = null);
+
+public record CriterionScoreDto(double Band, string Comment);
+
+public record WritingGradeDto(
+    double OverallBand,
+    int WordCount,
+    CriterionScoreDto? TaskResponse,
+    CriterionScoreDto? CoherenceAndCohesion,
+    CriterionScoreDto? LexicalResource,
+    CriterionScoreDto? GrammaticalRangeAndAccuracy,
+    List<string>? Suggestions,
+    string? ImprovedParagraph);
+
+public record SpeakingGradeDto(
+    double OverallBand,
+    string? Transcription,
+    CriterionScoreDto? FluencyAndCoherence,
+    CriterionScoreDto? LexicalResource,
+    CriterionScoreDto? GrammaticalRangeAndAccuracy,
+    CriterionScoreDto? Pronunciation,
+    List<string>? Suggestions,
+    string? ImprovedAnswer);
+

@@ -13,6 +13,12 @@ namespace course_service.Domains.Entities
         [Required] public string Title { get; set; } = default!;
         public string? ContentMd { get; set; }
         public int? DurationMin { get; set; }
+        
+        /// <summary>
+        /// Optional link to exam-service exam for quiz/exercise
+        /// </summary>
+        public Guid? QuizExamId { get; set; }
+        
         public Course Course { get; set; } = default!;
         public ICollection<LessonCompletion> LessonCompletions { get; set; } = [];
     }

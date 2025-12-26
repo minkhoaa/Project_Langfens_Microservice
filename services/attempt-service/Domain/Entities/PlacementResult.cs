@@ -26,6 +26,18 @@ namespace attempt_service.Domain.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+        /// <summary>
+        /// Full Writing grading response as JSON (includes CriterionScores, Suggestions, etc.)
+        /// </summary>
+        [Column(TypeName = "jsonb")]
+        public string? WritingGradeJson { get; set; }
+
+        /// <summary>
+        /// Full Speaking grading response as JSON (includes CriterionScores, Suggestions, etc.)
+        /// </summary>
+        [Column(TypeName = "jsonb")]
+        public string? SpeakingGradeJson { get; set; }
+
         public Attempt Attempt { get; set; } = default!;
     }
 }

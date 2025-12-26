@@ -161,7 +161,8 @@ namespace course_service.Features.AdminEndpoint
                     Title = request.Title,
                     ContentMd = request.ContentMd,
                     DurationMin = request.DurationMin,
-                    Idx = insertIdx
+                    Idx = insertIdx,
+                    QuizExamId = request.QuizExamId
                 };
 
                 context.Lessons.Add(newLesson);
@@ -192,6 +193,7 @@ namespace course_service.Features.AdminEndpoint
                             .SetProperty(a => a.ContentMd, request.ContentMd)
                             .SetProperty(a => a.DurationMin, request.DurationMin)
                             .SetProperty(a => a.Idx, request.Idx)
+                            .SetProperty(a => a.QuizExamId, request.QuizExamId)
                         , token);
                 await transaction.CommitAsync(token);
                 return Results.Ok(new ApiResultDto(true, $"Updated {affectedRows} rows", null!));

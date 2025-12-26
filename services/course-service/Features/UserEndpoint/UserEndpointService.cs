@@ -1,9 +1,11 @@
 using course_service.Contracts;
 using course_service.Domains.Entities;
 using course_service.Infrastructure;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Course.Enums;
+using Shared.PublicContracts.Events;
 
 namespace course_service.Features.UserEndpoint
 {
@@ -26,7 +28,7 @@ namespace course_service.Features.UserEndpoint
             CancellationToken token
         );
     }
-    public class UserEndpointService(CourseDbContext context) : IUserEndpointService
+    public class UserEndpointService(CourseDbContext context, IPublishEndpoint publishEndpoint) : IUserEndpointService
     {
         public async Task<IResult> CompleteCourse(CancellationToken token, Guid lessonId, Guid userId)
         {
@@ -57,6 +59,14 @@ namespace course_service.Features.UserEndpoint
             };
             context.LessonCompletions.Add(record);
             await context.SaveChangesAsync(token);
+            
+            // Publish gamification event
+            await publishEndpoint.Publish(new LessonCompletedEvent(
+                userId,
+                lessonId,
+                lesson.CourseId
+            ), token);
+            
             return Results.Ok(new ApiResultDto(true, "Success",
                 new CompleteResponse(record.Id, record.CompletedAt)));
         }

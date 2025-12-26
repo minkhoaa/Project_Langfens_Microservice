@@ -5,6 +5,7 @@ using course_service.Features.AdminEndpoint;
 using course_service.Features.PublicEndpoint;
 using course_service.Features.UserEndpoint;
 using course_service.Infrastructure;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -106,6 +107,27 @@ builder.Services.AddCors(options =>
 var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__COURSE")
                         ?? "Host=localhost;Port=5436;Database=course-db;Username=course;Password=course";
 builder.Services.AddDbContext<CourseDbContext>(option => option.UseNpgsql(connectionString));
+
+// MassTransit for event publishing
+builder.Services.AddMassTransit(x =>
+{
+    var rabbitConfig = new
+    {
+        Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
+        Username = EnvOrDefault("RABBITMQ__USERNAME", "guest"),
+        Password = EnvOrDefault("RABBITMQ__PASSWORD", "guest"),
+        VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
+        Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var p) ? p : (ushort)5672
+    };
+    x.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
+        {
+            h.Username(rabbitConfig.Username);
+            h.Password(rabbitConfig.Password);
+        });
+    });
+});
 
 // DI
 builder.Services.AddScoped<IPublicEndpointService, PublicEndpointService>();

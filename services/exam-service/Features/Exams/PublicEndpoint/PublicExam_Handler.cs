@@ -14,9 +14,10 @@ public static class PublicExamHandler
     public static Task<IResult> ListPublishedExam(
         string? category,
         string? level,
+        string? questionTypes,
         int page,
         int pageSize,
         [FromServices] IExamService svc,
         CancellationToken ct
-    ) => svc.ListPublishedAsync(category, level, page, pageSize, ct);
+    ) => svc.ListPublishedAsync(category, level, questionTypes, page, pageSize, ct);
 }

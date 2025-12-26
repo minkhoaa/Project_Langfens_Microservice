@@ -14,6 +14,7 @@ using Shared.ExamDto.Contracts.Exam.Enums;
 using Shared.ExamDto.Contracts.Exam.InternalExamDto;
 using Shared.ExamDto.Contracts.Writing;
 using Shared.Grpc.ExamInternal;
+using Shared.PublicContracts.Events;
 
 namespace attempt_service.Features.Attempt.AttemptEndpoint;
 
@@ -39,7 +40,7 @@ public class AttemptService(
     IIndexBuilder indexBuilder,
     IAnswerValidator answerValidator,
     IPlacementWorkflow placementWorkflow,
-
+    IPublishEndpoint publishEndpoint,
 IQuestionGraderFactory questionGraderFactory
 ) : IAttemptService
 {
@@ -567,6 +568,15 @@ IQuestionGraderFactory questionGraderFactory
 
 
             var message = isExpired ? "Auto-submitted (time expired)" : "Submitted";
+            
+            // Publish gamification event
+            await publishEndpoint.Publish(new AttemptCompletedEvent(
+                userId,
+                existedAttempt.Id,
+                "READING", // Default skill for now
+                correctCount
+            ), token);
+            
             return Results.Ok(new ApiResultDto(true, message, new
             {
                 attemptId = existedAttempt.Id,
@@ -684,6 +694,8 @@ IQuestionGraderFactory questionGraderFactory
         int? readingCorrect = null;
         decimal? writingBand = null;
         decimal? speakingBand = null;
+        WritingGradeDto? writingGrade = null;
+        SpeakingGradeDto? speakingGrade = null;
         if (isPlacement)
         {
             placementResult = await context.PlacementResults.AsNoTracking()
@@ -703,6 +715,28 @@ IQuestionGraderFactory questionGraderFactory
             totalQuestion = placementResult.ReadingTotal + placementResult.ListeningTotal;
 
             ieltsBand = placementBand;
+            
+            // Deserialize grade JSONs to typed DTOs
+            if (!string.IsNullOrEmpty(placementResult.WritingGradeJson))
+            {
+                try
+                {
+                    writingGrade = System.Text.Json.JsonSerializer.Deserialize<WritingGradeDto>(
+                        placementResult.WritingGradeJson,
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                catch { /* ignore parse errors */ }
+            }
+            if (!string.IsNullOrEmpty(placementResult.SpeakingGradeJson))
+            {
+                try
+                {
+                    speakingGrade = System.Text.Json.JsonSerializer.Deserialize<SpeakingGradeDto>(
+                        placementResult.SpeakingGradeJson,
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                catch { /* ignore parse errors */ }
+            }
         }
         else
         {
@@ -874,7 +908,9 @@ IQuestionGraderFactory questionGraderFactory
                     readingCorrect,
                     listeningCorrect,
                     writingBand,
-                    speakingBand
+                    speakingBand,
+                    writingGrade,
+                    speakingGrade
                     )
             )
         );
@@ -1076,16 +1112,63 @@ IQuestionGraderFactory questionGraderFactory
     public async Task<IResult> GetLatestPlacement(CancellationToken token)
     {
         var userId = user.UserId;
-        var placement = await context.PlacementResults.AsNoTracking()
-        .Where(x => x.UserId == userId)
-        .OrderByDescending(k => k.UpdatedAt)
-        .Select(k => new PlacementResultResponse(
-            k.Id, k.UserId, k.ExamId, k.AttemptId, k.ReadingCorrect, k.ListeningCorrect,
-            k.WritingBand, k.TotalCorrect, k.Level, k.Band, k.CreatedAt, k.UpdatedAt
-        )).FirstOrDefaultAsync(token);
-        return (placement != null) ? Results.Ok(new ApiResultDto(true, "Latest placement evaluation", placement))
-        : Results.NotFound(new ApiResultDto(false, "Not found any placement", null!));
+        var placementEntity = await context.PlacementResults.AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(k => k.UpdatedAt)
+            .FirstOrDefaultAsync(token);
+        
+        if (placementEntity == null)
+            return Results.NotFound(new ApiResultDto(false, "Not found any placement", null!));
+        
+        // Deserialize JSON grades to typed DTOs
+        WritingGradeDto? writingGrade = null;
+        SpeakingGradeDto? speakingGrade = null;
+        
+        if (!string.IsNullOrEmpty(placementEntity.WritingGradeJson))
+        {
+            try
+            {
+                writingGrade = System.Text.Json.JsonSerializer.Deserialize<WritingGradeDto>(
+                    placementEntity.WritingGradeJson,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch { /* ignore parse errors */ }
+        }
+        
+        if (!string.IsNullOrEmpty(placementEntity.SpeakingGradeJson))
+        {
+            try
+            {
+                speakingGrade = System.Text.Json.JsonSerializer.Deserialize<SpeakingGradeDto>(
+                    placementEntity.SpeakingGradeJson,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch { /* ignore parse errors */ }
+        }
+        
+        var placement = new PlacementResultResponse(
+            placementEntity.Id,
+            placementEntity.UserId,
+            placementEntity.ExamId,
+            placementEntity.AttemptId,
+            placementEntity.ReadingCorrect,
+            placementEntity.ReadingTotal,
+            placementEntity.ListeningCorrect,
+            placementEntity.ListeningTotal,
+            placementEntity.WritingBand,
+            placementEntity.SpeakingBand,
+            placementEntity.TotalCorrect,
+            placementEntity.Level,
+            placementEntity.Band,
+            placementEntity.CreatedAt,
+            placementEntity.UpdatedAt,
+            writingGrade,
+            speakingGrade
+        );
+        
+        return Results.Ok(new ApiResultDto(true, "Latest placement evaluation", placement));
     }
+
 
     private static string? TryGetExamCategory(JsonDocument? paperJson)
     {

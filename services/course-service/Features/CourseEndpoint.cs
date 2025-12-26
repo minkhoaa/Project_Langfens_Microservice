@@ -10,29 +10,30 @@ namespace course_service.Features
     {
         public static void MapCourseEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGroup("/api/course");
-            app.MapGet("/getpublishedcourse/", PublicEndpointHandler.GetPublicCourseHandler).AllowAnonymous();
-            app.MapGet("/getbyslug/{slug}", PublicEndpointHandler.GetCourseBySlugHandler).AllowAnonymous();
-            app.MapGet("/getlessonbyslug/{slug}", PublicEndpointHandler.GetLessonBySlugHandler).AllowAnonymous();
-            app.MapGet("/{courseId}/{userId}:enroll", UserEndpointHandler.GetEnrolledByCourseIdHandler)
+            app.MapGet("/api/getpublishedcourse/", PublicEndpointHandler.GetPublicCourseHandler).AllowAnonymous();
+            app.MapGet("/api/getbyslug/{slug}", PublicEndpointHandler.GetCourseBySlugHandler).AllowAnonymous();
+            app.MapGet("/api/getlessonbyslug/{slug}", PublicEndpointHandler.GetLessonBySlugHandler).AllowAnonymous();
+            app.MapGet("/api/lesson/{lessonId:guid}", PublicEndpointHandler.GetLessonByIdHandler).AllowAnonymous();
+            app.MapGet("/api/{courseId}/{userId}:enroll", UserEndpointHandler.GetEnrolledByCourseIdHandler)
                 .RequireAuthorization(CourseScope.CourseEnroll);
         }
         public static void MapLessonEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGroup("/api/lesson");
-            app.MapPost("/{userId}/{lessonId}:complete", UserEndpointHandler.CompeteCourseHandler)
+            app.MapPost("/api/{userId}/{lessonId}:complete", UserEndpointHandler.CompeteCourseHandler)
                 .RequireAuthorization(CourseScope.CourseComplete);
-            app.MapPost("/{userId}/progress", UserEndpointHandler.GetMyProgressHandler)
+            app.MapPost("/api/{userId}/progress", UserEndpointHandler.GetMyProgressHandler)
                 .RequireAuthorization(CourseScope.CourseRead);
-
         }
         public static void MapAdminEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGroup("/api/admin/course").RequireAuthorization(CourseScope.CourseManage);
-            app.MapPost("/create", AdminEndpointHandler.CreateCourseHandler);
-            app.MapPut("/update/{courseId}", AdminEndpointHandler.UpdateCourseHandler);
-            app.MapDelete("/delete/{courseId}", AdminEndpointHandler.DeleteCourseHandler);
-            app.MapPost("/{courseId}/lesson/create", AdminEndpointHandler.CreateLessonHandler);
+            app.MapPost("/api/admin/create", AdminEndpointHandler.CreateCourseHandler)
+                .RequireAuthorization(CourseScope.CourseManage);
+            app.MapPut("/api/admin/update/{courseId}", AdminEndpointHandler.UpdateCourseHandler)
+                .RequireAuthorization(CourseScope.CourseManage);
+            app.MapDelete("/api/admin/delete/{courseId}", AdminEndpointHandler.DeleteCourseHandler)
+                .RequireAuthorization(CourseScope.CourseManage);
+            app.MapPost("/api/admin/{courseId}/lesson/create", AdminEndpointHandler.CreateLessonHandler)
+                .RequireAuthorization(CourseScope.CourseManage);
         }
     }
 }

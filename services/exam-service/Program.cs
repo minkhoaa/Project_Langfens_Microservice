@@ -7,6 +7,7 @@ using exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
 using exam_service.Features.Exams.InternalEndpoint;
 using exam_service.Features.Exams.PublicEndpoint;
+using exam_service.Features.QuestionBank;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -119,6 +120,7 @@ builder.Services.AddScoped<IAdminOptionService, AdminOptionService>();
 builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
+builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
 
 int grpcPort = 8081;
 int httpPort = 8080;
@@ -163,6 +165,7 @@ app.MapAdminSectionEndpoint();
 app.MapAdminQuestionEndpoint();
 app.MapAdminOptionEndpoint();
 app.MapInternalExamEndpoint();
+app.MapQuestionBankEndpoints();
 app.Run();
 
 public partial class Program { }

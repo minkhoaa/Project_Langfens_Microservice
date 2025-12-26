@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -98,6 +99,28 @@ builder.Services.AddSwaggerGen(option =>
 builder.Services.AddDbContext<VocabularyDbContext>(option => option.UseNpgsql(
     EnvOrDefault("CONNECTIONSTRING__VOCABULARY", "Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary")
 ));
+
+// MassTransit for event publishing
+builder.Services.AddMassTransit(x =>
+{
+    var rabbitConfig = new
+    {
+        Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
+        Username = EnvOrDefault("RABBITMQ__USERNAME", "guest"),
+        Password = EnvOrDefault("RABBITMQ__PASSWORD", "guest"),
+        VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
+        Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var p) ? p : (ushort)5672
+    };
+    x.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
+        {
+            h.Username(rabbitConfig.Username);
+            h.Password(rabbitConfig.Password);
+        });
+    });
+});
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPublicService, PublicService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
