@@ -90,6 +90,25 @@ message GetInternalExamRequest {
   bool showAnswers = 2; // true = ẩn đáp án (unset is_correct)
 }
 
+message GetExamListRequest {
+  string category = 1;   // optional filter by category
+  string skill = 2;      // optional filter by skill
+  int32 limit = 3;       // max results, 0 = all
+}
+
+message GetExamListResponse {
+  repeated ExamListItem exams = 1;
+}
+
+message ExamListItem {
+  string id = 1;
+  string title = 2;
+  string category = 3;
+  int32 question_count = 4;
+  int32 duration_min = 5;
+}
+
 service ExamInternal {
   rpc GetInternalExam (GetInternalExamRequest) returns (InternalDeliveryExam);
+  rpc GetExamList (GetExamListRequest) returns (GetExamListResponse);
 }

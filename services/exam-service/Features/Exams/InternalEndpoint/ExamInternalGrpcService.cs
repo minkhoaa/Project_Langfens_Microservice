@@ -29,4 +29,40 @@ public class ExamInternalGrpcService : ExamInternal.ExamInternalBase
         var res = ProtoHelper.MapToProto(exams, request.ShowAnswers);
         return res;
     }
+    
+    public override async Task<GetExamListResponse> GetExamList(GetExamListRequest request,
+        ServerCallContext context)
+    {
+        var query = _context.Exams.AsNoTracking()
+            .Include(x => x.Sections)
+            .ThenInclude(s => s.Questions)
+            .AsQueryable();
+        
+        // Apply filters
+        if (!string.IsNullOrEmpty(request.Category))
+        {
+            query = query.Where(e => e.Category.ToString().ToUpper() == request.Category.ToUpper());
+        }
+        
+        // Limit results
+        var limit = request.Limit > 0 ? request.Limit : 50;
+        
+        var exams = await query.Take(limit).ToListAsync(context.CancellationToken);
+        
+        var response = new GetExamListResponse();
+        foreach (var exam in exams)
+        {
+            var questionCount = exam.Sections.Sum(s => s.Questions.Count);
+            response.Exams.Add(new Shared.Grpc.ExamInternal.ExamListItem
+            {
+                Id = exam.Id.ToString(),
+                Title = exam.Title ?? "",
+                Category = exam.Category.ToString(),
+                QuestionCount = questionCount,
+                DurationMin = exam.DurationMin
+            });
+        }
+        
+        return response;
+    }
 }

@@ -259,7 +259,6 @@ services:
       timeout: 5s
       retries: 20
       start_period: 10s
-
     ports:
       - 5434:5432
 
@@ -289,6 +288,8 @@ services:
       POSTGRES_PASSWORD: course
     networks:
       - backend
+    ports:
+      - 5446:5432
     volumes: ["pgdata:/var/lib/postgresql/course-data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U course -d course-db -h 127.0.0.1"]
@@ -303,7 +304,7 @@ services:
       POSTGRES_DB: vocabulary-db
       POSTGRES_USER: vocabulary
       POSTGRES_PASSWORD: vocabulary
-
+    
     networks:
       - backend
     volumes: ["pgdata:/var/lib/postgresql/vocabulary-data"]

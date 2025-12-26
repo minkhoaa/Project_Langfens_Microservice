@@ -41,7 +41,7 @@ public class StudyPlanService(AttemptDbContext context) : IStudyPlanService
         {
             UserId = userId,
             TargetBandScore = request.TargetBandScore,
-            TargetDate = request.TargetDate,
+            TargetDate = DateTime.SpecifyKind(request.TargetDate, DateTimeKind.Utc),
             FocusSkills = request.FocusSkills ?? new List<string> { "READING", "LISTENING" },
             StudyHoursPerDay = request.StudyHoursPerDay,
             IsActive = true
