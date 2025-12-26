@@ -167,6 +167,7 @@ namespace attempt_service.Features.Helpers
             }
 
             placement.WritingBand = (decimal)response.OverallBand;
+        placement.WritingGradeJson = JsonSerializer.Serialize(response);
             decimal? readingBand = null;
             if (placement.ReadingTotal > 0)
             {
@@ -218,6 +219,7 @@ namespace attempt_service.Features.Helpers
 
             // 1. Cập nhật band speaking
             placement.SpeakingBand = (decimal)response.OverallBand;
+        placement.SpeakingGradeJson = JsonSerializer.Serialize(response);
 
             decimal? readingBand = null;
             if (placement.ReadingTotal > 0)

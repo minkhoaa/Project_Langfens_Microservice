@@ -22,6 +22,12 @@ namespace course_service.Features.PublicEndpoint
         CancellationToken token,
         IPublicEndpointService service
         ) => service.GetLessonBySlug(slug, token);
+
+        public static Task<IResult> GetLessonByIdHandler(
+        Guid lessonId,
+        CancellationToken token,
+        IPublicEndpointService service
+        ) => service.GetLessonById(lessonId, token);
     }
 
 }

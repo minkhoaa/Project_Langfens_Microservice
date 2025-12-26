@@ -99,7 +99,8 @@ namespace attempt_service.Features.Helpers
         }
         public IEnumerable<string> SupportedTypes => new[]
      {
-            QuestionType.ShortAnswer
+            QuestionType.ShortAnswer,
+            QuestionType.AudioResponse
         };
 
         public IQuestionGrader Create() => _instance;

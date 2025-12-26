@@ -25,6 +25,10 @@ namespace course_service.Features.PublicEndpoint
             string slug,
             CancellationToken token
         );
+        public Task<IResult> GetLessonById(
+            Guid lessonId,
+            CancellationToken token
+        );
 
     }
     public class PublicEndpointService(CourseDbContext context) : IPublicEndpointService
@@ -46,7 +50,8 @@ namespace course_service.Features.PublicEndpoint
                                             x.Id,
                                             x.Idx,
                                             x.Title,
-                                            x.DurationMin
+                                            x.DurationMin,
+                                            x.QuizExamId
                                         )).ToList()
                                 )).ToListAsync(token);
             return course != null ? Results.Ok(new ApiResultDto(true, "Success", course))
@@ -63,10 +68,23 @@ namespace course_service.Features.PublicEndpoint
                 return Results.NotFound(new ApiResultDto(false, "Not found course", null!));
             var lesson = await context.Lessons.AsNoTracking()
                                 .Where(x => x.CourseId == courseId)
-                                .Select(x => new LessonItemDto(x.Id, x.Idx, x.Title, x.DurationMin))
+                                .Select(x => new LessonItemDto(x.Id, x.Idx, x.Title, x.DurationMin, x.QuizExamId))
                                 .ToListAsync(token);
             return lesson != null ? Results.Ok(new ApiResultDto(true, "Success", lesson))
                                     : Results.BadRequest(new ApiResultDto(false, "Not found lesson", null!));
+        }
+
+        public async Task<IResult> GetLessonById(Guid lessonId, CancellationToken token)
+        {
+            var lesson = await context.Lessons.AsNoTracking()
+                .Where(x => x.Id == lessonId)
+                .Select(x => new LessonDetailDto(
+                    x.Id, x.Idx, x.Title, x.ContentMd, x.DurationMin, x.QuizExamId, x.CourseId
+                ))
+                .FirstOrDefaultAsync(token);
+            return lesson != null 
+                ? Results.Ok(new ApiResultDto(true, "Success", lesson))
+                : Results.NotFound(new ApiResultDto(false, "Lesson not found", null!));
         }
 
 

@@ -14,6 +14,7 @@ public class AttemptDbContext : DbContext
     public DbSet<Attempt> Attempts { get; set; }
     public DbSet<AttemptAnswer> AttemptAnswers { get; set; }
     public DbSet<PlacementResult> PlacementResults { get; set; }
+    public DbSet<StudyGoal> StudyGoals { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder app)
@@ -49,7 +50,6 @@ public class AttemptDbContext : DbContext
             aa.Property(x => x.SelectedOptionIds).HasColumnType("uuid[]");
             aa.Property(x => x.AwardedPoints).HasPrecision(6, 2);
 
-            // Đảm bảo 1 câu hỏi chỉ có 1 dòng answer/attempt (UPSERT autosave dễ)
             aa.HasIndex(x => new { x.AttemptId, x.QuestionId })
                 .IsUnique()
                 .HasDatabaseName("uq_attempt_answer_attempt_question");
@@ -65,5 +65,14 @@ public class AttemptDbContext : DbContext
             a.HasIndex(k => k.AttemptId).IsUnique();
         });
 
+        app.Entity<StudyGoal>(sg =>
+        {
+            sg.ToTable("study_goals");
+            sg.Property(x => x.TargetBandScore).HasPrecision(3, 1);
+            sg.Property(x => x.StudyHoursPerDay).HasPrecision(3, 1);
+            sg.Property(x => x.FocusSkills).HasColumnType("text[]");
+            sg.HasIndex(x => x.UserId).HasDatabaseName("idx_study_goal_user");
+        });
     }
 }
+

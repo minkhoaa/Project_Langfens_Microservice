@@ -33,13 +33,15 @@ public record CreateLessonRequest(
     int? Idx,
     string Title,
     string? ContentMd,
-    int? DurationMin
+    int? DurationMin,
+    Guid? QuizExamId
 );
 
 public record UpdateLessonRequest(
     string? Title,
     string? ContentMd,
     int? DurationMin,
-    int? Idx 
+    int? Idx,
+    Guid? QuizExamId
 );
 public record LessonCreatedDto(Guid Id, int Idx);

@@ -156,6 +156,9 @@ namespace attempt_service.Migrations
                     b.Property<decimal?>("SpeakingBand")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("SpeakingGradeJson")
+                        .HasColumnType("jsonb");
+
                     b.Property<int>("TotalCorrect")
                         .HasColumnType("integer");
 
@@ -168,6 +171,9 @@ namespace attempt_service.Migrations
                     b.Property<decimal?>("WritingBand")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("WritingGradeJson")
+                        .HasColumnType("jsonb");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AttemptId")
@@ -178,6 +184,47 @@ namespace attempt_service.Migrations
                     b.HasIndex("UserId", "CreatedAt");
 
                     b.ToTable("placement_result", (string)null);
+                });
+
+            modelBuilder.Entity("attempt_service.Domain.Entities.StudyGoal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<List<string>>("FocusSkills")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("StudyHoursPerDay")
+                        .HasPrecision(3, 1)
+                        .HasColumnType("numeric(3,1)");
+
+                    b.Property<decimal>("TargetBandScore")
+                        .HasPrecision(3, 1)
+                        .HasColumnType("numeric(3,1)");
+
+                    b.Property<DateTime>("TargetDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("idx_study_goal_user");
+
+                    b.ToTable("study_goals", (string)null);
                 });
 
             modelBuilder.Entity("attempt_service.Domain.Entities.AttemptAnswer", b =>
