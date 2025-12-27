@@ -15,6 +15,7 @@ namespace dictionary_service.Features
         {
             var app = router.MapGroup("/api/dictionary");
             app.MapGet("/suggest", DictionaryHandler.GetSuggestsHandler);
+            app.MapGet("/lookup", DictionaryHandler.LookupWordHandler);
             app.MapGet("/details/{id}", DictionaryHandler.GetDetailsHandler);
             app.MapPost("/import", DictionaryHandler.ImportHandler)
                .DisableAntiforgery()

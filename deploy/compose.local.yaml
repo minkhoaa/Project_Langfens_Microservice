@@ -304,7 +304,8 @@ services:
       POSTGRES_DB: vocabulary-db
       POSTGRES_USER: vocabulary
       POSTGRES_PASSWORD: vocabulary
-    
+    ports:
+      - 5987:5432
     networks:
       - backend
     volumes: ["pgdata:/var/lib/postgresql/vocabulary-data"]

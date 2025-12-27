@@ -182,14 +182,15 @@ builder.Services.AddAuthorization(option =>
              || o.User.HasAnyScope(SpeakingScope.SpeakingViewAny) || o.User.IsInRole(Roles.Admin)));
 });
 
-var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI__APIKEY")
-                  ?? throw new Exception("GEMINI__APIKEY is missing");
-var geminiModel = Environment.GetEnvironmentVariable("GEMINI__MODEL")
-                 ?? "gemini-2.5-flash-lite";
-builder.Services.AddKernel().AddGoogleAIGeminiChatCompletion(
-    modelId: geminiModel,
-    apiKey: geminiApiKey,
-    apiVersion: GoogleAIVersion.V1_Beta
+var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT")
+                  ?? throw new Exception("AZURE_OPENAI__ENDPOINT is required");
+var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY")
+                  ?? throw new Exception("AZURE_OPENAI__APIKEY is required");
+var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
+builder.Services.AddKernel().AddAzureOpenAIChatCompletion(
+    deploymentName: azureDeployment,
+    endpoint: azureEndpoint,
+    apiKey: azureApiKey
 );
 
 builder.Services.AddSingleton<WhisperFactory>(_ =>

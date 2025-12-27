@@ -7,10 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.SemanticKernel;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
+using vocabulary_service.Application;
 using vocabulary_service.Features;
 using vocabulary_service.Features.Admin;
 using vocabulary_service.Features.Public;
@@ -100,7 +102,6 @@ builder.Services.AddDbContext<VocabularyDbContext>(option => option.UseNpgsql(
     EnvOrDefault("CONNECTIONSTRING__VOCABULARY", "Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary")
 ));
 
-// MassTransit for event publishing
 builder.Services.AddMassTransit(x =>
 {
     var rabbitConfig = new
@@ -121,9 +122,29 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
+// Azure OpenAI for vocabulary enrichment
+var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT");
+var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY");
+var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
+if (!string.IsNullOrWhiteSpace(azureEndpoint) && !string.IsNullOrWhiteSpace(azureApiKey))
+{
+    builder.Services.AddKernel().AddAzureOpenAIChatCompletion(
+        deploymentName: azureDeployment,
+        endpoint: azureEndpoint,
+        apiKey: azureApiKey);
+    Console.WriteLine($"[INFO] Azure OpenAI enabled for vocabulary enrichment with deployment: {azureDeployment}");
+}
+else
+{
+    builder.Services.AddSingleton<Kernel>(sp => null!);
+    Console.WriteLine("[WARN] Azure OpenAI not configured – AI enrichment disabled");
+}
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPublicService, PublicService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IAiEnrichmentService, AiEnrichmentService>();
+builder.Services.AddScoped<IVocabularyExtractionService, VocabularyExtractionService>();
 
 var app = builder.Build();
 

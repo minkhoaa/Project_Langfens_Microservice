@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.Google;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using writing_service.Contracts;
 using writing_service.Domains.Entities;
 
@@ -39,17 +39,17 @@ namespace writing_service.Features.Helper
             var history = new ChatHistory();
             history.AddSystemMessage(systemPrompt);
             history.AddUserMessage(userContent);
-            var settings = new GeminiPromptExecutionSettings
+            var settings = new OpenAIPromptExecutionSettings
             {
                 Temperature = 0.1,
                 MaxTokens = 1200,
-                ResponseMimeType = "application/json",
+                ResponseFormat = "json_object",
             };
             var messages = await _chat.GetChatMessageContentsAsync(history, executionSettings: settings, kernel: _kernel, cancellationToken: token);
             var content = messages.LastOrDefault()?.Content;
             if (string.IsNullOrWhiteSpace(content))
             {
-                _logger.LogWarning("Gemini returned empty content.");
+                _logger.LogWarning("Azure OpenAI returned empty content.");
                 throw new InvalidOperationException("Model returned empty content.");
             }
 
