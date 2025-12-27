@@ -167,14 +167,15 @@ builder.Services.AddMassTransit(configurator =>
 
 
     });
-    var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI__APIKEY")
-                      ?? throw new Exception("GEMINI__APIKEY invalid");
-    var geminiModel = Environment.GetEnvironmentVariable("GEMINI__MODEL")
-                     ?? "gemini-2.5-flash-lite";
-builder.Services.AddKernel().AddGoogleAIGeminiChatCompletion(
-    modelId: geminiModel,
-    apiKey: geminiApiKey,
-    apiVersion: Microsoft.SemanticKernel.Connectors.Google.GoogleAIVersion.V1_Beta
+var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT")
+                  ?? throw new Exception("AZURE_OPENAI__ENDPOINT is required");
+var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY")
+                  ?? throw new Exception("AZURE_OPENAI__APIKEY is required");
+var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
+builder.Services.AddKernel().AddAzureOpenAIChatCompletion(
+    deploymentName: azureDeployment,
+    endpoint: azureEndpoint,
+    apiKey: azureApiKey
 );
 
 

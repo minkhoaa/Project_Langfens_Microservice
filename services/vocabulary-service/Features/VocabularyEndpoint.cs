@@ -1,5 +1,6 @@
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
+using vocabulary_service.Application;
 using vocabulary_service.Features.Admin;
 using vocabulary_service.Features.Public;
 using vocabulary_service.Features.User;
@@ -16,7 +17,30 @@ public static class VocabularyEndpoint
         decks.MapGet("/{slug}", PublicHandler.GetBySlugHandler);
         decks.MapGet("/slug:{slug}/cards", PublicHandler.GetCardsBySlugHandler);
         decks.MapGet("/deck:{deckId}/cards", PublicHandler.GetCardsByDeckIdHandler);
+        
+        // AI enrichment endpoint (public for now)
+        var ai = app.MapGroup("/api/vocabulary").AllowAnonymous();
+        ai.MapGet("/enrich", async (string word, IAiEnrichmentService service, CancellationToken token) =>
+        {
+            if (string.IsNullOrWhiteSpace(word))
+                return Results.BadRequest("word is required");
+            
+            var result = await service.EnrichWord(word, token);
+            return Results.Ok(result);
+        });
+        
+        ai.MapPost("/extract", async (ExtractRequest request, IVocabularyExtractionService service, CancellationToken token) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.PassageText))
+                return Results.BadRequest("passageText is required");
+            
+            var maxWords = request.MaxWords > 0 ? request.MaxWords : 10;
+            var result = await service.ExtractFromPassage(request.PassageText, maxWords, token);
+            return Results.Ok(result);
+        });
     }
+
+    public record ExtractRequest(string PassageText, int MaxWords = 10);
 
     public static void MapUserVocabularyEndpoints(this IEndpointRouteBuilder app)
     {

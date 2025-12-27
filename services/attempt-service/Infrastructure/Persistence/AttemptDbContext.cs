@@ -17,6 +17,8 @@ public class AttemptDbContext : DbContext
     public DbSet<PlacementResult> PlacementResults { get; set; }
     public DbSet<StudyGoal> StudyGoals { get; set; }
     public DbSet<QuestionBookmark> QuestionBookmarks { get; set; }
+    public DbSet<Note> Notes { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder app)
@@ -84,6 +86,14 @@ public class AttemptDbContext : DbContext
                 .HasDatabaseName("uq_bookmark_user_question");
             qb.HasIndex(x => x.UserId).HasDatabaseName("idx_bookmark_user");
             qb.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_bookmark_created");
+        });
+
+        app.Entity<Note>(n =>
+        {
+            n.ToTable("notes");
+            n.HasIndex(x => x.UserId).HasDatabaseName("idx_note_user");
+            n.HasIndex(x => new { x.UserId, x.AttemptId }).HasDatabaseName("idx_note_user_attempt");
+            n.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_note_created");
         });
     }
 }

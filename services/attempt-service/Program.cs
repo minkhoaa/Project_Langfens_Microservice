@@ -7,6 +7,7 @@ using attempt_service.Features.Attempt;
 using attempt_service.Features.Attempt.AttemptEndpoint;
 using attempt_service.Features.Bookmarks;
 using attempt_service.Features.Helpers;
+using attempt_service.Features.Notes;
 using attempt_service.Features.RabbitMq;
 using attempt_service.Features.StudyPlan;
 using attempt_service.Infrastructure.Persistence;
@@ -144,6 +145,7 @@ builder.Services.AddScoped<IBandPredictorService, BandPredictorService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IStudyPlanService, StudyPlanService>();
 builder.Services.AddScoped<BookmarkService>();
+builder.Services.AddScoped<NoteService>();
 builder.Services.AddSingleton<IAnswerKeyBuilder, AnswerKeyBuilder>();
 builder.Services.AddSingleton<IBuildQuestionIdSet, BuildQuestionIdSet>();
 builder.Services.AddSingleton<IQuestionIndex, QuestionIndex>();
@@ -218,22 +220,23 @@ builder.Services.AddAuthorization(option =>
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
-// Gemini AI for insights
-var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI__APIKEY");
-var geminiModel = EnvOrDefault("GEMINI__MODEL", "gemini-2.5-flash-lite");
-if (!string.IsNullOrEmpty(geminiApiKey))
+// Azure OpenAI for insights
+var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT");
+var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY");
+var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
+if (!string.IsNullOrEmpty(azureEndpoint) && !string.IsNullOrEmpty(azureApiKey))
 {
-    builder.Services.AddKernel().AddGoogleAIGeminiChatCompletion(
-        modelId: geminiModel,
-        apiKey: geminiApiKey,
-        apiVersion: Microsoft.SemanticKernel.Connectors.Google.GoogleAIVersion.V1_Beta
+    builder.Services.AddKernel().AddAzureOpenAIChatCompletion(
+        deploymentName: azureDeployment,
+        endpoint: azureEndpoint,
+        apiKey: azureApiKey
     );
     builder.Services.AddScoped<IAiInsightsService, AiInsightsService>();
-    Console.WriteLine($"[INFO] Gemini AI enabled with model: {geminiModel}");
+    Console.WriteLine($"[INFO] Azure OpenAI enabled with deployment: {azureDeployment}");
 }
 else
 {
-    Console.WriteLine("[WARN] GEMINI__APIKEY not set, AI insights will be disabled");
+    Console.WriteLine("[WARN] Azure OpenAI not configured, AI insights will be disabled");
 }
 
 var app = builder.Build();
@@ -263,5 +266,6 @@ app.MapAdminEndpoint();
 app.MapAnalyticsEndpoints();
 app.MapStudyPlanEndpoints();
 app.MapBookmarkEndpoints();
+app.MapNoteEndpoints();
 
 app.Run();

@@ -13,6 +13,7 @@ namespace dictionary_service.Features.Service
     {
         Task<IResult> GetSuggests(string word, string? pos, CancellationToken token);
         Task<IResult> GetDetails(int id, CancellationToken token);
+        Task<IResult> LookupWord(string word, CancellationToken token);
         Task<IResult> Reindex(int? batchSize, ElasticIndexer indexer, CancellationToken ct);
         Task<IResult> Import(IFormFile file, int? maxLines, CancellationToken ct);
 
@@ -88,6 +89,37 @@ namespace dictionary_service.Features.Service
                     score = h.Score
                 });
             return Results.Ok(result);
+        }
+
+        public async Task<IResult> LookupWord(string word, CancellationToken token)
+        {
+            if (string.IsNullOrWhiteSpace(word))
+                return Results.BadRequest("word is required");
+
+            var normalizedWord = word.Trim().ToLowerInvariant();
+
+            // Search for exact match first
+            var resp = await _elasticSearch.SearchAsync<DictionaryDoc>(s => s
+                .Indices(_index)
+                .Size(1)
+                .TrackTotalHits(false)
+                .Query(qry => qry.Bool(b => b
+                    .Should(
+                        sh => sh.Term(t => t.Field("wordNorm").Value(normalizedWord)),
+                        sh => sh.Match(m => m.Field("wordNorm").Query(normalizedWord))
+                    )
+                    .MinimumShouldMatch(1)
+                )), token);
+
+            if (!resp.IsValidResponse)
+                return Results.Problem(resp.ElasticsearchServerError?.Error?.Reason ?? "Elasticsearch error");
+
+            var hit = resp.Hits.FirstOrDefault();
+            if (hit?.Source is null)
+                return Results.NotFound(new { word, message = "Word not found" });
+
+            var dto = await _mapper.ToDetailsDtoAsync(hit.Source, maxSenses: 5, maxExamplesPerSense: 2, token);
+            return Results.Ok(dto);
         }
 
 

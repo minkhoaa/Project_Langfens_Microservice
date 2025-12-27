@@ -13,6 +13,7 @@ namespace dictionary_service.Features.Handler
     {
         public static Task<IResult> GetSuggestsHandler(string word, string? pos, CancellationToken token, [FromServices] IDictionaryService service) => service.GetSuggests(word, pos, token);
         public static Task<IResult> GetDetailsHandler([FromRoute] int id, CancellationToken token, [FromServices] IDictionaryService service) => service.GetDetails(id, token);
+        public static Task<IResult> LookupWordHandler(string word, CancellationToken token, [FromServices] IDictionaryService service) => service.LookupWord(word, token);
         public static Task<IResult> ReindexHandler(int? batchSize, ElasticIndexer indexer, CancellationToken ct, [FromServices] IDictionaryService service) => service.Reindex(batchSize, indexer, ct);
         public static Task<IResult> ImportHandler(IFormFile file, int? maxLines, CancellationToken ct, [FromServices] IDictionaryService service)
             => service.Import(file, maxLines, ct);

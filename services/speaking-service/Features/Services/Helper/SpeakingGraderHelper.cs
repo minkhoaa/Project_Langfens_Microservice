@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.Google;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.Extensions.Logging;
 using speaking_service.Contracts;
 using speaking_service.Domains.Entities;
@@ -39,11 +39,11 @@ namespace speaking_service.Features.Services.Helper
             history.AddSystemMessage(systemPrompt);
             history.AddUserMessage(userContent);
 
-            var settings = new GeminiPromptExecutionSettings
+            var settings = new OpenAIPromptExecutionSettings
             {
                 Temperature = 0.2,
                 MaxTokens = 1200,
-                ResponseMimeType = "application/json",
+                ResponseFormat = "json_object",
             };
 
             var messages = await _chat.GetChatMessageContentsAsync(
@@ -54,7 +54,7 @@ namespace speaking_service.Features.Services.Helper
             var content = messages.LastOrDefault()?.Content;
             if (string.IsNullOrWhiteSpace(content))
             {
-                _logger.LogWarning("Gemini returned empty content for speaking submission.");
+                _logger.LogWarning("Azure OpenAI returned empty content for speaking submission.");
                 throw new InvalidOperationException("Model returned empty content.");
             }
             var trimmed = content.Trim();

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.Google;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using attempt_service.Domain.Enums;
 using attempt_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -81,11 +81,11 @@ public class AiInsightsService : IAiInsightsService
             history.AddSystemMessage(AiInsightsPrompt.SystemPrompt);
             history.AddUserMessage(userPrompt);
 
-            var settings = new GeminiPromptExecutionSettings
+            var settings = new OpenAIPromptExecutionSettings
             {
                 Temperature = 0.3,
                 MaxTokens = 800,
-                ResponseMimeType = "application/json",
+                ResponseFormat = "json_object",
             };
 
             var messages = await _chat.GetChatMessageContentsAsync(
@@ -97,7 +97,7 @@ public class AiInsightsService : IAiInsightsService
             var content = messages.LastOrDefault()?.Content;
             if (string.IsNullOrWhiteSpace(content))
             {
-                _logger.LogWarning("Gemini returned empty content for AI insights");
+                _logger.LogWarning("Azure OpenAI returned empty content for AI insights");
                 return Results.Ok(new
                 {
                     isSuccess = false,
