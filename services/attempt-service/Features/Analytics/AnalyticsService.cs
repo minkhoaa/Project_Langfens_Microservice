@@ -419,7 +419,32 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
                 // Try to get correct answer from different fields
                 var correctAnswer = TryGetString(q, "correctAnswer", "CorrectAnswer", "correctText", "CorrectText", "modelAnswer", "ModelAnswer");
                 
-                // If no direct correct answer, try to find from options
+                // Try blankAcceptTexts (for fill-in-blank, diagram label, table completion)
+                // Format: {"blank-1": ["answer1", "answer2"], ...}
+                if (string.IsNullOrEmpty(correctAnswer))
+                {
+                    correctAnswer = TryGetObjectMapValues(q, "blankAcceptTexts", "BlankAcceptTexts");
+                }
+                
+                // Try completionAccepts (for sentence/summary completion)
+                if (string.IsNullOrEmpty(correctAnswer))
+                {
+                    correctAnswer = TryGetCompletionAccepts(q);
+                }
+                
+                // Try shortAnswerAcceptTexts
+                if (string.IsNullOrEmpty(correctAnswer))
+                {
+                    correctAnswer = TryGetStringArrayJoined(q, " / ", "shortAnswerAcceptTexts", "ShortAnswerAcceptTexts");
+                }
+                
+                // Try matchPairs (for matching questions)
+                if (string.IsNullOrEmpty(correctAnswer))
+                {
+                    correctAnswer = TryGetMatchPairs(q);
+                }
+                
+                // If no direct correct answer, try to find from options (MCQ)
                 if (string.IsNullOrEmpty(correctAnswer))
                 {
                     if (q.TryGetProperty("options", out var opts) && opts.ValueKind == System.Text.Json.JsonValueKind.Array)
@@ -453,6 +478,163 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
                 questions[qId] = new QuestionInfo(content, type, correctAnswer, explanation);
             }
         }
+    }
+    
+    // For array properties like shortAnswerAcceptTexts: ["ans1", "ans2"]
+    private static string? TryGetStringArrayJoined(System.Text.Json.JsonElement el, string separator, params string[] propNames)
+    {
+        foreach (var name in propNames)
+        {
+            if (el.TryGetProperty(name, out var prop) && prop.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                var items = new List<string>();
+                foreach (var item in prop.EnumerateArray())
+                {
+                    if (item.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        var val = item.GetString();
+                        if (!string.IsNullOrEmpty(val)) items.Add(val);
+                    }
+                }
+                if (items.Count > 0) return string.Join(separator, items);
+            }
+        }
+        return null;
+    }
+    
+    // For object/map properties like blankAcceptTexts: {"blank-1": ["ans1", "ans2"], "blank-2": ["ans3"]}
+    private static string? TryGetObjectMapValues(System.Text.Json.JsonElement el, params string[] propNames)
+    {
+        foreach (var name in propNames)
+        {
+            if (el.TryGetProperty(name, out var prop) && prop.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                var answers = new List<string>();
+                foreach (var kvp in prop.EnumerateObject())
+                {
+                    // Each value can be array of strings or single string
+                    if (kvp.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        var items = new List<string>();
+                        foreach (var item in kvp.Value.EnumerateArray())
+                        {
+                            if (item.ValueKind == System.Text.Json.JsonValueKind.String)
+                            {
+                                var val = item.GetString();
+                                if (!string.IsNullOrEmpty(val)) items.Add(val);
+                            }
+                        }
+                        if (items.Count > 0)
+                        {
+                            // Join multiple valid answers with "/"
+                            answers.Add(string.Join(" / ", items));
+                        }
+                    }
+                    else if (kvp.Value.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        var val = kvp.Value.GetString();
+                        if (!string.IsNullOrEmpty(val)) answers.Add(val);
+                    }
+                }
+                // For single question, usually just one entry
+                if (answers.Count > 0) return string.Join("; ", answers);
+            }
+        }
+        return null;
+    }
+    
+    private static string? TryGetCompletionAccepts(System.Text.Json.JsonElement q)
+    {
+        // Protobuf format: completionAccepts: [{blankId: "blank-1", acceptedTexts: ["answer1"]}, ...]
+        // JSON DTO format: completionAccepts: [{gapKey: "blank-1", acceptTexts: ["answer1"]}, ...]
+        foreach (var name in new[] { "completionAccepts", "CompletionAccepts" })
+        {
+            if (q.TryGetProperty(name, out var accepts) && accepts.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                var answers = new List<string>();
+                foreach (var gap in accepts.EnumerateArray())
+                {
+                    // Try protobuf format first (acceptedTexts), then fallback to DTO format (acceptTexts)
+                    var texts = TryGetStringArrayJoined(gap, " / ", "acceptedTexts", "AcceptedTexts", "acceptTexts", "AcceptTexts");
+                    if (!string.IsNullOrEmpty(texts))
+                    {
+                        answers.Add(texts);
+                    }
+                }
+                if (answers.Count > 0) return string.Join("; ", answers);
+            }
+        }
+        return null;
+    }
+    
+    private static string? TryGetMatchPairs(System.Text.Json.JsonElement q)
+    {
+        foreach (var name in new[] { "matchPairs", "MatchPairs" })
+        {
+            if (!q.TryGetProperty(name, out var pairs)) continue;
+            
+            // Handle Object format: {"q1": ["A"], "q2": ["B", "C"]} - textArrayMap schema
+            if (pairs.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                var answers = new List<string>();
+                foreach (var kvp in pairs.EnumerateObject())
+                {
+                    if (kvp.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach (var item in kvp.Value.EnumerateArray())
+                        {
+                            if (item.ValueKind == System.Text.Json.JsonValueKind.String)
+                            {
+                                var val = item.GetString();
+                                if (!string.IsNullOrEmpty(val)) answers.Add(val);
+                            }
+                        }
+                    }
+                    else if (kvp.Value.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        var val = kvp.Value.GetString();
+                        if (!string.IsNullOrEmpty(val)) answers.Add(val);
+                    }
+                }
+                if (answers.Count > 0) return string.Join(", ", answers);
+            }
+            // Handle Array format: [{promptKey: "q1", acceptedValues: ["A","a"]}, ...] or [{correctKey: "A"}, ...]
+            else if (pairs.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                var answers = new List<string>();
+                foreach (var pair in pairs.EnumerateArray())
+                {
+                    // Try acceptedValues array first (actual data format)
+                    if (pair.TryGetProperty("acceptedValues", out var acceptedVals) && 
+                        acceptedVals.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach (var item in acceptedVals.EnumerateArray())
+                        {
+                            if (item.ValueKind == System.Text.Json.JsonValueKind.String)
+                            {
+                                var val = item.GetString();
+                                if (!string.IsNullOrEmpty(val))
+                                {
+                                    answers.Add(val);
+                                    break; // Take first accepted value only
+                                }
+                            }
+                        }
+                    }
+                    // Fall back to correctKey/answerKey
+                    else
+                    {
+                        var correctKey = TryGetString(pair, "correctKey", "CorrectKey", "answerKey", "AnswerKey");
+                        if (!string.IsNullOrEmpty(correctKey))
+                        {
+                            answers.Add(correctKey);
+                        }
+                    }
+                }
+                if (answers.Count > 0) return string.Join(", ", answers);
+            }
+        }
+        return null;
     }
 
     private static string? TryGetString(System.Text.Json.JsonElement el, params string[] propNames)

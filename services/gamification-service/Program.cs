@@ -102,6 +102,7 @@ builder.Services.AddMassTransit(configurator =>
     configurator.AddConsumer<AttemptCompletedConsumer>();
     configurator.AddConsumer<CardReviewedConsumer>();
     configurator.AddConsumer<LessonCompletedConsumer>();
+    configurator.AddConsumer<UserCreatedConsumer>();
 
     var rabbitConfig = new
     {
@@ -128,6 +129,7 @@ builder.Services.AddMassTransit(configurator =>
         config.ReceiveEndpoint("gamification-attempt-completed", e => e.ConfigureConsumer<AttemptCompletedConsumer>(bus));
         config.ReceiveEndpoint("gamification-card-reviewed", e => e.ConfigureConsumer<CardReviewedConsumer>(bus));
         config.ReceiveEndpoint("gamification-lesson-completed", e => e.ConfigureConsumer<LessonCompletedConsumer>(bus));
+        config.ReceiveEndpoint("gamification-user-created", e => e.ConfigureConsumer<UserCreatedConsumer>(bus));
     });
 });
 

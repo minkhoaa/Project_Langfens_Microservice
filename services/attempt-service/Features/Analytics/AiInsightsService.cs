@@ -1,7 +1,5 @@
 using System.Text.Json;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using OpenAI.Chat;
 using attempt_service.Domain.Enums;
 using attempt_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -16,19 +14,16 @@ public interface IAiInsightsService
 public class AiInsightsService : IAiInsightsService
 {
     private readonly AttemptDbContext _context;
-    private readonly IChatCompletionService _chat;
-    private readonly Kernel _kernel;
+    private readonly ChatClient _chatClient;
     private readonly ILogger<AiInsightsService> _logger;
 
     public AiInsightsService(
         AttemptDbContext context,
-        IChatCompletionService chat,
-        Kernel kernel,
+        ChatClient chatClient,
         ILogger<AiInsightsService> logger)
     {
         _context = context;
-        _chat = chat;
-        _kernel = kernel;
+        _chatClient = chatClient;
         _logger = logger;
     }
 
@@ -77,24 +72,22 @@ public class AiInsightsService : IAiInsightsService
 
         try
         {
-            var history = new ChatHistory();
-            history.AddSystemMessage(AiInsightsPrompt.SystemPrompt);
-            history.AddUserMessage(userPrompt);
-
-            var settings = new OpenAIPromptExecutionSettings
+            var messages = new List<ChatMessage>
             {
-                Temperature = 0.3,
-                MaxTokens = 800,
-                ResponseFormat = "json_object",
+                new SystemChatMessage(AiInsightsPrompt.SystemPrompt),
+                new UserChatMessage(userPrompt)
             };
 
-            var messages = await _chat.GetChatMessageContentsAsync(
-                history,
-                executionSettings: settings,
-                kernel: _kernel,
-                cancellationToken: token);
+            var options = new ChatCompletionOptions
+            {
+                Temperature = 0.3f,
+                MaxOutputTokenCount = 800,
+                ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat()
+            };
 
-            var content = messages.LastOrDefault()?.Content;
+            var completion = await _chatClient.CompleteChatAsync(messages, options, token);
+            var content = completion.Value.Content.FirstOrDefault()?.Text;
+
             if (string.IsNullOrWhiteSpace(content))
             {
                 _logger.LogWarning("Azure OpenAI returned empty content for AI insights");

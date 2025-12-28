@@ -63,7 +63,9 @@ public class ExamService : IExamService
                 .Select(x =>
                     new Dto_Public.PublicExamRecord(
                         x.Id, x.Slug, x.Title, x.Category, x.Level, x.DurationMin, 
-                        x.UpdatedAt, x.ImageUrl!
+                        x.UpdatedAt, x.ImageUrl!,
+                        x.Sections.SelectMany(s => s.Questions.Select(q => q.Type))
+                            .Distinct().ToList()
                     ))
                 .ToListAsync(cancellationToken: cancellationToken);
 

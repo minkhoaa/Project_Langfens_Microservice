@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Auth_Email;
+using Shared.PublicContracts.Events;
 using Shared.Security.Claims;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
@@ -266,6 +267,10 @@ public class AuthService(
             var msg = update.Errors.Select(x => x.Description).FirstOrDefault() ?? "Unable to update user";
             return Results.Problem(update.Errors.ToString() ?? msg);
         }
+        
+        // Publish UserCreatedEvent to trigger welcome notification
+        await publish.Publish(new UserCreatedEvent(Guid.Parse(existedUser.Id), email, DateTime.UtcNow), ct);
+        
         return Results.Ok(new ApiResultDto(true, $"Verified user {email} successfully", null!));
     }
 

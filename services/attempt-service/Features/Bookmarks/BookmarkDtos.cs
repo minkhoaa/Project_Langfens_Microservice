@@ -3,6 +3,7 @@ namespace attempt_service.Features.Bookmarks;
 public record BookmarkDto(
     Guid Id,
     Guid QuestionId,
+    Guid? AttemptId,
     string? QuestionContent,
     string? QuestionType,
     string? Skill,
@@ -13,6 +14,7 @@ public record BookmarkDto(
 
 public record CreateBookmarkRequest(
     Guid QuestionId,
+    Guid? AttemptId,
     string? QuestionContent,
     string? Skill,
     string? QuestionType,

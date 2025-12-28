@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using attempt_service.Infrastructure.Persistence;
@@ -13,9 +14,11 @@ using attempt_service.Infrastructure.Persistence;
 namespace attempt_service.Migrations
 {
     [DbContext(typeof(AttemptDbContext))]
-    partial class AttemptDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251228145038_AddBookmarkContextFields")]
+    partial class AddBookmarkContextFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,6 +282,9 @@ namespace attempt_service.Migrations
 
                     b.Property<Guid?>("AttemptId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("CorrectAnswer")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

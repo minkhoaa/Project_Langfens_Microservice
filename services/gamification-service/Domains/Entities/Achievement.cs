@@ -6,8 +6,9 @@ public class Achievement
     public string Slug { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;
-    public string? IconUrl { get; set; }
+    public string? IconUrl { get; set; } // Material Symbol name e.g., "local_fire_department"
     public string Category { get; set; } = null!; // STREAK, TEST, VOCABULARY, COURSE
+    public string Tier { get; set; } = "COMMON"; // COMMON, RARE, EPIC, LEGENDARY
     public int RequiredValue { get; set; }
     public int XpReward { get; set; }
 

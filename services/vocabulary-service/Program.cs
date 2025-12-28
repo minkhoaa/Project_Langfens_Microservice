@@ -128,15 +128,16 @@ var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY");
 var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
 if (!string.IsNullOrWhiteSpace(azureEndpoint) && !string.IsNullOrWhiteSpace(azureApiKey))
 {
-    builder.Services.AddKernel().AddAzureOpenAIChatCompletion(
-        deploymentName: azureDeployment,
-        endpoint: azureEndpoint,
-        apiKey: azureApiKey);
+    builder.Services.AddSingleton(_ => new OpenAI.Chat.ChatClient(
+        model: azureDeployment,
+        credential: new System.ClientModel.ApiKeyCredential(azureApiKey),
+        options: new OpenAI.OpenAIClientOptions { Endpoint = new Uri(azureEndpoint) }
+    ));
     Console.WriteLine($"[INFO] Azure OpenAI enabled for vocabulary enrichment with deployment: {azureDeployment}");
 }
 else
 {
-    builder.Services.AddSingleton<Kernel>(sp => null!);
+    builder.Services.AddSingleton<OpenAI.Chat.ChatClient>(sp => null!);
     Console.WriteLine("[WARN] Azure OpenAI not configured – AI enrichment disabled");
 }
 

@@ -7,6 +7,16 @@ public record CreateCardRequest(
     string? HintMd
 );
 
+public record CreateBulkCardsRequest(
+    List<CreateCardItem> Cards
+);
+
+public record CreateCardItem(
+    string FrontMd,
+    string BackMd,
+    string? HintMd
+);
+
 public record UpdateCardRequest(
     int? Idx, 
     string? FrontMd,

@@ -10,7 +10,8 @@ public class Dto_Public
         string Level,
         int DurationMin,
         DateTime? updateAt,
-        string ImageUrl
+        string ImageUrl,
+        List<string>? QuestionTypes
         );
 
     public record PubLicExamDetailRecord(

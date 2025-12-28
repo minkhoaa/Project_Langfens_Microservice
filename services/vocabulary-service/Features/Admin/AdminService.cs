@@ -18,6 +18,7 @@ public interface IAdminService
     Task<IResult> MakeDeckPublic(Guid deckId, CancellationToken token);
     
     Task<IResult> CreateCards(Guid deckId, CreateCardRequest request, CancellationToken token);
+    Task<IResult> CreateBulkCards(Guid deckId, CreateBulkCardsRequest request, CancellationToken token);
     Task<IResult> UpdateCards(Guid cardId, UpdateCardRequest request, CancellationToken token);
     Task<IResult> DeleteCards(Guid cardId, CancellationToken token); 
 
@@ -123,6 +124,41 @@ public class AdminService(VocabularyDbContext context) : IAdminService
         context.Cards.Add(newCard);
         await context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Created successfully", newCard));
+    }
+
+    public async Task<IResult> CreateBulkCards(Guid deckId, CreateBulkCardsRequest request, CancellationToken token)
+    {
+        // Validate deck exists
+        var deck = await context.Decks.AsNoTracking()
+            .Where(x => x.Id == deckId)
+            .FirstOrDefaultAsync(token);
+        if (deck is null)
+            return Results.NotFound("Deck not found");
+
+        if (request.Cards == null || request.Cards.Count == 0)
+            return Results.BadRequest("No cards provided");
+
+        // Get next index
+        var nextIdx = await context.Cards.AsNoTracking()
+            .Where(x => x.DeckId == deckId)
+            .Select(x => (int?)x.Idx)
+            .MaxAsync(token) + 1 ?? 1;
+
+        // Create all cards in bulk
+        var newCards = request.Cards.Select((card, i) => new Card
+        {
+            DeckId = deckId,
+            FrontMd = card.FrontMd,
+            BackMd = card.BackMd,
+            Idx = nextIdx + i,
+            HintMd = card.HintMd ?? string.Empty
+        }).ToList();
+
+        context.Cards.AddRange(newCards);
+        await context.SaveChangesAsync(token);
+        
+        return Results.Ok(new ApiResultDto(true, $"Created {newCards.Count} cards successfully", 
+            new { count = newCards.Count, ids = newCards.Select(c => c.Id) }));
     }
 
     public async Task<IResult> UpdateCards(Guid cardId, UpdateCardRequest request, CancellationToken token)
