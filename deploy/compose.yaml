@@ -14,6 +14,9 @@
       - attempt-service
       - exam-service
       - course-service
+      - gamification-service
+      - dictionary-service
+      - chatbot-service
 
 
 
