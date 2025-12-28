@@ -9,10 +9,12 @@ namespace gamification_service.Features.Consumers;
 public class CardReviewedConsumer : IConsumer<CardReviewedEvent>
 {
     private readonly GamificationDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public CardReviewedConsumer(GamificationDbContext context)
+    public CardReviewedConsumer(GamificationDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task Consume(ConsumeContext<CardReviewedEvent> context)
@@ -23,6 +25,9 @@ public class CardReviewedConsumer : IConsumer<CardReviewedEvent>
         var xp = msg.IsCorrect ? XpRewards.CardReviewedCorrect : XpRewards.CardReviewedWrong;
 
         var stats = await GetOrCreateUserStats(msg.UserId, token);
+        var previousLevel = stats.Level;
+        var previousStreak = stats.CurrentStreak;
+        
         stats.TotalCardsReviewed++;
         stats.TotalXp += xp;
         stats.Level = UserStats.CalculateLevel(stats.TotalXp);
@@ -42,9 +47,61 @@ public class CardReviewedConsumer : IConsumer<CardReviewedEvent>
         });
 
         // Check vocabulary achievements
-        await CheckVocabAchievements(msg.UserId, stats, token);
+        var newAchievements = await CheckVocabAchievements(msg.UserId, stats, token);
 
         await _context.SaveChangesAsync(token);
+
+        // === NOTIFICATION TRIGGERS ===
+
+        // 1. Level up notification
+        if (stats.Level > previousLevel)
+        {
+            await _notificationService.CreateNotification(
+                msg.UserId,
+                Notification.Types.LevelUp,
+                $"Chúc mừng! Bạn đã lên Level {stats.Level} ⬆️",
+                $"Bạn đã tích lũy đủ XP để đạt Level {stats.Level}. Hãy tiếp tục học tập để chinh phục những đỉnh cao mới!",
+                $"{{\"level\":{stats.Level},\"totalXp\":{stats.TotalXp}}}"
+            );
+        }
+
+        // 2. Achievement notifications
+        foreach (var achievement in newAchievements)
+        {
+            await _notificationService.CreateNotification(
+                msg.UserId,
+                Notification.Types.Achievement,
+                $"Thành tựu mới: {achievement.Title} 🏆",
+                $"Bạn đã đạt được thành tựu \"{achievement.Title}\"! {achievement.Description}",
+                $"{{\"achievementId\":\"{achievement.Id}\",\"slug\":\"{achievement.Slug}\",\"xpReward\":{achievement.XpReward}}}"
+            );
+        }
+
+        // 3. Streak milestone notifications
+        var streakMilestones = new[] { 7, 14, 30, 60, 100 };
+        if (stats.CurrentStreak != previousStreak && streakMilestones.Contains(stats.CurrentStreak))
+        {
+            await _notificationService.CreateNotification(
+                msg.UserId,
+                Notification.Types.Streak,
+                $"Chuỗi {stats.CurrentStreak} ngày! 🔥",
+                $"Tuyệt vời! Bạn đã học liên tục {stats.CurrentStreak} ngày. Hãy duy trì phong độ này nhé!",
+                $"{{\"streak\":{stats.CurrentStreak}}}"
+            );
+        }
+        
+        // 4. Vocabulary milestone notifications (every 50 cards)
+        var vocabMilestones = new[] { 50, 100, 250, 500, 1000 };
+        if (vocabMilestones.Contains(stats.TotalCardsReviewed))
+        {
+            await _notificationService.CreateNotification(
+                msg.UserId,
+                Notification.Types.Achievement,
+                $"Cột mốc từ vựng: {stats.TotalCardsReviewed} từ! 📚",
+                $"Bạn đã ôn tập {stats.TotalCardsReviewed} thẻ từ vựng. Vốn từ của bạn đang phát triển rất tốt!",
+                $"{{\"totalCardsReviewed\":{stats.TotalCardsReviewed}}}"
+            );
+        }
     }
 
     private async Task<UserStats> GetOrCreateUserStats(Guid userId, CancellationToken token)
@@ -79,8 +136,10 @@ public class CardReviewedConsumer : IConsumer<CardReviewedEvent>
         }
     }
 
-    private async Task CheckVocabAchievements(Guid userId, UserStats stats, CancellationToken token)
+    private async Task<List<Achievement>> CheckVocabAchievements(Guid userId, UserStats stats, CancellationToken token)
     {
+        var newlyUnlocked = new List<Achievement>();
+        
         var achievements = await _context.Achievements
             .Where(a => a.Category == AchievementCategory.Vocabulary)
             .ToListAsync(token);
@@ -112,7 +171,11 @@ public class CardReviewedConsumer : IConsumer<CardReviewedEvent>
                     SourceId = achievement.Slug,
                     CreatedAt = DateTime.UtcNow
                 });
+                
+                newlyUnlocked.Add(achievement);
             }
         }
+        
+        return newlyUnlocked;
     }
 }

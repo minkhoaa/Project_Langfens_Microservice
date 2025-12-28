@@ -25,6 +25,11 @@ public static class AdminHandler
         CancellationToken token, IAdminService service)
         => service.CreateCards(deckId, request, token);
 
+    public static Task<IResult> CreateBulkCardsHandler(Guid deckId,
+        CreateBulkCardsRequest request,
+        CancellationToken token, IAdminService service)
+        => service.CreateBulkCards(deckId, request, token);
+
     public static Task<IResult> UpdateCardHandler(Guid cardId,
         UpdateCardRequest request,
         CancellationToken token, IAdminService service)

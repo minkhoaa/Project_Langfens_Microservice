@@ -226,11 +226,11 @@ var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY");
 var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
 if (!string.IsNullOrEmpty(azureEndpoint) && !string.IsNullOrEmpty(azureApiKey))
 {
-    builder.Services.AddKernel().AddAzureOpenAIChatCompletion(
-        deploymentName: azureDeployment,
-        endpoint: azureEndpoint,
-        apiKey: azureApiKey
-    );
+    builder.Services.AddSingleton(_ => new OpenAI.Chat.ChatClient(
+        model: azureDeployment,
+        credential: new System.ClientModel.ApiKeyCredential(azureApiKey),
+        options: new OpenAI.OpenAIClientOptions { Endpoint = new Uri(azureEndpoint) }
+    ));
     builder.Services.AddScoped<IAiInsightsService, AiInsightsService>();
     Console.WriteLine($"[INFO] Azure OpenAI enabled with deployment: {azureDeployment}");
 }

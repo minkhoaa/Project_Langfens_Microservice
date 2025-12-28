@@ -20,10 +20,12 @@ public interface IGamificationService
 public class GamificationService : IGamificationService
 {
     private readonly GamificationDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public GamificationService(GamificationDbContext context)
+    public GamificationService(GamificationDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<UserStatsResponse> GetUserStats(Guid userId, CancellationToken token)
@@ -38,7 +40,7 @@ public class GamificationService : IGamificationService
             .Select(x => new AchievementResponse(
                 x.Achievement.Id, x.Achievement.Slug, x.Achievement.Title,
                 x.Achievement.Description, x.Achievement.IconUrl, x.Achievement.Category,
-                x.Achievement.RequiredValue, x.Achievement.XpReward, true, x.UnlockedAt))
+                x.Achievement.Tier, x.Achievement.RequiredValue, x.Achievement.XpReward, true, x.UnlockedAt))
             .ToListAsync(token);
 
         return new UserStatsResponse(
@@ -64,7 +66,7 @@ public class GamificationService : IGamificationService
             .ToDictionaryAsync(x => x.AchievementId, x => x.UnlockedAt, token);
 
         return allAchievements.Select(a => new AchievementResponse(
-            a.Id, a.Slug, a.Title, a.Description, a.IconUrl, a.Category,
+            a.Id, a.Slug, a.Title, a.Description, a.IconUrl, a.Category, a.Tier,
             a.RequiredValue, a.XpReward,
             unlocked.ContainsKey(a.Id),
             unlocked.GetValueOrDefault(a.Id)
@@ -101,6 +103,8 @@ public class GamificationService : IGamificationService
     {
         var stats = await GetOrCreateUserStats(userId, token);
         var today = DateTime.UtcNow.Date;
+        var previousLevel = stats.Level;
+        var previousStreak = stats.CurrentStreak;
 
         // Check if already checked in today
         var alreadyCheckedIn = await _context.XpTransactions
@@ -121,6 +125,48 @@ public class GamificationService : IGamificationService
         var newAchievements = await CheckAndUnlockAchievements(userId, stats, token);
 
         await _context.SaveChangesAsync(token);
+
+        // === NOTIFICATION TRIGGERS ===
+
+        // 1. Level up notification
+        if (stats.Level > previousLevel)
+        {
+            await _notificationService.CreateNotification(
+                userId,
+                Notification.Types.LevelUp,
+                $"Chúc mừng! Bạn đã lên Level {stats.Level} ⬆️",
+                $"Bạn đã tích lũy đủ XP để đạt Level {stats.Level}. Hãy tiếp tục học tập để chinh phục những đỉnh cao mới!",
+                $"{{\"level\":{stats.Level},\"totalXp\":{stats.TotalXp}}}"
+            );
+        }
+
+        // 2. Streak milestone notifications
+        var streakMilestones = new[] { 7, 14, 30, 60, 100 };
+        if (stats.CurrentStreak != previousStreak && streakMilestones.Contains(stats.CurrentStreak))
+        {
+            await _notificationService.CreateNotification(
+                userId,
+                Notification.Types.Streak,
+                $"Chuỗi {stats.CurrentStreak} ngày! 🔥",
+                $"Tuyệt vời! Bạn đã học liên tục {stats.CurrentStreak} ngày. Hãy duy trì phong độ này nhé!",
+                $"{{\"streak\":{stats.CurrentStreak}}}"
+            );
+        }
+
+        // 3. Achievement notifications
+        if (newAchievements != null)
+        {
+            foreach (var achievement in newAchievements)
+            {
+                await _notificationService.CreateNotification(
+                    userId,
+                    Notification.Types.Achievement,
+                    $"Thành tựu mới: {achievement.Title} 🏆",
+                    $"Bạn đã đạt được thành tựu \"{achievement.Title}\"!",
+                    $"{{\"achievementId\":\"{achievement.Id}\",\"slug\":\"{achievement.Slug}\",\"xpReward\":{achievement.XpReward}}}"
+                );
+            }
+        }
 
         return new DailyCheckinResponse(
             true,
@@ -249,7 +295,7 @@ public class GamificationService : IGamificationService
 
                 newlyUnlocked.Add(new AchievementResponse(
                     achievement.Id, achievement.Slug, achievement.Title, achievement.Description,
-                    achievement.IconUrl, achievement.Category, achievement.RequiredValue,
+                    achievement.IconUrl, achievement.Category, achievement.Tier, achievement.RequiredValue,
                     achievement.XpReward, true, userAchievement.UnlockedAt
                 ));
             }

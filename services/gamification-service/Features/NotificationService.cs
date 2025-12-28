@@ -138,6 +138,9 @@ public class NotificationService(GamificationDbContext context) : INotificationS
                 Notification.Types.Streak => settings.EnableStreak,
                 Notification.Types.GoalProgress => settings.EnableGoalProgress,
                 Notification.Types.Inactivity => settings.EnableInactivity,
+                Notification.Types.Welcome => settings.EnableWelcome,
+                Notification.Types.LevelUp => settings.EnableLevelUp,
+                Notification.Types.TestCompleted => settings.EnableTestCompleted,
                 _ => true
             };
 

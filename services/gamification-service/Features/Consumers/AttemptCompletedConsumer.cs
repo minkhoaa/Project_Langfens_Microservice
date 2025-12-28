@@ -10,11 +10,16 @@ public class AttemptCompletedConsumer : IConsumer<AttemptCompletedEvent>
 {
     private readonly GamificationDbContext _context;
     private readonly IGamificationService _service;
+    private readonly INotificationService _notificationService;
 
-    public AttemptCompletedConsumer(GamificationDbContext context, IGamificationService service)
+    public AttemptCompletedConsumer(
+        GamificationDbContext context, 
+        IGamificationService service,
+        INotificationService notificationService)
     {
         _context = context;
         _service = service;
+        _notificationService = notificationService;
     }
 
     public async Task Consume(ConsumeContext<AttemptCompletedEvent> context)
@@ -34,6 +39,9 @@ public class AttemptCompletedConsumer : IConsumer<AttemptCompletedEvent>
 
         // Update user stats
         var stats = await GetOrCreateUserStats(msg.UserId, token);
+        var previousLevel = stats.Level;
+        var previousStreak = stats.CurrentStreak;
+        
         stats.TotalTestsCompleted++;
         stats.TotalXp += xp;
         stats.Level = UserStats.CalculateLevel(stats.TotalXp);
@@ -54,9 +62,58 @@ public class AttemptCompletedConsumer : IConsumer<AttemptCompletedEvent>
         });
 
         // Check achievements
-        await CheckTestAchievements(msg.UserId, stats, token);
+        var newAchievements = await CheckTestAchievements(msg.UserId, stats, token);
 
         await _context.SaveChangesAsync(token);
+
+        // === NOTIFICATION TRIGGERS ===
+        
+        // 1. Test completed notification
+        var skillName = msg.Skill ?? "Reading";
+        await _notificationService.CreateNotification(
+            msg.UserId,
+            Notification.Types.TestCompleted,
+            "Bài test đã hoàn thành! 📝",
+            $"Bạn vừa hoàn thành bài test {skillName} với {msg.Score} câu đúng. Tiếp tục phát huy nhé!",
+            $"{{\"attemptId\":\"{msg.AttemptId}\",\"skill\":\"{skillName}\",\"score\":{msg.Score}}}"
+        );
+
+        // 2. Level up notification
+        if (stats.Level > previousLevel)
+        {
+            await _notificationService.CreateNotification(
+                msg.UserId,
+                Notification.Types.LevelUp,
+                $"Chúc mừng! Bạn đã lên Level {stats.Level} ⬆️",
+                $"Bạn đã tích lũy đủ XP để đạt Level {stats.Level}. Hãy tiếp tục học tập để chinh phục những đỉnh cao mới!",
+                $"{{\"level\":{stats.Level},\"totalXp\":{stats.TotalXp}}}"
+            );
+        }
+
+        // 3. Achievement notifications
+        foreach (var achievement in newAchievements)
+        {
+            await _notificationService.CreateNotification(
+                msg.UserId,
+                Notification.Types.Achievement,
+                $"Thành tựu mới: {achievement.Title} 🏆",
+                $"Bạn đã đạt được thành tựu \"{achievement.Title}\"! {achievement.Description}",
+                $"{{\"achievementId\":\"{achievement.Id}\",\"slug\":\"{achievement.Slug}\",\"xpReward\":{achievement.XpReward}}}"
+            );
+        }
+
+        // 4. Streak milestone notifications
+        var streakMilestones = new[] { 7, 14, 30, 60, 100 };
+        if (stats.CurrentStreak != previousStreak && streakMilestones.Contains(stats.CurrentStreak))
+        {
+            await _notificationService.CreateNotification(
+                msg.UserId,
+                Notification.Types.Streak,
+                $"Chuỗi {stats.CurrentStreak} ngày! 🔥",
+                $"Tuyệt vời! Bạn đã học liên tục {stats.CurrentStreak} ngày. Hãy duy trì phong độ này nhé!",
+                $"{{\"streak\":{stats.CurrentStreak}}}"
+            );
+        }
     }
 
     private async Task<UserStats> GetOrCreateUserStats(Guid userId, CancellationToken token)
@@ -91,8 +148,10 @@ public class AttemptCompletedConsumer : IConsumer<AttemptCompletedEvent>
         }
     }
 
-    private async Task CheckTestAchievements(Guid userId, UserStats stats, CancellationToken token)
+    private async Task<List<Achievement>> CheckTestAchievements(Guid userId, UserStats stats, CancellationToken token)
     {
+        var newlyUnlocked = new List<Achievement>();
+        
         var testAchievements = await _context.Achievements
             .Where(a => a.Category == AchievementCategory.Test)
             .ToListAsync(token);
@@ -124,7 +183,11 @@ public class AttemptCompletedConsumer : IConsumer<AttemptCompletedEvent>
                     SourceId = achievement.Slug,
                     CreatedAt = DateTime.UtcNow
                 });
+                
+                newlyUnlocked.Add(achievement);
             }
         }
+        
+        return newlyUnlocked;
     }
 }

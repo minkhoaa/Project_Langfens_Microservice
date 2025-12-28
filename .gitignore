@@ -100,14 +100,13 @@ docker-compose.override.yaml
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
-frontend/**
 
 .fake
 services/email-sender-nest/.prettierrc
 services/speaking-service/Helper/whisper/models/*.bin
 # All appsettings.Development.json across the project
 **/appsettings.Development.json
-
+frontend/**
 # Python virtual environments
 **/.venv/
 **/venv/

@@ -33,5 +33,20 @@ public class UserNotificationSettings
     /// </summary>
     public bool EnableInactivity { get; set; } = true;
 
+    /// <summary>
+    /// Enable welcome notifications
+    /// </summary>
+    public bool EnableWelcome { get; set; } = true;
+
+    /// <summary>
+    /// Enable level up notifications
+    /// </summary>
+    public bool EnableLevelUp { get; set; } = true;
+
+    /// <summary>
+    /// Enable test completed notifications
+    /// </summary>
+    public bool EnableTestCompleted { get; set; } = true;
+
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

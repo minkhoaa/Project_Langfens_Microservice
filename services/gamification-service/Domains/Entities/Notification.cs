@@ -46,5 +46,8 @@ public class Notification
         public const string GoalProgress = "GOAL_PROGRESS";
         public const string StudyReminder = "STUDY_REMINDER";
         public const string Inactivity = "INACTIVITY";
+        public const string Welcome = "WELCOME";
+        public const string LevelUp = "LEVEL_UP";
+        public const string TestCompleted = "TEST_COMPLETED";
     }
 }

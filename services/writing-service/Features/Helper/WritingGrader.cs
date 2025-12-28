@@ -1,7 +1,5 @@
 using System.Text.Json;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using OpenAI.Chat;
 using writing_service.Contracts;
 using writing_service.Domains.Entities;
 
@@ -14,18 +12,15 @@ namespace writing_service.Features.Helper
     }
     public class WritingGrader : IWritingGrader
     {
-
         private readonly ILogger<WritingGrader> _logger;
-        private readonly IChatCompletionService _chat;
-        private readonly Kernel _kernel;
-        public WritingGrader(
-        ILogger<WritingGrader> logger, Kernel kernel, IChatCompletionService chat
-        )
+        private readonly ChatClient _chatClient;
+
+        public WritingGrader(ILogger<WritingGrader> logger, ChatClient chatClient)
         {
-            _chat = chat;
-            _kernel = kernel;
+            _chatClient = chatClient;
             _logger = logger;
         }
+
         public async Task<(WritingGradeResponse, LlmWritingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token)
         {
             string systemPrompt = WritingTemplate.SystemPrompt;
@@ -36,17 +31,23 @@ namespace writing_service.Features.Helper
                             T:{submission.Task}
                             E:{submission.Answer}
                             """;
-            var history = new ChatHistory();
-            history.AddSystemMessage(systemPrompt);
-            history.AddUserMessage(userContent);
-            var settings = new OpenAIPromptExecutionSettings
+
+            var messages = new List<ChatMessage>
             {
-                Temperature = 0.1,
-                MaxTokens = 1200,
-                ResponseFormat = "json_object",
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage(userContent)
             };
-            var messages = await _chat.GetChatMessageContentsAsync(history, executionSettings: settings, kernel: _kernel, cancellationToken: token);
-            var content = messages.LastOrDefault()?.Content;
+
+            var options = new ChatCompletionOptions
+            {
+                Temperature = 0.1f,
+                MaxOutputTokenCount = 1200,
+                ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat()
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(messages, options, token);
+            var content = completion.Value.Content.FirstOrDefault()?.Text;
+
             if (string.IsNullOrWhiteSpace(content))
             {
                 _logger.LogWarning("Azure OpenAI returned empty content.");
@@ -97,7 +98,6 @@ namespace writing_service.Features.Helper
                 PromptSchemaVersion = "v1"
             };
             return evaluation;
-
         }
     }
 }

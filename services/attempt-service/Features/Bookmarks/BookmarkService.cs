@@ -19,6 +19,7 @@ public class BookmarkService(AttemptDbContext db)
         if (existing != null)
         {
             existing.Note = req.Note;
+            existing.AttemptId = req.AttemptId ?? existing.AttemptId;
             existing.QuestionContent = req.QuestionContent ?? existing.QuestionContent;
             existing.Skill = req.Skill ?? existing.Skill;
             existing.QuestionType = req.QuestionType ?? existing.QuestionType;
@@ -31,6 +32,7 @@ public class BookmarkService(AttemptDbContext db)
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 QuestionId = req.QuestionId,
+                AttemptId = req.AttemptId,
                 QuestionContent = req.QuestionContent,
                 Skill = req.Skill,
                 QuestionType = req.QuestionType,
@@ -75,6 +77,7 @@ public class BookmarkService(AttemptDbContext db)
             .Select(b => new BookmarkDto(
                 b.Id,
                 b.QuestionId,
+                b.AttemptId,
                 b.QuestionContent,
                 b.QuestionType,
                 b.Skill,

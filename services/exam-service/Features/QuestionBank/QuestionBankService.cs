@@ -63,8 +63,12 @@ public class QuestionBankService(ExamDbContext context) : IQuestionBankService
             .Where(e => context.ExamQuestions.Any(q => q.Section.ExamId == e.Id && q.Type == type))
             .Skip((page -1) * pageSize)
             .Take(pageSize)
-            .Select(k => new Dto_Public.PublicExamRecord(k.Id, k.Slug, k.Title, k.Category, k.Level, k.DurationMin,
-                k.UpdatedAt, k.ImageUrl!)).ToListAsync(token);
+            .Select(k => new Dto_Public.PublicExamRecord(
+                k.Id, k.Slug, k.Title, k.Category, k.Level, k.DurationMin,
+                k.UpdatedAt, k.ImageUrl!,
+                k.Sections.SelectMany(s => s.Questions.Select(q => q.Type))
+                    .Distinct().ToList()
+            )).ToListAsync(token);
         return Results.Ok(new ApiResultDto(true, "Fetched successfully", exams));
     }
 

@@ -57,6 +57,7 @@ public static class VocabularyEndpoint
         users.MapPut("/deck/{deckId}", AdminHandler.UpdateDeckHandler);
         users.MapDelete("/deck/{deckId}", AdminHandler.DeleteDeckHandler);
         users.MapPost("/deck/{deckId}/card", AdminHandler.CreateCardHandler);
+        users.MapPost("/deck/{deckId}/cards", AdminHandler.CreateBulkCardsHandler);  // Bulk create
         users.MapPut("/deck/card/{cardId}", AdminHandler.UpdateCardHandler);
         users.MapDelete("/deck/card/{cardId}", AdminHandler.DeleteCardHandler);
         users.MapDelete("/deck/{deckId}/publish", AdminHandler.PublishDeckHandler);

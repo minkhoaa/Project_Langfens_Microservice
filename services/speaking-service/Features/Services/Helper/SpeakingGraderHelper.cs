@@ -1,9 +1,7 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using OpenAI.Chat;
 using Microsoft.Extensions.Logging;
 using speaking_service.Contracts;
 using speaking_service.Domains.Entities;
@@ -11,23 +9,23 @@ using speaking_service.Features.Helper;
 
 namespace speaking_service.Features.Services.Helper
 {
-
     public interface ISpeakingGrader
     {
         Task<(SpeakingGradeResponse, LlmSpeakingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token);
         SpeakingEvaluation MapToEvaluation(SpeakingGradeResponse response, LlmSpeakingScoreCompact raw);
     }
+
     public class SpeakingGrader : ISpeakingGrader
     {
         private readonly ILogger<SpeakingGrader> _logger;
-        private readonly IChatCompletionService _chat;
-        private readonly Kernel _kernel;
-        public SpeakingGrader(ILogger<SpeakingGrader> logger, Kernel kernel, IChatCompletionService chat)
+        private readonly ChatClient _chatClient;
+
+        public SpeakingGrader(ILogger<SpeakingGrader> logger, ChatClient chatClient)
         {
             _logger = logger;
-            _kernel = kernel;
-            _chat = chat;
+            _chatClient = chatClient;
         }
+
         public async Task<(SpeakingGradeResponse, LlmSpeakingScoreCompact)> Grade(ContentSubmission submission, CancellationToken token)
         {
             string systemPrompt = SpeakingTemplate.SystemPrompt;
@@ -35,28 +33,29 @@ namespace speaking_service.Features.Services.Helper
                             Q:{submission.Task}
                             E:{submission.Transcript} 
                             """;
-            var history = new ChatHistory();
-            history.AddSystemMessage(systemPrompt);
-            history.AddUserMessage(userContent);
 
-            var settings = new OpenAIPromptExecutionSettings
+            var messages = new List<ChatMessage>
             {
-                Temperature = 0.2,
-                MaxTokens = 1200,
-                ResponseFormat = "json_object",
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage(userContent)
             };
 
-            var messages = await _chat.GetChatMessageContentsAsync(
-                history,
-                executionSettings: settings,
-                kernel: _kernel,
-                cancellationToken: token);
-            var content = messages.LastOrDefault()?.Content;
+            var options = new ChatCompletionOptions
+            {
+                Temperature = 0.2f,
+                MaxOutputTokenCount = 1200,
+                ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat()
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(messages, options, token);
+            var content = completion.Value.Content.FirstOrDefault()?.Text;
+
             if (string.IsNullOrWhiteSpace(content))
             {
                 _logger.LogWarning("Azure OpenAI returned empty content for speaking submission.");
                 throw new InvalidOperationException("Model returned empty content.");
             }
+
             var trimmed = content.Trim();
             trimmed = ExtractJsonObject.Extract(trimmed);
 
@@ -72,6 +71,7 @@ namespace speaking_service.Features.Services.Helper
                     $"Failed to parse model JSON. Content: {trimmed[..Math.Min(trimmed.Length, 200)]}",
                     ex);
             }
+
             if (jsonRes is null) throw new InvalidOperationException("Cannot convert into Object");
             var resp = LlmToResponseHelper.MapToResponse(submission, jsonRes);
             return (resp, jsonRes);
@@ -100,10 +100,6 @@ namespace speaking_service.Features.Services.Helper
                 PromptSchemaVersion = "v1"
             };
             return evaluation;
-
         }
     }
-
-
 }
-

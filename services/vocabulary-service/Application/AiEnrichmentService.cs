@@ -1,6 +1,5 @@
 using System.Text.Json;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using OpenAI.Chat;
 
 namespace vocabulary_service.Application;
 
@@ -23,12 +22,12 @@ public class EnrichedWordDto
 
 public class AiEnrichmentService : IAiEnrichmentService
 {
-    private readonly Kernel? _kernel;
+    private readonly ChatClient? _chatClient;
     private readonly ILogger<AiEnrichmentService> _logger;
 
-    public AiEnrichmentService(Kernel? kernel, ILogger<AiEnrichmentService> logger)
+    public AiEnrichmentService(ChatClient? chatClient, ILogger<AiEnrichmentService> logger)
     {
-        _kernel = kernel;
+        _chatClient = chatClient;
         _logger = logger;
     }
 
@@ -36,10 +35,10 @@ public class AiEnrichmentService : IAiEnrichmentService
     {
         var normalizedWord = word.Trim().ToLowerInvariant();
 
-        // If no AI kernel, return basic info
-        if (_kernel is null)
+        // If no ChatClient, return basic info
+        if (_chatClient is null)
         {
-            _logger.LogWarning("AI Kernel not available, returning basic word info");
+            _logger.LogWarning("ChatClient not available, returning basic word info");
             return new EnrichedWordDto
             {
                 Word = normalizedWord,
@@ -74,14 +73,19 @@ Return ONLY the JSON object, no markdown or explanation.
 
         try
         {
-            var settings = new OpenAIPromptExecutionSettings
+            var messages = new List<ChatMessage>
             {
-                Temperature = 0.3,
-                MaxTokens = 500
+                new UserChatMessage(prompt)
             };
 
-            var result = await _kernel.InvokePromptAsync(prompt, new KernelArguments(settings), cancellationToken: token);
-            var content = result.GetValue<string>();
+            var options = new ChatCompletionOptions
+            {
+                Temperature = 0.3f,
+                MaxOutputTokenCount = 500
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(messages, options, token);
+            var content = completion.Value.Content.FirstOrDefault()?.Text;
 
             if (string.IsNullOrWhiteSpace(content))
             {

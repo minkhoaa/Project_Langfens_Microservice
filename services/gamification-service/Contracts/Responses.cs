@@ -20,8 +20,9 @@ public record AchievementResponse(
     string Slug,
     string Title,
     string Description,
-    string? IconUrl,
+    string? IconUrl, // Material Symbol name e.g., "local_fire_department"
     string Category,
+    string Tier, // COMMON, RARE, EPIC, LEGENDARY
     int RequiredValue,
     int XpReward,
     bool IsUnlocked,
