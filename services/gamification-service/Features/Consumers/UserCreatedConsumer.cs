@@ -30,6 +30,7 @@ public class UserCreatedConsumer : IConsumer<UserCreatedEvent>
             {
                 Id = Guid.NewGuid(),
                 UserId = msg.UserId,
+                DisplayName = msg.Email, // Use email for leaderboard display
                 TotalXp = 0,
                 Level = 1,
                 CurrentStreak = 0,

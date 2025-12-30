@@ -83,7 +83,7 @@ public class GamificationService : IGamificationService
             .ToListAsync(token);
 
         return topUsers.Select((u, index) => new LeaderboardEntry(
-            index + 1, u.UserId, null, u.TotalXp, u.Level, u.CurrentStreak
+            index + 1, u.UserId, u.DisplayName, u.TotalXp, u.Level, u.CurrentStreak
         )).ToList();
     }
 

@@ -4,6 +4,7 @@ public class UserStats
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
+    public string? DisplayName { get; set; } // Email or name for leaderboard display
     public int TotalXp { get; set; }
     public int Level { get; set; } = 1;
     public int CurrentStreak { get; set; }
