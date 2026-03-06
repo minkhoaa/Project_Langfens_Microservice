@@ -41,9 +41,11 @@ public class AttemptService(
     IAnswerValidator answerValidator,
     IPlacementWorkflow placementWorkflow,
     IPublishEndpoint publishEndpoint,
-IQuestionGraderFactory questionGraderFactory
+    IQuestionGraderFactory questionGraderFactory,
+    ILogger<AttemptService> logger
 ) : IAttemptService
 {
+    private readonly ILogger<AttemptService> _logger = logger;
     public async Task<IResult> StartAttempt(
         AttemptStartRequest request,
         CancellationToken token
@@ -725,7 +727,10 @@ IQuestionGraderFactory questionGraderFactory
                         placementResult.WritingGradeJson,
                         new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 }
-                catch { /* ignore parse errors */ }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to deserialize WritingGradeJson for placement result");
+                }
             }
             if (!string.IsNullOrEmpty(placementResult.SpeakingGradeJson))
             {
@@ -735,7 +740,10 @@ IQuestionGraderFactory questionGraderFactory
                         placementResult.SpeakingGradeJson,
                         new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 }
-                catch { /* ignore parse errors */ }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to deserialize SpeakingGradeJson for placement result");
+                }
             }
         }
         else
@@ -1015,7 +1023,10 @@ IQuestionGraderFactory questionGraderFactory
                 if (x.PaperJson != null && x.PaperJson.RootElement.TryGetProperty("title", out var t))
                     title = t.GetString();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to extract exam title from PaperJson for attempt {AttemptId}", x.Id);
+            }
             return new AttemptListItem(x.Id, x.ExamId, x.Status, x.StartedAt, x.SubmittedAt, x.ScaledScore, title);
         }).ToList();
 
@@ -1132,9 +1143,12 @@ IQuestionGraderFactory questionGraderFactory
                     placementEntity.WritingGradeJson,
                     new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
-            catch { /* ignore parse errors */ }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to deserialize WritingGradeJson for placement entity {PlacementId}", placementEntity.Id);
+            }
         }
-        
+
         if (!string.IsNullOrEmpty(placementEntity.SpeakingGradeJson))
         {
             try
@@ -1143,7 +1157,10 @@ IQuestionGraderFactory questionGraderFactory
                     placementEntity.SpeakingGradeJson,
                     new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
-            catch { /* ignore parse errors */ }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to deserialize SpeakingGradeJson for placement entity {PlacementId}", placementEntity.Id);
+            }
         }
         
         var placement = new PlacementResultResponse(

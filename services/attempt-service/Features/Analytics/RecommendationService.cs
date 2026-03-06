@@ -11,8 +11,9 @@ public interface IRecommendationService
     Task<IResult> GetRecommendations(Guid userId, int limit, CancellationToken token);
 }
 
-public class RecommendationService(AttemptDbContext context, IExamGateway examGateway) : IRecommendationService
+public class RecommendationService(AttemptDbContext context, IExamGateway examGateway, ILogger<RecommendationService> logger) : IRecommendationService
 {
+    private readonly ILogger<RecommendationService> _logger = logger;
     public async Task<IResult> GetRecommendations(Guid userId, int limit, CancellationToken token)
     {
         limit = Math.Clamp(limit, 1, 10);
@@ -32,9 +33,10 @@ public class RecommendationService(AttemptDbContext context, IExamGateway examGa
         {
             availableExams = await examGateway.GetExamListAsync(token);
         }
-        catch
+        catch (Exception ex)
         {
-            return Results.Ok(new ApiResultDto(false, "Could not fetch exam list", 
+            _logger.LogWarning(ex, "Failed to fetch exam list from exam gateway for user {UserId}", userId);
+            return Results.Ok(new ApiResultDto(false, "Could not fetch exam list",
                 new RecommendationsDto(new List<RecommendationDto>())));
         }
         
@@ -242,16 +244,16 @@ public class RecommendationService(AttemptDbContext context, IExamGateway examGa
         Dictionary<Guid, QuestionInfo> Questions
     );
     
-    private static PaperInfo ExtractPaperInfo(System.Text.Json.JsonDocument? paperJson)
+    private PaperInfo ExtractPaperInfo(System.Text.Json.JsonDocument? paperJson)
     {
         var sections = new Dictionary<Guid, SectionInfo>();
         var questions = new Dictionary<Guid, QuestionInfo>();
-        
+
         if (paperJson == null) return new PaperInfo(sections, questions);
-        
+
         try
         {
-            if (paperJson.RootElement.TryGetProperty("sections", out var sectionsEl) && 
+            if (paperJson.RootElement.TryGetProperty("sections", out var sectionsEl) &&
                 sectionsEl.ValueKind == System.Text.Json.JsonValueKind.Array)
             {
                 foreach (var section in sectionsEl.EnumerateArray())
@@ -263,17 +265,17 @@ public class RecommendationService(AttemptDbContext context, IExamGateway examGa
                         sections[sectionId] = new SectionInfo(title, skill);
 
                         // Extract from questionGroups
-                        if (section.TryGetProperty("questionGroups", out var groupsEl) && 
+                        if (section.TryGetProperty("questionGroups", out var groupsEl) &&
                             groupsEl.ValueKind == System.Text.Json.JsonValueKind.Array)
                         {
                             foreach (var grp in groupsEl.EnumerateArray())
                             {
-                                if (grp.TryGetProperty("questions", out var questionsEl) && 
+                                if (grp.TryGetProperty("questions", out var questionsEl) &&
                                     questionsEl.ValueKind == System.Text.Json.JsonValueKind.Array)
                                 {
                                     foreach (var q in questionsEl.EnumerateArray())
                                     {
-                                        if (q.TryGetProperty("id", out var qIdEl) && 
+                                        if (q.TryGetProperty("id", out var qIdEl) &&
                                             Guid.TryParse(qIdEl.GetString(), out var qId))
                                         {
                                             var type = q.TryGetProperty("type", out var tp) ? tp.GetString() : null;
@@ -288,8 +290,11 @@ public class RecommendationService(AttemptDbContext context, IExamGateway examGa
                 }
             }
         }
-        catch { }
-        
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to extract paper info from PaperJson");
+        }
+
         return new PaperInfo(sections, questions);
     }
 }

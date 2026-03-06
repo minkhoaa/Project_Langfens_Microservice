@@ -14,8 +14,9 @@ public interface IAnalyticsService
     Task<IResult> GetWrongAnswers(Guid userId, string? skill, string? questionType, DateTime? fromDate, int page, int pageSize, CancellationToken token);
 }
 
-public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
+public class AnalyticsService(AttemptDbContext context, ILogger<AnalyticsService> logger) : IAnalyticsService
 {
+    private readonly ILogger<AnalyticsService> _logger = logger;
     public async Task<IResult> GetSummary(Guid userId, CancellationToken token)
     {
         var attempts = await context.Attempts
@@ -123,7 +124,7 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
             new StrengthsWeaknessesDto(strengths, weaknesses)));
     }
 
-    private static void ExtractQuestionTypes(System.Text.Json.JsonDocument? paperJson, Dictionary<Guid, string> questionTypes)
+    private void ExtractQuestionTypes(System.Text.Json.JsonDocument? paperJson, Dictionary<Guid, string> questionTypes)
     {
         if (paperJson == null) return;
         try
@@ -156,7 +157,10 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to extract question types from PaperJson");
+        }
     }
 
     private static string FormatQuestionType(string type)
@@ -183,7 +187,7 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
         };
     }
 
-    private static void ExtractSectionNames(System.Text.Json.JsonDocument? paperJson, Dictionary<Guid, string> sectionNames)
+    private void ExtractSectionNames(System.Text.Json.JsonDocument? paperJson, Dictionary<Guid, string> sectionNames)
     {
         if (paperJson == null) return;
         try
@@ -206,7 +210,10 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to extract section names from PaperJson");
+        }
     }
 
     public async Task<IResult> GetRecentActivity(Guid userId, int limit, CancellationToken token)
@@ -232,7 +239,7 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
         return Results.Ok(new ApiResultDto(true, "Recent activities fetched", new RecentActivitiesDto(activities)));
     }
 
-    private static string? ExtractExamTitle(System.Text.Json.JsonDocument? paperJson)
+    private string? ExtractExamTitle(System.Text.Json.JsonDocument? paperJson)
     {
         if (paperJson == null) return null;
         try
@@ -242,7 +249,10 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
                 return titleElement.GetString();
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to extract exam title from PaperJson");
+        }
         return null;
     }
 
@@ -360,13 +370,13 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
     private record SectionInfo(string? Title, string? Skill);
     private record QuestionInfo(string? Content, string? Type, string? CorrectAnswer, string? Explanation);
 
-    private static PaperInfo ExtractPaperInfo(System.Text.Json.JsonDocument? paperJson)
+    private PaperInfo ExtractPaperInfo(System.Text.Json.JsonDocument? paperJson)
     {
         var sections = new Dictionary<Guid, SectionInfo>();
         var questions = new Dictionary<Guid, QuestionInfo>();
-        
+
         if (paperJson == null) return new PaperInfo(sections, questions);
-        
+
         try
         {
             if (paperJson.RootElement.TryGetProperty("sections", out var sectionsEl) && sectionsEl.ValueKind == System.Text.Json.JsonValueKind.Array)
@@ -390,7 +400,7 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
                                 }
                             }
                         }
-                        
+
                         // Also check direct questions array (old structure)
                         if (section.TryGetProperty("questions", out var directQuestionsEl) && directQuestionsEl.ValueKind == System.Text.Json.JsonValueKind.Array)
                         {
@@ -400,8 +410,11 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
                 }
             }
         }
-        catch { }
-        
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to extract paper info from PaperJson");
+        }
+
         return new PaperInfo(sections, questions);
     }
 
