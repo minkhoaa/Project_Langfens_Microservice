@@ -30,27 +30,35 @@ namespace writing_service.Features.RabbitMq
             var answerText = !string.IsNullOrEmpty(request.AnswerText) ? request.AnswerText : "";
 
             var contentSubmission = new ContentSubmission() { Task = taskText, Answer = answerText };
-            var (response, rawResponse) = await _grader.Grade(contentSubmission, CancellationToken.None);
-            _logger.LogInformation(JsonSerializer.Serialize(response));
-            var gradingResponse = new WritingGradeResponseMessage
+            try
             {
-                AttemptId = request.AttemptId,
-                UserId = request.UserId,
-                QuestionId = request.QuestionId,
-                TaskText = request.TaskText,
-                EssayRaw = response.EssayRaw,
-                EssayNormalized = response.EssayNormalized,
-                WordCount = response.WordCount,
-                OverallBand = response.OverallBand,
-                TaskResponse = response.TaskResponse,
-                CoherenceAndCohesion = response.CoherenceAndCohesion,
-                LexicalResource = response.LexicalResource,
-                GrammaticalRangeAndAccuracy = response.GrammaticalRangeAndAccuracy,
-                Suggestions = response.Suggestions,
-                ImprovedParagraph = response.ImprovedParagraph
-            };
-            _logger.LogInformation(JsonSerializer.Serialize(response));
-            await _bus.Publish(gradingResponse);
+                var (response, rawResponse) = await _grader.Grade(contentSubmission, CancellationToken.None);
+                _logger.LogInformation(JsonSerializer.Serialize(response));
+                var gradingResponse = new WritingGradeResponseMessage
+                {
+                    AttemptId = request.AttemptId,
+                    UserId = request.UserId,
+                    QuestionId = request.QuestionId,
+                    TaskText = request.TaskText,
+                    EssayRaw = response.EssayRaw,
+                    EssayNormalized = response.EssayNormalized,
+                    WordCount = response.WordCount,
+                    OverallBand = response.OverallBand,
+                    TaskResponse = response.TaskResponse,
+                    CoherenceAndCohesion = response.CoherenceAndCohesion,
+                    LexicalResource = response.LexicalResource,
+                    GrammaticalRangeAndAccuracy = response.GrammaticalRangeAndAccuracy,
+                    Suggestions = response.Suggestions,
+                    ImprovedParagraph = response.ImprovedParagraph
+                };
+                _logger.LogInformation(JsonSerializer.Serialize(response));
+                await _bus.Publish(gradingResponse);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Writing grading failed for submission {SubmissionId}. Message will be nacked.", request.AttemptId);
+                throw; // re-throw so MassTransit can retry or move to DLQ
+            }
         }
     }
 }

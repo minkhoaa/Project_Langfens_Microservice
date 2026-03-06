@@ -34,37 +34,45 @@ namespace speaking_service.Features.RabbitMq
         {
             var request = context.Message;
             _logger.LogInformation(JsonSerializer.Serialize(request));
-            var taskText = request.Prompt ?? "";
-            var audioStream = await _audioDownloader.GetAudioStreamAsync(request.AudioUrl, CancellationToken.None);
-            var answerText = await _whisper.Transcript(audioStream);
-            var contentSubmission = new ContentSubmission
+            try
             {
-                Task = taskText,
-                Transcript = answerText
-            };
-            var (gradeResult, _) = await _grader.Grade(contentSubmission, CancellationToken.None);
-            var gradingResponse = new SpeakingGradingResponseMessage
+                var taskText = request.Prompt ?? "";
+                var audioStream = await _audioDownloader.GetAudioStreamAsync(request.AudioUrl, CancellationToken.None);
+                var answerText = await _whisper.Transcript(audioStream);
+                var contentSubmission = new ContentSubmission
+                {
+                    Task = taskText,
+                    Transcript = answerText
+                };
+                var (gradeResult, _) = await _grader.Grade(contentSubmission, CancellationToken.None);
+                var gradingResponse = new SpeakingGradingResponseMessage
+                {
+                    AttemptId = request.AttemptId,
+                    UserId = request.UserId,
+                    QuestionId = request.QuestionId,
+                    TaskText = taskText,
+                    TranscriptRaw = answerText,
+                    TranscriptNormalized = answerText,
+                    WordCount = gradeResult.WordCount,
+                    OverallBand = gradeResult.OverallBand,
+                    FluencyAndCoherence = gradeResult.FluencyAndCoherence,
+                    LexicalResource = gradeResult.LexicalResource,
+                    GrammaticalRangeAndAccuracy = gradeResult.GrammaticalRangeAndAccuracy,
+                    Pronunciation = gradeResult.Pronunciation,
+
+                    Suggestions = gradeResult.Suggestions,
+                    ImprovedAnswer = gradeResult.ImprovedAnswer
+
+                };
+                _logger.LogInformation(JsonSerializer.Serialize(gradeResult));
+
+                await _bus.Publish(gradingResponse);
+            }
+            catch (Exception ex)
             {
-                AttemptId = request.AttemptId,
-                UserId = request.UserId,
-                QuestionId = request.QuestionId,
-                TaskText = taskText,
-                TranscriptRaw = answerText,
-                TranscriptNormalized = answerText,
-                WordCount = gradeResult.WordCount,
-                OverallBand = gradeResult.OverallBand,
-                FluencyAndCoherence = gradeResult.FluencyAndCoherence,
-                LexicalResource = gradeResult.LexicalResource,
-                GrammaticalRangeAndAccuracy = gradeResult.GrammaticalRangeAndAccuracy,
-                Pronunciation = gradeResult.Pronunciation,
-
-                Suggestions = gradeResult.Suggestions,
-                ImprovedAnswer = gradeResult.ImprovedAnswer
-
-            };
-            _logger.LogInformation(JsonSerializer.Serialize(gradeResult));
-
-            await _bus.Publish(gradingResponse);
+                _logger.LogError(ex, "Speaking grading failed for submission {SubmissionId}. Message will be nacked.", request.AttemptId);
+                throw; // re-throw so MassTransit can retry or move to DLQ
+            }
 
         }
     }
