@@ -125,7 +125,7 @@ public class BandPredictorService(AttemptDbContext context) : IBandPredictorServ
     {
         if (values.Count < 2) return 0;
 
-        var mean = values.Average();
+        var mean = values.DefaultIfEmpty(0m).Average();
         var sumOfSquares = values.Sum(v => (v - mean) * (v - mean));
         return sumOfSquares / values.Count;
     }
