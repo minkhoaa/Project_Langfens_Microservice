@@ -23,7 +23,7 @@ public sealed class SingleChoiceGrader : IQuestionGrader
         var correctIds = (key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>())
             .Select(t => t.id)
             .ToHashSet();
-        var ok = selection.Count == 1 && correctIds.Contains(selection.First());
+        var ok = selection.Count == 1 && correctIds.Contains(selection.FirstOrDefault());
         return new GradeResult(ok ? key.QuestionPoints : 0m, ok);
     }
 }
@@ -219,6 +219,7 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
         }
         if (pairs.Count == 1)
         {
+            // pairs.Count == 1 guard makes First() safe here; no risk of InvalidOperationException.
             var (_, accepted) = pairs.First();
             var user = raw;
             var matched = accepted is { Length: > 0 } && accepted.Any(k => string.Equals(k, user, StringComparison.OrdinalIgnoreCase));
