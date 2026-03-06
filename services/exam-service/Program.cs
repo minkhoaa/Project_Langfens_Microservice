@@ -30,9 +30,9 @@ JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
 var jwtSettings = new
 {
-    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
-    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ")
+    Issuer = Environment.GetEnvironmentVariable("JwtSettings__Issuer") ?? throw new InvalidOperationException("Required env var 'JwtSettings__Issuer' is not set"),
+    Audience = Environment.GetEnvironmentVariable("JwtSettings__Audience") ?? throw new InvalidOperationException("Required env var 'JwtSettings__Audience' is not set"),
+    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("Required env var 'JwtSettings__SignKey' is not set")
 };
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>

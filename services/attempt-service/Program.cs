@@ -84,9 +84,9 @@ builder.Services
     ;
 var jwtSettings = new JwtSettings
 {
-    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
-    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ"),
+    Issuer = Environment.GetEnvironmentVariable("JwtSettings__Issuer") ?? throw new InvalidOperationException("Required env var 'JwtSettings__Issuer' is not set"),
+    Audience = Environment.GetEnvironmentVariable("JwtSettings__Audience") ?? throw new InvalidOperationException("Required env var 'JwtSettings__Audience' is not set"),
+    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("Required env var 'JwtSettings__SignKey' is not set"),
     AccessTokenLifetimeSeconds = int.TryParse(Environment.GetEnvironmentVariable("JwtSettings__AccessTokenLifetimeSeconds"), out var lifetime)
         ? lifetime
         : 15
