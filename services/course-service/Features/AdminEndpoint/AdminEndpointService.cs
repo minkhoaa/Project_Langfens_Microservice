@@ -205,9 +205,23 @@ namespace course_service.Features.AdminEndpoint
             }
         }
 
-        public Task<IResult> DeleteLesson(Guid lessonId, CancellationToken token)
+        public async Task<IResult> DeleteLesson(Guid lessonId, CancellationToken token)
         {
-            throw new NotImplementedException();
+            var existed = await context.Lessons.AsNoTracking()
+                .AnyAsync(x => x.Id == lessonId, token);
+            if (!existed)
+                return Results.NotFound(new ApiResultDto(false, "Not found lesson", null!));
+            try
+            {
+                var affectedRows = await context.Lessons
+                    .Where(x => x.Id == lessonId)
+                    .ExecuteDeleteAsync(token);
+                return Results.NoContent();
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(new ApiResultDto(false, "Error while deleting " + e.Message, null!));
+            }
         }
     }
 }
