@@ -10,6 +10,13 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 
 var jwt = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
+if (string.IsNullOrWhiteSpace(jwt!.SignKey))
+    throw new InvalidOperationException("Required config 'JwtSettings:SignKey' is not set");
+if (string.IsNullOrWhiteSpace(jwt.Issuer))
+    throw new InvalidOperationException("Required config 'JwtSettings:Issuer' is not set");
+if (string.IsNullOrWhiteSpace(jwt.Audience))
+    throw new InvalidOperationException("Required config 'JwtSettings:Audience' is not set");
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));

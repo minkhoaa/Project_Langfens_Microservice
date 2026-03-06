@@ -27,7 +27,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
 var jwtSettings = new
 {
     Issuer = Environment.GetEnvironmentVariable("JwtSettings__Issuer") ?? throw new InvalidOperationException("Required env var 'JwtSettings__Issuer' is not set"),
