@@ -1,7 +1,6 @@
 services:
 
   gateway-service:
-    image: ${DOCKERHUB_USER}/langfens-gateway:${TAG}
     build:
       context: ..
       dockerfile: gateway/api-gateway/Dockerfile
@@ -25,7 +24,6 @@ services:
 
 
   auth-service:
-    image: ${DOCKERHUB_USER}/langfens-auth:${TAG}
     build:
       context: ..
       dockerfile: services/auth-service/Dockerfile
@@ -45,7 +43,6 @@ services:
       - "8080:8080"
 
   attempt-service:
-    image: ${DOCKERHUB_USER}/langfens-attempt:${TAG}
     build:
       context: ..
       dockerfile: services/attempt-service/Dockerfile
@@ -64,7 +61,6 @@ services:
         condition: service_healthy
 
   exam-service:
-    image: ${DOCKERHUB_USER}/langfens-exam:${TAG}
     build:
       context: ..
       dockerfile: services/exam-service/Dockerfile
@@ -83,7 +79,6 @@ services:
       - backend
 
   course-service:
-    image: ${DOCKERHUB_USER}/langfens-course:${TAG}
     build:
       context: ..
       dockerfile: services/course-service/Dockerfile
@@ -100,7 +95,6 @@ services:
         condition: service_healthy
 
   vocabulary-service:
-    image: ${DOCKERHUB_USER}/langfens-vocabulary:${TAG}
     build:
       context: ..
       dockerfile: services/vocabulary-service/Dockerfile
@@ -117,7 +111,6 @@ services:
         condition: service_healthy
 
   speaking-service:
-    image: ${DOCKERHUB_USER}/langfens-speaking:${TAG}
     build:
       context: ..
       dockerfile: services/speaking-service/Dockerfile
@@ -144,7 +137,6 @@ services:
               capabilities: [gpu]
 
   writing-service:
-    image: ${DOCKERHUB_USER}/langfens-writing:${TAG}
     build:
       context: ..
       dockerfile: services/writing-service/Dockerfile
@@ -163,7 +155,6 @@ services:
         condition: service_healthy
 
   dictionary-service:
-    image: ${DOCKERHUB_USER}/langfens-dictionary:${TAG}
     build:
       context: ..
       dockerfile: services/dictionary-service/Dockerfile
@@ -181,7 +172,6 @@ services:
         condition: service_healthy
 
   email-service:
-    image: ${DOCKERHUB_USER}/langfens-email:${TAG}
     env_file:
       - path: ./envs/email.env
         required: false
@@ -198,7 +188,6 @@ services:
         condition: service_healthy
 
   gamification-service:
-    image: ${DOCKERHUB_USER}/langfens-gamification:${TAG}
     build:
       context: ..
       dockerfile: services/gamification-service/Dockerfile
@@ -432,7 +421,6 @@ services:
       retries: 5
       
   chatbot-service:
-    image: ${DOCKERHUB_USER}/langfens-chatbot:${TAG}
     build:
       context: ..
       dockerfile: services/chatbot-service/Dockerfile
