@@ -1,11 +1,11 @@
 <h1 align="center">LANGFENS</h1>
 
 <p align="center">
-  <strong>Học IELTS Thông Minh. Đạt Điểm Cao. Tiết Kiệm Thời Gian.</strong>
+  <strong>Study IELTS Smarter. Score Higher. Save Time.</strong>
 </p>
 
 <p align="center">
-  <em>Nền tảng luyện thi IELTS toàn diện với AI đánh giá tức thì — Biến việc học thành trải nghiệm, không chỉ là bài vở.</em>
+  <em>A comprehensive IELTS preparation platform with instant AI evaluation — Turning studying into an experience, not just coursework.</em>
 </p>
 
 <p align="center">
@@ -22,97 +22,97 @@
 
 ## Executive Summary
 
-### The Problem (Nỗi đau thị trường)
+### The Problem
 
-Thị trường luyện thi IELTS hiện nay đang gặp **3 nút thắt cổ chai nghiêm trọng**:
+The current IELTS preparation market is facing **3 serious bottlenecks**:
 
-| Vấn đề | Hậu quả |
+| Problem | Consequence |
 |--------|---------|
-| **Chi phí chấm Writing/Speaking cao** | Học viên phải trả $50-100/bài, hoặc chờ 5-7 ngày để nhận feedback từ giáo viên |
-| **Thiếu môi trường thi thực tế** | Học viên "choáng ngợp" khi bước vào phòng thi thật vì chưa quen áp lực thời gian |
-| **Quên từ vựng sau 1 tuần** | 90% từ vựng học nhồi nhét biến mất do không có hệ thống nhắc lại khoa học |
+| **High cost of Writing/Speaking grading** | Students must pay $50–100 per submission, or wait 5–7 days to receive feedback from a teacher |
+| **Lack of a realistic exam environment** | Students feel overwhelmed when entering the real exam hall because they are not accustomed to time pressure |
+| **Forgetting vocabulary after 1 week** | 90% of crammed vocabulary disappears due to the absence of a scientific spaced-repetition system |
 
-> **Các giải pháp hiện tại thất bại** vì phụ thuộc vào nguồn lực con người (chấm thủ công), hoặc chỉ cung cấp đề thi mà không có phản hồi có giá trị.
+> **Existing solutions fail** because they rely on human resources (manual grading), or only provide practice tests without meaningful feedback.
 
-### The Solution (Giải pháp của Langfens)
+### The Solution
 
-**Langfens** là nền tảng luyện thi IELTS đầu tiên kết hợp:
+**Langfens** is the first IELTS preparation platform to combine:
 
-- **AI đánh giá tức thì** cho Writing & Speaking — nhận feedback trong vài giây, không phải vài ngày.
-- **Môi trường mô phỏng 100% kỳ thi thật** — áp lực thời gian, giao diện thi, autosave bảo vệ bài làm.
-- **Hệ thống nhớ từ vựng vĩnh viễn** — thuật toán SM2 (Spaced Repetition) giúp giữ từ vựng trong não dài hạn.
+- **Instant AI evaluation** for Writing & Speaking — receive feedback in seconds, not days.
+- **100% real-exam simulation environment** — time pressure, exam interface, autosave to protect your work.
+- **Permanent vocabulary retention system** — the SM2 (Spaced Repetition) algorithm helps retain vocabulary in long-term memory.
 
-> **USP (Điểm khác biệt duy nhất):** Langfens là nền tảng duy nhất cung cấp **đánh giá AI chất lượng cao + Gamification + Spaced Repetition** trong MỘT hệ sinh thái liền mạch.
+> **USP (Unique Selling Proposition):** Langfens is the only platform that provides **high-quality AI evaluation + Gamification + Spaced Repetition** within ONE seamless ecosystem.
 
 ---
 
-## Key Value Propositions (Giá trị cốt lõi)
+## Key Value Propositions
 
-| # | Giá trị | Ý nghĩa cho người dùng |
+| # | Value | Meaning for Users |
 |---|---------|------------------------|
-| **1** | **Tiết kiệm 80% chi phí** | Không cần trả tiền chấm bài thủ công — AI chấm với độ chính xác sát tiêu chí IELTS chính thức |
-| **2** | **Học nhanh hơn 3x** | Feedback tức thì = sửa lỗi ngay = tiến bộ nhanh hơn học truyền thống |
-| **3** | **Nhớ từ lâu hơn 5x** | Thuật toán SM2 đã được chứng minh hiệu quả bởi hàng triệu người dùng Anki |
-| **4** | **Học vui, không bỏ cuộc** | Gamification với XP, Streaks, Achievements giữ động lực học liên tục |
+| **1** | **Save 80% on costs** | No need to pay for manual grading — AI grades with accuracy aligned to official IELTS criteria |
+| **2** | **Learn 3x faster** | Instant feedback = correct mistakes immediately = progress faster than traditional learning |
+| **3** | **Remember vocabulary 5x longer** | The SM2 algorithm has been proven effective by millions of Anki users |
+| **4** | **Fun learning, no dropout** | Gamification with XP, Streaks, and Achievements keeps motivation consistently high |
 
 ---
 
-## Feature Highlights (Tính năng nổi bật)
+## Feature Highlights
 
-### 1. Mô phỏng kỳ thi thực tế 100%
-> *"Nếu bạn thắng trong luyện tập, bạn sẽ thắng trong thi thật."*
+### 1. 100% Real Exam Simulation
+> *"If you win in practice, you will win in the real exam."*
 
-- **Full 4 kỹ năng:** Listening, Reading, Writing, Speaking — tất cả đều có thời gian giới hạn như thi thật.
-- **Bảo vệ bài làm:** Autosave chạy ngầm — mất mạng, trình duyệt crash? Bài làm vẫn an toàn.
-- **Phiên bản đề cố định:** Khi bạn bắt đầu làm bài, đề thi được "đóng băng" — admin cập nhật nội dung cũng không ảnh hưởng kết quả của bạn.
+- **All 4 skills:** Listening, Reading, Writing, Speaking — all with time limits matching the real exam.
+- **Work protection:** Autosave runs in the background — lost connection, browser crash? Your work is still safe.
+- **Fixed exam version:** When you start a test, the exam content is "frozen" — admin updates will not affect your results.
 
-### 2. AI Assessment Engine (Chấm điểm AI)
-> *"Từ bài làm đến điểm số: 30 giây, không phải 3 ngày."*
+### 2. AI Assessment Engine
+> *"From submission to score: 30 seconds, not 3 days."*
 
-| Kỹ năng | Công nghệ | Tốc độ phản hồi |
+| Skill | Technology | Response Speed |
 |---------|-----------|-----------------|
-| **Reading & Listening** | Pattern Matching thông minh (xử lý chữ hoa/thường, số nhiều, khoảng trắng) | **< 1 giây** |
-| **Writing** | GPT-4o đánh giá theo 4 tiêu chí IELTS chính thức (Task Response, Coherence, Lexical Resource, Grammar) | **< 30 giây** |
-| **Speaking** | Whisper STT → AI phân tích fluency, pronunciation, content | **< 60 giây** |
+| **Reading & Listening** | Smart Pattern Matching (handles case, plurals, whitespace) | **< 1 second** |
+| **Writing** | GPT-4o evaluates against 4 official IELTS criteria (Task Response, Coherence, Lexical Resource, Grammar) | **< 30 seconds** |
+| **Speaking** | Whisper STT → AI analyzes fluency, pronunciation, content | **< 60 seconds** |
 
-### 3. Vocabulary Mastery (Làm chủ từ vựng)
-> *"Không học thuộc. Hãy NHỚ LÂU."*
+### 3. Vocabulary Mastery
+> *"Don't memorize. Remember LONG-TERM."*
 
-- **Spaced Repetition System (SM2):** Thuật toán tính toán thời điểm ôn tập tối ưu — học ít hơn, nhớ lâu hơn.
-- **Từ điển tra cứu siêu nhanh:** Elasticsearch cho kết quả trong < 50ms.
-- **AI làm giàu ngữ cảnh:** Tự động thêm ví dụ, collocation, thông tin sử dụng cho mỗi từ.
+- **Spaced Repetition System (SM2):** Algorithm calculates optimal review timing — study less, remember longer.
+- **Ultra-fast dictionary lookup:** Elasticsearch delivers results in < 50ms.
+- **AI-enriched context:** Automatically adds examples, collocations, and usage notes for each word.
 
-### 4. Gamification (Học mà như chơi)
-> *"Biến mỗi bài học thành một trận game."*
+### 4. Gamification
+> *"Turn every lesson into a game."*
 
-- **XP & Level System:** Hoàn thành bài thi = nhận XP = lên level.
-- **Achievements & Badges:** Mở khóa huy hiệu khi đạt milestones (hoàn thành 10 bài, 7-day streak...).
-- **Leaderboard:** Cạnh tranh với bạn bè để giữ động lực.
+- **XP & Level System:** Complete a test = earn XP = level up.
+- **Achievements & Badges:** Unlock badges when reaching milestones (complete 10 tests, 7-day streak...).
+- **Leaderboard:** Compete with friends to maintain motivation.
 
-### 5. AI Chatbot hỗ trợ 24/7
-> *"Có thắc mắc? AI trả lời ngay — không cần chờ giáo viên."*
+### 5. AI Chatbot 24/7 Support
+> *"Got a question? AI answers immediately — no need to wait for a teacher."*
 
-- **Chạy Local LLM (Qwen 2.5):** Tiết kiệm chi phí vận hành, vẫn đảm bảo chất lượng.
-- **Hỗ trợ giải đáp:** Giải thích ngữ pháp, từ vựng, tips làm bài.
+- **Runs Local LLM (Qwen 2.5):** Reduces operational costs while maintaining quality.
+- **Support & explanations:** Explains grammar, vocabulary, and test-taking tips.
 
 ---
 
-## Target Audience (Khách hàng mục tiêu)
+## Target Audience
 
-| Đối tượng | Nhu cầu | Langfens giải quyết |
+| Audience | Need | How Langfens Helps |
 |-----------|---------|---------------------|
-| **Học sinh/Sinh viên** | Cần luyện thi IELTS nhưng ngân sách hạn chế | Chấm AI miễn phí, học mọi lúc mọi nơi |
-| **Người đi làm** | Thời gian ít, cần học hiệu quả tối đa | Spaced Repetition + feedback tức thì tiết kiệm thời gian |
-| **Trung tâm Anh ngữ** | Cần giảm chi phí chấm bài, tăng chất lượng dịch vụ | API tích hợp, dashboard theo dõi học viên |
-| **Giáo viên IELTS** | Cần công cụ hỗ trợ quản lý bài tập | Tạo & giao bài, AI hỗ trợ chấm sơ bộ |
+| **Students** | Need to prepare for IELTS on a limited budget | Free AI grading, study anytime anywhere |
+| **Working professionals** | Limited time, need maximum learning efficiency | Spaced Repetition + instant feedback saves time |
+| **English language centers** | Need to reduce grading costs, improve service quality | API integration, student progress dashboard |
+| **IELTS teachers** | Need tools to help manage assignments | Create & assign tasks, AI-assisted preliminary grading |
 
 ---
 
-## Technical Architecture (Kiến trúc kỹ thuật)
+## Technical Architecture
 
-> **Mọi lựa chọn công nghệ đều phục vụ MỘT mục tiêu: Mang lại trải nghiệm học tốt nhất cho người dùng.**
+> **Every technology choice serves ONE goal: Deliver the best learning experience for users.**
 
-### Kiến trúc Microservices — Tại sao?
+### Microservices Architecture — Why?
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -147,52 +147,52 @@ Thị trường luyện thi IELTS hiện nay đang gặp **3 nút thắt cổ ch
             └─────────────┘         └─────────────┘
 ```
 
-### Lý do chọn công nghệ (Why, không chỉ What)
+### Technology Choices — Why, Not Just What
 
-| Công nghệ | Bài toán kinh doanh được giải quyết |
+| Technology | Business Problem Solved |
 |-----------|-------------------------------------|
-| **Microservices Architecture** | **Mở rộng độc lập** — Khi traffic tăng vọt mùa thi, chỉ scale service cần thiết (Exam, Attempt), tiết kiệm chi phí server |
-| **.NET 8/9 + Minimal API** | **Hiệu năng cao, latency thấp** — Xử lý 10,000+ requests/giây trên mỗi service, người dùng không cảm nhận độ trễ |
-| **PostgreSQL** | **Dữ liệu quan trọng, cần ACID** — Điểm thi, bài làm của học viên được bảo vệ tuyệt đối |
-| **Redis** | **Phản hồi < 100ms** — Caching sessions, JWT tokens, data hot giúp trải nghiệm mượt mà |
-| **RabbitMQ (Event-Driven)** | **Không chặn người dùng** — Chấm bài, tính XP xử lý ngầm, người dùng không phải chờ |
-| **Elasticsearch** | **Tra từ điển trong 50ms** — Tìm kiếm full-text siêu nhanh, hỗ trợ fuzzy matching |
-| **Ollama (Qwen 2.5 Local LLM)** | **Tiết kiệm 90% chi phí AI** — Chatbot chạy local, không tốn tiền API call cloud |
-| **GPT-4o (Azure OpenAI)** | **Chất lượng đánh giá tốt nhất** — Cho tác vụ quan trọng như chấm Writing, dùng model tốt nhất |
-| **Whisper (OpenAI)** | **STT chính xác** — Chuyển giọng nói thành văn bản để AI đánh giá Speaking |
-| **Docker + Compose** | **Deploy 1 lệnh** — Từ code → production trong vài phút, không phụ thuộc môi trường |
+| **Microservices Architecture** | **Independent scaling** — When traffic spikes during exam season, only scale the necessary services (Exam, Attempt), reducing server costs |
+| **.NET 8/9 + Minimal API** | **High performance, low latency** — Handles 10,000+ requests/second per service, users feel no delay |
+| **PostgreSQL** | **Critical data requires ACID** — Exam scores and student submissions are fully protected |
+| **Redis** | **Response < 100ms** — Caching sessions, JWT tokens, and hot data ensures a smooth experience |
+| **RabbitMQ (Event-Driven)** | **Non-blocking for users** — Grading, XP calculation processed in the background; users don't have to wait |
+| **Elasticsearch** | **Dictionary lookup in 50ms** — Ultra-fast full-text search with fuzzy matching support |
+| **Ollama (Qwen 2.5 Local LLM)** | **Save 90% on AI costs** — Chatbot runs locally, no cloud API call costs |
+| **GPT-4o (Azure OpenAI)** | **Best evaluation quality** — For critical tasks like Writing grading, the best model is used |
+| **Whisper (OpenAI)** | **Accurate STT** — Converts speech to text for AI-based Speaking evaluation |
+| **Docker + Compose** | **One-command deployment** — From code to production in minutes, environment-independent |
 
-### Các nguyên tắc kiến trúc
+### Architecture Principles
 
-| Nguyên tắc | Ý nghĩa |
+| Principle | Meaning |
 |------------|---------|
-| **Fault Isolation** | Nếu Gamification service chết, người dùng vẫn làm bài thi bình thường |
-| **Event-Driven** | Các tác vụ nặng (AI grading, XP calculation) xử lý bất đồng bộ qua Message Queue |
-| **Security First** | JWT authentication, role-based access control, input validation tại mọi endpoint |
-| **Horizontal Scaling** | Thêm instance khi cần, load balancer phân tải tự động |
+| **Fault Isolation** | If the Gamification service goes down, users can still take exams normally |
+| **Event-Driven** | Heavy tasks (AI grading, XP calculation) are processed asynchronously via Message Queue |
+| **Security First** | JWT authentication, role-based access control, input validation at every endpoint |
+| **Horizontal Scaling** | Add instances as needed, load balancer distributes traffic automatically |
 
 ---
 
 ## Roadmap & Future Vision
 
-### Phase 1: Foundation (Hiện tại)
-- [x] 4 kỹ năng IELTS hoàn chỉnh
-- [x] AI Grading Engine cho Writing & Speaking
+### Phase 1: Foundation (Current)
+- [x] All 4 complete IELTS skills
+- [x] AI Grading Engine for Writing & Speaking
 - [x] Spaced Repetition Vocabulary System
 - [x] Gamification Core (XP, Levels, Achievements)
-- [x] 12+ Microservices production-ready
+- [x] 12+ production-ready Microservices
 
 ### Phase 2: Scale (Q2 2026)
 - [ ] Mobile App (React Native)
 - [ ] Real-time multiplayer practice rooms
-- [ ] Advanced analytics dashboard cho học viên
-- [ ] Teacher dashboard với batch grading
+- [ ] Advanced analytics dashboard for students
+- [ ] Teacher dashboard with batch grading
 
 ### Phase 3: Expansion (Q4 2026)
 - [ ] TOEFL, PTE, Duolingo English Test support
-- [ ] Enterprise API cho trung tâm Anh ngữ
+- [ ] Enterprise API for English language centers
 - [ ] White-label solution
-- [ ] AI Tutor cá nhân hóa lộ trình học
+- [ ] AI Tutor with personalized learning paths
 
 ---
 
@@ -234,7 +234,7 @@ docker compose up -d
 ---
 
 <p align="center">
-  <strong>Langfens — Học IELTS Thông Minh. Đạt Điểm Cao. Tiết Kiệm Thời Gian.</strong>
+  <strong>Langfens — Study IELTS Smarter. Score Higher. Save Time.</strong>
 </p>
 
 <p align="center">
