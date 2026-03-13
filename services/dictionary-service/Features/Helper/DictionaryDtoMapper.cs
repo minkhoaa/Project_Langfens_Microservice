@@ -29,8 +29,8 @@ namespace dictionary_service.Features.Helper
 
     public interface IDictionaryDtoMapper
     {
-        // Giữ sync cho backward compatible: chỉ map EN + VI terms (không có DefinitionVi)
-        DictionaryDetailsDto ToDetailsDto(DictionaryDoc doc, int maxSenses, int maxExamplesPerSense);
+        // Async: chỉ map EN + VI terms (không có DefinitionVi)
+        Task<DictionaryDetailsDto> ToDetailsDto(DictionaryDoc doc, int maxSenses, int maxExamplesPerSense);
 
         // Async: có thêm DefinitionVi (dịch EN->VI)
         Task<DictionaryDetailsDto> ToDetailsDtoAsync(DictionaryDoc doc, int maxSenses, int maxExamplesPerSense, CancellationToken ct);
@@ -45,10 +45,10 @@ namespace dictionary_service.Features.Helper
             _translator = translator;
         }
 
-        public DictionaryDetailsDto ToDetailsDto(DictionaryDoc doc, int maxSenses, int maxExamplesPerSense)
+        public Task<DictionaryDetailsDto> ToDetailsDto(DictionaryDoc doc, int maxSenses, int maxExamplesPerSense)
         {
             // Không dịch câu EN->VI (DefinitionVi=null), vẫn có VI terms
-            return BuildDto(doc, maxSenses, maxExamplesPerSense, translateVi: false, ct: default).GetAwaiter().GetResult();
+            return BuildDto(doc, maxSenses, maxExamplesPerSense, translateVi: false, ct: default);
         }
 
         public Task<DictionaryDetailsDto> ToDetailsDtoAsync(DictionaryDoc doc, int maxSenses, int maxExamplesPerSense, CancellationToken ct)

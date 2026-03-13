@@ -60,10 +60,14 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
+var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
+    ?? "http://localhost:3000,http://127.0.0.1:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FE", policy => policy
-        .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+        .WithOrigins(corsOrigins)
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials());
@@ -86,7 +90,7 @@ var jwtSettings = new JwtSettings
 {
     Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
     Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ"),
+    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("JwtSettings__SignKey environment variable is required"),
     AccessTokenLifetimeSeconds = int.TryParse(Environment.GetEnvironmentVariable("JwtSettings__AccessTokenLifetimeSeconds"), out var lifetime)
         ? lifetime
         : 15

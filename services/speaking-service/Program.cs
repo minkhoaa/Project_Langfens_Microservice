@@ -38,7 +38,7 @@ var jwtSettings = new
 {
     Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
     Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ")
+    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("JwtSettings__SignKey environment variable is required")
 };
 builder.Services.AddSingleton<CloudinaryConfig>();
 builder.Services.AddSingleton(option =>
@@ -85,13 +85,17 @@ builder.Services.AddSwaggerGen(option =>
 var connectionString = EnvOrDefault("CONNECTIONSTRING__SPEAKING",
     "Host=speaking-database;Port=5432;Database=speaking-db;Username=speaking;Password=speaking");
 builder.Services.AddDbContext<SpeakingDbContext>(option => option.UseNpgsql(connectionString));
+var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
+    ?? "http://localhost:3000,http://127.0.0.1:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(option =>
 {
     option.AddPolicy(
         "FE",
         policy =>
             policy
-                .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+                .WithOrigins(corsOrigins)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
@@ -194,17 +198,14 @@ builder.Services.AddSingleton(_ => new OpenAI.Chat.ChatClient(
     options: new OpenAI.OpenAIClientOptions { Endpoint = azureEndpoint }
 ));
 
-builder.Services.AddSingleton<WhisperFactory>(_ =>
-{
-    RuntimeOptions.RuntimeLibraryOrder =
-    [
-        RuntimeLibrary.Cuda,
-        RuntimeLibrary.Cpu,
-        RuntimeLibrary.CpuNoAvx
-    ];
-    var modelPath = WhisperModelHelper.EnsureModelDownloadedAsync().GetAwaiter().GetResult();
-    return WhisperFactory.FromPath(modelPath);
-});
+RuntimeOptions.RuntimeLibraryOrder =
+[
+    RuntimeLibrary.Cuda,
+    RuntimeLibrary.Cpu,
+    RuntimeLibrary.CpuNoAvx
+];
+var whisperModelPath = await WhisperModelHelper.EnsureModelDownloadedAsync();
+builder.Services.AddSingleton<WhisperFactory>(_ => WhisperFactory.FromPath(whisperModelPath));
 
 
 builder.Services.AddHttpClient<IAudioDownloader, AudioDownloader>();
@@ -214,7 +215,6 @@ builder.Services.AddScoped<IWhisperService, WhisperService>();
 builder.Services.AddScoped<ISpeakingService, SpeakingService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddSingleton<ISpeakingGrader, SpeakingGrader>();
-builder.Services.AddSingleton<IAudioDownloader, AudioDownloader>();
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
