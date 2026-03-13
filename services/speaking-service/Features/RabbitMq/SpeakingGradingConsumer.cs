@@ -35,14 +35,14 @@ namespace speaking_service.Features.RabbitMq
             var request = context.Message;
             _logger.LogInformation(JsonSerializer.Serialize(request));
             var taskText = request.Prompt ?? "";
-            var audioStream = await _audioDownloader.GetAudioStreamAsync(request.AudioUrl, CancellationToken.None);
+            var audioStream = await _audioDownloader.GetAudioStreamAsync(request.AudioUrl, context.CancellationToken);
             var answerText = await _whisper.Transcript(audioStream);
             var contentSubmission = new ContentSubmission
             {
                 Task = taskText,
                 Transcript = answerText
             };
-            var (gradeResult, _) = await _grader.Grade(contentSubmission, CancellationToken.None);
+            var (gradeResult, _) = await _grader.Grade(contentSubmission, context.CancellationToken);
             var gradingResponse = new SpeakingGradingResponseMessage
             {
                 AttemptId = request.AttemptId,

@@ -33,7 +33,7 @@ public class UserStats
     public static int GetXpForNextLevel(int currentLevel)
     {
         int totalRequired = 0;
-        for (int l = 1; l <= currentLevel; l++)
+        for (int l = 1; l <= currentLevel + 1; l++)
         {
             totalRequired += l * 100 + (l - 1) * 50;
         }

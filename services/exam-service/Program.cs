@@ -32,7 +32,7 @@ var jwtSettings = new
 {
     Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
     Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = EnvOrDefault("JwtSettings__SignKey", "bTNGPmniBGyINHPdsmONct16TIqqb1bZ")
+    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("JwtSettings__SignKey environment variable is required")
 };
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
@@ -42,8 +42,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = true,
             ValidIssuer = jwtSettings.Issuer 
                           ?? throw new Exception("valid issuer is missing"),
-            ValidAudience = jwtSettings.Audience 
-                            ?? throw new Exception("valid issuer is missing"),
+            ValidAudience = jwtSettings.Audience
+                            ?? throw new Exception("valid audience is missing"),
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true, 
@@ -68,10 +68,14 @@ builder.Services.AddAuthorization(options =>
         c.User.HasAnyScope(ExamScope.ExamManage) || c.User.IsInRole(Roles.Admin)));
 });
 
+var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
+    ?? "http://localhost:3000,http://127.0.0.1:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FE", policy => policy
-        .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+        .WithOrigins(corsOrigins)
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials());

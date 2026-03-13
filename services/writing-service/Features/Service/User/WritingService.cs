@@ -41,6 +41,12 @@ public class WritingService : IWritingService
     public async Task<IResult> WritingSubmit(WritingSubmissionRequest request,
         CancellationToken token)
     {
+        if (string.IsNullOrWhiteSpace(request.Answer))
+            return Results.BadRequest(new ApiResultDto(false, "Answer is required", null!));
+
+        if (request.Answer.Length > 5000)
+            return Results.BadRequest(new ApiResultDto(false, "Answer exceeds maximum length of 5000 characters", null!));
+
         var userId = _user.UserId;
         var exam = await _context.WritingExams.AsNoTracking().Where(x => x.Id == request.ExamId).FirstOrDefaultAsync(token)
                    ?? throw new Exception("Exam is not existed");

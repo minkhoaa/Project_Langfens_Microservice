@@ -10,6 +10,9 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 
 var jwt = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
+if (string.IsNullOrEmpty(jwt?.SignKey))
+    throw new InvalidOperationException("JwtSettings__SignKey environment variable is required");
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
@@ -33,8 +36,12 @@ builder.Services.AddAuthentication(option =>
     };
     JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 });
+var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
+    ?? "http://localhost:3000,http://127.0.0.1:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(c => c.AddPolicy("FE", p => p
-    .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+    .WithOrigins(corsOrigins)
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials()

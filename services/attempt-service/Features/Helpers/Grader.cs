@@ -115,8 +115,8 @@ public sealed class CompletionGrader : IQuestionGrader
 
             }
 
-            var score = (total > 0 ? get / total : 0) * key.QuestionPoints;
-            return new GradeResult(score, score >= key.QuestionPoints);
+            var score = (total > 0 ? (decimal)get / total : 0) * key.QuestionPoints;
+            return new GradeResult(score, score > 0);
         }
         // đoạn này payload không phải JSON chấm theo Plaintext
         var blankCount = texts.Count + regs.Count;
@@ -215,7 +215,7 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
                 }
             }
             var score = total > 0 ? got / total * key.QuestionPoints : 0m;
-            return new GradeResult(score, score >= key.QuestionPoints);
+            return new GradeResult(score, score > 0);
         }
         if (pairs.Count == 1)
         {
@@ -254,8 +254,7 @@ public sealed class FlowChartGrader : IQuestionGrader
             return new GradeResult(0m, false, false, "Malformed or empty sequence payload");
         var lcs = LCS(user, correct);
         var score = (decimal)lcs / correct.Count * key.QuestionPoints;
-        var full = score >= key.QuestionPoints;
-        return new GradeResult(score, full);
+        return new GradeResult(score, score > 0);
 
     }
     private static string NormNode(string? s)

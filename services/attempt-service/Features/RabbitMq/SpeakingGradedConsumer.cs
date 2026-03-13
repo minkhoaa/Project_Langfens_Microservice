@@ -19,7 +19,7 @@ namespace attempt_service.Features.RabbitMq
             var request = context.Message;
             _logger.LogInformation(JsonSerializer.Serialize(request));
 
-            await _placementWorkflow.OnSpeakingGradedAsync(request, CancellationToken.None);
+            await _placementWorkflow.OnSpeakingGradedAsync(request, context.CancellationToken);
 
         }
     }

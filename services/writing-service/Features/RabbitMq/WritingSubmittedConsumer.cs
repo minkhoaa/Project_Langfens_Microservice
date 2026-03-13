@@ -30,7 +30,7 @@ namespace writing_service.Features.RabbitMq
             var answerText = !string.IsNullOrEmpty(request.AnswerText) ? request.AnswerText : "";
 
             var contentSubmission = new ContentSubmission() { Task = taskText, Answer = answerText };
-            var (response, rawResponse) = await _grader.Grade(contentSubmission, CancellationToken.None);
+            var (response, rawResponse) = await _grader.Grade(contentSubmission, context.CancellationToken);
             _logger.LogInformation(JsonSerializer.Serialize(response));
             var gradingResponse = new WritingGradeResponseMessage
             {
