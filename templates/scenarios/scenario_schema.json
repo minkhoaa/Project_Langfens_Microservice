@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Langfens Roleplay Scenario",
+  "description": "Schema cho 1 roleplay scenario. Lưu tại ai-service/app/data/scenarios/. Mỗi file = 1 scenario.",
+  "type": "object",
+  "required": ["id", "slug", "title", "difficulty", "ielts_part", "context", "user_role", "agent_role", "opening_prompt", "target_vocabulary", "duration_min"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID unique.",
+      "example": "b1c2d3e4-f5a6-7890-bcde-f12345678901"
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "kebab-case unique identifier. Dùng cho URL và filename.",
+      "example": "job-interview-tech"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 80,
+      "description": "Tên hiển thị cho người học.",
+      "example": "Job Interview: Tech Company"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["BEGINNER", "INTERMEDIATE", "ADVANCED"],
+      "description": "Độ khó dựa trên vocabulary và grammar complexity."
+    },
+    "ielts_part": {
+      "type": "string",
+      "enum": ["PART_1", "PART_2", "PART_3", "SITUATIONAL"],
+      "description": "PART_1=personal questions, PART_2=cue card, PART_3=abstract discussion, SITUATIONAL=real-life scenario."
+    },
+    "context": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 500,
+      "description": "Mô tả tình huống. 2-4 câu. Học sinh đọc trước khi bắt đầu.",
+      "example": "You are attending a job interview at a technology company in Singapore. The interviewer will ask about your background, skills, and motivation. Try to use professional language and specific examples."
+    },
+    "user_role": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 150,
+      "description": "Mô tả vai của học sinh.",
+      "example": "A recent graduate applying for a software developer position"
+    },
+    "agent_role": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 150,
+      "description": "Vai của AI agent.",
+      "example": "HR manager at a tech company conducting a job interview"
+    },
+    "opening_prompt": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 300,
+      "description": "Câu mở đầu của AI. Đây là turn đầu tiên trong conversation.",
+      "example": "Good morning! Please have a seat. I'm Sarah from HR. Before we begin, could you briefly introduce yourself and tell me why you're interested in this position?"
+    },
+    "target_vocabulary": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 20,
+      "description": "Từ/cụm từ agent sẽ khuyến khích học sinh dùng. Agent tracks usage trong session.",
+      "items": {
+        "type": "string"
+      },
+      "example": ["motivated", "collaborative", "proficient in", "experience with", "contribute to", "team player", "deadline-driven"]
+    },
+    "target_grammar": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Grammar structures cần luyện tập trong scenario này.",
+      "example": ["Present Perfect for experience", "Passive Voice for achievements", "Conditional for hypotheticals"]
+    },
+    "suggested_topics": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Chủ đề agent có thể hỏi trong conversation.",
+      "example": ["education background", "work experience", "teamwork examples", "career goals", "salary expectations"]
+    },
+    "duration_min": {
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 15,
+      "description": "Thời gian dự kiến (phút) cho một session đầy đủ."
+    },
+    "turn_count_target": {
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 20,
+      "description": "Số turns (exchanges) dự kiến trong một session.",
+      "default": 8
+    }
+  },
+  "additionalProperties": false,
+
+  "_examples": {
+    "description": "Ví dụ scenario hoàn chỉnh (KHÔNG phải field thực):",
+    "sample": {
+      "id": "b1c2d3e4-f5a6-7890-bcde-f12345678901",
+      "slug": "job-interview-tech",
+      "title": "Job Interview: Technology Company",
+      "difficulty": "INTERMEDIATE",
+      "ielts_part": "SITUATIONAL",
+      "context": "You are attending a job interview at a technology company in Singapore. The interviewer will ask about your background, technical skills, and motivation. Use professional language and specific examples from your experience.",
+      "user_role": "A computer science graduate applying for a junior software developer position",
+      "agent_role": "HR manager at a mid-sized tech company conducting a first-round interview",
+      "opening_prompt": "Good morning! Please have a seat. I'm Sarah from HR. Let's start — could you briefly introduce yourself and tell me what attracted you to this role?",
+      "target_vocabulary": ["motivated", "collaborative", "proficient in", "experienced with", "contribute to", "deadline-oriented", "cross-functional", "scalable", "innovative"],
+      "target_grammar": ["Present Perfect for experience", "Specific examples with Past Simple", "Conditional sentences for problem-solving"],
+      "suggested_topics": ["educational background", "technical skills", "teamwork experience", "biggest challenge", "career goals"],
+      "duration_min": 8,
+      "turn_count_target": 10
+    }
+  }
+}
