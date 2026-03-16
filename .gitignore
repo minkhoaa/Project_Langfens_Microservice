@@ -159,3 +159,17 @@ data/.cache/
 
 # Temp fix scripts
 /tmp/
+
+# One-off fix scripts (should not be committed)
+scripts/fix_*.py
+
+# Intermediate crawled/parsed data (regenerable)
+scripts/crawled_jsons/
+scripts/parsed_sqls/
+scripts/crawler/output.sql
+
+# Old pipeline (superseded by pipeline_v2)
+scripts/pipeline/
+
+# Playwright MCP cache
+.playwright-mcp/

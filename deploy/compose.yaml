@@ -446,6 +446,36 @@
     depends_on:
       - elasticsearch
 
+  qdrant:
+    image: qdrant/qdrant:v1.13.6
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    networks:
+      - backend
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'cat < /dev/null > /dev/tcp/localhost/6333' 2>/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  ai-service:
+    image: ${DOCKERHUB_USER}/langfens-ai:${TAG}
+    env_file:
+      - path: ./envs/ai.env
+        required: false
+    ports:
+      - "8092:8080"
+    networks:
+      - backend
+    depends_on:
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 
 networks:
@@ -457,3 +487,4 @@ volumes:
   rabbitmq_data:
   ollama_data:
   esdata:
+  qdrant_data:
