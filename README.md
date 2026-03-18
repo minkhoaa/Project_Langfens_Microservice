@@ -72,7 +72,7 @@ The current IELTS preparation market is facing **3 serious bottlenecks**:
 | Skill | Technology | Response Speed |
 |---------|-----------|-----------------|
 | **Reading & Listening** | Smart Pattern Matching (handles case, plurals, whitespace) | **< 1 second** |
-| **Writing** | GPT-4o evaluates against 4 official IELTS criteria (Task Response, Coherence, Lexical Resource, Grammar) | **< 30 seconds** |
+| **Writing** | Gemini evaluates against 4 official IELTS criteria (Task Response, Coherence, Lexical Resource, Grammar) | **< 30 seconds** |
 | **Speaking** | Whisper STT → AI analyzes fluency, pronunciation, content | **< 60 seconds** |
 
 ### 3. Vocabulary Mastery
@@ -158,7 +158,7 @@ The current IELTS preparation market is facing **3 serious bottlenecks**:
 | **RabbitMQ (Event-Driven)** | **Non-blocking for users** — Grading, XP calculation processed in the background; users don't have to wait |
 | **Elasticsearch** | **Dictionary lookup in 50ms** — Ultra-fast full-text search with fuzzy matching support |
 | **Ollama (Qwen 2.5 Local LLM)** | **Save 90% on AI costs** — Chatbot runs locally, no cloud API call costs |
-| **GPT-4o (Azure OpenAI)** | **Best evaluation quality** — For critical tasks like Writing grading, the best model is used |
+| **Gemini 2.5 Flash** | **Best evaluation quality** — For critical tasks like Writing grading and RAG-based AI tutoring |
 | **Whisper (OpenAI)** | **Accurate STT** — Converts speech to text for AI-based Speaking evaluation |
 | **Docker + Compose** | **One-command deployment** — From code to production in minutes, environment-independent |
 
@@ -205,7 +205,7 @@ langfens-microservices/
     ├── auth-service           # Authentication & Authorization
     ├── exam-service           # Exam Content Management
     ├── attempt-service        # User Attempts & Submissions
-    ├── writing-service        # Writing Assessment (GPT-4o)
+    ├── writing-service        # Writing Assessment (Gemini)
     ├── speaking-service       # Speaking Assessment (Whisper + AI)
     ├── vocabulary-service     # Flashcards & Spaced Repetition
     ├── dictionary-service     # Dictionary & Word Lookup

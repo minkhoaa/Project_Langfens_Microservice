@@ -6,7 +6,6 @@ using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
-using Grpc.Core.Logging;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
