@@ -7,8 +7,12 @@ class Settings(BaseSettings):
     qdrant_port: int = 6333
     qdrant_grpc_port: int = 6334
     gemini_api_key: str = ""
+    gemini_embedding_model: str = "models/gemini-embedding-001"
+    qdrant_collection_writing: str = "writing_samples"
+    qdrant_collection_grammar: str = "grammar_knowledge"
     redis_host: str = "localhost"
     redis_port: int = 6379
+    data_dir: str = "/app/data"
 
     class Config:
         env_file = ".env"
