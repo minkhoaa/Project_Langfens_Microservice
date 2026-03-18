@@ -64,7 +64,7 @@ Python 3.12 + FastAPI. Key files:
 
 ## Key Event Flows
 
-- `WritingSubmitted` → Writing Service grades via GPT-4o → publishes `WritingGraded`
+- `WritingSubmitted` → Writing Service grades via Gemini → publishes `WritingGraded`
 - `SpeakingGraded` → Attempt Service records results
 - `UserRegistered` → Gamification + Email services
 
@@ -97,10 +97,10 @@ GitHub Actions on push to `master`: build → push Docker Hub (SHA tag) → SSH 
 
 ## Phase 2 Technical Decisions
 
-- All 3 AI modules use **Gemini 2.5 Flash Lite fine-tuned** (no GPT-4o for Phase 2 AI)
+- **All AI uses Gemini** — Phase 1 Writing grading migrated from GPT-4o to Gemini. Phase 2 modules use fine-tuned Gemini 2.5 Flash Lite
 - **Embedding**: Gemini text-embedding-004 (768-dim)
 - **Vector DB**: Qdrant (single container)
 - **Communication**: REST via YARP Gateway (not gRPC for AI calls)
-- **Writing flow**: ADDITIVE — existing grading stays, RAG comparison added after
+- **Writing flow**: ADDITIVE — Gemini grading stays, RAG comparison added after
 - **LangChain**: Used as library, not framework
 - **Dataset**: `/home/khoa/dataset_ielts/` — 41,146 essays, pre-filtered and exported to JSONL

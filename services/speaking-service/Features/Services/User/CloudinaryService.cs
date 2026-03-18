@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using Google.Protobuf.Reflection;
 using Microsoft.Extensions.Primitives;
 using Shared.ExamDto.Contracts.Speaking;
 
