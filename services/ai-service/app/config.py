@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     data_dir: str = "/app/data"
     gemini_chat_model: str = "gemini-2.5-flash"
     gemini_chat_temperature: float = 0.3
-    gemini_chat_max_tokens: int = 4096
-    gemini_chat_timeout: int = 30
+    gemini_chat_max_tokens: int = 8192
+    gemini_chat_timeout: int = 60
 
     class Config:
         env_file = ".env"
