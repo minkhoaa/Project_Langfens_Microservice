@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     redis_host: str = "localhost"
     redis_port: int = 6379
     data_dir: str = "/app/data"
+    gemini_chat_model: str = "gemini-2.5-flash"
+    gemini_chat_temperature: float = 0.3
+    gemini_chat_max_tokens: int = 2000
+    gemini_chat_timeout: int = 30
 
     class Config:
         env_file = ".env"
