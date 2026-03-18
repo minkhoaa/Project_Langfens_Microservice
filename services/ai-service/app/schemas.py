@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -18,3 +20,34 @@ class SearchResponse(BaseModel):
     results: list[SearchResult]
     query: str
     collection: str
+
+
+class CompareRequest(BaseModel):
+    essay_text: str = Field(..., min_length=50, max_length=3000)
+    topic: str = Field(..., min_length=5, max_length=500)
+    task_type: Literal["TASK_1", "TASK_2"] = "TASK_2"
+    band_filter: float = Field(default=8.0, ge=6.0, le=9.0)
+
+
+class SentenceComparison(BaseModel):
+    original: str
+    improved: str
+    explanation: str
+    category: Literal["vocabulary", "grammar", "coherence", "structure"]
+
+
+class ReferenceEssay(BaseModel):
+    id: str
+    text: str
+    band: float
+    similarity_score: float
+
+
+class CompareResponse(BaseModel):
+    overall_analysis: str
+    vocabulary_feedback: str = ""
+    coherence_feedback: str = ""
+    grammar_feedback: str = ""
+    task_response_feedback: str = ""
+    sentence_comparisons: list[SentenceComparison] = []
+    references: list[ReferenceEssay]
