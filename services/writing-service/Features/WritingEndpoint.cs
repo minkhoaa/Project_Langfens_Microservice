@@ -15,7 +15,8 @@ public static class WritingEndpoint
         app.MapGet("/history", WritingHandler.GetHistoryHandler).RequireAuthorization(Roles.User);
         app.MapGet("/history/{submissionId:guid}", WritingHandler.GetHistoryDetailHandler)
             .RequireAuthorization(Roles.User);
-        
+        app.MapGet("/{submissionId:guid}/comparison", WritingHandler.GetComparisonHandler)
+            .RequireAuthorization(Roles.User);
     }
     public static void MapWritingAdminEndpoint(this IEndpointRouteBuilder route)
     {

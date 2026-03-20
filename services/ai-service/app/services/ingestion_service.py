@@ -3,7 +3,6 @@ import logging
 import time
 from pathlib import Path
 
-from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PayloadSchemaType, PointStruct, VectorParams
 from tqdm import tqdm
 
@@ -39,31 +38,44 @@ _BASE = f"https://generativelanguage.googleapis.com/v1beta/{settings.gemini_embe
 
 
 def _embed_batch(texts: list[str]) -> list[list[float]]:
-    data = _post(
-        f"{_BASE}:batchEmbedContents",
-        {
-            "requests": [
+    for attempt in range(3):
+        try:
+            data = _post(
+                f"{_BASE}:batchEmbedContents",
                 {
-                    "model": settings.gemini_embedding_model,
-                    "content": {"parts": [{"text": t}]},
-                    "taskType": "RETRIEVAL_DOCUMENT",
-                    "outputDimensionality": EMBEDDING_DIM,
-                }
-                for t in texts
-            ]
-        },
-    )
-    return [e["values"] for e in data["embeddings"]]
+                    "requests": [
+                        {
+                            "model": settings.gemini_embedding_model,
+                            "content": {"parts": [{"text": t}]},
+                            "taskType": "RETRIEVAL_DOCUMENT",
+                            "outputDimensionality": EMBEDDING_DIM,
+                        }
+                        for t in texts
+                    ]
+                },
+            )
+            return [e["values"] for e in data["embeddings"]]
+        except Exception as e:
+            if attempt < 2:
+                logger.warning(f"  embed retry {attempt+1}/3: {e}")
+                time.sleep(3 * (attempt + 1))
+            else:
+                raise
 
 
-def _needs_ingestion(client: QdrantClient, collection: str) -> bool:
+def _needs_ingestion(client, collection: str) -> bool:
+    if settings.force_reingest:
+        if client.collection_exists(collection):
+            logger.info(f"  FORCE_REINGEST: deleting collection {collection}")
+            client.delete_collection(collection)
+        return True
     if not client.collection_exists(collection):
         return True
     info = client.get_collection(collection)
-    return (info.vectors_count or 0) == 0
+    return (info.points_count or 0) == 0
 
 
-def _ensure_collection(client: QdrantClient, name: str, indexes: dict) -> None:
+def _ensure_collection(client, name: str, indexes: dict) -> None:
     if client.collection_exists(name):
         return
     client.create_collection(
@@ -78,7 +90,7 @@ def _ensure_collection(client: QdrantClient, name: str, indexes: dict) -> None:
         )
 
 
-def _ingest_collection(client: QdrantClient, data_dir: Path, collection: str, cfg: dict) -> int:
+def _ingest_collection(client, data_dir: Path, collection: str, cfg: dict) -> int:
     jsonl_path = data_dir / cfg["file"]
     if not jsonl_path.exists():
         logger.warning(f"Data file not found: {jsonl_path} — skipping {collection}")
@@ -105,7 +117,16 @@ def _ingest_collection(client: QdrantClient, data_dir: Path, collection: str, cf
             )
             for d, vec in zip(batch, vectors)
         ]
-        client.upsert(collection_name=collection, points=points)
+        for attempt in range(3):
+            try:
+                client.upsert(collection_name=collection, points=points)
+                break
+            except Exception as e:
+                if attempt < 2:
+                    logger.warning(f"  upsert retry {attempt+1}/3: {e}")
+                    time.sleep(2 ** attempt)
+                else:
+                    raise
         uploaded += len(points)
         time.sleep(SLEEP_BETWEEN_BATCHES)
 
@@ -118,8 +139,10 @@ def run_ingestion() -> None:
         logger.warning("GEMINI_API_KEY not set — skipping ingestion")
         return
 
+    from app.services.qdrant_factory import get_qdrant_client
+
     data_dir = Path(settings.data_dir) / "rag"
-    client = QdrantClient(host=settings.qdrant_host, port=settings.qdrant_port)
+    client = get_qdrant_client()
 
     needs = {name: _needs_ingestion(client, name) for name in COLLECTIONS}
     if not any(needs.values()):

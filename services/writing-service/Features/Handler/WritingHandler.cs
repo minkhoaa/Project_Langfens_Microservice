@@ -1,6 +1,9 @@
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using writing_service.Contracts;
 using writing_service.Features.Service.Admin;
 using writing_service.Features.Service.User;
+using writing_service.Infrastructure.Persistence;
 
 namespace writing_service.Features.Handler;
 
@@ -45,4 +48,19 @@ public static class WritingHandler
 
     public static Task<IResult> DeleteExamHandler(Guid examId, CancellationToken token, IAdminService service) =>
         service.DeleteExam(examId, token);
+
+    public static async Task<IResult> GetComparisonHandler(
+        Guid submissionId, WritingDbContext db, CancellationToken token)
+    {
+        var evaluation = await db.WritingEvaluations
+            .Where(e => e.SubmissionId == submissionId)
+            .OrderByDescending(e => e.CreatedAt)
+            .FirstOrDefaultAsync(token);
+
+        if (evaluation?.ComparativeAnalysisJson == null)
+            return Results.NoContent();
+
+        var comparison = JsonSerializer.Deserialize<AiCompareResponseDto>(evaluation.ComparativeAnalysisJson);
+        return Results.Ok(comparison);
+    }
 }

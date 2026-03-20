@@ -36,6 +36,8 @@ public class WritingEvaluation
 
     public string RawLlmJson { get; set; } = string.Empty;  // dump nguyên JSON từ model
 
+    public string? ComparativeAnalysisJson { get; set; }  // Progressive band comparison result (nullable, populated async)
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [JsonIgnore]

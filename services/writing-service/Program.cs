@@ -91,6 +91,12 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddSingleton<IWritingGrader, WritingGrader>();
+
+builder.Services.AddHttpClient<IAiCompareClient, AiCompareClient>(client =>
+{
+    client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8092"));
+    client.Timeout = TimeSpan.FromSeconds(90);
+});
 var jwtSettings = new
 {
     Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
