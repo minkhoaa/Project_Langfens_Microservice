@@ -4,44 +4,98 @@ from fastapi import HTTPException
 from langchain_core.exceptions import OutputParserException
 
 from app.config import settings
-from app.prompts.writing_compare import WRITING_COMPARE_PROMPT
-from app.schemas import CompareRequest, CompareResponse, ReferenceEssay, SentenceComparison
+from app.prompts.writing_compare import WRITING_COMPARE_EXEMPLAR_PROMPT, WRITING_COMPARE_PROMPT
+from app.schemas import CompareRequest, CompareResponse, ReferenceEssay
 from app.services import gemini_service, search_service
 
 logger = logging.getLogger(__name__)
 
 
-def _format_references(references) -> str:
+async def _search_with_fallback(
+    topic: str, band_center: float, task_type: str, top_k: int = 2
+) -> list:
+    """Search for essays near band_center with progressive fallback."""
+    # Attempt 1: topic + band ±0.5
+    results = await search_service.search(
+        collection=settings.qdrant_collection_writing,
+        query=topic,
+        top_k=top_k,
+        filters={
+            "band_overall": {"gte": band_center - 0.5, "lte": band_center + 0.5},
+            "task_type": task_type,
+        },
+    )
+    if results:
+        return results
+
+    # Attempt 2: topic + band ±1.0
+    results = await search_service.search(
+        collection=settings.qdrant_collection_writing,
+        query=topic,
+        top_k=top_k,
+        filters={
+            "band_overall": {"gte": band_center - 1.0, "lte": band_center + 1.0},
+            "task_type": task_type,
+        },
+    )
+    if results:
+        return results
+
+    # Attempt 3: same task_type + band only (no topic similarity)
+    results = await search_service.search(
+        collection=settings.qdrant_collection_writing,
+        query=task_type,
+        top_k=top_k,
+        filters={
+            "band_overall": {"gte": band_center - 1.0, "lte": band_center + 1.0},
+            "task_type": task_type,
+        },
+    )
+    return results
+
+
+def _format_references(references: list, label: str) -> str:
+    if not references:
+        return f"(No {label} references available)"
     parts = []
     for i, ref in enumerate(references, 1):
         band = ref.metadata.get("band_overall", "?")
-        parts.append(f"--- Reference Essay {i} (Band {band}) ---\n{ref.text}")
+        parts.append(f"--- {label} Essay {i} (Band {band}) ---\n{ref.text}")
     return "\n\n".join(parts)
 
 
 async def compare_essay(req: CompareRequest) -> CompareResponse:
-    # 1. Search by topic (not full essay — better for RETRIEVAL_QUERY embedding)
-    references = await search_service.search(
-        collection=settings.qdrant_collection_writing,
-        query=req.topic,
-        top_k=3,
-        filters={"band_overall": req.band_filter, "task_type": req.task_type},
-    )
+    student_band = req.student_band
+    step_up_band = min(student_band + 1.0, 9.0)
+    target_band = min(student_band + 2.0, 9.0)
 
-    if not references:
-        raise HTTPException(
-            status_code=422,
-            detail=f"No reference essays found for {req.task_type} with band≥{req.band_filter}",
+    # Edge case: top band → exemplar mode
+    if student_band >= 8.5:
+        return await _compare_exemplar(req, student_band)
+
+    # Dual query
+    step_up_refs = await _search_with_fallback(req.topic, step_up_band, req.task_type)
+    target_refs = await _search_with_fallback(req.topic, target_band, req.task_type)
+
+    all_refs = step_up_refs + target_refs
+    if not all_refs:
+        return CompareResponse(
+            overall_analysis="No reference essays found for comparison at this band level and topic.",
+            step_up_band=step_up_band,
+            target_band=target_band,
+            no_references_found=True,
         )
 
-    # 2. Build prompt variables
     variables = {
         "student_essay": req.essay_text,
         "topic": req.topic,
-        "reference_essays": _format_references(references),
+        "student_band": str(student_band),
+        "step_up_band": str(step_up_band),
+        "target_band": str(target_band),
+        "step_up_references": _format_references(step_up_refs, "Step-up"),
+        "target_references": _format_references(target_refs, "Target"),
     }
 
-    # 3. Call Gemini via LangChain
     try:
         result = await gemini_service.generate(
             prompt_template=WRITING_COMPARE_PROMPT,
@@ -51,23 +105,17 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         logger.warning(f"LLM call failed: {e}")
         result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
 
-    # 4. Parse sentence comparisons safely
-    raw_comparisons = result.get("sentence_comparisons", [])
-    comparisons = []
-    for sc in raw_comparisons:
-        try:
-            comparisons.append(SentenceComparison(**sc))
-        except Exception:
-            continue
-
-    # 5. Build response
     return CompareResponse(
         overall_analysis=result.get("overall_analysis", ""),
         vocabulary_feedback=result.get("vocabulary_feedback", ""),
         coherence_feedback=result.get("coherence_feedback", ""),
         grammar_feedback=result.get("grammar_feedback", ""),
         task_response_feedback=result.get("task_response_feedback", ""),
-        sentence_comparisons=comparisons,
+        step_up_band=step_up_band,
+        target_band=target_band,
+        step_up_analysis=result.get("step_up_analysis", ""),
+        target_analysis=result.get("target_analysis", ""),
+        key_improvements=result.get("key_improvements", []),
         references=[
             ReferenceEssay(
                 id=r.id,
@@ -75,6 +123,57 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
                 band=r.metadata.get("band_overall", 0),
                 similarity_score=r.score,
             )
-            for r in references
+            for r in all_refs
+        ],
+    )
+
+
+async def _compare_exemplar(req: CompareRequest, student_band: float) -> CompareResponse:
+    """Exemplar mode for Band 8.5-9.0 students."""
+    exemplar_refs = await _search_with_fallback(req.topic, 9.0, req.task_type)
+
+    if not exemplar_refs:
+        return CompareResponse(
+            overall_analysis="No Band 9.0 exemplar essays found for this topic.",
+            step_up_band=9.0,
+            target_band=9.0,
+            no_references_found=True,
+        )
+
+    variables = {
+        "student_essay": req.essay_text,
+        "topic": req.topic,
+        "student_band": str(student_band),
+        "exemplar_references": _format_references(exemplar_refs, "Exemplar"),
+    }
+
+    try:
+        result = await gemini_service.generate(
+            prompt_template=WRITING_COMPARE_EXEMPLAR_PROMPT,
+            variables=variables,
+        )
+    except (OutputParserException, Exception) as e:
+        logger.warning(f"LLM call failed: {e}")
+        result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
+
+    return CompareResponse(
+        overall_analysis=result.get("overall_analysis", ""),
+        vocabulary_feedback=result.get("vocabulary_feedback", ""),
+        coherence_feedback=result.get("coherence_feedback", ""),
+        grammar_feedback=result.get("grammar_feedback", ""),
+        task_response_feedback=result.get("task_response_feedback", ""),
+        step_up_band=9.0,
+        target_band=9.0,
+        step_up_analysis=result.get("step_up_analysis", ""),
+        target_analysis="",
+        key_improvements=result.get("key_improvements", []),
+        references=[
+            ReferenceEssay(
+                id=r.id,
+                text=r.text[:300],
+                band=r.metadata.get("band_overall", 0),
+                similarity_score=r.score,
+            )
+            for r in exemplar_refs
         ],
     )

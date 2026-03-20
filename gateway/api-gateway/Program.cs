@@ -37,7 +37,7 @@ builder.Services.AddAuthentication(option =>
     JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 });
 var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
-    ?? "http://localhost:3000,http://127.0.0.1:3000")
+    ?? "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3003")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
 builder.Services.AddCors(c => c.AddPolicy("FE", p => p

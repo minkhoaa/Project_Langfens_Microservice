@@ -301,7 +301,7 @@ BEGIN
     2,
     'The green beans are roasted according to the _______ and then packaged.',
     '',
-    '{"blank-q13": ["customers' specifications"]}'::jsonb
+    '{"blank-q13": ["customers'' specifications"]}'::jsonb
   );
 
 

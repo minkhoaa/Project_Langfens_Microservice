@@ -29,6 +29,9 @@ namespace writing_service.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ComparativeAnalysisJson")
+                        .HasColumnType("text");
+
                     b.Property<double>("CoherenceAndCohesionBand")
                         .HasColumnType("double precision");
 

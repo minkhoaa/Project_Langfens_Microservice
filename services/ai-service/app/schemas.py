@@ -26,7 +26,7 @@ class CompareRequest(BaseModel):
     essay_text: str = Field(..., min_length=50, max_length=3000)
     topic: str = Field(..., min_length=5, max_length=500)
     task_type: Literal["TASK_1", "TASK_2"] = "TASK_2"
-    band_filter: float = Field(default=8.0, ge=6.0, le=9.0)
+    student_band: float = Field(..., ge=1.0, le=9.0)
 
 
 class SentenceComparison(BaseModel):
@@ -49,5 +49,11 @@ class CompareResponse(BaseModel):
     coherence_feedback: str = ""
     grammar_feedback: str = ""
     task_response_feedback: str = ""
+    step_up_band: float = 0.0
+    target_band: float = 0.0
+    step_up_analysis: str = ""
+    target_analysis: str = ""
+    key_improvements: list[str] = []
+    no_references_found: bool = False
     sentence_comparisons: list[SentenceComparison] = []
-    references: list[ReferenceEssay]
+    references: list[ReferenceEssay] = []
