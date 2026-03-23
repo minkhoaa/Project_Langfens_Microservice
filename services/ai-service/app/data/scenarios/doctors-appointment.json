@@ -1,0 +1,30 @@
+{
+  "id": "6afc0bf2-c340-4fd5-9ff3-3649af77a905",
+  "slug": "doctors-appointment",
+  "title": "Doctor's Appointment",
+  "difficulty": "INTERMEDIATE",
+  "ielts_part": "SITUATIONAL",
+  "context": "You are calling or speaking to a clinic receptionist to arrange a medical appointment. Explain your symptoms, ask about available times, and respond to questions about urgency and personal details.",
+  "user_role": "A patient trying to book an appointment at a local clinic",
+  "agent_role": "A clinic receptionist checking symptoms and appointment availability",
+  "opening_prompt": "Good afternoon, CityCare Clinic speaking. How may I help you today?",
+  "target_vocabulary": [
+    "symptoms",
+    "appointment",
+    "available slot",
+    "urgent",
+    "prescription"
+  ],
+  "target_grammar": [
+    "Present Perfect for recent symptoms",
+    "Modals for advice and urgency"
+  ],
+  "suggested_topics": [
+    "health problem",
+    "preferred time",
+    "doctor availability",
+    "contact details"
+  ],
+  "duration_min": 6,
+  "turn_count_target": 8
+}
