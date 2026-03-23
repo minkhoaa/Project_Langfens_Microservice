@@ -1,0 +1,30 @@
+{
+  "id": "2fe3ec7a-8cfc-4455-aa74-028be98d3507",
+  "slug": "lost-phone-report",
+  "title": "Lost Phone Report",
+  "difficulty": "INTERMEDIATE",
+  "ielts_part": "SITUATIONAL",
+  "context": "You have lost your phone while traveling across the city and need to report it at a customer support desk or police station. Explain where you last saw it, describe the device, and ask what to do next.",
+  "user_role": "A traveler reporting a missing mobile phone and asking for help",
+  "agent_role": "A support officer collecting details and explaining the reporting process",
+  "opening_prompt": "I'm sorry to hear that. Could you tell me when and where you last remember having your phone?",
+  "target_vocabulary": [
+    "missing",
+    "device",
+    "location",
+    "contact number",
+    "report form"
+  ],
+  "target_grammar": [
+    "Past Continuous for background events",
+    "Reported sequence of events"
+  ],
+  "suggested_topics": [
+    "last known location",
+    "phone description",
+    "security concerns",
+    "next actions"
+  ],
+  "duration_min": 6,
+  "turn_count_target": 8
+}

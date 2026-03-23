@@ -1,0 +1,30 @@
+{
+  "id": "9c6c3be4-86f1-4258-b2ff-6a6f3ca5bf02",
+  "slug": "library-membership",
+  "title": "Library Membership",
+  "difficulty": "BEGINNER",
+  "ielts_part": "SITUATIONAL",
+  "context": "You have just moved to a new neighborhood and want to join the local library. Ask about membership, borrowing rules, and study facilities. Respond clearly and politely when the librarian asks for details.",
+  "user_role": "A new resident who wants to register for a library card",
+  "agent_role": "A librarian explaining membership and available services",
+  "opening_prompt": "Hello, welcome to the community library. How can I help you today?",
+  "target_vocabulary": [
+    "membership",
+    "borrow",
+    "return date",
+    "study area",
+    "identity card"
+  ],
+  "target_grammar": [
+    "Polite requests with could",
+    "Present Simple for rules and schedules"
+  ],
+  "suggested_topics": [
+    "registration process",
+    "borrowing limits",
+    "opening hours",
+    "quiet study rooms"
+  ],
+  "duration_min": 5,
+  "turn_count_target": 7
+}

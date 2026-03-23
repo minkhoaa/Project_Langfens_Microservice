@@ -1,0 +1,30 @@
+{
+  "id": "f4e27ab3-b6d8-4e66-b0f0-05ca70644d04",
+  "slug": "gym-membership",
+  "title": "Gym Membership",
+  "difficulty": "BEGINNER",
+  "ielts_part": "SITUATIONAL",
+  "context": "You want to join a gym near your home and are speaking with the front desk staff. Ask about membership plans, class schedules, and facilities. Mention your fitness goals and preferred workout times.",
+  "user_role": "A customer choosing a gym membership for regular exercise",
+  "agent_role": "A fitness center receptionist explaining plans and services",
+  "opening_prompt": "Hi, welcome to FitZone Gym. Are you interested in a membership, or would you like a quick tour first?",
+  "target_vocabulary": [
+    "membership plan",
+    "monthly fee",
+    "personal trainer",
+    "equipment",
+    "workout"
+  ],
+  "target_grammar": [
+    "Present Continuous for future arrangements",
+    "Questions with how often"
+  ],
+  "suggested_topics": [
+    "membership types",
+    "opening hours",
+    "group classes",
+    "fitness goals"
+  ],
+  "duration_min": 5,
+  "turn_count_target": 7
+}
