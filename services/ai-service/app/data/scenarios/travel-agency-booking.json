@@ -1,0 +1,31 @@
+{
+  "id": "3e4197a7-7178-4c47-a3ef-2b93d8fb2603",
+  "slug": "travel-agency-booking",
+  "title": "Travel Agency Booking",
+  "difficulty": "INTERMEDIATE",
+  "ielts_part": "SITUATIONAL",
+  "context": "You are planning a short holiday and visit a travel agency for advice. Discuss destination options, budget, accommodation, and transport. Explain your preferences and compare a few choices before deciding.",
+  "user_role": "A customer looking for an affordable holiday package",
+  "agent_role": "A travel consultant recommending destinations and packages",
+  "opening_prompt": "Welcome to Horizon Travel. Tell me a little about the kind of trip you're looking for, and I'll suggest a few options.",
+  "target_vocabulary": [
+    "package",
+    "budget-friendly",
+    "accommodation",
+    "itinerary",
+    "reservation"
+  ],
+  "target_grammar": [
+    "Comparatives for options",
+    "Future forms for travel plans",
+    "Preferences with would rather"
+  ],
+  "suggested_topics": [
+    "destination choices",
+    "travel dates",
+    "hotel preferences",
+    "activities included"
+  ],
+  "duration_min": 6,
+  "turn_count_target": 8
+}

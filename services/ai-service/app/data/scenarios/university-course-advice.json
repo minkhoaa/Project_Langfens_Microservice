@@ -1,0 +1,31 @@
+{
+  "id": "a0dc0cd4-5d38-4c62-b271-6f71ca847906",
+  "slug": "university-course-advice",
+  "title": "University Course Advice",
+  "difficulty": "ADVANCED",
+  "ielts_part": "PART_3",
+  "context": "You are speaking with an academic advisor about choosing courses for the next semester. Discuss your long-term goals, the strengths of different modules, and any concerns about workload or prerequisites.",
+  "user_role": "A university student planning a balanced but useful course schedule",
+  "agent_role": "An academic advisor helping a student choose suitable modules",
+  "opening_prompt": "Thanks for coming in. Before we look at the course list, could you tell me about your academic goals for next semester?",
+  "target_vocabulary": [
+    "prerequisite",
+    "workload",
+    "specialization",
+    "elective",
+    "career prospects"
+  ],
+  "target_grammar": [
+    "Complex sentences for justification",
+    "Conditionals for decision-making",
+    "Hedging language for opinions"
+  ],
+  "suggested_topics": [
+    "study goals",
+    "module difficulty",
+    "time management",
+    "future career plans"
+  ],
+  "duration_min": 8,
+  "turn_count_target": 10
+}
