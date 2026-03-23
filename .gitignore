@@ -89,6 +89,8 @@ npm-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 tests
+!services/ai-service/tests/
+!services/ai-service/tests/*.py
 # ------------------------------
 # Docker (local overrides/artifacts)
 # ------------------------------
@@ -135,6 +137,9 @@ services/speaking-service/Helper/whisper/models/*.bin
 
 # All data directories (regenerable)
 data/
+!services/ai-service/app/data/
+!services/ai-service/app/data/scenarios/
+!services/ai-service/app/data/scenarios/*.json
 
 # Cleaned text (can regenerate)
 data/cleaned/
