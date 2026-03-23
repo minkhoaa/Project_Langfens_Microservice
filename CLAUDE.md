@@ -54,11 +54,11 @@ services/{name}/
 
 Python 3.12 + FastAPI. Key files:
 - `app/config.py` — Pydantic settings (Qdrant, Gemini, Redis, data paths)
-- `app/services/embedding_service.py` — Gemini text-embedding-004 wrapper (768-dim)
+- `app/services/embedding_service.py` — Gemini embedding-001 wrapper (768-dim)
 - `app/services/ingestion_service.py` — Auto-ingests JSONL data into Qdrant on startup
 - `app/routers/` — Health check, embedding endpoint
 
-**Qdrant collections**: `writing_samples` (12,339 Band 7+ essays), `grammar_knowledge` (5,659 corrections)
+**Qdrant collections** (cloud instance): `writing_samples` (40,122 essays), `grammar_knowledge` (5,659 corrections)
 
 **Data**: JSONL files in `data/rag/`, mounted read-only at `/app/data/rag/` in container.
 
@@ -98,7 +98,7 @@ GitHub Actions on push to `master`: build → push Docker Hub (SHA tag) → SSH 
 ## Phase 2 Technical Decisions
 
 - **All AI uses Gemini** — Phase 1 Writing grading migrated from GPT-4o to Gemini. Phase 2 modules use fine-tuned Gemini 2.5 Flash Lite
-- **Embedding**: Gemini text-embedding-004 (768-dim)
+- **Embedding**: Gemini embedding-001 (`models/gemini-embedding-001`, 768-dim)
 - **Vector DB**: Qdrant (single container)
 - **Communication**: REST via YARP Gateway (not gRPC for AI calls)
 - **Writing flow**: ADDITIVE — Gemini grading stays, RAG comparison added after

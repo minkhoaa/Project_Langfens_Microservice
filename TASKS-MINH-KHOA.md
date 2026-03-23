@@ -48,9 +48,9 @@
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ⬜ | Implement Gemini `text-embedding-004` wrapper | `/api/v1/embed` endpoint working |
-| ⬜ | Build `embed_and_upload.py`: embed essays → Qdrant | Script processes writing_samples.jsonl |
-| ⬜ | Create Qdrant collection `writing_samples` (HNSW + metadata) | Collection schema verified |
+| ✅ | Implement Gemini `embedding-001` wrapper | `/api/v1/embed` endpoint working (done in Week 1) |
+| ✅ | Build ingestion pipeline: embed essays → Qdrant | `ingestion_service.py` auto-ingests on startup (done in Week 1) |
+| ✅ | Create Qdrant collection `writing_samples` (HNSW + metadata) | 40,122 essays indexed in cloud Qdrant (done in Week 1) |
 | ⬜ | Spot-check 50 training examples from `m1_writing.jsonl` | Data quality verified, issues documented |
 | ⬜ | **Knowledge transfer session (2-3h):** Fine-tuning + AI Service patterns for TK | TK understands Google AI Studio, FastAPI, Qdrant, Gemini |
 
@@ -60,9 +60,9 @@
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ⬜ | Run embedding pipeline: upload writing_samples → Qdrant | 12,339 essays indexed, search verified |
-| ⬜ | Implement `/api/v1/writing/search` — similarity search endpoint | Returns top-K similar essays |
-| ⬜ | Create Qdrant collection `grammar_knowledge`, embed grammar pairs | 5,659 docs searchable |
+| ✅ | Run embedding pipeline: upload writing_samples → Qdrant | 40,122 essays indexed in cloud Qdrant, search verified (done in Week 1) |
+| ✅ | Implement `/api/v1/writing/search` — similarity search endpoint | Returns top-K similar essays with filters (done in Week 1) |
+| ✅ | Create Qdrant collection `grammar_knowledge`, embed grammar pairs | 5,659 docs searchable in cloud Qdrant (done in Week 1) |
 
 > **MS2 Deadline** — Apr 3, 2026
 
@@ -73,8 +73,8 @@
 | Status | Task | Deliverable |
 |--------|------|-------------|
 | ⬜ | **Fine-tune Gemini 2.5 Flash Lite — M1 Writing Comparative** | Model deployed, quality gate passed |
-| ⬜ | Implement `/api/v1/writing/compare` endpoint (embed → retrieve → Gemini) | Structured comparison JSON |
-| ⬜ | Design Writing Comparative prompt | Prompt tested with 10 essays |
+| ✅ | Implement `/api/v1/writing/compare` endpoint (embed → retrieve → Gemini) | Structured comparison JSON with progressive fallback (done in Week 1) |
+| ✅ | Design Writing Comparative prompt | Prompt with dual-band search + exemplar mode (done in Week 1) |
 | ⬜ | Scaffold WritingComparativeTab + SimilarEssaysSidebar (placeholder data) | Frontend page renders with mock data |
 
 ---
@@ -184,9 +184,9 @@
 | Phase | Tasks | Done | % |
 |-------|-------|------|---|
 | Week 1 — Infrastructure | 4 | 4 | **100%** ✅ |
-| Week 2 — Embedding setup | 5 | 0 | 0% |
-| Week 3 — Data indexed | 3 | 0 | 0% |
-| Week 4 — Writing API + FT | 4 | 0 | 0% |
+| Week 2 — Embedding setup | 5 | 3 | **60%** |
+| Week 3 — Data indexed | 3 | 3 | **100%** ✅ |
+| Week 4 — Writing API + FT | 4 | 2 | **50%** |
 | Week 5 — .NET integration | 5 | 0 | 0% |
 | Week 6 — Writing + Grammar frontend | 8 | 0 | 0% |
 | Week 7 — E2E + Polish | 4 | 0 | 0% |
@@ -194,4 +194,4 @@
 | Week 9 — Performance | 2 | 0 | 0% |
 | Week 10 — Load testing | 4 | 0 | 0% |
 | Week 11 — Deployment | 6 | 0 | 0% |
-| **TOTAL** | **48** | **4** | **8%** |
+| **TOTAL** | **48** | **12** | **25%** |

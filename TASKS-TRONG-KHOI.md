@@ -90,7 +90,7 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 | ⬜ | Validate grammar_knowledge.jsonl against grammar_rule_schema.json | Schema compliance verified |
 | ⬜ | Author 10 roleplay scenarios (JSON) — batch 1 | 10 scenario files in `ai-service/app/data/scenarios/` |
 | ⬜ | Spot-check 50 training examples from `m2_speaking.jsonl` | Data quality verified |
-| ⬜ | **Backend warm-up:** Implement `/api/v1/speaking/roleplay/scenarios` GET endpoint (read JSON, no AI) | First FastAPI endpoint deployed and working |
+| ✅ | **Backend warm-up:** Implement `/api/v1/speaking/roleplay/scenarios` GET endpoint (read JSON, no AI) | Endpoint working with scenario loader + fallback (done by MK in Week 1) |
 | ⬜ | Design Grammar Explainer UI mockup | Mockup: Error -> Theory -> Examples |
 
 > **MS2 Deadline** — Apr 3, 2026
@@ -223,7 +223,7 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 |-------|-------|------|---|
 | Week 1 — Research | 3 | 0 | 0% |
 | Week 2 — Mockups | 4 | 0 | 0% |
-| Week 3 — Content + Warm-up | 5 | 0 | 0% |
+| Week 3 — Content + Warm-up | 5 | 1 | 20% |
 | Week 4 — Fine-tuning + FE | 4 | 0 | 0% |
 | Week 5 — Speaking backend | 5 | 0 | 0% |
 | Week 6 — Prompt + Vocab | 3 | 0 | 0% |
@@ -232,4 +232,4 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 | Week 9 — E2E + Polish | 5 | 0 | 0% |
 | Week 10 — Testing | 4 | 0 | 0% |
 | Week 11 — Documentation | 4 | 0 | 0% |
-| **TOTAL** | **45** | **0** | **0%** |
+| **TOTAL** | **45** | **1** | **2%** |

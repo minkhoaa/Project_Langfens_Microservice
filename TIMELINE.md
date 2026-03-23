@@ -24,7 +24,7 @@
 | AI Service | Python 3.12 / FastAPI | RAG orchestrator for all 3 modules |
 | Vector DB | Qdrant v1.13+ | Semantic search (essays, grammar, memory) |
 | LLM | Gemini 2.5 Flash Lite (fine-tuned x3) | Comparative grading, roleplay, grammar explanation |
-| Embedding | Gemini text-embedding-004 | 768-dim vectors for all collections |
+| Embedding | Gemini embedding-001 (`models/gemini-embedding-001`) | 768-dim vectors for all collections |
 | Orchestration | LangChain (as library) | Prompt templates, retrievers, output parsers |
 | Communication | REST via YARP Gateway | .NET services <-> AI Service |
 | Session State | Redis 7.4 | Active roleplay conversation history |
@@ -374,9 +374,9 @@
 
 | Module | Design | Backend API | Fine-Tuning | Data Pipeline | .NET Integration | Frontend UI | Testing | Status |
 |--------|--------|-------------|-------------|---------------|------------------|-------------|---------|--------|
-| M1 Writing Comparative | [ ] | [ ] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
-| M2 Speaking Roleplay | [ ] | [ ] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
-| M3 Grammar Explainer | [ ] | [ ] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
+| M1 Writing Comparative | [ ] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
+| M2 Speaking Roleplay | [ ] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
+| M3 Grammar Explainer | [ ] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
 
 ### Infrastructure Progress
 
@@ -385,8 +385,8 @@
 | Qdrant in Docker Compose | [x] Done | v1.13.6, port 6333/6334 |
 | AI Service Scaffold | [x] Done | FastAPI, /api/healthz |
 | YARP Gateway Route | [x] Done | /api-ai/* -> ai-service:8080, timeout 60s |
-| Essay Data Embedding | [ ] Not Started | data/rag/writing_samples.jsonl (12,339 docs) |
-| Grammar Rules (GEC pairs) | [x] Done | 5,659 pairs in grammar_knowledge.jsonl + schema defined |
+| Essay Data Embedding | [x] Done | 40,122 essays indexed in cloud Qdrant |
+| Grammar Rules (GEC pairs) | [x] Done | 5,659 pairs indexed in cloud Qdrant + schema defined |
 | Roleplay Scenarios | [ ] Not Started | Target: 20 scenarios (Trong Khoi) |
 | Fine-Tuning: Writing Model | [ ] Not Started | Training data: 23,961 pairs |
 | Fine-Tuning: Grammar Model | [ ] Not Started | Training data: 5,659 pairs |
@@ -396,8 +396,8 @@
 
 | Week | Dates | Completed | Blockers | Notes |
 |------|-------|-----------|----------|-------|
-| 1 | Mar 16-20 | Qdrant, AI Service scaffold, YARP gateway, full dataset pipeline | None | **MS1 DONE** Mar 16 (ahead of deadline) |
-| 2 | Mar 23-27 | | | |
+| 1 | Mar 16-20 | Qdrant, AI Service scaffold, YARP gateway, full dataset pipeline, embedding service, search endpoints, compare endpoint, ingestion pipeline, scenario service, 40K essays + 5.6K grammar indexed in cloud Qdrant | None | **MS1 DONE** Mar 16. Also completed most of Week 2-4 backend tasks ahead of schedule |
+| 2 | Mar 23-27 | | | Remaining: spot-check data quality, knowledge transfer, frontend scaffolding, qdrant-client upgrade |
 | 3 | Mar 30 - Apr 3 | | | |
 | 4 | Apr 6-10 | | | |
 | 5 | Apr 13-17 | | | |
