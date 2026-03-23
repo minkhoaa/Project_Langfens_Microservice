@@ -1,0 +1,30 @@
+{
+  "id": "8a3b36f3-6ab0-49d6-a146-ef8cc72f3f01",
+  "slug": "airport-help-desk",
+  "title": "Airport Help Desk",
+  "difficulty": "INTERMEDIATE",
+  "ielts_part": "SITUATIONAL",
+  "context": "You have just arrived at an international airport, but your luggage has not appeared on the carousel. Speak to the help desk staff, explain the issue, and answer their follow-up questions with clear details.",
+  "user_role": "A traveler reporting a delayed suitcase after an international flight",
+  "agent_role": "An airport service officer helping passengers with missing baggage claims",
+  "opening_prompt": "Hello, welcome to the baggage support desk. I understand you may have an issue with your luggage. Could you tell me what happened?",
+  "target_vocabulary": [
+    "luggage",
+    "baggage claim",
+    "boarding pass",
+    "delayed",
+    "description"
+  ],
+  "target_grammar": [
+    "Past Simple for sequence of events",
+    "Present Perfect for current travel status"
+  ],
+  "suggested_topics": [
+    "flight details",
+    "bag description",
+    "travel plans",
+    "next steps"
+  ],
+  "duration_min": 6,
+  "turn_count_target": 8
+}
