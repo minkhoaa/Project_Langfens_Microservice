@@ -1,0 +1,30 @@
+{
+  "id": "58b4e954-bd80-4e2c-99c6-5bb2cc4d9603",
+  "slug": "restaurant-ordering",
+  "title": "Restaurant Ordering",
+  "difficulty": "BEGINNER",
+  "ielts_part": "SITUATIONAL",
+  "context": "You are meeting a friend for dinner at a busy restaurant. Talk to the server, ask about the menu, place your order, and make one special request politely.",
+  "user_role": "A customer ordering dinner and asking about suitable menu options",
+  "agent_role": "A restaurant server recommending dishes and taking an order",
+  "opening_prompt": "Hi there, welcome in. Are you ready to order, or would you like me to recommend a few popular dishes first?",
+  "target_vocabulary": [
+    "starter",
+    "main course",
+    "spicy",
+    "vegetarian",
+    "bill"
+  ],
+  "target_grammar": [
+    "Would like for ordering",
+    "Comparatives for preferences"
+  ],
+  "suggested_topics": [
+    "menu questions",
+    "dietary needs",
+    "drink choices",
+    "payment"
+  ],
+  "duration_min": 5,
+  "turn_count_target": 7
+}

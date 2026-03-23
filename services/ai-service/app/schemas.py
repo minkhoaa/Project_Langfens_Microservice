@@ -22,6 +22,28 @@ class SearchResponse(BaseModel):
     collection: str
 
 
+class RoleplayScenario(BaseModel):
+    id: str
+    slug: str
+    title: str
+    difficulty: Literal["BEGINNER", "INTERMEDIATE", "ADVANCED"]
+    ielts_part: Literal["PART_1", "PART_2", "PART_3", "SITUATIONAL"]
+    context: str
+    user_role: str
+    agent_role: str
+    opening_prompt: str
+    target_vocabulary: list[str]
+    target_grammar: list[str] = []
+    suggested_topics: list[str] = []
+    duration_min: int
+    turn_count_target: int = 8
+
+
+class RoleplayScenariosResponse(BaseModel):
+    scenarios: list[RoleplayScenario]
+    total: int
+
+
 class CompareRequest(BaseModel):
     essay_text: str = Field(..., min_length=50, max_length=3000)
     topic: str = Field(..., min_length=5, max_length=500)

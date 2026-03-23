@@ -1,0 +1,30 @@
+{
+  "id": "d19a9f74-2c27-4dbe-8295-1d5ea22ed702",
+  "slug": "hotel-check-in",
+  "title": "Hotel Check-in",
+  "difficulty": "BEGINNER",
+  "ielts_part": "SITUATIONAL",
+  "context": "You are arriving at a hotel in the evening after a long journey. Speak with the receptionist, confirm your reservation, and ask about useful services before going to your room.",
+  "user_role": "A guest checking into a city hotel for a short business trip",
+  "agent_role": "A hotel receptionist welcoming a guest and explaining the booking details",
+  "opening_prompt": "Good evening and welcome to Riverside Hotel. May I have your name, please, so I can find your reservation?",
+  "target_vocabulary": [
+    "reservation",
+    "single room",
+    "breakfast included",
+    "check-out",
+    "wifi password"
+  ],
+  "target_grammar": [
+    "Polite questions with could and would",
+    "Present Simple for hotel services"
+  ],
+  "suggested_topics": [
+    "booking confirmation",
+    "room preferences",
+    "hotel facilities",
+    "check-out time"
+  ],
+  "duration_min": 5,
+  "turn_count_target": 7
+}
