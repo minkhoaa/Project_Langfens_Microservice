@@ -58,26 +58,38 @@ namespace writing_service.Features.RabbitMq
                 Suggestions = response.Suggestions,
                 ImprovedParagraph = response.ImprovedParagraph
             };
+
+            // Run comparison BEFORE publishing (so response includes comparative data)
+            var taskType = taskText.Length > 300 ? "TASK_2" : "TASK_1";
+            try
+            {
+                var compareResult = await _compareClient.CompareAsync(
+                    answerText, taskText, taskType, (float)response.OverallBand);
+                if (compareResult != null)
+                {
+                    gradingResponse.ComparativeAnalysisJson = JsonSerializer.Serialize(compareResult);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Progressive comparison failed (non-blocking)");
+            }
+
             _logger.LogInformation(JsonSerializer.Serialize(response));
             await _bus.Publish(gradingResponse);
 
-            // Fire-and-forget: progressive band comparison (async, non-blocking)
-            _ = RunComparisonAsync(request, response, taskText, answerText);
+            // Fire-and-forget: update WritingEvaluation record (for durability)
+            _ = UpdateEvaluationRecordAsync(request, response, gradingResponse.ComparativeAnalysisJson);
         }
 
-        private async Task RunComparisonAsync(
+        private async Task UpdateEvaluationRecordAsync(
             WritingGradeRequestMessage request,
             WritingGradeResponse response,
-            string taskText,
-            string answerText)
+            string? comparativeAnalysisJson)
         {
             try
             {
-                var taskType = taskText.Length > 300 ? "TASK_2" : "TASK_1";
-                var result = await _compareClient.CompareAsync(
-                    answerText, taskText, taskType, (float)response.OverallBand);
-
-                if (result == null) return;
+                if (string.IsNullOrEmpty(comparativeAnalysisJson)) return;
 
                 var evaluation = await _db.WritingEvaluations
                     .Where(e => e.SubmissionId == request.QuestionId)
@@ -86,7 +98,7 @@ namespace writing_service.Features.RabbitMq
 
                 if (evaluation != null)
                 {
-                    evaluation.ComparativeAnalysisJson = JsonSerializer.Serialize(result);
+                    evaluation.ComparativeAnalysisJson = comparativeAnalysisJson;
                     await _db.SaveChangesAsync();
                     _logger.LogInformation(
                         "Progressive comparison stored for submission {Id}", evaluation.SubmissionId);
@@ -94,7 +106,7 @@ namespace writing_service.Features.RabbitMq
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Progressive comparison failed (non-blocking)");
+                _logger.LogWarning(ex, "Failed to update evaluation record (non-blocking)");
             }
         }
     }

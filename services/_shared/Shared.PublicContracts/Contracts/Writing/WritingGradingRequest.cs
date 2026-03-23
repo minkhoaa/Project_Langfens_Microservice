@@ -33,6 +33,9 @@ namespace Shared.ExamDto.Contracts.Writing
         // Gợi ý & ví dụ
         public List<string> Suggestions { get; set; } = default!;
         public string ImprovedParagraph { get; set; } = string.Empty;
+
+        // Progressive band comparison result (populated asynchronously after grading)
+        public string? ComparativeAnalysisJson { get; set; }
     };
     public class CriterionScore
     {
