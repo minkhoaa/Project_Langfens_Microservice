@@ -108,8 +108,10 @@ builder.Services.AddMassTransit(configurator =>
     var prodRabbitEnvironment = new RabbitMqConfig
     {
         Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
-        Username = EnvOrDefault("RABBITMQ__USERNAME", "guest"),
-        Password = EnvOrDefault("RABBITMQ__PASSWORD", "guest"),
+        Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") 
+        ?? throw new InvalidOperationException("RABBITMQ__USERNAME environment variable is required"),
+        Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") 
+        ?? throw new InvalidOperationException("RABBITMQ__PASSWORD environment variable is required"),
         VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
         Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a : (ushort)5672,
         UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var proSsl) && proSsl

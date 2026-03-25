@@ -92,9 +92,12 @@ builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddSingleton<IWritingGrader, WritingGrader>();
 
+// Circuit breaker for AI calls - singleton to maintain state across all calls
+builder.Services.AddSingleton<CircuitBreaker>();
+
 builder.Services.AddHttpClient<IAiCompareClient, AiCompareClient>(client =>
 {
-    client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8092"));
+    client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080"));
     client.Timeout = TimeSpan.FromSeconds(90);
 });
 var jwtSettings = new
@@ -151,8 +154,10 @@ builder.Services.AddMassTransit(configurator =>
         var prodRabbitEnvironment = new RabbitMqConfig
         {
             Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
-            Username = EnvOrDefault("RABBITMQ__USERNAME", "guest"),
-            Password = EnvOrDefault("RABBITMQ__PASSWORD", "guest"),
+            Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") 
+                ?? throw new InvalidOperationException("RABBITMQ__USERNAME environment variable is required"),
+            Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") 
+                ?? throw new InvalidOperationException("RABBITMQ__PASSWORD environment variable is required"),
             VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
             Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a : (ushort)5672,
             UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var proSsl) && proSsl

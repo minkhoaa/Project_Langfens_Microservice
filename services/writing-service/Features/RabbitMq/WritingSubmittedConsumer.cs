@@ -60,7 +60,10 @@ namespace writing_service.Features.RabbitMq
             };
 
             // Run comparison BEFORE publishing (so response includes comparative data)
-            var taskType = taskText.Length > 300 ? "TASK_2" : "TASK_1";
+            // Use explicit TaskType if provided, otherwise fall back to heuristic
+            var taskType = !string.IsNullOrEmpty(request.TaskType) 
+                ? request.TaskType 
+                : (taskText.Length > 300 ? "TASK_2" : "TASK_1");
             try
             {
                 var compareResult = await _compareClient.CompareAsync(

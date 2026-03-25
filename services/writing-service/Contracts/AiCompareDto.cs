@@ -43,4 +43,40 @@ public class AiCompareResponseDto
 
     [JsonPropertyName("no_references_found")]
     public bool NoReferencesFound { get; set; }
+
+    [JsonPropertyName("sentence_comparisons")]
+    public List<SentenceComparisonDto>? SentenceComparisons { get; set; } = [];
+
+    [JsonPropertyName("references")]
+    public List<ReferenceEssayDto>? References { get; set; } = [];
+}
+
+public class SentenceComparisonDto
+{
+    [JsonPropertyName("original")]
+    public string Original { get; set; } = "";
+
+    [JsonPropertyName("improved")]
+    public string Improved { get; set; } = "";
+
+    [JsonPropertyName("explanation")]
+    public string Explanation { get; set; } = "";
+
+    [JsonPropertyName("category")]
+    public string Category { get; set; } = "";
+}
+
+public class ReferenceEssayDto
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = "";
+
+    [JsonPropertyName("text")]
+    public string Text { get; set; } = "";
+
+    [JsonPropertyName("band")]
+    public float Band { get; set; }
+
+    [JsonPropertyName("similarity_score")]
+    public float SimilarityScore { get; set; }
 }

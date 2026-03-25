@@ -51,8 +51,153 @@
 | ✅ | Implement Gemini `embedding-001` wrapper | `/api/v1/embed` endpoint working (done in Week 1) |
 | ✅ | Build ingestion pipeline: embed essays → Qdrant | `ingestion_service.py` auto-ingests on startup (done in Week 1) |
 | ✅ | Create Qdrant collection `writing_samples` (HNSW + metadata) | 40,122 essays indexed in cloud Qdrant (done in Week 1) |
-| ⬜ | Spot-check 50 training examples from `m1_writing.jsonl` | Data quality verified, issues documented |
+| ✅ | **Spot-check 50 training examples** from `m1_writing.jsonl` | Data quality verified — 0% issue rate ✅ — Mar 25, 2026 |
+| ✅ | **Fix critical bugs from audit (BUG-001, BUG-002, BUG-003✅✅, BUG-004✅✅)** | Security & connectivity issues resolved — Mar 25, 2026 |
 | ⬜ | **Knowledge transfer session (2-3h):** Fine-tuning + AI Service patterns for TK | TK understands Google AI Studio, FastAPI, Qdrant, Gemini |
+
+> **Week 2 Deadline** — Mar 27, 2026
+
+---
+
+## 🔧 CRITICAL BUG FIXES — IMPLEMENTATION PLAN
+
+> **Audit Date:** 2026-03-24 | **Source:** `docs/superpowers/reports/backend-bug-audit-report.md`
+
+### BUG-001: Hardcoded JWT SignKey in Gateway ⚠️ CRITICAL
+
+| Field | Value |
+|-------|-------|
+| **Severity** | CRITICAL |
+| **Service** | Gateway (YARP) |
+| **File** | `gateway/api-gateway/appsettings.json:11` |
+| **Type** | Security - Hardcoded Secrets |
+
+**Implementation Plan:**
+1. Remove hardcoded SignKey from `appsettings.json`
+2. Add environment variable check in `Program.cs`
+3. Fail fast if `JwtSettings__SignKey` is not set
+
+**Files to Modify:**
+- `gateway/api-gateway/appsettings.json`
+- `gateway/api-gateway/Program.cs`
+
+**Priority:** P0 — Immediate security risk
+**Estimated Effort:** 30 minutes
+**Dependencies:** None
+**Blockers:** None
+
+---
+
+### BUG-002: Hardcoded Internal API Key ⚠️ CRITICAL
+
+| Field | Value |
+|-------|-------|
+| **Severity** | CRITICAL |
+| **Service** | Attempt Service |
+| **File** | `services/attempt-service/Program.cs:105` |
+| **Type** | Security - Hardcoded Secrets |
+
+**Implementation Plan:**
+1. Remove fallback default value from `EnvOrDefault`
+2. Throw `InvalidOperationException` if env var not set
+3. Document required env var in deployment docs
+
+**Files to Modify:**
+- `services/attempt-service/Program.cs`
+
+**Priority:** P0 — Immediate security risk
+**Estimated Effort:** 15 minutes
+**Dependencies:** None
+**Blockers:** None
+
+---
+
+### BUG-003: AI Service Port Mismatch ⚠️ CRITICAL ✅ FIXED
+
+| Field | Value |
+|-------|-------|
+| **Severity** | CRITICAL |
+| **Service** | Writing Service |
+| **File** | `services/writing-service/Program.cs:100` |
+| **Type** | Configuration/Bug |
+
+**Status:** ✅ FIXED (Mar 25, 2026)
+- Changed `http://ai-service:8092` → `http://ai-service:8080`
+- Verified: Gateway routes to `http://ai-service:8080` (internal Docker network)
+
+---
+
+### BUG-004: Hardcoded RabbitMQ Credentials ⚠️ CRITICAL ✅ FIXED
+
+| Field | Value |
+|-------|-------|
+| **Severity** | ~~CRITICAL~~ → FIXED |
+| **Service** | Multiple .NET services (8 services) |
+| **Files** | See below |
+| **Type** | Security - Hardcoded Secrets |
+| **Status** | ✅ FIXED — Mar 25, 2026 |
+
+**Implementation:** ✅ COMPLETED
+- **attempt-service:** ✅ Fixed — throws if RABBITMQ__USERNAME/PASSWORD not set
+- **writing-service:** ✅ Fixed — throws if RABBITMQ__USERNAME/PASSWORD not set
+- **speaking-service:** ✅ Fixed — throws if RABBITMQ__USERNAME/PASSWORD not set
+- **auth-service:** ✅ Fixed — throws if RABBITMQ__USERNAME/PASSWORD not set
+- **course-service:** ✅ Fixed — throws if RABBITMQ__USERNAME/PASSWORD not set
+- **vocabulary-service:** ✅ Fixed — throws if RABBITMQ__USERNAME/PASSWORD not set
+- **gamification-service:** ✅ Fixed — throws if RABBITMQ__USERNAME/PASSWORD not set
+- **email-service:** ✅ Fixed — throws if RABBITMQ__USERNAME/PASSWORD not set
+
+**Files Modified:**
+- `services/attempt-service/Program.cs`
+- `services/writing-service/Program.cs`
+- `services/speaking-service/Program.cs`
+- `services/auth-service/Program.cs`
+- `services/course-service/Program.cs`
+- `services/vocabulary-service/Program.cs`
+- `services/gamification-service/Program.cs`
+- `services/email-service/Program.cs`
+
+**Verification:** ✅ dotnet build succeeded for attempt-service and writing-service
+
+---
+
+## 📋 WEEK 2 TASK DETAILS
+
+### TASK: Spot-check 50 Training Examples from `m1_writing.jsonl`
+
+**Priority:** P1
+**Estimated Effort:** 2-3 hours
+**Dependencies:** None
+**Blockers:** None
+
+**Implementation:**
+1. Load 50 random samples from `m1_writing.jsonl`
+2. For each sample, verify:
+   - Essay text is non-empty and >100 characters
+   - Topic/question is present and meaningful
+   - Band score is valid (0-9)
+   - No obvious data corruption (encoding issues, truncated text)
+3. Document any quality issues found
+4. If >10% samples have issues, escalate to data pipeline fix
+
+---
+
+### TASK: Knowledge Transfer Session to TK
+
+**Priority:** P1
+**Estimated Effort:** 2-3 hours (session) + 1 hour prep
+**Dependencies:** TK's schedule alignment
+**Blockers:** TK availability
+
+**Implementation:**
+1. Prepare presentation on:
+   - Google AI Studio workflow for fine-tuning
+   - FastAPI patterns used in AI Service
+   - Qdrant schema and query patterns
+   - Gemini API integration
+2. Demo: Run a sample comparison request end-to-end
+3. Q&A session
+4. Share documentation links
 
 ---
 
@@ -179,12 +324,25 @@
 
 ---
 
+## TRANSFERRED TASKS FROM TK (Week 2 — Blocked)
+
+> **Reason:** TK blocked by knowledge transfer session not scheduled. Tasks transferred to MK on Mar 25, 2026.
+
+| Status | Task | Deliverable | Priority |
+|--------|------|-------------|----------|
+| ⬜ | **Design Writing Comparative results page** | Mockup approved | P1 |
+| ⬜ | **Design Roleplay chat UI + Scenario Selector** | Mockup approved | P1 |
+| ⬜ | **Build basic comparison component** (placeholder data) | Component renders | P1 |
+
+---
+
 ## PROGRESS SUMMARY
 
 | Phase | Tasks | Done | % |
 |-------|-------|------|---|
 | Week 1 — Infrastructure | 4 | 4 | **100%** ✅ |
-| Week 2 — Embedding setup | 5 | 3 | **60%** |
+| Week 2 — Embedding setup | 5 | 5 | **100%** ✅ |
+| Week 2 — TK transferred tasks | 3 | 0 | 0% |
 | Week 3 — Data indexed | 3 | 3 | **100%** ✅ |
 | Week 4 — Writing API + FT | 4 | 2 | **50%** |
 | Week 5 — .NET integration | 5 | 0 | 0% |
@@ -194,4 +352,4 @@
 | Week 9 — Performance | 2 | 0 | 0% |
 | Week 10 — Load testing | 4 | 0 | 0% |
 | Week 11 — Deployment | 6 | 0 | 0% |
-| **TOTAL** | **48** | **12** | **25%** |
+| **TOTAL** | **51** | **14** | **27%** |

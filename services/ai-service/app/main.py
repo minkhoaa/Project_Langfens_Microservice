@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from app.routers import health, embed, writing, grammar, speaking
+from app.routers import health, embed, writing, grammar, speaking, practice
 
 logger = logging.getLogger(__name__)
 _executor = ThreadPoolExecutor(max_workers=1)
@@ -26,3 +26,4 @@ app.include_router(embed.router, prefix="/api")
 app.include_router(writing.router, prefix="/api")
 app.include_router(grammar.router, prefix="/api")
 app.include_router(speaking.router, prefix="/api")
+app.include_router(practice.router, prefix="/api")

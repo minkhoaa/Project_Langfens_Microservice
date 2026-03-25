@@ -46,8 +46,10 @@ var rabbitMqConfig = new RabbitMqConfig
     Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
     Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var parsedPort) ? parsedPort : (ushort)5672,
     VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
-    Username = EnvOrDefault("RABBITMQ__USERNAME", "guest"),
-    Password = EnvOrDefault("RABBITMQ__PASSWORD", "guest"),
+    Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") 
+        ?? throw new InvalidOperationException("RABBITMQ__USERNAME environment variable is required"),
+    Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") 
+        ?? throw new InvalidOperationException("RABBITMQ__PASSWORD environment variable is required"),
     UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var proSsl) && proSsl
 };
 builder.Services.AddSingleton<IOptions<RabbitMqConfig>>(Options.Create(rabbitMqConfig));

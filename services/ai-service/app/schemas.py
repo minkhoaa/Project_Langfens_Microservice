@@ -79,3 +79,30 @@ class CompareResponse(BaseModel):
     no_references_found: bool = False
     sentence_comparisons: list[SentenceComparison] = []
     references: list[ReferenceEssay] = []
+
+
+# Grammar Explainer Schemas
+class GrammarExplainRequest(BaseModel):
+    error_text: str = Field(..., description="The erroneous sentence/phrase")
+    context: str = Field(..., description="Surrounding context for the error")
+    correct_form: str = Field(..., description="What the correct form should be")
+    language: Literal["en-GB", "en-US"] = "en-GB"
+
+
+class GrammarExplainResponse(BaseModel):
+    explanation: str
+    rule_description: str
+    correct_form: str
+    examples: list[str]
+    category: Literal["tense", "subject-verb", "word-order", "article", "preposition", "pronoun", "collocation", "other"]
+
+
+class GrammarBatchExplainRequest(BaseModel):
+    errors: list[GrammarExplainRequest]
+    max_concurrent: int = Field(default=3, ge=1, le=5)
+
+
+class GrammarBatchExplainResponse(BaseModel):
+    results: list[GrammarExplainResponse]
+    failed_count: int
+    total_count: int

@@ -5,10 +5,53 @@ from langchain_core.exceptions import OutputParserException
 
 from app.config import settings
 from app.prompts.writing_compare import WRITING_COMPARE_EXEMPLAR_PROMPT, WRITING_COMPARE_PROMPT
-from app.schemas import CompareRequest, CompareResponse, ReferenceEssay
+from app.schemas import CompareRequest, CompareResponse, ReferenceEssay, SentenceComparison
 from app.services import gemini_service, search_service
 
 logger = logging.getLogger(__name__)
+
+VALID_CATEGORIES = {"vocabulary", "grammar", "coherence", "structure"}
+
+
+def validate_sentence_comparisons_response(result: dict) -> dict:
+    """
+    Validate that the LLM response contains the required sentence_comparisons field.
+    
+    Returns the result unchanged if sentence_comparisons key exists (even if empty list).
+    Raises ValueError if the key is completely missing from the response.
+    """
+    if "sentence_comparisons" not in result:
+        logger.warning("LLM response missing required field: sentence_comparisons")
+        raise ValueError("LLM response missing required field: sentence_comparisons")
+    return result
+
+
+def _parse_sentence_comparisons(raw_comparisons: list, max_items: int = 5) -> list[SentenceComparison]:
+    """Parse and validate sentence comparisons from LLM response."""
+    if not raw_comparisons:
+        return []
+    
+    parsed = []
+    for item in raw_comparisons[:max_items]:
+        if not isinstance(item, dict):
+            continue
+        original = item.get("original", "").strip()
+        improved = item.get("improved", "").strip()
+        explanation = item.get("explanation", "").strip()
+        category = item.get("category", "vocabulary").lower()
+        
+        if not original or not improved or not explanation:
+            continue
+        if category not in VALID_CATEGORIES:
+            category = "vocabulary"
+        
+        parsed.append(SentenceComparison(
+            original=original,
+            improved=improved,
+            explanation=explanation,
+            category=category,
+        ))
+    return parsed
 
 
 async def _search_with_fallback(
@@ -101,6 +144,10 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
             prompt_template=WRITING_COMPARE_PROMPT,
             variables=variables,
         )
+        validate_sentence_comparisons_response(result)
+    except ValueError as e:
+        logger.warning(f"Validation failed: {e}")
+        result = {"overall_analysis": f"LLM response validation failed. Raw error: {e}"}
     except (OutputParserException, Exception) as e:
         logger.warning(f"LLM call failed: {e}")
         result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
@@ -116,10 +163,11 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         step_up_analysis=result.get("step_up_analysis", ""),
         target_analysis=result.get("target_analysis", ""),
         key_improvements=result.get("key_improvements", []),
+        sentence_comparisons=_parse_sentence_comparisons(result.get("sentence_comparisons", [])),
         references=[
             ReferenceEssay(
                 id=r.id,
-                text=r.text[:300],
+                text=r.text,
                 band=r.metadata.get("band_overall", 0),
                 similarity_score=r.score,
             )
@@ -152,6 +200,10 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
             prompt_template=WRITING_COMPARE_EXEMPLAR_PROMPT,
             variables=variables,
         )
+        validate_sentence_comparisons_response(result)
+    except ValueError as e:
+        logger.warning(f"Validation failed: {e}")
+        result = {"overall_analysis": f"LLM response validation failed. Raw error: {e}"}
     except (OutputParserException, Exception) as e:
         logger.warning(f"LLM call failed: {e}")
         result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
@@ -167,10 +219,11 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
         step_up_analysis=result.get("step_up_analysis", ""),
         target_analysis="",
         key_improvements=result.get("key_improvements", []),
+        sentence_comparisons=_parse_sentence_comparisons(result.get("sentence_comparisons", [])),
         references=[
             ReferenceEssay(
                 id=r.id,
-                text=r.text[:300],
+                text=r.text,
                 band=r.metadata.get("band_overall", 0),
                 similarity_score=r.score,
             )
