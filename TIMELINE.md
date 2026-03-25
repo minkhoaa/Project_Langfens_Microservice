@@ -397,7 +397,8 @@
 | Week | Dates | Completed | Blockers | Notes |
 |------|-------|-----------|----------|-------|
 | 1 | Mar 16-20 | Qdrant, AI Service scaffold, YARP gateway, full dataset pipeline, embedding service, search endpoints, compare endpoint, ingestion pipeline, scenario service, 40K essays + 5.6K grammar indexed in cloud Qdrant | None | **MS1 DONE** Mar 16. Also completed most of Week 2-4 backend tasks ahead of schedule |
-| 2 | Mar 23-27 | | | Remaining: spot-check data quality, knowledge transfer, frontend scaffolding, qdrant-client upgrade |
+| 2 | Mar 23-27 | BUG-003 fixed (port mismatch), implementing BUG-001, BUG-002, BUG-004 fixes | None | **Week 2 IN PROGRESS**. Critical bugs identified in backend audit (Mar 24). Remaining: spot-check data quality, knowledge transfer session |
+| 3 | Mar 30 - Apr 3 | | | |
 | 3 | Mar 30 - Apr 3 | | | |
 | 4 | Apr 6-10 | | | |
 | 5 | Apr 13-17 | | | |

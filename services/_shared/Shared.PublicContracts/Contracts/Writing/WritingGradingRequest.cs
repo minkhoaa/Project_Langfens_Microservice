@@ -10,7 +10,8 @@ namespace Shared.ExamDto.Contracts.Writing
         Guid? QuestionId,
         string Type,
         string? TaskText,
-        string? AnswerText
+        string? AnswerText,
+        string TaskType = "TASK_2"  // Default to TASK_2 (more common), explicit field replaces fragile length heuristic
     );
     public class WritingGradeResponseMessage
     {
