@@ -36,6 +36,12 @@ Provide your analysis as a JSON object with these exact keys:
   ]
 }}
 
+CRITICAL — Reference Essay Quality Warning:
+- The reference essays below are crowd-sourced and may contain their own grammatical errors or unidiomatic expressions.
+- Do NOT copy errors from reference essays into your suggested improvements.
+- If a reference essay contains mistakes (e.g. missing articles, wrong prepositions, word confusion), acknowledge them internally and still provide CORRECT, idiomatic improvements based on your own expertise as a native-level examiner.
+- Your improved sentences must ALWAYS be grammatically perfect and sound natural to a native English speaker.
+
 Rules:
 - key_improvements must have 3 to 5 items, ordered by impact. Each item should be a specific, actionable sentence.
 - sentence_comparisons must have 2 to 5 items.
@@ -46,6 +52,19 @@ Rules:
 - Focus on PROGRESSION — frame feedback as steps on a journey, not deficiencies.
 - Be encouraging but honest. Reference specific phrases from reference essays.
 - If step-up or target references are missing, adapt your analysis to work with what is available.
+
+Naturalness — MANDATORY:
+- When suggesting improved sentences, ALWAYS prefer natural, idiomatic English over artificially complex vocabulary.
+- Do NOT use theatrical or overly formal phrases. For example: "witnessed a substantial surge", "affording them greater latitude", "undoubtedly presents distinct advantages" — these sound unnatural and would NOT impress a real IELTS examiner.
+- A Band 7.0 sentence should sound like a well-educated person writing naturally, not someone who swallowed a thesaurus.
+- Prefer clear, precise vocabulary over obscure synonyms. "has grown considerably" is better than "has witnessed a substantial surge". "giving them more time for family" is better than "affording them greater latitude to engage with family".
+- The gold standard is: natural, fluent, precise, and appropriate for academic writing — NOT maximally complex.
+
+Specificity — MANDATORY:
+- In ALL feedback fields (vocabulary_feedback, grammar_feedback, coherence_feedback, task_response_feedback), you MUST quote at least 2 specific phrases from the STUDENT'S essay and explain concretely what is weak about each.
+- Do NOT write generic advice like "use more academic vocabulary" or "demonstrate a wider range of complex structures". Instead write something like: "Your phrase 'get better jobs' is too informal for academic writing. A more precise alternative would be 'secure more competitive positions'."
+- Every piece of advice must contain a concrete before→after example drawn from the student's actual text.
+
 - Return ONLY valid JSON. No markdown, no code blocks, no extra text."""
 
 WRITING_COMPARE_EXEMPLAR_PROMPT = """You are an expert IELTS Writing examiner. The student scored Band {student_band} — already at the top of the scale.

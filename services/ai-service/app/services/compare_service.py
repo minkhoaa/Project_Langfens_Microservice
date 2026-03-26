@@ -109,8 +109,8 @@ def _format_references(references: list, label: str) -> str:
 
 async def compare_essay(req: CompareRequest) -> CompareResponse:
     student_band = req.student_band
-    step_up_band = min(student_band + 1.0, 9.0)
-    target_band = min(student_band + 2.0, 9.0)
+    step_up_band = min(student_band + 0.5, 9.0)
+    target_band = min(student_band + 1.5, 9.0)
 
     # Edge case: top band → exemplar mode
     if student_band >= 8.5:
@@ -120,7 +120,14 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
     step_up_refs = await _search_with_fallback(req.topic, step_up_band, req.task_type)
     target_refs = await _search_with_fallback(req.topic, target_band, req.task_type)
 
-    all_refs = step_up_refs + target_refs
+    # Deduplicate references (same essay can appear in both step-up and target searches)
+    seen_ids = set()
+    all_refs = []
+    for r in step_up_refs + target_refs:
+        if r.id not in seen_ids:
+            seen_ids.add(r.id)
+            all_refs.append(r)
+
     if not all_refs:
         return CompareResponse(
             overall_analysis="No reference essays found for comparison at this band level and topic.",
