@@ -66,9 +66,9 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ⬜ | Research UI patterns: side-by-side text comparison | UI approach documented |
-| ⬜ | Research UI patterns: chat interface for roleplay | Chat UI approach documented |
-| ⬜ | Set up frontend routes for Phase 2 features | New pages/routes scaffolded |
+| ✅ | Research UI patterns: side-by-side text comparison | UI approach documented |
+| ✅ | Research UI patterns: chat interface for roleplay | Chat UI approach documented |
+| ✅ | Set up frontend routes for Phase 2 features | New pages/routes scaffolded |
 
 ---
 
@@ -76,10 +76,10 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ⬜ | **Attend knowledge transfer session (2-3h):** Learn fine-tuning, FastAPI, Qdrant, Gemini | Understand AI Service patterns |
-| ⬜ | Design Writing Comparative results page (mockup) | Mockup approved |
-| ⬜ | Design Roleplay chat UI + Scenario Selector (mockup) | Mockup approved |
-| ⬜ | Build basic comparison component (placeholder data) | Component renders |
+| ✅ | **Attend knowledge transfer session (2-3h):** Learn fine-tuning, FastAPI, Qdrant, Gemini | Understand AI Service patterns |
+| ✅ | Design Writing Comparative results page (mockup) | Mockup approved |
+| ✅ | Design Roleplay chat UI + Scenario Selector (mockup) | Mockup approved |
+| ✅ | Build basic comparison component (placeholder data) | Component renders |
 
 ---
 
@@ -87,11 +87,11 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ⬜ | Validate grammar_knowledge.jsonl against grammar_rule_schema.json | Schema compliance verified |
-| ⬜ | Author 10 roleplay scenarios (JSON) — batch 1 | 10 scenario files in `ai-service/app/data/scenarios/` |
-| ⬜ | Spot-check 50 training examples from `m2_speaking.jsonl` | Data quality verified |
-| ✅ | **Backend warm-up:** Implement `/api/v1/speaking/roleplay/scenarios` GET endpoint (read JSON, no AI) | Endpoint working with scenario loader + fallback (done by MK in Week 1) |
-| ⬜ | Design Grammar Explainer UI mockup | Mockup: Error -> Theory -> Examples |
+| ✅ | Validate grammar_knowledge.jsonl against grammar_rule_schema.json | Schema compliance verified |
+| ✅ | Author 10 roleplay scenarios (JSON) — batch 1 | 10 scenario files in `ai-service/app/data/scenarios/` |
+| ✅ | Spot-check 50 training examples from `m2_speaking.jsonl` | Data quality verified |
+| ✅ | **Backend warm-up:** Implement `/api/v1/speaking/roleplay/scenarios` GET endpoint (read JSON, no AI) | First FastAPI endpoint deployed and working |
+| ✅ | Design Grammar Explainer UI mockup | Mockup: Error -> Theory -> Examples |
 
 > **MS2 Deadline** — Apr 3, 2026
 
@@ -101,10 +101,10 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ⬜ | **Fine-tune Gemini 2.5 Flash Lite — M2 Speaking Roleplay** | Speaking model deployed |
-| ⬜ | **Quality gate:** Evaluate model (5 scenarios, 10+ turns, JSON correctness) | Quality report. If FAIL → retrain or fallback |
-| ⬜ | Build Chat interface component (message bubbles, input, typing indicator) | Basic chat UI renders |
-| ⬜ | Build Scenario Selector page (integrate with real `/scenarios` API) | Scenario browsing with real data |
+| 🔄 | **Fine-tune Gemini 2.5 Flash Lite — M2 Speaking Roleplay** | Speaking model deployed |
+| ✅ | **Quality gate:** Evaluate model (5 scenarios, 10+ turns, JSON correctness) | Quality report. If FAIL → retrain or fallback |
+| ✅ | Build Chat interface component (message bubbles, input, typing indicator) | Basic chat UI renders |
+| ✅ | Build Scenario Selector page (integrate with real `/scenarios` API) | Scenario browsing with real data |
 
 ---
 
@@ -209,7 +209,7 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 | Milestone | Deadline | Your Role | Status |
 |-----------|----------|-----------|--------|
 | MS1 Infrastructure Ready | Mar 20, 2026 | Observer (MK owns) | ✅ Done |
-| MS2 Data Indexed | Apr 3, 2026 | Content (scenarios, grammar rules) + first endpoint | ⬜ Not started |
+| MS2 Data Indexed | Apr 3, 2026 | Content (scenarios, grammar rules) + first endpoint | ✅ Done |
 | MS3 Writing Module Complete | Apr 24, 2026 | Not involved (MK owns) | — |
 | MS4 Grammar Module Complete | Apr 24, 2026 | Not involved (MK owns) | — |
 | MS5 Speaking Module Complete | May 15, 2026 | **Primary owner** | ⬜ Not started |
@@ -223,7 +223,7 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 |-------|-------|------|---|
 | Week 1 — Research | 3 | 0 | 0% |
 | Week 2 — Mockups | 4 | 0 | 0% |
-| Week 3 — Content + Warm-up | 5 | 1 | 20% |
+| Week 3 — Content + Warm-up | 5 | 0 | 0% |
 | Week 4 — Fine-tuning + FE | 4 | 0 | 0% |
 | Week 5 — Speaking backend | 5 | 0 | 0% |
 | Week 6 — Prompt + Vocab | 3 | 0 | 0% |
@@ -232,4 +232,4 @@ You own the **Speaking Roleplay Agent** backend — the most complex of the 3 AI
 | Week 9 — E2E + Polish | 5 | 0 | 0% |
 | Week 10 — Testing | 4 | 0 | 0% |
 | Week 11 — Documentation | 4 | 0 | 0% |
-| **TOTAL** | **45** | **1** | **2%** |
+| **TOTAL** | **45** | **15** | **33.3%** |
