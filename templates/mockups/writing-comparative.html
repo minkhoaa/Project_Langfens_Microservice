@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writing Comparative Mockup</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --card: #fffaf2;
+      --text: #2a2f35;
+      --muted: #69737d;
+      --line: #ded5c8;
+      --accent: #14686b;
+      --accent-soft: #dceeed;
+      --warm: #b4632f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(160deg, #f8f3ea, #efe5d8);
+      min-height: 100vh;
+      padding: 28px 16px;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero,
+    .board,
+    .summary {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 16px 32px rgba(42, 47, 53, 0.08);
+    }
+
+    .hero {
+      padding: 22px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: "Iowan Old Style", Georgia, serif;
+      font-size: clamp(1.7rem, 3.8vw, 2.8rem);
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .board {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fff;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .student h2 { color: var(--warm); }
+    .reference h2 { color: var(--accent); }
+
+    .line {
+      padding: 10px;
+      border-radius: 12px;
+      background: #f8f5ef;
+      border: 1px solid #ece5da;
+      line-height: 1.5;
+      color: #333b43;
+    }
+
+    .line em {
+      font-style: normal;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #0d4c4f;
+      font-size: 0.84rem;
+    }
+
+    .summary {
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 900px) {
+      .board { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>Writing comparative result page mockup</h1>
+      <p>Placeholder component for sentence-by-sentence comparison with actionable labels and concise coaching.</p>
+    </section>
+
+    <section class="board">
+      <article class="panel student">
+        <h2>Your sentence</h2>
+        <div class="line">Nowadays cities have many traffic and people wasting long time to go office every day.</div>
+        <div class="line">Public transport should be improve because it help reduce pollution and stress.</div>
+      </article>
+      <article class="panel reference">
+        <h2>Band 8.5 reference</h2>
+        <div class="line">Urban areas now face <em>severe congestion</em>, causing commuters to lose significant time each day.</div>
+        <div class="line">Public transport should be <em>expanded and modernized</em> to reduce emissions and daily stress.</div>
+      </article>
+    </section>
+
+    <section class="summary">
+      <h3>Key improvements</h3>
+      <div class="chip-row">
+        <span class="chip">Vocabulary precision</span>
+        <span class="chip">Verb form accuracy</span>
+        <span class="chip">Concise sentence structure</span>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

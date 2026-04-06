@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Grammar Knowledge Record",
+  "type": "object",
+  "required": [
+    "id",
+    "error_sentence",
+    "correct_sentence",
+    "rule_name",
+    "rule_explanation",
+    "level"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_sentence": {
+      "type": "string",
+      "minLength": 3
+    },
+    "correct_sentence": {
+      "type": "string",
+      "minLength": 3
+    },
+    "rule_name": {
+      "type": "string",
+      "minLength": 2
+    },
+    "rule_explanation": {
+      "type": "string",
+      "minLength": 10
+    },
+    "level": {
+      "type": "string",
+      "enum": ["A1", "A2", "B1", "B2", "C1", "C2"]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "source": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

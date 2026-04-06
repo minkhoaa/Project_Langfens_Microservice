@@ -1,0 +1,25 @@
+{
+  "base": "/phase2",
+  "routes": [
+    {
+      "path": "/phase2/writing/comparative",
+      "name": "Writing Comparative",
+      "module": "M1"
+    },
+    {
+      "path": "/phase2/speaking/roleplay",
+      "name": "Speaking Roleplay",
+      "module": "M2"
+    },
+    {
+      "path": "/phase2/speaking/roleplay/report/:sessionId",
+      "name": "Speaking Session Report",
+      "module": "M2"
+    },
+    {
+      "path": "/phase2/grammar/explainer",
+      "name": "Grammar Explainer",
+      "module": "M3"
+    }
+  ]
+}
