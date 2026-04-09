@@ -85,10 +85,16 @@ async def explain_single(request: GrammarExplainRequest) -> GrammarExplainRespon
     }
 
     try:
-        result = await gemini_service.generate(
-            prompt_template=GRAMMAR_EXPLAIN_PROMPT,
-            variables=variables,
-        )
+        if settings.use_ollama:
+            result = await ollama_service.generate(
+                prompt_template=GRAMMAR_EXPLAIN_PROMPT,
+                variables=variables,
+            )
+        else:
+            result = await gemini_service.generate(
+                prompt_template=GRAMMAR_EXPLAIN_PROMPT,
+                variables=variables,
+            )
     except asyncio.TimeoutError:
         logger.warning(f"Grammar explanation timed out for: {request.error_text}")
         raise HTTPException(status_code=504, detail="Grammar explanation timed out")

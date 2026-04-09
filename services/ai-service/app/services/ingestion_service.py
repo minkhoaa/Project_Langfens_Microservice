@@ -7,11 +7,11 @@ from qdrant_client.models import Distance, PayloadSchemaType, PointStruct, Vecto
 from tqdm import tqdm
 
 from app.config import settings
-from app.services.embedding_service import _post
+from app.services import embedding_service
 
 logger = logging.getLogger(__name__)
 
-EMBEDDING_DIM = 768
+EMBEDDING_DIM = 1024  # bge-m3 outputs 1024-dim vectors
 BATCH_SIZE = 100
 SLEEP_BETWEEN_BATCHES = 0.1
 
@@ -34,33 +34,10 @@ COLLECTIONS = {
 }
 
 
-_BASE = f"https://generativelanguage.googleapis.com/v1beta/{settings.gemini_embedding_model}"
-
-
 def _embed_batch(texts: list[str]) -> list[list[float]]:
-    for attempt in range(3):
-        try:
-            data = _post(
-                f"{_BASE}:batchEmbedContents",
-                {
-                    "requests": [
-                        {
-                            "model": settings.gemini_embedding_model,
-                            "content": {"parts": [{"text": t}]},
-                            "taskType": "RETRIEVAL_DOCUMENT",
-                            "outputDimensionality": EMBEDDING_DIM,
-                        }
-                        for t in texts
-                    ]
-                },
-            )
-            return [e["values"] for e in data["embeddings"]]
-        except Exception as e:
-            if attempt < 2:
-                logger.warning(f"  embed retry {attempt+1}/3: {e}")
-                time.sleep(3 * (attempt + 1))
-            else:
-                raise
+    import asyncio
+
+    return asyncio.run(embedding_service.embed_texts(texts))
 
 
 def _needs_ingestion(client, collection: str) -> bool:
@@ -123,8 +100,8 @@ def _ingest_collection(client, data_dir: Path, collection: str, cfg: dict) -> in
                 break
             except Exception as e:
                 if attempt < 2:
-                    logger.warning(f"  upsert retry {attempt+1}/3: {e}")
-                    time.sleep(2 ** attempt)
+                    logger.warning(f"  upsert retry {attempt + 1}/3: {e}")
+                    time.sleep(2**attempt)
                 else:
                     raise
         uploaded += len(points)
@@ -135,9 +112,7 @@ def _ingest_collection(client, data_dir: Path, collection: str, cfg: dict) -> in
 
 def run_ingestion() -> None:
     """Check Qdrant collections; ingest data if empty. Called at service startup."""
-    if not settings.gemini_api_key:
-        logger.warning("GEMINI_API_KEY not set — skipping ingestion")
-        return
+    # Note: Ollama must be running for ingestion to work
 
     from app.services.qdrant_factory import get_qdrant_client
 

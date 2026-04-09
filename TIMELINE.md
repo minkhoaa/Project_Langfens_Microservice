@@ -12,8 +12,8 @@
 
 | Role | Name | Responsibilities |
 |------|------|-----------------|
-| **Full-stack: Writing + Grammar** | Tu Minh Khoa | Writing Comparative module (full-stack), Grammar Explainer module (full-stack), fine-tune Writing + Grammar models, shared infrastructure (Qdrant, AI Service, Docker/CI/CD), code review Speaking |
-| **Full-stack: Speaking** | Nguyen Ba Trong Khoi | Speaking Roleplay module (full-stack), fine-tune Speaking model, scenario + grammar rules authoring, API documentation |
+| **Full-stack: Writing + Grammar** | Tu Minh Khoa | Writing Comparative module (full-stack), Grammar Explainer module (full-stack), Ollama local AI setup, shared infrastructure (Qdrant, AI Service, Docker/CI/CD), code review Speaking |
+| **Full-stack: Speaking** | Nguyen Ba Trong Khoi | Speaking Roleplay module (full-stack), Ollama setup, scenario + grammar rules authoring, API documentation |
 
 ---
 
@@ -23,12 +23,12 @@
 |-----------|-----------|---------|
 | AI Service | Python 3.12 / FastAPI | RAG orchestrator for all 3 modules |
 | Vector DB | Qdrant v1.13+ | Semantic search (essays, grammar, memory) |
-| LLM | Gemini 2.5 Flash Lite (fine-tuned x3) | Comparative grading, roleplay, grammar explanation |
-| Embedding | Gemini embedding-001 (`models/gemini-embedding-001`) | 768-dim vectors for all collections |
+| LLM | DeepSeek-V2:16B via Ollama (self-hosted) | Comparative grading, roleplay, grammar explanation |
+| Embedding | BGE-M3 via Ollama (self-hosted, 1024-dim) | 1024-dim vectors for all collections |
 | Orchestration | LangChain (as library) | Prompt templates, retrievers, output parsers |
 | Communication | REST via YARP Gateway | .NET services <-> AI Service |
 | Session State | Redis 7.4 | Active roleplay conversation history |
-| Fine-Tuning | Google AI Studio / Vertex AI | Custom model tuning per module |
+| Inference | Ollama (local, GPU-accelerated) | LLM + embedding inference |
 | Frontend | Next.js 16, React 19, TypeScript 5 | Web UI |
 | Styling | Tailwind CSS 4 + shadcn/ui | Component library |
 
@@ -38,9 +38,9 @@
 
 | # | Module | Description | Owner | Priority |
 |---|--------|-------------|-------|----------|
-| M1 | **Writing Comparative Examiner** | Compare student essays against 3 Band 8-9 reference samples from Qdrant using fine-tuned Gemini | Minh Khoa (full-stack) | MUST-HAVE |
-| M2 | **Speaking Roleplay Agent** | Context-aware conversation with long-term memory, vocabulary tracking, powered by fine-tuned Gemini | Trong Khoi (full-stack) | MUST-HAVE |
-| M3 | **Grammar Deep Error Explainer** | Explain grammar errors using theory retrieved from Vector DB, powered by fine-tuned Gemini | Minh Khoa (full-stack) | MUST-HAVE |
+| M1 | **Writing Comparative Examiner** | Compare student essays against 3 Band 8-9 reference samples from Qdrant using DeepSeek-V2:16B | Minh Khoa (full-stack) | MUST-HAVE |
+| M2 | **Speaking Roleplay Agent** | Context-aware conversation with long-term memory, vocabulary tracking, powered by DeepSeek-V2:16B | Trong Khoi (full-stack) | MUST-HAVE |
+| M3 | **Grammar Deep Error Explainer** | Explain grammar errors using theory retrieved from Vector DB, powered by DeepSeek-V2:16B | Minh Khoa (full-stack) | MUST-HAVE |
 
 ---
 
@@ -109,7 +109,7 @@
 | TK blocked by MK | When | Duration |
 |-------------------|------|----------|
 | AI Service scaffold + embedding service | Week 1 | Done (MK delivered ahead) |
-| Knowledge transfer: fine-tuning + AI patterns | Week 2 | 1 session (2-3h) |
+| Ollama local AI setup | Week 4 | 1 session (1h) |
 | Embedding service for `speaking_memory` | Week 5 | Soft dependency |
 | Whisper STT pairing session | Week 7 | 1 session (2h) |
 | Quick code review (start + turn) | Week 6 | 1 day |
@@ -143,11 +143,11 @@
 
 | Task | Owner | Deliverable |
 |------|-------|-------------|
-| Implement Gemini `text-embedding-004` wrapper | MK | `/api/v1/embed` endpoint working |
+| Implement BGE-M3 embedding wrapper via Ollama | MK | `/api/v1/embed` endpoint working |
 | Build `embed_and_upload.py`: embed essays -> Qdrant | MK | Script processes writing_samples.jsonl |
 | Create Qdrant collection `writing_samples` (HNSW + metadata) | MK | Collection schema verified |
 | Spot-check 50 training examples from `m1_writing.jsonl` | MK | Data quality verified |
-| **Knowledge transfer session (2-3h):** Fine-tuning workflow + AI Service patterns | MK -> TK | TK understands Google AI Studio, FastAPI patterns, Qdrant, Gemini |
+| **Knowledge transfer session (1h):** Ollama setup + AI Service patterns | MK -> TK | TK understands Ollama, FastAPI patterns, Qdrant |
 | Design Writing Comparative results page (mockup) | TK | Mockup approved |
 | Design Roleplay chat UI + Scenario Selector (mockup) | TK | Mockup approved |
 | Build basic comparison component (placeholder data) | TK | Component renders |
@@ -158,9 +158,9 @@
 
 | Task | Owner | Deliverable |
 |------|-------|-------------|
-| Run embedding pipeline: upload writing_samples -> Qdrant | MK | 12,339 essays indexed, search verified |
+| Run embedding pipeline: upload writing_samples -> Qdrant (BGE-M3) | MK | 12,339 essays indexed, search verified |
 | Implement `/api/v1/writing/search` endpoint | MK | Returns top-K similar essays |
-| Create Qdrant collection `grammar_knowledge`, embed grammar pairs | MK | 5,659 docs searchable |
+| Create Qdrant collection `grammar_knowledge`, embed grammar pairs (BGE-M3) | MK | 5,659 docs searchable |
 | Validate grammar_knowledge.jsonl against grammar_rule_schema.json | TK | Schema compliance verified |
 | Author 10 roleplay scenarios (JSON) — batch 1 | TK | 10 scenario files |
 | Spot-check 50 training examples from `m2_speaking.jsonl` | TK | Data quality verified |
@@ -179,16 +179,14 @@
 
 | Task | Owner | Deliverable |
 |------|-------|-------------|
-| **Fine-tune Gemini 2.5 Flash Lite — M1 Writing** | MK | Writing model deployed, quality gate passed |
-| Implement `/api/v1/writing/compare` endpoint (embed -> retrieve -> Gemini) | MK | Structured comparison JSON |
+| **Setup Ollama local AI** (bge-m3 + deepseek-v2:16b) | MK | Ollama running with GPU, models accessible |
+| Implement `/api/v1/writing/compare` endpoint (embed -> retrieve -> DeepSeek) | MK | Structured comparison JSON |
 | Design Writing Comparative prompt | MK | Prompt tested with 10 essays |
 | Scaffold WritingComparativeTab + SimilarEssaysSidebar (placeholder data) | MK | Frontend page renders with mock data |
-| **Fine-tune Gemini 2.5 Flash Lite — M2 Speaking** | TK | Speaking model deployed, quality gate passed |
-| **Quality gate:** Evaluate Speaking model (10+ turns, JSON >90%) | TK | Quality report |
+| **Setup Ollama for Speaking service** | TK | Ollama integrated with roleplay backend |
+| **Quality gate:** Evaluate DeepSeek responses (10 essays, JSON >90%) | TK | Quality report |
 | Build Chat interface component (message bubbles, input) | TK | Basic chat UI renders |
 | Build Scenario Selector page (integrate with real `/scenarios` API) | TK | Scenario browsing with real data |
-
-> **Fine-tuning quality gate:** If model quality insufficient → Week 5 retrain window. Fallback: base Gemini + prompt engineering.
 
 ---
 
@@ -196,8 +194,8 @@
 
 | Task | Owner | Deliverable |
 |------|-------|-------------|
-| **Fine-tune Gemini 2.5 Flash Lite — M3 Grammar** | MK | Grammar model deployed |
-| Modify `WritingSubmittedConsumer.cs`: call AI Service `/writing/compare` | MK | Consumer calls AI Service after Gemini grading |
+| **Re-embed Qdrant collections with BGE-M3** (1024-dim) | MK | All collections re-indexed with new embeddings |
+| Modify `WritingSubmittedConsumer.cs`: call AI Service `/writing/compare` | MK | Consumer calls AI Service after grading |
 | Add `ComparativeAnalysisJson` column + EF migration | MK | DB schema updated |
 | Build SentenceComparisonTable (placeholder/test data) | MK | Side-by-side comparison renders |
 | Implement circuit breaker for AI Service | MK | Graceful degradation tested |
@@ -217,11 +215,11 @@
 | Build VocabularySuggestions component (real data) | MK | Suggestions displayed |
 | Implement `/api/v1/grammar/explain` endpoint | MK | Single error explanation working |
 | Implement `/api/v1/grammar/batch-explain` endpoint | MK | Batch processing working |
-| Design Grammar Explainer prompt | MK | Prompt tested with 20 errors |
+| Design Grammar Explainer prompt (DeepSeek) | MK | Prompt tested with 20 errors |
 | Build GrammarExplainerCard + GrammarBatchView frontend | MK | Grammar UI renders real data |
 | Define Grammar-Writing cross-module UX | MK | Click error -> Grammar Explainer |
 | **Quick code review:** TK's Speaking endpoints (start + turn) | MK | Early feedback given |
-| Design Speaking roleplay prompt (scenario + history + memory) | TK | Agent stays in character |
+| Design Speaking roleplay prompt (DeepSeek, scenario + history + memory) | TK | Agent stays in character |
 | Implement vocabulary tracking in turns | TK | Vocabulary usage tracked |
 | Author 10 more scenarios (total: 20) | TK | 20 scenario files complete |
 
@@ -272,7 +270,7 @@
 | Test long-term memory: 2 sessions same user | TK | Memory continuity verified |
 | Build MemoryIndicator component | TK | Visual indicator in chat UI |
 | Polish Roleplay UI (responsive, transitions, loading states) | TK | Production-quality UI |
-| Prompt tuning: roleplay agent quality | TK | Agent quality meets standard |
+| Prompt tuning: roleplay agent quality (DeepSeek) | TK | Agent quality meets standard |
 
 > **MS5: Speaking Module Complete** — Deadline: May 15, 2026
 
@@ -313,13 +311,14 @@
 
 ---
 
-## FINE-TUNING SCHEDULE
+## LOCAL MODEL SETUP (OLLAMA)
 
-| Module | Owner | Training Data | Fine-Tune Start | Model Ready | Quality Gate |
-|--------|-------|---------------|-----------------|-------------|--------------|
-| M1 Writing | Minh Khoa | 23,961 pairs (ready) | Week 4 (Apr 6) | Apr 10 | 8/10 essays get relevant comparisons |
-| M2 Speaking | Trong Khoi | 8,938 pairs (ready) | Week 4 (Apr 6) | Apr 10 | 10+ turns in character, JSON >90% |
-| M3 Grammar | Minh Khoa | 5,659 pairs (ready) | Week 5 (Apr 13) | Apr 17 | 20 errors get accurate explanations |
+| Model | Size | Purpose | Status |
+|-------|------|---------|--------|
+| bge-m3 | ~500MB | Embedding (1024-dim) | Ready via Ollama |
+| deepseek-v2:16b | ~10GB | LLM inference | Ready via Ollama |
+
+> **Note:** All AI inference now self-hosted via Ollama. No cloud API keys required. GPU-accelerated on local machine.
 
 ---
 
@@ -328,14 +327,14 @@
 | # | Risk | Prob | Impact | Mitigation | Owner |
 |---|------|------|--------|------------|-------|
 | R1 | RAG comparison adds 5-10s to writing grading | Med | High | Async — return basic grading immediately, push comparison later | MK |
-| R2 | Speaking roleplay latency > 2s | Med | High | Fine-tuned Flash Lite optimized for speed; stream responses | TK |
+| R2 | Speaking roleplay latency > 2s | Med | High | DeepSeek-V2:16B optimized for speed; stream responses | TK |
 | R3 | Incorrect band scores in crowd-sourced data | Med | Med | Filter `quality_tier`. Spot-check 50 essays | MK |
 | R4 | AI Service down breaks writing grading | Low | Critical | Circuit breaker — existing grading independent | MK |
-| R5 | TK unfamiliar with fine-tuning | Med | Med | Week 2 knowledge transfer. Google AI Studio is accessible | MK+TK |
+| R5 | Ollama model quality insufficient | Med | High | Prompt engineering; fallback to different Ollama model | Both |
 | R6 | Compressed 11-week timeline for 3 modules | High | High | Full-stack ownership reduces blocking | Both |
-| R7 | Fine-tuning quality insufficient | Med | High | Quality gate Week 4. Fallback: base Gemini + prompt engineering | Both |
+| R7 | GPU VRAM < 16GB for DeepSeek-V2:16b | Med | High | Use DeepSeek-V2:6b or quantized model | MK |
 | R8 | TK Speaking backend quality | Med | Med | Two code reviews: quick Week 6, full Week 8 | MK |
-| R9 | TK Speaking fine-tuning quality | Med | High | Quality gate Week 4 with explicit criteria | TK+MK |
+| R9 | Local Ollama instability | Med | Med | Health check; restart Ollama service if unresponsive | MK |
 | R10 | Whisper STT cross-service integration | Med | Med | Pairing session Week 7. Existing Whisper is stable | MK+TK |
 
 ---
@@ -344,13 +343,10 @@
 
 | Item | Unit Cost | Volume (daily) | Monthly |
 |------|-----------|----------------|---------|
-| Embedding (one-time 18K docs) | Free tier | One-time | ~$0 |
-| Gemini Flash Lite — Writing comparison | ~$0.01/call | 100 | ~$30 |
-| Gemini Flash Lite — Speaking roleplay | ~$0.001/turn | 500 | ~$15 |
-| Gemini Flash Lite — Grammar explanation | ~$0.001/call | 200 | ~$6 |
-| Fine-tuning (3 models, one-time) | ~$5-10/model | One-time | ~$15-30 |
+| Embedding (BGE-M3 via Ollama) | $0 (local GPU) | - | $0 |
+| LLM (DeepSeek-V2:16B via Ollama) | $0 (local GPU) | - | $0 |
 | Qdrant (self-hosted) | $0 | - | $0 |
-| **Total** | | | **~$50-80/month** |
+| **Total** | | | **$0/month** |
 
 ---
 
@@ -372,11 +368,11 @@
 
 ### Module Progress
 
-| Module | Design | Backend API | Fine-Tuning | Data Pipeline | .NET Integration | Frontend UI | Testing | Status |
-|--------|--------|-------------|-------------|---------------|------------------|-------------|---------|--------|
-| M1 Writing Comparative | [ ] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
-| M2 Speaking Roleplay | [ ] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
-| M3 Grammar Explainer | [ ] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
+| Module | Design | Backend API | Ollama Setup | Data Pipeline | .NET Integration | Frontend UI | Testing | Status |
+|--------|--------|-------------|--------------|---------------|------------------|-------------|---------|--------|
+| M1 Writing Comparative | [x] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
+| M2 Speaking Roleplay | [x] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
+| M3 Grammar Explainer | [x] | [x] | [ ] | [x] | [ ] | [ ] | [ ] | In Progress |
 
 ### Infrastructure Progress
 
@@ -385,12 +381,10 @@
 | Qdrant in Docker Compose | [x] Done | v1.13.6, port 6333/6334 |
 | AI Service Scaffold | [x] Done | FastAPI, /api/healthz |
 | YARP Gateway Route | [x] Done | /api-ai/* -> ai-service:8080, timeout 60s |
-| Essay Data Embedding | [x] Done | 40,122 essays indexed in cloud Qdrant |
-| Grammar Rules (GEC pairs) | [x] Done | 5,659 pairs indexed in cloud Qdrant + schema defined |
+| Essay Data Embedding (Gemini) | [x] Done | 40,122 essays indexed in cloud Qdrant (needs re-embed) |
+| Grammar Rules (GEC pairs) | [x] Done | 5,659 pairs indexed in cloud Qdrant (needs re-embed) |
+| Ollama (bge-m3 + deepseek-v2:16b) | [ ] Not Started | Local GPU inference |
 | Roleplay Scenarios | [ ] Not Started | Target: 20 scenarios (Trong Khoi) |
-| Fine-Tuning: Writing Model | [ ] Not Started | Training data: 23,961 pairs |
-| Fine-Tuning: Grammar Model | [ ] Not Started | Training data: 5,659 pairs |
-| Fine-Tuning: Speaking Model | [ ] Not Started | Training data: 8,938 pairs |
 
 ### Weekly Status Log
 
@@ -399,9 +393,8 @@
 | 1 | Mar 16-20 | Qdrant, AI Service scaffold, YARP gateway, full dataset pipeline, embedding service, search endpoints, compare endpoint, ingestion pipeline, scenario service, 40K essays + 5.6K grammar indexed in cloud Qdrant | None | **MS1 DONE** Mar 16. Also completed most of Week 2-4 backend tasks ahead of schedule |
 | 2 | Mar 23-27 | BUG-003 fixed (port mismatch), implementing BUG-001, BUG-002, BUG-004 fixes | None | **Week 2 IN PROGRESS**. Critical bugs identified in backend audit (Mar 24). Remaining: spot-check data quality, knowledge transfer session |
 | 3 | Mar 30 - Apr 3 | | | |
-| 3 | Mar 30 - Apr 3 | | | |
-| 4 | Apr 6-10 | | | |
-| 5 | Apr 13-17 | | | |
+| 4 | Apr 6-10 | **Ollama local AI setup** (bge-m3 + deepseek-v2:16b) | | Self-hosted models replacing cloud Gemini |
+| 5 | Apr 13-17 | **Re-embed Qdrant with BGE-M3** | | All collections re-indexed with 1024-dim |
 | 6 | Apr 20-24 | | | |
 | 7 | Apr 27 - May 1 | | | |
 | 8 | May 4-8 | | | |

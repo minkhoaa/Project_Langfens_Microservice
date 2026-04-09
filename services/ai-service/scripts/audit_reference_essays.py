@@ -40,6 +40,8 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
 
 from google import genai
 from google.genai import types
@@ -57,9 +59,10 @@ GEMINI_MODEL = "gemini-2.5-pro"  # Use Gemini 2.5 Pro for highest quality regrad
 QDRANT_COLLECTION = "writing_samples"
 MIN_BAND_TO_AUDIT = 7.0
 BATCH_SIZE = 20  # Scroll batch size from Qdrant
-SLEEP_BETWEEN_CALLS = 1.0  # Rate limit protection
+SLEEP_BETWEEN_CALLS = 0.0  # Disabled for parallel processing
 MAX_RETRIES = 3
 PROGRESS_INTERVAL = 100  # Print summary every N essays
+MAX_WORKERS = 20  # Parallel API calls (Gemini supports ~15-20 concurrent)
 
 # Report directory (relative to this script's location)
 REPORT_DIR = Path(__file__).parent.parent.parent.parent / "docs" / "superpowers" / "reports"
@@ -179,7 +182,7 @@ def fetch_high_band_essays(qdrant: QdrantClient) -> list[dict]:
     return essays
 
 
-def grade_essay(gemini: genai.Client, essay_text: str) -> dict | None:
+def grade_essay(gemini: genai.Client, essay_text: str, essay_id: str = "") -> dict | None:
     """Use Gemini 2.5 Pro to grade a single essay."""
     prompt = AUDIT_PROMPT.format(essay_text=essay_text)
 
@@ -207,11 +210,11 @@ def grade_essay(gemini: genai.Client, essay_text: str) -> dict | None:
         except json.JSONDecodeError as e:
             logger.warning(f"  JSON parse error (attempt {attempt + 1}): {e}")
             if attempt < MAX_RETRIES - 1:
-                time.sleep(SLEEP_BETWEEN_CALLS * 2)
+                time.sleep(0.5)
         except Exception as e:
             logger.warning(f"  Gemini API error (attempt {attempt + 1}): {e}")
             if attempt < MAX_RETRIES - 1:
-                time.sleep(SLEEP_BETWEEN_CALLS * (attempt + 1))
+                time.sleep(0.5 * (attempt + 1))
 
     return None
 
@@ -230,20 +233,35 @@ def classify_result(stored_band: float, ai_band: float) -> str:
     return "KEEP"
 
 
-def load_checkpoint(csv_path: Path) -> set[str]:
-    """Load already-processed essay IDs from existing CSV."""
+def load_checkpoint(csv_path: Path) -> tuple[set[str], dict]:
+    """Load already-processed (successful) essay IDs from existing CSV.
+    
+    Returns:
+        tuple: (processed_ids set, band_counts dict by stored_band)
+    """
     processed = set()
+    band_counts = {}
+    
     if csv_path.exists():
         try:
             with open(csv_path, "r") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
-                    if "id" in row and row["id"]:
+                    # Only count successful grades (not ERROR)
+                    if "id" in row and row["id"] and row.get("action") != "ERROR":
                         processed.add(row["id"])
-            logger.info(f"Checkpoint: loaded {len(processed)} already-processed essays from {csv_path.name}")
+                        
+                        # Track counts by band
+                        band = row.get("stored_band", "unknown")
+                        band_counts[band] = band_counts.get(band, 0) + 1
+            
+            logger.info(f"Checkpoint: loaded {len(processed)} successfully-processed essays")
+            if band_counts:
+                logger.info(f"  Band distribution: {dict(sorted(band_counts.items()))}")
         except Exception as e:
             logger.warning(f"Could not read checkpoint file: {e}")
-    return processed
+    
+    return processed, band_counts
 
 
 def find_latest_csv() -> Path | None:
@@ -265,10 +283,16 @@ def print_progress_summary(results: list[dict], processed_count: int, total: int
     underrated = sum(1 for r in results if r["action"] == "UNDERRATED")
     errors = sum(1 for r in results if r["action"] == "ERROR")
 
+    # Band distribution
+    from collections import Counter
+    band_dist = Counter(r.get("stored_band") for r in results if r.get("stored_band"))
+    band_str = ", ".join(f"Band {k}:{v}" for k, v in sorted(band_dist.items(), key=lambda x: float(x[0]) if str(x[0]).replace(".", "", 1).isdigit() else 0, reverse=True))
+
     logger.info("")
     logger.info("─" * 50)
     logger.info(f"📊 PROGRESS: {processed_count}/{total} ({processed_count/total*100:.1f}%)")
     logger.info(f"   KEEP: {keep} | OVERRATED: {overrated} | FLAG: {flagged} | UNDERRATED: {underrated} | ERROR: {errors}")
+    logger.info(f"   Band distribution: {band_str}")
     if overrated + keep + flagged + underrated > 0:
         overrated_pct = overrated / (overrated + keep + flagged + underrated) * 100
         logger.info(f"   Overrated rate: {overrated_pct:.1f}%")
@@ -373,15 +397,16 @@ def analyze_csv(csv_path: str | Path) -> dict:
 
 
 def run_audit(apply_downgrades: bool = False, resume: bool = False):
-    """Main audit logic with checkpoint/resume support."""
+    """Main audit logic with parallel processing and checkpoint/resume support."""
     global _shutdown_requested
 
     logger.info("=" * 60)
-    logger.info("Phase 2: Reference Essay Quality Audit")
+    logger.info("Phase 2: Reference Essay Quality Audit (PARALLEL MODE)")
     logger.info(f"Model: {GEMINI_MODEL}")
     logger.info(f"Min band to audit: {MIN_BAND_TO_AUDIT}")
     logger.info(f"Apply downgrades: {apply_downgrades}")
     logger.info(f"Resume mode: {resume}")
+    logger.info(f"Max workers: {MAX_WORKERS}")
     logger.info("=" * 60)
 
     qdrant = get_qdrant_client()
@@ -413,7 +438,13 @@ def run_audit(apply_downgrades: bool = False, resume: bool = False):
         csv_path = REPORT_DIR / f"essay_audit_{timestamp}.csv"
 
     # Load checkpoint
-    processed_ids = load_checkpoint(csv_path) if resume else set()
+    processed_ids, band_counts = load_checkpoint(csv_path) if resume else (set(), {})
+    
+    # Log checkpoint stats
+    if resume and processed_ids:
+        logger.info(f"Resuming with {len(processed_ids)} already processed essays")
+        if band_counts:
+            logger.info(f"  Already processed by band: {dict(sorted(band_counts.items()))}")
 
     # Initialize CSV file with header if new
     if not csv_path.exists():
@@ -423,51 +454,55 @@ def run_audit(apply_downgrades: bool = False, resume: bool = False):
         logger.info(f"Created new CSV: {csv_path}")
 
     # Track results for progress reporting
-    # Load existing results for progress tracking
     existing_results = []
     if processed_ids:
         with open(csv_path, "r") as f:
             reader = csv.DictReader(f)
             existing_results = list(reader)
 
-    all_results = list(existing_results)  # Copy for progress tracking
+    all_results = list(existing_results)
     session_count = 0
     start_time = time.time()
 
-    # Step 3: Grade each essay incrementally
-    for i, essay in enumerate(essays):
-        if _shutdown_requested:
-            logger.info("Graceful shutdown — saving progress and exiting.")
-            break
+    # CSV write lock for thread safety
+    csv_lock = Lock()
 
-        # Skip already-processed essays
-        if essay["id"] in processed_ids:
-            continue
+    # Filter out already-processed essays
+    pending_essays = [e for e in essays if e["id"] not in processed_ids]
+    total_to_process = len(pending_essays)
 
-        logger.info(f"[{i + 1}/{len(essays)}] Grading essay {essay['id'][:8]}... "
-                     f"(stored: {essay['stored_band']})")
+    logger.info(f"Already processed: {len(processed_ids)} essays")
+    logger.info(f"Pending: {total_to_process} essays")
+    logger.info(f"Starting parallel grading with {MAX_WORKERS} workers...")
+    logger.info("")
 
-        ai_result = grade_essay(gemini, essay["text"])
+    def grade_single_essay(essay: dict) -> dict:
+        """Thread-safe grading function."""
+        essay_id = essay["id"]
+        # Create new gemini client per thread to avoid sharing issues
+        thread_gemini = get_gemini_client()
 
-        if ai_result is None:
-            logger.error(f"  Failed to grade essay {essay['id'][:8]} after {MAX_RETRIES} attempts")
-            result = {
-                **essay,
-                "ai_band": None,
-                "action": "ERROR",
-                "grammar_errors_count": 0,
-                "critical_errors_count": 0,
-                "notes": "Failed to grade",
-                "verdict": "",
-                "confidence": 0,
-                "ai_task_response": None,
-                "ai_coherence": None,
-                "ai_lexical": None,
-                "ai_grammar": None,
-                "grammar_errors_detail": "[]",
-                "vocab_issues_detail": "[]",
-            }
-        else:
+        try:
+            ai_result = grade_essay(thread_gemini, essay["text"], essay_id)
+
+            if ai_result is None:
+                return {
+                    **essay,
+                    "ai_band": None,
+                    "action": "ERROR",
+                    "grammar_errors_count": 0,
+                    "critical_errors_count": 0,
+                    "notes": "Failed to grade",
+                    "verdict": "",
+                    "confidence": 0,
+                    "ai_task_response": None,
+                    "ai_coherence": None,
+                    "ai_lexical": None,
+                    "ai_grammar": None,
+                    "grammar_errors_detail": "[]",
+                    "vocab_issues_detail": "[]",
+                }
+
             ai_band = ai_result.get("overall_band", 0.0)
             grammar_errors = ai_result.get("grammar_errors", [])
             vocab_issues = ai_result.get("vocabulary_issues", [])
@@ -477,12 +512,9 @@ def run_audit(apply_downgrades: bool = False, resume: bool = False):
             action = classify_result(essay["stored_band"], ai_band)
 
             band_diff = essay["stored_band"] - ai_band
-            status = "✅" if action == "KEEP" else "⚠️" if action == "FLAG_REVIEW" else "❌"
-            logger.info(f"  {status} AI band: {ai_band} (diff: {band_diff:+.1f}) "
-                         f"| {len(grammar_errors)} grammar errors, {len(critical_errors)} critical "
-                         f"| Action: {action}")
+            logger.info(f"  [{action}] {essay_id[:8]}: {essay['stored_band']} → {ai_band} (diff: {band_diff:+.1f})")
 
-            result = {
+            return {
                 **essay,
                 "ai_band": ai_band,
                 "ai_task_response": ai_result.get("task_response_band"),
@@ -495,24 +527,58 @@ def run_audit(apply_downgrades: bool = False, resume: bool = False):
                 "verdict": ai_result.get("verdict", ""),
                 "confidence": ai_result.get("confidence", 0),
                 "notes": ai_result.get("notes", ""),
-                "grammar_errors_detail": json.dumps(grammar_errors[:5]),  # Top 5
-                "vocab_issues_detail": json.dumps(vocab_issues[:3]),  # Top 3
+                "grammar_errors_detail": json.dumps(grammar_errors[:5]),
+                "vocab_issues_detail": json.dumps(vocab_issues[:3]),
+            }
+        except Exception as e:
+            logger.error(f"  ERROR grading {essay_id[:8]}: {e}")
+            return {
+                **essay,
+                "ai_band": None,
+                "action": "ERROR",
+                "notes": f"Exception: {str(e)}",
             }
 
-        # *** CRITICAL: Write each result immediately to CSV ***
-        with open(csv_path, "a", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES, extrasaction="ignore")
-            writer.writerow(result)
+    # Process essays in parallel batches
+    batch_size = 100  # Process and write in batches for efficiency
 
-        processed_ids.add(essay["id"])
-        all_results.append(result)
-        session_count += 1
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        for batch_start in range(0, total_to_process, batch_size):
+            if _shutdown_requested:
+                logger.info("Graceful shutdown requested. Saving progress...")
+                break
 
-        # Print progress summary every PROGRESS_INTERVAL essays
-        if session_count % PROGRESS_INTERVAL == 0:
-            print_progress_summary(all_results, len(processed_ids), len(essays), start_time)
+            batch_end = min(batch_start + batch_size, total_to_process)
+            batch_essays = pending_essays[batch_start:batch_end]
 
-        time.sleep(SLEEP_BETWEEN_CALLS)
+            logger.info(f"Processing batch {batch_start//batch_size + 1}: essays {batch_start + 1}-{batch_end}")
+
+            # Submit all essays in this batch
+            futures = {executor.submit(grade_single_essay, essay): essay for essay in batch_essays}
+
+            # Collect results as they complete
+            batch_results = []
+            for future in as_completed(futures):
+                result = future.result()
+                batch_results.append(result)
+
+                # Write immediately to CSV (thread-safe)
+                with csv_lock:
+                    with open(csv_path, "a", newline="") as f:
+                        writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES, extrasaction="ignore")
+                        writer.writerow(result)
+
+                processed_ids.add(result["id"])
+                all_results.append(result)
+
+            session_count += len(batch_results)
+
+            # Progress summary
+            elapsed = time.time() - start_time
+            rate = session_count / elapsed if elapsed > 0 else 0
+            remaining = (total_to_process - session_count) / rate if rate > 0 else 0
+            logger.info(f"  Batch done: {session_count}/{total_to_process} | {rate:.1f}/sec | ETA: {remaining/60:.1f} min")
+            logger.info("")
 
     # Step 4: Final Summary
     total_processed = len(processed_ids)
