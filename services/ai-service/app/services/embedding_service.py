@@ -1,42 +1,34 @@
+import logging
 import requests
 from app.config import settings
 
+logger = logging.getLogger(__name__)
+
+# nomic-embed-text outputs 768-dimensional vectors
 EMBEDDING_DIM = 768
-_BASE = f"https://generativelanguage.googleapis.com/v1beta/{settings.gemini_embedding_model}"
-
-
-def _post(url: str, payload: dict) -> dict:
-    resp = requests.post(url, json=payload, params={"key": settings.gemini_api_key}, timeout=60)
-    resp.raise_for_status()
-    return resp.json()
+OLLAMA_EMBED_MODEL = "nomic-embed-text"
 
 
 async def embed_texts(texts: list[str]) -> list[list[float]]:
-    data = _post(
-        f"{_BASE}:batchEmbedContents",
-        {
-            "requests": [
-                {
-                    "model": settings.gemini_embedding_model,
-                    "content": {"parts": [{"text": t}]},
-                    "taskType": "RETRIEVAL_DOCUMENT",
-                    "outputDimensionality": EMBEDDING_DIM,
-                }
-                for t in texts
-            ]
-        },
-    )
-    return [e["values"] for e in data["embeddings"]]
+    """Generate embeddings using Ollama nomic-embed-text model."""
+    embeddings = []
+    for text in texts:
+        embedding = await embed_query(text)
+        embeddings.append(embedding)
+    return embeddings
 
 
 async def embed_query(text: str) -> list[float]:
-    data = _post(
-        f"{_BASE}:embedContent",
-        {
-            "model": settings.gemini_embedding_model,
-            "content": {"parts": [{"text": text}]},
-            "taskType": "RETRIEVAL_QUERY",
-            "outputDimensionality": EMBEDDING_DIM,
-        },
-    )
-    return data["embedding"]["values"]
+    """Generate embedding for a single text using Ollama nomic-embed-text."""
+    try:
+        resp = requests.post(
+            f"{settings.ollama_base_url}/api/embeddings",
+            json={"model": OLLAMA_EMBED_MODEL, "prompt": text},
+            timeout=60,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("embedding", [])
+    except Exception as e:
+        logger.error(f"Failed to generate embedding: {e}")
+        raise
