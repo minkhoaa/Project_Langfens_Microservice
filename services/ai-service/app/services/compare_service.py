@@ -6,7 +6,7 @@ from langchain_core.exceptions import OutputParserException
 from app.config import settings
 from app.prompts.writing_compare import WRITING_COMPARE_EXEMPLAR_PROMPT, WRITING_COMPARE_PROMPT
 from app.schemas import CompareRequest, CompareResponse, ReferenceEssay, SentenceComparison
-from app.services import gemini_service, search_service
+from app.services import llm_service, search_service
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ async def _search_with_fallback(
 ) -> list:
     """Search for essays near band_center with progressive fallback."""
     # Attempt 1: topic + band ±0.5
-    results = await search_service.search(
+    results = await search_service.search_and_reassemble(
         collection=settings.qdrant_collection_writing,
         query=topic,
         top_k=top_k,
@@ -72,7 +72,7 @@ async def _search_with_fallback(
         return results
 
     # Attempt 2: topic + band ±1.0
-    results = await search_service.search(
+    results = await search_service.search_and_reassemble(
         collection=settings.qdrant_collection_writing,
         query=topic,
         top_k=top_k,
@@ -85,7 +85,7 @@ async def _search_with_fallback(
         return results
 
     # Attempt 3: same task_type + band only (no topic similarity)
-    results = await search_service.search(
+    results = await search_service.search_and_reassemble(
         collection=settings.qdrant_collection_writing,
         query=task_type,
         top_k=top_k,
@@ -124,8 +124,8 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
     seen_ids = set()
     all_refs = []
     for r in step_up_refs + target_refs:
-        if r.id not in seen_ids:
-            seen_ids.add(r.id)
+        if r.parent_id not in seen_ids:
+            seen_ids.add(r.parent_id)
             all_refs.append(r)
 
     if not all_refs:
@@ -147,15 +147,18 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
     }
 
     try:
-        result = await gemini_service.generate(
+        result = await llm_service.generate(
             prompt_template=WRITING_COMPARE_PROMPT,
             variables=variables,
         )
         validate_sentence_comparisons_response(result)
+    except OutputParserException as e:
+        logger.warning(f"LLM call failed: {e}")
+        result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
     except ValueError as e:
         logger.warning(f"Validation failed: {e}")
         result = {"overall_analysis": f"LLM response validation failed. Raw error: {e}"}
-    except (OutputParserException, Exception) as e:
+    except Exception as e:
         logger.warning(f"LLM call failed: {e}")
         result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
 
@@ -173,7 +176,7 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         sentence_comparisons=_parse_sentence_comparisons(result.get("sentence_comparisons", [])),
         references=[
             ReferenceEssay(
-                id=r.id,
+                id=r.parent_id,
                 text=r.text,
                 band=r.metadata.get("band_overall", 0),
                 similarity_score=r.score,
@@ -203,15 +206,18 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
     }
 
     try:
-        result = await gemini_service.generate(
+        result = await llm_service.generate(
             prompt_template=WRITING_COMPARE_EXEMPLAR_PROMPT,
             variables=variables,
         )
         validate_sentence_comparisons_response(result)
+    except OutputParserException as e:
+        logger.warning(f"LLM call failed: {e}")
+        result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
     except ValueError as e:
         logger.warning(f"Validation failed: {e}")
         result = {"overall_analysis": f"LLM response validation failed. Raw error: {e}"}
-    except (OutputParserException, Exception) as e:
+    except Exception as e:
         logger.warning(f"LLM call failed: {e}")
         result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
 
@@ -229,7 +235,7 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
         sentence_comparisons=_parse_sentence_comparisons(result.get("sentence_comparisons", [])),
         references=[
             ReferenceEssay(
-                id=r.id,
+                id=r.parent_id,
                 text=r.text,
                 band=r.metadata.get("band_overall", 0),
                 similarity_score=r.score,
