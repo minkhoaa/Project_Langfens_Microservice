@@ -29,7 +29,7 @@ def _get_redis() -> redis.Redis | None:
 
 
 def _cache_key(prefix: str, query_vector: list[float], top_k: int, filters: dict) -> str:
-    raw = json.dumps({"q": query_vector[:8], "k": top_k, "f": filters}, sort_keys=True)
+    raw = json.dumps({"q": query_vector[:32], "k": top_k, "f": filters}, sort_keys=True)
     digest = hashlib.sha256(raw.encode()).hexdigest()[:16]
     return f"{prefix}:{digest}"
 

@@ -5,9 +5,9 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 ROUTE_LIMITS: dict[str, int] = {
-    "/v1/writing/compare": 10,
-    "/v1/grammar/explain": 20,
-    "/v1/grammar/batch-explain": 10,
+    "/api/v1/writing/compare": 10,
+    "/api/v1/grammar/explain": 20,
+    "/api/v1/grammar/batch-explain": 10,
 }
 
 DEFAULT_LIMIT = 60
