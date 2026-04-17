@@ -1,8 +1,10 @@
+import json as json_lib
 import logging
 
 from qdrant_client.models import FieldCondition, Filter, MatchValue, Range
 
 from app.schemas import ReassembledEssay, SearchResult
+from app.services import cache_service
 from app.services.embedding_service import embed_query
 from app.services.qdrant_factory import get_qdrant_client
 
@@ -82,12 +84,19 @@ async def search_and_reassemble(
 ) -> list[ReassembledEssay]:
     vector = await embed_query(query)
     client = get_qdrant_client()
+    f = filters or {}
+
+    # Check cache
+    cached = cache_service.get_cached(f"reassemble:{collection}", vector, top_k, f)
+    if cached:
+        data = json_lib.loads(cached)
+        return [ReassembledEssay(**item) for item in data]
 
     hits = client.query_points(
         collection_name=collection,
         query=vector,
         limit=top_k * 3,
-        query_filter=_build_filter(filters or {}),
+        query_filter=_build_filter(f),
         with_payload=True,
     )
 
@@ -126,5 +135,16 @@ async def search_and_reassemble(
             metadata=metadata,
             chunk_scores=chunk_scores.get(parent_id, {}),
         ))
+
+    # Store in cache
+    if results:
+        cache_service.set_cached(
+            f"reassemble:{collection}",
+            vector,
+            top_k,
+            f,
+            json_lib.dumps([r.model_dump() for r in results]),
+            ttl_seconds=3600,
+        )
 
     return results
