@@ -3,7 +3,7 @@ warnings.filterwarnings("ignore")
 
 import pytest
 from unittest.mock import AsyncMock, patch
-from app.schemas import CompareRequest, SearchResult
+from app.schemas import CompareRequest, ReassembledEssay
 from app.services.compare_service import (
     validate_sentence_comparisons_response,
     _parse_sentence_comparisons,
@@ -13,8 +13,8 @@ from app.services.compare_service import (
 
 
 MOCK_SEARCH_RESULTS = [
-    SearchResult(id="r1", text="Band 9 essay about education...", score=0.92, metadata={"band_overall": 9.0, "task_type": "TASK_2", "word_count": 280}),
-    SearchResult(id="r2", text="Another Band 8.5 essay...", score=0.88, metadata={"band_overall": 8.5, "task_type": "TASK_2", "word_count": 300}),
+    ReassembledEssay(parent_id="r1", text="Band 9 essay about education...", score=0.92, metadata={"band_overall": 9.0, "task_type": "TASK_2", "word_count": 280}, chunk_scores={}),
+    ReassembledEssay(parent_id="r2", text="Another Band 8.5 essay...", score=0.88, metadata={"band_overall": 8.5, "task_type": "TASK_2", "word_count": 300}, chunk_scores={}),
 ]
 
 
@@ -129,8 +129,8 @@ class TestCompareEssayValidationIntegration:
             "vocabulary_feedback": "Some feedback",
         }
 
-        with patch("app.services.compare_service.search_service.search", new_callable=AsyncMock, return_value=MOCK_SEARCH_RESULTS), \
-             patch("app.services.compare_service.gemini_service.generate", new_callable=AsyncMock, return_value=llm_result_without_field):
+        with patch("app.services.compare_service.search_service.search_and_reassemble", new_callable=AsyncMock, return_value=MOCK_SEARCH_RESULTS), \
+             patch("app.services.compare_service.llm_service.generate", new_callable=AsyncMock, return_value=llm_result_without_field):
             result = await compare_essay(req)
 
         assert "LLM response validation failed" in result.overall_analysis
@@ -149,8 +149,8 @@ class TestCompareEssayValidationIntegration:
             ]
         }
 
-        with patch("app.services.compare_service.search_service.search", new_callable=AsyncMock, return_value=MOCK_SEARCH_RESULTS), \
-             patch("app.services.compare_service.gemini_service.generate", new_callable=AsyncMock, return_value=llm_result_with_field):
+        with patch("app.services.compare_service.search_service.search_and_reassemble", new_callable=AsyncMock, return_value=MOCK_SEARCH_RESULTS), \
+             patch("app.services.compare_service.llm_service.generate", new_callable=AsyncMock, return_value=llm_result_with_field):
             result = await compare_essay(req)
 
         assert result.overall_analysis == "Analysis with sentence comparisons"
@@ -170,8 +170,8 @@ class TestCompareExemplarValidationIntegration:
             "vocabulary_feedback": "Some feedback",
         }
 
-        with patch("app.services.compare_service.search_service.search", new_callable=AsyncMock, return_value=MOCK_SEARCH_RESULTS), \
-             patch("app.services.compare_service.gemini_service.generate", new_callable=AsyncMock, return_value=llm_result_without_field):
+        with patch("app.services.compare_service.search_service.search_and_reassemble", new_callable=AsyncMock, return_value=MOCK_SEARCH_RESULTS), \
+             patch("app.services.compare_service.llm_service.generate", new_callable=AsyncMock, return_value=llm_result_without_field):
             result = await _compare_exemplar(req, 8.5)
 
         assert "LLM response validation failed" in result.overall_analysis
@@ -190,8 +190,8 @@ class TestCompareExemplarValidationIntegration:
             ]
         }
 
-        with patch("app.services.compare_service.search_service.search", new_callable=AsyncMock, return_value=MOCK_SEARCH_RESULTS), \
-             patch("app.services.compare_service.gemini_service.generate", new_callable=AsyncMock, return_value=llm_result_with_field):
+        with patch("app.services.compare_service.search_service.search_and_reassemble", new_callable=AsyncMock, return_value=MOCK_SEARCH_RESULTS), \
+             patch("app.services.compare_service.llm_service.generate", new_callable=AsyncMock, return_value=llm_result_with_field):
             result = await _compare_exemplar(req, 8.5)
 
         assert result.overall_analysis == "Exemplar analysis with sentence comparisons"
