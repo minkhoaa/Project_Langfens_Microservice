@@ -16,6 +16,14 @@ class SearchResult(BaseModel):
     metadata: dict
 
 
+class ReassembledEssay(BaseModel):
+    parent_id: str
+    text: str
+    score: float
+    metadata: dict
+    chunk_scores: dict[str, float] = {}
+
+
 class SearchResponse(BaseModel):
     results: list[SearchResult]
     query: str
