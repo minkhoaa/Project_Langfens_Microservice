@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 
 from fastapi import HTTPException
 from langchain_core.exceptions import OutputParserException
@@ -12,7 +13,7 @@ from app.schemas import (
     GrammarExplainResponse,
     SearchResult,
 )
-from app.services import gemini_service, search_service
+from app.services import llm_service, search_service
 
 logger = logging.getLogger(__name__)
 
@@ -67,15 +68,16 @@ def _parse_grammar_response(raw_result: dict, error_text: str) -> GrammarExplain
 
 async def explain_single(request: GrammarExplainRequest) -> GrammarExplainResponse:
     """Explain a single grammar error."""
-    # Search for relevant grammar rules
+    t0 = time.time()
     rules = await search_service.search(
         collection=settings.qdrant_collection_grammar,
         query=request.error_text,
         top_k=3,
         filters={},
     )
+    t_search = time.time()
+    logger.info("grammar: search took %.1fms", (t_search - t0) * 1000)
 
-    # Prepare prompt variables
     variables = {
         "error_text": request.error_text,
         "context": request.context,
@@ -85,16 +87,10 @@ async def explain_single(request: GrammarExplainRequest) -> GrammarExplainRespon
     }
 
     try:
-        if settings.use_ollama:
-            result = await ollama_service.generate(
-                prompt_template=GRAMMAR_EXPLAIN_PROMPT,
-                variables=variables,
-            )
-        else:
-            result = await gemini_service.generate(
-                prompt_template=GRAMMAR_EXPLAIN_PROMPT,
-                variables=variables,
-            )
+        result = await llm_service.generate(
+            prompt_template=GRAMMAR_EXPLAIN_PROMPT,
+            variables=variables,
+        )
     except asyncio.TimeoutError:
         logger.warning(f"Grammar explanation timed out for: {request.error_text}")
         raise HTTPException(status_code=504, detail="Grammar explanation timed out")
@@ -105,6 +101,8 @@ async def explain_single(request: GrammarExplainRequest) -> GrammarExplainRespon
         logger.warning(f"LLM call failed: {e}")
         raise HTTPException(status_code=500, detail=f"Grammar explanation failed: {e}")
 
+    t_llm = time.time()
+    logger.info("grammar: llm took %.1fms, total %.1fms", (t_llm - t_search) * 1000, (t_llm - t0) * 1000)
     return _parse_grammar_response(result, request.error_text)
 
 

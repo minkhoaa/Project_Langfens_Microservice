@@ -1,4 +1,5 @@
 import logging
+import time
 
 from fastapi import HTTPException
 from langchain_core.exceptions import OutputParserException
@@ -116,9 +117,12 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
     if student_band >= 8.5:
         return await _compare_exemplar(req, student_band)
 
+    t0 = time.time()
     # Dual query
     step_up_refs = await _search_with_fallback(req.topic, step_up_band, req.task_type)
     target_refs = await _search_with_fallback(req.topic, target_band, req.task_type)
+    t_search = time.time()
+    logger.info("compare: search took %.1fms", (t_search - t0) * 1000)
 
     # Deduplicate references (same essay can appear in both step-up and target searches)
     seen_ids = set()
@@ -161,6 +165,9 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
     except Exception as e:
         logger.warning(f"LLM call failed: {e}")
         result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
+
+    t_llm = time.time()
+    logger.info("compare: llm took %.1fms, total %.1fms", (t_llm - t_search) * 1000, (t_llm - t0) * 1000)
 
     return CompareResponse(
         overall_analysis=result.get("overall_analysis", ""),
