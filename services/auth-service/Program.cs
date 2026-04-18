@@ -9,12 +9,8 @@ using auth_service.Infrastructure.Persistence;
 using auth_service.Infrastructure.Redis;
 using DotNetEnv;
 using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.Options;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
@@ -23,176 +19,109 @@ using StackExchange.Redis;
 using Role = auth_service.Infrastructure.Persistence.Role;
 
 Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
+// ── Shared bootstrap (local extensions, consistent across all services) ───────
+builder.Services.AddLangfensAuthEnv(key => Environment.GetEnvironmentVariable(key));
+builder.Services.AddLangfensCors();
+builder.Services.AddLangfensSwagger("Auth Service");
+
+// ── JWT singleton (auth-service issues tokens, needs full settings) ─────────────
+var jwtSettings = new auth_service.Application.Common.JwtSettings
+{
+    Issuer       = Environment.GetEnvironmentVariable("JwtSettings__Issuer")
+                    ?? throw new InvalidOperationException("JwtSettings__Issuer is required"),
+    Audience     = Environment.GetEnvironmentVariable("JwtSettings__Audience")
+                    ?? throw new InvalidOperationException("JwtSettings__Audience is required"),
+    SignKey      = Environment.GetEnvironmentVariable("JwtSettings__SignKey")
+                    ?? throw new InvalidOperationException("JwtSettings__SignKey is required"),
+    RsaPrivateKeyPem = Environment.GetEnvironmentVariable("JwtSettings__RsaPrivateKeyPem")
+                    ?? throw new InvalidOperationException("JwtSettings__RsaPrivateKeyPem is required"),
+    KeyId        = Environment.GetEnvironmentVariable("JwtSettings__KeyId")
+                    ?? throw new InvalidOperationException("JwtSettings__KeyId is required"),
+    AccessTokenLifetimeSeconds = int.TryParse(
+        Environment.GetEnvironmentVariable("JwtSettings__AccessTokenLifetimeSeconds"), out var ttl)
+            ? ttl : 3600,
+};
+builder.Services.AddSingleton(jwtSettings);
+
+// ── RabbitMQ ───────────────────────────────────────────────────────────────────
 static string EnvOrDefault(string key, string fallback) =>
     Environment.GetEnvironmentVariable(key) ?? fallback;
 
-var jwtSettings = new JwtSettings
+var rabbitConfig = new RabbitMqConfig
 {
-    Issuer = Environment.GetEnvironmentVariable("JwtSettings__Issuer") ?? throw new Exception("Jwt Issuer is missing"),
-    Audience = Environment.GetEnvironmentVariable("JwtSettings__Audience") ?? throw new Exception("Jwt Audience is missing"),
-    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new Exception("Jwt SignKey is missing"),
-    RsaPrivateKeyPem = Environment.GetEnvironmentVariable("JwtSettings__RsaPrivateKeyPem") ?? throw new Exception("Jwt RsaPrivateKeyPem is missing"),
-    KeyId = Environment.GetEnvironmentVariable("JwtSettings__KeyId") ?? throw new Exception("Jwt KeyId is missing"),
-    AccessTokenLifetimeSeconds = int.TryParse(Environment.GetEnvironmentVariable("JwtSettings__AccessTokenLifetimeSeconds"), out var tokenLifetime)
-        ? tokenLifetime
-        : 3600
+    Host       = EnvOrDefault("RABBITMQ__HOST", "localhost"),
+    Port       = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var port) ? port : (ushort)5672,
+    VirtualHost= EnvOrDefault("RABBITMQ__VHOST", "/"),
+    Username   = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME")
+                    ?? throw new InvalidOperationException("RABBITMQ__USERNAME is required"),
+    Password   = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD")
+                    ?? throw new InvalidOperationException("RABBITMQ__PASSWORD is required"),
+    UseSsl     = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var ssl) && ssl,
 };
-builder.Services.AddSingleton<IOptions<JwtSettings>>(Options.Create(jwtSettings));
-
-var rabbitMqConfig = new RabbitMqConfig
+builder.Services.AddSingleton(rabbitConfig);
+builder.Services.AddMassTransit(config =>
 {
-    Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
-    Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var parsedPort) ? parsedPort : (ushort)5672,
-    VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
-    Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") 
-        ?? throw new InvalidOperationException("RABBITMQ__USERNAME environment variable is required"),
-    Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") 
-        ?? throw new InvalidOperationException("RABBITMQ__PASSWORD environment variable is required"),
-    UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var proSsl) && proSsl
-};
-builder.Services.AddSingleton<IOptions<RabbitMqConfig>>(Options.Create(rabbitMqConfig));
-
-if (string.IsNullOrWhiteSpace(jwtSettings.SignKey))
-{
-    throw new InvalidOperationException("JwtSettings:SignKey is not configured.");
-}
-
-var redisConnection = EnvOrDefault("CONNECTIONSTRING__REDIS", "localhost:6379");
-builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(
-    redisConnection));
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
-builder.Services.AddMassTransit(configurator =>
-{
-    // Use unique endpoint names per service so fan-out works (no competing consumers)
-    configurator.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("user-registered", includeNamespace: false));
-    configurator.UsingRabbitMq((context, config) =>
+    config.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("user-registered", includeNamespace: false));
+    config.UsingRabbitMq((ctx, cfg) =>
     {
-        config.Host(rabbitMqConfig.Host, rabbitMqConfig.Port, rabbitMqConfig.VirtualHost, h =>
+        cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
         {
-            h.Username(rabbitMqConfig.Username);
-            h.Password(rabbitMqConfig.Password);
-            if (rabbitMqConfig.UseSsl)
-            {
-                h.UseSsl(a =>
-                {
-                    a.Protocol = SslProtocols.Tls12;
-                });
-            }
+            h.Username(rabbitConfig.Username);
+            h.Password(rabbitConfig.Password);
+            if (rabbitConfig.UseSsl) h.UseSsl(k => k.Protocol = SslProtocols.Tls12);
         });
-        // Configure endpoints automatically for registered consumers.
-        config.ConfigureEndpoints(context);
+        cfg.ConfigureEndpoints(ctx);
     });
 });
-builder.Services.AddDbContextPool<AuthDbContext>(options =>
-{
-    options.UseNpgsql(EnvOrDefault("CONNECTIONSTRING__AUTH",
-        "Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth"));
-});
-builder.Services.AddIdentityCore<User>(option =>
+
+// ── Database ───────────────────────────────────────────────────────────────────
+builder.Services.AddDbContextPool<AuthDbContext>(opts =>
+    opts.UseNpgsql(EnvOrDefault("CONNECTIONSTRING__AUTH",
+        "Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth")));
+
+// ── Identity ───────────────────────────────────────────────────────────────────
+builder.Services.AddIdentityCore<User>(opt =>
     {
-        option.User.RequireUniqueEmail = true;
-        option.Password.RequireDigit = true;
-        option.Password.RequireUppercase = true;
-        option.Password.RequireLowercase = true;
+        opt.User.RequireUniqueEmail = true;
+        opt.Password.RequireDigit = true;
+        opt.Password.RequireUppercase = true;
+        opt.Password.RequireLowercase = true;
     })
     .AddRoles<Role>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddSignInManager<SignInManager<User>>()
     .AddDefaultTokenProviders();
 
-
-
-
-var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
-    ?? "http://localhost:3000,http://127.0.0.1:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-builder.Services.AddCors(options =>
+// ── Authorization policies ────────────────────────────────────────────────────
+builder.Services.AddAuthorization(opts =>
 {
-    options.AddPolicy("FE", policy => policy
-        .WithOrigins(corsOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
+    opts.AddPolicy(Roles.User,  p => p.RequireRole(Roles.User));
+    opts.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
+    opts.AddPolicy(UserScope.UserReadAny, p => p.RequireAssertion(ctx =>
+        ctx.User.HasAnyScope(UserScope.UserReadAny) || ctx.User.IsInRole(Roles.Admin)));
 });
 
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.MapInboundClaims = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateIssuerSigningKey = true,
-            ValidateLifetime = true,
-            ValidAudience = jwtSettings.Audience,
-            ValidIssuer = jwtSettings.Issuer,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey)),
-            ClockSkew = TimeSpan.Zero,
-            NameClaimType = CustomClaims.Sub,
-            RoleClaimType = CustomClaims.Roles
-        };
-    });
+// ── Redis ─────────────────────────────────────────────────────────────────────
+var redisConn = EnvOrDefault("CONNECTIONSTRING__REDIS", "localhost:6379");
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConn));
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
-    options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
-    options.AddPolicy(UserScope.UserReadAny,
-        p => p.RequireAssertion(ctx =>
-            ctx.User.HasAnyScope(UserScope.UserReadAny) || ctx.User.IsInRole(Roles.Admin)));
-});
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Auth Service", Version = "1.0" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        Description = "Enter token"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-
-// DI
+// ── DI ───────────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
-builder.Services.AddScoped<ISessionStore, SessionStore>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IOtpGenerator, OtpGenerator>();
-builder.Services.AddScoped<IOtpStore, RedisOtpStore>();
+builder.Services.AddScoped<ISessionStore,      SessionStore>();
+builder.Services.AddScoped<IAuthService,       AuthService>();
+builder.Services.AddScoped<IOtpGenerator,      OtpGenerator>();
+builder.Services.AddScoped<IOtpStore,         RedisOtpStore>();
 builder.Services.AddScoped<IPasswordHasher<string>, PasswordHasher<string>>();
 builder.Services.AddSingleton<IEmailValidator, EmailValidator>();
-builder.Services.AddSingleton<ICookieService, CookieService>();
-builder.Services.AddSingleton<IJwtTokenFactory, JwtTokenFactory>();
+builder.Services.AddSingleton<ICookieService,   CookieService>();
+builder.Services.AddSingleton<IJwtTokenFactory,JwtTokenFactory>();
 builder.Services.AddSingleton<IGoogleTokenVerifier, GoogleTokenVerifier>();
 
+// ── App ───────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -203,12 +132,8 @@ using (var scope = app.Services.CreateScope())
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
 app.UseCors("FE");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapAuthEndpoints();
-
 app.Run();

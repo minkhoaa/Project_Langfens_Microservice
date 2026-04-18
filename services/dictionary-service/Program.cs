@@ -1,22 +1,23 @@
-using System.ComponentModel.Design;
+using Elastic.Clients.Elasticsearch;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using dictionary_service.Features;
 using dictionary_service.Features.Helper;
 using dictionary_service.Features.Service;
 using dictionary_service.Infrastructure.Persistence;
-using Elastic.Clients.Elasticsearch;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http.Features;
-using IDictionaryService = dictionary_service.Features.Service.IDictionaryService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
+// ── Shared bootstrap ────────────────────────────────────────────────────
+builder.Services.AddLangfensSwagger("Dictionary Service");
 
+// ── Kestrel: allow large uploads ────────────────────────────────────────
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxRequestBodySize = null; // allow large uploads for import
+    options.Limits.MaxRequestBodySize = null;
 });
 
+// ── Form options for large imports ──────────────────────────────────────
 builder.Services.Configure<FormOptions>(opt =>
 {
     opt.MultipartBodyLengthLimit = long.MaxValue;
@@ -24,24 +25,24 @@ builder.Services.Configure<FormOptions>(opt =>
     opt.MultipartHeadersLengthLimit = int.MaxValue;
 });
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-var connectionString = EnvOrDefault("CONNECTIONSTRING__DICTIONARY",
-    "Host=dictionary-database;Port=5432;Database=dictionary-db;Username=dictionary;Password=dictionary");
-builder.Services.AddDbContext<DictionaryDbContext>(option => option.UseNpgsql(connectionString));
-builder.Services.AddSingleton(k =>
-{
-    var url = EnvOrDefault("ELASTICSEARCH__URL", "http://elasticsearch:9200");
-    return new ElasticsearchClient(new ElasticsearchClientSettings(new Uri(url)));
-});
+// ── Database ─────────────────────────────────────────────────────────────
+var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__DICTIONARY")
+    ?? "Host=dictionary-database;Port=5432;Database=dictionary-db;Username=dictionary;Password=dictionary";
+builder.Services.AddDbContext<DictionaryDbContext>(o => o.UseNpgsql(connectionString));
+
+// ── Elasticsearch ────────────────────────────────────────────────────────
+var esUrl = Environment.GetEnvironmentVariable("ELASTICSEARCH__URL") ?? "http://elasticsearch:9200";
+builder.Services.AddSingleton(new ElasticsearchClient(
+    new ElasticsearchClientSettings(new Uri(esUrl))));
+
+// ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<ElasticIndexer>();
 builder.Services.AddScoped<IDictionaryService, DictionaryService>();
 builder.Services.AddSingleton<IEnViTranslator, NullEnViTranslator>();
 builder.Services.AddSingleton<IDictionaryDtoMapper, DictionaryDtoMapper>();
+
+// ── App ──────────────────────────────────────────────────────────────────
 var app = builder.Build();
-
-
-
 
 using (var scope = app.Services.CreateScope())
 {
@@ -49,13 +50,9 @@ using (var scope = app.Services.CreateScope())
     await context.Database.MigrateAsync();
 }
 
-
-
-
 app.UseSwagger();
 app.UseSwaggerUI();
-
-
-
 app.MapDictionaryEndpoint();
 app.Run();
+
+public partial class Program { }

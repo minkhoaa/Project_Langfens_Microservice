@@ -1,4 +1,4 @@
-using attempt_service.Domains.Entities;
+using attempt_service.Domain.Entities;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

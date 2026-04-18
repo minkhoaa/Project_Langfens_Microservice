@@ -1,4 +1,4 @@
-namespace attempt_service.Domains.Entities;
+namespace attempt_service.Domain.Entities;
 
 public class QuestionBookmark
 {

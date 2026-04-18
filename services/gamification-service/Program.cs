@@ -1,160 +1,61 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Authentication;
-using System.Text;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using gamification_service.Features;
 using gamification_service.Features.Consumers;
+using gamification_service.Infrastructure;
 using gamification_service.Infrastructure.Persistence;
-using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Shared.Security.Claims;
-using Shared.Security.Helper;
-using Shared.Security.Roles;
 
 var builder = WebApplication.CreateBuilder(args);
 
-static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
-
-var jwtSettings = new
-{
-    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
-    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("JwtSettings__SignKey environment variable is required")
-};
-
-var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
-    ?? "http://localhost:3000,http://127.0.0.1:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-builder.Services.AddCors(option =>
-{
-    option.AddPolicy("FE", policy => policy
-        .WithOrigins(corsOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
-});
-
-JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(option =>
-    {
-        option.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = jwtSettings.Issuer,
-            ValidAudience = jwtSettings.Audience,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey)),
-            ClockSkew = TimeSpan.Zero,
-            NameClaimType = CustomClaims.Sub,
-            RoleClaimType = CustomClaims.Roles
-        };
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser().Build();
-    options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
-    options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
-});
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Gamification Service", Version = "1.0" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        Description = "Enter token"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-builder.Services.AddDbContext<GamificationDbContext>(option => option
-    .UseNpgsql(EnvOrDefault("CONNECTIONSTRING__GAMIFICATION", 
-        "Host=gamification-database;Port=5432;Database=gamification-db;Username=gamification;Password=gamification"))
-);
-
+// ── Shared bootstrap ────────────────────────────────────────────────────
+builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key));
+builder.Services.AddGamificationAuthorization();
+builder.Services.AddLangfensCors();
+builder.Services.AddLangfensSwagger("Gamification Service");
 builder.Services.AddHttpContextAccessor();
+
+// ── Database ─────────────────────────────────────────────────────────────
+var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__GAMIFICATION")
+    ?? "Host=gamification-database;Port=5432;Database=gamification-db;Username=gamification;Password=gamification";
+builder.Services.AddDbContext<GamificationDbContext>(o => o.UseNpgsql(connectionString));
+
+// ── RabbitMQ ─────────────────────────────────────────────────────────────
+var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
+    key => Environment.GetEnvironmentVariable(key));
+builder.Services.AddMassTransit(cfg =>
+{
+    cfg.AddConsumer<AttemptCompletedConsumer>();
+    cfg.AddConsumer<CardReviewedConsumer>();
+    cfg.AddConsumer<LessonCompletedConsumer>();
+    cfg.AddConsumer<UserCreatedConsumer>();
+
+    cfg.UsingRabbitMq((ctx, bus) =>
+    {
+        bus.ConfigureRabbitMqHost(rabbitConfig);
+        bus.ConfigureEndpoints(ctx);
+    });
+});
+
+// ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IGamificationService, GamificationService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
-// RabbitMQ consumers
-builder.Services.AddMassTransit(configurator =>
-{
-    configurator.AddConsumer<AttemptCompletedConsumer>();
-    configurator.AddConsumer<CardReviewedConsumer>();
-    configurator.AddConsumer<LessonCompletedConsumer>();
-    configurator.AddConsumer<UserCreatedConsumer>();
-
-    var rabbitConfig = new
-    {
-        Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
-        Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") 
-        ?? throw new InvalidOperationException("RABBITMQ__USERNAME environment variable is required"),
-        Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") 
-        ?? throw new InvalidOperationException("RABBITMQ__PASSWORD environment variable is required"),
-        VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
-        Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var p) ? p : (ushort)5672,
-        UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var ssl) && ssl
-    };
-
-    configurator.UsingRabbitMq((bus, config) =>
-    {
-        config.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
-        {
-            h.Username(rabbitConfig.Username);
-            h.Password(rabbitConfig.Password);
-            if (rabbitConfig.UseSsl)
-            {
-                h.UseSsl(k => k.Protocol = SslProtocols.Tls12);
-            }
-        });
-
-        config.ReceiveEndpoint("gamification-attempt-completed", e => e.ConfigureConsumer<AttemptCompletedConsumer>(bus));
-        config.ReceiveEndpoint("gamification-card-reviewed", e => e.ConfigureConsumer<CardReviewedConsumer>(bus));
-        config.ReceiveEndpoint("gamification-lesson-completed", e => e.ConfigureConsumer<LessonCompletedConsumer>(bus));
-        config.ReceiveEndpoint("gamification-user-created", e => e.ConfigureConsumer<UserCreatedConsumer>(bus));
-    });
-});
-
+// ── App ──────────────────────────────────────────────────────────────────
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<GamificationDbContext>();
+    if (db.Database.IsRelational())
+        await db.Database.MigrateAsync();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<GamificationDbContext>();
-    if (db.Database.IsRelational())
-    {
-        await db.Database.MigrateAsync();
-    }
-}
 
 app.MapGamificationEndpoints();
 app.MapNotificationEndpoints();

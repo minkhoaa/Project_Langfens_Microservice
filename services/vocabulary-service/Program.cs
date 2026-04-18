@@ -1,17 +1,6 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
+using System.Net;
 using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Microsoft.SemanticKernel;
-using Shared.Security.Claims;
-using Shared.Security.Helper;
-using Shared.Security.Roles;
-using Shared.Security.Scopes;
 using vocabulary_service.Application;
 using vocabulary_service.Features;
 using vocabulary_service.Features.Admin;
@@ -21,117 +10,33 @@ using vocabulary_service.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
-var jwtSettings = new
-{
-    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
-    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("JwtSettings__SignKey environment variable is required")
-};
-var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
-    ?? "http://localhost:3000,http://127.0.0.1:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+// ── Shared bootstrap ────────────────────────────────────────────────────
+builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key));
+builder.Services.AddVocabularyAuthorization();
+builder.Services.AddLangfensCors();
+builder.Services.AddLangfensSwagger("Vocabulary Service");
 
-builder.Services.AddCors(option =>
-{
-    option.AddPolicy("FE", policy => policy
-        .WithOrigins(corsOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
-});
-JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(option =>
-    {
-        option.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = jwtSettings.Issuer
-                          ?? throw new Exception("valid issuer is missing"),
-            ValidAudience = jwtSettings.Audience
-                            ?? throw new Exception("valid issuer is missing"),
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey
-                                                                               ?? throw new Exception("Signing key is missing"))),
-            ClockSkew = TimeSpan.Zero,
-            NameClaimType = CustomClaims.Sub,
-            RoleClaimType = CustomClaims.Roles
-        };
-    });
-builder.Services.AddAuthorization(options =>
-{
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser().Build();
-    options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
-    options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
+// ── Database ─────────────────────────────────────────────────────────────
+var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__VOCABULARY")
+    ?? "Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary";
+builder.Services.AddDbContext<VocabularyDbContext>(o => o.UseNpgsql(connectionString));
 
-    options.AddPolicy(VocabScope.VocabRead, p => p.RequireAssertion(c =>
-        c.User.HasAnyScope(VocabScope.VocabRead) || c.User.IsInRole(Roles.User)));
-    options.AddPolicy(VocabScope.VocabManage, p => p.RequireAssertion(c =>
-        c.User.HasAnyScope(VocabScope.VocabManage) || c.User.IsInRole(Roles.Admin)));
-
-});
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Vocabulary Service", Version = "1.0" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        Description = "Enter token"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-    });
-builder.Services.AddDbContext<VocabularyDbContext>(option => option.UseNpgsql(
-    EnvOrDefault("CONNECTIONSTRING__VOCABULARY", "Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary")
-));
-
+// ── RabbitMQ ─────────────────────────────────────────────────────────────
+var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
+    key => Environment.GetEnvironmentVariable(key));
 builder.Services.AddMassTransit(x =>
 {
-    var rabbitConfig = new
-    {
-        Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
-        Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") 
-        ?? throw new InvalidOperationException("RABBITMQ__USERNAME environment variable is required"),
-        Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") 
-        ?? throw new InvalidOperationException("RABBITMQ__PASSWORD environment variable is required"),
-        VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
-        Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var p) ? p : (ushort)5672
-    };
     x.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
-        {
-            h.Username(rabbitConfig.Username);
-            h.Password(rabbitConfig.Password);
-        });
+        cfg.ConfigureRabbitMqHost(rabbitConfig);
     });
 });
 
-// Azure OpenAI for vocabulary enrichment
+// ── AI client (Azure OpenAI) ─────────────────────────────────────────────
 var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT");
 var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY");
-var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
+var azureDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI__DEPLOYMENT") ?? "gpt-4o-mini";
+
 if (!string.IsNullOrWhiteSpace(azureEndpoint) && !string.IsNullOrWhiteSpace(azureApiKey))
 {
     builder.Services.AddSingleton(_ => new OpenAI.Chat.ChatClient(
@@ -139,20 +44,22 @@ if (!string.IsNullOrWhiteSpace(azureEndpoint) && !string.IsNullOrWhiteSpace(azur
         credential: new System.ClientModel.ApiKeyCredential(azureApiKey),
         options: new OpenAI.OpenAIClientOptions { Endpoint = new Uri(azureEndpoint) }
     ));
-    Console.WriteLine($"[INFO] Azure OpenAI enabled for vocabulary enrichment with deployment: {azureDeployment}");
+    Console.WriteLine($"[INFO] Azure OpenAI enabled with deployment: {azureDeployment}");
 }
 else
 {
-    builder.Services.AddSingleton<OpenAI.Chat.ChatClient>(sp => null!);
+    builder.Services.AddSingleton<OpenAI.Chat.ChatClient>(_ => null!);
     Console.WriteLine("[WARN] Azure OpenAI not configured – AI enrichment disabled");
 }
 
+// ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPublicService, PublicService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IAiEnrichmentService, AiEnrichmentService>();
 builder.Services.AddScoped<IVocabularyExtractionService, VocabularyExtractionService>();
 
+// ── App ───────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
 app.UseSwagger();
@@ -160,13 +67,12 @@ app.UseSwaggerUI();
 app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<VocabularyDbContext>();
     if (db.Database.IsRelational())
-    {
         await db.Database.MigrateAsync();
-    }
 }
 
 app.MapPublicVocabularyEndpoints();

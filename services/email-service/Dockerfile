@@ -5,6 +5,7 @@ COPY services/email-service/email-service.csproj services/email-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
 COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
+COPY services/_shared/Shared.Bootstrap/Shared.Bootstrap.csproj services/_shared/Shared.Bootstrap/
 
 
 

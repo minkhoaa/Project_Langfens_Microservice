@@ -8,6 +8,7 @@ WORKDIR /src
 COPY ["services/gamification-service/gamification-service.csproj", "services/gamification-service/"]
 COPY ["services/_shared/Shared.Security/Shared.Security.csproj", "services/_shared/Shared.Security/"]
 COPY ["services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj", "services/_shared/Shared.PublicContracts/"]
+COPY ["services/_shared/Shared.Bootstrap/Shared.Bootstrap.csproj", "services/_shared/Shared.Bootstrap/"]
 RUN dotnet restore "services/gamification-service/gamification-service.csproj"
 COPY . .
 WORKDIR "/src/services/gamification-service"

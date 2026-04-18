@@ -1,10 +1,9 @@
 import json
 from pathlib import Path
 
-from fastapi.testclient import TestClient
+import pytest
 
 from app.config import settings
-from app.main import app
 
 
 def _write_scenario(path: Path, slug: str, title: str, difficulty: str) -> None:
@@ -27,7 +26,10 @@ def _write_scenario(path: Path, slug: str, title: str, difficulty: str) -> None:
     path.write_text(json.dumps(payload), encoding="utf-8")
 
 
-def test_list_roleplay_scenarios_returns_sorted_catalog(tmp_path):
+@pytest.mark.asyncio
+async def test_list_roleplay_scenarios_returns_sorted_catalog(tmp_path):
+    from app.routers.speaking import list_roleplay_scenarios
+
     scenarios_dir = tmp_path / "scenarios"
     scenarios_dir.mkdir()
     _write_scenario(scenarios_dir / "hotel.json", "hotel-check-in", "Hotel Check-in", "BEGINNER")
@@ -37,21 +39,21 @@ def test_list_roleplay_scenarios_returns_sorted_catalog(tmp_path):
     settings.roleplay_scenarios_dir = str(scenarios_dir)
 
     try:
-        with TestClient(app) as client:
-            response = client.get("/api/v1/speaking/roleplay/scenarios")
+        response = await list_roleplay_scenarios()
     finally:
         settings.roleplay_scenarios_dir = original_dir
 
-    assert response.status_code == 200
-    body = response.json()
-    assert body["total"] == 2
-    assert [scenario["slug"] for scenario in body["scenarios"]] == [
+    assert response.total == 2
+    assert [scenario.slug for scenario in response.scenarios] == [
         "hotel-check-in",
         "airport-help-desk",
     ]
 
 
-def test_list_roleplay_scenarios_skips_invalid_files(tmp_path):
+@pytest.mark.asyncio
+async def test_list_roleplay_scenarios_skips_invalid_files(tmp_path):
+    from app.routers.speaking import list_roleplay_scenarios
+
     scenarios_dir = tmp_path / "scenarios"
     scenarios_dir.mkdir()
     _write_scenario(scenarios_dir / "restaurant.json", "restaurant-ordering", "Restaurant Ordering", "BEGINNER")
@@ -61,12 +63,9 @@ def test_list_roleplay_scenarios_skips_invalid_files(tmp_path):
     settings.roleplay_scenarios_dir = str(scenarios_dir)
 
     try:
-        with TestClient(app) as client:
-            response = client.get("/api/v1/speaking/roleplay/scenarios")
+        response = await list_roleplay_scenarios()
     finally:
         settings.roleplay_scenarios_dir = original_dir
 
-    assert response.status_code == 200
-    body = response.json()
-    assert body["total"] == 1
-    assert body["scenarios"][0]["slug"] == "restaurant-ordering"
+    assert response.total == 1
+    assert response.scenarios[0].slug == "restaurant-ordering"

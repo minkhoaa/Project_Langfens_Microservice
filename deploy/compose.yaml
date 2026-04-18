@@ -16,7 +16,6 @@
       - course-service
       - gamification-service
       - dictionary-service
-      - chatbot-service
 
 
 
@@ -390,18 +389,6 @@
       timeout: 2s
       retries: 5
       
-  chatbot-service:
-    image: ${DOCKERHUB_USER}/langfens-chatbot:${TAG}
-    environment:
-      - OLLAMA_BASE_URL=http://ollama:11434
-    ports:
-      - "8095:8080"
-    networks:
-      - backend
-    depends_on:
-      - ollama
-#docker exec -it ollama ollama pull qwen2.5:1.5b-instruct
-#docker exec -it ollama ollama run qwen2.5:1.5b-instruct
   ollama:
     image: ollama/ollama:latest
     container_name: ollama

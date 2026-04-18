@@ -1,4 +1,4 @@
-namespace attempt_service.Features.Helpers;
+namespace Shared.Bootstrap;
 
 public class JwtSettings
 {

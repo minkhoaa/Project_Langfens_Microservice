@@ -21,17 +21,17 @@ logger = logging.getLogger(__name__)
 
 QDRANT_ENDPOINT = os.getenv("QDRANT_ENDPOINT", "")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
-OLLAMA_MODEL = "nomic-embed-text"
+OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", os.getenv("OLLAMA_URL", "http://localhost:11434"))
+OLLAMA_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "bge-m3")
 COLLECTION_NAME = "grammar_knowledge"
 DATA_FILE = "/home/khoa/dataset_ielts/export/rag/grammar_knowledge.jsonl"
 BATCH_SIZE = 100
-EMBEDDING_DIM = 768
+EMBEDDING_DIM = int(os.getenv("OLLAMA_EMBED_DIMENSIONS", "1024"))
 MAX_WORKERS = 10  # Parallel GPU requests
 
 
 def get_embedding(text: str) -> list[float]:
-    """Get embedding from Ollama nomic-embed-text."""
+    """Get embedding from Ollama using the configured embedding model."""
     for attempt in range(3):
         try:
             resp = requests.post(
