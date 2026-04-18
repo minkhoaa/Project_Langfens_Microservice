@@ -54,11 +54,11 @@ public class AuthService(
     IPublishEndpoint publish,
     ILogger<string> logger,
     IOtpGenerator otpGenerator,
-    IOptions<JwtSettings> jwtSetttings,
+    IOptions<Application.Common.JwtSettings> jwtSetttings,
     AuthDbContext dbContext)
     : IAuthService
 {
-    private JwtSettings _jwtSettings = jwtSetttings.Value;
+    private Application.Common.JwtSettings _jwtSettings = jwtSetttings.Value;
 
     private const int MaxSessionsPerUser = 5;
     private static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(30);

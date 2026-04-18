@@ -1,7 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Authentication;
-using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using Shared.Bootstrap;
+using Microsoft.EntityFrameworkCore;
 using attempt_service.Features.Analytics;
 using attempt_service.Features.Attempt;
 using attempt_service.Features.Attempt.AttemptEndpoint;
@@ -12,70 +12,25 @@ using attempt_service.Features.RabbitMq;
 using attempt_service.Features.StudyPlan;
 using attempt_service.Infrastructure.Persistence;
 using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Shared.Grpc.ExamInternal;
-using Shared.Security.Claims;
-using Shared.Security.Helper;
-using Shared.Security.Roles;
-using Shared.Security.Scopes;
-using Microsoft.SemanticKernel;
 
 var builder = WebApplication.CreateBuilder(args);
-JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddResponseCompression();
-static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo()
-    {
-        Title = "Attempt-service"
-    });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-    {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        Description = "Enter token"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme()
-            {
-                Reference = new OpenApiReference()
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
-    ?? "http://localhost:3000,http://127.0.0.1:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FE", policy => policy
-        .WithOrigins(corsOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
-});
+// ── Helpers ───────────────────────────────────────────────────────────────────
+static string EnvOrDefault(string key, string fallback) =>
+    Environment.GetEnvironmentVariable(key) ?? fallback;
 
+// ── Shared bootstrap (JWT, CORS, Swagger, JSON) ───────────────────────────────
+builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key));
+builder.Services.AddAttemptAuthorization();
+builder.Services.AddLangfensCors();
+builder.Services.AddLangfensSwagger("Attempt Service");
+builder.Services.AddLangfensJson();
 
+// ── HTTP/2 for gRPC ──────────────────────────────────────────────────────────
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
+// ── gRPC client ───────────────────────────────────────────────────────────────
 builder.Services
     .AddGrpcClient<ExamInternal.ExamInternalClient>(o =>
     {
@@ -84,66 +39,38 @@ builder.Services
     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
     {
         EnableMultipleHttp2Connections = true
-    })
-    ;
-var jwtSettings = new JwtSettings
-{
-    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
-    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("JwtSettings__SignKey environment variable is required"),
-    AccessTokenLifetimeSeconds = int.TryParse(Environment.GetEnvironmentVariable("JwtSettings__AccessTokenLifetimeSeconds"), out var lifetime)
-        ? lifetime
-        : 15
-};
-builder.Services.AddSingleton<IOptions<JwtSettings>>(Options.Create(jwtSettings));
-builder.Services.AddDbContext<AttemptDbContext>(option => option.UseNpgsql(
-    EnvOrDefault("CONNECTIONSTRING__ATTEMPT", "Host=attempt-database;Port=5432;Database=attempt-db;Username=attempt;Password=attempt")
-));
+    });
+
+// ── Internal HTTP client ─────────────────────────────────────────────────────
+var internalApiKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")
+    ?? throw new InvalidOperationException("EXAMSERVICE__INTERNAL__API__KEY is required");
 builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 {
-    var baseExamAddress = EnvOrDefault("EXAMSERVICE__EXAM__ADDRESS", "http://exam-service:8080");
-    var internalApiKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY") 
-        ?? throw new InvalidOperationException("EXAMSERVICE__INTERNAL__API__KEY environment variable is required");
-    http.BaseAddress = new Uri(baseExamAddress);
+    http.BaseAddress = new Uri(EnvOrDefault("EXAMSERVICE__EXAM__ADDRESS", "http://exam-service:8080"));
     http.DefaultRequestHeaders.Add("X-Internal-Key", internalApiKey);
 });
 
-builder.Services.AddMassTransit(configurator =>
+// ── Database ─────────────────────────────────────────────────────────────────
+builder.Services.AddDbContext<AttemptDbContext>(opts =>
+    opts.UseNpgsql(EnvOrDefault("CONNECTIONSTRING__ATTEMPT",
+        "Host=attempt-database;Port=5432;Database=attempt-db;Username=attempt;Password=attempt")));
+
+// ── RabbitMQ ───────────────────────────────────────────────────────────────────
+var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
+    key => Environment.GetEnvironmentVariable(key));
+builder.Services.AddMassTransit(cfg =>
 {
-    configurator.AddConsumer<WritingGradedConsumer>();
-    configurator.AddConsumer<SpeakingGradedConsumer>();
-    var prodRabbitEnvironment = new RabbitMqConfig
+    cfg.AddConsumer<WritingGradedConsumer>();
+    cfg.AddConsumer<SpeakingGradedConsumer>();
+    cfg.UsingRabbitMq((ctx, bus) =>
     {
-        Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
-        Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") 
-            ?? throw new InvalidOperationException("RABBITMQ__USERNAME environment variable is required"),
-        Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") 
-            ?? throw new InvalidOperationException("RABBITMQ__PASSWORD environment variable is required"),
-        VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
-        Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var a) ? a : (ushort)5672,
-        UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var proSsl) && proSsl
-    };
-    configurator.UsingRabbitMq((bus, config) =>
-    {
-        config.Host(prodRabbitEnvironment.Host, prodRabbitEnvironment.Port, prodRabbitEnvironment.VirtualHost,
-        h =>
-        {
-            h.Username(prodRabbitEnvironment.Username);
-            h.Password(prodRabbitEnvironment.Password);
-            if (prodRabbitEnvironment.UseSsl)
-            {
-                h.UseSsl(k => k.Protocol = SslProtocols.Tls12);
-            }
-        });
-
-        config.ReceiveEndpoint("writing-graded-response", k => k.ConfigureConsumer<WritingGradedConsumer>(bus));
-        config.ReceiveEndpoint("speaking-graded-response", k => k.ConfigureConsumer<SpeakingGradedConsumer>(bus));
+        bus.ConfigureRabbitMqHost(rabbitConfig);
+        bus.ReceiveEndpoint("writing-graded-response", e => e.ConfigureConsumer<WritingGradedConsumer>(ctx));
+        bus.ReceiveEndpoint("speaking-graded-response", e => e.ConfigureConsumer<SpeakingGradedConsumer>(ctx));
     });
-
-
-
 });
-// DI
+
+// ── DI: Domain services ──────────────────────────────────────────────────────
 builder.Services.AddScoped<IAttemptService, AttemptService>();
 builder.Services.AddScoped<IExamGateway, ExamGateway>();
 builder.Services.AddScoped<IUserContext, UserContext>();
@@ -153,12 +80,13 @@ builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IStudyPlanService, StudyPlanService>();
 builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<NoteService>();
+
+// ── DI: Graders ───────────────────────────────────────────────────────────────
 builder.Services.AddSingleton<IAnswerKeyBuilder, AnswerKeyBuilder>();
 builder.Services.AddSingleton<IBuildQuestionIdSet, BuildQuestionIdSet>();
 builder.Services.AddSingleton<IQuestionIndex, QuestionIndex>();
 builder.Services.AddSingleton<IIndexBuilder, IndexBuilder>();
 builder.Services.AddSingleton<IAnswerValidator, AnswerValidator>();
-
 
 builder.Services.AddSingleton<SingleChoiceGrader>();
 builder.Services.AddSingleton<MultipleChoiceGrader>();
@@ -175,61 +103,12 @@ builder.Services.AddSingleton<IQuestionGraderRegistration, LabelGraderRegistrati
 builder.Services.AddSingleton<IQuestionGraderRegistration, MatchingHeadingGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, FlowChartGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderRegistration, ShortAnswerGraderRegistration>();
+builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
 builder.Services.AddScoped<IPlacementWorkflow, PlacementWorkflow>();
 
-
-builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
-builder.Services.ConfigureHttpJsonOptions(option =>
-{
-    option.SerializerOptions.PropertyNameCaseInsensitive = true;
-    option.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-});
-builder.Services.AddAuthentication(option =>
-{
-    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateIssuerSigningKey = true,
-        ValidateLifetime = true,
-        ValidAudience = jwtSettings!.Audience,
-        ValidIssuer = jwtSettings.Issuer,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey)),
-        ClockSkew = TimeSpan.Zero,
-        RoleClaimType = CustomClaims.Roles,
-        NameClaimType = CustomClaims.Sub
-    };
-    options.MapInboundClaims = false;
-});
-builder.Services.AddAuthorization(option =>
-{
-    option.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-    option.AddPolicy(Roles.User, a => a.RequireRole(Roles.User));
-    option.AddPolicy(Roles.Admin, a => a.RequireRole(Roles.Admin));
-
-    option.AddPolicy(AttemptScope.AttemptStart, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptStart)
-                                                                   || c.User.IsInRole(Roles.User)));
-    option.AddPolicy(AttemptScope.AttemptSubmit, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptSubmit)
-                                                                   || c.User.IsInRole(Roles.User)));
-    option.AddPolicy(AttemptScope.AttemptReadOwn, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptReadOwn)
-                                                                   || c.User.IsInRole(Roles.User)));
-    option.AddPolicy(AttemptScope.AttemptReadAny, a => a.RequireAssertion(c => c.User.HasAnyScope(AttemptScope.AttemptReadAny)
-                                                                    || c.User.IsInRole(Roles.Admin)));
-
-});
-
-
-builder.Services.AddAuthorization();
-builder.Services.AddHttpContextAccessor();
-
-// Azure OpenAI for insights
+// ── DI: Azure OpenAI (optional) ───────────────────────────────────────────────
 var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT");
-var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY");
+var azureApiKey   = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY");
 var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
 if (!string.IsNullOrEmpty(azureEndpoint) && !string.IsNullOrEmpty(azureApiKey))
 {
@@ -246,13 +125,16 @@ else
     Console.WriteLine("[WARN] Azure OpenAI not configured, AI insights will be disabled");
 }
 
-var app = builder.Build();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddResponseCompression();
 
+// ── App ──────────────────────────────────────────────────────────────────────
+var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AttemptDbContext>();
-    var all = db.Database.GetMigrations().ToList();
+    var all     = db.Database.GetMigrations().ToList();
     var applied = (await db.Database.GetAppliedMigrationsAsync()).ToList();
     var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
     Console.WriteLine($"[EF] All:     {string.Join(", ", all)}");
@@ -263,7 +145,6 @@ using (var scope = app.Services.CreateScope())
 
 app.UseResponseCompression();
 app.UseCors("FE");
-
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseAuthentication();
@@ -274,5 +155,4 @@ app.MapAnalyticsEndpoints();
 app.MapStudyPlanEndpoints();
 app.MapBookmarkEndpoints();
 app.MapNoteEndpoints();
-
 app.Run();

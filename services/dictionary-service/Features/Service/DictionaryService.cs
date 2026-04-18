@@ -135,8 +135,6 @@ namespace dictionary_service.Features.Service
             if (file is null || file.Length == 0)
                 return Results.BadRequest("file is empty");
 
-            // Giới hạn kích thước (tuỳ bạn)
-            // if (file.Length > 5L * 1024 * 1024 * 1024) return Results.BadRequest("file too large");
 
             var isGz =
                 file.FileName.EndsWith(".gz", StringComparison.OrdinalIgnoreCase) ||

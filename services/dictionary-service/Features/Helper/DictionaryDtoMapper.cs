@@ -183,7 +183,6 @@ namespace dictionary_service.Features.Helper
                 if (!string.IsNullOrWhiteSpace(w)) outSet.Add(w!);
 
                 // nếu bạn muốn giữ cả alt (chữ Hán) thì có thể append "(詞典)" v.v.
-                // var alt = GetString(t, "alt");
             }
 
             return outSet.Take(20).ToList();

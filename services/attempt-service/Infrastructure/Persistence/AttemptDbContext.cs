@@ -1,6 +1,5 @@
 using System.Net;
 using attempt_service.Domain.Entities;
-using attempt_service.Domains.Entities;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 

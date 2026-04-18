@@ -11,7 +11,7 @@ from app.services import embedding_service
 
 logger = logging.getLogger(__name__)
 
-EMBEDDING_DIM = 1024  # bge-m3 outputs 1024-dim vectors
+EMBEDDING_DIM = settings.ollama_embed_dimensions
 BATCH_SIZE = 100
 SLEEP_BETWEEN_BATCHES = 0.1
 

@@ -1,5 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using exam_service.Features.Exams.AdminEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
@@ -9,115 +7,32 @@ using exam_service.Features.Exams.InternalEndpoint;
 using exam_service.Features.Exams.PublicEndpoint;
 using exam_service.Features.QuestionBank;
 using exam_service.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Npgsql;
-using Shared.Security.Claims;
-using Shared.Security.Helper;
-using Shared.Security.Roles;
-using Shared.Security.Scopes;
-
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+static string EnvOrDefault(string key, string fallback) =>
+    Environment.GetEnvironmentVariable(key) ?? fallback;
 
+// ── Shared bootstrap (JWT, Auth policies, CORS, Swagger) ────────────────────────────
+builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key));
+builder.Services.AddExamAuthorization();
+builder.Services.AddLangfensCors();
+builder.Services.AddLangfensSwagger("Exam Service");
 
-JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
-var jwtSettings = new
-{
-    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
-    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("JwtSettings__SignKey environment variable is required")
-};
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(option =>
-    {
-        option.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = jwtSettings.Issuer 
-                          ?? throw new Exception("valid issuer is missing"),
-            ValidAudience = jwtSettings.Audience
-                            ?? throw new Exception("valid audience is missing"),
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true, 
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey 
-            ?? throw new Exception("Signing key is missing"))),
-            
-            ClockSkew = TimeSpan.Zero,
-            NameClaimType = CustomClaims.Sub,
-            RoleClaimType = CustomClaims.Roles
-        };
-    });
-builder.Services.AddAuthorization(options =>
-{
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser().Build();
-    options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
-    options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
-    
-    options.AddPolicy(ExamScope.ExamRead,  p => p.RequireAssertion(c =>
-        c.User.HasAnyScope(ExamScope.ExamRead) || c.User.IsInRole(Roles.User)));
-    options.AddPolicy(ExamScope.ExamManage,  p => p.RequireAssertion(c =>
-        c.User.HasAnyScope(ExamScope.ExamManage) || c.User.IsInRole(Roles.Admin)));
-});
-
-var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
-    ?? "http://localhost:3000,http://127.0.0.1:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FE", policy => policy
-        .WithOrigins(corsOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
-});
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Exam Service", Version = "1.0" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        Description = "Enter token"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-    });
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__EXAM")
-                       ?? "Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam";
+// ── Database ───────────────────────────────────────────────────────────────
+var connectionString = EnvOrDefault("CONNECTIONSTRING__EXAM",
+    "Host=exam-database;Port=5432;Database=exam-db;Username=exam;Password=exam");
 var datasourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
 datasourceBuilder.EnableDynamicJson();
-builder.Services.AddDbContextPool<ExamDbContext>(options =>
-    options.UseNpgsql(datasourceBuilder.Build())); 
+builder.Services.AddDbContextPool<ExamDbContext>(opts =>
+    opts.UseNpgsql(datasourceBuilder.Build()));
 
+// ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IExamService, ExamService>();
 builder.Services.AddScoped<IAdminExamService, AdminExamService>();
 builder.Services.AddScoped<IAdminOptionService, AdminOptionService>();
@@ -126,16 +41,11 @@ builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
 
-int grpcPort = 8081;
-int httpPort = 8080;
-builder.WebHost.ConfigureKestrel(o =>
-{
-    o.ListenAnyIP(httpPort, lo => lo.Protocols = HttpProtocols.Http1);
-    o.ListenAnyIP(grpcPort, lo => lo.Protocols = HttpProtocols.Http2);
-});
+// ── gRPC + HTTP ports ───────────────────────────────────────────────────
+builder.ConfigureLangfensKestrel(httpPort: 8080, grpcPort: 8081);
 builder.Services.AddGrpc();
 
-
+// ── App ─────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -158,10 +68,8 @@ app.UseAuthorization();
 var grpcEndpoint = app.MapGrpcService<ExamInternalGrpcService>().AllowAnonymous();
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    grpcEndpoint.RequireHost($"*:{grpcPort}");
+    grpcEndpoint.RequireHost($"*:{8081}");
 }
-
-
 
 app.MapPublicExamEndpoints();
 app.MapAdminExamEndpoint();

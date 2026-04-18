@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Shared.ExamDto.Contracts;
+using SmtpOptions = email_service.Contracts.SmtpOptions;
 
 namespace email_service.Features.Service;
 

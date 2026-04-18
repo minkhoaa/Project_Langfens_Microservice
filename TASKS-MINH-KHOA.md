@@ -13,19 +13,20 @@
 
 - **Full-stack M1 Writing Comparative:** Backend AI + .NET integration + frontend UI
 - **Full-stack M3 Grammar Explainer:** Backend AI + frontend UI
-- **Fine-tuning:** Writing model + Grammar model (2 models)
+- **AI runtime baseline:** Ollama local AI setup (DeepSeek-V2:16B + BGE-M3), provider fallback readiness
 - **Shared infrastructure:** Qdrant, AI Service scaffold, embedding service, Docker/CI/CD
-- **Mentorship:** Knowledge transfer to Trong Khoi (fine-tuning, AI patterns, Whisper STT)
+- **Mentorship:** Knowledge transfer to Trong Khoi (Ollama, AI patterns, Whisper STT)
 - **Code review:** Speaking Roleplay backend (quick Week 6, full Week 8)
 
 ---
 
-## FINE-TUNING SCHEDULE
+## AI RUNTIME BASELINE
 
-| Module | Training Data | Fine-Tuning Start | Model Ready By | Quality Gate |
-|--------|---------------|-------------------|----------------|--------------|
-| M1 Writing Comparative | 23,961 pairs (ready) | Week 4 (Apr 6) | Apr 10, 2026 | 8/10 essays get relevant comparisons |
-| M3 Grammar Explainer | 5,659 pairs (ready) | Week 5 (Apr 13) | Apr 17, 2026 | 20 errors get accurate explanations |
+| Area | Baseline | Status as of 2026-04-11 | Next Check |
+|------|----------|--------------------------|------------|
+| LLM runtime | Ollama `deepseek-v2:16b` | Code/config aligned, live smoke pending | 2026-04-14 |
+| Embeddings | Ollama `bge-m3` (1024-dim) | Code/config aligned, re-embed still pending | 2026-04-15 |
+| Explicit fallback | OpenAI-compatible multi-key providers | Available behind config switch only | Use only if Ollama smoke fails |
 
 ---
 
@@ -48,12 +49,12 @@
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ✅ | Implement Gemini `embedding-001` wrapper | `/api/v1/embed` endpoint working (done in Week 1) |
+| ✅ | Implement BGE-M3 embedding wrapper baseline | `/api/v1/embed` endpoint working (done in Week 1; standardized on Ollama path 2026-04-11) |
 | ✅ | Build ingestion pipeline: embed essays → Qdrant | `ingestion_service.py` auto-ingests on startup (done in Week 1) |
 | ✅ | Create Qdrant collection `writing_samples` (HNSW + metadata) | 40,122 essays indexed in cloud Qdrant (done in Week 1) |
 | ✅ | **Spot-check 50 training examples** from `m1_writing.jsonl` | Data quality verified — 0% issue rate ✅ — Mar 25, 2026 |
 | ✅ | **Fix critical bugs from audit (BUG-001✅, BUG-002✅, BUG-003✅, BUG-004✅)** | Security & connectivity issues resolved — Mar 25, 2026. BUG-001 fully fixed Mar 31 — `appsettings.json` SignKey set to empty string |
-| ✅ | **Knowledge transfer session (2-3h):** Fine-tuning + AI Service patterns for TK | TK understands Google AI Studio, FastAPI, Qdrant, Gemini — confirmed by PM |
+| ✅ | **Knowledge transfer session (2-3h):** Ollama + AI Service patterns for TK | TK understands Ollama, FastAPI, Qdrant runtime patterns — confirmed by PM |
 
 > **Week 2 Deadline** — Mar 27, 2026
 
@@ -214,10 +215,10 @@
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ⬜ | **Fine-tune Gemini 2.5 Flash Lite — M1 Writing Comparative** | Model deployed, quality gate passed |
-| ✅ | Implement `/api/v1/writing/compare` endpoint (embed → retrieve → Gemini) | Structured comparison JSON with progressive fallback (done in Week 1) |
+| 🔄 | **Setup Ollama local AI — M1 Writing Comparative** | Code/config aligned on DeepSeek-V2:16B + BGE-M3; live smoke pending (2026-04-11) |
+| ✅ | Implement `/api/v1/writing/compare` endpoint (embed → retrieve → DeepSeek/Ollama-first runtime) | Structured comparison JSON with provider selection centralized in `llm_service` (verified by tests 2026-04-11) |
 | ✅ | Design Writing Comparative prompt | Prompt with dual-band search + exemplar mode (done in Week 1) |
-| ✅ | Scaffold WritingComparativeTab + SimilarEssaysSidebar (placeholder data) | Component + ReferenceEssayCard implemented; URL fix in `route.ts:24` applied (2026-03-31) |
+| 🔄 | Scaffold WritingComparativeTab + SimilarEssaysSidebar (placeholder data) | Mockup exists in `templates/mockups/writing-comparative.html`; real frontend source path not found in current repo snapshot (2026-04-11) |
 
 ---
 
@@ -225,10 +226,10 @@
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ⬜ | **Fine-tune Gemini 2.5 Flash Lite — M3 Grammar Explainer** | Grammar model deployed |
-| ✅ | Modify `WritingSubmittedConsumer.cs`: call AI Service `/writing/compare` after Gemini grading | Consumer calls AI Service — verified in codebase |
+| ⬜ | **Re-embed Qdrant collections with BGE-M3** (1024-dim) | Re-index run + verification report pending |
+| ✅ | Modify `WritingSubmittedConsumer.cs`: call AI Service `/writing/compare` after grading | Consumer calls AI Service — verified in codebase |
 | ✅ | Add `ComparativeAnalysisJson` column to WritingEvaluation + EF migration | DB schema updated — verified in codebase |
-| ✅ | Build SentenceComparisonTable component (placeholder/test data) | Side-by-side comparison renders — verified in codebase |
+| 🔄 | Build SentenceComparisonTable component (placeholder/test data) | Mockup intent captured, but component source path is unverified in current repo snapshot (2026-04-11) |
 | ✅ | Implement circuit breaker: AI Service down → return grading only | Graceful degradation tested — verified in codebase |
 
 ---
@@ -237,8 +238,8 @@
 
 | Status | Task | Deliverable |
 |--------|------|-------------|
-| ✅ | Wire WritingComparativeTab + SentenceComparisonTable to real API data | Comparative tab renders real data — API format verified, JSON naming confirmed match (2026-04-01) |
-| ✅ | Build VocabularySuggestions component (real data) | Component implemented with vocabulary extraction from sentence_comparisons + key_improvements; limit 5 suggestions; inline display (2026-04-01) |
+| ⬜ | Wire WritingComparativeTab + SentenceComparisonTable to real API data | Pending until real frontend source path is available in workspace |
+| ⬜ | Build VocabularySuggestions component (real data) | Pending until real frontend source path is available in workspace |
 | ✅ | Implement `/api/v1/grammar/explain` endpoint | Single error explanation working — verified in codebase |
 | ✅ | Implement `/api/v1/grammar/batch-explain` endpoint | Batch processing working — verified in codebase |
 | ⬜ | Design Grammar Explainer prompt | Prompt tested with 20 errors |
@@ -314,8 +315,8 @@
 |-----------|----------|--------|
 | MS1 Infrastructure Ready | Mar 20, 2026 | ✅ Done — Mar 16 |
 | MS2 Data Indexed | Apr 3, 2026 | ✅ Done — Mar 31 (ahead of deadline) |
-| MS3 Writing Module Complete | Apr 24, 2026 | ⬜ Not started |
-| MS4 Grammar Module Complete | Apr 24, 2026 | ⬜ Not started |
+| MS3 Writing Module Complete | Apr 24, 2026 | 🔄 In progress — backend ahead, frontend + live smoke pending |
+| MS4 Grammar Module Complete | Apr 24, 2026 | 🔄 In progress — backend ahead, frontend + live smoke pending |
 | MS5 Speaking Module Complete (TK owns, MK reviews) | May 15, 2026 | ⬜ Not started |
 | MS6 Production Ready | May 29, 2026 | ⬜ Not started |
 
@@ -327,40 +328,39 @@
 
 | Status | Task | Deliverable | Priority |
 |--------|------|-------------|----------|
-| ✅ | **Design Writing Comparative results page** | Mockup delivered as implemented React components: WritingComparativeTab + SentenceComparisonTable + ReferenceEssayCard + BandProgressIndicator + mockData (2026-03-31) | P1 |
-| ✅ | **Design Roleplay chat UI + Scenario Selector** | UI scaffold verified, API URLs fixed, error handling confirmed (2026-03-31) | P1 |
-| ✅ | **Build basic comparison component** (placeholder data) | SentenceComparisonTable component implemented — verified in codebase | P1 |
+| ✅ | **Design Writing Comparative results page** | Mockup available at `templates/mockups/writing-comparative.html` (verified 2026-04-11) | P1 |
+| ✅ | **Design Roleplay chat UI + Scenario Selector** | Mockup available at `templates/mockups/roleplay-chat-scenario-selector.html` (verified 2026-04-11) | P1 |
+| 🔄 | **Build basic comparison component** (placeholder data) | Mockup/design evidence only; implementation source path not found in current repo snapshot | P1 |
 
 ---
 
 ## PROGRESS SUMMARY
 
-> **Last updated:** 2026-04-01 — Week 6 tasks W6-01, W6-02 completed
+> **Last updated:** 2026-04-11 — Ollama-first runtime aligned in code, frontend evidence re-audited, ai-service tests green
 
 | Phase | Tasks | Done | % |
 |-------|-------|------|---|
 | Week 1 — Infrastructure | 4 | 4 | **100%** ✅ |
 | Week 2 — Embedding setup | 5 | 5 | **100%** ✅ |
 | Week 2 — KT Session | 1 | 1 | **100%** ✅ |
-| Week 2 — TK transferred tasks | 3 | 3 | **100%** ✅ (TK-T03 ✅, TK-T01 ✅, TK-T02 ✅) |
+| Week 2 — TK transferred tasks | 3 | 2 | **67%** (design mockups verified; component implementation path unverified) |
 | Week 3 — Data indexed | 3 | 3 | **100%** ✅ |
-| Week 4 — Writing API + FT | 4 | 3 | **75%** (compare+prompt ✅, ComparativeTab ✅, FT ⬜) |
-| Week 5 — .NET integration | 5 | 4 | **80%** (Consumer✅ EF✅ SentenceTable✅ CircuitBreaker✅, Grammar FT ⬜) |
-| Week 6 — Writing + Grammar frontend | 8 | 4 | **50%** (W6-01✅ W6-02✅ grammar/explain✅ grammar/batch-explain✅) |
+| Week 4 — Writing API + Runtime Pivot | 4 | 2 | **50%** (compare+prompt ✅, Ollama runtime 🔄, frontend scaffold 🔄) |
+| Week 5 — .NET integration | 5 | 3 | **60%** (Consumer✅ EF✅ CircuitBreaker✅, re-embed ⬜, SentenceTable 🔄) |
+| Week 6 — Writing + Grammar frontend | 8 | 2 | **25%** (grammar/explain✅ grammar/batch-explain✅; frontend/cross-module work pending) |
 | Week 7 — E2E + Polish | 4 | 0 | 0% |
 | Week 8 — Testing + Review | 3 | 0 | 0% |
 | Week 9 — Performance | 2 | 0 | 0% |
 | Week 10 — Load testing | 4 | 0 | 0% |
 | Week 11 — Deployment | 6 | 0 | 0% |
-| **TOTAL** | **52** | **26** | **50%** |
+| **TOTAL** | **52** | **22** | **42%** |
 
-### Audit Summary (2026-04-01)
+### Verification Snapshot (2026-04-11)
 
-| Status | Count | % |
-|--------|-------|---|
-| ✅ Completed | 20 | 95% of audited tasks |
-| 🔄 Partial | 0 | 0% |
-| ⬜ Pending | 1 | 5% (W4-01 fine-tune M1) |
-| **Audited tasks total** | **21** | — |
-
-> **Updates 2026-04-01:** W6-01 (Wire WritingComparativeTab) ✅ completed — API format verified, JSON naming match confirmed. W6-02 (VocabularySuggestions) ✅ completed — component implemented with real data from sentence_comparisons + key_improvements, limit 5 suggestions, inline display.
+| Area | Status | Notes |
+|------|--------|-------|
+| AI runtime selection | ✅ | Compare + grammar now use a shared `llm_service` with Ollama-first selection |
+| Embedding contract | ✅ | App config standardized on BGE-M3 1024-dim; re-embed still pending |
+| AI-service test suite | ✅ | `pytest tests -q` → 47 passed |
+| Frontend evidence | ⚠️ | Mockups verified, but production frontend source path is not available in current workspace |
+| Live local smoke tests | ⬜ | Still pending against Ollama/Qdrant runtime |

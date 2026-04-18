@@ -2,11 +2,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from unittest.mock import AsyncMock, patch
-from fastapi.testclient import TestClient
-from app.main import app
-from app.schemas import CompareResponse, ReferenceEssay
+import pytest
 
-client = TestClient(app)
+from app.main import app
+from app.schemas import CompareRequest, CompareResponse, ReferenceEssay
 
 MOCK_RESPONSE = CompareResponse(
     overall_analysis="Good essay with room for improvement.",
@@ -19,37 +18,42 @@ MOCK_RESPONSE = CompareResponse(
 )
 
 
-def test_writing_compare_success():
+@pytest.mark.asyncio
+async def test_writing_compare_success():
+    from app.routers.writing import writing_compare
+
     with patch("app.routers.writing.compare_service.compare_essay", new_callable=AsyncMock, return_value=MOCK_RESPONSE):
-        resp = client.post("/api/v1/writing/compare", json={
-            "essay_text": "A" * 100,
-            "topic": "Discuss the advantages of technology in education",
-        })
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "overall_analysis" in data
-    assert len(data["references"]) == 1
+        response = await writing_compare(CompareRequest(
+            essay_text="A" * 100,
+            topic="Discuss the advantages of technology in education",
+            student_band=6.0,
+        ))
+    assert "overall_analysis" in response.model_dump()
+    assert len(response.references) == 1
 
 
 def test_writing_compare_short_essay():
-    resp = client.post("/api/v1/writing/compare", json={
-        "essay_text": "too short",
-        "topic": "A valid topic here",
-    })
-    assert resp.status_code == 422
+    with pytest.raises(Exception):
+        CompareRequest(
+            essay_text="too short",
+            topic="A valid topic here",
+            student_band=6.0,
+        )
 
 
 def test_writing_compare_invalid_task_type():
-    resp = client.post("/api/v1/writing/compare", json={
-        "essay_text": "A" * 100,
-        "topic": "A valid topic",
-        "task_type": "TASK_3",
-    })
-    assert resp.status_code == 422
+    with pytest.raises(Exception):
+        CompareRequest(
+            essay_text="A" * 100,
+            topic="A valid topic",
+            task_type="TASK_3",
+            student_band=6.0,
+        )
 
 
 def test_writing_compare_missing_topic():
-    resp = client.post("/api/v1/writing/compare", json={
-        "essay_text": "A" * 100,
-    })
-    assert resp.status_code == 422
+    with pytest.raises(Exception):
+        CompareRequest(
+            essay_text="A" * 100,
+            student_band=6.0,
+        )

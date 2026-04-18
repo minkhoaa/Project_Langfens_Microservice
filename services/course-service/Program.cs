@@ -1,145 +1,42 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
+using System.Net;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using course_service.Features;
 using course_service.Features.AdminEndpoint;
 using course_service.Features.PublicEndpoint;
 using course_service.Features.UserEndpoint;
 using course_service.Infrastructure;
-using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Shared.Security.Claims;
-using Shared.Security.Helper;
-using Shared.Security.Roles;
-using Shared.Security.Scopes;
 
 var builder = WebApplication.CreateBuilder(args);
-JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-static string EnvOrDefault(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
 
-var jwtSettings = new
-{
-    Issuer = EnvOrDefault("JwtSettings__Issuer", "IssuerName"),
-    Audience = EnvOrDefault("JwtSettings__Audience", "AudienceName"),
-    SignKey = Environment.GetEnvironmentVariable("JwtSettings__SignKey") ?? throw new InvalidOperationException("JwtSettings__SignKey environment variable is required")
-};
+// ── Shared bootstrap ────────────────────────────────────────────────────
+builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key));
+builder.Services.AddCourseAuthorization();
+builder.Services.AddLangfensCors();
+builder.Services.AddLangfensSwagger("Course Service");
 
-JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(option =>
-    {
-        option.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = jwtSettings.Issuer 
-                          ?? throw new Exception("valid issuer is missing"),
-            ValidAudience = jwtSettings.Audience 
-                            ?? throw new Exception("valid issuer is missing"),
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true, 
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SignKey 
-                                                                               ?? throw new Exception("Signing key is missing"))),
-            ClockSkew = TimeSpan.Zero,
-            NameClaimType = CustomClaims.Sub,
-            RoleClaimType = CustomClaims.Roles
-        };
-    });
-builder.Services.AddAuthorization(options =>
-{
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser().Build();
-    options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
-    options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
-    
-    options.AddPolicy(CourseScope.CourseRead,  p => p.RequireAssertion(c =>
-        c.User.HasAnyScope(CourseScope.CourseRead) || c.User.IsInRole(Roles.User)));
-    options.AddPolicy(CourseScope.CourseEnroll,  p => p.RequireAssertion(c =>
-        c.User.HasAnyScope(CourseScope.CourseEnroll) || c.User.IsInRole(Roles.User)));
-    options.AddPolicy(CourseScope.CourseComplete,  p => p.RequireAssertion(c =>
-        c.User.HasAnyScope(CourseScope.CourseComplete) || c.User.IsInRole(Roles.User)));
-    options.AddPolicy(CourseScope.CourseManage,  p => p.RequireAssertion(c =>
-        c.User.HasAnyScope(CourseScope.CourseManage) || c.User.IsInRole(Roles.Admin)));
-});
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Course Service", Version = "1.0" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        Description = "Enter token"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
-    ?? "http://localhost:3000,http://127.0.0.1:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FE", policy => policy
-        .WithOrigins(corsOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
-    });
-
-// configure
+// ── Database ─────────────────────────────────────────────────────────────
 var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__COURSE")
-                        ?? "Host=localhost;Port=5436;Database=course-db;Username=course;Password=course";
-builder.Services.AddDbContext<CourseDbContext>(option => option.UseNpgsql(connectionString));
+    ?? "Host=course-database;Port=5432;Database=course-db;Username=course;Password=course";
+builder.Services.AddDbContext<CourseDbContext>(o => o.UseNpgsql(connectionString));
 
-// MassTransit for event publishing
+// ── RabbitMQ ─────────────────────────────────────────────────────────────
+var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
+    key => Environment.GetEnvironmentVariable(key));
 builder.Services.AddMassTransit(x =>
 {
-    var rabbitConfig = new
-    {
-        Host = EnvOrDefault("RABBITMQ__HOST", "localhost"),
-        Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") 
-        ?? throw new InvalidOperationException("RABBITMQ__USERNAME environment variable is required"),
-        Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") 
-        ?? throw new InvalidOperationException("RABBITMQ__PASSWORD environment variable is required"),
-        VirtualHost = EnvOrDefault("RABBITMQ__VHOST", "/"),
-        Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var p) ? p : (ushort)5672
-    };
     x.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
-        {
-            h.Username(rabbitConfig.Username);
-            h.Password(rabbitConfig.Password);
-        });
+        cfg.ConfigureRabbitMqHost(rabbitConfig);
     });
 });
 
-// DI
+// ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IPublicEndpointService, PublicEndpointService>();
 builder.Services.AddScoped<IUserEndpointService, UserEndpointService>();
 builder.Services.AddScoped<IAdminEndpointService, AdminEndpointService>();
 
+// ── App ──────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -148,12 +45,8 @@ using (var scope = app.Services.CreateScope())
     await context.Database.MigrateAsync();
 }
 
-
-
 app.UseSwagger();
 app.UseSwaggerUI();
-
-
 app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -163,3 +56,5 @@ app.MapLessonEndpoint();
 app.MapAdminEndpoint();
 
 app.Run();
+
+public partial class Program { }

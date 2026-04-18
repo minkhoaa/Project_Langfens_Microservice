@@ -2,9 +2,13 @@ from app.schemas import CompareRequest, CompareResponse, SentenceComparison, Ref
 
 
 def test_compare_request_defaults():
-    req = CompareRequest(essay_text="A" * 50, topic="Describe a chart")
+    req = CompareRequest(
+        essay_text="A" * 50,
+        topic="Describe a chart",
+        student_band=6.0,
+    )
     assert req.task_type == "TASK_2"
-    assert req.band_filter == 8.0
+    assert req.student_band == 6.0
 
 
 def test_compare_request_validation():
@@ -16,7 +20,12 @@ def test_compare_request_validation():
 def test_compare_request_task_type_literal():
     import pytest
     with pytest.raises(Exception):
-        CompareRequest(essay_text="A" * 50, topic="topic here", task_type="TASK_3")
+        CompareRequest(
+            essay_text="A" * 50,
+            topic="topic here",
+            task_type="TASK_3",
+            student_band=6.0,
+        )
 
 
 def test_sentence_comparison():

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
+from app.services import llm_service
 from app.services.qdrant_factory import get_qdrant_client
-from app.services.openai_like_service import get_llm_key_status
 
 router = APIRouter()
 
@@ -14,10 +14,20 @@ async def healthz():
         qdrant_status = "ok"
     except Exception:
         qdrant_status = "unavailable"
-    return {"status": "ok", "qdrant": qdrant_status}
+    return {
+        "status": "ok",
+        "qdrant": qdrant_status,
+        "llm": llm_service.get_runtime_status(),
+    }
 
 
 @router.get("/llm-keys-status")
 async def llm_keys_status():
-    """Get status of LLM API keys (for monitoring key rotation)."""
-    return get_llm_key_status()
+    """Backward-compatible runtime status endpoint."""
+    return llm_service.get_runtime_status()
+
+
+@router.get("/llm-status")
+async def llm_status():
+    """Get the active LLM runtime status."""
+    return llm_service.get_runtime_status()
