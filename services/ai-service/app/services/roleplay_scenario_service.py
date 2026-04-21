@@ -26,3 +26,11 @@ def load_scenarios() -> list[RoleplayScenario]:
 
     scenarios.sort(key=lambda scenario: (scenario.difficulty, scenario.title.lower(), scenario.slug))
     return scenarios
+
+
+def get_scenario_by_slug(slug: str) -> RoleplayScenario | None:
+    normalized_slug = slug.strip().lower()
+    for scenario in load_scenarios():
+        if scenario.slug.lower() == normalized_slug:
+            return scenario
+    return None

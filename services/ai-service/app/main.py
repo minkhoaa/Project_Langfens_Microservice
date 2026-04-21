@@ -11,11 +11,10 @@ from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import settings
-from app.routers import health, embed, writing, grammar, speaking, practice
+from app.routers import health, embed, writing, grammar, speaking, practice, speech_eval
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s: %(message)s")
 logger = logging.getLogger(__name__)
-_executor = ThreadPoolExecutor(max_workers=1)
 
 
 @asynccontextmanager
@@ -29,10 +28,11 @@ async def lifespan(app: FastAPI):
         return
 
     from app.services.ingestion_service import run_ingestion
+    executor = ThreadPoolExecutor(max_workers=1)
     loop = asyncio.get_event_loop()
-    asyncio.ensure_future(loop.run_in_executor(_executor, run_ingestion))
+    asyncio.ensure_future(loop.run_in_executor(executor, run_ingestion))
     yield
-    _executor.shutdown(wait=False)
+    executor.shutdown(wait=False)
 
 
 app = FastAPI(title="Langfens AI Service", version="1.0.0", lifespan=lifespan)
@@ -65,3 +65,4 @@ app.include_router(writing.router, prefix="/api")
 app.include_router(grammar.router, prefix="/api")
 app.include_router(speaking.router, prefix="/api")
 app.include_router(practice.router, prefix="/api")
+app.include_router(speech_eval.router, prefix="/api")
