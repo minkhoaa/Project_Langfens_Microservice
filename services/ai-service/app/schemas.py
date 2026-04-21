@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -50,6 +50,89 @@ class RoleplayScenario(BaseModel):
 class RoleplayScenariosResponse(BaseModel):
     scenarios: list[RoleplayScenario]
     total: int
+
+
+class RoleplayTurnMessage(BaseModel):
+    speaker: Literal["user", "agent"]
+    text: str
+    turn_index: int = Field(..., ge=1)
+    timestamp: str
+
+
+class RoleplayStartRequest(BaseModel):
+    user_id: str = Field(..., min_length=1, max_length=128)
+    scenario_slug: str = Field(..., min_length=1, max_length=120)
+
+
+class RoleplayStartResponse(BaseModel):
+    session_id: str
+    user_id: str
+    scenario: RoleplayScenario
+    agent_message: RoleplayTurnMessage
+
+
+class RoleplayTurnRequest(BaseModel):
+    session_id: str = Field(..., min_length=1)
+    user_id: str = Field(..., min_length=1, max_length=128)
+    utterance: str = Field(..., min_length=1, max_length=1000)
+
+
+class RoleplayTurnResponse(BaseModel):
+    session_id: str
+    scenario_slug: str
+    user_message: RoleplayTurnMessage
+    agent_message: RoleplayTurnMessage
+    turn_count: int = Field(..., ge=1)
+
+
+# ---------------------------------------------------------------------------
+# Speech-aware turn schemas (for /turn-with-speech)
+# ---------------------------------------------------------------------------
+
+class WordErrorItem(BaseModel):
+    """Single pronunciation error from the speech evaluator."""
+    word: str = Field(..., description="The word that was mispronounced or missed")
+    type: Literal["missing", "incorrect"] = Field(
+        ..., description="'incorrect' = mispronounced, 'missing' = skipped"
+    )
+
+
+class RoleplayTurnWithSpeechRequest(BaseModel):
+    """Request body for POST /turn-with-speech."""
+    session_id: str = Field(..., min_length=1)
+    user_id: str = Field(..., min_length=1, max_length=128)
+    # The spoken text (already transcribed by /api/v1/speech/evaluate)
+    text: str = Field(..., min_length=1, max_length=1000, description="Transcribed user utterance")
+    # Pronunciation metadata from the speech evaluator (both optional so
+    # callers that skip /evaluate can still use this endpoint)
+    errors: List[WordErrorItem] = Field(
+        default_factory=list,
+        description="Word-level pronunciation errors from the speech evaluator",
+    )
+    score: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=1.0,
+        description="Overall pronunciation score from the speech evaluator",
+    )
+
+
+class RoleplayTurnWithSpeechResponse(BaseModel):
+    """Response from POST /turn-with-speech."""
+    session_id: str
+    scenario_slug: str
+    user_message: RoleplayTurnMessage
+    agent_message: RoleplayTurnMessage
+    turn_count: int = Field(..., ge=1)
+    # Pronunciation feedback injected by Qwen
+    feedback: str = Field(
+        default="",
+        description="Short pronunciation tip extracted from the agent reply (may be empty)",
+    )
+    # Echo the score so the client doesn't need to track it separately
+    pronunciation_score: float = Field(
+        ..., ge=0.0, le=1.0, description="Echo of the submitted pronunciation score"
+    )
 
 
 class CompareRequest(BaseModel):
