@@ -62,16 +62,44 @@ builder.Services.AddMassTransit(cfg =>
     });
 });
 
-// ── Azure OpenAI ────────────────────────────────────────────────────
-var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT")
-    ?? throw new Exception("AZURE_OPENAI__ENDPOINT is required");
-var azureApiKey   = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY")
-    ?? throw new Exception("AZURE_OPENAI__APIKEY is required");
-var azureDeployment = EnvOrDefault("AZURE_OPENAI__DEPLOYMENT", "gpt-4o-mini");
+// ── Grader LLM (OpenAI-compatible — defaults to Groq) ──────────────────
+// Reads GRADER_LLM__ENDPOINT/_APIKEY/_MODEL. Falls back to legacy
+// AZURE_OPENAI__ENDPOINT/_APIKEY/_DEPLOYMENT for one release with a
+// deprecation warning so existing manifests keep booting.
+static (string, string, string) ResolveGraderLlmConfig(ILogger logger)
+{
+    string? endpoint = Environment.GetEnvironmentVariable("GRADER_LLM__ENDPOINT");
+    string? apiKey   = Environment.GetEnvironmentVariable("GRADER_LLM__APIKEY");
+    string? model    = Environment.GetEnvironmentVariable("GRADER_LLM__MODEL");
+    if (string.IsNullOrWhiteSpace(endpoint))
+    {
+        endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT");
+        if (!string.IsNullOrWhiteSpace(endpoint))
+            logger.LogWarning(
+                "Using deprecated AZURE_OPENAI__ENDPOINT; rename to GRADER_LLM__ENDPOINT");
+    }
+    if (string.IsNullOrWhiteSpace(apiKey))
+    {
+        apiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY");
+        if (!string.IsNullOrWhiteSpace(apiKey))
+            logger.LogWarning(
+                "Using deprecated AZURE_OPENAI__APIKEY; rename to GRADER_LLM__APIKEY");
+    }
+    model ??= Environment.GetEnvironmentVariable("AZURE_OPENAI__DEPLOYMENT")
+             ?? "llama-3.3-70b-versatile";
+    if (string.IsNullOrWhiteSpace(endpoint))
+        throw new Exception("GRADER_LLM__ENDPOINT (or legacy AZURE_OPENAI__ENDPOINT) is required");
+    if (string.IsNullOrWhiteSpace(apiKey))
+        throw new Exception("GRADER_LLM__APIKEY (or legacy AZURE_OPENAI__APIKEY) is required");
+    return (endpoint, apiKey, model);
+}
+
+var bootstrapLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Bootstrap");
+var (graderEndpoint, graderApiKey, graderModel) = ResolveGraderLlmConfig(bootstrapLogger);
 builder.Services.AddSingleton(_ => new OpenAI.Chat.ChatClient(
-    model: azureDeployment,
-    credential: new System.ClientModel.ApiKeyCredential(azureApiKey),
-    options: new OpenAI.OpenAIClientOptions { Endpoint = new Uri(azureEndpoint) }
+    model: graderModel,
+    credential: new System.ClientModel.ApiKeyCredential(graderApiKey),
+    options: new OpenAI.OpenAIClientOptions { Endpoint = new Uri(graderEndpoint) }
 ));
 
 // ── App ───────────────────────────────────────────────────────────
