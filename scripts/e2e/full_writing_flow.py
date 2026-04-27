@@ -79,20 +79,22 @@ async def run(gateway: str) -> int:
                 file=sys.stderr,
             )
             return 2
+        # Unwrap Langfens API envelope
+        payload = grade_resp.get("data") if isinstance(grade_resp.get("data"), dict) else grade_resp
         submission_id = (
-            grade_resp.get("submissionId")
-            or grade_resp.get("submission_id")
-            or grade_resp.get("id")
+            payload.get("submissionId")
+            or payload.get("submission_id")
+            or payload.get("id")
         )
         if not submission_id:
             print(
-                f"[e2e] grade response missing submissionId: {list(grade_resp)}",
+                f"[e2e] grade response missing submissionId: keys={list(grade_resp)} data_keys={list(payload) if isinstance(payload, dict) else None}",
                 file=sys.stderr,
             )
             return 2
         print(
             f"[e2e] submitted, submission_id={submission_id}, "
-            f"band={grade_resp.get('overallBand') or grade_resp.get('band')}"
+            f"band={payload.get('overallBand') or payload.get('band')}"
         )
 
         # 5. Poll for comparison

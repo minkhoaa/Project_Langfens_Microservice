@@ -20,8 +20,8 @@ PASSWORD = "E2eTest!2026"
 
 def seed(gateway: str) -> int:
     base = gateway.rstrip("/")
-    register_url = f"{base}/api-auth/api/auth/register"
-    login_url = f"{base}/api-auth/api/auth/login"
+    register_url = f"{base}/api-auth/auth/register"
+    login_url = f"{base}/api-auth/auth/login"
 
     with httpx.Client(timeout=15.0) as client:
         login_resp = client.post(login_url, json={"email": EMAIL, "password": PASSWORD})

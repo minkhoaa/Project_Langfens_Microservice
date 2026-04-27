@@ -18,18 +18,20 @@ class AuthSession:
 async def login(
     client: httpx.AsyncClient, gateway: str, email: str, password: str,
 ) -> AuthSession:
-    url = f"{gateway.rstrip('/')}/api-auth/api/auth/login"
+    url = f"{gateway.rstrip('/')}/api-auth/auth/login"
     resp = await client.post(url, json={"email": email, "password": password})
     if resp.status_code != 200:
         raise RuntimeError(f"login failed: {resp.status_code} {resp.text[:300]}")
     body = resp.json()
-    # Token field may live under different keys depending on auth-service shape;
-    # accept several common spellings for forward compatibility.
-    token = (
-        body.get("accessToken")
-        or body.get("token")
-        or body.get("access_token")
-    )
+    # Langfens API envelope: {"isSuccess": bool, "message": str, "data": <token-str>}
+    token = body.get("data") if isinstance(body.get("data"), str) else None
+    # Fallback for other shapes (forward compatibility)
+    if not token:
+        token = (
+            body.get("accessToken")
+            or body.get("token")
+            or body.get("access_token")
+        )
     if not token:
         raise RuntimeError(
             f"login response missing access token; keys={list(body.keys())[:5]}"

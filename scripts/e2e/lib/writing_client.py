@@ -21,12 +21,15 @@ async def list_exams(
     client: httpx.AsyncClient, gateway: str, auth: AuthSession,
 ) -> list[dict]:
     resp = await client.get(
-        f"{gateway.rstrip('/')}/api-writing/api/writing/exams",
+        f"{gateway.rstrip('/')}/api-writing/writing/exams",
         headers=auth.auth_headers(),
     )
     resp.raise_for_status()
     body = resp.json()
-    if isinstance(body, dict) and "exams" in body:
+    # Langfens API envelope: {"isSuccess": ..., "data": [...]}
+    if isinstance(body, dict) and isinstance(body.get("data"), list):
+        return body["data"]
+    if isinstance(body, dict) and isinstance(body.get("exams"), list):
         return body["exams"]
     return body if isinstance(body, list) else []
 
@@ -35,15 +38,19 @@ async def start_exam(
     client: httpx.AsyncClient, gateway: str, auth: AuthSession, exam_id: str,
 ) -> StartedExam:
     resp = await client.post(
-        f"{gateway.rstrip('/')}/api-writing/api/writing/start/{exam_id}",
+        f"{gateway.rstrip('/')}/api-writing/writing/start/{exam_id}",
         headers=auth.auth_headers(),
     )
     resp.raise_for_status()
     body = resp.json()
+    # Unwrap Langfens API envelope
+    payload = body.get("data") if isinstance(body, dict) and "data" in body else body
+    if not isinstance(payload, dict):
+        payload = body
     submission_id = (
-        body.get("submissionId")
-        or body.get("submission_id")
-        or body.get("id")
+        payload.get("submissionId")
+        or payload.get("submission_id")
+        or payload.get("id")
     )
     if not submission_id:
         raise RuntimeError(f"start exam: no submissionId in response keys={list(body)}")
@@ -56,7 +63,7 @@ async def submit_grade(
 ) -> dict[str, Any]:
     payload = {"examId": exam_id, "answer": answer, "timeSpentSeconds": time_spent}
     resp = await client.post(
-        f"{gateway.rstrip('/')}/api-writing/api/writing/grade",
+        f"{gateway.rstrip('/')}/api-writing/writing/grade",
         json=payload,
         headers=auth.auth_headers(),
     )
@@ -69,7 +76,7 @@ async def poll_comparison(
     submission_id: str, timeout: float = 90.0, interval: float = 2.0,
 ) -> dict[str, Any] | None:
     """Returns the comparison dict, or None if endpoint never produces one."""
-    url = f"{gateway.rstrip('/')}/api-writing/api/writing/{submission_id}/comparison"
+    url = f"{gateway.rstrip('/')}/api-writing/writing/{submission_id}/comparison"
     deadline = asyncio.get_event_loop().time() + timeout
     while asyncio.get_event_loop().time() < deadline:
         resp = await client.get(url, headers=auth.auth_headers())
