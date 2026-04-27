@@ -26,3 +26,16 @@ async def generate(prompt_template: str, variables: dict) -> dict:
     chain = prompt | model | parser
     result = await chain.ainvoke(variables)
     return result
+
+
+async def generate_roleplay_reply(*args, **kwargs):
+    """Placeholder so app.routers.speaking can import this symbol.
+
+    The real implementation is owned by Trong Khoi and lives on a separate
+    branch. Hitting any /speaking/roleplay/* endpoint with this stub returns
+    501; importing it must succeed so unrelated routers (writing, grammar)
+    can boot.
+    """
+    raise NotImplementedError(
+        "generate_roleplay_reply is not implemented on this branch"
+    )
