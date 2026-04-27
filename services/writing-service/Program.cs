@@ -33,8 +33,10 @@ if (string.IsNullOrWhiteSpace(writingConnectionString))
     throw new Exception("CONNECTIONSTRING__WRITING is required");
 var dsb = new Npgsql.NpgsqlDataSourceBuilder(writingConnectionString);
 dsb.EnableDynamicJson();
+var npgsqlDataSource = dsb.Build();
+builder.Services.AddSingleton(npgsqlDataSource);
 builder.Services.AddDbContext<WritingDbContext>(o =>
-    o.UseNpgsql(dsb.Build(), npg =>
+    o.UseNpgsql(npgsqlDataSource, npg =>
         npg.MigrationsAssembly(typeof(WritingDbContext).Assembly.GetName().Name)));
 
 // ── AI client ───────────────────────────────────────────────────────
