@@ -10,6 +10,7 @@ Exit codes:
     2 grading endpoint failed
     3 comparison never produced within timeout
     4 comparison schema invalid
+    5 comparison empty (Defect #3 regression — persistence broken)
 """
 from __future__ import annotations
 
@@ -112,6 +113,16 @@ async def run(gateway: str) -> int:
             print(f"[e2e] comparison schema invalid: {exc}", file=sys.stderr)
             print(json.dumps(comparison, indent=2)[:1000], file=sys.stderr)
             return 4
+
+        # Defect #3 regression guard: comparison must actually contain references
+        # (proves DB persistence + retrieval round-tripped real data, not just an
+        # empty schema-valid envelope).
+        if len(parsed.references) == 0 and not parsed.no_references_found:
+            print(
+                "[e2e] comparison persisted but references=[] without no_references_found flag",
+                file=sys.stderr,
+            )
+            return 5
 
         print(
             f"[e2e] OK — references={len(parsed.references)} "

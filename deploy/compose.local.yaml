@@ -484,8 +484,6 @@ services:
     env_file:
       - path: ./envs/ai.env
         required: false
-    environment:
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
     ports:
       - "8092:8080"
     networks:
