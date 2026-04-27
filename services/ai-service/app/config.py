@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 
@@ -53,7 +56,10 @@ class Settings(BaseSettings):
         return f"{self.ollama_base_url.rstrip('/')}/api/embed"
 
     class Config:
-        env_file = "/home/khoi/Projects/Project_Langfens_Microservice/deploy/envs/ai.env"
+        env_file = os.getenv(
+            "AI_SERVICE_ENV_FILE",
+            str(Path(__file__).resolve().parents[3] / "deploy" / "envs" / "ai.env"),
+        )
         case_sensitive = False
         extra = "ignore"
 
