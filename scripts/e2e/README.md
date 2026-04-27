@@ -39,3 +39,4 @@ make -C scripts/e2e e2e-down    # tear down
 - `2` grading endpoint failed
 - `3` comparison never produced within timeout
 - `4` comparison schema invalid
+- `5` comparison persisted-but-empty (Defect #3 regression)
