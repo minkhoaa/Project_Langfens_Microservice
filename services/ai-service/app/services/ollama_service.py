@@ -29,13 +29,15 @@ async def generate(prompt_template: str, variables: dict) -> dict:
 
 
 async def generate_roleplay_reply(*args, **kwargs):
-    """Placeholder so app.routers.speaking can import this symbol.
+    """Placeholder so ``app.routers.speaking`` can import this symbol.
 
-    The real implementation is owned by Trong Khoi and lives on a separate
-    branch. Hitting any /speaking/roleplay/* endpoint with this stub returns
-    501; importing it must succeed so unrelated routers (writing, grammar)
-    can boot.
+    !!! TK ACTION REQUIRED ON MERGE !!!
+    The real implementation lives on Trong Khoi's speaking branch. When that
+    branch merges into master, DELETE this stub. Hitting any
+    /speaking/roleplay/* endpoint with this stub returns 500 via
+    NotImplementedError. Tracking note in TASKS-MINH-KHOA.md Week 7.
     """
     raise NotImplementedError(
-        "generate_roleplay_reply is not implemented on this branch"
+        "generate_roleplay_reply is not implemented on this branch — "
+        "remove this stub when TK's speaking branch merges."
     )
