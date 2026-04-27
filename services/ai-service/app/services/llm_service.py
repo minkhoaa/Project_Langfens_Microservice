@@ -17,13 +17,20 @@ def get_active_provider() -> str:
     return "gemini"
 
 
-async def generate(prompt_template: str, variables: dict, **kwargs) -> dict:
+async def generate(
+    prompt_template: str,
+    variables: dict,
+    expect_json: bool = False,
+    **kwargs,
+) -> dict:
     provider = get_active_provider()
 
     if provider == "ollama":
         return await ollama_service.generate(prompt_template, variables)
     if provider == "openai_like":
-        return await openai_like_generate(prompt_template, variables, **kwargs)
+        return await openai_like_generate(
+            prompt_template, variables, expect_json=expect_json, **kwargs
+        )
     return await gemini_service.generate(prompt_template, variables)
 
 
