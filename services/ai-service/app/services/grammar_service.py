@@ -90,6 +90,7 @@ async def explain_single(request: GrammarExplainRequest) -> GrammarExplainRespon
         result = await llm_service.generate(
             prompt_template=GRAMMAR_EXPLAIN_PROMPT,
             variables=variables,
+            expect_json=True,
         )
     except asyncio.TimeoutError:
         logger.warning(f"Grammar explanation timed out for: {request.error_text}")
