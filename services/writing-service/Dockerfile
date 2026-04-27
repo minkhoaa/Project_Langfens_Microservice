@@ -11,6 +11,8 @@ ARG NUGET_CACHE_ID=nuget-writing
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages,sharing=locked,id=${NUGET_CACHE_ID} \
     dotnet restore services/writing-service/writing-service.csproj
 
+# Force re-COPY when source changes — overrides Docker layer cache.
+ARG CACHEBUST=1
 # copy toàn bộ source sau khi restore
 COPY . .
 WORKDIR /src/services/writing-service
