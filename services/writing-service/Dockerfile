@@ -16,19 +16,16 @@ ARG CACHEBUST=1
 # copy toàn bộ source sau khi restore
 COPY . .
 WORKDIR /src/services/writing-service
-RUN dotnet publish -c Release -o /out \
-    -r linux-musl-x64 \
-    --self-contained true \
-    /p:PublishSingleFile=true \
-    /p:EnableCompressionInSingleFile=true \
-    /p:DebugType=none
+# Multi-file publish (NOT single-file) — single-file strips reflection metadata
+# that EF Core needs to discover migration classes at MigrateAsync() time.
+RUN dotnet publish -c Release -o /out /p:DebugType=none
 
-# Runtime siêu gọn
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine
+# Runtime: full ASP.NET Core image (multi-file publish needs the framework).
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
     Swagger__Enabled=true
 COPY --from=build /out /app
 EXPOSE 8080
-ENTRYPOINT ["./writing-service"]   
+ENTRYPOINT ["dotnet", "writing-service.dll"]   
