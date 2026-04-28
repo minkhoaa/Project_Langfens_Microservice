@@ -178,6 +178,7 @@ public class WritingService : IWritingService
     {
         var query = _context.WritingEvaluations.AsNoTracking()
             .Include(k => k.WritingSubmission)
+                .ThenInclude(s => s.WritingExam)
             .Where(k => k.SubmissionId == submissionId);
         if (evaluationId is not null)
             query = query.Where(p => p.Id == evaluationId);
@@ -205,6 +206,8 @@ public class WritingService : IWritingService
         {
             SubmissionId = evaluation.SubmissionId,
             TaskText = evaluation.WritingSubmission.TaskTextSnapshot,
+            ImageUrl = evaluation.WritingSubmission.WritingExam?.ImageUrl,
+            ExamType = evaluation.WritingSubmission.ExamType,
             EssayRaw = evaluation.WritingSubmission.EssayRaw,
             EssayNormalized = evaluation.WritingSubmission.EssayNormalized,
             WordCount = evaluation.WritingSubmission.WordCount,
