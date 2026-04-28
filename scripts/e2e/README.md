@@ -90,3 +90,28 @@ make -C scripts/e2e e2e-down    # tear down
 - `3` comparison never produced within timeout
 - `4` comparison schema invalid
 - `5` comparison persisted-but-empty (Defect #3 regression)
+
+## Flow A — standalone writing comparison
+
+`test_flow_a_compare.py` exercises the path added in
+`docs/superpowers/specs/2026-04-28-writing-flow-unified-design.md`:
+
+  1. Login as `e2e+writing@langfens.test`.
+  2. Pick the first writing exam returned by `GET /writing/exams`
+     (override with `E2E_WRITING_EXAM_ID=<guid>` if you want a specific one).
+  3. POST a fixed essay to `/api-writing/writing/grade` (sync grade).
+  4. Poll `/api-writing/writing/{id}/comparison` every 2s for up to 60s.
+  5. Assert the comparison payload has either `references` or
+     `no_references_found = true`.
+
+Run:
+
+```bash
+python -m scripts.e2e.test_flow_a_compare
+```
+
+Pre-conditions: same as `full_writing_flow.py` — stack up and user seeded.
+This test would have caught the historical "Flow A never produces comparison"
+regression: prior to the unification spec, the standalone POST
+`/writing/grade` did not publish a `WritingGradeRequestMessage`, so the
+consumer never ran and the `/comparison` endpoint stayed at 204 forever.
