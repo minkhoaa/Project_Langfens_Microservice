@@ -97,43 +97,52 @@ class KeyManager:
             start_idx = self._current_indices.get(provider, 0)
             attempts = 0
             
+            now = time.time()
+            # First pass: revive any per-key cooldowns that have elapsed.
+            for ki in keys:
+                if ki["exhausted"] and ki["exhausted_at"]:
+                    cooldown = ki.get("cooldown_seconds", 3600)
+                    if (now - ki["exhausted_at"]) >= cooldown:
+                        ki["exhausted"] = False
+                        ki["exhausted_at"] = None
+                        logger.info(
+                            f"🔄 {provider.upper()}: Key #{ki['index'] + 1} cooldown elapsed ({cooldown}s), re-enabled"
+                        )
+
             while attempts < len(keys):
                 idx = (start_idx + attempts) % len(keys)
                 key_info = keys[idx]
-                
+
                 if not key_info["exhausted"]:
                     # Move current index to next key after this one
                     self._current_indices[provider] = (idx + 1) % len(keys)
                     return key_info["key"], idx
-                
+
                 attempts += 1
-            
-            # All keys exhausted - reset if oldest exhaustion was > 1 hour ago
-            oldest_exhausted = None
-            for ki in keys:
-                if ki["exhausted"] and ki["exhausted_at"]:
-                    if oldest_exhausted is None or ki["exhausted_at"] < oldest_exhausted:
-                        oldest_exhausted = ki["exhausted_at"]
-            
-            if oldest_exhausted and (time.time() - oldest_exhausted) > 3600:
-                logger.info(f"🔄 {provider.upper()}: Resetting exhausted keys after 1 hour cooldown")
-                for ki in keys:
-                    ki["exhausted"] = False
-                    ki["exhausted_at"] = None
-                self._current_indices[provider] = 0
-                return keys[0]["key"], 0
-            
+
+            # All keys still exhausted after revival pass — give up for this attempt.
             return None
-    
-    def mark_exhausted(self, provider: str, key_index: int, error_msg: str = ""):
-        """Mark a key as exhausted due to rate limit."""
+
+    def mark_exhausted(
+        self, provider: str, key_index: int, error_msg: str = "", cooldown_seconds: int = 3600
+    ):
+        """Mark a key as exhausted.
+
+        cooldown_seconds: how long until the key may be retried. Default 1h
+        (treats unknown failures as long cooldown). Pass 60 for rate-limit (429)
+        since GROQ TPM windows reset every minute — a 1-hour lockout for a
+        transient 429 effectively disables the key for the entire session.
+        """
         with self._lock:
             keys = self._keys.get(provider, [])
             if 0 <= key_index < len(keys):
                 keys[key_index]["exhausted"] = True
                 keys[key_index]["exhausted_at"] = time.time()
+                keys[key_index]["cooldown_seconds"] = cooldown_seconds
                 key_preview = keys[key_index]["key"][:8] + "..."
-                logger.warning(f"🚫 {provider.upper()}: Key {key_preview} marked EXHAUSTED - {error_msg}")
+                logger.warning(
+                    f"🚫 {provider.upper()}: Key {key_preview} marked EXHAUSTED ({cooldown_seconds}s cooldown) - {error_msg}"
+                )
     
     def mark_error(self, provider: str, key_index: int, error_msg: str = ""):
         """Mark a key as having an error (non-rate-limit)."""
@@ -355,20 +364,26 @@ class OpenAILikeService:
                 except RateLimitError as e:
                     error_msg = str(e)
                     if "429" in error_msg or "rate limit" in error_msg.lower():
-                        key_manager.mark_exhausted(provider_name, key_index, "rate limit")
+                        # GROQ TPM windows reset every minute; a long cooldown
+                        # would disable a key that's actually fine in 60s.
+                        key_manager.mark_exhausted(
+                            provider_name, key_index, "rate limit", cooldown_seconds=60
+                        )
                         continue  # Try next key
                     else:
                         key_manager.mark_error(provider_name, key_index, error_msg)
                         last_error = e
                         break  # Non-retryable error
-                
+
                 except APIError as e:
                     error_code = getattr(e, "status_code", None)
                     error_msg = str(e)
-                    
+
                     if error_code == 401:
-                        # Invalid key - remove it from rotation
-                        key_manager.mark_exhausted(provider_name, key_index, "invalid key")
+                        # Invalid key - long cooldown (won't recover for this run)
+                        key_manager.mark_exhausted(
+                            provider_name, key_index, "invalid key", cooldown_seconds=3600
+                        )
                         continue
                     
                     key_manager.mark_error(provider_name, key_index, error_msg)
