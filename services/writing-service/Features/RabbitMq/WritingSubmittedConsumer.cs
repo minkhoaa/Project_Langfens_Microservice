@@ -37,7 +37,7 @@ namespace writing_service.Features.RabbitMq
             var taskText = !string.IsNullOrEmpty(request.TaskText) ? request.TaskText : "";
             var answerText = !string.IsNullOrEmpty(request.AnswerText) ? request.AnswerText : "";
 
-            var contentSubmission = new ContentSubmission() { Task = taskText, Answer = answerText };
+            var contentSubmission = new ContentSubmission { Task = taskText, Answer = answerText };
             var (response, rawResponse) = await _grader.Grade(contentSubmission, context.CancellationToken);
             _logger.LogInformation(JsonSerializer.Serialize(response));
 
@@ -59,10 +59,9 @@ namespace writing_service.Features.RabbitMq
                 ImprovedParagraph = response.ImprovedParagraph
             };
 
-            // Run comparison BEFORE publishing (so response includes comparative data)
-            // Use explicit TaskType if provided, otherwise fall back to heuristic
-            var taskType = !string.IsNullOrEmpty(request.TaskType) 
-                ? request.TaskType 
+            // Run comparison BEFORE publishing (so response includes comparative data).
+            var taskType = !string.IsNullOrEmpty(request.TaskType)
+                ? request.TaskType
                 : (taskText.Length > 300 ? "TASK_2" : "TASK_1");
             try
             {
@@ -78,39 +77,38 @@ namespace writing_service.Features.RabbitMq
                 _logger.LogWarning(ex, "Progressive comparison failed (non-blocking)");
             }
 
-            _logger.LogInformation(JsonSerializer.Serialize(response));
-            await _bus.Publish(gradingResponse);
-
-            // Fire-and-forget: update WritingEvaluation record (for durability)
-            _ = UpdateEvaluationRecordAsync(request, response, gradingResponse.ComparativeAnalysisJson);
-        }
-
-        private async Task UpdateEvaluationRecordAsync(
-            WritingGradeRequestMessage request,
-            WritingGradeResponse response,
-            string? comparativeAnalysisJson)
-        {
-            try
+            // Persist comparison BEFORE publishing so the row exists when consumers
+            // (or the FE poll) hit /writing/{id}/comparison. Awaited because the
+            // previous fire-and-forget pattern leaked the scoped DbContext.
+            if (!string.IsNullOrEmpty(gradingResponse.ComparativeAnalysisJson))
             {
-                if (string.IsNullOrEmpty(comparativeAnalysisJson)) return;
-
-                var evaluation = await _db.WritingEvaluations
-                    .Where(e => e.SubmissionId == request.QuestionId)
-                    .OrderByDescending(e => e.CreatedAt)
-                    .FirstOrDefaultAsync();
-
-                if (evaluation != null)
+                try
                 {
-                    evaluation.ComparativeAnalysisJson = comparativeAnalysisJson;
-                    await _db.SaveChangesAsync();
-                    _logger.LogInformation(
-                        "Progressive comparison stored for submission {Id}", evaluation.SubmissionId);
+                    var evaluation = await _db.WritingEvaluations
+                        .Where(e => e.SubmissionId == request.QuestionId)
+                        .OrderByDescending(e => e.CreatedAt)
+                        .FirstOrDefaultAsync(context.CancellationToken);
+                    if (evaluation != null)
+                    {
+                        evaluation.ComparativeAnalysisJson = gradingResponse.ComparativeAnalysisJson;
+                        await _db.SaveChangesAsync(context.CancellationToken);
+                        _logger.LogInformation(
+                            "Progressive comparison stored for submission {Id}", evaluation.SubmissionId);
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "No WritingEvaluation row found for submission {Id} — comparison not persisted",
+                            request.QuestionId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to persist comparison to DB (non-blocking)");
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to update evaluation record (non-blocking)");
-            }
+
+            await _bus.Publish(gradingResponse);
         }
     }
 }

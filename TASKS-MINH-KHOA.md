@@ -259,6 +259,7 @@
 | ⬜ | Performance: cache Qdrant queries in Redis | Writing response < 5s |
 | ⬜ | Polish Writing + Grammar frontend | Production-quality UI |
 | ⬜ | **Whisper STT pairing session (2h):** Walk TK through .NET Speaking Service | TK understands cross-service STT flow |
+| 🔄 | **Coordination: TK speaking branch merge cleanup** | Remove `generate_roleplay_reply` stub in `services/ai-service/app/services/ollama_service.py` when TK's speaking branch merges. Tracked as Defect #6 in 2026-04-27 E2E validation report. |
 
 ---
 

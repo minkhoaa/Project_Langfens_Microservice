@@ -249,6 +249,7 @@ class OpenAILikeService:
         provider: str = None,
         temperature: float = 0.3,
         max_tokens: int = 2048,
+        expect_json: bool = False,
     ) -> dict:
         """
         Generate response from LLM using prompt template with automatic key rotation.
@@ -303,16 +304,19 @@ class OpenAILikeService:
                 
                 try:
                     logger.debug(f"Calling {provider_name} with model {model_name} (key #{key_index + 1})")
-                    
-                    response = client.chat.completions.create(
-                        model=model_name,
-                        messages=[{"role": "user", "content": formatted_prompt}],
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                    )
-                    
+
+                    create_kwargs = {
+                        "model": model_name,
+                        "messages": [{"role": "user", "content": formatted_prompt}],
+                        "temperature": temperature,
+                        "max_tokens": max_tokens,
+                    }
+                    if expect_json:
+                        create_kwargs["response_format"] = {"type": "json_object"}
+
+                    response = client.chat.completions.create(**create_kwargs)
                     content = response.choices[0].message.content
-                    
+
                     # Success - try to parse as JSON
                     try:
                         result = json.loads(content)
@@ -320,6 +324,32 @@ class OpenAILikeService:
                         return result
                     except json.JSONDecodeError:
                         logger.warning(f"⚠️ {provider_name.upper()} response not valid JSON")
+                        if expect_json:
+                            # 1-retry: re-prompt with stricter system instruction
+                            retry_messages = [
+                                {"role": "system", "content": (
+                                    "Your previous response was not valid JSON. "
+                                    "Respond ONLY with a JSON object matching the requested schema. "
+                                    "No markdown, no commentary."
+                                )},
+                                {"role": "user", "content": formatted_prompt},
+                            ]
+                            try:
+                                retry_resp = client.chat.completions.create(
+                                    model=model_name,
+                                    messages=retry_messages,
+                                    temperature=0.1,
+                                    max_tokens=max_tokens,
+                                    response_format={"type": "json_object"},
+                                )
+                                retry_content = retry_resp.choices[0].message.content
+                                result = json.loads(retry_content)
+                                logger.info(f"✅ {provider_name.upper()} JSON OK on retry")
+                                return result
+                            except (json.JSONDecodeError, Exception) as retry_exc:
+                                logger.warning(
+                                    f"⚠️ {provider_name.upper()} still not JSON on retry: {retry_exc}"
+                                )
                         return {"text": content, "provider": provider_name}
                 
                 except RateLimitError as e:
