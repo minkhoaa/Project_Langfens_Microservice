@@ -31,6 +31,7 @@ builder.Services.AddMassTransit(cfg =>
 });
 
 // ── Services ─────────────────────────────────────────────────────────────
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 // ── App ──────────────────────────────────────────────────────────────────
