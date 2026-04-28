@@ -4,6 +4,8 @@ from app.config import settings
 from app.schemas import (
     GrammarBatchExplainRequest,
     GrammarBatchExplainResponse,
+    GrammarDetectRequest,
+    GrammarDetectResponse,
     GrammarExplainRequest,
     GrammarExplainResponse,
     SearchRequest,
@@ -33,3 +35,8 @@ async def grammar_explain(req: GrammarExplainRequest):
 @router.post("/batch-explain", response_model=GrammarBatchExplainResponse)
 async def grammar_batch_explain(req: GrammarBatchExplainRequest):
     return await grammar_service.explain_batch(req.errors, req.max_concurrent)
+
+
+@router.post("/detect", response_model=GrammarDetectResponse)
+async def grammar_detect(req: GrammarDetectRequest):
+    return await grammar_service.detect(req)
