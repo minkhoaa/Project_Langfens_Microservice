@@ -1,21 +1,7 @@
+using email_service.Contracts;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
-
-// u2500u2500u2500 Config models u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
-
-public class SmtpOptions
-{
-    public string Host { get; set; } = "smtp.gmail.com";
-    public int Port { get; set; } = 587;
-    public string User { get; set; } = string.Empty;
-    public string Pass { get; set; } = string.Empty;
-    public string From { get; set; } = "No-Reply <no-reply@example.com>";
-    public string Brand { get; set; } = "Langfens English";
-    public string Support { get; set; } = "support@langfens-english.com";
-    public string VerifyUrlTemplate { get; set; } = "http://auth-service:8080/api/auth/verify";
-    public string RedirectUrl { get; set; } = "http://localhost:8080/api/auth/verify";
-}
 
 // u2500u2500u2500 Bootstrap extensions (email-service specific) u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
 
