@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 
@@ -53,7 +56,23 @@ class Settings(BaseSettings):
         return f"{self.ollama_base_url.rstrip('/')}/api/embed"
 
     class Config:
-        env_file = "/home/khoi/Projects/Project_Langfens_Microservice/deploy/envs/ai.env"
+        # Resolve env_file in this order:
+        # 1. AI_SERVICE_ENV_FILE env var (explicit override)
+        # 2. <repo>/deploy/envs/ai.env (when running ai-service from a checkout)
+        # 3. "" — Docker injects env vars directly via compose's env_file: directive
+        @staticmethod
+        def _resolve_env_file() -> str:
+            override = os.getenv("AI_SERVICE_ENV_FILE")
+            if override:
+                return override
+            here = Path(__file__).resolve()
+            for parent in here.parents:
+                candidate = parent / "deploy" / "envs" / "ai.env"
+                if candidate.is_file():
+                    return str(candidate)
+            return ""
+
+        env_file = _resolve_env_file()
         case_sensitive = False
         extra = "ignore"
 

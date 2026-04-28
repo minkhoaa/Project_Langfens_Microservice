@@ -154,6 +154,7 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         result = await llm_service.generate(
             prompt_template=WRITING_COMPARE_PROMPT,
             variables=variables,
+            expect_json=True,
         )
         validate_sentence_comparisons_response(result)
     except OutputParserException as e:
@@ -216,6 +217,7 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
         result = await llm_service.generate(
             prompt_template=WRITING_COMPARE_EXEMPLAR_PROMPT,
             variables=variables,
+            expect_json=True,
         )
         validate_sentence_comparisons_response(result)
     except OutputParserException as e:

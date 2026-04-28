@@ -231,6 +231,19 @@ docker compose up -d
 # Access API Gateway at http://localhost:5000
 ```
 
+### Writing service grader LLM
+
+The writing-service grading endpoint uses an OpenAI-compatible LLM. Configure via:
+
+| Env var | Default | Notes |
+|---|---|---|
+| `GRADER_LLM__ENDPOINT` | (none, required) | Base URL ending with `/v1/`. Examples: `https://api.groq.com/openai/v1/`, `https://<resource>.openai.azure.com/openai/v1/` |
+| `GRADER_LLM__APIKEY` | (none, required) | API key for the chosen provider |
+| `GRADER_LLM__MODEL` | `llama-3.3-70b-versatile` | Model identifier accepted by the endpoint |
+
+Legacy `AZURE_OPENAI__ENDPOINT` / `_APIKEY` / `_DEPLOYMENT` are still honored for
+one release with a deprecation log warning. Remove them after migration.
+
 ---
 
 <p align="center">

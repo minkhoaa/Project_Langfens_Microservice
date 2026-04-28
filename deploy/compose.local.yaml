@@ -472,6 +472,11 @@ services:
       retries: 10
       start_period: 10s
 
+  # NOTE: Ollama runs on the HOST machine for local dev (not in compose).
+  # Pull only the embedding model on the host (LLM goes to Groq cloud):
+  #   ollama pull bge-m3
+  # ai-service reaches it via host.docker.internal (extra_hosts maps it on Linux).
+  # Override OLLAMA_BASE_URL in your shell if Ollama runs elsewhere.
   ai-service:
     build:
       context: ..
@@ -488,6 +493,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ../data:/app/data:ro
 
