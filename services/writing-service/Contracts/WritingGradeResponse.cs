@@ -8,6 +8,8 @@ public class WritingGradeResponse
 
     // Thông tin task
     public string TaskText { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public WritingCategory ExamType { get; set; } = WritingCategory.TOEIC;
 
     // Bài viết
     public string EssayRaw { get; set; } = string.Empty;
