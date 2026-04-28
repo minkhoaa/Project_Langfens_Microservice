@@ -76,3 +76,77 @@ async def test_detect_returns_errors_for_essay_with_known_mistakes():
     assert response.errors[0].correct_form == "He went to school"
     assert response.errors[1].error_text == "She have many books"
     mock_generate.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_detect_returns_empty_on_clean_essay():
+    from app.schemas import GrammarDetectRequest
+    from app.services.grammar_service import detect
+
+    request = GrammarDetectRequest(essay="The student writes a clear, error-free sentence.")
+    with patch(
+        "app.services.grammar_service.llm_service.generate",
+        new_callable=AsyncMock,
+        return_value={"errors": []},
+    ):
+        response = await detect(request)
+    assert response.errors == []
+
+
+@pytest.mark.asyncio
+async def test_detect_handles_malformed_llm_json_gracefully():
+    from langchain_core.exceptions import OutputParserException
+    from app.schemas import GrammarDetectRequest
+    from app.services.grammar_service import detect
+
+    request = GrammarDetectRequest(essay="Some essay text that triggers a malformed reply.")
+    with patch(
+        "app.services.grammar_service.llm_service.generate",
+        new_callable=AsyncMock,
+        side_effect=OutputParserException("could not parse"),
+    ):
+        response = await detect(request)
+    assert response.errors == []
+
+
+@pytest.mark.asyncio
+async def test_detect_respects_max_errors_limit():
+    from app.schemas import GrammarDetectRequest
+    from app.services.grammar_service import detect
+
+    llm_result = {
+        "errors": [
+            {"error_text": f"err{i}", "context": f"ctx{i}", "correct_form": f"fix{i}"}
+            for i in range(5)
+        ]
+    }
+    request = GrammarDetectRequest(essay="essay text", max_errors=2)
+    with patch(
+        "app.services.grammar_service.llm_service.generate",
+        new_callable=AsyncMock,
+        return_value=llm_result,
+    ):
+        response = await detect(request)
+    assert len(response.errors) == 2
+
+
+@pytest.mark.asyncio
+async def test_detect_deduplicates_identical_errors():
+    from app.schemas import GrammarDetectRequest
+    from app.services.grammar_service import detect
+
+    llm_result = {
+        "errors": [
+            {"error_text": "He go", "context": "He go to school.", "correct_form": "He went"},
+            {"error_text": "He go", "context": "He go to school.", "correct_form": "He went"},
+            {"error_text": "She have", "context": "She have books.", "correct_form": "She has"},
+        ]
+    }
+    request = GrammarDetectRequest(essay="He go to school. She have books.")
+    with patch(
+        "app.services.grammar_service.llm_service.generate",
+        new_callable=AsyncMock,
+        return_value=llm_result,
+    ):
+        response = await detect(request)
+    assert len(response.errors) == 2
