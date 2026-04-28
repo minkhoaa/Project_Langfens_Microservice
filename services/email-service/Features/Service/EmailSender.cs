@@ -53,8 +53,8 @@ public class EmailSender(IOptions<SmtpOptions> options, IHttpClientFactory httpC
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Failed while sending email to {toEmail}", e.Message);
-            logger.LogInformation($"Failed while sending email to {toEmail}", e.Message);
+            Console.WriteLine($"Failed while sending email to {toEmail}: {e.Message}");
+            logger.LogError(e, "Failed while sending email to {Email}", toEmail);
         }
     }
 
