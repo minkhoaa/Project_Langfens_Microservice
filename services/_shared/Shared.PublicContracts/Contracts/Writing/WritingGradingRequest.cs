@@ -11,7 +11,8 @@ namespace Shared.ExamDto.Contracts.Writing
         string Type,
         string? TaskText,
         string? AnswerText,
-        string TaskType = "TASK_2"  // Default to TASK_2 (more common), explicit field replaces fragile length heuristic
+        string TaskType = "TASK_2", // Default to TASK_2 (more common), explicit field replaces fragile length heuristic
+        Guid? SubmissionId = null   // Set by Flow A sync handler so the consumer can locate the existing WritingEvaluation row. NULL means Flow B (consumer must create the row).
     );
     public class WritingGradeResponseMessage
     {
