@@ -45,6 +45,15 @@ var jwtSettings = new auth_service.Application.Common.JwtSettings
             ? ttl : 3600,
 };
 builder.Services.AddSingleton(jwtSettings);
+builder.Services.Configure<auth_service.Application.Common.JwtSettings>(options =>
+{
+    options.Issuer = jwtSettings.Issuer;
+    options.Audience = jwtSettings.Audience;
+    options.SignKey = jwtSettings.SignKey;
+    options.RsaPrivateKeyPem = jwtSettings.RsaPrivateKeyPem;
+    options.KeyId = jwtSettings.KeyId;
+    options.AccessTokenLifetimeSeconds = jwtSettings.AccessTokenLifetimeSeconds;
+});
 
 // ── RabbitMQ ───────────────────────────────────────────────────────────────────
 static string EnvOrDefault(string key, string fallback) =>

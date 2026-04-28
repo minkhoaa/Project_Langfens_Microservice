@@ -10,6 +10,6 @@ public sealed class UserRegisteredSendOtpConsumer(IEmailSender sender, ILogger<U
     {
         await sender.SendOtpAsync(context.Message.Email, context.Message.Otp, context.Message.TtlSeconds,
             context.CancellationToken);
-        logger.LogInformation($"Email sent to {context.Message.Email}");
+        logger.LogInformation("Email send flow completed for {Email}", context.Message.Email);
     }
 }
