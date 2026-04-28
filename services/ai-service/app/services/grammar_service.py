@@ -162,3 +162,68 @@ async def explain_batch(
         failed_count=failed_count,
         total_count=len(requests),
     )
+
+
+async def detect(request: "GrammarDetectRequest") -> "GrammarDetectResponse":
+    """Detect grammatical errors in a raw essay using the LLM.
+
+    Returns an empty error list if the LLM response is malformed (logged as warning)
+    rather than raising — callers can render an empty state instead of an error UI.
+    """
+    from app.prompts.grammar_detect import GRAMMAR_DETECT_PROMPT
+    from app.schemas import GrammarDetectResponse, GrammarErrorItem
+
+    t0 = time.time()
+    variables = {
+        "essay": request.essay,
+        "max_errors": request.max_errors,
+    }
+
+    try:
+        result = await llm_service.generate(
+            prompt_template=GRAMMAR_DETECT_PROMPT,
+            variables=variables,
+            expect_json=True,
+        )
+    except asyncio.TimeoutError:
+        logger.warning("Grammar detect timed out for essay length=%d", len(request.essay))
+        raise HTTPException(status_code=504, detail="Grammar detection timed out")
+    except OutputParserException as e:
+        logger.warning("Grammar detect LLM JSON parse failed: %s", e)
+        return GrammarDetectResponse(errors=[])
+    except Exception as e:
+        logger.warning("Grammar detect LLM call failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"Grammar detection failed: {e}")
+
+    raw_errors = result.get("errors", []) if isinstance(result, dict) else []
+
+    items: list[GrammarErrorItem] = []
+    seen: set[tuple[str, str]] = set()
+    for item in raw_errors:
+        if not isinstance(item, dict):
+            continue
+        error_text = (item.get("error_text") or "").strip()
+        context = (item.get("context") or "").strip()
+        correct_form = (item.get("correct_form") or "").strip()
+        if not error_text or not context or not correct_form:
+            continue
+        dedup_key = (error_text, context)
+        if dedup_key in seen:
+            continue
+        seen.add(dedup_key)
+        items.append(
+            GrammarErrorItem(
+                error_text=error_text,
+                context=context,
+                correct_form=correct_form,
+            )
+        )
+        if len(items) >= request.max_errors:
+            break
+
+    logger.info(
+        "grammar.detect: %d errors, took %.1fms",
+        len(items),
+        (time.time() - t0) * 1000,
+    )
+    return GrammarDetectResponse(errors=items)
