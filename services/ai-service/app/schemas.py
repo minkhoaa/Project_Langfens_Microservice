@@ -197,3 +197,19 @@ class GrammarBatchExplainResponse(BaseModel):
     results: list[GrammarExplainResponse]
     failed_count: int
     total_count: int
+
+
+# Grammar Detect Schemas (extracts errors from raw essay)
+class GrammarErrorItem(BaseModel):
+    error_text: str = Field(..., description="The exact erroneous phrase, verbatim from the essay")
+    context: str = Field(..., description="The full sentence containing the error")
+    correct_form: str = Field(..., description="The corrected version of error_text")
+
+
+class GrammarDetectRequest(BaseModel):
+    essay: str = Field(..., min_length=1, max_length=10000, description="Raw essay text to analyse")
+    max_errors: int = Field(default=20, ge=1, le=50, description="Maximum number of errors to return")
+
+
+class GrammarDetectResponse(BaseModel):
+    errors: list[GrammarErrorItem]
