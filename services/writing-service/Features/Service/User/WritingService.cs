@@ -1,6 +1,8 @@
 using System.Text.Json;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
+using Shared.ExamDto.Contracts.Exam.Enums;
 using Shared.ExamDto.Contracts.Writing;
 using writing_service.Contracts;
 using writing_service.Domains.Entities;
@@ -26,17 +28,23 @@ public class WritingService : IWritingService
     private readonly IUserContext _user;
     private readonly WritingDbContext _context;
     private readonly IWritingGrader _grader;
+    private readonly IPublishEndpoint _bus;
+    private readonly ILogger<WritingService> _logger;
 
     public WritingService(
         IUserContext user,
         WritingDbContext context,
-        IWritingGrader grader
+        IWritingGrader grader,
+        IPublishEndpoint bus,
+        ILogger<WritingService> logger
         )
     {
 
         _user = user;
         _context = context;
         _grader = grader;
+        _bus = bus;
+        _logger = logger;
     }
     public async Task<IResult> WritingSubmit(WritingSubmissionRequest request,
         CancellationToken token)
@@ -72,6 +80,32 @@ public class WritingService : IWritingService
         var evaluation = _grader.MapToEvaluation(res, raw);
         _context.WritingEvaluations.Add(evaluation);
         await _context.SaveChangesAsync(token);
+
+        // Publish for async comparison. Failure here does NOT fail the user-facing
+        // grading response; the user already has band scores. Comparison is augmentation.
+        try
+        {
+            var inferredTaskType = exam.TaskText is not null && exam.TaskText.Length > 300
+                ? "TASK_2"
+                : "TASK_1";
+            var compareRequest = new WritingGradeRequestMessage(
+                AttemptId: Guid.Empty,            // Flow A has no parent attempt
+                UserId: userId,
+                QuestionId: request.ExamId,       // Carry exam id for downstream logging only
+                Type: QuestionSkill.Writing,
+                TaskText: exam.TaskText,
+                AnswerText: request.Answer,
+                TaskType: inferredTaskType,
+                SubmissionId: submission.Id        // KEY: tells consumer "row already exists, just add comparison"
+            );
+            await _bus.Publish(compareRequest, token);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex,
+                "Failed to publish WritingGradeRequestMessage for submission {Id}; comparison will be skipped",
+                submission.Id);
+        }
 
         return Results.Ok(new ApiResultDto(true, "Submitted", res));
     }
