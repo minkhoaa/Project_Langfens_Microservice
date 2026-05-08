@@ -59,7 +59,9 @@ public class WritingService : IWritingService
         var exam = await _context.WritingExams.AsNoTracking().Where(x => x.Id == request.ExamId).FirstOrDefaultAsync(token)
                    ?? throw new Exception("Exam is not existed");
 
-        var (res, raw) = await _grader.Grade(new ContentSubmission { Answer = request.Answer, Task = exam.TaskText }, token);
+        var gradeResult = await _grader.GradeAsync(new ContentSubmission { Answer = request.Answer, Task = exam.TaskText }, token);
+        var res = gradeResult.Response;
+        var raw = gradeResult.Compact;
 
         var submission = new WritingSubmission
         {
@@ -69,7 +71,7 @@ public class WritingService : IWritingService
             EssayRaw = request.Answer,
             EssayNormalized = request.Answer,
             ExamType = exam.ExamType,
-            WordCount = res.WordCount,
+            WordCount = request.Answer.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length,
             Level = exam.Level,
             TimeSpentSeconds = request.TimeSpentSeconds,
             SubmittedAt = DateTime.UtcNow,
@@ -77,7 +79,7 @@ public class WritingService : IWritingService
         await _context.WritingSubmissions.AddAsync(submission, token);
 
         res.SubmissionId = submission.Id;
-        var evaluation = _grader.MapToEvaluation(res, raw);
+        var evaluation = WritingEvaluationMapper.MapToEvaluation(res, raw);
         _context.WritingEvaluations.Add(evaluation);
         await _context.SaveChangesAsync(token);
 

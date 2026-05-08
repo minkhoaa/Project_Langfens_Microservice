@@ -40,7 +40,7 @@ namespace writing_service.Features.RabbitMq
 
             // Branch on origin: Flow A pre-creates the row, Flow B does not.
             WritingEvaluation? evaluation;
-            WritingGradeResponse response;
+            WritingGradeResponseDto response = new(); // placeholder, replaced in each branch
 
             if (request.SubmissionId.HasValue)
             {
@@ -53,7 +53,7 @@ namespace writing_service.Features.RabbitMq
                         request.SubmissionId.Value);
                     return;
                 }
-                response = BuildResponseFromEvaluation(evaluation);
+                response = WritingGradeResponseDto.BuildResponseDtoFromEvaluation(evaluation);
             }
             else
             {
@@ -77,12 +77,12 @@ namespace writing_service.Features.RabbitMq
                 await _db.WritingSubmissions.AddAsync(submission, context.CancellationToken);
 
                 var contentSubmission = new ContentSubmission { Task = taskText, Answer = answerText };
-                var graded = await _grader.Grade(contentSubmission, context.CancellationToken);
-                response = graded.Item1;
-                var rawResponse = graded.Item2;
+                var gradeResult = await _grader.GradeAsync(contentSubmission, context.CancellationToken);
+                response = gradeResult.Response;
+                var rawResponse = gradeResult.Compact;
                 response.SubmissionId = submission.Id;
 
-                evaluation = _grader.MapToEvaluation(response, rawResponse);
+                evaluation = WritingEvaluationMapper.MapToEvaluation(response, rawResponse);
                 _db.WritingEvaluations.Add(evaluation);
                 await _db.SaveChangesAsync(context.CancellationToken);
             }
@@ -126,10 +126,10 @@ namespace writing_service.Features.RabbitMq
                     EssayNormalized = response.EssayNormalized,
                     WordCount = response.WordCount,
                     OverallBand = response.OverallBand,
-                    TaskResponse = response.TaskResponse,
-                    CoherenceAndCohesion = response.CoherenceAndCohesion,
-                    LexicalResource = response.LexicalResource,
-                    GrammaticalRangeAndAccuracy = response.GrammaticalRangeAndAccuracy,
+                    TaskResponse = response.TaskResponse.ToCriterionScore(),
+                    CoherenceAndCohesion = response.CoherenceAndCohesion.ToCriterionScore(),
+                    LexicalResource = response.LexicalResource.ToCriterionScore(),
+                    GrammaticalRangeAndAccuracy = response.GrammaticalRangeAndAccuracy.ToCriterionScore(),
                     Suggestions = response.Suggestions,
                     ImprovedParagraph = response.ImprovedParagraph,
                     ComparativeAnalysisJson = comparativeJson
@@ -153,38 +153,6 @@ namespace writing_service.Features.RabbitMq
                 .Where(e => e.SubmissionId == submissionId)
                 .OrderByDescending(e => e.CreatedAt)
                 .FirstOrDefaultAsync(ct);
-        }
-
-        private static WritingGradeResponse BuildResponseFromEvaluation(WritingEvaluation eval)
-        {
-            var suggestions = new List<string>();
-            if (!string.IsNullOrWhiteSpace(eval.SuggestionsJson))
-            {
-                try
-                {
-                    suggestions = JsonSerializer.Deserialize<List<string>>(eval.SuggestionsJson)
-                        ?? new List<string>();
-                }
-                catch (JsonException) { /* keep empty */ }
-            }
-            return new WritingGradeResponse
-            {
-                SubmissionId = eval.SubmissionId,
-                EssayRaw = string.Empty,
-                EssayNormalized = string.Empty,
-                WordCount = 0,
-                OverallBand = eval.OverallBand,
-                TaskResponse = new CriterionScore { Band = eval.TaskResponseBand, Comment = eval.TaskResponseComment },
-                CoherenceAndCohesion = new CriterionScore { Band = eval.CoherenceAndCohesionBand, Comment = eval.CoherenceAndCohesionComment },
-                LexicalResource = new CriterionScore { Band = eval.LexicalResourceBand, Comment = eval.LexicalResourceComment },
-                GrammaticalRangeAndAccuracy = new CriterionScore { Band = eval.GrammaticalRangeAndAccuracyBand, Comment = eval.GrammaticalRangeAndAccuracyComment },
-                Suggestions = suggestions,
-                ImprovedParagraph = eval.ImprovedParagraph ?? string.Empty,
-                Model = eval.Model,
-                ModelProvider = eval.Provider,
-                GradedAt = eval.CreatedAt,
-                RawLlmJson = eval.RawLlmJson
-            };
         }
     }
 }

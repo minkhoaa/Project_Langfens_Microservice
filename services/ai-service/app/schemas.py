@@ -142,6 +142,12 @@ class CompareRequest(BaseModel):
     student_band: float = Field(..., ge=1.0, le=9.0)
 
 
+class CriterionItem(BaseModel):
+    """Single criterion band + comment, matching LlmWritingScoreCompact.CriterionArray."""
+    b: float = Field(..., ge=0.0, le=9.0, description="Band score")
+    c: str = Field(default="", description="Comment")
+
+
 class SentenceComparison(BaseModel):
     original: str
     improved: str
@@ -170,6 +176,24 @@ class CompareResponse(BaseModel):
     no_references_found: bool = False
     sentence_comparisons: list[SentenceComparison] = []
     references: list[ReferenceEssay] = []
+
+
+class WritingGradeRequest(BaseModel):
+    task: str = Field(..., min_length=5, max_length=2000, description="Task/prompt text")
+    answer: str = Field(..., min_length=50, max_length=5000, description="Essay text")
+    word_count: int = Field(..., ge=0, description="Pre-computed word count")
+
+
+class WritingGradeResponse(BaseModel):
+    """Writing grade result, JSON shape matches LlmWritingScoreCompact fields."""
+    ob: float = Field(..., ge=0.0, le=9.0, description="Overall band score")
+    ta: CriterionItem = Field(..., description="Task achievement band + comment")
+    cc: CriterionItem = Field(..., description="Coherence and cohesion band + comment")
+    lr: CriterionItem = Field(..., description="Lexical resource band + comment")
+    gr: CriterionItem = Field(..., description="Grammatical range and accuracy band + comment")
+    s: list[str] = Field(default_factory=list, description="Suggestions for improvement")
+    p: str = Field(default="", description="Improved paragraph")
+    raw_llm_json: str = Field(default="", description="Raw LLM JSON response for debugging")
 
 
 # Grammar Explainer Schemas
