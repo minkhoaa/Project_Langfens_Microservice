@@ -1,20 +1,18 @@
 WRITING_COMPARE_PROMPT = """You are an expert IELTS Writing examiner helping a student improve progressively. The student's current band is {student_band}.
 
-You will compare the student's essay with two sets of reference essays:
-- **Step-up references** (Band {step_up_band}): Achievable improvements the student can make soon.
-- **Target references** (Band {target_band}): Stretch-goal quality for medium-term improvement.
+You have access to reference essay metadata discovered via RAG semantic search — these are statistically similar essays at nearby band levels.
 
 <topic>{topic}</topic>
 
 <student_essay>{student_essay}</student_essay>
 
-<step_up_references>
-{step_up_references}
-</step_up_references>
-
-<target_references>
-{target_references}
-</target_references>
+<reference_context>
+The RAG system found {reference_count} reference essays similar to this topic and band range.
+Band levels found: {band_distribution}
+Average word count at each level: {word_count_hints}
+Common vocabulary patterns at higher bands: {vocab_hints}
+Common structural patterns at higher bands: {structure_hints}
+</reference_context>
 
 Provide your analysis as a JSON object with these exact keys:
 
@@ -23,7 +21,7 @@ Provide your analysis as a JSON object with these exact keys:
   "coherence_feedback": "Compare coherence devices and paragraph structure across all three levels.",
   "grammar_feedback": "Compare grammatical range and accuracy across all three levels.",
   "task_response_feedback": "Compare how well each level addresses the prompt.",
-  "step_up_analysis": "Specific, actionable analysis: what the student needs to do to reach Band {step_up_band}. Reference concrete examples from the step-up essays.",
+  "step_up_analysis": "Specific, actionable analysis: what the student needs to do to reach Band {step_up_band}.",
   "target_analysis": "What distinguishes Band {target_band} writing from Band {step_up_band}. What the student should aim for in the medium term.",
   "key_improvements": ["First priority improvement", "Second priority improvement", "Third priority improvement"],
   "sentence_comparisons": [
@@ -36,12 +34,6 @@ Provide your analysis as a JSON object with these exact keys:
   ]
 }}
 
-CRITICAL — Reference Essay Quality Warning:
-- The reference essays below are crowd-sourced and may contain their own grammatical errors or unidiomatic expressions.
-- Do NOT copy errors from reference essays into your suggested improvements.
-- If a reference essay contains mistakes (e.g. missing articles, wrong prepositions, word confusion), acknowledge them internally and still provide CORRECT, idiomatic improvements based on your own expertise as a native-level examiner.
-- Your improved sentences must ALWAYS be grammatically perfect and sound natural to a native English speaker.
-
 Rules:
 - key_improvements must have 3 to 5 items, ordered by impact. Each item should be a specific, actionable sentence.
 - sentence_comparisons must have 2 to 5 items.
@@ -50,34 +42,35 @@ Rules:
 - Only include sentences that genuinely need improvement.
 - category must be one of: vocabulary, grammar, coherence, structure.
 - Focus on PROGRESSION — frame feedback as steps on a journey, not deficiencies.
-- Be encouraging but honest. Reference specific phrases from reference essays.
-- If step-up or target references are missing, adapt your analysis to work with what is available.
+- Be encouraging but honest.
 
 Naturalness — MANDATORY:
 - When suggesting improved sentences, ALWAYS prefer natural, idiomatic English over artificially complex vocabulary.
 - Do NOT use theatrical or overly formal phrases. For example: "witnessed a substantial surge", "affording them greater latitude", "undoubtedly presents distinct advantages" — these sound unnatural and would NOT impress a real IELTS examiner.
 - A Band 7.0 sentence should sound like a well-educated person writing naturally, not someone who swallowed a thesaurus.
-- Prefer clear, precise vocabulary over obscure synonyms. "has grown considerably" is better than "has witnessed a substantial surge". "giving them more time for family" is better than "affording them greater latitude to engage with family".
+- Prefer clear, precise vocabulary over obscure synonyms. "has grown considerably" is better than "has witnessed a substantial surge".
 - The gold standard is: natural, fluent, precise, and appropriate for academic writing — NOT maximally complex.
 
 Specificity — MANDATORY:
-- In ALL feedback fields (vocabulary_feedback, grammar_feedback, coherence_feedback, task_response_feedback), you MUST quote at least 2 specific phrases from the STUDENT'S essay and explain concretely what is weak about each.
-- Do NOT write generic advice like "use more academic vocabulary" or "demonstrate a wider range of complex structures". Instead write something like: "Your phrase 'get better jobs' is too informal for academic writing. A more precise alternative would be 'secure more competitive positions'."
+- In ALL feedback fields, you MUST quote at least 2 specific phrases from the STUDENT'S essay and explain concretely what is weak about each.
+- Do NOT write generic advice like "use more academic vocabulary". Instead write something like: "Your phrase 'get better jobs' is too informal for academic writing. A more precise alternative would be 'secure more competitive positions'."
 - Every piece of advice must contain a concrete before→after example drawn from the student's actual text.
+- Use the reference_context hints to inform your vocabulary and structure feedback — reference the band levels and patterns found.
 
 - Return ONLY valid JSON. No markdown, no code blocks, no extra text."""
 
 WRITING_COMPARE_EXEMPLAR_PROMPT = """You are an expert IELTS Writing examiner. The student scored Band {student_band} — already at the top of the scale.
 
-Analyze their essay against Band 9.0 exemplar essays to identify final refinements for perfection.
+Analyze their essay against Band 9.0 standards to identify final refinements for perfection.
 
 <topic>{topic}</topic>
 
 <student_essay>{student_essay}</student_essay>
 
-<exemplar_references>
-{exemplar_references}
-</exemplar_references>
+<reference_context>
+The RAG system found {reference_count} Band 9.0 exemplar essays similar to this topic.
+Key characteristics: {exemplar_hints}
+</reference_context>
 
 Provide your analysis as a JSON object with these exact keys:
 

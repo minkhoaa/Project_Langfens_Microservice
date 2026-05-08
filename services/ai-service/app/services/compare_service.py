@@ -98,14 +98,33 @@ async def _search_with_fallback(
     return results
 
 
-def _format_references(references: list, label: str) -> str:
+def _extract_hints(references: list) -> dict:
+    """Extract compact metadata hints from RAG results — no full essay text in prompt."""
     if not references:
-        return f"(No {label} references available)"
-    parts = []
-    for i, ref in enumerate(references, 1):
-        band = ref.metadata.get("band_overall", "?")
-        parts.append(f"--- {label} Essay {i} (Band {band}) ---\n{ref.text}")
-    return "\n\n".join(parts)
+        return {"reference_count": 0, "band_distribution": "none", "word_count_hints": "N/A",
+                "vocab_hints": "N/A", "structure_hints": "N/A"}
+
+    bands = set()
+    word_counts = []
+    for r in references:
+        b = r.metadata.get("band_overall", 0)
+        w = r.metadata.get("word_count", 0)
+        if b:
+            bands.add(str(b))
+        if w:
+            word_counts.append(w)
+
+    avg_words = sum(word_counts) // len(word_counts) if word_counts else 0
+
+    return {
+        "reference_count": len(references),
+        "band_distribution": ", ".join(sorted(bands, key=float)) if bands else "unknown",
+        "word_count_hints": f"~{avg_words} words average at higher bands (your essay should aim for 250+)",
+        "vocab_hints": "Higher-band essays use more precise academic vocabulary, topic-specific terminology, "
+                       "and avoid repetition through synonyms and paraphrase.",
+        "structure_hints": "Higher-band essays have clear intro-body-conclusion structure, use cohesive devices "
+                          "(however, furthermore, consequently), and develop each point with specific examples.",
+    }
 
 
 async def compare_essay(req: CompareRequest) -> CompareResponse:
@@ -118,13 +137,13 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         return await _compare_exemplar(req, student_band)
 
     t0 = time.time()
-    # Dual query
+    # Dual query — RAG finds references, but only metadata flows to prompt
     step_up_refs = await _search_with_fallback(req.topic, step_up_band, req.task_type)
     target_refs = await _search_with_fallback(req.topic, target_band, req.task_type)
     t_search = time.time()
     logger.info("compare: search took %.1fms", (t_search - t0) * 1000)
 
-    # Deduplicate references (same essay can appear in both step-up and target searches)
+    # Deduplicate references
     seen_ids = set()
     all_refs = []
     for r in step_up_refs + target_refs:
@@ -146,8 +165,7 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         "student_band": str(student_band),
         "step_up_band": str(step_up_band),
         "target_band": str(target_band),
-        "step_up_references": _format_references(step_up_refs, "Step-up"),
-        "target_references": _format_references(target_refs, "Target"),
+        **_extract_hints(all_refs),
     }
 
     try:
@@ -210,7 +228,10 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
         "student_essay": req.essay_text,
         "topic": req.topic,
         "student_band": str(student_band),
-        "exemplar_references": _format_references(exemplar_refs, "Exemplar"),
+        **_extract_hints(exemplar_refs),
+        "exemplar_hints": "Band 9.0 essays use sophisticated vocabulary without artificial complexity, "
+                          "demonstrate flawless grammar with varied complex structures, "
+                          "and develop ideas with concrete examples and nuanced reasoning.",
     }
 
     try:

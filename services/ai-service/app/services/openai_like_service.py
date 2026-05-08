@@ -23,6 +23,7 @@ Environment Variables:
 import os
 import json
 import logging
+import re
 import threading
 import time
 from typing import Literal, Optional
@@ -184,14 +185,14 @@ key_manager = KeyManager()
 
 # Provider configurations
 PROVIDERS = {
-    "groq": {
-        "base_url": "https://api.groq.com/openai/v1",
-        "api_key_env": "GROQ_API_KEY",      # Single key (backward compatible)
-        "api_keys_env": "GROQ_API_KEYS",     # Multiple keys (comma-separated)
+    "minimax": {
+        "base_url": "https://api.minimax.io/v1",
+        "api_key_env": "MINIMAX_API_KEY",
+        "api_keys_env": "MINIMAX_API_KEYS",
         "models": {
-            "large": "llama-3.3-70b-versatile",      # Best for IELTS grading (128K context)
-            "medium": "meta-llama/llama-4-scout-17b-16e-instruct",  # 328K context
-            "small": "llama-3.1-8b-instant",         # Fast, 500K TPD
+            "large": "MiniMax-M2.7",           # Best for IELTS grading
+            "medium": "MiniMax-M2.5",
+            "small": "MiniMax-M2.1",
         },
         "error_codes": {
             429: "rate_limit_exceeded",
@@ -199,23 +200,35 @@ PROVIDERS = {
             403: "forbidden",
         }
     },
-    "cerebras": {
-        "base_url": "https://api.cerebras.ai/v1",  # NOTE: NOT /openai/v1
-        "api_key_env": "CEREBRAS_API_KEY",
-        "api_keys_env": "CEREBRAS_API_KEYS",
+    "groq": {
+        "base_url": "https://api.groq.com/openai/v1",
+        "api_key_env": "GROQ_API_KEY",
+        "api_keys_env": "GROQ_API_KEYS",
         "models": {
-            "large": "qwen-3-235b-a22b-instruct-2507",  # 235B params
-            "small": "llama3.1-8b",                       # 8B params
+            "large": "openai/gpt-oss-20b",
+            "medium": "qwen-2.5-32b",
+            "small": "llama-3.1-8b-instant",
         },
         "error_codes": {
             429: "rate_limit_exceeded",
             401: "invalid_api_key",
+            403: "forbidden",
         }
     },
 }
 
 # Default provider order (tried in sequence until one works)
-DEFAULT_PROVIDER_ORDER = ["groq", "cerebras"]
+DEFAULT_PROVIDER_ORDER = ["groq", "minimax"]
+
+
+def _clean_mm_response(content: str) -> str:
+    """Strip MiniMax reasoning tags, markdown fences, and extract JSON."""
+    # Remove <think>...</think> blocks (MiniMax reasoning models)
+    content = re.sub(r"<think>.*?</think>\s*", "", content, flags=re.DOTALL).strip()
+    # Remove ```json / ``` fences if present
+    content = re.sub(r"^```(?:json)?\s*\n?", "", content, flags=re.MULTILINE)
+    content = re.sub(r"\n?```\s*$", "", content, flags=re.MULTILINE)
+    return content.strip()
 
 
 class OpenAILikeService:
@@ -257,7 +270,7 @@ class OpenAILikeService:
         model_size: Literal["large", "medium", "small"] = "large",
         provider: str = None,
         temperature: float = 0.3,
-        max_tokens: int = 2048,
+        max_tokens: int = 4096,
         expect_json: bool = False,
     ) -> dict:
         """
@@ -326,6 +339,9 @@ class OpenAILikeService:
                     response = client.chat.completions.create(**create_kwargs)
                     content = response.choices[0].message.content
 
+                    # MiniMax models embed reasoning in <think> tags — strip them
+                    content = _clean_mm_response(content)
+
                     # Success - try to parse as JSON
                     try:
                         result = json.loads(content)
@@ -351,7 +367,7 @@ class OpenAILikeService:
                                     max_tokens=max_tokens,
                                     response_format={"type": "json_object"},
                                 )
-                                retry_content = retry_resp.choices[0].message.content
+                                retry_content = _clean_mm_response(retry_resp.choices[0].message.content)
                                 result = json.loads(retry_content)
                                 logger.info(f"✅ {provider_name.upper()} JSON OK on retry")
                                 return result

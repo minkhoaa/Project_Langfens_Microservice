@@ -34,16 +34,16 @@ async def search(collection: str, query: str, top_k: int = 5, filters: dict | No
     vector = await embed_query(query)
     client = get_qdrant_client()
 
-    hits = client.query_points(
+    hits = client.search(
         collection_name=collection,
-        query=vector,
+        query_vector=vector,
         limit=top_k,
         query_filter=_build_filter(filters or {}),
         with_payload=True,
     )
 
     results = []
-    for point in hits.points:
+    for point in hits:
         payload = point.payload or {}
         text = payload.pop("text", "")
         results.append(SearchResult(
@@ -92,9 +92,9 @@ async def search_and_reassemble(
         data = json_lib.loads(cached)
         return [ReassembledEssay(**item) for item in data]
 
-    hits = client.query_points(
+    hits = client.search(
         collection_name=collection,
-        query=vector,
+        query_vector=vector,
         limit=top_k * 3,
         query_filter=_build_filter(f),
         with_payload=True,
@@ -103,7 +103,7 @@ async def search_and_reassemble(
     seen_parents: dict[str, float] = {}
     chunk_scores: dict[str, dict[str, float]] = {}
 
-    for point in hits.points:
+    for point in hits:
         payload = point.payload or {}
         parent_id = payload.get("parent_id", "")
         chunk_type = payload.get("chunk_type", "")
