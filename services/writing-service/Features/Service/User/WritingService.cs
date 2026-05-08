@@ -79,7 +79,7 @@ public class WritingService : IWritingService
         await _context.WritingSubmissions.AddAsync(submission, token);
 
         res.SubmissionId = submission.Id;
-        var evaluation = WritingGrader.MapToEvaluation(res, raw);
+        var evaluation = WritingEvaluationMapper.MapToEvaluation(res, raw);
         _context.WritingEvaluations.Add(evaluation);
         await _context.SaveChangesAsync(token);
 
