@@ -4,14 +4,13 @@ services:
     build:
       context: ..
       dockerfile: gateway/api-gateway/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+    env_file:
+      - path: ./envs/gateway.env
+        required: true
     ports:
       - 5000:8080
-
     networks:
       - backend
-        
     depends_on:
       - auth-service
       - attempt-service
@@ -19,6 +18,10 @@ services:
       - course-service
       - gamification-service
       - dictionary-service
+      - writing-service
+      - speaking-service
+      - vocabulary-service
+      - ai-service
     
 
 
@@ -237,7 +240,7 @@ services:
       POSTGRES_PASSWORD: exam
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/exam-data"]
+    volumes: ["exam_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U exam -d exam-db -h 127.0.0.1"]
       interval: 5s
@@ -255,7 +258,7 @@ services:
       POSTGRES_PASSWORD: auth
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/auth-data"]
+    volumes: ["auth_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U auth -d auth-db -h 127.0.0.1"]
       interval: 5s
@@ -273,7 +276,7 @@ services:
       POSTGRES_PASSWORD: attempt
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/attempt-data"]
+    volumes: ["attempt_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U attempt -d attempt-db -h 127.0.0.1"]
       interval: 5s
@@ -293,7 +296,7 @@ services:
       - backend
     ports:
       - 5446:5432
-    volumes: ["pgdata:/var/lib/postgresql/course-data"]
+    volumes: ["course_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U course -d course-db -h 127.0.0.1"]
       interval: 5s
@@ -311,7 +314,7 @@ services:
       - 5987:5432
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/vocabulary-data"]
+    volumes: ["vocabulary_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test:
         ["CMD-SHELL", "pg_isready -U vocabulary -d vocabulary-db -h 127.0.0.1"]
@@ -336,7 +339,7 @@ services:
       - 5440:5432
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/writing-data"]
+    volumes: ["writing_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U writing -d writing-db -h 127.0.0.1"]
       interval: 5s
@@ -354,7 +357,7 @@ services:
       - 5441:5432
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/speaking-data"]
+    volumes: ["speaking_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U speaking -d speaking-db -h 127.0.0.1"]
       interval: 5s
@@ -372,7 +375,7 @@ services:
       - 5443:5432
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/dictionary-data"]
+    volumes: ["dictionary_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dictionary -d dictionary-db -h 127.0.0.1"]
       interval: 5s
@@ -390,7 +393,7 @@ services:
       - 5444:5432
     networks:
       - backend
-    volumes: ["pgdata:/var/lib/postgresql/gamification-data"]
+    volumes: ["gamification_pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U gamification -d gamification-db -h 127.0.0.1"]
       interval: 5s
@@ -456,27 +459,6 @@ services:
   #   depends_on:
   #     - elasticsearch
 
-  qdrant:
-    image: qdrant/qdrant:v1.17.0
-    ports:
-      - "6333:6333"
-      - "6334:6334"
-    networks:
-      - backend
-    volumes:
-      - qdrant_data:/qdrant/storage
-    healthcheck:
-      test: ["CMD-SHELL", "bash -c 'cat < /dev/null > /dev/tcp/localhost/6333' 2>/dev/null"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-
-  # NOTE: Ollama runs on the HOST machine for local dev (not in compose).
-  # Pull only the embedding model on the host (LLM goes to Groq cloud):
-  #   ollama pull bge-m3
-  # ai-service reaches it via host.docker.internal (extra_hosts maps it on Linux).
-  # Override OLLAMA_BASE_URL in your shell if Ollama runs elsewhere.
   ai-service:
     build:
       context: ..
@@ -489,8 +471,6 @@ services:
     networks:
       - backend
     depends_on:
-      qdrant:
-        condition: service_healthy
       redis:
         condition: service_healthy
     extra_hosts:
@@ -504,8 +484,13 @@ networks:
     driver: bridge
 
 volumes:
-  pgdata:
+  auth_pgdata:
+  attempt_pgdata:
+  exam_pgdata:
+  course_pgdata:
+  vocabulary_pgdata:
+  writing_pgdata:
+  speaking_pgdata:
+  dictionary_pgdata:
+  gamification_pgdata:
   rabbitmq_data:
-  ollama_data:
-  esdata:
-  qdrant_data:
