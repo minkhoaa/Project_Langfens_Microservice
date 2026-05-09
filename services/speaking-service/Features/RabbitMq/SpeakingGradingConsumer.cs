@@ -42,7 +42,8 @@ namespace speaking_service.Features.RabbitMq
                 Task = taskText,
                 Transcript = answerText
             };
-            var (gradeResult, _) = await _grader.Grade(contentSubmission, context.CancellationToken);
+            var gradeResult = await _grader.GradeAsync(contentSubmission, context.CancellationToken);
+            var res = gradeResult.Response;
             var gradingResponse = new SpeakingGradingResponseMessage
             {
                 AttemptId = request.AttemptId,
@@ -51,18 +52,16 @@ namespace speaking_service.Features.RabbitMq
                 TaskText = taskText,
                 TranscriptRaw = answerText,
                 TranscriptNormalized = answerText,
-                WordCount = gradeResult.WordCount,
-                OverallBand = gradeResult.OverallBand,
-                FluencyAndCoherence = gradeResult.FluencyAndCoherence,
-                LexicalResource = gradeResult.LexicalResource,
-                GrammaticalRangeAndAccuracy = gradeResult.GrammaticalRangeAndAccuracy,
-                Pronunciation = gradeResult.Pronunciation,
-
-                Suggestions = gradeResult.Suggestions,
-                ImprovedAnswer = gradeResult.ImprovedAnswer
-
+                WordCount = res.WordCount,
+                OverallBand = res.OverallBand,
+                FluencyAndCoherence = res.FluencyAndCoherence,
+                LexicalResource = res.LexicalResource,
+                GrammaticalRangeAndAccuracy = res.GrammaticalRangeAndAccuracy,
+                Pronunciation = res.Pronunciation,
+                Suggestions = res.Suggestions,
+                ImprovedAnswer = res.ImprovedAnswer
             };
-            _logger.LogInformation(JsonSerializer.Serialize(gradeResult));
+            _logger.LogInformation(JsonSerializer.Serialize(res));
 
             await _bus.Publish(gradingResponse);
 

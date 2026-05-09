@@ -71,24 +71,16 @@ builder.Services.AddScoped<ISpeakingService, SpeakingService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 
 // ── AI clients ───────────────────────────────────────────────────────────
-var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT")
-    ?? throw new InvalidOperationException("AZURE_OPENAI__ENDPOINT is required");
-var azureApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI__APIKEY")
-    ?? throw new InvalidOperationException("AZURE_OPENAI__APIKEY is required");
-var azureDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI__DEPLOYMENT") ?? "gpt-4o-mini";
-
-builder.Services.AddSingleton(_ => new OpenAI.Chat.ChatClient(
-    model: azureDeployment,
-    credential: new System.ClientModel.ApiKeyCredential(azureApiKey),
-    options: new OpenAI.OpenAIClientOptions { Endpoint = new Uri(azureEndpoint) }
-));
+// AZURE_OPENAI removed — grading delegated to ai-service via HttpClient
 
 // ── Whisper ───────────────────────────────────────────────────────────────
 RuntimeOptions.RuntimeLibraryOrder = [RuntimeLibrary.Cuda, RuntimeLibrary.Cpu, RuntimeLibrary.CpuNoAvx];
 var whisperModelPath = await WhisperModelHelper.EnsureModelDownloadedAsync();
 builder.Services.AddSingleton<WhisperFactory>(_ => WhisperFactory.FromPath(whisperModelPath));
 builder.Services.AddHttpClient<IAudioDownloader, AudioDownloader>();
-builder.Services.AddSingleton<ISpeakingGrader, SpeakingGrader>();
+var aiServiceUrl = Environment.GetEnvironmentVariable("AI_SERVICE_URL") ?? "http://ai-service:8080";
+builder.Services.AddHttpClient<ISpeakingGrader, AiSpeakingGrader>()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri(aiServiceUrl));
 
 // ── App ──────────────────────────────────────────────────────────────────
 var app = builder.Build();

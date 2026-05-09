@@ -237,3 +237,29 @@ class GrammarDetectRequest(BaseModel):
 
 class GrammarDetectResponse(BaseModel):
     errors: list[GrammarErrorItem]
+
+
+# ---------------------------------------------------------------------------
+# Speaking Grading Schemas
+# ---------------------------------------------------------------------------
+
+class SpeakingGradeRequest(BaseModel):
+    task: str = Field(..., min_length=5, max_length=2000, description="Question/prompt text")
+    transcript: str = Field(..., min_length=10, max_length=3000, description="Whisper-transcribed answer")
+    word_count: int = Field(..., ge=0, description="Pre-computed word count")
+
+
+class SpeakingCriterionResult(BaseModel):
+    b: float = Field(..., ge=0.0, le=9.0, description="Band score")
+    c: str = Field(..., description="Analysis comment")
+
+
+class SpeakingGradeResponse(BaseModel):
+    ob: float = Field(..., ge=0.0, le=9.0, description="Overall band")
+    fc: SpeakingCriterionResult = Field(..., description="Fluency and Coherence")
+    lr: SpeakingCriterionResult = Field(..., description="Lexical Resource")
+    gr: SpeakingCriterionResult = Field(..., description="Grammatical Range and Accuracy")
+    pr: SpeakingCriterionResult = Field(..., description="Pronunciation")
+    s: list[str] = Field(default_factory=list, description="3-5 improvement suggestions")
+    p: str = Field(default="", description="Improved answer example")
+    raw_llm_json: str | None = Field(default=None, description="Raw LLM JSON for debugging")

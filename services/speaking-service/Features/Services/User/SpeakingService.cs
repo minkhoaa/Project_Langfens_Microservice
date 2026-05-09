@@ -51,11 +51,15 @@ public class SpeakingService : ISpeakingService
         var exam = await _context.SpeakingExams.AsNoTracking().Where(x => x.Id == submitForm.ExamId)
             .FirstOrDefaultAsync(token) ?? throw new Exception("Exam is not existed");
 
-        var (res, raw) = await _grader.Grade(new ContentSubmission
+        var gradeResult = await _grader.GradeAsync(new ContentSubmission
         {
             Task = exam.TaskText,
             Transcript = transcript
         }, token);
+        // gradeResult.Response = SpeakingGradeResponseDto (JSON compat)
+        // gradeResult.Compact = LlmSpeakingScoreCompact
+        var res = gradeResult.Response;
+        var raw = gradeResult.Compact;
 
         var submission = new SpeakingSubmission()
         {
@@ -71,8 +75,23 @@ public class SpeakingService : ISpeakingService
             SubmittedAt = DateTime.UtcNow,
         };
         await _context.SpeakingSubmissions.AddAsync(submission, token);
-        res.SubmissionId = submission.Id;
-        var evaluation = _grader.MapToEvaluation(res, raw);
+        // Build a full SpeakingGradeResponse for MapToEvaluation
+        var fullResponse = new SpeakingGradeResponse
+        {
+            SubmissionId = submission.Id,
+            TaskText = exam.TaskText,
+            TranscriptRaw = transcript,
+            TranscriptNormalized = transcript,
+            WordCount = res.WordCount,
+            OverallBand = res.OverallBand,
+            FluencyAndCoherence = new CriterionScore { Band = res.FluencyAndCoherence.Band, Comment = res.FluencyAndCoherence.Comment },
+            LexicalResource = new CriterionScore { Band = res.LexicalResource.Band, Comment = res.LexicalResource.Comment },
+            GrammaticalRangeAndAccuracy = new CriterionScore { Band = res.GrammaticalRangeAndAccuracy.Band, Comment = res.GrammaticalRangeAndAccuracy.Comment },
+            Pronunciation = new CriterionScore { Band = res.Pronunciation.Band, Comment = res.Pronunciation.Comment },
+            Suggestions = res.Suggestions,
+            ImprovedAnswer = res.ImprovedAnswer,
+        };
+        var evaluation = _grader.MapToEvaluation(fullResponse, raw);
         _context.SpeakingEvaluations.Add(evaluation);
         await _context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Submitted", new { submission.Id, res }));
