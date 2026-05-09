@@ -4,7 +4,9 @@ import time
 
 from app.config import settings
 from app.prompts.writing_grade import build_grade_prompt
+from app.prompts.speaking_grade import build_speaking_prompt
 from app.schemas import CriterionItem, ReassembledEssay, WritingGradeRequest, WritingGradeResponse
+from app.schemas import SpeakingGradeRequest, SpeakingGradeResponse as SpeakingGradeResponseSchema, SpeakingCriterionResult
 from app.services import llm_service, search_service
 
 logger = logging.getLogger(__name__)
@@ -149,3 +151,52 @@ async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
         p=str(improved_para) if improved_para else "",
         raw_llm_json=json_lib.dumps(result),
     )
+
+
+async def grade_speaking(req: SpeakingGradeRequest) -> SpeakingGradeResponseSchema:
+    """Grade an IELTS speaking submission using LLM (no RAG)."""
+    import json as json_lib_inner
+
+    t0 = time.time()
+
+    # Build prompt
+    prompt = build_speaking_prompt(req.task, req.transcript)
+
+    # Call LLM via openai_like (groq/minimax with KeyManager)
+    try:
+        result = await llm_service.generate(
+            prompt_template="{prompt}",
+            variables={"prompt": prompt},
+            expect_json=True,
+        )
+    except Exception as exc:
+        logger.error("LLM speaking grading failed: %s", exc)
+        raise
+
+    t_llm = time.time()
+    logger.info("grade_speaking: llm took %.1fms", (t_llm - t0) * 1000)
+
+    # Parse response
+    try:
+        ob = float(result.get("ob", 6.0))
+        return SpeakingGradeResponseSchema(
+            ob=ob,
+            fc=SpeakingCriterionResult(
+                b=float(result.get("fc", {}).get("b", ob)),
+                c=str(result.get("fc", {}).get("c", ""))),
+            lr=SpeakingCriterionResult(
+                b=float(result.get("lr", {}).get("b", ob)),
+                c=str(result.get("lr", {}).get("c", ""))),
+            gr=SpeakingCriterionResult(
+                b=float(result.get("gr", {}).get("b", ob)),
+                c=str(result.get("gr", {}).get("c", ""))),
+            pr=SpeakingCriterionResult(
+                b=float(result.get("pr", {}).get("b", ob)),
+                c=str(result.get("pr", {}).get("c", ""))),
+            s=result.get("s", []),
+            p=str(result.get("p", "")),
+            raw_llm_json=json_lib_inner.dumps(result),
+        )
+    except (ValueError, TypeError) as exc:
+        logger.error("Failed to parse LLM speaking response: %s — raw: %s", exc, result)
+        raise ValueError(f"Invalid LLM response format: {exc}")
