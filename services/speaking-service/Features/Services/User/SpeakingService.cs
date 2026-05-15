@@ -49,7 +49,9 @@ public class SpeakingService : ISpeakingService
         var transcript = await _whisper.Transcript(submitForm.Speech);
         var userId = _user.UserId;
         var exam = await _context.SpeakingExams.AsNoTracking().Where(x => x.Id == submitForm.ExamId)
-            .FirstOrDefaultAsync(token) ?? throw new Exception("Exam is not existed");
+            .FirstOrDefaultAsync(token);
+        if (exam is null)
+            return Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId = submitForm.ExamId }));
 
         var gradeResult = await _grader.GradeAsync(new ContentSubmission
         {
@@ -106,8 +108,9 @@ public class SpeakingService : ISpeakingService
                            .Select(x =>
                                new StartSpeakingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.CreatedAt,
                                    x.CreatedBy, userId))
-                           .FirstOrDefaultAsync(token)
-                       ?? throw new Exception("Exam id is not existed");
+                           .FirstOrDefaultAsync(token);
+        if (response is null)
+            return Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId }));
         return Results.Ok(new ApiResultDto(true, "Start successfully", response));
     }
 
@@ -170,9 +173,10 @@ public class SpeakingService : ISpeakingService
 
     public async Task<IResult> GetHistoryInDetail(Guid submissionId, Guid? evaluationId, CancellationToken token)
     {
+        var userId = _user.UserId;
         var query = _context.SpeakingEvaluations.AsNoTracking()
             .Include(k => k.SpeakingSubmission)
-            .Where(k => k.SubmissionId == submissionId);
+            .Where(k => k.SubmissionId == submissionId && k.SpeakingSubmission.UserId == userId);
         if (evaluationId is not null)
             query = query.Where(p => p.Id == evaluationId);
         else

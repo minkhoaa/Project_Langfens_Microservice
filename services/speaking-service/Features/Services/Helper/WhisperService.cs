@@ -127,10 +127,11 @@ public class WhisperService : IWhisperService
     private async Task<string> TranscribeChunkAsync(byte[] data, WhisperProcessor processor, CancellationToken token)
     {
         var tempInputPath = Path.GetTempFileName();
+        string? tempNormalizedPath = null;
         try
         {
             await File.WriteAllBytesAsync(tempInputPath, data, token);
-            var tempNormalizedPath = await AudioNormalizer.NormalizeTo16KWavAsync(tempInputPath, token);
+            tempNormalizedPath = await AudioNormalizer.NormalizeTo16KWavAsync(tempInputPath, token);
             await using var wavStream = File.OpenRead(tempNormalizedPath);
             var sb = new StringBuilder();
             await foreach (var segment in processor.ProcessAsync(wavStream, token))
@@ -142,6 +143,7 @@ public class WhisperService : IWhisperService
         }
         finally
         {
+            if (!string.IsNullOrEmpty(tempNormalizedPath) && File.Exists(tempNormalizedPath)) File.Delete(tempNormalizedPath);
             if (!string.IsNullOrEmpty(tempInputPath) && File.Exists(tempInputPath)) File.Delete(tempInputPath);
         }
     }

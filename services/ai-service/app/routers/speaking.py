@@ -169,15 +169,9 @@ async def roleplay_turn_with_speech(req: RoleplayTurnWithSpeechRequest):
         except Exception as exc:
             logger.warning("Failed to retrieve speaking memory: %s", exc)
 
-    # --- call Qwen via Ollama (memory_context is "" if retrieval failed) ---
-    agent_text, feedback = await generate_roleplay_reply(
-        utterance=req.text,
-        errors=req.errors,
-        score=req.score,
-        scenario=scenario,
-        history=session["turns"],
-        memory_context=memory_context,
-    )
+    # --- call agent reply (memory_context is "" if retrieval failed) ---
+    agent_text = await generate_agent_reply(scenario, session["turns"], req.text)
+    feedback = ""  # pronunciation feedback not yet implemented in this path
 
     # --- persist agent turn ---
     session, agent_turn = append_turn(req.session_id, "agent", agent_text)

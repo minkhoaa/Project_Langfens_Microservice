@@ -63,6 +63,13 @@ public class InternalExamDto
                 Questions = x.Questions.Select(a => a with
                 {
                     Options = a.Options.Select(q => q with { IsCorrect = false }).ToList()
+                }).ToList(),
+                QuestionGroups = x.QuestionGroups?.Select(g => g with
+                {
+                    Questions = g.Questions.Select(a => a with
+                    {
+                        Options = a.Options.Select(q => q with { IsCorrect = false }).ToList()
+                    }).ToList()
                 }).ToList()
             }).ToList()
         };

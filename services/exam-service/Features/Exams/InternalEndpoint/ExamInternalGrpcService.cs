@@ -25,7 +25,7 @@ public class ExamInternalGrpcService : ExamInternal.ExamInternalBase
             .Include(x => x.Sections).ThenInclude(x => x.Questions).ThenInclude(x => x.Options)
             .Include(x => x.Sections).ThenInclude(x => x.QuestionGroups)
             .FirstOrDefaultAsync(context.CancellationToken);
-        if (exams == null) return null!;
+        if (exams == null) throw new RpcException(new Status(StatusCode.NotFound, "Exam not found"));
         var res = ProtoHelper.MapToProto(exams, request.ShowAnswers);
         return res;
     }

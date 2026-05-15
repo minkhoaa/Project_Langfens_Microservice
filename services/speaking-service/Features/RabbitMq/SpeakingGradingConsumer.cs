@@ -35,8 +35,12 @@ namespace speaking_service.Features.RabbitMq
             var request = context.Message;
             _logger.LogInformation(JsonSerializer.Serialize(request));
             var taskText = request.Prompt ?? "";
-            var audioStream = await _audioDownloader.GetAudioStreamAsync(request.AudioUrl, context.CancellationToken);
-            var answerText = await _whisper.Transcript(audioStream);
+            var (audioFile, audioStream) = await _audioDownloader.GetAudioStreamAsync(request.AudioUrl, context.CancellationToken);
+            string answerText;
+            await using (audioStream)
+            {
+                answerText = await _whisper.Transcript(audioFile);
+            }
             var contentSubmission = new ContentSubmission
             {
                 Task = taskText,

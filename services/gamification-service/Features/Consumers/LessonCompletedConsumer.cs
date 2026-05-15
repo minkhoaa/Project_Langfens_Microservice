@@ -160,6 +160,7 @@ public class LessonCompletedConsumer : IConsumer<LessonCompletedEvent>
                 });
 
                 stats.TotalXp += achievement.XpReward;
+                stats.Level = UserStats.CalculateLevel(stats.TotalXp);
                 _context.XpTransactions.Add(new XpTransaction
                 {
                     Id = Guid.NewGuid(),

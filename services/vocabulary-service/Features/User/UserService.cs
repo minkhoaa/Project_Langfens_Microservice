@@ -70,7 +70,7 @@ public class UserService(VocabularyDbContext context, IPublishEndpoint publishEn
         }
         catch (Exception e)
         {
-            return Results.BadRequest(e.Message);
+            return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
         }
     }
 
@@ -96,7 +96,7 @@ public class UserService(VocabularyDbContext context, IPublishEndpoint publishEn
         }
         catch (Exception e)
         {
-            return Results.BadRequest(e.Message);
+            return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
         }
     }
 
@@ -107,7 +107,7 @@ public class UserService(VocabularyDbContext context, IPublishEndpoint publishEn
         var today = DateTime.UtcNow.Date;
         var deckIds = await context.UserDecks.AsNoTracking()
             .Where(x => x.UserId == userId && x.Status == UserDeckStatus.Active)
-            .Select(x => x.Id)
+            .Select(x => x.DeckId)
             .ToListAsync(token);
         if (deckIds.Count == 0)
             return Results.Ok(Array.Empty<DueCardDto>());

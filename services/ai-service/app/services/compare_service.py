@@ -176,14 +176,14 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         )
         validate_sentence_comparisons_response(result)
     except OutputParserException as e:
-        logger.warning(f"LLM call failed: {e}")
-        result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
+        logger.warning("LLM call failed: %s", e)
+        raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
     except ValueError as e:
-        logger.warning(f"Validation failed: {e}")
-        result = {"overall_analysis": f"LLM response validation failed. Raw error: {e}"}
+        logger.warning("Validation failed: %s", e)
+        raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
     except Exception as e:
-        logger.warning(f"LLM call failed: {e}")
-        result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
+        logger.warning("LLM call failed: %s", e)
+        raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
 
     t_llm = time.time()
     logger.info("compare: llm took %.1fms, total %.1fms", (t_llm - t_search) * 1000, (t_llm - t0) * 1000)
@@ -242,14 +242,14 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
         )
         validate_sentence_comparisons_response(result)
     except OutputParserException as e:
-        logger.warning(f"LLM call failed: {e}")
-        result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
+        logger.warning("LLM call failed: %s", e)
+        raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
     except ValueError as e:
-        logger.warning(f"Validation failed: {e}")
-        result = {"overall_analysis": f"LLM response validation failed. Raw error: {e}"}
+        logger.warning("Validation failed: %s", e)
+        raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
     except Exception as e:
-        logger.warning(f"LLM call failed: {e}")
-        result = {"overall_analysis": f"LLM returned unparseable response. Raw error: {e}"}
+        logger.warning("LLM call failed: %s", e)
+        raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
 
     return CompareResponse(
         overall_analysis=result.get("overall_analysis", ""),

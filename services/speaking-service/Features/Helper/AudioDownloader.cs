@@ -10,7 +10,7 @@ namespace speaking_service.Features.Helper
 {
     public interface IAudioDownloader
     {
-        Task<IFormFile> GetAudioStreamAsync(string url, CancellationToken token, string fileName = "audio/webm");
+        Task<(IFormFile File, MemoryStream Stream)> GetAudioStreamAsync(string url, CancellationToken token, string fileName = "audio/webm");
     }
     public class AudioDownloader : IAudioDownloader
     {
@@ -22,7 +22,7 @@ namespace speaking_service.Features.Helper
             _logger = logger;
         }
 
-        public async Task<IFormFile> GetAudioStreamAsync(string url, CancellationToken token, string fileName = "audio/webm")
+        public async Task<(IFormFile File, MemoryStream Stream)> GetAudioStreamAsync(string url, CancellationToken token, string fileName = "audio/webm")
         {
             var audio = await _client.GetAsync(url, token);
             _logger.LogInformation($"Downloading audio from {url}");
@@ -39,7 +39,7 @@ namespace speaking_service.Features.Helper
             };
             _logger.LogInformation("Download done");
 
-            return formFile;
+            return (formFile, memoryStream);
         }
     }
 }

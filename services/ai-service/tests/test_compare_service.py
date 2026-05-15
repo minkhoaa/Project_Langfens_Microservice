@@ -106,6 +106,7 @@ async def test_compare_essay_no_references():
 @pytest.mark.asyncio
 async def test_compare_essay_llm_parse_failure():
     from app.services.compare_service import compare_essay
+    from fastapi import HTTPException
     from langchain_core.exceptions import OutputParserException
     req = CompareRequest(
         essay_text="A" * 100,
@@ -116,8 +117,8 @@ async def test_compare_essay_llm_parse_failure():
 
     with patch("app.services.compare_service.search_service.search_and_reassemble", new_callable=AsyncMock, return_value=MOCK_REASSEMBLED_RESULTS), \
          patch("app.services.compare_service.llm_service.generate", new_callable=AsyncMock, side_effect=OutputParserException("bad json")):
-        result = await compare_essay(req)
+        with pytest.raises(HTTPException) as exc_info:
+            await compare_essay(req)
 
-    assert "LLM returned unparseable response" in result.overall_analysis
-    assert result.sentence_comparisons == []
-    assert len(result.references) == 3
+    assert exc_info.value.status_code == 503
+    assert "temporarily unavailable" in exc_info.value.detail

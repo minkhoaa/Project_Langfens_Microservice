@@ -114,7 +114,7 @@ public class InternalExamService : IInternalExamService
             var paper = new InternalExamDto.InternalDeliveryExam(
                 examId,
                 exam.Slug,
-                exam.Slug,
+                exam.Title,
                 exam.DescriptionMd,
                 exam.Category,
                 exam.Level,

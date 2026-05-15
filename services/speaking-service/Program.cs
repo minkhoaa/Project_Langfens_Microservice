@@ -77,6 +77,11 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 RuntimeOptions.RuntimeLibraryOrder = [RuntimeLibrary.Cuda, RuntimeLibrary.Cpu, RuntimeLibrary.CpuNoAvx];
 var whisperModelPath = await WhisperModelHelper.EnsureModelDownloadedAsync();
 builder.Services.AddSingleton<WhisperFactory>(_ => WhisperFactory.FromPath(whisperModelPath));
+builder.Services.AddScoped<WhisperProcessor>(sp =>
+    sp.GetRequiredService<WhisperFactory>()
+      .CreateBuilder()
+      .WithLanguage("en")
+      .Build());
 builder.Services.AddHttpClient<IAudioDownloader, AudioDownloader>();
 var aiServiceUrl = Environment.GetEnvironmentVariable("AI_SERVICE_URL") ?? "http://ai-service:8080";
 builder.Services.AddHttpClient<ISpeakingGrader, AiSpeakingGrader>()

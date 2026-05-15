@@ -84,7 +84,7 @@ public class ExamService : IExamService
         try
         {
             var exams = await _context.Exams.AsNoTracking()
-                .Where(x => x.Slug == slug)
+                .Where(x => x.Slug == slug && x.Status == ExamStatus.Published)
                 .Select(exam => new Dto_Public.PubLicExamDetailRecord(
                     exam.Id, exam.Slug, exam.Title, exam.DescriptionMd, exam.Category, exam.Level, exam.DurationMin, exam.ImageUrl!,
                     exam.Sections

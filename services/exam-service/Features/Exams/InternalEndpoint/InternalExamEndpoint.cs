@@ -6,6 +6,6 @@ public static class InternalExamEndpoint
     {
         var internalExam = app.MapGroup("/api/internal");
         internalExam.MapGet("/exams/{id}/delivery", InternalExamHandler.GetByExamIdHandler)
-            .AllowAnonymous();
+            .RequireAuthorization();
     }
 }

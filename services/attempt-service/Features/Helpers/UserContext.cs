@@ -16,12 +16,13 @@ namespace attempt_service.Features.Helpers
         public UserContext(IHttpContextAccessor context)
         {
 
-            User = context.HttpContext!.User ?? new ClaimsPrincipal(new ClaimsIdentity());
+            User = context.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
             var idValue = User.FindFirstValue(CustomClaims.Sub)
                 ?? User.FindFirst(CustomClaims.Sub)?.Value
                 ?? User.FindFirst("uid")?.Value;
-            if (!string.IsNullOrEmpty(idValue) && Guid.TryParse(idValue, out var guid))
-                UserId = guid;
+            if (string.IsNullOrEmpty(idValue) || !Guid.TryParse(idValue, out var guid))
+                throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
+            UserId = guid;
         }
     }
 }
