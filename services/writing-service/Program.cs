@@ -1,9 +1,12 @@
 using System.Net.Http.Headers;
-using DotNetEnv;
+using Aspire.Npgsql;
 using MassTransit;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Shared.Security.Claims;
 using Shared.Security.Scopes;
+using System.Text.Json;
 using writing_service.Contracts;
 using writing_service.Features;
 using writing_service.Features.Helper;
@@ -13,7 +16,7 @@ using writing_service.Features.Service.User;
 using writing_service.Infrastructure.Configuration;
 using writing_service.Infrastructure.Persistence;
 
-Env.Load();
+DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 static string EnvOrDefault(string key, string fallback) =>
@@ -27,14 +30,19 @@ builder.Services.AddLangfensSwagger("Writing Service");
 builder.Services.AddHttpContextAccessor();
 
 // ── Database ────────────────────────────────────────────────────────
-var writingConnectionString = EnvOrDefault("CONNECTIONSTRING__WRITING",
+// Register connection string in Aspire config so AppHost can inject it
+var writingDbConnString = EnvOrDefault("CONNECTIONSTRING__WRITING",
     "Host=writing-database;Port=5432;Database=writing-db;Username=writing;Password=writing");
-if (string.IsNullOrWhiteSpace(writingConnectionString))
-    throw new Exception("CONNECTIONSTRING__WRITING is required");
-var dsb = new Npgsql.NpgsqlDataSourceBuilder(writingConnectionString);
-dsb.EnableDynamicJson();
-var npgsqlDataSource = dsb.Build();
+builder.Configuration.GetSection("ConnectionStrings")["writing-db"] = writingDbConnString;
+
+// Add NpgsqlDataSource via Aspire (singleton, matches original behavior)
+builder.AddNpgsqlDataSource("writing-db");
+
+// Also register NpgsqlDataSource as singleton for direct use (e.g., raw queries)
+var npgsqlDataSource = new Npgsql.NpgsqlDataSourceBuilder(writingDbConnString).Build();
 builder.Services.AddSingleton(npgsqlDataSource);
+
+// DbContext still uses the singleton NpgsqlDataSource
 builder.Services.AddDbContext<WritingDbContext>(o =>
     o.UseNpgsql(npgsqlDataSource, npg =>
         npg.MigrationsAssembly(typeof(WritingDbContext).Assembly.GetName().Name)));
@@ -66,13 +74,24 @@ builder.Services.AddMassTransit(cfg =>
     cfg.AddConsumer<WritingSubmittedConsumer>();
     cfg.UsingRabbitMq((ctx, bus) =>
     {
-        bus.ConfigureRabbitMqHost(rabbitConfig);
+        bus.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
+        {
+            h.Username(rabbitConfig.Username);
+            h.Password(rabbitConfig.Password);
+            if (rabbitConfig.UseSsl)
+                h.UseSsl(k => k.Protocol = System.Security.Authentication.SslProtocols.Tls12);
+        });
         bus.ConfigureEndpoints(ctx);
     });
 });
 
-// ── Grader LLM (OpenAI-compatible — defaults to Groq) ──────────────────
-// REMOVED: Grading now via ai-service HTTP call. GRADER_LLM__* vars no longer used.
+// ── Health checks ────────────────────────────────────────────────────
+builder.Services.AddHealthChecks()
+    .AddNpgSql(
+        connectionString: writingDbConnString,
+        name: "writing-db",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "db", "postgresql" });
 
 // ── App ───────────────────────────────────────────────────────────
 var app = builder.Build();
@@ -87,4 +106,27 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapWritingEndpoint();
 app.MapWritingAdminEndpoint();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds
+            })
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+    }
+});
+
 app.Run();
+
+public partial class Program { }
