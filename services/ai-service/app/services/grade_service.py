@@ -54,6 +54,25 @@ def _extract_grade_hints(references: list[ReassembledEssay]) -> dict:
     }
 
 
+def _estimate_band_from_word_count(word_count: int) -> float:
+    """
+    Rough band estimate from word count alone (used only for RAG filter).
+    Under 150 words → likely band 4-5.
+    150-249 words → likely band 5-6 (below minimum, penalised).
+    250-349 words → likely band 5.5-6.5.
+    350+ words → likely band 6.5-7.5.
+    Returns the centre of the expected range.
+    """
+    if word_count < 150:
+        return 4.5
+    elif word_count < 250:
+        return 5.5
+    elif word_count < 350:
+        return 6.0
+    else:
+        return 7.0
+
+
 async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
     """
     Grade an IELTS writing submission using RAG + LLM.
