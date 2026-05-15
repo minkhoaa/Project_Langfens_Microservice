@@ -1,10 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
+using CommunityToolkit.Aspire.MassTransit.RabbitMQ;
 using HealthChecks.RabbitMQ;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using RabbitMQ.Client;
 using Shared.Bootstrap;
 using attempt_service.Features.Analytics;
 using attempt_service.Features.Attempt;
@@ -69,6 +71,7 @@ builder.AddNpgsqlDbContext<AttemptDbContext>("attempt-db");
 // ── Health checks ───────────────────────────────────────────────────────────
 var attemptConnectionString = builder.Configuration.GetConnectionString("attempt-db")
     ?? throw new InvalidOperationException("attempt-db connection string is required");
+
 var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
 
 builder.Services.AddHealthChecks()
