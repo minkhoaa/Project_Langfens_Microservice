@@ -1,6 +1,12 @@
 using System.Net;
+using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using MassTransit;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Shared.Bootstrap;
+using Shared.Security.Scopes;
+using System.Text.Json;
 using vocabulary_service.Application;
 using vocabulary_service.Features;
 using vocabulary_service.Features.Admin;
@@ -17,9 +23,7 @@ builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Vocabulary Service");
 
 // ── Database ─────────────────────────────────────────────────────────────
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__VOCABULARY")
-    ?? "Host=vocabulary-database;Port=5432;Database=vocabulary-db;Username=vocabulary;Password=vocabulary";
-builder.Services.AddDbContext<VocabularyDbContext>(o => o.UseNpgsql(connectionString));
+builder.AddNpgsqlDbContext<VocabularyDbContext>("vocabulary-db");
 
 // ── RabbitMQ ─────────────────────────────────────────────────────────────
 var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
@@ -28,7 +32,13 @@ builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.ConfigureRabbitMqHost(rabbitConfig);
+        cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
+        {
+            h.Username(rabbitConfig.Username);
+            h.Password(rabbitConfig.Password);
+            if (rabbitConfig.UseSsl)
+                h.UseSsl(k => k.Protocol = System.Security.Authentication.SslProtocols.Tls12);
+        });
     });
 });
 
@@ -52,6 +62,14 @@ else
     Console.WriteLine("[WARN] Azure OpenAI not configured – AI enrichment disabled");
 }
 
+// ── Health checks ────────────────────────────────────────────────────────
+builder.Services.AddHealthChecks()
+    .AddNpgSql(
+        connectionString: builder.Configuration.GetConnectionString("vocabulary-db")!,
+        name: "vocabulary-db",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "db", "postgresql" });
+
 // ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPublicService, PublicService>();
@@ -74,6 +92,26 @@ using (var scope = app.Services.CreateScope())
     if (db.Database.IsRelational())
         await db.Database.MigrateAsync();
 }
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds
+            })
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+    }
+});
 
 app.MapPublicVocabularyEndpoints();
 app.MapUserVocabularyEndpoints();
