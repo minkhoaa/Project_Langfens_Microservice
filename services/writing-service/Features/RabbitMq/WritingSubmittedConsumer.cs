@@ -140,19 +140,20 @@ namespace writing_service.Features.RabbitMq
 
         private async Task<WritingEvaluation?> LoadEvaluationWithRetry(Guid submissionId, CancellationToken ct)
         {
-            // Race: sync handler may not have committed before this consumer reads.
-            // Retry once after 500ms to absorb the typical race window.
-            var evaluation = await _db.WritingEvaluations
-                .Where(e => e.SubmissionId == submissionId)
-                .OrderByDescending(e => e.CreatedAt)
-                .FirstOrDefaultAsync(ct);
-            if (evaluation is not null) return evaluation;
+            // Exponential backoff: 200ms, 600ms, 1800ms (total max ~2.6s)
+            int[] delaysMs = [200, 600, 1800];
+            for (int attempt = 0; attempt <= delaysMs.Length; attempt++)
+            {
+                var evaluation = await _db.WritingEvaluations
+                    .Where(e => e.SubmissionId == submissionId)
+                    .OrderByDescending(e => e.CreatedAt)
+                    .FirstOrDefaultAsync(ct);
+                if (evaluation is not null) return evaluation;
 
-            await Task.Delay(500, ct);
-            return await _db.WritingEvaluations
-                .Where(e => e.SubmissionId == submissionId)
-                .OrderByDescending(e => e.CreatedAt)
-                .FirstOrDefaultAsync(ct);
+                if (attempt < delaysMs.Length)
+                    await Task.Delay(delaysMs[attempt], ct);
+            }
+            return null;
         }
     }
 }
