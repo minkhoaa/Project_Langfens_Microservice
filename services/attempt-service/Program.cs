@@ -75,7 +75,7 @@ builder.Services.AddHealthChecks()
     .AddNpgSql(attemptConnectionString, name: "attempt-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
     .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
 
-// ── MassTransit (RabbitMQ) ───────────────────────────────────────────────────
+// ── MassTransit (RabbitMQ) ────────────────────────────────────────────────────
 builder.Services.AddMassTransit(cfg =>
 {
     cfg.AddConsumer<WritingGradedConsumer>();
