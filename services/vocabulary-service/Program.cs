@@ -4,6 +4,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using HealthChecks.RabbitMQ;
 using Shared.Bootstrap;
 using Shared.Security.Scopes;
 using System.Text.Json;
@@ -25,19 +26,37 @@ builder.Services.AddLangfensSwagger("Vocabulary Service");
 // ── Database ─────────────────────────────────────────────────────────────
 builder.AddNpgsqlDbContext<VocabularyDbContext>("vocabulary-db");
 
-// ── RabbitMQ ─────────────────────────────────────────────────────────────
-var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
-    key => Environment.GetEnvironmentVariable(key));
+static string EnvOrDefault(string key, string fallback) =>
+    Environment.GetEnvironmentVariable(key) ?? fallback;
+
+var rabbitHost = EnvOrDefault("RABBITMQ__HOST", "localhost");
+var rabbitUser = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME")
+    ?? throw new InvalidOperationException("RABBITMQ__USERNAME is required");
+var rabbitPass = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD")
+    ?? throw new InvalidOperationException("RABBITMQ__PASSWORD is required");
+var rabbitVhost = EnvOrDefault("RABBITMQ__VHOST", "/");
+var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var port) ? port : (ushort)5672;
+
+var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
+
+// ── Health checks ────────────────────────────────────────────────────────
+builder.Services.AddHealthChecks()
+    .AddNpgSql(
+        connectionString: builder.Configuration.GetConnectionString("vocabulary-db")!,
+        name: "vocabulary-db",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "db", "postgresql" })
+    .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
+
+// ── MassTransit (RabbitMQ) ──────────────────────────────────────────────────
 builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
+        cfg.Host(rabbitHost, rabbitPort, rabbitVhost, h =>
         {
-            h.Username(rabbitConfig.Username);
-            h.Password(rabbitConfig.Password);
-            if (rabbitConfig.UseSsl)
-                h.UseSsl(k => k.Protocol = System.Security.Authentication.SslProtocols.Tls12);
+            h.Username(rabbitUser);
+            h.Password(rabbitPass);
         });
     });
 });
