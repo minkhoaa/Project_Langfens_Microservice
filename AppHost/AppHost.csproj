@@ -24,6 +24,12 @@
     <ProjectReference Include="..\services\gamification-service\gamification-service.csproj" />
     <ProjectReference Include="..\services\speaking-service\speaking-service.csproj" />
     <ProjectReference Include="..\services\dictionary-service\dictionary-service.csproj" />
+    <ProjectReference Include="..\services\attempt-service\attempt-service.csproj" />
+    <ProjectReference Include="..\services\auth-service\auth-service.csproj" />
+    <ProjectReference Include="..\services\course-service\course-service.csproj" />
+    <ProjectReference Include="..\services\email-service\email-service.csproj" />
+    <ProjectReference Include="..\services\vocabulary-service\vocabulary-service.csproj" />
+    <ProjectReference Include="..\services\writing-service\writing-service.csproj" />
   </ItemGroup>
 
 </Project>
