@@ -93,6 +93,30 @@ var writingService = builder.AddProject("writing-service", "writing-service")
     .WaitFor(writingDb)
     .WaitFor(rabbitmq);
 
+// ── auth-service ───────────────────────────────────────────────────────────
+var authDbServer = builder.AddPostgres("auth-db-server", port: 5434);
+var authDb = authDbServer.AddDatabase("auth-db");
+
+var authRedis = builder.AddRedis("auth-redis", port: 6379);
+
+var authService = builder.AddProject("auth-service", "auth-service")
+    .WithReference(authDb)
+    .WithReference(authRedis)
+    .WithReference(rabbitmq)
+    .WaitFor(authDb)
+    .WaitFor(authRedis)
+    .WaitFor(rabbitmq);
+
+// ── attempt-service ────────────────────────────────────────────────────────
+var attemptDbServer = builder.AddPostgres("attempt-db-server", port: 5435);
+var attemptDb = attemptDbServer.AddDatabase("attempt-db");
+
+var attemptService = builder.AddProject("attempt-service", "attempt-service")
+    .WithReference(attemptDb)
+    .WithReference(rabbitmq)
+    .WaitFor(attemptDb)
+    .WaitFor(rabbitmq);
+
 // ── API Gateway ──────────────────────────────────────────────────────────
 var gateway = builder.AddProject<Projects.ApiGateway>("api-gateway")
     .WithReference(exam)
@@ -101,12 +125,16 @@ var gateway = builder.AddProject<Projects.ApiGateway>("api-gateway")
     .WithReference(dictionaryService)
     .WithReference(vocabularyService)
     .WithReference(writingService)
+    .WithReference(authService)
+    .WithReference(attemptService)
     .WaitFor(exam)
     .WaitFor(gamificationService)
     .WaitFor(speakingService)
     .WaitFor(dictionaryService)
     .WaitFor(vocabularyService)
-    .WaitFor(writingService);
+    .WaitFor(writingService)
+    .WaitFor(authService)
+    .WaitFor(attemptService);
 
 // ── AI Service ───────────────────────────────────────────────────────────
 var redis = builder.AddRedis("redis", port: 6379);

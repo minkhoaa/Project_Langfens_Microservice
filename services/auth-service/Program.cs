@@ -170,7 +170,19 @@ app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapAuthEndpoints();
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new { name = e.Key, status = e.Value.Status.ToString(), description = e.Value.Description, duration = e.Value.Duration.TotalMilliseconds })
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+    }
+});
 app.Run();
 
 public partial class Program { }
