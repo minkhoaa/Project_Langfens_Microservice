@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using Aspire.Npgsql;
 using MassTransit;
+using RabbitMQ.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -67,8 +68,16 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 
 // ── RabbitMQ ───────────────────────────────────────────────────────
-var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
-    key => Environment.GetEnvironmentVariable(key));
+var rabbitConfig = new RabbitMqConfig
+{
+    Host = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ?? "localhost",
+    Port = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var port) ? port : (ushort)5672,
+    VirtualHost = Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/",
+    Username = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ?? throw new InvalidOperationException("RABBITMQ__USERNAME is required"),
+    Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ?? throw new InvalidOperationException("RABBITMQ__PASSWORD is required"),
+    UseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var ssl) && ssl,
+};
+
 builder.Services.AddMassTransit(cfg =>
 {
     cfg.AddConsumer<WritingSubmittedConsumer>();
