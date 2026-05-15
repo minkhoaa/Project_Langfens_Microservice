@@ -13,12 +13,17 @@
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.3.2" />
     <PackageReference Include="Aspire.Npgsql" Version="13.3.2" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.3.2" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.3.2" />
+    <PackageReference Include="Aspire.Hosting.Docker" Version="13.3.2" />
     <PackageReference Include="CommunityToolkit.Aspire.MassTransit.RabbitMQ" Version="13.3.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\gateway\api-gateway\api-gateway.csproj" />
     <ProjectReference Include="..\services\exam-service\exam-service.csproj" />
     <ProjectReference Include="..\services\gamification-service\gamification-service.csproj" />
+    <ProjectReference Include="..\services\speaking-service\speaking-service.csproj" />
+    <ProjectReference Include="..\services\dictionary-service\dictionary-service.csproj" />
   </ItemGroup>
 
 </Project>
