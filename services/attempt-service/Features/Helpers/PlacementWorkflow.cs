@@ -196,7 +196,9 @@ namespace attempt_service.Features.Helpers
 
             _context.PlacementResults.Update(placement);
 
-            if (placement.WritingBand.HasValue && placement.SpeakingBand.HasValue)
+            // Set GRADED when: both writing AND speaking are done,
+            // OR writing is done and speaking was never submitted (SpeakingGradeJson stays null).
+            if (placement.WritingBand.HasValue && (placement.SpeakingBand.HasValue || placement.SpeakingGradeJson == null))
             {
                 await _context.Attempts
                         .Where(a => a.Id == response.AttemptId)
@@ -254,7 +256,9 @@ namespace attempt_service.Features.Helpers
             _context.PlacementResults.Update(placement);
 
             // 4. Option: đánh dấu attempt là Graded
-            if (placement.WritingBand.HasValue && placement.SpeakingBand.HasValue)
+            // Set GRADED when: both speaking AND writing are done,
+            // OR speaking is done and writing was never submitted (WritingGradeJson stays null).
+            if (placement.SpeakingBand.HasValue && (placement.WritingBand.HasValue || placement.WritingGradeJson == null))
             {
                 await _context.Attempts
                     .Where(a => a.Id == response.AttemptId)
