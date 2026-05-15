@@ -1,5 +1,6 @@
 using System.Security.Authentication;
 using System.Text;
+using System.Text.Json;
 using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using auth_service.Application.Auth;
 using auth_service.Application.Common;
@@ -12,6 +13,7 @@ using DotNetEnv;
 using HealthChecks.RabbitMQ;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
