@@ -1,7 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Shared.Bootstrap;
+using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
+using HealthChecks.RabbitMQ;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Shared.Bootstrap;
 using attempt_service.Features.Analytics;
 using attempt_service.Features.Attempt;
 using attempt_service.Features.Attempt.AttemptEndpoint;
@@ -50,21 +54,39 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
     http.DefaultRequestHeaders.Add("X-Internal-Key", internalApiKey);
 });
 
-// ── Database ─────────────────────────────────────────────────────────────────
-builder.Services.AddDbContext<AttemptDbContext>(opts =>
-    opts.UseNpgsql(EnvOrDefault("CONNECTIONSTRING__ATTEMPT",
-        "Host=attempt-database;Port=5432;Database=attempt-db;Username=attempt;Password=attempt")));
-
 // ── RabbitMQ ───────────────────────────────────────────────────────────────────
-var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
-    key => Environment.GetEnvironmentVariable(key));
+var rabbitHost = EnvOrDefault("RABBITMQ__HOST", "localhost");
+var rabbitUser = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME")
+    ?? throw new InvalidOperationException("RABBITMQ__USERNAME is required");
+var rabbitPass = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD")
+    ?? throw new InvalidOperationException("RABBITMQ__PASSWORD is required");
+var rabbitVhost = EnvOrDefault("RABBITMQ__VHOST", "/");
+var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var port) ? port : (ushort)5672;
+
+// ── Database (Aspire) ──────────────────────────────────────────────────────────
+builder.AddNpgsqlDbContext<AttemptDbContext>("attempt-db");
+
+// ── Health checks ───────────────────────────────────────────────────────────
+var attemptConnectionString = builder.Configuration.GetConnectionString("attempt-db")
+    ?? throw new InvalidOperationException("attempt-db connection string is required");
+var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
+
+builder.Services.AddHealthChecks()
+    .AddNpgSql(attemptConnectionString, name: "attempt-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
+    .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
+
+// ── MassTransit (RabbitMQ) ───────────────────────────────────────────────────
 builder.Services.AddMassTransit(cfg =>
 {
     cfg.AddConsumer<WritingGradedConsumer>();
     cfg.AddConsumer<SpeakingGradedConsumer>();
     cfg.UsingRabbitMq((ctx, bus) =>
     {
-        bus.ConfigureRabbitMqHost(rabbitConfig);
+        bus.Host(rabbitHost, rabbitPort, rabbitVhost, h =>
+        {
+            h.Username(rabbitUser);
+            h.Password(rabbitPass);
+        });
         bus.ReceiveEndpoint("writing-graded-response", e => e.ConfigureConsumer<WritingGradedConsumer>(ctx));
         bus.ReceiveEndpoint("speaking-graded-response", e => e.ConfigureConsumer<SpeakingGradedConsumer>(ctx));
     });
@@ -143,6 +165,26 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 }
 
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds
+            })
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+    }
+});
+
 app.UseResponseCompression();
 app.UseCors("FE");
 app.UseSwagger();
@@ -156,3 +198,5 @@ app.MapStudyPlanEndpoints();
 app.MapBookmarkEndpoints();
 app.MapNoteEndpoints();
 app.Run();
+
+public partial class Program { }

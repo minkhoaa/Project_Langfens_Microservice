@@ -1,5 +1,6 @@
 using System.Security.Authentication;
 using System.Text;
+using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using auth_service.Application.Auth;
 using auth_service.Application.Common;
 using auth_service.Contracts;
@@ -8,9 +9,12 @@ using auth_service.Features.RabbitMq;
 using auth_service.Infrastructure.Persistence;
 using auth_service.Infrastructure.Redis;
 using DotNetEnv;
+using HealthChecks.RabbitMQ;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Shared.Security.Claims;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
@@ -59,39 +63,30 @@ builder.Services.Configure<auth_service.Application.Common.JwtSettings>(options 
 static string EnvOrDefault(string key, string fallback) =>
     Environment.GetEnvironmentVariable(key) ?? fallback;
 
+var rabbitHost = EnvOrDefault("RABBITMQ__HOST", "localhost");
+var rabbitUser = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME")
+                    ?? throw new InvalidOperationException("RABBITMQ__USERNAME is required");
+var rabbitPass = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD")
+                    ?? throw new InvalidOperationException("RABBITMQ__PASSWORD is required");
+var rabbitVhost = EnvOrDefault("RABBITMQ__VHOST", "/");
+var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var port) ? port : (ushort)5672;
+var rabbitUseSsl = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var ssl) && ssl;
+
 var rabbitConfig = new RabbitMqConfig
 {
-    Host       = EnvOrDefault("RABBITMQ__HOST", "localhost"),
-    Port       = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var port) ? port : (ushort)5672,
-    VirtualHost= EnvOrDefault("RABBITMQ__VHOST", "/"),
-    Username   = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME")
-                    ?? throw new InvalidOperationException("RABBITMQ__USERNAME is required"),
-    Password   = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD")
-                    ?? throw new InvalidOperationException("RABBITMQ__PASSWORD is required"),
-    UseSsl     = bool.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__USESSL"), out var ssl) && ssl,
+    Host       = rabbitHost,
+    Port       = rabbitPort,
+    VirtualHost= rabbitVhost,
+    Username   = rabbitUser,
+    Password   = rabbitPass,
+    UseSsl     = rabbitUseSsl,
 };
 builder.Services.AddSingleton(rabbitConfig);
-builder.Services.AddMassTransit(config =>
-{
-    config.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("user-registered", includeNamespace: false));
-    config.UsingRabbitMq((ctx, cfg) =>
-    {
-        cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost, h =>
-        {
-            h.Username(rabbitConfig.Username);
-            h.Password(rabbitConfig.Password);
-            if (rabbitConfig.UseSsl) h.UseSsl(k => k.Protocol = SslProtocols.Tls12);
-        });
-        cfg.ConfigureEndpoints(ctx);
-    });
-});
 
-// ── Database ───────────────────────────────────────────────────────────────────
-builder.Services.AddDbContextPool<AuthDbContext>(opts =>
-    opts.UseNpgsql(EnvOrDefault("CONNECTIONSTRING__AUTH",
-        "Host=auth-database;Port=5432;Database=auth-db;Username=auth;Password=auth")));
+// ── Database (Aspire) ──────────────────────────────────────────────────────────
+builder.AddNpgsqlDbContext<AuthDbContext>("auth-db");
 
-// ── Identity ───────────────────────────────────────────────────────────────────
+// ── Identity ──────────────────────────────────────────────────────────────────
 builder.Services.AddIdentityCore<User>(opt =>
     {
         opt.User.RequireUniqueEmail = true;
@@ -113,12 +108,26 @@ builder.Services.AddAuthorization(opts =>
         ctx.User.HasAnyScope(UserScope.UserReadAny) || ctx.User.IsInRole(Roles.Admin)));
 });
 
-// ── Redis ─────────────────────────────────────────────────────────────────────
-var redisConn = EnvOrDefault("CONNECTIONSTRING__REDIS", "localhost:6379");
-builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConn));
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+// ── Redis (Aspire) ─────────────────────────────────────────────────────────────
+// AddRedisClient registers IConnectionMultiplexer as singleton keyed by name
+builder.AddRedisClient("auth-redis");
+
+// ── Health checks ──────────────────────────────────────────────────────────────
+var authConnectionString = builder.Configuration.GetConnectionString("auth-db")
+    ?? throw new InvalidOperationException("auth-db connection string is required");
+var redisConnectionString = builder.Configuration.GetConnectionString("auth-redis")
+    ?? "localhost:6379";
+var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
+
+builder.Services.AddHealthChecks()
+    .AddNpgSql(authConnectionString, name: "auth-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
+    .AddRedis(redisConnectionString, name: "auth-redis", failureStatus: HealthStatus.Unhealthy, tags: new[] { "cache" })
+    .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
 
 // ── DI ───────────────────────────────────────────────────────────────────────
+// IConnectionMultiplexer registered directly by AddRedisClient
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ISessionStore,      SessionStore>();
 builder.Services.AddScoped<IAuthService,       AuthService>();
@@ -129,6 +138,22 @@ builder.Services.AddSingleton<IEmailValidator, EmailValidator>();
 builder.Services.AddSingleton<ICookieService,   CookieService>();
 builder.Services.AddSingleton<IJwtTokenFactory,JwtTokenFactory>();
 builder.Services.AddSingleton<IGoogleTokenVerifier, GoogleTokenVerifier>();
+
+// ── MassTransit (RabbitMQ) ────────────────────────────────────────────────────
+builder.Services.AddMassTransit(config =>
+{
+    config.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("user-registered", includeNamespace: false));
+    config.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(rabbitHost, rabbitPort, rabbitVhost, h =>
+        {
+            h.Username(rabbitUser);
+            h.Password(rabbitPass);
+            if (rabbitUseSsl) h.UseSsl(k => k.Protocol = SslProtocols.Tls12);
+        });
+        cfg.ConfigureEndpoints(ctx);
+    });
+});
 
 // ── App ───────────────────────────────────────────────────────────────────────
 var app = builder.Build();
@@ -145,4 +170,7 @@ app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapAuthEndpoints();
+app.MapHealthChecks("/health");
 app.Run();
+
+public partial class Program { }
