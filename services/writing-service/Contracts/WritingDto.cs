@@ -30,8 +30,8 @@ public record UpdateExamRequest(
 public record WritingExamResponse(
     Guid Id, 
     string Title, 
-    string TaskText, 
     string Slug, 
+    string TaskText, 
     WritingCategory ExamType, 
     string? Level, 
     string? Tag, 
