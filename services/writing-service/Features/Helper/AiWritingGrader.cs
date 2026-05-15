@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using writing_service.Contracts;
 
 namespace writing_service.Features.Helper;
@@ -9,7 +10,7 @@ public class AiWritingGrader : IWritingGrader
     private readonly ILogger<AiWritingGrader> _logger;
     private readonly CircuitBreaker _circuitBreaker;
 
-    public AiWritingGrader(HttpClient http, ILogger<AiWritingGrader> logger, CircuitBreaker circuitBreaker)
+    public AiWritingGrader(HttpClient http, ILogger<AiWritingGrader> logger, [FromKeyedServices("grader")] CircuitBreaker circuitBreaker)
     {
         _http = http;
         _logger = logger;

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using writing_service.Contracts;
 
 namespace writing_service.Features.Helper;
@@ -8,7 +9,7 @@ public class AiCompareClient : IAiCompareClient
     private readonly ILogger<AiCompareClient> _logger;
     private readonly CircuitBreaker _circuitBreaker;
 
-    public AiCompareClient(HttpClient http, ILogger<AiCompareClient> logger, CircuitBreaker circuitBreaker)
+    public AiCompareClient(HttpClient http, ILogger<AiCompareClient> logger, [FromKeyedServices("compare")] CircuitBreaker circuitBreaker)
     {
         _http = http;
         _logger = logger;
