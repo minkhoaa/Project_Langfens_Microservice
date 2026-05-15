@@ -1,7 +1,10 @@
 using System.Security.Authentication;
+using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using DotNetEnv;
 using MassTransit;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using speaking_service.Features;
 using speaking_service.Features.Helper;
 using speaking_service.Features.RabbitMq;
@@ -10,11 +13,16 @@ using speaking_service.Features.Services.Helper;
 using speaking_service.Features.Services.User;
 using speaking_service.Features.Storage;
 using speaking_service.Infrastructure.Persistence;
+using System.Text.Json;
 using Whisper.net;
 using Whisper.net.LibraryLoader;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+static string EnvOrDefault(string key, string fallback) =>
+    Environment.GetEnvironmentVariable(key) ?? fallback;
 
 // ── Shared bootstrap ────────────────────────────────────────────────────
 builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key));
@@ -42,20 +50,35 @@ builder.Services.AddSingleton(sp =>
     return new CloudinaryDotNet.Cloudinary(account) { Api = { Secure = true } };
 });
 
-// ── Database ─────────────────────────────────────────────────────────────
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING__SPEAKING")
-    ?? "Host=speaking-database;Port=5432;Database=speaking-db;Username=speaking;Password=speaking";
-builder.Services.AddDbContext<SpeakingDbContext>(o => o.UseNpgsql(connectionString));
+// ── Database (Aspire) ─────────────────────────────────────────────────────
+builder.AddNpgsqlDbContext<SpeakingDbContext>("speaking-db");
 
-// ── RabbitMQ ─────────────────────────────────────────────────────────────
-var rabbitConfig = LangfensBootstrapExtensions.BuildRabbitMqConfig(
-    key => Environment.GetEnvironmentVariable(key));
+// ── RabbitMQ (Aspire MassTransit factory pattern) ─────────────────────────
+var rabbitHost = EnvOrDefault("RABBITMQ__HOST", "localhost");
+var rabbitUser = EnvOrDefault("RABBITMQ__USERNAME", "guest");
+var rabbitPass = EnvOrDefault("RABBITMQ__PASSWORD", "guest");
+var rabbitVhost = EnvOrDefault("RABBITMQ__VHOST", "/");
+
+// Get connection string before adding health checks
+var connectionString = builder.Configuration.GetConnectionString("speaking-db")
+    ?? $"Host=localhost;Port=5432;Database=speaking-db;Username=speaking;Password=speaking";
+
+var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:5672/{rabbitVhost}");
+
+builder.Services.AddHealthChecks()
+    .AddNpgSql(connectionString, name: "speaking-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
+    .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
+
 builder.Services.AddMassTransit(cfg =>
 {
     cfg.AddConsumer<SpeakingGradingConsumer>();
     cfg.UsingRabbitMq((ctx, bus) =>
     {
-        bus.ConfigureRabbitMqHost(rabbitConfig);
+        bus.Host(new Uri($"rabbitmq://{rabbitHost}:5672/{rabbitVhost}"), h =>
+        {
+            h.Username(rabbitUser);
+            h.Password(rabbitPass);
+        });
         bus.ConfigureEndpoints(ctx);
     });
 });
@@ -83,7 +106,7 @@ builder.Services.AddScoped<WhisperProcessor>(sp =>
       .WithLanguage("en")
       .Build());
 builder.Services.AddHttpClient<IAudioDownloader, AudioDownloader>();
-var aiServiceUrl = Environment.GetEnvironmentVariable("AI_SERVICE_URL") ?? "http://ai-service:8080";
+var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080");
 builder.Services.AddHttpClient<ISpeakingGrader, AiSpeakingGrader>()
     .ConfigureHttpClient(c => c.BaseAddress = new Uri(aiServiceUrl));
 
@@ -93,8 +116,33 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SpeakingDbContext>();
-    await db.Database.MigrateAsync();
+    if (db.Database.IsRelational())
+    {
+        var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+        Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
+        await db.Database.MigrateAsync();
+    }
 }
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds
+            })
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+    }
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();

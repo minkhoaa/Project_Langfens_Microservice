@@ -1,7 +1,5 @@
 using Aspire.Hosting;
-using Aspire.Hosting.PostgreSQL;
 using CommunityToolkit.Aspire.MassTransit.RabbitMQ;
-using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
