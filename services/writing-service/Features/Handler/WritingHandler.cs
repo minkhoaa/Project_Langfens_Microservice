@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using writing_service.Contracts;
 using writing_service.Features.Service.Admin;
 using writing_service.Features.Service.User;
+using writing_service.Features.Helper;
 using writing_service.Infrastructure.Persistence;
 
 namespace writing_service.Features.Handler;
@@ -50,8 +51,19 @@ public static class WritingHandler
         service.DeleteExam(examId, token);
 
     public static async Task<IResult> GetComparisonHandler(
-        Guid submissionId, WritingDbContext db, CancellationToken token)
+        Guid submissionId, WritingDbContext db, IUserContext user, CancellationToken token)
     {
+        var submission = await db.WritingSubmissions
+            .Where(s => s.Id == submissionId)
+            .Select(s => new { s.UserId })
+            .FirstOrDefaultAsync(token);
+
+        if (submission is null)
+            return Results.NotFound();
+
+        if (submission.UserId != user.UserId)
+            return Results.Forbid();
+
         var evaluation = await db.WritingEvaluations
             .Where(e => e.SubmissionId == submissionId)
             .OrderByDescending(e => e.CreatedAt)
