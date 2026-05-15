@@ -56,8 +56,11 @@ public class WritingService : IWritingService
             return Results.BadRequest(new ApiResultDto(false, "Answer exceeds maximum length of 5000 characters", null!));
 
         var userId = _user.UserId;
-        var exam = await _context.WritingExams.AsNoTracking().Where(x => x.Id == request.ExamId).FirstOrDefaultAsync(token)
-                   ?? throw new Exception("Exam is not existed");
+        var exam = await _context.WritingExams.AsNoTracking()
+                       .Where(x => x.Id == request.ExamId)
+                       .FirstOrDefaultAsync(token);
+        if (exam is null)
+            return Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId = request.ExamId }));
 
         var gradeResult = await _grader.GradeAsync(new ContentSubmission { Answer = request.Answer, Task = exam.TaskText }, token);
         var res = gradeResult.Response;
