@@ -6,7 +6,7 @@ public static class QuestionBankEndpoint
     {
         var group = app.MapGroup("/api/question-bank")
             .WithTags("Question Bank")
-            .AllowAnonymous(); // Public API for question bank
+            .RequireAuthorization(); // Requires authentication to prevent answer key leakage
 
         group.MapGet("/types", Handler.GetQuestionTypes)
             .WithName("GetQuestionTypes")

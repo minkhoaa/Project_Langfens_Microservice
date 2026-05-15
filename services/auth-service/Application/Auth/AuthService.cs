@@ -138,8 +138,9 @@ public class AuthService(
         }
         catch (Exception e)
         {
+            logger.LogError(e, "Failed to send OTP for {Email}", email);
             return AuthOperationResult.Failure(
-                new ApiResultDto(false, $"Failed to send verification email. Please try again + {e.Message}", null!),
+                new ApiResultDto(false, "Failed to send verification email. Please try again later.", null!),
                 StatusCodes.Status502BadGateway);
         }
     }
@@ -265,7 +266,8 @@ public class AuthService(
         if (!update.Succeeded)
         {
             var msg = update.Errors.Select(x => x.Description).FirstOrDefault() ?? "Unable to update user";
-            return Results.Problem(update.Errors.ToString() ?? msg);
+            var errorMsg = string.Join("; ", update.Errors.Select(x => x.Description));
+            return Results.BadRequest(new ApiResultDto(false, errorMsg, null!));
         }
         
         // Publish UserCreatedEvent to trigger welcome notification

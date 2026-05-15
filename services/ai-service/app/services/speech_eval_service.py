@@ -14,6 +14,7 @@ No paid APIs. Uses:
 from __future__ import annotations
 
 import logging
+import os
 import re
 import tempfile
 from dataclasses import dataclass
@@ -72,14 +73,17 @@ def transcribe_audio(audio_bytes: bytes, language: str = "en") -> str:
         tmp.write(audio_bytes)
         tmp_path = tmp.name
 
-    segments, _ = model.transcribe(
-        tmp_path,
-        language=language,
-        beam_size=5,
-        vad_filter=True,
-    )
-    transcript = " ".join(seg.text.strip() for seg in segments)
-    return transcript.strip()
+    try:
+        segments, _ = model.transcribe(
+            tmp_path,
+            language=language,
+            beam_size=5,
+            vad_filter=True,
+        )
+        transcript = " ".join(seg.text.strip() for seg in segments)
+        return transcript.strip()
+    finally:
+        os.unlink(tmp_path)
 
 
 # ---------------------------------------------------------------------------

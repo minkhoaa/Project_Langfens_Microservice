@@ -68,7 +68,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
         }
         catch (Exception e)
         {
-            return Results.BadRequest(e.Message); 
+            return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!)); 
         }
         
     }
@@ -83,7 +83,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
         }
         catch (Exception e)
         {
-            return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
+            return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
         }
     }
 
@@ -97,7 +97,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
         }
         catch (Exception e)
     {
-        return Results.BadRequest(e.Message);
+        return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
     }
 }
 
@@ -189,7 +189,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
         }
         catch (Exception e)
         {
-            return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
+            return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
         }
     }
 }

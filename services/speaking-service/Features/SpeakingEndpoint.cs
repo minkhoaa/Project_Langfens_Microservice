@@ -14,13 +14,15 @@ public static class SpeakingEndpoint
         app.MapPost("/transcript", WhisperHandler.TranscriptHandler).DisableAntiforgery();
         app.MapPost("/grade", SpeakingHandler.SubmitHandler)
             .Accepts<SpeakingSubmitForm>("multipart/form-data")
-            .DisableAntiforgery();
+            .DisableAntiforgery()
+            .RequireAuthorization(Roles.User);
         app.MapGet("/exams", SpeakingHandler.GetExamListHandler);
         app.MapGet("/exams/{examId:guid}", SpeakingHandler.GetExamHandler);
         app.MapGet("/history", SpeakingHandler.GetHistoryHandler).RequireAuthorization(Roles.User);
         app.MapGet("/history/{submissionId:guid}", SpeakingHandler.GetHistoryDetailHandler)
             .RequireAuthorization(Roles.User);
-        app.MapPost("/start/{examId}", SpeakingHandler.StartSpeakingExamHandler);
+        app.MapPost("/start/{examId}", SpeakingHandler.StartSpeakingExamHandler)
+            .RequireAuthorization(Roles.User);
 
 
     }
@@ -35,10 +37,10 @@ public static class SpeakingEndpoint
     {
         var app = route.MapGroup("/api/admin/speaking");
         app.MapGet("/exams", SpeakingHandler.GetAdminExamsHandler).RequireAuthorization(Roles.Admin);
-        app.MapPost("/create", SpeakingHandler.CreateExamHandler);
-        app.MapPost("/exams", SpeakingHandler.CreateExamHandler);
-        app.MapPut("/exams/{examId:guid}", SpeakingHandler.UpdateExamHandler);
-        app.MapDelete("/exams/{examId:guid}", SpeakingHandler.DeleteExamHandler);
+        app.MapPost("/create", SpeakingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
+        app.MapPost("/exams", SpeakingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
+        app.MapPut("/exams/{examId:guid}", SpeakingHandler.UpdateExamHandler).RequireAuthorization(Roles.Admin);
+        app.MapDelete("/exams/{examId:guid}", SpeakingHandler.DeleteExamHandler).RequireAuthorization(Roles.Admin);
     }
     public static void MapUploadEndpoint(this IEndpointRouteBuilder route)
     {

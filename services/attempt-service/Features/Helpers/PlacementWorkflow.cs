@@ -162,8 +162,8 @@ namespace attempt_service.Features.Helpers
 
             if (placement == null)
             {
-                _logger.LogWarning("PlacementResult not found for attempt {AttemptId}", response.AttemptId);
-                return;
+                _logger.LogWarning("PlacementResult not found for attempt {AttemptId}, will retry", response.AttemptId);
+                throw new InvalidOperationException($"PlacementResult not found for attempt {response.AttemptId}");
             }
 
             placement.WritingBand = (decimal)response.OverallBand;
@@ -196,12 +196,15 @@ namespace attempt_service.Features.Helpers
 
             _context.PlacementResults.Update(placement);
 
-            await _context.Attempts
-                    .Where(a => a.Id == response.AttemptId)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(a => a.Status, AttemptStatus.Graded)
-                        .SetProperty(a => a.GradedAt, DateTime.UtcNow),
-                        token);
+            if (placement.WritingBand.HasValue && placement.SpeakingBand.HasValue)
+            {
+                await _context.Attempts
+                        .Where(a => a.Id == response.AttemptId)
+                        .ExecuteUpdateAsync(p => p
+                            .SetProperty(a => a.Status, AttemptStatus.Graded)
+                            .SetProperty(a => a.GradedAt, DateTime.UtcNow),
+                            token);
+            }
 
             await _context.SaveChangesAsync(token);
         }
@@ -213,8 +216,8 @@ namespace attempt_service.Features.Helpers
 
             if (placement == null)
             {
-                _logger.LogWarning("PlacementResult not found for attempt {AttemptId}", response.AttemptId);
-                return;
+                _logger.LogWarning("PlacementResult not found for attempt {AttemptId}, will retry", response.AttemptId);
+                throw new InvalidOperationException($"PlacementResult not found for attempt {response.AttemptId}");
             }
 
             // 1. Cập nhật band speaking
@@ -251,12 +254,15 @@ namespace attempt_service.Features.Helpers
             _context.PlacementResults.Update(placement);
 
             // 4. Option: đánh dấu attempt là Graded
-            await _context.Attempts
-                .Where(a => a.Id == response.AttemptId)
-                .ExecuteUpdateAsync(p => p
-                    .SetProperty(a => a.Status, AttemptStatus.Graded)
-                    .SetProperty(a => a.GradedAt, DateTime.UtcNow),
-                    token);
+            if (placement.WritingBand.HasValue && placement.SpeakingBand.HasValue)
+            {
+                await _context.Attempts
+                    .Where(a => a.Id == response.AttemptId)
+                    .ExecuteUpdateAsync(p => p
+                        .SetProperty(a => a.Status, AttemptStatus.Graded)
+                        .SetProperty(a => a.GradedAt, DateTime.UtcNow),
+                        token);
+            }
 
             await _context.SaveChangesAsync(token);
         }

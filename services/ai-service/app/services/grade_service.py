@@ -2,7 +2,10 @@ import json as json_lib
 import logging
 import time
 
+from fastapi import HTTPException
+
 from app.config import settings
+from app.core import get_guardrails
 from app.prompts.writing_grade import build_grade_prompt
 from app.prompts.speaking_grade import build_speaking_prompt
 from app.schemas import CriterionItem, ReassembledEssay, WritingGradeRequest, WritingGradeResponse
@@ -126,18 +129,20 @@ async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
     t_llm = time.time()
     logger.info("grade: llm took %.1fms, total %.1fms", (t_llm - t_search) * 1000, (t_llm - t0) * 1000)
 
+    try:
+        estimated_tokens = len(prompt) // 4 + 500
+        get_guardrails().record_api_call(
+            provider="llm",
+            model="grade",
+            tokens_used=estimated_tokens,
+            cost=estimated_tokens * 0.000002,
+        )
+    except Exception:
+        pass  # guardrail errors must never block grading
+
     # Step 4: Parse response into WritingGradeResponse
     if not result:
-        return WritingGradeResponse(
-            ob=0.0,
-            ta=CriterionItem(b=0.0, c="LLM call failed. Please retry."),
-            cc=CriterionItem(b=0.0, c=""),
-            lr=CriterionItem(b=0.0, c=""),
-            gr=CriterionItem(b=0.0, c=""),
-            s=[],
-            p="",
-            raw_llm_json=json_lib.dumps({"error": "LLM call returned empty response"}),
-        )
+        raise HTTPException(status_code=503, detail="LLM grading temporarily unavailable, please retry")
 
     # Safely extract values with defaults
     ob = result.get("ob", 0.0)
@@ -218,4 +223,4 @@ async def grade_speaking(req: SpeakingGradeRequest) -> SpeakingGradeResponseSche
         )
     except (ValueError, TypeError) as exc:
         logger.error("Failed to parse LLM speaking response: %s — raw: %s", exc, result)
-        raise ValueError(f"Invalid LLM response format: {exc}")
+        raise HTTPException(status_code=502, detail="Failed to parse LLM response")

@@ -22,7 +22,9 @@ public class UserContext : IUserContext
         get
         {
             var sub = _accessor.HttpContext?.User.FindFirstValue(CustomClaims.Sub);
-            return Guid.TryParse(sub, out var id) ? id : Guid.Empty;
+            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var id))
+                throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
+            return id;
         }
     }
 }

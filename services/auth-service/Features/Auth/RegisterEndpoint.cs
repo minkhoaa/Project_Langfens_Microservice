@@ -84,13 +84,13 @@ public static class RegisterEndpoint
         return result;
     }
     private static async Task<IResult> ConfirmForgotPasswordHandler([FromServices] IAuthService authService,
-        [FromQuery] string email,
-        string otp,
-        string newPassword,
+        [FromBody] ConfirmResetPasswordDto dto,
         CancellationToken ct)
     {
-        var result = await authService.ConfirmResetPasswordAsync(email,otp, newPassword, ct);
+        var result = await authService.ConfirmResetPasswordAsync(dto.Email, dto.Otp, dto.NewPassword, ct);
         return result;
     }
     
 }
+
+public record ConfirmResetPasswordDto(string Email, string Otp, string NewPassword);

@@ -20,6 +20,7 @@ Environment Variables:
     CEREBRAS_API_KEYS=key1,key2,key3
 """
 
+import asyncio
 import os
 import json
 import logging
@@ -336,7 +337,7 @@ class OpenAILikeService:
                     if expect_json:
                         create_kwargs["response_format"] = {"type": "json_object"}
 
-                    response = client.chat.completions.create(**create_kwargs)
+                    response = await asyncio.to_thread(client.chat.completions.create, **create_kwargs)
                     content = response.choices[0].message.content
 
                     # MiniMax models embed reasoning in <think> tags — strip them
@@ -360,7 +361,8 @@ class OpenAILikeService:
                                 {"role": "user", "content": formatted_prompt},
                             ]
                             try:
-                                retry_resp = client.chat.completions.create(
+                                retry_resp = await asyncio.to_thread(
+                                    client.chat.completions.create,
                                     model=model_name,
                                     messages=retry_messages,
                                     temperature=0.1,

@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace auth_service.Application.Common;
 
 
@@ -7,5 +9,5 @@ public interface IOtpGenerator
 }
 public class OtpGenerator : IOtpGenerator
 {
-    public string Generate() => new Random().Next(100000, 999999).ToString();
+    public string Generate() => RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
 }
