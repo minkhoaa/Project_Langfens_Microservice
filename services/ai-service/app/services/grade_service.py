@@ -82,7 +82,7 @@ async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
     Step 3: Call LLM to produce band scores + feedback.
     Step 4: Parse and return WritingGradeResponse.
     """
-    inferred_band = 6.0
+    inferred_band = _estimate_band_from_word_count(req.word_count)
 
     # Step 1: RAG lookup
     t0 = time.time()
