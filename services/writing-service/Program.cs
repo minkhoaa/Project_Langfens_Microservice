@@ -45,8 +45,13 @@ builder.Services.AddHttpClient<IAiCompareClient, AiCompareClient>(client =>
     client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080"));
     client.Timeout = TimeSpan.FromSeconds(90);
 });
-builder.Services.AddSingleton<CircuitBreaker>();
-builder.Services.AddHttpClient<IWritingGrader, AiWritingGrader>();
+builder.Services.AddKeyedSingleton<CircuitBreaker>("grader");
+builder.Services.AddKeyedSingleton<CircuitBreaker>("compare");
+builder.Services.AddHttpClient<IWritingGrader, AiWritingGrader>(client =>
+{
+    client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080"));
+    client.Timeout = TimeSpan.FromSeconds(90);
+});
 
 // ── Services ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IWritingService, WritingService>();
