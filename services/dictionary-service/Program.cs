@@ -1,16 +1,17 @@
 using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using Elastic.Clients.Elasticsearch;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using dictionary_service.Features;
 using dictionary_service.Features.Helper;
 using dictionary_service.Features.Service;
 using dictionary_service.Infrastructure.Persistence;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ── ServiceDefaults ──────────────────────────────────────────────────────
+builder.AddServiceDefaults();
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 static string EnvOrDefault(string key, string fallback) =>
@@ -70,25 +71,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var result = new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description,
-                duration = e.Value.Duration.TotalMilliseconds
-            })
-        };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
-    }
-});
+app.MapDefaultEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI();
