@@ -1,6 +1,5 @@
 using System.Security.Authentication;
 using System.Text;
-using System.Text.Json;
 using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using auth_service.Application.Auth;
 using auth_service.Application.Common;
@@ -13,7 +12,6 @@ using DotNetEnv;
 using HealthChecks.RabbitMQ;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -27,6 +25,8 @@ using Role = auth_service.Infrastructure.Persistence.Role;
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 // ── Shared bootstrap (local extensions, consistent across all services) ───────
 builder.Services.AddLangfensAuthEnv(key => Environment.GetEnvironmentVariable(key));
@@ -169,22 +169,10 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("FE");
+app.MapDefaultEndpoints();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapAuthEndpoints();
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var result = new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new { name = e.Key, status = e.Value.Status.ToString(), description = e.Value.Description, duration = e.Value.Duration.TotalMilliseconds })
-        };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
-    }
-});
 app.Run();
 
 public partial class Program { }
