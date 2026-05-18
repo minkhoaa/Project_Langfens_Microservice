@@ -1,10 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Sdk Name="Aspire.AppHost.Sdk" Version="13.3.2" />
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <EnableHotReload>true</EnableHotReload>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,21 +18,22 @@
     <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.3.2" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="13.3.2" />
     <PackageReference Include="Aspire.Hosting.Docker" Version="13.3.2" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
     <PackageReference Include="CommunityToolkit.Aspire.MassTransit.RabbitMQ" Version="13.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\gateway\api-gateway\api-gateway.csproj" />
-    <ProjectReference Include="..\services\exam-service\exam-service.csproj" />
-    <ProjectReference Include="..\services\gamification-service\gamification-service.csproj" />
-    <ProjectReference Include="..\services\speaking-service\speaking-service.csproj" />
-    <ProjectReference Include="..\services\dictionary-service\dictionary-service.csproj" />
-    <ProjectReference Include="..\services\attempt-service\attempt-service.csproj" />
-    <ProjectReference Include="..\services\auth-service\auth-service.csproj" />
-    <ProjectReference Include="..\services\course-service\course-service.csproj" />
-    <ProjectReference Include="..\services\email-service\email-service.csproj" />
-    <ProjectReference Include="..\services\vocabulary-service\vocabulary-service.csproj" />
-    <ProjectReference Include="..\services\writing-service\writing-service.csproj" />
+    <AppHostProjectReference Include="..\gateway\api-gateway\api-gateway.csproj" />
+    <AppHostProjectReference Include="..\services\exam-service\exam-service.csproj" />
+    <AppHostProjectReference Include="..\services\gamification-service\gamification-service.csproj" />
+    <AppHostProjectReference Include="..\services\speaking-service\speaking-service.csproj" />
+    <AppHostProjectReference Include="..\services\dictionary-service\dictionary-service.csproj" />
+    <AppHostProjectReference Include="..\services\attempt-service\attempt-service.csproj" />
+    <AppHostProjectReference Include="..\services\auth-service\auth-service.csproj" />
+    <AppHostProjectReference Include="..\services\course-service\course-service.csproj" />
+    <AppHostProjectReference Include="..\services\email-service\email-service.csproj" />
+    <AppHostProjectReference Include="..\services\vocabulary-service\vocabulary-service.csproj" />
+    <AppHostProjectReference Include="..\services\writing-service\writing-service.csproj" />
   </ItemGroup>
 
 </Project>
