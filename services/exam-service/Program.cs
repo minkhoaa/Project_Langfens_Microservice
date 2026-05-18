@@ -14,9 +14,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ── Aspire service defaults (OTel, discovery, resilience, /health, /alive) ──
+builder.AddServiceDefaults();
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 static string EnvOrDefault(string key, string fallback) =>
@@ -41,11 +43,24 @@ builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
 
 // ── gRPC + HTTP ports ───────────────────────────────────────────────────
-builder.ConfigureLangfensKestrel(httpPort: 8080, grpcPort: 8081);
+// Under Aspire, ASPNETCORE_URLS is injected and Kestrel binds to those endpoints
+// (HTTP/1.1 + HTTP/2 multiplexed on the same port). Only configure explicit
+// HTTP/gRPC ports when running outside Aspire (compose path).
+var aspireUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+if (string.IsNullOrEmpty(aspireUrls))
+{
+    var httpPort = int.TryParse(Environment.GetEnvironmentVariable("Kestrel__HttpPort"), out var hp) ? hp : 8080;
+    var grpcPort = int.TryParse(Environment.GetEnvironmentVariable("Kestrel__GrpcPort"), out var gp) ? gp : 8081;
+    builder.ConfigureLangfensKestrel(httpPort: httpPort, grpcPort: grpcPort);
+}
 builder.Services.AddGrpc();
 
 builder.Services.AddHealthChecks()
-    .AddNpgSql(connectionString: builder.Configuration.GetConnectionString("exam-db")!, name: "exam-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" });
+    .AddNpgSql(
+        connectionString: builder.Configuration.GetConnectionString("exam-db")!,
+        name: "exam-db",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "db", "postgresql" });
 
 // ── App ─────────────────────────────────────────────────────────────────
 var app = builder.Build();
@@ -61,25 +76,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var result = new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description,
-                duration = e.Value.Duration.TotalMilliseconds
-            })
-        };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
-    }
-});
+app.MapDefaultEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -87,11 +84,10 @@ app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
 
-var grpcEndpoint = app.MapGrpcService<ExamInternalGrpcService>().AllowAnonymous();
-if (!app.Environment.IsEnvironment("Testing"))
-{
-    grpcEndpoint.RequireHost($"*:{8081}");
-}
+// gRPC and HTTP/1.1 are multiplexed on the same Kestrel pipeline.
+// Under Aspire, ASPNETCORE_URLS is dynamic; clients distinguish gRPC from HTTP via content-type.
+// Under compose, ConfigureLangfensKestrel binds separate HTTP and HTTP/2 ports.
+app.MapGrpcService<ExamInternalGrpcService>().AllowAnonymous();
 
 app.MapPublicExamEndpoints();
 app.MapAdminExamEndpoint();
