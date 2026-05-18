@@ -31,7 +31,7 @@ public class SessionStore(IDatabase database) : ISessionStore
             return null;
         }
 
-        return JsonSerializer.Deserialize<SessionRecord>(value!, SerializerOptions);
+        return JsonSerializer.Deserialize<SessionRecord>((string)value!, SerializerOptions);
     }
 
     public async Task RemoveSessionAsync(SessionRecord record, CancellationToken ct)

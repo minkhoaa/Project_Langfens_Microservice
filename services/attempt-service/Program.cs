@@ -35,10 +35,12 @@ builder.Services.AddLangfensJson();
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
 // ── gRPC client ───────────────────────────────────────────────────────────────
+var examGrpcAddress = Environment.GetEnvironmentVariable("ExamService__GrpcAddress")
+    ?? "http://exam-service:8081";
 builder.Services
     .AddGrpcClient<ExamInternal.ExamInternalClient>(o =>
     {
-        o.Address = new Uri("http://exam-service:8081");
+        o.Address = new Uri(examGrpcAddress);
     })
     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
     {

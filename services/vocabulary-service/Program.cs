@@ -40,13 +40,15 @@ var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__P
 var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
 
 // ── Health checks ────────────────────────────────────────────────────────
+// NOTE: AspNetCore.HealthChecks.Rabbitmq 9.x requires registering an IConnection
+// in DI rather than passing a connection URI directly. Until that infra is added,
+// the RabbitMQ health probe is omitted here (MassTransit handles its own retries).
 builder.Services.AddHealthChecks()
     .AddNpgSql(
         connectionString: builder.Configuration.GetConnectionString("vocabulary-db")!,
         name: "vocabulary-db",
         failureStatus: HealthStatus.Unhealthy,
-        tags: new[] { "db", "postgresql" })
-    .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
+        tags: new[] { "db", "postgresql" });
 
 // ── MassTransit (RabbitMQ) ──────────────────────────────────────────────────
 builder.Services.AddMassTransit(x =>
@@ -80,14 +82,6 @@ else
     builder.Services.AddSingleton<OpenAI.Chat.ChatClient>(_ => null!);
     Console.WriteLine("[WARN] Azure OpenAI not configured – AI enrichment disabled");
 }
-
-// ── Health checks ────────────────────────────────────────────────────────
-builder.Services.AddHealthChecks()
-    .AddNpgSql(
-        connectionString: builder.Configuration.GetConnectionString("vocabulary-db")!,
-        name: "vocabulary-db",
-        failureStatus: HealthStatus.Unhealthy,
-        tags: new[] { "db", "postgresql" });
 
 // ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserService, UserService>();

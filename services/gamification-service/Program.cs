@@ -24,11 +24,12 @@ var rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ?? "localh
 var rabbitUser = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ?? throw new InvalidOperationException("RABBITMQ__USERNAME is required");
 var rabbitPass = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ?? throw new InvalidOperationException("RABBITMQ__PASSWORD is required");
 var rabbitVhost = Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/";
+var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var rp) ? rp : (ushort)5672;
 
 // Get connection string before adding health checks
 var connectionString = builder.Configuration.GetConnectionString("gamification-db") ?? throw new InvalidOperationException("gamification-db connection string is required");
 
-var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:5672/{rabbitVhost}");
+var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
 
 builder.Services.AddHealthChecks()
     .AddNpgSql(connectionString, name: "gamification-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
@@ -47,7 +48,7 @@ builder.Services.AddMassTransit(cfg =>
 
     cfg.UsingRabbitMq((ctx, bus) =>
     {
-        bus.Host(new Uri($"rabbitmq://{rabbitHost}:5672/{rabbitVhost}"), h =>
+        bus.Host(new Uri($"rabbitmq://{rabbitHost}:{rabbitPort}/{rabbitVhost}"), h =>
         {
             h.Username(rabbitUser);
             h.Password(rabbitPass);
