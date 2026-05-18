@@ -16,8 +16,9 @@ public static class ExamBootstrapExtensions
     {
         services.AddAuthorization(opts =>
         {
-            opts.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser().Build();
+            // No FallbackPolicy: endpoints opt in to auth via .RequireAuthorization(...) or
+            // [Authorize] on the endpoint, which lets ServiceDefaults' /health and /alive
+            // (mapped with .AllowAnonymous()) bypass the JwtBearer challenge cleanly.
 
             opts.AddPolicy(Roles.User,  p => p.RequireRole(Roles.User));
             opts.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));

@@ -82,15 +82,16 @@ public static class Extensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapHealthChecks(HealthEndpointPath).AllowAnonymous();
+        // Always map. The canonical Aspire template gates on IsDevelopment(), but our
+        // services run with ASPNETCORE_ENVIRONMENT=Production by default and we want
+        // /health + /alive to work the same in both modes for the dashboard and any
+        // future container probes. Endpoints opt out of auth via .AllowAnonymous().
+        app.MapHealthChecks(HealthEndpointPath).AllowAnonymous();
 
-            app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            }).AllowAnonymous();
-        }
+        app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+        {
+            Predicate = r => r.Tags.Contains("live")
+        }).AllowAnonymous();
 
         return app;
     }
