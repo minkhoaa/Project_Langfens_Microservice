@@ -7,9 +7,11 @@ using email_service.Features;
 using email_service.Features.Service;
 using email_service.Features.Worker;
 using Shared.ExamDto.Contracts.Auth_Email;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ── Aspire defaults ─────────────────────────────────────────────────────
+builder.AddServiceDefaults();
 
 // ── Shared bootstrap ────────────────────────────────────────────────────
 builder.Services.AddLangfensCors();
@@ -21,8 +23,9 @@ var rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ?? "localh
 var rabbitUser = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ?? "guest";
 var rabbitPass = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ?? "guest";
 var rabbitVhost = Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/";
+var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var rp) ? rp : (ushort)5672;
 
-var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:5672/{rabbitVhost}");
+var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
 
 builder.Services.AddHealthChecks()
     .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
@@ -34,7 +37,7 @@ builder.Services.AddMassTransit(cfg =>
 
     cfg.UsingRabbitMq((ctx, bus) =>
     {
-        bus.Host(new Uri($"rabbitmq://{rabbitHost}:5672/{rabbitVhost}"), h =>
+        bus.Host(new Uri($"rabbitmq://{rabbitHost}:{rabbitPort}/{rabbitVhost}"), h =>
         {
             h.Username(rabbitUser);
             h.Password(rabbitPass);
@@ -56,25 +59,7 @@ app.UseCors("FE");
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var result = new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description,
-                duration = e.Value.Duration.TotalMilliseconds
-            })
-        };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
-    }
-});
+app.MapDefaultEndpoints();
 
 app.MapPost("/send-otp", async (string email, string otp, IEmailSender mailer, CancellationToken ct = default) =>
 {
