@@ -1,6 +1,5 @@
 using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using MassTransit;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using course_service.Features;
@@ -8,9 +7,10 @@ using course_service.Features.AdminEndpoint;
 using course_service.Features.PublicEndpoint;
 using course_service.Features.UserEndpoint;
 using course_service.Infrastructure;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 // ── Shared bootstrap ────────────────────────────────────────────────────
 builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key));
@@ -23,8 +23,9 @@ var rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ?? "localh
 var rabbitUser = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ?? "guest";
 var rabbitPass = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ?? "guest";
 var rabbitVhost = Environment.GetEnvironmentVariable("RABBITMQ__VHOST") ?? "/";
+var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var rp) ? rp : (ushort)5672;
 
-var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:5672/{rabbitVhost}");
+var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
 
 // ── Database ─────────────────────────────────────────────────────────────
 var connectionString = builder.Configuration.GetConnectionString("course-db") ?? "Host=course-database;Port=5432;Database=course-db;Username=course;Password=course";
@@ -40,7 +41,7 @@ builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.Host(new Uri($"rabbitmq://{rabbitHost}:5672/{rabbitVhost}"), h =>
+        cfg.Host(new Uri($"rabbitmq://{rabbitHost}:{rabbitPort}/{rabbitVhost}"), h =>
         {
             h.Username(rabbitUser);
             h.Password(rabbitPass);
@@ -63,25 +64,7 @@ using (var scope = app.Services.CreateScope())
         await context.Database.MigrateAsync();
 }
 
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var result = new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description,
-                duration = e.Value.Duration.TotalMilliseconds
-            })
-        };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
-    }
-});
+app.MapDefaultEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI();

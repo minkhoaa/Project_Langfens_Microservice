@@ -14,8 +14,6 @@ public static class CourseBootstrapExtensions
     {
         services.AddAuthorization(options =>
         {
-            options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser().Build();
             options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
             options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
 
