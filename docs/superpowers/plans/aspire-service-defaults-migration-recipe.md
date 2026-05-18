@@ -31,3 +31,9 @@ For each service after exam-service:
 - Don't move `AddServiceDefaults()` after other `AddX` calls — OTel needs to wrap them.
 - Don't add OTel / ServiceDiscovery packages directly to a service csproj — they come transitively through the shared project.
 - Don't remove existing service-specific `AddHealthChecks().AddX(...)` calls. ServiceDefaults adds a `self` check; service-specific dependency checks stay where they are.
+
+## Known gotcha: FallbackPolicy
+
+If the service's `Add<Name>Authorization()` configures `opts.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()`, **drop it** during migration. The fallback policy intercepts every unmatched route (including `/health`, `/alive`, and any 404 path) with a JwtBearer challenge — even when endpoint metadata has `AllowAnonymous`. exam-service had this; we removed it in commit 5f04609.
+
+Audit before migrating each service: `grep -rn FallbackPolicy services/<svc>/`. If present, verify every endpoint already has explicit `.RequireAuthorization(...)` or `.AllowAnonymous()` (group- or method-level) before dropping the fallback. exam-service was clean; other services may not be.
