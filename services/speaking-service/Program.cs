@@ -13,12 +13,13 @@ using speaking_service.Features.Services.Helper;
 using speaking_service.Features.Services.User;
 using speaking_service.Features.Storage;
 using speaking_service.Infrastructure.Persistence;
-using System.Text.Json;
 using Whisper.net;
 using Whisper.net.LibraryLoader;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 static string EnvOrDefault(string key, string fallback) =>
@@ -58,12 +59,13 @@ var rabbitHost = EnvOrDefault("RABBITMQ__HOST", "localhost");
 var rabbitUser = EnvOrDefault("RABBITMQ__USERNAME", "guest");
 var rabbitPass = EnvOrDefault("RABBITMQ__PASSWORD", "guest");
 var rabbitVhost = EnvOrDefault("RABBITMQ__VHOST", "/");
+var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var rp) ? rp : (ushort)5672;
 
 // Get connection string before adding health checks
 var connectionString = builder.Configuration.GetConnectionString("speaking-db")
     ?? $"Host=localhost;Port=5432;Database=speaking-db;Username=speaking;Password=speaking";
 
-var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:5672/{rabbitVhost}");
+var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
 
 builder.Services.AddHealthChecks()
     .AddNpgSql(connectionString, name: "speaking-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
@@ -74,7 +76,7 @@ builder.Services.AddMassTransit(cfg =>
     cfg.AddConsumer<SpeakingGradingConsumer>();
     cfg.UsingRabbitMq((ctx, bus) =>
     {
-        bus.Host(new Uri($"rabbitmq://{rabbitHost}:5672/{rabbitVhost}"), h =>
+        bus.Host(new Uri($"rabbitmq://{rabbitHost}:{rabbitPort}/{rabbitVhost}"), h =>
         {
             h.Username(rabbitUser);
             h.Password(rabbitPass);
@@ -124,25 +126,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var result = new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description,
-                duration = e.Value.Duration.TotalMilliseconds
-            })
-        };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
-    }
-});
+app.MapDefaultEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI();

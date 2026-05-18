@@ -40,6 +40,7 @@
     <ProjectReference Include="..\_shared\Shared.Bootstrap\Shared.Bootstrap.csproj" />
     <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
     <ProjectReference Include="..\_shared\Shared.Security\Shared.Security.csproj" />
+    <ProjectReference Include="..\_shared\Shared.ServiceDefaults\Shared.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>
