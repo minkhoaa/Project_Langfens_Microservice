@@ -2,12 +2,10 @@ using System.Net.Http.Headers;
 using Aspire.Npgsql;
 using MassTransit;
 using RabbitMQ.Client;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Shared.Security.Claims;
 using Shared.Security.Scopes;
-using System.Text.Json;
 using writing_service.Contracts;
 using writing_service.Features;
 using writing_service.Features.Helper;
@@ -19,6 +17,7 @@ using writing_service.Infrastructure.Persistence;
 
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
+builder.AddServiceDefaults();
 
 static string EnvOrDefault(string key, string fallback) =>
     Environment.GetEnvironmentVariable(key) ?? fallback;
@@ -111,30 +110,11 @@ using (var scope = app.Services.CreateScope())
 }
 app.UseSwagger();
 app.UseSwaggerUI();
+app.MapDefaultEndpoints();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapWritingEndpoint();
 app.MapWritingAdminEndpoint();
-
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var result = new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description,
-                duration = e.Value.Duration.TotalMilliseconds
-            })
-        };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
-    }
-});
 
 app.Run();
 
