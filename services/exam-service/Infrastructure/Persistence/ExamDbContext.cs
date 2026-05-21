@@ -54,6 +54,7 @@ public class ExamDbContext : DbContext
             e.Property(x => x.OrderCorrects).HasColumnType("text[]");
             e.Property(x => x.ShortAnswerAcceptTexts).HasColumnType("text[]");
             e.Property(x => x.ShortAnswerAcceptRegex).HasColumnType("text[]");
+            e.Property(x => x.WordList).HasColumnType("jsonb");
 
             e.HasIndex(x => new { x.SectionId, x.Idx });
 

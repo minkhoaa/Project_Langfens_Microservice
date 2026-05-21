@@ -57,5 +57,12 @@ public class ExamQuestion
     [Column(TypeName = "jsonb")]
     public List<string>? ModelAnswers { get; set; }
 
+    /// <summary>
+    /// Structured word list for MATCHING_INFORMATION type questions.
+    /// Stored as JSONB array of strings.
+    /// </summary>
+    [Column(TypeName = "jsonb")]
+    public List<string>? WordList { get; set; }
+
     public List<ExamOption> Options { get; set; } = new();
 }

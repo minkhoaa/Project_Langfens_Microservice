@@ -49,7 +49,8 @@ public class Dto_Public
         string Skill,
         int Difficulty,
         string? PromptMd,
-        IReadOnlyList<PublicOptionRecord> Options);
+        IReadOnlyList<PublicOptionRecord> Options,
+        List<string>? WordList);
 
     public record PublicOptionRecord(int idx, string ContentMd);
 }

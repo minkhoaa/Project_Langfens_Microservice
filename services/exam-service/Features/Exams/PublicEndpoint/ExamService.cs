@@ -104,7 +104,8 @@ public class ExamService : IExamService
                                             .OrderBy(option => option.Idx)
                                             .Select(option =>
                                                 new Dto_Public.PublicOptionRecord(option.Idx, option.ContentMd))
-                                            .ToList()
+                                            .ToList(),
+                                        question.WordList
                                     )).ToList(),
                             section.QuestionGroups
                                 .OrderBy(g => g.Idx)
@@ -116,7 +117,8 @@ public class ExamService : IExamService
                                             q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd,
                                             q.Options.OrderBy(o => o.Idx)
                                                 .Select(o => new Dto_Public.PublicOptionRecord(o.Idx, o.ContentMd))
-                                                .ToList()
+                                                .ToList(),
+                                            q.WordList
                                         )).ToList()
                                 )).ToList()
                         )).ToList()
