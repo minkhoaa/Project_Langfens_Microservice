@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="13.3.2" />
 
@@ -8,6 +8,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableHotReload>true</EnableHotReload>
+    <UserSecretsId>ca28694d-ea69-4d51-80d4-5b93597c9fd3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

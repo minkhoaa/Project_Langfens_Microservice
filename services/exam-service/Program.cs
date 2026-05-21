@@ -31,7 +31,11 @@ builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Exam Service");
 
 // ── Database ───────────────────────────────────────────────────────────────
-builder.AddNpgsqlDbContext<ExamDbContext>("exam-db");
+NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
+builder.AddNpgsqlDbContext<ExamDbContext>("exam-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
+});
 
 // ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IExamService, ExamService>();
@@ -52,6 +56,27 @@ if (string.IsNullOrEmpty(aspireUrls))
     var httpPort = int.TryParse(Environment.GetEnvironmentVariable("Kestrel__HttpPort"), out var hp) ? hp : 8080;
     var grpcPort = int.TryParse(Environment.GetEnvironmentVariable("Kestrel__GrpcPort"), out var gp) ? gp : 8081;
     builder.ConfigureLangfensKestrel(httpPort: httpPort, grpcPort: grpcPort);
+}
+else
+{
+    // Under Aspire: if a dedicated gRPC port is allocated, add it as an additional
+    // Kestrel endpoint with HTTP/2 only. Use ListenOptions via KestrelServerOptions
+    // to ADD to the existing ASPNETCORE_URLS-based endpoints (not replace them).
+    var grpcPortEnv = Environment.GetEnvironmentVariable("KESTREL_GRPC_PORT");
+    if (int.TryParse(grpcPortEnv, out var aspireGrpcPort))
+    {
+        builder.WebHost.UseKestrelCore().ConfigureKestrel(o =>
+        {
+            // Parse and re-add the Aspire-assigned HTTP URL(s)
+            foreach (var url in aspireUrls!.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var uri = new Uri(url.Trim());
+                o.ListenLocalhost(uri.Port, lo => lo.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2);
+            }
+            // Add the dedicated gRPC HTTP/2 port
+            o.ListenAnyIP(aspireGrpcPort, lo => lo.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2);
+        });
+    }
 }
 builder.Services.AddGrpc();
 

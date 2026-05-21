@@ -39,31 +39,50 @@ var ollama = builder.AddContainer("ollama", "ollama/ollama", "latest")
 _ = ollama; // keep reference so the analyser is happy if not consumed
 
 // ── Postgres servers (host ports kept for developer DX: psql/pgAdmin) ────
-var examDbServer = builder.AddPostgres("exam-db-server", port: 5433);
+// Credentials match compose.local.yaml exactly for standalone dev parity.
+var examDbUser = builder.AddParameter("exam-db-user", "exam");
+var examDbPass = builder.AddParameter("exam-db-pass", "exam", secret: true);
+var examDbServer = builder.AddPostgres("exam-db-server", userName: examDbUser, password: examDbPass, port: 5433).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var examDb = examDbServer.AddDatabase("exam-db");
 
-var gamificationDbServer = builder.AddPostgres("gamification-db-server", port: 5444);
+var gamificationDbUser = builder.AddParameter("gamification-db-user", "gamification");
+var gamificationDbPass = builder.AddParameter("gamification-db-pass", "gamification", secret: true);
+var gamificationDbServer = builder.AddPostgres("gamification-db-server", userName: gamificationDbUser, password: gamificationDbPass, port: 5444).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var gamificationDb = gamificationDbServer.AddDatabase("gamification-db");
 
-var courseDbServer = builder.AddPostgres("course-db-server", port: 5446);
+var courseDbUser = builder.AddParameter("course-db-user", "course");
+var courseDbPass = builder.AddParameter("course-db-pass", "course", secret: true);
+var courseDbServer = builder.AddPostgres("course-db-server", userName: courseDbUser, password: courseDbPass, port: 5446).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var courseDb = courseDbServer.AddDatabase("course-db");
 
-var speakingDbServer = builder.AddPostgres("speaking-db-server", port: 5441);
+var speakingDbUser = builder.AddParameter("speaking-db-user", "speaking");
+var speakingDbPass = builder.AddParameter("speaking-db-pass", "speaking", secret: true);
+var speakingDbServer = builder.AddPostgres("speaking-db-server", userName: speakingDbUser, password: speakingDbPass, port: 5441).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var speakingDb = speakingDbServer.AddDatabase("speaking-db");
 
-var dictionaryDbServer = builder.AddPostgres("dictionary-db-server", port: 5443);
+var dictionaryDbUser = builder.AddParameter("dictionary-db-user", "dictionary");
+var dictionaryDbPass = builder.AddParameter("dictionary-db-pass", "dictionary", secret: true);
+var dictionaryDbServer = builder.AddPostgres("dictionary-db-server", userName: dictionaryDbUser, password: dictionaryDbPass, port: 5443).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var dictionaryDb = dictionaryDbServer.AddDatabase("dictionary-db");
 
-var vocabularyDbServer = builder.AddPostgres("vocabulary-db-server", port: 5987);
+var vocabularyDbUser = builder.AddParameter("vocabulary-db-user", "vocabulary");
+var vocabularyDbPass = builder.AddParameter("vocabulary-db-pass", "vocabulary", secret: true);
+var vocabularyDbServer = builder.AddPostgres("vocabulary-db-server", userName: vocabularyDbUser, password: vocabularyDbPass, port: 5987).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var vocabularyDb = vocabularyDbServer.AddDatabase("vocabulary-db");
 
-var writingDbServer = builder.AddPostgres("writing-db-server", port: 5440);
+var writingDbUser = builder.AddParameter("writing-db-user", "writing");
+var writingDbPass = builder.AddParameter("writing-db-pass", "writing", secret: true);
+var writingDbServer = builder.AddPostgres("writing-db-server", userName: writingDbUser, password: writingDbPass, port: 5440).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var writingDb = writingDbServer.AddDatabase("writing-db");
 
-var authDbServer = builder.AddPostgres("auth-db-server", port: 5434);
+var authDbUser = builder.AddParameter("auth-db-user", "auth");
+var authDbPass = builder.AddParameter("auth-db-pass", "auth", secret: true);
+var authDbServer = builder.AddPostgres("auth-db-server", userName: authDbUser, password: authDbPass, port: 5434).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var authDb = authDbServer.AddDatabase("auth-db");
 
-var attemptDbServer = builder.AddPostgres("attempt-db-server", port: 5435);
+var attemptDbUser = builder.AddParameter("attempt-db-user", "attempt");
+var attemptDbPass = builder.AddParameter("attempt-db-pass", "attempt", secret: true);
+var attemptDbServer = builder.AddPostgres("attempt-db-server", userName: attemptDbUser, password: attemptDbPass, port: 5435).WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
 var attemptDb = attemptDbServer.AddDatabase("attempt-db");
 
 // ── exam-service ─────────────────────────────────────────────────────────
@@ -72,6 +91,7 @@ var attemptDb = attemptDbServer.AddDatabase("attempt-db");
 // don't pin them — service discovery handles addressing.
 var exam = builder.AddProject("exam-service", "../services/exam-service/exam-service.csproj")
     .WithReference(examDb)
+    .WithHttpEndpoint(name: "grpc", env: "KESTREL_GRPC_PORT")
     .WithComposeEnvFile("exam")
     .WaitFor(examDb);
 
@@ -157,17 +177,13 @@ var auth = builder.AddProject("auth-service", "../services/auth-service/auth-ser
 // ── attempt-service ──────────────────────────────────────────────────────
 // EXAMSERVICE__INTERNAL__API__KEY is required (attempt-service throws on
 // startup without it). Dev placeholder only.
-// TODO(coordination-with-agent-4): if Agent 4 exposes a separate "grpc"
-// endpoint on exam-service, switch ExamService__GrpcAddress to
-// exam.GetEndpoint("grpc"). Until then we point both HTTP and gRPC at the
-// http endpoint (Aspire dynamic port + service discovery handles it).
 var attempt = builder.AddProject("attempt-service", "../services/attempt-service/attempt-service.csproj")
     .WithReference(attemptDb)
     .WithReference(rabbitmq)
     .WithComposeEnvFile("attempt")
     .WithRabbitMqEnv(rabbitmq, rabbitUser, rabbitPass)
     .WithEnvironment("EXAMSERVICE__EXAM__ADDRESS", exam.GetEndpoint("http"))
-    .WithEnvironment("ExamService__GrpcAddress", exam.GetEndpoint("http"))
+    .WithEnvironment("ExamService__GrpcAddress", exam.GetEndpoint("grpc"))
     .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod")
     .WaitFor(attemptDb)
     .WaitFor(rabbitmq);

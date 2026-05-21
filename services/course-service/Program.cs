@@ -34,7 +34,10 @@ builder.Services.AddHealthChecks()
     .AddNpgSql(connectionString, name: "course-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
     .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
 
-builder.AddNpgsqlDbContext<CourseDbContext>("course-db");
+builder.AddNpgsqlDbContext<CourseDbContext>("course-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
+});
 
 // ── MassTransit (RabbitMQ) ────────────────────────────────────────────────
 builder.Services.AddMassTransit(x =>

@@ -52,7 +52,10 @@ builder.Services.AddSingleton(sp =>
 });
 
 // ── Database (Aspire) ─────────────────────────────────────────────────────
-builder.AddNpgsqlDbContext<SpeakingDbContext>("speaking-db");
+builder.AddNpgsqlDbContext<SpeakingDbContext>("speaking-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
+});
 
 // ── RabbitMQ (Aspire MassTransit factory pattern) ─────────────────────────
 var rabbitHost = EnvOrDefault("RABBITMQ__HOST", "localhost");

@@ -45,7 +45,10 @@ builder.Services.AddSingleton(npgsqlDataSource);
 // DbContext still uses the singleton NpgsqlDataSource
 builder.Services.AddDbContext<WritingDbContext>(o =>
     o.UseNpgsql(npgsqlDataSource, npg =>
-        npg.MigrationsAssembly(typeof(WritingDbContext).Assembly.GetName().Name)));
+    {
+        npg.MigrationsAssembly(typeof(WritingDbContext).Assembly.GetName().Name);
+        npg.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps));
+    }));
 
 // ── AI client ───────────────────────────────────────────────────────
 builder.Services.AddHttpClient<IAiCompareClient, AiCompareClient>(client =>

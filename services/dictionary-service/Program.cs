@@ -35,7 +35,10 @@ builder.Services.Configure<FormOptions>(opt =>
 });
 
 // ── Database (Aspire) ─────────────────────────────────────────────────────
-builder.AddNpgsqlDbContext<DictionaryDbContext>("dictionary-db");
+builder.AddNpgsqlDbContext<DictionaryDbContext>("dictionary-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
+});
 
 // ── Elasticsearch ────────────────────────────────────────────────────────
 var esUrl = EnvOrDefault("ELASTICSEARCH__URL", "http://elasticsearch:9200");

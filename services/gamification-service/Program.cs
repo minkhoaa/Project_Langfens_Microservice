@@ -36,7 +36,10 @@ builder.Services.AddHealthChecks()
     .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
 
 // ── Database ─────────────────────────────────────────────────────────────
-builder.AddNpgsqlDbContext<GamificationDbContext>("gamification-db");
+builder.AddNpgsqlDbContext<GamificationDbContext>("gamification-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
+});
 
 // ── MassTransit (RabbitMQ) ────────────────────────────────────────────────
 builder.Services.AddMassTransit(cfg =>

@@ -4,6 +4,7 @@ using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using HealthChecks.RabbitMQ;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Shared.Bootstrap;
 using attempt_service.Features.Analytics;
@@ -66,7 +67,11 @@ var rabbitVhost = EnvOrDefault("RABBITMQ__VHOST", "/");
 var rabbitPort = ushort.TryParse(Environment.GetEnvironmentVariable("RABBITMQ__PORT"), out var port) ? port : (ushort)5672;
 
 // ── Database (Aspire) ──────────────────────────────────────────────────────────
-builder.AddNpgsqlDbContext<AttemptDbContext>("attempt-db");
+// Disable retrying execution strategy because Submit uses explicit transactions
+builder.AddNpgsqlDbContext<AttemptDbContext>("attempt-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new NonRetryingExecutionStrategy(deps)));
+});
 
 // ── Health checks ───────────────────────────────────────────────────────────
 var attemptConnectionString = builder.Configuration.GetConnectionString("attempt-db")

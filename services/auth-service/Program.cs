@@ -86,7 +86,10 @@ var rabbitConfig = new RabbitMqConfig
 builder.Services.AddSingleton(rabbitConfig);
 
 // ── Database (Aspire) ──────────────────────────────────────────────────────────
-builder.AddNpgsqlDbContext<AuthDbContext>("auth-db");
+builder.AddNpgsqlDbContext<AuthDbContext>("auth-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
+});
 
 // ── Identity ──────────────────────────────────────────────────────────────────
 builder.Services.AddIdentityCore<User>(opt =>

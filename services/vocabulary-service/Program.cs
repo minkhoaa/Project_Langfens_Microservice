@@ -24,7 +24,10 @@ builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Vocabulary Service");
 
 // ── Database ─────────────────────────────────────────────────────────────
-builder.AddNpgsqlDbContext<VocabularyDbContext>("vocabulary-db");
+builder.AddNpgsqlDbContext<VocabularyDbContext>("vocabulary-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
+});
 
 static string EnvOrDefault(string key, string fallback) =>
     Environment.GetEnvironmentVariable(key) ?? fallback;
