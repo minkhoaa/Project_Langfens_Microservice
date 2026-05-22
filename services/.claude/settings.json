@@ -1,0 +1,71 @@
+{
+  "permissions": {
+    "allow": [
+      {
+        "command": "dotnet build",
+        "reason": "Build all .NET services during development and CI"
+      },
+      {
+        "command": "dotnet test",
+        "reason": "Run unit tests for all .NET services"
+      },
+      {
+        "command": "dotnet run",
+        "reason": "Run services locally during development"
+      },
+      {
+        "command": "dotnet ef migrations add",
+        "reason": "Create EF Core migrations"
+      },
+      {
+        "command": "dotnet ef database update",
+        "reason": "Apply EF Core migrations"
+      },
+      {
+        "command": "dotnet ef migrations remove",
+        "reason": "Remove unapplied migrations"
+      },
+      {
+        "command": "dotnet format",
+        "reason": "Format C# code to project style"
+      },
+      {
+        "command": "dotnet restore",
+        "reason": "Restore NuGet packages"
+      },
+      {
+        "command": "cd /home/khoa/Projects/langfens/Project_Langfens_Microservice/services/* && dotnet build",
+        "reason": "Build any service from its directory"
+      },
+      {
+        "command": "dotnet publish",
+        "reason": "Publish services for deployment"
+      }
+    ]
+  },
+  "defaults": {
+    "build": {
+      "command": "dotnet build",
+      "dir": ".",
+      "reason": "Standard dotnet build for .NET projects"
+    },
+    "test": {
+      "command": "dotnet test",
+      "dir": ".",
+      "reason": "Run tests using built-in xUnit/NUnit test runner"
+    },
+    "run": {
+      "command": "dotnet run",
+      "dir": ".",
+      "reason": "Run the service with dotnet run"
+    }
+  },
+  "ignore": [
+    "**/bin/**",
+    "**/obj/**",
+    "**/.vs/**",
+    "**/node_modules/**",
+    "**/*.runtimeconfig.dev.json",
+    "**/Migrations/*.cs"
+  ]
+}

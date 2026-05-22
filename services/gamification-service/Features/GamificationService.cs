@@ -15,6 +15,7 @@ public interface IGamificationService
     Task<DailyCheckinResponse> DailyCheckin(Guid userId, CancellationToken token);
     Task AddXp(Guid userId, int amount, string source, string? sourceId, CancellationToken token);
     Task RecordActivity(Guid userId, CancellationToken token);
+    Task<ProgressRingResponse> GetProgressRing(Guid userId, CancellationToken token);
 }
 
 public class GamificationService : IGamificationService
@@ -190,6 +191,28 @@ public class GamificationService : IGamificationService
         var stats = await GetOrCreateUserStats(userId, token);
         await RecordActivityInternal(stats, token);
         await _context.SaveChangesAsync(token);
+    }
+
+    public async Task<ProgressRingResponse> GetProgressRing(Guid userId, CancellationToken token)
+    {
+        var stats = await GetOrCreateUserStats(userId, token);
+        var today = DateTime.UtcNow.Date;
+
+        var todayXp = await _context.XpTransactions
+            .Where(x => x.UserId == userId && x.CreatedAt.Date == today)
+            .SumAsync(x => x.Amount, token);
+
+        var targetXp = UserStats.GetXpForNextLevel(stats.Level);
+        var dailyGoalPercent = targetXp > 0 ? Math.Min(100, (todayXp * 100) / targetXp) : 0;
+
+        return new ProgressRingResponse(
+            stats.TotalXp,
+            targetXp,
+            stats.Level,
+            stats.CurrentStreak,
+            dailyGoalPercent,
+            todayXp.ToString()
+        );
     }
 
     private async Task<UserStats> GetOrCreateUserStats(Guid userId, CancellationToken token)

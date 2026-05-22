@@ -27,8 +27,13 @@ namespace speaking_service.Features.Services.User
         {
             if (file is null || file.Length == 0)
                 return Results.BadRequest("File is invalid");
-            if (!file.ContentType.StartsWith("audio/"))
-                return Results.BadRequest("Only audio is accepted");
+            // Accept standard audio MIME types AND common audio extensions as a fallback
+            // (some clients send wrong MIME types for .wav/.mp3/.m4a/.ogg)
+            var allowedExtensions = new[] { ".mp3", ".wav", ".ogg", ".m4a", ".webm", ".mp4", ".aac" };
+            var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant() ?? "";
+            var isAudioMime = file.ContentType.StartsWith("audio/") || file.ContentType == "application/octet-stream";
+            if (!isAudioMime && !allowedExtensions.Contains(ext))
+                return Results.BadRequest("Only audio files (.mp3, .wav, .ogg, .m4a, .webm, .mp4, .aac) are accepted");
             await using var stream = file.OpenReadStream();
             var uploadParams = new VideoUploadParams
             {

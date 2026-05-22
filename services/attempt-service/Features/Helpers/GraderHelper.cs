@@ -25,6 +25,19 @@ public sealed record QuestionKey(
 
 internal static class TextNorm
 {
+    // IELTS Listening short-answer: "2" == "two", "ten" == "10"
+    private static readonly Dictionary<string, string> WordToNumber = new(StringComparer.OrdinalIgnoreCase)
+    {
+        {"zero", "0"}, {"one", "1"}, {"two", "2"}, {"three", "3"}, {"four", "4"},
+        {"five", "5"}, {"six", "6"}, {"seven", "7"}, {"eight", "8"}, {"nine", "9"},
+        {"ten", "10"}, {"eleven", "11"}, {"twelve", "12"}, {"thirteen", "13"},
+        {"fourteen", "14"}, {"fifteen", "15"}, {"sixteen", "16"}, {"seventeen", "17"},
+        {"eighteen", "18"}, {"nineteen", "19"}, {"twenty", "20"}, {"thirty", "30"},
+        {"forty", "40"}, {"fifty", "50"}, {"sixty", "60"}, {"seventy", "70"},
+        {"eighty", "80"}, {"ninety", "90"}, {"hundred", "100"}, {"thousand", "1000"},
+        {"million", "1000000"}
+    };
+
     public static string Normalize(string? s)
     {
         if (string.IsNullOrWhiteSpace(s)) return "";
@@ -38,7 +51,81 @@ internal static class TextNorm
         }
 
         var noDia = sb.ToString().Normalize(NormalizationForm.FormC);
-        return Regex.Replace(noDia, "\\s+", " ").Trim();
+        var normalized = Regex.Replace(noDia, "\\s+", " ").Trim();
+
+        // Normalize written numbers: "two" -> "2", "twenty one" -> "21"
+        normalized = NormalizeWrittenNumbers(normalized);
+        return normalized;
+    }
+
+    private static string NormalizeWrittenNumbers(string input)
+    {
+        // Handle compound numbers like "twenty one", "one hundred and five"
+        var result = input;
+
+        // Match patterns: "twenty one", "one hundred", "one thousand"
+        // Simple approach: replace known word tokens with digits where the entire
+        // word sequence maps to a number
+        var words = result.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length == 0) return result;
+
+        var output = new List<string>();
+        int i = 0;
+        while (i < words.Length)
+        {
+            var w = words[i].ToLowerInvariant().Trim(',');
+            long? compound = null;
+
+            if (w == "a" && i + 1 < words.Length && words[i + 1].ToLowerInvariant() == "hundred")
+            {
+                // "a hundred" = 100
+                compound = 100;
+                i += 2;
+            }
+            else if (WordToNumber.TryGetValue(w, out var numStr) && long.TryParse(numStr, out var val))
+            {
+                if (i + 2 < words.Length)
+                {
+                    var next = words[i + 1].ToLowerInvariant();
+                    var nnext = words[i + 2].ToLowerInvariant();
+                    // hundreds + units: "one hundred and five" or "one hundred five"
+                    if (val >= 100 && (next == "and" || !WordToNumber.ContainsKey(next)) &&
+                        WordToNumber.TryGetValue(nnext, out var unitStr) && long.TryParse(unitStr, out var unitVal) && unitVal < 100)
+                    {
+                        compound = val + unitVal;
+                        i += next == "and" ? 3 : 2;
+                    }
+                    else if (val >= 20 && val < 100 && WordToNumber.TryGetValue(nnext, out var unit2Str) && long.TryParse(unit2Str, out var unit2Val) && unit2Val < 10)
+                    {
+                        // tens + units: "twenty one" -> 21
+                        compound = val + unit2Val;
+                        i += 2;
+                    }
+                    else
+                    {
+                        compound = val;
+                        i++;
+                    }
+                }
+                else
+                {
+                    compound = val;
+                    i++;
+                }
+            }
+            else
+            {
+                output.Add(words[i]);
+                i++;
+            }
+
+            if (compound.HasValue)
+            {
+                output.Add(compound.Value.ToString());
+            }
+        }
+
+        return string.Join(" ", output);
     }
 }
 

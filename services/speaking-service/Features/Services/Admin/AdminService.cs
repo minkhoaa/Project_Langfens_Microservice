@@ -101,6 +101,6 @@ public class AdminService : IAdminService
               || examType == SpeakingCategory.SPEAKING_PART1
               || examType == SpeakingCategory.SPEAKING_PART3
               || examType == SpeakingCategory.SPEAKING_PART2))
-            throw new InvalidExpressionException("Exam type is 0, 1 ,2");
+            throw new InvalidExpressionException("Exam type must be TOEIC(0), SPEAKING_PART1(1), SPEAKING_PART2(2), or SPEAKING_PART3(3)");
     }
 }

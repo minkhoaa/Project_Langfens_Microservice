@@ -98,7 +98,7 @@ public class ExamService : IExamService
                                 .OrderBy(d => d.Idx)
                                 .Select(question =>
                                     new Dto_Public.PublicQuestionRecord(
-                                        question.Idx, question.Type, question.Skill,
+                                        question.Id, question.Idx, question.Type, question.Skill,
                                         question.Difficulty, question.PromptMd,
                                         question.Options
                                             .OrderBy(option => option.Idx)
@@ -114,7 +114,7 @@ public class ExamService : IExamService
                                     group.Questions
                                         .OrderBy(q => q.Idx)
                                         .Select(q => new Dto_Public.PublicQuestionRecord(
-                                            q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd,
+                                            q.Id, q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd,
                                             q.Options.OrderBy(o => o.Idx)
                                                 .Select(o => new Dto_Public.PublicOptionRecord(o.Idx, o.ContentMd))
                                                 .ToList(),

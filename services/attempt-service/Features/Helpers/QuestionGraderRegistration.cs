@@ -85,7 +85,8 @@ namespace attempt_service.Features.Helpers
         }
         public IEnumerable<string> SupportedTypes => new[]
      {
-            QuestionType.FlowChart
+            QuestionType.FlowChart,
+            QuestionType.FlowChartCompletion,
         };
 
         public IQuestionGrader Create() => _instance;

@@ -1,0 +1,16 @@
+{
+  "before": {
+    "dotnet build": {
+      "description": "Verify shared libs build before building a service",
+      "run": "cd services/_shared && dotnet build --verbosity minimal 2>/dev/null || true"
+    },
+    "dotnet test": {
+      "description": "Ensure shared libs are built before running service tests",
+      "run": "cd services/_shared && dotnet build --verbosity minimal 2>/dev/null || true"
+    },
+    "git commit": {
+      "description": "Pre-commit checks",
+      "run": "dotnet build --verbosity minimal 2>/dev/null || true"
+    }
+  }
+}

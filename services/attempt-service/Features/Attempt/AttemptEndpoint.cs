@@ -26,6 +26,10 @@ public static class AttemptEndpointMapping
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
         group.MapGet("/placement/status", AttemptHandler.GetPlacementCompletionStatus)
             .RequireAuthorization(AttemptScope.AttemptReadOwn);
+        group.MapGet("/{attemptId:guid}/navigator", AttemptHandler.GetNavigator)
+            .RequireAuthorization(AttemptScope.AttemptReadOwn);
+        group.MapPatch("/{attemptId:guid}/question/{questionId:guid}/flag", AttemptHandler.ToggleFlag)
+            .RequireAuthorization(AttemptScope.AttemptReadOwn);
 
     }
     public static void MapAdminEndpoint(this IEndpointRouteBuilder router)

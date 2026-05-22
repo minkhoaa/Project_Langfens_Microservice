@@ -53,3 +53,12 @@ public record DailyCheckinResponse(
     int Level,
     List<AchievementResponse>? NewAchievements
 );
+
+public record ProgressRingResponse(
+    int CurrentXp,
+    int TargetXp,
+    int Level,
+    int Streak,
+    int DailyGoalPercent,
+    string TodayXp
+);

@@ -37,7 +37,6 @@ public static class SpeakingEndpoint
     {
         var app = route.MapGroup("/api/admin/speaking");
         app.MapGet("/exams", SpeakingHandler.GetAdminExamsHandler).RequireAuthorization(Roles.Admin);
-        app.MapPost("/create", SpeakingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
         app.MapPost("/exams", SpeakingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
         app.MapPut("/exams/{examId:guid}", SpeakingHandler.UpdateExamHandler).RequireAuthorization(Roles.Admin);
         app.MapDelete("/exams/{examId:guid}", SpeakingHandler.DeleteExamHandler).RequireAuthorization(Roles.Admin);

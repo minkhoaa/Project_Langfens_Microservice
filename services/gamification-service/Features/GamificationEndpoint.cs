@@ -39,5 +39,11 @@ public static class GamificationEndpoint
             var result = await service.DailyCheckin(user.UserId, token);
             return Results.Ok(new ApiResultDto(result.Success, result.Success ? "Checked in!" : "Already checked in today", result));
         });
+
+        group.MapGet("/progress-ring", async (IGamificationService service, IUserContext user, CancellationToken token) =>
+        {
+            var progress = await service.GetProgressRing(user.UserId, token);
+            return Results.Ok(new ApiResultDto(true, "Progress ring fetched", progress));
+        });
     }
 }

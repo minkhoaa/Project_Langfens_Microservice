@@ -29,6 +29,8 @@ public interface IAttemptService
     Task<IResult> GetAllAttempts(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
     Task<IResult> GetLatestPlacement(CancellationToken token);
     Task<IResult> GetPlacementCompletionStatus(CancellationToken token);
+    Task<IResult> GetNavigator(Guid attemptId, CancellationToken token);
+    Task<IResult> ToggleFlag(Guid attemptId, Guid questionId, CancellationToken token);
 }
 
 public class AttemptService(
@@ -1168,6 +1170,114 @@ IQuestionGraderFactory questionGraderFactory
         return Results.Ok(new ApiResultDto(true, "Latest placement evaluation", placement));
     }
 
+    public async Task<IResult> GetNavigator(Guid attemptId, CancellationToken token)
+    {
+        var userId = user.UserId;
+        var attempt = await context.Attempts.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == userId, token);
+        if (attempt == null)
+            return Results.NotFound(new ApiResultDto(false, "Attempt not found", null!));
+
+        // Parse PaperJson to get question IDs and indices
+        var questionMeta = new List<(Guid QuestionId, int Idx)>();
+        try
+        {
+            var parser = new JsonParser(JsonParser.Settings.Default.WithIgnoreUnknownFields(true));
+            var proto = parser.Parse<InternalDeliveryExam>(attempt.PaperJson!.RootElement.GetRawText());
+            foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
+            {
+                foreach (var group in section.QuestionGroups ?? new RepeatedField<InternalDeliveryQuestionGroup>())
+                {
+                    foreach (var q in group.Questions ?? new RepeatedField<InternalDeliveryQuestion>())
+                    {
+                        questionMeta.Add((Guid.Parse(q.Id), (int)q.Idx));
+                    }
+                }
+            }
+        }
+        catch
+        {
+            var dto = attempt.PaperJson.RootElement.Deserialize<InternalExamDto.InternalDeliveryExam>(
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (dto != null)
+            {
+                foreach (var section in dto.Sections ?? Array.Empty<InternalExamDto.InternalDeliverySection>())
+                {
+                    foreach (var group in section.QuestionGroups ?? Array.Empty<InternalExamDto.InternalDeliveryQuestionGroup>())
+                    {
+                        foreach (var q in group.Questions ?? Array.Empty<InternalExamDto.InternalDeliveryQuestion>())
+                        {
+                            questionMeta.Add((q.Id, q.Idx));
+                        }
+                    }
+                }
+            }
+        }
+
+        if (questionMeta.Count == 0)
+            return Results.Ok(new ApiResultDto(true, "No questions", new NavigatorResponse(0, 0, new List<NavigatorEntry>())));
+
+        var questionIds = questionMeta.Select(q => q.QuestionId).ToList();
+
+        // Get answered status from AttemptAnswers
+        var answeredMap = await context.AttemptAnswers
+            .Where(a => a.AttemptId == attemptId && questionIds.Contains(a.QuestionId))
+            .ToDictionaryAsync(a => a.QuestionId, a =>
+                (a.SelectedOptionIds != null && a.SelectedOptionIds.Count > 0) || !string.IsNullOrEmpty(a.TextAnswer),
+                token);
+
+        // Get flagged status from QuestionBookmarks
+        var flaggedMap = await context.QuestionBookmarks
+            .Where(b => b.UserId == userId && questionIds.Contains(b.QuestionId))
+            .ToDictionaryAsync(b => b.QuestionId, b => true, token);
+
+        var totalQuestions = questionMeta.Count;
+        var answeredCount = answeredMap.Count(kv => kv.Value);
+
+        var questions = questionMeta.Select(q => new NavigatorEntry(
+            q.QuestionId,
+            q.Idx,
+            answeredMap.TryGetValue(q.QuestionId, out var answered) && answered,
+            flaggedMap.TryGetValue(q.QuestionId, out var flagged) && flagged
+        )).OrderBy(q => q.Idx).ToList();
+
+        return Results.Ok(new ApiResultDto(true, "Navigator fetched", new NavigatorResponse(totalQuestions, answeredCount, questions)));
+    }
+
+    public async Task<IResult> ToggleFlag(Guid attemptId, Guid questionId, CancellationToken token)
+    {
+        var userId = user.UserId;
+
+        // Verify attempt belongs to user
+        var attemptExists = await context.Attempts
+            .AnyAsync(x => x.Id == attemptId && x.UserId == userId, token);
+        if (!attemptExists)
+            return Results.NotFound(new ApiResultDto(false, "Attempt not found", null!));
+
+        var bookmark = await context.QuestionBookmarks
+            .FirstOrDefaultAsync(b => b.UserId == userId && b.QuestionId == questionId, token);
+
+        if (bookmark != null)
+        {
+            context.QuestionBookmarks.Remove(bookmark);
+            await context.SaveChangesAsync(token);
+            return Results.Ok(new ApiResultDto(true, "Flag removed", new { flagged = false }));
+        }
+        else
+        {
+            var newBookmark = new QuestionBookmark
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                QuestionId = questionId,
+                AttemptId = attemptId,
+                CreatedAt = DateTime.UtcNow
+            };
+            context.QuestionBookmarks.Add(newBookmark);
+            await context.SaveChangesAsync(token);
+            return Results.Ok(new ApiResultDto(true, "Flag added", new { flagged = true }));
+        }
+    }
 
     private static string? TryGetExamCategory(JsonDocument? paperJson)
     {

@@ -68,4 +68,17 @@ public static class AttemptHandler
 
     public static Task<IResult> GetPlacementCompletionStatus(CancellationToken token, IAttemptService service)
         => service.GetPlacementCompletionStatus(token);
+
+    public static Task<IResult> GetNavigator(
+        [FromRoute] Guid attemptId,
+        CancellationToken token,
+        [FromServices] IAttemptService service
+    ) => service.GetNavigator(attemptId, token);
+
+    public static Task<IResult> ToggleFlag(
+        [FromRoute] Guid attemptId,
+        [FromRoute] Guid questionId,
+        CancellationToken token,
+        [FromServices] IAttemptService service
+    ) => service.ToggleFlag(attemptId, questionId, token);
 }

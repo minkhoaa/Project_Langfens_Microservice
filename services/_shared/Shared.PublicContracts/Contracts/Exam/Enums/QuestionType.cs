@@ -28,4 +28,5 @@ public static class QuestionType
 	public const string Classification = "CLASSIFICATION";
 
 	public const string FlowChart = "FLOW_CHART";
+	public const string FlowChartCompletion = "FLOW_CHART_COMPLETION";
 }

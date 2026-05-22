@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      {
+        "command": "uv",
+        "comment": "Python package manager and runner"
+      },
+      {
+        "command": "python",
+        "comment": "Python runtime"
+      },
+      {
+        "command": "pip",
+        "comment": "Package installation"
+      },
+      {
+        "command": "pytest",
+        "comment": "Test runner"
+      },
+      {
+        "command": "uvicorn",
+        "comment": "FastAPI dev server"
+      },
+      {
+        "command": "curl",
+        "comment": "Health check probes"
+      }
+    ]
+  },
+  "completion": {
+    "showContext": false,
+    "maxDepth": 3
+  }
+}

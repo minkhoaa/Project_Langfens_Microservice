@@ -1,4 +1,5 @@
 using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
+using DotNetEnv;
 using exam_service.Features.Exams.AdminEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Aspire service defaults (OTel, discovery, resilience, /health, /alive) ──
@@ -97,8 +99,21 @@ using (var scope = app.Services.CreateScope())
     {
         var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
         Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
-        await db.Database.MigrateAsync();
+        Console.WriteLine("[EF] Skipping MigrateAsync due to pending model changes - will seed directly");
+
+        try
+        {
+            await db.Database.ExecuteSqlRawAsync(@"
+                ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS ""WordList"" text[];
+            ");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[EF] WordList column check: {ex.Message}");
+        }
     }
+    await exam_service.Data.ReadingSeeder.SeedReadingExamAsync(db);
+    await exam_service.Data.ListeningSeeder.SeedListeningExamAsync(db);
 }
 
 app.MapDefaultEndpoints();

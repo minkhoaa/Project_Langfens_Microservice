@@ -44,6 +44,7 @@ public class Dto_Public
         List<PublicQuestionRecord> Questions);
 
     public record PublicQuestionRecord(
+        Guid Id,
         int Idx,
         string Type,
         string Skill,
