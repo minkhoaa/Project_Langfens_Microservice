@@ -91,6 +91,7 @@ var attemptDb = attemptDbServer.AddDatabase("attempt-db");
 // don't pin them — service discovery handles addressing.
 var exam = builder.AddProject("exam-service", "../services/exam-service/exam-service.csproj")
     .WithReference(examDb)
+    .WithHttpEndpoint(name: "http", env: "Kestrel__HttpPort")
     .WithHttpEndpoint(name: "grpc", env: "KESTREL_GRPC_PORT")
     .WithComposeEnvFile("exam")
     .WaitFor(examDb);
