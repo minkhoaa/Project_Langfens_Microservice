@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -23,6 +24,7 @@ namespace exam_service.Migrations
                     Level = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     DurationMin = table.Column<int>(type: "integer", nullable: false),
+                    ImageUrl = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -39,7 +41,10 @@ namespace exam_service.Migrations
                     ExamId = table.Column<Guid>(type: "uuid", nullable: false),
                     Idx = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
-                    InstructionsMd = table.Column<string>(type: "text", nullable: true)
+                    InstructionsMd = table.Column<string>(type: "text", nullable: true),
+                    PassageMd = table.Column<string>(type: "text", nullable: true),
+                    AudioUrl = table.Column<string>(type: "text", nullable: true),
+                    TranscriptMd = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -53,21 +58,58 @@ namespace exam_service.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "exam_questions",
+                name: "exam_question_groups",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SectionId = table.Column<Guid>(type: "uuid", nullable: false),
                     Idx = table.Column<int>(type: "integer", nullable: false),
+                    StartIdx = table.Column<int>(type: "integer", nullable: false),
+                    EndIdx = table.Column<int>(type: "integer", nullable: false),
+                    InstructionMd = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_exam_question_groups", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_exam_question_groups_exam_sections_SectionId",
+                        column: x => x.SectionId,
+                        principalTable: "exam_sections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "exam_questions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SectionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GroupId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Idx = table.Column<int>(type: "integer", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
                     Skill = table.Column<string>(type: "text", nullable: false),
                     Difficulty = table.Column<int>(type: "integer", nullable: false),
                     PromptMd = table.Column<string>(type: "text", nullable: false),
-                    ExplanationMd = table.Column<string>(type: "text", nullable: true)
+                    ExplanationMd = table.Column<string>(type: "text", nullable: true),
+                    BlankAcceptTexts = table.Column<Dictionary<string, string[]>>(type: "jsonb", nullable: true),
+                    BlankAcceptRegex = table.Column<Dictionary<string, string[]>>(type: "jsonb", nullable: true),
+                    MatchPairs = table.Column<Dictionary<string, string[]>>(type: "jsonb", nullable: true),
+                    OrderCorrects = table.Column<List<string>>(type: "text[]", nullable: true),
+                    ShortAnswerAcceptTexts = table.Column<List<string>>(type: "text[]", nullable: true),
+                    ShortAnswerAcceptRegex = table.Column<List<string>>(type: "text[]", nullable: true),
+                    ModelAnswers = table.Column<string>(type: "jsonb", nullable: true),
+                    WordList = table.Column<List<string>>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_exam_questions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_exam_questions_exam_question_groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "exam_question_groups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_exam_questions_exam_sections_SectionId",
                         column: x => x.SectionId,
@@ -103,6 +145,16 @@ namespace exam_service.Migrations
                 columns: new[] { "QuestionId", "Idx" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_exam_question_groups_SectionId_Idx",
+                table: "exam_question_groups",
+                columns: new[] { "SectionId", "Idx" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_exam_questions_GroupId",
+                table: "exam_questions",
+                column: "GroupId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_exam_questions_SectionId_Idx",
                 table: "exam_questions",
                 columns: new[] { "SectionId", "Idx" });
@@ -127,6 +179,9 @@ namespace exam_service.Migrations
 
             migrationBuilder.DropTable(
                 name: "exam_questions");
+
+            migrationBuilder.DropTable(
+                name: "exam_question_groups");
 
             migrationBuilder.DropTable(
                 name: "exam_sections");

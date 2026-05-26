@@ -99,17 +99,27 @@ using (var scope = app.Services.CreateScope())
     {
         var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
         Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
-        Console.WriteLine("[EF] Skipping MigrateAsync due to pending model changes - will seed directly");
 
-        try
+        if (pending.Count > 0)
         {
-            await db.Database.ExecuteSqlRawAsync(@"
-                ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS ""WordList"" text[];
-            ");
+            Console.WriteLine("[EF] Applying migrations...");
+            await db.Database.MigrateAsync();
+            Console.WriteLine("[EF] Migrations applied successfully");
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine($"[EF] WordList column check: {ex.Message}");
+            Console.WriteLine("[EF] No pending migrations, checking WordList column...");
+
+            try
+            {
+                await db.Database.ExecuteSqlRawAsync(@"
+                    ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS ""WordList"" text[];
+                ");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EF] WordList column check: {ex.Message}");
+            }
         }
     }
     await exam_service.Data.ReadingSeeder.SeedReadingExamAsync(db);

@@ -13,15 +13,15 @@ using exam_service.Infrastructure.Persistence;
 namespace exam_service.Migrations
 {
     [DbContext(typeof(ExamDbContext))]
-    [Migration("20251221135804_UpdateDB")]
-    partial class UpdateDB
+    [Migration("20260526164947_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -46,6 +46,9 @@ namespace exam_service.Migrations
 
                     b.Property<int>("DurationMin")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<string>("Level")
                         .IsRequired()
@@ -118,13 +121,19 @@ namespace exam_service.Migrations
                     b.Property<string>("ExplanationMd")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Idx")
                         .HasColumnType("integer");
 
                     b.Property<Dictionary<string, string[]>>("MatchPairs")
                         .HasColumnType("jsonb");
 
-                    b.Property<List<string>>("OrderCorrects")
+                    b.PrimitiveCollection<string>("ModelAnswers")
+                        .HasColumnType("jsonb");
+
+                    b.PrimitiveCollection<List<string>>("OrderCorrects")
                         .HasColumnType("text[]");
 
                     b.Property<string>("PromptMd")
@@ -134,10 +143,10 @@ namespace exam_service.Migrations
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uuid");
 
-                    b.Property<List<string>>("ShortAnswerAcceptRegex")
+                    b.PrimitiveCollection<List<string>>("ShortAnswerAcceptRegex")
                         .HasColumnType("text[]");
 
-                    b.Property<List<string>>("ShortAnswerAcceptTexts")
+                    b.PrimitiveCollection<List<string>>("ShortAnswerAcceptTexts")
                         .HasColumnType("text[]");
 
                     b.Property<string>("Skill")
@@ -148,11 +157,45 @@ namespace exam_service.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.PrimitiveCollection<List<string>>("WordList")
+                        .HasColumnType("text[]");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("SectionId", "Idx");
 
                     b.ToTable("exam_questions", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamQuestionGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("EndIdx")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Idx")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("InstructionMd")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("SectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("StartIdx")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SectionId", "Idx");
+
+                    b.ToTable("exam_question_groups", (string)null);
                 });
 
             modelBuilder.Entity("exam_service.Domains.Entities.ExamSection", b =>
@@ -203,8 +246,26 @@ namespace exam_service.Migrations
 
             modelBuilder.Entity("exam_service.Domains.Entities.ExamQuestion", b =>
                 {
+                    b.HasOne("exam_service.Domains.Entities.ExamQuestionGroup", "Group")
+                        .WithMany("Questions")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("exam_service.Domains.Entities.ExamSection", "Section")
                         .WithMany("Questions")
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Section");
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamQuestionGroup", b =>
+                {
+                    b.HasOne("exam_service.Domains.Entities.ExamSection", "Section")
+                        .WithMany("QuestionGroups")
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -233,8 +294,15 @@ namespace exam_service.Migrations
                     b.Navigation("Options");
                 });
 
+            modelBuilder.Entity("exam_service.Domains.Entities.ExamQuestionGroup", b =>
+                {
+                    b.Navigation("Questions");
+                });
+
             modelBuilder.Entity("exam_service.Domains.Entities.ExamSection", b =>
                 {
+                    b.Navigation("QuestionGroups");
+
                     b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
