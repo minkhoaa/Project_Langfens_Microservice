@@ -49,36 +49,34 @@ builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
 
 // ── gRPC + HTTP ports ───────────────────────────────────────────────────
-// Under Aspire, ASPNETCORE_URLS is injected and Kestrel binds to those endpoints
-// (HTTP/1.1 + HTTP/2 multiplexed on the same port). Only configure explicit
-// HTTP/gRPC ports when running outside Aspire (compose path).
+// Under Aspire, ASPNETCORE_URLS is injected and Kestrel binds to those endpoints.
+// When Kestrel__GrpcPort is also allocated (via WithHttpEndpoint(name: "grpc")),
+// add a dedicated HTTP/2-only listener. When running outside Aspire (compose path),
+// use the explicit Kestrel__HttpPort / Kestrel__GrpcPort env vars.
 var aspireUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
-if (string.IsNullOrEmpty(aspireUrls))
+if (!string.IsNullOrEmpty(aspireUrls))
+{
+    builder.WebHost.UseKestrelCore().ConfigureKestrel(o =>
+    {
+        // Always enable HTTP/1AndHttp2 on the Aspire-assigned endpoint so gRPC works
+        foreach (var url in aspireUrls.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var uri = new Uri(url.Trim());
+            o.ListenLocalhost(uri.Port, lo => lo.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2);
+        }
+        // If Aspire allocated a dedicated gRPC port, add it as HTTP/2-only
+        var grpcPortEnv = Environment.GetEnvironmentVariable("Kestrel__GrpcPort");
+        if (int.TryParse(grpcPortEnv, out var grpcPort))
+        {
+            o.ListenAnyIP(grpcPort, lo => lo.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2);
+        }
+    });
+}
+else
 {
     var httpPort = int.TryParse(Environment.GetEnvironmentVariable("Kestrel__HttpPort"), out var hp) ? hp : 8080;
     var grpcPort = int.TryParse(Environment.GetEnvironmentVariable("Kestrel__GrpcPort"), out var gp) ? gp : 8081;
     builder.ConfigureLangfensKestrel(httpPort: httpPort, grpcPort: grpcPort);
-}
-else
-{
-    // Under Aspire: if a dedicated gRPC port is allocated, add it as an additional
-    // Kestrel endpoint with HTTP/2 only. Use ListenOptions via KestrelServerOptions
-    // to ADD to the existing ASPNETCORE_URLS-based endpoints (not replace them).
-    var grpcPortEnv = Environment.GetEnvironmentVariable("KESTREL_GRPC_PORT");
-    if (int.TryParse(grpcPortEnv, out var aspireGrpcPort))
-    {
-        builder.WebHost.UseKestrelCore().ConfigureKestrel(o =>
-        {
-            // Parse and re-add the Aspire-assigned HTTP URL(s)
-            foreach (var url in aspireUrls!.Split(';', StringSplitOptions.RemoveEmptyEntries))
-            {
-                var uri = new Uri(url.Trim());
-                o.ListenLocalhost(uri.Port, lo => lo.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2);
-            }
-            // Add the dedicated gRPC HTTP/2 port
-            o.ListenAnyIP(aspireGrpcPort, lo => lo.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2);
-        });
-    }
 }
 builder.Services.AddGrpc();
 

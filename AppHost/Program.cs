@@ -92,7 +92,7 @@ var attemptDb = attemptDbServer.AddDatabase("attempt-db");
 var exam = builder.AddProject("exam-service", "../services/exam-service/exam-service.csproj")
     .WithReference(examDb)
     .WithHttpEndpoint(name: "http", env: "Kestrel__HttpPort")
-    .WithHttpEndpoint(name: "grpc", env: "KESTREL_GRPC_PORT")
+    .WithHttpEndpoint(name: "grpc", env: "Kestrel__GrpcPort")
     .WithComposeEnvFile("exam")
     .WaitFor(examDb);
 
@@ -187,7 +187,8 @@ var attempt = builder.AddProject("attempt-service", "../services/attempt-service
     .WithEnvironment("ExamService__GrpcAddress", exam.GetEndpoint("grpc"))
     .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod")
     .WaitFor(attemptDb)
-    .WaitFor(rabbitmq);
+    .WaitFor(rabbitmq)
+    .WaitFor(exam);
 
 // ── AI Service (Python, built from Dockerfile) ───────────────────────────
 var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/Dockerfile")
