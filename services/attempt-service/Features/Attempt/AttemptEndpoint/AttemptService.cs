@@ -1017,7 +1017,8 @@ IQuestionGraderFactory questionGraderFactory
                     title = t.GetString();
             }
             catch { }
-            return new AttemptListItem(x.Id, x.ExamId, x.Status, x.StartedAt, x.SubmittedAt, x.ScaledScore, title);
+            return new AttemptListItem(x.Id, x.ExamId, x.Status, x.StartedAt, x.SubmittedAt, x.ScaledScore,
+                x.ScaledScore.HasValue ? IeltsBandConverter.FromScaledPercent(x.ScaledScore.Value) : null, title);
         }).ToList();
 
         return Results.Ok(new ApiResultDto(true, successMessage, items));

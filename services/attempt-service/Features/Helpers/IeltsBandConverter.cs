@@ -44,5 +44,13 @@ public static class IeltsBandConverter
         var scaled = (int)Math.Round((decimal)correct / total * 40m, MidpointRounding.AwayFromZero);
         return FromAcademicReading(scaled);
     }
+
+    // Reading/Listening award 1 point per question, so ScaledScore (0..100) equals the
+    // correct-answer percentage. Convert it to the same band the detail endpoint reports.
+    public static decimal FromScaledPercent(decimal scaledPercent)
+    {
+        var scaled = (int)Math.Round(Math.Clamp(scaledPercent, 0m, 100m) / 100m * 40m, MidpointRounding.AwayFromZero);
+        return FromAcademicReading(scaled);
+    }
 }
 

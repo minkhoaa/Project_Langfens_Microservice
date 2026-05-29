@@ -63,6 +63,7 @@ public record AttemptListItem(
     DateTime StartedAt,
     DateTime? SubmittedAt,
     decimal? ScorePct,
+    decimal? IeltsBand,
     string? Title
 );
 
