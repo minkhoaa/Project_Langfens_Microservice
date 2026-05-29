@@ -29,7 +29,8 @@ Provide your analysis as a JSON object with these exact keys:
       "original": "The exact sentence from the student's essay that could be improved",
       "improved": "A rewritten version of that sentence demonstrating higher band quality",
       "explanation": "Why this change improves the essay (2-3 sentences)",
-      "category": "vocabulary"
+      "category": "vocabulary",
+      "severity": "medium"
     }}
   ]
 }}
@@ -41,6 +42,7 @@ Rules:
 - Each category (vocabulary, grammar, coherence, structure) should be represented if possible.
 - Only include sentences that genuinely need improvement.
 - category must be one of: vocabulary, grammar, coherence, structure.
+- severity must be one of: low, medium, high — how much this issue holds the essay back.
 - Focus on PROGRESSION — frame feedback as steps on a journey, not deficiencies.
 - Be encouraging but honest.
 
@@ -87,7 +89,8 @@ Provide your analysis as a JSON object with these exact keys:
       "original": "The exact sentence from the student's essay that could be refined",
       "improved": "A polished version of that sentence closer to Band 9.0 quality",
       "explanation": "Why this refinement moves toward perfection (2-3 sentences)",
-      "category": "vocabulary"
+      "category": "vocabulary",
+      "severity": "low"
     }}
   ]
 }}

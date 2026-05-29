@@ -4,6 +4,7 @@ using MassTransit;
 using RabbitMQ.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Polly;
 using Shared.Security.Claims;
 using Shared.Security.Scopes;
 using writing_service.Contracts;
@@ -51,18 +52,26 @@ builder.Services.AddDbContext<WritingDbContext>(o =>
     }));
 
 // ── AI client ───────────────────────────────────────────────────────
+#pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is experimental but stable for our use
 builder.Services.AddHttpClient<IAiCompareClient, AiCompareClient>(client =>
 {
     client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080"));
     client.Timeout = TimeSpan.FromSeconds(90);
-});
+})
+    // AI LLM calls take 12-32s; the global 10s-per-attempt / 30s-total standard
+    // resilience handler cancels them. Replace it with a single 90s timeout.
+    .RemoveAllResilienceHandlers()
+    .AddResilienceHandler("ai-compare", b => b.AddTimeout(TimeSpan.FromSeconds(90)));
 builder.Services.AddKeyedSingleton<CircuitBreaker>("grader");
 builder.Services.AddKeyedSingleton<CircuitBreaker>("compare");
 builder.Services.AddHttpClient<IWritingGrader, AiWritingGrader>(client =>
 {
     client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080"));
     client.Timeout = TimeSpan.FromSeconds(90);
-});
+})
+    .RemoveAllResilienceHandlers()
+    .AddResilienceHandler("ai-grader", b => b.AddTimeout(TimeSpan.FromSeconds(90)));
+#pragma warning restore EXTEXP0001
 
 // ── Services ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IWritingService, WritingService>();

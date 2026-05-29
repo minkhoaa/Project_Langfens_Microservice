@@ -64,6 +64,9 @@ public class SentenceComparisonDto
 
     [JsonPropertyName("category")]
     public string Category { get; set; } = "";
+
+    [JsonPropertyName("severity")]
+    public string Severity { get; set; } = "";
 }
 
 public class ReferenceEssayDto

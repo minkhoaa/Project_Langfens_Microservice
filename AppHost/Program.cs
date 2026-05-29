@@ -29,14 +29,23 @@ var elasticsearch = builder.AddContainer("elasticsearch", "docker.elastic.co/ela
 var qdrant = builder.AddContainer("qdrant", "qdrant/qdrant", "latest")
     .WithHttpEndpoint(targetPort: 6333, name: "http");
 
-// Ollama: parity with compose; ai-service has USE_OLLAMA=false by default so
-// nothing references it, but include it so devs can flip the flag.
+// Ollama: chat/grading default to Groq (USE_OLLAMA=false), but EMBEDDINGS are
+// always served by Ollama, so bge-m3 must be present or all RAG features
+// (writing compare, grammar explain/search) 404. Persist the volume and pull
+// bge-m3 via a one-shot init that ai-service waits for.
 var ollama = builder.AddContainer("ollama", "ollama/ollama", "latest")
     .WithHttpEndpoint(targetPort: 11434, name: "http")
     .WithEnvironment("OLLAMA_HOST", "0.0.0.0")
     .WithEnvironment("OLLAMA_KEEP_ALIVE", "5m")
-    .WithEnvironment("OLLAMA_NUM_PARALLEL", "1");
-_ = ollama; // keep reference so the analyser is happy if not consumed
+    .WithEnvironment("OLLAMA_NUM_PARALLEL", "1")
+    .WithVolume("ollama-data", "/root/.ollama")
+    .WithLifetime(ContainerLifetime.Persistent);
+
+var ollamaInit = builder.AddContainer("ollama-init", "ollama/ollama", "latest")
+    .WithEnvironment("OLLAMA_HOST", ollama.GetEndpoint("http"))
+    .WithEntrypoint("/bin/sh")
+    .WithArgs("-c", "ollama pull bge-m3")
+    .WaitFor(ollama);
 
 // ── Postgres servers (host ports kept for developer DX: psql/pgAdmin) ────
 // Credentials match compose.local.yaml exactly for standalone dev parity.
@@ -195,12 +204,15 @@ var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/
     .WithHttpEndpoint(targetPort: 8080, name: "http")
     .WithEnvironment("REDIS_HOST", redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host))
     .WithEnvironment("REDIS_PORT", redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Port))
+    .WithEnvironment("REDIS_PASSWORD", redis.Resource.PasswordParameter!)
+    .WithEnvironment("REDIS_SSL", "true")
     .WithEnvironment("QDRANT_HOST", qdrant.GetEndpoint("http").Property(EndpointProperty.Host))
     .WithEnvironment("QDRANT_PORT", qdrant.GetEndpoint("http").Property(EndpointProperty.Port))
     .WithEnvironment("OLLAMA_BASE_URL", ollama.GetEndpoint("http"))
     .WithComposeEnvFile("ai")
     .WaitFor(redis)
-    .WaitFor(qdrant);
+    .WaitFor(qdrant)
+    .WaitForCompletion(ollamaInit);
 
 // AI URL injection into writing & speaking (both default to http://ai-service:8080)
 writing.WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"));

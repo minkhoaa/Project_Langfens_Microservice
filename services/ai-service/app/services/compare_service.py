@@ -12,6 +12,7 @@ from app.services import llm_service, search_service
 logger = logging.getLogger(__name__)
 
 VALID_CATEGORIES = {"vocabulary", "grammar", "coherence", "structure"}
+VALID_SEVERITIES = {"low", "medium", "high"}
 
 
 def validate_sentence_comparisons_response(result: dict) -> dict:
@@ -40,17 +41,21 @@ def _parse_sentence_comparisons(raw_comparisons: list, max_items: int = 5) -> li
         improved = item.get("improved", "").strip()
         explanation = item.get("explanation", "").strip()
         category = item.get("category", "vocabulary").lower()
+        severity = str(item.get("severity", "medium")).lower()
         
         if not original or not improved or not explanation:
             continue
         if category not in VALID_CATEGORIES:
             category = "vocabulary"
+        if severity not in VALID_SEVERITIES:
+            severity = "medium"
         
         parsed.append(SentenceComparison(
             original=original,
             improved=improved,
             explanation=explanation,
             category=category,
+            severity=severity,
         ))
     return parsed
 
@@ -58,44 +63,34 @@ def _parse_sentence_comparisons(raw_comparisons: list, max_items: int = 5) -> li
 async def _search_with_fallback(
     topic: str, band_center: float, task_type: str, top_k: int = 2
 ) -> list:
-    """Search for essays near band_center with progressive fallback."""
-    # Attempt 1: topic + band ±0.5
-    results = await search_service.search_and_reassemble(
-        collection=settings.qdrant_collection_writing,
-        query=topic,
-        top_k=top_k,
-        filters={
-            "band_overall": {"gte": band_center - 0.5, "lte": band_center + 0.5},
-            "task_type": task_type,
-        },
-    )
-    if results:
-        return results
+    """Search for essays near band_center with progressive fallback.
 
-    # Attempt 2: topic + band ±1.0
-    results = await search_service.search_and_reassemble(
-        collection=settings.qdrant_collection_writing,
-        query=topic,
-        top_k=top_k,
-        filters={
-            "band_overall": {"gte": band_center - 1.0, "lte": band_center + 1.0},
-            "task_type": task_type,
-        },
-    )
-    if results:
-        return results
+    Embedding/search failures (e.g. Ollama embed model missing, Qdrant down)
+    degrade to an empty list so the caller returns grading-only instead of a
+    500/503 — comparison is augmentation, not core grading.
+    """
+    async def _safe(query: str, lo: float, hi: float) -> list:
+        return await search_service.search_and_reassemble(
+            collection=settings.qdrant_collection_writing,
+            query=query,
+            top_k=top_k,
+            filters={
+                "band_overall": {"gte": lo, "lte": hi},
+                "task_type": task_type,
+            },
+        )
 
-    # Attempt 3: same task_type + band only (no topic similarity)
-    results = await search_service.search_and_reassemble(
-        collection=settings.qdrant_collection_writing,
-        query=task_type,
-        top_k=top_k,
-        filters={
-            "band_overall": {"gte": band_center - 1.0, "lte": band_center + 1.0},
-            "task_type": task_type,
-        },
-    )
-    return results
+    try:
+        results = await _safe(topic, band_center - 0.5, band_center + 0.5)
+        if results:
+            return results
+        results = await _safe(topic, band_center - 1.0, band_center + 1.0)
+        if results:
+            return results
+        return await _safe(task_type, band_center - 1.0, band_center + 1.0)
+    except Exception as e:
+        logger.warning("compare: RAG search failed (degrading to no references): %s", e)
+        return []
 
 
 def _extract_hints(references: list) -> dict:
@@ -174,16 +169,25 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
             variables=variables,
             expect_json=True,
         )
-        validate_sentence_comparisons_response(result)
     except OutputParserException as e:
         logger.warning("LLM call failed: %s", e)
-        raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
-    except ValueError as e:
-        logger.warning("Validation failed: %s", e)
         raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
     except Exception as e:
         logger.warning("LLM call failed: %s", e)
         raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
+
+    # Missing sentence_comparisons is a soft failure: local models often omit it.
+    # Degrade gracefully instead of failing the whole call — otherwise the caller
+    # stores nothing and the FE polls until timeout.
+    try:
+        validate_sentence_comparisons_response(result)
+    except ValueError as e:
+        logger.warning("Validation failed: %s", e)
+        result["sentence_comparisons"] = []
+        existing = result.get("overall_analysis", "").strip()
+        result["overall_analysis"] = (
+            "LLM response validation failed; sentence comparisons unavailable. " + existing
+        ).strip()
 
     t_llm = time.time()
     logger.info("compare: llm took %.1fms, total %.1fms", (t_llm - t_search) * 1000, (t_llm - t0) * 1000)
@@ -240,16 +244,25 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
             variables=variables,
             expect_json=True,
         )
-        validate_sentence_comparisons_response(result)
     except OutputParserException as e:
         logger.warning("LLM call failed: %s", e)
-        raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
-    except ValueError as e:
-        logger.warning("Validation failed: %s", e)
         raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
     except Exception as e:
         logger.warning("LLM call failed: %s", e)
         raise HTTPException(status_code=503, detail="Comparison service temporarily unavailable")
+
+    # Missing sentence_comparisons is a soft failure: local models often omit it.
+    # Degrade gracefully instead of failing the whole call — otherwise the caller
+    # stores nothing and the FE polls until timeout.
+    try:
+        validate_sentence_comparisons_response(result)
+    except ValueError as e:
+        logger.warning("Validation failed: %s", e)
+        result["sentence_comparisons"] = []
+        existing = result.get("overall_analysis", "").strip()
+        result["overall_analysis"] = (
+            "LLM response validation failed; sentence comparisons unavailable. " + existing
+        ).strip()
 
     return CompareResponse(
         overall_analysis=result.get("overall_analysis", ""),

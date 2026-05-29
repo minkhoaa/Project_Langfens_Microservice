@@ -136,10 +136,10 @@ class RoleplayTurnWithSpeechResponse(BaseModel):
 
 
 class CompareRequest(BaseModel):
-    essay_text: str = Field(..., min_length=50, max_length=3000)
-    topic: str = Field(..., min_length=5, max_length=500)
+    essay_text: str = Field(..., min_length=50, max_length=5000)
+    topic: str = Field(..., min_length=5, max_length=2000)
     task_type: Literal["TASK_1", "TASK_2"] = "TASK_2"
-    student_band: float = Field(..., ge=1.0, le=9.0)
+    student_band: float = Field(..., ge=0.0, le=9.0)
 
 
 class CriterionItem(BaseModel):
@@ -153,6 +153,7 @@ class SentenceComparison(BaseModel):
     improved: str
     explanation: str
     category: Literal["vocabulary", "grammar", "coherence", "structure"]
+    severity: Optional[Literal["low", "medium", "high"]] = None
 
 
 class ReferenceEssay(BaseModel):

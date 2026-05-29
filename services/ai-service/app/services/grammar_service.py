@@ -69,12 +69,18 @@ def _parse_grammar_response(raw_result: dict, error_text: str) -> GrammarExplain
 async def explain_single(request: GrammarExplainRequest) -> GrammarExplainResponse:
     """Explain a single grammar error."""
     t0 = time.time()
-    rules = await search_service.search(
-        collection=settings.qdrant_collection_grammar,
-        query=request.error_text,
-        top_k=3,
-        filters={},
-    )
+    # RAG rules are optional context — the LLM can explain without them. If the
+    # embedding/search backend is unavailable, degrade to no rules rather than 500.
+    try:
+        rules = await search_service.search(
+            collection=settings.qdrant_collection_grammar,
+            query=request.error_text,
+            top_k=3,
+            filters={},
+        )
+    except Exception as e:
+        logger.warning("grammar: rule search failed (continuing without rules): %s", e)
+        rules = []
     t_search = time.time()
     logger.info("grammar: search took %.1fms", (t_search - t0) * 1000)
 

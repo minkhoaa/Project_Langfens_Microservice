@@ -16,9 +16,9 @@ async def test_health_reports_ok_when_stack_healthy(http_client):
 @pytest.mark.live
 @pytest.mark.asyncio
 async def test_compare_with_oversize_essay_rejected(http_client):
-    """essay_text > 3000 chars must 422."""
+    """essay_text > 5000 chars must 422."""
     payload = {
-        "essay_text": "x" * 3500,
+        "essay_text": "x" * 5500,
         "topic": "Some valid IELTS topic",
         "task_type": "TASK_2",
         "student_band": 6.0,
