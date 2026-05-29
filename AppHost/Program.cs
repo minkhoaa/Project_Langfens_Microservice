@@ -202,6 +202,12 @@ var attempt = builder.AddProject("attempt-service", "../services/attempt-service
 // ── AI Service (Python, built from Dockerfile) ───────────────────────────
 var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/Dockerfile")
     .WithHttpEndpoint(targetPort: 8080, name: "http")
+    // Hot reload: mount host source over the baked /app/app and run uvicorn
+    // --reload so Python edits apply live without an image rebuild.
+    .WithBindMount("../services/ai-service/app", "/app/app")
+    .WithEntrypoint("uvicorn")
+    .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
+              "--reload", "--reload-dir", "/app/app")
     .WithEnvironment("REDIS_HOST", redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host))
     .WithEnvironment("REDIS_PORT", redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Port))
     .WithEnvironment("REDIS_PASSWORD", redis.Resource.PasswordParameter!)
