@@ -130,14 +130,15 @@ async def _explain_single_with_error_handling(
 
 
 async def explain_batch(
-    requests: list[GrammarExplainRequest], max_concurrent: int = 3
+    requests: list[GrammarExplainRequest], max_concurrent: int = 8
 ) -> GrammarBatchExplainResponse:
     """Explain multiple grammar errors with concurrency control."""
     if not requests:
         return GrammarBatchExplainResponse(results=[], failed_count=0, total_count=0)
 
-    # Limit concurrency to max 5 as per requirements
-    semaphore = asyncio.Semaphore(min(max_concurrent, 5))
+    # Cloud provider (Groq) handles concurrency well; cap at 10 to stay within
+    # multi-key rate limits while keeping grammar analysis fast.
+    semaphore = asyncio.Semaphore(min(max_concurrent, 10))
 
     # Create tasks for all requests
     tasks = [

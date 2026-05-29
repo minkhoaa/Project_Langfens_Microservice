@@ -215,7 +215,7 @@ class GrammarExplainResponse(BaseModel):
 
 class GrammarBatchExplainRequest(BaseModel):
     errors: list[GrammarExplainRequest]
-    max_concurrent: int = Field(default=3, ge=1, le=5)
+    max_concurrent: int = Field(default=8, ge=1, le=10)
 
 
 class GrammarBatchExplainResponse(BaseModel):
