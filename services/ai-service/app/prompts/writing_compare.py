@@ -12,6 +12,10 @@ Band levels found: {band_distribution}
 Average word count at each level: {word_count_hints}
 Common vocabulary patterns at higher bands: {vocab_hints}
 Common structural patterns at higher bands: {structure_hints}
+
+Actual excerpts retrieved from these higher-band reference essays (use them to ground
+your sentence_comparisons and band-level feedback in REAL examples, not invented ones):
+{reference_excerpts}
 </reference_context>
 
 Provide your analysis as a JSON object with these exact keys:
@@ -72,6 +76,10 @@ Analyze their essay against Band 9.0 standards to identify final refinements for
 <reference_context>
 The RAG system found {reference_count} Band 9.0 exemplar essays similar to this topic.
 Key characteristics: {exemplar_hints}
+
+Actual excerpts retrieved from these Band 9.0 exemplar essays (ground your refinements
+in these REAL examples, not invented ones):
+{reference_excerpts}
 </reference_context>
 
 Provide your analysis as a JSON object with these exact keys:

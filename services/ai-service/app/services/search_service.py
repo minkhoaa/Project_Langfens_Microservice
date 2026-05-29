@@ -34,16 +34,16 @@ async def search(collection: str, query: str, top_k: int = 5, filters: dict | No
     vector = await embed_query(query)
     client = get_qdrant_client()
 
-    hits = client.search(
+    hits = client.query_points(
         collection_name=collection,
-        query_vector=vector,
+        query=vector,
         limit=top_k,
         query_filter=_build_filter(filters or {}),
         with_payload=True,
     )
 
     results = []
-    for point in hits:
+    for point in hits.points:
         payload = point.payload or {}
         text = payload.pop("text", "")
         results.append(SearchResult(
@@ -92,9 +92,9 @@ async def search_and_reassemble(
         data = json_lib.loads(cached)
         return [ReassembledEssay(**item) for item in data]
 
-    hits = client.search(
+    hits = client.query_points(
         collection_name=collection,
-        query_vector=vector,
+        query=vector,
         limit=top_k * 3,
         query_filter=_build_filter(f),
         with_payload=True,
@@ -103,7 +103,7 @@ async def search_and_reassemble(
     seen_parents: dict[str, float] = {}
     chunk_scores: dict[str, dict[str, float]] = {}
 
-    for point in hits:
+    for point in hits.points:
         payload = point.payload or {}
         parent_id = payload.get("parent_id", "")
         chunk_type = payload.get("chunk_type", "")
@@ -148,3 +148,36 @@ async def search_and_reassemble(
         )
 
     return results
+
+
+def build_reference_excerpts(references: list, max_refs: int = 3, max_chars_per_ref: int = 600) -> str:
+    """Build a compact, RAG-grounded excerpt block from retrieved reference essays.
+
+    Injects the actual retrieved text (intro + first body paragraph per reference,
+    bounded by char budget) so the LLM grounds its analysis in real band-level
+    exemplars instead of generic boilerplate. Falls back to an explicit
+    "no references" sentinel so prompts never see an empty block.
+    """
+    if not references:
+        return "No reference essays were retrieved for grounding."
+
+    blocks = []
+    for i, r in enumerate(references[:max_refs], 1):
+        text = (getattr(r, "text", "") or "").strip()
+        if not text:
+            continue
+        # Reassembled text joins chunks with blank lines; keep the first two
+        # paragraphs (typically intro + body1) to anchor band-level style.
+        paras = [p.strip() for p in text.split("\n\n") if p.strip()]
+        excerpt = "\n\n".join(paras[:2]) if paras else text
+        excerpt = excerpt[:max_chars_per_ref].strip()
+        band = ""
+        meta = getattr(r, "metadata", {}) or {}
+        b = meta.get("band_overall", 0)
+        if b:
+            band = f" (Band {b})"
+        blocks.append(f"--- Reference {i}{band} ---\n{excerpt}")
+
+    if not blocks:
+        return "No reference essays were retrieved for grounding."
+    return "\n\n".join(blocks)

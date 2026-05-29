@@ -8,6 +8,7 @@ from app.config import settings
 from app.prompts.writing_compare import WRITING_COMPARE_EXEMPLAR_PROMPT, WRITING_COMPARE_PROMPT
 from app.schemas import CompareRequest, CompareResponse, ReferenceEssay, SentenceComparison
 from app.services import llm_service, search_service
+from app.services.search_service import build_reference_excerpts
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,8 @@ def _extract_hints(references: list) -> dict:
     """Extract compact metadata hints from RAG results — no full essay text in prompt."""
     if not references:
         return {"reference_count": 0, "band_distribution": "none", "word_count_hints": "N/A",
-                "vocab_hints": "N/A", "structure_hints": "N/A"}
+                "vocab_hints": "N/A", "structure_hints": "N/A",
+                "reference_excerpts": "No reference essays were retrieved for grounding."}
 
     bands = set()
     word_counts = []
@@ -119,6 +121,7 @@ def _extract_hints(references: list) -> dict:
                        "and avoid repetition through synonyms and paraphrase.",
         "structure_hints": "Higher-band essays have clear intro-body-conclusion structure, use cohesive devices "
                           "(however, furthermore, consequently), and develop each point with specific examples.",
+        "reference_excerpts": build_reference_excerpts(references),
     }
 
 

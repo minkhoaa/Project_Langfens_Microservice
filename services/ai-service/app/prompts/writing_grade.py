@@ -52,7 +52,11 @@ def build_rag_context(rag_hints: dict) -> str:
 Band levels: {rag_hints['band_distribution']}
 {rag_hints.get('word_count_hints', '')}
 Common vocabulary patterns at higher bands: {rag_hints.get('vocab_hints', 'N/A')}
-Common structural patterns: {rag_hints.get('structure_hints', 'N/A')}"""
+Common structural patterns: {rag_hints.get('structure_hints', 'N/A')}
+
+Actual excerpts retrieved from these band-level reference essays (anchor your band scores
+and quoted comparisons to these REAL examples, not assumptions):
+{rag_hints.get('reference_excerpts', 'No reference essays were retrieved for grounding.')}"""
 
 def build_grade_prompt(task: str, essay: str, word_count: int, rag_hints: dict | None = None) -> str:
     """Build the full user prompt for writing grading."""

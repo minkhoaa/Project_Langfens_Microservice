@@ -1,3 +1,4 @@
+import asyncio
 import json as json_lib
 import logging
 import time
@@ -11,8 +12,14 @@ from app.prompts.speaking_grade import build_speaking_prompt
 from app.schemas import CriterionItem, ReassembledEssay, WritingGradeRequest, WritingGradeResponse
 from app.schemas import SpeakingGradeRequest, SpeakingGradeResponse as SpeakingGradeResponseSchema, SpeakingCriterionResult
 from app.services import llm_service, search_service
+from app.services.search_service import build_reference_excerpts
 
 logger = logging.getLogger(__name__)
+
+# RAG is an optional enhancement for grading. Bound it so total grade time stays
+# under the gateway's 20s writing-cluster timeout, even when Qdrant is remote and
+# the Redis cache is unavailable (every search misses cache and is slow).
+RAG_LOOKUP_TIMEOUT_SECONDS = 6.0
 
 
 def _extract_grade_hints(references: list[ReassembledEssay]) -> dict:
@@ -24,6 +31,7 @@ def _extract_grade_hints(references: list[ReassembledEssay]) -> dict:
             "word_count_hints": "N/A",
             "vocab_hints": "N/A",
             "structure_hints": "N/A",
+            "reference_excerpts": "No reference essays were retrieved for grounding.",
         }
 
     bands = set()
@@ -54,6 +62,7 @@ def _extract_grade_hints(references: list[ReassembledEssay]) -> dict:
             "use cohesive devices (however, furthermore, consequently), "
             "and develop each point with specific examples and well-developed reasoning."
         ),
+        "reference_excerpts": build_reference_excerpts(references),
     }
 
 
@@ -90,18 +99,24 @@ async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
     # Step 1: RAG lookup
     t0 = time.time()
     try:
-        refs = await search_service.search_and_reassemble(
-            collection=settings.qdrant_collection_writing,
-            query=req.task,
-            top_k=3,
-            filters={
-                "band_overall": {"gte": inferred_band - 1.0, "lte": inferred_band + 1.0},
-                "task_type": "TASK_2",
-            },
+        refs = await asyncio.wait_for(
+            search_service.search_and_reassemble(
+                collection=settings.qdrant_collection_writing,
+                query=req.task,
+                top_k=3,
+                filters={
+                    "band_overall": {"gte": inferred_band - 1.0, "lte": inferred_band + 1.0},
+                    "task_type": "TASK_2",
+                },
+            ),
+            timeout=RAG_LOOKUP_TIMEOUT_SECONDS,
         )
         rag_hints = _extract_grade_hints(refs)
-    except Exception as exc:
-        logger.warning("RAG lookup failed, proceeding without reference hints: %s", exc)
+    except (Exception, asyncio.TimeoutError) as exc:
+        # RAG is an optional enhancement: grading must not exceed the gateway's
+        # 20s budget waiting on a slow/remote Qdrant (esp. when Redis cache is
+        # down). On timeout or any failure, grade with empty reference hints.
+        logger.warning("RAG lookup failed/timed out, proceeding without reference hints: %s", exc)
         rag_hints = _extract_grade_hints([])
 
     t_search = time.time()
