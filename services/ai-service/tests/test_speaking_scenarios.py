@@ -111,8 +111,10 @@ def test_turn_endpoint_appends_user_and_agent_turns(tmp_path, monkeypatch):
 
     monkeypatch.setattr(speaking_router, "ensure_speaking_memory_collection", lambda: None)
 
+    from app.schemas import RoleplayLLMOutput
+
     async def fake_generate_agent_reply(*args, **kwargs):
-        return "Could you describe your suitcase, please?"
+        return RoleplayLLMOutput(agent_reply="Could you describe your suitcase, please?")
 
     monkeypatch.setattr(speaking_router, "generate_agent_reply", fake_generate_agent_reply)
 

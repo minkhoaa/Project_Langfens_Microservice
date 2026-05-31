@@ -37,15 +37,15 @@ class WordErrorOut(BaseModel):
 
 class EvaluateResponse(BaseModel):
     transcript: str = Field(..., description="What the model heard in the audio")
-    errors: List[WordErrorOut] = Field(
-        default_factory=list,
-        description="Words that are missing or incorrect relative to the target",
+    errors: Optional[List[WordErrorOut]] = Field(
+        default=None,
+        description="Words that are missing or incorrect relative to the target (None if no target)",
     )
-    score: float = Field(
-        ...,
+    score: Optional[float] = Field(
+        default=None,
         ge=0.0,
         le=1.0,
-        description="Pronunciation / accuracy score in [0.0, 1.0]",
+        description="Pronunciation / accuracy score in [0.0, 1.0] (None if no target)",
     )
 
 
@@ -97,10 +97,10 @@ async def evaluate_speech(
         ) from exc
 
     # --- step 2: compare text ---
-    errors: List[WordError] = []
+    raw_errors: Optional[List[WordError]] = None
     if target:
         try:
-            errors = await asyncio.to_thread(compare_text, transcript, target)
+            raw_errors = await asyncio.to_thread(compare_text, transcript, target)
         except Exception as exc:
             logger.exception("Text comparison failed")
             raise HTTPException(
@@ -109,17 +109,23 @@ async def evaluate_speech(
             ) from exc
 
     # --- step 3: score ---
-    try:
-        score = await asyncio.to_thread(compute_score, audio_bytes, transcript, target or "", errors)
-    except Exception as exc:
-        logger.exception("Scoring failed")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Scoring error: {exc}",
-        ) from exc
+    score: Optional[float] = None
+    if target:
+        try:
+            score = await asyncio.to_thread(compute_score, audio_bytes, transcript, target, raw_errors)
+        except Exception as exc:
+            logger.exception("Scoring failed")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Scoring error: {exc}",
+            ) from exc
+
+    errors_out = None
+    if raw_errors is not None:
+        errors_out = [WordErrorOut(word=e.word, type=e.type) for e in raw_errors]
 
     return EvaluateResponse(
         transcript=transcript,
-        errors=[WordErrorOut(word=e.word, type=e.type) for e in errors],
+        errors=errors_out,
         score=score,
     )
