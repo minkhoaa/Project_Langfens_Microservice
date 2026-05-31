@@ -22,3 +22,7 @@ torchaudio>=2.2.0
 transformers>=4.40.0
 cachetools>=5.3.0
 python-multipart>=0.0.9
+
+# --- Local LoRA inference (Qwen2.5 fine-tuned) ---
+peft>=0.19.0
+accelerate>=0.30.0
