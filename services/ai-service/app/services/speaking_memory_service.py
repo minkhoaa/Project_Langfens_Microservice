@@ -60,8 +60,8 @@ async def save_speaking_memory(
     session_id: str,
     scenario_slug: str,
     text: str,
-    errors: list,          # list[WordErrorItem] or plain dicts — serialised to payload
-    score: float,
+    errors: list | None,          # list[WordErrorItem] or plain dicts — serialised to payload
+    score: float | None,
 ) -> None:
     """
     Embed the spoken utterance and upsert a single point into the
@@ -84,13 +84,14 @@ async def save_speaking_memory(
 
     # Serialise errors: accept both WordErrorItem objects and plain dicts
     errors_payload = []
-    for e in errors:
-        if hasattr(e, "model_dump"):
-            errors_payload.append(e.model_dump())
-        elif isinstance(e, dict):
-            errors_payload.append(e)
-        else:
-            errors_payload.append({"word": str(e), "type": "incorrect"})
+    if errors is not None:
+        for e in errors:
+            if hasattr(e, "model_dump"):
+                errors_payload.append(e.model_dump())
+            elif isinstance(e, dict):
+                errors_payload.append(e)
+            else:
+                errors_payload.append({"word": str(e), "type": "incorrect"})
 
     payload = {
         "text": text,

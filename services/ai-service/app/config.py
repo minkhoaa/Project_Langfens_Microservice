@@ -45,6 +45,21 @@ class Settings(BaseSettings):
     gemini_chat_max_tokens: int = 12288
     gemini_chat_timeout: int = 60
 
+    # --- Local LoRA (Qwen2.5 fine-tuned) ---
+    # Set USE_LOCAL_LORA=true in ai.env to activate.
+    # Set LORA_DEVICE=cpu for local dev without a GPU.
+    use_local_lora: bool = False
+    lora_model_path: str = "/app/models/qwen25-lora"
+    lora_base_model: str = "Qwen/Qwen2.5-1.5B-Instruct"
+    # "cuda" | "cpu" | "mps"  — auto falls back to cpu if cuda unavailable
+    lora_device: str = "cuda"
+    # Enable bitsandbytes 4-bit quant (requires bitsandbytes installed)
+    lora_load_in_4bit: bool = False
+    lora_max_new_tokens: int = 200
+    lora_temperature: float = 0.7
+    lora_top_p: float = 0.9
+    lora_repetition_penalty: float = 1.1
+
     @property
     def ollama_url(self) -> str:
         """Full URL for POST /api/generate (chat)."""

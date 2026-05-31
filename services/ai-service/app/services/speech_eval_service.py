@@ -8,7 +8,7 @@ Core speech evaluation logic. Three composable functions:
 
 No paid APIs. Uses:
   • faster-whisper  (transcription)
-  • transformers + torchaudio  (wav2vec2 audio embeddings for pronunciation score)
+  • Word Error Rate (WER) based on text alignment (for pronunciation accuracy score)
 """
 
 from __future__ import annotations
@@ -97,7 +97,7 @@ def _normalize(text: str) -> List[str]:
     return text.split()
 
 
-def compare_text(transcript: str, target: str) -> List[WordError]:
+def compare_text(transcript: str, target: Optional[str]) -> Optional[List[WordError]]:
     """
     Compare the spoken transcript against the target sentence.
 
@@ -107,10 +107,10 @@ def compare_text(transcript: str, target: str) -> List[WordError]:
     • A transcript token that doesn't match the current expected target token
       → "incorrect".
 
-    Returns a list of WordError objects (may be empty for a perfect match).
+    Returns a list of WordError objects, or None if no target is provided.
     """
     if not target:
-        return []
+        return None
 
     ref_tokens = _normalize(target)
     hyp_tokens = _normalize(transcript)
@@ -154,19 +154,23 @@ def compare_text(transcript: str, target: str) -> List[WordError]:
 def compute_score(
     audio_bytes: bytes,
     transcript: str,
-    target: str,
-    errors: List[WordError],
-) -> float:
+    target: Optional[str],
+    errors: Optional[List[WordError]],
+) -> Optional[float]:
     """
     Compute a pronunciation / accuracy score in [0.0, 1.0].
     Safely rewritten to use text alignment accuracy to avoid false acoustic proxies.
+    Returns None if no target is provided.
     """
     if not target:
-        return 1.0
+        return None
 
     ref_tokens = _normalize(target)
     if not ref_tokens:
-        return 1.0
+        return None
+
+    if errors is None:
+        errors = []
 
     n_errors = len(errors)
     error_rate = min(n_errors / len(ref_tokens), 1.0)
