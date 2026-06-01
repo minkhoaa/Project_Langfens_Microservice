@@ -1,11 +1,12 @@
-﻿# Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY services/speaking-service/speaking-service.csproj services/speaking-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
 COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
 COPY services/_shared/Shared.Bootstrap/Shared.Bootstrap.csproj services/_shared/Shared.Bootstrap/
+COPY services/_shared/Shared.ServiceDefaults/Shared.ServiceDefaults.csproj services/_shared/Shared.ServiceDefaults/
 
 
 ARG NUGET_CACHE_ID=nuget-speaking
@@ -24,7 +25,7 @@ RUN dotnet publish -c Release -o /out \
 
 # Runtime siêu gọn
 # Runtime (Debian, glibc – compatible với whisper.net)
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0
 WORKDIR /app
 
 # 👇 Cài dependency mà whisper.net yêu cầu trên Linux: libstdc++6, glibc, libgomp1 

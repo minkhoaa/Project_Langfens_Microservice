@@ -59,6 +59,10 @@ class Settings(BaseSettings):
     lora_temperature: float = 0.7
     lora_top_p: float = 0.9
     lora_repetition_penalty: float = 1.1
+    
+    # --- Local Pronunciation Scorer (Wav2Vec2 fine-tuned) ---
+    pronunciation_scorer_path: str = "/app/models/pronunciation-scorer-v2/best_checkpoint.pt"
+    pronunciation_device: str = "cpu"
 
     @property
     def ollama_url(self) -> str:

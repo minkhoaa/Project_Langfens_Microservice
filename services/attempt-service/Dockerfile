@@ -1,5 +1,5 @@
 ﻿# Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY services/attempt-service/attempt-service.csproj services/attempt-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
@@ -22,7 +22,7 @@ RUN dotnet publish -c Release -o /out \
     /p:DebugType=none
 
 # Runtime siêu gọn
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
