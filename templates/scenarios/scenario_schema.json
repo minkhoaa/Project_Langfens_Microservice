@@ -1,33 +1,33 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Langfens Roleplay Scenario",
-  "description": "Schema cho 1 roleplay scenario. Lưu tại ai-service/app/data/scenarios/. Mỗi file = 1 scenario.",
+  "description": "Schema for a roleplay scenario. Save to ai-service/app/data/scenarios/. One file per scenario.",
   "type": "object",
   "required": ["id", "slug", "title", "difficulty", "ielts_part", "context", "user_role", "agent_role", "opening_prompt", "target_vocabulary", "duration_min"],
   "properties": {
     "id": {
       "type": "string",
       "format": "uuid",
-      "description": "UUID unique.",
+      "description": "Unique UUID.",
       "example": "b1c2d3e4-f5a6-7890-bcde-f12345678901"
     },
     "slug": {
       "type": "string",
       "pattern": "^[a-z0-9-]+$",
-      "description": "kebab-case unique identifier. Dùng cho URL và filename.",
+      "description": "kebab-case unique identifier. Used in URLs and filenames.",
       "example": "job-interview-tech"
     },
     "title": {
       "type": "string",
       "minLength": 5,
       "maxLength": 80,
-      "description": "Tên hiển thị cho người học.",
+      "description": "Display name for learners.",
       "example": "Job Interview: Tech Company"
     },
     "difficulty": {
       "type": "string",
       "enum": ["BEGINNER", "INTERMEDIATE", "ADVANCED"],
-      "description": "Độ khó dựa trên vocabulary và grammar complexity."
+      "description": "Difficulty based on vocabulary and grammar complexity."
     },
     "ielts_part": {
       "type": "string",
@@ -38,35 +38,35 @@
       "type": "string",
       "minLength": 20,
       "maxLength": 500,
-      "description": "Mô tả tình huống. 2-4 câu. Học sinh đọc trước khi bắt đầu.",
+      "description": "Situation description. 2-4 sentences. Student reads before starting.",
       "example": "You are attending a job interview at a technology company in Singapore. The interviewer will ask about your background, skills, and motivation. Try to use professional language and specific examples."
     },
     "user_role": {
       "type": "string",
       "minLength": 5,
       "maxLength": 150,
-      "description": "Mô tả vai của học sinh.",
+      "description": "Description of the student's role.",
       "example": "A recent graduate applying for a software developer position"
     },
     "agent_role": {
       "type": "string",
       "minLength": 5,
       "maxLength": 150,
-      "description": "Vai của AI agent.",
+      "description": "Role of the AI agent.",
       "example": "HR manager at a tech company conducting a job interview"
     },
     "opening_prompt": {
       "type": "string",
       "minLength": 10,
       "maxLength": 300,
-      "description": "Câu mở đầu của AI. Đây là turn đầu tiên trong conversation.",
+      "description": "Agent's opening line. This is the first turn in the conversation.",
       "example": "Good morning! Please have a seat. I'm Sarah from HR. Before we begin, could you briefly introduce yourself and tell me why you're interested in this position?"
     },
     "target_vocabulary": {
       "type": "array",
       "minItems": 5,
       "maxItems": 20,
-      "description": "Từ/cụm từ agent sẽ khuyến khích học sinh dùng. Agent tracks usage trong session.",
+      "description": "Words/phrases the agent encourages the student to use. Agent tracks usage in session.",
       "items": {
         "type": "string"
       },
@@ -75,33 +75,33 @@
     "target_grammar": {
       "type": "array",
       "items": {"type": "string"},
-      "description": "Grammar structures cần luyện tập trong scenario này.",
+      "description": "Grammar structures to practice in this scenario.",
       "example": ["Present Perfect for experience", "Passive Voice for achievements", "Conditional for hypotheticals"]
     },
     "suggested_topics": {
       "type": "array",
       "items": {"type": "string"},
-      "description": "Chủ đề agent có thể hỏi trong conversation.",
+      "description": "Topics the agent may ask about in the conversation.",
       "example": ["education background", "work experience", "teamwork examples", "career goals", "salary expectations"]
     },
     "duration_min": {
       "type": "integer",
       "minimum": 3,
       "maximum": 15,
-      "description": "Thời gian dự kiến (phút) cho một session đầy đủ."
+      "description": "Expected duration (minutes) for a full session."
     },
     "turn_count_target": {
       "type": "integer",
       "minimum": 3,
       "maximum": 20,
-      "description": "Số turns (exchanges) dự kiến trong một session.",
+      "description": "Expected number of turns (exchanges) in a session.",
       "default": 8
     }
   },
   "additionalProperties": false,
 
   "_examples": {
-    "description": "Ví dụ scenario hoàn chỉnh (KHÔNG phải field thực):",
+    "description": "Complete scenario example (NOT a real field):",
     "sample": {
       "id": "b1c2d3e4-f5a6-7890-bcde-f12345678901",
       "slug": "job-interview-tech",

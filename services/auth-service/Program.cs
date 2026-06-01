@@ -122,12 +122,10 @@ var authConnectionString = builder.Configuration.GetConnectionString("auth-db")
     ?? throw new InvalidOperationException("auth-db connection string is required");
 var redisConnectionString = builder.Configuration.GetConnectionString("auth-redis")
     ?? "localhost:6379";
-var amqpUri = new Uri($"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}/{rabbitVhost}");
 
 builder.Services.AddHealthChecks()
     .AddNpgSql(authConnectionString, name: "auth-db", failureStatus: HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
-    .AddRedis(redisConnectionString, name: "auth-redis", failureStatus: HealthStatus.Unhealthy, tags: new[] { "cache" })
-    .AddRabbitMQ(o => o.ConnectionUri = amqpUri, name: "rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: new[] { "messaging" });
+    .AddRedis(redisConnectionString, name: "auth-redis", failureStatus: HealthStatus.Unhealthy, tags: new[] { "cache" });
 
 // ── DI ───────────────────────────────────────────────────────────────────────
 // IConnectionMultiplexer registered directly by AddRedisClient

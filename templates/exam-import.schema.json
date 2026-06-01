@@ -101,11 +101,11 @@
         },
         "audioUrl": {
           "type": ["string", "null"],
-          "description": "URL bản audio dùng chung cho section Listening."
+          "description": "Shared audio URL for the Listening section."
         },
         "transcriptMd": {
           "type": ["string", "null"],
-          "description": "Transcript Markdown cho file nghe."
+          "description": "Listening transcript in Markdown format."
         },
         "questions": {
           "type": "array",

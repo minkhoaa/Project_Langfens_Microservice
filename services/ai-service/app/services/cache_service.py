@@ -18,6 +18,9 @@ def _get_redis() -> redis.Redis | None:
             _redis_client = redis.Redis(
                 host=settings.redis_host,
                 port=settings.redis_port,
+                password=settings.redis_password or None,
+                ssl=settings.redis_ssl,
+                ssl_cert_reqs="none" if settings.redis_ssl else None,
                 decode_responses=True,
                 socket_connect_timeout=2,
             )

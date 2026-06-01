@@ -312,7 +312,7 @@ class OpenAILikeService:
                 continue
             
             # Try keys for this provider (with rotation)
-            max_attempts = 3  # Max keys to try per provider
+            max_attempts = 6  # Max attempts per provider (reasoning models miss intermittently; keys rotate)
             attempts = 0
             
             while attempts < max_attempts:
@@ -403,7 +403,19 @@ class OpenAILikeService:
                             provider_name, key_index, "invalid key", cooldown_seconds=3600
                         )
                         continue
-                    
+
+                    # Reasoning models (e.g. gpt-oss-20b) intermittently spend the entire
+                    # token budget on internal reasoning and return empty content, which
+                    # the provider rejects with 400 json_validate_failed (empty
+                    # failed_generation). This is transient, so retry on the next key/attempt
+                    # instead of abandoning the provider.
+                    if error_code == 400 and "json_validate_failed" in error_msg:
+                        key_manager.mark_error(
+                            provider_name, key_index, "json_validate_failed (transient, retrying)"
+                        )
+                        last_error = e
+                        continue
+
                     key_manager.mark_error(provider_name, key_index, error_msg)
                     last_error = e
                     break

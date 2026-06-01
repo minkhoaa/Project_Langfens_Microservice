@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     # --- Redis ---
     redis_host: str = "localhost"
     redis_port: int = 6379
+    redis_password: str = ""
+    redis_ssl: bool = False
 
     # --- Paths ---
     data_dir: str = "/app/data"
