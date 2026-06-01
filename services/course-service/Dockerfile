@@ -1,11 +1,12 @@
-﻿# Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY services/course-service/course-service.csproj services/course-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Grpc/Shared.Grpc.csproj services/_shared/Shared.Grpc/
 COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
 COPY services/_shared/Shared.Bootstrap/Shared.Bootstrap.csproj services/_shared/Shared.Bootstrap/
+COPY services/_shared/Shared.ServiceDefaults/Shared.ServiceDefaults.csproj services/_shared/Shared.ServiceDefaults/
 
 
 ARG NUGET_CACHE_ID=nuget-course
@@ -23,7 +24,7 @@ RUN dotnet publish -c Release -o /out \
     /p:DebugType=none
 
 # Runtime siêu gọn
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \

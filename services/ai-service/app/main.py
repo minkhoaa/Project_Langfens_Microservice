@@ -79,4 +79,4 @@ app.include_router(grammar.router, prefix="/api")
 app.include_router(speaking.router, prefix="/api")
 app.include_router(practice.router, prefix="/api")
 app.include_router(speech_eval.router, prefix="/api")
-app.include_router(speaking_grade.router)  # prefix="/v1/speaking" is in the router itself
+app.include_router(speaking_grade.router, prefix="/api")  # endpoint: /api/v1/speaking/grade

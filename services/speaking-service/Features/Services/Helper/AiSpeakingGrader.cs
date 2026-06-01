@@ -71,8 +71,8 @@ public class AiSpeakingGrader : ISpeakingGrader
             Pronunciation = new CriterionScore { Band = aiResponse.pr.b, Comment = aiResponse.pr.c },
             Suggestions = aiResponse.s,
             ImprovedAnswer = aiResponse.p,
-            Model = "llama-3.3-70b-versatile",
-            ModelProvider = "groq",
+            Model = "qwen25-lora",
+            ModelProvider = "local",
             GradedAt = DateTimeOffset.UtcNow,
             RawLlmJson = aiResponse.raw_llm_json,
         };
@@ -111,7 +111,7 @@ public class AiSpeakingGrader : ISpeakingGrader
             Model = response.Model,
             PronunciationBand = response.Pronunciation.Band,
             PronunciationComment = response.Pronunciation.Comment,
-            Provider = response.ModelProvider ?? "groq",
+            Provider = response.ModelProvider ?? "local",
             SuggestionsJson = System.Text.Json.JsonSerializer.Serialize(response.Suggestions),
             RawLlmJson = System.Text.Json.JsonSerializer.Serialize(raw),
             PromptSchemaVersion = "v1"

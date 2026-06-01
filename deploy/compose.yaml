@@ -1,4 +1,4 @@
-﻿services:
+services:
   gateway-service:
     image: ${DOCKERHUB_USER}/langfens-gateway:${TAG}
     environment:
@@ -176,6 +176,20 @@
 
 
 
+
+  frontend-service:
+    image: ${DOCKERHUB_USER}/langfens-frontend:${TAG}
+    env_file:
+      - path: ./envs/frontend.env
+        required: false
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    depends_on:
+      - gateway-service
 
   rabbitmq-service:
     image: rabbitmq:3-management

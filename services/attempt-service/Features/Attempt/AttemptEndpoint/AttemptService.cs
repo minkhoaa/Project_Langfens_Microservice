@@ -416,186 +416,190 @@ IQuestionGraderFactory questionGraderFactory
         if (index.Count == 0 || compiled.Keys.Count == 0)
             return Results.Problem("Snapshot index/keys empty",
                 statusCode: StatusCodes.Status500InternalServerError);
-        await using var transaction = await context.Database.BeginTransactionAsync(token);
-        try
+        var strategy = context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            var answers = await context.AttemptAnswers
-                .Where(x => x.AttemptId == attemptId)
-                .ToListAsync(token);
-            decimal awardedTotal = 0m;
-            int correctCount = 0;
-            int manualCount = 0;
-            foreach (var ans in answers)
+            await using var transaction = await context.Database.BeginTransactionAsync(token);
+            try
             {
-                if (!index.TryGetValue(ans.QuestionId, out var meta)) continue;
-                if (!compiled.Keys.TryGetValue(ans.QuestionId, out var key)) continue;
-                IQuestionGrader grader;
-                try
+                var answers = await context.AttemptAnswers
+                    .Where(x => x.AttemptId == attemptId)
+                    .ToListAsync(token);
+                decimal awardedTotal = 0m;
+                int correctCount = 0;
+                int manualCount = 0;
+                foreach (var ans in answers)
                 {
-                    grader = questionGraderFactory.Resolve(meta.Type);
+                    if (!index.TryGetValue(ans.QuestionId, out var meta)) continue;
+                    if (!compiled.Keys.TryGetValue(ans.QuestionId, out var key)) continue;
+                    IQuestionGrader grader;
+                    try
+                    {
+                        grader = questionGraderFactory.Resolve(meta.Type);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception(e.Message);
+                    }
+                    var result = grader.Grade(ans, key);
+                    ans.AwardedPoints = result.AwardedPoints;
+                    ans.IsCorrect = result.IsCorrect;
+                    if (result.NeedsManualReview) manualCount++;
+                    awardedTotal += result.AwardedPoints;
+                    if (result.IsCorrect ?? false) correctCount++;
                 }
-                catch (Exception e)
+
+                var answeredIds = answers.Select(x => x.QuestionId).ToHashSet();
+                foreach (var questionId in compiled.Keys.Keys)
+                    if (!answeredIds.Contains(questionId))
+                        context.AttemptAnswers.Add(new AttemptAnswer
+                        {
+                            AttemptId = attemptId,
+                            QuestionId = questionId,
+                            SectionId = index[questionId].SectionId,
+                            AwardedPoints = 0,
+
+                            IsCorrect = false
+                        });
+                existedAttempt.Status = (manualCount == 0) ? AttemptStatus.Graded : AttemptStatus.Submitted;
+                existedAttempt.SubmittedAt = DateTime.UtcNow;
+                existedAttempt.GradedAt = (manualCount == 0) ? DateTime.UtcNow : existedAttempt.GradedAt;
+                existedAttempt.RawScore = awardedTotal;
+                existedAttempt.ScaledScore = compiled.TotalPoints <= 0
+                    ? 0m
+                    : Math.Round((awardedTotal / compiled.TotalPoints) * 100m, 2);
+
+                var examCategory = proto?.Category ?? dto?.Category ?? "";
+                var isPlacement = string.Equals(examCategory, ExamCategory.PLACEMENT, StringComparison.OrdinalIgnoreCase);
+                var skillByQuestion = new Dictionary<Guid, string>();
+                Guid? writingQid = null;
+                string? writingTask = null;
+                Guid? speakingQid = null;
+                string? speakingTask = null;
+                if (proto != null)
                 {
-                    throw new Exception(e.Message);
+                    foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
+                        foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
+                        {
+                            var qid = Guid.Parse(question.Id);
+                            skillByQuestion[qid] = question.Skill ?? "";
+                            if (writingQid == null && string.Equals(question.Skill,
+                            QuestionSkill.Writing, StringComparison.OrdinalIgnoreCase))
+                            {
+                                writingQid = qid;
+                                writingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
+                                    : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
+                            }
+                            if (speakingQid == null && string.Equals(question.Skill, QuestionSkill.Speaking,
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                speakingQid = qid;
+                                speakingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
+                                        : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
+                            }
+                        }
+
                 }
-                var result = grader.Grade(ans, key);
-                ans.AwardedPoints = result.AwardedPoints;
-                ans.IsCorrect = result.IsCorrect;
-                if (result.NeedsManualReview) manualCount++;
-                awardedTotal += result.AwardedPoints;
-                if (result.IsCorrect ?? false) correctCount++;
-            }
-
-            var answeredIds = answers.Select(x => x.QuestionId).ToHashSet();
-            foreach (var questionId in compiled.Keys.Keys)
-                if (!answeredIds.Contains(questionId))
-                    context.AttemptAnswers.Add(new AttemptAnswer
-                    {
-                        AttemptId = attemptId,
-                        QuestionId = questionId,
-                        SectionId = index[questionId].SectionId,
-                        AwardedPoints = 0,
-
-                        IsCorrect = false
-                    });
-            existedAttempt.Status = (manualCount == 0) ? AttemptStatus.Graded : AttemptStatus.Submitted;
-            existedAttempt.SubmittedAt = DateTime.UtcNow;
-            existedAttempt.GradedAt = (manualCount == 0) ? DateTime.UtcNow : existedAttempt.GradedAt;
-            existedAttempt.RawScore = awardedTotal;
-            existedAttempt.ScaledScore = compiled.TotalPoints <= 0
-                ? 0m
-                : Math.Round((awardedTotal / compiled.TotalPoints) * 100m, 2);
-
-            var examCategory = proto?.Category ?? dto?.Category ?? "";
-            var isPlacement = string.Equals(examCategory, ExamCategory.PLACEMENT, StringComparison.OrdinalIgnoreCase);
-            var skillByQuestion = new Dictionary<Guid, string>();
-            Guid? writingQid = null;
-            string? writingTask = null;
-            Guid? speakingQid = null;
-            string? speakingTask = null;
-            if (proto != null)
-            {
-                foreach (var section in proto.Sections ?? new RepeatedField<InternalDeliverySection>())
-                    foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
-                    {
-                        var qid = Guid.Parse(question.Id);
-                        skillByQuestion[qid] = question.Skill ?? "";
-                        if (writingQid == null && string.Equals(question.Skill,
-                        QuestionSkill.Writing, StringComparison.OrdinalIgnoreCase))
+                else if (dto != null)
+                {
+                    foreach (var section in dto.Sections ?? Array.Empty<InternalExamDto.InternalDeliverySection>())
+                        foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
                         {
-                            writingQid = qid;
-                            writingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
-                                : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
-                        }
-                        if (speakingQid == null && string.Equals(question.Skill, QuestionSkill.Speaking,
-                            StringComparison.OrdinalIgnoreCase))
-                        {
-                            speakingQid = qid;
-                            speakingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
+                            var qid = question.Id;
+                            skillByQuestion[question.Id] = question.Skill ?? "";
+                            if (writingQid == null && string.Equals(question.Skill,
+                            QuestionSkill.Writing, StringComparison.OrdinalIgnoreCase))
+                            {
+                                writingQid = qid;
+                                writingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
                                     : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
+                            }
+                            if (speakingQid == null && string.Equals(question.Skill, QuestionSkill.Speaking,
+                              StringComparison.OrdinalIgnoreCase))
+                            {
+                                speakingQid = qid;
+                                speakingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
+                                        : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
+                            }
                         }
-                    }
 
-            }
-            else if (dto != null)
-            {
-                foreach (var section in dto.Sections ?? Array.Empty<InternalExamDto.InternalDeliverySection>())
-                    foreach (var question in section.QuestionGroups.SelectMany(g => g.Questions))
-                    {
-                        var qid = question.Id;
-                        skillByQuestion[question.Id] = question.Skill ?? "";
-                        if (writingQid == null && string.Equals(question.Skill,
-                        QuestionSkill.Writing, StringComparison.OrdinalIgnoreCase))
-                        {
-                            writingQid = qid;
-                            writingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
-                                : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
-                        }
-                        if (speakingQid == null && string.Equals(question.Skill, QuestionSkill.Speaking,
-                          StringComparison.OrdinalIgnoreCase))
-                        {
-                            speakingQid = qid;
-                            speakingTask = !string.IsNullOrWhiteSpace(question.PromptMd) ? question.PromptMd
-                                    : question.ExplanationMd ?? section.InstructionsMd ?? string.Empty;
-                        }
-                    }
+                }
+                int CountCorrect(string skill) => existedAttempt.Answers.Count(a => a.IsCorrect == true
+                    && skillByQuestion.TryGetValue(a.QuestionId, out var sk)
+                    && string.Equals(skill, sk, StringComparison.OrdinalIgnoreCase)
+                );
+                string? writingAnswer = null;
+                if (writingQid.HasValue)
+                {
+                    writingAnswer = existedAttempt.Answers
+                        .Where(a => a.QuestionId == writingQid.Value)
+                        .Select(a => a.TextAnswer)
+                        .FirstOrDefault();
+                }
 
-            }
-            int CountCorrect(string skill) => existedAttempt.Answers.Count(a => a.IsCorrect == true
-                && skillByQuestion.TryGetValue(a.QuestionId, out var sk)
-                && string.Equals(skill, sk, StringComparison.OrdinalIgnoreCase)
-            );
-            string? writingAnswer = null;
-            if (writingQid.HasValue)
-            {
-                writingAnswer = existedAttempt.Answers
-                    .Where(a => a.QuestionId == writingQid.Value)
-                    .Select(a => a.TextAnswer)
-                    .FirstOrDefault();
-            }
+                string? speakingAnswerJson = null;
+                if (speakingQid.HasValue)
+                {
+                    speakingAnswerJson = existedAttempt.Answers
+                        .Where(a => a.QuestionId == speakingQid.Value)
+                        .Select(a => a.TextAnswer)
+                        .FirstOrDefault();
+                }
 
-            string? speakingAnswerJson = null;
-            if (speakingQid.HasValue)
-            {
-                speakingAnswerJson = existedAttempt.Answers
-                    .Where(a => a.QuestionId == speakingQid.Value)
-                    .Select(a => a.TextAnswer)
-                    .FirstOrDefault();
-            }
+                var readingCorrect = CountCorrect(QuestionSkill.Reading);
+                var listeningCorrect = CountCorrect(QuestionSkill.Listening);
+                var totalReading = skillByQuestion.Count(k => k.Value.Equals(QuestionSkill.Reading, StringComparison.OrdinalIgnoreCase));
+                var totalListening = skillByQuestion.Count(k => k.Value.Equals(QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase));
 
-            var readingCorrect = CountCorrect(QuestionSkill.Reading);
-            var listeningCorrect = CountCorrect(QuestionSkill.Listening);
-            var totalReading = skillByQuestion.Count(k => k.Value.Equals(QuestionSkill.Reading, StringComparison.OrdinalIgnoreCase));
-            var totalListening = skillByQuestion.Count(k => k.Value.Equals(QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase));
+                if (isPlacement)
+                {
+                    await placementWorkflow.OnPlacementSubmittedAsync(
+                        existedAttempt.Id,
+                        writingQid, writingTask,
+                        writingAnswer, speakingQid,
+                        speakingTask, speakingAnswerJson, listeningCorrect,
+                        totalListening, readingCorrect, totalReading, token);
+                }
 
-            if (isPlacement)
-            {
-                await placementWorkflow.OnPlacementSubmittedAsync(
+                await context.SaveChangesAsync(token);
+                await transaction.CommitAsync(token);
+                deadline = existedAttempt.StartedAt.AddSeconds(existedAttempt.DurationSec);
+                timeLeftSec = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
+                var timeUsedSec = (int)(existedAttempt.SubmittedAt!.Value - existedAttempt.StartedAt).TotalSeconds;
+
+
+
+                var message = isExpired ? "Auto-submitted (time expired)" : "Submitted";
+                
+                // Publish gamification event
+                await publishEndpoint.Publish(new AttemptCompletedEvent(
+                    userId,
                     existedAttempt.Id,
-                    writingQid, writingTask,
-                    writingAnswer, speakingQid,
-                    speakingTask, speakingAnswerJson, listeningCorrect,
-                    totalListening, readingCorrect, totalReading, token);
+                    "READING", // Default skill for now
+                    correctCount
+                ), token);
+                
+                return Results.Ok(new ApiResultDto(true, message, new
+                {
+                    attemptId = existedAttempt.Id,
+                    status = existedAttempt.Status,
+                    finishedAt = existedAttempt.SubmittedAt,
+                    timeUsedSec,
+                    timeLeftSec,
+                    awardedTotal,
+                    correctCount,
+                    totalPoints = compiled.TotalPoints,
+                    needsManualReview = manualCount,
+                    isExpired
+                }));
+
             }
-
-            await context.SaveChangesAsync(token);
-            await transaction.CommitAsync(token);
-            deadline = existedAttempt.StartedAt.AddSeconds(existedAttempt.DurationSec);
-            timeLeftSec = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
-            var timeUsedSec = (int)(existedAttempt.SubmittedAt!.Value - existedAttempt.StartedAt).TotalSeconds;
-
-
-
-            var message = isExpired ? "Auto-submitted (time expired)" : "Submitted";
-            
-            // Publish gamification event
-            await publishEndpoint.Publish(new AttemptCompletedEvent(
-                userId,
-                existedAttempt.Id,
-                "READING", // Default skill for now
-                correctCount
-            ), token);
-            
-            return Results.Ok(new ApiResultDto(true, message, new
+            catch (Exception e)
             {
-                attemptId = existedAttempt.Id,
-                status = existedAttempt.Status,
-                finishedAt = existedAttempt.SubmittedAt,
-                timeUsedSec,
-                timeLeftSec,
-                awardedTotal,
-                correctCount,
-                totalPoints = compiled.TotalPoints,
-                needsManualReview = manualCount,
-                isExpired
-            }));
-
-        }
-        catch (Exception e)
-        {
-            await transaction.RollbackAsync(token);
-            return Results.Problem($"Errors while grading: {e.Message}", statusCode: 500);
-        }
+                await transaction.RollbackAsync(token);
+                return Results.Problem($"Errors while grading: {e.Message}", statusCode: 500);
+            }
+        });
     }
 
     public async Task<IResult> GetResult(Guid attemptId, CancellationToken token)

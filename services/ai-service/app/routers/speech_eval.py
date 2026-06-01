@@ -110,15 +110,14 @@ async def evaluate_speech(
 
     # --- step 3: score ---
     score: Optional[float] = None
-    if target:
-        try:
-            score = await asyncio.to_thread(compute_score, audio_bytes, transcript, target, raw_errors)
-        except Exception as exc:
-            logger.exception("Scoring failed")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Scoring error: {exc}",
-            ) from exc
+    try:
+        score = await asyncio.to_thread(compute_score, audio_bytes, transcript, target, raw_errors)
+    except Exception as exc:
+        logger.exception("Scoring failed")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Scoring error: {exc}",
+        ) from exc
 
     errors_out = None
     if raw_errors is not None:

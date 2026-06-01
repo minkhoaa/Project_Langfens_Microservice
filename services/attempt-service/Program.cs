@@ -18,6 +18,9 @@ using attempt_service.Infrastructure.Persistence;
 using MassTransit;
 using Shared.Grpc.ExamInternal;
 
+// ── HTTP/2 cleartext (h2c) support — MUST be set before any HttpClient/gRPC setup ──
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -31,9 +34,6 @@ builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Attempt Service");
 builder.Services.AddLangfensJson();
 
-// ── HTTP/2 for gRPC ──────────────────────────────────────────────────────────
-AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
 // ── gRPC client ───────────────────────────────────────────────────────────────
 var examGrpcAddress = Environment.GetEnvironmentVariable("ExamService__GrpcAddress")
     ?? "http://exam-service:8081";
@@ -44,8 +44,12 @@ builder.Services
     })
     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
     {
-        EnableMultipleHttp2Connections = true
+        EnableMultipleHttp2Connections = true,
+        // Required for cleartext HTTP/2 (h2c) inside Docker without TLS
+        // AppContext switch alone is not reliable after runtime init
+        PooledConnectionIdleTimeout = TimeSpan.FromMinutes(5),
     });
+
 
 // ── Internal HTTP client ─────────────────────────────────────────────────────
 var internalApiKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")

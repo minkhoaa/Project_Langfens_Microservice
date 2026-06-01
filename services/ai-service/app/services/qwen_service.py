@@ -327,3 +327,51 @@ async def qwen_roleplay_generate(
         # Fallback to plain text if JSON extraction failed completely
         feedback = extract_feedback_from_reply(reply)
         return RoleplayLLMOutput(agent_reply=reply, feedback=feedback)
+
+async def qwen_generate(
+    prompt: str,
+    max_tokens: int = 800,
+    expect_json: bool = False,
+) -> dict:
+    """Generate generic response using Qwen LoRA."""
+    if not _model_ready:
+        try:
+            await load_qwen_model()
+        except Exception as exc:
+            logger.error("qwen_service: lazy load failed: %s", exc)
+            raise RuntimeError("Model not loaded")
+
+    messages = [{"role": "user", "content": prompt}]
+
+    loop = asyncio.get_event_loop()
+    fn = partial(
+        _generate_blocking,
+        messages,
+        max_tokens,
+        settings.lora_temperature,
+        settings.lora_top_p,
+        settings.lora_repetition_penalty,
+    )
+    
+    try:
+        reply = await loop.run_in_executor(None, fn)
+    except Exception as exc:
+        logger.error("qwen_service: generation failed: %s", exc, exc_info=True)
+        return {}
+
+    if not reply:
+        return {}
+
+    if expect_json:
+        import json
+        json_str = reply
+        match = re.search(r'\{.*\}', reply, re.DOTALL)
+        if match:
+            json_str = match.group(0)
+        try:
+            return json.loads(json_str)
+        except Exception as exc:
+            logger.error("qwen_service: JSON parsing failed: %s", exc)
+            return {}
+            
+    return {"text": reply}
