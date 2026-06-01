@@ -215,6 +215,25 @@ services:
 
 
 
+  frontend-service:
+    build:
+      context: /home/khoi/Projects/langfens-fe-app
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+        - NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL:-http://localhost:5000}
+    env_file:
+      - path: ./envs/frontend.env
+        required: false
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    depends_on:
+      - gateway-service
+
   rabbitmq-service:
     image: rabbitmq:3-management
     volumes:
@@ -477,6 +496,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ../data:/app/data:ro
+      - ../models:/app/models:ro
 
 
 networks:

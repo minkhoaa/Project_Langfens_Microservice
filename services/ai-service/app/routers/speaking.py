@@ -569,16 +569,18 @@ async def roleplay_turn_audio(
     raw_errors: Optional[list[WordError]] = None
     score: Optional[float] = None
 
-    if target:
-        try:
+    try:
+        if target:
             raw_errors = await asyncio.to_thread(compare_text, transcript, target)
-            score = await asyncio.to_thread(
-                compute_score, audio_bytes, transcript, target, raw_errors
-            )
-        except Exception as exc:
-            logger.warning("turn-audio: pronunciation scoring failed, defaulting to None: %s", exc)
-            raw_errors = None
-            score = None
+        
+        # Always compute pronunciation score (either target-based or free-form acoustic)
+        score = await asyncio.to_thread(
+            compute_score, audio_bytes, transcript, target, raw_errors, True
+        )
+    except Exception as exc:
+        logger.warning("turn-audio: pronunciation scoring failed, defaulting to None: %s", exc)
+        raw_errors = None
+        score = None
 
     # Convert internal WordError dataclasses → Pydantic WordErrorItem
     word_errors: Optional[list[WordErrorItem]] = None

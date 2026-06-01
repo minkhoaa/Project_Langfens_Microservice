@@ -48,18 +48,24 @@ builder.Services.AddDbContext<WritingDbContext>(o =>
         npg.MigrationsAssembly(typeof(WritingDbContext).Assembly.GetName().Name)));
 
 // ── AI client ───────────────────────────────────────────────────────
-builder.Services.AddHttpClient<IAiCompareClient, AiCompareClient>(client =>
-{
-    client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080"));
-    client.Timeout = TimeSpan.FromSeconds(90);
-});
+var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080");
+var aiClient = new HttpClient {
+    BaseAddress = new Uri(aiServiceUrl),
+    Timeout = TimeSpan.FromMinutes(10)
+};
+
+builder.Services.AddSingleton<IAiCompareClient>(sp => 
+    new AiCompareClient(aiClient, 
+        sp.GetRequiredService<ILogger<AiCompareClient>>(),
+        sp.GetRequiredKeyedService<CircuitBreaker>("compare")));
+
 builder.Services.AddKeyedSingleton<CircuitBreaker>("grader");
 builder.Services.AddKeyedSingleton<CircuitBreaker>("compare");
-builder.Services.AddHttpClient<IWritingGrader, AiWritingGrader>(client =>
-{
-    client.BaseAddress = new Uri(EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080"));
-    client.Timeout = TimeSpan.FromSeconds(90);
-});
+
+builder.Services.AddSingleton<IWritingGrader>(sp => 
+    new AiWritingGrader(aiClient, 
+        sp.GetRequiredService<ILogger<AiWritingGrader>>(),
+        sp.GetRequiredKeyedService<CircuitBreaker>("grader")));
 
 // ── Services ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IWritingService, WritingService>();

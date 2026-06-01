@@ -10,7 +10,7 @@ from app.prompts.writing_grade import build_grade_prompt
 from app.prompts.speaking_grade import build_speaking_prompt
 from app.schemas import CriterionItem, ReassembledEssay, WritingGradeRequest, WritingGradeResponse
 from app.schemas import SpeakingGradeRequest, SpeakingGradeResponse as SpeakingGradeResponseSchema, SpeakingCriterionResult
-from app.services import llm_service, search_service
+from app.services import llm_service, search_service, qwen_service
 
 logger = logging.getLogger(__name__)
 
@@ -186,16 +186,15 @@ async def grade_speaking(req: SpeakingGradeRequest) -> SpeakingGradeResponseSche
     # Build prompt
     prompt = build_speaking_prompt(req.task, req.transcript)
 
-    # Call LLM via openai_like (groq/minimax with KeyManager)
+    # Call local LoRA (qwen2.5-lora)
     try:
-        result = await llm_service.generate(
-            prompt_template="{prompt}",
-            variables={"prompt": prompt},
+        result = await qwen_service.qwen_generate(
+            prompt=prompt,
             expect_json=True,
         )
     except Exception as exc:
         logger.error("LLM speaking grading failed: %s", exc)
-        raise
+        raise HTTPException(status_code=503, detail="LLM grading temporarily unavailable, please retry")
 
     t_llm = time.time()
     logger.info("grade_speaking: llm took %.1fms", (t_llm - t0) * 1000)

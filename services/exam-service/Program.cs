@@ -31,7 +31,13 @@ builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Exam Service");
 
 // ── Database ───────────────────────────────────────────────────────────────
-builder.AddNpgsqlDbContext<ExamDbContext>("exam-db");
+// Npgsql 8+ requires explicit opt-in for jsonb → CLR type mapping (Dictionary, List, etc.)
+// Aspire's AddNpgsqlDbContext builds its own NpgsqlDataSource; we hook in via
+// the DbContextOptions action to call ConfigureDataSource with EnableDynamicJson.
+builder.AddNpgsqlDbContext<ExamDbContext>("exam-db", configureDbContextOptions: opts =>
+{
+    opts.UseNpgsql(o => o.ConfigureDataSource(ds => ds.EnableDynamicJson()));
+});
 
 // ── Services ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IExamService, ExamService>();
