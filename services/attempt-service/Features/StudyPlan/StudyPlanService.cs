@@ -68,7 +68,7 @@ public class StudyPlanService(AttemptDbContext context) : IStudyPlanService
             .FirstOrDefaultAsync(g => g.UserId == userId && g.IsActive, token);
 
         if (goal == null)
-            return Results.NotFound(new ApiResultDto(false, "No active goal found", null!));
+            return Results.Ok(new ApiResultDto(true, "No active goal found", null!));
 
         var dto = new StudyGoalDto(
             goal.Id,
@@ -90,7 +90,7 @@ public class StudyPlanService(AttemptDbContext context) : IStudyPlanService
             .FirstOrDefaultAsync(g => g.UserId == userId && g.IsActive, token);
 
         if (goal == null)
-            return Results.NotFound(new ApiResultDto(false, "No active goal found", null));
+            return Results.Ok(new ApiResultDto(true, "No active goal found", null));
 
         var attempts = await context.Attempts
             .AsNoTracking()
