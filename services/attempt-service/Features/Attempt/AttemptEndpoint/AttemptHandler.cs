@@ -34,9 +34,10 @@ public static class AttemptHandler
 
     public static Task<IResult> AttemptSubmit(
         [FromRoute] Guid attemptId,
+        [FromBody] SubmitRequest? req,
         CancellationToken token,
         IAttemptService service)
-        => service.Submit(attemptId, token);
+        => service.Submit(attemptId, token, req?.Answers);
 
     public static Task<IResult> AttemptGetResult(
         [FromRoute] Guid attemptId,

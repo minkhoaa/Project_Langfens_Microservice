@@ -67,7 +67,7 @@ BEGIN
     2,
     'Paragraph B',
     '',
-    '{"paragraph-b-q1": ["viii", "viii"]}'
+    '{"paragraph-b-q1": ["viii", "viii. The Spread of Coffee"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Growing Coffee', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Problems with Manufacture', false);
@@ -92,7 +92,7 @@ BEGIN
     2,
     'Paragraph C',
     '',
-    '{"paragraph-c-q2": ["ix", "ix"]}'
+    '{"paragraph-c-q2": ["ix", "ix. Consuming Coffee"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Growing Coffee', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Problems with Manufacture', false);
@@ -117,7 +117,7 @@ BEGIN
     2,
     'Paragraph D',
     '',
-    '{"paragraph-d-q3": ["vi", "vi"]}'
+    '{"paragraph-d-q3": ["vi", "vi. Coffee Varieties"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Growing Coffee', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Problems with Manufacture', false);
@@ -142,7 +142,7 @@ BEGIN
     2,
     'Paragraph E',
     '',
-    '{"paragraph-e-q4": ["xi", "xi"]}'
+    '{"paragraph-e-q4": ["xi", "xi. The Coffee Plant"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Growing Coffee', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Problems with Manufacture', false);
@@ -167,7 +167,7 @@ BEGIN
     2,
     'Paragraph F',
     '',
-    '{"paragraph-f-q5": ["i", "i"]}'
+    '{"paragraph-f-q5": ["i", "i. Growing Coffee"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Growing Coffee', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Problems with Manufacture', false);
@@ -192,7 +192,7 @@ BEGIN
     2,
     'Paragraph G',
     '',
-    '{"paragraph-g-q6": ["iii", "iii"]}'
+    '{"paragraph-g-q6": ["iii", "iii. Processing the Bean"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. Growing Coffee', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. Problems with Manufacture', false);

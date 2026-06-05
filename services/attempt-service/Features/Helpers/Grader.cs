@@ -160,7 +160,60 @@ public sealed class CompletionGrader : IQuestionGrader
             var score = matched ? key.QuestionPoints : 0m;
             return new GradeResult(score, matched);
         }
-        return new GradeResult(0, false, Feedback: "Malformed completion payload (expected JSON or one-blank legacy)");
+        // Multi-blank positional fallback: the FE packs user answers as
+        // newline-separated values (e.g. "answer1\nanswer2"). Match each part
+        // to the corresponding blank ID in dictionary iteration order, which
+        // mirrors the order of `question.CompletionAccepts` and therefore the
+        // UI's blank order. Extra trailing parts are ignored; missing parts
+        // count as unmatched for that blank.
+        var userParts = raw.Split('\n')
+            .Select(p => p.Trim())
+            .ToArray();
+        var blankIds = texts.Keys
+            .Union(regs.Keys, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        decimal positionalGet = 0m, positionalTotal = 0m;
+        for (var i = 0; i < blankIds.Count; i++)
+        {
+            var blankId = blankIds[i];
+            texts.TryGetValue(blankId, out var accepted);
+            regs.TryGetValue(blankId, out var patterns);
+            var hasText = accepted is { Length: > 0 };
+            var hasRegex = patterns is { Length: > 0 };
+            if (!hasRegex && !hasText) continue;
+            positionalTotal += 1;
+
+            var userRaw = i < userParts.Length ? userParts[i] : string.Empty;
+            var userNorm = TextNorm.Normalize(userRaw);
+            var matched = hasText && accepted!.Any(x => TextNorm.Normalize(x) == userNorm);
+            if (!matched && hasRegex)
+            {
+                foreach (var rx in patterns!)
+                {
+                    if (string.IsNullOrWhiteSpace(rx)) continue;
+                    try
+                    {
+                        var pat = rx.StartsWith('^') || rx.EndsWith('$') ? rx : $"^{rx}$";
+                        if (Regex.IsMatch(userRaw, pat,
+                                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                        {
+                            matched = true;
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+            }
+
+            if (matched) positionalGet++;
+        }
+        var positionalScore = positionalTotal > 0
+            ? (positionalGet / positionalTotal) * key.QuestionPoints
+            : 0m;
+        return new GradeResult(positionalScore, positionalScore > 0);
     }
 }
 
@@ -220,8 +273,8 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
         if (pairs.Count == 1)
         {
             var (_, accepted) = pairs.First();
-            var user = raw;
-            var matched = accepted is { Length: > 0 } && accepted.Any(k => string.Equals(k, user, StringComparison.OrdinalIgnoreCase));
+            var matched = accepted is { Length: > 0 } &&
+                          accepted.Any(k => string.Equals(k, raw, StringComparison.OrdinalIgnoreCase));
             var score = matched ? key.QuestionPoints : 0m;
             return new GradeResult(score, matched);
         }

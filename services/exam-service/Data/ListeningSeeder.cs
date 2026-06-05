@@ -460,17 +460,42 @@ In conclusion, while the challenges are significant, the scientific consensus is
             }
         };
 
-        var q17Id = Guid.Parse("55555555-5555-5555-5555-555555555567");
-        var q17 = new ExamQuestion
+        // Q41–Q43: split from the original 3-blank question into 3 single-blank
+        // questions, matching the one-question-per-blank convention used by every
+        // other SUMMARY_COMPLETION seed (blank-q<Idx> key, single ___ in prompt).
+        var q17aId = Guid.Parse("55555555-5555-5555-5555-555555555568");
+        var q17a = new ExamQuestion
         {
-            Id = q17Id, SectionId = section4Id, Idx = 4,
+            Id = q17aId, SectionId = section4Id, Idx = 4,
             Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "Complete the summary below. Write NO MORE THAN TWO WORDS for each answer.\n\nThe most reliable temperature records date back to 1880 and are compiled from over 7,000 weather stations and ocean buoys. The decade 2011–2020 was the warmest on record, with 2016 being the hottest individual year. The Arctic is warming at approximately three times the global average rate, a phenomenon known as Arctic amplification. Under a moderate emissions scenario, sea levels could rise by 30–60 centimetres by 2100. The Paris Agreement, signed in __________, committed 196 countries to limiting warming to __________ above pre-industrial levels. A positive development is that solar panel costs have fallen by __________ since 2010.",
+            PromptMd = "The Paris Agreement, signed in _______, committed 196 countries to limiting warming.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "2015" } },
-                { "1", new[] { "1.5 degrees", "1.5 degrees Celsius", "1.5 degrees celsius", "1.5°C", "one point five degrees" } },
-                { "2", new[] { "89%", "89 percent", "eighty nine percent" } }
+                { "blank-q4", new[] { "2015" } }
+            }
+        };
+
+        var q17bId = Guid.Parse("55555555-5555-5555-5555-555555555569");
+        var q17b = new ExamQuestion
+        {
+            Id = q17bId, SectionId = section4Id, Idx = 5,
+            Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
+            PromptMd = "The Paris Agreement, signed in 2015, committed 196 countries to limiting warming to _______ above pre-industrial levels.",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
+            {
+                { "blank-q5", new[] { "1.5 degrees", "1.5 degrees Celsius", "1.5 degrees celsius", "1.5°C", "one point five degrees" } }
+            }
+        };
+
+        var q17cId = Guid.Parse("55555555-5555-5555-5555-55555555556a");
+        var q17c = new ExamQuestion
+        {
+            Id = q17cId, SectionId = section4Id, Idx = 6,
+            Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
+            PromptMd = "Solar panel costs have fallen by _______ since 2010.",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
+            {
+                { "blank-q6", new[] { "89%", "89 percent", "eighty nine percent" } }
             }
         };
 
@@ -483,15 +508,15 @@ In conclusion, while the challenges are significant, the scientific consensus is
             q1, q2, q3,    // Section 1
             q4, q5, q6, q7, // Section 2
             q8, q9, q10, q11, q12, // Section 3
-            q13, q14, q15, q16, q17  // Section 4
+            q13, q14, q15, q16, q17a, q17b, q17c  // Section 4
         );
-        // Note: q1-q17 = 17 questions shown above.
-        // Remaining 23 questions (to reach 40) are intentionally omitted from the seeder
+        // Note: q1-q17c = 19 questions shown above.
+        // Remaining 21 questions (to reach 40) are intentionally omitted from the seeder
         // as a practical design: admins can add remaining questions via the admin API
         // once real audio URLs are confirmed. The partial seeder still validates the
         // schema and exam structure end-to-end.
 
         await db.SaveChangesAsync();
-        Console.WriteLine("Seeded listening exam with 17 questions across 4 sections (40 target; remaining 23 can be added via admin API).");
+        Console.WriteLine("Seeded listening exam with 19 questions across 4 sections (40 target; remaining 21 can be added via admin API).");
     }
 }

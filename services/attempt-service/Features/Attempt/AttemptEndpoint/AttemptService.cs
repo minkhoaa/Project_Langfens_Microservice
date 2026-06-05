@@ -23,7 +23,7 @@ public interface IAttemptService
     Task<IResult> GetAttemptById(Guid attemptId, CancellationToken token);
     Task<IResult> GetPreviousTurn(Guid examId, CancellationToken token);
     Task<IResult> Autosave(Guid attemptId, AutosaveRequest req, CancellationToken token);
-    Task<IResult> Submit(Guid attemptId, CancellationToken token);
+    Task<IResult> Submit(Guid attemptId, CancellationToken token, List<AnswerItem>? submittedAnswers = null);
     Task<IResult> GetResult(Guid attemptId, CancellationToken token);
     Task<IResult> GetAttemptList(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
     Task<IResult> GetAllAttempts(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
@@ -360,7 +360,7 @@ IQuestionGraderFactory questionGraderFactory
 
     }
 
-    public async Task<IResult> Submit(Guid attemptId, CancellationToken token)
+    public async Task<IResult> Submit(Guid attemptId, CancellationToken token, List<AnswerItem>? submittedAnswers = null)
     {
         var userId = user.UserId;
         var existedAttempt =
@@ -370,6 +370,46 @@ IQuestionGraderFactory questionGraderFactory
         if (existedAttempt.PaperJson is null)
             return Results.Problem("Snapshot is missing", statusCode: StatusCodes.Status500InternalServerError);
         var deadline = existedAttempt.StartedAt.AddSeconds(existedAttempt.DurationSec);
+
+        // Defensive fallback: if the FE sent answers inline in the submit body
+        // (because the autosave debounce hadn't fired yet, for example), persist
+        // them now so the grader has the user's actual selections.
+        if (submittedAnswers is { Count: > 0 })
+        {
+            Dictionary<Guid, QMeta>? submitIndex = null;
+            foreach (var ans in submittedAnswers)
+            {
+                if (ans.QuestionId == Guid.Empty) continue;
+                if (submitIndex is null)
+                {
+                    submitIndex = indexBuilder.BuildIndexFromProto(
+                        new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!)
+                            .Parse<InternalDeliveryExam>(existedAttempt.PaperJson.RootElement.GetRawText()));
+                }
+                var sectionId = ans.SectionId ?? Guid.Empty;
+                if (sectionId == Guid.Empty && submitIndex.TryGetValue(ans.QuestionId, out var m))
+                    sectionId = m.SectionId;
+                var existing = existedAttempt.Answers.FirstOrDefault(a => a.QuestionId == ans.QuestionId);
+                if (existing is null)
+                {
+                    existedAttempt.Answers.Add(new AttemptAnswer
+                    {
+                        AttemptId = attemptId,
+                        QuestionId = ans.QuestionId,
+                        SectionId = sectionId,
+                        SelectedOptionIds = ans.SelectedOptionIds,
+                        TextAnswer = ans.TextAnswer,
+                    });
+                }
+                else
+                {
+                    if (ans.SelectedOptionIds is not null)
+                        existing.SelectedOptionIds = ans.SelectedOptionIds;
+                    if (ans.TextAnswer is not null)
+                        existing.TextAnswer = ans.TextAnswer;
+                }
+            }
+        }
         var timeLeftSec = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
         var isExpired = timeLeftSec <= 0;
         
@@ -421,9 +461,14 @@ IQuestionGraderFactory questionGraderFactory
         await using var transaction = await context.Database.BeginTransactionAsync(token);
         try
         {
-            var answers = await context.AttemptAnswers
-                .Where(x => x.AttemptId == attemptId)
-                .ToListAsync(token);
+            // Use the navigation collection (existedAttempt.Answers) instead of
+            // re-fetching from the DB: the inline-submit path above adds new
+            // AttemptAnswers here in-memory, and they aren't in the DB until
+            // SaveChangesAsync runs at the bottom of this transaction. A fresh
+            // `.ToListAsync()` would skip them and the "ensure all questions
+            // have an answer" loop below would insert blank rows over the top
+            // of the user's submission.
+            var answers = existedAttempt.Answers.ToList();
             decimal awardedTotal = 0m;
             int correctCount = 0;
             int manualCount = 0;
@@ -779,9 +824,27 @@ IQuestionGraderFactory questionGraderFactory
                        (totalScore <= 0 ? 0m : Math.Round((awardedPoints / totalScore) * 100m, 2));
 
         static bool IsNotBlank(string? s) => !string.IsNullOrWhiteSpace(s);
+
+        // For matching questions, resolve a grading value (e.g. "viii") to the
+        // full option content (e.g. "viii. The Spread of Coffee") so the
+        // selectedText and correctText columns display in the same format.
+        static string? ResolveMatchingText(string? value, QMeta? meta)
+        {
+            if (meta is null || string.IsNullOrWhiteSpace(value)) return null;
+            var text = value.Trim();
+            return meta.OptionIds
+                .Select(o => o.content)
+                .FirstOrDefault(c =>
+                    !string.IsNullOrEmpty(c) &&
+                    (c.StartsWith(text + ".", StringComparison.OrdinalIgnoreCase) ||
+                     c.StartsWith(text + " ", StringComparison.OrdinalIgnoreCase) ||
+                     c.Equals(text, StringComparison.OrdinalIgnoreCase)));
+        }
+
         string? BuildCorrectText(Guid questionId)
         {
             if (!compiled.Keys.TryGetValue(questionId, out var key)) return null;
+            index.TryGetValue(questionId, out var qMeta);
             if (key.CorrectOptionIds is { Count: > 0 })
             {
                 var texts = key.CorrectOptionIds.Select(t => t.content)
@@ -815,12 +878,26 @@ IQuestionGraderFactory questionGraderFactory
 
             if (key.MatchPairs is { Count: > 0 })
             {
-                var pairs = key.MatchPairs
-                    .Where(p => p.Value is { Length: > 0 })
-                    .Select(p => $"{p.Key}: {string.Join(" / ", p.Value!.Where(IsNotBlank))}")
-                    .Where(IsNotBlank)
-                    .ToList();
-                if (pairs.Count > 0) return string.Join("; ", pairs);
+                // MATCHING_HEADING: render each pair's accepted value as the full
+                // option content so it matches the user's selected answer format.
+                // Convention: pair.Value[0] = grading key, pair.Value[1..] = display
+                // text. The display text is the last non-empty entry; if absent we
+                // fall back to looking up the option content via the question index.
+                var resolved = new List<string>();
+                foreach (var (_, values) in key.MatchPairs)
+                {
+                    if (values is not { Length: > 0 }) continue;
+                    var display = values.Where(IsNotBlank).LastOrDefault();
+                    if (display is null) continue;
+                    if (qMeta is not null)
+                    {
+                        var resolved2 = ResolveMatchingText(display, qMeta);
+                        if (resolved2 is not null) display = resolved2;
+                    }
+                    resolved.Add(display);
+                }
+                if (resolved.Count > 0) return string.Join("; ",
+                    resolved.Distinct(StringComparer.OrdinalIgnoreCase));
             }
 
             if (key.OrderCorrects is { Count: > 0 })
@@ -873,17 +950,12 @@ IQuestionGraderFactory questionGraderFactory
                         }
                         else if (IsNotBlank(x.TextAnswer) && index.TryGetValue(x.QuestionId, out var questionMeta))
                         {
-                            // For MATCHING_HEADING: TextAnswer is value like "i", "ii"
-                            // Try to find matching option content (e.g., "i. The beginning...")
+                            // For MATCHING_HEADING the user picks a roman ("viii")
+                            // from the dropdown. Resolve it to the full option text
+                            // so selectedText and correctText display in the same
+                            // format ("viii. The Spread of Coffee").
                             var textAnswer = x.TextAnswer!.Trim();
-                            var matchedOption = questionMeta.OptionIds
-                                .Select(opt => opt.content)
-                                .FirstOrDefault(content => 
-                                    !string.IsNullOrEmpty(content) &&
-                                    (content.StartsWith(textAnswer + ".", StringComparison.OrdinalIgnoreCase) ||
-                                     content.StartsWith(textAnswer + " ", StringComparison.OrdinalIgnoreCase) ||
-                                     content.Equals(textAnswer, StringComparison.OrdinalIgnoreCase)));
-                            selectedText = matchedOption ?? textAnswer;
+                            selectedText = ResolveMatchingText(textAnswer, questionMeta) ?? textAnswer;
                         }
                         else
                         {

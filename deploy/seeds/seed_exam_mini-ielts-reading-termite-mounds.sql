@@ -67,7 +67,7 @@ BEGIN
     2,
     'Paragraph A',
     E'**Đáp án: iii (reconsidering the termite’s reputation)**\n\n> "To most of us, termites are destructive insects... But... these pests may serve a useful purpose for us after all."\n\n(Đoạn A) Tác giả đối lập quan điểm phổ biến rằng mối là loài "phá hoại" (destructive) với quan điểm nghiên cứu mới là chúng có "mục đích hữu ích" (useful purpose). Điều này tương ứng với việc xem xét lại danh tiếng của loài mối.',
-    '{"paragraph-a-q1": ["iii", "iii"]}'
+    '{"paragraph-a-q1": ["iii", "iii. reconsidering the termite’s reputation"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. methods used to investigate termite mound formation', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. challenging our assumptions about the nature of life', false);
@@ -90,7 +90,7 @@ BEGIN
     2,
     'Paragraph B',
     E'**Đáp án: vii**\n\n> "The mound itself is formed of an intricate lattice of tunnels... typically they are three metres high..."\n\n(Đoạn B) Đoạn văn tập trung mô tả các đặc điểm vật lý và cấu trúc của tổ mối như chiều cao, vật liệu xây dựng và hệ thống đường hầm (lattice of tunnels). Nội dung này phù hợp với tiêu đề về cấu trúc của tổ mối.',
-    '{"paragraph-b-q2": ["vii", "vii"]}'
+    '{"paragraph-b-q2": ["vii", "vii. the astonishing physical dimensions of the termite mound"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. methods used to investigate termite mound formation', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. challenging our assumptions about the nature of life', false);
@@ -113,7 +113,7 @@ BEGIN
     2,
     'Paragraph C',
     E'**Đáp án: iv (principal functions of the termite mound)**\n\n> "This complex system of tunnels draws in air... expel spent respiratory gases... ensuring them a continuous provision of fresh, breathable air."\n\n(Đoạn C) Đoạn văn giải thích cơ chế hoạt động của tổ mối, cụ thể là chức năng thông gió (draws in air, expel gases) và điều hòa nhiệt độ. Đây là các chức năng chính (principal functions) của gò mối.',
-    '{"paragraph-c-q3": ["iv", "iv"]}'
+    '{"paragraph-c-q3": ["iv", "iv. principal functions of the termite mound"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. methods used to investigate termite mound formation', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. challenging our assumptions about the nature of life', false);
@@ -136,7 +136,7 @@ BEGIN
     2,
     'Paragraph D',
     E'**Đáp án: ix**\n\n> "...scanning the mound..."\n\n(Đoạn D) Đoạn này (dựa trên ngữ cảnh bài đọc) thường mô tả phương pháp cắt lát và quét (scan) tổ mối để nghiên cứu cấu trúc bên trong. Điều này khớp với tiêu đề về phương pháp điều tra/nghiên cứu.',
-    '{"paragraph-d-q4": ["ix", "ix"]}'
+    '{"paragraph-d-q4": ["ix", "ix. a mutually beneficial relationship"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. methods used to investigate termite mound formation', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. challenging our assumptions about the nature of life', false);
@@ -159,7 +159,7 @@ BEGIN
     2,
     'Paragraph E',
     E'**Đáp án: ii (challenging our assumptions about the nature of life)**\n\n> "...homeostasis..."\n\n(Đoạn E) Đoạn văn thảo luận về khả năng tự điều chỉnh của tổ mối giống như một cơ thể sống (super-organism), thách thức các giả định thông thường về ranh giới của sự sống.',
-    '{"paragraph-e-q5": ["ii", "ii"]}'
+    '{"paragraph-e-q5": ["ii", "ii. challenging our assumptions about the nature of life"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. methods used to investigate termite mound formation', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. challenging our assumptions about the nature of life', true);
@@ -182,7 +182,7 @@ BEGIN
     2,
     'Paragraph F',
     E'**Đáp án: i (methods used to investigate termite mound formation)**\n\n> "...construction..."\n\n(Đoạn F) Đoạn này mô tả cách mối xây dựng tổ (từng viên đất, phương pháp xây), tương ứng với tiêu đề về quy trình hoặc phương pháp hình thành tổ.',
-    '{"paragraph-f-q6": ["i", "i"]}'
+    '{"paragraph-f-q6": ["i", "i. methods used to investigate termite mound formation"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. methods used to investigate termite mound formation', true);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. challenging our assumptions about the nature of life', false);
@@ -205,7 +205,7 @@ BEGIN
     2,
     'Paragraph G',
     E'**Đáp án: vi**\n\n> "...future architecture..."\n\n(Đoạn G) Đoạn cuối thường liên hệ những hiểu biết về tổ mối với các ứng dụng trong kiến trúc tòa nhà của con người trong tương lai.',
-    '{"paragraph-g-q7": ["vi", "vi"]}'
+    '{"paragraph-g-q7": ["vi", "vi. some potential benefits of understanding termite architecture"]}'
   );
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 1, 'i. methods used to investigate termite mound formation', false);
   INSERT INTO exam_options ("Id","QuestionId","Idx","ContentMd","IsCorrect") VALUES (gen_random_uuid(), qid, 2, 'ii. challenging our assumptions about the nature of life', false);

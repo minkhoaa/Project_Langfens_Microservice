@@ -31,6 +31,7 @@ public record ResultAnswerItem(
 );
 
 public record AutosaveRequest(List<AnswerItem> Answers, long? ClientRevision);
+public record SubmitRequest(List<AnswerItem>? Answers);
 
 public record SubmitResponse(Guid AttemptId, string Status, decimal ScoreRaw, decimal ScorePct, int Correct, int Total);
 

@@ -56,6 +56,10 @@ public class InternalExamDto
             = null;
         [JsonPropertyName("blankAcceptTexts")] public IReadOnlyDictionary<string, string[]?> BlankAcceptTexts { get; init; } = new Dictionary<string, string[]?>();
         [JsonPropertyName("blankAcceptRegex")] public IReadOnlyDictionary<string, string[]?> BlankAcceptRegex { get; init; } = new Dictionary<string, string[]?>();
+        // Canonical shape: { "<promptKey>": ["<gradingKey>", "<displayText>"] }
+        // — used by MATCHING_HEADING and other matching question types. Index
+        // 0 is the value compared against the user's answer; index 1 is the
+        // human-readable label shown in the result review.
         [JsonPropertyName("matchPairs")] public IReadOnlyDictionary<string, string[]?> MatchPairs { get; init; } = new Dictionary<string, string[]?>();
         [JsonPropertyName("orderCorrects")] public IReadOnlyList<string> OrderCorrects { get; init; } = Array.Empty<string>();
         [JsonPropertyName("shortAnswerAcceptTexts")] public IReadOnlyList<string> ShortAnswerAcceptTexts { get; init; } = Array.Empty<string>();

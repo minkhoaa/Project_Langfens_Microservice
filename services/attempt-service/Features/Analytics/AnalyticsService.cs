@@ -608,18 +608,21 @@ public class AnalyticsService(AttemptDbContext context) : IAnalyticsService
                     if (pair.TryGetProperty("acceptedValues", out var acceptedVals) && 
                         acceptedVals.ValueKind == System.Text.Json.JsonValueKind.Array)
                     {
+                        // Convention: acceptedValues[0] = grading key,
+                        // acceptedValues[1..] = display text. Take the last
+                        // non-empty entry so we surface the full option content
+                        // (e.g. "viii. The Spread of Coffee") instead of the
+                        // bare roman.
+                        string? display = null;
                         foreach (var item in acceptedVals.EnumerateArray())
                         {
                             if (item.ValueKind == System.Text.Json.JsonValueKind.String)
                             {
                                 var val = item.GetString();
-                                if (!string.IsNullOrEmpty(val))
-                                {
-                                    answers.Add(val);
-                                    break; // Take first accepted value only
-                                }
+                                if (!string.IsNullOrEmpty(val)) display = val;
                             }
                         }
+                        if (display is not null) answers.Add(display);
                     }
                     // Fall back to correctKey/answerKey
                     else

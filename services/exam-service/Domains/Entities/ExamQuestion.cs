@@ -38,6 +38,14 @@ public class ExamQuestion
     [Column(TypeName = "jsonb")]
     public Dictionary<string, string[]?>? BlankAcceptRegex { get; set; }
 
+    /// <summary>
+    /// Canonical shape (used by MATCHING_HEADING and other matching question
+    /// types):
+    /// <code>{ "&lt;promptKey&gt;": ["&lt;gradingKey&gt;", "&lt;displayText&gt;"] }</code>
+    /// — index 0 is the value compared against the user's answer, index 1 is
+    /// the human-readable label shown in the result review. Per the standard
+    /// in docs/standards/question-data.md.
+    /// </summary>
     [Column(TypeName = "jsonb")]
     public Dictionary<string, string[]?>? MatchPairs { get; set; }
 
