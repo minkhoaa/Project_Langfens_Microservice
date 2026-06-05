@@ -55,7 +55,7 @@ class TestCompareText:
 
     def test_empty_target(self):
         errors = compare_text("anything", "")
-        assert errors == []
+        assert errors is None
 
     def test_case_and_punctuation_ignored(self):
         errors = compare_text("Hello, World!", "hello world")
@@ -82,11 +82,10 @@ class TestComputeScore:
         score = compute_score(wav, "hello world", "hello world", [])
         assert 0.0 <= score <= 1.0
 
-    def test_no_target_gives_high_text_score(self):
+    def test_no_target_gives_none(self):
         wav = _make_silent_wav()
         score = compute_score(wav, "hello world", "", [])
-        # text_score = 1.0 → final ≥ 0.6
-        assert score >= 0.5
+        assert score is None
 
     def test_all_errors_lowers_score(self):
         wav = _make_silent_wav()
@@ -125,9 +124,8 @@ class TestEvaluateEndpoint:
         assert resp.status_code == 200
         body = resp.json()
         assert "transcript" in body
-        assert "errors" in body
-        assert "score" in body
-        assert 0.0 <= body["score"] <= 1.0
+        assert body.get("errors") is None
+        assert body.get("score") is None
 
     def test_valid_wav_with_target(self):
         wav = _make_silent_wav()

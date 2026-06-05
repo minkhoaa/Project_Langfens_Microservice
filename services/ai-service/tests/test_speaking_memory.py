@@ -84,7 +84,7 @@ class TestSaveSpeakingMemory:
 
         with (
             patch(
-                "app.services.speaking_memory_service.embed_query",
+                "app.services.embedding_service.embed_query",
                 new=AsyncMock(return_value=fake_vector),
             ),
             patch(
@@ -114,7 +114,7 @@ class TestSaveSpeakingMemory:
     async def test_embedding_failure_does_not_raise(self):
         """If embedding fails, save_speaking_memory must return None silently."""
         with patch(
-            "app.services.speaking_memory_service.embed_query",
+            "app.services.embedding_service.embed_query",
             new=AsyncMock(side_effect=RuntimeError("Gemini API down")),
         ):
             # Must not raise
@@ -137,7 +137,7 @@ class TestSaveSpeakingMemory:
 
         with (
             patch(
-                "app.services.speaking_memory_service.embed_query",
+                "app.services.embedding_service.embed_query",
                 new=AsyncMock(return_value=fake_vector),
             ),
             patch(
@@ -185,7 +185,7 @@ class TestSearchSpeakingMemory:
 
         with (
             patch(
-                "app.services.speaking_memory_service.embed_query",
+                "app.services.embedding_service.embed_query",
                 new=AsyncMock(return_value=fake_vector),
             ),
             patch(
@@ -213,7 +213,7 @@ class TestSearchSpeakingMemory:
 
         with (
             patch(
-                "app.services.speaking_memory_service.embed_query",
+                "app.services.embedding_service.embed_query",
                 new=AsyncMock(return_value=fake_vector),
             ),
             patch(
@@ -231,7 +231,7 @@ class TestSearchSpeakingMemory:
     @pytest.mark.asyncio
     async def test_embedding_failure_returns_empty_list(self):
         with patch(
-            "app.services.speaking_memory_service.embed_query",
+            "app.services.embedding_service.embed_query",
             new=AsyncMock(side_effect=RuntimeError("API key invalid")),
         ):
             results = await search_speaking_memory(
@@ -251,7 +251,7 @@ class TestSearchSpeakingMemory:
 
         with (
             patch(
-                "app.services.speaking_memory_service.embed_query",
+                "app.services.embedding_service.embed_query",
                 new=AsyncMock(return_value=fake_vector),
             ),
             patch(
@@ -321,7 +321,7 @@ class TestTurnWithSpeechMemoryResilience:
             ),
             patch(
                 "app.routers.speaking.generate_roleplay_reply",
-                new=AsyncMock(return_value=("Great choice!", "")),
+                new=AsyncMock(return_value=__import__("app.schemas", fromlist=["RoleplayLLMOutput"]).RoleplayLLMOutput(agent_reply="Great choice!")),
             ),
             # Qdrant completely unavailable
             patch(

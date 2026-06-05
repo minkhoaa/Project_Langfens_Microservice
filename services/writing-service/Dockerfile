@@ -1,10 +1,11 @@
-﻿# Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY services/writing-service/writing-service.csproj services/writing-service/
 COPY services/_shared/Shared.PublicContracts/Shared.PublicContracts.csproj services/_shared/Shared.PublicContracts/
 COPY services/_shared/Shared.Security/Shared.Security.csproj services/_shared/Shared.Security/
 COPY services/_shared/Shared.Bootstrap/Shared.Bootstrap.csproj services/_shared/Shared.Bootstrap/
+COPY services/_shared/Shared.ServiceDefaults/Shared.ServiceDefaults.csproj services/_shared/Shared.ServiceDefaults/
 
 
 ARG NUGET_CACHE_ID=nuget-writing
@@ -21,7 +22,7 @@ WORKDIR /src/services/writing-service
 RUN dotnet publish -c Release -o /out /p:DebugType=none
 
 # Runtime: full ASP.NET Core image (multi-file publish needs the framework).
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \

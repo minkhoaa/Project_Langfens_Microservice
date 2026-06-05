@@ -1,7 +1,7 @@
 import time
 import pytest
 from app.services.roleplay_session_service import _memory_sessions, get_session, create_session
-from app.schemas import RoleplayScenario
+from app.schemas import RoleplayLLMOutput, RoleplayScenario
 from app.routers import speaking as speaking_router
 from fastapi.testclient import TestClient
 from app.main import app
@@ -56,7 +56,7 @@ async def test_roleplay_works_when_qdrant_unavailable(monkeypatch):
     
     # Mock LLM generation so we don't need Ollama running
     async def mock_generate(*args, **kwargs):
-        return "This is a fallback reply.", "No feedback."
+        return RoleplayLLMOutput(agent_reply="This is a fallback reply.")
     monkeypatch.setattr("app.routers.speaking.generate_roleplay_reply", mock_generate)
     
     # Create a session
@@ -105,7 +105,7 @@ async def test_memory_retrieval_uses_new_strategy_error_words(monkeypatch):
     ))
     
     async def mock_generate(*args, **kwargs):
-        return "Reply", "Feedback"
+        return RoleplayLLMOutput(agent_reply="Reply")
     monkeypatch.setattr("app.routers.speaking.generate_roleplay_reply", mock_generate)
     
     import app.services.roleplay_session_service as rss

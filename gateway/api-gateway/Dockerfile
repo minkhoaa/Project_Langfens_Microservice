@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY gateway/api-gateway/api-gateway.csproj gateway/api-gateway/
@@ -20,7 +20,7 @@ RUN dotnet publish -c Release -o /app/publish \
     /p:EnableCompressionInSingleFile=true \
     /p:DebugType=none
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine AS final
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine AS final
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \

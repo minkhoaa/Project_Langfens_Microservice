@@ -112,8 +112,12 @@ builder.Services.AddScoped<WhisperProcessor>(sp =>
       .Build());
 builder.Services.AddHttpClient<IAudioDownloader, AudioDownloader>();
 var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080");
-builder.Services.AddHttpClient<ISpeakingGrader, AiSpeakingGrader>()
-    .ConfigureHttpClient(c => c.BaseAddress = new Uri(aiServiceUrl));
+var aiClient = new HttpClient {
+    BaseAddress = new Uri(aiServiceUrl),
+    Timeout = TimeSpan.FromMinutes(10)
+};
+builder.Services.AddSingleton<ISpeakingGrader>(sp => 
+    new AiSpeakingGrader(aiClient, sp.GetRequiredService<ILogger<AiSpeakingGrader>>()));
 
 // ── App ──────────────────────────────────────────────────────────────────
 var app = builder.Build();

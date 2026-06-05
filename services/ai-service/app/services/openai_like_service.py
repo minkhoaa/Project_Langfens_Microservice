@@ -387,6 +387,7 @@ class OpenAILikeService:
                         key_manager.mark_exhausted(
                             provider_name, key_index, "rate limit", cooldown_seconds=60
                         )
+                        last_error = e
                         continue  # Try next key
                     else:
                         key_manager.mark_error(provider_name, key_index, error_msg)
@@ -402,6 +403,7 @@ class OpenAILikeService:
                         key_manager.mark_exhausted(
                             provider_name, key_index, "invalid key", cooldown_seconds=3600
                         )
+                        last_error = e
                         continue
 
                     # Reasoning models (e.g. gpt-oss-20b) intermittently spend the entire

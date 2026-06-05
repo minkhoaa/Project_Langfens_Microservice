@@ -179,3 +179,7 @@ scripts/pipeline/
 # Playwright MCP cache
 .playwright-mcp/
 .gsd/MK-GAPS-CLOSURE-PLAN.md
+models/**/*.pt
+models/**/*.pth
+models/**/*.ckpt
+models/**/*.bin

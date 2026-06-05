@@ -105,16 +105,24 @@ class RoleplayTurnWithSpeechRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=1000, description="Transcribed user utterance")
     # Pronunciation metadata from the speech evaluator (both optional so
     # callers that skip /evaluate can still use this endpoint)
-    errors: List[WordErrorItem] = Field(
-        default_factory=list,
-        description="Word-level pronunciation errors from the speech evaluator",
+    errors: Optional[List[WordErrorItem]] = Field(
+        default=None,
+        description="Word-level pronunciation errors from the speech evaluator (only for target-based tasks)",
     )
-    score: float = Field(
-        default=1.0,
+    score: Optional[float] = Field(
+        default=None,
         ge=0.0,
         le=1.0,
-        description="Overall pronunciation score from the speech evaluator",
+        description="Overall pronunciation score from the speech evaluator (only for target-based tasks)",
     )
+
+
+class FeedbackDetails(BaseModel):
+    content: str = Field(default="")
+    grammar: str = Field(default="")
+    lexical: str = Field(default="")
+    fluency: str = Field(default="")
+    pronunciation: str = Field(default="")
 
 
 class RoleplayTurnWithSpeechResponse(BaseModel):
@@ -124,15 +132,61 @@ class RoleplayTurnWithSpeechResponse(BaseModel):
     user_message: RoleplayTurnMessage
     agent_message: RoleplayTurnMessage
     turn_count: int = Field(..., ge=1)
-    # Pronunciation feedback injected by Qwen
-    feedback: str = Field(
-        default="",
-        description="Short pronunciation tip extracted from the agent reply (may be empty)",
+    # Detailed feedback
+    feedback: FeedbackDetails = Field(
+        default_factory=FeedbackDetails,
+        description="Field-specific feedback",
     )
-    # Echo the score so the client doesn't need to track it separately
-    pronunciation_score: float = Field(
-        ..., ge=0.0, le=1.0, description="Echo of the submitted pronunciation score"
+    # --- Pronunciation scoring ---
+    pronunciation_score: Optional[float] = Field(
+        default=None, ge=0.0, le=1.0,
+        description=(
+            "The pronunciation score. In target-based mode, this is a real WER-based acoustic score. "
+            "In free-form mode, this is a heuristic approximation derived from LLM signals."
+        )
     )
+    pronunciation_mode: Optional[Literal["acoustic", "heuristic", "none"]] = Field(
+        default=None,
+        description=(
+            "'acoustic' = real WER-based score (target-based mode). "
+            "'heuristic' = proxy derived from LLM evaluation signals (free-form mode). "
+            "'none' = no pronunciation data available."
+        ),
+    )
+    # --- IELTS evaluation signals (LLM-generated) ---
+    content_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Content relevance and task completion [0.0–1.0]")
+    grammar_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Grammatical range and accuracy [0.0–1.0]")
+    fluency_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Fluency and coherence [0.0–1.0]")
+    lexical_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Lexical resource [0.0–1.0]")
+    off_topic: Optional[bool] = Field(default=None, description="True if the user’s response was off-topic for the scenario")
+    # --- Estimated overall band ---
+    overall_speaking_band: Optional[float] = Field(
+        default=None, ge=0.0, le=9.0,
+        description=(
+            "Estimated IELTS-style speaking band (0.0–9.0, 0.5 increments). "
+            "Derived from content, grammar, lexical, fluency, and heuristic pronunciation scores. "
+            "This is an approximation, not an official IELTS band."
+        ),
+    )
+
+
+class RoleplayTurnAudioResponse(RoleplayTurnWithSpeechResponse):
+    """
+    Response from POST /turn-audio.
+
+    Extends RoleplayTurnWithSpeechResponse with the Whisper transcript so the
+    client knows exactly what the model heard — no separate /speech/evaluate
+    call required.
+    """
+    transcript: str = Field(
+        ...,
+        description="Whisper ASR transcript of the uploaded audio",
+    )
+    word_errors: Optional[List[WordErrorItem]] = Field(
+        default=None,
+        description="Per-word pronunciation errors detected against the last agent prompt (None in free-form mode)",
+    )
+
 
 
 class CompareRequest(BaseModel):
@@ -264,3 +318,14 @@ class SpeakingGradeResponse(BaseModel):
     s: list[str] = Field(default_factory=list, description="3-5 improvement suggestions")
     p: str = Field(default="", description="Improved answer example")
     raw_llm_json: str | None = Field(default=None, description="Raw LLM JSON for debugging")
+# ---------------------------------------------------------------------------
+# Internal / Orchestration Schemas
+# ---------------------------------------------------------------------------
+class RoleplayLLMOutput(BaseModel):
+    agent_reply: str = Field(..., description="The conversational reply from the agent.")
+    feedback: FeedbackDetails = Field(default_factory=FeedbackDetails, description="Field-specific feedback.")
+    content_score: Optional[float] = Field(default=None, description="Relevance and task completion score [0.0, 1.0].")
+    grammar_score: Optional[float] = Field(default=None, description="Grammatical range and accuracy score [0.0, 1.0].")
+    fluency_score: Optional[float] = Field(default=None, description="Fluency and coherence score [0.0, 1.0].")
+    lexical_score: Optional[float] = Field(default=None, description="Lexical resource score [0.0, 1.0].")
+    off_topic: bool = Field(default=False, description="True if the learner's response was completely off-topic.")

@@ -8,7 +8,7 @@ Core speech evaluation logic. Three composable functions:
 
 No paid APIs. Uses:
   • faster-whisper  (transcription)
-  • transformers + torchaudio  (wav2vec2 audio embeddings for pronunciation score)
+  • Word Error Rate (WER) based on text alignment (for pronunciation accuracy score)
 """
 
 from __future__ import annotations
@@ -97,7 +97,7 @@ def _normalize(text: str) -> List[str]:
     return text.split()
 
 
-def compare_text(transcript: str, target: str) -> List[WordError]:
+def compare_text(transcript: str, target: Optional[str]) -> Optional[List[WordError]]:
     """
     Compare the spoken transcript against the target sentence.
 
@@ -107,10 +107,10 @@ def compare_text(transcript: str, target: str) -> List[WordError]:
     • A transcript token that doesn't match the current expected target token
       → "incorrect".
 
-    Returns a list of WordError objects (may be empty for a perfect match).
+    Returns a list of WordError objects, or None if no target is provided.
     """
     if not target:
-        return []
+        return None
 
     ref_tokens = _normalize(target)
     hyp_tokens = _normalize(transcript)
@@ -154,21 +154,47 @@ def compare_text(transcript: str, target: str) -> List[WordError]:
 def compute_score(
     audio_bytes: bytes,
     transcript: str,
-    target: str,
-    errors: List[WordError],
-) -> float:
+    target: Optional[str] = None,
+    errors: Optional[List[WordError]] = None,
+    force_acoustic: bool = False,
+) -> Optional[float]:
     """
     Compute a pronunciation / accuracy score in [0.0, 1.0].
-    Safely rewritten to use text alignment accuracy to avoid false acoustic proxies.
+    Uses the fine-tuned acoustic Wav2Vec2 model if available.
+    If target is provided, scales the acoustic score by the text alignment accuracy (WER).
+    Returns the acoustic score directly if no target is provided.
     """
-    if not target:
-        return 1.0
+    if not target and not force_acoustic:
+        return None
+    # 1. Compute acoustic score from model
+    try:
+        from app.services.pronunciation_scorer import evaluate_acoustic_pronunciation
+        acoustic_scores = evaluate_acoustic_pronunciation(audio_bytes)
+        acoustic_score = acoustic_scores["overall"]
+    except Exception as exc:
+        logger.warning(
+            "Could not run acoustic pronunciation scorer, falling back to text-only evaluation: %s",
+            exc
+        )
+        acoustic_score = 1.0
 
-    ref_tokens = _normalize(target)
-    if not ref_tokens:
-        return 1.0
+    # 2. Combine with text-alignment accuracy (WER) if target is provided
+    if target:
+        ref_tokens = _normalize(target)
+        if not ref_tokens:
+            return None
 
-    n_errors = len(errors)
-    error_rate = min(n_errors / len(ref_tokens), 1.0)
-    score = 1.0 - error_rate
-    return round(float(np.clip(score, 0.0, 1.0)), 4)
+        if errors is None:
+            errors = []
+
+        n_errors = len(errors)
+        error_rate = min(n_errors / len(ref_tokens), 1.0)
+        alignment_acc = 1.0 - error_rate
+        
+        # Combine score (e.g. alignment_acc acts as a gate / weight)
+        final_score = alignment_acc * acoustic_score
+    else:
+        # Free-form mode: score is solely acoustic pronunciation quality
+        final_score = acoustic_score
+
+    return round(float(np.clip(final_score, 0.0, 1.0)), 4)

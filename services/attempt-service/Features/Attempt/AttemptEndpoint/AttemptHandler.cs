@@ -34,10 +34,9 @@ public static class AttemptHandler
 
     public static Task<IResult> AttemptSubmit(
         [FromRoute] Guid attemptId,
-        [FromBody] SubmitRequest? req,
         CancellationToken token,
         IAttemptService service)
-        => service.Submit(attemptId, token, req?.Answers);
+        => service.Submit(attemptId, token);
 
     public static Task<IResult> AttemptGetResult(
         [FromRoute] Guid attemptId,
@@ -69,17 +68,4 @@ public static class AttemptHandler
 
     public static Task<IResult> GetPlacementCompletionStatus(CancellationToken token, IAttemptService service)
         => service.GetPlacementCompletionStatus(token);
-
-    public static Task<IResult> GetNavigator(
-        [FromRoute] Guid attemptId,
-        CancellationToken token,
-        [FromServices] IAttemptService service
-    ) => service.GetNavigator(attemptId, token);
-
-    public static Task<IResult> ToggleFlag(
-        [FromRoute] Guid attemptId,
-        [FromRoute] Guid questionId,
-        CancellationToken token,
-        [FromServices] IAttemptService service
-    ) => service.ToggleFlag(attemptId, questionId, token);
 }

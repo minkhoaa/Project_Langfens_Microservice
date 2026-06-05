@@ -1,5 +1,4 @@
 using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
-using DotNetEnv;
 using exam_service.Features.Exams.AdminEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.ExamEndpoint;
 using exam_service.Features.Exams.AdminEndpoint.OptionEndpoint;
@@ -16,7 +15,6 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
-Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Aspire service defaults (OTel, discovery, resilience, /health, /alive) ──
@@ -33,10 +31,12 @@ builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Exam Service");
 
 // ── Database ───────────────────────────────────────────────────────────────
-NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
+// Npgsql 8+ requires explicit opt-in for jsonb → CLR type mapping (Dictionary, List, etc.)
+// Aspire's AddNpgsqlDbContext builds its own NpgsqlDataSource; we hook in via
+// the DbContextOptions action to call ConfigureDataSource with EnableDynamicJson.
 builder.AddNpgsqlDbContext<ExamDbContext>("exam-db", configureDbContextOptions: opts =>
 {
-    opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
+    opts.UseNpgsql(o => o.ConfigureDataSource(ds => ds.EnableDynamicJson()));
 });
 
 // ── Services ─────────────────────────────────────────────────────────────
@@ -49,30 +49,11 @@ builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
 
 // ── gRPC + HTTP ports ───────────────────────────────────────────────────
-// Under Aspire, ASPNETCORE_URLS is injected and Kestrel binds to those endpoints.
-// When Kestrel__GrpcPort is also allocated (via WithHttpEndpoint(name: "grpc")),
-// add a dedicated HTTP/2-only listener. When running outside Aspire (compose path),
-// use the explicit Kestrel__HttpPort / Kestrel__GrpcPort env vars.
+// Under Aspire, ASPNETCORE_URLS is injected and Kestrel binds to those endpoints
+// (HTTP/1.1 + HTTP/2 multiplexed on the same port). Only configure explicit
+// HTTP/gRPC ports when running outside Aspire (compose path).
 var aspireUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
-if (!string.IsNullOrEmpty(aspireUrls))
-{
-    builder.WebHost.UseKestrelCore().ConfigureKestrel(o =>
-    {
-        // Always enable HTTP/1AndHttp2 on the Aspire-assigned endpoint so gRPC works
-        foreach (var url in aspireUrls.Split(';', StringSplitOptions.RemoveEmptyEntries))
-        {
-            var uri = new Uri(url.Trim());
-            o.ListenLocalhost(uri.Port, lo => lo.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2);
-        }
-        // If Aspire allocated a dedicated gRPC port, add it as HTTP/2-only
-        var grpcPortEnv = Environment.GetEnvironmentVariable("Kestrel__GrpcPort");
-        if (int.TryParse(grpcPortEnv, out var grpcPort))
-        {
-            o.ListenAnyIP(grpcPort, lo => lo.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2);
-        }
-    });
-}
-else
+if (string.IsNullOrEmpty(aspireUrls))
 {
     var httpPort = int.TryParse(Environment.GetEnvironmentVariable("Kestrel__HttpPort"), out var hp) ? hp : 8080;
     var grpcPort = int.TryParse(Environment.GetEnvironmentVariable("Kestrel__GrpcPort"), out var gp) ? gp : 8081;
@@ -97,31 +78,8 @@ using (var scope = app.Services.CreateScope())
     {
         var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
         Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
-
-        if (pending.Count > 0)
-        {
-            Console.WriteLine("[EF] Applying migrations...");
-            await db.Database.MigrateAsync();
-            Console.WriteLine("[EF] Migrations applied successfully");
-        }
-        else
-        {
-            Console.WriteLine("[EF] No pending migrations, checking WordList column...");
-
-            try
-            {
-                await db.Database.ExecuteSqlRawAsync(@"
-                    ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS ""WordList"" text[];
-                ");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[EF] WordList column check: {ex.Message}");
-            }
-        }
+        await db.Database.MigrateAsync();
     }
-    await exam_service.Data.ReadingSeeder.SeedReadingExamAsync(db);
-    await exam_service.Data.ListeningSeeder.SeedListeningExamAsync(db);
 }
 
 app.MapDefaultEndpoints();

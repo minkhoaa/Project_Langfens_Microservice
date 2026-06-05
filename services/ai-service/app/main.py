@@ -27,10 +27,23 @@ async def lifespan(app: FastAPI):
         yield
         return
 
+    # --- Background ingestion ---
     from app.services.ingestion_service import run_ingestion
     executor = ThreadPoolExecutor(max_workers=1)
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(loop.run_in_executor(executor, run_ingestion))
+
+    # --- Local LoRA pre-warm ---
+    if settings.use_local_lora:
+        try:
+            from app.services.qwen_service import load_qwen_model
+            logger.info("lifespan: pre-warming local Qwen2.5-LoRA model …")
+            await load_qwen_model()
+            logger.info("lifespan: Qwen2.5-LoRA model ready.")
+        except Exception as exc:
+            # Non-fatal: the service can still serve non-LoRA endpoints.
+            logger.error("lifespan: LoRA pre-warm failed: %s", exc, exc_info=True)
+
     yield
     executor.shutdown(wait=False)
 
@@ -66,4 +79,4 @@ app.include_router(grammar.router, prefix="/api")
 app.include_router(speaking.router, prefix="/api")
 app.include_router(practice.router, prefix="/api")
 app.include_router(speech_eval.router, prefix="/api")
-app.include_router(speaking_grade.router)  # prefix="/v1/speaking" is in the router itself
+app.include_router(speaking_grade.router, prefix="/api")  # endpoint: /api/v1/speaking/grade
