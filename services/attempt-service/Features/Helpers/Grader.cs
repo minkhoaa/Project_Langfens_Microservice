@@ -20,10 +20,19 @@ public sealed class SingleChoiceGrader : IQuestionGrader
     public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
     {
         var selection = (answer.SelectedOptionIds ?? new List<Guid>()).ToHashSet();
-        var correctIds = (key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>())
-            .Select(t => t.id)
-            .ToHashSet();
-        var ok = selection.Count == 1 && correctIds.Contains(selection.First());
+        var correct = key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>();
+        var correctIds = correct.Select(t => t.id).ToHashSet();
+        // Accept match if EITHER:
+        //   1. The user's SelectedOptionIds UUID is in the correct set
+        //   2. TextAnswer holds a GUID that's in the correct set (older FE
+        //      builds routed the option UUID into TextAnswer instead)
+        //   3. TextAnswer equals a correct option's text content
+        var ok = (selection.Count == 1 && correctIds.Contains(selection.First()))
+            || (!string.IsNullOrWhiteSpace(answer.TextAnswer) && (
+                (Guid.TryParse(answer.TextAnswer, out var tGuid) && correctIds.Contains(tGuid))
+                || correct.Any(c => !string.IsNullOrEmpty(c.content)
+                    && string.Equals(c.content.Trim(), answer.TextAnswer.Trim(), StringComparison.OrdinalIgnoreCase))
+            ));
         return new GradeResult(ok ? key.QuestionPoints : 0m, ok);
     }
 }

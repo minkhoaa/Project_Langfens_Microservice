@@ -680,6 +680,36 @@ IQuestionGraderFactory questionGraderFactory
         var awardedPoints = existedAttempt.Answers.Sum(x => x.AwardedPoints ?? 0);
         int correctCount = existedAttempt.Answers.Count(x => x.IsCorrect == true);
         var totalScore = compiled.TotalPoints;
+
+        // Re-grade all answers in-memory so the result page reflects the
+        // current grader logic. This fixes legacy rows where the FE routed
+        // the option UUID into TextAnswer (pre-forice_single rename) and
+        // the stored IsCorrect/AwardedPoints are stale. DB rows are not
+        // mutated; only the response values are recomputed.
+        var regradeMap = new Dictionary<Guid, (bool? IsCorrect, decimal? AwardedPoints)>();
+        foreach (var ans in existedAttempt.Answers)
+        {
+            if (index.TryGetValue(ans.QuestionId, out var rgMeta)
+                && compiled.Keys.TryGetValue(ans.QuestionId, out var rgKey))
+            {
+                try
+                {
+                    var rgGrader = questionGraderFactory.Resolve(rgMeta.Type);
+                    var rgResult = rgGrader.Grade(ans, rgKey);
+                    regradeMap[ans.QuestionId] = (rgResult.IsCorrect, rgResult.AwardedPoints);
+                }
+                catch
+                {
+                    regradeMap[ans.QuestionId] = (ans.IsCorrect, ans.AwardedPoints);
+                }
+            }
+            else
+            {
+                regradeMap[ans.QuestionId] = (ans.IsCorrect, ans.AwardedPoints);
+            }
+        }
+        awardedPoints = regradeMap.Values.Sum(v => v.AwardedPoints ?? 0);
+        correctCount = regradeMap.Values.Count(v => v.IsCorrect == true);
         int totalQuestion = compiled.Keys.Count;
         var totalTime = existedAttempt.SubmittedAt - existedAttempt.StartedAt;
 
@@ -898,7 +928,7 @@ IQuestionGraderFactory questionGraderFactory
                             questionIdxMap.TryGetValue(x.QuestionId, out var idx) ? idx : 0,
                             x.SelectedOptionIds,
                             x.TextAnswer,
-                            x.IsCorrect,
+                            regradeMap.TryGetValue(x.QuestionId, out var rg) ? rg.IsCorrect : x.IsCorrect,
                             selectedText,
                             correctText
                         );
