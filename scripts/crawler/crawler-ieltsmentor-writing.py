@@ -230,21 +230,46 @@ def extract_task_id(url: str) -> str:
     return re.sub(r'[^a-z0-9]+', '-', path.lower()).strip('-')[:60]
 
 
+def extract_image_url(soup: BeautifulSoup) -> str:
+    """Extract the chart/diagram image URL from a task page.
+
+    Only the Academic pages have a chart <img> hosted on ielts-mentor.com
+    (under /images/writingsamples/). GT letter pages do not have a chart
+    image, so this returns an empty string for letters.
+    """
+    # Primary: look for an <img> inside the article body whose src is on
+    # ielts-mentor.com/images/writingsamples/ — the canonical Academic chart.
+    article = soup.find('article', class_='item-page') or soup.find('article') or soup.find('div', class_='item-page')
+    if not article:
+        article = soup.find('body')
+    if not article:
+        return ""
+
+    for img in article.find_all('img'):
+        src = img.get('src', '') or ''
+        if '/images/writingsamples/' in src:
+            return urljoin(BASE_URL, src)
+
+    return ""
+
+
 def fetch_task_page(url: str) -> dict:
     """Fetch and extract content from a single task page."""
     soup = fetch_page(url)
-    
+
     title = extract_title(soup, url)
     prompt = extract_prompt(soup)
     model_answers = extract_model_answers(soup)
     task_id = extract_task_id(url)
-    
+    image_url = extract_image_url(soup)
+
     return {
         'id': task_id,
         'url': url,
         'title': title,
         'prompt': prompt,
         'model_answers': model_answers,
+        'image_url': image_url,
     }
 
 
@@ -268,6 +293,7 @@ def generate_normalized_json(data: dict) -> dict:
         'category': 'IELTS_WRITING',
         'level': 'B2',
         'durationMin': 20,
+        'image_url': data.get('image_url', ''),
         'sections': [{
             'idx': 1,
             'title': 'GT Writing Task 1',
@@ -296,19 +322,22 @@ def escape_sql(text: str) -> str:
 def generate_sql(data: dict) -> str:
     """Generate SQL insert statements for writing-service database."""
     normalized = generate_normalized_json(data)
-    
+
     task_id = normalized['id']
     title = escape_sql(normalized['title'])
     prompt = escape_sql(normalized['sections'][0]['questions'][0]['prompt_md'])
     model_answers = normalized['sections'][0]['questions'][0]['model_answers']
-    
+    image_url_raw = data.get('image_url', '') or ''
+    image_url = escape_sql(image_url_raw)
+    slug = escape_sql(normalized['slug'])
+
     # Convert model answers to JSONB
     model_answers_json = json.dumps(model_answers, ensure_ascii=False)
     model_answers_sql = escape_sql(model_answers_json)
-    
+
     # ExamType: 0=TOEIC, 1=WRITING_TASK1, 2=WRITING_TASK2
     exam_type = 1  # WRITING_TASK1
-    
+
     sql = f"""-- ============================================
 -- IELTS Writing Task 1 Data Import (writing-service)
 -- Generated: {datetime.now().isoformat()}
@@ -319,29 +348,33 @@ def generate_sql(data: dict) -> str:
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Cleanup existing data with same title
-DELETE FROM "writing_exams" WHERE "Title" = E'{title}';
+-- Cleanup existing data with same slug (idempotent re-runs)
+DELETE FROM "writing_exams" WHERE "Slug" = E'{slug}';
 
 -- Insert into writing_exams table
 INSERT INTO "writing_exams" (
   "Id",
-  "Title", 
+  "Title",
+  "Slug",
   "TaskText",
   "ExamType",
   "Level",
   "Tags",
   "ModelAnswers",
+  "ImageUrl",
   "CreatedAt",
   "CreatedBy"
 )
 VALUES (
   gen_random_uuid(),
   E'{title}',
+  E'{slug}',
   E'{prompt}',
   {exam_type},
   'B2',
   'ielts,letter,task1,gt',
   E'{model_answers_sql}'::jsonb,
+  E'{image_url}',
   now(),
   '00000000-0000-0000-0000-000000000000'
 );
@@ -362,6 +395,10 @@ def process_task(url: str) -> dict:
     logger.info(f"Extracted: {data['title']}")
     logger.info(f"  Prompt: {len(data['prompt'])} chars")
     logger.info(f"  Model Answers: {len(data['model_answers'])}")
+    if data.get('image_url'):
+        logger.info(f"  Image: {data['image_url']}")
+    else:
+        logger.info(f"  Image: (none — letter task)")
     
     # Generate normalized JSON
     normalized = generate_normalized_json(data)
