@@ -3,7 +3,7 @@ name: langfens-ai-service
 description: >
   CRITICAL: This is the AI infrastructure specialist for Langfens ai-service.
   ALWAYS invoke this agent when work involves FastAPI routers, Pydantic models,
-  LangChain chains, LLM integrations (Ollama/Groq/MiniMax/Gemini), embeddings,
+  LangChain chains, LLM integrations (Groq sole LLM; Ollama for embeddings only), embeddings,
   vector search (Qdrant), RAG pipelines, speech-to-text (faster-whisper),
   Redis caching, session management for roleplay, or any AI inference endpoint.
   This agent owns all code in services/ai-service/app/ — routers, services,
@@ -67,22 +67,27 @@ ai-service.
 
 ### LLM Integrations
 
-**Primary — Ollama (`app/services/ollama_service.py`):**
-- Model: `qwen2.5` (chat), `bge-m3` (embeddings, 1024 dims, CPU mode)
-- Settings: temperature 0.3, timeout 120s
+**Groq — sole LLM (`app/services/groq_service.py`):**
+- OpenAI-compatible Python SDK against `https://api.groq.com/openai/v1`
+- Default model: `openai/gpt-oss-20b` (override via `GROQ_MODEL`)
+- Multi-key rotation via `GROQ_API_KEYS` (comma-separated) or single-key `GROQ_API_KEY`
+- 60s cooldown on HTTP 429; `KeyManager` re-enables keys after cooldown elapses
+- Single source of truth: `PROVIDERS = {"groq": {...}}` and `DEFAULT_PROVIDER_ORDER = ["groq"]`
+
+**Embeddings — Ollama BGE-M3 (`app/services/embedding_service.py`):**
+- Model: `bge-m3` (1024 dims, CPU mode)
 - Always set `num_gpu=0` in Ollama embed options — CUDA causes NaN JSON errors
+- Endpoint: `POST {OLLAMA_BASE_URL}/api/embeddings`
 
-**Fallback — OpenAI-compatible (`app/services/openai_like_service.py`):**
-- Groq and MiniMax with multi-key rotation
-- 60s cooldown on HTTP 429
-- Keys: `GROQ_API_KEYS`, `MINIMAX_API_KEYS` (comma-separated for rotation)
+**Speaking roleplay (out of LLM-judge scope) — `app/services/ollama_service.py`:**
+- `generate_roleplay_reply` is called by `routers/speaking.py`. Do not refactor.
 
-**Legacy — Gemini (`app/services/gemini_service.py`):**
-- `langchain-google-genai` client
-- Model: `gemini-2.5-flash`
+**Speaking grading (out of LLM-judge scope) — `app/services/qwen_service.py`:**
+- Local Qwen2.5 LoRA for `POST /api/v1/speaking/grade`. Do not refactor.
 
 **Central `llm_service.py`:**
-- `llm_service.generate()` routes to active backend based on config
+- Thin facade: `llm_service.generate()` delegates to `groq_service.groq_generate()`.
+- `llm_service.get_runtime_status()` returns Groq key counts for `/api/llm-status`.
 
 ### Embedding Generation (`app/services/embedding_service.py`)
 - Ollama `/api/embeddings` endpoint
@@ -150,7 +155,7 @@ ai-service.
 - "essay grading", "band score", "writing grade"
 - "grammar detection", "grammar explanation"
 - "speech evaluation", "pronunciation score"
-- "Ollama", "Groq", "MiniMax", "Gemini"
+- "Ollama", "Groq", "BGE-M3"
 - "ingestion pipeline", "startup data loading"
 - "new environment variable" for AI service
 

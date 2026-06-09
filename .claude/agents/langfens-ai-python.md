@@ -1,6 +1,6 @@
 ---
 name: langfens-ai-python
-description: Python/FastAPI specialist agent for Langfens ai-service. Use this agent for FastAPI router development, LangChain chain/prompt management, LLM integration (Ollama, Groq, MiniMax, Gemini), vector search (Qdrant), embedding generation, speech-to-text (faster-whisper), Redis caching, and Python testing. This is the AI workhorse.
+description: Python/FastAPI specialist agent for Langfens ai-service. Use this agent for FastAPI router development, LangChain chain/prompt management, LLM integration (Groq via OpenAI-compatible SDK; Ollama for embeddings only), vector search (Qdrant), embedding generation, speech-to-text (faster-whisper), Redis caching, and Python testing. This is the AI workhorse.
 tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, SendMessage, NotepadEdit
 model: minimax/MiniMax-M2.7
 ---
@@ -59,8 +59,8 @@ services/ai-service/
 │   └── services/
 │       ├── cache_service.py       # Redis caching
 │       ├── ingestion_service.py   # Qdrant data ingestion
-│       ├── openai_like_service.py # Groq/MiniMax multi-key
-│       ├── llm_service.py         # Primary LLM abstraction
+│       ├── groq_service.py        # Groq multi-key LLM service (sole provider)
+│       ├── llm_service.py         # Thin facade routing to groq_service
 │       ├── embedding_service.py   # Ollama BGE-M3
 │       ├── search_service.py      # Qdrant vector search
 │       ├── grade_service.py        # Writing/speaking grading
@@ -122,14 +122,14 @@ class LlmService:
         # calls Ollama
 ```
 
-**Fallback (Groq/MiniMax):**
+**Sole LLM (Groq):**
 ```python
-# app/services/openai_like_service.py
-# Multi-key rotation, 60s cooldown on 429
-# Uses AsyncHTTPProxyAgent or similar
+# app/services/groq_service.py
+# OpenAI-compatible SDK against https://api.groq.com/openai/v1
+# Multi-key rotation via GROQ_API_KEYS, 60s cooldown on 429
 ```
 
-**Routing priority:** Ollama → Groq → MiniMax → Gemini (legacy)
+**Routing priority:** Single provider (Groq). Embeddings still use Ollama BGE-M3.
 
 ## Vector Search (Qdrant) Pattern
 
@@ -249,15 +249,14 @@ OLLAMA_EMBED_DIMENSIONS=1024
 OLLAMA_TEMPERATURE=0.3
 OLLAMA_TIMEOUT=120
 
-# OpenAI-like (fallback)
-GROQ_API_KEY=...
-GROQ_API_KEYS=key1,key2  # comma-separated for rotation
-MINIMAX_API_KEY=...
-MINIMAX_API_KEYS=key1,key2
+# Groq (sole LLM)
+GROQ_BASE_URL=https://api.groq.com/openai/v1
+GROQ_MODEL=openai/gpt-oss-20b
+GROQ_API_KEY=...                 # single-key fallback
+GROQ_API_KEYS=key1,key2,key3     # multi-key rotation (preferred)
 
-# Gemini (legacy)
-GEMINI_API_KEY=...
-GEMINI_CHAT_MODEL=gemini-2.5-flash
+# Legacy envs (no longer read by LLM-judge path; retained for speaking code):
+#   USE_OLLAMA, USE_OPENAI_LIKE, GEMINI_*, MINIMAX_*, CEREBRAS_*
 
 # Data
 DATA_DIR=/app/data
@@ -300,7 +299,7 @@ Service starts on port 8092. Ollama must be reachable at `OLLAMA_BASE_URL`.
 1. **Max audio size: 25 MB** — hard limit enforced before processing
 2. **Async for I/O** — use `async def` for LLM calls, Qdrant, Redis; `ThreadPoolExecutor` for sync (whisper)
 3. **Ingestion on startup** — runs if collections empty, skip with `PYTEST_CURRENT_TEST`
-4. **Multi-key rotation** — Groq/MiniMax keys comma-separated; 60s cooldown on 429
+4. **Multi-key rotation** — Groq keys comma-separated (`GROQ_API_KEYS`); 60s cooldown on 429
 5. **Embedding dim** — 1024 for BGE-M3; matches Qdrant collection config
 6. **Vector cache key** — SHA256 of first 32 dims + top_k + filters JSON
 
@@ -308,7 +307,7 @@ Service starts on port 8092. Ollama must be reachable at `OLLAMA_BASE_URL`.
 
 Use this agent for:
 - Adding new FastAPI routers or endpoints to ai-service
-- LLM integration work (Ollama, Groq, MiniMax, Gemini)
+- LLM integration work (Groq sole LLM; Ollama for embeddings only)
 - Vector search / Qdrant changes
 - Embedding generation
 - Speech-to-text (faster-whisper)
