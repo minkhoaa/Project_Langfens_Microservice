@@ -38,8 +38,8 @@ app/
 └── services/
     ├── cache_service.py       # Redis caching (get_cached, set_cached)
     ├── ingestion_service.py  # Qdrant data ingestion on startup
-    ├── openai_like_service.py # Groq/MiniMax multi-key LLM service
-    ├── llm_service.py        # Primary LLM abstraction (Ollama/Gemini)
+    ├── groq_service.py        # Groq multi-key LLM service (sole LLM provider)
+    ├── llm_service.py         # Thin facade routing to groq_service
     ├── embedding_service.py   # Embedding generation (Ollama BGE-M3)
     ├── search_service.py      # Qdrant vector search
     ├── grade_service.py       # Writing/speaking grading chains
@@ -64,11 +64,21 @@ app/
 
 ## AI Integration
 
-- **Ollama** (primary): Qwen2.5 for chat, BGE-M3 for embeddings
-- **Groq/MiniMax** (fallback): `openai_like_service.py` with multi-key rotation and 60s cooldown on 429
-- **Gemini**: legacy fallback via `langchain-google-genai`
-- Prompt templates in `app/prompts/` — raw strings with `{variable}` placeholders
-- LLM calls go through `llm_service.generate()` which routes to the active backend
+- **Groq** (sole LLM): `app/services/groq_service.py` uses the OpenAI-compatible Python SDK
+  against `https://api.groq.com/openai/v1`. Multi-key rotation via
+  `GROQ_API_KEYS` (comma-separated) with single-key fallback `GROQ_API_KEY`.
+  Default model `openai/gpt-oss-20b`. 60s cooldown on HTTP 429.
+- **Ollama** (embeddings only): `app/services/embedding_service.py` calls
+  `POST /api/embeddings` with `model=bge-m3` (1024 dims) for query-time
+  embeddings and ingestion. The Ollama container is still required in
+  `deploy/compose.yaml` for this.
+- Speaking roleplay (`app/services/ollama_service.py` + `routers/speaking.py`)
+  uses Ollama chat directly and is **independent** of the LLM-judge path.
+- Speaking grading uses a local Qwen2.5 LoRA (`app/services/qwen_service.py`)
+  via `POST /api/v1/speaking/grade`.
+- Prompt templates in `app/prompts/` — raw strings with `{variable}` placeholders.
+- All LLM-judge calls go through `llm_service.generate()` (a thin facade that
+  delegates to `groq_service.groq_generate`).
 
 ## Vector Search (Qdrant)
 
@@ -150,14 +160,14 @@ OLLAMA_TIMEOUT=120
 OLLAMA_EMBED_URL=http://localhost:11434/api/embed
 
 # OpenAI-like providers (Groq/MiniMax fallback)
-GROQ_API_KEY=...
-GROQ_API_KEYS=key1,key2  # comma-separated for rotation
-MINIMAX_API_KEY=...
-MINIMAX_API_KEYS=key1,key2
+GROQ_BASE_URL=https://api.groq.com/openai/v1
+GROQ_MODEL=openai/gpt-oss-20b
+GROQ_API_KEY=...                 # single-key fallback
+GROQ_API_KEYS=key1,key2,key3     # multi-key rotation (preferred)
 
-# Gemini (legacy fallback)
-GEMINI_API_KEY=...
-GEMINI_CHAT_MODEL=gemini-2.5-flash
+# Legacy envs (no longer read by LLM-judge path; retained for speaking code
+# and backward compatibility with other deploy targets):
+#   USE_OLLAMA, USE_OPENAI_LIKE, GEMINI_*, MINIMAX_*, CEREBRAS_*
 
 # Data paths
 DATA_DIR=/app/data
