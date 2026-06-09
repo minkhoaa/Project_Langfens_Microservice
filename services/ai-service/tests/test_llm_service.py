@@ -1,42 +1,53 @@
+"""Tests for the Groq-only llm_service facade."""
+from __future__ import annotations
+
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 
 @pytest.mark.asyncio
-async def test_generate_uses_ollama_when_enabled():
-    with patch("app.services.llm_service.settings.use_ollama", True), \
-         patch("app.services.llm_service.settings.use_openai_like", False), \
-         patch("app.services.llm_service.ollama_service.generate", new_callable=AsyncMock, return_value={"provider": "ollama"}) as mock_generate:
-        from app.services.llm_service import generate
-
-        result = await generate("Hello {name}", {"name": "Minh"})
-
-    assert result["provider"] == "ollama"
-    mock_generate.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_generate_uses_openai_like_when_explicitly_enabled():
-    with patch("app.services.llm_service.settings.use_ollama", False), \
-         patch("app.services.llm_service.settings.use_openai_like", True), \
-         patch("app.services.llm_service.openai_like_generate", new_callable=AsyncMock, return_value={"provider": "openai_like"}) as mock_generate:
+async def test_generate_delegates_to_groq_generate():
+    """llm_service.generate must call groq_generate exactly once."""
+    with patch("app.services.llm_service.groq_generate", new_callable=AsyncMock, return_value={"provider": "groq"}) as mock_generate:
         from app.services.llm_service import generate
 
         result = await generate("Hello {name}", {"name": "Khoa"})
 
-    assert result["provider"] == "openai_like"
+    assert result["provider"] == "groq"
     mock_generate.assert_awaited_once()
 
 
 @pytest.mark.asyncio
-async def test_generate_falls_back_to_gemini_when_local_runtime_disabled():
-    with patch("app.services.llm_service.settings.use_ollama", False), \
-         patch("app.services.llm_service.settings.use_openai_like", False), \
-         patch("app.services.llm_service.gemini_service.generate", new_callable=AsyncMock, return_value={"provider": "gemini"}) as mock_generate:
+async def test_generate_passes_expect_json_through():
+    """The expect_json kwarg must be forwarded to groq_generate."""
+    with patch("app.services.llm_service.groq_generate", new_callable=AsyncMock, return_value={}) as mock_generate:
         from app.services.llm_service import generate
 
-        result = await generate("Hello {name}", {"name": "Khoi"})
+        await generate("p", {}, expect_json=True)
 
-    assert result["provider"] == "gemini"
-    mock_generate.assert_awaited_once()
+    args, kwargs = mock_generate.call_args
+    assert kwargs.get("expect_json") is True
+
+
+def test_get_runtime_status_returns_groq_keys():
+    """The runtime status dict must report provider=groq and key counts."""
+    with patch("app.services.llm_service.get_groq_key_status", return_value={"groq": {"total": 1, "available": 1, "exhausted": 0, "current_index": 0, "keys": []}}) as mock_status:
+        from app.services.llm_service import get_runtime_status
+
+        status = get_runtime_status()
+
+    assert status["provider"] == "groq"
+    assert status["available"] is True
+    assert "keys" in status
+    mock_status.assert_called_once()
+
+
+def test_get_runtime_status_reports_unavailable_when_no_keys():
+    with patch("app.services.llm_service.get_groq_key_status", return_value={"groq": {"total": 0, "available": 0, "exhausted": 0, "current_index": 0, "keys": []}}):
+        from app.services.llm_service import get_runtime_status
+
+        status = get_runtime_status()
+
+    assert status["provider"] == "groq"
+    assert status["available"] is False
