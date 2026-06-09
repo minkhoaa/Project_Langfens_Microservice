@@ -29,25 +29,22 @@ class Settings(BaseSettings):
     force_reingest: bool = False
     disable_ingestion_on_startup: bool = False
 
-    # Ollama settings (PRIMARY - self-hosted local AI)
-    use_ollama: bool = True
-    use_openai_like: bool = False
+    # --- Ollama (BGE-M3 embeddings) ---
+    # The ai-service uses Ollama only for embeddings (BGE-M3). LLM calls go to
+    # Groq (see groq_base_url / groq_model below). The Ollama container must
+    # remain in deploy/compose.yaml.
     ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "qwen2.5"
     ollama_embed_model: str = "bge-m3"
     ollama_embed_dimensions: int = 1024
-    ollama_temperature: float = 0.3
-    ollama_timeout: int = 120
+    ollama_timeout: int = 60  # used by embedding_service for /api/embeddings
 
-    # Legacy fallbacks kept for explicit runtime switches.
-    gemini_api_key: str = ""
-    gemini_embedding_model: str = "models/gemini-embedding-001"
-    gemini_chat_model: str = "gemini-2.5-flash"
-    gemini_chat_temperature: float = 0.3
-    gemini_chat_max_tokens: int = 12288
-    gemini_chat_timeout: int = 60
+    # --- Groq (LLM) ---
+    # Single LLM provider. Multi-key rotation is handled by groq_service.KeyManager
+    # using GROQ_API_KEYS (comma-separated) or GROQ_API_KEY as a single-key fallback.
+    groq_base_url: str = "https://api.groq.com/openai/v1"
+    groq_model: str = "openai/gpt-oss-20b"
 
-    # --- Local LoRA (Qwen2.5 fine-tuned) ---
+    # --- Local LoRA (Qwen2.5 fine-tuned, speaking grading) ---
     # Set USE_LOCAL_LORA=true in ai.env to activate.
     # Set LORA_DEVICE=cpu for local dev without a GPU.
     use_local_lora: bool = False
@@ -61,7 +58,7 @@ class Settings(BaseSettings):
     lora_temperature: float = 0.7
     lora_top_p: float = 0.9
     lora_repetition_penalty: float = 1.1
-    
+
     # --- Local Pronunciation Scorer (Wav2Vec2 fine-tuned) ---
     pronunciation_scorer_path: str = "/app/models/pronunciation-scorer-v2/best_checkpoint.pt"
     pronunciation_device: str = "cpu"

@@ -39,3 +39,24 @@ def test_no_minimax_helper_remains():
     assert not hasattr(groq_service, "_clean_mm_response"), (
         "_clean_mm_response was MiniMax-specific and must be removed"
     )
+
+
+def test_settings_exposes_groq_base_url_and_model():
+    """The Pydantic Settings must expose groq_base_url and groq_model fields."""
+    from app.config import settings
+
+    assert hasattr(settings, "groq_base_url"), "settings.groq_base_url is required"
+    assert hasattr(settings, "groq_model"), "settings.groq_model is required"
+    assert settings.groq_base_url.startswith("https://") or settings.groq_base_url.startswith("http://")
+    assert settings.groq_model  # non-empty
+
+
+def test_settings_drops_use_ollama_use_openai_like_and_gemini():
+    """After cleanup, these legacy fields must be removed from Settings."""
+    from app.config import Settings
+
+    fields = Settings.model_fields
+    for legacy in ("use_ollama", "use_openai_like", "gemini_api_key", "gemini_chat_model"):
+        assert legacy not in fields, (
+            f"Settings must drop legacy field '{legacy}' after provider cleanup"
+        )
