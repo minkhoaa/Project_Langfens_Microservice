@@ -44,6 +44,23 @@ class Settings(BaseSettings):
     groq_base_url: str = "https://api.groq.com/openai/v1"
     groq_model: str = "openai/gpt-oss-20b"
 
+    # --- Legacy / speaking-only ---
+    # These fields are NOT used by the LLM-judge path (which is Groq-only).
+    # They exist because out-of-scope speaking code still reads them:
+    #   - app/routers/speaking.py
+    #   - app/services/ollama_service.py (roleplay)
+    #   - app/services/roleplay_chat_service.py (uses Gemini as an LLM-fallback)
+    # They are slated for removal in a separate "speaking provider cleanup" task
+    # that will route all speaking paths through the same Groq pipeline.
+    ollama_model: str = "qwen2.5"
+    ollama_temperature: float = 0.3
+    gemini_api_key: str = ""
+    gemini_embedding_model: str = "models/gemini-embedding-001"
+    gemini_chat_model: str = "gemini-2.5-flash"
+    gemini_chat_temperature: float = 0.3
+    gemini_chat_max_tokens: int = 12288
+    gemini_chat_timeout: int = 60
+
     # --- Local LoRA (Qwen2.5 fine-tuned, speaking grading) ---
     # Set USE_LOCAL_LORA=true in ai.env to activate.
     # Set LORA_DEVICE=cpu for local dev without a GPU.

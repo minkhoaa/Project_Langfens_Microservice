@@ -51,12 +51,20 @@ def test_settings_exposes_groq_base_url_and_model():
     assert settings.groq_model  # non-empty
 
 
-def test_settings_drops_use_ollama_use_openai_like_and_gemini():
-    """After cleanup, these legacy fields must be removed from Settings."""
+def test_settings_drops_use_ollama_and_use_openai_like_flags():
+    """After cleanup, the LLM-judge routing flags must be removed from Settings.
+
+    Note: `gemini_api_key` and `gemini_chat_model` are NOT in this list. They
+    remain on Settings because out-of-scope speaking code
+    (roleplay_chat_service.py) reads them as an LLM fallback. They are slated
+    for removal in a separate "speaking provider cleanup" task. The narrow
+    regression guard for those fields lives in
+    tests/test_config_speaking_fields.py.
+    """
     from app.config import Settings
 
     fields = Settings.model_fields
-    for legacy in ("use_ollama", "use_openai_like", "gemini_api_key", "gemini_chat_model"):
+    for legacy in ("use_ollama", "use_openai_like"):
         assert legacy not in fields, (
-            f"Settings must drop legacy field '{legacy}' after provider cleanup"
+            f"Settings must drop legacy routing flag '{legacy}' after provider cleanup"
         )
