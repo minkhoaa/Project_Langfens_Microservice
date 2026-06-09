@@ -181,7 +181,13 @@ public static class ReadingSeeder
         {
             Id = q6Id, SectionId = section2Id, Idx = 0,
             Type = QuestionType.Classification, Skill = "READING", Difficulty = 3,
-            PromptMd = "Classify the following as referring to:\nA. dopamine research\nB. cultural factors\nC. musical training\n\n1. Instrumental musicians typically have more gray matter in their auditory cortices.\n2. What one person considers beautiful music, another may find completely uninteresting.\n3. The brain shows similar activity patterns when listening to music and eating chocolate."
+            PromptMd = "Classify the following as referring to:\nA. dopamine research\nB. cultural factors\nC. musical training\n\n1. Instrumental musicians typically have more gray matter in their auditory cortices.\n2. What one person considers beautiful music, another may find completely uninteresting.\n3. The brain shows similar activity patterns when listening to music and eating chocolate.",
+            MatchPairs = new Dictionary<string, string[]?>
+            {
+                { "0", new[] { "C" } },
+                { "1", new[] { "B" } },
+                { "2", new[] { "A" } }
+            }
         };
 
         // Q7: Sentence Completion
