@@ -3,6 +3,11 @@ uvicorn[standard]==0.30.6
 pydantic-settings==2.4.0
 qdrant-client==1.17.1
 requests==2.32.3
+# langchain-google-genai is retained because out-of-scope speaking code
+# (app/services/roleplay_chat_service.py) imports ChatGoogleGenerativeAI as an
+# LLM fallback for roleplay. The LLM-judge path no longer depends on it; this
+# entry will be removed when the speaking provider cleanup routes all paths
+# through the same Groq pipeline.
 langchain-google-genai==4.2.1
 langchain-core==1.2.17
 langchain-ollama==1.0.1
