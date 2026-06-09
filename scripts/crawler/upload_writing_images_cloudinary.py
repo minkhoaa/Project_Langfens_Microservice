@@ -39,6 +39,13 @@ IMAGES = [
     ("ielts-mentor-writing-4135-letter-to-your-friend-describing-your-experience-o",
                                                             "ielts-mentor-writing-4135-letter-to-your-friend-describing-your-experience-o.png",
                                                             "ielts/writing-task1/ielts-mentor-writing-4135-letter-to-your-friend-describing-your-experience-o"),
+    # Task 2 essay covers
+    ("task2-opinion-children-screen-time",                 "task2-opinion-children-screen-time.png",                 "ielts/writing-task1/task2-opinion-children-screen-time"),
+    ("task2-opinion-university-tuition-free",              "task2-opinion-university-tuition-free.png",              "ielts/writing-task1/task2-opinion-university-tuition-free"),
+    ("task2-discuss-cars-vs-public-transport",             "task2-discuss-cars-vs-public-transport.png",             "ielts/writing-task1/task2-discuss-cars-vs-public-transport"),
+    ("task2-discuss-traditional-vs-modern-buildings",      "task2-discuss-traditional-vs-modern-buildings.png",      "ielts/writing-task1/task2-discuss-traditional-vs-modern-buildings"),
+    ("task2-problem-solution-traffic-congestion",          "task2-problem-solution-traffic-congestion.png",          "ielts/writing-task1/task2-problem-solution-traffic-congestion"),
+    ("task2-problem-solution-air-pollution-cities",        "task2-problem-solution-air-pollution-cities.png",        "ielts/writing-task1/task2-problem-solution-air-pollution-cities"),
 ]
 
 

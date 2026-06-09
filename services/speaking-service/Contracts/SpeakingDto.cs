@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace speaking_service.Contracts;
 
 public record SpeakingSubmissionRequest(Guid ExamId, int? TimeSpentSeconds);
-public record CreateSpeakingExamRequest(string Title, string TaskText, SpeakingCategory ExamType, string? Level, string? Tag, DateTime CreatedAt, Guid CreatedBy);
-public record UpdateSpeakingExamRequest(string Title, string TaskText, SpeakingCategory ExamType, string? Level, string? Tag);
-public record SpeakingExamResponse(Guid Id, string Title, string TaskText, SpeakingCategory ExamType, string? Level, string? Tag, DateTime CreatedAt, Guid CreatedBy);
-public record StartSpeakingExamResponse(Guid Id, string Title, string TaskText, string? Tag, DateTime CreatedAt, Guid CreatedBy, Guid StartedBy);
+public record CreateSpeakingExamRequest(string Title, string TaskText, SpeakingCategory ExamType, string? Level, string? Tag, string ImageUrl, DateTime CreatedAt, Guid CreatedBy);
+public record UpdateSpeakingExamRequest(string Title, string TaskText, SpeakingCategory ExamType, string? Level, string? Tag, string? ImageUrl);
+public record SpeakingExamResponse(Guid Id, string Title, string TaskText, SpeakingCategory ExamType, string? Level, string? Tag, string ImageUrl, DateTime CreatedAt, Guid CreatedBy);
+public record StartSpeakingExamResponse(Guid Id, string Title, string TaskText, string? Tag, string ImageUrl, DateTime CreatedAt, Guid CreatedBy, Guid StartedBy);
 public record SpeakingHistoryItem(
     Guid SubmissionId,
     Guid? ExamId,

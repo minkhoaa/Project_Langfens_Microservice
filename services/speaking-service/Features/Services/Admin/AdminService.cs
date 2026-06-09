@@ -42,6 +42,7 @@ public class AdminService : IAdminService
             Level = request.Level,
             CreatedAt = DateTime.UtcNow,
             Tags = request.Tag,
+            ImageUrl = request.ImageUrl ?? string.Empty,
             CreatedBy = request.CreatedBy,
         };
         _context.SpeakingExams.Add(newExam);
@@ -62,6 +63,8 @@ public class AdminService : IAdminService
         exam.ExamType = request.ExamType;
         exam.Level = request.Level;
         exam.Tags = request.Tag;
+        if (request.ImageUrl is not null)
+            exam.ImageUrl = request.ImageUrl;
 
         await _context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Updated exam successfully", new { exam.Id, exam.Title }));
@@ -71,7 +74,7 @@ public class AdminService : IAdminService
     {
         var exams = await _context.SpeakingExams.AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
-            .Select(x => new SpeakingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
+            .Select(x => new SpeakingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags, x.ImageUrl,
                 x.CreatedAt, x.CreatedBy))
             .ToListAsync(token);
 

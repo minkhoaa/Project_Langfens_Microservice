@@ -15,7 +15,7 @@ from app.services import llm_service, search_service, qwen_service
 logger = logging.getLogger(__name__)
 
 
-def _extract_grade_hints(references: list[ReassembledEssay]) -> dict:
+def _extract_grade_hints(references: list[ReassembledEssay], task_type: str = "TASK_2") -> dict:
     """Extract compact metadata hints from RAG results for the grading prompt."""
     if not references:
         return {
@@ -37,43 +37,60 @@ def _extract_grade_hints(references: list[ReassembledEssay]) -> dict:
             word_counts.append(w)
 
     avg_words = sum(word_counts) // len(word_counts) if word_counts else 0
+    min_words = "150" if task_type == "TASK_1" else "250"
+
+    if task_type == "TASK_1":
+        structure_hints = (
+            "Higher-band Task 1 responses have a clear overview paragraph identifying main trends/features, "
+            "use cohesive devices for comparisons (in contrast, similarly, by comparison), "
+            "and group data logically with accurate reporting of key figures."
+        )
+    else:
+        structure_hints = (
+            "Higher-band essays have a clear introduction-body-conclusion structure, "
+            "use cohesive devices (however, furthermore, consequently), "
+            "and develop each point with specific examples and well-developed reasoning."
+        )
 
     return {
         "reference_count": len(references),
         "band_distribution": ", ".join(sorted(bands, key=float)) if bands else "unknown",
         "word_count_hints": (
             f"~{avg_words} words average in reference essays at similar bands "
-            "(IELTS Task 2 requires min 250 words)"
+            f"(IELTS {task_type.replace('_', ' ')} requires min {min_words} words)"
         ),
         "vocab_hints": (
             "Higher-band essays use precise academic vocabulary, topic-specific terminology, "
             "and avoid repetition through synonyms and effective paraphrase."
         ),
-        "structure_hints": (
-            "Higher-band essays have a clear introduction-body-conclusion structure, "
-            "use cohesive devices (however, furthermore, consequently), "
-            "and develop each point with specific examples and well-developed reasoning."
-        ),
+        "structure_hints": structure_hints,
     }
 
 
-def _estimate_band_from_word_count(word_count: int) -> float:
+def _estimate_band_from_word_count(word_count: int, task_type: str = "TASK_2") -> float:
     """
     Rough band estimate from word count alone (used only for RAG filter).
-    Under 150 words → likely band 4-5.
-    150-249 words → likely band 5-6 (below minimum, penalised).
-    250-349 words → likely band 5.5-6.5.
-    350+ words → likely band 6.5-7.5.
+    Task 1 min = 150 words, Task 2 min = 250 words.
     Returns the centre of the expected range.
     """
-    if word_count < 150:
-        return 4.5
-    elif word_count < 250:
-        return 5.5
-    elif word_count < 350:
-        return 6.0
+    if task_type == "TASK_1":
+        if word_count < 100:
+            return 4.5
+        elif word_count < 150:
+            return 5.5
+        elif word_count < 200:
+            return 6.0
+        else:
+            return 7.0
     else:
-        return 7.0
+        if word_count < 150:
+            return 4.5
+        elif word_count < 250:
+            return 5.5
+        elif word_count < 350:
+            return 6.0
+        else:
+            return 7.0
 
 
 async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
@@ -99,10 +116,10 @@ async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
                 "task_type": "TASK_2",
             },
         )
-        rag_hints = _extract_grade_hints(refs)
+        rag_hints = _extract_grade_hints(refs, req.task_type)
     except Exception as exc:
         logger.warning("RAG lookup failed, proceeding without reference hints: %s", exc)
-        rag_hints = _extract_grade_hints([])
+        rag_hints = _extract_grade_hints([], req.task_type)
 
     t_search = time.time()
     logger.info("grade: search took %.1fms", (t_search - t0) * 1000)

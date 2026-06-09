@@ -74,6 +74,7 @@ public class AdminService : IAdminService
         exam.ImageUrl = request.ImageUrl;
         exam.SourceExamId = request.SourceExamId;
         exam.SourceSectionId = request.SourceSectionId;
+        exam.ChartDescription = request.ChartDescription;
         await _context.SaveChangesAsync(token);
         return Results.Ok(new ApiResultDto(true, "Updated exam successfully", new { exam.Id, exam.Title, exam.SourceExamId }));
     }

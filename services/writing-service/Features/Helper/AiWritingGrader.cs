@@ -31,7 +31,9 @@ public class AiWritingGrader : IWritingGrader
         {
             task = submission.Task,
             answer = submission.Answer,
-            word_count = wordCount
+            word_count = wordCount,
+            chart_description = submission.ChartDescription,
+            task_type = submission.TaskType
         };
 
         try

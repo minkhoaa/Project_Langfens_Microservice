@@ -106,7 +106,7 @@ public class SpeakingService : ISpeakingService
         var response = await _context.SpeakingExams.AsNoTracking()
                            .Where(x => x.Id == examId)
                            .Select(x =>
-                               new StartSpeakingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.CreatedAt,
+                               new StartSpeakingExamResponse(x.Id, x.Title, x.TaskText, x.Tags, x.ImageUrl, x.CreatedAt,
                                    x.CreatedBy, userId))
                            .FirstOrDefaultAsync(token);
         if (response is null)
@@ -118,7 +118,7 @@ public class SpeakingService : ISpeakingService
     {
         var exam = await _context.SpeakingExams.AsNoTracking()
             .Where(x => x.Id == examId)
-            .Select(x => new SpeakingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
+            .Select(x => new SpeakingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags, x.ImageUrl,
                 x.CreatedAt, x.CreatedBy))
             .FirstOrDefaultAsync(token);
 
@@ -131,7 +131,7 @@ public class SpeakingService : ISpeakingService
     {
         var exams = await _context.SpeakingExams.AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
-            .Select(x => new SpeakingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags,
+            .Select(x => new SpeakingExamResponse(x.Id, x.Title, x.TaskText, x.ExamType, x.Level, x.Tags, x.ImageUrl,
                 x.CreatedAt, x.CreatedBy))
             .ToListAsync(token);
 

@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using writing_service.Infrastructure.Persistence;
+using speaking_service.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace writing_service.Migrations
+namespace speaking_service.Migrations
 {
-    [DbContext(typeof(WritingDbContext))]
-    partial class WritingDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(SpeakingDbContext))]
+    [Migration("20260609040344_SyncSnapshotImageUrl")]
+    partial class SyncSnapshotImageUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,24 +25,21 @@ namespace writing_service.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("writing_service.Domains.Entities.WritingEvaluation", b =>
+            modelBuilder.Entity("speaking_service.Domains.Entities.SpeakingEvaluation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<double>("CoherenceAndCohesionBand")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("CoherenceAndCohesionComment")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ComparativeAnalysisJson")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("FluencyAndCoherenceBand")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("FluencyAndCoherenceComment")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<double>("GrammaticalRangeAndAccuracyBand")
                         .HasColumnType("double precision");
@@ -48,7 +48,7 @@ namespace writing_service.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ImprovedParagraph")
+                    b.Property<string>("ImprovedAnswer")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -70,6 +70,13 @@ namespace writing_service.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<double>("PronunciationBand")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PronunciationComment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Provider")
                         .IsRequired()
                         .HasColumnType("text");
@@ -85,28 +92,18 @@ namespace writing_service.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("TaskResponseBand")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("TaskResponseComment")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("SubmissionId");
 
-                    b.ToTable("writing_evaluation", (string)null);
+                    b.ToTable("speaking_evaluations", (string)null);
                 });
 
-            modelBuilder.Entity("writing_service.Domains.Entities.WritingExam", b =>
+            modelBuilder.Entity("speaking_service.Domains.Entities.SpeakingExam", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("ChartDescription")
-                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -124,19 +121,6 @@ namespace writing_service.Migrations
                     b.Property<string>("Level")
                         .HasColumnType("text");
 
-                    b.PrimitiveCollection<string>("ModelAnswers")
-                        .HasColumnType("jsonb");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("SourceExamId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("SourceSectionId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Tags")
                         .HasColumnType("text");
 
@@ -150,22 +134,14 @@ namespace writing_service.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("writing_exams", (string)null);
+                    b.ToTable("speaking_exams", (string)null);
                 });
 
-            modelBuilder.Entity("writing_service.Domains.Entities.WritingSubmission", b =>
+            modelBuilder.Entity("speaking_service.Domains.Entities.SpeakingSubmission", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("EssayNormalized")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EssayRaw")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<Guid?>("ExamId")
                         .HasColumnType("uuid");
@@ -186,6 +162,14 @@ namespace writing_service.Migrations
                     b.Property<int?>("TimeSpentSeconds")
                         .HasColumnType("integer");
 
+                    b.Property<string>("TranscriptNormalized")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TranscriptRaw")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uuid");
 
@@ -196,37 +180,37 @@ namespace writing_service.Migrations
 
                     b.HasIndex("ExamId");
 
-                    b.ToTable("writing_submissions", (string)null);
+                    b.ToTable("speaking_submissions", (string)null);
                 });
 
-            modelBuilder.Entity("writing_service.Domains.Entities.WritingEvaluation", b =>
+            modelBuilder.Entity("speaking_service.Domains.Entities.SpeakingEvaluation", b =>
                 {
-                    b.HasOne("writing_service.Domains.Entities.WritingSubmission", "WritingSubmission")
-                        .WithMany("WritingEvaluations")
+                    b.HasOne("speaking_service.Domains.Entities.SpeakingSubmission", "SpeakingSubmission")
+                        .WithMany("SpeakingEvaluations")
                         .HasForeignKey("SubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("WritingSubmission");
+                    b.Navigation("SpeakingSubmission");
                 });
 
-            modelBuilder.Entity("writing_service.Domains.Entities.WritingSubmission", b =>
+            modelBuilder.Entity("speaking_service.Domains.Entities.SpeakingSubmission", b =>
                 {
-                    b.HasOne("writing_service.Domains.Entities.WritingExam", "WritingExam")
-                        .WithMany("WritingSubmissions")
+                    b.HasOne("speaking_service.Domains.Entities.SpeakingExam", "SpeakingExam")
+                        .WithMany("SpeakingSubmissions")
                         .HasForeignKey("ExamId");
 
-                    b.Navigation("WritingExam");
+                    b.Navigation("SpeakingExam");
                 });
 
-            modelBuilder.Entity("writing_service.Domains.Entities.WritingExam", b =>
+            modelBuilder.Entity("speaking_service.Domains.Entities.SpeakingExam", b =>
                 {
-                    b.Navigation("WritingSubmissions");
+                    b.Navigation("SpeakingSubmissions");
                 });
 
-            modelBuilder.Entity("writing_service.Domains.Entities.WritingSubmission", b =>
+            modelBuilder.Entity("speaking_service.Domains.Entities.SpeakingSubmission", b =>
                 {
-                    b.Navigation("WritingEvaluations");
+                    b.Navigation("SpeakingEvaluations");
                 });
 #pragma warning restore 612, 618
         }

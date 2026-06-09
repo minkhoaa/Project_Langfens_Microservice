@@ -62,7 +62,14 @@ public class WritingService : IWritingService
         if (exam is null)
             return Results.NotFound(new ApiResultDto(false, "Exam not found", new { examId = request.ExamId }));
 
-        var gradeResult = await _grader.GradeAsync(new ContentSubmission { Answer = request.Answer, Task = exam.TaskText }, token);
+        var taskType = exam.ExamType == WritingCategory.WRITING_TASK1 ? "TASK_1" : "TASK_2";
+        var gradeResult = await _grader.GradeAsync(new ContentSubmission
+        {
+            Answer = request.Answer,
+            Task = exam.TaskText,
+            ChartDescription = exam.ChartDescription,
+            TaskType = taskType
+        }, token);
         var res = gradeResult.Response;
         var raw = gradeResult.Compact;
 

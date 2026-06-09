@@ -43,6 +43,12 @@ public class WritingExam
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid CreatedBy { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Human-written description of the chart/graph/diagram for Task 1.
+    /// Used by the AI grader to assess data accuracy without vision capability.
+    /// </summary>
+    public string? ChartDescription { get; set; }
 
     [JsonIgnore]
     public ICollection<WritingSubmission> WritingSubmissions { get; set; } = new List<WritingSubmission>();

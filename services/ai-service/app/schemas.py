@@ -237,6 +237,8 @@ class WritingGradeRequest(BaseModel):
     task: str = Field(..., min_length=5, max_length=2000, description="Task/prompt text")
     answer: str = Field(..., min_length=50, max_length=5000, description="Essay text")
     word_count: int = Field(..., ge=0, description="Pre-computed word count")
+    chart_description: Optional[str] = Field(default=None, description="Human-written description of the chart/graph for Task 1")
+    task_type: Literal["TASK_1", "TASK_2"] = Field(default="TASK_2", description="Task type for prompt selection and RAG filtering")
 
 
 class WritingGradeResponse(BaseModel):

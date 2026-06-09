@@ -13,7 +13,8 @@ public record CreateExamRequest(
     string ImageUrl, 
     DateTime CreatedAt,
     Guid? SourceExamId = null,      // Reference to exam-service exam (for full test mode)
-    Guid? SourceSectionId = null    // Reference to exam-service section (for full test mode)
+    Guid? SourceSectionId = null,   // Reference to exam-service section (for full test mode)
+    string? ChartDescription = null // Human-written chart description for Task 1 grading
 );
 public record UpdateExamRequest(
     string Title, 
@@ -25,7 +26,8 @@ public record UpdateExamRequest(
     List<string>? ModelAnswers, 
     string ImageUrl,
     Guid? SourceExamId = null,
-    Guid? SourceSectionId = null
+    Guid? SourceSectionId = null,
+    string? ChartDescription = null
 );
 public record WritingExamResponse(
     Guid Id, 
