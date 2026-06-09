@@ -152,6 +152,7 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
     if not all_refs:
         return CompareResponse(
             overall_analysis="No reference essays found for comparison at this band level and topic.",
+            student_band=student_band,
             step_up_band=step_up_band,
             target_band=target_band,
             no_references_found=True,
@@ -201,6 +202,7 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         coherence_feedback=result.get("coherence_feedback", ""),
         grammar_feedback=result.get("grammar_feedback", ""),
         task_response_feedback=result.get("task_response_feedback", ""),
+        student_band=student_band,
         step_up_band=step_up_band,
         target_band=target_band,
         step_up_analysis=result.get("step_up_analysis", ""),
@@ -226,6 +228,7 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
     if not exemplar_refs:
         return CompareResponse(
             overall_analysis="No Band 9.0 exemplar essays found for this topic.",
+            student_band=student_band,
             step_up_band=9.0,
             target_band=9.0,
             no_references_found=True,
@@ -273,6 +276,7 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
         coherence_feedback=result.get("coherence_feedback", ""),
         grammar_feedback=result.get("grammar_feedback", ""),
         task_response_feedback=result.get("task_response_feedback", ""),
+        student_band=student_band,
         step_up_band=9.0,
         target_band=9.0,
         step_up_analysis=result.get("step_up_analysis", ""),

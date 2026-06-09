@@ -32,6 +32,9 @@ public class AiCompareResponseDto
     [JsonPropertyName("target_band")]
     public float TargetBand { get; set; }
 
+    [JsonPropertyName("student_band")]
+    public float StudentBand { get; set; }
+
     [JsonPropertyName("step_up_analysis")]
     public string StepUpAnalysis { get; set; } = "";
 

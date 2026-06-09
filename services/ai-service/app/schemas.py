@@ -223,6 +223,7 @@ class CompareResponse(BaseModel):
     coherence_feedback: str = ""
     grammar_feedback: str = ""
     task_response_feedback: str = ""
+    student_band: float = 0.0
     step_up_band: float = 0.0
     target_band: float = 0.0
     step_up_analysis: str = ""
