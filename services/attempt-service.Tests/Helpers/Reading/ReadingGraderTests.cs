@@ -1,9 +1,10 @@
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using Shared.PublicContracts.Contracts.Ai;
 using Xunit;
+using attempt_service.Features.Helpers.RagExplainer;
 using attempt_service.Features.Helpers.Reading;
 
 namespace attempt_service.Tests.Helpers.Reading;
@@ -13,23 +14,27 @@ public class ReadingGraderTests
     [Fact]
     public async Task Returns_envelope_when_client_succeeds()
     {
-        var expected = new RagFeedbackEnvelope(
-            "r1", "reading", 6.5,
-            new[] { new CriterionScore("comprehension", 6.5, "ok") },
-            System.Array.Empty<Evidence>(),
-            System.Array.Empty<Suggestion>());
+        var expected = new RagFeedbackEnvelopeDto
+        {
+            ItemId = "r1",
+            Domain = "reading",
+            OverallBand = 6.5,
+        };
+        var json = JsonSerializer.Serialize(expected);
         var client = new Mock<IReadingExplainerClient>();
         client.Setup(c => c.ExplainAsync(
             "r1", "passage", "Q", "MCQ",
             It.IsAny<System.Collections.Generic.IReadOnlyList<string>>(),
             "A", "B", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expected);
+            .ReturnsAsync(json);
 
         var grader = new ReadingGrader(client.Object, NullLogger<ReadingGrader>.Instance);
-        var env = await grader.AugmentAsync(
+        var envJson = await grader.AugmentAsync(
             "r1", "passage", "Q", "MCQ",
             new[] { "A", "B" }, "A", "B");
 
+        Assert.NotNull(envJson);
+        var env = JsonSerializer.Deserialize<RagFeedbackEnvelopeDto>(envJson!);
         Assert.NotNull(env);
         Assert.Equal("reading", env!.Domain);
     }
@@ -45,10 +50,10 @@ public class ReadingGraderTests
             .ThrowsAsync(new System.Net.Http.HttpRequestException("boom"));
 
         var grader = new ReadingGrader(client.Object, NullLogger<ReadingGrader>.Instance);
-        var env = await grader.AugmentAsync(
+        var envJson = await grader.AugmentAsync(
             "r1", "passage", "Q", "MCQ",
             new[] { "A", "B" }, "A", "B");
 
-        Assert.Null(env);
+        Assert.Null(envJson);
     }
 }

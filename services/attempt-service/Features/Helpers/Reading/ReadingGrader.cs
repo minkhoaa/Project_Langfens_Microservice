@@ -1,14 +1,17 @@
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Shared.PublicContracts.Contracts.Ai;
 
 namespace attempt_service.Features.Helpers.Reading;
 
 public interface IReadingGrader
 {
-    Task<RagFeedbackEnvelope?> AugmentAsync(
+    /// <summary>
+    /// Returns the raw JSON envelope string, or null on failure. The
+    /// orchestrator (or caller) deserializes the string into the local
+    /// <c>RagFeedbackEnvelopeDto</c>.
+    /// </summary>
+    Task<string?> AugmentAsync(
         string itemId,
         string passageText,
         string question,
@@ -30,7 +33,7 @@ public sealed class ReadingGrader : IReadingGrader
         _logger = logger;
     }
 
-    public async Task<RagFeedbackEnvelope?> AugmentAsync(
+    public async Task<string?> AugmentAsync(
         string itemId,
         string passageText,
         string question,

@@ -3,13 +3,17 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Shared.PublicContracts.Contracts.Ai;
 
 namespace attempt_service.Features.Helpers.Listening;
 
 public interface IListeningExplainerClient
 {
-    Task<RagFeedbackEnvelope?> ExplainAsync(
+    /// <summary>
+    /// Returns the raw JSON envelope string from the ai-service, or null on
+    /// transport / non-2xx failure. The orchestrator deserializes the string
+    /// into the local <c>RagFeedbackEnvelopeDto</c>.
+    /// </summary>
+    Task<string?> ExplainAsync(
         string itemId,
         string transcript,
         string question,
@@ -32,7 +36,7 @@ public sealed class ListeningExplainerClient : IListeningExplainerClient
         _logger = logger;
     }
 
-    public async Task<RagFeedbackEnvelope?> ExplainAsync(
+    public async Task<string?> ExplainAsync(
         string itemId,
         string transcript,
         string question,
@@ -58,7 +62,7 @@ public sealed class ListeningExplainerClient : IListeningExplainerClient
         {
             using var resp = await _http.PostAsJsonAsync("/api/v1/listening/explain-item", payload, ct);
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<RagFeedbackEnvelope>(cancellationToken: ct);
+            return await resp.Content.ReadAsStringAsync(ct);
         }
         catch (Exception ex)
         {
