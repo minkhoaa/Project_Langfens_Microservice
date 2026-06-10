@@ -30,7 +30,12 @@ Output ONLY one JSON object with EXACTLY this structure — no markdown, no code
 "lr": {{"b": 7.0, "c": "..."}},
 "gr": {{"b": 6.0, "c": "..."}},
 "s": ["...", "...", "..."],
-"p": "..."
+"p": "...",
+"errors": [
+  {{"quote": "<exact erroneous phrase verbatim from the essay>",
+    "fix": "<the corrected phrase>",
+    "reason": "<one short sentence explaining why it is wrong, e.g. 'Subject-verb agreement: collective noun "number" takes singular verb.'>"}}
+]
 }}
 
 Field requirements:
@@ -38,6 +43,7 @@ Field requirements:
 - c: Detailed analysis string. MUST quote specific errors from the essay to justify the score.
 - s: Array of 3 specific actionable improvements (e.g., 'Replace [bad phrase] with [better phrase]').
 - p: A rewritten version of one body paragraph (approx 50-80 words) demonstrating band 8.0+ style.
+- errors: 2-4 specific grammatical issues you noticed in THIS essay. Each `quote` MUST be a contiguous substring of the essay (never a generic example — copy the exact words from the student's text). Categories: tense, subject-verb, article, preposition, pronoun, word-order, collocation, other. A typical IELTS essay at band 5-7 has 2-4 such issues — do not return [] unless the writing is genuinely flawless.
 
 Naturalness MANDATORY:
 - Prefer natural, idiomatic English over artificially complex vocabulary.
@@ -79,7 +85,12 @@ Output ONLY one JSON object with EXACTLY this structure — no markdown, no code
 "lr": {{"b": 7.0, "c": "..."}},
 "gr": {{"b": 6.0, "c": "..."}},
 "s": ["...", "...", "..."],
-"p": "..."
+"p": "...",
+"errors": [
+  {{"quote": "<exact erroneous phrase verbatim from the essay>",
+    "fix": "<the corrected phrase>",
+    "reason": "<one short sentence explaining why it is wrong>"}}
+]
 }}
 
 Field requirements:
@@ -87,6 +98,7 @@ Field requirements:
 - c: Detailed analysis string. MUST quote specific phrases from the essay to justify the score. For ta, compare student's data claims against the chart description.
 - s: Array of 3 specific actionable improvements.
 - p: A rewritten version of one body paragraph (approx 50-80 words) demonstrating band 8.0+ Task 1 style (accurate data reporting, trend language, comparisons).
+- errors: 2-4 specific grammatical issues you noticed in THIS essay. Each `quote` MUST be a contiguous substring of the essay (never a generic example — copy the exact words from the student's text). Categories: tense, subject-verb, article, preposition, pronoun, word-order, collocation, other. A typical IELTS essay at band 5-7 has 2-4 such issues — do not return [] unless the writing is genuinely flawless.
 
 Naturalness MANDATORY:
 - Prefer natural, idiomatic English over artificially complex vocabulary.

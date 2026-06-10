@@ -34,5 +34,13 @@ public class WritingGradeResponse
 
     // Optional: lưu raw JSON để debug
     public string? RawLlmJson { get; set; }
+
+    // Grammar rules used to ground the `gr` criterion
+    [System.Text.Json.Serialization.JsonPropertyName("grammarRules")]
+    public List<GrammarRuleDto> GrammarRules { get; set; } = new();
+
+    // User-essay-specific grammar issues the LLM grader identified
+    [System.Text.Json.Serialization.JsonPropertyName("grammarErrors")]
+    public List<GrammarErrorDto> GrammarErrors { get; set; } = new();
 }
 

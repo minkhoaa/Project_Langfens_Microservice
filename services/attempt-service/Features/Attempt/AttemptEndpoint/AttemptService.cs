@@ -488,10 +488,26 @@ public class AttemptService(
                     }
                 }
 
-                foreach (var ans in answers)
+                // Map questionId -> existing AttemptAnswer (may be null for never-saved ones)
+                var answerByQid = answers.ToDictionary(x => x.QuestionId);
+
+                foreach (var (qid, key) in compiled.Keys)
                 {
-                    if (!index.TryGetValue(ans.QuestionId, out var meta)) continue;
-                    if (!compiled.Keys.TryGetValue(ans.QuestionId, out var key)) continue;
+                    if (!index.TryGetValue(qid, out var meta)) continue;
+                    // Ensure an AttemptAnswer exists for every question so RAG + grading
+                    // run for both autosaved AND submit-only users (the latter have no
+                    // pre-existing rows when Submit fires).
+                    if (!answerByQid.TryGetValue(qid, out var ans))
+                    {
+                        ans = new AttemptAnswer
+                        {
+                            AttemptId = attemptId,
+                            QuestionId = qid,
+                            SectionId = meta.SectionId,
+                        };
+                        context.AttemptAnswers.Add(ans);
+                        answerByQid[qid] = ans;
+                    }
                     IQuestionGrader grader;
                     try
                     {
@@ -509,11 +525,11 @@ public class AttemptService(
                     if (result.IsCorrect ?? false) correctCount++;
 
                     // ── RAG feedback (reading + listening only) ─────────────
-                    questionSkillByQid.TryGetValue(ans.QuestionId, out var ansSkill);
+                    questionSkillByQid.TryGetValue(qid, out var ansSkill);
                     if (string.Equals(ansSkill, "READING", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(ansSkill, "LISTENING", StringComparison.OrdinalIgnoreCase))
                     {
-                        sectionByQid.TryGetValue(ans.QuestionId, out var secId);
+                        sectionByQid.TryGetValue(qid, out var secId);
                         if (secId == Guid.Empty) secId = meta.SectionId;
                         var contextText = GetSectionContext(secId, ansSkill);
 
@@ -531,7 +547,7 @@ public class AttemptService(
                             var envelope = await ragExplainer.ExplainAsync(
                                 skill: ansSkill,
                                 sectionId: secId,
-                                questionId: ans.QuestionId,
+                                questionId: qid,
                                 questionType: meta.Type,
                                 passageOrTranscript: contextText,
                                 options: optionTexts,
@@ -551,18 +567,7 @@ public class AttemptService(
                     }
                 }
 
-                var answeredIds = answers.Select(x => x.QuestionId).ToHashSet();
-                foreach (var questionId in compiled.Keys.Keys)
-                    if (!answeredIds.Contains(questionId))
-                        context.AttemptAnswers.Add(new AttemptAnswer
-                        {
-                            AttemptId = attemptId,
-                            QuestionId = questionId,
-                            SectionId = index[questionId].SectionId,
-                            AwardedPoints = 0,
-
-                            IsCorrect = false
-                        });
+                // (Unanswered AttemptAnswer rows are now created inside the grading+RAG loop above.)
                 existedAttempt.Status = (manualCount == 0) ? AttemptStatus.Graded : AttemptStatus.Submitted;
                 existedAttempt.SubmittedAt = DateTime.UtcNow;
                 existedAttempt.GradedAt = (manualCount == 0) ? DateTime.UtcNow : existedAttempt.GradedAt;

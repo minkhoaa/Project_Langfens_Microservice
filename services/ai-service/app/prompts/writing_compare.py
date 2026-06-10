@@ -41,7 +41,7 @@ Provide your analysis as a JSON object with these exact keys:
 
 Rules:
 - key_improvements must have 3 to 5 items, ordered by impact. Each item should be a specific, actionable sentence.
-- sentence_comparisons must have 2 to 5 items.
+- sentence_comparisons is MANDATORY — your response will be REJECTED without it. You MUST always include 2 to 5 items in this array, even if the essay is strong (in which case, note the polish opportunities). For a near-perfect essay, return 2 items with severity "low". For a clearly weak essay, return 4-5 items spread across the four categories.
 - Choose the MOST impactful sentence improvements, not trivial ones.
 - Each category (vocabulary, grammar, coherence, structure) should be represented if possible.
 - Only include sentences that genuinely need improvement.
@@ -105,7 +105,7 @@ Provide your analysis as a JSON object with these exact keys:
 
 Rules:
 - key_improvements must have 3 to 5 items. Focus on polish, not fundamental changes.
-- sentence_comparisons must have 2 to 5 items. Even at this high level, identify final polish opportunities.
+- sentence_comparisons is MANDATORY — your response will be REJECTED without it. You MUST always include 2 to 5 items in this array, even at this high level. For a near-perfect essay, return 2 items with severity "low" focused on the very last 1-2% of polish.
 - Choose the MOST impactful refinements, not trivial ones.
 - Each category (vocabulary, grammar, coherence, structure) should be represented if possible.
 - category must be one of: vocabulary, grammar, coherence, structure.

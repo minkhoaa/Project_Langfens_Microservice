@@ -121,9 +121,14 @@ class TestCompareEssayValidationIntegration:
 
     @pytest.mark.asyncio
     async def test_compare_essay_missing_sentence_comparisons_logs_warning(self):
-        """When sentence_comparisons is missing, ValueError is caught and logged."""
+        """When sentence_comparisons is missing, the soft-fail path runs:
+        sentence_comparisons is set to an empty list, the warning is
+        surfaced via validation_warnings, and overall_analysis is left
+        exactly as the LLM returned it (no dev/debug prefix injected
+        into the user-facing feedback).
+        """
         req = CompareRequest(essay_text="A" * 100, topic="Education", task_type="TASK_2", student_band=6.0)
-        
+
         llm_result_without_field = {
             "overall_analysis": "Analysis without sentence comparisons",
             "vocabulary_feedback": "Some feedback",
@@ -133,8 +138,12 @@ class TestCompareEssayValidationIntegration:
              patch("app.services.compare_service.llm_service.generate", new_callable=AsyncMock, return_value=llm_result_without_field):
             result = await compare_essay(req)
 
-        assert "LLM response validation failed" in result.overall_analysis
+        # overall_analysis is exactly the LLM's return — no dev prefix
+        assert result.overall_analysis == "Analysis without sentence comparisons"
+        # sentence_comparisons is empty (the soft-fail default)
         assert result.sentence_comparisons == []
+        # The warning is exposed via the operator-facing field
+        assert any("sentence_comparisons" in w for w in result.validation_warnings)
 
     @pytest.mark.asyncio
     async def test_compare_essay_present_sentence_comparisons_accepted(self):
@@ -162,9 +171,14 @@ class TestCompareExemplarValidationIntegration:
 
     @pytest.mark.asyncio
     async def test_compare_exemplar_missing_sentence_comparisons_logs_warning(self):
-        """When sentence_comparisons is missing in exemplar mode, ValueError is caught."""
+        """When sentence_comparisons is missing in exemplar mode, the
+        soft-fail path runs: sentence_comparisons is set to an empty
+        list, the warning is surfaced via validation_warnings, and
+        overall_analysis is left exactly as the LLM returned it (no
+        dev/debug prefix injected into the user-facing feedback).
+        """
         req = CompareRequest(essay_text="A" * 100, topic="Education", task_type="TASK_2", student_band=6.0)
-        
+
         llm_result_without_field = {
             "overall_analysis": "Exemplar analysis without sentence comparisons",
             "vocabulary_feedback": "Some feedback",
@@ -174,8 +188,12 @@ class TestCompareExemplarValidationIntegration:
              patch("app.services.compare_service.llm_service.generate", new_callable=AsyncMock, return_value=llm_result_without_field):
             result = await _compare_exemplar(req, 8.5)
 
-        assert "LLM response validation failed" in result.overall_analysis
+        # overall_analysis is exactly the LLM's return — no dev prefix
+        assert result.overall_analysis == "Exemplar analysis without sentence comparisons"
+        # sentence_comparisons is empty (the soft-fail default)
         assert result.sentence_comparisons == []
+        # The warning is exposed via the operator-facing field
+        assert any("sentence_comparisons" in w for w in result.validation_warnings)
 
     @pytest.mark.asyncio
     async def test_compare_exemplar_present_sentence_comparisons_accepted(self):

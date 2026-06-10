@@ -133,6 +133,7 @@ def _build_groq_config() -> dict:
         "api_key_env": "GROQ_API_KEY",
         "api_keys_env": "GROQ_API_KEYS",
         "models": {
+            "xlarge": "openai/gpt-oss-120b",  # Used for pre-LLM band estimation
             "large": model,
             "medium": "qwen-2.5-32b",
             "small": "llama-3.1-8b-instant",
@@ -178,7 +179,7 @@ class GroqService:
         self,
         prompt_template: str,
         variables: dict,
-        model_size: Literal["large", "medium", "small"] = "large",
+        model_size: Literal["xlarge", "large", "medium", "small"] = "large",
         provider: str = None,
         temperature: float = 0.3,
         max_tokens: int = 4096,

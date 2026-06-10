@@ -214,6 +214,32 @@ public class WritingService : IWritingService
             }
         }
 
+        var grammarRules = new List<GrammarRuleDto>();
+        if (!string.IsNullOrWhiteSpace(evaluation.GrammarRulesJson))
+        {
+            try
+            {
+                grammarRules = JsonSerializer.Deserialize<List<GrammarRuleDto>>(evaluation.GrammarRulesJson) ?? new List<GrammarRuleDto>();
+            }
+            catch (JsonException)
+            {
+                // If parsing fails, keep grammar rules empty.
+            }
+        }
+
+        var grammarErrors = new List<GrammarErrorDto>();
+        if (!string.IsNullOrWhiteSpace(evaluation.GrammarErrorsJson))
+        {
+            try
+            {
+                grammarErrors = JsonSerializer.Deserialize<List<GrammarErrorDto>>(evaluation.GrammarErrorsJson) ?? new List<GrammarErrorDto>();
+            }
+            catch (JsonException)
+            {
+                // If parsing fails, keep grammar errors empty.
+            }
+        }
+
         var result = new WritingGradeResponse
         {
             SubmissionId = evaluation.SubmissionId,
@@ -233,7 +259,9 @@ public class WritingService : IWritingService
             Model = evaluation.Model,
             ModelProvider = evaluation.Provider,
             GradedAt = evaluation.CreatedAt,
-            RawLlmJson = evaluation.RawLlmJson
+            RawLlmJson = evaluation.RawLlmJson,
+            GrammarRules = grammarRules,
+            GrammarErrors = grammarErrors
         };
 
         return Results.Ok(new ApiResultDto(true, "Fetched writing detail successfully", result));

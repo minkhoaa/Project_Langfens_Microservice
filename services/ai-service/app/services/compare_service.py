@@ -19,7 +19,7 @@ VALID_SEVERITIES = {"low", "medium", "high"}
 def validate_sentence_comparisons_response(result: dict) -> dict:
     """
     Validate that the LLM response contains the required sentence_comparisons field.
-    
+
     Returns the result unchanged if sentence_comparisons key exists (even if empty list).
     Raises ValueError if the key is completely missing from the response.
     """
@@ -27,6 +27,23 @@ def validate_sentence_comparisons_response(result: dict) -> dict:
         logger.warning("LLM response missing required field: sentence_comparisons")
         raise ValueError("LLM response missing required field: sentence_comparisons")
     return result
+
+def _soft_validate(result: dict) -> list[str]:
+    """Run response-shape validation and return operator-facing warnings.
+
+    Used as a soft-fail alternative to raising: when the LLM omits a
+    required field, we still return the rest of the response to the
+    caller, but expose the issue via CompareResponse.validation_warnings
+    so operators can monitor the failure rate. We DO NOT mutate
+    `overall_analysis` to inject a dev string — that field is the
+    student's feedback and the prefix would leak internal noise to the UI.
+    """
+    warnings: list[str] = []
+    if "sentence_comparisons" not in result:
+        logger.warning("compare: sentence_comparisons missing from LLM response")
+        result["sentence_comparisons"] = []
+        warnings.append("sentence_comparisons field missing from LLM response")
+    return warnings
 
 
 def _parse_sentence_comparisons(raw_comparisons: list, max_items: int = 5) -> list[SentenceComparison]:
@@ -182,16 +199,13 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
 
     # Missing sentence_comparisons is a soft failure: local models often omit it.
     # Degrade gracefully instead of failing the whole call — otherwise the caller
-    # stores nothing and the FE polls until timeout.
-    try:
-        validate_sentence_comparisons_response(result)
-    except ValueError as e:
-        logger.warning("Validation failed: %s", e)
-        result["sentence_comparisons"] = []
-        existing = result.get("overall_analysis", "").strip()
-        result["overall_analysis"] = (
-            "LLM response validation failed; sentence comparisons unavailable. " + existing
-        ).strip()
+    # stores nothing and the FE polls until timeout. We log the issue and
+    # silently set an empty list; we DO NOT prepend a dev/debug message to
+    # `overall_analysis` because that field is user-facing feedback and the
+    # "validation failed" string would leak internal noise to the student.
+    # The warning is surfaced via CompareResponse.validation_warnings
+    # (operator-facing, not student-facing).
+    validation_warnings = _soft_validate(result)
 
     t_llm = time.time()
     logger.info("compare: llm took %.1fms, total %.1fms", (t_llm - t_search) * 1000, (t_llm - t0) * 1000)
@@ -209,6 +223,7 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         target_analysis=result.get("target_analysis", ""),
         key_improvements=result.get("key_improvements", []),
         sentence_comparisons=_parse_sentence_comparisons(result.get("sentence_comparisons", [])),
+        validation_warnings=validation_warnings,
         references=[
             ReferenceEssay(
                 id=r.parent_id,
@@ -220,7 +235,6 @@ async def compare_essay(req: CompareRequest) -> CompareResponse:
         ],
     )
 
-
 async def _compare_exemplar(req: CompareRequest, student_band: float) -> CompareResponse:
     """Exemplar mode for Band 8.5-9.0 students."""
     exemplar_refs = await _search_with_fallback(req.topic, 9.0, req.task_type)
@@ -229,8 +243,8 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
         return CompareResponse(
             overall_analysis="No Band 9.0 exemplar essays found for this topic.",
             student_band=student_band,
-            step_up_band=9.0,
-            target_band=9.0,
+            step_up_band=min(student_band + 0.5, 9.0),
+            target_band=min(student_band + 1.5, 9.0),
             no_references_found=True,
         )
 
@@ -244,6 +258,7 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
                           "and develop ideas with concrete examples and nuanced reasoning.",
     }
 
+    t0 = time.time()
     try:
         result = await llm_service.generate(
             prompt_template=WRITING_COMPARE_EXEMPLAR_PROMPT,
@@ -259,16 +274,17 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
 
     # Missing sentence_comparisons is a soft failure: local models often omit it.
     # Degrade gracefully instead of failing the whole call — otherwise the caller
-    # stores nothing and the FE polls until timeout.
-    try:
-        validate_sentence_comparisons_response(result)
-    except ValueError as e:
-        logger.warning("Validation failed: %s", e)
-        result["sentence_comparisons"] = []
-        existing = result.get("overall_analysis", "").strip()
-        result["overall_analysis"] = (
-            "LLM response validation failed; sentence comparisons unavailable. " + existing
-        ).strip()
+    # stores nothing and the FE polls until timeout. We log the issue and
+    # silently set an empty list; we DO NOT prepend a dev/debug message to
+    # `overall_analysis` because that field is user-facing feedback and the
+    # "validation failed" string would leak internal noise to the student.
+    # The warning is surfaced via CompareResponse.validation_warnings
+    # (operator-facing, not student-facing).
+    t_search = time.time()
+    validation_warnings = _soft_validate(result)
+
+    t_llm = time.time()
+    logger.info("compare (exemplar): llm took %.1fms, total %.1fms", (t_llm - t_search) * 1000, (t_llm - t0) * 1000)
 
     return CompareResponse(
         overall_analysis=result.get("overall_analysis", ""),
@@ -277,12 +293,13 @@ async def _compare_exemplar(req: CompareRequest, student_band: float) -> Compare
         grammar_feedback=result.get("grammar_feedback", ""),
         task_response_feedback=result.get("task_response_feedback", ""),
         student_band=student_band,
-        step_up_band=9.0,
-        target_band=9.0,
+        step_up_band=min(student_band + 0.5, 9.0),
+        target_band=min(student_band + 1.5, 9.0),
         step_up_analysis=result.get("step_up_analysis", ""),
-        target_analysis="",
+        target_analysis=result.get("target_analysis", ""),
         key_improvements=result.get("key_improvements", []),
         sentence_comparisons=_parse_sentence_comparisons(result.get("sentence_comparisons", [])),
+        validation_warnings=validation_warnings,
         references=[
             ReferenceEssay(
                 id=r.parent_id,

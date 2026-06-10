@@ -65,20 +65,27 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 });
 
 // ── AI service (RAG explainers) ──────────────────────────────────────────
-// Default to localhost so `dotnet run` works out of the box. In
-// compose/Aspire, AI_SERVICE_URL is set to the internal service name
-// (e.g. http://ai-service:8080 — note: ai-service container listens on 8080
-// internally, mapped to host 8092).
-var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://localhost:8092");
+// When run via Aspire, AI_SERVICE_URL is set by AppHost to the internal
+// docker-network endpoint (http://ai-service:8080). When run standalone
+// via `dotnet run`, the URL is dynamic — Aspire allocates a different
+// host port per launch. Auto-discover it by asking the Docker socket
+// for the running ai-service container's host port. The user can still
+// override by setting AI_SERVICE_URL explicitly.
+var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", null) ?? DiscoverAiServiceUrl();
+if (string.IsNullOrEmpty(aiServiceUrl))
+{
+    aiServiceUrl = "http://localhost:8092";
+}
+Console.WriteLine($"[INFO] AI service URL: {aiServiceUrl}");
 builder.Services.AddHttpClient<IReadingExplainerClient, ReadingExplainerClient>(http =>
 {
     http.BaseAddress = new Uri(aiServiceUrl);
-    http.Timeout = TimeSpan.FromSeconds(5);
+    http.Timeout = TimeSpan.FromSeconds(10);
 });
 builder.Services.AddHttpClient<IListeningExplainerClient, ListeningExplainerClient>(http =>
 {
     http.BaseAddress = new Uri(aiServiceUrl);
-    http.Timeout = TimeSpan.FromSeconds(5);
+    http.Timeout = TimeSpan.FromSeconds(10);
 });
 
 // ── RabbitMQ ───────────────────────────────────────────────────────────────────
@@ -185,6 +192,76 @@ else
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddResponseCompression();
+
+static string? DiscoverAiServiceUrl()
+{
+    // When attempt-service runs outside Aspire (e.g. `dotnet run` from VS
+    // Code) the Aspire-allocated host port is not known to us. Probe the
+    // Docker socket for a running ai-service container and extract the
+    // host port bound to container port 8080. Returns null on any failure
+    // so the caller falls back to the legacy localhost:8092 default.
+    try
+    {
+        var socket = Environment.GetEnvironmentVariable("DOCKER_HOST") ?? "unix:///var/run/docker.sock";
+        if (!socket.StartsWith("unix://")) return null;
+        var sockPath = socket["unix://".Length..];
+
+        // Use a short-lived curl probe via shell: docker inspect --format
+        // is simpler and more portable than binding a Docker.DotNet client
+        // for this single use case.
+        var psi = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "docker",
+            ArgumentList = {
+                "ps", "--filter", "ancestor=ai-service", "--filter", "status=running",
+                "-q"
+            },
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+        };
+        using var p = System.Diagnostics.Process.Start(psi);
+        if (p is null) return null;
+        var cid = p.StandardOutput.ReadToEnd().Trim();
+        p.WaitForExit(2000);
+        if (string.IsNullOrEmpty(cid)) return null;
+
+        var psi2 = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "docker",
+            ArgumentList = { "inspect", "--format", "{{index (indexOf .HostPort \"\") }}", cid },
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+        };
+        // We actually need a JSON path; the cleanest cross-platform call is
+        // `docker port <cid> 8080/tcp` which prints e.g. "0.0.0.0:32832".
+        var psi3 = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "docker",
+            ArgumentList = { "port", cid, "8080/tcp" },
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+        };
+        using var p3 = System.Diagnostics.Process.Start(psi3);
+        if (p3 is null) return null;
+        var portLine = p3.StandardOutput.ReadToEnd().Trim();
+        p3.WaitForExit(2000);
+        // Format: "127.0.0.1:32832" or "0.0.0.0:32832"
+        var parts = portLine.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0) return null;
+        var firstPort = parts[0].Trim();
+        var colon = firstPort.LastIndexOf(':');
+        if (colon < 0) return null;
+        var port = firstPort[(colon + 1)..];
+        return $"http://127.0.0.1:{port}";
+    }
+    catch
+    {
+        return null;
+    }
+}
 
 // ── App ──────────────────────────────────────────────────────────────────────
 var app = builder.Build();

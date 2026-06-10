@@ -101,6 +101,9 @@ namespace attempt_service.Migrations
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid");
 
+                    b.Property<JsonDocument>("RagFeedbackJson")
+                        .HasColumnType("jsonb");
+
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uuid");
 

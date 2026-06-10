@@ -28,6 +28,8 @@ public class WritingEvaluation
 
     public string SuggestionsJson { get; set; } = "[]"; // List<string>
     public string ImprovedParagraph { get; set; } = string.Empty;
+    public string GrammarRulesJson { get; set; } = "[]"; // List<{id,text,category}> grounded on the gr criterion
+    public string GrammarErrorsJson { get; set; } = "[]"; // List<{quote,fix,reason,category}> LLM-detected user-essay issues
 
     // Info model
     public string Model { get; set; } = string.Empty;       // "deepseek/deepseek-chat-v3-0324:free"

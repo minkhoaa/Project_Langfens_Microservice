@@ -61,12 +61,22 @@ public sealed class ListeningExplainerClient : IListeningExplainerClient
         try
         {
             using var resp = await _http.PostAsJsonAsync("/api/v1/listening/explain-item", payload, ct);
-            resp.EnsureSuccessStatusCode();
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync(ct);
+                _logger.LogError(
+                    "Listening explainer returned {Status} for item {ItemId}: {Body}. BaseAddress={BaseAddress}",
+                    (int)resp.StatusCode, itemId, body, _http.BaseAddress);
+                return null;
+            }
             return await resp.Content.ReadAsStringAsync(ct);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Listening explainer call failed for item {ItemId}", itemId);
+            _logger.LogError(ex,
+                "Listening explainer call failed for item {ItemId}. BaseAddress={BaseAddress}. " +
+                "If this is a connection error, ensure ai-service is running and AI_SERVICE_URL points to it.",
+                itemId, _http.BaseAddress);
             return null;
         }
     }

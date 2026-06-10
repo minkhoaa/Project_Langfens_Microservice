@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using writing_service.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using writing_service.Infrastructure.Persistence;
 namespace writing_service.Migrations
 {
     [DbContext(typeof(WritingDbContext))]
-    partial class WritingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260610034303_AddGrammarRulesJson")]
+    partial class AddGrammarRulesJson
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,10 +43,6 @@ namespace writing_service.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("GrammarErrorsJson")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("GrammarRulesJson")
                         .IsRequired()

@@ -122,3 +122,45 @@ async def test_compare_essay_llm_parse_failure():
 
     assert exc_info.value.status_code == 503
     assert "temporarily unavailable" in exc_info.value.detail
+
+
+@pytest.mark.asyncio
+async def test_compare_essay_missing_sentence_comparisons_does_not_pollute_overall_analysis():
+    """Regression: the previous soft-fail path prepended a dev/debug string
+    ('LLM response validation failed; sentence comparisons unavailable. ')
+    to `overall_analysis`. That field is the student's feedback, so the
+    internal noise leaked to the UI. The fix: silently set an empty
+    `sentence_comparisons` list and expose the issue via
+    `validation_warnings` (operator-facing), leaving `overall_analysis`
+    exactly as the LLM returned it.
+    """
+    from app.services.compare_service import compare_essay
+    req = CompareRequest(
+        essay_text="A" * 100,
+        topic="Education topic",
+        task_type="TASK_2",
+        student_band=6.0,
+    )
+    # LLM returns everything EXCEPT sentence_comparisons
+    llm_response_no_comparisons = {
+        "overall_analysis": "Your essay shows good structure but limited vocabulary range.",
+        "vocabulary_feedback": "Use more academic terms.",
+        "coherence_feedback": "Good paragraphing.",
+        "grammar_feedback": "Watch subject-verb agreement.",
+        "task_response_feedback": "Address all parts of the prompt.",
+        "key_improvements": ["Enrich vocabulary", "Vary sentence structures"],
+        # sentence_comparisons is intentionally absent
+    }
+
+    with patch("app.services.compare_service.search_service.search_and_reassemble", new_callable=AsyncMock, return_value=MOCK_REASSEMBLED_RESULTS), \
+         patch("app.services.compare_service.llm_service.generate", new_callable=AsyncMock, return_value=llm_response_no_comparisons):
+        result = await compare_essay(req)
+
+    # overall_analysis is exactly what the LLM returned — no dev prefix
+    assert result.overall_analysis == "Your essay shows good structure but limited vocabulary range.", (
+        f"overall_analysis was polluted: {result.overall_analysis[:120]!r}"
+    )
+    # sentence_comparisons is empty (the soft-fail default)
+    assert result.sentence_comparisons == []
+    # The warning is exposed via the operator-facing field
+    assert any("sentence_comparisons" in w for w in result.validation_warnings)

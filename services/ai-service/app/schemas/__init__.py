@@ -4,6 +4,13 @@ from pydantic import BaseModel, Field
 
 if TYPE_CHECKING:
     from app.schemas.rag_feedback import RagFeedbackEnvelope
+else:
+    # Resolve at runtime so Pydantic v2 can validate the forward ref used by
+    # WritingGradeResponse.envelope. Without this, instantiating the response
+    # raises `PydanticUserError: WritingGradeResponse is not fully defined`
+    # and FastAPI aborts the response mid-stream (`ResponseEnded` on the
+    # .NET HttpClient side).
+    from app.schemas.rag_feedback import RagFeedbackEnvelope  # noqa: F401
 
 
 class SearchRequest(BaseModel):
@@ -235,6 +242,14 @@ class CompareResponse(BaseModel):
     no_references_found: bool = False
     sentence_comparisons: list[SentenceComparison] = []
     references: list[ReferenceEssay] = []
+    validation_warnings: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Internal warnings about the LLM response shape (e.g. missing "
+            "sentence_comparisons). NOT shown to the student — kept for "
+            "operator visibility only."
+        ),
+    )
 
 
 class WritingGradeRequest(BaseModel):
@@ -255,7 +270,15 @@ class WritingGradeResponse(BaseModel):
     s: list[str] = Field(default_factory=list, description="Suggestions for improvement")
     p: str = Field(default="", description="Improved paragraph")
     raw_llm_json: str = Field(default="", description="Raw LLM JSON response for debugging")
-    envelope: "RagFeedbackEnvelope | None" = Field(
+    grammar_rules: list[dict] = Field(
+        default_factory=list,
+        description="Top-N grammar rules retrieved from the grammar_knowledge Qdrant collection to ground the gr criterion.",
+    )
+    grammar_errors: list[dict] = Field(
+        default_factory=list,
+        description="User-essay-specific grammar errors found by the LLM grader. Each item: {quote, fix, reason, category}.",
+    )
+    envelope: Optional["RagFeedbackEnvelope"] = Field(
         default=None,
         description="Shared RAG feedback envelope. None when generation is degraded.",
     )
@@ -297,6 +320,7 @@ class GrammarErrorItem(BaseModel):
 
 class GrammarDetectRequest(BaseModel):
     essay: str = Field(..., min_length=1, max_length=10000, description="Raw essay text to analyse")
+    task: Optional[str] = Field(default=None, description="Optional task prompt — gives the LLM context so it can distinguish real grammar errors from style/intent issues")
     max_errors: int = Field(default=20, ge=1, le=50, description="Maximum number of errors to return")
 
 

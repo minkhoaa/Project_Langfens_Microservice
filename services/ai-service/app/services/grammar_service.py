@@ -30,6 +30,31 @@ def _format_relevant_rules(rules: list[SearchResult]) -> str:
     return "\n\n".join(parts)
 
 
+def format_grammar_rules_for_gr_evidence(
+    rules: list[SearchResult],
+    max_chars_per_rule: int = 400,
+) -> str:
+    """Format grammar rules for inclusion in the writing grade `gr` evidence block.
+
+    Slightly tighter than the full explain prompt formatter: a 400-char cap per
+    rule keeps the `gr` block compact so it does not crowd out the per-criterion
+    essay excerpts. Falls back to an explicit "no rules" sentinel so the LLM
+    never sees an empty block.
+    """
+    if not rules:
+        return "No grammar rules retrieved for this criterion."
+    parts: list[str] = []
+    for i, rule in enumerate(rules, 1):
+        text = (getattr(rule, "text", "") or "").strip()
+        if not text:
+            continue
+        text = text[:max_chars_per_rule].rstrip()
+        parts.append(f"--- Rule {i} ---\n{text}")
+    if not parts:
+        return "No grammar rules retrieved for this criterion."
+    return "\n\n".join(parts)
+
+
 def _parse_category(category: str) -> str:
     """Parse and validate category from LLM response."""
     if not category:
@@ -181,9 +206,18 @@ async def detect(request: "GrammarDetectRequest") -> "GrammarDetectResponse":
     from app.schemas import GrammarDetectResponse, GrammarErrorItem
 
     t0 = time.time()
+    # Pass the task prompt as additional context so the LLM can distinguish
+    # real grammatical mistakes from intentional paraphrases of the prompt
+    # (e.g. "the chart shows" repeats in the task itself).
+    task_context = (
+        f"\n\nThe student was responding to this task prompt (for context only — do not flag phrases that are direct quotes of it):\n<task>\n{request.task}\n</task>\n"
+        if request.task
+        else ""
+    )
     variables = {
         "essay": request.essay,
         "max_errors": request.max_errors,
+        "task_context": task_context,
     }
 
     try:

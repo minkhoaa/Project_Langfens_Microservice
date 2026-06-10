@@ -25,6 +25,8 @@ public static class WritingEvaluationMapper
             TaskResponseComment = response.TaskResponse.Comment,
             Provider = "ai-service",
             SuggestionsJson = JsonSerializer.Serialize(response.Suggestions),
+            GrammarRulesJson = JsonSerializer.Serialize(response.GrammarRules ?? new()),
+            GrammarErrorsJson = JsonSerializer.Serialize(response.GrammarErrors ?? new()),
             RawLlmJson = JsonSerializer.Serialize(raw),
             PromptSchemaVersion = "v2"  // ai-service uses v2 prompt schema
         };

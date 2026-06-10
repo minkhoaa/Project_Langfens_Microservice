@@ -53,7 +53,7 @@ public class AiWritingGrader : IWritingGrader
                 LexicalResource = new CriterionArray { Band = gradeResponse.LexicalResource.Band, Comment = gradeResponse.LexicalResource.Comment },
                 GrammaticalRangeAndAccuracy = new CriterionArray { Band = gradeResponse.GrammaticalRangeAndAccuracy.Band, Comment = gradeResponse.GrammaticalRangeAndAccuracy.Comment },
                 Suggestions = gradeResponse.Suggestions,
-                ImprovedParagraph = gradeResponse.ImprovedParagraph
+                ImprovedParagraph = gradeResponse.ImprovedParagraph,
             };
 
             var result = new WritingGradeResult
