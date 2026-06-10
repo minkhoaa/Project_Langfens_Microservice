@@ -1,6 +1,9 @@
-from typing import List, Literal, Optional
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 from pydantic import BaseModel, Field
+
+if TYPE_CHECKING:
+    from app.schemas.rag_feedback import RagFeedbackEnvelope
 
 
 class SearchRequest(BaseModel):
@@ -252,6 +255,10 @@ class WritingGradeResponse(BaseModel):
     s: list[str] = Field(default_factory=list, description="Suggestions for improvement")
     p: str = Field(default="", description="Improved paragraph")
     raw_llm_json: str = Field(default="", description="Raw LLM JSON response for debugging")
+    envelope: "RagFeedbackEnvelope | None" = Field(
+        default=None,
+        description="Shared RAG feedback envelope. None when generation is degraded.",
+    )
 
 
 # Grammar Explainer Schemas

@@ -94,42 +94,34 @@ def _estimate_band_from_word_count(word_count: int, task_type: str = "TASK_2") -
 
 
 async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
-    """
-    Grade an IELTS writing submission using RAG + LLM.
+    """Grade an IELTS writing submission using per-criterion RAG + LLM.
 
-    Step 1: RAG lookup — search for reference essays at similar band level.
-    Step 2: Build the grading prompt with RAG context.
-    Step 3: Call LLM to produce band scores + feedback.
-    Step 4: Parse and return WritingGradeResponse.
+    Step 1: Per-criterion RAG (4 parallel searches: ta, cc, lr, gr).
+    Step 2: Build the grading prompt with per-criterion evidence block.
+    Step 3: Call LLM to produce band scores + evidence_ids + feedback.
+    Step 4: Parse into WritingGradeResponse with both flat fields and envelope.
     """
-    inferred_band = _estimate_band_from_word_count(req.word_count)
-
-    # Step 1: RAG lookup
     t0 = time.time()
+    # Step 1: Per-criterion RAG
+    from app.services import per_criterion_rag
     try:
-        refs = await search_service.search_and_reassemble(
-            collection=settings.qdrant_collection_writing,
-            query=req.task,
-            top_k=3,
-            filters={
-                "band_overall": {"gte": inferred_band - 1.0, "lte": inferred_band + 1.0},
-                "task_type": "TASK_2",
-            },
-        )
-        rag_hints = _extract_grade_hints(refs, req.task_type)
+        rag_by_criterion = await per_criterion_rag.retrieve(req.task, req.task_type)
     except Exception as exc:
-        logger.warning("RAG lookup failed, proceeding without reference hints: %s", exc)
-        rag_hints = _extract_grade_hints([], req.task_type)
+        logger.warning("per_criterion_rag failed, proceeding without evidence: %s", exc)
+        rag_by_criterion = {"ta": [], "cc": [], "lr": [], "gr": []}
 
     t_search = time.time()
-    logger.info("grade: search took %.1fms", (t_search - t0) * 1000)
+    logger.info("grade: per-criterion search took %.1fms", (t_search - t0) * 1000)
 
     # Step 2: Build prompt
-    prompt = build_grade_prompt(
+    from app.prompts.writing_grade_criterion import build_grade_prompt_criterion
+    prompt = build_grade_prompt_criterion(
         task=req.task,
         essay=req.answer,
         word_count=req.word_count,
-        rag_hints=rag_hints,
+        rag_by_criterion=rag_by_criterion,
+        task_type=req.task_type,
+        chart_description=req.chart_description,
     )
 
     # Step 3: Call LLM
@@ -155,14 +147,13 @@ async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
             cost=estimated_tokens * 0.000002,
         )
     except Exception:
-        pass  # guardrail errors must never block grading
+        pass
 
     # Step 4: Parse response into WritingGradeResponse
     if not result:
         raise HTTPException(status_code=503, detail="LLM grading temporarily unavailable, please retry")
 
-    # Safely extract values with defaults
-    ob = result.get("ob", 0.0)
+    ob = float(result.get("ob", 0.0)) or 0.0
     ta_data = result.get("ta", {})
     cc_data = result.get("cc", {})
     lr_data = result.get("lr", {})
@@ -170,8 +161,47 @@ async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
     suggestions = result.get("s", [])
     improved_para = result.get("p", "")
 
+    # Build the shared envelope from the same data.
+    from app.schemas.rag_feedback import (
+        CriterionScore,
+        Evidence,
+        RagFeedbackEnvelope,
+        Suggestion as EnvelopeSuggestion,
+    )
+
+    def _crit(name: str, data: dict) -> CriterionScore:
+        if not isinstance(data, dict):
+            data = {}
+        raw_ids = data.get("evidence_ids", [])
+        if not isinstance(raw_ids, list):
+            raw_ids = []
+        return CriterionScore(
+            name=name,
+            band=float(data.get("b", 0.0)) or 0.0,
+            comment=str(data.get("c", "")).strip(),
+            evidence_ids=[str(i) for i in raw_ids if isinstance(i, (str, int))],
+        )
+
+    envelope = RagFeedbackEnvelope(
+        item_id=f"writing-{req.task_type}",
+        domain="writing",
+        overall_band=ob,
+        criteria=[
+            _crit("task_response", ta_data),
+            _crit("coherence", cc_data),
+            _crit("lexical_resource", lr_data),
+            _crit("grammatical_range", gr_data),
+        ],
+        evidence=[],  # refs live in Qdrant; we don't dump full text into the envelope
+        suggestions=[
+            EnvelopeSuggestion(text=str(s), target="writing")
+            for s in (suggestions if isinstance(suggestions, list) else [])
+        ],
+        raw_llm_json=json_lib.dumps(result),
+    )
+
     return WritingGradeResponse(
-        ob=float(ob) if ob else 0.0,
+        ob=ob,
         ta=CriterionItem(
             b=float(ta_data.get("b", 0.0)) if ta_data.get("b") else 0.0,
             c=ta_data.get("c", "") if isinstance(ta_data, dict) else "",
@@ -191,6 +221,7 @@ async def grade_writing(req: WritingGradeRequest) -> WritingGradeResponse:
         s=suggestions if isinstance(suggestions, list) else [],
         p=str(improved_para) if improved_para else "",
         raw_llm_json=json_lib.dumps(result),
+        envelope=envelope,
     )
 
 
