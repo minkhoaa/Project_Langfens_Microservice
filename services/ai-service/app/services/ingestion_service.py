@@ -31,6 +31,21 @@ COLLECTIONS = {
             "task": PayloadSchemaType.KEYWORD,
         },
     },
+    settings.qdrant_collection_reading: {
+        "file": "reading_samples.jsonl",
+        "indexes": {
+            "question_type": PayloadSchemaType.KEYWORD,
+            "skill": PayloadSchemaType.KEYWORD,
+            "band_signal": PayloadSchemaType.FLOAT,
+        },
+    },
+    settings.qdrant_collection_listening: {
+        "file": "listening_samples.jsonl",
+        "indexes": {
+            "section": PayloadSchemaType.KEYWORD,
+            "topic": PayloadSchemaType.KEYWORD,
+        },
+    },
 }
 
 
