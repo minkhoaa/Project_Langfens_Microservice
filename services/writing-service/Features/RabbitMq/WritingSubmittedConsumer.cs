@@ -101,10 +101,21 @@ namespace writing_service.Features.RabbitMq
                 if (compareResult != null)
                 {
                     comparativeJson = JsonSerializer.Serialize(compareResult);
-                    evaluation.ComparativeAnalysisJson = comparativeJson;
-                    await _db.SaveChangesAsync(context.CancellationToken);
-                    _logger.LogInformation(
-                        "Progressive comparison stored for submission {Id}", evaluation.SubmissionId);
+                    // Don't overwrite a comparison the FE has already received —
+                    // a stale re-run would 204 the GET while the FE is still rendering.
+                    if (string.IsNullOrEmpty(evaluation.ComparativeAnalysisJson))
+                    {
+                        evaluation.ComparativeAnalysisJson = comparativeJson;
+                        await _db.SaveChangesAsync(context.CancellationToken);
+                        _logger.LogInformation(
+                            "Progressive comparison stored for submission {Id}", evaluation.SubmissionId);
+                    }
+                    else
+                    {
+                        _logger.LogInformation(
+                            "Progressive comparison already present for submission {Id}; skipping overwrite",
+                            evaluation.SubmissionId);
+                    }
                 }
             }
             catch (Exception ex)
