@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     qdrant_collection_writing: str = "writing_samples"
     qdrant_collection_grammar: str = "grammar_knowledge"
     qdrant_collection_speaking_memory: str = "speaking_memory"
+    qdrant_collection_reading: str = "reading_samples"
+    qdrant_collection_listening: str = "listening_samples"
 
     # --- Redis ---
     redis_host: str = "localhost"
