@@ -41,6 +41,28 @@ var ollamaInit = builder.AddContainer("ollama-init", "ollama/ollama", "latest")
     .WithArgs("-c", "ollama pull bge-m3")
     .WaitFor(ollama);
 
+// ── AI Service (Python, built from Dockerfile) ───────────────────────────
+// Declared here so all downstream .NET services can reference its endpoint
+// for AI_SERVICE_URL injection. Python ai-service listens on container port
+// 8080; Aspire allocates the host port dynamically.
+var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/Dockerfile")
+    .WithHttpEndpoint(targetPort: 8080, name: "http")
+    .WithBindMount("../services/ai-service/app", "/app/app")
+    .WithEntrypoint("uvicorn")
+    .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
+              "--reload", "--reload-dir", "/app/app")
+    .WithEnvironment("REDIS_HOST", redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host))
+    .WithEnvironment("REDIS_PORT", redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Port))
+    .WithEnvironment("REDIS_PASSWORD", redis.Resource.PasswordParameter!)
+    .WithEnvironment("REDIS_SSL", "true")
+    .WithEnvironment("QDRANT_HOST", qdrant.GetEndpoint("http").Property(EndpointProperty.Host))
+    .WithEnvironment("QDRANT_PORT", qdrant.GetEndpoint("http").Property(EndpointProperty.Port))
+    .WithEnvironment("OLLAMA_BASE_URL", ollama.GetEndpoint("http"))
+    .WithComposeEnvFile("ai")
+    .WaitFor(redis)
+    .WaitFor(qdrant)
+    .WaitForCompletion(ollamaInit);
+
 // ── Postgres servers (host ports kept for developer DX: psql/pgAdmin) ────
 // Credentials match compose.local.yaml exactly for standalone dev parity.
 var examDbUser = builder.AddParameter("exam-db-user", "exam");
@@ -187,32 +209,13 @@ var attempt = builder.AddProject("attempt-service", "../services/attempt-service
     .WithEnvironment("EXAMSERVICE__EXAM__ADDRESS", exam.GetEndpoint("http"))
     .WithEnvironment("ExamService__GrpcAddress", exam.GetEndpoint("grpc"))
     .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod")
+    .WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"))
+    .WaitFor(aiService)
     .WaitFor(attemptDb)
     .WaitFor(rabbitmq)
     .WaitFor(exam);
 
-// ── AI Service (Python, built from Dockerfile) ───────────────────────────
-var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/Dockerfile")
-    .WithHttpEndpoint(targetPort: 8080, name: "http")
-    // Hot reload: mount host source over the baked /app/app and run uvicorn
-    // --reload so Python edits apply live without an image rebuild.
-    .WithBindMount("../services/ai-service/app", "/app/app")
-    .WithEntrypoint("uvicorn")
-    .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
-              "--reload", "--reload-dir", "/app/app")
-    .WithEnvironment("REDIS_HOST", redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host))
-    .WithEnvironment("REDIS_PORT", redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Port))
-    .WithEnvironment("REDIS_PASSWORD", redis.Resource.PasswordParameter!)
-    .WithEnvironment("REDIS_SSL", "true")
-    .WithEnvironment("QDRANT_HOST", qdrant.GetEndpoint("http").Property(EndpointProperty.Host))
-    .WithEnvironment("QDRANT_PORT", qdrant.GetEndpoint("http").Property(EndpointProperty.Port))
-    .WithEnvironment("OLLAMA_BASE_URL", ollama.GetEndpoint("http"))
-    .WithComposeEnvFile("ai")
-    .WaitFor(redis)
-    .WaitFor(qdrant)
-    .WaitForCompletion(ollamaInit);
-
-// AI URL injection into writing & speaking (both default to http://ai-service:8080)
+// AI URL injection into writing & speaking (aiService declared above infra section)
 writing.WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"));
 speaking.WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"));
 
