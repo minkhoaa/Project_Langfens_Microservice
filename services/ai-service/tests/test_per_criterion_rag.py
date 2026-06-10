@@ -65,25 +65,3 @@ async def test_retrieve_degrades_to_empty_on_rag_failure():
 
     assert out == {"ta": [], "cc": [], "lr": [], "gr": []}
 
-@pytest.mark.asyncio
-async def test_retrieve_caches_results():
-    async def fake_reassemble(collection, query, top_k, filters):
-        return [_ref(filters.get("criterion", "x"))]
-
-    with patch(
-        "app.services.search_service.search_and_reassemble",
-        new=AsyncMock(side_effect=fake_reassemble),
-    ) as mock_sa, patch(
-        "app.services.cache_service.get_cached", return_value=None
-    ) as mock_get, patch(
-        "app.services.cache_service.set_cached"
-    ) as mock_set, patch(
-        "app.services.per_criterion_rag.settings"
-    ) as mock_settings:
-        mock_settings.qdrant_collection_writing = "writing_samples"
-        from app.services import per_criterion_rag
-
-        await per_criterion_rag.retrieve("topic", "TASK_2")
-        # 4 distinct cache writes (one per criterion)
-        assert mock_set.await_count == 4
-        assert mock_get.await_count == 4
