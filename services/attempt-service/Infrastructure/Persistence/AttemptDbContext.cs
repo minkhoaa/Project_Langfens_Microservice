@@ -52,6 +52,7 @@ public class AttemptDbContext : DbContext
 
             aa.Property(x => x.SelectedOptionIds).HasColumnType("uuid[]");
             aa.Property(x => x.AwardedPoints).HasPrecision(6, 2);
+            aa.Property(x => x.RagFeedbackJson).HasColumnType("jsonb");
 
             aa.HasIndex(x => new { x.AttemptId, x.QuestionId })
                 .IsUnique()

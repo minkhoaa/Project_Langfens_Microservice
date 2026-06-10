@@ -21,4 +21,6 @@ public class AttemptAnswer
 
     public bool? IsCorrect { get; set; }
     public decimal? AwardedPoints { get; set; }
+
+    public System.Text.Json.JsonDocument? RagFeedbackJson { get; set; }
 }
