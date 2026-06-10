@@ -48,7 +48,11 @@ builder.Services.AddDbContext<WritingDbContext>(o =>
         npg.MigrationsAssembly(typeof(WritingDbContext).Assembly.GetName().Name)));
 
 // ── AI client ───────────────────────────────────────────────────────
-var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8080");
+// Default to localhost so `dotnet run` works out of the box. In
+// compose/Aspire, AI_SERVICE_URL is set to the internal service name
+// (e.g. http://ai-service:8080 — ai-service container listens on 8080
+// internally, mapped to host 8092).
+var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://localhost:8092");
 var aiClient = new HttpClient {
     BaseAddress = new Uri(aiServiceUrl),
     Timeout = TimeSpan.FromMinutes(10)

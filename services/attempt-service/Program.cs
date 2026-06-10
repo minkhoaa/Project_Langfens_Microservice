@@ -65,7 +65,11 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 });
 
 // ── AI service (RAG explainers) ──────────────────────────────────────────
-var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8092");
+// Default to localhost so `dotnet run` works out of the box. In
+// compose/Aspire, AI_SERVICE_URL is set to the internal service name
+// (e.g. http://ai-service:8080 — note: ai-service container listens on 8080
+// internally, mapped to host 8092).
+var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://localhost:8092");
 builder.Services.AddHttpClient<IReadingExplainerClient, ReadingExplainerClient>(http =>
 {
     http.BaseAddress = new Uri(aiServiceUrl);
