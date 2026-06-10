@@ -1032,7 +1032,8 @@ public class AttemptService(
                             x.TextAnswer,
                             regradeMap.TryGetValue(x.QuestionId, out var rg) ? rg.IsCorrect : x.IsCorrect,
                             selectedText,
-                            correctText
+                            correctText,
+                            x.RagFeedbackJson?.RootElement.Clone()
                         );
                     })
                     .OrderBy(a => a.Idx)

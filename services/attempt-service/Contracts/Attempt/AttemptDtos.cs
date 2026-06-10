@@ -27,7 +27,8 @@ public record ResultAnswerItem(
     string? TextAnswer,
     bool? IsCorrect,
     string? SelectedAnswerText,
-    string? CorrectAnswerText
+    string? CorrectAnswerText,
+    JsonElement? RagFeedback = null
 );
 
 public record AutosaveRequest(List<AnswerItem> Answers, long? ClientRevision);
