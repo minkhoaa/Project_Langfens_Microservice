@@ -12,6 +12,9 @@ using attempt_service.Features.Attempt;
 using attempt_service.Features.Attempt.AttemptEndpoint;
 using attempt_service.Features.Bookmarks;
 using attempt_service.Features.Helpers;
+using attempt_service.Features.Helpers.Listening;
+using attempt_service.Features.Helpers.RagExplainer;
+using attempt_service.Features.Helpers.Reading;
 using attempt_service.Features.Notes;
 using attempt_service.Features.RabbitMq;
 using attempt_service.Features.StudyPlan;
@@ -59,6 +62,19 @@ builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 {
     http.BaseAddress = new Uri(EnvOrDefault("EXAMSERVICE__EXAM__ADDRESS", "http://exam-service:8080"));
     http.DefaultRequestHeaders.Add("X-Internal-Key", internalApiKey);
+});
+
+// ── AI service (RAG explainers) ──────────────────────────────────────────
+var aiServiceUrl = EnvOrDefault("AI_SERVICE_URL", "http://ai-service:8092");
+builder.Services.AddHttpClient<IReadingExplainerClient, ReadingExplainerClient>(http =>
+{
+    http.BaseAddress = new Uri(aiServiceUrl);
+    http.Timeout = TimeSpan.FromSeconds(5);
+});
+builder.Services.AddHttpClient<IListeningExplainerClient, ListeningExplainerClient>(http =>
+{
+    http.BaseAddress = new Uri(aiServiceUrl);
+    http.Timeout = TimeSpan.FromSeconds(5);
 });
 
 // ── RabbitMQ ───────────────────────────────────────────────────────────────────
@@ -139,6 +155,10 @@ builder.Services.AddSingleton<IQuestionGraderRegistration, FlowChartGraderRegist
 builder.Services.AddSingleton<IQuestionGraderRegistration, ShortAnswerGraderRegistration>();
 builder.Services.AddSingleton<IQuestionGraderFactory, QuestionGraderFactory>();
 builder.Services.AddScoped<IPlacementWorkflow, PlacementWorkflow>();
+
+// ── DI: RAG explainer orchestrator ───────────────────────────────────────
+builder.Services.AddSingleton<ISectionContextLookup, SectionContextLookup>();
+builder.Services.AddScoped<ISkillRagExplainer, SkillRagExplainer>();
 
 // ── DI: Azure OpenAI (optional) ───────────────────────────────────────────────
 var azureEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI__ENDPOINT");
