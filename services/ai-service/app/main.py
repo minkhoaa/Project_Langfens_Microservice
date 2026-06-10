@@ -80,3 +80,7 @@ app.include_router(speaking.router, prefix="/api")
 app.include_router(practice.router, prefix="/api")
 app.include_router(speech_eval.router, prefix="/api")
 app.include_router(speaking_grade.router, prefix="/api")  # endpoint: /api/v1/speaking/grade
+
+from app.routers import reading  # noqa: E402
+
+app.include_router(reading.router, prefix="/api")
