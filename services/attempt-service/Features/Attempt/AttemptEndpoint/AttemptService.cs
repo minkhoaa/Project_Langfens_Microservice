@@ -3,6 +3,7 @@ using attempt_service.Contracts.Attempt;
 using attempt_service.Domain.Entities;
 using attempt_service.Domain.Enums;
 using attempt_service.Features.Helpers;
+using attempt_service.Features.Helpers.RagExplainer;
 using attempt_service.Infrastructure.Persistence;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
@@ -40,7 +41,9 @@ public class AttemptService(
     IAnswerValidator answerValidator,
     IPlacementWorkflow placementWorkflow,
     IPublishEndpoint publishEndpoint,
-IQuestionGraderFactory questionGraderFactory
+    IQuestionGraderFactory questionGraderFactory,
+    ISkillRagExplainer ragExplainer,
+    ISectionContextLookup sectionContext
 ) : IAttemptService
 {
     public async Task<IResult> StartAttempt(
@@ -358,6 +361,24 @@ IQuestionGraderFactory questionGraderFactory
 
     }
 
+    private static string MapUserAnswerToText(AttemptAnswer ans, QMeta meta)
+    {
+        // For MCQ-style items, the FE typically stores the option UUID in
+        // SelectedOptionIds. We resolve each UUID back to its option text
+        // using the meta.OptionIds index.
+        if (ans.SelectedOptionIds is { Count: > 0 })
+        {
+            var texts = ans.SelectedOptionIds
+                .Select(id => meta.OptionIds.FirstOrDefault(o => o.id == id).content ?? id.ToString())
+                .Where(t => !string.IsNullOrEmpty(t))
+                .ToList();
+            if (texts.Count > 0) return string.Join(", ", texts);
+        }
+        // For text-based items (completion, short answer), TextAnswer holds
+        // the raw user text (or JSON for multi-blank).
+        return ans.TextAnswer ?? string.Empty;
+    }
+
     public async Task<IResult> Submit(Guid attemptId, CancellationToken token)
     {
         var userId = user.UserId;
@@ -428,6 +449,45 @@ IQuestionGraderFactory questionGraderFactory
                 decimal awardedTotal = 0m;
                 int correctCount = 0;
                 int manualCount = 0;
+                // Per-section context cache: PassageMd / TranscriptMd are
+                // section-scoped, so we look them up once per section to
+                // avoid 30+ JSON parses on a typical reading test.
+                var sectionContextCache = new Dictionary<Guid, string>();
+                string GetSectionContext(Guid sectionId, string skill)
+                {
+                    if (sectionContextCache.TryGetValue(sectionId, out var cached)) return cached;
+                    var skillUpper = (skill ?? "").ToUpperInvariant();
+                    string value = skillUpper == "LISTENING"
+                        ? sectionContext.GetTranscriptMd(existedAttempt.PaperJson!, sectionId)
+                        : sectionContext.GetPassageMd(existedAttempt.PaperJson!, sectionId);
+                    sectionContextCache[sectionId] = value;
+                    return value;
+                }
+
+                // Pre-build a per-skill question map from the snapshot so we
+                // can read the prompt text and the section's transcript.
+                var questionSkillByQid = new Dictionary<Guid, string>();
+                var sectionByQid = new Dictionary<Guid, Guid>();
+                foreach (var sec in (proto?.Sections ?? new Google.Protobuf.Collections.RepeatedField<Shared.Grpc.ExamInternal.InternalDeliverySection>()))
+                {
+                    foreach (var grp in sec.QuestionGroups)
+                    foreach (var q in grp.Questions)
+                    {
+                        var qid = Guid.Parse(q.Id);
+                        questionSkillByQid[qid] = q.Skill ?? "";
+                        sectionByQid[qid] = Guid.Parse(sec.Id);
+                    }
+                }
+                foreach (var sec in (dto?.Sections ?? Enumerable.Empty<InternalExamDto.InternalDeliverySection>()))
+                {
+                    foreach (var grp in sec.QuestionGroups)
+                    foreach (var q in grp.Questions)
+                    {
+                        questionSkillByQid[q.Id] = q.Skill ?? "";
+                        sectionByQid[q.Id] = sec.Id;
+                    }
+                }
+
                 foreach (var ans in answers)
                 {
                     if (!index.TryGetValue(ans.QuestionId, out var meta)) continue;
@@ -447,6 +507,48 @@ IQuestionGraderFactory questionGraderFactory
                     if (result.NeedsManualReview) manualCount++;
                     awardedTotal += result.AwardedPoints;
                     if (result.IsCorrect ?? false) correctCount++;
+
+                    // ── RAG feedback (reading + listening only) ─────────────
+                    questionSkillByQid.TryGetValue(ans.QuestionId, out var ansSkill);
+                    if (string.Equals(ansSkill, "READING", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(ansSkill, "LISTENING", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sectionByQid.TryGetValue(ans.QuestionId, out var secId);
+                        if (secId == Guid.Empty) secId = meta.SectionId;
+                        var contextText = GetSectionContext(secId, ansSkill);
+
+                        var optionTexts = meta.OptionIds.Select(o => o.content).ToList();
+                        var userAnswerText = MapUserAnswerToText(ans, meta);
+                        var correctAnswerText = key.CorrectOptionIds is { Count: > 0 }
+                            ? string.Join(", ", key.CorrectOptionIds.Select(c => c.content))
+                            : "";
+
+                        // 3-second overall timeout, then we move on with null.
+                        using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                        cts.CancelAfter(TimeSpan.FromSeconds(3));
+                        try
+                        {
+                            var envelope = await ragExplainer.ExplainAsync(
+                                skill: ansSkill,
+                                sectionId: secId,
+                                questionId: ans.QuestionId,
+                                questionType: meta.Type,
+                                passageOrTranscript: contextText,
+                                options: optionTexts,
+                                userAnswerText: userAnswerText,
+                                correctAnswerText: correctAnswerText,
+                                section: 0,
+                                ct: cts.Token);
+                            if (envelope is not null)
+                            {
+                                ans.RagFeedbackJson = JsonSerializer.SerializeToDocument(envelope);
+                            }
+                        }
+                        catch (OperationCanceledException) when (cts.IsCancellationRequested && !token.IsCancellationRequested)
+                        {
+                            // 3s timeout — envelope stays null, grading continues
+                        }
+                    }
                 }
 
                 var answeredIds = answers.Select(x => x.QuestionId).ToHashSet();
