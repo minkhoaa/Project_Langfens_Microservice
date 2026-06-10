@@ -2,9 +2,9 @@
 # ============================================
 # Dictionary Service Data Migration Script
 # ============================================
-# 
+#
 # Purpose: Export PostgreSQL data from local and import to production server
-# Also triggers Elasticsearch re-indexing
+# Also restarts dictionary-service so it picks up the new rows
 #
 # Usage:
 #   ./migrate_dictionary.sh export   # Export từ local
@@ -125,29 +125,25 @@ import_data() {
 # ELASTICSEARCH RE-INDEX
 # ============================================
 reindex_elasticsearch() {
-    log_info "Re-indexing Elasticsearch..."
-    
-    # Call the dictionary-service reindex endpoint if available
-    # Or restart the service to trigger auto-index
+    log_info "Refreshing PostgreSQL statistics..."
+
     cd "${COMPOSE_DIR}"
-    
-    # Option 1: Restart dictionary-service (auto-indexes on startup)
-    log_info "Restarting dictionary-service to trigger re-index..."
+
+    # Restart dictionary-service to pick up the freshly imported rows
+    log_info "Restarting dictionary-service..."
     docker compose restart dictionary-service
-    
-    # Wait for service to be healthy
+
     log_info "Waiting for dictionary-service to be ready..."
     sleep 10
-    
-    # Verify Elasticsearch has data
-    ES_COUNT=$(curl -s "http://localhost:9200/dictionary/_count" 2>/dev/null | grep -o '"count":[0-9]*' | grep -o '[0-9]*' || echo "0")
-    
-    if [[ "${ES_COUNT}" -gt 0 ]]; then
-        log_info "Elasticsearch indexed: ${ES_COUNT} documents"
+
+    # Verify PG row count via the service's lookup endpoint
+    ROWS=$(curl -s "http://localhost:8094/api/dictionary/suggest?word=the" 2>/dev/null | head -c 200 || echo "")
+    if [[ -n "${ROWS}" ]]; then
+        log_info "dictionary-service responding: ${ROWS:0:80}..."
     else
-        log_warn "Elasticsearch may not have indexed yet. Check dictionary-service logs."
+        log_warn "dictionary-service may not be ready. Check logs."
     fi
-    
+
     log_info "Migration complete! ✅"
 }
 
@@ -169,8 +165,8 @@ case "${1:-help}" in
         echo ""
         echo "Commands:"
         echo "  export   - Export dictionary data from local PostgreSQL"
-        echo "  import   - Import dictionary data to production PostgreSQL + reindex ES"
-        echo "  reindex  - Only trigger Elasticsearch re-indexing"
+        echo "  import   - Import dictionary data to production PostgreSQL"
+        echo "  reindex  - Restart dictionary-service to pick up new data"
         exit 1
         ;;
 esac

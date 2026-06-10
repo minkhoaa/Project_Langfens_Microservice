@@ -20,12 +20,6 @@ var rabbitmq = builder.AddRabbitMQ("rabbitmq", userName: rabbitUser, password: r
 // so we explicitly inject that key onto the auth resource below.
 var redis = builder.AddRedis("redis");
 
-var elasticsearch = builder.AddContainer("elasticsearch", "docker.elastic.co/elasticsearch/elasticsearch", "8.19.0")
-    .WithHttpEndpoint(targetPort: 9200, name: "http")
-    .WithEnvironment("discovery.type", "single-node")
-    .WithEnvironment("xpack.security.enabled", "false")
-    .WithEnvironment("ES_JAVA_OPTS", "-Xms512m -Xmx512m");
-
 var qdrant = builder.AddContainer("qdrant", "qdrant/qdrant", "latest")
     .WithHttpEndpoint(targetPort: 6333, name: "http");
 
@@ -142,10 +136,8 @@ var speaking = builder.AddProject("speaking-service", "../services/speaking-serv
 // ── dictionary-service ───────────────────────────────────────────────────
 var dictionary = builder.AddProject("dictionary-service", "../services/dictionary-service/dictionary-service.csproj")
     .WithReference(dictionaryDb)
-    .WithEnvironment("ELASTICSEARCH__URL", elasticsearch.GetEndpoint("http"))
     .WithComposeEnvFile("dictionary")
-    .WaitFor(dictionaryDb)
-    .WaitFor(elasticsearch);
+    .WaitFor(dictionaryDb);
 
 // ── vocabulary-service ───────────────────────────────────────────────────
 var vocabulary = builder.AddProject("vocabulary-service", "../services/vocabulary-service/vocabulary-service.csproj")
@@ -332,7 +324,6 @@ internal static class AppHostExtensions
                 key == "EXAMSERVICE__EXAM__ADDRESS" ||
                 key == "EXAMSERVICE__INTERNAL__API__KEY" ||
                 key == "AI_SERVICE_URL" ||
-                key == "ELASTICSEARCH__URL" ||
                 key == "REDIS_HOST" ||
                 key == "REDIS_PORT" ||
                 key == "QDRANT_HOST" ||

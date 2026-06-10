@@ -1,8 +1,6 @@
 using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
-using Elastic.Clients.Elasticsearch;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using dictionary_service.Features;
 using dictionary_service.Features.Helper;
 using dictionary_service.Features.Service;
@@ -40,22 +38,13 @@ builder.AddNpgsqlDbContext<DictionaryDbContext>("dictionary-db", configureDbCont
     opts.UseNpgsql(npgsqlOpts => npgsqlOpts.ExecutionStrategy(deps => new Microsoft.EntityFrameworkCore.Storage.NonRetryingExecutionStrategy(deps)));
 });
 
-// ── Elasticsearch ────────────────────────────────────────────────────────
-var esUrl = EnvOrDefault("ELASTICSEARCH__URL", "http://elasticsearch:9200");
-
-// Get connection string before adding health checks
 var connectionString = builder.Configuration.GetConnectionString("dictionary-db")
-    ?? $"Host=localhost;Port=5432;Database=dictionary-db;Username=dictionary;Password=dictionary";
+    ?? $"Host=localhost;Port=5443;Database=dictionary-db;Username=dictionary;Password=dictionary";
 
 builder.Services.AddHealthChecks()
-    .AddNpgSql(connectionString, name: "dictionary-db", failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" })
-    .AddUrlGroup(new Uri(esUrl), name: "elasticsearch", failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy, tags: new[] { "search" });
-
-builder.Services.AddSingleton(new ElasticsearchClient(
-    new ElasticsearchClientSettings(new Uri(esUrl))));
+    .AddNpgSql(connectionString, name: "dictionary-db", failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy, tags: new[] { "db", "postgresql" });
 
 // ── Services ─────────────────────────────────────────────────────────────
-builder.Services.AddScoped<ElasticIndexer>();
 builder.Services.AddScoped<IDictionaryService, DictionaryService>();
 builder.Services.AddSingleton<IEnViTranslator, NullEnViTranslator>();
 builder.Services.AddSingleton<IDictionaryDtoMapper, DictionaryDtoMapper>();
@@ -71,6 +60,8 @@ using (var scope = app.Services.CreateScope())
         var pending = (await context.Database.GetPendingMigrationsAsync()).ToList();
         Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
         await context.Database.MigrateAsync();
+        await context.Database.ExecuteSqlRawAsync(
+            "CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE INDEX IF NOT EXISTS ix_dictionary_wordnorm_trgm ON dictionary USING GIN (\"WordNorm\" gin_trgm_ops);");
     }
 }
 

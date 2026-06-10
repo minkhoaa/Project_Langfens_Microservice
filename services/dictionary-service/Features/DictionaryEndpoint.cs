@@ -22,7 +22,6 @@ namespace dictionary_service.Features
                .WithMetadata(new DisableRequestSizeLimitAttribute())
                .Accepts<IFormFile>("multipart/form-data")
                .WithMetadata(new ConsumesAttribute("multipart/form-data"));
-            app.MapPost("/reindex", DictionaryHandler.ReindexHandler);
         }
     }
 }
