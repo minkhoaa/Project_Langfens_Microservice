@@ -50,12 +50,55 @@ Features/
 - `ICloudinaryService` handles upload/download
 - Kestrel max body size: 50 MB
 
+## Migration Postmortem — 2026-08-24
+
+**Symptom:** `dotnet run` / AppHost start of `speaking-service` crashed with
+`Npgsql.PostgresException 42703: column "ImageUrl" of relation "speaking_exams" does not exist`
+during `Program.cs:136` (`db.Database.MigrateAsync()`).
+
+**Root cause:** `Migrations/20260608000000_AddImageUrlToSpeakingExam.cs` had **no
+`.Designer.cs`** file checked in. EF Core uses each migration's `<Name>.Designer.cs`
+(which declares `[Migration("...")]` + a partial class implementing `BuildTargetModel`)
+to enumerate migrations and compute deltas. Without a Designer file, EF silently
+skipped the migration in `GetPendingMigrationsAsync()`. The runner then jumped
+straight from `InitSpeakingDb` (the last applied) to `SyncSnapshotImageUrl`, which
+issued `ALTER COLUMN "ImageUrl" DROP DEFAULT` — and the column had never been added.
+
+Verified via:
+- `dotnet ef migrations list` listed only `InitSpeakingDb` + `SyncSnapshotImageUrl`
+  (the broken migration was invisible).
+- `dotnet ef migrations script` produced SQL that skipped `AddImageUrlToSpeakingExam`
+  entirely.
+- Live DB `__EFMigrationsHistory` had only `InitSpeakingDb`; `speaking_exams`
+  had no `ImageUrl` column.
+
+**Fix applied:** deleted both `20260608000000_AddImageUrlToSpeakingExam.cs`
+and `20260609040344_SyncSnapshotImageUrl*.cs` (the second migration only existed
+to paper over the first one's `defaultValue: ""` artifact; with a clean migration
+the column is just added without the unnecessary default-removal dance). Re-ran
+`dotnet ef migrations add AddImageUrlToSpeakingExam`. Verified:
+- `dotnet ef migrations list` now shows both `InitSpeakingDb` and the new
+  `AddImageUrlToSpeakingExam`.
+- `dotnet ef migrations script` emits `ALTER TABLE speaking_exams ADD "ImageUrl" text NOT NULL DEFAULT ''`.
+- Manual application against the live `speaking-db-server` succeeded.
+- `dotnet run` against the Aspire speaking-db container: `[EF] Pending migrations: 0`,
+  service started cleanly, MassTransit bus + RabbitMQ consumer registered, listening
+  on its bound port.
+
+**Rule for the team:** every `dotnet ef migrations add <Name>` **must** be checked
+in with its matching `<Name>.Designer.cs`. If you only commit the `.cs` file, EF
+silently skips the migration and the next one will explode on a missing column.
+When in doubt, run `dotnet ef migrations list` after `git add` and confirm the
+new migration is present.
+
 ### DB Migrations
 ```bash
 cd /home/khoa/Projects/langfens/Project_Langfens_Microservice/services/speaking-service
 dotnet ef migrations add <Name> --project speaking-service.csproj --output-dir Migrations
 dotnet ef database update --project speaking-service.csproj
 ```
+
+
 
 ## How This Service Communicates with Others
 - **RabbitMQ consumer**: `SpeakingGradingConsumer` — receives grading results from ai-service

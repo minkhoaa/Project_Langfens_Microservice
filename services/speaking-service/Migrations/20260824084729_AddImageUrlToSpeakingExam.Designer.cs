@@ -12,8 +12,8 @@ using speaking_service.Infrastructure.Persistence;
 namespace speaking_service.Migrations
 {
     [DbContext(typeof(SpeakingDbContext))]
-    [Migration("20260609040344_SyncSnapshotImageUrl")]
-    partial class SyncSnapshotImageUrl
+    [Migration("20260824084729_AddImageUrlToSpeakingExam")]
+    partial class AddImageUrlToSpeakingExam
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
