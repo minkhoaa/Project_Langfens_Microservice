@@ -8,7 +8,6 @@ public sealed class TestpingConsumer(ILogger<TestpingConsumer> log) : IConsumer<
     public Task Consume(ConsumeContext<TestPing> context)
     {
         log.LogInformation("✅ TestPing received: {Text} @ {At}", context.Message.Text, context.Message.At);
-        Console.WriteLine("email service received");
         return Task.CompletedTask;
     }
 }

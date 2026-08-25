@@ -1,6 +1,0 @@
-@vocabulary_service_HostAddress = http://localhost:5092
-
-GET {{vocabulary_service_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -19,7 +19,7 @@ public static class VocabularyEndpoint
         decks.MapGet("/deck:{deckId}/cards", PublicHandler.GetCardsByDeckIdHandler);
         
         // AI enrichment endpoint (public for now)
-        var ai = app.MapGroup("/api/vocabulary").AllowAnonymous();
+        var ai = app.MapGroup("/api").AllowAnonymous();
         ai.MapGet("/enrich", async (string word, IAiEnrichmentService service, CancellationToken token) =>
         {
             if (string.IsNullOrWhiteSpace(word))

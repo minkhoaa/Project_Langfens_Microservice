@@ -7,15 +7,15 @@ public static class NoteEndpoint
 {
     public static void MapNoteEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/notes")
+        var group = app.MapGroup("/api")
             .WithTags("Notes")
             .RequireAuthorization();
 
-        group.MapPost("/", Handler.CreateNote);
-        group.MapGet("/", Handler.GetNotes);
-        group.MapGet("/{noteId:guid}", Handler.GetNoteById);
-        group.MapPut("/{noteId:guid}", Handler.UpdateNote);
-        group.MapDelete("/{noteId:guid}", Handler.DeleteNote);
+        group.MapPost("/notes/", Handler.CreateNote);
+        group.MapGet("/notes/", Handler.GetNotes);
+        group.MapGet("/notes/{noteId:guid}", Handler.GetNoteById);
+        group.MapPut("/notes/{noteId:guid}", Handler.UpdateNote);
+        group.MapDelete("/notes/{noteId:guid}", Handler.DeleteNote);
     }
 
     private static class Handler

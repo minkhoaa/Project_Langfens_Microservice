@@ -11,11 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 // ── ServiceDefaults ──────────────────────────────────────────────────────
 builder.AddServiceDefaults();
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
-static string EnvOrDefault(string key, string fallback) =>
-    Environment.GetEnvironmentVariable(key) ?? fallback;
-
-// ── Shared bootstrap ────────────────────────────────────────────────────
 builder.Services.AddLangfensSwagger("Dictionary Service");
 
 // ── Kestrel: allow large uploads ────────────────────────────────────────

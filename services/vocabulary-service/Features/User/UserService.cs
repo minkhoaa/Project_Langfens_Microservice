@@ -68,7 +68,7 @@ public class UserService(VocabularyDbContext context, IPublishEndpoint publishEn
                 }).ToListAsync(token);
             return Results.Ok(new ApiResultDto(true, "Success", subscribedDeck));
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
         }
@@ -94,7 +94,7 @@ public class UserService(VocabularyDbContext context, IPublishEndpoint publishEn
                 }).ToListAsync(token);
             return Results.Ok(new ApiResultDto(true, "Success", userDecks));
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
         }

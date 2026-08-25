@@ -6,39 +6,39 @@ public static class AnalyticsEndpoint
 {
     public static void MapAnalyticsEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/api/analytics")
+        var group = app.MapGroup("/api")
             .WithTags("Analytics")
             .RequireAuthorization();
 
-        group.MapGet("/summary", Handler.GetSummary)
+        group.MapGet("/analytics/summary", Handler.GetSummary)
             .WithName("GetAnalyticsSummary")
             .WithDescription("Get user's overall learning summary");
 
-        group.MapGet("/score-trend", Handler.GetScoreTrend)
+        group.MapGet("/analytics/score-trend", Handler.GetScoreTrend)
             .WithName("GetScoreTrend")
             .WithDescription("Get user's score trend over time");
 
-        group.MapGet("/strengths", Handler.GetStrengthsWeaknesses)
+        group.MapGet("/analytics/strengths", Handler.GetStrengthsWeaknesses)
             .WithName("GetStrengthsWeaknesses")
             .WithDescription("Get user's strengths and weaknesses by question type");
 
-        group.MapGet("/recent-activity", Handler.GetRecentActivity)
+        group.MapGet("/analytics/recent-activity", Handler.GetRecentActivity)
             .WithName("GetRecentActivity")
             .WithDescription("Get user's recent learning activities");
 
-        group.MapGet("/errors", Handler.GetWrongAnswers)
+        group.MapGet("/analytics/errors", Handler.GetWrongAnswers)
             .WithName("GetWrongAnswers")
             .WithDescription("Get user's wrong answers for review");
-        
-        group.MapGet("/predicted-band", Handler.GetPredictedBand)
+
+        group.MapGet("/analytics/predicted-band", Handler.GetPredictedBand)
             .WithName("GetPredictedBand")
             .WithDescription("Get user's predicted IELTS band score");
-        
-        group.MapGet("/ai-insights", Handler.GetAiInsights)
+
+        group.MapGet("/analytics/ai-insights", Handler.GetAiInsights)
             .WithName("GetAiInsights")
             .WithDescription("Get AI-generated study insights and recommendations");
-        
-        group.MapGet("/recommendations", Handler.GetRecommendations)
+
+        group.MapGet("/analytics/recommendations", Handler.GetRecommendations)
             .WithName("GetRecommendations")
             .WithDescription("Get personalized exam recommendations based on weaknesses");
     }

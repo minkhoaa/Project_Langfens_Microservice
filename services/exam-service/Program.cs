@@ -20,11 +20,6 @@ var builder = WebApplication.CreateBuilder(args);
 // ── Aspire service defaults (OTel, discovery, resilience, /health, /alive) ──
 builder.AddServiceDefaults();
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
-static string EnvOrDefault(string key, string fallback) =>
-    Environment.GetEnvironmentVariable(key) ?? fallback;
-
-// ── Shared bootstrap (JWT, Auth policies, CORS, Swagger) ────────────────────────────
 builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key));
 builder.Services.AddExamAuthorization();
 builder.Services.AddLangfensCors();

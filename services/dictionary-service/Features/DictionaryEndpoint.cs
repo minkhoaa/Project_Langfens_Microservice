@@ -13,7 +13,7 @@ namespace dictionary_service.Features
     {
         public static void MapDictionaryEndpoint(this IEndpointRouteBuilder router)
         {
-            var app = router.MapGroup("/api/dictionary");
+            var app = router.MapGroup("/api");
             app.MapGet("/suggest", DictionaryHandler.GetSuggestsHandler);
             app.MapGet("/lookup", DictionaryHandler.LookupWordHandler);
             app.MapGet("/details/{id}", DictionaryHandler.GetDetailsHandler);

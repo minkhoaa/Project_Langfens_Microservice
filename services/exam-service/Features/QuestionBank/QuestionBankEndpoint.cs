@@ -4,19 +4,19 @@ public static class QuestionBankEndpoint
 {
     public static void MapQuestionBankEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/api/question-bank")
+        var group = app.MapGroup("/api")
             .WithTags("Question Bank")
             .RequireAuthorization(); // Requires authentication to prevent answer key leakage
 
-        group.MapGet("/types", Handler.GetQuestionTypes)
+        group.MapGet("/question-bank/types", Handler.GetQuestionTypes)
             .WithName("GetQuestionTypes")
             .WithDescription("Get list of all question types with counts");
 
-        group.MapGet("/questions", Handler.GetQuestionsByType)
+        group.MapGet("/question-bank/questions", Handler.GetQuestionsByType)
             .WithName("GetQuestionsByType")
             .WithDescription("Get questions filtered by type with pagination");
 
-        group.MapGet("/exams", Handler.GetExamsByQuestionType)
+        group.MapGet("/question-bank/exams", Handler.GetExamsByQuestionType)
             .WithName("GetExamsByQuestionType")
             .WithDescription("Get exams filtered by question type with pagination");
     }

@@ -66,7 +66,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
             await context.SaveChangesAsync(token);
             return Results.Ok(new ApiResultDto(true, "Updated successfully", existed));
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!)); 
         }
@@ -81,7 +81,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
                 .ExecuteDeleteAsync(token);
             return Results.Ok(new ApiResultDto(true, $"Deleted {deletedRow}", null!));
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
         }
@@ -95,7 +95,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
                 .ExecuteUpdateAsync(x => x.SetProperty(a => a.Status, FlashCardStatus.Published), token);
             return Results.NoContent();
         }
-        catch (Exception e)
+        catch (Exception)
     {
         return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
     }
@@ -187,7 +187,7 @@ public class AdminService(VocabularyDbContext context) : IAdminService
                 .ExecuteDeleteAsync(token);
             return Results.Ok(new ApiResultDto(true, $"Deleted {affectedRow} rows", null!));
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return Results.BadRequest(new ApiResultDto(false, "An error occurred", null!));
         }

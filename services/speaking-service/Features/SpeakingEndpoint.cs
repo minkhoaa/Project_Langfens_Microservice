@@ -10,7 +10,7 @@ public static class SpeakingEndpoint
 {
     public static void MapSpeakingEndpoint(this IEndpointRouteBuilder route)
     {
-        var app = route.MapGroup("/api/speaking");
+        var app = route.MapGroup("/api");
         app.MapPost("/transcript", WhisperHandler.TranscriptHandler).DisableAntiforgery();
         app.MapPost("/grade", SpeakingHandler.SubmitHandler)
             .Accepts<SpeakingSubmitForm>("multipart/form-data")
@@ -35,7 +35,7 @@ public static class SpeakingEndpoint
 
     public static void MapSpeakingAdminEndpoint(this IEndpointRouteBuilder route)
     {
-        var app = route.MapGroup("/api/admin/speaking");
+        var app = route.MapGroup("/api/admin");
         app.MapGet("/exams", SpeakingHandler.GetAdminExamsHandler).RequireAuthorization(Roles.Admin);
         app.MapPost("/exams", SpeakingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
         app.MapPut("/exams/{examId:guid}", SpeakingHandler.UpdateExamHandler).RequireAuthorization(Roles.Admin);
