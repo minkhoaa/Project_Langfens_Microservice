@@ -7,7 +7,7 @@ public static class AttemptEndpointMapping
 {
     public static void MapAttemptEndpoint(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api");
+        var group = app.MapGroup("/api/attempt");
         group.MapPost("/attempts:start", AttemptHandler.AttemptStartHandler)
             .RequireAuthorization(AttemptScope.AttemptStart);
         group.MapPost("/attempts:status", AttemptHandler.GetPreviousAttempt)
@@ -30,7 +30,7 @@ public static class AttemptEndpointMapping
     }
     public static void MapAdminEndpoint(this IEndpointRouteBuilder router)
     {
-        var admin = router.MapGroup("/api/admin")
+        var admin = router.MapGroup("/api/admin/attempt")
           .RequireAuthorization(AttemptScope.AttemptReadAny);
         admin.MapGet("/", AttemptHandler.GetAttemptListAdmin);
 

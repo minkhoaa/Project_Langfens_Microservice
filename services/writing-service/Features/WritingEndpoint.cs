@@ -7,12 +7,8 @@ public static class WritingEndpoint
 {
     public static void MapWritingEndpoint(this IEndpointRouteBuilder route)
     {
-        // /grade lives at /api/writing/grade to match gateway writing-api-grade (PathPrefix: /api/writing)
-        var gradeGroup = route.MapGroup("/api/writing");
-        gradeGroup.MapPost("/grade", WritingHandler.SubmitHandler).RequireAuthorization(Roles.User);
-
-        // Other endpoints served under /api/... via gateway writing-api catch-all (PathPrefix: /api)
-        var app = route.MapGroup("/api");
+        var app = route.MapGroup("/api/writing");
+        app.MapPost("/grade", WritingHandler.SubmitHandler).RequireAuthorization(Roles.User);
         app.MapGet("/exams", WritingHandler.GetExamListHandler);
         app.MapPost("/start/{examId}", WritingHandler.StartWritingExamHandler);
         app.MapGet("/exams/{examId:guid}", WritingHandler.GetExamHandler);
@@ -24,11 +20,12 @@ public static class WritingEndpoint
     }
     public static void MapWritingAdminEndpoint(this IEndpointRouteBuilder route)
     {
-        var app = route.MapGroup("/api/admin");
+        var app = route.MapGroup("/api/admin/writing");
         app.MapGet("/exams", WritingHandler.GetAdminExamsHandler).RequireAuthorization(Roles.Admin);
         app.MapPost("/create", WritingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
         app.MapPost("/exams", WritingHandler.CreateExamHandler).RequireAuthorization(Roles.Admin);
         app.MapPut("/exams/{examId:guid}", WritingHandler.UpdateExamHandler).RequireAuthorization(Roles.Admin);
         app.MapDelete("/exams/{examId:guid}", WritingHandler.DeleteExamHandler).RequireAuthorization(Roles.Admin);
+
     }
 }

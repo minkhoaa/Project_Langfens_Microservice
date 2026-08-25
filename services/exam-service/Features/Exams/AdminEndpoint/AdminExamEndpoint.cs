@@ -12,17 +12,17 @@ public static class AdminExamEndpoint
     //exam
     public static void MapAdminExamEndpoint(this IEndpointRouteBuilder app)
     {
-        var adminGroup = app.MapGroup("/api/admin");
-        adminGroup.MapPost("/exam/addexam", AdminExamHandler.AddExamHandler).RequireAuthorization(Roles.Admin)
+        var adminGroup = app.MapGroup("/api/admin/exam/");
+        adminGroup.MapPost("/addexam", AdminExamHandler.AddExamHandler).RequireAuthorization(Roles.Admin)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
-        adminGroup.MapGet("/exam/all", AdminExamHandler.GetAllExamHandler).RequireAuthorization(Roles.Admin)
+        adminGroup.MapGet("/all", AdminExamHandler.GetAllExamHandler).RequireAuthorization(Roles.Admin)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
-        adminGroup.MapPut("/exam/update/{id}", AdminExamHandler.UpdateExamHandler).RequireAuthorization(Roles.Admin)
+        adminGroup.MapPut("/update/{id}", AdminExamHandler.UpdateExamHandler).RequireAuthorization(Roles.Admin)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
-        adminGroup.MapDelete("/exam/delete/{id}", AdminExamHandler.DeleteExamHandler).RequireAuthorization(Roles.Admin)
+        adminGroup.MapDelete("/delete/{id}", AdminExamHandler.DeleteExamHandler).RequireAuthorization(Roles.Admin)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status200OK);
     }
@@ -30,16 +30,16 @@ public static class AdminExamEndpoint
     //section
     public static void MapAdminSectionEndpoint(this IEndpointRouteBuilder app)
     {
-        var adminSection = app.MapGroup("/api/admin").RequireAuthorization(ExamScope.ExamManage);
-        adminSection.MapPost("/section/add", AdminSectionHandler.AddSectionHandler)
+        var adminSection = app.MapGroup("/api/admin/section").RequireAuthorization(ExamScope.ExamManage);
+        adminSection.MapPost("/add", AdminSectionHandler.AddSectionHandler)
             .Produces(StatusCodes.Status200OK).Produces(StatusCodes.Status400BadRequest);
 
-        adminSection.MapPut("/section/update/{id}", AdminSectionHandler.UpdateSectionHandler);
-        adminSection.MapDelete("/section/delete/{id}", AdminSectionHandler.DeleteSectionHandler)
-
+        adminSection.MapPut("/update/{id}", AdminSectionHandler.UpdateSectionHandler);
+        adminSection.MapDelete("/delete/{id}", AdminSectionHandler.DeleteSectionHandler)
+         
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
-        adminSection.MapGet("/section/by-exam/{examId:guid}", AdminSectionHandler.GetSectionsByExamHandler)
+        adminSection.MapGet("/by-exam/{examId:guid}", AdminSectionHandler.GetSectionsByExamHandler)
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }
@@ -47,11 +47,11 @@ public static class AdminExamEndpoint
     //question
     public static void MapAdminQuestionEndpoint(this IEndpointRouteBuilder app)
     {
-        var adminQuestion = app.MapGroup("/api/admin").RequireAuthorization(Roles.Admin);
-        adminQuestion.MapPost("/question/add", AdminQuestionHandler.AddQuestionHandler);
-        adminQuestion.MapPut("/question/update/{id}", AdminQuestionHandler.UpdateQuestionHandler);
-        adminQuestion.MapDelete("/question/delete/{id}", AdminQuestionHandler.DeleteQuestionHandler);
-        adminQuestion.MapGet("/question/by-section/{sectionId:guid}", AdminQuestionHandler.GetQuestionsBySectionHandler)
+        var adminQuestion = app.MapGroup("/api/admin/question/").RequireAuthorization(Roles.Admin);
+        adminQuestion.MapPost("/add", AdminQuestionHandler.AddQuestionHandler);
+        adminQuestion.MapPut("/update/{id}", AdminQuestionHandler.UpdateQuestionHandler);
+        adminQuestion.MapDelete("/delete/{id}", AdminQuestionHandler.DeleteQuestionHandler);
+        adminQuestion.MapGet("/by-section/{sectionId:guid}", AdminQuestionHandler.GetQuestionsBySectionHandler)
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }
@@ -59,11 +59,11 @@ public static class AdminExamEndpoint
     //option
     public static void MapAdminOptionEndpoint(this IEndpointRouteBuilder app)
     {
-        var adminOption = app.MapGroup("/api/admin").RequireAuthorization(Roles.Admin);
-        adminOption.MapPost("/option/add", AdminOptionHandler.AddOptionHandler);
-        adminOption.MapPut("/option/update/{id}", AdminOptionHandler.UpdateOptionHandler);
-        adminOption.MapDelete("/option/delete/{id}", AdminOptionHandler.DeleteOptionHandler);
-        adminOption.MapGet("/option/by-question/{questionId:guid}", AdminOptionHandler.GetOptionsByQuestionHandler)
+        var adminOption = app.MapGroup("/api/admin/option/").RequireAuthorization(Roles.Admin);
+        adminOption.MapPost("/add", AdminOptionHandler.AddOptionHandler);
+        adminOption.MapPut("/update/{id}", AdminOptionHandler.UpdateOptionHandler);
+        adminOption.MapDelete("/delete/{id}", AdminOptionHandler.DeleteOptionHandler);
+        adminOption.MapGet("/by-question/{questionId:guid}", AdminOptionHandler.GetOptionsByQuestionHandler)
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
     }

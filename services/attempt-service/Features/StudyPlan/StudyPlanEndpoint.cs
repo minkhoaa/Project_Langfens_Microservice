@@ -6,23 +6,23 @@ public static class StudyPlanEndpoint
 {
     public static void MapStudyPlanEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/api")
+        var group = app.MapGroup("/api/study-plan")
             .WithTags("Study Plan")
             .RequireAuthorization();
 
-        group.MapPost("/study-plan/goals", Handler.CreateGoal)
+        group.MapPost("/goals", Handler.CreateGoal)
             .WithName("CreateStudyGoal")
             .WithDescription("Create or update a study goal");
 
-        group.MapGet("/study-plan/goals/active", Handler.GetActiveGoal)
+        group.MapGet("/goals/active", Handler.GetActiveGoal)
             .WithName("GetActiveStudyGoal")
             .WithDescription("Get the active study goal");
 
-        group.MapGet("/study-plan/progress", Handler.GetProgress)
+        group.MapGet("/progress", Handler.GetProgress)
             .WithName("GetStudyProgress")
             .WithDescription("Get progress towards the active goal");
 
-        group.MapDelete("/study-plan/goals/{goalId:guid}", Handler.DeleteGoal)
+        group.MapDelete("/goals/{goalId:guid}", Handler.DeleteGoal)
             .WithName("DeleteStudyGoal")
             .WithDescription("Delete a study goal");
     }

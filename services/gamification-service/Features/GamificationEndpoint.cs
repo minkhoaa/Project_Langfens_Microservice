@@ -8,7 +8,7 @@ public static class GamificationEndpoint
 {
     public static void MapGamificationEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api");
+        var group = app.MapGroup("/api/gamification");
 
         group.MapGet("/me", async (IGamificationService service, IUserContext user, CancellationToken token) =>
         {

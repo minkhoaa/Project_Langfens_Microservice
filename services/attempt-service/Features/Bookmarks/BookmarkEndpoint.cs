@@ -7,14 +7,14 @@ public static class BookmarkEndpoint
 {
     public static void MapBookmarkEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api")
+        var group = app.MapGroup("/api/bookmarks")
             .WithTags("Bookmarks")
             .RequireAuthorization();
 
-        group.MapPost("/bookmarks/", Handler.CreateOrUpdateBookmark);
-        group.MapGet("/bookmarks/", Handler.GetBookmarks);
-        group.MapDelete("/bookmarks/{questionId:guid}", Handler.DeleteBookmark);
-        group.MapGet("/bookmarks/check/{questionId:guid}", Handler.CheckBookmark);
+        group.MapPost("/", Handler.CreateOrUpdateBookmark);
+        group.MapGet("/", Handler.GetBookmarks);
+        group.MapDelete("/{questionId:guid}", Handler.DeleteBookmark);
+        group.MapGet("/check/{questionId:guid}", Handler.CheckBookmark);
     }
 
     private static class Handler

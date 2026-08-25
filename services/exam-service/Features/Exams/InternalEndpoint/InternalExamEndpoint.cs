@@ -4,8 +4,8 @@ public static class InternalExamEndpoint
 {
     public static void MapInternalExamEndpoint(this IEndpointRouteBuilder app)
     {
-        var internalExam = app.MapGroup("/api");
-        internalExam.MapGet("/internal/exams/{id}/delivery", InternalExamHandler.GetByExamIdHandler)
+        var internalExam = app.MapGroup("/api/internal");
+        internalExam.MapGet("/exams/{id}/delivery", InternalExamHandler.GetByExamIdHandler)
             .RequireAuthorization();
     }
 }

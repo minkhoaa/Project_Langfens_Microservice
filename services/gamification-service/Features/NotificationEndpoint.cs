@@ -4,7 +4,7 @@ public static class NotificationEndpoint
 {
     public static void MapNotificationEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/api/notification")
+        var group = app.MapGroup("/api/notifications")
             .WithTags("Notifications")
             .RequireAuthorization();
 
