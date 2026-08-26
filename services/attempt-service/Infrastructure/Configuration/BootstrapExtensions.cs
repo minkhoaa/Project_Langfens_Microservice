@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
+using attempt_service.Features.Helpers;
+using attempt_service.Infrastructure.Persistence;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -44,5 +46,44 @@ public static class AttemptBootstrapExtensions
             opts.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
         return services;
+    }
+
+    // ── Persistence (attempt-db) ──────────────────────────────────────────────
+
+    public static WebApplicationBuilder AddAttemptPersistence(this WebApplicationBuilder builder)
+    {
+        builder.AddNpgsqlDbContext<AttemptDbContext>("attempt-db");
+        return builder;
+    }
+
+    // ── Grader foundation (DI wiring for Tasks 14-17) ──────────────────────────
+
+    public static IServiceCollection AddGraderRegistry(this IServiceCollection s)
+    {
+        s.AddSingleton<ITextNormalizer, TextNormalizer>();
+        s.AddSingleton<AnswerEnvelopeReader>();
+        s.AddSingleton<IGrader, MultipleChoiceSingleGrader>();
+        s.AddSingleton<IGrader, MultipleChoiceSingleImageGrader>();
+        s.AddSingleton<IGrader, MultipleChoiceMultipleGrader>();
+        s.AddSingleton<IGrader, TrueFalseNotGivenGrader>();
+        s.AddSingleton<IGrader, YesNoNotGivenGrader>();
+        s.AddSingleton<IGrader, SummaryCompletionGrader>();
+        s.AddSingleton<IGrader, TableCompletionGrader>();
+        s.AddSingleton<IGrader, NoteCompletionGrader>();
+        s.AddSingleton<IGrader, FormCompletionGrader>();
+        s.AddSingleton<IGrader, SentenceCompletionGrader>();
+        s.AddSingleton<IGrader, MatchingHeadingGrader>();
+        s.AddSingleton<IGrader, MatchingInformationGrader>();
+        s.AddSingleton<IGrader, MatchingFeaturesGrader>();
+        s.AddSingleton<IGrader, MatchingEndingsGrader>();
+        s.AddSingleton<IGrader, ClassificationGrader>();
+        s.AddSingleton<IGrader, DiagramLabelGrader>();
+        s.AddSingleton<IGrader, MapLabelGrader>();
+        s.AddSingleton<IGrader, FlowChartGrader>();
+        s.AddSingleton<IGrader, FlowChartCompletionGrader>();
+        s.AddSingleton<IGrader, ShortAnswerGrader>();
+        s.AddSingleton<IGrader, AudioResponseGrader>();
+        s.AddSingleton<GraderRegistry>();
+        return s;
     }
 }
