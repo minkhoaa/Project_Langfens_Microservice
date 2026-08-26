@@ -10,3 +10,6 @@ export * from './types';
 export * from './answers';
 // Backward-compat deprecated aliases
 export * from './deprecated-aliases';
+// Cross-reference validators + envelope schemas (Phase 3)
+export * from './invariants';
+export * from './envelopes';

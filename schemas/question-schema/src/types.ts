@@ -7,7 +7,7 @@ import {
   OptionSchema,
   ScoringModeSchema,
 } from './shared';
-
+import { refineCompletionPlaceholders, refineLabelGapIds } from './invariants';
 /* --------------------------------------------------------------------- */
 /* Helpers shared across many types                                       */
 /* --------------------------------------------------------------------- */
@@ -513,6 +513,28 @@ export const flowChartPayloadSchema = BasePayloadSchema.extend({
     .describe('Directed edges between nodes (informational; grading uses the order array).'),
 });
 
+/** Cross-ref validated form: edges.{from,}o must reference nodes[].id. */
+export const flowChartPayloadValidatedSchema = flowChartPayloadSchema.superRefine((d, ctx) => {
+  const nodeIds = new Set(d.nodes.map((n) => n.id));
+  const available = d.nodes.map((n) => `'${n.id}'`).join(', ');
+  d.edges.forEach((edge, i) => {
+    if (!nodeIds.has(edge.from)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['edges', i, 'from'],
+        message: `edges[${i}].from '${edge.from}' does not exist in nodes. Available node ids: [${available}].`,
+      });
+    }
+    if (!nodeIds.has(edge.to)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['edges', i, 'to'],
+        message: `edges[${i}].to '${edge.to}' does not exist in nodes. Available node ids: [${available}].`,
+      });
+    }
+  });
+});
+
 /* --------------------------------------------------------------------- */
 /* 21. FLOW_CHART_COMPLETION — security-fixed shape                       */
 /* --------------------------------------------------------------------- */
@@ -548,26 +570,76 @@ const flowChartCompletionPayloadObject = BasePayloadSchema.extend({
     .describe('Gaps embedded in nodes. Accepted answers live in CorrectAnswer.gapAnswers.'),
 });
 
-export const flowChartCompletionPayloadSchema = flowChartCompletionPayloadObject.refine(
-  (d) => {
+export const flowChartCompletionPayloadSchema = flowChartCompletionPayloadObject
+  .superRefine((d, ctx) => {
     const nodeIds = new Set(d.nodes.map((n) => n.id));
     for (const gap of d.gaps) {
-      if (!nodeIds.has(gap.nodeId)) return false;
+      if (!nodeIds.has(gap.nodeId)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['gaps', d.gaps.indexOf(gap), 'nodeId'],
+          message: `gaps[${d.gaps.indexOf(gap)}].nodeId '${gap.nodeId}' does not exist in nodes. Available node ids: [${d.nodes.map((n) => `'${n.id}'`).join(', ')}].`,
+        });
+      }
     }
     const edgeIds = new Set<string>();
-    for (const edge of d.edges) {
-      if (!nodeIds.has(edge.from) || !nodeIds.has(edge.to)) return false;
+    d.edges.forEach((edge, i) => {
+      if (!nodeIds.has(edge.from)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['edges', i, 'from'],
+          message: `edges[${i}].from '${edge.from}' does not exist in nodes. Available node ids: [${d.nodes.map((n) => `'${n.id}'`).join(', ')}].`,
+        });
+      }
+      if (!nodeIds.has(edge.to)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['edges', i, 'to'],
+          message: `edges[${i}].to '${edge.to}' does not exist in nodes. Available node ids: [${d.nodes.map((n) => `'${n.id}'`).join(', ')}].`,
+        });
+      }
       const key = `${edge.from}>${edge.to}`;
-      if (edgeIds.has(key)) return false;
+      if (edgeIds.has(key)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['edges', i],
+          message: `duplicate edge ${key} at index ${i}.`,
+        });
+      }
       edgeIds.add(key);
-    }
-    return true;
-  },
-  { message: 'edges and gaps must reference existing node ids and edges must be unique' },
-);
+    });
+  });
 
 /** Object form (without the cross-field refine) — used by the discriminated union. */
 export const flowChartCompletionPayloadObjectSchema = flowChartCompletionPayloadObject;
+
+/* --------------------------------------------------------------------- */
+/* Cross-reference validated payload schemas                              */
+/* --------------------------------------------------------------------- */
+// Wrappers around the per-type payload object schemas with an extra
+// `.superRefine()` that emits actionable error messages for cross-reference
+// violations (DIAGRAM/MAP_LABEL gaps[].id ⊆ labels[].id; COMPLETION promptMd
+// placeholders resolve to defined gap ids). Not used by the discriminated
+// union (which requires ZodObject-only members); tests and the new
+// `<slug>EnvelopeSchema` validators (see envelopes.ts) use them.
+export const diagramLabelPayloadValidatedSchema = diagramLabelPayloadSchema.superRefine((d, ctx) =>
+  refineLabelGapIds(d, ctx),
+);
+export const mapLabelPayloadValidatedSchema = mapLabelPayloadSchema.superRefine((d, ctx) =>
+  refineLabelGapIds(d, ctx),
+);
+export const summaryCompletionPayloadValidatedSchema = summaryCompletionPayloadSchema.superRefine(
+  (d, ctx) => refineCompletionPlaceholders(d, ctx, 'gaps'),
+);
+export const noteCompletionPayloadValidatedSchema = noteCompletionPayloadSchema.superRefine(
+  (d, ctx) => refineCompletionPlaceholders(d, ctx, 'gaps'),
+);
+export const formCompletionPayloadValidatedSchema = formCompletionPayloadSchema.superRefine(
+  (d, ctx) => refineCompletionPlaceholders(d, ctx, 'gaps'),
+);
+export const sentenceCompletionPayloadValidatedSchema = sentenceCompletionPayloadSchema.superRefine(
+  (d, ctx) => refineCompletionPlaceholders(d, ctx, 'gap'),
+);
 
 /** Ordered list of all 21 payload schemas, used as the payloadSchemas registry.
  *  `multipleChoiceMultiple` and `flowChartCompletion` use the object-form schemas
