@@ -14,3 +14,5 @@ export * from './deprecated-aliases';
 export * from './invariants';
 export * from './envelopes';
 export * from './retry';
+// Region-overlap geometry helpers (DIAGRAM/MAP_LABEL)
+export * from './geometry';
