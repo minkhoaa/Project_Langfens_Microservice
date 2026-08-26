@@ -67,13 +67,13 @@ export const canonicalExamples: Record<QuestionTypeSlug, CanonicalExample> = {
       schemaVersion: '1.0.0',
       explanationMd: 'Panel C shows condensation forming clouds above the lake.',
       options: [
-        { id: 'img_1', idx: 0, contentMd: 'Evaporation', mediaUrl: 'https://example.com/c1-evap.png', altText: 'Diagram showing water rising from a lake toward the sky.' },
-        { id: 'img_2', idx: 1, contentMd: 'Condensation', mediaUrl: 'https://example.com/c2-cond.png', altText: 'Diagram showing water vapour forming a cloud.' },
-        { id: 'img_3', idx: 2, contentMd: 'Precipitation', mediaUrl: 'https://example.com/c3-prec.png', altText: 'Diagram showing rain falling from a cloud.' },
+        { id: 'opt_1', idx: 0, contentMd: 'Evaporation', mediaUrl: 'https://example.com/c1-evap.png', altText: 'Diagram showing water rising from a lake toward the sky.' },
+        { id: 'opt_2', idx: 1, contentMd: 'Condensation', mediaUrl: 'https://example.com/c2-cond.png', altText: 'Diagram showing water vapour forming a cloud.' },
+        { id: 'opt_3', idx: 2, contentMd: 'Precipitation', mediaUrl: 'https://example.com/c3-prec.png', altText: 'Diagram showing rain falling from a cloud.' },
       ],
     },
     {
-      correctOptionId: 'img_2',
+      correctOptionId: 'opt_2',
     },
   ),
 
@@ -149,21 +149,21 @@ export const canonicalExamples: Record<QuestionTypeSlug, CanonicalExample> = {
       difficulty: 4,
       promptMd:
         'Complete the summary below. Choose **NO MORE THAN TWO WORDS** from the passage for each answer.\n\n' +
-        'The {{gap:gap_1}} is a layer of gas that traps heat close to the Earth. ' +
-        'When its concentration rises, average surface {{gap:gap_2}} increase. ' +
-        'Scientists monitor this with instruments placed on {{gap:gap_3}} and in orbit.',
+        'The {{gap:g_1}} is a layer of gas that traps heat close to the Earth. ' +
+        'When its concentration rises, average surface {{gap:g_2}} increase. ' +
+        'Scientists monitor this with instruments placed on {{gap:g_3}} and in orbit.',
       schemaVersion: '1.0.0',
       gaps: [
-        { id: 'gap_1', wordLimit: 2 },
-        { id: 'gap_2', wordLimit: 2 },
-        { id: 'gap_3', wordLimit: 2 },
+        { id: 'g_1', wordLimit: 2 },
+        { id: 'g_2', wordLimit: 2 },
+        { id: 'g_3', wordLimit: 2 },
       ],
     },
     {
       answers: {
-        gap_1: ['greenhouse', 'green house'],
-        gap_2: ['temperatures'],
-        gap_3: ['mountains'],
+        g_1: ['greenhouse', 'green house'],
+        g_2: ['temperatures'],
+        g_3: ['mountains'],
       },
     },
   ),
@@ -177,18 +177,18 @@ export const canonicalExamples: Record<QuestionTypeSlug, CanonicalExample> = {
       promptMd: 'Complete the table below. Write **NO MORE THAN ONE WORD** for each answer.',
       schemaVersion: '1.0.0',
       cells: [
-        { rowId: 'row_mon', colId: 'col_focus', gapId: 'gap_1' },
-        { rowId: 'row_wed', colId: 'col_focus', gapId: 'gap_2' },
+        { rowId: 'row_mon', colId: 'col_focus', gapId: 'g_1' },
+        { rowId: 'row_wed', colId: 'col_focus', gapId: 'g_2' },
       ],
       gaps: [
-        { id: 'gap_1', wordLimit: 1, expectedKind: 'text' },
-        { id: 'gap_2', wordLimit: 1, expectedKind: 'text' },
+        { id: 'g_1', wordLimit: 1, expectedKind: 'text' },
+        { id: 'g_2', wordLimit: 1, expectedKind: 'text' },
       ],
     },
     {
       answers: {
-        gap_1: ['vocabulary'],
-        gap_2: ['pronunciation'],
+        g_1: ['vocabulary'],
+        g_2: ['pronunciation'],
       },
     },
   ),
@@ -202,18 +202,18 @@ export const canonicalExamples: Record<QuestionTypeSlug, CanonicalExample> = {
       promptMd:
         'Complete the notes below. Write **ONE WORD ONLY**.\n\n' +
         'Library orientation\n' +
-        '- Borrow up to {{gap:gap_1}} books at a time.\n' +
-        '- Returns must be made by the {{gap:gap_2}} of each month.',
+        '- Borrow up to {{gap:g_1}} books at a time.\n' +
+        '- Returns must be made by the {{gap:g_2}} of each month.',
       schemaVersion: '1.0.0',
       gaps: [
-        { id: 'gap_1', wordLimit: 1, expectedKind: 'number' },
-        { id: 'gap_2', wordLimit: 1 },
+        { id: 'g_1', wordLimit: 1, expectedKind: 'number' },
+        { id: 'g_2', wordLimit: 1 },
       ],
     },
     {
       answers: {
-        gap_1: ['five'],
-        gap_2: ['tenth'],
+        g_1: ['five'],
+        g_2: ['tenth'],
       },
     },
   ),
@@ -227,14 +227,14 @@ export const canonicalExamples: Record<QuestionTypeSlug, CanonicalExample> = {
       promptMd: 'Complete the booking form below.',
       schemaVersion: '1.0.0',
       gaps: [
-        { id: 'gap_1', expectedKind: 'date' },
-        { id: 'gap_2', expectedKind: 'text' },
+        { id: 'g_1', expectedKind: 'date' },
+        { id: 'g_2', expectedKind: 'text' },
       ],
     },
     {
       answers: {
-        gap_1: ['14 March 2024'],
-        gap_2: ['Kingston'],
+        g_1: ['14 March 2024'],
+        g_2: ['Kingston'],
       },
     },
   ),
@@ -246,9 +246,9 @@ export const canonicalExamples: Record<QuestionTypeSlug, CanonicalExample> = {
       skill: 'READING',
       difficulty: 2,
       promptMd:
-        "Complete the sentence. The blackbird's song is most distinctive at {{gap:gap_1}}.",
+        "Complete the sentence. The blackbird's song is most distinctive at {{gap:g_1}}.",
       schemaVersion: '1.0.0',
-      gap: { id: 'gap_1', wordLimit: 1 },
+      gap: { id: 'g_1', wordLimit: 1 },
     },
     {
       acceptedTexts: ['dawn'],
@@ -418,22 +418,22 @@ export const canonicalExamples: Record<QuestionTypeSlug, CanonicalExample> = {
       promptMd: 'Match each theory with the researcher who proposed it.',
       schemaVersion: '1.0.0',
       items: [
-        { id: 'i_1', text: 'Relativity' },
-        { id: 'i_2', text: 'Natural selection' },
-        { id: 'i_3', text: 'Plate tectonics' },
+        { id: 'item_1', text: 'Relativity' },
+        { id: 'item_2', text: 'Natural selection' },
+        { id: 'item_3', text: 'Plate tectonics' },
       ],
       features: [
-        { id: 'f_1', label: 'Einstein' },
-        { id: 'f_2', label: 'Darwin' },
-        { id: 'f_3', label: 'Wegener' },
+        { id: 'feat_1', label: 'Einstein' },
+        { id: 'feat_2', label: 'Darwin' },
+        { id: 'feat_3', label: 'Wegener' },
       ],
       allowReuse: false,
     },
     {
       pairs: [
-        { itemId: 'i_1', featureId: 'f_1' },
-        { itemId: 'i_2', featureId: 'f_2' },
-        { itemId: 'i_3', featureId: 'f_3' },
+        { itemId: 'item_1', featureId: 'feat_1' },
+        { itemId: 'item_2', featureId: 'feat_2' },
+        { itemId: 'item_3', featureId: 'feat_3' },
       ],
       scoring: 'all-or-nothing',
     },
@@ -477,22 +477,22 @@ export const canonicalExamples: Record<QuestionTypeSlug, CanonicalExample> = {
       promptMd: 'Classify each item as either Fruit or Vegetable.',
       schemaVersion: '1.0.0',
       items: [
-        { id: 'i_1', text: 'Apple' },
-        { id: 'i_2', text: 'Carrot' },
-        { id: 'i_3', text: 'Spinach' },
-        { id: 'i_4', text: 'Tomato' },
+        { id: 'item_1', text: 'Apple' },
+        { id: 'item_2', text: 'Carrot' },
+        { id: 'item_3', text: 'Spinach' },
+        { id: 'item_4', text: 'Tomato' },
       ],
       categories: [
-        { id: 'c_1', label: 'Fruit' },
-        { id: 'c_2', label: 'Vegetable' },
+        { id: 'cat_1', label: 'Fruit' },
+        { id: 'cat_2', label: 'Vegetable' },
       ],
     },
     {
       pairs: [
-        { itemId: 'i_1', categoryId: 'c_1' },
-        { itemId: 'i_2', categoryId: 'c_2' },
-        { itemId: 'i_3', categoryId: 'c_2' },
-        { itemId: 'i_4', categoryId: 'c_1' },
+        { itemId: 'item_1', categoryId: 'cat_1' },
+        { itemId: 'item_2', categoryId: 'cat_2' },
+        { itemId: 'item_3', categoryId: 'cat_2' },
+        { itemId: 'item_4', categoryId: 'cat_1' },
       ],
       scoring: 'all-or-nothing',
     },

@@ -6,6 +6,7 @@
   "x-when-to-use": "When the question asks the learner to select K of N options where more than one is correct.",
   "x-when-not-to-use": "Use MULTIPLE_CHOICE_SINGLE for exactly-one selection. Use CLASSIFICATION when each option belongs to exactly one category.",
   "x-typical-range": "{ \"options\": [4, 5, 6], \"correct\": [2, 3, 4] }",
+  "x-id-prefix": "opt_",
   "type": "object",
   "additionalProperties": false,
   "required": [

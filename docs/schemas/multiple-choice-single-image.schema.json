@@ -6,6 +6,7 @@
   "x-when-to-use": "When each option is an image the learner must compare against a stimulus (e.g. pick the matching diagram).",
   "x-when-not-to-use": "Use MULTIPLE_CHOICE_SINGLE for text-only options. Use DIAGRAM_LABEL for filling gaps on a single image, not choosing among separate images.",
   "x-typical-range": "{ \"options\": [3, 4] }",
+  "x-id-prefix": "opt_",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -40,21 +41,21 @@
         "explanationMd": "Panel C shows condensation forming clouds above the lake.",
         "options": [
           {
-            "id": "img_1",
+            "id": "opt_1",
             "idx": 0,
             "contentMd": "Evaporation",
             "mediaUrl": "https://example.com/c1-evap.png",
             "altText": "Diagram showing water rising from a lake toward the sky."
           },
           {
-            "id": "img_2",
+            "id": "opt_2",
             "idx": 1,
             "contentMd": "Condensation",
             "mediaUrl": "https://example.com/c2-cond.png",
             "altText": "Diagram showing water vapour forming a cloud."
           },
           {
-            "id": "img_3",
+            "id": "opt_3",
             "idx": 2,
             "contentMd": "Precipitation",
             "mediaUrl": "https://example.com/c3-prec.png",
@@ -63,7 +64,7 @@
         ]
       },
       "correctAnswer": {
-        "correctOptionId": "img_2"
+        "correctOptionId": "opt_2"
       }
     }
   ],

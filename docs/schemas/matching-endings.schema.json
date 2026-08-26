@@ -200,5 +200,9 @@
         }
       }
     }
+  },
+  "x-id-prefix": {
+    "beginnings": "b_",
+    "endings": "e_"
   }
 }

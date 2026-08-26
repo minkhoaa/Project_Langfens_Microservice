@@ -63,21 +63,21 @@
         ],
         "gaps": [
           {
-            "id": "gap_1",
+            "id": "lbl_1",
             "wordLimit": 1
           },
           {
-            "id": "gap_2",
+            "id": "lbl_2",
             "wordLimit": 1
           }
         ]
       },
       "correctAnswer": {
         "answers": {
-          "gap_1": [
+          "lbl_1": [
             "library"
           ],
-          "gap_2": [
+          "lbl_2": [
             "school"
           ]
         }
@@ -193,5 +193,9 @@
       "$ref": "_shared.schema.json#/$defs/CompletionAnswer",
       "writeOnly": true
     }
+  },
+  "x-id-prefix": {
+    "labels": "lbl_",
+    "gaps": "lbl_"
   }
 }

@@ -39,29 +39,29 @@
         "schemaVersion": "1.0.0",
         "items": [
           {
-            "id": "i_1",
+            "id": "item_1",
             "text": "Apple"
           },
           {
-            "id": "i_2",
+            "id": "item_2",
             "text": "Carrot"
           },
           {
-            "id": "i_3",
+            "id": "item_3",
             "text": "Spinach"
           },
           {
-            "id": "i_4",
+            "id": "item_4",
             "text": "Tomato"
           }
         ],
         "categories": [
           {
-            "id": "c_1",
+            "id": "cat_1",
             "label": "Fruit"
           },
           {
-            "id": "c_2",
+            "id": "cat_2",
             "label": "Vegetable"
           }
         ]
@@ -69,20 +69,20 @@
       "correctAnswer": {
         "pairs": [
           {
-            "itemId": "i_1",
-            "categoryId": "c_1"
+            "itemId": "item_1",
+            "categoryId": "cat_1"
           },
           {
-            "itemId": "i_2",
-            "categoryId": "c_2"
+            "itemId": "item_2",
+            "categoryId": "cat_2"
           },
           {
-            "itemId": "i_3",
-            "categoryId": "c_2"
+            "itemId": "item_3",
+            "categoryId": "cat_2"
           },
           {
-            "itemId": "i_4",
-            "categoryId": "c_1"
+            "itemId": "item_4",
+            "categoryId": "cat_1"
           }
         ],
         "scoring": "all-or-nothing"
@@ -204,5 +204,9 @@
         }
       }
     }
+  },
+  "x-id-prefix": {
+    "items": "item_",
+    "categories": "cat_"
   }
 }

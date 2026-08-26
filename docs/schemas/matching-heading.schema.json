@@ -226,5 +226,9 @@
       }
     }
   },
-  "x-generation-recipe": "1. Create 4-6 paragraphs and 6-10 headings. 2. Ensure unique mapping (no two paragraphs share a heading) unless arity=1-many. 3. Mark heading options i-vii (or similar)."
+  "x-generation-recipe": "1. Create 4-6 paragraphs and 6-10 headings. 2. Ensure unique mapping (no two paragraphs share a heading) unless arity=1-many. 3. Mark heading options i-vii (or similar).",
+  "x-id-prefix": {
+    "paragraphs": "p_",
+    "headings": "h_"
+  }
 }

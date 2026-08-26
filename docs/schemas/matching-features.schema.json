@@ -39,29 +39,29 @@
         "schemaVersion": "1.0.0",
         "items": [
           {
-            "id": "i_1",
+            "id": "item_1",
             "text": "Relativity"
           },
           {
-            "id": "i_2",
+            "id": "item_2",
             "text": "Natural selection"
           },
           {
-            "id": "i_3",
+            "id": "item_3",
             "text": "Plate tectonics"
           }
         ],
         "features": [
           {
-            "id": "f_1",
+            "id": "feat_1",
             "label": "Einstein"
           },
           {
-            "id": "f_2",
+            "id": "feat_2",
             "label": "Darwin"
           },
           {
-            "id": "f_3",
+            "id": "feat_3",
             "label": "Wegener"
           }
         ],
@@ -70,16 +70,16 @@
       "correctAnswer": {
         "pairs": [
           {
-            "itemId": "i_1",
-            "featureId": "f_1"
+            "itemId": "item_1",
+            "featureId": "feat_1"
           },
           {
-            "itemId": "i_2",
-            "featureId": "f_2"
+            "itemId": "item_2",
+            "featureId": "feat_2"
           },
           {
-            "itemId": "i_3",
-            "featureId": "f_3"
+            "itemId": "item_3",
+            "featureId": "feat_3"
           }
         ],
         "scoring": "all-or-nothing"
@@ -206,5 +206,9 @@
         }
       }
     }
+  },
+  "x-id-prefix": {
+    "items": "item_",
+    "features": "feat_"
   }
 }

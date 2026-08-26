@@ -6,6 +6,7 @@
   "x-when-to-use": "When a table contains gaps in one or more cells the learner must fill from the source text.",
   "x-when-not-to-use": "Use FORM_COMPLETION for labelled fields. Use SUMMARY_COMPLETION for prose passages with gaps.",
   "x-typical-range": "{ \"cells\": [2, 6, 10], \"gaps\": [1, 4, 8] }",
+  "x-id-prefix": "g_",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -41,22 +42,22 @@
           {
             "rowId": "row_mon",
             "colId": "col_focus",
-            "gapId": "gap_1"
+            "gapId": "g_1"
           },
           {
             "rowId": "row_wed",
             "colId": "col_focus",
-            "gapId": "gap_2"
+            "gapId": "g_2"
           }
         ],
         "gaps": [
           {
-            "id": "gap_1",
+            "id": "g_1",
             "wordLimit": 1,
             "expectedKind": "text"
           },
           {
-            "id": "gap_2",
+            "id": "g_2",
             "wordLimit": 1,
             "expectedKind": "text"
           }
@@ -64,10 +65,10 @@
       },
       "correctAnswer": {
         "answers": {
-          "gap_1": [
+          "g_1": [
             "vocabulary"
           ],
-          "gap_2": [
+          "g_2": [
             "pronunciation"
           ]
         }

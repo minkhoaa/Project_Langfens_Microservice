@@ -6,6 +6,7 @@
   "x-when-to-use": "When the prompt presents bulleted or partial notes with gaps the learner fills from a listening passage.",
   "x-when-not-to-use": "Use SUMMARY_COMPLETION for prose-style summaries. Use SENTENCE_COMPLETION for a single-gap sentence.",
   "x-typical-range": "{ \"gaps\": [2, 4, 6, 8] }",
+  "x-id-prefix": "g_",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -35,26 +36,26 @@
         "id": "11111111-1111-4111-8111-111111111108",
         "skill": "LISTENING",
         "difficulty": 3,
-        "promptMd": "Complete the notes below. Write **ONE WORD ONLY**.\n\nLibrary orientation\n- Borrow up to {{gap:gap_1}} books at a time.\n- Returns must be made by the {{gap:gap_2}} of each month.",
+        "promptMd": "Complete the notes below. Write **ONE WORD ONLY**.\n\nLibrary orientation\n- Borrow up to {{gap:g_1}} books at a time.\n- Returns must be made by the {{gap:g_2}} of each month.",
         "schemaVersion": "1.0.0",
         "gaps": [
           {
-            "id": "gap_1",
+            "id": "g_1",
             "wordLimit": 1,
             "expectedKind": "number"
           },
           {
-            "id": "gap_2",
+            "id": "g_2",
             "wordLimit": 1
           }
         ]
       },
       "correctAnswer": {
         "answers": {
-          "gap_1": [
+          "g_1": [
             "five"
           ],
-          "gap_2": [
+          "g_2": [
             "tenth"
           ]
         }

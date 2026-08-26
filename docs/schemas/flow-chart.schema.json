@@ -238,5 +238,6 @@
       }
     }
   },
-  "x-generation-recipe": "1. Create N nodes (4-7 typical). 2. Define edges as a DAG. 3. Pick scoring mode (default = lcs for IELTS-style tolerance)."
+  "x-generation-recipe": "1. Create N nodes (4-7 typical). 2. Define edges as a DAG. 3. Pick scoring mode (default = lcs for IELTS-style tolerance).",
+  "x-id-prefix": "n_"
 }

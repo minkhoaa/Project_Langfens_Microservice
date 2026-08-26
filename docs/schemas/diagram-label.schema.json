@@ -63,22 +63,22 @@
         ],
         "gaps": [
           {
-            "id": "gap_1",
+            "id": "lbl_1",
             "wordLimit": 2
           },
           {
-            "id": "gap_2",
+            "id": "lbl_2",
             "wordLimit": 1
           }
         ]
       },
       "correctAnswer": {
         "answers": {
-          "gap_1": [
+          "lbl_1": [
             "cell wall",
             "wall"
           ],
-          "gap_2": [
+          "lbl_2": [
             "nucleus"
           ]
         }
@@ -194,5 +194,9 @@
       "$ref": "_shared.schema.json#/$defs/CompletionAnswer",
       "writeOnly": true
     }
+  },
+  "x-id-prefix": {
+    "labels": "lbl_",
+    "gaps": "lbl_"
   }
 }

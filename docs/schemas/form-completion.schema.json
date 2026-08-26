@@ -6,6 +6,7 @@
   "x-when-to-use": "When the prompt is a structured form (e.g. application, registration) with labelled fields the learner fills from a listening passage.",
   "x-when-not-to-use": "Use TABLE_COMPLETION for grid-style tables. Use NOTE_COMPLETION for bulleted notes.",
   "x-typical-range": "{ \"fields\": [2, 5, 10] }",
+  "x-id-prefix": "g_",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -39,21 +40,21 @@
         "schemaVersion": "1.0.0",
         "gaps": [
           {
-            "id": "gap_1",
+            "id": "g_1",
             "expectedKind": "date"
           },
           {
-            "id": "gap_2",
+            "id": "g_2",
             "expectedKind": "text"
           }
         ]
       },
       "correctAnswer": {
         "answers": {
-          "gap_1": [
+          "g_1": [
             "14 March 2024"
           ],
-          "gap_2": [
+          "g_2": [
             "Kingston"
           ]
         }
