@@ -11,12 +11,14 @@
  */
 import { z } from 'zod';
 import {
+  flowChartPayloadSchema,
   flowChartCompletionPayloadObjectSchema,
   matchingHeadingPayloadSchema,
   matchingInformationPayloadSchema,
   multipleChoiceMultiplePayloadObjectSchema,
 } from './types';
 import {
+  flowChartAnswerSchema,
   flowChartCompletionAnswerSchema,
   matchingHeadingAnswerSchema,
   matchingInformationAnswerSchema,
@@ -29,7 +31,19 @@ import {
   refineMiNoDuplicateParagraphs,
 } from './invariants';
 
-/** FCC envelope: payload.gaps[].nodeId ⊆ nodes[].id AND correctAnswer.order ⊆ nodes[].id. */
+/** FLOW_CHART envelope: correctAnswer.order must be a permutation of payload.nodes[].id. */
+export const flowChartEnvelopeSchema = z
+  .object({
+    payload: flowChartPayloadSchema,
+    correctAnswer: flowChartAnswerSchema,
+    rubric: z.unknown().optional(),
+  })
+  .passthrough()
+  .superRefine((env, ctx) => {
+    refineFccGapsAndOrder(env, ctx);
+  });
+
+/** FCC envelope: payload.gaps[].nodeId ⊆ nodes[].id AND correctAnswer.order is a permutation of nodes[].id. */
 export const flowChartCompletionEnvelopeSchema = z
   .object({
     payload: flowChartCompletionPayloadObjectSchema,

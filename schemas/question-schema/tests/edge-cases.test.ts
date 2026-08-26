@@ -7,6 +7,7 @@ import {
   flowChartCompletionAnswerSchema,
   flowChartCompletionEnvelopeSchema,
   flowChartCompletionPayloadSchema,
+  flowChartEnvelopeSchema,
   flowChartPayloadSchema,
   flowChartPayloadValidatedSchema,
   mapLabelPayloadValidatedSchema,
@@ -273,7 +274,7 @@ describe('cross-reference invariants (superRefine)', () => {
       const msg = r.error.issues.map((i) => i.message).join('\n');
       expect(msg).toMatch(/correctAnswer\.order/);
       expect(msg).toMatch(/unknown node id.*'n_unknown'/);
-      expect(msg).toMatch(/Available:/);
+      expect(msg).toMatch(/Available node ids/);
     }
   });
 
@@ -366,5 +367,35 @@ describe('cross-reference invariants (superRefine)', () => {
       expect(msg).toMatch(/Available options/);
     }
     expect(multipleChoiceMultipleEnvelopeSchema.safeParse(envelope('MULTIPLE_CHOICE_MULTIPLE')).success).toBe(true);
+  });
+
+  it('FLOW_CHART envelope: correctAnswer.order missing 1 node id is rejected (permutation check)', () => {
+    const good = envelope('FLOW_CHART');
+    // FLOW_CHART sample has nodes n_1..n_5 and order ['n_1','n_2','n_3','n_4','n_5'].
+    // Drop 'n_3' to leave a valid 4-entry order that omits a node.
+    (good['correctAnswer'] as Record<string, unknown>)['order'] = ['n_1', 'n_2', 'n_4', 'n_5'];
+    const r = flowChartEnvelopeSchema.safeParse(good);
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      const msg = r.error.issues.map((i) => i.message).join('\n');
+      expect(msg).toMatch(/correctAnswer\.order is missing node id\(s\)/);
+      expect(msg).toMatch(/'n_3'/);
+      expect(msg).toMatch(/Available node ids/);
+    }
+    const clean = envelope('FLOW_CHART');
+    expect(flowChartEnvelopeSchema.safeParse(clean).success).toBe(true);
+  });
+
+  it('FLOW_CHART_COMPLETION envelope: correctAnswer.order with an extra unknown id is rejected (permutation check)', () => {
+    const good = envelope('FLOW_CHART_COMPLETION');
+    ((good['correctAnswer'] as Record<string, unknown>)['order'] as string[]).push('n_unknown');
+    const r = flowChartCompletionEnvelopeSchema.safeParse(good);
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      const msg = r.error.issues.map((i) => i.message).join('\n');
+      expect(msg).toMatch(/correctAnswer\.order/);
+      expect(msg).toMatch(/unknown node id.*'n_unknown'/);
+      expect(msg).toMatch(/Available node ids/);
+    }
   });
 });

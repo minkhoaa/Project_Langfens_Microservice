@@ -35,7 +35,13 @@ interface MaybeLabelsAndGaps {
 
 /**
  * FCC envelope: `payload.gaps[].nodeId ⊆ payload.nodes[].id`
- *              AND `correctAnswer.order ⊆ payload.nodes[].id`
+ *              AND `correctAnswer.order` is a **permutation** of `payload.nodes[].id`
+ *              (combined with the existing `order ⊆ nodes[].id` and the array's
+ *              `uniqueItems` refinement, this guarantees every node appears
+ *              exactly once in `order`).
+ *
+ * Used for both FLOW_CHART and FLOW_CHART_COMPLETION envelopes. FLOW_CHART has
+ * no `gaps` field, so the gap-check loop is a no-op for that type.
  */
 export function refineFccGapsAndOrder(env: { payload?: unknown; correctAnswer?: unknown }, ctx: RefinementCtx): void {
   if (!env || typeof env !== 'object') return;
@@ -58,12 +64,22 @@ export function refineFccGapsAndOrder(env: { payload?: unknown; correctAnswer?: 
   }
   if (answer && typeof answer === 'object' && Array.isArray(answer.order)) {
     const order = (answer.order as unknown[]).map(String);
-    const missing = order.filter((id) => !nodeIds.includes(id));
+    const nodeIdSet = new Set(nodeIds);
+    const orderSet = new Set(order);
+    const missing = nodeIds.filter((id) => !orderSet.has(id));
+    const extra = order.filter((id) => !nodeIdSet.has(id));
     if (missing.length > 0) {
       ctx.addIssue({
         code: 'custom',
         path: ['correctAnswer', 'order'],
-        message: `correctAnswer.order contains unknown node id(s): ${missing.map((s) => `'${s}'`).join(', ')}. Available: ${formatList(nodeIds)}.`,
+        message: `correctAnswer.order is missing node id(s): ${missing.map((s) => `'${s}'`).join(', ')}. Every node in payload.nodes[].id must appear exactly once. Available node ids: ${formatList(nodeIds)}.`,
+      });
+    }
+    if (extra.length > 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['correctAnswer', 'order'],
+        message: `correctAnswer.order contains unknown node id(s): ${extra.map((s) => `'${s}'`).join(', ')}. Available node ids: ${formatList(nodeIds)}.`,
       });
     }
   }
