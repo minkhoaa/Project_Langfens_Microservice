@@ -13,3 +13,4 @@ export * from './deprecated-aliases';
 // Cross-reference validators + envelope schemas (Phase 3)
 export * from './invariants';
 export * from './envelopes';
+export * from './retry';

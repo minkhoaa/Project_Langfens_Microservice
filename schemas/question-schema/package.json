@@ -17,9 +17,9 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node scripts/dual-format.mjs",
+    "build": "tsc -p tsconfig.build.json && node scripts/dual-format.mjs && tsx scripts/emit-deref-schemas.mjs",
+    "gen:deref": "tsx scripts/emit-deref-schemas.mjs",
     "test": "vitest run",
-    "test:watch": "vitest",
     "parity": "node scripts/parity-check.mjs"
   },
   "dependencies": {
