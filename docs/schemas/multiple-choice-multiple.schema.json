@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/multiple-choice-multiple.schema.json",
   "title": "Multiple Choice (Multiple Answers)",
   "description": "A question where the learner selects one or more correct options from a list, bounded by minSelections and maxSelections.",
+  "x-when-to-use": "When the question asks the learner to select K of N options where more than one is correct.",
+  "x-when-not-to-use": "Use MULTIPLE_CHOICE_SINGLE for exactly-one selection. Use CLASSIFICATION when each option belongs to exactly one category.",
+  "x-typical-range": "{ \"options\": [4, 5, 6], \"correct\": [2, 3, 4] }",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -133,7 +136,9 @@
           "maxItems": 8
         },
         "scoring": {
-          "$ref": "_shared.schema.json#/$defs/ScoringMode"
+          "$ref": "_shared.schema.json#/$defs/ScoringMode",
+          "default": "all-or-nothing",
+          "description": "MULTIPLE_CHOICE_MULTIPLE scoring mode. Default 'all-or-nothing' since the learner must select the exact set of correct options."
         }
       }
     }

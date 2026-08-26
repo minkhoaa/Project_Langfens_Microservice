@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/multiple-choice-single.schema.json",
   "title": "Multiple Choice (Single Answer)",
   "description": "A reading or listening question that asks the learner to choose exactly one option from a small set (2-6).",
+  "x-when-to-use": "When the question asks the learner to pick one of N options. N is typically 3-4.",
+  "x-when-not-to-use": "Use MULTIPLE_CHOICE_MULTIPLE for K-of-N selection. Use TRUE_FALSE_NOT_GIVEN for binary statements.",
+  "x-typical-range": "{ \"options\": [3, 4, 5] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

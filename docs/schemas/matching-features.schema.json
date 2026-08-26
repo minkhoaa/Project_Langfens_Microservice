@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/matching-features.schema.json",
   "title": "Matching Features",
   "description": "Match each item to one of a fixed set of features (e.g. theories, dates, or people).",
+  "x-when-to-use": "When a list of items must be matched to a fixed set of features (people, dates, theories, etc.).",
+  "x-when-not-to-use": "Use MATCHING_HEADING for paragraph→heading matching. Use MATCHING_INFORMATION for question→paragraph matching.",
+  "x-typical-range": "{ \"items\": [5, 6, 8], \"features\": [3, 4, 6] }",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -197,7 +200,9 @@
           "writeOnly": true
         },
         "scoring": {
-          "$ref": "_shared.schema.json#/$defs/ScoringMode"
+          "$ref": "_shared.schema.json#/$defs/ScoringMode",
+          "default": "afi",
+          "description": "MATCHING_FEATURES scoring mode. Default 'afi' since matching-features typically allows reuse and each item-feature pair should be graded independently."
         }
       }
     }

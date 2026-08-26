@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/form-completion.schema.json",
   "title": "Form Completion",
   "description": "Complete a structured form (e.g. an application or registration) by filling gaps based on the listening audio. It is recommended to set expectedKind on each gap so graders know whether to parse dates or numbers.",
+  "x-when-to-use": "When the prompt is a structured form (e.g. application, registration) with labelled fields the learner fills from a listening passage.",
+  "x-when-not-to-use": "Use TABLE_COMPLETION for grid-style tables. Use NOTE_COMPLETION for bulleted notes.",
+  "x-typical-range": "{ \"fields\": [2, 5, 10] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

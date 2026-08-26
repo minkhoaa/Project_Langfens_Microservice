@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/short-answer.schema.json",
   "title": "Short Answer",
   "description": "Free-text question with a short learner response (typically up to a few words) matched against whitelisted texts and regexes.",
+  "x-when-to-use": "When the learner writes a short free-text response (typically a few words) matched against literal answers or regexes.",
+  "x-when-not-to-use": "Use SENTENCE_COMPLETION when the answer fills a gap in a supplied sentence. Use AUDIO_RESPONSE for spoken answers.",
+  "x-typical-range": "{ \"words\": [1, 2, 3] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/audio-response.schema.json",
   "title": "Audio Response",
   "description": "Speaking prompt: the learner records an audio response, transcribed and graded by AI and/or a human rater.",
+  "x-when-to-use": "When the speaking prompt asks the learner to record an audio response (e.g. IELTS Speaking Part 1/2/3).",
+  "x-when-not-to-use": "Use SHORT_ANSWER for typed text. Use a non-speaking type entirely if the prompt is not a speaking task.",
+  "x-typical-range": "{ \"durationSeconds\": [30, 90, 180] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

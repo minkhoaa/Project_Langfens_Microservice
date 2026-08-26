@@ -147,25 +147,14 @@
     },
     "ScoringMode": {
       "type": "string",
-      "oneOf": [
-        {
-          "const": "all-or-nothing",
-          "description": "Score is awarded only when the learner selection matches the correct option set EXACTLY (sets equal); partial credit is 0."
-        },
-        {
-          "const": "proportional",
-          "description": "Score proportional to the count of correct selections (correctOptionIds ∩ learnerSelection / correctOptionIds). For MULTIPLE_CHOICE_MULTIPLE this is the canonical precision formula."
-        },
-        {
-          "const": "afi",
-          "description": "\"Any Fully-correct Item\" — each correctly selected option scores independently."
-        },
-        {
-          "const": "rubric",
-          "description": "A weighted rubric drives the score; pairs only annotate which criteria apply."
-        }
-      ],
-      "description": "How multi-answer selections are scored. Each value specifies a different grading strategy."
+      "enum": ["all-or-nothing", "proportional", "afi", "rubric"],
+      "description": "How multi-answer selections are scored.",
+      "x-enum-descriptions": {
+        "all-or-nothing": "Full credit only if every correct option is selected AND no incorrect option is selected.",
+        "proportional": "Partial credit proportional to correct picks (formula varies by type — see per-type description).",
+        "afi": "Any Fully-correct Item counts: each correct pair scores independently, no penalty for missing.",
+        "rubric": "Human/AI rater applies the supplied rubric."
+      }
     },
     "Criterion": {
       "type": "object",

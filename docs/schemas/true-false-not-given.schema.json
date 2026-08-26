@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/true-false-not-given.schema.json",
   "title": "True / False / Not Given",
   "description": "Reading comprehension item: decide whether a statement is TRUE, FALSE, or NOT GIVEN relative to the passage.",
+  "x-when-to-use": "When a reading passage contains statements the learner evaluates as TRUE, FALSE, or NOT GIVEN.",
+  "x-when-not-to-use": "Use YES_NO_NOT_GIVEN for writer-views questions. Use MULTIPLE_CHOICE_SINGLE when options vary beyond three fixed judgments.",
+  "x-typical-range": "{ \"options\": 3 }",
   "type": "object",
   "additionalProperties": false,
   "required": [

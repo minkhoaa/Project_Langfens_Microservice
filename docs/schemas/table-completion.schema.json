@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/table-completion.schema.json",
   "title": "Table Completion",
   "description": "Fill one or more cells in a table by referencing the source text.",
+  "x-when-to-use": "When a table contains gaps in one or more cells the learner must fill from the source text.",
+  "x-when-not-to-use": "Use FORM_COMPLETION for labelled fields. Use SUMMARY_COMPLETION for prose passages with gaps.",
+  "x-typical-range": "{ \"cells\": [2, 6, 10], \"gaps\": [1, 4, 8] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

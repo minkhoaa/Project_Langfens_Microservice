@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/matching-endings.schema.json",
   "title": "Matching Sentence Endings",
   "description": "Match each sentence beginning to the correct sentence ending from a fixed list.",
+  "x-when-to-use": "When sentence beginnings must be matched to the correct sentence endings from a fixed list.",
+  "x-when-not-to-use": "Use SENTENCE_COMPLETION for a single sentence. Use MATCHING_FEATURES for item→feature matching.",
+  "x-typical-range": "{ \"beginnings\": [4, 5, 7], \"endings\": [4, 5, 7] }",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -191,7 +194,9 @@
           "writeOnly": true
         },
         "scoring": {
-          "$ref": "_shared.schema.json#/$defs/ScoringMode"
+          "$ref": "_shared.schema.json#/$defs/ScoringMode",
+          "default": "all-or-nothing",
+          "description": "MATCHING_ENDINGS scoring mode. Default 'all-or-nothing' since each sentence beginning is paired with exactly one ending."
         }
       }
     }

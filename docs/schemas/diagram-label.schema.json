@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/diagram-label.schema.json",
   "title": "Diagram Labelling",
   "description": "Label parts of a diagram (e.g. a process diagram) by filling gaps whose regions are specified in normalized image coordinates.",
+  "x-when-to-use": "When a static diagram (process, device, etc.) has labels with gaps the learner fills based on the listening passage.",
+  "x-when-not-to-use": "Use MAP_LABEL for maps (geographic layouts). Use FLOW_CHART_COMPLETION when labels imply an ordering.",
+  "x-typical-range": "{ \"labels\": [3, 5, 8] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

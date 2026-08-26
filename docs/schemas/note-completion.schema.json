@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/note-completion.schema.json",
   "title": "Note Completion",
   "description": "Complete a notes-style passage by filling one or more gaps from the listening audio.",
+  "x-when-to-use": "When the prompt presents bulleted or partial notes with gaps the learner fills from a listening passage.",
+  "x-when-not-to-use": "Use SUMMARY_COMPLETION for prose-style summaries. Use SENTENCE_COMPLETION for a single-gap sentence.",
+  "x-typical-range": "{ \"gaps\": [2, 4, 6, 8] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

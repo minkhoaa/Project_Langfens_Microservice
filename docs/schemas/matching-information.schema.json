@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/matching-information.schema.json",
   "title": "Matching Information",
   "description": "Match each question to the paragraph that contains the information it asks about.",
+  "x-when-to-use": "When questions must be matched to the paragraph in a passage that contains the information each asks about.",
+  "x-when-not-to-use": "Use MATCHING_HEADING when matching paragraphs to headings. Use MATCHING_FEATURES when matching items to a feature list.",
+  "x-typical-range": "{ \"paragraphs\": [4, 6, 8], \"questions\": [3, 5, 7] }",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -189,7 +192,9 @@
           "writeOnly": true
         },
         "scoring": {
-          "$ref": "_shared.schema.json#/$defs/ScoringMode"
+          "$ref": "_shared.schema.json#/$defs/ScoringMode",
+          "default": "afi",
+          "description": "MATCHING_INFORMATION scoring mode. Default 'afi' when allowReuse is false (each question's match is graded independently); use 'proportional' when allowReuse is true and partial credit is desired."
         }
       }
     }

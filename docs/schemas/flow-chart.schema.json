@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/flow-chart.schema.json",
   "title": "Flow Chart (Ordering)",
   "description": "Order the nodes of a flow chart into the correct sequence. Grading may use exact match, longest common subsequence, or adjacent-swap count.",
+  "x-when-to-use": "When a process has 4-7 ordered steps (e.g. IELTS Listening Section 4 process diagrams).",
+  "x-when-not-to-use": "Use FLOW_CHART_COMPLETION when some nodes have fill-in-the-blank gaps. Use DIAGRAM_LABEL for static labelling (no ordering).",
+  "x-typical-range": "{ \"nodes\": [4, 5, 6, 7], \"edges\": [3, 6] }",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -224,21 +227,12 @@
             "adjacent-swap-count"
           ],
           "default": "lcs",
-          "description": "Algorithm used to score the learner ordering. Each value describes a different matching strategy.",
-          "oneOf": [
-            {
-              "const": "exact",
-              "description": "Learner order must equal the reference order exactly; any deviation scores 0."
-            },
-            {
-              "const": "lcs",
-              "description": "Score by Longest Common Subsequence length between learner order and reference (default). Tolerant of minor reorderings."
-            },
-            {
-              "const": "adjacent-swap-count",
-              "description": "Score by counting adjacent swaps needed to convert learner order into reference order."
-            }
-          ],
+          "description": "Flow chart node ordering scoring strategy.",
+          "x-enum-descriptions": {
+            "exact": "Full credit only if the order matches the canonical sequence exactly.",
+            "lcs": "Longest Common Subsequence — partial credit proportional to the longest common subsequence.",
+            "adjacent-swap-count": "Partial credit based on the number of adjacent swaps needed to reach the canonical order."
+          },
           "x-default-scoring": "lcs"
         }
       }

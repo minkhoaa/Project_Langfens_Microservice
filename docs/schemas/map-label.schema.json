@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/map-label.schema.json",
   "title": "Map Labelling",
   "description": "Label parts of a map by filling gaps whose regions are specified in normalized image coordinates, based on the listening audio.",
+  "x-when-to-use": "When a map image has labels with gaps the learner fills based on the listening passage.",
+  "x-when-not-to-use": "Use DIAGRAM_LABEL for non-map diagrams (processes, devices). Use FLOW_CHART_COMPLETION when labels imply an ordering.",
+  "x-typical-range": "{ \"labels\": [3, 5, 8] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

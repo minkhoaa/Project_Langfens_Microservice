@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/summary-completion.schema.json",
   "title": "Summary Completion",
   "description": "Complete a summary passage by filling one or more gaps from the source text.",
+  "x-when-to-use": "When a summary passage contains one or more gaps the learner fills using words from the source text.",
+  "x-when-not-to-use": "Use SENTENCE_COMPLETION for a single-gap sentence. Use NOTE_COMPLETION for bulleted notes; use TABLE_COMPLETION for tabular gaps.",
+  "x-typical-range": "{ \"gaps\": [1, 3, 5] }",
   "type": "object",
   "additionalProperties": false,
   "required": [

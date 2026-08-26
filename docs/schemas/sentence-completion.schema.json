@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/sentence-completion.schema.json",
   "title": "Sentence Completion",
   "description": "Complete a single sentence by filling one gap with an answer from the source text.",
+  "x-when-to-use": "When the prompt is a single sentence with exactly one gap to fill from the source text.",
+  "x-when-not-to-use": "Use SUMMARY_COMPLETION when there are multiple gaps. Use SHORT_ANSWER for free-text responses with no in-prompt gap.",
+  "x-typical-range": "{ \"gaps\": 1 }",
   "type": "object",
   "additionalProperties": false,
   "required": [

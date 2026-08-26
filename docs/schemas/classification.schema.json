@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/classification.schema.json",
   "title": "Classification",
   "description": "Sort each item into one of several categories. Each item belongs to exactly one category.",
+  "x-when-to-use": "When a list of items must each be sorted into exactly one of several categories.",
+  "x-when-not-to-use": "Use MULTIPLE_CHOICE_MULTIPLE when items can belong to multiple categories. Use MATCHING_FEATURES when categories are exclusive but framed as features.",
+  "x-typical-range": "{ \"items\": [5, 7, 10], \"categories\": [2, 3, 5] }",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -195,7 +198,9 @@
           "writeOnly": true
         },
         "scoring": {
-          "$ref": "_shared.schema.json#/$defs/ScoringMode"
+          "$ref": "_shared.schema.json#/$defs/ScoringMode",
+          "default": "afi",
+          "description": "CLASSIFICATION scoring mode. Default 'afi' since each item belongs to exactly one category and is scored independently."
         }
       }
     }

@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/yes-no-not-given.schema.json",
   "title": "Yes / No / Not Given",
   "description": "Reading comprehension item: decide whether a statement agrees with the writer's view (YES), contradicts it (NO), or whether the view is NOT GIVEN.",
+  "x-when-to-use": "When a reading passage contains statements the learner judges against the writer's opinion (YES / NO / NOT GIVEN).",
+  "x-when-not-to-use": "Use TRUE_FALSE_NOT_GIVEN for factual statements. Use MULTIPLE_CHOICE_SINGLE for varied option sets.",
+  "x-typical-range": "{ \"options\": 3 }",
   "type": "object",
   "additionalProperties": false,
   "required": [

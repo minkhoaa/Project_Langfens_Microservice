@@ -3,6 +3,9 @@
   "$id": "https://langfens.dev/schemas/matching-heading.schema.json",
   "title": "Matching Headings",
   "description": "Match each paragraph to the heading that best summarizes it. Supports one-to-one and one-to-many arities.",
+  "x-when-to-use": "When paragraphs (or sections) need to be matched to a list of headings summarizing each one.",
+  "x-when-not-to-use": "Use MATCHING_FEATURES when items are matched to attributes/categories. Use MATCHING_INFORMATION when questions are matched to paragraphs.",
+  "x-typical-range": "{ \"paragraphs\": [4, 5, 6], \"headings\": [6, 8, 10] }",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -217,7 +220,8 @@
         },
         "scoring": {
           "$ref": "_shared.schema.json#/$defs/ScoringMode",
-          "x-default-scoring": "all-or-nothing"
+          "default": "all-or-nothing",
+          "description": "MATCHING_HEADING scoring mode. Default 'all-or-nothing' for arity '1-1'; use 'afi' for '1-many' to credit each correct pair independently."
         }
       }
     }
