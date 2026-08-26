@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace exam_service.Infrastructure.Persistence;
+namespace ExamService.Infrastructure.Persistence;
 
 public class ExamDbContextFactory : IDesignTimeDbContextFactory<ExamDbContext>
 {

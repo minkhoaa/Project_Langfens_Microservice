@@ -12,32 +12,22 @@ public class StudyGoal
     [Required]
     public Guid UserId { get; set; }
 
-    /// <summary>
-    /// Target IELTS band score (5.0 - 9.0)
-    /// </summary>
+    /// <summary>Target IELTS band score (5.0 - 9.0).</summary>
     [Required]
     public decimal TargetBandScore { get; set; }
 
-    /// <summary>
-    /// Deadline to achieve the goal
-    /// </summary>
+    /// <summary>Deadline to achieve the goal.</summary>
     [Required]
     public DateTime TargetDate { get; set; }
 
-    /// <summary>
-    /// Skills to focus on: READING, LISTENING, WRITING, SPEAKING
-    /// </summary>
+    /// <summary>Skills to focus on: READING, LISTENING, WRITING, SPEAKING.</summary>
     [Column(TypeName = "text[]")]
     public List<string> FocusSkills { get; set; } = new();
 
-    /// <summary>
-    /// Hours per day dedicated to study (0.5 - 8.0)
-    /// </summary>
+    /// <summary>Hours per day dedicated to study (0.5 - 8.0).</summary>
     public decimal StudyHoursPerDay { get; set; } = 2.0m;
 
-    /// <summary>
-    /// Only one goal can be active per user
-    /// </summary>
+    /// <summary>Only one goal can be active per user.</summary>
     public bool IsActive { get; set; } = true;
 
     [Required]

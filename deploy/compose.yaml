@@ -43,6 +43,14 @@ services:
       - path: ./envs/attempt.env
         required: false
 
+    environment:
+      # Lock-step with attempt.env: gRPC ExamGateway endpoint + AI/RAG service URL.
+      # Internal compose-network endpoints (NOT host-mapped ports 8082/8092).
+      # - exam-service gRPC listens on 8081 inside the container (Kestrel gRPC endpoint).
+      # - ai-service listens on 8080 inside the container (host port 8092 maps to 8080).
+      - ExamServiceGateway=http://exam-service:8081
+      - AI_SERVICE_URL=http://ai-service:8080
+
     ports:
       - "8081:8080"
     networks:
@@ -58,16 +66,22 @@ services:
     env_file:
       - path: ./envs/exam.env
         required: false
+    environment:
+      # ExamJsonSeeder (Task 11) reads deploy/seeds/exams/*.json from this dir;
+      # the bind mount below populates /app/seeds/exams from the host.
+      - EXAM_SEEDS_DIR=/app/seeds/exams
     expose:
       - "8081"
     ports:
       - "8082:8080"
-
+    volumes:
+      - ./seeds/exams:/app/seeds/exams:ro
     depends_on:
       exam-database:
         condition: "service_healthy"
     networks:
       - backend
+
 
   course-service:
     image: ${DOCKERHUB_USER}/langfens-course:${TAG}

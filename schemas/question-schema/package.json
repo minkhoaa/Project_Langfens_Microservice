@@ -17,8 +17,9 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node scripts/dual-format.mjs && tsx scripts/emit-deref-schemas.mjs",
+    "build": "tsc -p tsconfig.build.json && node scripts/dual-format.mjs && tsx scripts/emit-deref-schemas.mjs && tsx scripts/emit-openapi.mjs",
     "gen:deref": "tsx scripts/emit-deref-schemas.mjs",
+    "gen:openapi": "tsx scripts/emit-openapi.mjs",
     "test": "vitest run",
     "parity": "node scripts/parity-check.mjs"
   },
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^16.0.0",
+    "@asteasolutions/zod-to-openapi": "^7.3.4",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "tsx": "^4.19.0",

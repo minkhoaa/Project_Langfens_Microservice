@@ -16,6 +16,12 @@
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.7" />
         <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.2" />
         <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="8.0.2" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+        <PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0" />
+        <PackageReference Include="Grpc.Tools" Version="2.72.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.22" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
@@ -39,6 +45,7 @@
         <ProjectReference Include="..\_shared\Shared.Bootstrap\Shared.Bootstrap.csproj" />
         <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
         <ProjectReference Include="..\_shared\Shared.Grpc\Shared.Grpc.csproj" />
+        <ProjectReference Include="..\_shared\Shared.ServiceDefaults\Shared.ServiceDefaults.csproj" />
         <ProjectReference Include="..\_shared\Shared.Security\Shared.Security.csproj" />
     </ItemGroup>
     <ItemGroup>

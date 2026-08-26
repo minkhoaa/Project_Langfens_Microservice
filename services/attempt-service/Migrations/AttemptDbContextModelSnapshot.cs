@@ -19,7 +19,7 @@ namespace attempt_service.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -33,7 +33,7 @@ namespace attempt_service.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("DurationSec")
+                    b.Property<int?>("DurationSec")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("ExamId")
@@ -43,23 +43,21 @@ namespace attempt_service.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<JsonDocument>("PaperJson")
+                        .IsRequired()
                         .HasColumnType("jsonb");
 
                     b.Property<decimal?>("RawScore")
-                        .HasPrecision(6, 2)
                         .HasColumnType("numeric(6,2)");
 
                     b.Property<decimal?>("ScaledScore")
-                        .HasPrecision(6, 2)
-                        .HasColumnType("numeric(6,2)");
+                        .HasColumnType("numeric(4,1)");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
+                        .HasColumnType("text")
                         .HasColumnName("status");
 
                     b.Property<DateTime?>("SubmittedAt")
@@ -73,11 +71,11 @@ namespace attempt_service.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExamId", "Status")
-                        .HasDatabaseName("idx_attempt_exam_status");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_attempts_user_id");
 
-                    b.HasIndex("UserId", "Status")
-                        .HasDatabaseName("idx_attempt_user_status");
+                    b.HasIndex("UserId", "ExamId")
+                        .HasDatabaseName("ix_attempts_user_exam");
 
                     b.ToTable("attempts", (string)null);
                 });
@@ -88,12 +86,18 @@ namespace attempt_service.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<JsonDocument>("AnswerJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("AnsweredAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("AttemptId")
                         .HasColumnType("uuid");
 
                     b.Property<decimal?>("AwardedPoints")
-                        .HasPrecision(6, 2)
-                        .HasColumnType("numeric(6,2)");
+                        .HasColumnType("numeric(5,2)");
 
                     b.Property<bool?>("IsCorrect")
                         .HasColumnType("boolean");
@@ -107,19 +111,15 @@ namespace attempt_service.Migrations
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uuid");
 
-                    b.Property<List<Guid>>("SelectedOptionIds")
-                        .HasColumnType("uuid[]");
-
-                    b.Property<string>("TextAnswer")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("AttemptId", "QuestionId")
-                        .IsUnique()
-                        .HasDatabaseName("uq_attempt_answer_attempt_question");
+                    b.HasIndex("AttemptId")
+                        .HasDatabaseName("ix_attempt_answers_attempt_id");
 
-                    b.ToTable("attempt_answer", (string)null);
+                    b.HasIndex("AttemptId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("attempt_answers", (string)null);
                 });
 
             modelBuilder.Entity("attempt_service.Domain.Entities.Note", b =>
@@ -154,14 +154,8 @@ namespace attempt_service.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("idx_note_created");
-
                     b.HasIndex("UserId")
-                        .HasDatabaseName("idx_note_user");
-
-                    b.HasIndex("UserId", "AttemptId")
-                        .HasDatabaseName("idx_note_user_attempt");
+                        .HasDatabaseName("ix_notes_user_id");
 
                     b.ToTable("notes", (string)null);
                 });
@@ -224,57 +218,15 @@ namespace attempt_service.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AttemptId")
-                        .IsUnique();
-
-                    b.HasIndex("ExamId");
-
-                    b.HasIndex("UserId", "CreatedAt");
-
-                    b.ToTable("placement_result", (string)null);
-                });
-
-            modelBuilder.Entity("attempt_service.Domain.Entities.StudyGoal", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<List<string>>("FocusSkills")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("StudyHoursPerDay")
-                        .HasPrecision(3, 1)
-                        .HasColumnType("numeric(3,1)");
-
-                    b.Property<decimal>("TargetBandScore")
-                        .HasPrecision(3, 1)
-                        .HasColumnType("numeric(3,1)");
-
-                    b.Property<DateTime>("TargetDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
+                        .HasDatabaseName("ix_placement_results_attempt_id");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("idx_study_goal_user");
+                        .HasDatabaseName("ix_placement_results_user_id");
 
-                    b.ToTable("study_goals", (string)null);
+                    b.ToTable("placement_results", (string)null);
                 });
 
-            modelBuilder.Entity("attempt_service.Domains.Entities.QuestionBookmark", b =>
+            modelBuilder.Entity("attempt_service.Domain.Entities.QuestionBookmark", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -309,17 +261,48 @@ namespace attempt_service.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("idx_bookmark_created");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("idx_bookmark_user");
-
-                    b.HasIndex("UserId", "QuestionId")
-                        .IsUnique()
-                        .HasDatabaseName("uq_bookmark_user_question");
+                    b.HasIndex("UserId", "QuestionId");
 
                     b.ToTable("question_bookmarks", (string)null);
+                });
+
+            modelBuilder.Entity("attempt_service.Domain.Entities.StudyGoal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.PrimitiveCollection<List<string>>("FocusSkills")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("StudyHoursPerDay")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("TargetBandScore")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("TargetDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_study_goals_user_id");
+
+                    b.ToTable("study_goals", (string)null);
                 });
 
             modelBuilder.Entity("attempt_service.Domain.Entities.AttemptAnswer", b =>

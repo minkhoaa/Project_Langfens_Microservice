@@ -13,7 +13,7 @@ public sealed class AudioResponseGrader : IGrader
 {
     public string Slug => "AUDIO_RESPONSE";
 
-    public GradeResult Grade(AnswerEnvelope learner, AnswerEnvelope correct, NormalizationConfig _)
+    public GradeResult Grade(AnswerEnvelope learner, AnswerEnvelope correct, NormalizationConfig norm)
     {
         // Ensure the envelopes parse to the expected record type before queueing for review,
         // so a malformed learner payload surfaces as a graded failure rather than silent review.

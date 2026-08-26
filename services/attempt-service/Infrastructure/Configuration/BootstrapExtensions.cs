@@ -1,8 +1,10 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using Shared.Grpc.ExamInternal;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
 using Shared.Security.Scopes;
+using attempt_service.Features.Attempt;
 using attempt_service.Features.Helpers;
 using attempt_service.Infrastructure.Persistence;
 
@@ -85,5 +87,37 @@ public static class AttemptBootstrapExtensions
         s.AddSingleton<IGrader, AudioResponseGrader>();
         s.AddSingleton<GraderRegistry>();
         return s;
+    }
+
+    // ── Submit flow (Task 18) ────────────────────────────────────────────────
+
+    public static IServiceCollection AddAttemptFlow(this IServiceCollection s)
+    {
+        s.AddScoped<AttemptFlow>();
+        // Real gRPC-backed ExamGateway (Task 20). AddAttemptGrpcClient() must be
+        // called on the WebApplicationBuilder so the ExamInternal.ExamInternalClient
+        // is registered with the typed-client factory.
+        s.AddScoped<IExamGateway, ExamGateway>();
+        s.AddSingleton<IGradeCalculator, GradeCalculator>();
+        s.AddSingleton<RagExplainer>();
+        return s;
+    }
+
+    // ── gRPC client (Task 20) ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// Registers the typed gRPC client that <see cref="ExamGateway"/> injects.
+    /// Address comes from <c>ExamServiceGateway</c> (env var) and falls back to
+    /// <c>http://localhost:5000</c> for local dev. AppHost wires this env var
+    /// to the exam-service's gRPC endpoint in <c>AppHost.cs</c>.
+    /// </summary>
+    public static WebApplicationBuilder AddAttemptGrpcClient(this WebApplicationBuilder builder)
+    {
+        var grpcAddress = Environment.GetEnvironmentVariable("ExamServiceGateway") ?? "http://localhost:5000";
+        builder.Services.AddGrpcClient<ExamInternal.ExamInternalClient>(o =>
+        {
+            o.Address = new Uri(grpcAddress);
+        });
+        return builder;
     }
 }

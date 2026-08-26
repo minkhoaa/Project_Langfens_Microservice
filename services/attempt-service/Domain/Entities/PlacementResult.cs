@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.VisualBasic;
 
 namespace attempt_service.Domain.Entities
 {
@@ -13,7 +12,6 @@ namespace attempt_service.Domain.Entities
         public Guid ExamId { get; set; }
         public Guid AttemptId { get; set; }
 
-
         public int ReadingCorrect { get; set; }
         public int ReadingTotal { get; set; }
         public int ListeningCorrect { get; set; }
@@ -22,19 +20,15 @@ namespace attempt_service.Domain.Entities
         public decimal? SpeakingBand { get; set; }
         public int TotalCorrect { get; set; }
         public string Level { get; set; } = default!;
-        public decimal Band { get; set; } = default!;
+        public decimal Band { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        /// <summary>
-        /// Full Writing grading response as JSON (includes CriterionScores, Suggestions, etc.)
-        /// </summary>
+        /// <summary>Full Writing grading response as JSON (includes CriterionScores, Suggestions, etc.).</summary>
         [Column(TypeName = "jsonb")]
         public string? WritingGradeJson { get; set; }
 
-        /// <summary>
-        /// Full Speaking grading response as JSON (includes CriterionScores, Suggestions, etc.)
-        /// </summary>
+        /// <summary>Full Speaking grading response as JSON (includes CriterionScores, Suggestions, etc.).</summary>
         [Column(TypeName = "jsonb")]
         public string? SpeakingGradeJson { get; set; }
 

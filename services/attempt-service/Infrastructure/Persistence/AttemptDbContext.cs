@@ -1,100 +1,84 @@
-using System.Net;
 using attempt_service.Domain.Entities;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 
 namespace attempt_service.Infrastructure.Persistence;
 
 public class AttemptDbContext : DbContext
 {
-    public AttemptDbContext(DbContextOptions<AttemptDbContext> options) : base(options)
+    public AttemptDbContext(DbContextOptions<AttemptDbContext> options) : base(options) { }
+
+    public DbSet<Attempt> Attempts { get; set; } = null!;
+    public DbSet<AttemptAnswer> AttemptAnswers { get; set; } = null!;
+    public DbSet<PlacementResult> PlacementResults { get; set; } = null!;
+    public DbSet<StudyGoal> StudyGoals { get; set; } = null!;
+    public DbSet<Note> Notes { get; set; } = null!;
+    public DbSet<QuestionBookmark> QuestionBookmarks { get; set; } = null!;
+
+    protected override void OnModelCreating(ModelBuilder mb)
     {
-    }
+        base.OnModelCreating(mb);
 
-    public DbSet<Attempt> Attempts { get; set; }
-    public DbSet<AttemptAnswer> AttemptAnswers { get; set; }
-    public DbSet<PlacementResult> PlacementResults { get; set; }
-    public DbSet<StudyGoal> StudyGoals { get; set; }
-    public DbSet<QuestionBookmark> QuestionBookmarks { get; set; }
-    public DbSet<Note> Notes { get; set; }
-
-
-
-    protected override void OnModelCreating(ModelBuilder app)
-    {
-        base.OnModelCreating(app);
-
-        app.Entity<Attempt>(a =>
+        mb.Entity<Attempt>(e =>
         {
-            a.ToTable("attempts");
-            a.Property(x => x.Status)
-                .HasColumnName("status")
-                .HasMaxLength(16)
-                .IsRequired();
-            a.Property(x => x.Status).HasMaxLength(16);
-            a.Property(x => x.PaperJson).HasColumnType("jsonb");
-
-            a.Property(x => x.RawScore).HasPrecision(6, 2);
-            a.Property(x => x.ScaledScore).HasPrecision(6, 2);
-
-            // Indexes
-            a.HasIndex(x => new { x.UserId, x.Status }).HasDatabaseName("idx_attempt_user_status");
-            a.HasIndex(x => new { x.ExamId, x.Status }).HasDatabaseName("idx_attempt_exam_status");
+            e.ToTable("attempts");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.PaperJson).HasColumnType("jsonb").IsRequired();
+            e.Property(x => x.RawScore).HasColumnType("numeric(6,2)");
+            e.Property(x => x.ScaledScore).HasColumnType("numeric(4,1)");
+            e.HasIndex(x => x.UserId).HasDatabaseName("ix_attempts_user_id");
+            e.HasIndex(x => new { x.UserId, x.ExamId }).HasDatabaseName("ix_attempts_user_exam");
         });
 
-        app.Entity<AttemptAnswer>(aa =>
+        mb.Entity<AttemptAnswer>(e =>
         {
-            aa.ToTable("attempt_answer");
-            aa.HasOne(x => x.Attempt)
+            e.ToTable("attempt_answers");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.AnswerJson).HasColumnType("jsonb").IsRequired();
+            e.Property(x => x.RagFeedbackJson).HasColumnType("jsonb");
+            e.Property(x => x.AwardedPoints).HasColumnType("numeric(5,2)");
+            e.HasIndex(x => new { x.AttemptId, x.QuestionId }).IsUnique();
+            e.HasIndex(x => x.AttemptId).HasDatabaseName("ix_attempt_answers_attempt_id");
+            e.HasOne(x => x.Attempt)
                 .WithMany(x => x.Answers)
                 .HasForeignKey(x => x.AttemptId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            aa.Property(x => x.SelectedOptionIds).HasColumnType("uuid[]");
-            aa.Property(x => x.AwardedPoints).HasPrecision(6, 2);
-            aa.Property(x => x.RagFeedbackJson).HasColumnType("jsonb");
-
-            aa.HasIndex(x => new { x.AttemptId, x.QuestionId })
-                .IsUnique()
-                .HasDatabaseName("uq_attempt_answer_attempt_question");
-        });
-        app.Entity<PlacementResult>(a =>
-        {
-            a.ToTable("placement_result");
-            a.HasOne(k => k.Attempt)
-            .WithMany(k => k.PlacementResults)
-            .HasForeignKey(p => p.AttemptId);
-            a.HasIndex(k => new { k.UserId, k.CreatedAt });
-            a.HasIndex(k => k.ExamId);
-            a.HasIndex(k => k.AttemptId).IsUnique();
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
         });
 
-        app.Entity<StudyGoal>(sg =>
+        mb.Entity<PlacementResult>(e =>
         {
-            sg.ToTable("study_goals");
-            sg.Property(x => x.TargetBandScore).HasPrecision(3, 1);
-            sg.Property(x => x.StudyHoursPerDay).HasPrecision(3, 1);
-            sg.Property(x => x.FocusSkills).HasColumnType("text[]");
-            sg.HasIndex(x => x.UserId).HasDatabaseName("idx_study_goal_user");
+            e.ToTable("placement_results");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.WritingGradeJson).HasColumnType("jsonb");
+            e.Property(x => x.SpeakingGradeJson).HasColumnType("jsonb");
+            e.HasIndex(x => x.UserId).HasDatabaseName("ix_placement_results_user_id");
+            e.HasIndex(x => x.AttemptId).HasDatabaseName("ix_placement_results_attempt_id");
+            e.HasOne(x => x.Attempt)
+                .WithMany(x => x.PlacementResults)
+                .HasForeignKey(x => x.AttemptId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
         });
 
-        app.Entity<QuestionBookmark>(qb =>
+        mb.Entity<StudyGoal>(e =>
         {
-            qb.ToTable("question_bookmarks");
-            qb.HasIndex(x => new { x.UserId, x.QuestionId })
-                .IsUnique()
-                .HasDatabaseName("uq_bookmark_user_question");
-            qb.HasIndex(x => x.UserId).HasDatabaseName("idx_bookmark_user");
-            qb.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_bookmark_created");
+            e.ToTable("study_goals");
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => x.UserId).HasDatabaseName("ix_study_goals_user_id");
         });
 
-        app.Entity<Note>(n =>
+        mb.Entity<Note>(e =>
         {
-            n.ToTable("notes");
-            n.HasIndex(x => x.UserId).HasDatabaseName("idx_note_user");
-            n.HasIndex(x => new { x.UserId, x.AttemptId }).HasDatabaseName("idx_note_user_attempt");
-            n.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_note_created");
+            e.ToTable("notes");
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => x.UserId).HasDatabaseName("ix_notes_user_id");
+        });
+
+        mb.Entity<QuestionBookmark>(e =>
+        {
+            e.ToTable("question_bookmarks");
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => new { x.UserId, x.QuestionId });
         });
     }
 }
-

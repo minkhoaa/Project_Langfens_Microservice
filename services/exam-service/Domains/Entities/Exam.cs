@@ -1,36 +1,28 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Shared.ExamDto.Contracts.Exam.Enums;
+namespace ExamService.Domains.Entities;
 
-namespace exam_service.Domains.Entities;
-
-public class Exam
+public sealed class Exam
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
-    [Required] public string Slug { get; set; } = default!;
+    public string Slug { get; set; } = "";
 
-    [Required] public string Title { get; set; } = default!;
+    public string Title { get; set; } = "";
 
     public string? DescriptionMd { get; set; }
 
-    // IELTS/TOEIC/...
-    [Required] public string Category { get; set; } = ExamCategory.IELTS!;
+    public string Category { get; set; } = "";
 
-    // A1..C2 hoặc Beginner/Intermediate...
-    [Required] public string Level { get; set; } = ExamLevel.B1!;
+    public string Level { get; set; } = "";
 
-    // Draft = 0, Published = 1, Archived = 2  
-    public string Status { get; set; } = ExamStatus.Draft;
+    public string Status { get; set; } = "draft";
 
-    public int DurationMin { get; set; } = 60;
-    
-    public string? ImageUrl { get; set; }  // Thumbnail/cover image URL
+    public int DurationMin { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
+    public string? ImageUrl { get; set; }
+
+    public DateTimeOffset CreatedAt { get; set; }
+
+    public DateTimeOffset UpdatedAt { get; set; }
 
     public List<ExamSection> Sections { get; set; } = new();
 }

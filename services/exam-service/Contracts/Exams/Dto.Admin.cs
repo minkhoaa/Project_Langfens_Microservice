@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace exam_service.Contracts.Exams;
 
@@ -41,6 +42,11 @@ public class DtoAdmin
         string? AudioUrl,
         string? TranscriptMd);
 
+    /// <summary>
+    /// Admin upsert payload for an <c>ExamQuestion</c>. Carries the canonical
+    /// SSOT envelope (Phase 4 <c>Payload</c> column) alongside the legacy
+    /// nullable columns so dual-write stays in a single SaveChanges round-trip.
+    /// </summary>
     public record AdminQuestionUpsert(
         Guid SectionId,
         int? Idx,
@@ -49,6 +55,12 @@ public class DtoAdmin
         int Difficulty,
         string? PromptMd,
         string? ExplanationMd,
+        /// <summary>
+        /// SSOT discriminated-union envelope { type, payload, correctAnswer, rubric }.
+        /// When provided, persisted to <c>ExamQuestion.Payload</c> (jsonb).
+        /// Legacy columns below are always populated in parallel.
+        /// </summary>
+        JsonElement? Payload,
         Dictionary<string, string[]?>? BlankAcceptTexts,
         Dictionary<string, string[]?>? BlankAcceptRegex,
         Dictionary<string, string[]?>? MatchPairs,
@@ -56,6 +68,10 @@ public class DtoAdmin
         IEnumerable<string>? ShortAnswerAcceptTexts,
         IEnumerable<string>? ShortAnswerAcceptRegex);
 
+    /// <summary>
+    /// Admin update payload for an <c>ExamQuestion</c>. Same dual-write
+    /// contract as <see cref="AdminQuestionUpsert"/>.
+    /// </summary>
     public record AdminQuestionUpdate(
         Guid SectionId,
         int? Idx,
@@ -64,6 +80,11 @@ public class DtoAdmin
         int Difficulty,
         string? PromptMd,
         string? ExplanationMd,
+        /// <summary>
+        /// SSOT discriminated-union envelope. Replaces the persisted
+        /// <c>ExamQuestion.Payload</c> column when provided.
+        /// </summary>
+        JsonElement? Payload,
         Dictionary<string, string[]?>? BlankAcceptTexts,
         Dictionary<string, string[]?>? BlankAcceptRegex,
         Dictionary<string, string[]?>? MatchPairs,

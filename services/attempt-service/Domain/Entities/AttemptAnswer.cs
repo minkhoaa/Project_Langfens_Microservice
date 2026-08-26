@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace attempt_service.Domain.Entities;
 
@@ -15,12 +16,16 @@ public class AttemptAnswer
     [Required] public Guid SectionId { get; set; }
     [Required] public Guid QuestionId { get; set; }
 
-    public List<Guid>? SelectedOptionIds { get; set; }
+    /// <summary>Per-type SSOT-correct answer shape.</summary>
+    [Required]
+    [Column(TypeName = "jsonb")]
+    public JsonDocument AnswerJson { get; set; } = null!;
 
-    public string? TextAnswer { get; set; } = string.Empty;
-
-    public bool? IsCorrect { get; set; }
     public decimal? AwardedPoints { get; set; }
+    public bool? IsCorrect { get; set; }
 
-    public System.Text.Json.JsonDocument? RagFeedbackJson { get; set; }
+    [Column(TypeName = "jsonb")]
+    public JsonDocument? RagFeedbackJson { get; set; }
+
+    [Required] public DateTime AnsweredAt { get; set; } = DateTime.UtcNow;
 }

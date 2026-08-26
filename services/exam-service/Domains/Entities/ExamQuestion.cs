@@ -1,76 +1,52 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
-namespace exam_service.Domains.Entities;
+namespace ExamService.Domains.Entities;
 
-public class ExamQuestion
+public sealed class ExamQuestion
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
     public Guid SectionId { get; set; }
-    public ExamSection Section { get; set; } = default!;
 
-    /// <summary>
-    /// Optional reference to question group for grouped display.
-    /// </summary>
     public Guid? GroupId { get; set; }
-    public ExamQuestionGroup? Group { get; set; }
 
     public int Idx { get; set; }
 
-    // ví dụ: MULTIPLE_CHOICE_SINGLE, TRUE_FALSE_NOT_GIVEN...
-    [Required] public string Type { get; set; } = default!;
-
-    // READING/LISTENING/WRITING/SPEAKING
-    [Required] public string Skill { get; set; } = default!;
-
-    public int Difficulty { get; set; } = 1;
-
-    [Required] public string? PromptMd { get; set; } = default!;
-
-    public string? ExplanationMd { get; set; }
-
-    [Column(TypeName = "jsonb")]
-    public Dictionary<string, string[]?>? BlankAcceptTexts { get; set; }
-
-    [Column(TypeName = "jsonb")]
-    public Dictionary<string, string[]?>? BlankAcceptRegex { get; set; }
+    /// <summary>
+    /// READING | LISTENING — denormalized from <c>payload.skill</c> per spec §2.1.
+    /// Lets the FE pre-filter sections without unpacking every <c>Payload</c>.
+    /// </summary>
+    [Required]
+    public string Skill { get; set; } = "";
 
     /// <summary>
-    /// Canonical shape (used by MATCHING_HEADING and other matching question
-    /// types):
-    /// <code>{ "&lt;promptKey&gt;": ["&lt;gradingKey&gt;", "&lt;displayText&gt;"] }</code>
-    /// — index 0 is the value compared against the user's answer, index 1 is
-    /// the human-readable label shown in the result review. Per the standard
-    /// in docs/standards/question-data.md.
+    /// Full SSOT question payload verbatim from <c>docs/schemas/&lt;type&gt;.schema.json</c>.
+    /// Carries id, skill, difficulty, promptMd, explanationMd, schemaVersion, uiHints,
+    /// provenance (writeOnly) and per-type fields. See spec §2.1 + §3.2.
     /// </summary>
+    [Required]
     [Column(TypeName = "jsonb")]
-    public Dictionary<string, string[]?>? MatchPairs { get; set; }
-
-    [Column(TypeName = "text[]")]
-    public List<string>? OrderCorrects { get; set; }
-
-    [Column(TypeName = "text[]")]
-    public List<string>? ShortAnswerAcceptTexts { get; set; }
-
-    [Column(TypeName = "text[]")]
-    public List<string>? ShortAnswerAcceptRegex { get; set; }
+    public JsonDocument Payload { get; set; } = null!;
 
     /// <summary>
-    /// Model/sample answers for ESSAY/WRITING type questions.
-    /// Stored as JSONB array of strings.
+    /// Full SSOT correct-answer payload verbatim (e.g.
+    /// <c>MultipleChoiceSingleAnswer.CorrectOptionId</c>,
+    /// <c>FlowChartAnswer.{Order, Scoring}</c>,
+    /// <c>CompletionAnswer.Answers</c>). See spec §2.1 + §3.2.
     /// </summary>
+    [Required]
     [Column(TypeName = "jsonb")]
-    public List<string>? ModelAnswers { get; set; }
+    public JsonDocument CorrectAnswer { get; set; } = null!;
 
     /// <summary>
-    /// Structured word list for MATCHING_INFORMATION type questions.
-    /// Stored as JSONB array of strings.
+    /// Mirrors <c>payload.schemaVersion</c>; defaults to <c>"1.0.0"</c>.
     /// </summary>
-    [Column(TypeName = "jsonb")]
-    public List<string>? WordList { get; set; }
+    public string SchemaVersion { get; set; } = "1.0.0";
 
-    public List<ExamOption> Options { get; set; } = new();
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public ExamSection Section { get; set; } = null!;
+    public ExamQuestionGroup? Group { get; set; }
 }

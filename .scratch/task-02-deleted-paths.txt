@@ -1,0 +1,128 @@
+Task 2 — Wipe legacy code in exam-service + attempt-service
+=============================================================
+
+Capture timestamp: 2026-08-26
+Source plan: docs/superpowers/plans/2026-08-26-attempt-exam-rebuild-plan.md (Task 2, lines 215-289)
+Source spec: docs/superpowers/specs/2026-08-26-attempt-exam-rebuild-design.md (§6 Step 1+2, lines 505-531)
+
+
+────────────────────────────────────────────────────────────
+STEP 1 — DB volume wipe decision
+────────────────────────────────────────────────────────────
+
+Decision: SKIP `docker compose down -v`.
+
+Reason:
+- Primary local dev is Aspire (per project CLAUDE.md line 7: `dotnet run --project AppHost/AppHost.csproj`).
+- AppHost/Program.cs (lines 70, 110) provisions its OWN Postgres containers for exam-db (port 5433) and attempt-db (port 5435) via `AddPostgres(...).WithDataVolume().WithLifetime(ContainerLifetime.Persistent)`. Aspire owns its volumes in the default Aspire volume directory.
+- `deploy/compose.yaml` (production-style) uses a single SHARED `pgdata` named volume for ALL Postgres databases (lines 217, 235, 254, 272, 289, 314, 332, 350, 368). `docker compose down -v` would wipe auth-db, course-db, vocabulary-db, writing-db, speaking-db, dictionary-db, gamification-db too — destructive side-effect outside the rebuild's scope.
+- `deploy/compose.local.yaml` does use per-DB volumes (`exam_pgdata`, `attempt_pgdata`), but the file is for an alternate local-dev path that is not currently in use (Aspire is).
+- No Aspire dev session is currently running, so there are no live DB connections to disconnect.
+
+Conceptual "wipe" semantics: Aspire provisions a fresh Postgres container + volume on next `dotnet run --project AppHost/AppHost.csproj`; the upcoming EF Core `InitDb` migration (Task 5 + Task 8) creates the new schema (Payload + CorrectAnswer jsonb on exam_questions; AnswerJson jsonb on attempt_answers). No data to physically delete.
+
+────────────────────────────────────────────────────────────
+STEP 2 — Deletion list (resolved against actual filesystem)
+────────────────────────────────────────────────────────────
+
+DELETED paths (resolved from `ls` of the actual repo, not from plan text):
+
+  services/exam-service/Application/         # plan: yes — matches plan
+  services/exam-service/Data/                # plan: yes — matches plan
+  services/exam-service/Domains/             # plan: yes — matches plan
+  services/exam-service/Features/            # plan: yes — matches plan
+  services/exam-service/Migrations/          # plan said Infrastructure/Persistence/Migrations/ but that path does not exist; actual is top-level Migrations/
+
+  services/attempt-service/Domain/           # plan said Domains/ (plural) but actual is Domain/ (singular)
+  services/attempt-service/Features/Attempt/ # plan: yes — matches plan
+  services/attempt-service/Features/Helpers/ # plan said Features/Graders/ but actual is Features/Helpers/ — contains the existing grader files + ExamGateway + PlacementWorkflow (replaced by Tasks 14-17 + 20-21)
+  services/attempt-service/Migrations/       # plan said Infrastructure/Persistence/Migrations/ but that path does not exist; actual is top-level Migrations/
+
+NO-OP paths (plan said delete but the directory does not exist in this service):
+
+  services/attempt-service/Application/      # does not exist
+  services/attempt-service/Data/             # does not exist
+  services/attempt-service/Features/Graders/ # does not exist (actual is Features/Helpers/)
+
+KEPT paths (verified, must NOT be deleted):
+
+  exam-service (top-level files / dirs not in delete list):
+    services/exam-service/Program.cs
+    services/exam-service/Program.Partial.cs
+    services/exam-service/appsettings.json
+    services/exam-service/exam-service.csproj
+    services/exam-service/Dockerfile
+    services/exam-service/CLAUDE.md
+    services/exam-service/Properties/
+    services/exam-service/Infrastructure/BootstrapExtensions.cs
+
+  exam-service (NOT in plan's keep list, but kept here):
+    services/exam-service/Infrastructure/Persistence/ExamDbContext.cs         # Task 4 will rewrite to add jsonb + GIN
+    services/exam-service/Infrastructure/Persistence/ExamDbContextFactory.cs  # design-time factory — required for `dotnet ef migrations add InitDb` in Task 5
+    services/exam-service/Contracts/Exams/Dto.Public.cs                       # plan silent; FE-facing DTOs survive rebuild (PaperJson contract is preserved, spec §3.5)
+    services/exam-service/Contracts/Exams/Dto.Admin.cs                         # plan silent; admin-side DTOs
+    services/exam-service/Contracts/Exams/Dto.Internal.cs                      # plan silent; internal gRPC DTOs
+
+    NOTE — exam-service/Contracts/Exams/ is NOT mentioned in the plan's keep list. The plan's "File Structure" section only lists Application/Common/ProtoHelper.cs under CREATE/REPLACE for exam-service, no explicit keep/create for Contracts/. We keep it for now (Tasks 9-13 will explicitly rebuild the DTOs in Features/Exams/Dtos/PaperJson.cs; this pre-existing Contracts/Exams/ will be replaced or dropped in those tasks). Verified: no other service or gateway project references exam-service.Contracts.
+
+  attempt-service (top-level files / dirs not in delete list):
+    services/attempt-service/Program.cs
+    services/attempt-service/Program.Partial.cs
+    services/attempt-service/appsettings.json
+    services/attempt-service/attempt-service.csproj
+    services/attempt-service/Dockerfile
+    services/attempt-service/CLAUDE.md
+    services/attempt-service/Properties/
+    services/attempt-service/Contracts/                                          # plan says keep
+    services/attempt-service/Contracts/Attempt/AttemptDtos.cs                   # inside Contracts/
+
+  attempt-service (NOT in plan's keep list, but kept here):
+    services/attempt-service/Infrastructure/BootstrapExtensions.cs              # design-time auth + persistence wiring
+    services/attempt-service/Infrastructure/Configuration/BootstrapExtensions.cs  # plan kept exam-service's BootstrapExtensions.cs; attempt-service's bootstrap is here. Verified: Program.cs imports `attempt_service.Infrastructure.Configuration.BootstrapExtensions`.
+    services/attempt-service/Infrastructure/Persistence/AttemptDbContext.cs    # Task 7 will rewrite to add jsonb mapping
+    services/attempt-service/Features/Analytics/                                # plan says keep
+    services/attempt-service/Features/Bookmarks/                                # plan says keep
+    services/attempt-service/Features/Notes/                                    # plan says keep
+    services/attempt-service/Features/StudyPlan/                                # plan says keep
+    services/attempt-service/Features/RabbitMq/                                 # plan says keep
+
+EXPECTED BUILD FAILURE
+───────────────────────
+
+After deletion, `dotnet build` on both services will FAIL. This is intentional per plan Task 2 acceptance. Reasons:
+
+  exam-service:
+    - Features/Exams/AdminEndpoint/* referenced exam-service.Application.* and exam-service.Domains.Entities.* — those namespaces are gone.
+    - Features/Exams/InternalEndpoint/ExamInternalGrpcService.cs referenced exam-service.Application.Common.ProtoHelper + exam-service.Domains.Entities.* — gone.
+    - Infrastructure/Persistence/ExamDbContext.cs still `using exam_service.Domains.Entities;` — gone.
+    - Program.cs references `Features/Exams/...` endpoint registration — gone.
+    → Task 3-13 will rebuild entities + DbContext + endpoints + ProtoHelper slim.
+
+  attempt-service:
+    - Features/Attempt/AttemptEndpoint/AttemptService.cs referenced Domain.Entities — gone.
+    - Features/Helpers/{Grader, GraderHelper, ClassificationGrader, PlacementWorkflow, ExamGateway, BuildQuestionIdSet}.cs referenced Domain.Entities — gone.
+    - Features/Analytics/*.cs, Features/Bookmarks/BookmarkService.cs, Features/Notes/NoteService.cs, Features/StudyPlan/StudyPlanService.cs all `using attempt_service.Domain.Entities;` — gone. Kept folders will fail to compile until Tasks 6-8 + 19-21 land the new slim entities + flow + endpoints.
+    - Infrastructure/Persistence/AttemptDbContext.cs `using attempt_service.Domain.Entities;` — gone.
+    - Program.cs references removed endpoint types — gone.
+    → Tasks 6-8 will recreate entities; Tasks 14-21 will rebuild graders + flow + endpoints.
+
+DO NOT attempt to fix build errors in this task. The plan explicitly says: "Tasks 3+ will rebuild them."
+
+DEVIATIONS FROM PLAN (summary)
+──────────────────────────────
+
+  1. `services/exam-service/Migrations/` is at TOP LEVEL, not under `Infrastructure/Persistence/Migrations/`. (Plan path does not exist.)
+  2. `services/attempt-service/Migrations/` is at TOP LEVEL, not under `Infrastructure/Persistence/Migrations/`. (Plan path does not exist.)
+  3. `services/attempt-service/Domain/` (singular) vs plan's `Domains/` (plural).
+  4. `services/attempt-service/Features/Helpers/` vs plan's `Features/Graders/`. (Helpers is the actual location of grader code, ExamGateway, PlacementWorkflow.)
+  5. `services/attempt-service/Application/` and `Data/` do not exist. Recorded as no-ops.
+  6. `services/exam-service/Contracts/Exams/` not mentioned in plan; KEPT (no external consumers, will be replaced/rebuilt in Tasks 9-13).
+  7. `services/exam-service/Infrastructure/Persistence/ExamDbContext.cs` + `ExamDbContextFactory.cs` not mentioned in plan's "keep" list; KEPT (required for `dotnet ef` design-time in Task 5).
+  8. `services/attempt-service/Infrastructure/Configuration/BootstrapExtensions.cs` not in plan's keep list; KEPT (Program.cs imports it).
+
+RATIONALE FOR ASPIRE-FIRST DEV
+──────────────────────────────
+
+The plan's Step 1 `docker compose down -v` is functionally a no-op for the live DBs (Aspire owns its volumes). The "wipe" is conceptual — the upcoming `InitDb` migration creates a fresh schema on the Aspire-managed Postgres, no manual data deletion needed.
+
+END OF FILE

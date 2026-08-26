@@ -1,96 +1,101 @@
-using exam_service.Domains.Entities;
+using ExamService.Domains.Entities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
-namespace exam_service.Infrastructure.Persistence;
+namespace ExamService.Infrastructure.Persistence;
 
-public class ExamDbContext : DbContext
+public sealed class ExamDbContext(DbContextOptions<ExamDbContext> options) : DbContext(options)
 {
-    public ExamDbContext(DbContextOptions<ExamDbContext> dbContextOptions) : base(dbContextOptions)
-    {
-    }
-
     public DbSet<Exam> Exams => Set<Exam>();
-    public DbSet<ExamSection> ExamSections => Set<ExamSection>();
-    public DbSet<ExamQuestion> ExamQuestions => Set<ExamQuestion>();
-    public DbSet<ExamQuestionGroup> ExamQuestionGroups => Set<ExamQuestionGroup>();
-    public DbSet<ExamOption> ExamOptions => Set<ExamOption>();
+    public DbSet<ExamSection> Sections => Set<ExamSection>();
+    public DbSet<ExamQuestionGroup> QuestionGroups => Set<ExamQuestionGroup>();
+    public DbSet<ExamQuestion> Questions => Set<ExamQuestion>();
+    public DbSet<ExamOption> Options => Set<ExamOption>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
         base.OnModelCreating(mb);
+
         mb.Entity<Exam>(e =>
         {
             e.ToTable("exams");
             e.HasKey(x => x.Id);
             e.Property(x => x.Slug).IsRequired();
             e.HasIndex(x => x.Slug).IsUnique();
+            e.Property(x => x.Title).IsRequired();
+            e.Property(x => x.Category).IsRequired();
+            e.Property(x => x.Level).IsRequired();
+            e.Property(x => x.Status).IsRequired();
+            e.Property(x => x.DurationMin).IsRequired();
             e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
         });
+
         mb.Entity<ExamSection>(e =>
         {
             e.ToTable("exam_sections");
             e.HasKey(x => x.Id);
-
             e.Property(x => x.Title).IsRequired();
-            e.HasIndex(x => new { x.ExamId, x.Idx });
-
+            e.HasIndex(x => new { x.ExamId, x.Idx }).IsUnique();
             e.HasOne(x => x.Exam)
                 .WithMany(x => x.Sections)
                 .HasForeignKey(x => x.ExamId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
         });
-        mb.Entity<ExamQuestion>(e =>
-        {
-            e.ToTable("exam_questions");
-            e.HasKey(x => x.Id);
 
-            e.Property(x => x.Type).IsRequired();
-            e.Property(x => x.Skill).IsRequired();
-            e.Property(x => x.PromptMd).IsRequired();
-            e.Property(x => x.BlankAcceptTexts).HasColumnType("jsonb");
-            e.Property(x => x.BlankAcceptRegex).HasColumnType("jsonb");
-            e.Property(x => x.MatchPairs).HasColumnType("jsonb");
-            e.Property(x => x.OrderCorrects).HasColumnType("text[]");
-            e.Property(x => x.ShortAnswerAcceptTexts).HasColumnType("text[]");
-            e.Property(x => x.ShortAnswerAcceptRegex).HasColumnType("text[]");
-            e.Property(x => x.WordList).HasColumnType("text[]");
-
-            e.HasIndex(x => new { x.SectionId, x.Idx });
-
-            e.HasOne(x => x.Section)
-                .WithMany(x => x.Questions)
-                .HasForeignKey(x => x.SectionId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired();
-
-            e.HasOne(x => x.Group)
-                .WithMany(x => x.Questions)
-                .HasForeignKey(x => x.GroupId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .IsRequired(false);
-        });
         mb.Entity<ExamQuestionGroup>(e =>
         {
             e.ToTable("exam_question_groups");
             e.HasKey(x => x.Id);
             e.Property(x => x.InstructionMd).IsRequired();
-            e.HasIndex(x => new { x.SectionId, x.Idx });
-
+            e.HasIndex(x => new { x.SectionId, x.Idx }).IsUnique();
             e.HasOne(x => x.Section)
                 .WithMany(x => x.QuestionGroups)
                 .HasForeignKey(x => x.SectionId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
         });
+
+        mb.Entity<ExamQuestion>(e =>
+        {
+            e.ToTable("exam_questions");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Skill).IsRequired();
+            e.Property(x => x.Payload).HasColumnType("jsonb").IsRequired();
+            e.Property(x => x.CorrectAnswer).HasColumnType("jsonb").IsRequired();
+            e.Property(x => x.SchemaVersion).HasDefaultValue("1.0.0");
+            e.HasIndex(x => new { x.SectionId, x.Idx }).IsUnique();
+            e.HasIndex(x => x.Payload)
+                .HasMethod("gin")
+                .HasOperators("jsonb_path_ops")
+                .HasDatabaseName("ix_exam_questions_payload_gin");
+            e.HasIndex(x => x.CorrectAnswer)
+                .HasMethod("gin")
+                .HasOperators("jsonb_path_ops")
+                .HasDatabaseName("ix_exam_questions_correct_answer_gin");
+            e.HasOne(x => x.Section)
+                .WithMany()
+                .HasForeignKey(x => x.SectionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+            e.HasOne(x => x.Group)
+                .WithMany()
+                .HasForeignKey(x => x.GroupId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+        });
+
         mb.Entity<ExamOption>(e =>
         {
             e.ToTable("exam_options");
             e.HasKey(x => x.Id);
             e.Property(x => x.ContentMd).IsRequired();
             e.HasIndex(x => new { x.QuestionId, x.Idx });
-            e.HasOne(x => x.Question).WithMany(x => x.Options).HasForeignKey(x => x.QuestionId)
-                .OnDelete(DeleteBehavior.Cascade).IsRequired();
+            e.HasOne(x => x.Question)
+                .WithMany()
+                .HasForeignKey(x => x.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
         });
     }
 }

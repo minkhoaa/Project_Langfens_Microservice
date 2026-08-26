@@ -6,6 +6,16 @@ using Shared.ExamDto.Contracts.Exam.Enums;
 
 namespace Shared.ExamDto.Contracts.Exam.InternalExamDto;
 
+// Phase 2 note: the records in this class are the legacy "flat" wire shape
+// used between attempt-service and exam-service via JSON and gRPC. Phase 2
+// added polymorphic SSOT-derived types under
+// `Shared.PublicContracts.Generated.QuestionSchema` (see
+// `Generated/QuestionSchema.cs`, produced by `nswag.json` from
+// `schemas/question-schema/dist/openapi/question-schema.openapi.json`).
+// Each per-type `*Payload` / `*Answer` record is the new source of truth for
+// the question-level wire contract; the legacy records below are retained
+// until attempt-service migrates off the flat shape — see
+// `services/attempt-service/Features/Helpers/BuildQuestionIdSet.cs`.
 public class InternalExamDto
 {
     public record InternalDeliveryExam

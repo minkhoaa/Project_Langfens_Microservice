@@ -27,6 +27,13 @@ public static class ExamBootstrapExtensions
                 c.User.HasAnyScope(ExamScope.ExamRead) || c.User.IsInRole(Roles.User)));
             opts.AddPolicy(ExamScope.ExamManage, p => p.RequireAssertion(c =>
                 c.User.HasAnyScope(ExamScope.ExamManage) || c.User.IsInRole(Roles.Admin)));
+
+            // AdminPolicy is the canonical alias for admin-only write endpoints
+            // (e.g. POST /api/admin/questions). Accepts either the Admin role or the
+            // exam.manage scope so the same policy works for human admins and service-to-service
+            // callers.
+            opts.AddPolicy("AdminPolicy", p => p.RequireAssertion(c =>
+                c.User.IsInRole(Roles.Admin) || c.User.HasAnyScope(ExamScope.ExamManage)));
         });
         return services;
     }

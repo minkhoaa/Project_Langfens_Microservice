@@ -84,7 +84,33 @@ import { QUESTION_TYPE_LABELS } from '@langfens/question-schema/labels';
 
 ## Security note: `FLOW_CHART_COMPLETION`
 
-## Verification
+## OpenAPI emission
+
+`npm run gen:openapi` emits an OpenAPI 3.1 document from the SSOT Zod
+schemas to `dist/openapi/question-schema.openapi.json` and
+`dist/openapi/question-schema.openapi.yaml`. The document is the wire
+contract consumed by
+`services/_shared/Shared.PublicContracts/nswag.json` (Phase 2 of the
+SSOT wire-up), which in turn produces
+`Generated/QuestionSchema.cs` for the BE.
+
+Components emitted:
+
+- 21 per-type payload schemas (`<Slug>Payload`, e.g.
+  `MultipleChoiceSinglePayload`).
+- 21 per-type answer schemas (`<Slug>Answer`).
+- 5 envelope schemas (`Envelope_FlowChart`, `Envelope_FlowChartCompletion`,
+  `Envelope_MultipleChoiceMultiple`, `Envelope_MatchingHeading`,
+  `Envelope_MatchingInformation`) — one per Zod `superRefine` variant.
+- One discriminated union envelope `QuestionEnvelope` with
+  `discriminator.propertyName: 'type'` mapping each slug to its
+  payload component. The `payload` and `correctAnswer` properties are
+  `anyOf` over every per-type schema so downstream generators (NSwag)
+  emit polymorphic classes.
+
+The script also runs as the last step of `npm run build`, so the OpenAPI
+document stays in lock-step with the Zod source.
+
 
 The package ships with a roundtrip parity check that proves the Zod
 package stays in lock-step with the JSON Schema docs in

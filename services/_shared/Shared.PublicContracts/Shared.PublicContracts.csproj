@@ -7,8 +7,10 @@
         <RootNamespace>Shared.ExamDto</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7"/>
-    </ItemGroup>
+    <!-- Generated/QuestionSchema.cs is auto-included via SDK default Compile glob. -->
+
+     <ItemGroup>
+         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7"/>
+     </ItemGroup>
 
 </Project>

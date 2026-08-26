@@ -1,26 +1,24 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace ExamService.Domains.Entities;
 
-namespace exam_service.Domains.Entities;
-
-public class ExamSection
+public sealed class ExamSection
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
     public Guid ExamId { get; set; }
-    public Exam Exam { get; set; } = null!;
 
-    public int Idx { get; set; } // thứ tự trong đề
+    public int Idx { get; set; }
 
-    [Required] public string Title { get; set; } = string.Empty;
+    public string Title { get; set; } = "";
 
     public string? InstructionsMd { get; set; }
-    public string? PassageMd { get; set; }  // Reading passage text (separate from instructions)
+
+    public string? PassageMd { get; set; }
+
     public string? AudioUrl { get; set; }
+
     public string? TranscriptMd { get; set; }
 
     public List<ExamQuestionGroup> QuestionGroups { get; set; } = new();
     public List<ExamQuestion> Questions { get; set; } = new();
+    public Exam Exam { get; set; } = null!;
 }

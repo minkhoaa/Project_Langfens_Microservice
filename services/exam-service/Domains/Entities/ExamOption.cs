@@ -1,20 +1,20 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace ExamService.Domains.Entities;
 
-namespace exam_service.Domains.Entities;
-
-public class ExamOption
+public sealed class ExamOption
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
     public Guid QuestionId { get; set; }
-    public ExamQuestion Question { get; set; } = default!;
 
     public int Idx { get; set; }
 
-    [Required] public string ContentMd { get; set; } = default!;
+    public string ContentMd { get; set; } = "";
 
-    public bool IsCorrect { get; set; }
+    /// <summary>
+    /// Admin-UI convenience flag. <c>payload.options[].isCorrect</c> is the
+    /// source of truth; this column is redundant with the jsonb but kept for
+    /// Phase-1.5 cleanup per spec §2.1.
+    /// </summary>
+    public bool? IsCorrect { get; set; }
+    public ExamQuestion Question { get; set; } = null!;
 }

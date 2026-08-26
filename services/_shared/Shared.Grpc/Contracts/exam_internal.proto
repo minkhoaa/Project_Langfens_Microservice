@@ -5,6 +5,9 @@ package exam.v1;
 // Namespace C# sinh ra
 option csharp_namespace = "Shared.Grpc.ExamInternal";
 
+// Well-known types (Google.Protobuf ships these with the runtime).
+import "google/protobuf/struct.proto";
+
 // ------------ Messages ------------
 
 message InternalDeliveryExam {
@@ -54,6 +57,21 @@ message InternalDeliveryQuestion {
   repeated string short_answer_accept_texts = 12;
   repeated string short_answer_accept_regex = 13;
   repeated FlowChartNode flow_chart_nodes = 14;
+  // SSOT discriminated-union envelope (Phase 3 wire-up). The legacy flat
+  // fields above (9-13) remain populated for backward compatibility; new
+  // consumers SHOULD prefer `envelope` when present.
+  InternalDeliveryQuestionEnvelope envelope = 15;
+}
+
+// SSOT discriminated-union envelope for a single question. Carries the
+// canonical `type` discriminator plus JSON-shaped `payload` and
+// `correct_answer` (`google.protobuf.Struct`) that mirror the Zod SSOT
+// question schemas. `rubric` is reserved for free-text / writing items.
+message InternalDeliveryQuestionEnvelope {
+  string type = 1;
+  google.protobuf.Struct payload = 2;
+  google.protobuf.Struct correct_answer = 3;
+  google.protobuf.Struct rubric = 4;
 }
 
 message InternalDeliveryOption {
