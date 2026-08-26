@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/matching-endings.schema.json",
+  "title": "Matching Sentence Endings",
+  "description": "Match each sentence beginning to the correct sentence ending from a fixed list.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "MATCHING_ENDINGS"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "MATCHING_ENDINGS",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111118",
+        "skill": "READING",
+        "difficulty": 3,
+        "promptMd": "Match each sentence beginning with the correct ending.",
+        "schemaVersion": "1.0.0",
+        "beginnings": [
+          {
+            "id": "b_1",
+            "text": "When the rain stops,"
+          },
+          {
+            "id": "b_2",
+            "text": "Before the bell rings,"
+          },
+          {
+            "id": "b_3",
+            "text": "Although the road was flooded,"
+          }
+        ],
+        "endings": [
+          {
+            "id": "e_1",
+            "text": "we usually walk home together."
+          },
+          {
+            "id": "e_2",
+            "text": "they leave the classroom quietly."
+          },
+          {
+            "id": "e_3",
+            "text": "we still managed to get to school."
+          }
+        ]
+      },
+      "correctAnswer": {
+        "pairs": [
+          {
+            "beginId": "b_1",
+            "endId": "e_1"
+          },
+          {
+            "beginId": "b_2",
+            "endId": "e_2"
+          },
+          {
+            "beginId": "b_3",
+            "endId": "e_3"
+          }
+        ],
+        "scoring": "all-or-nothing"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "beginnings",
+            "endings"
+          ],
+          "properties": {
+            "beginnings": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this sentence beginning. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Sentence beginning text."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Sentence beginnings to be completed.",
+              "maxItems": 10
+            },
+            "endings": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this sentence ending. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Sentence ending text."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Candidate sentence endings.",
+              "maxItems": 10
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pairs",
+        "scoring"
+      ],
+      "properties": {
+        "pairs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "beginId",
+              "endId"
+            ],
+            "properties": {
+              "beginId": {
+                "type": "string",
+                "description": "Id of the sentence beginning. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+              },
+              "endId": {
+                "type": "string",
+                "description": "Id of the matching sentence ending. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+              }
+            }
+          },
+          "uniqueItems": true,
+          "description": "Correct begin-end pairs.",
+          "maxItems": 10,
+          "writeOnly": true
+        },
+        "scoring": {
+          "$ref": "_shared.schema.json#/$defs/ScoringMode"
+        }
+      }
+    }
+  }
+}

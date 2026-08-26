@@ -1,0 +1,480 @@
+{
+  "$id": "https://langfens.dev/schemas/_shared.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Langfens Shared Schema Definitions",
+  "description": "Reusable $defs shared across all 21 Langfens question type schemas.",
+  "$defs": {
+    "Option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "idx",
+        "contentMd"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier for the option. Must be unique within its question."
+        },
+        "idx": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Zero-based display index of the option."
+        },
+        "contentMd": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Option text rendered as Markdown."
+        },
+        "mediaUrl": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "Optional media (image/audio) attached to this option."
+        },
+        "altText": {
+          "type": "string",
+          "description": "Alt text for option media, required when mediaUrl is image-like."
+        },
+        "isCorrect": {
+          "type": "boolean",
+          "description": "Whether this option is marked correct (used by multi-select types)."
+        }
+      }
+    },
+    "Gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier for the gap within its question."
+        },
+        "normalization": {
+          "$ref": "#/$defs/Normalization",
+          "description": "Normalization applied to learner input before matching."
+        },
+        "wordLimit": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum number of words allowed in the learner response."
+        },
+        "expectedKind": {
+          "type": "string",
+          "enum": [
+            "text",
+            "date",
+            "number"
+          ],
+          "description": "Expected semantic kind of the accepted answer."
+        }
+      },
+      "description": "Payload-side gap descriptor: WHERE the gap is and its constraints. Accepted answers NEVER belong here; they live in the per-type CorrectAnswer definition."
+    },
+    "Normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "case": {
+          "type": "string",
+          "enum": [
+            "sensitive",
+            "insensitive"
+          ],
+          "default": "insensitive",
+          "description": "Case sensitivity policy applied before matching.",
+          "oneOf": [
+            {
+              "const": "sensitive",
+              "description": "Match exactly, including case (case-sensitive)."
+            },
+            {
+              "const": "insensitive",
+              "description": "Match ignoring case (default)."
+            }
+          ]
+        },
+        "trimWhitespace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Strip leading/trailing whitespace before matching."
+        },
+        "collapseInnerWhitespace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Collapse runs of internal whitespace to a single space."
+        },
+        "stripArticles": {
+          "type": "boolean",
+          "default": false,
+          "description": "Strip leading English articles (a, an, the) before matching."
+        },
+        "stripTrailingPunctuation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Strip trailing punctuation before matching."
+        },
+        "unicode": {
+          "type": "string",
+          "enum": [
+            "NFC",
+            "NFKC",
+            "none"
+          ],
+          "default": "NFKC",
+          "description": "Unicode normalization form applied before matching.",
+          "oneOf": [
+            {
+              "const": "NFC",
+              "description": "Apply Canonical Decomposition followed by Canonical Composition."
+            },
+            {
+              "const": "NFKC",
+              "description": "Apply Compatibility Decomposition followed by Canonical Composition (default)."
+            },
+            {
+              "const": "none",
+              "description": "Do not apply any unicode normalization."
+            }
+          ]
+        }
+      }
+    },
+    "ScoringMode": {
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "all-or-nothing",
+          "description": "Score is awarded only when the learner selection matches the correct option set EXACTLY (sets equal); partial credit is 0."
+        },
+        {
+          "const": "proportional",
+          "description": "Score proportional to the count of correct selections (correctOptionIds ∩ learnerSelection / correctOptionIds). For MULTIPLE_CHOICE_MULTIPLE this is the canonical precision formula."
+        },
+        {
+          "const": "afi",
+          "description": "\"Any Fully-correct Item\" — each correctly selected option scores independently."
+        },
+        {
+          "const": "rubric",
+          "description": "A weighted rubric drives the score; pairs only annotate which criteria apply."
+        }
+      ],
+      "description": "How multi-answer selections are scored. Each value specifies a different grading strategy."
+    },
+    "Criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "weight"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier for the rubric criterion."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable label for the criterion."
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Relative weight of this criterion; weights across criteria typically sum to 1."
+        }
+      }
+    },
+    "Rubric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "criteria",
+        "scoringStrategy"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+-v\\d+$",
+          "description": "Rubric version slug, e.g. 'ielts-writing-task2-v1'."
+        },
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Criterion"
+          },
+          "description": "Scoring criteria comprising this rubric."
+        },
+        "requiredTokens": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Tokens that must appear in the learner response."
+        },
+        "forbiddenTokens": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Tokens that must NOT appear in the learner response."
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum acceptable response length (characters)."
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum acceptable response length (characters)."
+        },
+        "scoringStrategy": {
+          "type": "string",
+          "enum": [
+            "rubric-weighted-key-token",
+            "llm-judge"
+          ],
+          "description": "Algorithm used to score the response against the rubric."
+        }
+      }
+    },
+    "UiHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inputControl": {
+          "type": "string",
+          "enum": [
+            "text",
+            "textarea",
+            "select",
+            "radio",
+            "checkbox",
+            "drag",
+            "audio",
+            "image-pick"
+          ],
+          "description": "Recommended frontend input control for this question."
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "stacked",
+            "grid",
+            "columns",
+            "full-bleed"
+          ],
+          "description": "Recommended layout for the rendered question."
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Recommended column count when layout is 'columns' or 'grid'."
+        },
+        "mediaPosition": {
+          "type": "string",
+          "enum": [
+            "above",
+            "below",
+            "left",
+            "right",
+            "inline"
+          ],
+          "description": "Position of the question media relative to the prompt."
+        },
+        "estimatedSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Author-declared estimate of how long this question takes (seconds)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Free-form UI/authoring tags used for filtering or grouping."
+        }
+      },
+      "description": "Optional UI rendering hints shared across all question types."
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Sidecar provenance metadata for AI-generated questions.",
+      "properties": {
+        "generatorVersion": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Version of the generator that emitted this question."
+        },
+        "generatorType": {
+          "type": "string",
+          "enum": [
+            "human",
+            "llm",
+            "mixed"
+          ],
+          "description": "How the question was authored."
+        },
+        "promptHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 of the generation prompt in the form `sha256:<64-hex>`."
+        },
+        "modelId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Model identifier used to generate the question."
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Generation timestamp (RFC 3339 / ISO 8601)."
+        },
+        "reviewStatus": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "pending",
+            "approved",
+            "rejected"
+          ],
+          "description": "Editorial review status of the generated question."
+        },
+        "reviewerId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Editor who reviewed the question."
+        },
+        "reviewedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Review timestamp (RFC 3339 / ISO 8601)."
+        },
+        "rejectionReason": {
+          "type": "string",
+          "description": "Reason given when reviewStatus is `rejected`."
+        },
+        "regenerationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many times this question was regenerated."
+        }
+      }
+    },
+    "BasePayload": {
+      "type": "object",
+      "required": [
+        "id",
+        "skill",
+        "difficulty",
+        "promptMd",
+        "schemaVersion"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable UUID for this question."
+        },
+        "skill": {
+          "type": "string",
+          "enum": [
+            "READING",
+            "LISTENING"
+          ],
+          "description": "Skill band this question belongs to. Every question targets exactly one skill.",
+          "oneOf": [
+            {
+              "const": "READING",
+              "description": "Reading comprehension item — the learner reads text passages and answers questions."
+            },
+            {
+              "const": "LISTENING",
+              "description": "Listening comprehension item — the learner listens to audio and answers questions."
+            }
+          ]
+        },
+        "difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 1,
+          "description": "Difficulty band from 1 (easiest) to 5 (hardest)."
+        },
+        "promptMd": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Question prompt rendered as Markdown."
+        },
+        "explanationMd": {
+          "type": "string",
+          "description": "Optional author-facing explanation shown after grading."
+        },
+        "schemaVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "default": "1.0.0",
+          "description": "Version of the question payload schema this document conforms to."
+        },
+        "uiHints": {
+          "$ref": "#/$defs/UiHints",
+          "description": "Optional UI rendering hints for the frontend."
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "description": "Optional generation/editorial provenance.",
+          "writeOnly": true
+        }
+      },
+      "description": "Base fields shared by every question payload. Each per-type schema extends this via allOf.",
+      "x-generation-hint": "Required fields only. provenance is server-side audit metadata; do not display to learners."
+    },
+    "BaseQuestion": {
+      "$ref": "#/$defs/BasePayload",
+      "description": "Deprecated alias for BasePayload kept for backward compatibility with existing consumers."
+    },
+    "BaseQuestionRef": {
+      "$ref": "#/$defs/BasePayload",
+      "description": "Reference shorthand for the shared BasePayload (formerly BaseQuestion) definition."
+    },
+    "OptionRef": {
+      "$ref": "#/$defs/Option",
+      "description": "Reference shorthand for the shared Option definition."
+    },
+    "GapRef": {
+      "$ref": "#/$defs/Gap",
+      "description": "Reference shorthand for the shared Gap definition."
+    },
+    "NormalizationRef": {
+      "$ref": "#/$defs/Normalization",
+      "description": "Reference shorthand for the shared Normalization definition."
+    },
+    "RubricRef": {
+      "$ref": "#/$defs/Rubric",
+      "description": "Reference shorthand for the shared Rubric definition."
+    },
+    "ScoringModeRef": {
+      "$ref": "#/$defs/ScoringMode",
+      "description": "Reference shorthand for the shared ScoringMode definition."
+    }
+  }
+}

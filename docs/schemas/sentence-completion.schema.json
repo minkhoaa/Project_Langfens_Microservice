@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/sentence-completion.schema.json",
+  "title": "Sentence Completion",
+  "description": "Complete a single sentence by filling one gap with an answer from the source text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "SENTENCE_COMPLETION"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "SENTENCE_COMPLETION",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111110",
+        "skill": "READING",
+        "difficulty": 2,
+        "promptMd": "Complete the sentence. The blackbird's song is most distinctive at {{gap:gap_1}}.",
+        "schemaVersion": "1.0.0",
+        "gap": {
+          "id": "gap_1",
+          "wordLimit": 1
+        }
+      },
+      "correctAnswer": {
+        "acceptedTexts": [
+          "dawn"
+        ],
+        "acceptedRegexes": [
+          "^sunrise$"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "gap"
+          ],
+          "properties": {
+            "gap": {
+              "$ref": "_shared.schema.json#/$defs/Gap",
+              "description": "Single gap definition for the sentence."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptedTexts"
+      ],
+      "properties": {
+        "acceptedTexts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Literal answers accepted for the gap.",
+          "maxItems": 10,
+          "writeOnly": true
+        },
+        "acceptedRegexes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Optional regex patterns accepted for the gap.",
+          "maxItems": 5
+        }
+      }
+    }
+  }
+}

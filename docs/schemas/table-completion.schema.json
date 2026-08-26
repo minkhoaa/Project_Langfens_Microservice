@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/table-completion.schema.json",
+  "title": "Table Completion",
+  "description": "Fill one or more cells in a table by referencing the source text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "TABLE_COMPLETION"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "TABLE_COMPLETION",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111107",
+        "skill": "LISTENING",
+        "difficulty": 4,
+        "promptMd": "Complete the table below. Write **NO MORE THAN ONE WORD** for each answer.",
+        "schemaVersion": "1.0.0",
+        "cells": [
+          {
+            "rowId": "row_mon",
+            "colId": "col_focus",
+            "gapId": "gap_1"
+          },
+          {
+            "rowId": "row_wed",
+            "colId": "col_focus",
+            "gapId": "gap_2"
+          }
+        ],
+        "gaps": [
+          {
+            "id": "gap_1",
+            "wordLimit": 1,
+            "expectedKind": "text"
+          },
+          {
+            "id": "gap_2",
+            "wordLimit": 1,
+            "expectedKind": "text"
+          }
+        ]
+      },
+      "correctAnswer": {
+        "answers": {
+          "gap_1": [
+            "vocabulary"
+          ],
+          "gap_2": [
+            "pronunciation"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "cells",
+            "gaps"
+          ],
+          "properties": {
+            "cells": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rowId",
+                  "colId",
+                  "gapId"
+                ],
+                "properties": {
+                  "rowId": {
+                    "type": "string",
+                    "description": "Id of the row containing the cell. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "colId": {
+                    "type": "string",
+                    "description": "Id of the column containing the cell. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "gapId": {
+                    "type": "string",
+                    "description": "Id of the gap occupying the cell. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Cells that contain a gap; one entry per gap.",
+              "maxItems": 50
+            },
+            "gaps": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "_shared.schema.json#/$defs/Gap"
+              },
+              "uniqueItems": true,
+              "description": "Gap definitions referenced by cell gapIds.",
+              "maxItems": 30
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers"
+      ],
+      "properties": {
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "description": "Map of gap id to accepted answers.",
+          "writeOnly": true
+        }
+      }
+    }
+  }
+}

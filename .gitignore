@@ -28,7 +28,9 @@ deploy/envs/**
 *.pem
 *.key
 *.cert
-/docs/
+/docs/**
+!/docs/schemas/
+!/docs/schemas/**
 # ------------------------------
 # Node / JS / TS
 # ------------------------------

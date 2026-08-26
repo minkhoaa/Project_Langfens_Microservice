@@ -36,7 +36,7 @@ function assertMetadataKeys(): void {
 
 /**
  * Authoring metadata for every canonical question type, derived 1:1 from
- * `docs/standards/schemas/_registry.json`.
+ * `Project_Langfens_Microservice/docs/schemas/_registry.json`.
  */
 export const QUESTION_TYPE_METADATA: Readonly<Record<QuestionTypeSlug, QuestionTypeMetadata>> = {
   MULTIPLE_CHOICE_SINGLE: {

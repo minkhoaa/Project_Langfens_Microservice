@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/diagram-label.schema.json",
+  "title": "Diagram Labelling",
+  "description": "Label parts of a diagram (e.g. a process diagram) by filling gaps whose regions are specified in normalized image coordinates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "DIAGRAM_LABEL"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "DIAGRAM_LABEL",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111113",
+        "skill": "READING",
+        "difficulty": 4,
+        "promptMd": "Label the diagram. Write **NO MORE THAN TWO WORDS** for each label.",
+        "schemaVersion": "1.0.0",
+        "diagramImageUrl": "https://example.com/diagrams/plant-cell.png",
+        "diagramAltText": "Cross-section of a plant cell showing the main organelles.",
+        "labels": [
+          {
+            "id": "lbl_1",
+            "text": "A",
+            "region": {
+              "x": 0.1,
+              "y": 0.2,
+              "w": 0.08,
+              "h": 0.05
+            }
+          },
+          {
+            "id": "lbl_2",
+            "text": "B",
+            "region": {
+              "x": 0.55,
+              "y": 0.4,
+              "w": 0.08,
+              "h": 0.05
+            }
+          }
+        ],
+        "gaps": [
+          {
+            "id": "gap_1",
+            "wordLimit": 2
+          },
+          {
+            "id": "gap_2",
+            "wordLimit": 1
+          }
+        ]
+      },
+      "correctAnswer": {
+        "answers": {
+          "gap_1": [
+            "cell wall",
+            "wall"
+          ],
+          "gap_2": [
+            "nucleus"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "diagramImageUrl",
+            "diagramAltText",
+            "labels",
+            "gaps"
+          ],
+          "properties": {
+            "diagramImageUrl": {
+              "type": "string",
+              "format": "uri-reference",
+              "description": "URL of the diagram image."
+            },
+            "diagramAltText": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Alt text describing the diagram for screen readers."
+            },
+            "labels": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "text",
+                  "region"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this label. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Pre-printed label text (e.g. 'Step 1') shown on the diagram."
+                  },
+                  "region": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "x",
+                      "y",
+                      "w",
+                      "h"
+                    ],
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Top-left X in normalized coordinates."
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Top-left Y in normalized coordinates."
+                      },
+                      "w": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Width in normalized coordinates."
+                      },
+                      "h": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Height in normalized coordinates."
+                      }
+                    },
+                    "description": "Bounding box of the label as a fraction of the image."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Pre-printed labels on the diagram.",
+              "maxItems": 12
+            },
+            "gaps": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "_shared.schema.json#/$defs/Gap"
+              },
+              "uniqueItems": true,
+              "description": "Gaps the learner must fill in for each label region.",
+              "maxItems": 12
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers"
+      ],
+      "properties": {
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "maxItems": 6
+          },
+          "description": "Map of gap id to accepted answers.",
+          "writeOnly": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/flow-chart.schema.json",
+  "title": "Flow Chart (Ordering)",
+  "description": "Order the nodes of a flow chart into the correct sequence. Grading may use exact match, longest common subsequence, or adjacent-swap count.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "FLOW_CHART"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "FLOW_CHART",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111120",
+        "skill": "READING",
+        "difficulty": 4,
+        "promptMd": "Order the stages of the coffee roasting process.",
+        "schemaVersion": "1.0.0",
+        "nodes": [
+          {
+            "id": "n_1",
+            "label": "Harvest",
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "id": "n_2",
+            "label": "Wash",
+            "position": {
+              "x": 1,
+              "y": 0
+            }
+          },
+          {
+            "id": "n_3",
+            "label": "Roast",
+            "position": {
+              "x": 2,
+              "y": 0
+            }
+          },
+          {
+            "id": "n_4",
+            "label": "Cool",
+            "position": {
+              "x": 3,
+              "y": 0
+            }
+          },
+          {
+            "id": "n_5",
+            "label": "Package",
+            "position": {
+              "x": 4,
+              "y": 0
+            }
+          }
+        ],
+        "edges": [
+          {
+            "from": "n_1",
+            "to": "n_2"
+          },
+          {
+            "from": "n_2",
+            "to": "n_3"
+          },
+          {
+            "from": "n_3",
+            "to": "n_4"
+          },
+          {
+            "from": "n_4",
+            "to": "n_5"
+          }
+        ]
+      },
+      "correctAnswer": {
+        "order": [
+          "n_1",
+          "n_2",
+          "n_3",
+          "n_4",
+          "n_5"
+        ],
+        "scoring": "exact"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "nodes",
+            "edges"
+          ],
+          "properties": {
+            "nodes": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "position"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this node. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Node label shown to the learner."
+                  },
+                  "position": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "description": "X coordinate in arbitrary units."
+                      },
+                      "y": {
+                        "type": "number",
+                        "description": "Y coordinate in arbitrary units."
+                      }
+                    },
+                    "description": "Layout position for rendering the flow chart."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Nodes comprising the flow chart.",
+              "maxItems": 12
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "description": "Id of the source node. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "to": {
+                    "type": "string",
+                    "description": "Id of the destination node. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  }
+                }
+              },
+              "description": "Directed edges between nodes (informational; grading uses the order array).",
+              "maxItems": 24
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order"
+      ],
+      "properties": {
+        "order": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,16}$",
+            "description": "Local identifier for this item (e.g., 'item_1', 'node_A'). Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars."
+          },
+          "description": "Correct node id sequence.",
+          "maxItems": 12
+        },
+        "scoring": {
+          "type": "string",
+          "enum": [
+            "exact",
+            "lcs",
+            "adjacent-swap-count"
+          ],
+          "default": "lcs",
+          "description": "Algorithm used to score the learner ordering. Each value describes a different matching strategy.",
+          "oneOf": [
+            {
+              "const": "exact",
+              "description": "Learner order must equal the reference order exactly; any deviation scores 0."
+            },
+            {
+              "const": "lcs",
+              "description": "Score by Longest Common Subsequence length between learner order and reference (default). Tolerant of minor reorderings."
+            },
+            {
+              "const": "adjacent-swap-count",
+              "description": "Score by counting adjacent swaps needed to convert learner order into reference order."
+            }
+          ],
+          "x-default-scoring": "lcs"
+        }
+      }
+    }
+  },
+  "x-generation-recipe": "1. Create N nodes (4-7 typical). 2. Define edges as a DAG. 3. Pick scoring mode (default = lcs for IELTS-style tolerance)."
+}

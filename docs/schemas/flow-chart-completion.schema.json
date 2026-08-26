@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/flow-chart-completion.schema.json",
+  "title": "Flow Chart Completion",
+  "description": "Complete a flow chart by filling gaps inside some nodes, plus optionally ordering the nodes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "FLOW_CHART_COMPLETION"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "FLOW_CHART_COMPLETION",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111121",
+        "skill": "READING",
+        "difficulty": 5,
+        "promptMd": "Complete the flow chart showing the water cycle. Use **ONE WORD** for each gap. Then order the stages.",
+        "schemaVersion": "1.0.0",
+        "nodes": [
+          {
+            "id": "n_1",
+            "label": "Step 1",
+            "position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "id": "n_2",
+            "label": "Step 2",
+            "position": {
+              "x": 1,
+              "y": 0
+            }
+          },
+          {
+            "id": "n_3",
+            "label": "Step 3",
+            "position": {
+              "x": 2,
+              "y": 0
+            }
+          },
+          {
+            "id": "n_4",
+            "label": "Step 4",
+            "position": {
+              "x": 3,
+              "y": 0
+            }
+          }
+        ],
+        "edges": [
+          {
+            "from": "n_1",
+            "to": "n_2"
+          },
+          {
+            "from": "n_2",
+            "to": "n_3"
+          },
+          {
+            "from": "n_3",
+            "to": "n_4"
+          }
+        ],
+        "gaps": [
+          {
+            "nodeId": "n_1",
+            "wordLimit": 1
+          },
+          {
+            "nodeId": "n_3",
+            "wordLimit": 1
+          }
+        ]
+      },
+      "correctAnswer": {
+        "order": [
+          "n_1",
+          "n_2",
+          "n_3",
+          "n_4"
+        ],
+        "gapAnswers": {
+          "n_1": {
+            "acceptedTexts": [
+              "evaporation"
+            ]
+          },
+          "n_3": {
+            "acceptedTexts": [
+              "precipitation"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "nodes",
+            "edges",
+            "gaps"
+          ],
+          "properties": {
+            "nodes": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "position"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this node. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Node label shown to the learner."
+                  },
+                  "position": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "description": "X coordinate in arbitrary units."
+                      },
+                      "y": {
+                        "type": "number",
+                        "description": "Y coordinate in arbitrary units."
+                      }
+                    },
+                    "description": "Layout position for rendering the flow chart."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Nodes comprising the flow chart.",
+              "maxItems": 12
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "description": "Id of the source node. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "to": {
+                    "type": "string",
+                    "description": "Id of the destination node. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  }
+                }
+              },
+              "description": "Directed edges between nodes.",
+              "maxItems": 24
+            },
+            "gaps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "nodeId"
+                ],
+                "properties": {
+                  "nodeId": {
+                    "type": "string",
+                    "description": "Id of the node containing the gap. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "wordLimit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Maximum number of words allowed in the learner response."
+                  },
+                  "expectedKind": {
+                    "type": "string",
+                    "enum": [
+                      "text",
+                      "date",
+                      "number"
+                    ],
+                    "description": "Expected semantic kind of the accepted answer."
+                  },
+                  "normalization": {
+                    "$ref": "_shared.schema.json#/$defs/Normalization",
+                    "description": "Normalization applied to learner input before matching."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Gaps embedded in nodes. Accepted answers live in CorrectAnswer.gapAnswers; the payload gap only describes WHERE the gap is and its constraints.",
+              "maxItems": 12
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "gapAnswers"
+      ],
+      "properties": {
+        "order": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,16}$",
+            "description": "Local identifier for this item (e.g., 'item_1', 'node_A'). Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars."
+          },
+          "description": "Correct node id sequence.",
+          "maxItems": 12
+        },
+        "gapAnswers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "acceptedTexts"
+            ],
+            "properties": {
+              "acceptedTexts": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "Literal answers accepted for this gap."
+              },
+              "acceptedRegexes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "maxItems": 10,
+                "description": "Optional regex patterns accepted for this gap."
+              }
+            }
+          },
+          "description": "Map of gap id (nodeId) to its accepted answer bundle.",
+          "writeOnly": true
+        }
+      }
+    }
+  }
+}

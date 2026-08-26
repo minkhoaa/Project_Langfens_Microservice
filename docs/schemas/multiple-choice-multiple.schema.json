@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/multiple-choice-multiple.schema.json",
+  "title": "Multiple Choice (Multiple Answers)",
+  "description": "A question where the learner selects one or more correct options from a list, bounded by minSelections and maxSelections.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "MULTIPLE_CHOICE_MULTIPLE"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "MULTIPLE_CHOICE_MULTIPLE",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111103",
+        "skill": "READING",
+        "difficulty": 4,
+        "promptMd": "Which **two** factors does the passage cite as causes of coral bleaching on the Great Barrier Reef?",
+        "schemaVersion": "1.0.0",
+        "options": [
+          {
+            "id": "opt_1",
+            "idx": 0,
+            "contentMd": "Rising sea-surface temperatures"
+          },
+          {
+            "id": "opt_2",
+            "idx": 1,
+            "contentMd": "Increased coastal tourism"
+          },
+          {
+            "id": "opt_3",
+            "idx": 2,
+            "contentMd": "Ocean acidification"
+          },
+          {
+            "id": "opt_4",
+            "idx": 3,
+            "contentMd": "Overfishing of parrotfish"
+          },
+          {
+            "id": "opt_5",
+            "idx": 4,
+            "contentMd": "Storm-driven sediment runoff"
+          }
+        ],
+        "minSelections": 2,
+        "maxSelections": 2
+      },
+      "correctAnswer": {
+        "correctOptionIds": [
+          "opt_1",
+          "opt_3"
+        ],
+        "scoring": "all-or-nothing"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "options",
+            "minSelections",
+            "maxSelections"
+          ],
+          "properties": {
+            "options": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "_shared.schema.json#/$defs/Option"
+              },
+              "uniqueItems": true,
+              "description": "Candidate options; one or more are correct.",
+              "maxItems": 8
+            },
+            "minSelections": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Minimum number of options the learner must select."
+            },
+            "maxSelections": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of options the learner may select."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correctOptionIds",
+        "scoring"
+      ],
+      "properties": {
+        "correctOptionIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,16}$",
+            "description": "Local identifier for this item (e.g., 'item_1', 'node_A'). Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars."
+          },
+          "description": "Ids of all correct options.",
+          "maxItems": 8
+        },
+        "scoring": {
+          "$ref": "_shared.schema.json#/$defs/ScoringMode"
+        }
+      }
+    }
+  }
+}

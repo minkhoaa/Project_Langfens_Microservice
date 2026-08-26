@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/form-completion.schema.json",
+  "title": "Form Completion",
+  "description": "Complete a structured form (e.g. an application or registration) by filling gaps based on the listening audio. It is recommended to set expectedKind on each gap so graders know whether to parse dates or numbers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "FORM_COMPLETION"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "FORM_COMPLETION",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111109",
+        "skill": "LISTENING",
+        "difficulty": 3,
+        "promptMd": "Complete the booking form below.",
+        "schemaVersion": "1.0.0",
+        "gaps": [
+          {
+            "id": "gap_1",
+            "expectedKind": "date"
+          },
+          {
+            "id": "gap_2",
+            "expectedKind": "text"
+          }
+        ]
+      },
+      "correctAnswer": {
+        "answers": {
+          "gap_1": [
+            "14 March 2024"
+          ],
+          "gap_2": [
+            "Kingston"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "gaps"
+          ],
+          "properties": {
+            "gaps": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "_shared.schema.json#/$defs/Gap"
+              },
+              "uniqueItems": true,
+              "description": "Gaps embedded in form fields. Setting expectedKind is recommended for date/number fields.",
+              "maxItems": 10
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers"
+      ],
+      "properties": {
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "description": "Map of gap id to accepted answers.",
+          "writeOnly": true
+        }
+      }
+    }
+  }
+}

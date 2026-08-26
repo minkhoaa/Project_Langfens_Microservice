@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/yes-no-not-given.schema.json",
+  "title": "Yes / No / Not Given",
+  "description": "Reading comprehension item: decide whether a statement agrees with the writer's view (YES), contradicts it (NO), or whether the view is NOT GIVEN.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "YES_NO_NOT_GIVEN"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "YES_NO_NOT_GIVEN",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111105",
+        "skill": "READING",
+        "difficulty": 3,
+        "promptMd": "Do the following statements agree with the views of the author?",
+        "schemaVersion": "1.0.0",
+        "statement": "The author believes that four-day workweeks improve employee wellbeing.",
+        "options": [
+          {
+            "id": "y",
+            "idx": 0,
+            "contentMd": "YES"
+          },
+          {
+            "id": "n",
+            "idx": 1,
+            "contentMd": "NO"
+          },
+          {
+            "id": "ng",
+            "idx": 2,
+            "contentMd": "NOT GIVEN"
+          }
+        ]
+      },
+      "correctAnswer": {
+        "choice": "YES"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "statement",
+            "options"
+          ],
+          "properties": {
+            "statement": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Statement the learner must judge as YES, NO, or NOT GIVEN."
+            },
+            "options": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "idx",
+                  "contentMd"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "enum": [
+                      "y",
+                      "n",
+                      "ng"
+                    ],
+                    "description": "Canonical id for YES (y), NO (n), NOT GIVEN (ng)."
+                  },
+                  "idx": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2,
+                    "description": "Zero-based display index of the option."
+                  },
+                  "contentMd": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Label rendered for this option."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Exactly three options with ids constrained to y, n, ng."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "choice"
+      ],
+      "properties": {
+        "choice": {
+          "type": "string",
+          "enum": [
+            "YES",
+            "NO",
+            "NOT_GIVEN"
+          ],
+          "description": "The correct judgment for the statement."
+        }
+      }
+    }
+  }
+}

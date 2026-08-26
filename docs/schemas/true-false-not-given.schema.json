@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/true-false-not-given.schema.json",
+  "title": "True / False / Not Given",
+  "description": "Reading comprehension item: decide whether a statement is TRUE, FALSE, or NOT GIVEN relative to the passage.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "TRUE_FALSE_NOT_GIVEN"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111104",
+        "skill": "READING",
+        "difficulty": 2,
+        "promptMd": "Do the following statements agree with the information in the passage?",
+        "schemaVersion": "1.0.0",
+        "statement": "The Okavango Delta is the largest inland delta in the world.",
+        "options": [
+          {
+            "id": "t",
+            "idx": 0,
+            "contentMd": "TRUE"
+          },
+          {
+            "id": "f",
+            "idx": 1,
+            "contentMd": "FALSE"
+          },
+          {
+            "id": "ng",
+            "idx": 2,
+            "contentMd": "NOT GIVEN"
+          }
+        ]
+      },
+      "correctAnswer": {
+        "choice": "TRUE"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "statement",
+            "options"
+          ],
+          "properties": {
+            "statement": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Statement the learner must judge as TRUE, FALSE, or NOT GIVEN."
+            },
+            "options": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "idx",
+                  "contentMd"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "enum": [
+                      "t",
+                      "f",
+                      "ng"
+                    ],
+                    "description": "Canonical id for TRUE (t), FALSE (f), NOT GIVEN (ng)."
+                  },
+                  "idx": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2,
+                    "description": "Zero-based display index of the option."
+                  },
+                  "contentMd": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Label rendered for this option."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Exactly three options with ids constrained to t, f, ng."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "choice"
+      ],
+      "properties": {
+        "choice": {
+          "type": "string",
+          "enum": [
+            "TRUE",
+            "FALSE",
+            "NOT_GIVEN"
+          ],
+          "description": "The correct judgment for the statement."
+        }
+      }
+    }
+  }
+}

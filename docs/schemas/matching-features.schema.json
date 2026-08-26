@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/matching-features.schema.json",
+  "title": "Matching Features",
+  "description": "Match each item to one of a fixed set of features (e.g. theories, dates, or people).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "MATCHING_FEATURES"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "MATCHING_FEATURES",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111117",
+        "skill": "LISTENING",
+        "difficulty": 3,
+        "promptMd": "Match each theory with the researcher who proposed it.",
+        "schemaVersion": "1.0.0",
+        "items": [
+          {
+            "id": "i_1",
+            "text": "Relativity"
+          },
+          {
+            "id": "i_2",
+            "text": "Natural selection"
+          },
+          {
+            "id": "i_3",
+            "text": "Plate tectonics"
+          }
+        ],
+        "features": [
+          {
+            "id": "f_1",
+            "label": "Einstein"
+          },
+          {
+            "id": "f_2",
+            "label": "Darwin"
+          },
+          {
+            "id": "f_3",
+            "label": "Wegener"
+          }
+        ],
+        "allowReuse": false
+      },
+      "correctAnswer": {
+        "pairs": [
+          {
+            "itemId": "i_1",
+            "featureId": "f_1"
+          },
+          {
+            "itemId": "i_2",
+            "featureId": "f_2"
+          },
+          {
+            "itemId": "i_3",
+            "featureId": "f_3"
+          }
+        ],
+        "scoring": "all-or-nothing"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "items",
+            "features"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this item. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Item text shown to the learner."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Items to be matched to features.",
+              "maxItems": 20
+            },
+            "features": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this feature. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Feature label shown to the learner."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Candidate features.",
+              "maxItems": 10
+            },
+            "allowReuse": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether a feature may be matched to more than one item."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pairs",
+        "scoring"
+      ],
+      "properties": {
+        "pairs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "itemId",
+              "featureId"
+            ],
+            "properties": {
+              "itemId": {
+                "type": "string",
+                "description": "Id of the item. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+              },
+              "featureId": {
+                "type": "string",
+                "description": "Id of the matching feature. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+              }
+            }
+          },
+          "uniqueItems": true,
+          "description": "Correct item-feature pairs.",
+          "maxItems": 20,
+          "writeOnly": true
+        },
+        "scoring": {
+          "$ref": "_shared.schema.json#/$defs/ScoringMode"
+        }
+      }
+    }
+  }
+}

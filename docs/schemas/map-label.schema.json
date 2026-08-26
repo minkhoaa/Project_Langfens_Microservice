@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/map-label.schema.json",
+  "title": "Map Labelling",
+  "description": "Label parts of a map by filling gaps whose regions are specified in normalized image coordinates, based on the listening audio.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "MAP_LABEL"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "MAP_LABEL",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111114",
+        "skill": "LISTENING",
+        "difficulty": 3,
+        "promptMd": "Label the map of Newton village. Write **ONE WORD ONLY** for each answer.",
+        "schemaVersion": "1.0.0",
+        "diagramImageUrl": "https://example.com/maps/newton.png",
+        "diagramAltText": "Sketch map of Newton village showing the school, library, and bus stop.",
+        "labels": [
+          {
+            "id": "lbl_1",
+            "text": "?",
+            "region": {
+              "x": 0.2,
+              "y": 0.3,
+              "w": 0.1,
+              "h": 0.06
+            }
+          },
+          {
+            "id": "lbl_2",
+            "text": "?",
+            "region": {
+              "x": 0.65,
+              "y": 0.55,
+              "w": 0.1,
+              "h": 0.06
+            }
+          }
+        ],
+        "gaps": [
+          {
+            "id": "gap_1",
+            "wordLimit": 1
+          },
+          {
+            "id": "gap_2",
+            "wordLimit": 1
+          }
+        ]
+      },
+      "correctAnswer": {
+        "answers": {
+          "gap_1": [
+            "library"
+          ],
+          "gap_2": [
+            "school"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "diagramImageUrl",
+            "diagramAltText",
+            "labels",
+            "gaps"
+          ],
+          "properties": {
+            "diagramImageUrl": {
+              "type": "string",
+              "format": "uri-reference",
+              "description": "URL of the map image."
+            },
+            "diagramAltText": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Alt text describing the map for screen readers."
+            },
+            "labels": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "text",
+                  "region"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this label. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Pre-printed label text (e.g. 'A', 'B') shown on the map."
+                  },
+                  "region": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "x",
+                      "y",
+                      "w",
+                      "h"
+                    ],
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Top-left X in normalized coordinates."
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Top-left Y in normalized coordinates."
+                      },
+                      "w": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Width in normalized coordinates."
+                      },
+                      "h": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Height in normalized coordinates."
+                      }
+                    },
+                    "description": "Bounding box of the label as a fraction of the image."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Pre-printed labels on the map.",
+              "maxItems": 12
+            },
+            "gaps": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "_shared.schema.json#/$defs/Gap"
+              },
+              "uniqueItems": true,
+              "description": "Gaps the learner must fill in for each label region.",
+              "maxItems": 12
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers"
+      ],
+      "properties": {
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "description": "Map of gap id to accepted answers.",
+          "writeOnly": true
+        }
+      }
+    }
+  }
+}

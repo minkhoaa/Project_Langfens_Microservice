@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/multiple-choice-single.schema.json",
+  "title": "Multiple Choice (Single Answer)",
+  "description": "A reading or listening question that asks the learner to choose exactly one option from a small set (2-6).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "MULTIPLE_CHOICE_SINGLE"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111101",
+        "skill": "READING",
+        "difficulty": 3,
+        "promptMd": "Which of the following best describes the author's view of urban rewilding projects?",
+        "schemaVersion": "1.0.0",
+        "explanationMd": "The author contrasts the promise of biodiversity gains with concerns about pacing and funding.",
+        "options": [
+          {
+            "id": "opt_1",
+            "idx": 0,
+            "contentMd": "They are an underfunded distraction from real conservation."
+          },
+          {
+            "id": "opt_2",
+            "idx": 1,
+            "contentMd": "They are a promising but unevenly executed experiment."
+          },
+          {
+            "id": "opt_3",
+            "idx": 2,
+            "contentMd": "They have already proven their long-term value."
+          },
+          {
+            "id": "opt_4",
+            "idx": 3,
+            "contentMd": "They should replace traditional nature reserves entirely."
+          }
+        ]
+      },
+      "correctAnswer": {
+        "correctOptionId": "opt_2"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "options"
+          ],
+          "properties": {
+            "options": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 6,
+              "items": {
+                "$ref": "_shared.schema.json#/$defs/Option"
+              },
+              "uniqueItems": true,
+              "description": "Exactly one of these options is correct."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correctOptionId"
+      ],
+      "properties": {
+        "correctOptionId": {
+          "type": "string",
+          "description": "Id of the single correct option. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+          "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+        }
+      }
+    }
+  }
+}

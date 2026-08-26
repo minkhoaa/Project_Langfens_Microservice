@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/short-answer.schema.json",
+  "title": "Short Answer",
+  "description": "Free-text question with a short learner response (typically up to a few words) matched against whitelisted texts and regexes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "SHORT_ANSWER"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "SHORT_ANSWER",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "skill": "READING",
+        "difficulty": 2,
+        "promptMd": "What colour are the seats at Wimbledon's Centre Court? Answer in **ONE WORD**.",
+        "schemaVersion": "1.0.0",
+        "wordLimit": 1,
+        "normalization": {
+          "case": "insensitive",
+          "trimWhitespace": true,
+          "collapseInnerWhitespace": true
+        }
+      },
+      "correctAnswer": {
+        "acceptedTexts": [
+          "purple",
+          "green"
+        ],
+        "acceptedRegexes": []
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "wordLimit": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of words allowed in the response."
+            },
+            "normalization": {
+              "$ref": "_shared.schema.json#/$defs/Normalization",
+              "description": "Normalization applied to the response before matching."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptedTexts"
+      ],
+      "properties": {
+        "acceptedTexts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Literal answers accepted for this question.",
+          "maxItems": 10,
+          "writeOnly": true
+        },
+        "acceptedRegexes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Optional regex patterns accepted for this question.",
+          "maxItems": 5
+        }
+      }
+    }
+  }
+}

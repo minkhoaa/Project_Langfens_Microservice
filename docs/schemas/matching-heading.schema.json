@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/matching-heading.schema.json",
+  "title": "Matching Headings",
+  "description": "Match each paragraph to the heading that best summarizes it. Supports one-to-one and one-to-many arities.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "MATCHING_HEADING"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "MATCHING_HEADING",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111115",
+        "skill": "READING",
+        "difficulty": 4,
+        "promptMd": "Match each paragraph with the correct heading.",
+        "schemaVersion": "1.0.0",
+        "paragraphs": [
+          {
+            "id": "p_1",
+            "romanNumeral": "i"
+          },
+          {
+            "id": "p_2",
+            "romanNumeral": "ii"
+          },
+          {
+            "id": "p_3",
+            "romanNumeral": "iii"
+          }
+        ],
+        "headings": [
+          {
+            "id": "h_1",
+            "text": "A long-standing tradition"
+          },
+          {
+            "id": "h_2",
+            "text": "An unexpected consequence"
+          },
+          {
+            "id": "h_3",
+            "text": "The economic backdrop"
+          }
+        ],
+        "arity": "1-1"
+      },
+      "correctAnswer": {
+        "pairs": [
+          {
+            "paragraphId": "p_1",
+            "headingId": "h_1"
+          },
+          {
+            "paragraphId": "p_2",
+            "headingId": "h_3"
+          },
+          {
+            "paragraphId": "p_3",
+            "headingId": "h_2"
+          }
+        ],
+        "scoring": "all-or-nothing"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "paragraphs",
+            "headings"
+          ],
+          "properties": {
+            "paragraphs": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "romanNumeral"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this paragraph. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "romanNumeral": {
+                    "type": "string",
+                    "enum": [
+                      "i",
+                      "ii",
+                      "iii",
+                      "iv",
+                      "v",
+                      "vi",
+                      "vii",
+                      "viii",
+                      "ix",
+                      "x",
+                      "xi",
+                      "xii",
+                      "xiii",
+                      "xiv"
+                    ],
+                    "description": "Roman numeral label shown next to the paragraph."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Paragraphs to be matched.",
+              "maxItems": 14
+            },
+            "headings": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for this heading. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Heading text."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Candidate headings.",
+              "maxItems": 14
+            },
+            "arity": {
+              "type": "string",
+              "enum": [
+                "1-1",
+                "1-many"
+              ],
+              "default": "1-1",
+              "description": "Whether each heading may be used at most once or may be reused across paragraphs."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pairs",
+        "scoring"
+      ],
+      "properties": {
+        "pairs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "paragraphId",
+              "headingId"
+            ],
+            "properties": {
+              "paragraphId": {
+                "type": "string",
+                "description": "Id of the paragraph. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+              },
+              "headingId": {
+                "type": "string",
+                "description": "Id of the heading that matches the paragraph. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+              }
+            }
+          },
+          "uniqueItems": true,
+          "description": "Correct paragraph-heading pairs.",
+          "maxItems": 14,
+          "writeOnly": true
+        },
+        "scoring": {
+          "$ref": "_shared.schema.json#/$defs/ScoringMode",
+          "x-default-scoring": "all-or-nothing"
+        }
+      }
+    }
+  },
+  "x-generation-recipe": "1. Create 4-6 paragraphs and 6-10 headings. 2. Ensure unique mapping (no two paragraphs share a heading) unless arity=1-many. 3. Mark heading options i-vii (or similar)."
+}

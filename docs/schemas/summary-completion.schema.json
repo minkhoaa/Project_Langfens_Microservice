@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/summary-completion.schema.json",
+  "title": "Summary Completion",
+  "description": "Complete a summary passage by filling one or more gaps from the source text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "SUMMARY_COMPLETION"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "SUMMARY_COMPLETION",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111106",
+        "skill": "READING",
+        "difficulty": 4,
+        "promptMd": "Complete the summary below. Choose **NO MORE THAN TWO WORDS** from the passage for each answer.\n\nThe {{gap:gap_1}} is a layer of gas that traps heat close to the Earth. When its concentration rises, average surface {{gap:gap_2}} increase. Scientists monitor this with instruments placed on {{gap:gap_3}} and in orbit.",
+        "schemaVersion": "1.0.0",
+        "gaps": [
+          {
+            "id": "gap_1",
+            "wordLimit": 2
+          },
+          {
+            "id": "gap_2",
+            "wordLimit": 2
+          },
+          {
+            "id": "gap_3",
+            "wordLimit": 2
+          }
+        ]
+      },
+      "correctAnswer": {
+        "answers": {
+          "gap_1": [
+            "greenhouse",
+            "green house"
+          ],
+          "gap_2": [
+            "temperatures"
+          ],
+          "gap_3": [
+            "mountains"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "gaps"
+          ],
+          "properties": {
+            "gaps": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "_shared.schema.json#/$defs/Gap"
+              },
+              "uniqueItems": true,
+              "description": "Gaps embedded in the summary passage.",
+              "maxItems": 10
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers"
+      ],
+      "properties": {
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "description": "Map of gap id to accepted answers.",
+          "writeOnly": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "$id": "https://langfens.dev/schemas/_registry.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Langfens Question Type Registry",
+  "description": "Mapping of every questionType slug to its schema file, with human label, group, auto-gradability, and skill metadata.",
+  "types": [
+    {
+      "slug": "MULTIPLE_CHOICE_SINGLE",
+      "file": "multiple-choice-single.schema.json",
+      "label": "Multiple Choice (Single Answer)",
+      "group": "multiple-choice",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "MULTIPLE_CHOICE_SINGLE_IMAGE",
+      "file": "multiple-choice-single-image.schema.json",
+      "label": "Multiple Choice (Single Answer, Image-Based)",
+      "group": "multiple-choice",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "MULTIPLE_CHOICE_MULTIPLE",
+      "file": "multiple-choice-multiple.schema.json",
+      "label": "Multiple Choice (Multiple Answers)",
+      "group": "multiple-choice",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "TRUE_FALSE_NOT_GIVEN",
+      "file": "true-false-not-given.schema.json",
+      "label": "True / False / Not Given",
+      "group": "true-false",
+      "autoGradable": true,
+      "skill": ["READING"]
+    },
+    {
+      "slug": "YES_NO_NOT_GIVEN",
+      "file": "yes-no-not-given.schema.json",
+      "label": "Yes / No / Not Given",
+      "group": "true-false",
+      "autoGradable": true,
+      "skill": ["READING"]
+    },
+    {
+      "slug": "SUMMARY_COMPLETION",
+      "file": "summary-completion.schema.json",
+      "label": "Summary Completion",
+      "group": "completion",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "TABLE_COMPLETION",
+      "file": "table-completion.schema.json",
+      "label": "Table Completion",
+      "group": "completion",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "NOTE_COMPLETION",
+      "file": "note-completion.schema.json",
+      "label": "Note Completion",
+      "group": "completion",
+      "autoGradable": true,
+      "skill": ["LISTENING"]
+    },
+    {
+      "slug": "FORM_COMPLETION",
+      "file": "form-completion.schema.json",
+      "label": "Form Completion",
+      "group": "completion",
+      "autoGradable": true,
+      "skill": ["LISTENING"]
+    },
+    {
+      "slug": "SENTENCE_COMPLETION",
+      "file": "sentence-completion.schema.json",
+      "label": "Sentence Completion",
+      "group": "completion",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "SHORT_ANSWER",
+      "file": "short-answer.schema.json",
+      "label": "Short Answer",
+      "group": "short-answer",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "AUDIO_RESPONSE",
+      "file": "audio-response.schema.json",
+      "label": "Audio Response",
+      "group": "speaking",
+      "autoGradable": false,
+      "skill": ["LISTENING"]
+    },
+    {
+      "slug": "DIAGRAM_LABEL",
+      "file": "diagram-label.schema.json",
+      "label": "Diagram Labelling",
+      "group": "label",
+      "autoGradable": true,
+      "skill": ["READING"]
+    },
+    {
+      "slug": "MAP_LABEL",
+      "file": "map-label.schema.json",
+      "label": "Map Labelling",
+      "group": "label",
+      "autoGradable": true,
+      "skill": ["LISTENING"]
+    },
+    {
+      "slug": "MATCHING_HEADING",
+      "file": "matching-heading.schema.json",
+      "label": "Matching Headings",
+      "group": "matching",
+      "autoGradable": true,
+      "skill": ["READING"]
+    },
+    {
+      "slug": "MATCHING_INFORMATION",
+      "file": "matching-information.schema.json",
+      "label": "Matching Information",
+      "group": "matching",
+      "autoGradable": true,
+      "skill": ["READING"]
+    },
+    {
+      "slug": "MATCHING_FEATURES",
+      "file": "matching-features.schema.json",
+      "label": "Matching Features",
+      "group": "matching",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "MATCHING_ENDINGS",
+      "file": "matching-endings.schema.json",
+      "label": "Matching Sentence Endings",
+      "group": "matching",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "CLASSIFICATION",
+      "file": "classification.schema.json",
+      "label": "Classification",
+      "group": "matching",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "FLOW_CHART",
+      "file": "flow-chart.schema.json",
+      "label": "Flow Chart (Ordering)",
+      "group": "flow-chart",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    },
+    {
+      "slug": "FLOW_CHART_COMPLETION",
+      "file": "flow-chart-completion.schema.json",
+      "label": "Flow Chart Completion",
+      "group": "flow-chart",
+      "autoGradable": true,
+      "skill": ["READING", "LISTENING"]
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/multiple-choice-single-image.schema.json",
+  "title": "Multiple Choice (Single Answer, Image-Based)",
+  "description": "A multiple-choice question where each option is an image. The learner picks exactly one image that matches the prompt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "MULTIPLE_CHOICE_SINGLE_IMAGE"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "MULTIPLE_CHOICE_SINGLE_IMAGE",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111102",
+        "skill": "READING",
+        "difficulty": 2,
+        "promptMd": "Look at the diagram of the water cycle. Which stage is shown in panel C?",
+        "schemaVersion": "1.0.0",
+        "explanationMd": "Panel C shows condensation forming clouds above the lake.",
+        "options": [
+          {
+            "id": "img_1",
+            "idx": 0,
+            "contentMd": "Evaporation",
+            "mediaUrl": "https://example.com/c1-evap.png",
+            "altText": "Diagram showing water rising from a lake toward the sky."
+          },
+          {
+            "id": "img_2",
+            "idx": 1,
+            "contentMd": "Condensation",
+            "mediaUrl": "https://example.com/c2-cond.png",
+            "altText": "Diagram showing water vapour forming a cloud."
+          },
+          {
+            "id": "img_3",
+            "idx": 2,
+            "contentMd": "Precipitation",
+            "mediaUrl": "https://example.com/c3-prec.png",
+            "altText": "Diagram showing rain falling from a cloud."
+          }
+        ]
+      },
+      "correctAnswer": {
+        "correctOptionId": "img_2"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "options"
+          ],
+          "properties": {
+            "options": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "idx",
+                  "contentMd",
+                  "mediaUrl",
+                  "altText"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Stable identifier for the image option. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+                    "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+                  },
+                  "idx": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Zero-based display index of the option."
+                  },
+                  "contentMd": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Optional Markdown label rendered alongside the image."
+                  },
+                  "mediaUrl": {
+                    "type": "string",
+                    "format": "uri-reference",
+                    "description": "Image URL for this option."
+                  },
+                  "altText": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Alt text describing the image, required for accessibility."
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "description": "Image options; each must carry a mediaUrl and altText."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correctOptionId"
+      ],
+      "properties": {
+        "correctOptionId": {
+          "type": "string",
+          "description": "Id of the single correct image option. Pattern: ASCII letters, digits, underscore, hyphen, 1-16 chars.",
+          "pattern": "^[a-zA-Z0-9_-]{1,16}$"
+        }
+      }
+    }
+  }
+}

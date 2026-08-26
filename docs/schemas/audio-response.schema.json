@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.dev/schemas/audio-response.schema.json",
+  "title": "Audio Response",
+  "description": "Speaking prompt: the learner records an audio response, transcribed and graded by AI and/or a human rater.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "payload",
+    "correctAnswer"
+  ],
+  "properties": {
+    "type": {
+      "const": "AUDIO_RESPONSE"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    },
+    "correctAnswer": {
+      "$ref": "#/$defs/CorrectAnswer",
+      "writeOnly": true
+    },
+    "rubric": {
+      "$ref": "_shared.schema.json#/$defs/Rubric"
+    }
+  },
+  "examples": [
+    {
+      "type": "AUDIO_RESPONSE",
+      "payload": {
+        "id": "11111111-1111-4111-8111-111111111112",
+        "skill": "LISTENING",
+        "difficulty": 3,
+        "promptMd": "Describe a memorable journey you have taken. You should say where you went, how you travelled, and explain why it was memorable.",
+        "schemaVersion": "1.0.0",
+        "maxDurationSec": 120,
+        "promptAudioUrl": "https://example.com/prompts/ielts-part2-cue.mp3"
+      },
+      "correctAnswer": {
+        "acceptedTranscriptions": [
+          "Last summer I travelled by train through the Scottish Highlands with two friends."
+        ],
+        "modelTranscription": "Last summer I travelled by train through the Scottish Highlands with two friends. We spent three days hiking near Glencoe and the views from the ridge were unforgettable.",
+        "scoring": "ai+human"
+      }
+    }
+  ],
+  "$defs": {
+    "Payload": {
+      "allOf": [
+        {
+          "$ref": "_shared.schema.json#/$defs/BasePayload"
+        },
+        {
+          "type": "object",
+          "required": [
+            "maxDurationSec"
+          ],
+          "properties": {
+            "maxDurationSec": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 600,
+              "description": "Maximum recording length, in seconds (1 second to 10 minutes).",
+              "x-common-mistakes": [
+                "Setting >120 without good reason makes transcripts noisy",
+                "Setting <30 blocks anything but Part 1 short answers"
+              ]
+            },
+            "promptAudioUrl": {
+              "type": "string",
+              "format": "uri-reference",
+              "description": "Optional audio prompt the learner hears before recording."
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CorrectAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptedTranscriptions",
+        "scoring"
+      ],
+      "properties": {
+        "acceptedTranscriptions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Whitelisted reference transcriptions the learner response is matched against.",
+          "maxItems": 5,
+          "writeOnly": true
+        },
+        "modelTranscription": {
+          "type": "string",
+          "description": "Optional canonical model transcription used as a reference answer.",
+          "writeOnly": true
+        },
+        "scoring": {
+          "type": "string",
+          "enum": [
+            "ai",
+            "human",
+            "ai+human"
+          ],
+          "default": "ai",
+          "description": "Who scores the response: AI, human, or both."
+        },
+        "rubric": {
+          "$ref": "_shared.schema.json#/$defs/Rubric",
+          "description": "Optional rubric used by AI or human raters."
+        }
+      }
+    }
+  }
+}
