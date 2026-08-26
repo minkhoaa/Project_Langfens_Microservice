@@ -60,8 +60,8 @@ export const QUESTION_TYPE_LABELS: Readonly<Record<AnyQuestionType, string>> = {
   FLOW_CHART: 'Flow Chart (Ordering)',
   FLOW_CHART_COMPLETION: 'Flow Chart Completion',
   // Deprecated aliases
-  MCQ_SINGLE: 'Multiple Choice (Single Answer) [deprecated MCQ_SINGLE]',
-  MCQ_MULTIPLE: 'Multiple Choice (Multiple Answers) [deprecated MCQ_MULTIPLE]',
+  MCQ_SINGLE: 'Multiple Choice (deprecated — use MULTIPLE_CHOICE_SINGLE)',
+  MCQ_MULTIPLE: 'Multiple Selection (deprecated — use MULTIPLE_CHOICE_MULTIPLE)',
 };
 
 assertLabelKeys(Object.keys(QUESTION_TYPE_LABELS));
