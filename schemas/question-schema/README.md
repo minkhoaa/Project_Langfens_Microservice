@@ -4,7 +4,7 @@ Single source of truth (SSOT) for the 21 Langfens question type payloads and
 their correct answers, expressed as [Zod](https://zod.dev) schemas.
 
 The package is derived directly from the canonical JSON Schema files at
-`docs/standards/schemas/`. The mapping is one-to-one: each property,
+`Project_Langfens_Microservice/docs/schemas/`. The mapping is one-to-one: each property,
 constraint, enum, regex, `uniqueItems`, `additionalProperties: false`, and
 `required` array in the JSON becomes the corresponding Zod construct.
 
@@ -60,7 +60,7 @@ import { QUESTION_TYPE_LABELS } from '@langfens/question-schema/labels';
 
 ## How to add a new question type
 
-1. Add the JSON Schema file to `docs/standards/schemas/` and register the new
+1. Add the JSON Schema file to `Project_Langfens_Microservice/docs/schemas/` and register the new
    slug in `_registry.json`. Follow the existing `oneOf` block in
    `_index.schema.json`.
 2. In `src/types.ts`:
@@ -84,8 +84,41 @@ import { QUESTION_TYPE_LABELS } from '@langfens/question-schema/labels';
 
 ## Security note: `FLOW_CHART_COMPLETION`
 
-After the security fix, accepted answers for flow-chart-completion gaps live
-**only** in `CorrectAnswer.gapAnswers` as an object bundle
-(`{ acceptedTexts: string[], acceptedRegexes?: string[] }`). The payload
-`gaps[]` entries MUST NOT carry `acceptedTexts` or `acceptedRegexes`. The
-schemas enforce this — see `tests/edge-cases.test.ts` for regression tests.
+## Verification
+
+The package ships with a roundtrip parity check that proves the Zod
+package stays in lock-step with the JSON Schema docs in
+`Project_Langfens_Microservice/docs/schemas/`.
+
+```bash
+npm run parity
+```
+
+Runs **`86` cross-layer checks** across 6 phases:
+
+1. **Per-type parity** — a valid sample must be accepted by both Ajv
+   (against the dereferenced JSON) and the corresponding Zod schemas;
+   a discriminator-swapped invalid sample must be rejected by both.
+2. **Discriminator match** — the `const` value in the JSON
+   `type` field equals the literal expected by Zod for all 21 types.
+3. **`FLOW_CHART_COMPLETION` security invariant** — both layers reject
+   the four forbidden payload/answer mutations and accept a well-formed
+   sample.
+4. **`LocalId` pattern** — both layers reject ids >16 chars and ids with
+   spaces; both accept the 16-char boundary id.
+5. **`maxItems` enforcement** — 14 boundary cases (8/20/12/24/50/etc.)
+   uniformly accepted/rejected by both layers.
+6. **`BasePayload` field set** — Zod and JSON expose the same properties
+   (including `provenance`) and the same `required` set.
+
+Expected output, last line:
+
+```
+[done] 86 checks, 86 pass, 0 fail
+```
+
+Exit non-zero if any check fails. A full per-check report is written to
+`parity-results.json` next to this README.
+
+Run `npm test` (125 vitest cases across 3 files) for the in-package test
+suite, and `npm run build` to refresh `dist/` before re-running parity.

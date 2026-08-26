@@ -19,12 +19,16 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/dual-format.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "parity": "node scripts/parity-check.mjs"
   },
   "dependencies": {
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^16.0.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4",
     "vitest": "^2.1.0"

@@ -5,17 +5,27 @@
 // per-type schemas at runtime.
 //
 // No source files in either layer are modified.
-import { readFileSync } from 'node:fs';
-import { resolve as pathResolve } from 'node:path';
+//
+// Paths are computed from this script's location so it works regardless of
+// the current working directory.
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve as pathResolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import RefParser from '@apidevtools/json-schema-ref-parser';
-
-const ZodPkgDir = '/home/khoa/Projects/langfens/Project_Langfens_Microservice/schemas/question-schema';
-const SCHEMAS_DIR = '/home/khoa/Projects/langfens/docs/standards/schemas';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// Package: <repo>/Project_Langfens_Microservice/schemas/question-schema
+// JSON Schemas: <repo>/Project_Langfens_Microservice/docs/schemas/
+const ZodPkgDir = pathResolve(__dirname, '..');
+const SCHEMAS_DIR = pathResolve(__dirname, '..', '..', '..', 'docs', 'schemas');
 
 const Z = await import(pathResolve(ZodPkgDir, 'dist/index.mjs'));
 const AjvMod = await import('ajv').catch(() => null);
-if (!AjvMod) throw new Error('ajv not installed — run `npm install --no-save ajv@8 ajv-formats @apidevtools/json-schema-ref-parser` in question-schema/');
+if (!AjvMod) {
+  throw new Error(
+    'ajv not installed — run `npm install` in question-schema/ (devDeps: ajv@8, ajv-formats, @apidevtools/json-schema-ref-parser).',
+  );
+}
 const AjvCtor = AjvMod.default || AjvMod;
 // Prefer Ajv2020 so the draft-2020-12 meta-schema is recognized (our JSON files declare draft 2020-12).
 const _Ajv2020Mod = await import('ajv/dist/2020.js').catch(() => null);
@@ -46,7 +56,6 @@ async function derefJsonSchema(slug) {
     canRead: /^https?:\/\/langfens\.dev\//,
     async read({ url }) {
       const m = url.match(/\/schemas\/([^?#]+)$/);
-  const ajv = new FinalAjv({ allErrors: true, strict: false });
       const localPath = `${SCHEMAS_DIR}/${m[1]}`;
       return readFileSync(localPath, 'utf8');
     },
@@ -572,7 +581,7 @@ if (basePayloadParity.matches && basePayloadParity.jsonHasProvenance === basePay
 // ---------------------------------------------------------------------------
 const report = {
   timestamp: new Date().toISOString(),
-  jsonSource: 'docs/standards/schemas/*.schema.json (dereferenced via @apidevtools/json-schema-ref-parser)',
+  jsonSource: 'Project_Langfens_Microservice/docs/schemas/*.schema.json (dereferenced via @apidevtools/json-schema-ref-parser)',
   zodSource: 'Project_Langfens_Microservice/schemas/question-schema/dist/',
   ajvMode: 'Ajv 8 / draft 2020-12 + ajv-formats / strict:false',
   totalChecks,
@@ -586,8 +595,7 @@ const report = {
   basePayload: basePayloadParity,
 };
 
-import('node:fs').then((fs) => {
-  fs.writeFileSync('/tmp/parity-results.json', JSON.stringify(report, null, 2));
-  console.error(`\n[done] ${totalChecks} checks, ${passCount} pass, ${failCount} fail`);
-  console.error('[done] results → /tmp/parity-results.json');
-});
+const reportPath = pathResolve(__dirname, '..', 'parity-results.json');
+writeFileSync(reportPath, JSON.stringify(report, null, 2));
+console.error(`\n[done] ${totalChecks} checks, ${passCount} pass, ${failCount} fail`);
+console.error(`[done] results → ${reportPath}`);
