@@ -39,7 +39,7 @@ export const ProvenanceSchema = z
 /** A candidate option for any option-bearing multiple choice question. */
 export const OptionSchema = z
   .object({
-    id: z.string().min(1).describe('Stable identifier for the option. Must be unique within its question.'),
+    id: LocalIdSchema.describe('Stable identifier for the option. Must be unique within its question.'),
     idx: z.number().int().min(0).describe('Zero-based display index of the option.'),
     contentMd: z.string().min(1).describe('Option text rendered as Markdown.'),
     mediaUrl: z.string().url().optional().describe('Optional media (image/audio) attached to this option.'),

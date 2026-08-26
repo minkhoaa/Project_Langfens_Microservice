@@ -446,10 +446,10 @@ console.error('[phase 4] LocalId pattern…');
 const lidTests = [
   {
     name: 'localId-options-spaces',
-    description: 'options[0].id with spaces. Pattern: id is NOT LocalId-restricted; both layers should consistently ACCEPT.',
+    description: 'options[0].id with spaces. Pattern: Option.id IS LocalId-restricted (1-16 chars [A-Za-z0-9_-]); both layers must REJECT.',
     slug: 'MULTIPLE_CHOICE_SINGLE',
-    expectedAjv: true,
-    expectedZod: true,
+    expectedAjv: false,
+    expectedZod: false,
     mutate: (s) => { s.payload.options[0].id = 'has spaces'; return s; },
   },
   {

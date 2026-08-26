@@ -15,8 +15,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "minLength": 1,
-          "description": "Stable identifier for the option. Must be unique within its question."
+          "pattern": "^[a-zA-Z0-9_-]{1,16}$",
+          "description": "Local identifier for this option (1-16 chars, ASCII letters, digits, underscore, hyphen)."
         },
         "idx": {
           "type": "integer",
@@ -456,6 +456,30 @@
     "NormalizationRef": {
       "$ref": "#/$defs/Normalization",
       "description": "Reference shorthand for the shared Normalization definition."
+    },
+    "CompletionAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers"
+      ],
+      "properties": {
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "description": "Map of gap id to accepted answers."
+        }
+      },
+      "description": "Canonical completion answer: map of gap id to list of accepted answers. The first matching gap id is used; if multiple acceptedTexts match, partial credit is awarded per the scoring mode.",
+      "title": "Completion Answer"
     },
     "RubricRef": {
       "$ref": "#/$defs/Rubric",

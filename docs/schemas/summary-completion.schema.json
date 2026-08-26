@@ -96,27 +96,8 @@
       "unevaluatedProperties": false
     },
     "CorrectAnswer": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "answers"
-      ],
-      "properties": {
-        "answers": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            },
-            "minItems": 1,
-            "uniqueItems": true
-          },
-          "description": "Map of gap id to accepted answers.",
-          "writeOnly": true
-        }
-      }
+      "$ref": "_shared.schema.json#/$defs/CompletionAnswer",
+      "writeOnly": true
     }
   }
 }
