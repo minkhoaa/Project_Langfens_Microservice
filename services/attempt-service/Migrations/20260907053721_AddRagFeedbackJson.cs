@@ -1,3 +1,4 @@
+﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -10,7 +11,7 @@ namespace attempt_service.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.AddColumn<JsonDocument>(
                 name: "RagFeedbackJson",
                 table: "attempt_answer",
                 type: "jsonb",
