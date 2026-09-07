@@ -5,7 +5,7 @@ using exam_service.Contracts.Exams;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
-
+using exam_service.Application.Common;
 namespace exam_service.Features.Exams.InternalEndpoint;
 
 public interface IInternalExamService
@@ -121,12 +121,9 @@ public class InternalExamService : IInternalExamService
                 exam.DurationMin,
                 exam.ImageUrl,  // Thumbnail/cover image URL
                 sections);
-
-            return paper != null
-                ? Results.Ok(new ApiResultDto(true, "Success", paper))
-                : Results.NotFound(new ApiResultDto(false, "Not found", null!));
+            return Results.Ok(new ApiResultDto(true, "Success", PaperWideNormalizer.Normalize(paper)));
         }
-        catch (Exception e)
+         catch (Exception e)
         {
             return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
         }

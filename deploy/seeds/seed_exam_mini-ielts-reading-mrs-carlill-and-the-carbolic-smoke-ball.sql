@@ -242,7 +242,7 @@ BEGIN
     qid,
     sec1,
     13,
-    'MCQ_SINGLE',
+    'MULTIPLE_CHOICE_SINGLE',
     'READING',
     2,
     'Why is Mrs. Carlill’s case often cited in present-day court trials?',

@@ -90,6 +90,7 @@ public static class ProtoHelper
 
             proto.Sections.Add(pSec); // ✅ add vào proto-exam
         }
+        PaperWideNormalizer.NormalizeInPlace(proto);
 
         return proto;
     }

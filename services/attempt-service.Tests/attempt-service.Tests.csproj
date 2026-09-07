@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\attempt-service\attempt-service.csproj" />
+    <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
   </ItemGroup>
 
 </Project>

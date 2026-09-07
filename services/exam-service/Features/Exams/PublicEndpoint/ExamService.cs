@@ -1,3 +1,4 @@
+using exam_service.Application.Common;
 using exam_service.Contracts.Exams;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -125,7 +126,7 @@ public class ExamService : IExamService
                 )).FirstOrDefaultAsync(cancellationToken);
             return exams == null
                 ? Results.NotFound(new ApiResultDto(false, "Not found", null!))
-                : Results.Ok(new ApiResultDto(true, "Success", exams));
+                : Results.Ok(new ApiResultDto(true, "Success", PaperWideNormalizer.Normalize(exams)));
         }
         catch (Exception e)
         {

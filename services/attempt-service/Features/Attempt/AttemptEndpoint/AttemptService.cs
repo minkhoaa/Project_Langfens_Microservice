@@ -69,7 +69,8 @@ public class AttemptService(
                 var parsed =
                     parser.Parse<InternalDeliveryExam>(existedStartedAttempt.PaperJson.RootElement.GetRawText());
                 var safeJson = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(parsed!));
-                var safeEl = JsonDocument.Parse(safeJson!).RootElement.Clone();
+                using var parsedDoc = JsonDocument.Parse(safeJson!);
+                var safeEl = PaperWideNormalizer.NormalizeJsonElement(parsedDoc.RootElement);
                 var deadline = existedStartedAttempt.StartedAt.AddSeconds(existedStartedAttempt.DurationSec);
                 var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
                 return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
@@ -92,7 +93,7 @@ public class AttemptService(
                     if (dto == null) return Results.NotFound(new ApiResultDto(false, "Not found", null!));
                     using var sanitized =
                         JsonSerializer.SerializeToDocument(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-                    var safeEl = sanitized.RootElement.Clone();
+                    var safeEl = PaperWideNormalizer.NormalizeJsonElement(sanitized.RootElement);
 
                     //time left
                     var deadline = existedStartedAttempt.StartedAt.AddSeconds(existedStartedAttempt.DurationSec);
@@ -110,7 +111,7 @@ public class AttemptService(
                 catch
                 {
                     return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
-                        existedStartedAttempt.PaperJson.RootElement.Clone()));
+                        PaperWideNormalizer.NormalizeJsonElement(existedStartedAttempt.PaperJson.RootElement)));
                 }
             }
         }
@@ -118,7 +119,7 @@ public class AttemptService(
         var snapShot = await gateway.GetExamSnapshotAsync(request.ExamId, token);
         var json = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(snapShot));
         using var doc = JsonDocument.Parse(json!);
-        var safeElement = doc.RootElement.Clone();
+        var safeElement = PaperWideNormalizer.NormalizeJsonElement(doc.RootElement);
         var attempt = new Domain.Entities.Attempt
         {
             UserId = userId,
@@ -170,7 +171,7 @@ public class AttemptService(
             var parsed = parser.Parse<InternalDeliveryExam>(attempts.PaperJson.RootElement.GetRawText());
             var jsonFormatted = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(parsed!));
             using var doc = JsonDocument.Parse(jsonFormatted!);
-            var safeEl = doc.RootElement.Clone();
+            var safeEl = PaperWideNormalizer.NormalizeJsonElement(doc.RootElement);
 
             var answer = await context.AttemptAnswers.AsNoTracking()
                 .Where(x => x.AttemptId == attempts.Id)
@@ -197,7 +198,7 @@ public class AttemptService(
                 if (dto == null) return Results.NotFound(new ApiResultDto(false, "NOt found snapshot", null!));
                 var sanitized = InternalExamDto.SnapshotSanitizer.Sanitize(dto);
                 using var doc = JsonSerializer.SerializeToDocument(sanitized);
-                var safeEl = doc.RootElement.Clone();
+                var safeEl = PaperWideNormalizer.NormalizeJsonElement(doc.RootElement);
                 var answer = await context.AttemptAnswers.AsNoTracking()
                     .Where(x => x.AttemptId == attempts.Id)
                     .Select(x => new AnswerItem(
@@ -732,7 +733,7 @@ public class AttemptService(
             proto = parser.Parse<InternalDeliveryExam>(existedAttempt.PaperJson.RootElement.GetRawText());
             var fullJson = JsonFormatter.Default!.Format(proto!);
             using var fullDoc = JsonDocument.Parse(fullJson!);
-            fullSnapshot = fullDoc.RootElement.Clone();
+            fullSnapshot = PaperWideNormalizer.NormalizeJsonElement(fullDoc.RootElement);
         }
         catch
         {
@@ -741,7 +742,7 @@ public class AttemptService(
             if (dto == null)
                 return Results.Problem("Snapshot is bad", statusCode: StatusCodes.Status500InternalServerError);
             using var fullDoc = JsonSerializer.SerializeToDocument(dto);
-            fullSnapshot = fullDoc.RootElement.Clone();
+            fullSnapshot = PaperWideNormalizer.NormalizeJsonElement(fullDoc.RootElement);
         }
 
         // build lại theo question id và thông tin trong snapshot 
@@ -779,6 +780,37 @@ public class AttemptService(
                 {
                     skillByQuestion[question.Id] = question.Skill ?? "";
                     questionIdxMap[question.Id] = question.Idx;
+                }
+            }
+        }
+
+        // Re-align questionIdxMap with paper-wide idx from normalized fullSnapshot
+        if (fullSnapshot.ValueKind == JsonValueKind.Object &&
+            fullSnapshot.TryGetProperty("sections", out var fSecs) &&
+            fSecs.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var sec in fSecs.EnumerateArray())
+            {
+                if (sec.TryGetProperty("questionGroups", out var fGrps) &&
+                    fGrps.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var grp in fGrps.EnumerateArray())
+                    {
+                        if (grp.TryGetProperty("questions", out var fQs) &&
+                            fQs.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var q in fQs.EnumerateArray())
+                            {
+                                if (q.TryGetProperty("id", out var idProp) &&
+                                    Guid.TryParse(idProp.GetString(), out var qid) &&
+                                    q.TryGetProperty("idx", out var idxProp) &&
+                                    idxProp.TryGetInt32(out var qidx))
+                                {
+                                    questionIdxMap[qid] = qidx;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -952,11 +984,17 @@ public class AttemptService(
                 if (blanks.Count > 0) return string.Join("; ", blanks);
             }
 
+            // Matching: render the display label (MatchPairs value[1]) rather than
+            // slash-joining the entire ["letter", "label"] array. Fall back to
+            // value[0] (the accepted letter) when no display label is stored.
             if (key.MatchPairs is { Count: > 0 })
             {
                 var pairs = key.MatchPairs
                     .Where(p => p.Value is { Length: > 0 })
-                    .Select(p => $"{p.Key}: {string.Join(" / ", p.Value!.Where(IsNotBlank))}")
+                    .Select(p => $"{p.Key}: " +
+                        (p.Value!.Length >= 2 && !string.IsNullOrWhiteSpace(p.Value[1])
+                            ? p.Value[1]
+                            : p.Value![0]))
                     .Where(IsNotBlank)
                     .ToList();
                 if (pairs.Count > 0) return string.Join("; ", pairs);

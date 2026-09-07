@@ -80,6 +80,10 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"[EF] Pending migrations: {pending.Count} => {string.Join(", ", pending)}");
         await db.Database.MigrateAsync();
     }
+
+    // Seed canonical IELTS Reading practice exams (idempotent — skipped when slug present).
+    await exam_service.Data.ReadingSeeder.SeedReadingExamAsync(db);
+    await exam_service.Data.GeneratedReadingSeeder.SeedAsync(db);
 }
 
 app.MapDefaultEndpoints();
