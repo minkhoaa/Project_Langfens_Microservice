@@ -81,34 +81,41 @@ public class InternalExamService : IInternalExamService
                         }).ToList(),
                     section.QuestionGroups
                         .OrderBy(g => g.Idx)
-                        .Select(group => new InternalExamDto.InternalDeliveryQuestionGroup(
-                            group.Id,
-                            group.Idx,
-                            group.StartIdx,
-                            group.EndIdx,
-                            group.InstructionMd,
-                            group.Questions
-                                .OrderBy(q => q.Idx)
-                                .Select(q =>
-                                {
-                                    var flowChartNodes = BuildFlowChartNodes(q.OrderCorrects);
-                                    var nodesOrNull = flowChartNodes.Count > 0 ? flowChartNodes : null;
-                                    return new InternalExamDto.InternalDeliveryQuestion(
-                                        q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd, q.ExplanationMd,
-                                        q.Options.OrderBy(o => o.Idx)
-                                            .Select(o => new InternalExamDto.InternalDeliveryOption(
-                                                o.Id, o.Idx, o.ContentMd, showAnswer ? o.IsCorrect : null
-                                            )).ToList(),
-                                        nodesOrNull,
-                                        showAnswer ? q.BlankAcceptTexts : null,
-                                        showAnswer ? q.BlankAcceptRegex : null,
-                                        showAnswer ? q.MatchPairs : null,
-                                        showAnswer ? q.OrderCorrects : null,
-                                        showAnswer ? q.ShortAnswerAcceptTexts : null,
-                                        showAnswer ? q.ShortAnswerAcceptRegex : null
-                                    );
-                                }).ToList()
-                        )).ToList()
+                        .Select(group =>
+                        {
+                            var groupQuestions = (group.Questions != null && group.Questions.Count > 0)
+                                ? (IEnumerable<exam_service.Domains.Entities.ExamQuestion>)group.Questions
+                                : section.Questions.Where(q => q.Idx >= group.StartIdx && q.Idx <= group.EndIdx);
+
+                            return new InternalExamDto.InternalDeliveryQuestionGroup(
+                                group.Id,
+                                group.Idx,
+                                group.StartIdx,
+                                group.EndIdx,
+                                group.InstructionMd,
+                                groupQuestions
+                                    .OrderBy(q => q.Idx)
+                                    .Select(q =>
+                                    {
+                                        var flowChartNodes = BuildFlowChartNodes(q.OrderCorrects);
+                                        var nodesOrNull = flowChartNodes.Count > 0 ? flowChartNodes : null;
+                                        return new InternalExamDto.InternalDeliveryQuestion(
+                                            q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd, q.ExplanationMd,
+                                            q.Options.OrderBy(o => o.Idx)
+                                                .Select(o => new InternalExamDto.InternalDeliveryOption(
+                                                    o.Id, o.Idx, o.ContentMd, showAnswer ? o.IsCorrect : null
+                                                )).ToList(),
+                                            nodesOrNull,
+                                            showAnswer ? q.BlankAcceptTexts : null,
+                                            showAnswer ? q.BlankAcceptRegex : null,
+                                            showAnswer ? q.MatchPairs : null,
+                                            showAnswer ? q.OrderCorrects : null,
+                                            showAnswer ? q.ShortAnswerAcceptTexts : null,
+                                            showAnswer ? q.ShortAnswerAcceptRegex : null
+                                        );
+                                    }).ToList()
+                            );
+                        }).ToList()
                 )).ToList();
 
             var paper = new InternalExamDto.InternalDeliveryExam(

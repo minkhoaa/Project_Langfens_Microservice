@@ -124,8 +124,9 @@ public sealed class CompletionGrader : IQuestionGrader
 
             }
 
-            var score = (total > 0 ? (decimal)get / total : 0) * key.QuestionPoints;
-            return new GradeResult(score, score > 0);
+            var isAllMatched = total > 0 && get == total;
+            var score = isAllMatched ? key.QuestionPoints : 0m;
+            return new GradeResult(score, isAllMatched);
         }
         // đoạn này payload không phải JSON chấm theo Plaintext
         var blankCount = texts.Count + regs.Count;
@@ -219,10 +220,9 @@ public sealed class CompletionGrader : IQuestionGrader
 
             if (matched) positionalGet++;
         }
-        var positionalScore = positionalTotal > 0
-            ? (positionalGet / positionalTotal) * key.QuestionPoints
-            : 0m;
-        return new GradeResult(positionalScore, positionalScore > 0);
+        var isPositionalAllMatched = positionalTotal > 0 && positionalGet == positionalTotal;
+        var positionalScore = isPositionalAllMatched ? key.QuestionPoints : 0m;
+        return new GradeResult(positionalScore, isPositionalAllMatched);
     }
 }
 
@@ -276,8 +276,9 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
                     got++;
                 }
             }
-            var score = total > 0 ? got / total * key.QuestionPoints : 0m;
-            return new GradeResult(score, score > 0);
+            var isAllMatched = total > 0 && got == total;
+            var score = isAllMatched ? key.QuestionPoints : 0m;
+            return new GradeResult(score, isAllMatched);
         }
         if (pairs.Count == 1)
         {
@@ -315,8 +316,9 @@ public sealed class FlowChartGrader : IQuestionGrader
         if (user.Count == 0)
             return new GradeResult(0m, false, false, "Malformed or empty sequence payload");
         var lcs = LCS(user, correct);
-        var score = (decimal)lcs / correct.Count * key.QuestionPoints;
-        return new GradeResult(score, score > 0);
+        var isAllMatched = correct.Count > 0 && lcs == correct.Count;
+        var score = isAllMatched ? key.QuestionPoints : 0m;
+        return new GradeResult(score, isAllMatched);
 
     }
     private static string NormNode(string? s)

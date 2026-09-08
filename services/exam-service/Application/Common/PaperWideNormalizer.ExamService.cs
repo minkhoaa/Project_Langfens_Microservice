@@ -73,7 +73,9 @@ public static partial class PaperWideNormalizer
 
     private static InternalExamDto.InternalDeliveryQuestionGroup StampGroup(InternalExamDto.InternalDeliveryQuestionGroup group, Counter counter)
     {
-        var qs = group.Questions.ToList();
+        if (group.Questions is not { Count: > 0 } qsList) return group;
+
+        var qs = qsList.ToList();
         qs.Sort((a, b) => a.Idx.CompareTo(b.Idx));
         var first = counter.Value;
         var newQs = new InternalExamDto.InternalDeliveryQuestion[qs.Count];
@@ -150,7 +152,9 @@ public static partial class PaperWideNormalizer
 
     private static Dto_Public.PublicQuestionGroupRecord StampPublicGroup(Dto_Public.PublicQuestionGroupRecord group, ExamServiceCounter counter)
     {
-        var qs = group.Questions.ToList();
+        if (group.Questions is not { Count: > 0 } qsList) return group;
+
+        var qs = qsList.ToList();
         qs.Sort((a, b) => a.Idx.CompareTo(b.Idx));
         var first = counter.Value;
         var newQs = new Dto_Public.PublicQuestionRecord[qs.Count];

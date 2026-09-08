@@ -5,12 +5,13 @@ using Shared.Grpc.ExamInternal;
 
 /// <summary>
 /// Paper-wide index normalizer for the gRPC proto
-/// (<see cref="InternalDeliveryExam"/>). Mutates a deep-cloned snapshot of
-/// the input and merges back, so the caller's instance is left intact iff
-/// they pass a fresh clone — matches
-/// <c>attempt-service/Features/Helpers/ExamGateway.GrpcSnapshotSanitizer</c>'s
-/// clone-then-mutate pattern. See <c>docs/be-paper-data-shape.md</c> for the
-/// contract.
+/// (<see cref="InternalDeliveryExam"/>). Sorts sections, groups, and questions
+/// by their domain <c>Idx</c>, then renumbers questions to a global
+/// monotonically-increasing sequence and sets each group's <c>StartIdx</c>/
+/// <c>EndIdx</c> to that range. Mutates the input directly — protobuf's
+/// <c>MergeFrom</c> on repeated fields APPENDS rather than replaces, so we
+/// cannot use the clone+merge pattern; sorting and renumbering on the live
+/// instance avoids duplicating any repeated field.
 ///
 /// Proto sections only have <c>QuestionGroups</c> (no section-level
 /// <c>Questions</c>), so the empty-group synthetic fallback lives in
@@ -20,33 +21,37 @@ using Shared.Grpc.ExamInternal;
 public static partial class PaperWideNormalizer
 {
     /// <summary>
-    /// Renumbers the proto in place via an internal <c>Clone()</c> + mutate +
-    /// <c>MergeFrom()</c>. Idempotent — works whether the caller passes a
-    /// live or pre-cloned instance.
+    /// Renumbers the proto in place. Repeated fields are sorted via
+    /// <c>Clear()</c> + <c>AddRange()</c> to avoid protobuf's append
+    /// semantics on repeated fields. Idempotent — repeated calls produce the
+    /// same final layout.
     /// </summary>
     public static void NormalizeInPlace(InternalDeliveryExam exam)
     {
-        var draft = exam.Clone();
         var counter = new Counter();
 
-        var sections = draft.Sections.ToList();
-        sections.Sort((a, b) => a.Idx.CompareTo(b.Idx));
+        var sortedSections = exam.Sections.OrderBy(s => s.Idx).ToList();
+        exam.Sections.Clear();
+        exam.Sections.AddRange(sortedSections);
 
-        foreach (var section in sections)
+        foreach (var section in exam.Sections)
         {
             if (section.QuestionGroups.Count == 0) continue;
 
-            var groups = section.QuestionGroups.ToList();
-            groups.Sort((a, b) => a.Idx.CompareTo(b.Idx));
-            foreach (var group in groups)
+            var sortedGroups = section.QuestionGroups.OrderBy(g => g.Idx).ToList();
+            section.QuestionGroups.Clear();
+            section.QuestionGroups.AddRange(sortedGroups);
+
+            foreach (var group in section.QuestionGroups)
             {
                 if (group.Questions.Count == 0) continue;
 
-                var qs = group.Questions.ToList();
-                qs.Sort((a, b) => a.Idx.CompareTo(b.Idx));
+                var sortedQs = group.Questions.OrderBy(q => q.Idx).ToList();
+                group.Questions.Clear();
+                group.Questions.AddRange(sortedQs);
 
                 var first = counter.Value;
-                foreach (var q in qs)
+                foreach (var q in group.Questions)
                 {
                     q.Idx = counter.Value++;
                 }
@@ -54,8 +59,6 @@ public static partial class PaperWideNormalizer
                 group.EndIdx = counter.Value - 1;
             }
         }
-
-        exam.MergeFrom(draft);
     }
 
     /// <summary>
