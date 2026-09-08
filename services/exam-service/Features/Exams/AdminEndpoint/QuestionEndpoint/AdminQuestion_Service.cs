@@ -71,6 +71,7 @@ public class AdminQuestionService : IAdminQuestionService
                 Type = dto.Type,
                 Skill = dto.Skill,
                 PromptMd = dto.PromptMd,
+                ImageUrl = dto.ImageUrl,
                 BlankAcceptTexts = dto.BlankAcceptTexts,
                 BlankAcceptRegex = dto.BlankAcceptRegex,
                 MatchPairs = dto.MatchPairs,
@@ -124,6 +125,7 @@ public class AdminQuestionService : IAdminQuestionService
                         .SetProperty(x => x.Difficulty, dto.Difficulty)
                         .SetProperty(x => x.PromptMd, dto.PromptMd)
                         .SetProperty(x => x.ExplanationMd, dto.ExplanationMd)
+                        .SetProperty(x => x.ImageUrl, dto.ImageUrl)
                         .SetProperty(x => x.BlankAcceptTexts, dto.BlankAcceptTexts)
                         .SetProperty(x => x.BlankAcceptRegex, dto.BlankAcceptRegex)
                         .SetProperty(x => x.MatchPairs, dto.MatchPairs)

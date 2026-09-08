@@ -41,16 +41,17 @@ public class InternalExamDto
         int Difficulty,
         string? PromptMd,
         string? ExplanationMd,
-        IReadOnlyList<InternalDeliveryOption> Options,
-        IReadOnlyList<InternalFlowChartNode>? FlowChartNodes,
-        IReadOnlyDictionary<string, string[]?>? BlankAcceptTexts,
-        IReadOnlyDictionary<string, string[]?>? BlankAcceptRegex,
-        IReadOnlyDictionary<string, string[]?>? MatchPairs,
-        IReadOnlyList<string>? OrderCorrects,
-        IReadOnlyList<string>? ShortAnswerAcceptTexts,
-        IReadOnlyList<string>? ShortAnswerAcceptRegex);
+        string? ImageUrl = null,
+        IReadOnlyList<InternalDeliveryOption>? Options = null,
+        IReadOnlyList<InternalFlowChartNode>? FlowChartNodes = null,
+        IReadOnlyDictionary<string, string[]?>? BlankAcceptTexts = null,
+        IReadOnlyDictionary<string, string[]?>? BlankAcceptRegex = null,
+        IReadOnlyDictionary<string, string[]?>? MatchPairs = null,
+        IReadOnlyList<string>? OrderCorrects = null,
+        IReadOnlyList<string>? ShortAnswerAcceptTexts = null,
+        IReadOnlyList<string>? ShortAnswerAcceptRegex = null);
 
-    public record InternalDeliveryOption(Guid Id, int Idx, string ContentMd, bool? IsCorrect);
+    public record InternalDeliveryOption(Guid Id, int Idx, string ContentMd, bool? IsCorrect, string? ImageUrl = null, string? AltText = null);
 
     public record InternalFlowChartNode(string Key, string Label);
 

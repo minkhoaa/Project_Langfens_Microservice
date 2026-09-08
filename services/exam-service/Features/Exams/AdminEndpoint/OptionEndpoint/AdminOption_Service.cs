@@ -50,7 +50,9 @@ public class AdminOptionService(ExamDbContext db) : IAdminOptionService
                 QuestionId = dto.QuestionId,
                 Idx = desired,
                 IsCorrect = dto.IsCorrect,
-                ContentMd = dto.ContentMd
+                ContentMd = dto.ContentMd,
+                ImageUrl = dto.ImageUrl,
+                AltText = dto.AltText
             };
 
             db.ExamOptions.Add(newOption);
@@ -76,7 +78,9 @@ public class AdminOptionService(ExamDbContext db) : IAdminOptionService
                     .SetProperty(x => x.QuestionId, dto.QuestionId)
                     .SetProperty(x => x.Idx, dto.Idx)
                     .SetProperty(x => x.ContentMd, dto.ContentMd)
-                    .SetProperty(x => x.IsCorrect, dto.IsCorrect), token);
+                    .SetProperty(x => x.IsCorrect, dto.IsCorrect)
+                    .SetProperty(x => x.ImageUrl, dto.ImageUrl)
+                    .SetProperty(x => x.AltText, dto.AltText), token);
 
             return Results.Ok(new ApiResultDto(true, $"Updated {effected} row", null!));
         }

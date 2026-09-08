@@ -75,7 +75,7 @@ public static class ProtoHelper
                     EndIdx = sec.Questions.Any() ? sec.Questions.Max(q => q.Idx) : 0,
                     InstructionMd = sec.InstructionsMd ?? string.Empty
                 };
-                
+
                 foreach (var q in sec.Questions.OrderBy(q => q.Idx))
                 {
                     var pQ = MapQuestionToProto(q, showAnswers);
@@ -104,6 +104,7 @@ public static class ProtoHelper
             ExplanationMd = showAnswers ? q.ExplanationMd ?? string.Empty : string.Empty,
             Difficulty = q.Difficulty,
             PromptMd = q.PromptMd ?? string.Empty,
+            ImageUrl = q.ImageUrl ?? string.Empty,
             Skill = q.Skill ?? string.Empty,
             Type = q.Type ?? string.Empty
         };
@@ -118,7 +119,9 @@ public static class ProtoHelper
             {
                 Id = opt.Id.ToString(),
                 Idx = opt.Idx,
-                ContentMd = opt.ContentMd ?? string.Empty
+                ContentMd = opt.ContentMd ?? string.Empty,
+                ImageUrl = opt.ImageUrl ?? string.Empty,
+                AltText = opt.AltText ?? string.Empty
             };
             if (showAnswers) pOpt.IsCorrect = opt.IsCorrect;
             pQ.Options.Add(pOpt);

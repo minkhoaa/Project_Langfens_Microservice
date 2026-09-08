@@ -62,13 +62,16 @@ public class InternalExamService : IInternalExamService
                                 question.Difficulty,
                                 question.PromptMd,
                                 question.ExplanationMd,
+                                question.ImageUrl,
                                 question.Options.Where(d => d.QuestionId == question.Id)
                                     .OrderBy(d => d.Idx)
                                     .Select(option => new InternalExamDto.InternalDeliveryOption(
                                         option.Id,
                                         option.Idx,
                                         option.ContentMd,
-                                        showAnswer ? option.IsCorrect : null
+                                        showAnswer ? option.IsCorrect : null,
+                                        option.ImageUrl,
+                                        option.AltText
                                     )).ToList(),
                                 nodesOrNull,
                                 showAnswer ? question.BlankAcceptTexts : null,
@@ -101,9 +104,11 @@ public class InternalExamService : IInternalExamService
                                         var nodesOrNull = flowChartNodes.Count > 0 ? flowChartNodes : null;
                                         return new InternalExamDto.InternalDeliveryQuestion(
                                             q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd, q.ExplanationMd,
+                                            q.ImageUrl,
                                             q.Options.OrderBy(o => o.Idx)
                                                 .Select(o => new InternalExamDto.InternalDeliveryOption(
-                                                    o.Id, o.Idx, o.ContentMd, showAnswer ? o.IsCorrect : null
+                                                    o.Id, o.Idx, o.ContentMd, showAnswer ? o.IsCorrect : null,
+                                                    o.ImageUrl, o.AltText
                                                 )).ToList(),
                                             nodesOrNull,
                                             showAnswer ? q.BlankAcceptTexts : null,

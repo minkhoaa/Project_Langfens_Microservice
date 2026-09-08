@@ -50,9 +50,10 @@ public class Dto_Public
         string Skill,
         int Difficulty,
         string? PromptMd,
-        IReadOnlyList<PublicOptionRecord> Options,
-        List<string>? WordList);
+        string? ImageUrl = null,
+        IReadOnlyList<PublicOptionRecord>? Options = null,
+        List<string>? WordList = null);
 
-    public record PublicOptionRecord(int idx, string ContentMd);
+    public record PublicOptionRecord(int idx, string ContentMd, string? ImageUrl = null, string? AltText = null);
 }
 
