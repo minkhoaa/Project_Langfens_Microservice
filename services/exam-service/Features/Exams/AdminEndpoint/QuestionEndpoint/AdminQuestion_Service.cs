@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts;
 using Shared.ExamDto.Contracts.Exam.Enums;
+using System.Collections.Generic;
 
 namespace exam_service.Features.Exams.AdminEndpoint.QuestionEndpoint;
 
@@ -34,6 +35,81 @@ public class AdminQuestionService : IAdminQuestionService
     private readonly ExamDbContext _context;
     public AdminQuestionService(ExamDbContext context) => _context = context;
 
+    private static IResult? ValidatePayload(
+        string type,
+        Dictionary<string, string[]?>? blankAcceptTexts,
+        Dictionary<string, string[]?>? matchPairs,
+        IEnumerable<string>? orderCorrects,
+        IEnumerable<string>? shortAnswerAcceptTexts)
+    {
+        bool HasText(IEnumerable<string?>? seq) => seq?.Any(x => !string.IsNullOrWhiteSpace(x)) ?? false;
+        bool DictNonEmpty(Dictionary<string, string[]?>? d) =>
+            d != null && d.Count > 0 && d.Values.Any(v => v != null && v.Length > 0 && v.Any(s => !string.IsNullOrWhiteSpace(s)));
+
+        IResult? Reject(string msg) => Results.BadRequest(new ApiResultDto(false, msg, null!));
+
+        switch (type)
+        {
+            case QuestionType.MultipleChoiceSingle:
+            case QuestionType.MultipleChoiceSingleImage:
+            case QuestionType.MultipleChoiceMultiple:
+            case QuestionType.TrueFalseNotGiven:
+            case QuestionType.YesNoNotGiven:
+                if (DictNonEmpty(blankAcceptTexts)) return Reject($"{type}: BlankAcceptTexts must be empty.");
+                if (DictNonEmpty(matchPairs))       return Reject($"{type}: MatchPairs must be empty.");
+                if (HasText(orderCorrects))         return Reject($"{type}: OrderCorrects must be empty.");
+                if (HasText(shortAnswerAcceptTexts))return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
+                break;
+
+            case QuestionType.SummaryCompletion:
+            case QuestionType.TableCompletion:
+            case QuestionType.NoteCompletion:
+            case QuestionType.FormCompletion:
+            case QuestionType.SentenceCompletion:
+            case QuestionType.DiagramLabel:
+            case QuestionType.MapLabel:
+                if (!DictNonEmpty(blankAcceptTexts)) return Reject($"{type}: BlankAcceptTexts is required (non-empty dict).");
+                if (DictNonEmpty(matchPairs))        return Reject($"{type}: MatchPairs must be empty.");
+                if (HasText(orderCorrects))          return Reject($"{type}: OrderCorrects must be empty.");
+                if (HasText(shortAnswerAcceptTexts)) return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
+                break;
+
+            case QuestionType.ShortAnswer:
+                if (!HasText(shortAnswerAcceptTexts)) return Reject($"{type}: ShortAnswerAcceptTexts is required (non-empty list).");
+                if (DictNonEmpty(blankAcceptTexts))   return Reject($"{type}: BlankAcceptTexts must be empty.");
+                if (DictNonEmpty(matchPairs))         return Reject($"{type}: MatchPairs must be empty.");
+                if (HasText(orderCorrects))           return Reject($"{type}: OrderCorrects must be empty.");
+                break;
+
+            case QuestionType.MatchingHeading:
+            case QuestionType.MatchingInformation:
+            case QuestionType.MatchingFeatures:
+            case QuestionType.MatchingEndings:
+            case QuestionType.Classification:
+                if (!DictNonEmpty(matchPairs))        return Reject($"{type}: MatchPairs is required (non-empty dict).");
+                if (matchPairs != null)
+                    foreach (var kv in matchPairs)
+                        if (kv.Value == null || kv.Value.Length < 2 || string.IsNullOrWhiteSpace(kv.Value[0]))
+                            return Reject($"{type}: MatchPairs[{kv.Key}] must have [acceptedKey, displayLabel].");
+                if (DictNonEmpty(blankAcceptTexts))   return Reject($"{type}: BlankAcceptTexts must be empty.");
+                if (HasText(orderCorrects))           return Reject($"{type}: OrderCorrects must be empty.");
+                if (HasText(shortAnswerAcceptTexts))  return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
+                break;
+
+            case QuestionType.FlowChart:
+                if (!HasText(orderCorrects)) return Reject($"{type}: OrderCorrects is required (non-empty list).");
+                if (orderCorrects != null)
+                    foreach (var k in orderCorrects)
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(k ?? "", "^[a-z0-9]+(?:-[a-z0-9]+)*$"))
+                            return Reject($"{type}: OrderCorrects key '{k}' must match ^[a-z0-9]+(?:-[a-z0-9]+)*$.");
+                if (DictNonEmpty(blankAcceptTexts))   return Reject($"{type}: BlankAcceptTexts must be empty.");
+                if (DictNonEmpty(matchPairs))         return Reject($"{type}: MatchPairs must be empty.");
+                if (HasText(shortAnswerAcceptTexts)) return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
+                break;
+        }
+        return null; // OK
+    }
+
     public async Task<IResult> AddAsync(
         CancellationToken token,
         [FromBody] DtoAdmin.AdminQuestionUpsert dto
@@ -48,6 +124,11 @@ public class AdminQuestionService : IAdminQuestionService
             var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
             if (requiresAudio && string.IsNullOrWhiteSpace(existedSection.AudioUrl))
                 return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
+
+            var validationError = ValidatePayload(
+                dto.Type, dto.BlankAcceptTexts, dto.MatchPairs,
+                dto.OrderCorrects, dto.ShortAnswerAcceptTexts);
+            if (validationError != null) return validationError;
 
             var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
@@ -112,6 +193,11 @@ public class AdminQuestionService : IAdminQuestionService
                 if (string.IsNullOrWhiteSpace(section.AudioUrl))
                     return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
             }
+
+            var validationError = ValidatePayload(
+                dto.Type, dto.BlankAcceptTexts, dto.MatchPairs,
+                dto.OrderCorrects, dto.ShortAnswerAcceptTexts);
+            if (validationError != null) return validationError;
 
             var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
