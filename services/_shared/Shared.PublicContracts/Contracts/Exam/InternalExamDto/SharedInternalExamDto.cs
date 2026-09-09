@@ -51,6 +51,7 @@ public class InternalExamDto
         [JsonPropertyName("difficulty")] public int Difficulty { get; init; }
         [JsonPropertyName("promptMd")] public string? PromptMd { get; init; }
         [JsonPropertyName("explanationMd")] public string? ExplanationMd { get; init; }
+        [JsonPropertyName("imageUrl")] public string? ImageUrl { get; init; }
         [JsonPropertyName("options")] public IReadOnlyList<InternalDeliveryOption> Options { get; init; } = [];
         [JsonPropertyName("flowChartNodes")] public IReadOnlyList<InternalFlowChartNode>? FlowChartNodes { get; init; }
             = null;
@@ -64,6 +65,12 @@ public class InternalExamDto
         [JsonPropertyName("orderCorrects")] public IReadOnlyList<string> OrderCorrects { get; init; } = Array.Empty<string>();
         [JsonPropertyName("shortAnswerAcceptTexts")] public IReadOnlyList<string> ShortAnswerAcceptTexts { get; init; } = Array.Empty<string>();
         [JsonPropertyName("shortAnswerAcceptRegex")] public IReadOnlyList<string> ShortAnswerAcceptRegex { get; init; } = Array.Empty<string>();
+        // Sprint 1 G13: expose fields the entity already had but the DTO was
+        // stripping. All nullable so old snapshots round-trip without these
+        // keys (FE falls back to `undefined` and uses defensive defaults).
+        [JsonPropertyName("groupId")] public Guid? GroupId { get; init; }
+        [JsonPropertyName("modelAnswers")] public IReadOnlyList<string>? ModelAnswers { get; init; }
+        [JsonPropertyName("wordList")] public IReadOnlyList<string>? WordList { get; init; }
     }
 
     public record InternalFlowChartNode

@@ -49,7 +49,10 @@ public class InternalExamDto
         IReadOnlyDictionary<string, string[]?>? MatchPairs = null,
         IReadOnlyList<string>? OrderCorrects = null,
         IReadOnlyList<string>? ShortAnswerAcceptTexts = null,
-        IReadOnlyList<string>? ShortAnswerAcceptRegex = null);
+        IReadOnlyList<string>? ShortAnswerAcceptRegex = null,
+        Guid? GroupId = null,
+        IReadOnlyList<string>? ModelAnswers = null,
+        IReadOnlyList<string>? WordList = null);
 
     public record InternalDeliveryOption(Guid Id, int Idx, string ContentMd, bool? IsCorrect, string? ImageUrl = null, string? AltText = null);
 

@@ -79,7 +79,10 @@ public class InternalExamService : IInternalExamService
                                 showAnswer ? question.MatchPairs : null,
                                 showAnswer ? question.OrderCorrects : null,
                                 showAnswer ? question.ShortAnswerAcceptTexts : null,
-                                showAnswer ? question.ShortAnswerAcceptRegex : null
+                                showAnswer ? question.ShortAnswerAcceptRegex : null,
+                                question.GroupId,
+                                showAnswer ? question.ModelAnswers : null,
+                                question.WordList
                             );
                         }).ToList(),
                     section.QuestionGroups
@@ -116,7 +119,10 @@ public class InternalExamService : IInternalExamService
                                             showAnswer ? q.MatchPairs : null,
                                             showAnswer ? q.OrderCorrects : null,
                                             showAnswer ? q.ShortAnswerAcceptTexts : null,
-                                            showAnswer ? q.ShortAnswerAcceptRegex : null
+                                            showAnswer ? q.ShortAnswerAcceptRegex : null,
+                                            q.GroupId,
+                                            showAnswer ? q.ModelAnswers : null,
+                                            q.WordList
                                         );
                                     }).ToList()
                             );
