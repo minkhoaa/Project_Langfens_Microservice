@@ -324,7 +324,7 @@ BEGIN
     qid,
     sec_speaking,
     1,
-    'AUDIO_RESPONSE',
+    'SHORT_ANSWER',
     'SPEAKING',
     3,
     E'### Speaking Task\n\n**Topic: Online Learning**\n\nMany people now prefer online learning to traditional classroom learning.\n\nPlease speak for **1-2 minutes** about:\n- **What are the advantages of online learning?**\n- **What are the disadvantages of online learning?**\n- **Which type of learning do you prefer and why?**\n\nYou may use your own experience to support your ideas.',
