@@ -88,8 +88,14 @@ using (var scope = app.Services.CreateScope())
 
 app.MapDefaultEndpoints();
 
+// Static files (serves /uploads/images/...). Placed before auth so the
+// images are publicly readable; the upload endpoint itself still requires Admin.
+var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "images"));
+
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseStaticFiles();
 app.UseCors("FE");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -106,6 +112,7 @@ app.MapAdminQuestionEndpoint();
 app.MapAdminOptionEndpoint();
 app.MapInternalExamEndpoint();
 app.MapQuestionBankEndpoints();
+app.MapAdminUploadEndpoint();
 app.Run();
 
 public partial class Program { }

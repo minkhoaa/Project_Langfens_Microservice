@@ -1,0 +1,2 @@
+# Keep this folder in git so the build pipeline always has wwwroot/.
+# Actual uploaded user content lives under uploads/ which is gitignored.

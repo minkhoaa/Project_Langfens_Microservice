@@ -181,5 +181,12 @@ scripts/pipeline/
 .gsd/MK-GAPS-CLOSURE-PLAN.md
 models/**/*.pt
 models/**/*.pth
+# ------------------------------
+# User-uploaded media (admin image upload)
+# ------------------------------
+# Keep the wwwroot skeleton (.gitkeep files) but ignore uploaded binaries.
+**/wwwroot/uploads/**/*
+!**/wwwroot/uploads/.gitkeep
+!**/wwwroot/uploads/**/.gitkeep
 models/**/*.ckpt
 models/**/*.bin
