@@ -241,7 +241,7 @@ public static class ReadingSeeder
         var q10 = new ExamQuestion
         {
             Id = q10Id, SectionId = section3Id, Idx = 0,
-            Type = QuestionType.FlowChartCompletion, Skill = "READING", Difficulty = 3,
+            Type = QuestionType.SummaryCompletion, Skill = "READING", Difficulty = 3,
             PromptMd = "Complete the flow chart:\n1. Plant seeds in __________\n2. Install LED lights to simulate __________\n3. Use __________ to deliver nutrients\n4. Maintain optimal __________ and humidity\n5. Harvest and package for __________",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
@@ -253,14 +253,30 @@ public static class ReadingSeeder
             }
         };
 
-        // Q11: Short Answer
-        var q11Id = Guid.Parse("33333333-3333-3333-3333-333333333342");
-        var q11 = new ExamQuestion
+        // Q11a-c: Short Answer (3 sub-questions split into individual rows)
+        var q11aId = Guid.Parse("33333333-3333-3333-3333-333333333342"); // keep same first ID
+        var q11a = new ExamQuestion
         {
-            Id = q11Id, SectionId = section3Id, Idx = 1,
+            Id = q11aId, SectionId = section3Id, Idx = 1,
             Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
-            PromptMd = "1. What company pioneered vertical farming in Singapore?\n2. How many vertical farms does Spread Co. operate in Japan?\n3. In which city was a former textile factory converted into a vertical farm?",
-            ShortAnswerAcceptTexts = new List<string> { "Sky Greens", "18", "Detroit" }
+            PromptMd = "What company pioneered vertical farming in Singapore?",
+            ShortAnswerAcceptTexts = new List<string> { "Sky Greens" }
+        };
+        var q11bId = Guid.Parse("33333333-3333-3333-3333-3333333333a1");
+        var q11b = new ExamQuestion
+        {
+            Id = q11bId, SectionId = section3Id, Idx = 2,
+            Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
+            PromptMd = "How many vertical farms does Spread Co. operate in Japan?",
+            ShortAnswerAcceptTexts = new List<string> { "18", "eighteen" }
+        };
+        var q11cId = Guid.Parse("33333333-3333-3333-3333-3333333333a2");
+        var q11c = new ExamQuestion
+        {
+            Id = q11cId, SectionId = section3Id, Idx = 3,
+            Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
+            PromptMd = "In which city was a former textile factory converted into a vertical farm?",
+            ShortAnswerAcceptTexts = new List<string> { "Detroit" }
         };
 
         // Q12: Multiple Choice
@@ -274,19 +290,22 @@ public static class ReadingSeeder
         };
         var q12 = new ExamQuestion
         {
-            Id = q12Id, SectionId = section3Id, Idx = 2,
+            Id = q12Id, SectionId = section3Id, Idx = 4,
             Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 3,
             PromptMd = "What limitation of vertical farming is mentioned in the passage?",
             Options = q12Options
         };
 
         // Q13: Diagram Label
+        // TODO: replace with real diagram URL — admin can override via Admin UI upload (BlankAcceptsEditor).
+        // Placeholder used so FE can render the diagram card; admin override is the canonical path.
         var q13Id = Guid.Parse("33333333-3333-3333-3333-333333333344");
         var q13 = new ExamQuestion
         {
-            Id = q13Id, SectionId = section3Id, Idx = 3,
+            Id = q13Id, SectionId = section3Id, Idx = 5,
             Type = QuestionType.DiagramLabel, Skill = "READING", Difficulty = 2,
             PromptMd = "Label the diagram using no more than three words from the passage.\n[Diagram: LED system, Water system, Climate control, Harvest area]",
+            ImageUrl = "https://placehold.co/600x400?text=Vertical+Farm+Diagram",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
                 { "0", new[] { "LED lights", "LED" } },
@@ -296,11 +315,10 @@ public static class ReadingSeeder
             }
         };
 
-        db.Exams.Add(exam);
+        db.ExamQuestions.AddRange(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11a, q11b, q11c, q12, q13);
         db.ExamSections.AddRange(section1, section2, section3);
-        db.ExamQuestions.AddRange(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13);
 
         await db.SaveChangesAsync();
-        Console.WriteLine("Seeded reading exam with 13 questions across 3 sections.");
+        Console.WriteLine("Seeded reading exam with 15 questions across 3 sections.");
     }
 }
