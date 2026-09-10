@@ -293,16 +293,22 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
                 }
             }
             var isAllMatched = total > 0 && got == total;
-            return new GradeResult(GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints), isAllMatched);
+            return new GradeResult(
+                GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints),
+                isAllMatched,
+                Feedback: isAllMatched ? null : "One or more pairs do not match");
         }
         if (pairs.Count == 1)
         {
             var (_, accepted) = pairs.First();
             var matched = accepted is { Length: > 0 } &&
                           accepted.Any(k => string.Equals(k, raw, StringComparison.OrdinalIgnoreCase));
-            return new GradeResult(GraderScoring.ScoreFor(matched, key.QuestionPoints), matched);
+            return new GradeResult(
+                GraderScoring.ScoreFor(matched, key.QuestionPoints),
+                matched,
+                Feedback: matched ? null : "One or more pairs do not match");
         }
-        return new GradeResult(0, false, Feedback: "Malformed matching payload (expected JSON for multiple pairs)");
+        return new GradeResult(0, false, Feedback: "One or more pairs do not match");
 
     }
 }
@@ -329,10 +335,15 @@ public sealed class FlowChartGrader : IQuestionGrader
             .ToList();
         if (user.Count == 0)
             return new GradeResult(0m, false, false, "Malformed or empty sequence payload");
-        var lcs = LCS(user, correct);
-        var isAllMatched = correct.Count > 0 && lcs == correct.Count;
-        var score = isAllMatched ? key.QuestionPoints : 0m;
-        return new GradeResult(score, isAllMatched);
+        // Spec §11.11: FlowChart grading is exact-match (sequence-equal) — no
+        // partial credit. Both `user` and `correct` are already lowercased +
+        // punctuation-stripped by NormNode, so ordinal comparison is correct.
+        var isAllMatched = user.Count == correct.Count
+                           && user.SequenceEqual(correct, StringComparer.Ordinal);
+        return new GradeResult(
+            GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints),
+            isAllMatched,
+            Feedback: isAllMatched ? null : "Sequence order does not match answer key");
 
     }
     private static string NormNode(string? s)
@@ -356,17 +367,6 @@ public sealed class FlowChartGrader : IQuestionGrader
         {
             return new List<string>();
         }
-    }
-
-    public static int LCS(IList<string> a, IList<string> b)
-    {
-        var dp = new int[a.Count + 1, b.Count + 1];
-        for (var i = 1; i <= a.Count; i++)
-            for (var j = 1; j <= b.Count; j++)
-                dp[i, j] = a[i - 1] == b[j - 1]
-                    ? dp[i - 1, j - 1] + 1
-                    : Math.Max(dp[i - 1, j], dp[i, j - 1]);
-        return dp[a.Count, b.Count];
     }
 }
 
