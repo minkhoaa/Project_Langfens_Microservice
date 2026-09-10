@@ -14,7 +14,26 @@ public interface IQuestionGrader
     GradeResult Grade(AttemptAnswer answer, QuestionKey key);
 }
 
-// single choice grader
+/// <summary>
+/// D1 invariant helpers: <c>AwardedPoints ∈ { 0, QuestionPoints }</c>.
+/// Multi-blank graders MUST collapse partial credit to 0 (all-or-nothing).
+/// </summary>
+internal static class GraderScoring
+{
+    public static decimal ScoreFor(bool isCorrect, decimal questionPoints)
+        => isCorrect ? questionPoints : 0m;
+}
+
+/// <summary>
+/// Grades TRUE_FALSE_NOT_GIVEN / YES_NO_NOT_GIVEN / CLASSIFICATION / FE_MULTI_SINGLE kinds.
+///
+/// Canonical wire format (Spec D4): <c>answer.SelectedOptionIds = [optionGuid]</c>
+/// where <c>optionGuid</c> is the row with <c>ExamOption.IsCorrect = true</c>.
+///
+/// Defensive fallback (deprecated, FE Phase 2): if <c>TextAnswer</c> holds a GUID string
+/// OR text equals the correct option's <c>contentMd</c>, accept the answer. This protects
+/// legacy FE builds and JSON-string migrations; new clients MUST send <c>SelectedOptionIds</c>.
+/// </summary>
 public sealed class SingleChoiceGrader : IQuestionGrader
 {
     public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
@@ -47,7 +66,7 @@ public sealed class MultipleChoiceGrader : IQuestionGrader
         var correctIds = (key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>())
             .Select(t => t.id)
             .ToHashSet();
-        
+
         // Set equality - order doesn't matter, just need to match all correct options
         var isCorrect = selection.SetEquals(correctIds);
         return new GradeResult(isCorrect ? key.QuestionPoints : 0m, isCorrect);
@@ -125,8 +144,7 @@ public sealed class CompletionGrader : IQuestionGrader
             }
 
             var isAllMatched = total > 0 && get == total;
-            var score = isAllMatched ? key.QuestionPoints : 0m;
-            return new GradeResult(score, isAllMatched);
+            return new GradeResult(GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints), isAllMatched);
         }
         // đoạn này payload không phải JSON chấm theo Plaintext
         var blankCount = texts.Count + regs.Count;
@@ -167,8 +185,7 @@ public sealed class CompletionGrader : IQuestionGrader
                     }
                 }
             }
-            var score = matched ? key.QuestionPoints : 0m;
-            return new GradeResult(score, matched);
+            return new GradeResult(GraderScoring.ScoreFor(matched, key.QuestionPoints), matched);
         }
         // Multi-blank positional fallback: the FE packs user answers as
         // newline-separated values (e.g. "answer1\nanswer2"). Match each part
@@ -221,8 +238,7 @@ public sealed class CompletionGrader : IQuestionGrader
             if (matched) positionalGet++;
         }
         var isPositionalAllMatched = positionalTotal > 0 && positionalGet == positionalTotal;
-        var positionalScore = isPositionalAllMatched ? key.QuestionPoints : 0m;
-        return new GradeResult(positionalScore, isPositionalAllMatched);
+        return new GradeResult(GraderScoring.ScoreFor(isPositionalAllMatched, key.QuestionPoints), isPositionalAllMatched);
     }
 }
 
@@ -277,16 +293,14 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
                 }
             }
             var isAllMatched = total > 0 && got == total;
-            var score = isAllMatched ? key.QuestionPoints : 0m;
-            return new GradeResult(score, isAllMatched);
+            return new GradeResult(GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints), isAllMatched);
         }
         if (pairs.Count == 1)
         {
             var (_, accepted) = pairs.First();
             var matched = accepted is { Length: > 0 } &&
                           accepted.Any(k => string.Equals(k, raw, StringComparison.OrdinalIgnoreCase));
-            var score = matched ? key.QuestionPoints : 0m;
-            return new GradeResult(score, matched);
+            return new GradeResult(GraderScoring.ScoreFor(matched, key.QuestionPoints), matched);
         }
         return new GradeResult(0, false, Feedback: "Malformed matching payload (expected JSON for multiple pairs)");
 
@@ -391,5 +405,3 @@ public sealed class ShortAnswerGrader : IQuestionGrader
         return new GradeResult(matched ? key.QuestionPoints : 0m, matched);
     }
 }
-
-
