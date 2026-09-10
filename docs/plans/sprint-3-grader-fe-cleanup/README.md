@@ -320,4 +320,200 @@ Manual smoke checklist: T1–T12 above.
 2. `feat(fe-admin): S31 prompt-blanks coverage validator (Sprint 3 appendix)` — validator
 3. `docs(plans): S31 click-to-add-blank section in Sprint 3 README (Sprint 3 appendix)` — README
 
+
+
 Revert any one without breaking the others. Zero data risk — DB schema unchanged, no migration.
+
+
+## Appendix S32: Standardize `[N]` Placeholder — Phase 1
+
+**Sprint**: Sprint 3 appendix
+**Effort estimate**: 2–3 hours (1 dev, no DB write — audit + UI tightening)
+**Risk level**: Low (audit-only script + FE admin-side UI tightening; runtime wire format unchanged)
+**Can run in parallel with**: anything that does not edit `scripts/migrate_blank_placeholders.py`, `validation.ts`, `questionSchemas.ts`, or `templates/exam-import.schema.json`
+**Depends on**: Sprint 3 G16 (placeholder convention) + S31 (click-to-add blank UX)
+**Phase 2 / Phase 3 status**: **BLOCKED / gated.** This appendix only ships the Phase 1 safety net. Phase 2 (runtime parser update in `CompletionCard.tsx`) and Phase 3 (50+ seed SQL rewrite) are scoped out and will land via separate worker turns / spawn.
+
+### 1. Objective
+
+Sprint 3 G16 changed the admin example convention to `___`; S31 wired click-to-add `[N]` blanks at the admin prompt cursor. Both legacy formats coexist on disk and in the DB:
+
+1. `___` (7+ underscore runs) inside `promptMd` (real seed data: `ListeningSeeder.cs`, `ReadingSeeder.cs`)
+2. `blank-q<digit>` keys inside `BlankAcceptTexts` jsonb (real seed data: `ListeningSeeder.cs:474,486,498` — q17a/b/c)
+
+S32 fully standardizes on `[N]` placeholders + bare-numeric JSON keys via a 3-phase strategy:
+
+- **Phase 1 (this appendix)** — Audit tool + FE admin-side tightening. No DB writes by default.
+- **Phase 2 (BLOCKED, separate spawn)** — Runtime parser update: tighten `CompletionCard.tsx` regex to ONLY match `[N]`. Reject `___` at runtime.
+- **Phase 3 (BLOCKED, separate spawn)** — Rewrite all seed SQL/C# files to `[N]` format. Use `scripts/migrate_blank_placeholders.py migrate --apply` against the live DB.
+
+### 2. Scope
+This appendix ships only Phase 1.
+**In-scope** (4 files + 1 tool):
+
+- `scripts/migrate_blank_placeholders.py` (Create) — Python 3 stdlib-only audit + migrate + rollback tool.
+- `langfens-fe-app/src/app/admin/_lib/validation.ts` (Edit) — `validateBlankKeyFormat` regex tightened to `/^\d+$/` only.
+- `langfens-fe-app/src/app/admin/_lib/questionSchemas.ts` (Edit) — Revert 14 `___` placeholders back to `[N]` in example payloads.
+- `templates/exam-import.schema.json` (Edit) — Add `[N]` placeholder + numeric-key contract description.
+- `docs/plans/sprint-3-grader-fe-cleanup/README.md` (Edit, append) — This appendix section.
+
+**Out-of-scope** (explicitly NOT touched in Phase 1):
+
+- `langfens-fe-app/src/app/.../CompletionCard.tsx` runtime parser (Phase 2 — separate spawn).
+- 50+ seed SQL/C# files (Phase 3 — separate spawn; see commit `793dfe9` for the deliverable).
+- `attempt-service` graders or `AttemptAnswer` DTOs (no wire format change).
+- Any FE runtime behavior changes beyond what the 4 deliverables specify.
+
+
+### 3. Files to change
+
+| File | Change type | Description |
+|---|---|---|
+| `scripts/migrate_blank_placeholders.py` | Create | Python 3 stdlib-only tool. `audit`, `migrate`, `rollback` subcommands. Loads `deploy/envs/exam.env` for connection. Prefers psycopg2 > psycopg3 > `psql` subprocess. `--mock` flag for offline testing. Audit-first precondition: refuses to migrate when rows have BOTH `___` underscores AND `blank-q<N>` keys in the SAME row (row-level, not dataset-level — dataset coexistence is safe because each row's blanks are independent). Idempotent: re-running on already-canonical state migrates 0 rows. Atomic: single transaction; rollback on any per-row failure. DRY-RUN by default; requires `--apply` to actually write. |
+| `langfens-fe-app/src/app/admin/_lib/validation.ts` | Edit | `validateBlankKeyFormat`: drop the `^blank-q\d+$` route from the regex. After edit: only `/^\d+$/` is accepted. Error message simplified to "should be numeric". Existing call site at `QuestionEditor.tsx:127` continues to work. |
+| `langfens-fe-app/src/app/admin/_lib/questionSchemas.ts` | Edit | Revert 14 `___` placeholders → `[N]` across SUMMARY/TABLE/NOTE/FORM/SENTENCE/DIAGRAM/MAP example payloads. Constraint text on lines 208, 235 explicitly NOT touched (per spec "DO NOT TOUCH constraint text mentioning `___` or other references that are not example payloads"). |
+| `templates/exam-import.schema.json` | Edit | Add `description` to `promptMd` (line 157-161) + sibling `description` to `blankAcceptTexts` (line 174-176). Document the `[N]` numeric-key contract and the S32 retirement of underscore + `blank-q<N>` formats. |
+| `docs/plans/sprint-3-grader-fe-cleanup/README.md` | Edit (append) | This appendix section. |
+
+### 4. Python tool — subcommands and exit codes
+
+```bash
+# 1. Audit (dry-run by default; reads from DB)
+python3 scripts/migrate_blank_placeholders.py audit
+python3 scripts/migrate_blank_placeholders.py audit --mock  # canned rows, no DB
+
+# 2. Migrate (DRY-RUN by default; refuses if row-level coexistence detected)
+python3 scripts/migrate_blank_placeholders.py migrate             # dry-run, refused on coexistence
+python3 scripts/migrate_blank_placeholders.py migrate --apply     # actually writes to DB
+python3 scripts/migrate_blank_placeholders.py migrate --apply --force  # override coexistence guard (NOT recommended)
+python3 scripts/migrate_blank_placeholders.py migrate --skip-audit   # skip audit-first precondition (NOT recommended)
+
+# 3. Rollback (dump current completion-family rows to JSONL snapshot)
+python3 scripts/migrate_blank_placeholders.py rollback --output scripts/.pre-migration.jsonl
+```
+
+Exit codes:
+
+| Code | Meaning |
+|------|---------|
+| 0    | Success (audit completed OR migration completed OR rollback completed OR dry-run found nothing to migrate) |
+| 1    | Audit/migration error (DB connection failure, transform error, etc.); rolled back if migration in progress |
+| 2    | Refused because row-level coexistence detected AND `--force` not passed |
+
+### 5. Audit JSON shape
+
+```json
+{
+  "total_questions": int,
+  "type_breakdown": { "SUMMARY_COMPLETION": int, "TABLE_COMPLETION": int, ... },
+  "underscore_placeholder_count": int,
+  "underscore_placeholder_examples": [string, ...],
+  "blank_q_key_count": int,
+  "blank_q_key_examples": ["blank-q0", "blank-q1", ...],
+  "coexistence_row_count": int,
+  "coexistence_row_examples": [string, ...],
+  "bracket_format_count": int,
+  "ready_for_phase2": bool
+}
+```
+
+`ready_for_phase2` is `true` ONLY when BOTH `underscore_placeholder_count == 0` AND `blank_q_key_count == 0`. `coexistence_row_count` is the number of rows that have BOTH legacy formats in the SAME row — these need operator review before any migration.
+
+### 6. Edge cases (10 — handled in code)
+
+| # | Trigger | Behavior |
+|---|---------|----------|
+| E1 | Run `audit` without a DB driver (no psycopg2 / psycopg3 / psql) | Falls back to `--mock` mode with a hint, OR raises a clear error telling operator to install a driver. |
+| E2 | `deploy/envs/exam.env` missing or empty | Falls back to Compose defaults (host=localhost port=5433 dbname=exam-db user=postgres password=postgres) with a WARN print on stderr. |
+| E3 | `PG*` env vars already set in shell | Shell env wins (allows override). |
+| E4 | Re-running `migrate --apply` after first pass | Idempotent: 0 rows migrated, exits 0. |
+| E5 | Row has BOTH `___` underscores AND `blank-q<N>` keys | Audit reports `coexistence_row_count > 0`. `migrate` (without `--force`) refuses (exit 2). `migrate --force` proceeds with operator's blessing — assumes `[N]` numbering is 1-indexed regardless of `blank-q<N>` index. |
+| E6 | Per-row UPDATE fails (network blip, constraint violation, etc.) | Whole transaction rolls back. Exit 1. Database unchanged. |
+| E7 | `BlankAcceptTexts` is `null` (no blanks) | Skipped — no transform needed. |
+| E8 | `promptMd` is `null` | Skipped — no transform needed. |
+| E9 | `promptMd` has BOTH `___` AND existing `[N]` tokens | `___` runs replaced starting from `N+1` (preserves existing numbering). E.g. `__ [1] ___` becomes `__ [1] [2]`. |
+| E10 | `promptMd` has non-completion-family question type | Out of scope — SQL `WHERE "Type" = ANY(completion_types)` excludes it entirely. |
+
+### 7. Invariants (8)
+
+| # | Invariant |
+|---|-----------|
+| I1 | After `migrate --apply`, every migrated row has `promptMd` containing only `[N]` placeholders (no `___` runs). |
+| I2 | After `migrate --apply`, every migrated row's `BlankAcceptTexts` keys are plain numeric strings (`"0"`, `"1"`, ..., NOT `blank-q<N>`). |
+| I3 | Migration is atomic: either ALL eligible rows migrate OR none do. Per-row failure → full rollback. |
+| I4 | Migration is idempotent: running twice yields the same end state. The second pass migrates 0 rows. |
+| I5 | Audit precedes migrate (default). `--skip-audit` is opt-in. |
+| I6 | DRY-RUN is the default. `--apply` is required for any DB write. |
+| I7 | Connection credentials loaded from `deploy/envs/exam.env`. Shell `PG*` env vars override. Compose defaults with a WARN if all else fails. |
+| I8 | `audit` output JSON is valid (round-trips through `json.loads`); no internal-only fields leaked. |
+
+### 8. Conflict resolutions (5 — baked into code)
+
+| # | Conflict | Resolution |
+|---|----------|------------|
+| C1 | Row has BOTH `___` and `[N]` tokens | `___` runs replaced starting from `max(existing_N) + 1` (preserves existing numbering). |
+| C2 | Ambiguous index ordering (dataset-level vs row-level coexistence) | Row-level check: refuse only when the SAME row mixes both formats. Dataset-level coexistence is safe because each row's blanks are independent. |
+| C3 | Multiple completion-family types (SUMMARY/TABLE/NOTE/FORM/SENTENCE/DIAGRAM/MAP/FLOW_CHART) | Same `COMPLETION_TYPES` set as `validateBlankKeyFormat` in `validation.ts:354-363`. Keep in sync. |
+| C4 | No psycopg / no psql | Use `--mock` flag for offline testing, or install psycopg2-binary via pip. Script never silently connects to a wrong host. |
+| C5 | Audit changes mid-migration (concurrent write) | Out of scope — script is single-threaded, single-transaction. Concurrent writers are operator's problem. |
+
+### 9. Risks (8)
+
+| # | Risk | Mitigation |
+|---|------|------------|
+| R1 | Python stdlib has no DB driver on dev machine | Driver fallback chain: psycopg2 → psycopg3 → psql subprocess → explicit error with install hint. |
+| R2 | Audit histogram pulls 10k+ rows | Single round-trip SQL; aggregate in Python. Acceptable for n < 100k. |
+| R3 | `promptMd` contains escape sequences (markdown code fences, literal underscores in identifiers) | Regex `_{7,}` only matches 7+ consecutive underscores. Identifiers with `_<6` underscores are safe. |
+| R4 | `BlankAcceptTexts` has nested arrays (jsonb) | Only top-level keys are migrated. Values (`string[]`) are untouched. |
+| R5 | Long-running migration holds row locks | Script uses one transaction. Acceptable for < 10k rows; for larger sets, recommend batched migrations (out of scope for Phase 1). |
+| R6 | Pre-existing typo `"1:": ["park"]` in MAP_LABEL example payload (questionSchemas.ts:395) | Out of scope for S32; flagged for follow-up. NOT touched in this commit. |
+| R7 | Phase 3 seed rewrite (separate spawn) might re-introduce legacy formats | The Python tool will catch legacy formats on re-audit. `ready_for_phase2 == true` is the gate for Phase 2. |
+| R8 | Pre-existing `scripts/rewrite_seeds_s32.py` (untracked, Phase 3) might conflict with the new `scripts/migrate_blank_placeholders.py` | Distinct filenames, no conflict. Phase 3 worker will integrate both. |
+
+### 10. Test invariants (10 — manual smoke + mock)
+
+| # | Action | Expected |
+|---|--------|----------|
+| T1 | `python3 scripts/migrate_blank_placeholders.py audit --mock` | Exits 0, prints JSON histogram with `total_questions: 9`, `coexistence_row_count: 2`, `ready_for_phase2: false`. |
+| T2 | `python3 scripts/migrate_blank_placeholders.py migrate --mock` | Audit prints; then refuses with rc=2 because `coexistence_row_count > 0`. |
+| T3 | `python3 scripts/migrate_blank_placeholders.py migrate --apply --force --mock` | Migrates 7 rows, skips 1 (q7 already canonical), exits 0. q8 (MULTIPLE_CHOICE_SINGLE) out of scope. |
+| T4 | Re-run T3 | Migrates 0 rows, exits 0 (idempotency). |
+| T5 | Run `audit --mock` after T3 | `coexistence_row_count: 0`, `ready_for_phase2: true`, all `*_count` for legacy formats are 0. |
+| T6 | `python3 -c "import ast; ast.parse(open('scripts/migrate_blank_placeholders.py').read())"` | No errors. |
+| T7 | `cd langfens-fe-app && ./node_modules/.bin/tsc --noEmit` | 13 baseline errors (none in `validation.ts` or `questionSchemas.ts`). |
+| T8 | `git diff --stat` on `validation.ts` | 1 file changed, 2 insertions(+), 2 deletions(-). |
+| T9 | `git diff --stat` on `questionSchemas.ts` | 1 file changed, 14 insertions(+), 14 deletions(-). |
+| T10 | `git diff --stat` on `templates/exam-import.schema.json` | 1 file changed, 3 insertions(+), 2 deletions(-). |
+
+### 11. Verification
+
+```bash
+# 1. Python tool syntax + behavior
+python3 -c "import ast; ast.parse(open('scripts/migrate_blank_placeholders.py').read())"
+python3 scripts/migrate_blank_placeholders.py audit --mock
+python3 scripts/migrate_blank_placeholders.py migrate --apply --force --mock   # one-time migration of mock data
+python3 scripts/migrate_blank_placeholders.py migrate --apply --force --mock   # second pass = 0 migrations
+
+# 2. FE typecheck (baseline 13 errors, none in touched files)
+cd langfens-fe-app && ./node_modules/.bin/tsc --noEmit | grep -E "validation.ts|questionSchemas.ts"
+
+# 3. JSON schema valid
+python3 -c "import json; json.load(open('templates/exam-import.schema.json')); print('valid JSON')"
+
+# 4. Git log
+git log --oneline -5   # BE repo
+cd langfens-fe-app && git log --oneline -5   # FE repo
+```
+
+Manual smoke checklist: T1–T10 above.
+
+### 12. Rollback
+
+4 atomic commits (one per deliverable + this README) per the commit convention:
+
+1. `feat(script): S32 audit + migrate tool for blank placeholders (Sprint 3 appendix)` — Python tool
+2. `docs(templates): S32 JSON schema description for [N] placeholders (Sprint 3 appendix)` — JSON schema
+3. `feat(fe-admin): S32 validator tighten — retire blank-q\d+ route (Sprint 3 appendix)` — FE validator
+4. `feat(fe-admin): S32 admin schema examples revert to [N] (Sprint 3 appendix)` — FE admin schema
+
+Revert any one without breaking the others. **Phase 1 has ZERO DB write risk** — the Python tool defaults to DRY-RUN and is NOT invoked against any real DB in this commit set. Phase 2 (runtime) and Phase 3 (live DB migration) are explicitly gated to separate worker turns.
