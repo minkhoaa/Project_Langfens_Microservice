@@ -21,6 +21,7 @@ deploy/envs/**
 # ------------------------------
 # Env and secrets (repo-wide)
 # ------------------------------
+WATCHDOG.yml
 .env
 .env.*
 **/.env
