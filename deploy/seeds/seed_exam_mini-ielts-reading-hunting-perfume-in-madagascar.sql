@@ -220,9 +220,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Perfumers use the _______ technique to capture smells from plants.',
+    'Perfumers use the [1] technique to capture smells from plants.',
     '',
-    '{"blank-q11": ["headspace"]}'::jsonb
+    '{"1": ["headspace"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -234,9 +234,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Absorbent _______ are used to collect fragrance molecules.',
+    'Absorbent [1] are used to collect fragrance molecules.',
     '',
-    '{"blank-q12": ["filters"]}'::jsonb
+    '{"1": ["filters"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -248,9 +248,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'A _______ is used to inject samples into the spectrometer.',
+    'A [1] is used to inject samples into the spectrometer.',
     '',
-    '{"blank-q13": ["needle"]}'::jsonb
+    '{"1": ["needle"]}'::jsonb
   );
 
 

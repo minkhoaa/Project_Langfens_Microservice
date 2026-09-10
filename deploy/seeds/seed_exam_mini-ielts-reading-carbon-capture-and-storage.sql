@@ -101,9 +101,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Diagram label 3 _______',
+    'Diagram label 3 [1]',
     '',
-    '{"blank-q3": ["A", "a"]}'::jsonb
+    '{"1": ["A", "a"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -115,9 +115,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Diagram label 4 _______',
+    'Diagram label 4 [1]',
     '',
-    '{"blank-q4": ["C", "c"]}'::jsonb
+    '{"1": ["C", "c"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -129,9 +129,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Diagram label 5 _______',
+    'Diagram label 5 [1]',
     '',
-    '{"blank-q5": ["E", "e"]}'::jsonb
+    '{"1": ["E", "e"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -143,9 +143,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Diagram label 6 _______',
+    'Diagram label 6 [1]',
     '',
-    '{"blank-q6": ["B", "b"]}'::jsonb
+    '{"1": ["B", "b"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -157,9 +157,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Diagram label 7 _______',
+    'Diagram label 7 [1]',
     '',
-    '{"blank-q7": ["G", "g"]}'::jsonb
+    '{"1": ["G", "g"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -171,9 +171,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Diagram label 8 _______',
+    'Diagram label 8 [1]',
     '',
-    '{"blank-q8": ["F", "f"]}'::jsonb
+    '{"1": ["F", "f"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -185,9 +185,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'CCS may cut _______ in a short time',
+    'CCS may cut [1] in a short time',
     '',
-    '{"blank-q9": ["carbon emissions"]}'::jsonb
+    '{"1": ["carbon emissions"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -199,9 +199,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ in labour, industry, and states already support CCS',
+    '[1] in labour, industry, and states already support CCS',
     '',
-    '{"blank-q10": ["powerful lobbies"]}'::jsonb
+    '{"1": ["powerful lobbies"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -213,9 +213,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Alternatives, like _______ energy, take up vast amounts of space',
+    'Alternatives, like [1] energy, take up vast amounts of space',
     '',
-    '{"blank-q11": ["solar"]}'::jsonb
+    '{"1": ["solar"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -227,9 +227,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Therefore, CCS would need _______',
+    'Therefore, CCS would need [1]',
     '',
-    '{"blank-q12": ["massive state subsidies"]}'::jsonb
+    '{"1": ["massive state subsidies"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -241,9 +241,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Some CCS technology is _______',
+    'Some CCS technology is [1]',
     '',
-    '{"blank-q13": ["untried"]}'::jsonb
+    '{"1": ["untried"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -255,9 +255,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'LCOE for natural gas = _______',
+    'LCOE for natural gas = [1]',
     '',
-    '{"blank-q14": ["$0.0686", "kWh"]}'::jsonb
+    '{"1": ["$0.0686", "kWh"]}'::jsonb
   );
 
 

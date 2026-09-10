@@ -52,7 +52,7 @@ BEGIN
     exam_id,
     1,
     'Listening Test - Self-drive tours in the USA',
-    E'## Questions 1-6\n\nComplete the notes below.\n\nWrite **ONE WORD** for each answer.\n\n### SELF-DRIVE TOURS IN THE USA\n\n**Example**\n- Name: Andrea Brown\n\n**Customer Details**\n- Address: 24, **(1)** ______ Road\n- Postcode: BH5 2OP\n- Phone: (mobile) 077 86 643 091\n- Heard about World Tours from: **(2)** ______\n\n**Trip Preferences**\n- Interested in: **(3)** ______ parks\n- Accommodation: staying in a **(4)** ______\n- Visit: a **(5)** ______\n- Visit: the **(6)** ______\n\n---\n## Questions 7-10\n\nComplete the table below.\n\nWrite **ONE WORD AND/OR A NUMBER** for each answer.\n\n| | **Trip One** | **Trip Two** |\n| :--- | :--- | :--- |\n| **Name** | Ardleigh | Grand |\n| **Number of days/Date** | 12 | **(7)** ______ |\n| **Total distance** | 980 km | 3000 km |\n| **Price (per person)** | £**(9)** ______ | £980 |\n| **Includes** | The **(8)** ______ | Free **(10)** ______ |\n',
+    E'## Questions 1-6\n\nComplete the notes below.\n\nWrite **ONE WORD** for each answer.\n\n### SELF-DRIVE TOURS IN THE USA\n\n**Example**\n- Name: Andrea Brown\n\n**Customer Details**\n- Address: 24, **(1)** [1] Road\n- Postcode: BH5 2OP\n- Phone: (mobile) 077 86 643 091\n- Heard about World Tours from: **(2)** [2]\n\n**Trip Preferences**\n- Interested in: **(3)** [3] parks\n- Accommodation: staying in a **(4)** [4]\n- Visit: a **(5)** [5]\n- Visit: the **(6)** [6]\n\n---\n## Questions 7-10\n\nComplete the table below.\n\nWrite **ONE WORD AND/OR A NUMBER** for each answer.\n\n| | **Trip One** | **Trip Two** |\n| :--- | :--- | :--- |\n| **Name** | Ardleigh | Grand |\n| **Number of days/Date** | 12 | **(7)** [7] |\n| **Total distance** | 980 km | 3000 km |\n| **Price (per person)** | £**(9)** [8] | £980 |\n| **Includes** | The **(8)** [9] | Free **(10)** [10] |\n',
     E'# Section 1: Self-Drive Tours in the USA\n\n**Instructions for the Candidate:**\n\nYou will hear a conversation between two people. One is a customer named Andrea Brown, and the other is a travel agent named Jamie from World Tours. They are discussing options for self-drive tours in the USA, specifically comparing two itineraries: the ''Ardleigh'' trip and the ''Grand'' trip.\n\n**Questions 1-10**\n\n**Questions 1-6**\nComplete the notes below.\nWrite **ONE WORD ONLY** for each answer.\n\n**Questions 7-10**\nComplete the table below.\nWrite **ONE WORD AND/OR A NUMBER** for each answer.\n\nPlease pay attention to specific details in the conversation, such as dates, costs, included activities, and accommodation types. You should read the questions before the audio begins to familiarize yourself with the information you need to identify. \n\n*Note: This text is provided for context. In the actual examination, you will only hear the audio recording.*'
   ,
     'https://www.youtube.com/embed/AS8_B5_-Xew?enablejsapi=1');
@@ -66,9 +66,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Address: 24, _______ Road',
+    'Address: 24, [1] Road',
     '',
-    '{"blank-q1": ["Ardleigh"]}'::jsonb
+    '{"1": ["Ardleigh"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -80,9 +80,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Heard about World Tours from: _______',
+    'Heard about World Tours from: [1]',
     '',
-    '{"blank-q2": ["newspaper"]}'::jsonb
+    '{"1": ["newspaper"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -94,9 +94,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Interested in: _______ parks',
+    'Interested in: [1] parks',
     '',
-    '{"blank-q3": ["theme"]}'::jsonb
+    '{"1": ["theme"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -108,9 +108,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Accommodation: staying in a _______',
+    'Accommodation: staying in a [1]',
     '',
-    '{"blank-q4": ["tent"]}'::jsonb
+    '{"1": ["tent"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -122,9 +122,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Visit: a _______',
+    'Visit: a [1]',
     '',
-    '{"blank-q5": ["castle"]}'::jsonb
+    '{"1": ["castle"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -136,9 +136,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Visit: the _______',
+    'Visit: the [1]',
     '',
-    '{"blank-q6": ["beach"]}'::jsonb
+    '{"1": ["beach"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -150,9 +150,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Trip Two - Date: _______',
+    'Trip Two - Date: [1]',
     '',
-    '{"blank-q7": ["2020"]}'::jsonb
+    '{"1": ["2020"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -164,9 +164,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Trip One - Includes: The _______',
+    'Trip One - Includes: The [1]',
     '',
-    '{"blank-q8": ["flight"]}'::jsonb
+    '{"1": ["flight"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -178,9 +178,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Trip One - Price (per person): £_______',
+    'Trip One - Price (per person): £[1]',
     '',
-    '{"blank-q9": ["429"]}'::jsonb
+    '{"1": ["429"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -192,9 +192,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Trip Two - Includes: Free _______',
+    'Trip Two - Includes: Free [1]',
     '',
-    '{"blank-q10": ["dinner"]}'::jsonb
+    '{"1": ["dinner"]}'::jsonb
   );
 
 
@@ -204,10 +204,10 @@ BEGIN
 
   -- Insert question groups
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 1, 1, 6, E'## Questions 1-6\n\nComplete the notes below.\n\nWrite **ONE WORD** for each answer.\n\n### SELF-DRIVE TOURS IN THE USA\n\n**Example**\n- Name: Andrea Brown\n\n**Customer Details**\n- Address: 24, **(1)** ______ Road\n- Postcode: BH5 2OP\n- Phone: (mobile) 077 86 643 091\n- Heard about World Tours from: **(2)** ______\n\n**Trip Preferences**\n- Interested in: **(3)** ______ parks\n- Accommodation: staying in a **(4)** ______\n- Visit: a **(5)** ______\n- Visit: the **(6)** ______\n');
+  VALUES (gen_random_uuid(), sec1, 1, 1, 6, E'## Questions 1-6\n\nComplete the notes below.\n\nWrite **ONE WORD** for each answer.\n\n### SELF-DRIVE TOURS IN THE USA\n\n**Example**\n- Name: Andrea Brown\n\n**Customer Details**\n- Address: 24, **(1)** [1] Road\n- Postcode: BH5 2OP\n- Phone: (mobile) 077 86 643 091\n- Heard about World Tours from: **(2)** [2]\n\n**Trip Preferences**\n- Interested in: **(3)** [3] parks\n- Accommodation: staying in a **(4)** [4]\n- Visit: a **(5)** [5]\n- Visit: the **(6)** [6]\n');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 7, 10, E'## Questions 7-10\n\nComplete the table below.\n\nWrite **ONE WORD AND/OR A NUMBER** for each answer.\n\n| | **Trip One** | **Trip Two** |\n| :--- | :--- | :--- |\n| **Name** | Ardleigh | Grand |\n| **Number of days/Date** | 12 | **(7)** ______ |\n| **Total distance** | 980 km | 3000 km |\n| **Price (per person)** | £**(9)** ______ | £980 |\n| **Includes** | The **(8)** ______ | Free **(10)** ______ |\n');
+  VALUES (gen_random_uuid(), sec1, 2, 7, 10, E'## Questions 7-10\n\nComplete the table below.\n\nWrite **ONE WORD AND/OR A NUMBER** for each answer.\n\n| | **Trip One** | **Trip Two** |\n| :--- | :--- | :--- |\n| **Name** | Ardleigh | Grand |\n| **Number of days/Date** | 12 | **(7)** [1] |\n| **Total distance** | 980 km | 3000 km |\n| **Price (per person)** | £**(9)** [2] | £980 |\n| **Includes** | The **(8)** [3] | Free **(10)** [4] |\n');
 
 END$$;
 

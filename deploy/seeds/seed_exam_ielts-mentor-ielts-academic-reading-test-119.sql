@@ -65,9 +65,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ in shape',
+    '[1] in shape',
     '',
-    '{"blank-q1": ["OVAL"]}'::jsonb
+    '{"1": ["OVAL"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -79,9 +79,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ surrounds the fruit and breaks open when the fruit is ripe',
+    '[1] surrounds the fruit and breaks open when the fruit is ripe',
     '',
-    '{"blank-q2": ["HUSK"]}'::jsonb
+    '{"1": ["HUSK"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -93,9 +93,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ is used to produce the spice nutmeg',
+    '[1] is used to produce the spice nutmeg',
     '',
-    '{"blank-q3": ["SEED"]}'::jsonb
+    '{"1": ["SEED"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -107,9 +107,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______',
+    '[1]',
     '',
-    '{"blank-q4": ["MACE"]}'::jsonb
+    '{"1": ["MACE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -172,9 +172,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete the blank. _______ Question 8',
+    'Complete the blank. [1] Question 8',
     '',
-    '{"blank-q8": ["ARABS"]}'::jsonb
+    '{"1": ["ARABS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -186,9 +186,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete the blank. _______ Question 9',
+    'Complete the blank. [1] Question 9',
     '',
-    '{"blank-q9": ["PLAGUE"]}'::jsonb
+    '{"1": ["PLAGUE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -200,9 +200,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete the blank. _______ Question 10',
+    'Complete the blank. [1] Question 10',
     '',
-    '{"blank-q10": ["LIME"]}'::jsonb
+    '{"1": ["LIME"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -214,9 +214,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete the blank. _______ Question 11',
+    'Complete the blank. [1] Question 11',
     '',
-    '{"blank-q11": ["RUN"]}'::jsonb
+    '{"1": ["RUN"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -228,9 +228,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete the blank. _______ Question 12',
+    'Complete the blank. [1] Question 12',
     '',
-    '{"blank-q12": ["MAURITIUS"]}'::jsonb
+    '{"1": ["MAURITIUS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -242,9 +242,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete the blank. _______ Question 13',
+    'Complete the blank. [1] Question 13',
     '',
-    '{"blank-q13": ["TSUNAMI"]}'::jsonb
+    '{"1": ["TSUNAMI"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -326,9 +326,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______, so the introduction of driverless vehicles will result in greater safety. In addition to the direct benefits of automation, it may bring other advantages. For example, schemes for',
+    '[1], so the introduction of driverless vehicles will result in greater safety. In addition to the direct benefits of automation, it may bring other advantages. For example, schemes for',
     E'**Đáp án: HUMAN ERROR**\n\n> "...research... has demonstrated that more than 90 percent of road collisions involve human error..."\n\n(Đoạn B) Bài đọc khẳng định nguyên nhân chính của tai nạn là lỗi con người. Việc giới thiệu xe tự lái sẽ giảm thiểu yếu tố này, dẫn đến an toàn hơn.',
-    '{"blank-q19": ["HUMAN ERROR"]}'::jsonb
+    '{"1": ["HUMAN ERROR"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -340,9 +340,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ will be more workable, especially in towns and cities, resulting in fewer cars on the road.',
+    '[1] will be more workable, especially in towns and cities, resulting in fewer cars on the road.',
     E'**Đáp án: CARSHARING / CAR-SHARING**\n\n> "Schemes for car-sharing will be more workable..."\n\n(Đoạn C) Đoạn văn nói rằng các mô hình chia sẻ xe (car-sharing) sẽ trở nên khả thi hơn, đặc biệt là ở các thị trấn và thành phố, giúp giảm lượng xe trên đường.',
-    '{"blank-q20": ["CARSHARING", "CAR-SHARING"]}'::jsonb
+    '{"1": ["CARSHARING", "CAR-SHARING"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -354,9 +354,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ of cars. However, this would mean that the yearly',
+    '[1] of cars. However, this would mean that the yearly',
     E'**Đáp án: OWNERSHIP**\n\n> "...reduce the need for individual ownership of cars."\n\n(Đoạn C) Việc xe tự lái và chia sẻ xe phát triển sẽ làm giảm nhu cầu sở hữu xe cá nhân (individual ownership).',
-    '{"blank-q21": ["OWNERSHIP"]}'::jsonb
+    '{"1": ["OWNERSHIP"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -368,9 +368,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______of each car would, on average, be twice as high as it currently is. This would lead to a higher turnover of vehicles, and therefore no reduction in automotive manufacturing.',
+    '[1]of each car would, on average, be twice as high as it currently is. This would lead to a higher turnover of vehicles, and therefore no reduction in automotive manufacturing.',
     E'**Đáp án: MILEAGE**\n\n> "...the yearly mileage of each car would, on average, be twice as high..."\n\n(Đoạn D) Do xe được sử dụng chuyên sâu hơn trong các mô hình chia sẻ, tổng số dặm đi được hàng năm (yearly mileage) của mỗi xe sẽ cao gấp đôi so với hiện tại.',
-    '{"blank-q22": ["MILEAGE"]}'::jsonb
+    '{"1": ["MILEAGE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -382,9 +382,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete the summary using words from the passage _______.',
+    'Complete the summary using words from the passage [1].',
     '',
-    '{"blank-q23": ["AND"]}'::jsonb
+    '{"1": ["AND"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -410,9 +410,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Complete the summary using words from the passage _______.',
+    'Complete the summary using words from the passage [1].',
     '',
-    '{"blank-q25": ["& 26. A"]}'::jsonb
+    '{"1": ["& 26. A"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -440,7 +440,7 @@ BEGIN
     2,
     'The writer refers to visitors to New York to illustrate the point that',
     '',
-    '{"blank-q27": ["A", "a"]}'::jsonb
+    '{"1": ["A", "a"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -454,7 +454,7 @@ BEGIN
     2,
     'According to the second paragraph, what is the writer’s view of explorers?',
     '',
-    '{"blank-q28": ["C", "c"]}'::jsonb
+    '{"1": ["C", "c"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -468,7 +468,7 @@ BEGIN
     2,
     'The writer refers to a description of Egdon Heath to suggest that',
     '',
-    '{"blank-q29": ["C", "c"]}'::jsonb
+    '{"1": ["C", "c"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -482,7 +482,7 @@ BEGIN
     2,
     'In the fourth paragraph, the writer refers to ‘a golden age’ to suggest that',
     '',
-    '{"blank-q30": ["D", "d"]}'::jsonb
+    '{"1": ["D", "d"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -496,7 +496,7 @@ BEGIN
     2,
     'In the sixth paragraph, when discussing the definition of exploration, the writer argues that',
     '',
-    '{"blank-q31": ["A", "a"]}'::jsonb
+    '{"1": ["A", "a"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -510,7 +510,7 @@ BEGIN
     2,
     'In the last paragraph, the writer explains that he is interested in',
     '',
-    '{"blank-q32": ["B", "b"]}'::jsonb
+    '{"1": ["B", "b"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -627,9 +627,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ , and was the first stranger that certain previously',
+    '[1] , and was the first stranger that certain previously',
     '',
-    '{"blank-q38": ["EXPEDITIONS"]}'::jsonb
+    '{"1": ["EXPEDITIONS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -641,9 +641,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ people had encountered.',
+    '[1] people had encountered.',
     '',
-    '{"blank-q39": ["UNCONTACTED", "ISOLATED"]}'::jsonb
+    '{"1": ["UNCONTACTED", "ISOLATED"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -655,9 +655,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ , except to answer specific questions such as how buffalo eat.',
+    '[1] , except to answer specific questions such as how buffalo eat.',
     '',
-    '{"blank-q40": ["SURFACE"]}'::jsonb
+    '{"1": ["SURFACE"]}'::jsonb
   );
 
 
@@ -667,7 +667,7 @@ BEGIN
 
   -- Insert question groups
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 1, 1, 13, E'Questions 1-13:**\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.\n\n---\n\n**\n\n**1.** _______ _______ in shape\n\n**2.** _______ _______ surrounds the fruit and breaks open when the fruit is ripe\n\n**3.** _______ _______ is used to produce the spice nutmeg\n\n**4.** _______ _______\n\n**5.** TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n5. In the Middle Ages, most Europeans knew where nutmeg was grown.\n\n**6.** TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n6. The VOC was the world’s first major trading company.\n\n**7.** TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n7. Following the Treaty of Breda, the Dutch had control of all the islands where nutmeg grew.\n\n**8.** Complete the blank. _______ Question 8\n\n**9.** Complete the blank. _______ Question 9\n\n**10.** Complete the blank. _______ Question 10\n\n**11.** Complete the blank. _______ Question 11\n\n**12.** Complete the blank. _______ Question 12\n\n**13.** Complete the blank. _______ Question 13');
+  VALUES (gen_random_uuid(), sec1, 1, 1, 13, E'Questions 1-13:**\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.\n\n---\n\n**\n\n**1.** [1] in shape\n\n**2.** [2] surrounds the fruit and breaks open when the fruit is ripe\n\n**3.** [3] is used to produce the spice nutmeg\n\n**4.** [4]\n\n**5.** TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n5. In the Middle Ages, most Europeans knew where nutmeg was grown.\n\n**6.** TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n6. The VOC was the world’s first major trading company.\n\n**7.** TRUE if the statement agrees with the information, FALSE if it contradicts, NOT GIVEN if there is no information on this.\n\n7. Following the Treaty of Breda, the Dutch had control of all the islands where nutmeg grew.\n\n**8.** Complete the blank. [5] Question 8\n\n**9.** Complete the blank. [6] Question 9\n\n**10.** Complete the blank. [7] Question 10\n\n**11.** Complete the blank. [8] Question 11\n\n**12.** Complete the blank. [9] Question 12\n\n**13.** Complete the blank. [10] Question 13');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
   VALUES (gen_random_uuid(), sec1, 1, 14, 18, E'Questions 14-18:**\nWhich section contains the following information?\n\nWrite the correct letter, **A-L**.\n\n---\n\n**');
@@ -679,13 +679,13 @@ BEGIN
   VALUES (gen_random_uuid(), sec1, 2, 5, 7, E'Questions 5-7:**\nDo the following statements agree with the information given in the text?\n\nWrite\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 19, 26, E'Questions 19-26:**\nChoose the correct letter, **A**, **B**, **C** or **D**.\n\n**19.** _______ _______, so the introduction of driverless vehicles will result in greater safety. In addition to the direct benefits of automation, it may bring other advantages. For example, schemes for\n\n**20.** _______ _______ will be more workable, especially in towns and cities, resulting in fewer cars on the road.\n\n**21.** _______ _______ of cars. However, this would mean that the yearly\n\n**22.** _______ _______of each car would, on average, be twice as high as it currently is. This would lead to a higher turnover of vehicles, and therefore no reduction in automotive manufacturing.\n\n**23.** Complete the summary using words from the passage _______.\n\n**24.** on your answer sheet.\n\n**25.** Complete the summary using words from the passage _______.\n\n**26.** on your answer sheet.');
+  VALUES (gen_random_uuid(), sec1, 2, 19, 26, E'Questions 19-26:**\nChoose the correct letter, **A**, **B**, **C** or **D**.\n\n**19.** [1], so the introduction of driverless vehicles will result in greater safety. In addition to the direct benefits of automation, it may bring other advantages. For example, schemes for\n\n**20.** [2] will be more workable, especially in towns and cities, resulting in fewer cars on the road.\n\n**21.** [3] of cars. However, this would mean that the yearly\n\n**22.** [4]of each car would, on average, be twice as high as it currently is. This would lead to a higher turnover of vehicles, and therefore no reduction in automotive manufacturing.\n\n**23.** Complete the summary using words from the passage [5].\n\n**24.** on your answer sheet.\n\n**25.** Complete the summary using words from the passage [6].\n\n**26.** on your answer sheet.');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
   VALUES (gen_random_uuid(), sec1, 2, 33, 37, E'Questions 33-37:**\nWhich section contains the following information?\n\nWrite the correct letter, **A-L**.\n\n---\n\n**');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 3, 38, 40, E'Questions 38-40:**\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.\n\n**38.** _______ , and was the first stranger that certain previously\n\n**39.** _______ people had encountered.\n\n**40.** _______ , except to answer specific questions such as how buffalo eat.');
+  VALUES (gen_random_uuid(), sec1, 3, 38, 40, E'Questions 38-40:**\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.\n\n**38.** [1] , and was the first stranger that certain previously\n\n**39.** [2] people had encountered.\n\n**40.** [3] , except to answer specific questions such as how buffalo eat.');
 
 END$$;
 

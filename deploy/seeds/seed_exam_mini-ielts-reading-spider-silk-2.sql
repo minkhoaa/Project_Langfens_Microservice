@@ -135,9 +135,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Synthetic gene grown in _______ or',
+    'Synthetic gene grown in [1] or',
     E'**Đáp án: YEAST**\n\n> "They also tried **yeast**..."\n\n(Đoạn E) Gen tổng hợp được cấy vào nấm men (yeast) hoặc vi khuẩn để sản xuất protein. Câu hỏi yêu cầu điền tên vật liệu nuôi cấy.',
-    '{"blank-q6": ["YEAST"]}'::jsonb
+    '{"1": ["YEAST"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -149,9 +149,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'or _______',
+    'or [1]',
     E'**Đáp án: BACTERIA**\n\n> "They inserted the genes into **bacteria**..."\n\n(Đoạn E) Tương tự như câu trên, vi khuẩn (bacteria) là môi trường nuôi cấy khác được nhắc đến trong quy trình tổng hợp gen.',
-    '{"blank-q7": ["BACTERIA"]}'::jsonb
+    '{"1": ["BACTERIA"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -163,9 +163,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'globules of _______ .',
+    'globules of [1] .',
     E'**Đáp án: PROTEIN**\n\n> "The bacteria reproduced... forming an insoluble **protein**."\n\n(Đoạn E) Kết quả của quá trình nuôi cấy trong vi khuẩn là tạo ra các khối ''globules'' của protein không hòa tan. Từ cần điền là danh từ chỉ sản phẩm tạo thành.',
-    '{"blank-q8": ["PROTEIN"]}'::jsonb
+    '{"1": ["PROTEIN"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -177,9 +177,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'dissolved in _______',
+    'dissolved in [1]',
     E'**Đáp án: CHEMICAL**\n\n> "...dissolved in a harsh **chemical**..."\n\n(Đoạn E) Protein sau đó được hòa tan trong một loại hóa chất/dung môi mạnh. Từ khóa ''dissolved in'' trong câu hỏi giúp định vị thông tin này.',
-    '{"blank-q9": ["CHEMICAL"]}'::jsonb
+    '{"1": ["CHEMICAL"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -191,9 +191,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'passed through _______',
+    'passed through [1]',
     E'**Đáp án: HOLES**\n\n> "...carefully squirted through tiny **holes**..."\n\n(Đoạn E) Để tạo thành sợi tơ, dung dịch được ép qua các lỗ nhỏ, mô phỏng bộ phận spinneret của nhện. Từ khóa ''passed through'' tương đương với ''squirted through''.',
-    '{"blank-q10": ["HOLES"]}'::jsonb
+    '{"1": ["HOLES"]}'::jsonb
   );
 
   qid := gen_random_uuid();

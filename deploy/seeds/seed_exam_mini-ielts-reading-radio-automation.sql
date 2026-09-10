@@ -65,9 +65,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'In 1944, Sargrove invented a primitive _______ which could be made by machines.',
+    'In 1944, Sargrove invented a primitive [1] which could be made by machines.',
     E'**Đáp án: CHIP**\n\n> "His solution was to dispense with most of the fiddly bits by inventing a primitive **chip**..."\n\n(Đoạn B) Đoạn văn mô tả giải pháp của Sargrove vào năm 1944. Ông đã tạo ra một "primitive chip" (con chip sơ khai) làm bằng Bakelite để thay thế các linh kiện phức tạp. Từ khóa "invented" trong câu hỏi khớp với "inventing" trong bài.',
-    '{"blank-q1": ["CHIP"]}'::jsonb
+    '{"1": ["CHIP"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -79,9 +79,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'First stop was the sandblaster... then cleaned to remove any traces of _______ .',
+    'First stop was the sandblaster... then cleaned to remove any traces of [1] .',
     E'**Đáp án: GRIT**\n\n> "First stop was the sandblaster... then cleaned to remove any traces of **grit**."\n\n(Đoạn C) Quy trình sản xuất bắt đầu bằng việc phun cát (sandblaster). Sau đó, các tấm này được làm sạch để loại bỏ dấu vết của "grit" (bụi/cát). Câu hỏi yêu cầu điền từ chỉ thứ bị loại bỏ sau khi làm sạch.',
-    '{"blank-q2": ["GRIT"]}'::jsonb
+    '{"1": ["GRIT"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -93,9 +93,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Eight nozzles rotated into position and sprayed _______ over both sides of the plate.',
+    'Eight nozzles rotated into position and sprayed [1] over both sides of the plate.',
     E'**Đáp án: MOLTEN ZINC**\n\n> "Eight nozzles rotated into position and sprayed **molten zinc** over both sides of the plate."\n\n(Đoạn C) Máy móc tự động sử dụng 8 vòi phun (nozzles) để phun kẽm nóng chảy (molten zinc) lên cả hai mặt của tấm bảng. Thông tin hoàn toàn trùng khớp với ngữ cảnh mô tả quy trình phun kim loại.',
-    '{"blank-q3": ["MOLTEN ZINC"]}'::jsonb
+    '{"1": ["MOLTEN ZINC"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -107,9 +107,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'The next stop was the _______ which ground away the surface layer of metal.',
+    'The next stop was the [1] which ground away the surface layer of metal.',
     E'**Đáp án: MILLING MACHINE**\n\n> "The next stop was the **milling machine** which ground away the surface layer of metal..."\n\n(Đoạn C) Sau khi phun kẽm, công đoạn tiếp theo là loại bỏ lớp kim loại thừa trên bề mặt. Thiết bị thực hiện việc này được gọi tên chính xác là "milling machine" (máy phay).',
-    '{"blank-q4": ["MILLING MACHINE"]}'::jsonb
+    '{"1": ["MILLING MACHINE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -121,9 +121,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Robot hands fitted it with _______ to attach other components.',
+    'Robot hands fitted it with [1] to attach other components.',
     E'**Đáp án: SOCKETS**\n\n> "Robot hands fitted it with **sockets** to attach other components."\n\n(Đoạn C/D) Bài đọc mô tả các cánh tay robot (robot hands) lắp các bộ phận vào bảng mạch. Từ cần điền là "sockets" (ổ cắm) để gắn các linh kiện khác sau này.',
-    '{"blank-q5": ["SOCKETS"]}'::jsonb
+    '{"1": ["SOCKETS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -135,9 +135,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'The robot hands fitted the radio with components such as _______ .',
+    'The robot hands fitted the radio with components such as [1] .',
     E'**Đáp án: LOUDSPEAKERS**\n\n> "Human hands were only required to... fit **loudspeakers**."\n\n(Đoạn D) Mặc dù là dây chuyền tự động, con người vẫn cần thực hiện một số bước cuối cùng. Câu hỏi đề cập đến "components such as...", và bài đọc liệt kê "loudspeakers" (loa) là một trong những bộ phận được lắp thủ công.',
-    '{"blank-q6": ["LOUDSPEAKERS"]}'::jsonb
+    '{"1": ["LOUDSPEAKERS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -149,9 +149,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'The other type of component fitted to the radio was _______ .',
+    'The other type of component fitted to the radio was [1] .',
     E'**Đáp án: VALVES**\n\n> "The other type of component fitted to the radio was **valves**."\n\n(Đoạn D) Tương tự câu trước, đây là một linh kiện khác được lắp vào radio. Bài đọc nhắc đến việc công nhân "plug in valves" (cắm các van/bóng đèn điện tử). "Valves" là đáp án chính xác.',
-    '{"blank-q7": ["VALVES"]}'::jsonb
+    '{"1": ["VALVES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -163,9 +163,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Sargrove had been dedicated to creating a _______ radio by automation of manufacture.',
+    'Sargrove had been dedicated to creating a [1] radio by automation of manufacture.',
     E'**Đáp án: CHEAPER**\n\n> "Sargrove had been trying to figure out how to make **cheaper** radios."\n\n(Đoạn A) Mục tiêu ban đầu của Sargrove là giảm giá thành sản xuất. Câu hỏi paraphrase lại ý này: "dedicated to creating a... radio". Từ "cheaper" (rẻ hơn) điền vào chỗ trống là hợp lý nhất.',
-    '{"blank-q8": ["CHEAPER"]}'::jsonb
+    '{"1": ["CHEAPER"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -177,9 +177,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The old version of radio had a large number of independent _______ .',
+    'The old version of radio had a large number of independent [1] .',
     E'**Đáp án: COMPONENTS**\n\n> "Even a simple receiver might have 30 separate **components**..."\n\n(Đoạn A) Phiên bản radio cũ (old version) chứa rất nhiều bộ phận riêng biệt. Bài đọc sử dụng cụm từ "30 separate components", tương đương với "large number of independent components" trong câu hỏi.',
-    '{"blank-q9": ["COMPONENTS"]}'::jsonb
+    '{"1": ["COMPONENTS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -191,9 +191,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'After this innovation was made, wireless-style radios became _______ and inexpensive to export overseas.',
+    'After this innovation was made, wireless-style radios became [1] and inexpensive to export overseas.',
     E'**Đáp án: LIGHTER**\n\n> "The absence of wires also made the radios **lighter**..."\n\n(Đoạn E) Sau cải tiến, radio không chỉ rẻ hơn mà còn nhẹ hơn do không còn nhiều dây nối chằng chịt. Điều này giúp việc xuất khẩu (export) trở nên dễ dàng và ít tốn kém hơn.',
-    '{"blank-q10": ["LIGHTER"]}'::jsonb
+    '{"1": ["LIGHTER"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -205,9 +205,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'As Sargrove saw it, the real benefit of ECME’s radio was that it reduced the _______ of manual work.',
+    'As Sargrove saw it, the real benefit of ECME’s radio was that it reduced the [1] of manual work.',
     E'**Đáp án: COST**\n\n> "...it reduced the **cost** of manual work."\n\n(Đoạn E) Lợi ích thực sự của ECME theo quan điểm của Sargrove là tiết kiệm chi phí nhân công. Cụm từ "save on labor costs" trong bài tương đương với "reduced the cost of manual work".',
-    '{"blank-q11": ["COST"]}'::jsonb
+    '{"1": ["COST"]}'::jsonb
   );
 
   qid := gen_random_uuid();

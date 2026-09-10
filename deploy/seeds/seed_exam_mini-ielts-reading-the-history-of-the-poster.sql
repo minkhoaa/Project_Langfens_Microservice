@@ -65,9 +65,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'cost, weight and _______ difficulties',
+    'cost, weight and [1] difficulties',
     '',
-    '{"blank-q1": ["STORAGE SPACE"]}'::jsonb
+    '{"1": ["STORAGE SPACE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -79,9 +79,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'Darius''s wood drill used in connection with another _______',
+    'Darius''s wood drill used in connection with another [1]',
     '',
-    '{"blank-q2": ["INVENTION"]}'::jsonb
+    '{"1": ["INVENTION"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -93,9 +93,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'lacked both _______',
+    'lacked both [1]',
     '',
-    '{"blank-q3": ["COLOUR AND DESIGN"]}'::jsonb
+    '{"1": ["COLOUR AND DESIGN"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -107,9 +107,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'design tool - a _______',
+    'design tool - a [1]',
     '',
-    '{"blank-q4": ["GREASY CRAYON"]}'::jsonb
+    '{"1": ["GREASY CRAYON"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -121,9 +121,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'had to use a mirror or _______ to achieve correct image',
+    'had to use a mirror or [1] to achieve correct image',
     '',
-    '{"blank-q5": ["TRANSFER PAPER"]}'::jsonb
+    '{"1": ["TRANSFER PAPER"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -135,9 +135,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'combination of both _______ on coloured posters',
+    'combination of both [1] on coloured posters',
     '',
-    '{"blank-q6": ["WORDS AND IMAGES"]}'::jsonb
+    '{"1": ["WORDS AND IMAGES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -149,9 +149,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'posters used for advertising and _______ in Europe',
+    'posters used for advertising and [1] in Europe',
     '',
-    '{"blank-q7": ["MASS COMMUNICATION"]}'::jsonb
+    '{"1": ["MASS COMMUNICATION"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -163,9 +163,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Cheret’s poster _______ and book on poster art',
+    'Cheret’s poster [1] and book on poster art',
     '',
-    '{"blank-q8": ["EXHIBITION"]}'::jsonb
+    '{"1": ["EXHIBITION"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -177,9 +177,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'posters represent _______ around the world',
+    'posters represent [1] around the world',
     '',
-    '{"blank-q9": ["UNIQUE CULTURAL INSTITUTIONS"]}'::jsonb
+    '{"1": ["UNIQUE CULTURAL INSTITUTIONS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -257,10 +257,10 @@ BEGIN
 
   -- Insert question groups
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 1, 1, 5, E'## Questions 1-5\n\nComplete the notes below.\n\nChoose **NO MORE THAN THREE WORDS** from the passage for each answer.\n\n### Early Printing Methods\n\n**Metal type**\n- **Features:** produced large print\n- **Problems:**\n  - cost, weight and **1** _______ difficulties\n  - mixed styles\n\n**Wood type**\n- **Features:**\n  - Darius''s wood drill used in connection with another **2** _______\n  - produced a range of letters\n- **Problems:**\n  - lacked both **3** _______\n  - mixed type\n\n**Lithography**\n- **Features:**\n  - letters drawn by hand\n  - design tool - a **4** _______\n- **Problems:** had to use a mirror or **5** _______ to achieve correct image');
+  VALUES (gen_random_uuid(), sec1, 1, 1, 5, E'## Questions 1-5\n\nComplete the notes below.\n\nChoose **NO MORE THAN THREE WORDS** from the passage for each answer.\n\n### Early Printing Methods\n\n**Metal type**\n- **Features:** produced large print\n- **Problems:**\n  - cost, weight and **1** [1] difficulties\n  - mixed styles\n\n**Wood type**\n- **Features:**\n  - Darius''s wood drill used in connection with another **2** [2]\n  - produced a range of letters\n- **Problems:**\n  - lacked both **3** [3]\n  - mixed type\n\n**Lithography**\n- **Features:**\n  - letters drawn by hand\n  - design tool - a **4** [4]\n- **Problems:** had to use a mirror or **5** [5] to achieve correct image');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 6, 9, E'## Questions 6-9\n\nComplete the flow chart below.\n\nWrite **NO MORE THAN THREE WORDS** from the passage for each answer.\n\n### Jules Cheret\n\n**1860s** - invention of ''three-stone lithographic process''\n\n↓\n\ncombination of both **6** _______ on coloured posters\n\n↓\n\n**1870s** - posters used for advertising and **7** _______ in Europe\n\n↓\n\n**1884-86** - Cheret’s poster **8** _______ and book on poster art\n\n↓\n\n**1890s** - posters represent **9** _______ around the world');
+  VALUES (gen_random_uuid(), sec1, 2, 6, 9, E'## Questions 6-9\n\nComplete the flow chart below.\n\nWrite **NO MORE THAN THREE WORDS** from the passage for each answer.\n\n### Jules Cheret\n\n**1860s** - invention of ''three-stone lithographic process''\n\n↓\n\ncombination of both **6** [1] on coloured posters\n\n↓\n\n**1870s** - posters used for advertising and **7** [2] in Europe\n\n↓\n\n**1884-86** - Cheret’s poster **8** [3] and book on poster art\n\n↓\n\n**1890s** - posters represent **9** [4] around the world');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
   VALUES (gen_random_uuid(), sec1, 3, 10, 13, E'## Questions 10-13\n\nDo the following statements agree with the information in the reading passage?\n\nWrite:\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this');

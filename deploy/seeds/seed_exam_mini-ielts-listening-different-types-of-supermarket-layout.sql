@@ -66,9 +66,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Grid layout - Controls _______',
+    'Grid layout - Controls [1]',
     '',
-    '{"blank-q1": ["TRAFFIC FLOWS"]}'::jsonb
+    '{"1": ["TRAFFIC FLOWS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -80,9 +80,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Grid layout - Shoppers can _______ through their shopping',
+    'Grid layout - Shoppers can [1] through their shopping',
     '',
-    '{"blank-q2": ["RUSH"]}'::jsonb
+    '{"1": ["RUSH"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -94,9 +94,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Free-form layout - Description: _______ organization',
+    'Free-form layout - Description: [1] organization',
     '',
-    '{"blank-q3": ["RANDOM"]}'::jsonb
+    '{"1": ["RANDOM"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -108,9 +108,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Free-form layout - Customers need more _______ to find products',
+    'Free-form layout - Customers need more [1] to find products',
     '',
-    '{"blank-q4": ["TIME"]}'::jsonb
+    '{"1": ["TIME"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -122,9 +122,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Free-form layout - Less _______',
+    'Free-form layout - Less [1]',
     '',
-    '{"blank-q5": ["COST EFFECTIVE"]}'::jsonb
+    '{"1": ["COST EFFECTIVE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -136,9 +136,9 @@ BEGIN
     'TABLE_COMPLETION',
     'LISTENING',
     2,
-    'Boutique layout - Separates space into _______',
+    'Boutique layout - Separates space into [1]',
     '',
-    '{"blank-q6": ["SMALL AREAS"]}'::jsonb
+    '{"1": ["SMALL AREAS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -204,10 +204,10 @@ BEGIN
 
   -- Insert question groups
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 1, 1, 6, E'## Questions 1-6\n\nComplete the table below.\n\nWrite **NO MORE THAN THREE WORDS** for each answer.\n\n### Different Types of Supermarket Layout\n\n**Grid Layout**\n- Description: parallel aisles\n- Advantages: efficient use of floor space, Controls **1** _______\n- Disadvantages: Uninteresting layout, Shoppers can **2** _______ through their shopping\n\n**Free-form Layout**\n- Description: **3** _______ organization\n- Advantages: customers need more **4** _______ to find products\n- Disadvantages: poor use of space, so less **5** _______\n\n**Boutique Layout**\n- Description: Displays arranged around a food specialty\n- Advantages: separates space into **6** _______, creates attractive image\n- Disadvantages: poor use of space');
+  VALUES (gen_random_uuid(), sec1, 1, 1, 6, E'## Questions 1-6\n\nComplete the table below.\n\nWrite **NO MORE THAN THREE WORDS** for each answer.\n\n### Different Types of Supermarket Layout\n\n**Grid Layout**\n- Description: parallel aisles\n- Advantages: efficient use of floor space, Controls **1** [1]\n- Disadvantages: Uninteresting layout, Shoppers can **2** [2] through their shopping\n\n**Free-form Layout**\n- Description: **3** [3] organization\n- Advantages: customers need more **4** [4] to find products\n- Disadvantages: poor use of space, so less **5** [5]\n\n**Boutique Layout**\n- Description: Displays arranged around a food specialty\n- Advantages: separates space into **6** [6], creates attractive image\n- Disadvantages: poor use of space');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 7, 10, E'## Questions 7-10\n\nWhich types of products are placed in each location in supermarkets?\n\nChoose **FOUR** answers from the box and write the correct letter, **A-F**.\n\n### Types of Products:\n- **A** more expensive products\n- **B** most profitable products\n- **C** products reduced in price\n- **D** products aimed at children\n- **E** products requiring careful selection\n- **F** slow-moving products\n\n**Locations:**\n- **7** quieter areas: _______\n- **8** end of aisles: _______\n- **9** middle shelves: _______\n- **10** near the entrance: _______');
+  VALUES (gen_random_uuid(), sec1, 2, 7, 10, E'## Questions 7-10\n\nWhich types of products are placed in each location in supermarkets?\n\nChoose **FOUR** answers from the box and write the correct letter, **A-F**.\n\n### Types of Products:\n- **A** more expensive products\n- **B** most profitable products\n- **C** products reduced in price\n- **D** products aimed at children\n- **E** products requiring careful selection\n- **F** slow-moving products\n\n**Locations:**\n- **7** quieter areas: [1]\n- **8** end of aisles: [2]\n- **9** middle shelves: [3]\n- **10** near the entrance: [4]');
 
 END$$;
 

@@ -227,9 +227,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Label 10 on flow chart: _______',
+    'Label 10 on flow chart: [1]',
     '',
-    '{"blank-q10": ["HEAT"]}'::jsonb
+    '{"1": ["HEAT"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -241,9 +241,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Label 11 on flow chart: _______',
+    'Label 11 on flow chart: [1]',
     '',
-    '{"blank-q11": ["DENSER"]}'::jsonb
+    '{"1": ["DENSER"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -255,9 +255,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Label 12 on flow chart: _______',
+    'Label 12 on flow chart: [1]',
     '',
-    '{"blank-q12": ["GREAT OCEAN CONVEYOR"]}'::jsonb
+    '{"1": ["GREAT OCEAN CONVEYOR"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -269,9 +269,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Label 13 on flow chart: _______',
+    'Label 13 on flow chart: [1]',
     '',
-    '{"blank-q13": ["FRESH WATER"]}'::jsonb
+    '{"1": ["FRESH WATER"]}'::jsonb
   );
 
 
@@ -287,7 +287,7 @@ BEGIN
   VALUES (gen_random_uuid(), sec1, 2, 5, 9, E'## Questions 5-9\n\nLook at the following statements (Questions 5-9) and the list of people in the box below.\n\nMatch each statement with the correct person **A-D**.\n\n*NB You may use any letter more than once.*\n\n### List of People\n- **A** William Curry\n- **B** Terrence Joyce\n- **C** Bob Dickson\n- **D** National Academy of Sciences\n\n**5** Most Americans are not prepared for the next ice age  \n**6** The result of abrupt climate change is catastrophic  \n**7** The world is not as cold as it used to be  \n**8** Global warming is closely connected to the ice age  \n**9** Alerted people to the change of ocean water in a conference');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 3, 10, 13, E'## Questions 10-13\n\nComplete the flow chart below.\n\nChoose **NO MORE THAN THREE WORDS** from the passage for each answer.\n\n![Flow Chart](https://res.cloudinary.com/df41zs8il/image/upload/v1766597308/ielts/diagram_50ff07cd4689.jpg)\n\n**10** _______  \n**11** _______  \n**12** _______  \n**13** _______');
+  VALUES (gen_random_uuid(), sec1, 3, 10, 13, E'## Questions 10-13\n\nComplete the flow chart below.\n\nChoose **NO MORE THAN THREE WORDS** from the passage for each answer.\n\n![Flow Chart](https://res.cloudinary.com/df41zs8il/image/upload/v1766597308/ielts/diagram_50ff07cd4689.jpg)\n\n**10** [1]  \n**11** [2]  \n**12** [3]  \n**13** [4]');
 
 END$$;
 

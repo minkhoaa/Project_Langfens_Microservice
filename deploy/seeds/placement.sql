@@ -124,41 +124,41 @@ BEGIN
   qid := '7c5343b4-dc7e-4e9c-9f24-c10597931551';
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
   VALUES (qid, sec_reading, 6, 'SUMMARY_COMPLETION', 'READING', 2, 
-    'Kaldi shared his discovery with a local _______, where monks began brewing the drink.',
+    'Kaldi shared his discovery with a local [1], where monks began brewing the drink.',
     E'**Answer: MONASTERY**\n\nParagraph B: "Kaldi shared his discovery with a local monastery."',
-    '{"blank-q6": ["monastery"]}'::jsonb
+    '{"1": ["monastery"]}'::jsonb
   );
 
   qid := 'a5929ff9-7bf8-4b3f-9b18-6e61434117e5';
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
   VALUES (qid, sec_reading, 7, 'SUMMARY_COMPLETION', 'READING', 2, 
-    'Coffee spread from Ethiopia to the _______ Peninsula.',
+    'Coffee spread from Ethiopia to the [1] Peninsula.',
     E'**Answer: ARABIAN**\n\nParagraph C: "From Ethiopia, coffee spread to the Arabian Peninsula."',
-    '{"blank-q7": ["Arabian"]}'::jsonb
+    '{"1": ["Arabian"]}'::jsonb
   );
 
   qid := '5002728b-8c6d-4eb2-aa21-81a4086ee130';
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
   VALUES (qid, sec_reading, 8, 'SUMMARY_COMPLETION', 'READING', 3, 
-    'The Pope gave coffee his _______ instead of banning it.',
+    'The Pope gave coffee his [1] instead of banning it.',
     E'**Answer: BLESSING**\n\nParagraph D: "he reportedly gave it his blessing instead."',
-    '{"blank-q8": ["blessing"]}'::jsonb
+    '{"1": ["blessing"]}'::jsonb
   );
 
   qid := 'e77ae559-60bf-42a3-bf1b-c21c1661608c';
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
   VALUES (qid, sec_reading, 9, 'SUMMARY_COMPLETION', 'READING', 3, 
-    'The Dutch established coffee plantations in their _______ in Indonesia.',
+    'The Dutch established coffee plantations in their [1] in Indonesia.',
     E'**Answer: COLONIES**\n\nParagraph E: "establishing plantations in their colonies in Indonesia."',
-    '{"blank-q9": ["colonies"]}'::jsonb
+    '{"1": ["colonies"]}'::jsonb
   );
 
   qid := '5b24bdf9-241d-4e9f-8ee5-3b65a2ad02a3';
   INSERT INTO exam_questions ("Id","SectionId","Idx","Type","Skill","Difficulty","PromptMd","ExplanationMd","BlankAcceptTexts")
   VALUES (qid, sec_reading, 10, 'SUMMARY_COMPLETION', 'READING', 3, 
-    'The Portuguese brought coffee to _______, which became the largest producer.',
+    'The Portuguese brought coffee to [1], which became the largest producer.',
     E'**Answer: BRAZIL**\n\nParagraph E: "the Portuguese brought it to Brazil, which would eventually become the world''s largest coffee producer."',
-    '{"blank-q10": ["Brazil"]}'::jsonb
+    '{"1": ["Brazil"]}'::jsonb
   );
 
   -- Reading Question Groups

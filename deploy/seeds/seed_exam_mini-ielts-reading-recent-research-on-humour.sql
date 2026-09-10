@@ -184,9 +184,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     E'**Đáp án: PROBLEM SOLVING**\n\n> "He suggests that comedy... usually involves **problem solving**."\n\n(Đoạn G) Câu hỏi yêu cầu tìm danh từ chỉ một quá trình liên quan đến logic. Đoạn văn nêu rõ hài kịch buộc chúng ta đối mặt với sự bất hợp lý và quá trình này liên quan đến "problem solving".',
-    '{"blank-q8": ["PROBLEM SOLVING"]}'::jsonb
+    '{"1": ["PROBLEM SOLVING"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -198,9 +198,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     E'**Đáp án: TEMPORAL LOBES**\n\n> "...activity in the **temporal lobes**..."\n\n(Đoạn G) Dựa vào ngữ cảnh về hoạt động não bộ khi nghe truyện cười, bài đọc chỉ ra sự kích hoạt ở "temporal lobes" (thùy thái dương) liên quan đến việc phân tích ngữ nghĩa.',
-    '{"blank-q9": ["TEMPORAL LOBES"]}'::jsonb
+    '{"1": ["TEMPORAL LOBES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -212,9 +212,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     E'**Đáp án: EVALUATING INFORMATION**\n\n> "...orbital prefrontal cortex... involved in **evaluating information**."\n\n(Đoạn G) Vùng não "orbital prefrontal cortex" được xác định có chức năng "evaluating information" (đánh giá thông tin) để quyết định xem một câu chuyện có hài hước hay không.',
-    '{"blank-q10": ["EVALUATING INFORMATION"]}'::jsonb
+    '{"1": ["EVALUATING INFORMATION"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -283,7 +283,7 @@ BEGIN
   VALUES (gen_random_uuid(), sec1, 1, 1, 7, E'## Questions 1-7\n\nDo the following statements agree with the information given in the text?\n\nWrite\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this\n\n---\n\n');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 8, 10, E'## Questions 8-10\n\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.\n\n---\n\n\n\n![Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766591284/ielts/05_3f01ed6791e4.jpg)\n\n**8.** _______\n\n**9.** _______\n\n**10.** _______');
+  VALUES (gen_random_uuid(), sec1, 2, 8, 10, E'## Questions 8-10\n\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.\n\n---\n\n\n\n![Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766591284/ielts/05_3f01ed6791e4.jpg)\n\n**8.** [1]\n\n**9.** [2]\n\n**10.** [3]');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
   VALUES (gen_random_uuid(), sec1, 3, 11, 14, E'## Questions 11-14\n\nWhich section contains the following information?\n\nWrite the correct letter, **A-L**.');

@@ -52,7 +52,7 @@ BEGIN
     exam_id,
     1,
     'Listening Test - Fiddy Working Heritage Farm',
-    E'## Questions 1-4\n\nComplete the notes below. Write **NO MORE THAN TWO WORDS** for each answer.\n\n### Safety rules:\n- **1.** take care not to harm any _______\n- **2.** not touch any _______\n- **3.** wear _______\n- **4.** not bring _______ into the farm, with certain exceptions\n\n---\n\n## Questions 5-10\n\nLabel the map below. Write the correct letter, **A-I**, next to Questions 5-10.\n\n### Map:\n\n![Farm Map](https://res.cloudinary.com/df41zs8il/image/upload/v1766530670/ielts/listening-test-1-label-map_186689a6f18b.jpg)\n\n### Options:\n- **A** Fiddy House\n- **B** Farm Shop\n- **C** Covered picnic area\n- **D** Cafe\n- **E** Ticket Office\n- **F** Scarecrow\n- **G** Maze\n- **H** Black Barn\n- **I** Entrance\n\n**Questions:**\n- **5.** Scarecrow → _______\n- **6.** Maze → _______\n- **7.** Cafe → _______\n- **8.** Black Barn → _______\n- **9.** Covered picnic area → _______\n- **10.** Fiddy House → _______',
+    E'## Questions 1-4\n\nComplete the notes below. Write **NO MORE THAN TWO WORDS** for each answer.\n\n### Safety rules:\n- **1.** take care not to harm any [1]\n- **2.** not touch any [2]\n- **3.** wear [3]\n- **4.** not bring [4] into the farm, with certain exceptions\n\n---\n\n## Questions 5-10\n\nLabel the map below. Write the correct letter, **A-I**, next to Questions 5-10.\n\n### Map:\n\n![Farm Map](https://res.cloudinary.com/df41zs8il/image/upload/v1766530670/ielts/listening-test-1-label-map_186689a6f18b.jpg)\n\n### Options:\n- **A** Fiddy House\n- **B** Farm Shop\n- **C** Covered picnic area\n- **D** Cafe\n- **E** Ticket Office\n- **F** Scarecrow\n- **G** Maze\n- **H** Black Barn\n- **I** Entrance\n\n**Questions:**\n- **5.** Scarecrow → [5]\n- **6.** Maze → [6]\n- **7.** Cafe → [7]\n- **8.** Black Barn → [8]\n- **9.** Covered picnic area → [9]\n- **10.** Fiddy House → [10]',
     E'# Fiddy Working Heritage Farm - Listening Practice\n\n**Instructions:**\nYou will hear a guide giving visitors information about Fiddy Working Heritage Farm. Listen carefully to the audio recording and answer the questions below.\n\n**Audio Format:**\n- You will hear the recording ONCE only\n- There are 10 questions in total\n- Questions 1-4 require you to complete notes about farm safety rules\n- Questions 5-10 require you to label locations on the farm map\n- Pay attention to the guide''s instructions and directions\n\n**About the Farm:**\nFiddy Working Heritage Farm is a traditional working farm that demonstrates historical farming methods and techniques. Visitors can explore various areas of the farm, learn about traditional crafts, and see how farming was done in the past.\n\n**Task:**\nFor Questions 1-4, complete the notes about safety rules. Write NO MORE THAN TWO WORDS for each answer.\nFor Questions 5-10, label the map by writing the correct letter (A-I) next to each location.\n\n**Timing:**\nThis is a short listening practice test. Take notes while listening to help you remember the key information given by the guide.'
   ,
     'https://www.youtube.com/embed/IXfa58mHqMM?enablejsapi=1');
@@ -66,9 +66,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• take care not to harm any _______',
+    '• take care not to harm any [1]',
     '',
-    '{"blank-q1": ["ANIMAL", "ANIMALS"]}'::jsonb
+    '{"1": ["ANIMAL", "ANIMALS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -80,9 +80,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• not touch any _______',
+    '• not touch any [1]',
     '',
-    '{"blank-q2": ["TOOL", "TOOLS"]}'::jsonb
+    '{"1": ["TOOL", "TOOLS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -94,9 +94,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• wear _______',
+    '• wear [1]',
     '',
-    '{"blank-q3": ["SHOES"]}'::jsonb
+    '{"1": ["SHOES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -108,9 +108,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• not bring _______ into the farm, with certain exceptions',
+    '• not bring [1] into the farm, with certain exceptions',
     '',
-    '{"blank-q4": ["DOG", "DOGS"]}'::jsonb
+    '{"1": ["DOG", "DOGS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -204,10 +204,10 @@ BEGIN
 
   -- Insert question groups
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 1, 1, 4, E'## Questions 1-4\n\nComplete the notes below. Write **NO MORE THAN TWO WORDS** for each answer.\n\n### Safety rules:\n- **1.** take care not to harm any _______\n- **2.** not touch any _______\n- **3.** wear _______\n- **4.** not bring _______ into the farm, with certain exceptions');
+  VALUES (gen_random_uuid(), sec1, 1, 1, 4, E'## Questions 1-4\n\nComplete the notes below. Write **NO MORE THAN TWO WORDS** for each answer.\n\n### Safety rules:\n- **1.** take care not to harm any [1]\n- **2.** not touch any [2]\n- **3.** wear [3]\n- **4.** not bring [4] into the farm, with certain exceptions');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 5, 10, E'## Questions 5-10\n\nLabel the map below. Write the correct letter, **A-I**, next to Questions 5-10.\n\n### Map:\n\n![Farm Map](https://res.cloudinary.com/df41zs8il/image/upload/v1766530670/ielts/listening-test-1-label-map_186689a6f18b.jpg)\n\n### Options:\n- **A** Fiddy House\n- **B** Farm Shop\n- **C** Covered picnic area\n- **D** Cafe\n- **E** Ticket Office\n- **F** Scarecrow\n- **G** Maze\n- **H** Black Barn\n- **I** Entrance\n\n**Questions:**\n- **5.** Scarecrow → _______\n- **6.** Maze → _______\n- **7.** Cafe → _______\n- **8.** Black Barn → _______\n- **9.** Covered picnic area → _______\n- **10.** Fiddy House → _______');
+  VALUES (gen_random_uuid(), sec1, 2, 5, 10, E'## Questions 5-10\n\nLabel the map below. Write the correct letter, **A-I**, next to Questions 5-10.\n\n### Map:\n\n![Farm Map](https://res.cloudinary.com/df41zs8il/image/upload/v1766530670/ielts/listening-test-1-label-map_186689a6f18b.jpg)\n\n### Options:\n- **A** Fiddy House\n- **B** Farm Shop\n- **C** Covered picnic area\n- **D** Cafe\n- **E** Ticket Office\n- **F** Scarecrow\n- **G** Maze\n- **H** Black Barn\n- **I** Entrance\n\n**Questions:**\n- **5.** Scarecrow → [1]\n- **6.** Maze → [2]\n- **7.** Cafe → [3]\n- **8.** Black Barn → [4]\n- **9.** Covered picnic area → [5]\n- **10.** Fiddy House → [6]');
 
 END$$;
 

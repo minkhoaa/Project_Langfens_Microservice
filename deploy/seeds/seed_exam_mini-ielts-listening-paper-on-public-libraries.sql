@@ -117,9 +117,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• whether it has a _______ of its own',
+    '• whether it has a [1] of its own',
     '',
-    '{"blank-q4": ["BUDGET"]}'::jsonb
+    '{"1": ["BUDGET"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -131,9 +131,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• how it’s affected by laws regarding all aspects of _______',
+    '• how it’s affected by laws regarding all aspects of [1]',
     '',
-    '{"blank-q5": ["EMPLOYMENT"]}'::jsonb
+    '{"1": ["EMPLOYMENT"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -145,9 +145,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• how the design needs to take the _______ of customers into account',
+    '• how the design needs to take the [1] of customers into account',
     '',
-    '{"blank-q6": ["SAFETY"]}'::jsonb
+    '{"1": ["SAFETY"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -159,9 +159,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• what _______ is required in case of accidents',
+    '• what [1] is required in case of accidents',
     '',
-    '{"blank-q7": ["INSURANCE"]}'::jsonb
+    '{"1": ["INSURANCE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -173,9 +173,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• why a famous person’s _______ is located in the library',
+    '• why a famous person’s [1] is located in the library',
     '',
-    '{"blank-q8": ["DIARY"]}'::jsonb
+    '{"1": ["DIARY"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -187,9 +187,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• whether it has a _______ of local organisations',
+    '• whether it has a [1] of local organisations',
     '',
-    '{"blank-q9": ["DATABASE"]}'::jsonb
+    '{"1": ["DATABASE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -201,9 +201,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    '• how it’s different from a library in a _______',
+    '• how it’s different from a library in a [1]',
     '',
-    '{"blank-q10": ["MUSEUM"]}'::jsonb
+    '{"1": ["MUSEUM"]}'::jsonb
   );
 
 
@@ -216,7 +216,7 @@ BEGIN
   VALUES (gen_random_uuid(), sec1, 1, 1, 3, E'## Questions 1-3\n\nChoose the correct letter, **A**, **B** or **C**.\n\n### Paper on Public Libraries\n\n**1.** What will be the main topic of Trudie and Stewart''s paper?\n- **A** how public library services are organised in different countries\n- **B** how changes in society are reflected in public libraries\n- **C** how the funding of public libraries has changed\n\n**2.** They agree that one disadvantage of free digitalised books is that\n- **A** they may take a long time to read.\n- **B** they can be difficult to read.\n- **C** they are generally old.\n\n**3.** Stewart expects that in the future libraries will\n- **A** maintain their traditional function.\n- **B** become centres for local communities.\n- **C** no longer contain any books.');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 4, 10, E'## Questions 4-10\n\nComplete the notes below.\n\nWrite **ONE WORD ONLY** for each answer.\n\n### Study of local library: possible questions\n\n- whether it has a **4** _______ of its own\n- its policy regarding noise of various kinds\n- how it''s affected by laws regarding all aspects of **5** _______\n- how the design needs to take the **6** _______ of customers into account\n- what **7** _______ is required in case of accidents\n- why a famous person''s **8** _______ is located in the library\n- whether it has a **9** _______ of local organisations\n- how it''s different from a library in a **10** _______');
+  VALUES (gen_random_uuid(), sec1, 2, 4, 10, E'## Questions 4-10\n\nComplete the notes below.\n\nWrite **ONE WORD ONLY** for each answer.\n\n### Study of local library: possible questions\n\n- whether it has a **4** [1] of its own\n- its policy regarding noise of various kinds\n- how it''s affected by laws regarding all aspects of **5** [2]\n- how the design needs to take the **6** [3] of customers into account\n- what **7** [4] is required in case of accidents\n- why a famous person''s **8** [5] is located in the library\n- whether it has a **9** [6] of local organisations\n- how it''s different from a library in a **10** [7]');
 
 END$$;
 

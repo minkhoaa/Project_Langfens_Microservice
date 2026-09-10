@@ -52,7 +52,7 @@ BEGIN
     exam_id,
     1,
     'Reading Passage - The history of cakes at weddings',
-    E'**Questions 1-6:**\nDo the following statements agree with the information given in the passage?\nWrite:\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this\n\n**1.** Breaking a cake over the bride’s head was the last part of an ancient Roman wedding ceremony.\n**2.** Confetti is still made of nuts, dried fruit and honeyed almonds.\n**3.** The groom’s family used to supply the confetti.\n**4.** It was considered lucky for a newly married couple to be able to kiss over a tower of spiced buns.\n**5.** Only brides were allowed to eat Bride Pie.\n**6.** The wedding cakes eaten in Britain today developed from Bride Cake of the 17th century.\n\n---\n\n**Questions 7-9:**\nComplete the notes below.\nChoose **ONE WORD ONLY** from the passage for each answer.\n\n### Wedding cakes\n**17th century - Britain Bride Cake:**\n- expensive ingredients were a sign of wealth\n- less expensive round cakes were made of **7** _______ with currants in between and sugar on top\n- they were baked on a hearth stone because not all homes had **8** _______\n\n**Now - United States - Groom’s cake:**\n- guest receive pieces of the groom’s cake\n- cakes may represent the **9** _______ of the groom\n\n---\n\n**Questions 10-13:**\nLabel the diagram below.\nChoose **ONE WORD ONLY** from the passage for each answer.\n\n![Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766589423/ielts/cake_3b3cb4106bbb.jpg)\n\n**10.** Examples of wedding cakes with several **10** _______.\n**11.** In the early 1900s, **11** _______ were used to keep individual cakes apart.\n**12.** The size of these cakes as well as their **12** _______ affects pricing.\n**13.** Hardened **13** _______ between cakes stopped higher cakes sinking into lower cakes.',
+    E'**Questions 1-6:**\nDo the following statements agree with the information given in the passage?\nWrite:\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this\n\n**1.** Breaking a cake over the bride’s head was the last part of an ancient Roman wedding ceremony.\n**2.** Confetti is still made of nuts, dried fruit and honeyed almonds.\n**3.** The groom’s family used to supply the confetti.\n**4.** It was considered lucky for a newly married couple to be able to kiss over a tower of spiced buns.\n**5.** Only brides were allowed to eat Bride Pie.\n**6.** The wedding cakes eaten in Britain today developed from Bride Cake of the 17th century.\n\n---\n\n**Questions 7-9:**\nComplete the notes below.\nChoose **ONE WORD ONLY** from the passage for each answer.\n\n### Wedding cakes\n**17th century - Britain Bride Cake:**\n- expensive ingredients were a sign of wealth\n- less expensive round cakes were made of **7** [1] with currants in between and sugar on top\n- they were baked on a hearth stone because not all homes had **8** [2]\n\n**Now - United States - Groom’s cake:**\n- guest receive pieces of the groom’s cake\n- cakes may represent the **9** [3] of the groom\n\n---\n\n**Questions 10-13:**\nLabel the diagram below.\nChoose **ONE WORD ONLY** from the passage for each answer.\n\n![Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766589423/ielts/cake_3b3cb4106bbb.jpg)\n\n**10.** Examples of wedding cakes with several **10** [4].\n**11.** In the early 1900s, **11** [5] were used to keep individual cakes apart.\n**12.** The size of these cakes as well as their **12** [6] affects pricing.\n**13.** Hardened **13** [7] between cakes stopped higher cakes sinking into lower cakes.',
     E'**Paragraph A.**\nIn Western cultures, since antiquity, weddings customarily have been celebrated with a special cake. Ancient Roman wedding ceremonies were finalized by breaking a cake of wheat or barley over the bride’s head as a symbol of good fortune. The newly married couple then ate some of the crumbs together. Afterward, the wedding guests gathered up the remaining crumbs as tokens of good luck. Wedding guests were also supplied with sweetmeats called confetti, a sweet mixture of nuts, dried fruit and honeyed almonds. Handfuls of confetti were showered over the bride and groom; indeed, it seems to have been the custom to throw confetti about enthusiastically. Eventually, confetti in the form of sweets and nuts was replaced with rice, flower petals, or colored paper, and these new types of confetti continue to be thrown over newly married couples in many countries around the world.\n\n**Paragraph B.**\nWhen the Romans invaded Britain in 43 AD, many of their customs and traditions became part of British life. These customs included their wedding customs, and when the Normans invaded Britain in 1066 they brought many French traditions. Other changes came about due to increased trade and contact with Europe, but present-day British wedding traditions remain firmly rooted in the past. In medieval Britain, small spiced buns, which were common everyday fare, were often eaten at weddings. These were stacked in a towering pile, as high as possible. If the bride and groom were able to kiss over the tall stack, it augured a lifetime of riches. The earliest British recipe exclusively for eating at weddings is Bride Pie, which was recorded in 1685. This was a large round pie with an elaborately decorated pastry crust that concealed a filling of oysters, pine nuts, lamb and spices. Each guest had to eat a small piece of the pie; not to do so was considered extremely impolite. A ring was traditionally placed in the pie, and the lady who found it would be next to marry.\n\n**Paragraph C.**\nIn the 17th century, Bride Pie was changed into Bride Cake, the predecessor of the modern British wedding cake. Cakes containing dried fruit and sugar, symbols of prosperity, gradually became the centerpieces for weddings. Some people made Bride Cake in the cheaper form of two large rounds of pastry sandwiched together with currants and sprinkled with sugar. Very few homes at the time could boast of having ovens, but this type of pastry cake could be cooked on a baking stone on the hearth.\n\n**Paragraph D.**\nLater in the 17th century, there was a new development when wedding cakes began to be made in pairs, one for the bride and another for the groom. Both cakes were dark, heavy fruitcakes; the groom’s cake was smaller than the bride’s cake, and was cut up into little squares that were placed in boxes for the guests to take home as a wedding memento. Groom’s cakes gradually died out and are no longer part of British weddings. However, the tradition has undergone a revival in the United States, where for many years the groom’s cake has served as a wedding gift for guests. Modern groom’s cakes are often formed and decorated to depict the groom’s hobby, for example a golf bag, a camera, a chess board.\n\n**Paragraph E.**\nGroom’s cakes were never covered with icing, but Bride Cake covered with white icing first appeared sometime in the 17th century. After the cake was baked, it was covered with a pure white, smooth icing made with double refined sugar, egg whites, and orange-flower water. The mixture was beaten for two hours, then spread over the cake and dried in the oven until hard. A pure white color was much sought after for wedding cake icing because white icing meant that only the finest refined sugar had been used. Thus a pure white cake was a status symbol, as it displayed the family’s wealth.\n\n**Paragraph F.**\nThe late 1800s in Britain saw the introduction of a new tradition, with the first multi-tiered wedding cakes. These were impressive cakes: they were heavy because they were made with so much dried fruit, and highly decorated with icing and embellished with sugar flowers, doves, horseshoes and bells. The first multi-tiered cakes comprised iced cakes stacked on top of each other rather like a succession of boxes gradually decreasing in size. The cakes from the upper tiers did not sink into the lower tiers because they were not put on top of each other until the icing between each cake had had time to harden. It was not until the beginning of the 20th century that the cake tiers were separated and supported by columns.\n\n**Paragraph G.**\nTwenty-first-century weddings are big business for Britain’s wedding industry. Over 300,000 people get married each year and a wedding can cost thousands of pounds. The cost of the all-important wedding cake can be hundreds of pounds, depending on the dimension and design. It will be interesting to see whether wedding cakes continue to be popular at weddings.'
   );
 
@@ -167,9 +167,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'less expensive round cakes were made of _______ with currants in between and sugar on top',
+    'less expensive round cakes were made of [1] with currants in between and sugar on top',
     '',
-    '{"blank-q7": ["PASTRY"]}'::jsonb
+    '{"1": ["PASTRY"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -181,9 +181,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'they were baked on a hearth stone because not all homes had _______',
+    'they were baked on a hearth stone because not all homes had [1]',
     '',
-    '{"blank-q8": ["OVENS"]}'::jsonb
+    '{"1": ["OVENS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -195,9 +195,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'cakes may represent the _______ of the groom',
+    'cakes may represent the [1] of the groom',
     '',
-    '{"blank-q9": ["HOBBY"]}'::jsonb
+    '{"1": ["HOBBY"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -209,9 +209,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Examples of wedding cakes with several _______ .',
+    'Examples of wedding cakes with several [1] .',
     '',
-    '{"blank-q10": ["BOXES"]}'::jsonb
+    '{"1": ["BOXES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -223,9 +223,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'In the early 1900s, _______ were used to keep individual cakes apart.',
+    'In the early 1900s, [1] were used to keep individual cakes apart.',
     '',
-    '{"blank-q11": ["COLUMNS"]}'::jsonb
+    '{"1": ["COLUMNS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -237,9 +237,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'The size of these cakes as well as their _______ affects pricing.',
+    'The size of these cakes as well as their [1] affects pricing.',
     '',
-    '{"blank-q12": ["DESIGN"]}'::jsonb
+    '{"1": ["DESIGN"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -251,9 +251,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Hardened _______ between cakes stopped higher cakes sinking into lower cakes.',
+    'Hardened [1] between cakes stopped higher cakes sinking into lower cakes.',
     '',
-    '{"blank-q13": ["ICING"]}'::jsonb
+    '{"1": ["ICING"]}'::jsonb
   );
 
 
@@ -266,7 +266,7 @@ BEGIN
   VALUES (gen_random_uuid(), sec1, 1, 1, 6, E'## Questions 1-6\n\nDo the following statements agree with the information given in the passage?\n\nWrite:\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 7, 9, E'## Questions 7-9\n\nComplete the notes below.\n\nChoose **ONE WORD ONLY** from the passage for each answer.\n\n### Wedding cakes\n**17th century - Britain Bride Cake:**\n- expensive ingredients were a sign of wealth\n- less expensive round cakes were made of **7** _______ with currants in between and sugar on top\n- they were baked on a hearth stone because not all homes had **8** _______\n\n**Now - United States - Groom’s cake:**\n- guest receive pieces of the groom’s cake\n- cakes may represent the **9** _______ of the groom');
+  VALUES (gen_random_uuid(), sec1, 2, 7, 9, E'## Questions 7-9\n\nComplete the notes below.\n\nChoose **ONE WORD ONLY** from the passage for each answer.\n\n### Wedding cakes\n**17th century - Britain Bride Cake:**\n- expensive ingredients were a sign of wealth\n- less expensive round cakes were made of **7** [1] with currants in between and sugar on top\n- they were baked on a hearth stone because not all homes had **8** [2]\n\n**Now - United States - Groom’s cake:**\n- guest receive pieces of the groom’s cake\n- cakes may represent the **9** [3] of the groom');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
   VALUES (gen_random_uuid(), sec1, 3, 10, 13, E'## Questions 10-13\n\nLabel the diagram below.\n\nChoose **ONE WORD ONLY** from the passage for each answer.\n\n![Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766589423/ielts/cake_3b3cb4106bbb.jpg)');

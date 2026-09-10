@@ -133,9 +133,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     '',
-    '{"blank-q5": ["GAUZE"]}'::jsonb
+    '{"1": ["GAUZE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -147,9 +147,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     '',
-    '{"blank-q6": ["NOZZLE"]}'::jsonb
+    '{"1": ["NOZZLE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -161,9 +161,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     '',
-    '{"blank-q7": ["POWDER"]}'::jsonb
+    '{"1": ["POWDER"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -175,9 +175,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     '',
-    '{"blank-q8": ["RUBBER BALL"]}'::jsonb
+    '{"1": ["RUBBER BALL"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -247,7 +247,7 @@ BEGIN
     2,
     'Why is Mrs. Carlill’s case often cited in present-day court trials?',
     '',
-    '{"blank-q13": ["B", "b"]}'::jsonb
+    '{"1": ["B", "b"]}'::jsonb
   );
 
 

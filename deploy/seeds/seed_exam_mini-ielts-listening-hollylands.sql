@@ -52,7 +52,7 @@ BEGIN
     exam_id,
     1,
     'Listening Test - Hollylands',
-    E'## Questions 1-2\n\nChoose **TWO** letters, A-E.\n\n**1.** Which TWO activities are for school groups but MUST be booked at least one week in advance?\n\n- **A** drama workshops\n- **B** garden sculpture experience\n- **C** painting demonstrations\n- **D** tours for the blind\n- **E** video making\n\n**2.** Which TWO facilities are closed in winter?\n\n- **A** café\n- **B** museum shop\n- **C** picnic area\n- **D** souvenir stand\n- **E** toilets\n\n---\n\n## Questions 3-7\n\nComplete the table below. Write **NO MORE THAN THREE WORDS AND/OR A NUMBER** for each answer.\n\n### HOLLYLANDS MUSEUM & EDUCATION CENTRE\n\n| Starting Date | Exhibition Name | Special Feature |\n|---------------|----------------|-----------------|\n| **3.** _______ | History in Pictures | - |\n| 19th September | **4.** _______ | visitors can use **5.** _______ |\n| 11th November | **6.** _______ | - |\n| - | - | competition prize: **7.** _______ for 2 people |\n\n---\n\n## Questions 8-10\n\nLabel the plan below. Choose **THREE** answers from the box and write the letters next to questions 8-10.\n\n### Options:\n- **A** bicycle parking\n- **B** drinks machine\n- **C** first aid room\n- **D** manager''s office\n- **E** telephones\n- **F** ticket office\n- **G** toilets\n\n### Map:\n\n![Hollylands Centre Plan](https://res.cloudinary.com/df41zs8il/image/upload/v1766532669/ielts/m20_resized_b51818a0cbf6.jpg)\n\n**8.** Location 8: _______\n\n**9.** Location 9: _______\n\n**10.** Location 10: _______',
+    E'## Questions 1-2\n\nChoose **TWO** letters, A-E.\n\n**1.** Which TWO activities are for school groups but MUST be booked at least one week in advance?\n\n- **A** drama workshops\n- **B** garden sculpture experience\n- **C** painting demonstrations\n- **D** tours for the blind\n- **E** video making\n\n**2.** Which TWO facilities are closed in winter?\n\n- **A** café\n- **B** museum shop\n- **C** picnic area\n- **D** souvenir stand\n- **E** toilets\n\n---\n\n## Questions 3-7\n\nComplete the table below. Write **NO MORE THAN THREE WORDS AND/OR A NUMBER** for each answer.\n\n### HOLLYLANDS MUSEUM & EDUCATION CENTRE\n\n| Starting Date | Exhibition Name | Special Feature |\n|---------------|----------------|-----------------|\n| **3.** [1] | History in Pictures | - |\n| 19th September | **4.** [2] | visitors can use **5.** [3] |\n| 11th November | **6.** [4] | - |\n| - | - | competition prize: **7.** [5] for 2 people |\n\n---\n\n## Questions 8-10\n\nLabel the plan below. Choose **THREE** answers from the box and write the letters next to questions 8-10.\n\n### Options:\n- **A** bicycle parking\n- **B** drinks machine\n- **C** first aid room\n- **D** manager''s office\n- **E** telephones\n- **F** ticket office\n- **G** toilets\n\n### Map:\n\n![Hollylands Centre Plan](https://res.cloudinary.com/df41zs8il/image/upload/v1766532669/ielts/m20_resized_b51818a0cbf6.jpg)\n\n**8.** Location 8: [6]\n\n**9.** Location 9: [7]\n\n**10.** Location 10: [8]',
     E'# Hollylands Museum & Education Centre - Listening Practice\n\n**Instructions:**\nYou will hear information about Hollylands Museum and Education Centre. Listen carefully and answer the questions below.\n\n**About Hollylands:**\nHollylands Museum & Education Centre is a cultural and educational facility offering various activities for school groups and the general public. The centre features exhibitions, workshops, and educational programs throughout the year.\n\n**Facilities:**\nThe centre includes a museum, café, picnic area, souvenir stand, and various educational spaces. Some facilities operate seasonally, with certain areas closed during winter months.\n\n**Exhibitions:**\nThe centre hosts rotating exhibitions throughout the year, covering topics from local history to toys and seasonal celebrations. Visitors can enhance their experience with audio guides and participate in competitions.\n\n**Task:**\nListen to the recording and complete Questions 1-10. Pay attention to details about activities, facilities, exhibition schedules, and the centre''s layout.'
   ,
     'https://www.youtube.com/embed/yx_Oezp8uj8?enablejsapi=1');
@@ -104,9 +104,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Starting date for ''History in Pictures'' exhibition: _______',
+    'Starting date for ''History in Pictures'' exhibition: [1]',
     '',
-    '{"blank-q3": ["21st May"]}'::jsonb
+    '{"1": ["21st May"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -118,9 +118,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Name of exhibition starting on 19th September: _______',
+    'Name of exhibition starting on 19th September: [1]',
     '',
-    '{"blank-q4": ["Toys through the Ages"]}'::jsonb
+    '{"1": ["Toys through the Ages"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -132,9 +132,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Visitors can use _______ during September exhibition',
+    'Visitors can use [1] during September exhibition',
     '',
-    '{"blank-q5": ["audio guide"]}'::jsonb
+    '{"1": ["audio guide"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -146,9 +146,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Name of exhibition starting on 11th November: _______',
+    'Name of exhibition starting on 11th November: [1]',
     '',
-    '{"blank-q6": ["Christmas Past"]}'::jsonb
+    '{"1": ["Christmas Past"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -160,9 +160,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Competition prize for 2 people: _______',
+    'Competition prize for 2 people: [1]',
     '',
-    '{"blank-q7": ["family ticket"]}'::jsonb
+    '{"1": ["family ticket"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -217,10 +217,10 @@ BEGIN
   VALUES (gen_random_uuid(), sec1, 1, 1, 2, E'## Questions 1-2\n\nChoose **TWO** letters, A-E.\n\n**1.** Which TWO activities are for school groups but MUST be booked at least one week in advance?\n\n- **A** drama workshops\n- **B** garden sculpture experience\n- **C** painting demonstrations\n- **D** tours for the blind\n- **E** video making\n\n**2.** Which TWO facilities are closed in winter?\n\n- **A** café\n- **B** museum shop\n- **C** picnic area\n- **D** souvenir stand\n- **E** toilets');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 3, 7, E'## Questions 3-7\n\nComplete the table below. Write **NO MORE THAN THREE WORDS AND/OR A NUMBER** for each answer.\n\n### HOLLYLANDS MUSEUM & EDUCATION CENTRE\n\n| Starting Date | Exhibition Name | Special Feature |\n|---------------|----------------|-----------------|\n| **3.** _______ | History in Pictures | - |\n| 19th September | **4.** _______ | visitors can use **5.** _______ |\n| 11th November | **6.** _______ | - |\n| - | - | competition prize: **7.** _______ for 2 people |');
+  VALUES (gen_random_uuid(), sec1, 2, 3, 7, E'## Questions 3-7\n\nComplete the table below. Write **NO MORE THAN THREE WORDS AND/OR A NUMBER** for each answer.\n\n### HOLLYLANDS MUSEUM & EDUCATION CENTRE\n\n| Starting Date | Exhibition Name | Special Feature |\n|---------------|----------------|-----------------|\n| **3.** [1] | History in Pictures | - |\n| 19th September | **4.** [2] | visitors can use **5.** [3] |\n| 11th November | **6.** [4] | - |\n| - | - | competition prize: **7.** [5] for 2 people |');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 3, 8, 10, E'## Questions 8-10\n\nLabel the plan below. Choose **THREE** answers from the box and write the letters next to questions 8-10.\n\n### Options:\n- **A** bicycle parking\n- **B** drinks machine\n- **C** first aid room\n- **D** manager''s office\n- **E** telephones\n- **F** ticket office\n- **G** toilets\n\n### Map:\n\n![Hollylands Centre Plan](https://res.cloudinary.com/df41zs8il/image/upload/v1766532669/ielts/m20_resized_b51818a0cbf6.jpg)\n\n**8.** Location 8: _______\n\n**9.** Location 9: _______\n\n**10.** Location 10: _______');
+  VALUES (gen_random_uuid(), sec1, 3, 8, 10, E'## Questions 8-10\n\nLabel the plan below. Choose **THREE** answers from the box and write the letters next to questions 8-10.\n\n### Options:\n- **A** bicycle parking\n- **B** drinks machine\n- **C** first aid room\n- **D** manager''s office\n- **E** telephones\n- **F** ticket office\n- **G** toilets\n\n### Map:\n\n![Hollylands Centre Plan](https://res.cloudinary.com/df41zs8il/image/upload/v1766532669/ielts/m20_resized_b51818a0cbf6.jpg)\n\n**8.** Location 8: [1]\n\n**9.** Location 9: [2]\n\n**10.** Location 10: [3]');
 
 END$$;
 

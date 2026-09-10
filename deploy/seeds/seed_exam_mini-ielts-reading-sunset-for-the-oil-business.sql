@@ -150,9 +150,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Many people believed Hubbert’s theory was _______ when it was originally presented.',
+    'Many people believed Hubbert’s theory was [1] when it was originally presented.',
     '',
-    '{"blank-q6": ["CONTROVERSIAL"]}'::jsonb
+    '{"1": ["CONTROVERSIAL"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -164,9 +164,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '(1) When an oilfield is _______ , it is easy to…',
+    '(1) When an oilfield is [1] , it is easy to…',
     '',
-    '{"blank-q7": ["TAPPED"]}'::jsonb
+    '{"1": ["TAPPED"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -178,9 +178,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '(2) The recovery of the oil gets more _______ as the reservoir gets older',
+    '(2) The recovery of the oil gets more [1] as the reservoir gets older',
     '',
-    '{"blank-q8": ["EXPENSIVE"]}'::jsonb
+    '{"1": ["EXPENSIVE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -192,9 +192,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '(3) The oilfield can’t be as _______ as other areas.',
+    '(3) The oilfield can’t be as [1] as other areas.',
     '',
-    '{"blank-q9": ["COMPETITIVE"]}'::jsonb
+    '{"1": ["COMPETITIVE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
