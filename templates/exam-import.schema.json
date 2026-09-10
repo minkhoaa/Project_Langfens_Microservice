@@ -157,7 +157,7 @@
         "promptMd": {
           "type": "string",
           "minLength": 1,
-          "description": "Markdown prompt shown to candidates."
+          "description": "Markdown prompt shown to candidates. For completion-family questions (SUMMARY_COMPLETION, TABLE_COMPLETION, NOTE_COMPLETION, FORM_COMPLETION, SENTENCE_COMPLETION, DIAGRAM_LABEL, MAP_LABEL, FLOW_CHART), use [N] placeholders (e.g. 'The moon orbits the [1] every [2] days'). N is 1-indexed and sequential within the question. Migration note: Sprint 3 appendix S32 retired underscore (`___`) placeholders."
         },
         "explanationMd": {
           "type": ["string", "null"],
@@ -172,7 +172,8 @@
           "description": "Only used for question types that contain selectable options."
         },
         "blankAcceptTexts": {
-          "$ref": "#/$defs/textArrayMap"
+          "$ref": "#/$defs/textArrayMap",
+          "description": "Map of numeric placeholder key (as string, e.g. '1', '2') to accepted answer strings. Keys must match [N] tokens in promptMd — e.g. 'The moon orbits the [1] every [2] days' pairs with { '1': ['earth'], '2': ['27'] }. Migration note: Sprint 3 appendix S32 retired the `blank-q<N>` key prefix; use plain numeric strings."
         },
         "blankAcceptRegex": {
           "$ref": "#/$defs/textArrayMap"
