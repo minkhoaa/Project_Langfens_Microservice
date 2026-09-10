@@ -100,11 +100,11 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
             PromptMd = "Complete the hotel registration form below. Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.\n\n**Hotel Registration Form**\n\n1. Guest name: __________\n2. Arrival date: __________\n3. Room type: __________\n4. Room view: __________\n5. Number of nights: __________",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "Rachel Torres", "Torres" } },
-                { "1", new[] { "15 September", "15th September", "September 15" } },
-                { "2", new[] { "single", "single room" } },
-                { "3", new[] { "sea view", "seaview" } },
-                { "4", new[] { "3", "three" } }
+                { "1", new[] { "Rachel Torres", "Torres" } },
+                { "2", new[] { "15 September", "15th September", "September 15" } },
+                { "3", new[] { "single", "single room" } },
+                { "4", new[] { "sea view", "seaview" } },
+                { "5", new[] { "3", "three" } }
             }
         };
 
@@ -116,11 +116,11 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
             PromptMd = "6. Rate per night (including breakfast): $__________\n7. Bathroom type: __________\n8. Check-in time: from __________\n9. Parking: underground car park / __________ (public)\n10. Airport shuttle price: $__________ each way",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "180", "one hundred and eighty" } },
-                { "1", new[] { "en-suite", "private", "ensuite" } },
-                { "2", new[] { "2 PM", "2pm", "2:00 PM", "2pm onwards", "from 2 PM", "from 2pm" } },
-                { "3", new[] { "public car park", "public carpark", "car park across the street" } },
-                { "4", new[] { "45", "forty five", "forty-five" } }
+                { "1", new[] { "180", "one hundred and eighty" } },
+                { "2", new[] { "en-suite", "private", "ensuite" } },
+                { "3", new[] { "2 PM", "2pm", "2:00 PM", "2pm onwards", "from 2 PM", "from 2pm" } },
+                { "4", new[] { "public car park", "public carpark", "car park across the street" } },
+                { "5", new[] { "45", "forty five", "forty-five" } }
             }
         };
 
@@ -230,16 +230,16 @@ That's a quick overview of what we offer. Does anyone have any questions?"
             PromptMd = "Complete the notes below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.\n\n**Opening Hours**\n\nMonday – Saturday: 8:00 AM – __________\nSunday: 10:00 AM – __________\nClosed: __________\n\n**Borrowing Policy**\n\nMaximum items per member: __________\nLoan period: __________ weeks\nRenewals allowed: __________\n\n**Facilities**\n\nComputer workstations: __________ floor\nStudy rooms: __________ people maximum\n\n**Fees**\n\nInter-library loan: $__________ per request\nDelivery time: __________ – 7 working days",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "9 PM", "9pm", "21:00", "9:00 PM", "21:00" } },
-                { "1", new[] { "6 PM", "6pm", "18:00", "6:00 PM", "18:00" } },
-                { "2", new[] { "public holidays", "public holiday", "holidays" } },
-                { "3", new[] { "10", "ten" } },
-                { "4", new[] { "3", "three" } },
-                { "5", new[] { "2", "two" } },
-                { "6", new[] { "second", "2", "2nd" } },
-                { "7", new[] { "6", "six" } },
-                { "8", new[] { "8", "eight" } },
-                { "9", new[] { "5", "five" } }
+                { "1", new[] { "9 PM", "9pm", "21:00", "9:00 PM", "21:00" } },
+                { "2", new[] { "6 PM", "6pm", "18:00", "6:00 PM", "18:00" } },
+                { "3", new[] { "public holidays", "public holiday", "holidays" } },
+                { "4", new[] { "10", "ten" } },
+                { "5", new[] { "3", "three" } },
+                { "6", new[] { "2", "two" } },
+                { "7", new[] { "second", "2", "2nd" } },
+                { "8", new[] { "6", "six" } },
+                { "9", new[] { "8", "eight" } },
+                { "10", new[] { "5", "five" } }
             }
         };
 
@@ -363,10 +363,10 @@ James: Will do. Thank you, Dr. Chen."
             PromptMd = "Complete the sentences below. Write NO MORE THAN THREE WORDS for each answer.\n\n32. James plans to study Singapore in the __________ of his dissertation.\n33. Singapore's approach to reducing car dependency is described as __________.\n34. James's first draft should be submitted by the end of week __________.\n35. James must send his progress report to Dr. Chen by the __________ of the current month.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "first half", "first section", "first part" } },
-                { "1", new[] { "government-managed", "top-down", "government led", "government-managed" } },
-                { "2", new[] { "8", "eight" } },
-                { "3", new[] { "15", "fifteenth", "15th" } }
+                { "1", new[] { "first half", "first section", "first part" } },
+                { "2", new[] { "government-managed", "top-down", "government led", "government-managed" } },
+                { "3", new[] { "8", "eight" } },
+                { "4", new[] { "15", "fifteenth", "15th" } }
             }
         };
 

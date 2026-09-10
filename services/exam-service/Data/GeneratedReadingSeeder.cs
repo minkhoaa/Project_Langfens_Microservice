@@ -234,10 +234,10 @@ public static class GeneratedReadingSeeder
             }
         };
 
-        // ── Q6: SUMMARY_COMPLETION (numeric blankIds '0','1','2') ───────────────────
+        // ── Q6: SUMMARY_COMPLETION (numeric blankIds '1','2','3') ───────────────────
         // Per classification.json summary-completion.json edgeCases:
         //   "BlankId conventions differ across seeders: ReadingSeeder SentenceCompletion
-        //    q3 uses '0','1'; ListeningSeeder q17a/b/c use 'blank-q<Idx>'. Both accepted
+        //    q3 uses '1','2'; ListeningSeeder q17a/b/c use 'blank-q<Idx>'. Both accepted
         //    by CompletionGrader via dictionary lookup." — numeric is the convention used
         //    by ReadingSeeder for completion types (q10 FlowChart, q13 DiagramLabel).
         var q6Id = Guid.Parse("43333333-3333-3333-3333-333333333336");
@@ -253,9 +253,9 @@ public static class GeneratedReadingSeeder
                 "below __________ (2) metres can produce light.",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
-                { "0", new[] { "dark", "featureless" } },
-                { "1", new[] { "glowing points", "glowing" } },
-                { "2", new[] { "200", "two hundred" } }
+                { "1", new[] { "dark", "featureless" } },
+                { "2", new[] { "glowing points", "glowing" } },
+                { "3", new[] { "200", "two hundred" } }
             }
         };
 
@@ -358,8 +358,8 @@ public static class GeneratedReadingSeeder
                 "2. In medical research, tumour cells in mice can be tagged with a luciferase gene so that the tumour itself __________ (1) up.",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
-                { "0", new[] { "bacterial cells", "bacteria", "cells" } },
-                { "1", new[] { "lights", "lights up", "glows", "lights up" } }
+                { "1", new[] { "bacterial cells", "bacteria", "cells" } },
+                { "2", new[] { "lights", "lights up", "glows", "lights up" } }
             }
         };
 

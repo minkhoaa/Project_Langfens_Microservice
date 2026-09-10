@@ -19,6 +19,10 @@ namespace attempt_service.Tests.Helpers;
 /// stable across insertion order and across all 7 completion-family
 /// question types (SENTENCE/SUMMARY/NOTE/FORM/TABLE_COMPLETION +
 /// DIAGRAM/MAP_LABEL).
+///
+/// Sprint 3: blank keys standardized to 1-indexed end-to-end (prompt digit
+/// = dict key). Every test below uses numeric keys "1", "2", ... so the
+/// canonical answer-key shape matches the FE active path and the BE grader.
 /// </summary>
 public class GraderCompletionIndexTests
 {
@@ -60,11 +64,11 @@ public class GraderCompletionIndexTests
         // dictionary to look up each accepted value, so it must produce
         // the same result regardless of how the JSON was serialised.
         var texts = TextsFor(
-            ("0", new[] { "stacked layers", "layers" }),
-            ("1", new[] { "sunlight" }),
-            ("2", new[] { "hydroponic systems", "hydroponics" }),
-            ("3", new[] { "temperature" }),
-            ("4", new[] { "supermarkets", "sale" })
+            ("1", new[] { "stacked layers", "layers" }),
+            ("2", new[] { "sunlight" }),
+            ("3", new[] { "hydroponic systems", "hydroponics" }),
+            ("4", new[] { "temperature" }),
+            ("5", new[] { "supermarkets", "sale" })
         );
         var key = CompletionKey(texts);
 
@@ -72,11 +76,11 @@ public class GraderCompletionIndexTests
         // implementation-defined ordering).
         var raw = JsonSerializer.Serialize(new Dictionary<string, string>
         {
-            ["4"] = "supermarkets",
-            ["3"] = "temperature",
-            ["2"] = "hydroponics",
-            ["1"] = "sunlight",
-            ["0"] = "stacked layers",
+            ["5"] = "supermarkets",
+            ["4"] = "temperature",
+            ["3"] = "hydroponics",
+            ["2"] = "sunlight",
+            ["1"] = "stacked layers",
         });
 
         var result = new CompletionGrader().Grade(MakeAnswer(raw), key);
@@ -89,23 +93,46 @@ public class GraderCompletionIndexTests
     public void Completion_json_map_with_one_wrong_blank_returns_zero()
     {
         var texts = TextsFor(
-            ("0", new[] { "stacked layers" }),
-            ("1", new[] { "sunlight" }),
-            ("2", new[] { "hydroponic systems" })
+            ("1", new[] { "stacked layers" }),
+            ("2", new[] { "sunlight" }),
+            ("3", new[] { "hydroponic systems" })
         );
         var key = CompletionKey(texts);
 
         var raw = JsonSerializer.Serialize(new Dictionary<string, string>
         {
-            ["0"] = "stacked layers",
-            ["1"] = "WRONG",
-            ["2"] = "hydroponic systems",
+            ["1"] = "stacked layers",
+            ["2"] = "WRONG",
+            ["3"] = "hydroponic systems",
         });
 
         var result = new CompletionGrader().Grade(MakeAnswer(raw), key);
 
         Assert.Equal(0m, result.AwardedPoints);
         Assert.False(result.IsCorrect);
+    }
+
+    [Fact]
+    public void Completion_json_map_with_1_indexed_keys_matches_correctly()
+    {
+        // Sprint 3 canonical case: answer key uses 1-indexed literal
+        // digits, user payload uses the same 1-indexed keys.
+        var texts = TextsFor(
+            ("1", new[] { "river" }),
+            ("2", new[] { "mountain" })
+        );
+        var key = CompletionKey(texts);
+
+        var raw = JsonSerializer.Serialize(new Dictionary<string, string>
+        {
+            ["1"] = "river",
+            ["2"] = "mountain",
+        });
+
+        var result = new CompletionGrader().Grade(MakeAnswer(raw), key);
+
+        Assert.Equal(2m, result.AwardedPoints);
+        Assert.True(result.IsCorrect);
     }
 
     // ---------- 2. Positional fallback — main bug reproduction ----------
@@ -116,9 +143,9 @@ public class GraderCompletionIndexTests
         // Without `{` `}` the grader takes the positional fallback. The FE
         // currently packs answers as newline-separated values for 2+ blanks.
         var texts = TextsFor(
-            ("0", new[] { "a" }),
-            ("1", new[] { "b" }),
-            ("2", new[] { "c" })
+            ("1", new[] { "a" }),
+            ("2", new[] { "b" }),
+            ("3", new[] { "c" })
         );
         var key = CompletionKey(texts);
 
@@ -134,9 +161,9 @@ public class GraderCompletionIndexTests
         // The fallback splits on `\n` and trims each part. Windows-style
         // `\r\n` line endings must still work after Trim.
         var texts = TextsFor(
-            ("0", new[] { "alpha" }),
-            ("1", new[] { "beta" }),
-            ("2", new[] { "gamma" })
+            ("1", new[] { "alpha" }),
+            ("2", new[] { "beta" }),
+            ("3", new[] { "gamma" })
         );
         var key = CompletionKey(texts);
 
@@ -147,17 +174,35 @@ public class GraderCompletionIndexTests
     }
 
     [Fact]
+    public void Completion_positional_falls_back_with_1_indexed_keys()
+    {
+        // Sprint 3 canonical case for the positional fallback: answer key
+        // uses 1-indexed literal digits, user payload uses newline
+        // separation (parseUserAnswer turns this into 1-indexed dict).
+        var texts = TextsFor(
+            ("1", new[] { "river" }),
+            ("2", new[] { "mountain" })
+        );
+        var key = CompletionKey(texts);
+
+        var result = new CompletionGrader().Grade(MakeAnswer("river\nmountain"), key);
+
+        Assert.Equal(2m, result.AwardedPoints);
+        Assert.True(result.IsCorrect);
+    }
+
+    [Fact]
     public void Completion_positional_matches_userParts_to_blankIds_regardless_of_dict_order()
     {
         // Insert keys in REVERSE order to simulate PostgreSQL jsonb_object_keys
         // returning keys in non-insertion order. After the sort fix, the
-        // grader must still match userParts[0]="a" against texts["0"] etc.
+        // grader must still match userParts[0]="a" against texts["1"] etc.
         var texts = TextsFor(
-            ("4", new[] { "e" }),
-            ("3", new[] { "d" }),
-            ("2", new[] { "c" }),
-            ("1", new[] { "b" }),
-            ("0", new[] { "a" })
+            ("5", new[] { "e" }),
+            ("4", new[] { "d" }),
+            ("3", new[] { "c" }),
+            ("2", new[] { "b" }),
+            ("1", new[] { "a" })
         );
         var key = CompletionKey(texts);
 
@@ -174,8 +219,8 @@ public class GraderCompletionIndexTests
         // returns zero (the bug is about ordering, not about losing
         // sensitivity to wrong swaps).
         var texts = TextsFor(
-            ("0", new[] { "alpha" }),
-            ("1", new[] { "beta" })
+            ("1", new[] { "alpha" }),
+            ("2", new[] { "beta" })
         );
         var key = CompletionKey(texts);
 
@@ -188,15 +233,15 @@ public class GraderCompletionIndexTests
     [Fact]
     public void Completion_positional_user_fills_4_of_5_blanks_correctly_returns_zero()
     {
-        // All-or-nothing per D1 invariant — leaving blank 4 (5th) empty
+        // All-or-nothing per D1 invariant — leaving blank 5 (5th) empty
         // must mark the whole answer wrong even if the other four are
         // correct. This pins the no-partial-credit rule.
         var texts = TextsFor(
-            ("0", new[] { "a" }),
-            ("1", new[] { "b" }),
-            ("2", new[] { "c" }),
-            ("3", new[] { "d" }),
-            ("4", new[] { "e" })
+            ("1", new[] { "a" }),
+            ("2", new[] { "b" }),
+            ("3", new[] { "c" }),
+            ("4", new[] { "d" }),
+            ("5", new[] { "e" })
         );
         var key = CompletionKey(texts);
 
@@ -213,7 +258,7 @@ public class GraderCompletionIndexTests
     {
         // When the answer key has exactly one blank the grader short-circuits
         // to a single-blank plaintext match. Order doesn't matter.
-        var texts = TextsFor(("0", new[] { "river" }));
+        var texts = TextsFor(("1", new[] { "river" }));
         var key = CompletionKey(texts);
 
         var result = new CompletionGrader().Grade(MakeAnswer("river"), key);
@@ -225,7 +270,7 @@ public class GraderCompletionIndexTests
     [Fact]
     public void Completion_single_blank_user_leaves_empty_returns_zero()
     {
-        var texts = TextsFor(("0", new[] { "river" }));
+        var texts = TextsFor(("1", new[] { "river" }));
         var key = CompletionKey(texts);
 
         var result = new CompletionGrader().Grade(MakeAnswer(""), key);
@@ -239,7 +284,7 @@ public class GraderCompletionIndexTests
     [Fact]
     public void Completion_textAnswer_null_returns_zero_no_feedback()
     {
-        var texts = TextsFor(("0", new[] { "x" }));
+        var texts = TextsFor(("1", new[] { "x" }));
         var key = CompletionKey(texts);
 
         var result = new CompletionGrader().Grade(MakeAnswer(null), key);
@@ -251,7 +296,7 @@ public class GraderCompletionIndexTests
     [Fact]
     public void Completion_textAnswer_whitespace_only_returns_zero()
     {
-        var texts = TextsFor(("0", new[] { "x" }));
+        var texts = TextsFor(("1", new[] { "x" }));
         var key = CompletionKey(texts);
 
         var result = new CompletionGrader().Grade(MakeAnswer("   \n  \n   "), key);
@@ -265,8 +310,8 @@ public class GraderCompletionIndexTests
     {
         // The fallback ignores extra trailing parts (spec).
         var texts = TextsFor(
-            ("0", new[] { "a" }),
-            ("1", new[] { "b" })
+            ("1", new[] { "a" }),
+            ("2", new[] { "b" })
         );
         var key = CompletionKey(texts);
 
@@ -280,9 +325,9 @@ public class GraderCompletionIndexTests
     public void Completion_textAnswer_fewer_parts_than_blanks_marks_wrong()
     {
         var texts = TextsFor(
-            ("0", new[] { "a" }),
-            ("1", new[] { "b" }),
-            ("2", new[] { "c" })
+            ("1", new[] { "a" }),
+            ("2", new[] { "b" }),
+            ("3", new[] { "c" })
         );
         var key = CompletionKey(texts);
 
@@ -351,8 +396,8 @@ public class GraderCompletionIndexTests
         // TextNorm collapses runs of whitespace to a single space. User
         // answer with extra spaces between words must still match.
         var texts = TextsFor(
-            ("0", new[] { "river bank" }),
-            ("1", new[] { "mountain peak" })
+            ("1", new[] { "river bank" }),
+            ("2", new[] { "mountain peak" })
         );
         var key = CompletionKey(texts);
 
@@ -367,8 +412,8 @@ public class GraderCompletionIndexTests
     {
         // TextNorm lowercases both sides; case must not matter.
         var texts = TextsFor(
-            ("0", new[] { "River" }),
-            ("1", new[] { "Mountain" })
+            ("1", new[] { "River" }),
+            ("2", new[] { "Mountain" })
         );
         var key = CompletionKey(texts);
 
@@ -384,8 +429,8 @@ public class GraderCompletionIndexTests
         // The fallback trims each part, so leading/trailing spaces per line
         // are tolerated.
         var texts = TextsFor(
-            ("0", new[] { "alpha" }),
-            ("1", new[] { "beta" })
+            ("1", new[] { "alpha" }),
+            ("2", new[] { "beta" })
         );
         var key = CompletionKey(texts);
 
@@ -405,8 +450,8 @@ public class GraderCompletionIndexTests
         // LabelGrader is registered for both DIAGRAM_LABEL and MAP_LABEL;
         // verify the alias path also respects the sort fix.
         var texts = TextsFor(
-            ("0", new[] { "alpha" }),
-            ("1", new[] { "beta" })
+            ("1", new[] { "alpha" }),
+            ("2", new[] { "beta" })
         );
         var key = new QuestionKey(
             QuestionId: Guid.NewGuid(),
@@ -424,8 +469,8 @@ public class GraderCompletionIndexTests
     public void Label_diagram_with_reversed_dict_order_still_matches()
     {
         var texts = TextsFor(
-            ("1", new[] { "beta" }),
-            ("0", new[] { "alpha" })
+            ("2", new[] { "beta" }),
+            ("1", new[] { "alpha" })
         );
         var key = new QuestionKey(
             QuestionId: Guid.NewGuid(),
@@ -442,14 +487,14 @@ public class GraderCompletionIndexTests
     [Fact]
     public void Label_map_with_random_dict_order_still_matches()
     {
-        // Insert in 3,1,4,0,2 order — random non-sequential insertion to
+        // Insert in 4,2,5,1,3 order — random non-sequential insertion to
         // stress the sort fix.
         var texts = TextsFor(
-            ("3", new[] { "delta" }),
-            ("1", new[] { "beta" }),
-            ("4", new[] { "epsilon" }),
-            ("0", new[] { "alpha" }),
-            ("2", new[] { "gamma" })
+            ("4", new[] { "delta" }),
+            ("2", new[] { "beta" }),
+            ("5", new[] { "epsilon" }),
+            ("1", new[] { "alpha" }),
+            ("3", new[] { "gamma" })
         );
         var key = new QuestionKey(
             QuestionId: Guid.NewGuid(),

@@ -137,8 +137,8 @@ public static class ReadingSeeder
             PromptMd = "Fill in the blanks:\n1. The nets are made from __________ and can reach heights of 12 meters.\n2. The collected water is stored in __________ tanks.",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
-                { "0", new[] { "polypropylene", "polypropylene nets" } },
-                { "1", new[] { "underground", "underground tanks" } }
+                { "1", new[] { "polypropylene", "polypropylene nets" } },
+                { "2", new[] { "underground", "underground tanks" } }
             }
         };
 
@@ -199,8 +199,8 @@ public static class ReadingSeeder
             PromptMd = "Complete the sentences:\n1. Listening to preferred music significantly reduces __________ levels.\n2. The brain structure that manages emotional responses is called the __________.",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
-                { "0", new[] { "cortisol" } },
-                { "1", new[] { "nucleus accumbens" } }
+                { "1", new[] { "cortisol" } },
+                { "2", new[] { "nucleus accumbens" } }
             }
         };
 
@@ -245,11 +245,11 @@ public static class ReadingSeeder
             PromptMd = "Complete the flow chart:\n1. Plant seeds in __________\n2. Install LED lights to simulate __________\n3. Use __________ to deliver nutrients\n4. Maintain optimal __________ and humidity\n5. Harvest and package for __________",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
-                { "0", new[] { "stacked layers", "layers" } },
-                { "1", new[] { "sunlight" } },
-                { "2", new[] { "hydroponic systems", "hydroponics" } },
-                { "3", new[] { "temperature" } },
-                { "4", new[] { "supermarkets", "sale" } }
+                { "1", new[] { "stacked layers", "layers" } },
+                { "2", new[] { "sunlight" } },
+                { "3", new[] { "hydroponic systems", "hydroponics" } },
+                { "4", new[] { "temperature" } },
+                { "5", new[] { "supermarkets", "sale" } }
             }
         };
 
@@ -308,10 +308,10 @@ public static class ReadingSeeder
             ImageUrl = "https://placehold.co/600x400?text=Vertical+Farm+Diagram",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
-                { "0", new[] { "LED lights", "LED" } },
-                { "1", new[] { "hydroponic system", "hydroponics" } },
-                { "2", new[] { "climate control" } },
-                { "3", new[] { "harvest", "harvest area" } }
+                { "1", new[] { "LED lights", "LED" } },
+                { "2", new[] { "hydroponic system", "hydroponics" } },
+                { "3", new[] { "climate control" } },
+                { "4", new[] { "harvest", "harvest area" } }
             }
         };
 
