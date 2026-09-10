@@ -189,8 +189,10 @@ public sealed class CompletionGrader : IQuestionGrader
         }
         // Multi-blank positional fallback: the FE packs user answers as
         // newline-separated values (e.g. "answer1\nanswer2"). Match each part
-        // to the corresponding blank ID in dictionary iteration order, which
-        // mirrors the order of `question.CompletionAccepts` and therefore the
+        // to the corresponding blank ID. Sort blank IDs by numeric value
+        // (then alphabetically for non-numeric legacy keys) so the positional
+        // match is stable across JSONB deserialization order and .NET
+        // Dictionary hash iteration — both are not guaranteed to match the
         // UI's blank order. Extra trailing parts are ignored; missing parts
         // count as unmatched for that blank.
         var userParts = raw.Split('\n')
@@ -198,6 +200,8 @@ public sealed class CompletionGrader : IQuestionGrader
             .ToArray();
         var blankIds = texts.Keys
             .Union(regs.Keys, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(k => int.TryParse(k, out var n) ? n : int.MaxValue)
+            .ThenBy(k => k, StringComparer.Ordinal)
             .ToList();
         decimal positionalGet = 0m, positionalTotal = 0m;
         for (var i = 0; i < blankIds.Count; i++)
