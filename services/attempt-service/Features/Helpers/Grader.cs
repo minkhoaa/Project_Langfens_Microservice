@@ -22,6 +22,27 @@ internal static class GraderScoring
 {
     public static decimal ScoreFor(bool isCorrect, decimal questionPoints)
         => isCorrect ? questionPoints : 0m;
+
+    /// <summary>
+    /// Sprint 3: union of <c>texts.Keys</c> and <c>regs.Keys</c> sorted
+    /// numerically with ordinal fallback. PostgreSQL jsonb_object_keys order
+    /// and .NET Dictionary hash iteration are not guaranteed to match the
+    /// UI's blank order — sorting here keeps rendering + grading aligned
+    /// independent of dict insertion order.
+    /// </summary>
+    public static IEnumerable<string> SortedUnionKeys(
+        IDictionary<string, string[]?> texts,
+        IDictionary<string, string[]?> regs)
+    {
+        return texts.Keys
+            .Union(regs.Keys, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(k => k, Comparer<string>.Create((a, b) =>
+            {
+                if (long.TryParse(a, out var la) && long.TryParse(b, out var lb))
+                    return la.CompareTo(lb);
+                return string.CompareOrdinal(a, b);
+            }));
+    }
 }
 
 /// <summary>
@@ -101,10 +122,11 @@ public sealed class CompletionGrader : IQuestionGrader
                 // map vẫn null → sẽ fallback phía dưới
             }
         }
+
         if (map is not null)
         {
             decimal get = 0, total = 0;
-            foreach (var blankId in texts.Keys.Union(regs.Keys))
+            foreach (var blankId in GraderScoring.SortedUnionKeys(texts, regs))
             {
 
                 texts.TryGetValue(blankId, out var accepted);
@@ -198,11 +220,7 @@ public sealed class CompletionGrader : IQuestionGrader
         var userParts = raw.Split('\n')
             .Select(p => p.Trim())
             .ToArray();
-        var blankIds = texts.Keys
-            .Union(regs.Keys, StringComparer.OrdinalIgnoreCase)
-            .OrderBy(k => int.TryParse(k, out var n) ? n : int.MaxValue)
-            .ThenBy(k => k, StringComparer.Ordinal)
-            .ToList();
+        var blankIds = GraderScoring.SortedUnionKeys(texts, regs).ToList();
         decimal positionalGet = 0m, positionalTotal = 0m;
         for (var i = 0; i < blankIds.Count; i++)
         {
