@@ -91,26 +91,44 @@ COMPLETION_TYPES = frozenset(
     }
 )
 
+MCQ_TYPES = frozenset(
+    {
+        "MULTIPLE_CHOICE_SINGLE",
+        "MULTIPLE_CHOICE_MULTIPLE",
+        "MCQ_SINGLE",
+        "MCQ_MULTIPLE",
+    }
+)
+
+AUDITED_TYPES = frozenset(COMPLETION_TYPES | MCQ_TYPES)
+
 UNDERSCORE_RE = re.compile(r"_{7,}")           # legacy: 7+ underscore run
 BRACKET_RE = re.compile(r"\[(\d+)\]")          # canonical: [1], [2], ...
 BLANK_Q_KEY_RE = re.compile(r"^blank-q(\d+)$") # legacy key prefix
 
-# SQL — read everything we need in one round-trip.
+# SQL — read everything we need in one round-trip (with optional exam slug/indices).
 SELECT_ALL_SQL = """
 SELECT
-    "Id",
-    "Type",
-    "PromptMd",
-    "BlankAcceptTexts"
-FROM "exam_questions"
-WHERE "Type" = ANY(%s)
-ORDER BY "Idx"
+    q."Id",
+    q."Type",
+    q."PromptMd",
+    q."BlankAcceptTexts",
+    q."BlankAcceptRegex",
+    e."Slug" as "ExamSlug",
+    s."Idx" as "SectionIdx",
+    q."Idx" as "QuestionIdx"
+FROM "exam_questions" q
+LEFT JOIN "exam_sections" s ON s."Id" = q."SectionId"
+LEFT JOIN "exams" e ON e."Id" = s."ExamId"
+WHERE q."Type" = ANY(%s)
+ORDER BY q."Idx"
 """
 
 UPDATE_SQL = """
 UPDATE "exam_questions"
 SET "PromptMd" = %s,
-    "BlankAcceptTexts" = %s::jsonb
+    "BlankAcceptTexts" = %s::jsonb,
+    "BlankAcceptRegex" = %s::jsonb
 WHERE "Id" = %s
 """
 
@@ -204,14 +222,17 @@ def resolve_connection() -> dict[str, str]:
 class _Adapter:
     """Tiny adapter so audit/migrate code doesn't care which driver it got."""
 
-    def query_rows(self, completion_types: list[str]) -> list[dict[str, Any]]:
+    def query_rows(self, types: list[str]) -> list[dict[str, Any]]:
         raise NotImplementedError
 
     def update_row(
-        self, row_id: str, prompt_md: Optional[str], blank_accept_texts_json: str
+        self,
+        row_id: str,
+        prompt_md: Optional[str],
+        blank_accept_texts_json: Optional[str],
+        blank_accept_regex_json: Optional[str] = None,
     ) -> None:
         raise NotImplementedError
-
     def begin(self) -> None:
         raise NotImplementedError
 
@@ -229,18 +250,25 @@ class _Psycopg2Adapter(_Adapter):
     def __init__(self, conn) -> None:  # type: ignore[no-untyped-def]
         self._conn = conn
 
-    def query_rows(self, completion_types: list[str]) -> list[dict[str, Any]]:
+    def query_rows(self, types: list[str]) -> list[dict[str, Any]]:
         with self._conn.cursor() as cur:
-            cur.execute(SELECT_ALL_SQL, (completion_types,))
+            cur.execute(SELECT_ALL_SQL, (types,))
             cols = [d[0] for d in cur.description]
             rows = cur.fetchall()
         return [dict(zip(cols, r)) for r in rows]
 
     def update_row(
-        self, row_id: str, prompt_md: Optional[str], blank_accept_texts_json: str
+        self,
+        row_id: str,
+        prompt_md: Optional[str],
+        blank_accept_texts_json: Optional[str],
+        blank_accept_regex_json: Optional[str] = None,
     ) -> None:
         with self._conn.cursor() as cur:
-            cur.execute(UPDATE_SQL, (prompt_md, blank_accept_texts_json, row_id))
+            cur.execute(
+                UPDATE_SQL,
+                (prompt_md, blank_accept_texts_json, blank_accept_regex_json, row_id),
+            )
 
     def begin(self) -> None:
         self._conn.autocommit = False
@@ -260,19 +288,25 @@ class _PsycopgAdapter(_Adapter):
 
     def __init__(self, conn) -> None:  # type: ignore[no-untyped-def]
         self._conn = conn
-
-    def query_rows(self, completion_types: list[str]) -> list[dict[str, Any]]:
+    def query_rows(self, types: list[str]) -> list[dict[str, Any]]:
         with self._conn.cursor() as cur:
-            cur.execute(SELECT_ALL_SQL, (completion_types,))
+            cur.execute(SELECT_ALL_SQL, (types,))
             cols = [d.name for d in cur.description]
             rows = cur.fetchall()
         return [dict(zip(cols, r)) for r in rows]
 
     def update_row(
-        self, row_id: str, prompt_md: Optional[str], blank_accept_texts_json: str
+        self,
+        row_id: str,
+        prompt_md: Optional[str],
+        blank_accept_texts_json: Optional[str],
+        blank_accept_regex_json: Optional[str] = None,
     ) -> None:
         with self._conn.cursor() as cur:
-            cur.execute(UPDATE_SQL, (prompt_md, blank_accept_texts_json, row_id))
+            cur.execute(
+                UPDATE_SQL,
+                (prompt_md, blank_accept_texts_json, blank_accept_regex_json, row_id),
+            )
 
     def begin(self) -> None:
         # psycopg3 starts in transaction by default when autocommit=False.
@@ -304,7 +338,7 @@ class _PsqlSubprocessAdapter(_Adapter):
         # We'll build a single transaction via `psql --single-transaction`.
         self._types_sql = (
             "SELECT ARRAY["
-            + ",".join(f"'{t}'" for t in COMPLETION_TYPES)
+            + ",".join(f"'{t}'" for t in AUDITED_TYPES)
             + "]::text[]"
         )
 
@@ -322,66 +356,75 @@ class _PsqlSubprocessAdapter(_Adapter):
             )
         return proc.stdout
 
-    def query_rows(self, completion_types: list[str]) -> list[dict[str, Any]]:
+    def query_rows(self, types: list[str]) -> list[dict[str, Any]]:
         types_literal = (
             "ARRAY["
-            + ",".join(f"'{t}'" for t in completion_types)
+            + ",".join(f"'{t}'" for t in types)
             + "]::text[]"
         )
         sql = (
-            "SELECT \"Id\", \"Type\", \"PromptMd\", \"BlankAcceptTexts\" "
-            f"FROM \"exam_questions\" WHERE \"Type\" = ANY({types_literal}) "
-            "ORDER BY \"Idx\";"
+            "SELECT q.\"Id\", q.\"Type\", q.\"PromptMd\", q.\"BlankAcceptTexts\", "
+            "q.\"BlankAcceptRegex\", e.\"Slug\" as \"ExamSlug\", "
+            "s.\"Idx\" as \"SectionIdx\", q.\"Idx\" as \"QuestionIdx\" "
+            "FROM \"exam_questions\" q "
+            "LEFT JOIN \"exam_sections\" s ON s.\"Id\" = q.\"SectionId\" "
+            "LEFT JOIN \"exams\" e ON e.\"Id\" = s.\"ExamId\" "
+            f"WHERE q.\"Type\" = ANY({types_literal}) "
+            "ORDER BY q.\"Idx\";"
         )
         out = self._run(sql)
         rows: list[dict[str, Any]] = []
         for line in out.strip().splitlines():
             if not line:
                 continue
-            # Columns are pipe-separated because we use -A -t and a manual
-            # delimiter. To keep this simple and safe, we re-issue per-row
-            # JSON queries instead. (See query_rows_json.)
             rows.append({"raw": line})
-        # Re-issue per row as JSON to recover jsonb cleanly.
-        return self._rehydrate_rows(rows)
+        return self._rehydrate_rows(types)
 
-    def _rehydrate_rows(self, stub_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        # Pull rows one at a time with to_jsonb for fidelity.
+    def _rehydrate_rows(self, types: list[str]) -> list[dict[str, Any]]:
         ids_sql = (
-            "SELECT \"Id\" FROM \"exam_questions\" WHERE \"Type\" = ANY("
+            "SELECT q.\"Id\" FROM \"exam_questions\" q WHERE q.\"Type\" = ANY("
             + "ARRAY["
-            + ",".join(f"'{t}'" for t in COMPLETION_TYPES)
-            + "]::text[]) ORDER BY \"Idx\";"
+            + ",".join(f"'{t}'" for t in types)
+            + "]::text[]) ORDER BY q.\"Idx\";"
         )
         ids = [ln.strip() for ln in self._run(ids_sql).splitlines() if ln.strip()]
         out: list[dict[str, Any]] = []
         for rid in ids:
             row_sql = (
-                f"SELECT \"Id\", \"Type\", \"PromptMd\", "
-                f"to_jsonb(\"BlankAcceptTexts\") "
-                f"FROM \"exam_questions\" WHERE \"Id\" = '{rid}';"
+                f"SELECT q.\"Id\", q.\"Type\", q.\"PromptMd\", "
+                f"to_jsonb(q.\"BlankAcceptTexts\"), to_jsonb(q.\"BlankAcceptRegex\"), "
+                f"e.\"Slug\", s.\"Idx\", q.\"Idx\" "
+                f"FROM \"exam_questions\" q "
+                f"LEFT JOIN \"exam_sections\" s ON s.\"Id\" = q.\"SectionId\" "
+                f"LEFT JOIN \"exams\" e ON e.\"Id\" = s.\"ExamId\" "
+                f"WHERE q.\"Id\" = '{rid}';"
             )
             line = self._run(row_sql).strip()
-            # Format: Id|Type|PromptMd|JsonbJson
-            parts = line.split("|", 3)
-            if len(parts) < 4:
+            parts = line.split("|", 7)
+            if len(parts) < 8:
                 continue
-            _id, _type, prompt_md, jsonb_json = parts
+            _id, _type, prompt_md, bat_json, bar_json, exam_slug, s_idx, q_idx = parts
             out.append(
                 {
                     "Id": _id,
                     "Type": _type,
                     "PromptMd": prompt_md if prompt_md else None,
-                    "BlankAcceptTexts": json.loads(jsonb_json) if jsonb_json else None,
+                    "BlankAcceptTexts": json.loads(bat_json) if bat_json else None,
+                    "BlankAcceptRegex": json.loads(bar_json) if bar_json else None,
+                    "ExamSlug": exam_slug if exam_slug else None,
+                    "SectionIdx": int(s_idx) if s_idx else None,
+                    "QuestionIdx": int(q_idx) if q_idx else None,
                 }
             )
         return out
 
     def update_row(
-        self, row_id: str, prompt_md: Optional[str], blank_accept_texts_json: str
+        self,
+        row_id: str,
+        prompt_md: Optional[str],
+        blank_accept_texts_json: Optional[str],
+        blank_accept_regex_json: Optional[str] = None,
     ) -> None:
-        # Use dollar-quoting to embed the prompt safely.
-        # We escape any $tag$ occurrences in the prompt.
         tag = "S32PROMPT"
         prompt_escaped = (
             prompt_md.replace(f"${tag}$", f"${tag}$${tag}$")
@@ -392,12 +435,15 @@ class _PsqlSubprocessAdapter(_Adapter):
             prompt_sql = "NULL"
         else:
             prompt_sql = f"${tag}$" + prompt_escaped + f"${tag}$"
-        # For jsonb: cast the literal with ::jsonb; escape the literal.
-        escaped_dict = blank_accept_texts_json.replace("'", "''")
+        bat_escaped = blank_accept_texts_json.replace("'", "''") if blank_accept_texts_json is not None else None
+        bar_escaped = blank_accept_regex_json.replace("'", "''") if blank_accept_regex_json is not None else None
+        bat_sql = f"'{bat_escaped}'::jsonb" if bat_escaped is not None else "NULL"
+        bar_sql = f"'{bar_escaped}'::jsonb" if bar_escaped is not None else "NULL"
         sql = (
             f"UPDATE \"exam_questions\" SET "
             f"\"PromptMd\" = {prompt_sql}, "
-            f"\"BlankAcceptTexts\" = '{escaped_dict}'::jsonb "
+            f"\"BlankAcceptTexts\" = {bat_sql}, "
+            f"\"BlankAcceptRegex\" = {bar_sql} "
             f"WHERE \"Id\" = '{row_id}';"
         )
         self._run(sql)
@@ -418,12 +464,17 @@ class _PsqlSubprocessAdapter(_Adapter):
 
     # Special path: do the entire migration in one psql invocation so the
     # transaction boundary is inside the same process.
-    def apply_all(self, updates: list[tuple[str, str, str]]) -> None:
+    def apply_all(
+        self,
+        updates: list[
+            tuple[str, Optional[str], Optional[str], Optional[str]]
+        ],
+    ) -> None:
         if not updates:
             self._run("BEGIN; COMMIT;")
             return
         statements: list[str] = ["BEGIN"]
-        for row_id, prompt_md, jsonb_dict in updates:
+        for row_id, prompt_md, jsonb_dict, regex_dict in updates:
             tag = "S32PROMPT"
             prompt_escaped = (
                 prompt_md.replace(f"${tag}$", f"${tag}$${tag}$")
@@ -434,14 +485,17 @@ class _PsqlSubprocessAdapter(_Adapter):
                 prompt_sql = "NULL"
             else:
                 prompt_sql = f"${tag}$" + prompt_escaped + f"${tag}$"
-            escaped_dict = jsonb_dict.replace("'", "''")
+            bat_escaped = jsonb_dict.replace("'", "''") if jsonb_dict is not None else None
+            bar_escaped = regex_dict.replace("'", "''") if regex_dict is not None else None
+            bat_sql = f"'{bat_escaped}'::jsonb" if bat_escaped is not None else "NULL"
+            bar_sql = f"'{bar_escaped}'::jsonb" if bar_escaped is not None else "NULL"
             statements.append(
                 f"UPDATE \"exam_questions\" SET "
                 f"\"PromptMd\" = {prompt_sql}, "
-                f"\"BlankAcceptTexts\" = '{escaped_dict}'::jsonb "
+                f"\"BlankAcceptTexts\" = {bat_sql}, "
+                f"\"BlankAcceptRegex\" = {bar_sql} "
                 f"WHERE \"Id\" = '{row_id}';"
             )
-        # Rollback if anything fails (psql -1 wraps in single transaction).
         sql = "\n".join(statements)
         proc = subprocess.run(
             ["psql", "-1", "-A", "-t", "-X", "-v", "ON_ERROR_STOP=1"],
@@ -551,12 +605,16 @@ _MOCK_ROWS: list[dict[str, Any]] = [
         "PromptMd": "The quick brown fox jumps over the lazy dog. (no blanks)",
         "BlankAcceptTexts": None,
     },
-    # q8: non-completion type — out of scope entirely.
+    # q8: MCQ type with legacy blank-q key — should migrate key to blank<N>.
     {
         "Id": "88888888-8888-8888-8888-888888888888",
         "Type": "MULTIPLE_CHOICE_SINGLE",
         "PromptMd": "Pick one.",
-        "BlankAcceptTexts": None,
+        "BlankAcceptTexts": {"blank-q1": ["A", "a"]},
+        "BlankAcceptRegex": None,
+        "ExamSlug": "ielts-mentor-mock-exam",
+        "SectionIdx": 1,
+        "QuestionIdx": 1,
     },
     # q9: legacy blank-q keys only (no underscores) — should migrate keys only.
     {
@@ -564,9 +622,9 @@ _MOCK_ROWS: list[dict[str, Any]] = [
         "Type": "SENTENCE_COMPLETION",
         "PromptMd": "The protocol was finalised in the year of the conference.",
         "BlankAcceptTexts": {"blank-q0": ["2015"], "blank-q1": ["Paris"]},
+        "BlankAcceptRegex": None,
     },
 ]
-
 
 class _MockAdapter(_Adapter):
     """Returns canned rows and short-circuits UPDATE — supports `--mock` runs."""
@@ -576,21 +634,28 @@ class _MockAdapter(_Adapter):
         self._updates: list[tuple[str, Optional[str], dict[str, Any]]] = []
         self._begun = False
 
-    def query_rows(self, completion_types: list[str]) -> list[dict[str, Any]]:
-        return [r for r in self._rows if r["Type"] in completion_types]
+    def query_rows(self, types: list[str]) -> list[dict[str, Any]]:
+        return [r for r in self._rows if r["Type"] in types]
 
     def update_row(
-        self, row_id: str, prompt_md: Optional[str], blank_accept_texts_json: str
+        self,
+        row_id: str,
+        prompt_md: Optional[str],
+        blank_accept_texts_json: Optional[str],
+        blank_accept_regex_json: Optional[str] = None,
     ) -> None:
-        # Round-trip the jsonb payload so we honour the canonical shape.
         bat: Optional[dict[str, Any]] = (
             json.loads(blank_accept_texts_json) if blank_accept_texts_json else None
+        )
+        bar: Optional[dict[str, Any]] = (
+            json.loads(blank_accept_regex_json) if blank_accept_regex_json else None
         )
         self._updates.append((row_id, prompt_md, bat))
         for r in self._rows:
             if r["Id"] == row_id:
                 r["PromptMd"] = prompt_md
                 r["BlankAcceptTexts"] = bat
+                r["BlankAcceptRegex"] = bar
                 break
 
     def begin(self) -> None:
@@ -613,47 +678,107 @@ class _MockAdapter(_Adapter):
 # ============================================
 
 
-def transform_prompt(prompt_md: Optional[str]) -> tuple[Optional[str], bool]:
+def transform_prompt(
+    prompt_md: Optional[str], is_mcq: bool = False
+) -> tuple[Optional[str], bool]:
     """Rewrite `___` (7+ underscores) runs to `[N]` in occurrence order.
+    Also rewrites `blank-q<N>` placeholder tokens (to `blank<N>` if MCQ, or `[N]` if completion).
 
-    Returns (new_prompt, changed). If the prompt is None or already uses
-    `[N]` for every blank, changed=False and new_prompt is the same string.
+    Returns (new_prompt, changed).
     """
     if not prompt_md:
         return prompt_md, False
-    counter = [0]
-    already_bracket_count = len(BRACKET_RE.findall(prompt_md))
+    changed = False
+    new_prompt = prompt_md
 
-    def _replace(match: re.Match[str]) -> str:
-        counter[0] += 1
-        return f"[{already_bracket_count + counter[0]}]"
+    if not is_mcq and UNDERSCORE_RE.search(new_prompt):
+        counter = [0]
+        already_bracket_count = len(BRACKET_RE.findall(new_prompt))
 
-    new_prompt = UNDERSCORE_RE.sub(_replace, prompt_md)
-    return new_prompt, new_prompt != prompt_md
+        def _replace(match: re.Match[str]) -> str:
+            counter[0] += 1
+            return f"[{already_bracket_count + counter[0]}]"
+
+        new_prompt = UNDERSCORE_RE.sub(_replace, new_prompt)
+        changed = True
+
+    # Prompt placeholder tokens: replace blank-q<N> with blank<N>
+    if "blank-q" in new_prompt:
+        replacement = r"blank\1" if is_mcq else r"[\1]"
+        updated = re.sub(r"blank-q(\d+)", replacement, new_prompt)
+        if updated != new_prompt:
+            new_prompt = updated
+            changed = True
+
+    return new_prompt, changed
 
 
 def transform_blank_keys(
-    blank_accept_texts: Optional[dict[str, Any]],
+    blank_accept_texts: Optional[dict[str, Any]], is_mcq: bool = False
 ) -> tuple[Optional[dict[str, Any]], bool]:
-    """Rename keys `blank-q<digit>` → `<digit>` (drop prefix).
+    """Rename keys `blank-q<digit>` → `blank<digit>` (for MCQ) or `<digit>` (for completion).
 
     Returns (new_dict, changed). Idempotent: re-running on an already-
     canonical dict yields (same_dict, False).
     """
-    if not blank_accept_texts:
+    if not blank_accept_texts or not isinstance(blank_accept_texts, dict):
         return blank_accept_texts, False
     new_dict: dict[str, Any] = {}
     changed = False
     for key, value in blank_accept_texts.items():
         m = BLANK_Q_KEY_RE.match(key)
         if m:
-            new_key = m.group(1)
+            new_key = f"blank{m.group(1)}" if is_mcq else m.group(1)
             changed = True
         else:
             new_key = key
         new_dict[new_key] = value
     return (new_dict if changed else blank_accept_texts), changed
 
+
+def transform_regex(
+    blank_accept_regex: Optional[dict[str, Any]], is_mcq: bool = False
+) -> tuple[Optional[dict[str, Any]], bool]:
+    """Rename keys in blank_accept_regex from `blank-q<digit>` → `blank<digit>` (for MCQ) or `<digit>` (for completion),
+    and replace `blank-q<N>` inside regex pattern strings if any.
+    """
+    if not blank_accept_regex or not isinstance(blank_accept_regex, dict):
+        return blank_accept_regex, False
+    new_dict: dict[str, Any] = {}
+    changed = False
+    for key, value in blank_accept_regex.items():
+        m = BLANK_Q_KEY_RE.match(key)
+        if m:
+            new_key = f"blank{m.group(1)}" if is_mcq else m.group(1)
+            changed = True
+        else:
+            new_key = key
+
+        # Value might be str or list of str
+        new_val = value
+        if isinstance(value, str) and "blank-q" in value:
+            replacement = r"blank\1" if is_mcq else r"\1"
+            new_val = re.sub(r"blank-q(\d+)", replacement, value)
+            if new_val != value:
+                changed = True
+        elif isinstance(value, list):
+            val_list: list[Any] = []
+            val_changed = False
+            for item in value:
+                if isinstance(item, str) and "blank-q" in item:
+                    replacement = r"blank\1" if is_mcq else r"\1"
+                    subbed = re.sub(r"blank-q(\d+)", replacement, item)
+                    val_list.append(subbed)
+                    if subbed != item:
+                        val_changed = True
+                else:
+                    val_list.append(item)
+            if val_changed:
+                new_val = val_list
+                changed = True
+
+        new_dict[new_key] = new_val
+    return (new_dict if changed else blank_accept_regex), changed
 
 # ============================================
 # Subcommand: audit
@@ -671,13 +796,19 @@ def compute_audit(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
     coexistence_count = 0
     total = 0
 
+    mcq_blank_q_count = 0
+    mcq_affected_rows: list[dict[str, Any]] = []
+
     for row in rows:
         total += 1
-        by_type[row["Type"]] = by_type.get(row["Type"], 0) + 1
+        q_type = row["Type"]
+        by_type[q_type] = by_type.get(q_type, 0) + 1
         prompt = row.get("PromptMd") or ""
         has_underscore = bool(UNDERSCORE_RE.search(prompt))
         has_blank_q = False
         matched_blank_q_key: Optional[str] = None
+
+        # Scan BlankAcceptTexts
         bat = row.get("BlankAcceptTexts") or {}
         if isinstance(bat, dict):
             for key in bat.keys():
@@ -686,6 +817,29 @@ def compute_audit(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
                     if matched_blank_q_key is None:
                         matched_blank_q_key = key
                     break
+
+        # Scan BlankAcceptRegex
+        bar = row.get("BlankAcceptRegex") or {}
+        if isinstance(bar, dict):
+            for key, val in bar.items():
+                if isinstance(key, str) and BLANK_Q_KEY_RE.match(key):
+                    has_blank_q = True
+                    if matched_blank_q_key is None:
+                        matched_blank_q_key = key
+                    break
+                if isinstance(val, str) and "blank-q" in val:
+                    has_blank_q = True
+                    if matched_blank_q_key is None:
+                        matched_blank_q_key = val
+                    break
+                elif isinstance(val, list):
+                    for v in val:
+                        if isinstance(v, str) and "blank-q" in v:
+                            has_blank_q = True
+                            if matched_blank_q_key is None:
+                                matched_blank_q_key = v
+                            break
+
         if has_underscore:
             underscore_count += 1
             if len(underscore_examples) < 5:
@@ -696,10 +850,19 @@ def compute_audit(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
             blank_q_count += 1
             if len(blank_q_examples) < 5 and matched_blank_q_key is not None:
                 blank_q_examples.append(matched_blank_q_key)
-        # Row-level coexistence: BOTH legacy formats in the SAME row makes
-        # index ordering impossible to infer without operator help. Dataset-
-        # level coexistence (some rows with underscores, others with
-        # blank-q) is safe because each row's blanks are independent.
+            if q_type in MCQ_TYPES:
+                mcq_blank_q_count += 1
+                mcq_affected_rows.append(
+                    {
+                        "slug": row.get("ExamSlug") or row.get("slug") or "unknown",
+                        "section": row.get("SectionIdx") if row.get("SectionIdx") is not None else row.get("section", 0),
+                        "question": row.get("QuestionIdx") if row.get("QuestionIdx") is not None else row.get("question", 0),
+                        "type": q_type,
+                        "blank_q_key": matched_blank_q_key,
+                    }
+                )
+
+        # Row-level coexistence: BOTH legacy formats in the SAME row
         if has_underscore and has_blank_q:
             coexistence_count += 1
             if len(coexistence_examples) < 5:
@@ -707,7 +870,7 @@ def compute_audit(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
 
     ready_for_phase2 = underscore_count == 0 and blank_q_count == 0
 
-    return {
+    res: dict[str, Any] = {
         "total_questions": total,
         "type_breakdown": by_type,
         "underscore_placeholder_count": underscore_count,
@@ -720,13 +883,28 @@ def compute_audit(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
         "ready_for_phase2": ready_for_phase2,
     }
 
+    # Include MCQ reporting
+    res["mcq_blank_q_key_count"] = mcq_blank_q_count
+    res["mcq_affected_rows"] = mcq_affected_rows
+    return res
+
+
+def _resolve_target_types(types_flag: str) -> list[str]:
+    if types_flag == "completion":
+        return list(COMPLETION_TYPES)
+    elif types_flag == "mcq":
+        return list(MCQ_TYPES)
+    return list(AUDITED_TYPES)
+
+
 def cmd_audit(args: argparse.Namespace) -> int:
+    target_types = _resolve_target_types(getattr(args, "types", "all"))
     if args.mock:
-        rows = _MOCK_ROWS
+        rows = [r for r in _MOCK_ROWS if r["Type"] in target_types]
     else:
         adapter = open_adapter()
         try:
-            rows = adapter.query_rows(list(COMPLETION_TYPES))
+            rows = adapter.query_rows(target_types)
         finally:
             adapter.close()
 
@@ -757,13 +935,14 @@ def _looks_ambiguous(audit: dict[str, Any]) -> bool:
 def cmd_migrate(args: argparse.Namespace) -> int:
     audit_first = not args.skip_audit
     audit_data: dict[str, Any] = {}
+    target_types = _resolve_target_types(getattr(args, "types", "all"))
     if audit_first:
         if args.mock:
-            rows = _MOCK_ROWS
+            rows = [r for r in _MOCK_ROWS if r["Type"] in target_types]
         else:
             adapter = open_adapter()
             try:
-                rows = adapter.query_rows(list(COMPLETION_TYPES))
+                rows = adapter.query_rows(target_types)
             finally:
                 adapter.close()
         audit_data = compute_audit(rows)
@@ -801,38 +980,48 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         adapter.begin()
         if isinstance(adapter, _PsqlSubprocessAdapter):
             # Bundle UPDATEs into a single psql --single-transaction.
-            updates: list[tuple[str, str, str]] = []
-            for row in _iter_target_rows(adapter, list(COMPLETION_TYPES)):
-                new_prompt, prompt_changed = transform_prompt(row.get("PromptMd"))
+            updates: list[tuple[str, Optional[str], Optional[str], Optional[str]]] = []
+            for row in _iter_target_rows(adapter, target_types):
+                is_mcq = row["Type"] in MCQ_TYPES
+                new_prompt, prompt_changed = transform_prompt(row.get("PromptMd"), is_mcq=is_mcq)
                 new_bat, bat_changed = transform_blank_keys(
-                    row.get("BlankAcceptTexts")
+                    row.get("BlankAcceptTexts"), is_mcq=is_mcq
                 )
-                if not (prompt_changed or bat_changed):
+                new_bar, bar_changed = transform_regex(
+                    row.get("BlankAcceptRegex"), is_mcq=is_mcq
+                )
+                if not (prompt_changed or bat_changed or bar_changed):
                     skipped += 1
                     continue
-                if isinstance(adapter, _PsqlSubprocessAdapter):
-                    updates.append(
-                        (row["Id"], new_prompt or "", json.dumps(new_bat or {}))
+                updates.append(
+                    (
+                        row["Id"],
+                        new_prompt,
+                        json.dumps(new_bat) if new_bat is not None else None,
+                        json.dumps(new_bar) if new_bar is not None else None,
                     )
-                    migrated += 1
-                else:  # pragma: no cover
-                    adapter.update_row(
-                        row["Id"], new_prompt, json.dumps(new_bat or {})
-                    )
-                    migrated += 1
-            if updates:
-                adapter.apply_all(updates)  # type: ignore[attr-defined]
-        else:
-            for row in _iter_target_rows(adapter, list(COMPLETION_TYPES)):
-                new_prompt, prompt_changed = transform_prompt(row.get("PromptMd"))
-                new_bat, bat_changed = transform_blank_keys(
-                    row.get("BlankAcceptTexts")
                 )
-                if not (prompt_changed or bat_changed):
+                migrated += 1
+            if updates:
+                adapter.apply_all(updates)
+        else:
+            for row in _iter_target_rows(adapter, target_types):
+                is_mcq = row["Type"] in MCQ_TYPES
+                new_prompt, prompt_changed = transform_prompt(row.get("PromptMd"), is_mcq=is_mcq)
+                new_bat, bat_changed = transform_blank_keys(
+                    row.get("BlankAcceptTexts"), is_mcq=is_mcq
+                )
+                new_bar, bar_changed = transform_regex(
+                    row.get("BlankAcceptRegex"), is_mcq=is_mcq
+                )
+                if not (prompt_changed or bat_changed or bar_changed):
                     skipped += 1
                     continue
                 adapter.update_row(
-                    row["Id"], new_prompt, json.dumps(new_bat or {})
+                    row["Id"],
+                    new_prompt,
+                    json.dumps(new_bat) if new_bat is not None else None,
+                    json.dumps(new_bar) if new_bar is not None else None,
                 )
                 migrated += 1
         adapter.commit()
@@ -854,12 +1043,11 @@ def cmd_migrate(args: argparse.Namespace) -> int:
 
 
 def _iter_target_rows(
-    adapter: _Adapter, completion_types: list[str]
+    adapter: _Adapter, target_types: list[str]
 ) -> Iterable[dict[str, Any]]:
-    """Yield rows eligible for migration (completion family only)."""
-    for row in adapter.query_rows(completion_types):
+    """Yield rows eligible for migration."""
+    for row in adapter.query_rows(target_types):
         yield row
-
 
 # ============================================
 # Subcommand: rollback (stretch; dump pre-migration state)
@@ -874,12 +1062,13 @@ def cmd_rollback(args: argparse.Namespace) -> int:
     output = Path(args.output or "scripts/.migrate_blank_placeholders.snapshot.jsonl")
     output.parent.mkdir(parents=True, exist_ok=True)
 
+    target_types = _resolve_target_types(getattr(args, "types", "all"))
     if args.mock:
-        rows = _MOCK_ROWS
+        rows = [r for r in _MOCK_ROWS if r["Type"] in target_types]
     else:
         adapter = open_adapter()
         try:
-            rows = adapter.query_rows(list(COMPLETION_TYPES))
+            rows = adapter.query_rows(target_types)
         finally:
             adapter.close()
 
@@ -908,6 +1097,12 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p_audit = sub.add_parser("audit", help="print JSON histogram of legacy placeholders")
     p_audit.add_argument(
+        "--types",
+        choices=["all", "completion", "mcq"],
+        default="all",
+        help="question types to process: all, completion, or mcq (default: all)",
+    )
+    p_audit.add_argument(
         "--mock",
         action="store_true",
         help="use canned sample rows instead of connecting to Postgres",
@@ -915,6 +1110,12 @@ def _build_parser() -> argparse.ArgumentParser:
     p_audit.set_defaults(func=cmd_audit)
 
     p_migrate = sub.add_parser("migrate", help="rewrite `___` and `blank-q<N>` to `[N]`")
+    p_migrate.add_argument(
+        "--types",
+        choices=["all", "completion", "mcq"],
+        default="all",
+        help="question types to process: all, completion, or mcq (default: all)",
+    )
     p_migrate.add_argument(
         "--apply",
         action="store_true",
@@ -939,7 +1140,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p_rollback = sub.add_parser(
         "rollback",
-        help="dump current completion-family rows to a JSONL snapshot",
+        help="dump current question rows to a JSONL snapshot",
+    )
+    p_rollback.add_argument(
+        "--types",
+        choices=["all", "completion", "mcq"],
+        default="all",
+        help="question types to process: all, completion, or mcq (default: all)",
     )
     p_rollback.add_argument(
         "--output",
