@@ -384,3 +384,45 @@ SELECT "QuestionId", MIN("Idx") FROM exam_options GROUP BY "QuestionId" HAVING M
 - [ ] **Platform Parity Verified**:
   - A learner taking any IELTS exam (seeded or imported) observes questions numbered sequentially `1` through `40`.
   - An admin creating questions sees ordinals beginning at `1`.
+
+---
+
+## §7 Verification & Closeout Scoreboard
+
+- **Date of Closure**: 2026-09-11
+- **Status**: **CLOSED & VERIFIED**
+
+### Shipped Commits
+
+| Phase | Component | Commit | Description |
+|---|---|---|---|
+| **Phase 1** | Database Migration Script | BE `f9c8cdf` | Shift existing 0-indexed sections, questions, and options to 1-indexed |
+| **Phase 2** | Backend Seeders | BE `ef66896` | Update `ReadingSeeder`, `ListeningSeeder`, `GeneratedReadingSeeder` to 1-indexed |
+| **Phase 3** | Admin Schemas & Editors | FE `2786d12` | MatchPairsEditor fallback to 1, enforce 1-based indexing comments in schemas |
+| **Phase 4** | Frontend Question Types & Runtime | FE `b33407c` | Verify and test runtime components (`displayIdx ?? idx`, review badges) |
+
+### Test Metrics
+
+- **Backend Unit Tests**: 73 / 73 passed (0 failed, 0 skipped) via `dotnet test services/attempt-service.Tests/attempt-service.Tests.csproj`
+- **Backend Build**: Exam service build succeeded (`0 errors, 21 warnings`) via `dotnet build services/exam-service/exam-service.csproj`
+- **Frontend Vitest**: 22 / 22 passed across 5 test suites (0 failed) via `npx vitest run` in `langfens-fe-app`
+
+### Live DB Snapshot
+
+Verified against container `exam-db-server-7c03dc93` (`exam-db` database):
+
+```sql
+SELECT
+  (SELECT COUNT(*) FROM exam_sections WHERE "Idx" = 0) AS zero_sections,
+  (SELECT COUNT(*) FROM exam_questions WHERE "Idx" = 0) AS zero_questions,
+  (SELECT COUNT(*) FROM exam_options WHERE "Idx" = 0) AS zero_options,
+  (SELECT MIN("Idx") FROM exam_sections) AS min_section_idx,
+  (SELECT MIN("Idx") FROM exam_questions) AS min_question_idx,
+  (SELECT MIN("Idx") FROM exam_options) AS min_option_idx;
+```
+
+| zero_sections | zero_questions | zero_options | min_section_idx | min_question_idx | min_option_idx |
+|---|---|---|---|---|---|
+| 0 | 0 | 0 | 1 | 1 | 1 |
+
+All `zero_*` counts are `0`, and all `min_*_idx` values are `1` across all tables.
