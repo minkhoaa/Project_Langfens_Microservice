@@ -7,7 +7,27 @@
 #   Standardize the completion-family question placeholder format on `[N]`
 #   (Sprint 3 G16 / Sprint 3 appendix S31.F follow-up).
 #
-#   Two legacy formats coexist in the `exam_questions` table:
+# Sprint 4 scope: This script audits and migrates TEXT PLACEHOLDERS in
+# `exam-db` only (does NOT touch `attempt-db`). It operates on the prompt
+# text and `BlankAcceptTexts`/`BlankAcceptRegex` text values, converting
+# legacy patterns like `___` runs and `blank-q\d+` prefixes to the canonical
+# `[N]` ordinal form.
+#
+# DISTINCT FROM: `scripts/migrate_blank_keys_to_1_indexed.py`
+# - This script: text placeholder migration in `exam-db` (one DB).
+# - Keys script: numeric JSONB dict key shift 0→1 in BOTH `exam-db` AND
+#   `attempt-db` (two DBs).
+#
+# Live execution example (Docker host ports 32779/32780):
+#     export PGHOST=localhost
+#     export PGPORT=32779
+#     export PGUSER=exam
+#     export PGPASSWORD=exam
+#     export PGDATABASE=exam-db
+#     python3 scripts/migrate_blank_placeholders.py audit
+#
+# For 0→1 JSONB key shift in both databases, use `migrate_blank_keys_to_1_indexed.py` instead.
+# Two legacy formats coexist in the `exam_questions` table:
 #     1. `___` (7+ underscore runs) inside `PromptMd`
 #     2. `blank-q<digit>` keys inside `BlankAcceptTexts` (jsonb)
 #
