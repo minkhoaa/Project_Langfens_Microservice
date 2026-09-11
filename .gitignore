@@ -29,7 +29,8 @@ WATCHDOG.yml
 *.pem
 *.key
 *.cert
-/docs/
+/docs/*
+!/docs/sprint*/
 # ------------------------------
 # Node / JS / TS
 # ------------------------------
