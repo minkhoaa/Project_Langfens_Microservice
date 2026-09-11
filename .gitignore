@@ -192,3 +192,6 @@ models/**/*.pth
 !**/wwwroot/uploads/**/.gitkeep
 models/**/*.ckpt
 models/**/*.bin
+
+# Session exports
+omp-session-*.html
