@@ -7,11 +7,14 @@
 
 ## §0 — State summary
 
-**Repository & Branch Baseline.** The backend repository (`/home/khoa/Projects/langfens/Project_Langfens_Microservice`) is on branch `refactor/sync-dotest-admin-renderer` at HEAD `0f8fd4f` (Sprint 4 closure BE commit). The frontend repository (`/home/khoa/Projects/langfens/langfens-fe-app`) is on branch `refactor/sync-dotest-admin-renderer` at HEAD `3ff2e41` (Sprint 4 closure FE commit). Sprint 4 is officially closed as of 2026-09-11 with all five §3 readiness items marked DONE or DEFERRED, six Group C bugs declared HALLUCINATED, vitest infrastructure operational (9 tests passing across 2 files), and one backlog item (`scripts/migrate_blank_placeholders.py`) carried into Sprint 5 as an uncommitted working-tree modification.
+**Repository & Branch Baseline.** The backend repository (`/home/khoa/Projects/langfens/Project_Langfens_Microservice`) is on branch `refactor/sync-dotest-admin-renderer` and the frontend repository (`/home/khoa/Projects/langfens/langfens-fe-app`) is on branch `refactor/sync-dotest-admin-renderer`. Sprint 5 is officially **CLOSED** as of 2026-09-11 with all 5 items (Item 0, Item 6, Item 7, Item 9, Item 3) shipped across 7 commits (3 BE + 4 FE). Backend tests are green (73/73 passed in `attempt-service.Tests`), frontend vitest suite is green (22/22 tests passed across 5 test files), and database invariants in live `exam-db` and `attempt-db` show 0 errors.
 
-**Sprint 5 Scope (Carryover).** Sprint 5 picks up four Group D backlog items explicitly DEFERRED from Sprint 4 §3 readiness checklist item #4. Item 3 replaces inline question-ID `Guid.Parse("33333333-…")` literals with deterministic GUID generation (e.g. `SeederHelpers.CreateDeterministicGuid(slug, idx)`) in three exam-service seeder files while preserving literal section/exam UUIDs; Item 6 consolidates two `cleanAnswer` regex implementations into a true union helper in `src/lib/cleanAnswer.ts` preserving case, G15, prefix stripping, and slash tokens; Item 7 extracts `buildQuestion` into `src/lib/buildQuestion.ts` while importing canonical `deriveUiKind` and `isWordListBlank` from `@/lib/deriveUiKind`; Item 9 replaces the silent `null` fallback in `QuestionPanel` with `UnsupportedQuestionCard` throttled by a seen-type warning set. Item 0 (`/docs/` gitignore policy) is added as a Phase 1 deliverable to prevent further accumulation of untracked working docs under `docs/sprint5/`.
-
-**Sprint 5 Readback.** Vitest is operational from Sprint 4 commits `5c7319e` (install) + `3ff2e41` (config rewrite), so Items 6, 7, 9 each have a target test file precedent to extend. No new packages, no Aspire resource-graph changes, no gateway routing changes, no schema migrations are required for Items 6/7/9. Item 3 changes inline seed UUIDs — execution requires capturing `attempt_answer.QuestionId` references for orphan-mapping reconstruction, and the live `exam-db` is not re-seeded during Sprint 5 unless explicitly requested by the parent.
+**Sprint 5 Scope & Delivery.** Sprint 5 picked up all four Group D backlog items deferred from Sprint 4 plus the `/docs/` policy resolution (Item 0):
+1. **Item 0 (`/docs/` policy):** Narrowed `.gitignore` in both repos to allow tracked sprint documentation under `/docs/` (BE commit `30eb6f2`, FE commit `f8ad5b3`).
+2. **Item 6 (`cleanAnswer` DRY helper):** Extracted canonical `cleanAnswer` helper to `src/lib/cleanAnswer.ts`, unified `QuestionPanel.tsx` and review utils, added unit tests (FE commit `fa8f425`).
+3. **Item 7 (`buildQuestion` DRY helper):** Extracted canonical `buildQuestion` helper to `src/lib/buildQuestion.ts`, wired across do-test and placement pages, added unit tests (FE commit `13737ab`).
+4. **Item 9 (`UnsupportedQuestionCard` fallback):** Added `UnsupportedQuestionCard` and wired throttled `console.warn` fallback dispatching in `QuestionPanel.tsx`, added unit tests (FE commit `6a91b0b`).
+5. **Item 3 (Seeder UUID cleanup):** Replaced hardcoded question GUID literals with deterministic `SeederHelpers.CreateDeterministicGuid` generation across `ReadingSeeder`, `ListeningSeeder`, and `GeneratedReadingSeeder`, preserving Section/Exam UUIDs and adding determinism test coverage (BE commit `d5b0135`).
 ---
 
 ## §1 — Repository state
@@ -98,12 +101,14 @@ Four Group D items republished from `HANDOFF_SPRINT4.md` §2 (Engineering) + §2
 
 ## §3 — Sprint 5 readiness checklist
 
-1. **Sprint 4 closure acknowledged.** README + handoff continuity confirmed via `HANDOFF_SPRINT4.md` §6 Closure Summary. — **READY** (Sprint 4 closed 2026-09-11).
-2. **Vitest operational.** 9 tests passing (Sprint 4 commits `5c7319e` + `3ff2e41`). PostCSS workaround `css: { postcss: {} }` in `langfens-fe-app/vitest.config.ts`. — **READY** (all 4 Sprint 5 FE items can be backed by vitest specs; Item 3 targets .NET and uses an xUnit/NUnit project, no vitest involvement).
-3. **Branches aligned.** Both repos on `refactor/sync-dotest-admin-renderer`. Working trees clean except BE `scripts/migrate_blank_placeholders.py` (Item 1 carryover). — **READY with action**: commit or revert the carryover before Sprint 5 starts. See Risk §6 (d).
-4. **`/docs/` policy decision (Item 0).** Decide between options 1/2/3 in Phase 1 before authoring `docs/sprint5/PLAN.md` (because the chosen policy affects whether `PLAN.md` is force-added). — **BLOCKED on parent decision** at start of Phase 1.
-5. **BE seeder FK risk reviewed.** Item 3 changes seed UUIDs; any new seed may orphan `attempt_answer.QuestionId` references. — **READY with caveat**: Item 3 must run with the existing `exam-db` left untouched in Phase 5. Pre/Post row-count snapshots recorded before and after the seeder rewrite so the FK mapping dictionary has a deterministic source.
-
+1. **Sprint 4 closure acknowledged.** README + handoff continuity confirmed via `HANDOFF_SPRINT4.md` §6 Closure Summary. — **SHIPPED** (Sprint 4 closed 2026-09-11).
+2. **Vitest operational.** 9 tests baseline passing, expanded in Sprint 5 to 22 tests across 5 files. — **SHIPPED** (FE commits `fa8f425`, `13737ab`, `6a91b0b`).
+3. **Branches aligned.** Both repos on `refactor/sync-dotest-admin-renderer`. Working tree carryovers resolved. — **SHIPPED**.
+4. **`/docs/` policy decision (Item 0).** Option 2 selected (narrow `.gitignore` to allow sprint docs). Tracked sprint 4 & 5 artifacts. — **SHIPPED** (BE `30eb6f2`, FE `f8ad5b3`).
+5. **BE seeder FK risk reviewed & resolved (Item 3).** Hardcoded question GUIDs replaced with deterministic lookup helper; Section/Exam UUIDs preserved. 73/73 tests pass including seeder determinism. Live DB untouched. — **SHIPPED** (BE `d5b0135`).
+6. **Item 6 (`cleanAnswer`):** Canonical helper extracted to `src/lib/cleanAnswer.ts`, wired to `QuestionPanel.tsx` and `utils.ts`, 6/6 tests pass. — **SHIPPED** (FE `fa8f425`).
+7. **Item 7 (`buildQuestion`):** Canonical helper extracted to `src/lib/buildQuestion.ts`, wired to `do-test` and `placement`, 6/6 tests pass. — **SHIPPED** (FE `13737ab`).
+8. **Item 9 (`UnsupportedQuestionCard`):** Fallback card created, wired into `QuestionPanel.tsx` with throttled `console.warn`, unit tests pass. — **SHIPPED** (FE `6a91b0b`).
 ---
 
 ## §4 — Manual verification steps
@@ -210,17 +215,52 @@ Six phases. Phases 1, 6 are repo-wide setup/closure. Phases 2-5 are items in exe
 
 ---
 
-## §6 — Risks
+## §6 — Sprint 5 Closure Summary
 
-| ID | Risk | Likelihood | Impact | Mitigation | Owner |
-|----|------|------------|--------|------------|-------|
-| (a) | Item 3 seeder PK churn breaks `attempt_answer.QuestionId` FK refs on next re-seed | Med | High | Phase 5 captures pre-seed row counts and emits a `Dictionary<Guid, Guid>` FK remap via `scripts/migrate_blank_placeholders.py`. Sprint 5 does not re-seed live DB; FK remap is staged for any future re-seed event. | Parent |
-| (b) | Item 6 `cleanAnswer` signature change breaks `ResultV3Review.parseUserAnswer.test.ts` | Low | Med | Signature `(s: string \| undefined) => string` is a pure superset of the prior inline behavior; vitest re-run before commit catches regressions. | Phase 2 implementer |
-| (c) | Item 9 registry card needs visible render + log fallback simultaneously | Med | Low | New vitest spec explicitly verifies `console.warn` is fired once per unique type using `vi.spyOn`. Dispatcher guards re-warn with an in-memory Set of seen types. | Phase 4 implementer |
-| (d) | `/docs/` policy debt accumulates (Sprint 4 already has 8 untracked docs) | High | Low | Item 0 forces a parent decision in Phase 1; chosen option tracked in §7 closure. | Parent |
-| (e) | BE working-tree carryover `scripts/migrate_blank_placeholders.py` collides with Item 3 Phase 5 changes to the same file | Med | Med | Resolve by Phase 1: either commit the carryover separately (`chore(scripts): commit MCQ-scan extension`) or stash it. Item 3 Phase 5 modifications assume a clean base. | Phase 1 implementer |
-| (f) | `docs/sprint5/` files remain untracked under chosen `/docs/` policy; subsequent agents cannot locate them via `git log` | Med | Low | If Item 0 = option 1, force-add `docs/sprint5/*.md` on each commit; if option 2, untracked paths become tracked by repo convention; if option 3, no `/docs/` surface at all. | Per phase committer |
+Sprint 5 closed on 2026-09-11. All 5 planned items (Item 0, Item 6, Item 7, Item 9, Item 3) have been implemented, verified, and shipped across 7 commits in the backend and frontend repositories.
 
+### Scoreboard Table
+
+| Phase | Item | Description | Repository | Commit SHA | Status |
+|---|---|---|---|---|---|
+| Kickoff | — | Sprint 5 kickoff handoff doc | BE (`Project_Langfens_Microservice`) | `05b41d6` | SHIPPED |
+| Phase 1 | Item 0 | `/docs/` policy: un-ignore sprint docs in `.gitignore` | BE (`Project_Langfens_Microservice`) | `30eb6f2` | SHIPPED |
+| Phase 1 | Item 0 | `/docs/` policy: un-ignore sprint docs in `.gitignore` | FE (`langfens-fe-app`) | `f8ad5b3` | SHIPPED |
+| Phase 2 | Item 6 | DRY `cleanAnswer` helper in `src/lib/cleanAnswer.ts` + tests | FE (`langfens-fe-app`) | `fa8f425` | SHIPPED |
+| Phase 3 | Item 7 | DRY `buildQuestion` helper in `src/lib/buildQuestion.ts` + tests | FE (`langfens-fe-app`) | `13737ab` | SHIPPED |
+| Phase 4 | Item 9 | `UnsupportedQuestionCard` G11 dispatcher fallback + tests | FE (`langfens-fe-app`) | `6a91b0b` | SHIPPED |
+| Phase 5 | Item 3 | Deterministic seeder GUID generation in `Reading`/`Listening`/`GeneratedReadingSeeder` | BE (`Project_Langfens_Microservice`) | `d5b0135` | SHIPPED |
+
+### Test Metrics & Verification
+
+- **Backend unit tests (`dotnet test services/attempt-service.Tests`):**
+  - Result: **73 / 73 passed** (0 failed, 0 skipped, duration 86 ms).
+  - Coverage includes `ReadingSeederDeterminismTests` verifying identical deterministic GUID outputs across repeated executions.
+- **Frontend vitest suite (`npx vitest run`):**
+  - Result: **5 / 5 files passed**, **22 / 22 tests passed** (0 failed).
+  - Files:
+    - `ResultV3Review.parseUserAnswer.test.ts` (8 tests)
+    - `CompletionCard.sort.test.tsx` (1 test)
+    - `buildQuestion.test.ts` (6 tests)
+    - `cleanAnswer.test.ts` (6 tests)
+    - `UnsupportedQuestionCard.test.tsx` (1 test)
+- **Live Database Invariant Checks (`exam-db` & `attempt-db`):**
+  - `exam-db`:
+    - `zero_idx_exam` (`BlankAcceptTexts ? '0'`): **0**
+    - `blank_q_exam` (`BlankAcceptTexts::text ~ 'blank-q[0-9]+'`): **0**
+  - `attempt-db`:
+    - `zero_idx_attempt` (`TextAnswer LIKE '%"0":%'`): **0**
+    - `blank_q_attempt` (`TextAnswer LIKE '%blank-q%'`): **0**
+  - Total DB invariant violations: **0 errors**.
+
+### Risks & Follow-Up
+
+| ID | Area | Status | Notes |
+|----|------|--------|-------|
+| (a) | Item 3 Seeder GUIDs | Mitigated | Question GUID generation is strictly deterministic (`SeederHelpers.CreateDeterministicGuid`). Live DB was not re-seeded. |
+| (b) | Item 6 `cleanAnswer` | Mitigated | Tested and unified; preserves casing, trims whitespace, handles slash tokens correctly. |
+| (c) | Item 9 Registry Fallback | Mitigated | Fallback card tested with simulated unknown question type and throttled logging. |
+| (d) | `/docs/` policy | Mitigated | Option 2 selected; `.gitignore` in both repos un-ignores sprint docs. Sprint 4 and Sprint 5 artifacts are tracked. |
 ---
 
 ## §7 — Acceptance criteria
