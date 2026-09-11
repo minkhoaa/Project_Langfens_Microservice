@@ -20,4 +20,8 @@
     <ProjectReference Include="..\_shared\Shared.PublicContracts\Shared.PublicContracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\exam-service\Data\SeederHelpers.cs" Link="Seeders\SeederHelpers.cs" />
+  </ItemGroup>
+
 </Project>

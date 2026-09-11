@@ -2,6 +2,7 @@ using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts.Exam.Enums;
+using ExamService.Data;
 
 namespace exam_service.Data;
 
@@ -96,7 +97,7 @@ public static class ReadingSeeder
         };
 
         // Q1: Multiple Choice
-        var q1Id = Guid.Parse("33333333-3333-3333-3333-333333333331");
+        var q1Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 1);
         var q1Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 0, ContentMd = "A. 10 liters", IsCorrect = false },
@@ -113,7 +114,7 @@ public static class ReadingSeeder
         };
 
         // Q2: True/False/Not Given
-        var q2Id = Guid.Parse("33333333-3333-3333-3333-333333333332");
+        var q2Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 2);
         var q2Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 0, ContentMd = "A. True", IsCorrect = false },
@@ -129,7 +130,7 @@ public static class ReadingSeeder
         };
 
         // Q3: Sentence Completion
-        var q3Id = Guid.Parse("33333333-3333-3333-3333-333333333333");
+        var q3Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 3);
         var q3 = new ExamQuestion
         {
             Id = q3Id, SectionId = section1Id, Idx = 2,
@@ -143,7 +144,7 @@ public static class ReadingSeeder
         };
 
         // Q4: Multiple Choice
-        var q4Id = Guid.Parse("33333333-3333-3333-3333-333333333334");
+        var q4Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 4);
         var q4Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 0, ContentMd = "A. Nets are too expensive to maintain", IsCorrect = false },
@@ -160,7 +161,7 @@ public static class ReadingSeeder
         };
 
         // Q5: True/False/Not Given
-        var q5Id = Guid.Parse("33333333-3333-3333-3333-333333333335");
+        var q5Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 5);
         var q5Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 0, ContentMd = "A. True", IsCorrect = true },
@@ -176,7 +177,7 @@ public static class ReadingSeeder
         };
 
         // Q6: Classification (Matching Headings)
-        var q6Id = Guid.Parse("33333333-3333-3333-3333-333333333336");
+        var q6Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 6);
         var q6 = new ExamQuestion
         {
             Id = q6Id, SectionId = section2Id, Idx = 0,
@@ -191,7 +192,7 @@ public static class ReadingSeeder
         };
 
         // Q7: Sentence Completion
-        var q7Id = Guid.Parse("33333333-3333-3333-3333-333333333337");
+        var q7Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 7);
         var q7 = new ExamQuestion
         {
             Id = q7Id, SectionId = section2Id, Idx = 1,
@@ -205,7 +206,7 @@ public static class ReadingSeeder
         };
 
         // Q8: Multiple Choice
-        var q8Id = Guid.Parse("33333333-3333-3333-3333-333333333338");
+        var q8Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 8);
         var q8Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 0, ContentMd = "A. They practice language while reading sheet music", IsCorrect = false },
@@ -222,7 +223,7 @@ public static class ReadingSeeder
         };
 
         // Q9: Yes/No/Not Given
-        var q9Id = Guid.Parse("33333333-3333-3333-3333-333333333339");
+        var q9Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 9);
         var q9Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 0, ContentMd = "A. Yes", IsCorrect = true },
@@ -237,7 +238,7 @@ public static class ReadingSeeder
         };
 
         // Q10: Flow Chart Completion
-        var q10Id = Guid.Parse("33333333-3333-3333-3333-333333333341");
+        var q10Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 10);
         var q10 = new ExamQuestion
         {
             Id = q10Id, SectionId = section3Id, Idx = 0,
@@ -254,7 +255,7 @@ public static class ReadingSeeder
         };
 
         // Q11a-c: Short Answer (3 sub-questions split into individual rows)
-        var q11aId = Guid.Parse("33333333-3333-3333-3333-333333333342"); // keep same first ID
+        var q11aId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11a");
         var q11a = new ExamQuestion
         {
             Id = q11aId, SectionId = section3Id, Idx = 1,
@@ -262,7 +263,7 @@ public static class ReadingSeeder
             PromptMd = "What company pioneered vertical farming in Singapore?",
             ShortAnswerAcceptTexts = new List<string> { "Sky Greens" }
         };
-        var q11bId = Guid.Parse("33333333-3333-3333-3333-3333333333a1");
+        var q11bId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11b");
         var q11b = new ExamQuestion
         {
             Id = q11bId, SectionId = section3Id, Idx = 2,
@@ -270,7 +271,7 @@ public static class ReadingSeeder
             PromptMd = "How many vertical farms does Spread Co. operate in Japan?",
             ShortAnswerAcceptTexts = new List<string> { "18", "eighteen" }
         };
-        var q11cId = Guid.Parse("33333333-3333-3333-3333-3333333333a2");
+        var q11cId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11c");
         var q11c = new ExamQuestion
         {
             Id = q11cId, SectionId = section3Id, Idx = 3,
@@ -280,7 +281,7 @@ public static class ReadingSeeder
         };
 
         // Q12: Multiple Choice
-        var q12Id = Guid.Parse("33333333-3333-3333-3333-333333333343");
+        var q12Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 12);
         var q12Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 0, ContentMd = "A. Staple crops like wheat and rice cannot be grown economically", IsCorrect = true },
@@ -299,7 +300,7 @@ public static class ReadingSeeder
         // Q13: Diagram Label
         // TODO: replace with real diagram URL — admin can override via Admin UI upload (BlankAcceptsEditor).
         // Placeholder used so FE can render the diagram card; admin override is the canonical path.
-        var q13Id = Guid.Parse("33333333-3333-3333-3333-333333333344");
+        var q13Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 13);
         var q13 = new ExamQuestion
         {
             Id = q13Id, SectionId = section3Id, Idx = 5,

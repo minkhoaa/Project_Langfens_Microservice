@@ -40,7 +40,7 @@ builder.AddNpgsqlDbContext<ExamDbContext>("exam-db", configureDbContextOptions: 
 });
 
 // ── Services ─────────────────────────────────────────────────────────────
-builder.Services.AddScoped<IExamService, ExamService>();
+builder.Services.AddScoped<IExamService, exam_service.Features.Exams.PublicEndpoint.ExamService>();
 builder.Services.AddScoped<IAdminExamService, AdminExamService>();
 builder.Services.AddScoped<IAdminOptionService, AdminOptionService>();
 builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();

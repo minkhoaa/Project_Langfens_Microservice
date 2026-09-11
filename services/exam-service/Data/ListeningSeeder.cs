@@ -2,6 +2,7 @@ using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts.Exam.Enums;
+using ExamService.Data;
 
 namespace exam_service.Data;
 
@@ -92,7 +93,7 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
         };
 
         // Q1-5: Form Completion (hotel registration form)
-        var q1Id = Guid.Parse("55555555-5555-5555-5555-555555555551");
+        var q1Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 1);
         var q1 = new ExamQuestion
         {
             Id = q1Id, SectionId = section1Id, Idx = 0,
@@ -107,8 +108,7 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
                 { "5", new[] { "3", "three" } }
             }
         };
-
-        var q2Id = Guid.Parse("55555555-5555-5555-5555-555555555552");
+        var q2Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 2);
         var q2 = new ExamQuestion
         {
             Id = q2Id, SectionId = section1Id, Idx = 1,
@@ -125,7 +125,7 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
         };
 
         // Q3-5: Short answer
-        var q3Id = Guid.Parse("55555555-5555-5555-5555-555555555553");
+        var q3Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 3);
         var q3 = new ExamQuestion
         {
             Id = q3Id, SectionId = section1Id, Idx = 2,
@@ -172,8 +172,7 @@ For those of you interested in research, our inter-library loan service allows y
 
 That's a quick overview of what we offer. Does anyone have any questions?"
         };
-
-        var q4Id = Guid.Parse("55555555-5555-5555-5555-555555555554");
+        var q4Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 4);
         var q4Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 0, ContentMd = "A. Ground floor", IsCorrect = false },
@@ -188,8 +187,7 @@ That's a quick overview of what we offer. Does anyone have any questions?"
             PromptMd = "16. Where are the computer workstations located?",
             Options = q4Options
         };
-
-        var q5Id = Guid.Parse("55555555-5555-5555-5555-555555555555");
+        var q5Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 5);
         var q5Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 0, ContentMd = "A. $0.05 per page", IsCorrect = false },
@@ -204,8 +202,7 @@ That's a quick overview of what we offer. Does anyone have any questions?"
             PromptMd = "17. How much does printing cost per page?",
             Options = q5Options
         };
-
-        var q6Id = Guid.Parse("55555555-5555-5555-5555-555555555556");
+        var q6Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 6);
         var q6Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 0, ContentMd = "A. Up to 2 hours per session", IsCorrect = false },
@@ -222,7 +219,7 @@ That's a quick overview of what we offer. Does anyone have any questions?"
         };
 
         // Q19-25: Note completion
-        var q7Id = Guid.Parse("55555555-5555-5555-5555-555555555557");
+        var q7Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 7);
         var q7 = new ExamQuestion
         {
             Id = q7Id, SectionId = section2Id, Idx = 3,
@@ -292,8 +289,7 @@ Dr. Chen: Yes, that's correct. Our next meeting is on the 18th. Please send me a
 
 James: Will do. Thank you, Dr. Chen."
         };
-
-        var q8Id = Guid.Parse("55555555-5555-5555-5555-555555555558");
+        var q8Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 8);
         var q8Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 0, ContentMd = "A. She recommended a book list", IsCorrect = false },
@@ -308,8 +304,7 @@ James: Will do. Thank you, Dr. Chen."
             PromptMd = "26. What help did the librarian provide to James?",
             Options = q8Options
         };
-
-        var q9Id = Guid.Parse("55555555-5555-5555-5555-555555555559");
+        var q9Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 9);
         var q9Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 0, ContentMd = "A. Quantitative research methods", IsCorrect = false },
@@ -324,8 +319,7 @@ James: Will do. Thank you, Dr. Chen."
             PromptMd = "27. Which research seminar topic did James find most useful?",
             Options = q9Options
         };
-
-        var q10Id = Guid.Parse("55555555-5555-5555-5555-555555555560");
+        var q10Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 10);
         var q10Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 0, ContentMd = "A. Every Monday", IsCorrect = false },
@@ -340,8 +334,7 @@ James: Will do. Thank you, Dr. Chen."
             PromptMd = "28. How often are James's individual supervision sessions with Dr. Chen?",
             Options = q10Options
         };
-
-        var q11Id = Guid.Parse("55555555-5555-5555-5555-555555555561");
+        var q11Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 11);
         var q11 = new ExamQuestion
         {
             Id = q11Id, SectionId = section3Id, Idx = 3,
@@ -354,8 +347,7 @@ James: Will do. Thank you, Dr. Chen."
                 "Room 307", "307", "Room 307 of the Humanities Building"
             }
         };
-
-        var q12Id = Guid.Parse("55555555-5555-5555-5555-555555555562");
+        var q12Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 12);
         var q12 = new ExamQuestion
         {
             Id = q12Id, SectionId = section3Id, Idx = 4,
@@ -397,8 +389,7 @@ On a more hopeful note, renewable energy sources such as solar and wind power ha
 
 In conclusion, while the challenges are significant, the scientific consensus is clear, and the tools to address climate change are increasingly within our reach. Thank you for your attention. I welcome any questions."
         };
-
-        var q13Id = Guid.Parse("55555555-5555-5555-5555-555555555563");
+        var q13Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 13);
         var q13Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 0, ContentMd = "A. 1850s", IsCorrect = false },
@@ -413,8 +404,7 @@ In conclusion, while the challenges are significant, the scientific consensus is
             PromptMd = "36. According to the lecture, since when have the most reliable continuous temperature records been available?",
             Options = q13Options
         };
-
-        var q14Id = Guid.Parse("55555555-5555-5555-5555-555555555564");
+        var q14Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 14);
         var q14Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 0, ContentMd = "A. Approximately 0.5 degrees", IsCorrect = false },
@@ -429,8 +419,7 @@ In conclusion, while the challenges are significant, the scientific consensus is
             PromptMd = "37. By how much has the Earth's average surface temperature risen since pre-industrial times?",
             Options = q14Options
         };
-
-        var q15Id = Guid.Parse("55555555-5555-5555-5555-555555555565");
+        var q15Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 15);
         var q15Options = new List<ExamOption>
         {
             new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 0, ContentMd = "A. 196 countries", IsCorrect = false },
@@ -445,8 +434,7 @@ In conclusion, while the challenges are significant, the scientific consensus is
             PromptMd = "38. How many countries signed the Paris Agreement?",
             Options = q15Options
         };
-
-        var q16Id = Guid.Parse("55555555-5555-5555-5555-555555555566");
+        var q16Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 16);
         var q16 = new ExamQuestion
         {
             Id = q16Id, SectionId = section4Id, Idx = 3,
@@ -463,7 +451,7 @@ In conclusion, while the challenges are significant, the scientific consensus is
         // Q41–Q43: split from the original 3-blank question into 3 single-blank
         // questions, matching the one-question-per-blank convention used by every
         // other SUMMARY_COMPLETION seed (blank-q<Idx> key, single ___ in prompt).
-        var q17aId = Guid.Parse("55555555-5555-5555-5555-555555555568");
+        var q17aId = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", "17a");
         var q17a = new ExamQuestion
         {
             Id = q17aId, SectionId = section4Id, Idx = 4,
@@ -474,8 +462,7 @@ In conclusion, while the challenges are significant, the scientific consensus is
                 { "blank-q4", new[] { "2015" } }
             }
         };
-
-        var q17bId = Guid.Parse("55555555-5555-5555-5555-555555555569");
+        var q17bId = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", "17b");
         var q17b = new ExamQuestion
         {
             Id = q17bId, SectionId = section4Id, Idx = 5,
@@ -486,8 +473,7 @@ In conclusion, while the challenges are significant, the scientific consensus is
                 { "blank-q5", new[] { "1.5 degrees", "1.5 degrees Celsius", "1.5 degrees celsius", "1.5°C", "one point five degrees" } }
             }
         };
-
-        var q17cId = Guid.Parse("55555555-5555-5555-5555-55555555556a");
+        var q17cId = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", "17c");
         var q17c = new ExamQuestion
         {
             Id = q17cId, SectionId = section4Id, Idx = 6,

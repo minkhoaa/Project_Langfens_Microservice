@@ -1,0 +1,288 @@
+{
+  "GeneratedAtUtc": "2026-09-11T00:00:00Z",
+  "TotalMappings": 47,
+  "Mappings": [
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "1",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333331",
+      "NewUuid": "3dc1efa7-2b15-88ab-2fd8-046027c92e2a"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "2",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333332",
+      "NewUuid": "3aff2b4e-be95-8b15-20fc-dc5c2e7f7eed"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "3",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333333",
+      "NewUuid": "4fef5c2a-387d-2bdd-c65b-5502f04063db"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "4",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333334",
+      "NewUuid": "e9ffaf00-8a27-0592-d471-b1dada6d976e"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "5",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333335",
+      "NewUuid": "0e51567f-cc03-acfc-16ab-5d5838e97928"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "6",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333336",
+      "NewUuid": "0414e4ed-0686-d1e3-e4c9-482277ca1256"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "7",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333337",
+      "NewUuid": "f2a58ed6-4dad-a58d-33c9-6790954586f5"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "8",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333338",
+      "NewUuid": "d3228148-3e56-58e0-8b9f-3a1a62e569e9"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "9",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333339",
+      "NewUuid": "b1e92875-c248-a2bb-a115-f88fce97721d"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "10",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333341",
+      "NewUuid": "16e35c23-3cc4-2087-abdd-82be025d1564"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "11a",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333342",
+      "NewUuid": "aeab2517-9d6f-ec8a-c652-776b3a458d7e"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "11b",
+      "LegacyUuid": "33333333-3333-3333-3333-3333333333a1",
+      "NewUuid": "e52dd121-e892-6dd2-cf3d-3997f80c88ab"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "11c",
+      "LegacyUuid": "33333333-3333-3333-3333-3333333333a2",
+      "NewUuid": "5343b92d-dab2-bafe-d71e-12ea08abf4ee"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "12",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333343",
+      "NewUuid": "dd6482e6-79b6-17e8-9f27-e67a41e5021f"
+    },
+    {
+      "ExamSlug": "ielts-reading-practice-1",
+      "QuestionKey": "13",
+      "LegacyUuid": "33333333-3333-3333-3333-333333333344",
+      "NewUuid": "1f298362-c13f-f2d7-5bc9-1aef199729a2"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "1",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555551",
+      "NewUuid": "4f4596b9-74ae-02fe-0801-5cac7c13df44"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "2",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555552",
+      "NewUuid": "058c7a47-4ffa-4998-e485-1a8158b672f3"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "3",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555553",
+      "NewUuid": "091a5597-0e56-6129-277b-f78a78b46882"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "4",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555554",
+      "NewUuid": "abe30ef5-0221-3ebe-f967-74bc2bcc9a61"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "5",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555555",
+      "NewUuid": "3706d187-4084-df0c-cb5c-281a6e292a4d"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "6",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555556",
+      "NewUuid": "c2a0f876-366f-6d93-3fdb-e4b1412a5893"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "7",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555557",
+      "NewUuid": "8a358271-6cf5-5a19-7438-99789a238424"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "8",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555558",
+      "NewUuid": "5a2374ed-2578-8c9c-28f5-36f55eec1684"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "9",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555559",
+      "NewUuid": "22f046c1-a717-3e79-55cc-b7139e16cba5"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "10",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555560",
+      "NewUuid": "67685ea4-62b1-f0e2-24ac-7afd724bb613"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "11",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555561",
+      "NewUuid": "941cc84e-6d07-48fd-18af-0b062bc028a3"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "12",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555562",
+      "NewUuid": "35ff303b-d90d-eb69-ca20-f4293a6e5d4d"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "13",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555563",
+      "NewUuid": "8f8c523e-d624-b151-ec16-c9eb728b7269"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "14",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555564",
+      "NewUuid": "82b6717c-30c6-508d-5227-99758da0be9e"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "15",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555565",
+      "NewUuid": "9c7a6524-08da-cfd4-be04-9e7949213c8d"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "16",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555566",
+      "NewUuid": "21a7b20f-6b9b-6c69-ab46-731e6a4e98d8"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "17a",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555568",
+      "NewUuid": "ef63c5d0-fa71-1650-70cb-bd44b65bbce0"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "17b",
+      "LegacyUuid": "55555555-5555-5555-5555-555555555569",
+      "NewUuid": "24f52fcf-68b9-1032-a767-f7a11ccb61fb"
+    },
+    {
+      "ExamSlug": "ielts-listening-practice-1",
+      "QuestionKey": "17c",
+      "LegacyUuid": "55555555-5555-5555-5555-55555555556a",
+      "NewUuid": "f30e9b3a-2b78-b2bb-6d64-b6518b593480"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "1",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333331",
+      "NewUuid": "9cb41128-076b-ce9a-d307-fb2e61aab0d2"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "2",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333332",
+      "NewUuid": "7a4162ec-d4e5-f446-1bec-65603f7d66c8"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "3",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333333",
+      "NewUuid": "0505cf98-f16c-36da-5e55-b47398cc47a7"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "4",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333334",
+      "NewUuid": "62598d75-46eb-c052-8fde-87477991a8c3"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "5",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333335",
+      "NewUuid": "9d03d856-abdf-09b4-0d6a-fb22e619a2f3"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "6",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333336",
+      "NewUuid": "58c05f82-e572-ea70-7619-8d49da79a9c0"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "7",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333337",
+      "NewUuid": "83d91947-4b1a-c0fa-2757-da7524f2557f"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "8",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333338",
+      "NewUuid": "670b6fa2-32de-9f9a-2fb0-03506ae53277"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "9",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333339",
+      "NewUuid": "4d54afc4-ed56-814a-1e69-c60e02c4aa33"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "10",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333341",
+      "NewUuid": "1e586438-79bf-a49d-9f45-703daba8a6ec"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "11",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333342",
+      "NewUuid": "e1bed596-6da4-b77a-5ced-36652f3b925e"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "12",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333343",
+      "NewUuid": "4db3ac44-5764-3617-e15a-efc340f408e7"
+    },
+    {
+      "ExamSlug": "ielts-reading-generated-1",
+      "QuestionKey": "13",
+      "LegacyUuid": "43333333-3333-3333-3333-333333333344",
+      "NewUuid": "6b6045fa-cdca-5a46-53b1-d4691b4782f7"
+    }
+  ]
+}
