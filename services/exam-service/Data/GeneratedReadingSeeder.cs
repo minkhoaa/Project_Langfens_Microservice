@@ -54,7 +54,7 @@ public static class GeneratedReadingSeeder
         {
             Id = s1Id,
             ExamId = examId,
-            Idx = 0,
+            Idx = 1,
             Title = "Section 1: Living Light",
             InstructionsMd = "Read the passage and answer questions 1-5.",
             PassageMd =
@@ -92,7 +92,7 @@ public static class GeneratedReadingSeeder
         {
             Id = s2Id,
             ExamId = examId,
-            Idx = 1,
+            Idx = 2,
             Title = "Section 2: Lighting the Ocean",
             InstructionsMd = "Read the passage and answer questions 6-10.",
             PassageMd =
@@ -130,7 +130,7 @@ public static class GeneratedReadingSeeder
         {
             Id = s3Id,
             ExamId = examId,
-            Idx = 2,
+            Idx = 3,
             Title = "Section 3: Glowing in the Lab",
             InstructionsMd = "Read the passage and answer questions 11-13.",
             PassageMd =
@@ -162,14 +162,14 @@ public static class GeneratedReadingSeeder
         // IELTS TFNG convention: A=True, B=False, C=Not Given (matches ReadingSeeder q2/q5).
         var q1 = new ExamQuestion
         {
-            Id = q1Id, SectionId = s1Id, Idx = 0,
+            Id = q1Id, SectionId = s1Id, Idx = 1,
             Type = QuestionType.TrueFalseNotGiven, Skill = "READING", Difficulty = 2,
             PromptMd = "Fireflies use species-specific flashing patterns to find mates.",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 0, ContentMd = "A. True",      IsCorrect = true  },
-                new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 1, ContentMd = "B. False",     IsCorrect = false },
-                new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 2, ContentMd = "C. Not Given", IsCorrect = false }
+                new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 1, ContentMd = "A. True",      IsCorrect = true  },
+                new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 2, ContentMd = "B. False",     IsCorrect = false },
+                new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 3, ContentMd = "C. Not Given", IsCorrect = false }
             }
         };
 
@@ -177,15 +177,15 @@ public static class GeneratedReadingSeeder
         var q2Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 2);
         var q2 = new ExamQuestion
         {
-            Id = q2Id, SectionId = s1Id, Idx = 1,
+            Id = q2Id, SectionId = s1Id, Idx = 2,
             Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 2,
             PromptMd = "Why do most marine organisms produce blue or green light rather than other colours?",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 0, ContentMd = "A. Their eyes are only sensitive to those wavelengths.", IsCorrect = false },
-                new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 1, ContentMd = "B. Blue and green light travels farthest through seawater.", IsCorrect = true },
-                new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 2, ContentMd = "C. Other colours would attract too many predators.", IsCorrect = false },
-                new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 3, ContentMd = "D. Luciferin molecules in the sea are chemically restricted.", IsCorrect = false }
+                new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 1, ContentMd = "A. Their eyes are only sensitive to those wavelengths.", IsCorrect = false },
+                new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 2, ContentMd = "B. Blue and green light travels farthest through seawater.", IsCorrect = true },
+                new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 3, ContentMd = "C. Other colours would attract too many predators.", IsCorrect = false },
+                new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 4, ContentMd = "D. Luciferin molecules in the sea are chemically restricted.", IsCorrect = false }
             }
         };
 
@@ -196,7 +196,7 @@ public static class GeneratedReadingSeeder
         var q3Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 3);
         var q3 = new ExamQuestion
         {
-            Id = q3Id, SectionId = s1Id, Idx = 2,
+            Id = q3Id, SectionId = s1Id, Idx = 3,
             Type = QuestionType.MatchingFeatures, Skill = "READING", Difficulty = 3,
             PromptMd =
                 "Match each function of light with the animal that uses it.\n\n" +
@@ -214,7 +214,7 @@ public static class GeneratedReadingSeeder
         var q4Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 4);
         var q4 = new ExamQuestion
         {
-            Id = q4Id, SectionId = s1Id, Idx = 3,
+            Id = q4Id, SectionId = s1Id, Idx = 4,
             Type = QuestionType.MatchingFeatures, Skill = "READING", Difficulty = 3,
             PromptMd = "feature-q2. Certain squid",
             MatchPairs = new Dictionary<string, string[]?>
@@ -226,7 +226,7 @@ public static class GeneratedReadingSeeder
         var q5Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 5);
          var q5 = new ExamQuestion
         {
-            Id = q5Id, SectionId = s1Id, Idx = 4,
+            Id = q5Id, SectionId = s1Id, Idx = 5,
             Type = QuestionType.MatchingFeatures, Skill = "READING", Difficulty = 3,
             PromptMd = "feature-q3. Anglerfish",
             MatchPairs = new Dictionary<string, string[]?>
@@ -244,7 +244,7 @@ public static class GeneratedReadingSeeder
         var q6Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 6);
         var q6 = new ExamQuestion
         {
-            Id = q6Id, SectionId = s2Id, Idx = 0,
+            Id = q6Id, SectionId = s2Id, Idx = 1,
             Type = QuestionType.SummaryCompletion, Skill = "READING", Difficulty = 2,
             PromptMd =
                 "Complete the summary using words from the passage. Write NO MORE THAN TWO WORDS for each answer.\n\n" +
@@ -264,15 +264,15 @@ public static class GeneratedReadingSeeder
         var q7Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 7);
         var q7 = new ExamQuestion
         {
-            Id = q7Id, SectionId = s2Id, Idx = 1,
+            Id = q7Id, SectionId = s2Id, Idx = 2,
             Type = QuestionType.MultipleChoiceMultiple, Skill = "READING", Difficulty = 3,
             PromptMd = "Which TWO reasons does the author give for the abundance of light production in the deep ocean?",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 0, ContentMd = "A. Sunlight is absorbed within the first few hundred metres of water.", IsCorrect = true  },
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 1, ContentMd = "B. Cold temperatures make chemical reactions easier.",               IsCorrect = false },
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 2, ContentMd = "C. Producing light is the only practical way to communicate or lure prey.", IsCorrect = true },
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 3, ContentMd = "D. Deep-sea organisms have larger eyes than shallow-water species.",   IsCorrect = false }
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 1, ContentMd = "A. Sunlight is absorbed within the first few hundred metres of water.", IsCorrect = true  },
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 2, ContentMd = "B. Cold temperatures make chemical reactions easier.",               IsCorrect = false },
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 3, ContentMd = "C. Producing light is the only practical way to communicate or lure prey.", IsCorrect = true },
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 4, ContentMd = "D. Deep-sea organisms have larger eyes than shallow-water species.",   IsCorrect = false }
             }
         };
 
@@ -284,7 +284,7 @@ public static class GeneratedReadingSeeder
         var q8Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 8);
         var q8 = new ExamQuestion
         {
-            Id = q8Id, SectionId = s2Id, Idx = 2,
+            Id = q8Id, SectionId = s2Id, Idx = 3,
             Type = QuestionType.FlowChart, Skill = "READING", Difficulty = 3,
             PromptMd =
                 "The diagram below shows how a stoplight loosejaw produces red light.\n\n" +
@@ -303,7 +303,7 @@ public static class GeneratedReadingSeeder
         var q9Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 9);
         var q9 = new ExamQuestion
         {
-            Id = q9Id, SectionId = s2Id, Idx = 3,
+            Id = q9Id, SectionId = s2Id, Idx = 4,
             Type = QuestionType.MatchingInformation, Skill = "READING", Difficulty = 3,
             PromptMd = "match-q1. A description of the unique optical organs of the stoplight loosejaw.",
             MatchPairs = new Dictionary<string, string[]?>
@@ -315,7 +315,7 @@ public static class GeneratedReadingSeeder
         var q10Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 10);
         var q10 = new ExamQuestion
         {
-            Id = q10Id, SectionId = s2Id, Idx = 4,
+            Id = q10Id, SectionId = s2Id, Idx = 5,
              Type = QuestionType.MatchingInformation, Skill = "READING", Difficulty = 3,
             PromptMd = "match-q2. An explanation of why deep-sea displays are usually brief.",
             MatchPairs = new Dictionary<string, string[]?>
@@ -332,7 +332,7 @@ public static class GeneratedReadingSeeder
         var q11Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 11);
         var q11 = new ExamQuestion
         {
-            Id = q11Id, SectionId = s3Id, Idx = 0,
+            Id = q11Id, SectionId = s3Id, Idx = 1,
             Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
             PromptMd = "Question 11: Which species of firefly is the source of the most widely used laboratory luciferin-luciferase system?",
             ShortAnswerAcceptTexts = new List<string> { "Photinus pyralis", "photinus pyralis" }
@@ -341,7 +341,7 @@ public static class GeneratedReadingSeeder
         var q12Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 12);
         var q12 = new ExamQuestion
         {
-            Id = q12Id, SectionId = s3Id, Idx = 1,
+            Id = q12Id, SectionId = s3Id, Idx = 2,
             Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
             PromptMd = "Question 12: What chemical does the firefly luciferase reaction require in order to produce light?",
             ShortAnswerAcceptTexts = new List<string> { "ATP", "adenosine triphosphate" }
@@ -351,7 +351,7 @@ public static class GeneratedReadingSeeder
         var q13Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-generated-1", 13);
         var q13 = new ExamQuestion
         {
-            Id = q13Id, SectionId = s3Id, Idx = 2,
+            Id = q13Id, SectionId = s3Id, Idx = 3,
             Type = QuestionType.SentenceCompletion, Skill = "READING", Difficulty = 2,
             PromptMd =
                 "Complete the sentences. Write NO MORE THAN THREE WORDS for each answer.\n\n" +

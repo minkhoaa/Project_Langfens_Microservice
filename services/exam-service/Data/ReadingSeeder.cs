@@ -49,7 +49,7 @@ public static class ReadingSeeder
         {
             Id = section1Id,
             ExamId = examId,
-            Idx = 0,
+            Idx = 1,
             Title = "Section 1: Water in the Desert",
             InstructionsMd = "Read the passage and answer the questions.",
             PassageMd = "Water in the Desert\n\n" +
@@ -66,7 +66,7 @@ public static class ReadingSeeder
         {
             Id = section2Id,
             ExamId = examId,
-            Idx = 1,
+            Idx = 2,
             Title = "Section 2: The Science of Music",
             InstructionsMd = "Read the passage and complete the sentences.",
             PassageMd = "The Science of Music\n\n" +
@@ -83,7 +83,7 @@ public static class ReadingSeeder
         {
             Id = section3Id,
             ExamId = examId,
-            Idx = 2,
+            Idx = 3,
             Title = "Section 3: Urban Farming Revolution",
             InstructionsMd = "Complete the flow chart below using information from the passage.",
             PassageMd = "Urban Farming Revolution\n\n" +
@@ -100,14 +100,14 @@ public static class ReadingSeeder
         var q1Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 1);
         var q1Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 0, ContentMd = "A. 10 liters", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 1, ContentMd = "B. 18 liters", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 2, ContentMd = "C. 50 liters", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 3, ContentMd = "D. 900 liters", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 1, ContentMd = "A. 10 liters", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 2, ContentMd = "B. 18 liters", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 3, ContentMd = "C. 50 liters", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 4, ContentMd = "D. 900 liters", IsCorrect = false }
         };
         var q1 = new ExamQuestion
         {
-            Id = q1Id, SectionId = section1Id, Idx = 0,
+            Id = q1Id, SectionId = section1Id, Idx = 1,
             Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 2,
             PromptMd = "According to the passage, the fog harvesting nets can collect up to how many liters per day per net?",
             Options = q1Options
@@ -117,13 +117,13 @@ public static class ReadingSeeder
         var q2Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 2);
         var q2Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 0, ContentMd = "A. True", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 1, ContentMd = "B. False", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 2, ContentMd = "C. Not Given", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 1, ContentMd = "A. True", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 2, ContentMd = "B. False", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 3, ContentMd = "C. Not Given", IsCorrect = false }
         };
         var q2 = new ExamQuestion
         {
-            Id = q2Id, SectionId = section1Id, Idx = 1,
+            Id = q2Id, SectionId = section1Id, Idx = 2,
             Type = QuestionType.TrueFalseNotGiven, Skill = "READING", Difficulty = 2,
             PromptMd = "The polypropylene nets were originally invented in Chile.",
             Options = q2Options
@@ -133,7 +133,7 @@ public static class ReadingSeeder
         var q3Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 3);
         var q3 = new ExamQuestion
         {
-            Id = q3Id, SectionId = section1Id, Idx = 2,
+            Id = q3Id, SectionId = section1Id, Idx = 3,
             Type = QuestionType.SentenceCompletion, Skill = "READING", Difficulty = 2,
             PromptMd = "Fill in the blanks:\n1. The nets are made from __________ and can reach heights of 12 meters.\n2. The collected water is stored in __________ tanks.",
             BlankAcceptTexts = new Dictionary<string, string[]>
@@ -147,14 +147,14 @@ public static class ReadingSeeder
         var q4Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 4);
         var q4Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 0, ContentMd = "A. Nets are too expensive to maintain", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 1, ContentMd = "B. Algae buildup can reduce efficiency by up to 40%", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 2, ContentMd = "C. Communities refuse to participate in maintenance", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 3, ContentMd = "D. The nets only work during certain months", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 1, ContentMd = "A. Nets are too expensive to maintain", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 2, ContentMd = "B. Algae buildup can reduce efficiency by up to 40%", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 3, ContentMd = "C. Communities refuse to participate in maintenance", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 4, ContentMd = "D. The nets only work during certain months", IsCorrect = false }
         };
         var q4 = new ExamQuestion
         {
-            Id = q4Id, SectionId = section1Id, Idx = 3,
+            Id = q4Id, SectionId = section1Id, Idx = 4,
             Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 3,
             PromptMd = "What is mentioned as a potential problem with the fog harvesting system?",
             Options = q4Options
@@ -164,13 +164,13 @@ public static class ReadingSeeder
         var q5Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 5);
         var q5Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 0, ContentMd = "A. True", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 1, ContentMd = "B. False", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 2, ContentMd = "C. Not Given", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 1, ContentMd = "A. True", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 2, ContentMd = "B. False", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 3, ContentMd = "C. Not Given", IsCorrect = false }
         };
         var q5 = new ExamQuestion
         {
-            Id = q5Id, SectionId = section1Id, Idx = 4,
+            Id = q5Id, SectionId = section1Id, Idx = 5,
             Type = QuestionType.TrueFalseNotGiven, Skill = "READING", Difficulty = 2,
             PromptMd = "The Chilean government began collaborating with the Chungungo community in 1993.",
             Options = q5Options
@@ -180,7 +180,7 @@ public static class ReadingSeeder
         var q6Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 6);
         var q6 = new ExamQuestion
         {
-            Id = q6Id, SectionId = section2Id, Idx = 0,
+            Id = q6Id, SectionId = section2Id, Idx = 1,
             Type = QuestionType.Classification, Skill = "READING", Difficulty = 3,
             PromptMd = "Classify the following as referring to:\nA. dopamine research\nB. cultural factors\nC. musical training\n\n1. Instrumental musicians typically have more gray matter in their auditory cortices.\n2. What one person considers beautiful music, another may find completely uninteresting.\n3. The brain shows similar activity patterns when listening to music and eating chocolate.",
             MatchPairs = new Dictionary<string, string[]?>
@@ -195,7 +195,7 @@ public static class ReadingSeeder
         var q7Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 7);
         var q7 = new ExamQuestion
         {
-            Id = q7Id, SectionId = section2Id, Idx = 1,
+            Id = q7Id, SectionId = section2Id, Idx = 2,
             Type = QuestionType.SentenceCompletion, Skill = "READING", Difficulty = 2,
             PromptMd = "Complete the sentences:\n1. Listening to preferred music significantly reduces __________ levels.\n2. The brain structure that manages emotional responses is called the __________.",
             BlankAcceptTexts = new Dictionary<string, string[]>
@@ -209,14 +209,14 @@ public static class ReadingSeeder
         var q8Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 8);
         var q8Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 0, ContentMd = "A. They practice language while reading sheet music", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 1, ContentMd = "B. Musical training strengthens the brain's sound pattern recognition", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 2, ContentMd = "C. Music contains embedded linguistic information", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 3, ContentMd = "D. Musicians have higher overall IQ scores", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 1, ContentMd = "A. They practice language while reading sheet music", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 2, ContentMd = "B. Musical training strengthens the brain's sound pattern recognition", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 3, ContentMd = "C. Music contains embedded linguistic information", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 4, ContentMd = "D. Musicians have higher overall IQ scores", IsCorrect = false }
         };
         var q8 = new ExamQuestion
         {
-            Id = q8Id, SectionId = section2Id, Idx = 2,
+            Id = q8Id, SectionId = section2Id, Idx = 3,
             Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 2,
             PromptMd = "According to the passage, why might musicians be better at learning languages?",
             Options = q8Options
@@ -226,12 +226,12 @@ public static class ReadingSeeder
         var q9Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 9);
         var q9Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 0, ContentMd = "A. Yes", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 1, ContentMd = "B. No", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 1, ContentMd = "A. Yes", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 2, ContentMd = "B. No", IsCorrect = false }
         };
         var q9 = new ExamQuestion
         {
-            Id = q9Id, SectionId = section2Id, Idx = 3,
+            Id = q9Id, SectionId = section2Id, Idx = 4,
             Type = QuestionType.YesNoNotGiven, Skill = "READING", Difficulty = 2,
             PromptMd = "Concentration-enhancing playlists typically feature music with moderate complexity.",
             Options = q9Options
@@ -241,7 +241,7 @@ public static class ReadingSeeder
         var q10Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 10);
         var q10 = new ExamQuestion
         {
-            Id = q10Id, SectionId = section3Id, Idx = 0,
+            Id = q10Id, SectionId = section3Id, Idx = 1,
             Type = QuestionType.SummaryCompletion, Skill = "READING", Difficulty = 3,
             PromptMd = "Complete the flow chart:\n1. Plant seeds in __________\n2. Install LED lights to simulate __________\n3. Use __________ to deliver nutrients\n4. Maintain optimal __________ and humidity\n5. Harvest and package for __________",
             BlankAcceptTexts = new Dictionary<string, string[]>
@@ -258,7 +258,7 @@ public static class ReadingSeeder
         var q11aId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11a");
         var q11a = new ExamQuestion
         {
-            Id = q11aId, SectionId = section3Id, Idx = 1,
+            Id = q11aId, SectionId = section3Id, Idx = 2,
             Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
             PromptMd = "What company pioneered vertical farming in Singapore?",
             ShortAnswerAcceptTexts = new List<string> { "Sky Greens" }
@@ -266,7 +266,7 @@ public static class ReadingSeeder
         var q11bId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11b");
         var q11b = new ExamQuestion
         {
-            Id = q11bId, SectionId = section3Id, Idx = 2,
+            Id = q11bId, SectionId = section3Id, Idx = 3,
             Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
             PromptMd = "How many vertical farms does Spread Co. operate in Japan?",
             ShortAnswerAcceptTexts = new List<string> { "18", "eighteen" }
@@ -274,7 +274,7 @@ public static class ReadingSeeder
         var q11cId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11c");
         var q11c = new ExamQuestion
         {
-            Id = q11cId, SectionId = section3Id, Idx = 3,
+            Id = q11cId, SectionId = section3Id, Idx = 4,
             Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
             PromptMd = "In which city was a former textile factory converted into a vertical farm?",
             ShortAnswerAcceptTexts = new List<string> { "Detroit" }
@@ -284,14 +284,14 @@ public static class ReadingSeeder
         var q12Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 12);
         var q12Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 0, ContentMd = "A. Staple crops like wheat and rice cannot be grown economically", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 1, ContentMd = "B. LED lights are too expensive for commercial use", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 2, ContentMd = "C. Hydroponic systems require constant supervision", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 3, ContentMd = "D. Vertical farms can only produce leafy greens", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 1, ContentMd = "A. Staple crops like wheat and rice cannot be grown economically", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 2, ContentMd = "B. LED lights are too expensive for commercial use", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 3, ContentMd = "C. Hydroponic systems require constant supervision", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 4, ContentMd = "D. Vertical farms can only produce leafy greens", IsCorrect = false }
         };
         var q12 = new ExamQuestion
         {
-            Id = q12Id, SectionId = section3Id, Idx = 4,
+            Id = q12Id, SectionId = section3Id, Idx = 5,
             Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 3,
             PromptMd = "What limitation of vertical farming is mentioned in the passage?",
             Options = q12Options
@@ -303,7 +303,7 @@ public static class ReadingSeeder
         var q13Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 13);
         var q13 = new ExamQuestion
         {
-            Id = q13Id, SectionId = section3Id, Idx = 5,
+            Id = q13Id, SectionId = section3Id, Idx = 6,
             Type = QuestionType.DiagramLabel, Skill = "READING", Difficulty = 2,
             PromptMd = "Label the diagram using no more than three words from the passage.\n[Diagram: LED system, Water system, Climate control, Harvest area]",
             ImageUrl = "https://placehold.co/600x400?text=Vertical+Farm+Diagram",
