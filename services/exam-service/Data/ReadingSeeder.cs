@@ -156,12 +156,14 @@ Write ONE OR TWO WORDS from the passage for each answer.
             }
         };
 
-        // Q5: FlowChart
+        // Q5: SentenceCompletion (reclassified from FlowChart — prompt is fill-in-blanks only,
+        // no reorder; OrderCorrects was null, only BlankAcceptTexts used. FlowChart semantics
+        // require reorderable steps + per-step text, which Q5 lacks.)
         var q5Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q5");
         var q5 = new ExamQuestion
         {
             Id = q5Id, SectionId = s1Id, Idx = 5,
-            Type = QuestionType.FlowChart, Skill = "READING", Difficulty = 2,
+            Type = QuestionType.SentenceCompletion, Skill = "READING", Difficulty = 2,
             PromptMd = @"Complete the flow chart showing the papermaking process described in the passage.
 Write ONE OR TWO WORDS from the passage for each answer.
 
@@ -385,23 +387,28 @@ Critics point to significant limitations. Vertical farming consumes enormous amo
             }
         };
 
-        // Q12: SummaryCompletion
+        // Q12: FlowChart — vertical farm process steps in chronological order.
+        // Real FLOW_CHART semantics (LCS-style step ordering, not fill-in-blanks).
         var q12Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s3q2");
         var q12 = new ExamQuestion
         {
             Id = q12Id, SectionId = s3Id, Idx = 2,
-            Type = QuestionType.SummaryCompletion, Skill = "READING", Difficulty = 2,
-            PromptMd = @"Complete the summary below.
-Write ONE OR TWO WORDS from the passage for each answer.
+            Type = QuestionType.FlowChart, Skill = "READING", Difficulty = 2,
+            PromptMd = @"Look at the four steps of the vertical farming process below and put them in the correct chronological order.
 
-Vertical farms grow crops in [11] layers indoors under controlled conditions. [12] lights are used to simulate natural sunlight, while [13] systems deliver nutrients directly to plant roots. One company in Singapore called [14] produces over 500 kilograms of vegetables per day. In Japan, the 2011 earthquake encouraged the expansion of indoor farms operated by [15].",
-            BlankAcceptTexts = new Dictionary<string, string[]?>
+Available steps:
+A. LED lights simulate natural sunlight
+B. Sensors monitor plant health in real time
+C. Hydroponic systems deliver nutrients to plant roots
+D. Workers harvest and package the produce for supermarkets
+
+Arrange steps in the correct chronological order:",
+            OrderCorrects = new List<string>
             {
-                { "11", new[] { "stacked" } },
-                { "12", new[] { "LED" } },
-                { "13", new[] { "hydroponic" } },
-                { "14", new[] { "Sky Greens" } },
-                { "15", new[] { "Spread Co." } }
+                "led-lights-simulate-natural-sunlight",
+                "hydroponic-systems-deliver-nutrients",
+                "sensors-monitor-plant-health",
+                "workers-harvest-and-package"
             }
         };
 
