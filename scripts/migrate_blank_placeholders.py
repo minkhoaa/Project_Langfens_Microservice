@@ -910,6 +910,20 @@ def cmd_audit(args: argparse.Namespace) -> int:
 
     audit = compute_audit(rows)
     print(json.dumps(audit, indent=2, ensure_ascii=False))
+    if getattr(args, "verify_only", False):
+        # Sprint 7 Phase 10: fail CI when legacy placeholders still exist.
+        legacy_keys = (
+            "underscore_placeholder_count",
+            "blank_q_key_count",
+            "mcq_blank_q_key_count",
+            "coexistence_row_count",
+        )
+        total_legacy = sum(int(audit.get(k, 0)) for k in legacy_keys)
+        if total_legacy > 0:
+            print(f"\nFAIL: {total_legacy} legacy placeholder rows detected. Run 'migrate_blank_placeholders migrate --apply' to fix.",
+                  file=sys.stderr)
+            return 1
+        print("\nPASS: All PromptMd placeholders canonical ([N] format).")
     return 0
 
 
@@ -1106,6 +1120,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "--mock",
         action="store_true",
         help="use canned sample rows instead of connecting to Postgres",
+    )
+    p_audit.add_argument(
+        "--verify-only",
+        action="store_true",
+        help="Sprint 7 Phase 10: exit 1 if any legacy placeholders detected (for CI/pre-push hooks)",
     )
     p_audit.set_defaults(func=cmd_audit)
 
