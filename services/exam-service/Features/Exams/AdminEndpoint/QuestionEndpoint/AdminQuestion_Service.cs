@@ -33,14 +33,26 @@ public interface IAdminQuestionService
 public class AdminQuestionService : IAdminQuestionService
 {
     private readonly ExamDbContext _context;
-    public AdminQuestionService(ExamDbContext context) => _context = context;
-
-    private static IResult? ValidatePayload(
+    private readonly IConfiguration _config;
+    public AdminQuestionService(ExamDbContext context, IConfiguration config)
+    {
+        _context = context;
+        _config = config;
+    }
+    /// <summary>
+    /// Sprint 7 Phase 10: prompt-format contract enforcement.
+    /// Returns null if all BlankAcceptTexts keys are present as [N] markers
+    /// in PromptMd. Returns a 400 IResult otherwise.
+    /// Public for unit testing (InternalsVisibleTo("exam-service.Tests")).
+    /// </summary>
+    internal static IResult? ValidatePayload(
         string type,
+        string? promptMd,
         Dictionary<string, string[]?>? blankAcceptTexts,
         Dictionary<string, string[]?>? matchPairs,
         IEnumerable<string>? orderCorrects,
-        IEnumerable<string>? shortAnswerAcceptTexts)
+        IEnumerable<string>? shortAnswerAcceptTexts,
+        IConfiguration? config = null)
     {
         bool HasText(IEnumerable<string?>? seq) => seq?.Any(x => !string.IsNullOrWhiteSpace(x)) ?? false;
         bool DictNonEmpty(Dictionary<string, string[]?>? d) =>
@@ -72,6 +84,27 @@ public class AdminQuestionService : IAdminQuestionService
                 if (DictNonEmpty(matchPairs))        return Reject($"{type}: MatchPairs must be empty.");
                 if (HasText(orderCorrects))          return Reject($"{type}: OrderCorrects must be empty.");
                 if (HasText(shortAnswerAcceptTexts)) return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
+                // Sprint 7 Phase 10: enforce [N] ↔ BlankAcceptTexts parity.
+                // Skip DIAGRAM/MAP word-bank markers (handled separately).
+                if (blankAcceptTexts != null && !string.IsNullOrEmpty(promptMd) &&
+                    !((type == QuestionType.DiagramLabel || type == QuestionType.MapLabel) &&
+                      System.Text.RegularExpressions.Regex.IsMatch(promptMd, @"\[(Diagram|Map):\s*[^\]]+\]")))
+                {
+                    var inPrompt = new HashSet<string>();
+                    foreach (System.Text.RegularExpressions.Match m in
+                             System.Text.RegularExpressions.Regex.Matches(promptMd, @"\[(\d+)\]"))
+                    {
+                        inPrompt.Add(m.Groups[1].Value);
+                    }
+                    var missing = blankAcceptTexts.Keys.Where(k => !inPrompt.Contains(k)).ToList();
+                    if (missing.Count > 0)
+                    {
+                        var enforce = config?.GetValue<bool>("Langfens:PromptFormatEnforce") ?? true;
+                        var msg = $"{type}: PromptMd is missing [N] markers for BlankAcceptTexts keys [{string.Join(",", missing)}]. Use [1], [2], … format.";
+                        if (enforce) return Reject(msg);
+                        Console.WriteLine($"[PROMPT-FORMAT-VIOLATION] {msg}");
+                    }
+                }
                 break;
 
             case QuestionType.ShortAnswer:
@@ -109,7 +142,6 @@ public class AdminQuestionService : IAdminQuestionService
         }
         return null; // OK
     }
-
     public async Task<IResult> AddAsync(
         CancellationToken token,
         [FromBody] DtoAdmin.AdminQuestionUpsert dto
@@ -126,8 +158,8 @@ public class AdminQuestionService : IAdminQuestionService
                 return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
 
             var validationError = ValidatePayload(
-                dto.Type, dto.BlankAcceptTexts, dto.MatchPairs,
-                dto.OrderCorrects, dto.ShortAnswerAcceptTexts);
+                dto.Type, dto.PromptMd, dto.BlankAcceptTexts, dto.MatchPairs,
+                dto.OrderCorrects, dto.ShortAnswerAcceptTexts, _config);
             if (validationError != null) return validationError;
 
             var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
@@ -195,8 +227,8 @@ public class AdminQuestionService : IAdminQuestionService
             }
 
             var validationError = ValidatePayload(
-                dto.Type, dto.BlankAcceptTexts, dto.MatchPairs,
-                dto.OrderCorrects, dto.ShortAnswerAcceptTexts);
+                dto.Type, dto.PromptMd, dto.BlankAcceptTexts, dto.MatchPairs,
+                dto.OrderCorrects, dto.ShortAnswerAcceptTexts, _config);
             if (validationError != null) return validationError;
 
             var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
@@ -257,7 +289,17 @@ public class AdminQuestionService : IAdminQuestionService
                 q.Skill,
                 q.Difficulty,
                 q.PromptMd,
-                q.ExplanationMd
+                q.ExplanationMd,
+                q.ImageUrl,
+                q.GroupId,
+                q.ModelAnswers,
+                q.WordList,
+                q.OrderCorrects,
+                q.ShortAnswerAcceptTexts,
+                q.ShortAnswerAcceptRegex,
+                q.BlankAcceptTexts,
+                q.BlankAcceptRegex,
+                q.MatchPairs
             })
             .ToListAsync(token);
 
