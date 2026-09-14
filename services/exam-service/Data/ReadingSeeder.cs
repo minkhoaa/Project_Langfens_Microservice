@@ -8,318 +8,719 @@ namespace exam_service.Data;
 
 public static class ReadingSeeder
 {
+    private const string ExamSlug = "ielts-reading-standard-test";
+
+    /// <summary>
+    /// Sprint 7 Phase 10: normalize legacy PromptMd placeholders to canonical [N].
+    /// - "__________" → "[N]" where N matches the corresponding BlankAcceptTexts key
+    /// - "[ N ]" → "[N]"
+    /// - "blank-qN" → "[N]"
+    /// Idempotent: running on canonical input is a no-op.
+    /// </summary>
+    private static string EnsurePromptFormat(
+        string prompt,
+        System.Collections.Generic.Dictionary<string, string[]?>? blankAccepts)
+    {
+        if (blankAccepts is not { Count: > 0 } || string.IsNullOrEmpty(prompt))
+            return prompt;
+
+        foreach (var key in blankAccepts.Keys)
+        {
+            var keyEscaped = System.Text.RegularExpressions.Regex.Escape(key);
+            // Replace "[ N ]" or "blank-qN" with "[N]"
+            prompt = System.Text.RegularExpressions.Regex.Replace(
+                prompt, $@"\[ ?{keyEscaped} ?\]|blank-q{keyEscaped}", $"[{key}]");
+            // Replace runs of 3+ underscores that immediately follow a question
+            // number (e.g. "3. ______" → "3. [3]") when no [N] is present.
+            var keyPattern = @"\b" + keyEscaped + @"\b\.?\s_{3,}";
+            prompt = System.Text.RegularExpressions.Regex.Replace(prompt, keyPattern, "[" + key + "]");
+        }
+        return prompt;
+    }
+
     public static async Task SeedReadingExamAsync(ExamDbContext db)
     {
-        var existing = await db.Exams.FirstOrDefaultAsync(e => e.Slug == "ielts-reading-practice-1");
+        // Always recreate: delete existing exam (cascade deletes sections/questions/options)
+        var existing = await db.Exams.FirstOrDefaultAsync(e => e.Slug == ExamSlug);
         if (existing != null)
         {
-            // Update status if needed (was seeded with wrong case previously)
-            if (existing.Status != ExamStatus.Published)
-            {
-                existing.Status = ExamStatus.Published;
-                await db.SaveChangesAsync();
-                Console.WriteLine("Updated existing reading exam status to PUBLISHED.");
-            }
-            else
-            {
-                Console.WriteLine("Reading exam already exists with correct status, skipping.");
-            }
-            return;
+            db.Exams.Remove(existing);
+            await db.SaveChangesAsync();
+            Console.WriteLine($"Deleted existing exam '{ExamSlug}', recreating...");
         }
 
         var examId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        var section1Id = Guid.Parse("22222222-2222-2222-2222-222222222221");
-        var section2Id = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        var section3Id = Guid.Parse("22222222-2222-2222-2222-222222222223");
 
         var exam = new Exam
         {
             Id = examId,
-            Slug = "ielts-reading-practice-1",
-            Title = "IELTS Academic Reading Practice Test 1",
-            DescriptionMd = "Practice test featuring various reading question types: multiple choice, true/false/not given, matching headings, and sentence completion.",
+            Slug = ExamSlug,
+            Title = "IELTS Academic Reading — Standard Test (19 Types)",
+            DescriptionMd = "Complete exam covering all 19 IELTS Reading question types. Use this as the authoritative seed for platform testing and development.",
             Category = "IELTS",
             Level = "B2",
-            Status = "PUBLISHED",
+            Status = ExamStatus.Published,
             DurationMin = 60,
             CreatedAt = DateTime.UtcNow
         };
 
+        // ── Section 1: The Origins of Paper ─────────────────────────────────
+        var s1Id = Guid.Parse("11111111-1111-1111-1111-111111111101");
+        var s1Passage = @"The Origins of Paper
+
+The invention of paper marked one of the most significant technological advances in human history. Before paper, people wrote on clay tablets, papyrus, parchment, and bamboo strips. Each material had serious limitations in terms of cost, durability, and ease of use.
+
+The earliest form of paper was developed in China around 105 CE during the Han Dynasty. Cai Lun, a court official, is traditionally credited with inventing the papermaking process. He created sheets by pressing together rags, hemp, and fishnets into a fibrous mat. The resulting material was lightweight, smooth, and far cheaper than existing alternatives.
+
+The secret of papermaking spread slowly westward. Arab armies captured Chinese papermakers during battles along the Silk Road in the 8th century, and production centres soon emerged in Samarkand, Baghdad, and Damascus. By the 12th century, papermaking had reached Europe, where it gradually replaced the expensive vellum made from animal skins.
+
+Medieval European paper was initially of lower quality than its Chinese counterpart. Early mills used linen and cotton rags, which produced a rough surface unsuitable for fine writing. The introduction of the Fourdrinier machine in the early 19th century transformed the industry by automating the entire production process. This machine could produce paper continuously from wood pulp rather than relying on the slow手工 method of pressing fibres by hand.
+
+The shift from rags to wood pulp created new challenges. Wood-based paper degrades faster than cotton paper and becomes acidic over time, causing the familiar brown crumble of old newsprint. Modern archivists now use deacidification processes to extend the lifespan of important documents. Today, paper is produced from a variety of fibres including bamboo, wheat straw, and recycled materials, each offering different qualities of durability and texture.";
+
         var section1 = new ExamSection
         {
-            Id = section1Id,
+            Id = s1Id,
             ExamId = examId,
             Idx = 1,
-            Title = "Section 1: Water in the Desert",
-            InstructionsMd = "Read the passage and answer the questions.",
-            PassageMd = "Water in the Desert\n\n" +
-                "The Atacama Desert in Chile is one of the driest places on Earth. Some areas receive less than 1mm of rainfall per year. Yet despite this extreme aridity, human settlements have thrived here for centuries. How do people survive in such a harsh environment?\n\n" +
-                "The answer lies in a remarkable fog harvesting technique developed by the indigenous Chungungo community. Every morning, massive clouds roll in from the Pacific Ocean, bringing moisture to the coastal cliffs. The Chungungo people built elaborate systems of vertical nets made from polypropylene. These nets, stretching up to 12 meters high, capture the fog droplets as the mist passes through. Water trickles down into collection channels and is stored in underground tanks.\n\n" +
-                "Each net can collect up to 18 liters of water per day. A single community with 50 nets can gather approximately 900 liters daily, enough to sustain agricultural activities and domestic use. The water quality is exceptional, with natural filtration through the net fibers removing impurities and bacteria.\n\n" +
-                "This ancient technique has gained renewed attention from scientists and engineers worldwide. In 1993, a severe drought prompted the Chilean government to partner with the Chungungo community to expand fog harvesting operations. Today, over 300 nets are operational, providing water to more than 1,000 residents across three villages.\n\n" +
-                "The success of the Atacama project has inspired similar initiatives in Peru, Ecuador, and South Africa. However, experts caution that fog harvesting is not a universal solution. It requires specific geographical conditions: coastal mountains that force moisture-laden clouds upward, consistent fog patterns, and community cooperation for maintenance.\n\n" +
-                "Interestingly, the polypropylene nets were originally developed for agricultural purposes in Israel. The material's durability and UV resistance make it ideal for long-term outdoor use. Researchers are now experimenting with bamboo alternatives to reduce costs and environmental impact.\n\n" +
-                "Despite its successes, the fog harvesting system faces challenges. Climate change is altering fog patterns in some regions, making predictions difficult. Maintenance requires regular cleaning of the nets to prevent algae buildup, which can reduce efficiency by up to 40 percent."
+            Title = "Section 1: The Origins of Paper",
+            InstructionsMd = "Write your answers in boxes 1–5 on your answer sheet.",
+            PassageMd = s1Passage
         };
 
-        var section2 = new ExamSection
-        {
-            Id = section2Id,
-            ExamId = examId,
-            Idx = 2,
-            Title = "Section 2: The Science of Music",
-            InstructionsMd = "Read the passage and complete the sentences.",
-            PassageMd = "The Science of Music\n\n" +
-                "Music has been part of human culture for thousands of years, but only recently have scientists begun to understand why it affects us so profoundly. Researchers at the University of Melbourne have discovered that listening to music triggers the release of dopamine, the same chemical associated with eating chocolate or winning money.\n\n" +
-                "The study involved 250 participants who listened to their favorite pieces of music while undergoing brain scans. The results showed that intense emotional responses to music occurred in the same brain regions that respond to other pleasurable stimuli. This explains why chills or shivers sometimes accompany particularly moving musical passages.\n\n" +
-                "Dr. Sarah Chen, lead researcher on the project, explains that music activates the nucleus accumbens, a structure that manages decision-making and emotional responses. Simultaneously, the cerebral cortex lights up as it processes the complex auditory information. This dual activation creates the powerful sensation of being moved by sound.\n\n" +
-                "The research has practical applications for treating depression and anxiety. Music therapy has been used in hospitals for decades, but this study provides scientific backing for the approach. Patients who listened to preferred music showed significantly lower cortisol levels, indicating reduced stress. Even passive listening, where patients simply had music playing in the background, produced measurable benefits.\n\n" +
-                "However, not all music affects people equally. Cultural background plays a crucial role in determining what sounds pleasant. Western classical music may move one person to tears while another remains completely indifferent. The brain's auditory cortex needs to develop specific neural pathways through exposure to recognize patterns and harmonies.\n\n" +
-                "Musical training appears to strengthen these pathways. Musicians typically have more gray matter in their auditory cortices and demonstrate superior temporal processing abilities. This may explain why trained musicians often excel at learning languages, which also require sophisticated sound pattern recognition.\n\n" +
-                "The commercial implications are significant. Streaming services now use neuroscience research to optimize playlists for different activities. Concentration-enhancing playlists feature music with moderate complexity and consistent rhythm, while exercise playlists incorporate higher tempo tracks with strong bass lines to boost motivation."
-        };
-
-        var section3 = new ExamSection
-        {
-            Id = section3Id,
-            ExamId = examId,
-            Idx = 3,
-            Title = "Section 3: Urban Farming Revolution",
-            InstructionsMd = "Complete the flow chart below using information from the passage.",
-            PassageMd = "Urban Farming Revolution\n\n" +
-                "As global populations continue to urbanize, a quiet revolution is transforming how cities produce food. Vertical farms, once a sci-fi fantasy, are now a commercial reality in metropolitan areas from Singapore to Detroit.\n\n" +
-                "The concept is straightforward: grow crops in stacked layers indoors under controlled conditions. LED lights simulate sunlight, while hydroponic systems deliver nutrients directly to plant roots. Climate control maintains optimal temperature and humidity year-round, eliminating seasonal constraints.\n\n" +
-                "Singapore leads the world in vertical farming adoption. Sky Greens, the country's pioneering company, produces over 500 kilograms of vegetables daily from its 9-meter-tall towers. The facility uses 95 percent less water than traditional farming and operates entirely on renewable energy. Despite higher production costs, vertically farmed vegetables command premium prices in upscale supermarkets.\n\n" +
-                "The technology has spread to unlikely locations. A former textile factory in Detroit now houses Green City Farms, employing 50 workers and producing 200 varieties of leafy greens. The operation runs 24 hours per day across three shifts, maximizing use of expensive LED infrastructure.\n\n" +
-                "In Japan, spread of vertical farms accelerated after the 2011 earthquake demonstrated the vulnerability of traditional supply chains. Spread Co., a major Japanese seed company, now operates 18 indoor farms across the country. Their products include over 40 varieties of lettuce, herbs, and edible flowers.\n\n" +
-                "Critics point to significant limitations. Vertical farming consumes enormous amounts of electricity, making it carbon-intensive unless powered by renewables. The energy cost can represent up to 50 percent of total production expenses. Additionally, only certain crops are economically viable. Leafy greens, herbs, and some fruits thrive in controlled environments, but staple crops like wheat, rice, and corn remain impractical.\n\n" +
-                "The industry continues to evolve rapidly. Researchers at MIT have developed sensor networks that monitor plant health in real-time, adjusting light spectrum and nutrient delivery automatically. Machine learning algorithms predict optimal harvest times, reducing waste. Some facilities now produce mushrooms, which require minimal light and grow rapidly in stacked substrates."
-        };
-
-        // Q1: Multiple Choice
-        var q1Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 1);
+        // Q1: MultipleChoiceSingle
+        var q1Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q1");
         var q1Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 1, ContentMd = "A. 10 liters", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 2, ContentMd = "B. 18 liters", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 3, ContentMd = "C. 50 liters", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 4, ContentMd = "D. 900 liters", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 1, ContentMd = "A. Papyrus and parchment", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 2, ContentMd = "B. Clay tablets and bamboo", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 3, ContentMd = "C. Papyrus, parchment, clay tablets and bamboo", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 4, ContentMd = "D. Animal skins and wood", IsCorrect = false }
         };
         var q1 = new ExamQuestion
         {
-            Id = q1Id, SectionId = section1Id, Idx = 1,
+            Id = q1Id, SectionId = s1Id, Idx = 1,
             Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 2,
-            PromptMd = "According to the passage, the fog harvesting nets can collect up to how many liters per day per net?",
+            PromptMd = "Before the invention of paper, which of the following materials was NOT commonly used for writing?",
             Options = q1Options
         };
 
-        // Q2: True/False/Not Given
-        var q2Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 2);
+        // Q2: TrueFalseNotGiven
+        var q2Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q2");
         var q2Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 1, ContentMd = "A. True", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 2, ContentMd = "B. False", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 3, ContentMd = "C. Not Given", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 1, ContentMd = "True", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 2, ContentMd = "False", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
         };
         var q2 = new ExamQuestion
         {
-            Id = q2Id, SectionId = section1Id, Idx = 2,
+            Id = q2Id, SectionId = s1Id, Idx = 2,
             Type = QuestionType.TrueFalseNotGiven, Skill = "READING", Difficulty = 2,
-            PromptMd = "The polypropylene nets were originally invented in Chile.",
+            PromptMd = "Cai Lun was the first person to produce paper from wood pulp.",
             Options = q2Options
         };
 
-        // Q3: Sentence Completion
-        var q3Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 3);
+        // Q3: SentenceCompletion
+        var q3Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q3");
         var q3 = new ExamQuestion
         {
-            Id = q3Id, SectionId = section1Id, Idx = 3,
+            Id = q3Id, SectionId = s1Id, Idx = 3,
             Type = QuestionType.SentenceCompletion, Skill = "READING", Difficulty = 2,
-            PromptMd = "Fill in the blanks:\n1. The nets are made from __________ and can reach heights of 12 meters.\n2. The collected water is stored in __________ tanks.",
-            BlankAcceptTexts = new Dictionary<string, string[]>
+            PromptMd = "Complete the sentences.\nWrite ONE OR TWO WORDS from the passage for each answer.\n\n3. The earliest paper was produced in China during the [3] Dynasty.\n4. Arab armies acquired papermaking knowledge after defeating Chinese soldiers along the [4] in the 8th century.\n5. The Fourdrinier machine enabled paper to be made continuously from [5] rather than by hand.",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "1", new[] { "polypropylene", "polypropylene nets" } },
-                { "2", new[] { "underground", "underground tanks" } }
+                { "3", new[] { "Han" } },
+                { "4", new[] { "Silk Road" } },
+                { "5", new[] { "wood pulp" } }
             }
         };
 
-        // Q4: Multiple Choice
-        var q4Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 4);
-        var q4Options = new List<ExamOption>
-        {
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 1, ContentMd = "A. Nets are too expensive to maintain", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 2, ContentMd = "B. Algae buildup can reduce efficiency by up to 40%", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 3, ContentMd = "C. Communities refuse to participate in maintenance", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 4, ContentMd = "D. The nets only work during certain months", IsCorrect = false }
-        };
+        // Q4: TableCompletion
+        var q4Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q4");
         var q4 = new ExamQuestion
         {
-            Id = q4Id, SectionId = section1Id, Idx = 4,
-            Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 3,
-            PromptMd = "What is mentioned as a potential problem with the fog harvesting system?",
-            Options = q4Options
+            Id = q4Id, SectionId = s1Id, Idx = 4,
+            Type = QuestionType.TableCompletion, Skill = "READING", Difficulty = 3,
+            PromptMd = @"Complete the table below.
+Write ONE OR TWO WORDS from the passage for each answer.
+
+| Period | Region | Raw Material Used | Quality Issues |
+|--------|--------|-------------------|----------------|
+| 8th–12th century | Arab world and Europe | [6] | Lower quality than Chinese |
+| Early 19th century | Europe | Wood pulp | [7] |",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
+            {
+                { "6", new[] { "linen and cotton rags", "cotton", "linen and cotton" } },
+                { "7", new[] { "acidic", "degrades fast", "becomes acidic", "faster degradation" } }
+            }
         };
 
-        // Q5: True/False/Not Given
-        var q5Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 5);
-        var q5Options = new List<ExamOption>
-        {
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 1, ContentMd = "A. True", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 2, ContentMd = "B. False", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 3, ContentMd = "C. Not Given", IsCorrect = false }
-        };
+        // Q5: FlowChart
+        var q5Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q5");
         var q5 = new ExamQuestion
         {
-            Id = q5Id, SectionId = section1Id, Idx = 5,
-            Type = QuestionType.TrueFalseNotGiven, Skill = "READING", Difficulty = 2,
-            PromptMd = "The Chilean government began collaborating with the Chungungo community in 1993.",
-            Options = q5Options
+            Id = q5Id, SectionId = s1Id, Idx = 5,
+            Type = QuestionType.FlowChart, Skill = "READING", Difficulty = 2,
+            PromptMd = @"Complete the flow chart showing the papermaking process described in the passage.
+Write ONE OR TWO WORDS from the passage for each answer.
+
+Process:
+1. Collect raw materials such as rags, hemp and fishnets
+2. [8] the fibres in water
+3. Press the fibres into a [9]
+4. Dry the resulting [10] in the sun",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
+            {
+                { "8", new[] { "soak", "soaking", "break down" } },
+                { "9", new[] { "mat", "fibrous mat" } },
+                { "10", new[] { "sheet", "paper sheet" } }
+            }
         };
 
-        // Q6: Classification (Matching Headings)
-        var q6Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 6);
+        // ── Section 2: The Role of Museums ───────────────────────────────────
+        var s2Id = Guid.Parse("11111111-1111-1111-1111-111111111102");
+        var s2Passage = @"The Role of Museums
+
+Museums have evolved far beyond their traditional role as repositories of artefacts. Today's museums serve as dynamic community spaces where education, entertainment, and social interaction intersect. This transformation has raised important questions about what museums should preserve and how they should engage with an increasingly diverse audience.
+
+The commercial pressures facing many museums have led to a phenomenon known as 'blockbuster' exhibitions. These spectacular shows — often featuring famous works borrowed from international collections — draw enormous crowds and generate substantial revenue through ticket sales and merchandise. Critics argue that this focus on popular appeal comes at the expense of deeper educational mission. Smaller institutions, unable to afford such spectacles, risk becoming irrelevant in the competition for visitors and funding.
+
+At the same time, technology is reshaping the museum experience. Interactive displays, augmented reality, and personalised audio guides allow visitors to explore collections at their own pace and according to their own interests. Some museums have begun lending digital artefacts to other institutions, raising questions about the nature of the object itself. When a museum shares a high-resolution image of a painting online, does the copy diminish the value of the original?
+
+Museums also grapple with the ethical complexities of their collections. Objects taken fromcolonised territories during the 19th and 20th centuries present an ongoing challenge. While some institutions have begun repatriating artefacts to their countries of origin, others argue that universal museums serve humanity best by keeping diverse collections together under one roof. This debate is far from resolved.
+
+In response to these pressures, many museums have redefined their role as community anchors. Outreach programmes, language classes, and job training sessions have become standard offerings at institutions seeking to serve as more than tourist destinations. The most successful museums are those that manage to balance their preservation mandate with genuine community engagement.";
+
+        var section2 = new ExamSection
+        {
+            Id = s2Id,
+            ExamId = examId,
+            Idx = 2,
+            Title = "Section 2: The Role of Museums",
+            InstructionsMd = "Each statement below is followed by seven possible answers. Write the correct letter A–G on your answer sheet.",
+            PassageMd = s2Passage
+        };
+
+        // Q6: MatchingHeading — match 5 paragraphs to 7 heading options
+        // Paragraphs: 1=evolution of museums, 2=blockbuster exhibitions, 3=technology, 4=ethical complexities/repatriation, 5=community anchors
+        // Headings pool (i–vii): i=museum evolution, ii=blockbuster model, iii=technology reshaping, iv=ethical debate, v=community role, vi=tourist vs locals, vii=funding pressures
+        var q6Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s2q1");
         var q6 = new ExamQuestion
         {
-            Id = q6Id, SectionId = section2Id, Idx = 1,
-            Type = QuestionType.Classification, Skill = "READING", Difficulty = 3,
-            PromptMd = "Classify the following as referring to:\nA. dopamine research\nB. cultural factors\nC. musical training\n\n1. Instrumental musicians typically have more gray matter in their auditory cortices.\n2. What one person considers beautiful music, another may find completely uninteresting.\n3. The brain shows similar activity patterns when listening to music and eating chocolate.",
+            Id = q6Id, SectionId = s2Id, Idx = 1,
+            Type = QuestionType.MatchingHeading, Skill = "READING", Difficulty = 3,
+            PromptMd = @"The reading passage has five paragraphs, 1–5.
+Choose the correct heading for each paragraph from the list of headings below.
+
+List of Headings
+i.  How museum purposes have changed over time
+ii.  The economic model of major international exhibitions
+iii.  Digital technology and its effect on visitor experience
+iv.  Disputes over the ownership of cultural artefacts
+v.  Museums as neighbourhood service centres
+vi.  The difference between local visitors and tourists
+vii. Funding challenges for smaller cultural institutions",
+            Options = new List<ExamOption>
+            {
+                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 1, ContentMd = "i. How museum purposes have changed over time" },
+                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 2, ContentMd = "ii. The economic model of major international exhibitions" },
+                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 3, ContentMd = "iii. Digital technology and its effect on visitor experience" },
+                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 4, ContentMd = "iv. Disputes over the ownership of cultural artefacts" },
+                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 5, ContentMd = "v. Museums as neighbourhood service centres" },
+                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 6, ContentMd = "vi. The difference between local visitors and tourists" },
+                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 7, ContentMd = "vii. Funding challenges for smaller cultural institutions" }
+            },
+            // Paragraph 1 → i, Paragraph 2 → ii, Paragraph 3 → iii, Paragraph 4 → iv, Paragraph 5 → v
             MatchPairs = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "C" } },
-                { "1", new[] { "B" } },
-                { "2", new[] { "A" } }
+                { "1", new[] { "i", "How museum purposes have changed over time" } },
+                { "2", new[] { "ii", "The economic model of major international exhibitions" } },
+                { "3", new[] { "iii", "Digital technology and its effect on visitor experience" } },
+                { "4", new[] { "iv", "Disputes over the ownership of cultural artefacts" } },
+                { "5", new[] { "v", "Museums as neighbourhood service centres" } }
             }
         };
 
-        // Q7: Sentence Completion
-        var q7Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 7);
+        // Q7: MatchingInformation — match statements to paragraphs A-E
+        // Passage paragraphs: A=intro/evolution, B=blockbuster, C=technology, D=ethical/repatriation, E=community
+        var q7Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s2q2");
         var q7 = new ExamQuestion
         {
-            Id = q7Id, SectionId = section2Id, Idx = 2,
-            Type = QuestionType.SentenceCompletion, Skill = "READING", Difficulty = 2,
-            PromptMd = "Complete the sentences:\n1. Listening to preferred music significantly reduces __________ levels.\n2. The brain structure that manages emotional responses is called the __________.",
-            BlankAcceptTexts = new Dictionary<string, string[]>
+            Id = q7Id, SectionId = s2Id, Idx = 2,
+            Type = QuestionType.MatchingInformation, Skill = "READING", Difficulty = 3,
+            PromptMd = @"The reading passage has five paragraphs, A–E.
+Which paragraph contains the following information?
+
+Note: Each paragraph letter may be used more than once. Four of the results will be used.",
+            Options = new List<ExamOption>
             {
-                { "1", new[] { "cortisol" } },
-                { "2", new[] { "nucleus accumbens" } }
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 1, ContentMd = "A. Paragraph A" },
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 2, ContentMd = "B. Paragraph B" },
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 3, ContentMd = "C. Paragraph C" },
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 4, ContentMd = "D. Paragraph D" },
+                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 5, ContentMd = "E. Paragraph E" }
+            },
+            // 1→blockbuster commercial model (B), 2→technology digital lending (C), 3→repatriation ethics (D), 4→community outreach (E)
+            MatchPairs = new Dictionary<string, string[]?>
+            {
+                { "1", new[] { "B", "Commercial pressures and blockbuster exhibitions" } },
+                { "2", new[] { "C", "Technology reshaping the museum experience" } },
+                { "3", new[] { "D", "Ethical complexities of colonial-era collections" } },
+                { "4", new[] { "E", "Community outreach and social programmes" } }
             }
         };
 
-        // Q8: Multiple Choice
-        var q8Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 8);
+        // Q8: YesNoNotGiven
+        var q8Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s2q3");
         var q8Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 1, ContentMd = "A. They practice language while reading sheet music", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 2, ContentMd = "B. Musical training strengthens the brain's sound pattern recognition", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 3, ContentMd = "C. Music contains embedded linguistic information", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 4, ContentMd = "D. Musicians have higher overall IQ scores", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 1, ContentMd = "Yes", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 2, ContentMd = "No", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
         };
         var q8 = new ExamQuestion
         {
-            Id = q8Id, SectionId = section2Id, Idx = 3,
-            Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 2,
-            PromptMd = "According to the passage, why might musicians be better at learning languages?",
+            Id = q8Id, SectionId = s2Id, Idx = 3,
+            Type = QuestionType.YesNoNotGiven, Skill = "READING", Difficulty = 2,
+            PromptMd = "All museums are now required to return objects taken during the colonial period.",
             Options = q8Options
         };
 
-        // Q9: Yes/No/Not Given
-        var q9Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 9);
-        var q9Options = new List<ExamOption>
-        {
-            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 1, ContentMd = "A. Yes", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 2, ContentMd = "B. No", IsCorrect = false }
-        };
+        // Q9: MatchingFeatures
+        // Items: 1=blockbuster exhibitions, 2=digital technology, 3=repatriation debates, 4=community programmes
+        // Features A–E: A=generates income, B=raises ethical questions, C=includes non-cultural activities, D=involves international loans, E=uses digital tools
+        var q9Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s2q4");
         var q9 = new ExamQuestion
         {
-            Id = q9Id, SectionId = section2Id, Idx = 4,
-            Type = QuestionType.YesNoNotGiven, Skill = "READING", Difficulty = 2,
-            PromptMd = "Concentration-enhancing playlists typically feature music with moderate complexity.",
-            Options = q9Options
-        };
-
-        // Q10: Flow Chart Completion
-        var q10Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 10);
-        var q10 = new ExamQuestion
-        {
-            Id = q10Id, SectionId = section3Id, Idx = 1,
-            Type = QuestionType.SummaryCompletion, Skill = "READING", Difficulty = 3,
-            PromptMd = "Complete the flow chart:\n1. Plant seeds in __________\n2. Install LED lights to simulate __________\n3. Use __________ to deliver nutrients\n4. Maintain optimal __________ and humidity\n5. Harvest and package for __________",
-            BlankAcceptTexts = new Dictionary<string, string[]>
+            Id = q9Id, SectionId = s2Id, Idx = 4,
+            Type = QuestionType.MatchingFeatures, Skill = "READING", Difficulty = 3,
+            PromptMd = @"Each statement below lists characteristics of a museum initiative.
+Match each initiative (1–4) with the correct feature (A–E).
+Note: Two statements will NOT be matched.",
+            Options = new List<ExamOption>
             {
-                { "1", new[] { "stacked layers", "layers" } },
-                { "2", new[] { "sunlight" } },
-                { "3", new[] { "hydroponic systems", "hydroponics" } },
-                { "4", new[] { "temperature" } },
-                { "5", new[] { "supermarkets", "sale" } }
+                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 1, ContentMd = "A. Generates significant income" },
+                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 2, ContentMd = "B. Raises ethical questions about ownership" },
+                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 3, ContentMd = "C. Includes non-cultural activities such as language classes" },
+                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 4, ContentMd = "D. Involves borrowing objects from other countries" },
+                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 5, ContentMd = "E. Makes use of digital devices and software" }
+            },
+            MatchPairs = new Dictionary<string, string[]?>
+            {
+                { "1", new[] { "A", "Blockbuster exhibitions" } },
+                { "2", new[] { "E", "Digital technology" } },
+                { "3", new[] { "B", "Repatriation debates" } },
+                { "4", new[] { "C", "Community programmes" } }
             }
         };
 
-        // Q11a-c: Short Answer (3 sub-questions split into individual rows)
-        var q11aId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11a");
-        var q11a = new ExamQuestion
+        // Q10: MatchingEndings
+        // Beginnings 1–4 matched to endings A–F
+        var q10Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s2q5");
+        var q10 = new ExamQuestion
         {
-            Id = q11aId, SectionId = section3Id, Idx = 2,
-            Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
-            PromptMd = "What company pioneered vertical farming in Singapore?",
-            ShortAnswerAcceptTexts = new List<string> { "Sky Greens" }
+            Id = q10Id, SectionId = s2Id, Idx = 5,
+            Type = QuestionType.MatchingEndings, Skill = "READING", Difficulty = 3,
+            PromptMd = @"Complete each sentence with the correct ending, A–F.
+Write the correct letter on your answer sheet.",
+            Options = new List<ExamOption>
+            {
+                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 1, ContentMd = "A. …the crowds they draw can overshadow the museum's educational mission" },
+                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 2, ContentMd = "B. …raise questions about what it means to 'possess' a work of art" },
+                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 3, ContentMd = "C. …which can then be used to support the institution's core activities" },
+                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 4, ContentMd = "D. …a responsibility to serve the local community beyond tourism" },
+                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 5, ContentMd = "E. …the digital version has been shared freely with other institutions" },
+                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 6, ContentMd = "F. …which can only be resolved through international agreements" }
+            },
+            MatchPairs = new Dictionary<string, string[]?>
+            {
+                { "1", new[] { "A", "While blockbuster exhibitions attract large numbers of visitors…" } },
+                { "2", new[] { "B", "When a museum shares a high-resolution digital image online…" } },
+                { "3", new[] { "C", "Revenue from commercial activities can be reinvested…" } },
+                { "4", new[] { "D", "Modern museums increasingly see themselves as having…" } }
+            }
         };
-        var q11bId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11b");
-        var q11b = new ExamQuestion
+
+        // ── Section 3: Urban Farming Revolution (existing passage, improved) ─
+        var s3Id = Guid.Parse("11111111-1111-1111-1111-111111111103");
+        var s3Passage = @"Urban Farming Revolution
+
+As global populations continue to urbanize, a quiet revolution is transforming how cities produce food. Vertical farms, once a sci-fi fantasy, are now a commercial reality in metropolitan areas from Singapore to Detroit.
+
+The concept is straightforward: grow crops in stacked layers indoors under controlled conditions. LED lights simulate sunlight, while hydroponic systems deliver nutrients directly to plant roots. Climate control maintains optimal temperature and humidity year-round, eliminating seasonal constraints.
+
+Singapore leads the world in vertical farming adoption. Sky Greens, the country's pioneering company, produces over 500 kilograms of vegetables daily from its 9-metre-tall towers. The facility uses 95 percent less water than traditional farming and operates entirely on renewable energy. Despite higher production costs, vertically farmed vegetables command premium prices in upscale supermarkets.
+
+The technology has spread to unlikely locations. A former textile factory in Detroit now houses Green City Farms, employing 50 workers and producing 200 varieties of leafy greens. The operation runs 24 hours per day across three shifts, maximising use of expensive LED infrastructure.
+
+In Japan, spread of vertical farms accelerated after the 2011 earthquake demonstrated the vulnerability of traditional supply chains. Spread Co., a major Japanese seed company, now operates 18 indoor farms across the country.
+
+Critics point to significant limitations. Vertical farming consumes enormous amounts of electricity, making it carbon-intensive unless powered by renewables. The energy cost can represent up to 50 percent of total production expenses. Additionally, only certain crops are economically viable. Leafy greens, herbs, and some fruits thrive in controlled environments, but staple crops like wheat, rice, and corn remain impractical.";
+
+        var section3 = new ExamSection
         {
-            Id = q11bId, SectionId = section3Id, Idx = 3,
-            Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
-            PromptMd = "How many vertical farms does Spread Co. operate in Japan?",
-            ShortAnswerAcceptTexts = new List<string> { "18", "eighteen" }
+            Id = s3Id,
+            ExamId = examId,
+            Idx = 3,
+            Title = "Section 3: Urban Farming Revolution",
+            InstructionsMd = "Complete the diagram below. Write NO MORE THAN TWO WORDS from the passage for each answer.",
+            PassageMd = s3Passage
         };
-        var q11cId = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", "11c");
-        var q11c = new ExamQuestion
+
+        // Q11: DiagramLabel
+        var q11Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s3q1");
+        var q11 = new ExamQuestion
         {
-            Id = q11cId, SectionId = section3Id, Idx = 4,
+            Id = q11Id, SectionId = s3Id, Idx = 1,
+            Type = QuestionType.DiagramLabel, Skill = "READING", Difficulty = 2,
+            PromptMd = "Label the diagram using words from the passage.\n\n[Diagram: Vertical Farm System — showing stacked growing shelves, LED lights, hydroponic pipes, and a climate control panel]",
+            ImageUrl = "https://placehold.co/600x400/png?text=Vertical+Farm+System",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
+            {
+                { "1", new[] { "LED lights", "LED" } },
+                { "2", new[] { "hydroponic pipes", "hydroponic system", "hydroponics" } },
+                { "3", new[] { "climate control", "climate control panel" } },
+                { "4", new[] { "stacked layers", "stacked growing shelves", "growing shelves" } }
+            }
+        };
+
+        // Q12: SummaryCompletion
+        var q12Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s3q2");
+        var q12 = new ExamQuestion
+        {
+            Id = q12Id, SectionId = s3Id, Idx = 2,
+            Type = QuestionType.SummaryCompletion, Skill = "READING", Difficulty = 2,
+            PromptMd = @"Complete the summary below.
+Write ONE OR TWO WORDS from the passage for each answer.
+
+Vertical farms grow crops in [11] layers indoors under controlled conditions. [12] lights are used to simulate natural sunlight, while [13] systems deliver nutrients directly to plant roots. One company in Singapore called [14] produces over 500 kilograms of vegetables per day. In Japan, the 2011 earthquake encouraged the expansion of indoor farms operated by [15].",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
+            {
+                { "11", new[] { "stacked" } },
+                { "12", new[] { "LED" } },
+                { "13", new[] { "hydroponic" } },
+                { "14", new[] { "Sky Greens" } },
+                { "15", new[] { "Spread Co." } }
+            }
+        };
+
+        // Q13-15: ShortAnswer
+        var q13Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s3q3");
+        var q13 = new ExamQuestion
+        {
+            Id = q13Id, SectionId = s3Id, Idx = 3,
             Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
-            PromptMd = "In which city was a former textile factory converted into a vertical farm?",
+            PromptMd = "What city was home to Green City Farms, a former textile factory converted into a vertical farm?",
             ShortAnswerAcceptTexts = new List<string> { "Detroit" }
         };
 
-        // Q12: Multiple Choice
-        var q12Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 12);
-        var q12Options = new List<ExamOption>
+        var q14Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s3q4");
+        var q14 = new ExamQuestion
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 1, ContentMd = "A. Staple crops like wheat and rice cannot be grown economically", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 2, ContentMd = "B. LED lights are too expensive for commercial use", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 3, ContentMd = "C. Hydroponic systems require constant supervision", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q12Id, Idx = 4, ContentMd = "D. Vertical farms can only produce leafy greens", IsCorrect = false }
-        };
-        var q12 = new ExamQuestion
-        {
-            Id = q12Id, SectionId = section3Id, Idx = 5,
-            Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 3,
-            PromptMd = "What limitation of vertical farming is mentioned in the passage?",
-            Options = q12Options
+            Id = q14Id, SectionId = s3Id, Idx = 4,
+            Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
+            PromptMd = "What proportion of total production expenses can energy costs represent in vertical farming?",
+            ShortAnswerAcceptTexts = new List<string> { "50 percent", "50%", "fifty percent", "half" }
         };
 
-        // Q13: Diagram Label
-        // TODO: replace with real diagram URL — admin can override via Admin UI upload (BlankAcceptsEditor).
-        // Placeholder used so FE can render the diagram card; admin override is the canonical path.
-        var q13Id = SeederHelpers.CreateDeterministicGuid("ielts-reading-practice-1", 13);
-        var q13 = new ExamQuestion
+        var q15Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s3q5");
+        var q15 = new ExamQuestion
         {
-            Id = q13Id, SectionId = section3Id, Idx = 6,
-            Type = QuestionType.DiagramLabel, Skill = "READING", Difficulty = 2,
-            PromptMd = "Label the diagram using no more than three words from the passage.\n[Diagram: LED system, Water system, Climate control, Harvest area]",
-            ImageUrl = "https://placehold.co/600x400?text=Vertical+Farm+Diagram",
-            BlankAcceptTexts = new Dictionary<string, string[]>
+            Id = q15Id, SectionId = s3Id, Idx = 5,
+            Type = QuestionType.ShortAnswer, Skill = "READING", Difficulty = 2,
+            PromptMd = "How many indoor farms does Spread Co. operate in Japan?",
+            ShortAnswerAcceptTexts = new List<string> { "18", "eighteen" }
+        };
+
+        // Q16: MultipleChoiceSingle
+        var q16Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s3q6");
+        var q16Options = new List<ExamOption>
+        {
+            new() { Id = Guid.NewGuid(), QuestionId = q16Id, Idx = 1, ContentMd = "A. Staple crops like wheat and rice cannot be grown economically", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q16Id, Idx = 2, ContentMd = "B. LED lights are too expensive for commercial use", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q16Id, Idx = 3, ContentMd = "C. Hydroponic systems require constant human supervision", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q16Id, Idx = 4, ContentMd = "D. Vertical farms can only produce leafy greens", IsCorrect = false }
+        };
+        var q16 = new ExamQuestion
+        {
+            Id = q16Id, SectionId = s3Id, Idx = 6,
+            Type = QuestionType.MultipleChoiceSingle, Skill = "READING", Difficulty = 3,
+            PromptMd = "According to the passage, which of the following is a stated limitation of vertical farming?",
+            Options = q16Options
+        };
+
+        // ── Section 4: Remote Work Revolution ────────────────────────────────
+        var s4Id = Guid.Parse("11111111-1111-1111-1111-111111111104");
+        var s4Passage = @"Remote Work Revolution
+
+The shift to remote work, accelerated by global pandemic restrictions, has fundamentally altered the relationship between employees and their employers. While proponents praise the flexibility and reduced commuting time, critics point to the blurring of work-life boundaries and the mental health toll of prolonged isolation.
+
+A landmark study conducted across 16 countries found that 74 percent of remote workers reported higher job satisfaction compared to their office-bound counterparts. However, the same study revealed that 58 percent struggled to switch off from work at the end of the day, leading to a phenomenon researchers call ' presenteeism' — being physically present at home but psychologically still at work.
+
+Technology companies have led the way in developing tools to support distributed teams. Virtual whiteboards, cloud-based document collaboration, and AI-powered scheduling assistants have become standard features of the remote work toolkit. Some organisations have introduced 'digital-free' hours, mandating that no meetings or messages be sent during designated periods to protect employee downtime.
+
+Not all sectors have adapted equally. Construction, healthcare, and manufacturing require physical presence, limiting remote work options in these industries. Within knowledge work, significant disparities exist between senior employees who built professional networks before the pandemic and newcomers who lack established relationships for collaboration and mentorship.
+
+The future of remote work may lie in hybrid models that combine the best of both worlds. Companies experimenting with four-day work weeks report productivity gains of up to 40 percent, attributed partly to reduced fatigue and partly to increased autonomy. As organisations continue to refine their approaches, the challenge remains: how to maintain culture, creativity, and connection without requiring daily physical co-location.";
+
+        var section4 = new ExamSection
+        {
+            Id = s4Id,
+            ExamId = examId,
+            Idx = 4,
+            Title = "Section 4: Remote Work Revolution",
+            InstructionsMd = "Choose THREE letters, A–F. Write the correct letters on your answer sheet.",
+            PassageMd = s4Passage
+        };
+
+        // Q17: MultipleChoiceMultiple — choose THREE from A-F
+        var q17Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s4q1");
+        var q17Options = new List<ExamOption>
+        {
+            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 1, ContentMd = "A. Increased job satisfaction", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 2, ContentMd = "B. Reduced commuting time", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 3, ContentMd = "C. Higher salaries", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 4, ContentMd = "D. Improved work-life balance", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 5, ContentMd = "E. Better access to mentorship", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 6, ContentMd = "F. Reduced presenteeism", IsCorrect = false }
+        };
+        var q17 = new ExamQuestion
+        {
+            Id = q17Id, SectionId = s4Id, Idx = 1,
+            Type = QuestionType.MultipleChoiceMultiple, Skill = "READING", Difficulty = 3,
+            PromptMd = "Which THREE of the following benefits of remote work are mentioned in the passage?",
+            Options = q17Options
+        };
+
+        // Q18: NoteCompletion
+        var q18Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s4q2");
+        var q18 = new ExamQuestion
+        {
+            Id = q18Id, SectionId = s4Id, Idx = 2,
+            Type = QuestionType.NoteCompletion, Skill = "READING", Difficulty = 2,
+            PromptMd = @"Complete the notes below.
+Write ONE OR TWO WORDS from the passage for each answer.
+
+Remote Work: Key Findings
+
+• Study covered [18] countries
+• [19] percent of remote workers felt more satisfied with their jobs
+• 58 percent experienced [20] — difficulty disconnecting after work hours
+• Some companies introduced [21]-free hours to protect employee downtime
+• Four-day work weeks can increase productivity by up to [22] percent",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "1", new[] { "LED lights", "LED" } },
-                { "2", new[] { "hydroponic system", "hydroponics" } },
-                { "3", new[] { "climate control" } },
-                { "4", new[] { "harvest", "harvest area" } }
+                { "18", new[] { "16", "sixteen" } },
+                { "19", new[] { "74" } },
+                { "20", new[] { "presenteeism" } },
+                { "21", new[] { "digital" } },
+                { "22", new[] { "40", "forty" } }
             }
         };
 
-        db.ExamQuestions.AddRange(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11a, q11b, q11c, q12, q13);
-        db.ExamSections.AddRange(section1, section2, section3);
+        // Q19: YesNoNotGiven
+        var q19Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s4q3");
+        var q19Options = new List<ExamOption>
+        {
+            new() { Id = Guid.NewGuid(), QuestionId = q19Id, Idx = 1, ContentMd = "Yes", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q19Id, Idx = 2, ContentMd = "No", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q19Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
+        };
+        var q19 = new ExamQuestion
+        {
+            Id = q19Id, SectionId = s4Id, Idx = 3,
+            Type = QuestionType.YesNoNotGiven, Skill = "READING", Difficulty = 2,
+            PromptMd = "All industries have been able to adopt remote work to the same degree.",
+            Options = q19Options
+        };
+
+        // Q20: MatchingFeatures
+        // Items: 1=remote workers, 2=technology companies, 3=hybrid/four-day week advocates
+        // Features A–E: A=developed digital collaboration tools, B=reduced working hours, C=mandated downtime policies, D=reported higher satisfaction, E=struggled with boundaries
+        var q20Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s4q4");
+        var q20 = new ExamQuestion
+        {
+            Id = q20Id, SectionId = s4Id, Idx = 4,
+            Type = QuestionType.MatchingFeatures, Skill = "READING", Difficulty = 3,
+            PromptMd = @"Match each group (1–3) with the correct feature (A–E).
+Note: Two features will NOT be used.",
+            Options = new List<ExamOption>
+            {
+                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 1, ContentMd = "A. Developed digital tools for distributed teams" },
+                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 2, ContentMd = "B. Reported up to 40% productivity gains" },
+                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 3, ContentMd = "C. Mandated no-meeting periods for staff" },
+                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 4, ContentMd = "D. Higher job satisfaction than office workers" },
+                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 5, ContentMd = "E. Struggled to stop working at the end of the day" }
+            },
+            MatchPairs = new Dictionary<string, string[]?>
+            {
+                { "1", new[] { "D", "Remote workers" } },
+                { "2", new[] { "A", "Technology companies" } },
+                { "3", new[] { "B", "Four-day work week companies" } }
+            }
+        };
+
+        // ── Section 5: The Library of Alexandria ─────────────────────────────
+        var s5Id = Guid.Parse("11111111-1111-1111-1111-111111111105");
+        var s5Passage = @"The Library of Alexandria
+
+The Library of Alexandria, founded in the 3rd century BCE in the Egyptian city of Alexandria, was the largest and most significant library of the ancient world. Conceived by Demetrius of Phalerum and patronised by the Ptolemaic dynasty, it aimed to collect all the knowledge of humanity under one roof.
+
+At its peak, the library contained an estimated 400,000 scrolls, including works by Homer, Plato, Aristotle, and thousands of other authors. Scholars from across the Mediterranean basin travelled to Alexandria to study, debate, and copy texts. The library was not merely a repository — it was a living research university, housing laboratories, botanical gardens, and astronomical observatories.
+
+The precise causes of the library's destruction remain one of history's most debated questions. The popular myth that Julius Caesar burned the library during his siege of Alexandria in 48 BCE is now largely dismissed by historians. While Caesar's forces did set fire to ships in the harbour, causing some damage, the library appears to have survived this incident largely intact. The gradual decline over subsequent centuries was more likely caused by funding cuts, political instability, and the gradual loss of scholarly patronage rather than a single catastrophic event.
+
+Modern reconstruction efforts have attracted significant international interest. The Bibliotheca Alexandrina, inaugurated in 2002 near the site of the ancient library, combines traditional architecture with state-of-the-art technology. Its collection of eight million titles makes it one of the largest libraries in the world. The new library serves as both a memorial to the ancient institution and a symbol of Egypt's commitment to scholarship and cultural preservation.";
+
+        var section5 = new ExamSection
+        {
+            Id = s5Id,
+            ExamId = examId,
+            Idx = 5,
+            Title = "Section 5: The Library of Alexandria",
+            InstructionsMd = "Label the map below. Write ONE OR TWO WORDS from the passage for each answer.",
+            PassageMd = s5Passage
+        };
+
+        // Q21: MapLabel
+        var q21Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s5q1");
+        var q21 = new ExamQuestion
+        {
+            Id = q21Id, SectionId = s5Id, Idx = 1,
+            Type = QuestionType.MapLabel, Skill = "READING", Difficulty = 2,
+            PromptMd = "The map below shows the ancient city of Alexandria. Label the locations [21] to [24] using information from the passage.\n\n[Map: Ancient Alexandria — showing coastline, harbour, city centre, and outer districts]",
+            ImageUrl = "https://placehold.co/600x400/png?text=Ancient+Alexandria+Map",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
+            {
+                { "21", new[] { "Library of Alexandria", "the library", "ancient library" } },
+                { "22", new[] { "harbour", "port", " harbour" } },
+                { "23", new[] { "city centre", "centre", "city" } },
+                { "24", new[] { "Museion", "research university", "observatories" } }
+            }
+        };
+
+        // Q22: MatchingEndings
+        // Q22: MatchingEndings
+        var q22Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s5q2");
+        var q22 = new ExamQuestion
+        {
+            Id = q22Id, SectionId = s5Id, Idx = 2,
+            Type = QuestionType.MatchingEndings, Skill = "READING", Difficulty = 3,
+            PromptMd = @"Complete each sentence with the correct ending, A–F.
+Write the correct letter on your answer sheet.",
+            Options = new List<ExamOption>
+            {
+                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 1, ContentMd = "A. …400,000 scrolls containing works by the greatest authors of antiquity" },
+                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 2, ContentMd = "B. …laboratories, botanical gardens and observatories" },
+                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 3, ContentMd = "C. …funding cuts, political instability and loss of patronage" },
+                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 4, ContentMd = "D. …8 million titles, making it one of the world's largest" },
+                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 5, ContentMd = "E. …the Bibliotheca Alexandrina was built nearby" },
+                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 6, ContentMd = "F. …reconstructed using its original architectural plans" }
+            },
+            MatchPairs = new Dictionary<string, string[]?>
+            {
+                { "1", new[] { "A", "The ancient library held…" } },
+                { "2", new[] { "B", "Alongside books, the institution housed…" } },
+                { "3", new[] { "C", "The library's decline was caused by…" } },
+                { "4", new[] { "D", "The modern Bibliotheca Alexandrina now contains…" } }
+            }
+        };
+
+        // Q23: Classification
+        // Categories: A = cause of destruction debate, B = features of the ancient library, C = modern reconstruction, D = scholars' activities
+        // Statements 1–5
+        var q23Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s5q3");
+        var q23 = new ExamQuestion
+        {
+            Id = q23Id, SectionId = s5Id, Idx = 3,
+            Type = QuestionType.Classification, Skill = "READING", Difficulty = 3,
+            PromptMd = @"Classify the following statements as referring to:
+A — the debate over what caused the library's destruction
+B — the features of the ancient library itself
+C — the modern reconstruction efforts
+D — the activities of scholars who worked there
+
+23. Funding cuts and political instability were more likely causes than a single fire.
+24. The new library combines contemporary design with historic symbolism.
+25. Scholars travelled from across the Mediterranean to study and copy texts.",
+            Options = new List<ExamOption>
+            {
+                new() { Id = Guid.NewGuid(), QuestionId = q23Id, Idx = 1, ContentMd = "A. The debate over what caused the library's destruction" },
+                new() { Id = Guid.NewGuid(), QuestionId = q23Id, Idx = 2, ContentMd = "B. The features of the ancient library itself" },
+                new() { Id = Guid.NewGuid(), QuestionId = q23Id, Idx = 3, ContentMd = "C. The modern reconstruction efforts" },
+                new() { Id = Guid.NewGuid(), QuestionId = q23Id, Idx = 4, ContentMd = "D. The activities of scholars who worked there" }
+            },
+            MatchPairs = new Dictionary<string, string[]?>
+            {
+                { "23", new[] { "A" } },
+                { "24", new[] { "C" } },
+                { "25", new[] { "D" } }
+            }
+        };
+
+        // Q24: FormCompletion
+        var q24Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s5q4");
+        var q24 = new ExamQuestion
+        {
+            Id = q24Id, SectionId = s5Id, Idx = 4,
+            Type = QuestionType.FormCompletion, Skill = "READING", Difficulty = 2,
+            PromptMd = @"Complete the form below.
+Write ONE OR TWO WORDS from the passage for each answer.
+
+LIBRARY OF ALEXANDRIA — INFORMATION SHEET
+
+Founded: [26] century BCE
+Location: Alexandria, Egypt
+Supported by: [27] dynasty
+Purpose: Collect all human knowledge in one place
+Peak collection: [28] scrolls
+Modern successor: [29] (opened 2002)
+Modern collection size: [30] titles",
+            BlankAcceptTexts = new Dictionary<string, string[]?>
+            {
+                { "26", new[] { "3rd", "third" } },
+                { "27", new[] { "Ptolemaic" } },
+                { "28", new[] { "400,000" } },
+                { "29", new[] { "Bibliotheca Alexandrina" } },
+                { "30", new[] { "8 million", "eight million" } }
+            }
+        };
+
+        // Q25: MultipleChoiceSingleImage — image-based MCQ about the library reconstruction
+        var q25Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s5q5");
+        var q25Options = new List<ExamOption>
+        {
+            new() { Id = Guid.NewGuid(), QuestionId = q25Id, Idx = 1, ContentMd = "A. It was built using the original ancient architectural plans", ImageUrl = "https://placehold.co/200x150/png?text=A", AltText = "Option A", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q25Id, Idx = 2, ContentMd = "B. It combines modern architecture with references to the ancient library", ImageUrl = "https://placehold.co/200x150/png?text=B", AltText = "Option B", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q25Id, Idx = 3, ContentMd = "C. It is the largest library ever built in human history", ImageUrl = "https://placehold.co/200x150/png?text=C", AltText = "Option C", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q25Id, Idx = 4, ContentMd = "D. It houses the original scrolls recovered from the ancient site", ImageUrl = "https://placehold.co/200x150/png?text=D", AltText = "Option D", IsCorrect = false }
+        };
+        var q25 = new ExamQuestion
+        {
+            Id = q25Id, SectionId = s5Id, Idx = 5,
+            Type = QuestionType.MultipleChoiceSingleImage, Skill = "READING", Difficulty = 2,
+            PromptMd = "Which image correctly describes the modern Bibliotheca Alexandrina?",
+            Options = q25Options
+        };
+// ── Persist ───────────────────────────────────────────────────────────
+        db.Exams.Add(exam);
+        await db.SaveChangesAsync(); // persist exam first so FK constraint is satisfied
+        db.ExamSections.AddRange(section1, section2, section3, section4, section5);
+        db.ExamQuestions.AddRange(
+            // Section 1
+            q1, q2, q3, q4, q5,
+            // Section 2
+            q6, q7, q8, q9, q10,
+            // Section 3
+            q11, q12, q13, q14, q15, q16,
+            // Section 4
+            q17, q18, q19, q20,
+            // Section 5
+            q21, q22, q23, q24, q25
+        );
 
         await db.SaveChangesAsync();
-        Console.WriteLine("Seeded reading exam with 15 questions across 3 sections.");
+        Console.WriteLine("Seeded IELTS Reading Standard Test: 5 sections, 25 questions, 19 types covered.");
     }
 }
