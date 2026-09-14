@@ -730,6 +730,12 @@ Sprint 8 is decomposed into **10 small phases**. Phases 1-4 build the 3 ai-servi
 11. No untracked files left in working tree.
 12. Branch remains `refactor/sync-dotest-admin-renderer`.
 
+13. (Warning fix) Sprint 8 introduces **0 new .NET warnings** in BulkInsert code (verified via §12.2.3 grep).
+14. (Warning fix) Sprint 8 introduces **0 Python warnings** in new ai-service files (verified via §12.2.1 lint script).
+15. (Warning fix) Sprint 8 introduces **0 TypeScript errors** in new FE files (verified via `tsc --noEmit`).
+16. (Warning fix) Sprint 8 introduces **0 `describe.skip` regressions** in Vitest (verified via §12.2.4 grep).
+17. (Warning fix) Sprint 8 introduces **0 pytest warnings** in new ai-service test files + **0 xunit deprecated warnings** in ExamServiceBulkInsertTests (verified via §12.2.5 grep).
+
 ---
 
 ## 9. Effort Estimate
@@ -766,7 +772,170 @@ Sprint 8 is decomposed into **10 small phases**. Phases 1-4 build the 3 ai-servi
 - Chart types beyond bar/line/pie/table.
 - Speaking `CueCard` field on `SpeakingExam` entity (DB migration).
 - SSE streaming preview.
-- Bulk insert rollback UX (Phase 6 ships per-row errors[], not row-level rollback).
+---
+
+## 12. Warning Verification Fixes (In-Scope)
+
+Sprint 8 introduces more new files than Sprint 7. Verification ran `dotnet build` against `attempt-service`, `exam-service`, `writing-service`, `speaking-service`, `Shared.ServiceDefaults`, `Shared.Bootstrap` and surfaced these warning classes:
+
+### 12.1 Baseline warning inventory (2026-09-14)
+
+| Warning ID | Source | File scope | In Sprint 8 scope? |
+|---|---|---|---|
+| `NU1903` Microsoft.AspNetCore.OpenApi CVE | exam-service + Shared.Bootstrap | None — pre-existing | **OUT** |
+| `NU1902` OpenTelemetry CVE | Shared.ServiceDefaults + others | None — pre-existing | **OUT** |
+| `NU1510` Microsoft.Extensions.Diagnostics.HealthChecks pruning | exam-service + writing-service | None | **OUT** |
+| `CS8604` Possible null reference (4 instances) | AttemptService.cs, StudyPlanService.cs, Dto.Internal.cs (NOT touched by Sprint 8) | None | **OUT** |
+| `CS8625` Cannot convert null literal (4 instances) | AttemptService.cs, StudyPlanService.cs, Program.cs (NOT touched by Sprint 8) | None | **OUT** |
+| `CS8629` Nullable value type (1 instance) | BandPredictorService.cs (NOT touched by Sprint 8) | None | **OUT** |
+| `CS8619` Nullability mismatch in seeders (4 instances) | ReadingSeeder.cs, GeneratedReadingSeeder.cs (NOT touched by Sprint 8) | None | **OUT** |
+| (Python) | ai-service files Sprint 8 touches | `prompts/autogen_listening.py`, `prompts/autogen_writing.py`, `prompts/autogen_speaking.py`, `services/matplotlib_chart.py`, 3 routers, 3 schemas | **IN** — must lint clean |
+| (TypeScript) | FE files Sprint 8 touches | `/admin/exams/auto-gen/page.tsx` + 4 sub-tabs + 3 components + `autogenClient.ts` | **IN** — `tsc --noEmit` clean |
+| (BE) | exam-service files Sprint 8 touches | `AdminQuestion_Service.cs` (BulkInsertAsync), `AdminQuestion_Handler.cs` (BulkInsertHandler), `BulkInsertRequest.cs` (new) | **IN** — must follow existing nullable-aware style (e.g. `Results.BadRequest(new ApiResultDto(false, msg, null!))` pattern) |
+
+**Decision**: All CVEs and pre-existing .NET warnings are **out of scope**. Sprint 8's new Python + TypeScript + .NET files must be clean from day 1.
+
+### 12.2 In-scope warning prevention (concrete tasks)
+
+#### 12.2.1 Python: extend §12.2.1 from Sprint 7
+
+Same lint script as Sprint 7 §12.2.1, extended file list:
+
+```python
+files = [
+    'app/prompts/autogen_listening.py',
+    'app/prompts/autogen_writing.py',
+    'app/prompts/autogen_speaking.py',
+    'app/services/matplotlib_chart.py',
+    'app/routers/autogen_listening.py',
+    'app/routers/autogen_writing.py',
+    'app/routers/autogen_speaking.py',
+    'app/schemas/autogen_listening.py',
+    'app/schemas/autogen_writing.py',
+    'app/schemas/autogen_speaking.py',
+]
+```
+
+**Additional rule for `matplotlib_chart.py`** (Phase 3): this file does rendering + file I/O. It MUST:
+
++ Use `Agg` backend (`matplotlib.use("Agg")`) — verified by existing pattern in `services/ai-service/app/services/ingestion_service.py` if applicable.
++ Wrap `plt.savefig` in `try/except OSError` to surface matplotlib errors as 502 to FE.
++ No bare `import matplotlib.pyplot as plt` at module level — defer to inside function (matplotlib backend setup is per-process).
+
+**Acceptance**: Zero `WARNING:` lines from Sprint 7 §12.2.1 script.
+
+#### 12.2.2 TypeScript: extend §12.2.2 from Sprint 7
+
+Sprint 8 FE files (all NEW):
+
+```ts
+langfens-fe-app/src/app/admin/exams/auto-gen/
+├── page.tsx
+├── _lib/autogenClient.ts
+└── _components/
+    ├── SkillPicker.tsx
+    ├── TopicForm.tsx
+    ├── NavButtons.tsx
+    ├── StepIndicator.tsx
+    ├── ReadingSubTab.tsx
+    ├── ListeningSubTab.tsx
+    ├── WritingSubTab.tsx
+    ├── SpeakingSubTab.tsx
+    ├── QuestionListEditor.tsx
+    ├── ChartPreview.tsx
+    └── ScenarioJsonEditor.tsx
+```
+
+**Verification command** (added to Phase 10 closure):
+```bash
+cd /home/khoa/Projects/langfens/langfens-fe-app
+npx tsc --noEmit
+```
+
+**Acceptance**: exit code 0, zero TS errors.
+
+#### 12.2.3 .NET: nullable-aware style for new BulkInsert code
+
+Phase 6 adds `BulkInsertAsync` to `AdminQuestion_Service.cs` and `BulkInsertRequest.cs`. Must follow existing pattern:
+
++ Return `Results.BadRequest(new ApiResultDto(false, msg, null!))` — uses `null!` suppression matching `AdminQuestion_Service.cs:120,167,172`.
++ Use `await using var transaction = ...` (verified at line 121).
++ Cast nullable dict: `(IEnumerable<string?>? seq)` for blank texts — matches existing signature pattern.
+
+**Verification command** (added to Phase 10 closure):
+```bash
+cd /home/khoa/Projects/langfens/Project_Langfens_Microservice
+dotnet build services/exam-service/exam-service.csproj 2>&1 | grep -E "warning CS" | grep -i "AdminQuestion\|BulkInsert" | head -10
+```
+
+**Acceptance**: Zero CS warnings referencing Sprint 8-edited files.
+
+#### 12.2.4 Vitest: avoid `describe.skip` regression
+
+Sprint 7 baseline: 44+ tests, 0 skipped suites. Sprint 8 may add 4-5 wizard component tests. Must maintain "0 skipped" baseline.
+
+**Verification command** (added to Phase 10):
+```bash
+cd /home/khoa/Projects/langfens/langfens-fe-app
+npm run test 2>&1 | grep -E "skipped|Skipped" | head -5
+```
+
+**Acceptance**: Zero "skipped" entries.
+
+#### 12.2.5 pytest: zero warnings on new test files
+
+Sprint 8 adds 4 new test files in `services/ai-service/tests/`:
+
++ `test_autogen_listening_router.py`
++ `test_autogen_writing_router.py`
++ `test_autogen_speaking_router.py`
++ `test_matplotlib_chart.py`
+
+Plus 1 test file in `services/attempt-service.Tests/`:
+
++ `ExamServiceBulkInsertTests.cs`
+
+**Verification command** (added to Phase 10):
+```bash
+cd /home/khoa/Projects/langfens/Project_Langfens_Microservice/services/ai-service
+PYTHONPATH=. pytest tests/test_autogen_listening_router.py tests/test_autogen_writing_router.py tests/test_autogen_speaking_router.py tests/test_matplotlib_chart.py -v --tb=short 2>&1 | grep -iE "warning|deprecat" | head -10
+```
+
+**Acceptance**: Zero "DeprecationWarning" or "PendingDeprecationWarning" entries.
+
+```bash
+cd /home/khoa/Projects/langfens/Project_Langfens_Microservice
+dotnet test services/attempt-service.Tests/attempt-service.Tests.csproj --no-build 2>&1 | grep -iE "warning|deprecat" | head -10
+```
+
+**Acceptance**: Zero "warning" or "deprecated" entries from xunit.
+
+### 12.3 Warning delta tracking
+
+**Baseline (after Sprint 7, before Sprint 8)**:
+
++ `dotnet build` warnings: 16 + 12 (exam-service) + others = 30+ (all CVE + pre-existing nullable, OUT of scope)
++ `npm run test` skipped suites: 0
++ Python warnings: 0 (Sprint 7 fixup)
+
+**Target (after Sprint 8)**:
+
++ `dotnet build` warnings: 30+ (unchanged — pre-existing, OUT of scope)
++ `npm run test` skipped suites: 0 (unchanged)
++ Python warnings: 0 (extended Sprint 8 files lint clean)
++ Sprint 8 BE additions: 0 new CS warnings
+
+### 12.4 Why this section exists (carried from Sprint 7)
+
+The cumulative drift risk across Sprints 7+8: 19 net-new files (10 Python, 9 TypeScript, 3 .NET). Without explicit verification commands at each phase, the codebase accumulates style drift:
+
++ Python files could diverge from `groq_service.py` type-hint discipline.
++ TS files could ship with `any` leaks.
++ BE bulk endpoint could introduce nullable patterns inconsistent with `AdminQuestion_Service.cs`.
++ pytest files could ship with deprecated fixtures.
++ Vitest could regress `describe.skip` baseline.
+
+The §12.2.1-§12.2.5 verification commands + §12.3 baseline/target tracking prevent this drift accumulating over multiple sprints.
 
 ---
 

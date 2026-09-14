@@ -494,6 +494,12 @@ Each phase is small enough to land as 1 PR. Each phase ends with a green test su
 9. 6th request within 60s from same IP → 429 (rate limit enforced).
 10. `grep -rn "NEXT_PUBLIC_AI_API_KEY" services/ langfens-fe-app/src/` shows no NEW references (existing kept for backward compat in Anthropic/OpenAI paths).
 11. Branch remains `refactor/sync-dotest-admin-renderer`.
+12. (Warning fix) Sprint 7 introduces **0 new .NET warnings** beyond the 16 baseline CVE + nullable (verified via `dotnet build` warning count delta).
+13. (Warning fix) Sprint 7 introduces **0 Python warnings** in new ai-service files (verified via §12.2.1 lint script).
+14. (Warning fix) Sprint 7 introduces **0 TypeScript errors** in new FE files (verified via `tsc --noEmit`).
+15. (Warning fix) Sprint 7 introduces **0 `describe.skip` regressions** in Vitest (verified via §12.2.3 grep).
+16. (Warning fix) Sprint 7 introduces **0 pytest warnings** in new ai-service test files (verified via §12.2.4 grep).
+
 
 ---
 
@@ -529,6 +535,164 @@ Each phase is small enough to land as 1 PR. Each phase ends with a green test su
 - Admin wizard `/admin/exams/auto-gen` (Sprint 8).
 - SSE streaming preview (Sprint 8 optional).
 - Chart image generation for Writing Task 1 (Sprint 9+).
+---
+
+## 12. Warning Verification Fixes (In-Scope)
+
+This sprint introduces **6 net-new files** (4 Python, 2 TypeScript) and edits **5 existing files**. Verification ran `dotnet build services/attempt-service.Tests/attempt-service.Tests.csproj` and surfaced these warning classes (categorized by scope):
+
+### 12.1 Baseline warning inventory (2026-09-14)
+
+| Warning ID | Source | File scope | In Sprint 7 scope? |
+|---|---|---|---|
+| `NU1903` Microsoft.AspNetCore.OpenApi 8.0.22 has high CVE | Shared.Bootstrap / attempt-service / email-service / exam-service | None — no Sprint 7 .NET files | **OUT** (security backlog) |
+| `NU1902` OpenTelemetry.Api 1.13.1 + OpenTelemetry.Exporter.OpenTelemetryProtocol 1.13.0 have moderate CVE | Shared.ServiceDefaults | None | **OUT** |
+| `NU1603` xunit.runner.visualstudio 3.0.0 vs pinned 2.9.3 | attempt-service.Tests.csproj | None — Sprint 7 uses Vitest + pytest | **OUT** |
+| `NU1510` Microsoft.Extensions.Diagnostics.HealthChecks pruning | writing-service.csproj | None | **OUT** |
+| `CS8604` Possible null reference argument (4 instances in AttemptService.cs, StudyPlanService.cs, Dto.Internal.cs, exam-service) | .NET features we don't touch | None | **OUT** |
+| `CS8625` Cannot convert null literal to non-nullable (4 instances) | .NET features we don't touch | None | **OUT** |
+| `CS8629` Nullable value type may be null (1 instance) | .NET feature we don't touch | None | **OUT** |
+| `CS8619` Nullability mismatch in seeders (4 instances) | ReadingSeeder.cs, GeneratedReadingSeeder.cs | None — Sprint 7 doesn't edit seeders | **OUT** |
+| `CS8981` Lowercase class name | Migration files | None | **OUT** |
+| (none — Python warnings) | ai-service files we touch | `prompts/autogen.py`, `prompts/autogen_templates.py`, `schemas/autogen.py`, `routers/autogen.py` | **IN** — new files must lint clean |
+| (none — TypeScript warnings) | FE files we touch | `llmPrompts.ts`, `aiConfig.ts`, `AiAuthorModal.tsx`, `jsonShape.ts`, `llmPromptBuilder.ts` | **IN** — `tsc --noEmit` must remain 0 errors |
+
+**Decision**: All CVEs and pre-existing .NET warnings are **out of scope** for Sprint 7. The new Python and TypeScript files we create must be clean from day 1.
+
+### 12.2 In-scope warning prevention (concrete tasks)
+
+#### 12.2.1 Python: `py_compile` + manual type-hint lint on new ai-service files
+
+For each new file in Phase 4 + Phase 5:
+
++ `services/ai-service/app/prompts/autogen.py`
++ `services/ai-service/app/prompts/autogen_templates.py`
++ `services/ai-service/app/schemas/autogen.py`
++ `services/ai-service/app/routers/autogen.py`
+
+**Required patterns** (verified existing convention at `groq_service.py:178-187`):
+
++ All public functions have type hints on parameters and return.
++ `from __future__ import annotations` at top of file (allows forward references, matches existing pattern).
++ `Optional[T]` for nullable params (not `T | None`) — matches Python 3.10 compat target.
++ No `# noqa` without justification comment.
++ No unused imports.
+
+**Verification command** (added to Phase 9 closure):
+```bash
+cd /home/khoa/Projects/langfens/Project_Langfens_Microservice/services/ai-service
+python3 -c "
+import ast
+files = [
+    'app/prompts/autogen.py',
+    'app/prompts/autogen_templates.py',
+    'app/schemas/autogen.py',
+    'app/routers/autogen.py',
+]
+for f in files:
+    with open(f) as fp:
+        tree = ast.parse(fp.read())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            if node.name.startswith('_'):  # private — skip
+                continue
+            if not node.returns:
+                print(f'WARNING: {f}:{node.lineno} {node.name}() missing return annotation')
+            for arg in node.args.args:
+                if arg.arg == 'self':
+                    continue
+                if not arg.annotation:
+                    print(f'WARNING: {f}:{node.lineno} {node.name}({arg.arg}) missing arg annotation')
+"
+```
+
+**Acceptance**: Zero `WARNING:` lines printed.
+
+#### 12.2.2 TypeScript: `tsc --noEmit` clean on touched FE files
+
+For each FE file touched (Phases 1, 2, 3, 6):
+
++ `langfens-fe-app/src/app/admin/_lib/llmPrompts.ts`
++ `langfens-fe-app/src/app/admin/_lib/jsonShape.ts` (new)
++ `langfens-fe-app/src/app/admin/_lib/llmPromptBuilder.ts` (new)
++ `langfens-fe-app/src/app/admin/_lib/aiConfig.ts`
++ `langfens-fe-app/src/app/admin/exams/[id]/_components/AiAuthorModal.tsx`
+
+**Required patterns** (matches existing convention):
+
++ All exported functions have explicit parameter types and return types.
++ No `any` in public function signatures — use `unknown` if type is genuinely unknown.
++ No `@ts-ignore` without justification.
++ All optional fields use `?:` modifier (e.g. `imageUrl?: string | null`), not `| undefined`.
+
+**Verification command** (added to every phase's local CI):
+```bash
+cd /home/khoa/Projects/langfens/langfens-fe-app
+npx tsc --noEmit
+```
+
+**Acceptance**: exit code 0, zero TS errors.
+
+#### 12.2.3 Vitest: avoid `describe.skip` regression
+
+Sprint 3 un-skipped 2 test files (`ResultV3Review.parseUserAnswer.test.ts`, `CompletionCard.sort.test.tsx`). Sprint 7 adds 1 new test file (`llmPrompts.test.ts`). Sprint 7 must NOT regress the "0 skipped suites" baseline.
+
+**Verification command** (added to Phase 7):
+```bash
+cd /home/khoa/Projects/langfens/langfens-fe-app
+npm run test 2>&1 | grep -E "skipped|Skipped" | head -5
+```
+
+**Acceptance**: Zero "skipped" entries in output. If any `describe.skip` appears, the test must be either completed (preferred) or removed with justification comment in commit message.
+
+#### 12.2.4 pytest: zero warnings on new test files
+
+For each new test file in Phase 4 + Phase 7:
+
++ `services/ai-service/tests/test_autogen_prompts.py`
++ `services/ai-service/tests/test_autogen_router.py`
+
+**Required patterns** (matches existing convention):
+
++ Use `pytest` fixtures, not unittest-style `setUp`/`tearDown`.
++ All async tests use `@pytest.mark.asyncio` (asyncio_mode=auto is set in `pytest.ini`).
++ Mock at the import boundary: `monkeypatch.setattr(...)` or `patch("module.function", ...)`.
++ No `print()` in tests — use `pytest -s` only when debugging.
+
+**Verification command** (added to Phase 9 closure):
+```bash
+cd /home/khoa/Projects/langfens/Project_Langfens_Microservice/services/ai-service
+PYTHONPATH=. pytest tests/test_autogen_prompts.py tests/test_autogen_router.py -v --tb=short 2>&1 | grep -iE "warning|deprecat" | head -10
+```
+
+**Acceptance**: Zero "DeprecationWarning" or "PendingDeprecationWarning" entries.
+
+### 12.3 Warning delta tracking
+
+**Baseline (before Sprint 7)**:
+
++ `dotnet build` warnings: 16 (all CVE + nullable, OUT of scope)
++ `npm run test` skipped suites: 0
++ Python warnings: unknown (no pytest installed in PATH)
+
+**Target (after Sprint 7)**:
+
++ `dotnet build` warnings: 16 (unchanged — all pre-existing, OUT of scope)
++ `npm run test` skipped suites: 0 (unchanged)
++ Python warnings: 0 (newly created files lint clean)
+
+If any Sprint 7 phase introduces a NEW warning (e.g. a Python `import not used`), the phase's commit message must include a "fixup" line referencing the warning ID. The closing phase (Phase 9) verifies the delta is exactly 0.
+
+### 12.4 Why this section exists
+
+The verification pass before Sprint 7 design surfaced 16 .NET warnings (none in scope). Sprint 7 introduces new files in ai-service (Python) + FE (TypeScript) + tests (pytest + Vitest). Without an explicit "warning-free from day 1" gate:
+
++ New Python files could ship with type-hint gaps that `groq_service.py` doesn't have.
++ New TS files could introduce `any` leaks that `deriveUiKind.ts` doesn't have.
++ New pytest tests could ship with `DeprecationWarning` patterns.
++ New Vitest tests could regress `describe.skip` baseline.
+
+The §12.2.1-§12.2.4 verification commands + §12.3 baseline/target tracking prevent this drift.
 
 ---
 
