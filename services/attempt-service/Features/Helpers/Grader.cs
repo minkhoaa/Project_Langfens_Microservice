@@ -347,27 +347,62 @@ public sealed class FlowChartGrader : IQuestionGrader
             .ToList();
         if (correct.Count == 0)
             return new GradeResult(0m, null, true, "No answer key");
-        var userRawList = ParseUserSequence(answer.TextAnswer);
-        if (userRawList.Count == 0)
+
+        // Sprint 7 Phase 10: FE sends {steps: [...], labels: {"1": "soak", "2": "dry", ...}}
+        // when BlankAcceptTexts is present (reorder + label).
+        var payload = ParseUserPayload(answer.TextAnswer);
+        List<string> userSteps;
+        Dictionary<string, string> userLabels;
+        if (payload.Steps != null && payload.Steps.Count > 0)
+        {
+            userSteps = payload.Steps;
+            userLabels = payload.Labels ?? new Dictionary<string, string>();
+        }
+        else
+        {
+            // Legacy fallback: plain array of step keys.
+            userSteps = ParseUserSequence(answer.TextAnswer);
+            userLabels = new Dictionary<string, string>();
+        }
+
+        if (userSteps.Count == 0)
             return new GradeResult(0m, false, false, "Malformed or empty sequence payload");
 
-        var user = userRawList
+        var user = userSteps
             .Where(k => !string.IsNullOrEmpty(k))
             .Select(NormNode)
             .ToList();
         if (user.Count == 0)
             return new GradeResult(0m, false, false, "Malformed or empty sequence payload");
-        // Spec §11.11: FlowChart grading is exact-match (sequence-equal) — no
-        // partial credit. Both `user` and `correct` are already lowercased +
-        // punctuation-stripped by NormNode, so ordinal comparison is correct.
-        var isAllMatched = user.Count == correct.Count
-                           && user.SequenceEqual(correct, StringComparer.Ordinal);
+
+        var isOrderMatched = user.Count == correct.Count
+                             && user.SequenceEqual(correct, StringComparer.Ordinal);
+
+        // Grade labels against BlankAcceptTexts (case-insensitive trim compare).
+        var isLabelsMatched = true;
+        if (key.BlankAcceptTexts is { Count: > 0 })
+        {
+            foreach (var kv in key.BlankAcceptTexts)
+            {
+                var stepKey = kv.Key; // "1", "2", ...
+                var acceptTexts = kv.Value ?? Array.Empty<string>();
+                var userLabel = (userLabels.TryGetValue(stepKey, out var v) ? v : "").Trim();
+                if (string.IsNullOrEmpty(userLabel) ||
+                    !acceptTexts.Any(a => string.Equals(a?.Trim(), userLabel, StringComparison.OrdinalIgnoreCase)))
+                {
+                    isLabelsMatched = false;
+                    break;
+                }
+            }
+        }
+
+        var isAllMatched = isOrderMatched && isLabelsMatched;
         return new GradeResult(
             GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints),
             isAllMatched,
-            Feedback: isAllMatched ? null : "Sequence order does not match answer key");
-
+            Feedback: isAllMatched ? null : "Sequence order or labels do not match answer key");
     }
+
     private static string NormNode(string? s)
     {
         if (string.IsNullOrWhiteSpace(s)) return string.Empty;
@@ -377,10 +412,29 @@ public sealed class FlowChartGrader : IQuestionGrader
         s = Regex.Replace(s, @"\s+", " ").Trim();
         return s;
     }
+
+    private sealed class FlowChartPayload
+    {
+        public List<string>? Steps { get; set; }
+        public Dictionary<string, string>? Labels { get; set; }
+    }
+
+    private static FlowChartPayload ParseUserPayload(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return new FlowChartPayload();
+        try
+        {
+            return JsonSerializer.Deserialize<FlowChartPayload>(raw) ?? new FlowChartPayload();
+        }
+        catch
+        {
+            return new FlowChartPayload();
+        }
+    }
+
     private static List<string> ParseUserSequence(string? raw)
     {
-        if (string.IsNullOrWhiteSpace(raw))
-            return new List<string>();
+        if (string.IsNullOrWhiteSpace(raw)) return new List<string>();
         try
         {
             return JsonSerializer.Deserialize<List<string>>(raw) ?? new List<string>();

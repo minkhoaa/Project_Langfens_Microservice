@@ -158,7 +158,7 @@ public class GraderCleanupTests
 
         Assert.Equal(0m, result.AwardedPoints);
         Assert.False(result.IsCorrect);
-        Assert.Equal("Sequence order does not match answer key", result.Feedback);
+        Assert.Equal("Sequence order or labels do not match answer key", result.Feedback);
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public class GraderCleanupTests
 
         Assert.Equal(0m, result.AwardedPoints);
         Assert.False(result.IsCorrect);
-        Assert.Equal("Sequence order does not match answer key", result.Feedback);
+        Assert.Equal("Sequence order or labels do not match answer key", result.Feedback);
     }
 
     [Fact]
@@ -185,6 +185,6 @@ public class GraderCleanupTests
 
         Assert.Equal(0m, result.AwardedPoints);
         Assert.False(result.IsCorrect);
-        Assert.Equal("Sequence order does not match answer key", result.Feedback);
+        Assert.Equal("Sequence order or labels do not match answer key", result.Feedback);
     }
 }
