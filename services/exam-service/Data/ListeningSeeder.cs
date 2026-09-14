@@ -98,7 +98,7 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
         {
             Id = q1Id, SectionId = section1Id, Idx = 1,
             Type = QuestionType.FormCompletion, Skill = QuestionSkill.Listening, Difficulty = 1,
-            PromptMd = "Complete the hotel registration form below. Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.\n\n**Hotel Registration Form**\n\n1. Guest name: __________\n2. Arrival date: __________\n3. Room type: __________\n4. Room view: __________\n5. Number of nights: __________",
+            PromptMd = "Complete the hotel registration form below. Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.\n\n**Hotel Registration Form**\n\n1. Guest name: [1]\n2. Arrival date: [2]\n3. Room type: [3]\n4. Room view: [4]\n5. Number of nights: [5]",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
                 { "1", new[] { "Rachel Torres", "Torres" } },
@@ -113,7 +113,7 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
         {
             Id = q2Id, SectionId = section1Id, Idx = 2,
             Type = QuestionType.FormCompletion, Skill = QuestionSkill.Listening, Difficulty = 1,
-            PromptMd = "6. Rate per night (including breakfast): $__________\n7. Bathroom type: __________\n8. Check-in time: from __________\n9. Parking: underground car park / __________ (public)\n10. Airport shuttle price: $__________ each way",
+            PromptMd = "6. Rate per night (including breakfast): $[1]\n7. Bathroom type: [2]\n8. Check-in time: from [3]\n9. Parking: underground car park / [4] (public)\n10. Airport shuttle price: $[5] each way",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
                 { "1", new[] { "180", "one hundred and eighty" } },
@@ -223,8 +223,7 @@ That's a quick overview of what we offer. Does anyone have any questions?"
         var q7 = new ExamQuestion
         {
             Id = q7Id, SectionId = section2Id, Idx = 4,
-            Type = QuestionType.NoteCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "Complete the notes below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.\n\n**Opening Hours**\n\nMonday – Saturday: 8:00 AM – __________\nSunday: 10:00 AM – __________\nClosed: __________\n\n**Borrowing Policy**\n\nMaximum items per member: __________\nLoan period: __________ weeks\nRenewals allowed: __________\n\n**Facilities**\n\nComputer workstations: __________ floor\nStudy rooms: __________ people maximum\n\n**Fees**\n\nInter-library loan: $__________ per request\nDelivery time: __________ – 7 working days",
+            PromptMd = "Complete the notes below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.\n\n**Opening Hours**\n\nMonday – Saturday: 8:00 AM – [1]\nSunday: 10:00 AM – [2]\nClosed: [3]\n\n**Borrowing Policy**\n\nMaximum items per member: [4]\nLoan period: [5] weeks\nRenewals allowed: [6]\n\n**Facilities**\n\nComputer workstations: [7] floor\nStudy rooms: [8] people maximum\n\n**Fees**\n\nInter-library loan: $[9] per request\nDelivery time: [10] – 7 working days",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
                 { "1", new[] { "9 PM", "9pm", "21:00", "9:00 PM", "21:00" } },
@@ -352,7 +351,7 @@ James: Will do. Thank you, Dr. Chen."
         {
             Id = q12Id, SectionId = section3Id, Idx = 5,
             Type = QuestionType.SentenceCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "Complete the sentences below. Write NO MORE THAN THREE WORDS for each answer.\n\n32. James plans to study Singapore in the __________ of his dissertation.\n33. Singapore's approach to reducing car dependency is described as __________.\n34. James's first draft should be submitted by the end of week __________.\n35. James must send his progress report to Dr. Chen by the __________ of the current month.",
+            PromptMd = "Complete the sentences below. Write NO MORE THAN THREE WORDS for each answer.\n\n32. James plans to study Singapore in the [1] of his dissertation.\n33. Singapore's approach to reducing car dependency is described as [2].\n34. James's first draft should be submitted by the end of week [3].\n35. James must send his progress report to Dr. Chen by the [4] of the current month.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
                 { "1", new[] { "first half", "first section", "first part" } },
@@ -456,10 +455,10 @@ In conclusion, while the challenges are significant, the scientific consensus is
         {
             Id = q17aId, SectionId = section4Id, Idx = 5,
             Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "The Paris Agreement, signed in _______, committed 196 countries to limiting warming.",
+            PromptMd = "The Paris Agreement, signed in [4], committed 196 countries to limiting warming.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "blank-q4", new[] { "2015" } }
+                { "4", new[] { "2015" } }
             }
         };
         var q17bId = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", "17b");
@@ -467,10 +466,10 @@ In conclusion, while the challenges are significant, the scientific consensus is
         {
             Id = q17bId, SectionId = section4Id, Idx = 6,
             Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "The Paris Agreement, signed in 2015, committed 196 countries to limiting warming to _______ above pre-industrial levels.",
+            PromptMd = "The Paris Agreement, signed in 2015, committed 196 countries to limiting warming to [5] above pre-industrial levels.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "blank-q5", new[] { "1.5 degrees", "1.5 degrees Celsius", "1.5 degrees celsius", "1.5°C", "one point five degrees" } }
+                { "5", new[] { "1.5 degrees", "1.5 degrees Celsius", "1.5 degrees celsius", "1.5°C", "one point five degrees" } }
             }
         };
         var q17cId = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", "17c");
@@ -478,10 +477,10 @@ In conclusion, while the challenges are significant, the scientific consensus is
         {
             Id = q17cId, SectionId = section4Id, Idx = 7,
             Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "Solar panel costs have fallen by _______ since 2010.",
+            PromptMd = "Solar panel costs have fallen by [6] since 2010.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "blank-q6", new[] { "89%", "89 percent", "eighty nine percent" } }
+                { "6", new[] { "89%", "89 percent", "eighty nine percent" } }
             }
         };
 

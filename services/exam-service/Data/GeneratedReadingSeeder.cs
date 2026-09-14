@@ -248,10 +248,10 @@ public static class GeneratedReadingSeeder
             Type = QuestionType.SummaryCompletion, Skill = "READING", Difficulty = 2,
             PromptMd =
                 "Complete the summary using words from the passage. Write NO MORE THAN TWO WORDS for each answer.\n\n" +
-                "Until the mid-twentieth century, the deep ocean was believed to be largely __________ (0). " +
+                "Until the mid-twentieth century, the deep ocean was believed to be largely [1] (0). " +
                 "The first photographs taken below one thousand metres revealed that the water was full of " +
-                "__________ (1). Researchers now suggest that between 80 and 90 per cent of organisms living " +
-                "below __________ (2) metres can produce light.",
+                "[2] (1). Researchers now suggest that between 80 and 90 per cent of organisms living " +
+                "below [3] (2) metres can produce light.",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
                 { "1", new[] { "dark", "featureless" } },
@@ -355,8 +355,8 @@ public static class GeneratedReadingSeeder
             Type = QuestionType.SentenceCompletion, Skill = "READING", Difficulty = 2,
             PromptMd =
                 "Complete the sentences. Write NO MORE THAN THREE WORDS for each answer.\n\n" +
-                "1. The luciferase test is sensitive enough to detect a few hundred __________ (0) in a single drop.\n" +
-                "2. In medical research, tumour cells in mice can be tagged with a luciferase gene so that the tumour itself __________ (1) up.",
+                "1. The luciferase test is sensitive enough to detect a few hundred [1] in a single drop.\n" +
+                "2. In medical research, tumour cells in mice can be tagged with a luciferase gene so that the tumour itself [2] up.",
             BlankAcceptTexts = new Dictionary<string, string[]>
             {
                 { "1", new[] { "bacterial cells", "bacteria", "cells" } },
