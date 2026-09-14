@@ -193,5 +193,4 @@ models/**/*.pth
 models/**/*.ckpt
 models/**/*.bin
 
-# Session exports
-omp-session-*.html
+

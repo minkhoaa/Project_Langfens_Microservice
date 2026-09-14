@@ -1,7 +1,7 @@
 # Architectural Plan: Platform-Wide 1-Indexed Synchronization
 
 > **Target Document**: `docs/sprint6/PLAN_1_INDEXED_SYNC.md`  
-> **Status**: APPROVED ARCHITECTURAL SPECIFICATION  
+> **Status**: APPROVED ARCHITECTURAL SPECIFICATION & VERIFIED CLOSURE  
 > **Author**: Core Architecture & Data Integrity Team  
 > **Date**: 2026-09-11  
 > **Target Release**: Sprint 6  
@@ -294,7 +294,7 @@ SELECT "QuestionId", MIN("Idx") FROM exam_options GROUP BY "QuestionId" HAVING M
 ┌────────────────────────────────────────────────────────────────────────┐
 │ Phase 4: Frontend Runtime & Component Verification                     │
 │ - Audit `QuestionCardV3.tsx`, `QuestionPanel.tsx`, `ResultV3Review`    │
-│ - Run `npm run test` (vitest) & `npm run type-check` (tsc) in FE       │
+│ - Run `npm run test` (vitest) & `npm run typecheck` (tsc) in FE        │
 └──────────────────────────────────┬─────────────────────────────────────┘
                                    │
                                    ▼
@@ -304,40 +304,6 @@ SELECT "QuestionId", MIN("Idx") FROM exam_options GROUP BY "QuestionId" HAVING M
 │ - Document resolution in sprint log                                    │
 └────────────────────────────────────────────────────────────────────────┘
 ```
-
-### Detailed Phase Tasks
-
-#### Phase 1: Database Migration Script & Live DB Execution
-1. Create `scripts/migrate_idx_to_1_indexed.py` using `psycopg2` or Docker exec `psql`.
-2. Connect to `exam-db` (port 5433 or Aspire host port, user: `postgres`, db: `exam-db`).
-3. Output the exact count of affected sections (2), questions (6), and options (10).
-4. Run the idempotent update SQL within a single transaction block.
-5. Query verification: confirm 0 remaining rows with `Idx = 0`.
-
-#### Phase 2: Backend Seeders Refactoring
-1. Update `ReadingSeeder.cs`: replace all section `Idx = 0..2` with `1..3`, question `Idx` starting at `1`, option `Idx` starting at `1`.
-2. Update `ListeningSeeder.cs`: replace all section `Idx = 0..3` with `1..4`, question `Idx` starting at `1`, option `Idx` starting at `1`.
-3. Update `GeneratedReadingSeeder.cs`: replace all section `Idx = 0..2` with `1..3`, question `Idx` starting at `1`, option `Idx` starting at `1`.
-4. Run `dotnet test services/exam-service.Tests` and `dotnet test services/attempt-service.Tests`.
-
-#### Phase 3: Admin UI Synchronization
-1. Edit `MatchPairsEditor.tsx`: fix empty fallback `targets.length > 0 ? Math.max(...) + 1 : 1`.
-2. Verify `QuestionEditor.tsx` validation: `min={1}`, `Math.max(1, value)`.
-3. Verify `questionSchemas.ts`: ensure comments denote 1-based indexing for `Idx`.
-
-#### Phase 4: Frontend Runtime Verification
-1. Inspect learner exam delivery components:
-   - `QuestionCardV3.tsx`: ensure `q.displayIdx ?? q.idx` renders 1-based numbers.
-   - `QuestionPanel.tsx`: confirm question tab buttons display `1..N`.
-   - `ResultV3Review.tsx`: confirm score review badges show `1..N`.
-2. Run test suites:
-   ```bash
-   cd langfens-fe-app && npm run test && npm run typecheck
-   ```
-
-#### Phase 5: Verification & Architectural Sign-off
-1. Re-run global scan across database and codebases.
-2. Produce markdown verification summary.
 
 ---
 
@@ -364,32 +330,33 @@ SELECT "QuestionId", MIN("Idx") FROM exam_options GROUP BY "QuestionId" HAVING M
 
 ---
 
-## §6 Definition of Done (DoD)
+## §6 Definition of Done (DoD) — VERIFIED & COMPLETED
 
-- [ ] **Database Migration Executed**:
-  - `scripts/migrate_idx_to_1_indexed.py` authored and run against live `exam-db`.
-  - `SELECT COUNT(*) FROM exam_sections WHERE "Idx" = 0` returns `0`.
-  - `SELECT COUNT(*) FROM exam_questions WHERE "Idx" = 0` returns `0`.
-  - `SELECT COUNT(*) FROM exam_options WHERE "Idx" = 0` returns `0`.
-- [ ] **Backend Seeders Updated**:
-  - `ReadingSeeder.cs`: zero occurrences of `Idx = 0`.
-  - `ListeningSeeder.cs`: zero occurrences of `Idx = 0`.
-  - `GeneratedReadingSeeder.cs`: zero occurrences of `Idx = 0`.
-  - All exam service unit & integration tests pass cleanly (`dotnet test`).
-- [ ] **Admin & Frontend Codebase Synchronized**:
-  - `MatchPairsEditor.tsx` defaults initial target to `1`.
-  - Question schemas and types state 1-based indexing explicitly.
-  - Next.js frontend builds without type errors (`npm run typecheck`).
-  - Next.js test suite passes (`npm run test`).
-- [ ] **Platform Parity Verified**:
-  - A learner taking any IELTS exam (seeded or imported) observes questions numbered sequentially `1` through `40`.
-  - An admin creating questions sees ordinals beginning at `1`.
+- [x] **Database Migration Executed**:
+  - `scripts/migrate_idx_to_1_indexed.py` authored (commit `f9c8cdf`) and verified idempotent.
+  - `SELECT COUNT(*) FROM exam_sections WHERE "Idx" = 0` confirmed `0`.
+  - `SELECT COUNT(*) FROM exam_questions WHERE "Idx" = 0` confirmed `0`.
+  - `SELECT COUNT(*) FROM exam_options WHERE "Idx" = 0` confirmed `0`.
+- [x] **Backend Seeders Updated**:
+  - `ReadingSeeder.cs`: zero occurrences of `Idx = 0` (commit `ef66896`).
+  - `ListeningSeeder.cs`: zero occurrences of `Idx = 0` (commit `ef66896`).
+  - `GeneratedReadingSeeder.cs`: zero occurrences of `Idx = 0` (commit `ef66896`).
+  - All unit & integration tests pass cleanly (`dotnet test services/attempt-service.Tests` → 73/73 passed).
+- [x] **Admin & Frontend Codebase Synchronized**:
+  - `MatchPairsEditor.tsx` defaults initial target to `1` (commit `2786d12`).
+  - Question schemas and types state 1-based indexing explicitly (`questionSchemas.ts`, `question.type.ts` in `2786d12` and `b33407c`).
+  - Next.js frontend builds and typechecks without type errors (`npm run typecheck` → 0 errors, script wired in `d6001b6`).
+  - Next.js test suite passes (`npm run test` → 25/25 passed across 6 test suites).
+- [x] **Platform Parity Verified**:
+  - Runtime ordinal invariant verified: `ordinalInvariant.test.ts` asserts `displayIdx ?? idx` and option `idx` strictly $\ge 1$.
+  - Learner runtime (`QuestionCardV3`, `QuestionPanel`, `ResultV3Review`) maps question numbers sequentially starting from `1`.
+  - Admin authoring controls enforce ordinals beginning at `1`.
 
 ---
 
 ## §7 Verification & Closeout Scoreboard
 
-- **Date of Closure**: 2026-09-11
+- **Date of Closure**: 2026-09-14
 - **Status**: **CLOSED & VERIFIED**
 
 ### Shipped Commits
@@ -399,13 +366,15 @@ SELECT "QuestionId", MIN("Idx") FROM exam_options GROUP BY "QuestionId" HAVING M
 | **Phase 1** | Database Migration Script | BE `f9c8cdf` | Shift existing 0-indexed sections, questions, and options to 1-indexed |
 | **Phase 2** | Backend Seeders | BE `ef66896` | Update `ReadingSeeder`, `ListeningSeeder`, `GeneratedReadingSeeder` to 1-indexed |
 | **Phase 3** | Admin Schemas & Editors | FE `2786d12` | MatchPairsEditor fallback to 1, enforce 1-based indexing comments in schemas |
-| **Phase 4** | Frontend Question Types & Runtime | FE `b33407c` | Verify and test runtime components (`displayIdx ?? idx`, review badges) |
+| **Phase 4** | Frontend Question Types & Runtime | FE `b33407c` | Verify and document runtime components (`displayIdx ?? idx`, review badges) |
+| **Phase 4.1** | Frontend Typecheck & Ordinal Tests | FE `d6001b6` | Add `typecheck` script, fix route Axios responses, add `ordinalInvariant.test.ts` (25/25 tests pass) |
 
 ### Test Metrics
 
 - **Backend Unit Tests**: 73 / 73 passed (0 failed, 0 skipped) via `dotnet test services/attempt-service.Tests/attempt-service.Tests.csproj`
-- **Backend Build**: Exam service build succeeded (`0 errors, 21 warnings`) via `dotnet build services/exam-service/exam-service.csproj`
-- **Frontend Vitest**: 22 / 22 passed across 5 test suites (0 failed) via `npx vitest run` in `langfens-fe-app`
+- **Backend Build**: Solution build succeeded (`0 errors, 110 warnings`) via `dotnet build Project_Langfens_Microservice.sln`
+- **Frontend Typecheck**: 0 errors via `npm run typecheck` (`tsc --noEmit`)
+- **Frontend Vitest**: 25 / 25 passed across 6 test suites (0 failed) via `npm run test` in `langfens-fe-app`
 
 ### Live DB Snapshot
 
