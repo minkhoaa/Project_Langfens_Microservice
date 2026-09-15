@@ -149,9 +149,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'During the assembly of the Surveyor 3 probe, someone _______ on a TV camera.',
+    'During the assembly of the Surveyor 3 probe, someone [1] on a TV camera.',
     E'**Đáp án: SNEEZED**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Trong quá trình lắp ráp tàu thăm dò Surveyor 3, một kỹ sư đã vô tình hắt hơi (sneezed) lên camera, dẫn đến việc vi khuẩn bám vào thiết bị trước khi phóng.',
-    '{"blank-q7": ["SNEEZED"]}'::jsonb
+    '{"1": ["SNEEZED"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -163,9 +163,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The TV Camera remained on the Moon for over _______ years',
+    'The TV Camera remained on the Moon for over [1] years',
     E'**Đáp án: TWO**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Tàu Surveyor 3 và camera của nó đã nằm trên bề mặt Mặt Trăng trong khoảng hơn hai năm (over two years) trước khi được tìm thấy.',
-    '{"blank-q8": ["TWO"]}'::jsonb
+    '{"1": ["TWO"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -177,9 +177,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Apollo 12 astronauts _______ the TV camera',
+    'Apollo 12 astronauts [1] the TV camera',
     E'**Đáp án: REMOVED**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Các phi hành gia của tàu Apollo 12 đã tháo gỡ (removed) chiếc camera này từ tàu Surveyor 3 để mang về Trái Đất.',
-    '{"blank-q9": ["REMOVED"]}'::jsonb
+    '{"1": ["REMOVED"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -191,9 +191,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The TV camera was returned to Earth for _______',
+    'The TV camera was returned to Earth for [1]',
     E'**Đáp án: ANALYSIS**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Chiếc camera được mang trở lại Trái Đất nhằm mục đích phân tích (analysis) để xem vi khuẩn có thể sống sót trong môi trường khắc nghiệt của vũ trụ hay không.',
-    '{"blank-q10": ["ANALYSIS"]}'::jsonb
+    '{"1": ["ANALYSIS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -205,9 +205,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The theory that this suggested there was _______ on the Moon was rejected.',
+    'The theory that this suggested there was [1] on the Moon was rejected.',
     E'**Đáp án: LIFE**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Ban đầu có giả thuyết cho rằng vi khuẩn tìm thấy là sự sống (life) trên Mặt Trăng, nhưng giả thuyết này sau đó bị bác bỏ vì đó là vi khuẩn từ Trái Đất.',
-    '{"blank-q11": ["LIFE"]}'::jsonb
+    '{"1": ["LIFE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -221,7 +221,7 @@ BEGIN
     2,
     'Choose 2 correct options.',
     E'**Đáp án: C**\n\n(Không đủ dữ liệu câu hỏi) Dựa trên đáp án được cung cấp là C. Cần xem xét nội dung cụ thể của các lựa chọn để giải thích chi tiết.',
-    '{"blank-q12": ["C", "c"]}'::jsonb
+    '{"1": ["C", "c"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -235,7 +235,7 @@ BEGIN
     2,
     'Choose 2 correct options.',
     E'**Đáp án: C**\n\n(Không đủ dữ liệu câu hỏi) Dựa trên đáp án được cung cấp là C. Đây có thể là một phần của câu hỏi chọn nhiều đáp án (Multiple Choice Multiple Answer).',
-    '{"blank-q13": ["C", "c"]}'::jsonb
+    '{"1": ["C", "c"]}'::jsonb
   );
 
 

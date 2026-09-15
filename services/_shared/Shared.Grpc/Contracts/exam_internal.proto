@@ -40,29 +40,32 @@ message InternalDeliveryQuestionGroup {
 }
 
 message InternalDeliveryQuestion {
-  string id = 1;             
+  string id = 1;
   int32 idx = 2;
   string type = 3;
   string skill = 4;
   int32 difficulty = 5;
   string prompt_md = 6;
   string explanation_md = 7;
-  repeated InternalDeliveryOption options = 8;
-  repeated InternalCompletionAccept completion_accepts = 9;
-  repeated InternalMatchPair match_pairs = 10;
-  repeated string order_corrects = 11;
-  repeated string short_answer_accept_texts = 12;
-  repeated string short_answer_accept_regex = 13;
-  repeated FlowChartNode flow_chart_nodes = 14;
+  string image_url = 8;       // Optional image for DIAGRAM_LABEL/MAP_LABEL
+  repeated InternalDeliveryOption options = 9;
+  repeated InternalCompletionAccept completion_accepts = 10;
+  repeated InternalMatchPair match_pairs = 11;
+  repeated string order_corrects = 12;
+  repeated string short_answer_accept_texts = 13;
+  repeated string short_answer_accept_regex = 14;
+  repeated FlowChartNode flow_chart_nodes = 15;
 }
 
 message InternalDeliveryOption {
-  string id = 1;              
+  string id = 1;
   int32 idx = 2;
   string content_md = 3;
+  string image_url = 4;       // Optional image for MCQ_IMAGE
+  string alt_text = 5;        // a11y alt text when image_url is set
 
   // proto3 optional: có cờ hiện diện (HasIsCorrect). Khi sanitize thì *unset* (ClearIsCorrect).
-  optional bool is_correct = 4;
+  optional bool is_correct = 6;
 }
 
 message InternalCompletionAccept {

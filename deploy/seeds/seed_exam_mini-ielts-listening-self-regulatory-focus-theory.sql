@@ -66,9 +66,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Promotion goals focus on _______',
+    'Promotion goals focus on [1]',
     '',
-    '{"blank-q1": ["ACHIEVEMENT"]}'::jsonb
+    '{"1": ["ACHIEVEMENT"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -80,9 +80,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'The Chronic Factor comes from one''s _______',
+    'The Chronic Factor comes from one''s [1]',
     '',
-    '{"blank-q2": ["PERSONALITY"]}'::jsonb
+    '{"1": ["PERSONALITY"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -94,9 +94,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'The _______ Factor',
+    'The [1] Factor',
     '',
-    '{"blank-q3": ["SITUATIONAL"]}'::jsonb
+    '{"1": ["SITUATIONAL"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -108,9 +108,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'we are more likely to focus on promotion goals when with a _______',
+    'we are more likely to focus on promotion goals when with a [1]',
     '',
-    '{"blank-q4": ["FRIEND"]}'::jsonb
+    '{"1": ["FRIEND"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -122,9 +122,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Promotion Focus: People think about an ideal version of themselves, their _______ and their gains.',
+    'Promotion Focus: People think about an ideal version of themselves, their [1] and their gains.',
     '',
-    '{"blank-q5": ["ASPIRATIONS"]}'::jsonb
+    '{"1": ["ASPIRATIONS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -136,9 +136,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Leadership behaviour and _______ affects people''s focus',
+    'Leadership behaviour and [1] affects people''s focus',
     '',
-    '{"blank-q6": ["STYLE"]}'::jsonb
+    '{"1": ["STYLE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -150,9 +150,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'pay special attention to the _______ of their followers',
+    'pay special attention to the [1] of their followers',
     '',
-    '{"blank-q7": ["DEVELOPMENT"]}'::jsonb
+    '{"1": ["DEVELOPMENT"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -164,9 +164,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'passionately communicate a clear _______',
+    'passionately communicate a clear [1]',
     '',
-    '{"blank-q8": ["VISION"]}'::jsonb
+    '{"1": ["VISION"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -178,9 +178,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'create _______ to make expectations clear',
+    'create [1] to make expectations clear',
     '',
-    '{"blank-q9": ["STRUCTURES"]}'::jsonb
+    '{"1": ["STRUCTURES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -192,9 +192,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'LISTENING',
     2,
-    'Promotion Focus is good for jobs requiring _______',
+    'Promotion Focus is good for jobs requiring [1]',
     '',
-    '{"blank-q10": ["INNOVATION"]}'::jsonb
+    '{"1": ["INNOVATION"]}'::jsonb
   );
 
 
@@ -204,7 +204,7 @@ BEGIN
 
   -- Insert question groups
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 1, 1, 10, E'## Questions 1-10\n\nComplete the notes below.\n\nWrite **ONE WORD ONLY** for each answer.\n\n### ''Self-regulatory focus theory'' and leadership\n\n**Self-regulatory focus theory**\n- People''s focus is to approach pleasure or avoid pain\n- Promotion goals focus on **1** _______\n- Prevention goals emphasise avoiding punishment\n\n**Factors that affect people''s focus**\n\n*The Chronic Factor*\n- comes from one''s **2** _______\n\n*The **3** _______ Factor*\n- we are more likely to focus on promotion goals when with a **4** _______\n- we are more likely to focus on prevention goals with our boss\n\n**How people''s focus affects them**\n- Promotion Focus: People think about an ideal version of themselves, their **5** _______ and their gains.\n- Prevention Focus: People think about their ''ought'' self and their obligations\n\n**Leaders**\n- Leadership behaviour and **6** _______ affects people''s focus\n\n*Transformational Leaders:*\n- pay special attention to the **7** _______ of their followers\n- passionately communicate a clear **8** _______\n- inspire promotion focus in followers\n\n*Transactional Leaders:*\n- create **9** _______ to make expectations clear\n- emphasise the results of a mistake\n- inspire prevention focus in followers\n\n**Conclusion**\n- Promotion Focus is good for jobs requiring **10** _______\n- Prevention Focus is good for work such as a surgeon\n- Leaders'' actions affect which focus people use');
+  VALUES (gen_random_uuid(), sec1, 1, 1, 10, E'## Questions 1-10\n\nComplete the notes below.\n\nWrite **ONE WORD ONLY** for each answer.\n\n### ''Self-regulatory focus theory'' and leadership\n\n**Self-regulatory focus theory**\n- People''s focus is to approach pleasure or avoid pain\n- Promotion goals focus on **1** [1]\n- Prevention goals emphasise avoiding punishment\n\n**Factors that affect people''s focus**\n\n*The Chronic Factor*\n- comes from one''s **2** [2]\n\n*The **3** [3] Factor*\n- we are more likely to focus on promotion goals when with a **4** [4]\n- we are more likely to focus on prevention goals with our boss\n\n**How people''s focus affects them**\n- Promotion Focus: People think about an ideal version of themselves, their **5** [5] and their gains.\n- Prevention Focus: People think about their ''ought'' self and their obligations\n\n**Leaders**\n- Leadership behaviour and **6** [6] affects people''s focus\n\n*Transformational Leaders:*\n- pay special attention to the **7** [7] of their followers\n- passionately communicate a clear **8** [8]\n- inspire promotion focus in followers\n\n*Transactional Leaders:*\n- create **9** [9] to make expectations clear\n- emphasise the results of a mistake\n- inspire prevention focus in followers\n\n**Conclusion**\n- Promotion Focus is good for jobs requiring **10** [10]\n- Prevention Focus is good for work such as a surgeon\n- Leaders'' actions affect which focus people use');
 
 END$$;
 

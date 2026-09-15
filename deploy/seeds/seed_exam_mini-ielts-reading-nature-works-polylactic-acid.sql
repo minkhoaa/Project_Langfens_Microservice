@@ -121,9 +121,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Process: Polylactic acid - Box 5 _______',
+    'Process: Polylactic acid - Box 5 [1]',
     '',
-    '{"blank-q5": ["starch"]}'::jsonb
+    '{"1": ["starch"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -135,9 +135,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Process: Polylactic acid - Box 6 _______',
+    'Process: Polylactic acid - Box 6 [1]',
     '',
-    '{"blank-q6": ["fermentation"]}'::jsonb
+    '{"1": ["fermentation"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -149,9 +149,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Process: Polylactic acid - Box 7 _______',
+    'Process: Polylactic acid - Box 7 [1]',
     '',
-    '{"blank-q7": ["condensation"]}'::jsonb
+    '{"1": ["condensation"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -163,9 +163,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Process: Polylactic acid - Box 8 _______',
+    'Process: Polylactic acid - Box 8 [1]',
     '',
-    '{"blank-q8": ["polymer"]}'::jsonb
+    '{"1": ["polymer"]}'::jsonb
   );
 
   qid := gen_random_uuid();

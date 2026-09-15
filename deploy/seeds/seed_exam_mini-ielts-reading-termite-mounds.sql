@@ -226,9 +226,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'network of _______ helps to give the termites a constant',
+    'network of [1] helps to give the termites a constant',
     E'**Đáp án: TUNNELS**\n\n> "The mound itself is formed of an intricate lattice of tunnels..."\n\n(Đoạn B) Bài đọc nêu rõ gò mối được hình thành từ một mạng lưới (lattice/network) các đường hầm (tunnels), giúp lưu thông khí.',
-    '{"blank-q8": ["TUNNELS"]}'::jsonb
+    '{"1": ["TUNNELS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -240,9 +240,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    '_______ supply and to maintain a limited temperature range',
+    '[1] supply and to maintain a limited temperature range',
     E'**Đáp án: AIR**\n\n> "ensuring them a continuous provision of fresh, breathable air."\n\n(Đoạn C) Hệ thống đường hầm giúp cung cấp và duy trì lượng không khí (air) trong lành cho mối.',
-    '{"blank-q9": ["AIR"]}'::jsonb
+    '{"1": ["AIR"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -254,9 +254,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'cellar to aid control of _______ levels in mound',
+    'cellar to aid control of [1] levels in mound',
     E'**Đáp án: MOISTURE**\n\n> "...control of moisture..."\n\n(Đoạn D/E - suy luận từ ngữ cảnh) Mối thường xuống sâu dưới lòng đất để lấy nước hoặc bùn ẩm nhằm kiểm soát độ ẩm (moisture) trong tổ.',
-    '{"blank-q10": ["MOISTURE"]}'::jsonb
+    '{"1": ["MOISTURE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -268,9 +268,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'top of the mound permits _______',
+    'top of the mound permits [1]',
     E'**Đáp án: EVAPORATION**\n\n> "...permits evaporation..."\n\n(Đoạn E/F - suy luận từ ngữ cảnh) Đỉnh của gò mối có cấu trúc cho phép sự bay hơi (evaporation) để giải phóng nhiệt và khí ẩm.',
-    '{"blank-q11": ["EVAPORATION"]}'::jsonb
+    '{"1": ["EVAPORATION"]}'::jsonb
   );
 
   qid := gen_random_uuid();

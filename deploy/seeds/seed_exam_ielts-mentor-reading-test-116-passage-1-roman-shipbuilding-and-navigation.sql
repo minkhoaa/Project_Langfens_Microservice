@@ -150,9 +150,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ and moved quickly. They often remained afloat after battles and were able to sail close to land as they lacked any additional weight. A battering ram made of',
+    '[1] and moved quickly. They often remained afloat after battles and were able to sail close to land as they lacked any additional weight. A battering ram made of',
     '',
-    '{"blank-q6": ["LIGHTWEIGHT"]}'::jsonb
+    '{"1": ["LIGHTWEIGHT"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -164,9 +164,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ was included in the design for attacking and damaging the timber and oars of enemy ships. Warships, such as the ‘trireme’, had rowers on three different',
+    '[1] was included in the design for attacking and damaging the timber and oars of enemy ships. Warships, such as the ‘trireme’, had rowers on three different',
     '',
-    '{"blank-q7": ["BRONZE"]}'::jsonb
+    '{"1": ["BRONZE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -178,9 +178,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______',
+    '[1]',
     '',
-    '{"blank-q8": ["LEVELS"]}'::jsonb
+    '{"1": ["LEVELS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -192,9 +192,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ that lay far below the surface of the sea. Merchant ships were steered through the water with the help of large rudders and a tiller bar. They had both square and',
+    '[1] that lay far below the surface of the sea. Merchant ships were steered through the water with the help of large rudders and a tiller bar. They had both square and',
     '',
-    '{"blank-q9": ["HULL"]}'::jsonb
+    '{"1": ["HULL"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -206,9 +206,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ sails. On merchant ships and warships,',
+    '[1] sails. On merchant ships and warships,',
     '',
-    '{"blank-q10": ["TRIANGULAR"]}'::jsonb
+    '{"1": ["TRIANGULAR"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -220,9 +220,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ was used to ensure rowers moved their oars in and out of the water at the same time.',
+    '[1] was used to ensure rowers moved their oars in and out of the water at the same time.',
     '',
-    '{"blank-q11": ["MUSIC"]}'::jsonb
+    '{"1": ["MUSIC"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -234,9 +234,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ were transported by merchant ships to two main ports in Italy. The ships were pulled to the shore by',
+    '[1] were transported by merchant ships to two main ports in Italy. The ships were pulled to the shore by',
     '',
-    '{"blank-q12": ["GRAIN"]}'::jsonb
+    '{"1": ["GRAIN"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -248,9 +248,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______ _______ When the weather was clear and they could see islands or land, sailors used landmarks that they knew to help them navigate their route.',
+    '[1] When the weather was clear and they could see islands or land, sailors used landmarks that they knew to help them navigate their route.',
     '',
-    '{"blank-q13": ["TOWBOATS"]}'::jsonb
+    '{"1": ["TOWBOATS"]}'::jsonb
   );
 
 
@@ -263,7 +263,7 @@ BEGIN
   VALUES (gen_random_uuid(), sec1, 1, 1, 5, E'Questions 1-5:**\nDo the following statements agree with the information given in the text?\n\nWrite\n- **TRUE** if the statement agrees with the information\n- **FALSE** if the statement contradicts the information\n- **NOT GIVEN** if there is no information on this\n\n---\n\n**');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 6, 13, E'Questions 6-13:**\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.\n\n**6.** _______ _______ and moved quickly. They often remained afloat after battles and were able to sail close to land as they lacked any additional weight. A battering ram made of\n\n**7.** _______ _______ was included in the design for attacking and damaging the timber and oars of enemy ships. Warships, such as the ‘trireme’, had rowers on three different\n\n**8.** _______ _______\n\n**9.** _______ _______ that lay far below the surface of the sea. Merchant ships were steered through the water with the help of large rudders and a tiller bar. They had both square and\n\n**10.** _______ _______ sails. On merchant ships and warships,\n\n**11.** _______ _______ was used to ensure rowers moved their oars in and out of the water at the same time.\n\n**12.** _______ _______ were transported by merchant ships to two main ports in Italy. The ships were pulled to the shore by\n\n**13.** _______ _______ When the weather was clear and they could see islands or land, sailors used landmarks that they knew to help them navigate their route.');
+  VALUES (gen_random_uuid(), sec1, 2, 6, 13, E'Questions 6-13:**\nComplete the sentences below.\n\nWrite **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.\n\n**6.** [1] and moved quickly. They often remained afloat after battles and were able to sail close to land as they lacked any additional weight. A battering ram made of\n\n**7.** [2] was included in the design for attacking and damaging the timber and oars of enemy ships. Warships, such as the ‘trireme’, had rowers on three different\n\n**8.** [3]\n\n**9.** [4] that lay far below the surface of the sea. Merchant ships were steered through the water with the help of large rudders and a tiller bar. They had both square and\n\n**10.** [5] sails. On merchant ships and warships,\n\n**11.** [6] was used to ensure rowers moved their oars in and out of the water at the same time.\n\n**12.** [7] were transported by merchant ships to two main ports in Italy. The ships were pulled to the shore by\n\n**13.** [8] When the weather was clear and they could see islands or land, sailors used landmarks that they knew to help them navigate their route.');
 
 END$$;
 

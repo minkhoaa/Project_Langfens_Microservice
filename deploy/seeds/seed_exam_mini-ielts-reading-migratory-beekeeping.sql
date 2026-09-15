@@ -65,9 +65,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'In March, beekeepers _______ for migration at night when the hives are full and the bees are generally tranquil.',
+    'In March, beekeepers [1] for migration at night when the hives are full and the bees are generally tranquil.',
     '',
-    '{"blank-q1": ["PREPARE"]}'::jsonb
+    '{"1": ["PREPARE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -79,9 +79,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'In March, beekeepers prepare for migration at night when the hives are _______ and the bees are generally tranquil.',
+    'In March, beekeepers prepare for migration at night when the hives are [1] and the bees are generally tranquil.',
     '',
-    '{"blank-q2": ["FULL"]}'::jsonb
+    '{"1": ["FULL"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -93,9 +93,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'A little _______ can ensure that this is the case.',
+    'A little [1] can ensure that this is the case.',
     '',
-    '{"blank-q3": ["SMOKE"]}'::jsonb
+    '{"1": ["SMOKE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -107,9 +107,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'They transport their hives to orange groves where farmers _______ beekeepers for placing them on their land.',
+    'They transport their hives to orange groves where farmers [1] beekeepers for placing them on their land.',
     '',
-    '{"blank-q4": ["CHARGE"]}'::jsonb
+    '{"1": ["CHARGE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -121,9 +121,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'After three weeks, the supers can be taken to a warehouse where _______ are used to remove the wax and extract the honey from the combs.',
+    'After three weeks, the supers can be taken to a warehouse where [1] are used to remove the wax and extract the honey from the combs.',
     '',
-    '{"blank-q5": ["MACHINES"]}'::jsonb
+    '{"1": ["MACHINES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -135,9 +135,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'After three weeks, the supers can be taken to a warehouse where machines are used to remove the wax and extract the honey from the _______.',
+    'After three weeks, the supers can be taken to a warehouse where machines are used to remove the wax and extract the honey from the [1].',
     '',
-    '{"blank-q6": ["COMBS"]}'::jsonb
+    '{"1": ["COMBS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -149,9 +149,9 @@ BEGIN
     'TABLE_COMPLETION',
     'READING',
     2,
-    'After the honey collection, the old hives are rejected. Good double hives are _______ and re-queened and the beekeeper transports them to their summer base.',
+    'After the honey collection, the old hives are rejected. Good double hives are [1] and re-queened and the beekeeper transports them to their summer base.',
     '',
-    '{"blank-q7": ["SPLIT"]}'::jsonb
+    '{"1": ["SPLIT"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -163,9 +163,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Label 8 (top cover/lid) _______',
+    'Label 8 (top cover/lid) [1]',
     '',
-    '{"blank-q8": ["HEXAGONAL CELLS"]}'::jsonb
+    '{"1": ["HEXAGONAL CELLS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -177,9 +177,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Label 9 (frames/slats) _______',
+    'Label 9 (frames/slats) [1]',
     '',
-    '{"blank-q9": ["FRAMES"]}'::jsonb
+    '{"1": ["FRAMES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -191,9 +191,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Label 10 (queen excluder) _______',
+    'Label 10 (queen excluder) [1]',
     '',
-    '{"blank-q10": ["SCREEN"]}'::jsonb
+    '{"1": ["SCREEN"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -205,9 +205,9 @@ BEGIN
     'DIAGRAM_LABEL',
     'READING',
     2,
-    'Label 11 (bottom board/entrance) _______',
+    'Label 11 (bottom board/entrance) [1]',
     '',
-    '{"blank-q11": ["BROOD CHAMBER"]}'::jsonb
+    '{"1": ["BROOD CHAMBER"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -285,10 +285,10 @@ BEGIN
 
   -- Insert question groups
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 1, 1, 7, E'## Questions 1-7\n\nThe flow chart below outlines the movements of the migratory beekeeper as described in Reading Passage.\n\nComplete the flow chart.\n\nChoose your answers from the box below and write your answers in boxes 1-7 on your answer sheet.\n\n### List of Words/Phrases:\nsmoke, chemicals, pay, barrels, protection, charge, set off, light, split, pollinate, machines, supers, combs, screen, prepare, full, empty, queens\n\n---\n\n**Example:** In February, Californian farmers hire bees to help **pollinate** almond trees.\n\n**1.** In March, beekeepers _______ for migration at night when the hives are **2** _______ and the bees are generally tranquil.\n\n**3.** A little _______ can ensure that this is the case.\n\n**4.** They transport their hives to orange groves where farmers _______ beekeepers for placing them on their land. Here the bees make honey.\n\n**5.** After three weeks, the supers can be taken to a warehouse where _______ are used to remove the wax and extract the honey from the **6** _______.\n\n**7.** After the honey collection, the old hives are rejected. Good double hives are _______ and re-queened and the beekeeper transports them to their summer base.');
+  VALUES (gen_random_uuid(), sec1, 1, 1, 7, E'## Questions 1-7\n\nThe flow chart below outlines the movements of the migratory beekeeper as described in Reading Passage.\n\nComplete the flow chart.\n\nChoose your answers from the box below and write your answers in boxes 1-7 on your answer sheet.\n\n### List of Words/Phrases:\nsmoke, chemicals, pay, barrels, protection, charge, set off, light, split, pollinate, machines, supers, combs, screen, prepare, full, empty, queens\n\n---\n\n**Example:** In February, Californian farmers hire bees to help **pollinate** almond trees.\n\n**1.** In March, beekeepers [1] for migration at night when the hives are **2** [2] and the bees are generally tranquil.\n\n**3.** A little [3] can ensure that this is the case.\n\n**4.** They transport their hives to orange groves where farmers [4] beekeepers for placing them on their land. Here the bees make honey.\n\n**5.** After three weeks, the supers can be taken to a warehouse where [5] are used to remove the wax and extract the honey from the **6** [6].\n\n**7.** After the honey collection, the old hives are rejected. Good double hives are [7] and re-queened and the beekeeper transports them to their summer base.');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 2, 8, 11, E'## Questions 8-11\n\nLabel the diagram below.\n\nChoose **ONE OR TWO WORDS** from the Reading Passage for each answer.\n\nWrite your answers in boxes 8-11 on your answer sheet.\n\n![A Beehive Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766599315/ielts/01_0dcc9fc534f3.jpg)\n\n**8.** _______\n\n**9.** _______\n\n**10.** _______\n\n**11.** _______');
+  VALUES (gen_random_uuid(), sec1, 2, 8, 11, E'## Questions 8-11\n\nLabel the diagram below.\n\nChoose **ONE OR TWO WORDS** from the Reading Passage for each answer.\n\nWrite your answers in boxes 8-11 on your answer sheet.\n\n![A Beehive Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766599315/ielts/01_0dcc9fc534f3.jpg)\n\n**8.** [1]\n\n**9.** [2]\n\n**10.** [3]\n\n**11.** [4]');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
   VALUES (gen_random_uuid(), sec1, 3, 12, 15, E'## Questions 12-15\n\nDo the following statements agree with the claims of the writer?\n\nWrite:\n- **YES** if the statement agrees with the claims of the writer\n- **NO** if the statement contradicts the claims of the writer\n- **NOT GIVEN** if it is impossible to say what the writer thinks about this\n\n**12.** The Egyptians keep bees on the banks of the Nile.\n\n**13.** First attempts at migratory beekeeping in America were unsuccessful.\n\n**14.** Bees keep honey for themselves in the bottom of the hive.\n\n**15.** The honey is spun to make it liquid.');

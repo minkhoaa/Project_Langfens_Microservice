@@ -215,9 +215,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The outer coating of the coffee berry is called the _______.',
+    'The outer coating of the coffee berry is called the [1].',
     '',
-    '{"blank-q7": ["epicarp"]}'::jsonb
+    '{"1": ["epicarp"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -229,9 +229,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Inside the coating is a white, sugary mucilaginous flesh called the _______.',
+    'Inside the coating is a white, sugary mucilaginous flesh called the [1].',
     '',
-    '{"blank-q8": ["mesocarp"]}'::jsonb
+    '{"1": ["mesocarp"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -243,9 +243,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The resistant, golden yellow parchment coating the beans is called the _______.',
+    'The resistant, golden yellow parchment coating the beans is called the [1].',
     '',
-    '{"blank-q9": ["endocarp"]}'::jsonb
+    '{"1": ["endocarp"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -257,9 +257,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'First, ripe beans are picked and taken to pulping mills where they can be pulped (or _______).',
+    'First, ripe beans are picked and taken to pulping mills where they can be pulped (or [1]).',
     '',
-    '{"blank-q10": ["wet milled"]}'::jsonb
+    '{"1": ["wet milled"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -271,9 +271,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The pulped beans rest in pure rainwater to ferment _______.',
+    'The pulped beans rest in pure rainwater to ferment [1].',
     '',
-    '{"blank-q11": ["overnight"]}'::jsonb
+    '{"1": ["overnight"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -285,9 +285,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'During the drying process, beans need to be _______ many times to dry evenly.',
+    'During the drying process, beans need to be [1] many times to dry evenly.',
     '',
-    '{"blank-q12": ["raked"]}'::jsonb
+    '{"1": ["raked"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -299,9 +299,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The green beans are roasted according to the _______ and then packaged.',
+    'The green beans are roasted according to the [1] and then packaged.',
     '',
-    '{"blank-q13": ["customers'' specifications"]}'::jsonb
+    '{"1": ["customers'' specifications"]}'::jsonb
   );
 
 

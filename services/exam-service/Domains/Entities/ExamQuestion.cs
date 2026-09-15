@@ -32,6 +32,13 @@ public class ExamQuestion
 
     public string? ExplanationMd { get; set; }
 
+    /// <summary>
+    /// Optional image URL for image-based questions
+    /// (DIAGRAM_LABEL, MAP_LABEL, etc.). When set, candidates see the image
+    /// alongside the prompt to label or annotate.
+    /// </summary>
+    public string? ImageUrl { get; set; }
+
     [Column(TypeName = "jsonb")]
     public Dictionary<string, string[]?>? BlankAcceptTexts { get; set; }
 

@@ -101,10 +101,11 @@ public class ExamService : IExamService
                                     new Dto_Public.PublicQuestionRecord(
                                         question.Id, question.Idx, question.Type, question.Skill,
                                         question.Difficulty, question.PromptMd,
+                                        question.ImageUrl,
                                         question.Options
                                             .OrderBy(option => option.Idx)
                                             .Select(option =>
-                                                new Dto_Public.PublicOptionRecord(option.Idx, option.ContentMd))
+                                                new Dto_Public.PublicOptionRecord(option.Idx, option.ContentMd, option.ImageUrl, option.AltText))
                                             .ToList(),
                                         question.WordList
                                     )).ToList(),
@@ -116,8 +117,9 @@ public class ExamService : IExamService
                                         .OrderBy(q => q.Idx)
                                         .Select(q => new Dto_Public.PublicQuestionRecord(
                                             q.Id, q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd,
+                                            q.ImageUrl,
                                             q.Options.OrderBy(o => o.Idx)
-                                                .Select(o => new Dto_Public.PublicOptionRecord(o.Idx, o.ContentMd))
+                                                .Select(o => new Dto_Public.PublicOptionRecord(o.Idx, o.ContentMd, o.ImageUrl, o.AltText))
                                                 .ToList(),
                                             q.WordList
                                         )).ToList()

@@ -21,6 +21,7 @@ deploy/envs/**
 # ------------------------------
 # Env and secrets (repo-wide)
 # ------------------------------
+WATCHDOG.yml
 .env
 .env.*
 **/.env
@@ -28,7 +29,8 @@ deploy/envs/**
 *.pem
 *.key
 *.cert
-/docs/
+/docs/*
+!/docs/sprint*/
 # ------------------------------
 # Node / JS / TS
 # ------------------------------
@@ -181,5 +183,14 @@ scripts/pipeline/
 .gsd/MK-GAPS-CLOSURE-PLAN.md
 models/**/*.pt
 models/**/*.pth
+# ------------------------------
+# User-uploaded media (admin image upload)
+# ------------------------------
+# Keep the wwwroot skeleton (.gitkeep files) but ignore uploaded binaries.
+**/wwwroot/uploads/**/*
+!**/wwwroot/uploads/.gitkeep
+!**/wwwroot/uploads/**/.gitkeep
 models/**/*.ckpt
 models/**/*.bin
+
+

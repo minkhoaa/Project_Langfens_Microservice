@@ -49,12 +49,13 @@ public class DtoAdmin
         int Difficulty,
         string? PromptMd,
         string? ExplanationMd,
-        Dictionary<string, string[]?>? BlankAcceptTexts,
-        Dictionary<string, string[]?>? BlankAcceptRegex,
-        Dictionary<string, string[]?>? MatchPairs,
-        IEnumerable<string>? OrderCorrects,
-        IEnumerable<string>? ShortAnswerAcceptTexts,
-        IEnumerable<string>? ShortAnswerAcceptRegex);
+        string? ImageUrl = null,
+        Dictionary<string, string[]?>? BlankAcceptTexts = null,
+        Dictionary<string, string[]?>? BlankAcceptRegex = null,
+        Dictionary<string, string[]?>? MatchPairs = null,
+        IEnumerable<string>? OrderCorrects = null,
+        IEnumerable<string>? ShortAnswerAcceptTexts = null,
+        IEnumerable<string>? ShortAnswerAcceptRegex = null);
 
     public record AdminQuestionUpdate(
         Guid SectionId,
@@ -64,15 +65,16 @@ public class DtoAdmin
         int Difficulty,
         string? PromptMd,
         string? ExplanationMd,
-        Dictionary<string, string[]?>? BlankAcceptTexts,
-        Dictionary<string, string[]?>? BlankAcceptRegex,
-        Dictionary<string, string[]?>? MatchPairs,
-        IEnumerable<string>? OrderCorrects,
-        IEnumerable<string>? ShortAnswerAcceptTexts,
-        IEnumerable<string>? ShortAnswerAcceptRegex);
+        string? ImageUrl = null,
+        Dictionary<string, string[]?>? BlankAcceptTexts = null,
+        Dictionary<string, string[]?>? BlankAcceptRegex = null,
+        Dictionary<string, string[]?>? MatchPairs = null,
+        IEnumerable<string>? OrderCorrects = null,
+        IEnumerable<string>? ShortAnswerAcceptTexts = null,
+        IEnumerable<string>? ShortAnswerAcceptRegex = null);
 
 
-    public record AdminOptionUpsert(Guid QuestionId, int? Idx, string ContentMd, bool IsCorrect);
+    public record AdminOptionUpsert(Guid QuestionId, int? Idx, string ContentMd, bool IsCorrect, string? ImageUrl = null, string? AltText = null);
 
-    public record AdminOptionUpdate(Guid QuestionId, int? Idx, string ContentMd, bool IsCorrect);
+    public record AdminOptionUpdate(Guid QuestionId, int? Idx, string ContentMd, bool IsCorrect, string? ImageUrl = null, string? AltText = null);
 }

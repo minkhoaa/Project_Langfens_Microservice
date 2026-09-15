@@ -2,6 +2,7 @@ using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts.Exam.Enums;
+using ExamService.Data;
 
 namespace exam_service.Data;
 
@@ -63,7 +64,7 @@ public static class ListeningSeeder
         {
             Id = section1Id,
             ExamId = examId,
-            Idx = 0,
+            Idx = 1,
             Title = "Section 1: Hotel Booking Enquiry",
             InstructionsMd = "You will hear a telephone conversation between a customer and a hotel reservations clerk. Answer the questions below.\n\nYou have 10 seconds to read each question. You will hear the recording ONCE.\n\nWrite your answers as you listen. At the end, you will have 10 minutes to transfer your answers to the answer sheet.",
             AudioUrl = "https://langfens-audio.example.com/ielts-listening/section1-hotel-booking.mp3",
@@ -92,43 +93,42 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
         };
 
         // Q1-5: Form Completion (hotel registration form)
-        var q1Id = Guid.Parse("55555555-5555-5555-5555-555555555551");
+        var q1Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 1);
         var q1 = new ExamQuestion
         {
-            Id = q1Id, SectionId = section1Id, Idx = 0,
+            Id = q1Id, SectionId = section1Id, Idx = 1,
             Type = QuestionType.FormCompletion, Skill = QuestionSkill.Listening, Difficulty = 1,
-            PromptMd = "Complete the hotel registration form below. Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.\n\n**Hotel Registration Form**\n\n1. Guest name: __________\n2. Arrival date: __________\n3. Room type: __________\n4. Room view: __________\n5. Number of nights: __________",
+            PromptMd = "Complete the hotel registration form below. Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.\n\n**Hotel Registration Form**\n\n1. Guest name: [1]\n2. Arrival date: [2]\n3. Room type: [3]\n4. Room view: [4]\n5. Number of nights: [5]",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "Rachel Torres", "Torres" } },
-                { "1", new[] { "15 September", "15th September", "September 15" } },
-                { "2", new[] { "single", "single room" } },
-                { "3", new[] { "sea view", "seaview" } },
-                { "4", new[] { "3", "three" } }
+                { "1", new[] { "Rachel Torres", "Torres" } },
+                { "2", new[] { "15 September", "15th September", "September 15" } },
+                { "3", new[] { "single", "single room" } },
+                { "4", new[] { "sea view", "seaview" } },
+                { "5", new[] { "3", "three" } }
             }
         };
-
-        var q2Id = Guid.Parse("55555555-5555-5555-5555-555555555552");
+        var q2Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 2);
         var q2 = new ExamQuestion
         {
-            Id = q2Id, SectionId = section1Id, Idx = 1,
+            Id = q2Id, SectionId = section1Id, Idx = 2,
             Type = QuestionType.FormCompletion, Skill = QuestionSkill.Listening, Difficulty = 1,
-            PromptMd = "6. Rate per night (including breakfast): $__________\n7. Bathroom type: __________\n8. Check-in time: from __________\n9. Parking: underground car park / __________ (public)\n10. Airport shuttle price: $__________ each way",
+            PromptMd = "6. Rate per night (including breakfast): $[1]\n7. Bathroom type: [2]\n8. Check-in time: from [3]\n9. Parking: underground car park / [4] (public)\n10. Airport shuttle price: $[5] each way",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "180", "one hundred and eighty" } },
-                { "1", new[] { "en-suite", "private", "ensuite" } },
-                { "2", new[] { "2 PM", "2pm", "2:00 PM", "2pm onwards", "from 2 PM", "from 2pm" } },
-                { "3", new[] { "public car park", "public carpark", "car park across the street" } },
-                { "4", new[] { "45", "forty five", "forty-five" } }
+                { "1", new[] { "180", "one hundred and eighty" } },
+                { "2", new[] { "en-suite", "private", "ensuite" } },
+                { "3", new[] { "2 PM", "2pm", "2:00 PM", "2pm onwards", "from 2 PM", "from 2pm" } },
+                { "4", new[] { "public car park", "public carpark", "car park across the street" } },
+                { "5", new[] { "45", "forty five", "forty-five" } }
             }
         };
 
         // Q3-5: Short answer
-        var q3Id = Guid.Parse("55555555-5555-5555-5555-555555555553");
+        var q3Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 3);
         var q3 = new ExamQuestion
         {
-            Id = q3Id, SectionId = section1Id, Idx = 2,
+            Id = q3Id, SectionId = section1Id, Idx = 3,
             Type = QuestionType.ShortAnswer, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "Write your answers in the spaces provided.\n\n11. How far is the hotel from Central Station?\n12. What is the daily rate for the underground car park?\n13. What is the approximate journey time from the airport to the hotel?\n14. What method of payment does the guest decide to use?\n15. What percentage deposit is required to confirm the booking?",
             ShortAnswerAcceptTexts = new List<string>
@@ -150,7 +150,7 @@ Clerk: Thank you, Ms. Torres. We look forward to welcoming you on the 15th."
         {
             Id = section2Id,
             ExamId = examId,
-            Idx = 1,
+            Idx = 2,
             Title = "Section 2: Library Services and Facilities",
             InstructionsMd = "You will hear a talk by a library information officer about the services and facilities available at the Central Library. Answer the questions below.\n\nYou will hear the recording ONCE.",
             AudioUrl = "https://langfens-audio.example.com/ielts-listening/section2-library-talk.mp3",
@@ -172,74 +172,70 @@ For those of you interested in research, our inter-library loan service allows y
 
 That's a quick overview of what we offer. Does anyone have any questions?"
         };
-
-        var q4Id = Guid.Parse("55555555-5555-5555-5555-555555555554");
+        var q4Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 4);
         var q4Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 0, ContentMd = "A. Ground floor", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 1, ContentMd = "B. First floor", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 2, ContentMd = "C. Second floor", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 3, ContentMd = "D. Third floor", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 1, ContentMd = "A. Ground floor", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 2, ContentMd = "B. First floor", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 3, ContentMd = "C. Second floor", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q4Id, Idx = 4, ContentMd = "D. Third floor", IsCorrect = false }
         };
         var q4 = new ExamQuestion
         {
-            Id = q4Id, SectionId = section2Id, Idx = 0,
+            Id = q4Id, SectionId = section2Id, Idx = 1,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "16. Where are the computer workstations located?",
             Options = q4Options
         };
-
-        var q5Id = Guid.Parse("55555555-5555-5555-5555-555555555555");
+        var q5Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 5);
         var q5Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 0, ContentMd = "A. $0.05 per page", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 1, ContentMd = "B. $0.10 per page", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 2, ContentMd = "C. $0.25 per page", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 3, ContentMd = "D. $1.00 per page", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 1, ContentMd = "A. $0.05 per page", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 2, ContentMd = "B. $0.10 per page", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 3, ContentMd = "C. $0.25 per page", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q5Id, Idx = 4, ContentMd = "D. $1.00 per page", IsCorrect = false }
         };
         var q5 = new ExamQuestion
         {
-            Id = q5Id, SectionId = section2Id, Idx = 1,
+            Id = q5Id, SectionId = section2Id, Idx = 2,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "17. How much does printing cost per page?",
             Options = q5Options
         };
-
-        var q6Id = Guid.Parse("55555555-5555-5555-5555-555555555556");
+        var q6Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 6);
         var q6Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 0, ContentMd = "A. Up to 2 hours per session", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 1, ContentMd = "B. Up to 3 hours per session", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 2, ContentMd = "C. Up to 4 hours per session", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 3, ContentMd = "D. Unlimited use", IsCorrect = true }
+            new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 1, ContentMd = "A. Up to 2 hours per session", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 2, ContentMd = "B. Up to 3 hours per session", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 3, ContentMd = "C. Up to 4 hours per session", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 4, ContentMd = "D. Unlimited use", IsCorrect = true }
         };
         var q6 = new ExamQuestion
         {
-            Id = q6Id, SectionId = section2Id, Idx = 2,
+            Id = q6Id, SectionId = section2Id, Idx = 3,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 3,
             PromptMd = "18. Which of the following is NOT allowed in the study rooms?",
             Options = q6Options
         };
 
         // Q19-25: Note completion
-        var q7Id = Guid.Parse("55555555-5555-5555-5555-555555555557");
+        var q7Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 7);
         var q7 = new ExamQuestion
         {
-            Id = q7Id, SectionId = section2Id, Idx = 3,
-            Type = QuestionType.NoteCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "Complete the notes below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.\n\n**Opening Hours**\n\nMonday – Saturday: 8:00 AM – __________\nSunday: 10:00 AM – __________\nClosed: __________\n\n**Borrowing Policy**\n\nMaximum items per member: __________\nLoan period: __________ weeks\nRenewals allowed: __________\n\n**Facilities**\n\nComputer workstations: __________ floor\nStudy rooms: __________ people maximum\n\n**Fees**\n\nInter-library loan: $__________ per request\nDelivery time: __________ – 7 working days",
+            Id = q7Id, SectionId = section2Id, Idx = 4,
+            PromptMd = "Complete the notes below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.\n\n**Opening Hours**\n\nMonday – Saturday: 8:00 AM – [1]\nSunday: 10:00 AM – [2]\nClosed: [3]\n\n**Borrowing Policy**\n\nMaximum items per member: [4]\nLoan period: [5] weeks\nRenewals allowed: [6]\n\n**Facilities**\n\nComputer workstations: [7] floor\nStudy rooms: [8] people maximum\n\n**Fees**\n\nInter-library loan: $[9] per request\nDelivery time: [10] – 7 working days",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "9 PM", "9pm", "21:00", "9:00 PM", "21:00" } },
-                { "1", new[] { "6 PM", "6pm", "18:00", "6:00 PM", "18:00" } },
-                { "2", new[] { "public holidays", "public holiday", "holidays" } },
-                { "3", new[] { "10", "ten" } },
-                { "4", new[] { "3", "three" } },
-                { "5", new[] { "2", "two" } },
-                { "6", new[] { "second", "2", "2nd" } },
-                { "7", new[] { "6", "six" } },
-                { "8", new[] { "8", "eight" } },
-                { "9", new[] { "5", "five" } }
+                { "1", new[] { "9 PM", "9pm", "21:00", "9:00 PM", "21:00" } },
+                { "2", new[] { "6 PM", "6pm", "18:00", "6:00 PM", "18:00" } },
+                { "3", new[] { "public holidays", "public holiday", "holidays" } },
+                { "4", new[] { "10", "ten" } },
+                { "5", new[] { "3", "three" } },
+                { "6", new[] { "2", "two" } },
+                { "7", new[] { "second", "2", "2nd" } },
+                { "8", new[] { "6", "six" } },
+                { "9", new[] { "8", "eight" } },
+                { "10", new[] { "5", "five" } }
             }
         };
 
@@ -252,7 +248,7 @@ That's a quick overview of what we offer. Does anyone have any questions?"
         {
             Id = section3Id,
             ExamId = examId,
-            Idx = 2,
+            Idx = 3,
             Title = "Section 3: Meeting with University Tutor",
             InstructionsMd = "You will hear a conversation between a student, James, and his academic tutor, Dr. Chen, discussing James's research project and study plan. Answer the questions below.\n\nYou will hear the recording ONCE.",
             AudioUrl = "https://langfens-audio.example.com/ielts-listening/section3-tutor-meeting.mp3",
@@ -292,59 +288,55 @@ Dr. Chen: Yes, that's correct. Our next meeting is on the 18th. Please send me a
 
 James: Will do. Thank you, Dr. Chen."
         };
-
-        var q8Id = Guid.Parse("55555555-5555-5555-5555-555555555558");
+        var q8Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 8);
         var q8Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 0, ContentMd = "A. She recommended a book list", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 1, ContentMd = "B. She arranged access to databases", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 2, ContentMd = "C. She found a research partner for him", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 3, ContentMd = "D. She arranged an interview with a transport official", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 1, ContentMd = "A. She recommended a book list", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 2, ContentMd = "B. She arranged access to databases", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 3, ContentMd = "C. She found a research partner for him", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 4, ContentMd = "D. She arranged an interview with a transport official", IsCorrect = false }
         };
         var q8 = new ExamQuestion
         {
-            Id = q8Id, SectionId = section3Id, Idx = 0,
+            Id = q8Id, SectionId = section3Id, Idx = 1,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 3,
             PromptMd = "26. What help did the librarian provide to James?",
             Options = q8Options
         };
-
-        var q9Id = Guid.Parse("55555555-5555-5555-5555-555555555559");
+        var q9Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 9);
         var q9Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 0, ContentMd = "A. Quantitative research methods", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 1, ContentMd = "B. Qualitative research methods", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 2, ContentMd = "C. Statistical data analysis", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 3, ContentMd = "D. Academic writing skills", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 1, ContentMd = "A. Quantitative research methods", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 2, ContentMd = "B. Qualitative research methods", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 3, ContentMd = "C. Statistical data analysis", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 4, ContentMd = "D. Academic writing skills", IsCorrect = false }
         };
         var q9 = new ExamQuestion
         {
-            Id = q9Id, SectionId = section3Id, Idx = 1,
+            Id = q9Id, SectionId = section3Id, Idx = 2,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "27. Which research seminar topic did James find most useful?",
             Options = q9Options
         };
-
-        var q10Id = Guid.Parse("55555555-5555-5555-5555-555555555560");
+        var q10Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 10);
         var q10Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 0, ContentMd = "A. Every Monday", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 1, ContentMd = "B. Every two weeks", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 2, ContentMd = "C. Every three weeks", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 3, ContentMd = "D. Once a month", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 1, ContentMd = "A. Every Monday", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 2, ContentMd = "B. Every two weeks", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 3, ContentMd = "C. Every three weeks", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 4, ContentMd = "D. Once a month", IsCorrect = false }
         };
         var q10 = new ExamQuestion
         {
-            Id = q10Id, SectionId = section3Id, Idx = 2,
+            Id = q10Id, SectionId = section3Id, Idx = 3,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "28. How often are James's individual supervision sessions with Dr. Chen?",
             Options = q10Options
         };
-
-        var q11Id = Guid.Parse("55555555-5555-5555-5555-555555555561");
+        var q11Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 11);
         var q11 = new ExamQuestion
         {
-            Id = q11Id, SectionId = section3Id, Idx = 3,
+            Id = q11Id, SectionId = section3Id, Idx = 4,
             Type = QuestionType.ShortAnswer, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "29. How many interviews does James plan to conduct per city?\n30. On which day are the compulsory tutorial sessions held?\n31. In which room are the Friday tutorials held?",
             ShortAnswerAcceptTexts = new List<string>
@@ -354,19 +346,18 @@ James: Will do. Thank you, Dr. Chen."
                 "Room 307", "307", "Room 307 of the Humanities Building"
             }
         };
-
-        var q12Id = Guid.Parse("55555555-5555-5555-5555-555555555562");
+        var q12Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 12);
         var q12 = new ExamQuestion
         {
-            Id = q12Id, SectionId = section3Id, Idx = 4,
+            Id = q12Id, SectionId = section3Id, Idx = 5,
             Type = QuestionType.SentenceCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "Complete the sentences below. Write NO MORE THAN THREE WORDS for each answer.\n\n32. James plans to study Singapore in the __________ of his dissertation.\n33. Singapore's approach to reducing car dependency is described as __________.\n34. James's first draft should be submitted by the end of week __________.\n35. James must send his progress report to Dr. Chen by the __________ of the current month.",
+            PromptMd = "Complete the sentences below. Write NO MORE THAN THREE WORDS for each answer.\n\n32. James plans to study Singapore in the [1] of his dissertation.\n33. Singapore's approach to reducing car dependency is described as [2].\n34. James's first draft should be submitted by the end of week [3].\n35. James must send his progress report to Dr. Chen by the [4] of the current month.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "0", new[] { "first half", "first section", "first part" } },
-                { "1", new[] { "government-managed", "top-down", "government led", "government-managed" } },
-                { "2", new[] { "8", "eight" } },
-                { "3", new[] { "15", "fifteenth", "15th" } }
+                { "1", new[] { "first half", "first section", "first part" } },
+                { "2", new[] { "government-managed", "top-down", "government led", "government-managed" } },
+                { "3", new[] { "8", "eight" } },
+                { "4", new[] { "15", "fifteenth", "15th" } }
             }
         };
 
@@ -379,7 +370,7 @@ James: Will do. Thank you, Dr. Chen."
         {
             Id = section4Id,
             ExamId = examId,
-            Idx = 3,
+            Idx = 4,
             Title = "Section 4: Lecture on Climate Science",
             InstructionsMd = "You will hear a lecture by Professor Alan Hughes on climate change and global temperature records. Answer the questions below.\n\nYou will hear the recording ONCE.\n\nNote: Section 4 contains 5 questions.",
             AudioUrl = "https://langfens-audio.example.com/ielts-listening/section4-climate-lecture.mp3",
@@ -397,59 +388,55 @@ On a more hopeful note, renewable energy sources such as solar and wind power ha
 
 In conclusion, while the challenges are significant, the scientific consensus is clear, and the tools to address climate change are increasingly within our reach. Thank you for your attention. I welcome any questions."
         };
-
-        var q13Id = Guid.Parse("55555555-5555-5555-5555-555555555563");
+        var q13Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 13);
         var q13Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 0, ContentMd = "A. 1850s", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 1, ContentMd = "B. 1880", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 2, ContentMd = "C. 1900", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 3, ContentMd = "D. 1950", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 1, ContentMd = "A. 1850s", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 2, ContentMd = "B. 1880", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 3, ContentMd = "C. 1900", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q13Id, Idx = 4, ContentMd = "D. 1950", IsCorrect = false }
         };
         var q13 = new ExamQuestion
         {
-            Id = q13Id, SectionId = section4Id, Idx = 0,
+            Id = q13Id, SectionId = section4Id, Idx = 1,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "36. According to the lecture, since when have the most reliable continuous temperature records been available?",
             Options = q13Options
         };
-
-        var q14Id = Guid.Parse("55555555-5555-5555-5555-555555555564");
+        var q14Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 14);
         var q14Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 0, ContentMd = "A. Approximately 0.5 degrees", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 1, ContentMd = "B. Approximately 1.1 degrees", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 2, ContentMd = "C. Approximately 3 degrees", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 3, ContentMd = "D. Approximately 5 degrees", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 1, ContentMd = "A. Approximately 0.5 degrees", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 2, ContentMd = "B. Approximately 1.1 degrees", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 3, ContentMd = "C. Approximately 3 degrees", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q14Id, Idx = 4, ContentMd = "D. Approximately 5 degrees", IsCorrect = false }
         };
         var q14 = new ExamQuestion
         {
-            Id = q14Id, SectionId = section4Id, Idx = 1,
+            Id = q14Id, SectionId = section4Id, Idx = 2,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "37. By how much has the Earth's average surface temperature risen since pre-industrial times?",
             Options = q14Options
         };
-
-        var q15Id = Guid.Parse("55555555-5555-5555-5555-555555555565");
+        var q15Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 15);
         var q15Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 0, ContentMd = "A. 196 countries", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 1, ContentMd = "B. 136 countries", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 2, ContentMd = "C. 196 parties", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 3, ContentMd = "D. 100 parties", IsCorrect = false }
+            new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 1, ContentMd = "A. 196 countries", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 2, ContentMd = "B. 136 countries", IsCorrect = false },
+            new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 3, ContentMd = "C. 196 parties", IsCorrect = true },
+            new() { Id = Guid.NewGuid(), QuestionId = q15Id, Idx = 4, ContentMd = "D. 100 parties", IsCorrect = false }
         };
         var q15 = new ExamQuestion
         {
-            Id = q15Id, SectionId = section4Id, Idx = 2,
+            Id = q15Id, SectionId = section4Id, Idx = 3,
             Type = QuestionType.MultipleChoiceSingle, Skill = QuestionSkill.Listening, Difficulty = 3,
             PromptMd = "38. How many countries signed the Paris Agreement?",
             Options = q15Options
         };
-
-        var q16Id = Guid.Parse("55555555-5555-5555-5555-555555555566");
+        var q16Id = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", 16);
         var q16 = new ExamQuestion
         {
-            Id = q16Id, SectionId = section4Id, Idx = 3,
+            Id = q16Id, SectionId = section4Id, Idx = 4,
             Type = QuestionType.ShortAnswer, Skill = QuestionSkill.Listening, Difficulty = 2,
             PromptMd = "39. What is the phenomenon called when the Arctic warms faster than the global average?\n40. According to the IPCC, by how much might sea levels rise by 2100 under a moderate scenario?",
             ShortAnswerAcceptTexts = new List<string>
@@ -463,39 +450,37 @@ In conclusion, while the challenges are significant, the scientific consensus is
         // Q41–Q43: split from the original 3-blank question into 3 single-blank
         // questions, matching the one-question-per-blank convention used by every
         // other SUMMARY_COMPLETION seed (blank-q<Idx> key, single ___ in prompt).
-        var q17aId = Guid.Parse("55555555-5555-5555-5555-555555555568");
+        var q17aId = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", "17a");
         var q17a = new ExamQuestion
         {
-            Id = q17aId, SectionId = section4Id, Idx = 4,
+            Id = q17aId, SectionId = section4Id, Idx = 5,
             Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "The Paris Agreement, signed in _______, committed 196 countries to limiting warming.",
+            PromptMd = "The Paris Agreement, signed in [4], committed 196 countries to limiting warming.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "blank-q4", new[] { "2015" } }
+                { "4", new[] { "2015" } }
             }
         };
-
-        var q17bId = Guid.Parse("55555555-5555-5555-5555-555555555569");
+        var q17bId = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", "17b");
         var q17b = new ExamQuestion
         {
-            Id = q17bId, SectionId = section4Id, Idx = 5,
+            Id = q17bId, SectionId = section4Id, Idx = 6,
             Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "The Paris Agreement, signed in 2015, committed 196 countries to limiting warming to _______ above pre-industrial levels.",
+            PromptMd = "The Paris Agreement, signed in 2015, committed 196 countries to limiting warming to [5] above pre-industrial levels.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "blank-q5", new[] { "1.5 degrees", "1.5 degrees Celsius", "1.5 degrees celsius", "1.5°C", "one point five degrees" } }
+                { "5", new[] { "1.5 degrees", "1.5 degrees Celsius", "1.5 degrees celsius", "1.5°C", "one point five degrees" } }
             }
         };
-
-        var q17cId = Guid.Parse("55555555-5555-5555-5555-55555555556a");
+        var q17cId = SeederHelpers.CreateDeterministicGuid("ielts-listening-practice-1", "17c");
         var q17c = new ExamQuestion
         {
-            Id = q17cId, SectionId = section4Id, Idx = 6,
+            Id = q17cId, SectionId = section4Id, Idx = 7,
             Type = QuestionType.SummaryCompletion, Skill = QuestionSkill.Listening, Difficulty = 2,
-            PromptMd = "Solar panel costs have fallen by _______ since 2010.",
+            PromptMd = "Solar panel costs have fallen by [6] since 2010.",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
-                { "blank-q6", new[] { "89%", "89 percent", "eighty nine percent" } }
+                { "6", new[] { "89%", "89 percent", "eighty nine percent" } }
             }
         };
 

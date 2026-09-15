@@ -51,4 +51,8 @@
         <Folder Include="Contracts\Exam\" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="attempt-service.Tests" />
+    </ItemGroup>
+
 </Project>

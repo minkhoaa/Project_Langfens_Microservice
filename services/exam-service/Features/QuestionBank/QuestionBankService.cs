@@ -20,7 +20,13 @@ public record QuestionBankItemDto(
     string SectionTitle,
     Guid ExamId,
     string ExamTitle,
-    List<OptionDto> Options
+    List<OptionDto> Options,
+    Dictionary<string, string[]?>? MatchPairs,
+    Dictionary<string, string[]?>? BlankAcceptTexts,
+    Dictionary<string, string[]?>? BlankAcceptRegex,
+    List<string>? OrderCorrects,
+    List<string>? ShortAnswerAcceptTexts,
+    List<string>? ShortAnswerAcceptRegex
 );
 
 public record OptionDto(Guid Id, string Text, bool IsCorrect, int Idx);
@@ -105,7 +111,13 @@ public class QuestionBankService(ExamDbContext context) : IQuestionBankService
                 q.Section.Title ?? "",
                 q.Section.ExamId,
                 q.Section.Exam.Title,
-                q.Options.OrderBy(o => o.Idx).Select(o => new OptionDto(o.Id, o.ContentMd, o.IsCorrect, o.Idx)).ToList()
+                q.Options.OrderBy(o => o.Idx).Select(o => new OptionDto(o.Id, o.ContentMd, o.IsCorrect, o.Idx)).ToList(),
+                q.MatchPairs,
+                q.BlankAcceptTexts,
+                q.BlankAcceptRegex,
+                q.OrderCorrects,
+                q.ShortAnswerAcceptTexts,
+                q.ShortAnswerAcceptRegex
             ))
             .ToListAsync(token);
         

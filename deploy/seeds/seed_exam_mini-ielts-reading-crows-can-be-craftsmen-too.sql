@@ -65,9 +65,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Label 1 on diagram: _______',
+    'Label 1 on diagram: [1]',
     '',
-    '{"blank-q1": ["RIPS"]}'::jsonb
+    '{"1": ["RIPS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -79,9 +79,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Label 2 on diagram: _______',
+    'Label 2 on diagram: [1]',
     '',
-    '{"blank-q2": ["PANDANUS"]}'::jsonb
+    '{"1": ["PANDANUS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -93,9 +93,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Label 3 on diagram: _______',
+    'Label 3 on diagram: [1]',
     '',
-    '{"blank-q3": ["WIDE"]}'::jsonb
+    '{"1": ["WIDE"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -107,9 +107,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Label 4 on diagram: _______',
+    'Label 4 on diagram: [1]',
     '',
-    '{"blank-q4": ["TAPERED"]}'::jsonb
+    '{"1": ["TAPERED"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -206,9 +206,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'It used to be thought that only human beings used tools. Even after we learned that many other **10** _______ also do so, it was still believed that only humans were intelligent enough to gradually evolve better tools.',
+    'It used to be thought that only human beings used tools. Even after we learned that many other **10** [1] also do so, it was still believed that only humans were intelligent enough to gradually evolve better tools.',
     '',
-    '{"blank-q10": ["ANIMALS"]}'::jsonb
+    '{"1": ["ANIMALS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -220,9 +220,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'A study of crows in **11** _______, however, shows that these birds use a leaf tool which has been evolved over several generations.',
+    'A study of crows in **11** [1], however, shows that these birds use a leaf tool which has been evolved over several generations.',
     '',
-    '{"blank-q11": ["NEW CALEDONIA"]}'::jsonb
+    '{"1": ["NEW CALEDONIA"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -234,9 +234,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'A crow in another study has shown the human-like ability to understand **12** _______ in order to manufacture tools, which not even **13** _______ can do.',
+    'A crow in another study has shown the human-like ability to understand **12** [1] in order to manufacture tools, which not even **13** [2] can do.',
     '',
-    '{"blank-q12": ["PHYSICAL LAWS"]}'::jsonb
+    '{"1": ["PHYSICAL LAWS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -248,9 +248,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'A crow in another study has shown the human-like ability to understand **12** _______ in order to manufacture tools, which not even **13** _______ can do.',
+    'A crow in another study has shown the human-like ability to understand **12** [1] in order to manufacture tools, which not even **13** [2] can do.',
     '',
-    '{"blank-q13": ["CHIMPANZEES", "CHIMPS"]}'::jsonb
+    '{"1": ["CHIMPANZEES", "CHIMPS"]}'::jsonb
   );
 
 
@@ -260,13 +260,13 @@ BEGIN
 
   -- Insert question groups
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 1, 1, 4, E'## Questions 1-4\n\nComplete the diagrams.\n\nChoose **NO MORE THAN TWO WORDS** from the passage for each answer.\n\n![Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766596011/ielts/a_0f8f84b00a95.jpg)\n\n**1** _______  \n**2** _______  \n**3** _______  \n**4** _______');
+  VALUES (gen_random_uuid(), sec1, 1, 1, 4, E'## Questions 1-4\n\nComplete the diagrams.\n\nChoose **NO MORE THAN TWO WORDS** from the passage for each answer.\n\n![Diagram](https://res.cloudinary.com/df41zs8il/image/upload/v1766596011/ielts/a_0f8f84b00a95.jpg)\n\n**1** [1]  \n**2** [2]  \n**3** [3]  \n**4** [4]');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
   VALUES (gen_random_uuid(), sec1, 2, 5, 9, E'## Questions 5-9\n\nClassify the following statements as referring to the crow(s) in:\n\n- **A** the study by Hunt and Gray\n- **B** the study by Kacelnik, Chappell and Weir\n- **C** both studies\n\nWrite the correct letter, **A, B or C.**\n\n**5** can share tool-making skills with other crows  \n**6** can make special tools for a particular purpose  \n**7** can solve problems by understanding rather than learning  \n**8** can make tools better than British crows can  \n**9** can manufacture hooks to extract food');
 
   INSERT INTO exam_question_groups ("Id","SectionId","Idx","StartIdx","EndIdx","InstructionMd")
-  VALUES (gen_random_uuid(), sec1, 3, 10, 13, E'## Questions 10-13\n\nComplete the summary.\n\nChoose **NO MORE THAN TWO WORDS** from the passage for each answer.\n\nIt used to be thought that only human beings used tools. Even after we learned that many other **10** _______ also do so, it was still believed that only humans were intelligent enough to gradually evolve better tools. A study of crows in **11** _______, however, shows that these birds use a leaf tool which has been evolved over several generations. A crow in another study has shown the human-like ability to understand **12** _______ in order to manufacture tools, which not even **13** _______ can do.');
+  VALUES (gen_random_uuid(), sec1, 3, 10, 13, E'## Questions 10-13\n\nComplete the summary.\n\nChoose **NO MORE THAN TWO WORDS** from the passage for each answer.\n\nIt used to be thought that only human beings used tools. Even after we learned that many other **10** [1] also do so, it was still believed that only humans were intelligent enough to gradually evolve better tools. A study of crows in **11** [2], however, shows that these birds use a leaf tool which has been evolved over several generations. A crow in another study has shown the human-like ability to understand **12** [3] in order to manufacture tools, which not even **13** [4] can do.');
 
 END$$;
 

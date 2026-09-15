@@ -14,7 +14,47 @@ public interface IQuestionGrader
     GradeResult Grade(AttemptAnswer answer, QuestionKey key);
 }
 
-// single choice grader
+/// <summary>
+/// D1 invariant helpers: <c>AwardedPoints ∈ { 0, QuestionPoints }</c>.
+/// Multi-blank graders MUST collapse partial credit to 0 (all-or-nothing).
+/// </summary>
+internal static class GraderScoring
+{
+    public static decimal ScoreFor(bool isCorrect, decimal questionPoints)
+        => isCorrect ? questionPoints : 0m;
+
+    /// <summary>
+    /// Sprint 3: union of <c>texts.Keys</c> and <c>regs.Keys</c> sorted
+    /// numerically with ordinal fallback. PostgreSQL jsonb_object_keys order
+    /// and .NET Dictionary hash iteration are not guaranteed to match the
+    /// UI's blank order — sorting here keeps rendering + grading aligned
+    /// independent of dict insertion order.
+    /// </summary>
+    public static IEnumerable<string> SortedUnionKeys(
+        IDictionary<string, string[]?> texts,
+        IDictionary<string, string[]?> regs)
+    {
+        return texts.Keys
+            .Union(regs.Keys, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(k => k, Comparer<string>.Create((a, b) =>
+            {
+                if (long.TryParse(a, out var la) && long.TryParse(b, out var lb))
+                    return la.CompareTo(lb);
+                return string.CompareOrdinal(a, b);
+            }));
+    }
+}
+
+/// <summary>
+/// Grades TRUE_FALSE_NOT_GIVEN / YES_NO_NOT_GIVEN / CLASSIFICATION / FE_MULTI_SINGLE kinds.
+///
+/// Canonical wire format (Spec D4): <c>answer.SelectedOptionIds = [optionGuid]</c>
+/// where <c>optionGuid</c> is the row with <c>ExamOption.IsCorrect = true</c>.
+///
+/// Defensive fallback (deprecated, FE Phase 2): if <c>TextAnswer</c> holds a GUID string
+/// OR text equals the correct option's <c>contentMd</c>, accept the answer. This protects
+/// legacy FE builds and JSON-string migrations; new clients MUST send <c>SelectedOptionIds</c>.
+/// </summary>
 public sealed class SingleChoiceGrader : IQuestionGrader
 {
     public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
@@ -47,7 +87,7 @@ public sealed class MultipleChoiceGrader : IQuestionGrader
         var correctIds = (key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>())
             .Select(t => t.id)
             .ToHashSet();
-        
+
         // Set equality - order doesn't matter, just need to match all correct options
         var isCorrect = selection.SetEquals(correctIds);
         return new GradeResult(isCorrect ? key.QuestionPoints : 0m, isCorrect);
@@ -82,10 +122,11 @@ public sealed class CompletionGrader : IQuestionGrader
                 // map vẫn null → sẽ fallback phía dưới
             }
         }
+
         if (map is not null)
         {
             decimal get = 0, total = 0;
-            foreach (var blankId in texts.Keys.Union(regs.Keys))
+            foreach (var blankId in GraderScoring.SortedUnionKeys(texts, regs))
             {
 
                 texts.TryGetValue(blankId, out var accepted);
@@ -124,8 +165,8 @@ public sealed class CompletionGrader : IQuestionGrader
 
             }
 
-            var score = (total > 0 ? (decimal)get / total : 0) * key.QuestionPoints;
-            return new GradeResult(score, score > 0);
+            var isAllMatched = total > 0 && get == total;
+            return new GradeResult(GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints), isAllMatched);
         }
         // đoạn này payload không phải JSON chấm theo Plaintext
         var blankCount = texts.Count + regs.Count;
@@ -166,21 +207,20 @@ public sealed class CompletionGrader : IQuestionGrader
                     }
                 }
             }
-            var score = matched ? key.QuestionPoints : 0m;
-            return new GradeResult(score, matched);
+            return new GradeResult(GraderScoring.ScoreFor(matched, key.QuestionPoints), matched);
         }
         // Multi-blank positional fallback: the FE packs user answers as
         // newline-separated values (e.g. "answer1\nanswer2"). Match each part
-        // to the corresponding blank ID in dictionary iteration order, which
-        // mirrors the order of `question.CompletionAccepts` and therefore the
+        // to the corresponding blank ID. Sort blank IDs by numeric value
+        // (then alphabetically for non-numeric legacy keys) so the positional
+        // match is stable across JSONB deserialization order and .NET
+        // Dictionary hash iteration — both are not guaranteed to match the
         // UI's blank order. Extra trailing parts are ignored; missing parts
         // count as unmatched for that blank.
         var userParts = raw.Split('\n')
             .Select(p => p.Trim())
             .ToArray();
-        var blankIds = texts.Keys
-            .Union(regs.Keys, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var blankIds = GraderScoring.SortedUnionKeys(texts, regs).ToList();
         decimal positionalGet = 0m, positionalTotal = 0m;
         for (var i = 0; i < blankIds.Count; i++)
         {
@@ -219,10 +259,8 @@ public sealed class CompletionGrader : IQuestionGrader
 
             if (matched) positionalGet++;
         }
-        var positionalScore = positionalTotal > 0
-            ? (positionalGet / positionalTotal) * key.QuestionPoints
-            : 0m;
-        return new GradeResult(positionalScore, positionalScore > 0);
+        var isPositionalAllMatched = positionalTotal > 0 && positionalGet == positionalTotal;
+        return new GradeResult(GraderScoring.ScoreFor(isPositionalAllMatched, key.QuestionPoints), isPositionalAllMatched);
     }
 }
 
@@ -276,18 +314,23 @@ public sealed class MatchingHeadingGrader : IQuestionGrader
                     got++;
                 }
             }
-            var score = total > 0 ? got / total * key.QuestionPoints : 0m;
-            return new GradeResult(score, score > 0);
+            var isAllMatched = total > 0 && got == total;
+            return new GradeResult(
+                GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints),
+                isAllMatched,
+                Feedback: isAllMatched ? null : "One or more pairs do not match");
         }
         if (pairs.Count == 1)
         {
             var (_, accepted) = pairs.First();
             var matched = accepted is { Length: > 0 } &&
                           accepted.Any(k => string.Equals(k, raw, StringComparison.OrdinalIgnoreCase));
-            var score = matched ? key.QuestionPoints : 0m;
-            return new GradeResult(score, matched);
+            return new GradeResult(
+                GraderScoring.ScoreFor(matched, key.QuestionPoints),
+                matched,
+                Feedback: matched ? null : "One or more pairs do not match");
         }
-        return new GradeResult(0, false, Feedback: "Malformed matching payload (expected JSON for multiple pairs)");
+        return new GradeResult(0, false, Feedback: "One or more pairs do not match");
 
     }
 }
@@ -304,21 +347,62 @@ public sealed class FlowChartGrader : IQuestionGrader
             .ToList();
         if (correct.Count == 0)
             return new GradeResult(0m, null, true, "No answer key");
-        var userRawList = ParseUserSequence(answer.TextAnswer);
-        if (userRawList.Count == 0)
+
+        // Sprint 7 Phase 10: FE sends {steps: [...], labels: {"1": "soak", "2": "dry", ...}}
+        // when BlankAcceptTexts is present (reorder + label).
+        var payload = ParseUserPayload(answer.TextAnswer);
+        List<string> userSteps;
+        Dictionary<string, string> userLabels;
+        if (payload.Steps != null && payload.Steps.Count > 0)
+        {
+            userSteps = payload.Steps;
+            userLabels = payload.Labels ?? new Dictionary<string, string>();
+        }
+        else
+        {
+            // Legacy fallback: plain array of step keys.
+            userSteps = ParseUserSequence(answer.TextAnswer);
+            userLabels = new Dictionary<string, string>();
+        }
+
+        if (userSteps.Count == 0)
             return new GradeResult(0m, false, false, "Malformed or empty sequence payload");
 
-        var user = userRawList
+        var user = userSteps
             .Where(k => !string.IsNullOrEmpty(k))
             .Select(NormNode)
             .ToList();
         if (user.Count == 0)
             return new GradeResult(0m, false, false, "Malformed or empty sequence payload");
-        var lcs = LCS(user, correct);
-        var score = (decimal)lcs / correct.Count * key.QuestionPoints;
-        return new GradeResult(score, score > 0);
 
+        var isOrderMatched = user.Count == correct.Count
+                             && user.SequenceEqual(correct, StringComparer.Ordinal);
+
+        // Grade labels against BlankAcceptTexts (case-insensitive trim compare).
+        var isLabelsMatched = true;
+        if (key.BlankAcceptTexts is { Count: > 0 })
+        {
+            foreach (var kv in key.BlankAcceptTexts)
+            {
+                var stepKey = kv.Key; // "1", "2", ...
+                var acceptTexts = kv.Value ?? Array.Empty<string>();
+                var userLabel = (userLabels.TryGetValue(stepKey, out var v) ? v : "").Trim();
+                if (string.IsNullOrEmpty(userLabel) ||
+                    !acceptTexts.Any(a => string.Equals(a?.Trim(), userLabel, StringComparison.OrdinalIgnoreCase)))
+                {
+                    isLabelsMatched = false;
+                    break;
+                }
+            }
+        }
+
+        var isAllMatched = isOrderMatched && isLabelsMatched;
+        return new GradeResult(
+            GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints),
+            isAllMatched,
+            Feedback: isAllMatched ? null : "Sequence order or labels do not match answer key");
     }
+
     private static string NormNode(string? s)
     {
         if (string.IsNullOrWhiteSpace(s)) return string.Empty;
@@ -328,10 +412,29 @@ public sealed class FlowChartGrader : IQuestionGrader
         s = Regex.Replace(s, @"\s+", " ").Trim();
         return s;
     }
+
+    private sealed class FlowChartPayload
+    {
+        public List<string>? Steps { get; set; }
+        public Dictionary<string, string>? Labels { get; set; }
+    }
+
+    private static FlowChartPayload ParseUserPayload(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return new FlowChartPayload();
+        try
+        {
+            return JsonSerializer.Deserialize<FlowChartPayload>(raw) ?? new FlowChartPayload();
+        }
+        catch
+        {
+            return new FlowChartPayload();
+        }
+    }
+
     private static List<string> ParseUserSequence(string? raw)
     {
-        if (string.IsNullOrWhiteSpace(raw))
-            return new List<string>();
+        if (string.IsNullOrWhiteSpace(raw)) return new List<string>();
         try
         {
             return JsonSerializer.Deserialize<List<string>>(raw) ?? new List<string>();
@@ -340,17 +443,6 @@ public sealed class FlowChartGrader : IQuestionGrader
         {
             return new List<string>();
         }
-    }
-
-    public static int LCS(IList<string> a, IList<string> b)
-    {
-        var dp = new int[a.Count + 1, b.Count + 1];
-        for (var i = 1; i <= a.Count; i++)
-            for (var j = 1; j <= b.Count; j++)
-                dp[i, j] = a[i - 1] == b[j - 1]
-                    ? dp[i - 1, j - 1] + 1
-                    : Math.Max(dp[i - 1, j], dp[i, j - 1]);
-        return dp[a.Count, b.Count];
     }
 }
 
@@ -389,5 +481,3 @@ public sealed class ShortAnswerGrader : IQuestionGrader
         return new GradeResult(matched ? key.QuestionPoints : 0m, matched);
     }
 }
-
-

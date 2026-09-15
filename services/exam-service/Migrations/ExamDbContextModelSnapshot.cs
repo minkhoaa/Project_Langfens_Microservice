@@ -80,12 +80,18 @@ namespace exam_service.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AltText")
+                        .HasColumnType("text");
+
                     b.Property<string>("ContentMd")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Idx")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("boolean");
@@ -123,6 +129,9 @@ namespace exam_service.Migrations
 
                     b.Property<int>("Idx")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<Dictionary<string, string[]>>("MatchPairs")
                         .HasColumnType("jsonb");

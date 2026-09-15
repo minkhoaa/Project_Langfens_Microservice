@@ -86,7 +86,6 @@ namespace attempt_service.Features.Helpers
         public IEnumerable<string> SupportedTypes => new[]
      {
             QuestionType.FlowChart,
-            QuestionType.FlowChartCompletion,
         };
 
         public IQuestionGrader Create() => _instance;
@@ -100,13 +99,12 @@ namespace attempt_service.Features.Helpers
         }
         public IEnumerable<string> SupportedTypes => new[]
      {
-            QuestionType.ShortAnswer,
-            QuestionType.AudioResponse
+            QuestionType.ShortAnswer
         };
 
         public IQuestionGrader Create() => _instance;
     }
-    
+
     public class MultipleChoiceGraderRegistration : IQuestionGraderRegistration
     {
         private readonly IQuestionGrader _instance;

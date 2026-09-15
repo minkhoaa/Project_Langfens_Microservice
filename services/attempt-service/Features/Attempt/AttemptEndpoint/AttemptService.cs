@@ -60,42 +60,23 @@ public class AttemptService(
         if (existedStartedAttempt != null)
         {
             if (existedStartedAttempt.PaperJson is null)
-                return Results.BadRequest(
-                    new ApiResultDto(false, "Stored snapshot is empty", null!)
-                );
-            try
             {
-                var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
-                var parsed =
-                    parser.Parse<InternalDeliveryExam>(existedStartedAttempt.PaperJson.RootElement.GetRawText());
-                var safeJson = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(parsed!));
-                using var parsedDoc = JsonDocument.Parse(safeJson!);
-                var safeEl = PaperWideNormalizer.NormalizeJsonElement(parsedDoc.RootElement);
-                var deadline = existedStartedAttempt.StartedAt.AddSeconds(existedStartedAttempt.DurationSec);
-                var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
-                return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
-                    new AttemptStartResponse(
-                        existedStartedAttempt.Id,
-                        safeEl,
-                        existedStartedAttempt.StartedAt,
-                        existedStartedAttempt.DurationSec,
-                        timeLeft
-                        )
-                ));
+                // Stale STARTED row with no paper snapshot (e.g. cleared during a
+                // duplicate-section bugfix). Drop it and fall through to start a
+                // fresh attempt below — better than failing the user with 400.
+                context.Attempts.Remove(existedStartedAttempt);
+                await context.SaveChangesAsync(token);
             }
-            catch
+            else
             {
                 try
                 {
-                    var dto = existedStartedAttempt.PaperJson.RootElement
-                        .Deserialize<InternalExamDto.InternalDeliveryExam>(new JsonSerializerOptions
-                        { PropertyNameCaseInsensitive = true });
-                    if (dto == null) return Results.NotFound(new ApiResultDto(false, "Not found", null!));
-                    using var sanitized =
-                        JsonSerializer.SerializeToDocument(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-                    var safeEl = PaperWideNormalizer.NormalizeJsonElement(sanitized.RootElement);
-
-                    //time left
+                    var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
+                    var parsed =
+                        parser.Parse<InternalDeliveryExam>(existedStartedAttempt.PaperJson.RootElement.GetRawText());
+                    var safeJson = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(parsed!));
+                    using var parsedDoc = JsonDocument.Parse(safeJson!);
+                    var safeEl = PaperWideNormalizer.NormalizeJsonElement(parsedDoc.RootElement);
                     var deadline = existedStartedAttempt.StartedAt.AddSeconds(existedStartedAttempt.DurationSec);
                     var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
                     return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
@@ -110,8 +91,34 @@ public class AttemptService(
                 }
                 catch
                 {
-                    return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
-                        PaperWideNormalizer.NormalizeJsonElement(existedStartedAttempt.PaperJson.RootElement)));
+                    try
+                    {
+                        var dto = existedStartedAttempt.PaperJson.RootElement
+                            .Deserialize<InternalExamDto.InternalDeliveryExam>(new JsonSerializerOptions
+                            { PropertyNameCaseInsensitive = true });
+                        if (dto == null) return Results.NotFound(new ApiResultDto(false, "Not found", null!));
+                        using var sanitized =
+                            JsonSerializer.SerializeToDocument(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                        var safeEl = PaperWideNormalizer.NormalizeJsonElement(sanitized.RootElement);
+
+                        //time left
+                        var deadline = existedStartedAttempt.StartedAt.AddSeconds(existedStartedAttempt.DurationSec);
+                        var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
+                        return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
+                            new AttemptStartResponse(
+                                existedStartedAttempt.Id,
+                                safeEl,
+                                existedStartedAttempt.StartedAt,
+                                existedStartedAttempt.DurationSec,
+                                timeLeft
+                                )
+                        ));
+                    }
+                    catch
+                    {
+                        return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
+                            PaperWideNormalizer.NormalizeJsonElement(existedStartedAttempt.PaperJson.RootElement)));
+                    }
                 }
             }
         }

@@ -65,9 +65,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'easy _______ of food items',
+    'easy [1] of food items',
     '',
-    '{"blank-q1": ["TRANSPORTATION"]}'::jsonb
+    '{"1": ["TRANSPORTATION"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -79,9 +79,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'long-term storage of _______ and biological samples',
+    'long-term storage of [1] and biological samples',
     '',
-    '{"blank-q2": ["PHARMACEUTICALS"]}'::jsonb
+    '{"1": ["PHARMACEUTICALS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -93,9 +93,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'preservation of precious _______',
+    'preservation of precious [1]',
     '',
-    '{"blank-q3": ["MANUSCRIPTS"]}'::jsonb
+    '{"1": ["MANUSCRIPTS"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -107,9 +107,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'is based on process of _______ is more efficient than',
+    'is based on process of [1] is more efficient than',
     '',
-    '{"blank-q4": ["SUBLIMATION"]}'::jsonb
+    '{"1": ["SUBLIMATION"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -121,9 +121,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'is more efficient than _______',
+    'is more efficient than [1]',
     '',
-    '{"blank-q5": ["SIMPLE DRYING"]}'::jsonb
+    '{"1": ["SIMPLE DRYING"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -135,9 +135,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     '',
-    '{"blank-q6": ["CHAMBER"]}'::jsonb
+    '{"1": ["CHAMBER"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -149,9 +149,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     '',
-    '{"blank-q7": ["SHELVES"]}'::jsonb
+    '{"1": ["SHELVES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -163,9 +163,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     '',
-    '{"blank-q8": ["FREEZING COIL"]}'::jsonb
+    '{"1": ["FREEZING COIL"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -177,9 +177,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    '_______',
+    '[1]',
     '',
-    '{"blank-q9": ["COMPRESSOR"]}'::jsonb
+    '{"1": ["COMPRESSOR"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -191,9 +191,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Freeze-drying prevents food from going bad by stopping the activity of microorganisms or _______ Its advantages are that the food tastes and feels the same as the original because both the and structure are preserved.',
+    'Freeze-drying prevents food from going bad by stopping the activity of microorganisms or [1] Its advantages are that the food tastes and feels the same as the original because both the and structure are preserved.',
     '',
-    '{"blank-q10": ["ENZYMES"]}'::jsonb
+    '{"1": ["ENZYMES"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -205,9 +205,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'Its advantages are that the food tastes and feels the same as the original because both the _______ and structure are preserved.',
+    'Its advantages are that the food tastes and feels the same as the original because both the [1] and structure are preserved.',
     '',
-    '{"blank-q11": ["COMPOSITION"]}'::jsonb
+    '{"1": ["COMPOSITION"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -219,9 +219,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The process is carried out slowly in order to ensure that _______ does not take place.',
+    'The process is carried out slowly in order to ensure that [1] does not take place.',
     '',
-    '{"blank-q12": ["OVERHEATING"]}'::jsonb
+    '{"1": ["OVERHEATING"]}'::jsonb
   );
 
   qid := gen_random_uuid();
@@ -233,9 +233,9 @@ BEGIN
     'SUMMARY_COMPLETION',
     'READING',
     2,
-    'The people of one ancient mountain civilisation were able to use this method of food preservation because the conditions needed were present at _______ .',
+    'The people of one ancient mountain civilisation were able to use this method of food preservation because the conditions needed were present at [1] .',
     '',
-    '{"blank-q13": ["HIGH ALTITUDES"]}'::jsonb
+    '{"1": ["HIGH ALTITUDES"]}'::jsonb
   );
 
 
