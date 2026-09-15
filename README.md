@@ -3,15 +3,14 @@
 > **An AI-powered IELTS preparation platform that solves the high cost of manual grading and poor vocabulary retention using specialized AI pipelines, event-driven microservices, and spaced repetition.**
 
 <p align="center">
-  <img src="https://img.shields.io/badge/.NET-10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 10">
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white" alt="FastAPI">
-  <img src="https://img.shields.io/badge/Aspire-Orchestration-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET Aspire">
+  <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 10">
+  <img src="https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis">
-  <img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" alt="RabbitMQ">
-  <img src="https://img.shields.io/badge/Qdrant-F83C56?style=for-the-badge&logo=qdrant&logoColor=white" alt="Qdrant">
+  <img src="https://img.shields.io/badge/Qdrant-Vector_DB-FF5252?style=for-the-badge&logo=qdrant&logoColor=white" alt="Qdrant">
+  <img src="https://img.shields.io/badge/RabbitMQ-3.x-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" alt="RabbitMQ">
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Qwen_2.5-LoRA-412991?style=for-the-badge&logo=huggingface&logoColor=white" alt="Qwen">
 </p>
 
 
