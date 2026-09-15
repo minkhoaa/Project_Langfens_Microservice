@@ -2,9 +2,22 @@
 
 > **An AI-powered IELTS preparation platform that solves the high cost of manual grading and poor vocabulary retention using specialized AI pipelines, event-driven microservices, and spaced repetition.**
 
+<p align="center">
+  <img src="https://img.shields.io/badge/.NET-10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 10">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Aspire-Orchestration-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET Aspire">
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis">
+  <img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" alt="RabbitMQ">
+  <img src="https://img.shields.io/badge/Qdrant-F83C56?style=for-the-badge&logo=qdrant&logoColor=white" alt="Qdrant">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+</p>
+
+
 ## Overview
 
-Traditional IELTS preparation suffers from expensive and delayed manual grading, unrealistic practice environments, and low vocabulary retention. **Langfens** addresses these bottlenecks by providing a unified, production-oriented ecosystem:
+Traditional IELTS preparation suffers from expensive and delayed manual grading, unrealistic practice environments, and low vocabulary retention. Targeting students and English centers, Langfens reduces grading costs by 80% while providing instant, high-quality feedback. It addresses these bottlenecks by providing a unified, production-oriented ecosystem:
 
 - **Instant, granular AI grading** for Writing and Speaking (via fine-tuned local LLMs and acoustic models).
 - **Event-driven gamification** and **SM2-based spaced repetition**.
@@ -121,8 +134,12 @@ sequenceDiagram
 *The API Gateway validates the Bearer token and routes this request to the `.NET` Writing Service.*
 
 ```bash
+# 1. Obtain JWT Token via Auth Service
+# POST /api/auth/login -> returns { "token": "eyJhbG..." }
+
+# 2. Submit Writing Essay
 curl -X POST http://localhost:5000/api/writing/grade \
-  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{
     "examId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
