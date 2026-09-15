@@ -27,8 +27,8 @@ Traditional IELTS preparation suffers from expensive and delayed manual grading,
 ## System Architecture
 
 ```mermaid
-flowchart TB
-    Client --> Gateway[API Gateway (YARP)]
+flowchart TD
+    Client -->|HTTPS| Gateway[API Gateway: YARP + JWT]
     
     Gateway --> Auth[Auth Service]
     Gateway --> Attempt[Attempt Service]
@@ -39,10 +39,12 @@ flowchart TB
     Attempt --> |HTTP| Writing[Writing Service]
     Attempt --> |HTTP| Speaking[Speaking Service]
     
-    Writing --> |HTTP w/ Circuit Breaker| AIService[AI Service (Python FastAPI)]
+    Writing --> |HTTP w/ Circuit Breaker| AIService[AI Service: Python FastAPI]
     Speaking --> |HTTP w/ Circuit Breaker| AIService
     
-    AIService --> Models[Qwen2.5 + LoRA \n Whisper \n Wav2Vec2]
+    AIService --> Models[Qwen2.5 + LoRA 
+ Whisper 
+ Wav2Vec2]
     AIService --> Qdrant[(Qdrant Vector DB)]
     
     Vocab --> |RabbitMQ: CardReviewed| Gamification[Gamification Service]
@@ -55,11 +57,53 @@ flowchart TB
     Gamification -.-> DB5[(Postgres Gamification)]
 ```
 
-*Note: Architecture simplified. All 10 .NET services map to their own dedicated PostgreSQL databases.*
+*Note: The API Gateway (YARP) validates JWTs before routing traffic. The Frontend acquires tokens from Auth Service, but all protected endpoints rely on the Gateway's strict validation.*
 
 ## AI Pipeline: End-to-End Writing Grading
 
 Langfens avoids generic "black box" LLM prompts by using a deeply orchestrated, criterion-specific retrieval pipeline.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as API Gateway
+    participant W as Writing Service
+    participant MQ as RabbitMQ
+    participant AI as AI Service (Python)
+    participant Q as Qdrant DB
+    participant LLM as Qwen2.5-LoRA
+    participant A as Attempt Service
+    participant XP as Gamification
+
+    U->>G: POST /api/writing/grade
+    G->>W: Validate Token & Route
+    W->>MQ: Publish WritingSubmitted
+    W-->>U: Return 202 Accepted (Pending)
+    
+    MQ->>W: Consume WritingSubmitted (Async Worker)
+    W->>AI: HTTP POST /grade (Circuit Breaker)
+    
+    rect rgb(30, 41, 59)
+    note right of AI: AI Pipeline Execution
+    AI->>AI: Extract Heuristics (Word Count, Errors)
+    AI->>Q: Embed & Retrieve Reference Essays (RAG)
+    Q-->>AI: High-Scoring Context
+    AI->>LLM: Prompt (Essay + Context + Rubric)
+    LLM-->>AI: Raw JSON Output
+    AI->>AI: Pydantic Validation & Parse
+    end
+    
+    AI-->>W: Return Structured JSON Feedback
+    W->>MQ: Publish WritingGraded Event
+    
+    MQ->>A: Consume (Persist Scores)
+    A->>MQ: Publish AttemptCompleted Event
+    MQ->>XP: Consume (Award XP)
+    
+    U->>G: GET /api/writing/history
+    G->>W: Retrieve Results
+    W-->>U: Detailed 0-9 Band Scores + Feedback
+```
 
 1. **Submission**: User submits text. `writing-service` receives the payload and pushes an event to RabbitMQ.
 2. **Pre-processing**: Python `ai-service` receives the request. It parses the essay and calculates raw heuristic metrics (word count, grammar error density).
@@ -73,7 +117,21 @@ Langfens avoids generic "black box" LLM prompts by using a deeply orchestrated, 
 
 ## Data Flow & API Examples
 
-### `POST /api/v1/speaking/grade` (Python AI Service)
+### Example: Submit a Writing Essay
+*The API Gateway validates the Bearer token and routes this request to the `.NET` Writing Service.*
+
+```bash
+curl -X POST http://localhost:5000/api/writing/grade \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "examId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "answer": "The chart illustrates the changes in...",
+    "timeSpentSeconds": 1200
+  }'
+```
+
+### `POST /api/v1/speaking/grade` (Internal Python AI Service)
 **Input Flow**: Accepts raw transcripts and heuristic word counts.
 **Output Flow**: Returns a deeply structured JSON schema explicitly enforcing IELTS criteria.
 
@@ -160,3 +218,7 @@ Production infrastructure is managed via Docker Compose (`deploy/compose.yaml`).
 - **Built a Multi-Modal RAG System**: Integrated Qdrant and Pydantic to ensure the LLM grades based on retrieved real-world reference essays, eliminating generic "hallucinated" feedback.
 - **Production-Oriented Microservices**: Managed 11 distinct services and 10 separate databases without sacrificing data integrity, utilizing .NET Aspire and Docker Compose.
 - **Model Fine-Tuning Integration**: Successfully deployed a custom LoRA adapter natively within a FastAPI inference server using `peft` and PyTorch.
+
+
+---
+*A solo engineering project by Khoa.*
