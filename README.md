@@ -1,255 +1,224 @@
-<h1 align="center">LANGFENS</h1>
+# Langfens
 
-<p align="center">
-  <strong>Study IELTS Smarter. Score Higher. Save Time.</strong>
-</p>
+> **An AI-powered IELTS preparation platform that solves the high cost of manual grading and poor vocabulary retention using specialized AI pipelines, event-driven microservices, and spaced repetition.**
 
-<p align="center">
-  <em>A comprehensive IELTS preparation platform with instant AI evaluation — Turning studying into an experience, not just coursework.</em>
-</p>
+## Overview
 
-<p align="center">
-  <img src="https://img.shields.io/badge/.NET-8.0%2F9.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET">
-  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/Redis-7.4-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis">
-  <img src="https://img.shields.io/badge/RabbitMQ-3.x-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" alt="RabbitMQ">
-  <img src="https://img.shields.io/badge/Elasticsearch-8.19-005571?style=for-the-badge&logo=elasticsearch&logoColor=white" alt="Elasticsearch">
-  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
-  <img src="https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI">
-</p>
+Traditional IELTS preparation suffers from expensive and delayed manual grading, unrealistic practice environments, and low vocabulary retention. **Langfens** addresses these bottlenecks by providing a unified, production-oriented ecosystem:
 
----
+- **Instant, granular AI grading** for Writing and Speaking (via fine-tuned local LLMs and acoustic models).
+- **Event-driven gamification** and **SM2-based spaced repetition**.
+- A **scalable microservices architecture** (.NET 10 + Python) leveraging asynchronous message queues and independent data stores.
 
-## Executive Summary
+## Key Capabilities
 
-### The Problem
+### AI & Machine Learning
+- **Local LoRA Inference**: Uses a dynamically loaded LoRA adapter on Qwen2.5 (`peft` via HuggingFace) for IELTS-specific scoring.
+- **Criterion-Based RAG Pipeline**: Retrieves high-scoring reference essays from a Qdrant vector database (using `bge-m3` embeddings) based on the specific grading criterion being evaluated, drastically reducing LLM hallucination.
+- **Acoustic & STT Pipeline**: Combines `faster-whisper` for speech-to-text with a custom `Wav2Vec2`-based acoustic model (`PronunciationScorerModel` in PyTorch) for precise fluency and pronunciation scoring.
+- **Model Orchestration**: Intelligently routes between local inference (Qwen/Ollama) and external APIs (Groq) with fallback mechanisms.
 
-The current IELTS preparation market is facing **3 serious bottlenecks**:
+### Engineering & Architecture
+- **Distributed Microservices**: 11 distinct services (10 ASP.NET Core, 1 FastAPI Python) mapped via YARP Reverse Proxy.
+- **Event-Driven Workflows**: RabbitMQ (via MassTransit) decouples heavy AI inference and gamification from synchronous user request paths.
+- **Domain-Driven Data**: 10 isolated PostgreSQL databases enforce strict boundaries. `pg_trgm` GIN indexes handle rapid dictionary lookups without needing external search engines.
+- **Resilience**: Implements Circuit Breaker patterns for AI HTTP clients and isolated worker scaling.
 
-| Problem | Consequence |
-|--------|---------|
-| **High cost of Writing/Speaking grading** | Students must pay $50–100 per submission, or wait 5–7 days to receive feedback from a teacher |
-| **Lack of a realistic exam environment** | Students feel overwhelmed when entering the real exam hall because they are not accustomed to time pressure |
-| **Forgetting vocabulary after 1 week** | 90% of crammed vocabulary disappears due to the absence of a scientific spaced-repetition system |
+## System Architecture
 
-> **Existing solutions fail** because they rely on human resources (manual grading), or only provide practice tests without meaningful feedback.
-
-### The Solution
-
-**Langfens** is the first IELTS preparation platform to combine:
-
-- **Instant AI evaluation** for Writing & Speaking — receive feedback in seconds, not days.
-- **100% real-exam simulation environment** — time pressure, exam interface, autosave to protect your work.
-- **Permanent vocabulary retention system** — the SM2 (Spaced Repetition) algorithm helps retain vocabulary in long-term memory.
-
-> **USP (Unique Selling Proposition):** Langfens is the only platform that provides **high-quality AI evaluation + Gamification + Spaced Repetition** within ONE seamless ecosystem.
-
----
-
-## Key Value Propositions
-
-| # | Value | Meaning for Users |
-|---|---------|------------------------|
-| **1** | **Save 80% on costs** | No need to pay for manual grading — AI grades with accuracy aligned to official IELTS criteria |
-| **2** | **Learn 3x faster** | Instant feedback = correct mistakes immediately = progress faster than traditional learning |
-| **3** | **Remember vocabulary 5x longer** | The SM2 algorithm has been proven effective by millions of Anki users |
-| **4** | **Fun learning, no dropout** | Gamification with XP, Streaks, and Achievements keeps motivation consistently high |
-
----
-
-## Feature Highlights
-
-### 1. 100% Real Exam Simulation
-> *"If you win in practice, you will win in the real exam."*
-
-- **All 4 skills:** Listening, Reading, Writing, Speaking — all with time limits matching the real exam.
-- **Work protection:** Autosave runs in the background — lost connection, browser crash? Your work is still safe.
-- **Fixed exam version:** When you start a test, the exam content is "frozen" — admin updates will not affect your results.
-
-### 2. AI Assessment Engine
-> *"From submission to score: 30 seconds, not 3 days."*
-
-| Skill | Technology | Response Speed |
-|---------|-----------|-----------------|
-| **Reading & Listening** | Smart Pattern Matching (handles case, plurals, whitespace) | **< 1 second** |
-| **Writing** | Gemini evaluates against 4 official IELTS criteria (Task Response, Coherence, Lexical Resource, Grammar) | **< 30 seconds** |
-| **Speaking** | Whisper STT → AI analyzes fluency, pronunciation, content | **< 60 seconds** |
-
-### 3. Vocabulary Mastery
-> *"Don't memorize. Remember LONG-TERM."*
-
-- **Spaced Repetition System (SM2):** Algorithm calculates optimal review timing — study less, remember longer.
-- **Ultra-fast dictionary lookup:** Elasticsearch delivers results in < 50ms.
-- **AI-enriched context:** Automatically adds examples, collocations, and usage notes for each word.
-
-### 4. Gamification
-> *"Turn every lesson into a game."*
-
-- **XP & Level System:** Complete a test = earn XP = level up.
-- **Achievements & Badges:** Unlock badges when reaching milestones (complete 10 tests, 7-day streak...).
-- **Leaderboard:** Compete with friends to maintain motivation.
-
-### 5. AI Chatbot 24/7 Support
-> *"Got a question? AI answers immediately — no need to wait for a teacher."*
-
-- **Runs Local LLM (Qwen 2.5):** Reduces operational costs while maintaining quality.
-- **Support & explanations:** Explains grammar, vocabulary, and test-taking tips.
-
----
-
-## Target Audience
-
-| Audience | Need | How Langfens Helps |
-|-----------|---------|---------------------|
-| **Students** | Need to prepare for IELTS on a limited budget | Free AI grading, study anytime anywhere |
-| **Working professionals** | Limited time, need maximum learning efficiency | Spaced Repetition + instant feedback saves time |
-| **English language centers** | Need to reduce grading costs, improve service quality | API integration, student progress dashboard |
-| **IELTS teachers** | Need tools to help manage assignments | Create & assign tasks, AI-assisted preliminary grading |
-
----
-
-## Technical Architecture
-
-> **Every technology choice serves ONE goal: Deliver the best learning experience for users.**
-
-### Microservices Architecture — Why?
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                           API GATEWAY                               │
-│               (YARP Reverse Proxy + JWT Authentication)             │
-└───────────────────────────────┬─────────────────────────────────────┘
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        ▼                       ▼                       ▼
-┌───────────────┐     ┌───────────────┐     ┌───────────────────────┐
-│ Auth          │     │ Exam          │     │ Attempt               │
-│ Service       │     │ Service       │     │ Service               │
-└───────────────┘     └───────────────┘     └───────────────────────┘
-        │                     │                       │
-        ▼                     ▼                       ▼
-┌───────────────┐     ┌───────────────┐     ┌───────────────────────┐
-│ Writing       │     │ Speaking      │     │ Vocabulary            │
-│ Service       │     │ Service       │     │ Service               │
-└───────────────┘     └───────────────┘     └───────────────────────┘
-        │                     │                       │
-        ▼                     ▼                       ▼
-┌───────────────┐     ┌───────────────┐     ┌───────────────────────┐
-│ Gamification  │     │ Dictionary    │     │ Chatbot               │
-│ Service       │     │ Service       │     │ Service               │
-└───────────────┘     └───────────────┘     └───────────────────────┘
-                                │
-                    ┌───────────┴───────────┐
-                    ▼                       ▼
-            ┌─────────────┐         ┌─────────────┐
-            │ RabbitMQ    │         │ Elastic     │
-            │ Event Bus   │         │ Search      │
-            └─────────────┘         └─────────────┘
+```mermaid
+flowchart TD
+    Client -->|HTTPS| Gateway[API Gateway: YARP + JWT]
+    
+    Gateway --> Auth[Auth Service]
+    Gateway --> Attempt[Attempt Service]
+    Gateway --> Dictionary[Dictionary Service]
+    Gateway --> Vocab[Vocabulary Service]
+    Gateway --> Exam[Exam Service]
+    
+    Attempt --> |HTTP| Writing[Writing Service]
+    Attempt --> |HTTP| Speaking[Speaking Service]
+    
+    Writing --> |HTTP w/ Circuit Breaker| AIService[AI Service: Python FastAPI]
+    Speaking --> |HTTP w/ Circuit Breaker| AIService
+    
+    AIService --> Models[Qwen2.5 + LoRA 
+ Whisper 
+ Wav2Vec2]
+    AIService --> Qdrant[(Qdrant Vector DB)]
+    
+    Vocab --> |RabbitMQ: CardReviewed| Gamification[Gamification Service]
+    Attempt --> |RabbitMQ: AttemptCompleted| Gamification
+    
+    Auth -.-> DB1[(Postgres Auth)]
+    Attempt -.-> DB2[(Postgres Attempt)]
+    Writing -.-> DB3[(Postgres Writing)]
+    Vocab -.-> DB4[(Postgres Vocab)]
+    Gamification -.-> DB5[(Postgres Gamification)]
 ```
 
-### Technology Choices — Why, Not Just What
+*Note: The API Gateway (YARP) validates JWTs before routing traffic. The Frontend acquires tokens from Auth Service, but all protected endpoints rely on the Gateway's strict validation.*
 
-| Technology | Business Problem Solved |
-|-----------|-------------------------------------|
-| **Microservices Architecture** | **Independent scaling** — When traffic spikes during exam season, only scale the necessary services (Exam, Attempt), reducing server costs |
-| **.NET 8/9 + Minimal API** | **High performance, low latency** — Handles 10,000+ requests/second per service, users feel no delay |
-| **PostgreSQL** | **Critical data requires ACID** — Exam scores and student submissions are fully protected |
-| **Redis** | **Response < 100ms** — Caching sessions, JWT tokens, and hot data ensures a smooth experience |
-| **RabbitMQ (Event-Driven)** | **Non-blocking for users** — Grading, XP calculation processed in the background; users don't have to wait |
-| **Elasticsearch** | **Dictionary lookup in 50ms** — Ultra-fast full-text search with fuzzy matching support |
-| **Ollama (Qwen 2.5 Local LLM)** | **Save 90% on AI costs** — Chatbot runs locally, no cloud API call costs |
-| **Gemini 2.5 Flash** | **Best evaluation quality** — For critical tasks like Writing grading and RAG-based AI tutoring |
-| **Whisper (OpenAI)** | **Accurate STT** — Converts speech to text for AI-based Speaking evaluation |
-| **Docker + Compose** | **One-command deployment** — From code to production in minutes, environment-independent |
+## AI Pipeline: End-to-End Writing Grading
 
-### Architecture Principles
+Langfens avoids generic "black box" LLM prompts by using a deeply orchestrated, criterion-specific retrieval pipeline.
 
-| Principle | Meaning |
-|------------|---------|
-| **Fault Isolation** | If the Gamification service goes down, users can still take exams normally |
-| **Event-Driven** | Heavy tasks (AI grading, XP calculation) are processed asynchronously via Message Queue |
-| **Security First** | JWT authentication, role-based access control, input validation at every endpoint |
-| **Horizontal Scaling** | Add instances as needed, load balancer distributes traffic automatically |
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as API Gateway
+    participant W as Writing Service
+    participant MQ as RabbitMQ
+    participant AI as AI Service (Python)
+    participant Q as Qdrant DB
+    participant LLM as Qwen2.5-LoRA
+    participant A as Attempt Service
+    participant XP as Gamification
 
----
-
-## Roadmap & Future Vision
-
-### Phase 1: Foundation (Current)
-- [x] All 4 complete IELTS skills
-- [x] AI Grading Engine for Writing & Speaking
-- [x] Spaced Repetition Vocabulary System
-- [x] Gamification Core (XP, Levels, Achievements)
-- [x] 12+ production-ready Microservices
-
-### Phase 2: Scale (Q2 2026)
-- [ ] Mobile App (React Native)
-- [ ] Real-time multiplayer practice rooms
-- [ ] Advanced analytics dashboard for students
-- [ ] Teacher dashboard with batch grading
-
-### Phase 3: Expansion (Q4 2026)
-- [ ] TOEFL, PTE, Duolingo English Test support
-- [ ] Enterprise API for English language centers
-- [ ] White-label solution
-- [ ] AI Tutor with personalized learning paths
-
----
-
-## Services Overview
-
-```
-langfens-microservices/
-├── gateway/api-gateway        # YARP Reverse Proxy
-└── services/
-    ├── auth-service           # Authentication & Authorization
-    ├── exam-service           # Exam Content Management
-    ├── attempt-service        # User Attempts & Submissions
-    ├── writing-service        # Writing Assessment (Gemini)
-    ├── speaking-service       # Speaking Assessment (Whisper + AI)
-    ├── vocabulary-service     # Flashcards & Spaced Repetition
-    ├── dictionary-service     # Dictionary & Word Lookup
-    ├── gamification-service   # XP, Levels, Achievements
-    ├── chatbot-service        # AI Assistant (Ollama/Qwen)
-    ├── course-service         # Learning Paths & Courses
-    └── email-service          # Transactional Emails
+    U->>G: POST /api/writing/grade
+    G->>W: Validate Token & Route
+    W->>MQ: Publish WritingSubmitted
+    W-->>U: Return 202 Accepted (Pending)
+    
+    MQ->>W: Consume WritingSubmitted (Async Worker)
+    W->>AI: HTTP POST /grade (Circuit Breaker)
+    
+    rect rgb(30, 41, 59)
+    note right of AI: AI Pipeline Execution
+    AI->>AI: Extract Heuristics (Word Count, Errors)
+    AI->>Q: Embed & Retrieve Reference Essays (RAG)
+    Q-->>AI: High-Scoring Context
+    AI->>LLM: Prompt (Essay + Context + Rubric)
+    LLM-->>AI: Raw JSON Output
+    AI->>AI: Pydantic Validation & Parse
+    end
+    
+    AI-->>W: Return Structured JSON Feedback
+    W->>MQ: Publish WritingGraded Event
+    
+    MQ->>A: Consume (Persist Scores)
+    A->>MQ: Publish AttemptCompleted Event
+    MQ->>XP: Consume (Award XP)
+    
+    U->>G: GET /api/writing/history
+    G->>W: Retrieve Results
+    W-->>U: Detailed 0-9 Band Scores + Feedback
 ```
 
----
+1. **Submission**: User submits text. `writing-service` receives the payload and pushes an event to RabbitMQ.
+2. **Pre-processing**: Python `ai-service` receives the request. It parses the essay and calculates raw heuristic metrics (word count, grammar error density).
+3. **Retrieval (RAG)**: For each IELTS criterion (Task Response, Coherence, Lexical Resource, Grammar):
+   - The essay is embedded using `bge-m3`.
+   - Qdrant retrieves historically high-scoring essays that match the exact task and criterion.
+4. **Inference**: The Qwen2.5-LoRA model is prompted with the raw text, heuristics, and the retrieved contextual examples.
+5. **Post-processing**: Granular scores (0-9 bands) and JSON feedback are validated via Pydantic output parsers.
+6. **Publish**: `writing-service` receives the HTTP response and publishes a `WritingGraded` event.
+7. **Resolution**: `attempt-service` consumes the event, persists the score, and publishes an `AttemptCompleted` event. `gamification-service` consumes this to grant XP.
 
-## Quick Start
+## Data Flow & API Examples
+
+### Example: Submit a Writing Essay
+*The API Gateway validates the Bearer token and routes this request to the `.NET` Writing Service.*
 
 ```bash
-# Clone repository
-git clone https://github.com/your-org/langfens-microservices.git
-cd langfens-microservices
-
-# Start all services with Docker Compose
-cd deploy
-docker compose up -d
-
-# Access API Gateway at http://localhost:5000
+curl -X POST http://localhost:5000/api/writing/grade \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "examId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "answer": "The chart illustrates the changes in...",
+    "timeSpentSeconds": 1200
+  }'
 ```
 
-### Writing service grader LLM
+### `POST /api/v1/speaking/grade` (Internal Python AI Service)
+**Input Flow**: Accepts raw transcripts and heuristic word counts.
+**Output Flow**: Returns a deeply structured JSON schema explicitly enforcing IELTS criteria.
 
-The writing-service grading endpoint uses an OpenAI-compatible LLM. Configure via:
+```json
+{
+  "ob": 6.5,
+  "fc": { "b": 6.0, "c": "Frequent hesitation detected." },
+  "lr": { "b": 7.0, "c": "Good use of idiomatic language." },
+  "gr": { "b": 6.5, "c": "Some structural errors in complex sentences." },
+  "pr": { "b": 6.5, "c": "Acoustic model detected mispronunciation in 'infrastructure'." },
+  "s": ["Practice complex dependent clauses.", "Focus on pacing."],
+  "p": "Improved version of the user's transcript...",
+  "raw_llm_json": "{...}"
+}
+```
+*This compact JSON payload is mapped back into strict C# Data Transfer Objects via `AiSpeakingGrader.cs`.*
 
-| Env var | Default | Notes |
-|---|---|---|
-| `GRADER_LLM__ENDPOINT` | (none, required) | Base URL ending with `/v1/`. Examples: `https://api.groq.com/openai/v1/`, `https://<resource>.openai.azure.com/openai/v1/` |
-| `GRADER_LLM__APIKEY` | (none, required) | API key for the chosen provider |
-| `GRADER_LLM__MODEL` | `llama-3.3-70b-versatile` | Model identifier accepted by the endpoint |
+## Core Technical Decisions
 
-Legacy `AZURE_OPENAI__ENDPOINT` / `_APIKEY` / `_DEPLOYMENT` are still honored for
-one release with a deprecation log warning. Remove them after migration.
+### Why Independent PostgreSQL Databases?
+To enforce Domain-Driven Design (DDD). Services like `vocabulary-service` and `writing-service` do not share schemas. This prevents tightly coupled queries and allows each service to scale or be migrated independently. `dictionary-service` relies on Postgres `pg_trgm` extensions, whereas `attempt-service` relies on relational normalization.
+
+### Why MassTransit + RabbitMQ?
+Grading an IELTS essay or analyzing speech audio takes significant compute time (often 10–40 seconds). Synchronous HTTP would block the .NET thread pool and lead to terrible UX. RabbitMQ allows services to publish events (`WritingSubmitted`, `AttemptCompleted`) and process tasks asynchronously, guaranteeing delivery even during AI service restarts.
+
+### Why Python for the AI Service?
+While .NET is excellent for the core API and orchestration, the AI ecosystem (PyTorch, transformers, PEFT for LoRA, faster-whisper) is inherently Python-native. Isolating AI logic in a FastAPI service provides the best of both worlds.
+
+## Project Structure (Mono-Repo)
+
+```text
+Project_Langfens_Microservice/
+├── AppHost/                   # .NET Aspire local orchestrator (Zero-config dev)
+├── deploy/                    # Docker Compose, environment configurations
+├── gateway/api-gateway/       # YARP Reverse Proxy handling JWT Auth
+├── services/
+│   ├── ai-service/            # Python 3.12, FastAPI, Qdrant, LoRA adapters, Whisper
+│   ├── attempt-service/       # .NET 10, Auto-graders, MassTransit Consumers
+│   ├── auth-service/          # .NET 10, Identity, Redis OTP
+│   ├── dictionary-service/    # .NET 10, PostgreSQL pg_trgm fuzzy text search
+│   ├── gamification-service/  # .NET 10, XP/Achievements event consumer
+│   ├── speaking-service/      # .NET 10, Cloudinary STT orchestration
+│   ├── vocabulary-service/    # .NET 10, SM2 Spaced Repetition Algorithm
+│   ├── writing-service/       # .NET 10, AI Pipeline HttpClient w/ Circuit Breaker
+│   └── _shared/               # Core NuGet libraries, Grpc definitions, Contracts
+```
+
+## Running Locally
+
+**Prerequisites:** Docker Desktop and .NET 10 SDK.
+
+The project uses **.NET Aspire** to orchestrate 20+ containers effortlessly in development.
+
+1. **Clone & Configure:**
+   ```bash
+   git clone <repo-url>
+   cd Project_Langfens_Microservice
+   cp deploy/envs/*.env .env # Add necessary secrets or placeholders
+   ```
+
+2. **Run via AppHost:**
+   ```bash
+   dotnet run --project AppHost/AppHost.csproj
+   ```
+   *Aspire automatically pulls required models (like `bge-m3` into Ollama), starts 10 Postgres databases on unique host ports, boots Redis, RabbitMQ, and Qdrant, and wires up connection strings dynamically.*
+
+3. **Access:**
+   - Gateway API: `http://localhost:5000`
+   - Aspire Telemetry Dashboard: `http://localhost:18888`
+
+## Deployment
+
+Production infrastructure is managed via Docker Compose (`deploy/compose.yaml`). It defines explicit health checks, persistent volumes for databases, models, and message queues, and pins memory limits (e.g., Redis `maxmemory-policy`). Reverse proxy and SSL termination can be layered over the Gateway container.
+
+## Limitations
+
+- **Hardware Dependency**: The `ai-service` running LoRA models and `faster-whisper` requires significant RAM/VRAM. Without a GPU, inference gracefully falls back to CPU but latency increases from ~5s to ~45s.
+- **Experimental Acoustic Scoring**: The `Wav2Vec2` pronunciation scorer is experimental and occasionally overly strict on non-native accents.
+- **External AI Fallback**: If the local Qwen LoRA adapter fails to load or OOMs, the system currently defaults to external Groq endpoints, incurring a network dependency.
+
+## Why This Project Matters
+
+- **Engineered an Asynchronous AI Pipeline**: Solved long-running LLM inference bottlenecks by decoupling .NET API requests via RabbitMQ and MassTransit.
+- **Built a Multi-Modal RAG System**: Integrated Qdrant and Pydantic to ensure the LLM grades based on retrieved real-world reference essays, eliminating generic "hallucinated" feedback.
+- **Production-Oriented Microservices**: Managed 11 distinct services and 10 separate databases without sacrificing data integrity, utilizing .NET Aspire and Docker Compose.
+- **Model Fine-Tuning Integration**: Successfully deployed a custom LoRA adapter natively within a FastAPI inference server using `peft` and PyTorch.
+
 
 ---
-
-<p align="center">
-  <strong>Langfens — Study IELTS Smarter. Score Higher. Save Time.</strong>
-</p>
-
-<p align="center">
-  Built with passion by the Langfens Team
-</p>
+*A solo engineering project by Khoa.*
