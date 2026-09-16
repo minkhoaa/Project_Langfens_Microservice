@@ -9,6 +9,7 @@ ROUTE_LIMITS: dict[str, int] = {
     "/api/v1/grammar/explain": 20,
     "/api/v1/grammar/batch-explain": 10,
     "/api/v1/grammar/detect": 10,
+    "/api/v1/autogen/questions": 5,
 }
 
 DEFAULT_LIMIT = 60

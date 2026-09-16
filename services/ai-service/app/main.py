@@ -11,7 +11,7 @@ from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import settings
-from app.routers import health, embed, writing, grammar, speaking, practice, speech_eval, speaking_grade
+from app.routers import health, embed, writing, grammar, speaking, practice, speech_eval, speaking_grade, autogen
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -80,6 +80,7 @@ app.include_router(speaking.router, prefix="/api")
 app.include_router(practice.router, prefix="/api")
 app.include_router(speech_eval.router, prefix="/api")
 app.include_router(speaking_grade.router, prefix="/api")  # endpoint: /api/v1/speaking/grade
+app.include_router(autogen.router, prefix="/api")
 
 from app.routers import reading  # noqa: E402
 
