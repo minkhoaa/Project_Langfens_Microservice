@@ -20,6 +20,31 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/autogen", tags=["autogen"])
 
 
+def _normalize_questions(result: Any) -> list[dict] | None:
+    """Defensively extract a list of question dicts from LLM result.
+
+    Handles bare lists, wrapper keys ('questions', 'items', 'data', 'results'),
+    singular 'question', and direct single question objects.
+    """
+    if isinstance(result, list):
+        return [q for q in result if isinstance(q, dict)]
+
+    if isinstance(result, dict):
+        # 1. Common wrapper keys
+        for key in ("questions", "items", "data", "results", "question"):
+            val = result.get(key)
+            if isinstance(val, list):
+                return [q for q in val if isinstance(q, dict)]
+            if isinstance(val, dict) and ("type" in val or "promptMd" in val):
+                return [val]
+
+        # 2. Check if the dict itself is a single question object
+        if "type" in result or "promptMd" in result:
+            return [result]
+
+    return None
+
+
 @router.post("/questions", response_model=AutogenQuestionsResponse)
 async def autogen_questions(
     req: AutogenQuestionsRequest,
@@ -59,9 +84,13 @@ async def autogen_questions(
         max_tokens=4096,
     )
 
-    questions_raw = result.get("questions")
-    if not isinstance(questions_raw, list):
-        logger.error("LLM output not a list: %s", type(questions_raw))
+    questions_raw = _normalize_questions(result)
+    if not questions_raw:
+        logger.error(
+            "LLM output not a list. type=%s preview=%s",
+            type(result).__name__,
+            str(result)[:300],
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="LLM output is not a list of questions",
