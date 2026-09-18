@@ -79,3 +79,20 @@ async def test_autogen_questions_502_when_llm_returns_non_list():
             )
         assert resp.status_code == 502
         assert "not a list" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_autogen_cors_preflight():
+    """Verify OPTIONS preflight request gets 200 with CORS headers."""
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        resp = await ac.options(
+            "/api/v1/autogen/questions",
+            headers={
+                "Origin": "http://localhost:3000",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+    assert resp.status_code == 200
+    assert resp.headers.get("access-control-allow-origin") == "*"
+    assert "POST" in resp.headers.get("access-control-allow-methods", "")
