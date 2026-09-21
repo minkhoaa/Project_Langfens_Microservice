@@ -225,12 +225,12 @@ CONSTRAINTS: dict[str, list[str]] = {
         "options[].altText is required when imageUrl is set (a11y)"
     ],
     "SUMMARY_COMPLETION": [
-        "promptMd should contain ___ placeholders OR numbered list",
+        "promptMd should contain [N] placeholders OR numbered list",
         "blankAcceptTexts keys must match placeholder indices (e.g. '1', '2'…)",
         "each blank value can be string[] (multiple acceptable spellings)"
     ],
     "TABLE_COMPLETION": [
-        "promptMd typically contains a markdown table with ___ cells",
+        "promptMd typically contains a markdown table with [N] cells",
         "blankAcceptTexts keys match placeholder indices"
     ],
     "NOTE_COMPLETION": [
