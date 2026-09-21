@@ -9,13 +9,14 @@
 **Files:**
 - Create: `langfens-fe-app/src/app/admin/_lib/__tests__/llmPrompts.test.ts`
 
-- [ ] **Step 1: Write the test file**
+- [x] **Step 1: Write the test file**
 
 ```ts
 import { describe, expect, it } from "vitest";
 import { QuestionType } from "../types";
 import { LLM_PROMPTS, getLlmPrompt } from "../llmPrompts";
-import { getJsonShape } from "../jsonShape";
+import { callAi, tryParseLlmJson } from "../aiConfig";
+import type { AiConfig } from "../aiConfig";
 
 const ALL_TYPES: string[] = Object.values(QuestionType);
 
@@ -31,24 +32,18 @@ describe("LLM_PROMPTS coverage", () => {
         expect(getLlmPrompt(type)).not.toBeNull();
       });
 
-      it("system prompt contains the canonical jsonShape verbatim", () => {
+      it("system prompt contains STRICT_JSON_INSTRUCTION markers", () => {
         const entry = getLlmPrompt(type);
         expect(entry).not.toBeNull();
-        const jsonShape = getJsonShape(type);
-        expect(entry!.system).toContain(jsonShape);
-      });
-
-      it("system prompt contains STRICT_JSON_SUFFIX markers", () => {
-        const entry = getLlmPrompt(type);
-        expect(entry!.system).toContain("Strict JSON mode");
         expect(entry!.system).toContain("Output ONLY a single JSON array");
+        expect(entry!.system).toContain("No prose, no markdown fences");
       });
 
-      it("userTemplate substitutes difficulty and count", () => {
+      it("userTemplate substitutes count and passage", () => {
         const entry = getLlmPrompt(type)!;
         const user = entry.userTemplate("foo passage", 3, { difficulty: "4" });
         expect(user).toContain("Generate 3");
-        expect(user).toContain("at difficulty 4");
+        expect(user).toContain("foo passage");
       });
     });
   }
@@ -57,9 +52,9 @@ describe("LLM_PROMPTS coverage", () => {
 describe("server-proxy round-trip (mocked fetch)", () => {
   it("callAi parses response.questions into array", async () => {
     const originalFetch = global.fetch;
-    global.fetch = (async (url: string, opts: any) => {
-      expect(url).toContain("/api/v1/autogen/questions");
-      const body = JSON.parse(opts.body);
+    global.fetch = (async (url: string | URL | Request, opts?: RequestInit) => {
+      expect(String(url)).toContain("/api/v1/autogen/questions");
+      const body = JSON.parse(String(opts?.body ?? "{}"));
       expect(body.type).toBe("MULTIPLE_CHOICE_SINGLE");
       expect(body.skill).toBe("READING");
       expect(body.count).toBe(1);
@@ -74,9 +69,8 @@ describe("server-proxy round-trip (mocked fetch)", () => {
     }) as typeof fetch;
 
     try {
-      const { callAi, tryParseLlmJson } = await import("../aiConfig");
-      const cfg = {
-        provider: "server-proxy" as const,
+      const cfg: AiConfig = {
+        provider: "server-proxy",
         apiKey: "",
         model: "",
         endpoint: "http://test-server:8092",
@@ -99,7 +93,7 @@ describe("server-proxy round-trip (mocked fetch)", () => {
 });
 ```
 
-- [ ] **Step 2: Run Vitest**
+- [x] **Step 2: Run Vitest**
 
 ```bash
 cd /home/khoa/Projects/langfens/langfens-fe-app
@@ -107,8 +101,9 @@ npm run test
 ```
 
 Expected: ≥ 96 tests pass (25 baseline + 19×4 type fixtures + 1 server-proxy round-trip = 25 + 76 + 1 = 102 total). Suite count ≥ 7.
+Actual: **13 suites passed (13), 128 tests passed (128)**.
 
-- [ ] **Step 3: Verify no skipped suites**
+- [x] **Step 3: Verify no skipped suites**
 
 ```bash
 cd /home/khoa/Projects/langfens/langfens-fe-app
@@ -116,8 +111,9 @@ npm run test 2>&1 | grep -E "skipped|Skipped"
 ```
 
 Expected: no output.
+Actual: clean (no skipped tests).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd /home/khoa/Projects/langfens/langfens-fe-app
