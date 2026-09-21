@@ -4,6 +4,12 @@ using CommunityToolkit.Aspire.MassTransit.RabbitMQ;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Remove container runtime initialization and startup watch timeout limits so
+// heavy image builds (like ai-service downloading PyTorch) don't get canceled.
+builder.Configuration["Dcp:ContainerRuntimeInitializationTimeout"] = "02:00:00";
+builder.Configuration["Dcp:ServiceStartupWatchTimeout"] = "02:00:00";
+builder.Configuration["Dcp:DependencyCheckTimeout"] = "7200";
+
 // ── Shared infra ──────────────────────────────────────────────────────────
 // RabbitMQ: declare credentials as parameters so we can both hand them to
 // AddRabbitMQ and reuse them when pushing the discrete RABBITMQ__USERNAME /
@@ -48,6 +54,8 @@ var ollamaInit = builder.AddContainer("ollama-init", "ollama/ollama", "latest")
 var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/Dockerfile")
     .WithHttpEndpoint(targetPort: 8080, name: "http")
     .WithBindMount("../services/ai-service/app", "/app/app")
+    // Mount the fine-tuned Qwen2.5-LoRA adapter so Speaking Grade works.
+    .WithBindMount("../models/qwen25-lora", "/app/models/qwen25-lora", isReadOnly: true)
     .WithEntrypoint("uvicorn")
     .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
               "--reload", "--reload-dir", "/app/app")

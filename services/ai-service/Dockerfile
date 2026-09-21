@@ -1,13 +1,12 @@
-# Multi-stage Dockerfile for Langfens AI service.
-# For rapid local dev and Aspire orchestration, derive directly from the local base image
-# (langfens-ai-base:latest) which contains PyTorch CPU, transformers, faster-whisper, etc.
-# This prevents 10-minute download timeouts when Aspire recalculates the context hash.
-# To regenerate or build the base image from scratch:
-#   docker build -t langfens-ai-base:latest -f services/ai-service/Dockerfile.base .
-ARG BASE_IMAGE=langfens-ai-base:latest
-
-FROM ${BASE_IMAGE} AS runtime
+FROM python:3.12-slim AS deps
 WORKDIR /app
+COPY services/ai-service/requirements.txt .
+RUN pip install --default-timeout=1000 --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+
+FROM python:3.12-slim AS runtime
+WORKDIR /app
+COPY --from=deps /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=deps /usr/local/bin /usr/local/bin
 COPY services/ai-service/app ./app
 EXPOSE 8080
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
