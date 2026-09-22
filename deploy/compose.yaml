@@ -448,6 +448,11 @@ services:
       - "8092:8080"
     networks:
       - backend
+    volumes:
+      # Mount the fine-tuned Qwen2.5-LoRA adapter so Speaking Grade works.
+      # The adapter is ~36MB (safetensors) and lives in models/qwen25-lora/
+      # relative to the repo root (one level above deploy/).
+      - ../models/qwen25-lora:/app/models/qwen25-lora:ro
     depends_on:
       redis:
         condition: service_healthy

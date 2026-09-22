@@ -15,7 +15,7 @@
 | **BE Unit Tests** (`attempt-service.Tests`) | 73 tests pass | 73 / 73 passed (85 ms) | **PASS** |
 | **BE Warning Delta** | Baseline ≤ 16 warnings | 16 warnings (delta = 0) | **PASS** |
 | **FE Typecheck** (`tsc --noEmit`) | exit code 0 | 0 errors | **PASS** |
-| **FE Vitest Suite** | ≥ 102 tests pass | 128 / 128 passed (13 test files) | **PASS** |
+| **FE Vitest Suite** | ≥ 102 tests pass | 141 / 141 passed (14 test files) | **PASS** |
 | **FE Next.js Build** (`npm run build`) | 39+ pages compiled | 39 / 39 pages generated (Turbopack) | **PASS** |
 | **AI Service pytest** | 8+ tests pass | 14 / 14 passed (1.43s) | **PASS** |
 | **Python AST Lint** (§12.2.1) | Zero missing annotations | `PYTHON_LINT_CLEAN` | **PASS** |
@@ -42,7 +42,7 @@ npm run test
 npm run build
 ```
 - **tsc:** Clean exit (0 errors).
-- **Vitest:** 128 passed across 13 test files (including 59 tests in `llmPrompts.test.ts` and 8 in `promptFormatContract.test.ts`).
+- **Vitest:** 141 passed across 14 test files (including 59 tests in `llmPrompts.test.ts`, 20 in `pipelineValidation.test.ts`, 11 in `questionGeneration.test.ts`, and 8 in `promptFormatContract.test.ts`).
 - **Next.js Build:** Production build generated all 39 static and dynamic routes successfully.
 
 ### 2.3. AI Service Tests & Static Analysis
@@ -85,11 +85,14 @@ Tested via `/admin/exams/[id]` → **AI Author Modal** with `server-proxy` provi
 | 16 | `MATCHING_FEATURES` | Matching | 3 | PASS | PASS | PASS | PASS |
 | 17 | `MATCHING_ENDINGS` | Matching | 3 | PASS | PASS | PASS | PASS |
 | 18 | `CLASSIFICATION` | Matching | 3 | PASS | PASS | PASS | PASS |
-| 19 | `FLOW_CHART` | Completion | 3 | PASS | PASS | PASS (`[N]` Parity) | PASS |
+| 19 | `FLOW_CHART` | Ordering | 2 | PASS | PASS | PASS (Step Order Slugs) | PASS |
 
 ### Observations:
 - **Difficulty Clamping:** Successfully clamps any out-of-range integer to `[1, 5]` interval (tested with negative values and `> 5`).
-- **Placeholder Format:** All completion questions output canonical `[N]` placeholders; non-canonical placeholders (e.g. `___` or `blank-qN`) are rejected by `validatePromptBlankParity`.
+- **Placeholder Format:** All completion questions output canonical `[N]` placeholders; non-canonical placeholders (e.g. `___` or `blank-qN`) are rejected by `validatePromptBlankParity`. Ordering types (FlowChart) correctly use lowercase hyphenated slugs without prompt blank corruption.
+- **Option In-Place Updates:** AI auto-fill preserves option identity to avoid duplicate options in the database and cleans up removed options.
+- **Image MCQ Options:** `MULTIPLE_CHOICE_SINGLE_IMAGE` options carry `imageUrl` and `altText` down to persistence and render appropriately in test views.
+- **Authorization Enforced:** Admin authorization policy wired in API gateway for `/api-ai/v1/autogen/{**catch-all}` and Bearer token forwarded by `aiConfig.ts`.
 - **Error Recovery:** Invalid non-JSON AI payloads trigger the inline error container gracefully without breaking the modal UI.
 
 ---

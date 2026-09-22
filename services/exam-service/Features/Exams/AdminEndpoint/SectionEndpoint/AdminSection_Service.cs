@@ -28,45 +28,49 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
         var existedExam = context.Exams.AsNoTracking().FirstOrDefault(exam => exam.Id == dto.ExamId);
         if (existedExam == null) return Results.NotFound(new ApiResultDto(false, "Not found", null!));
 
-        await using var transaction = await context.Database.BeginTransactionAsync(token);
-        try
+        var strategy = context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            var maxIdx = await context.ExamSections.AsNoTracking().Where(x => x.ExamId == dto.ExamId)
-                .Select(x => (int?)x.Idx).MaxAsync(token) ?? 0;
-            var desired = dto.Idx ?? maxIdx + 1;
-            if (desired < 1) desired = 1;
-            if (desired > maxIdx + 1) desired = maxIdx + 1;
-            if (desired <= maxIdx)
+            await using var transaction = await context.Database.BeginTransactionAsync(token);
+            try
             {
-                await context.ExamSections.Where(x => x.ExamId == dto.ExamId && x.Idx >= desired)
-                    .ExecuteUpdateAsync(x => x.SetProperty(section => section.Idx, section => section.Idx + 1), token);
-            }
+                var maxIdx = await context.ExamSections.AsNoTracking().Where(x => x.ExamId == dto.ExamId)
+                    .Select(x => (int?)x.Idx).MaxAsync(token) ?? 0;
+                var desired = dto.Idx ?? maxIdx + 1;
+                if (desired < 1) desired = 1;
+                if (desired > maxIdx + 1) desired = maxIdx + 1;
+                if (desired <= maxIdx)
+                {
+                    await context.ExamSections.Where(x => x.ExamId == dto.ExamId && x.Idx >= desired)
+                        .ExecuteUpdateAsync(x => x.SetProperty(section => section.Idx, section => section.Idx + 1), token);
+                }
 
-            var sec = new ExamSection
+                var sec = new ExamSection
+                {
+                    ExamId = dto.ExamId,
+                    Idx = desired,
+                    InstructionsMd = dto.InstructionsMd,
+                    PassageMd = dto.PassageMd,
+                    Title = dto.Title,
+                    AudioUrl = dto.AudioUrl,
+                    TranscriptMd = dto.TranscriptMd
+                };
+                context.ExamSections.Add(sec);
+                var now = DateTime.UtcNow;
+                await context.Exams.Where(x => x.Id == dto.ExamId)
+                    .ExecuteUpdateAsync(
+                        s => s.SetProperty(e => e.UpdatedAt, now),
+                        token);
+                await context.SaveChangesAsync(token);
+                await transaction.CommitAsync(token);
+                return Results.Ok(new ApiResultDto(true, "Added successfully", sec));
+            }
+            catch (Exception e)
             {
-                ExamId = dto.ExamId,
-                Idx = desired,
-                InstructionsMd = dto.InstructionsMd,
-                PassageMd = dto.PassageMd,
-                Title = dto.Title,
-                AudioUrl = dto.AudioUrl,
-                TranscriptMd = dto.TranscriptMd
-            };
-            context.ExamSections.Add(sec);
-            var now = DateTime.UtcNow;
-            await context.Exams.Where(x => x.Id == dto.ExamId)
-                .ExecuteUpdateAsync(
-                    s => s.SetProperty(e => e.UpdatedAt, now),
-                    token);
-            await context.SaveChangesAsync(token);
-            await transaction.CommitAsync(token);
-            return Results.Ok(new ApiResultDto(true, "Added successfully", sec));
-        }
-        catch (Exception e)
-        {
-            await transaction.RollbackAsync(token);
-            return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
-        }
+                await transaction.RollbackAsync(token);
+                return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
+            }
+        });
     }
 
     public async Task<IResult> UpdateAync(DtoAdmin.AdminSectionUpdate dto, Guid id, CancellationToken token)

@@ -82,8 +82,9 @@ using (var scope = app.Services.CreateScope())
     }
 
     // Seed canonical IELTS Reading practice exams (idempotent — skipped when slug present).
+    // GeneratedReadingSeeder disabled: only 11111111 standard exam should exist per Sprint 7 Phase 2.
     await exam_service.Data.ReadingSeeder.SeedReadingExamAsync(db);
-    await exam_service.Data.GeneratedReadingSeeder.SeedAsync(db);
+    // await exam_service.Data.GeneratedReadingSeeder.SeedAsync(db);
 }
 
 app.MapDefaultEndpoints();

@@ -31,6 +31,7 @@ WATCHDOG.yml
 *.cert
 /docs/*
 !/docs/sprint*/
+!/docs/standards/
 # ------------------------------
 # Node / JS / TS
 # ------------------------------
@@ -194,3 +195,8 @@ models/**/*.ckpt
 models/**/*.bin
 
 
+
+.superpowers/
+
+benchmarks/
+LANGFENS_METRICS_REPORT.md

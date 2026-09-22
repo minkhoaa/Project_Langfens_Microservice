@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     # The ai-service uses Ollama only for embeddings (BGE-M3). LLM calls go to
     # Groq (see groq_base_url / groq_model below). The Ollama container must
     # remain in deploy/compose.yaml.
-    ollama_base_url: str = "http://localhost:11434"
+    ollama_base_url: str = "http://ollama:11434"
     ollama_embed_model: str = "bge-m3"
     ollama_embed_dimensions: int = 1024
     ollama_timeout: int = 60  # used by embedding_service for /api/embeddings

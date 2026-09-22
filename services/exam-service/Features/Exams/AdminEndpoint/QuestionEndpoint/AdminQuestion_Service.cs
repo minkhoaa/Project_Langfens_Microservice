@@ -121,9 +121,49 @@ public class AdminQuestionService : IAdminQuestionService
             case QuestionType.Classification:
                 if (!DictNonEmpty(matchPairs))        return Reject($"{type}: MatchPairs is required (non-empty dict).");
                 if (matchPairs != null)
+                {
                     foreach (var kv in matchPairs)
-                        if (kv.Value == null || kv.Value.Length < 2 || string.IsNullOrWhiteSpace(kv.Value[0]))
-                            return Reject($"{type}: MatchPairs[{kv.Key}] must have [acceptedKey, displayLabel].");
+                    {
+                        var minLength = type == QuestionType.Classification ? 1 : 2;
+                        if (kv.Value == null || kv.Value.Length < minLength || string.IsNullOrWhiteSpace(kv.Value[0]))
+                        {
+                            var expectedFormat = minLength == 1 ? "[acceptedKey]" : "[acceptedKey, displayLabel]";
+                            return Reject($"{type}: MatchPairs[{kv.Key}] must have {expectedFormat}.");
+                        }
+                    }
+
+                    // Matching parity: PromptMd must contain numbered items matching MatchPairs keys
+                    if (!string.IsNullOrEmpty(promptMd))
+                    {
+                        var inPrompt = new HashSet<string>();
+                        foreach (System.Text.RegularExpressions.Match m in
+                                 System.Text.RegularExpressions.Regex.Matches(promptMd, @"(?m)^\s*(\d+)[\.\)]\s+"))
+                        {
+                            inPrompt.Add(m.Groups[1].Value);
+                        }
+
+                        if (type == QuestionType.MatchingHeading)
+                        {
+                            var paraMatch = System.Text.RegularExpressions.Regex.Match(
+                                promptMd,
+                                @"(?i)(?:five|six|seven|eight|nine|ten|\d+)\s+paragraphs[,\s]+(?:1[–-](\d+)|([A-Z])[–-]([A-Z]))");
+                            if (paraMatch.Success && paraMatch.Groups[1].Success)
+                            {
+                                var total = int.Parse(paraMatch.Groups[1].Value);
+                                for (int i = 1; i <= total; i++) inPrompt.Add(i.ToString());
+                            }
+                        }
+
+                        var missing = matchPairs.Keys.Where(k => !inPrompt.Contains(k)).ToList();
+                        if (missing.Count > 0)
+                        {
+                            var enforce = config?.GetValue<bool>("Langfens:PromptFormatEnforce") ?? true;
+                            var msg = $"{type}: PromptMd must contain numbered items (1., 2., …) matching MatchPairs keys [{string.Join(",", missing)}].";
+                            if (enforce) return Reject(msg);
+                            Console.WriteLine($"[PROMPT-FORMAT-VIOLATION] {msg}");
+                        }
+                    }
+                }
                 if (DictNonEmpty(blankAcceptTexts))   return Reject($"{type}: BlankAcceptTexts must be empty.");
                 if (HasText(orderCorrects))           return Reject($"{type}: OrderCorrects must be empty.");
                 if (HasText(shortAnswerAcceptTexts))  return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
@@ -150,59 +190,64 @@ public class AdminQuestionService : IAdminQuestionService
         var existedSection =
             _context.ExamSections.AsNoTracking().FirstOrDefault(section => section.Id == dto.SectionId);
         if (existedSection == null) return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
-        await using var transaction = await _context.Database.BeginTransactionAsync(token);
-        try
+
+        var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
+        if (requiresAudio && string.IsNullOrWhiteSpace(existedSection.AudioUrl))
+            return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
+
+        var validationError = ValidatePayload(
+            dto.Type, dto.PromptMd, dto.BlankAcceptTexts, dto.MatchPairs,
+            dto.OrderCorrects, dto.ShortAnswerAcceptTexts, _config);
+        if (validationError != null) return validationError;
+
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
-            if (requiresAudio && string.IsNullOrWhiteSpace(existedSection.AudioUrl))
-                return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
-
-            var validationError = ValidatePayload(
-                dto.Type, dto.PromptMd, dto.BlankAcceptTexts, dto.MatchPairs,
-                dto.OrderCorrects, dto.ShortAnswerAcceptTexts, _config);
-            if (validationError != null) return validationError;
-
-            var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            var maxIdx = await _context.ExamQuestions.AsNoTracking()
-                .Where(question => question.SectionId == dto.SectionId)
-                .Select(a => (int?)a.Idx).MaxAsync(token) ?? 0;
-            var desired = dto.Idx ?? maxIdx + 1;
-            if (desired < 1) desired = 1;
-            if (desired > maxIdx + 1) desired = maxIdx + 1;
-            if (desired <= maxIdx)
-                await _context.ExamQuestions
-                    .Where(x => x.SectionId == dto.SectionId && x.Idx >= desired)
-                    .ExecuteUpdateAsync(s => s.SetProperty(d => d.Idx, d => d.Idx + 1), token);
-            var ques = new ExamQuestion
+            await using var transaction = await _context.Database.BeginTransactionAsync(token);
+            try
             {
-                Difficulty = dto.Difficulty,
-                ExplanationMd = dto.ExplanationMd,
-                Idx = desired,
-                SectionId = dto.SectionId,
-                Type = dto.Type,
-                Skill = dto.Skill,
-                PromptMd = dto.PromptMd,
-                ImageUrl = dto.ImageUrl,
-                BlankAcceptTexts = dto.BlankAcceptTexts,
-                BlankAcceptRegex = dto.BlankAcceptRegex,
-                MatchPairs = dto.MatchPairs,
-                OrderCorrects = orderCorrects,
-                ShortAnswerAcceptTexts = shortTexts,
-                ShortAnswerAcceptRegex = shortRegex
-            };
-            _context.ExamQuestions.Add(ques);
+                var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                var maxIdx = await _context.ExamQuestions.AsNoTracking()
+                    .Where(question => question.SectionId == dto.SectionId)
+                    .Select(a => (int?)a.Idx).MaxAsync(token) ?? 0;
+                var desired = dto.Idx ?? maxIdx + 1;
+                if (desired < 1) desired = 1;
+                if (desired > maxIdx + 1) desired = maxIdx + 1;
+                if (desired <= maxIdx)
+                    await _context.ExamQuestions
+                        .Where(x => x.SectionId == dto.SectionId && x.Idx >= desired)
+                        .ExecuteUpdateAsync(s => s.SetProperty(d => d.Idx, d => d.Idx + 1), token);
+                var ques = new ExamQuestion
+                {
+                    Difficulty = dto.Difficulty,
+                    ExplanationMd = dto.ExplanationMd,
+                    Idx = desired,
+                    SectionId = dto.SectionId,
+                    Type = dto.Type,
+                    Skill = dto.Skill,
+                    PromptMd = dto.PromptMd,
+                    ImageUrl = dto.ImageUrl,
+                    BlankAcceptTexts = dto.BlankAcceptTexts,
+                    BlankAcceptRegex = dto.BlankAcceptRegex,
+                    MatchPairs = dto.MatchPairs,
+                    OrderCorrects = orderCorrects,
+                    ShortAnswerAcceptTexts = shortTexts,
+                    ShortAnswerAcceptRegex = shortRegex
+                };
+                _context.ExamQuestions.Add(ques);
 
-            await _context.SaveChangesAsync(token);
-            await transaction.CommitAsync(token);
-            return Results.Ok(new ApiResultDto(true, "Created question successfully", ques));
-        }
-        catch (Exception e)
-        {
-            await transaction.RollbackAsync(token);
-            return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
-        }
+                await _context.SaveChangesAsync(token);
+                await transaction.CommitAsync(token);
+                return Results.Ok(new ApiResultDto(true, "Created question successfully", ques));
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync(token);
+                return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
+            }
+        });
     }
 
     public async Task<IResult> UpdateAsync(

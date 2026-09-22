@@ -262,11 +262,13 @@ router = APIRouter(prefix="/v1/autogen", tags=["autogen"])
 
 @router.post("/questions", response_model=AutogenQuestionsResponse)
 async def autogen_questions(req: AutogenQuestionsRequest):
-    system_prompt = build_system_prompt(req.type, req.json_shape, req.constraints)
-    user_prompt = build_user_prompt(req.type, req.passage, req.count, req.difficulty, req.extra_context)
+    json_shape = get_json_shape(req.type)
+    constraints = get_constraints(req.type)
+    system_prompt = build_system_prompt(req.type, json_shape, constraints)
+    user_prompt = build_user_prompt(req.type, req.passage, req.count, req.difficulty, req.extra_context or "")
     result = await groq_generate(
-        prompt_template="{user}",
-        variables={"user": user_prompt},
+        prompt_template="{system}\n\n{user}",
+        variables={"system": system_prompt, "user": user_prompt},
         expect_json=True,
         temperature=0.3,
         max_tokens=4096,

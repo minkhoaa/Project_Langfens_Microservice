@@ -1,316 +1,711 @@
 """Server-side mirror of questionSchemas.ts jsonShape + constraints.
 
-This module is a Python copy of the TypeScript source. To prevent drift,
-both must be updated together. Sprint 9 introduces codegen (Phase 9.4 of
-PLAN.md).
-
-Keep this in sync with langfens-fe-app/src/app/admin/_lib/questionSchemas.ts.
+This module is generated from autogen_contract.json which is locked
+against the canonical standard exam (11111111-1111-1111-1111-111111111111).
 """
 from __future__ import annotations
 
 JSON_SHAPES: dict[str, str] = {
-    "MULTIPLE_CHOICE_SINGLE": """{
-  "type": "MULTIPLE_CHOICE_SINGLE",
-  "skill": "READING",
-  "difficulty": 2,
-  "promptMd": "What is the main idea of paragraph 2?",
-  "explanationMd": "The passage states...",
-  "options": [
-    { "contentMd": "A. The moon's orbit", "isCorrect": false },
-    { "contentMd": "B. The sun's energy", "isCorrect": true }
-  ]
-}""",
-    "MULTIPLE_CHOICE_MULTIPLE": """{
-  "type": "MULTIPLE_CHOICE_MULTIPLE",
+    "CLASSIFICATION": """{
+  "type": "CLASSIFICATION",
   "skill": "READING",
   "difficulty": 3,
-  "promptMd": "Which THREE of the following are mentioned?",
+  "promptMd": "Classify the following statements as referring to:\nA — the debate over what caused the library's destruction\nB — the features of the ancient library itself\nC — the modern reconstruction efforts\nD — the activities of scholars who worked there\n\n23. Funding cuts and political instability were more likely causes than a single fire.\n24. The new library combines contemporary design with historic symbolism.\n25. Scholars travelled from across the Mediterranean to study and copy texts.",
+  "matchPairs": {
+    "23": [
+      "A"
+    ],
+    "24": [
+      "C"
+    ],
+    "25": [
+      "D"
+    ]
+  },
   "options": [
-    { "contentMd": "A. Item one", "isCorrect": true },
-    { "contentMd": "B. Item two", "isCorrect": false }
+    {
+      "idx": 1,
+      "contentMd": "A. The debate over what caused the library's destruction",
+      "isCorrect": false
+    },
+    {
+      "idx": 2,
+      "contentMd": "B. The features of the ancient library itself",
+      "isCorrect": false
+    },
+    {
+      "idx": 3,
+      "contentMd": "C. The modern reconstruction efforts",
+      "isCorrect": false
+    },
+    {
+      "idx": 4,
+      "contentMd": "D. The activities of scholars who worked there",
+      "isCorrect": false
+    }
   ]
-}""",
-    "TRUE_FALSE_NOT_GIVEN": """{
-  "type": "TRUE_FALSE_NOT_GIVEN",
-  "skill": "READING",
-  "difficulty": 2,
-  "promptMd": "The author argues that...",
-  "options": [
-    { "contentMd": "True", "isCorrect": true },
-    { "contentMd": "False", "isCorrect": false },
-    { "contentMd": "Not Given", "isCorrect": false }
-  ]
-}""",
-    "YES_NO_NOT_GIVEN": """{
-  "type": "YES_NO_NOT_GIVEN",
-  "skill": "READING",
-  "difficulty": 2,
-  "promptMd": "The author believes...",
-  "options": [
-    { "contentMd": "Yes", "isCorrect": true },
-    { "contentMd": "No", "isCorrect": false },
-    { "contentMd": "Not Given", "isCorrect": false }
-  ]
-}""",
-    "MULTIPLE_CHOICE_SINGLE_IMAGE": """{
-  "type": "MULTIPLE_CHOICE_SINGLE_IMAGE",
-  "skill": "LISTENING",
-  "difficulty": 3,
-  "promptMd": "Which image matches the description?",
-  "options": [
-    { "contentMd": "A. Option 1", "imageUrl": "https://.../1.png", "altText": "...", "isCorrect": true }
-  ]
-}""",
-    "SUMMARY_COMPLETION": """{
-  "type": "SUMMARY_COMPLETION",
-  "skill": "READING",
-  "difficulty": 2,
-  "promptMd": "Complete the summary:\n\nThe moon orbits the [1] every [2] days.",
-  "blankAcceptTexts": {
-    "1": ["earth", "Earth"],
-    "2": ["27", "twenty-seven"]
-  }
-}""",
-    "TABLE_COMPLETION": """{
-  "type": "TABLE_COMPLETION",
-  "skill": "READING",
-  "difficulty": 3,
-  "promptMd": "Complete the table:\n\n| Year | Sales |\n|------|-------|\n| 2020 | [1]   |",
-  "blankAcceptTexts": { "1": ["100", "one hundred"] }
-}""",
-    "NOTE_COMPLETION": """{
-  "type": "NOTE_COMPLETION",
-  "skill": "LISTENING",
-  "difficulty": 2,
-  "promptMd": "Notes:\n- Type: [1]\n- Capacity: [2] people",
-  "blankAcceptTexts": { "1": ["workshop"], "2": ["20"] }
-}""",
-    "FORM_COMPLETION": """{
-  "type": "FORM_COMPLETION",
-  "skill": "LISTENING",
-  "difficulty": 2,
-  "promptMd": "Application Form\n\nName: [1]\nDate: [2]\nRoom: [3]",
-  "blankAcceptTexts": {
-    "1": ["Rachel Torres", "Torres"],
-    "2": ["15 September"],
-    "3": ["single"]
-  }
-}""",
-    "SENTENCE_COMPLETION": """{
-  "type": "SENTENCE_COMPLETION",
-  "skill": "READING",
-  "promptMd": "1. Listening to music reduces [1] levels.\n2. The brain's [2] manages emotion.",
-  "blankAcceptTexts": { "1": ["cortisol"], "2": ["nucleus accumbens"] }
-}""",
-    "SHORT_ANSWER": """{
-  "type": "SHORT_ANSWER",
-  "skill": "READING",
-  "difficulty": 2,
-  "promptMd": "What percentage of patients showed improvement?",
-  "shortAnswerAcceptTexts": ["15", "fifteen", "15%"],
-  "shortAnswerAcceptRegex": ["^\\d+(\\.\\d+)?\\s*%?$"]
 }""",
     "DIAGRAM_LABEL": """{
   "type": "DIAGRAM_LABEL",
-  "skill": "LISTENING",
-  "difficulty": 3,
-  "promptMd": "Label the diagram below with [1], [2]…",
-  "imageUrl": "https://.../diagram.png",
-  "blankAcceptTexts": { "1": ["chloroplast"], "2": ["nucleus"] }
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "Label the diagram using words from the passage.\n\n[Diagram: Vertical Farm System — showing stacked growing shelves, LED lights, hydroponic pipes, and a climate control panel]",
+  "imageUrl": "https://placehold.co/600x400/png?text=Vertical+Farm+System",
+  "blankAcceptTexts": {
+    "1": [
+      "LED lights",
+      "LED"
+    ],
+    "2": [
+      "hydroponic pipes",
+      "hydroponic system",
+      "hydroponics"
+    ],
+    "3": [
+      "climate control",
+      "climate control panel"
+    ],
+    "4": [
+      "stacked layers",
+      "stacked growing shelves",
+      "growing shelves"
+    ]
+  }
+}""",
+    "FLOW_CHART": """{
+  "type": "FLOW_CHART",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "The flow chart below illustrates the traditional papermaking process invented by Cai Lun as described in the passage.\n\n```\n┌─────────────────────────────────────────────────────────────┐\n│                           STAGE 1                           │\n│   Collect raw materials such as rags, hemp, and fishnets    │\n└──────────────────────────────┬──────────────────────────────┘\n                               │\n                               ▼\n┌─────────────────────────────────────────────────────────────┐\n│                           STAGE 2                           │\n│          Soak the raw fibres in water to soften them        │\n└──────────────────────────────┬──────────────────────────────┘\n                               │\n                               ▼\n┌─────────────────────────────────────────────────────────────┐\n│                           STAGE 3                           │\n│         Press the fibres together into a fibrous mat        │\n└──────────────────────────────┬──────────────────────────────┘\n                               │\n                               ▼\n┌─────────────────────────────────────────────────────────────┐\n│                           STAGE 4                           │\n│             Dry the resulting sheets in the sun             │\n└─────────────────────────────────────────────────────────────┘\n```\n\nLook at the four steps of the papermaking process below and put them into the correct chronological order:\n\nAvailable steps:\n\nA. Soak the raw fibres in water to soften them\n\nB. Dry the resulting sheets in the sun\n\nC. Collect raw materials such as rags, hemp, and fishnets\n\nD. Press the fibres together into a fibrous mat\n\nArrange steps in the correct chronological order:",
+  "orderCorrects": [
+    "collect-raw-materials-such-as-rags-hemp-and-fishnets",
+    "soak-the-raw-fibres-in-water-to-soften-them",
+    "press-the-fibres-together-into-a-fibrous-mat",
+    "dry-the-resulting-sheets-in-the-sun"
+  ]
+}""",
+    "FORM_COMPLETION": """{
+  "type": "FORM_COMPLETION",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "Complete the form below.\nWrite ONE OR TWO WORDS from the passage for each answer.\n\nLIBRARY OF ALEXANDRIA — INFORMATION SHEET\n\nFounded: [26] century BCE\nLocation: [27], Egypt\nSupported by: [28] dynasty\nPurpose: Collect all human knowledge in one place\nPeak collection: [29] scrolls\nModern successor: [30] (opened 2002)\nModern collection size: [31] titles",
+  "blankAcceptTexts": {
+    "26": [
+      "3rd",
+      "third"
+    ],
+    "27": [
+      "Alexandria"
+    ],
+    "28": [
+      "Ptolemaic"
+    ],
+    "29": [
+      "400,000"
+    ],
+    "30": [
+      "Bibliotheca Alexandrina"
+    ],
+    "31": [
+      "8 million",
+      "eight million"
+    ]
+  }
 }""",
     "MAP_LABEL": """{
   "type": "MAP_LABEL",
-  "skill": "LISTENING",
-  "difficulty": 3,
-  "promptMd": "Label positions [1] through [2] on the map.",
-  "imageUrl": "https://.../map.png",
-  "blankAcceptTexts": { "1": ["library"], "2": ["park"] }
-}""",
-    "MATCHING_HEADING": """{
-  "type": "MATCHING_HEADING",
   "skill": "READING",
-  "difficulty": 3,
-  "promptMd": "Reading passage...",
-  "options": [
-    { "contentMd": "i. The Early Years" },
-    { "contentMd": "ii. The Modern Period" }
-  ],
-  "matchPairs": {
-    "A": ["i", "Paragraph A excerpt"],
-    "B": ["ii", "Paragraph B excerpt"]
-  }
-}""",
-    "MATCHING_INFORMATION": """{
-  "type": "MATCHING_INFORMATION",
-  "skill": "READING",
-  "difficulty": 3,
-  "promptMd": "14. Which paragraph mentions X?\n15. Which paragraph describes Y?",
-  "matchPairs": {
-    "1": ["B", "Question 14 text"],
-    "2": ["A", "Question 15 text"]
-  }
-}""",
-    "MATCHING_FEATURES": """{
-  "type": "MATCHING_FEATURES",
-  "skill": "READING",
-  "difficulty": 3,
-  "promptMd": "1. The speaker\n2. The researcher",
-  "options": [
-    { "contentMd": "A. Used the method" },
-    { "contentMd": "B. Criticised the theory" }
-  ],
-  "matchPairs": {
-    "1": ["A", "The speaker"],
-    "2": ["B", "The researcher"]
+  "difficulty": 2,
+  "promptMd": "The map below shows the ancient city of Alexandria. Label the locations [21] to [24] using information from the passage.\n\n[Map: Ancient Alexandria — showing coastline, harbour, city centre, and outer districts]",
+  "imageUrl": "https://placehold.co/600x400/png?text=Ancient+Alexandria+Map",
+  "blankAcceptTexts": {
+    "21": [
+      "Library of Alexandria",
+      "the library",
+      "ancient library"
+    ],
+    "22": [
+      "harbour",
+      "port",
+      " harbour"
+    ],
+    "23": [
+      "city centre",
+      "centre",
+      "city"
+    ],
+    "24": [
+      "Museion",
+      "research university",
+      "observatories"
+    ]
   }
 }""",
     "MATCHING_ENDINGS": """{
   "type": "MATCHING_ENDINGS",
   "skill": "READING",
   "difficulty": 3,
-  "promptMd": "21. Despite the rain,\n22. As the temperature rose,",
-  "options": [
-    { "contentMd": "A. the team continued." },
-    { "contentMd": "B. the ice began to melt." }
-  ],
+  "promptMd": "Complete each sentence with the correct ending, A–F, below.\nWrite the correct letter on your answer sheet.\n\nSentence beginnings:\n1. While blockbuster exhibitions attract large numbers of visitors…\n2. When a museum shares a high-resolution digital image online…\n3. Revenue from commercial activities can be reinvested…\n4. Modern museums increasingly see themselves as having…",
   "matchPairs": {
-    "1": ["A", "Despite the rain,"],
-    "2": ["B", "As the temperature rose,"]
-  }
+    "1": [
+      "A",
+      "While blockbuster exhibitions attract large numbers of visitors…"
+    ],
+    "2": [
+      "B",
+      "When a museum shares a high-resolution digital image online…"
+    ],
+    "3": [
+      "C",
+      "Revenue from commercial activities can be reinvested…"
+    ],
+    "4": [
+      "D",
+      "Modern museums increasingly see themselves as having…"
+    ]
+  },
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "A. …the crowds they draw can overshadow the museum's educational mission",
+      "isCorrect": false
+    },
+    {
+      "idx": 2,
+      "contentMd": "B. …raise questions about what it means to 'possess' a work of art",
+      "isCorrect": false
+    },
+    {
+      "idx": 3,
+      "contentMd": "C. …which can then be used to support the institution's core activities",
+      "isCorrect": false
+    },
+    {
+      "idx": 4,
+      "contentMd": "D. …a responsibility to serve the local community beyond tourism",
+      "isCorrect": false
+    },
+    {
+      "idx": 5,
+      "contentMd": "E. …the digital version has been shared freely with other institutions",
+      "isCorrect": false
+    },
+    {
+      "idx": 6,
+      "contentMd": "F. …which can only be resolved through international agreements",
+      "isCorrect": false
+    }
+  ]
 }""",
-    "CLASSIFICATION": """{
-  "type": "CLASSIFICATION",
+    "MATCHING_FEATURES": """{
+  "type": "MATCHING_FEATURES",
   "skill": "READING",
   "difficulty": 3,
-  "promptMd": "Classify as:\nA. dopamine research\nB. cultural factors\nC. musical training\n\n1. Musicians have more gray matter...\n2. What one finds beautiful...\n3. The brain shows...",
-  "options": [
-    { "contentMd": "A. dopamine research" },
-    { "contentMd": "B. cultural factors" },
-    { "contentMd": "C. musical training" }
-  ],
+  "promptMd": "Look at the following museum initiatives and the list of features below.\nMatch each initiative (1–4) with the correct feature (A–E).\nNote: One feature will NOT be matched.\n\nInitiatives:\n1. Blockbuster exhibitions\n2. Digital technology\n3. Repatriation debates\n4. Community programmes",
   "matchPairs": {
-    "1": ["C"],
-    "2": ["B"],
-    "3": ["A"]
+    "1": [
+      "A",
+      "Blockbuster exhibitions"
+    ],
+    "2": [
+      "E",
+      "Digital technology"
+    ],
+    "3": [
+      "B",
+      "Repatriation debates"
+    ],
+    "4": [
+      "C",
+      "Community programmes"
+    ]
+  },
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "A. Generates significant income",
+      "isCorrect": false
+    },
+    {
+      "idx": 2,
+      "contentMd": "B. Raises ethical questions about ownership",
+      "isCorrect": false
+    },
+    {
+      "idx": 3,
+      "contentMd": "C. Includes non-cultural activities such as language classes",
+      "isCorrect": false
+    },
+    {
+      "idx": 4,
+      "contentMd": "D. Involves borrowing objects from other countries",
+      "isCorrect": false
+    },
+    {
+      "idx": 5,
+      "contentMd": "E. Makes use of digital devices and software",
+      "isCorrect": false
+    }
+  ]
+}""",
+    "MATCHING_HEADING": """{
+  "type": "MATCHING_HEADING",
+  "skill": "READING",
+  "difficulty": 3,
+  "promptMd": "The reading passage has five paragraphs, 1–5.\nChoose the correct heading for each paragraph from the list of headings below.\n\nList of Headings:\ni. How museum purposes have changed over time\nii. The economic model of major international exhibitions\niii. Digital technology and its effect on visitor experience\niv. Disputes over the ownership of cultural artefacts\nv. Museums as neighbourhood service centres\nvi. The difference between local visitors and tourists\nvii. Funding challenges for smaller cultural institutions\n\nParagraphs:\n1. Paragraph 1\n2. Paragraph 2\n3. Paragraph 3\n4. Paragraph 4\n5. Paragraph 5",
+  "matchPairs": {
+    "1": [
+      "i",
+      "How museum purposes have changed over time"
+    ],
+    "2": [
+      "ii",
+      "The economic model of major international exhibitions"
+    ],
+    "3": [
+      "iii",
+      "Digital technology and its effect on visitor experience"
+    ],
+    "4": [
+      "iv",
+      "Disputes over the ownership of cultural artefacts"
+    ],
+    "5": [
+      "v",
+      "Museums as neighbourhood service centres"
+    ]
+  },
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "i. How museum purposes have changed over time",
+      "isCorrect": false
+    },
+    {
+      "idx": 2,
+      "contentMd": "ii. The economic model of major international exhibitions",
+      "isCorrect": false
+    },
+    {
+      "idx": 3,
+      "contentMd": "iii. Digital technology and its effect on visitor experience",
+      "isCorrect": false
+    },
+    {
+      "idx": 4,
+      "contentMd": "iv. Disputes over the ownership of cultural artefacts",
+      "isCorrect": false
+    },
+    {
+      "idx": 5,
+      "contentMd": "v. Museums as neighbourhood service centres",
+      "isCorrect": false
+    },
+    {
+      "idx": 6,
+      "contentMd": "vi. The difference between local visitors and tourists",
+      "isCorrect": false
+    },
+    {
+      "idx": 7,
+      "contentMd": "vii. Funding challenges for smaller cultural institutions",
+      "isCorrect": false
+    }
+  ]
+}""",
+    "MATCHING_INFORMATION": """{
+  "type": "MATCHING_INFORMATION",
+  "skill": "READING",
+  "difficulty": 3,
+  "promptMd": "The reading passage has five paragraphs, A–E.\nWhich paragraph contains the following information?\n\nWrite the correct letter, A–E, on your answer sheet.\nNB You may use any letter more than once.\n\nQuestions 1–4:\n1. Commercial pressures and blockbuster exhibitions\n2. Technology reshaping the museum experience\n3. Ethical complexities of colonial-era collections\n4. Community outreach and social programmes",
+  "matchPairs": {
+    "1": [
+      "B",
+      "Commercial pressures and blockbuster exhibitions"
+    ],
+    "2": [
+      "C",
+      "Technology reshaping the museum experience"
+    ],
+    "3": [
+      "D",
+      "Ethical complexities of colonial-era collections"
+    ],
+    "4": [
+      "E",
+      "Community outreach and social programmes"
+    ]
+  },
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "A. Paragraph A",
+      "isCorrect": false
+    },
+    {
+      "idx": 2,
+      "contentMd": "B. Paragraph B",
+      "isCorrect": false
+    },
+    {
+      "idx": 3,
+      "contentMd": "C. Paragraph C",
+      "isCorrect": false
+    },
+    {
+      "idx": 4,
+      "contentMd": "D. Paragraph D",
+      "isCorrect": false
+    },
+    {
+      "idx": 5,
+      "contentMd": "E. Paragraph E",
+      "isCorrect": false
+    }
+  ]
+}""",
+    "MULTIPLE_CHOICE_MULTIPLE": """{
+  "type": "MULTIPLE_CHOICE_MULTIPLE",
+  "skill": "READING",
+  "difficulty": 3,
+  "promptMd": "Which THREE of the following benefits of remote work are mentioned in the passage?",
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "A. Increased job satisfaction",
+      "isCorrect": true
+    },
+    {
+      "idx": 2,
+      "contentMd": "B. Reduced commuting time",
+      "isCorrect": true
+    },
+    {
+      "idx": 3,
+      "contentMd": "C. Higher salaries",
+      "isCorrect": false
+    },
+    {
+      "idx": 4,
+      "contentMd": "D. Improved work-life balance",
+      "isCorrect": true
+    },
+    {
+      "idx": 5,
+      "contentMd": "E. Better access to mentorship",
+      "isCorrect": false
+    },
+    {
+      "idx": 6,
+      "contentMd": "F. Reduced presenteeism",
+      "isCorrect": false
+    }
+  ]
+}""",
+    "MULTIPLE_CHOICE_SINGLE": """{
+  "type": "MULTIPLE_CHOICE_SINGLE",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "Before the invention of paper, which of the following materials was NOT commonly used for writing?",
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "A. Papyrus and parchment",
+      "isCorrect": false
+    },
+    {
+      "idx": 2,
+      "contentMd": "B. Clay tablets and bamboo",
+      "isCorrect": false
+    },
+    {
+      "idx": 3,
+      "contentMd": "C. Papyrus, parchment, clay tablets and bamboo",
+      "isCorrect": true
+    },
+    {
+      "idx": 4,
+      "contentMd": "D. Animal skins and wood",
+      "isCorrect": false
+    }
+  ]
+}""",
+    "MULTIPLE_CHOICE_SINGLE_IMAGE": """{
+  "type": "MULTIPLE_CHOICE_SINGLE_IMAGE",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "Which image correctly describes the modern Bibliotheca Alexandrina?",
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "A. It was built using the original ancient architectural plans",
+      "isCorrect": false,
+      "imageUrl": "https://placehold.co/200x150/png?text=A",
+      "altText": "Option A"
+    },
+    {
+      "idx": 2,
+      "contentMd": "B. It combines modern architecture with references to the ancient library",
+      "isCorrect": true,
+      "imageUrl": "https://placehold.co/200x150/png?text=B",
+      "altText": "Option B"
+    },
+    {
+      "idx": 3,
+      "contentMd": "C. It is the largest library ever built in human history",
+      "isCorrect": false,
+      "imageUrl": "https://placehold.co/200x150/png?text=C",
+      "altText": "Option C"
+    },
+    {
+      "idx": 4,
+      "contentMd": "D. It houses the original scrolls recovered from the ancient site",
+      "isCorrect": false,
+      "imageUrl": "https://placehold.co/200x150/png?text=D",
+      "altText": "Option D"
+    }
+  ]
+}""",
+    "NOTE_COMPLETION": """{
+  "type": "NOTE_COMPLETION",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "Complete the notes below.\nWrite ONE OR TWO WORDS from the passage for each answer.\n\nRemote Work: Key Findings\n\n• Study covered [18] countries\n• [19] percent of remote workers felt more satisfied with their jobs\n• 58 percent experienced [20] — difficulty disconnecting after work hours\n• Some companies introduced [21]-free hours to protect employee downtime\n• Four-day work weeks can increase productivity by up to [22] percent",
+  "blankAcceptTexts": {
+    "18": [
+      "16",
+      "sixteen"
+    ],
+    "19": [
+      "74"
+    ],
+    "20": [
+      "presenteeism"
+    ],
+    "21": [
+      "digital"
+    ],
+    "22": [
+      "40",
+      "forty"
+    ]
   }
 }""",
-    "FLOW_CHART": """{
-  "type": "FLOW_CHART",
-  "skill": "LISTENING",
+    "SENTENCE_COMPLETION": """{
+  "type": "SENTENCE_COMPLETION",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "Complete the sentences.\nWrite ONE OR TWO WORDS from the passage for each answer.\n\n3. The earliest paper was produced in China during the [3] Dynasty.\n4. Arab armies acquired papermaking knowledge after defeating Chinese soldiers along the [4] in the 8th century.\n5. The Fourdrinier machine enabled paper to be made continuously from [5] rather than by hand.",
+  "blankAcceptTexts": {
+    "3": [
+      "Han"
+    ],
+    "4": [
+      "Silk Road"
+    ],
+    "5": [
+      "wood pulp"
+    ]
+  }
+}""",
+    "SHORT_ANSWER": """{
+  "type": "SHORT_ANSWER",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "What city was home to Green City Farms, a former textile factory converted into a vertical farm?",
+  "shortAnswerAcceptTexts": [
+    "Detroit"
+  ]
+}""",
+    "SUMMARY_COMPLETION": """{
+  "type": "SUMMARY_COMPLETION",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "Complete the summary. Write ONE OR TWO WORDS from the passage.\n\nCai Lun developed paper during the [32] Dynasty. Later, industrial production used [33].",
+  "blankAcceptTexts": {
+    "32": [
+      "Han"
+    ],
+    "33": [
+      "wood pulp"
+    ]
+  }
+}""",
+    "TABLE_COMPLETION": """{
+  "type": "TABLE_COMPLETION",
+  "skill": "READING",
   "difficulty": 3,
-  "promptMd": "Complete the flow chart below.",
-  "orderCorrects": ["collect-samples", "analyze-data", "publish-results"]
+  "promptMd": "Complete the table below.\nWrite ONE OR TWO WORDS from the passage for each answer.\n\n| Period | Region | Raw Material Used | Quality Issues |\n|--------|--------|-------------------|----------------|\n| 8th–12th century | Arab world and Europe | [6] | Lower quality than Chinese |\n| Early 19th century | Europe | Wood pulp | [7] |",
+  "blankAcceptTexts": {
+    "6": [
+      "linen and cotton rags",
+      "cotton",
+      "linen and cotton"
+    ],
+    "7": [
+      "acidic",
+      "degrades fast",
+      "becomes acidic",
+      "faster degradation"
+    ]
+  }
+}""",
+    "TRUE_FALSE_NOT_GIVEN": """{
+  "type": "TRUE_FALSE_NOT_GIVEN",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "Cai Lun was the first person to produce paper from wood pulp.",
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "True",
+      "isCorrect": true
+    },
+    {
+      "idx": 2,
+      "contentMd": "False",
+      "isCorrect": false
+    },
+    {
+      "idx": 3,
+      "contentMd": "Not Given",
+      "isCorrect": false
+    }
+  ]
+}""",
+    "YES_NO_NOT_GIVEN": """{
+  "type": "YES_NO_NOT_GIVEN",
+  "skill": "READING",
+  "difficulty": 2,
+  "promptMd": "All museums are now required to return objects taken during the colonial period.",
+  "options": [
+    {
+      "idx": 1,
+      "contentMd": "Yes",
+      "isCorrect": true
+    },
+    {
+      "idx": 2,
+      "contentMd": "No",
+      "isCorrect": false
+    },
+    {
+      "idx": 3,
+      "contentMd": "Not Given",
+      "isCorrect": false
+    }
+  ]
 }""",
 }
 
 CONSTRAINTS: dict[str, list[str]] = {
-    "MULTIPLE_CHOICE_SINGLE": [
-        "options[] must have exactly 1 with isCorrect=true (single answer)",
-        "options[].contentMd should follow 'A. text', 'B. text' convention"
-    ],
-    "MULTIPLE_CHOICE_MULTIPLE": [
-        "options[] must have 2+ with isCorrect=true",
-        "options[].contentMd should follow 'A. text'...'H. text' convention"
-    ],
-    "TRUE_FALSE_NOT_GIVEN": [
-        "options[] must contain exactly 3 items: True, False, Not Given",
-        "exactly 1 must be isCorrect=true"
-    ],
-    "YES_NO_NOT_GIVEN": [
-        "options[] must contain exactly 3 items: Yes, No, Not Given",
-        "exactly 1 must be isCorrect=true"
-    ],
-    "MULTIPLE_CHOICE_SINGLE_IMAGE": [
-        "options[].imageUrl is recommended for image-based MCQ",
-        "options[].altText is required when imageUrl is set (a11y)"
-    ],
-    "SUMMARY_COMPLETION": [
-        "promptMd should contain [N] placeholders OR numbered list",
-        "blankAcceptTexts keys must match placeholder indices (e.g. '1', '2'…)",
-        "each blank value can be string[] (multiple acceptable spellings)"
-    ],
-    "TABLE_COMPLETION": [
-        "promptMd typically contains a markdown table with [N] cells",
-        "blankAcceptTexts keys match placeholder indices"
-    ],
-    "NOTE_COMPLETION": [
-        "Same as SummaryCompletion."
-    ],
-    "FORM_COMPLETION": [
-        "Same as SummaryCompletion."
-    ],
-    "SENTENCE_COMPLETION": [
-        "Same as SummaryCompletion."
-    ],
-    "SHORT_ANSWER": [
-        "shortAnswerAcceptTexts is compared case-insensitively",
-        "shortAnswerAcceptRegex uses .NET regex syntax",
-        "at least one of texts/regex must be non-empty"
+    "CLASSIFICATION": [
+        "Include a non-empty options[] choice pool; label each contentMd with its grading key (A., B. or i., ii.).",
+        "matchPairs keys are positive numeric strings matching numbered items in promptMd; they need not start at 1.",
+        "Each matchPairs value starts with an accepted key from options[]. Include a display label as value[1] for MATCHING_*; it is optional for CLASSIFICATION.",
+        "Every item to be matched must be visible in promptMd without revealing its answer.",
     ],
     "DIAGRAM_LABEL": [
-        "imageUrl is required for DIAGRAM_LABEL",
-        "promptMd should describe what to label (or be empty)",
-        "blankAcceptTexts keys match placeholder indices"
-    ],
-    "MAP_LABEL": [
-        "imageUrl is required for MAP_LABEL",
-        "blankAcceptTexts keys match placeholder indices"
-    ],
-    "MATCHING_HEADING": [
-        "matchPairs keys = paragraph letters (A, B, C…)",
-        "matchPairs values[0] = heading Roman numeral",
-        "options[] = heading pool (i, ii, iii…)"
-    ],
-    "MATCHING_INFORMATION": [
-        "matchPairs keys = 1-based question index strings ('1', '2', …)",
-        "matchPairs values[0] = paragraph letter (A-H)"
-    ],
-    "MATCHING_FEATURES": [
-        "options[] = feature list (A-H)",
-        "matchPairs keys = 1-based item index ('1', '2', …)",
-        "features can be reused across items"
-    ],
-    "MATCHING_ENDINGS": [
-        "options[] = endings pool (A-H)",
-        "matchPairs keys = 1-based beginning index ('1', '2', …)",
-        "endings can only be used once (one-to-one)"
-    ],
-    "CLASSIFICATION": [
-        "promptMd MUST contain 'A. label', 'B. label' for categories and '1. text', '2. text' for statements",
-        "matchPairs keys = 1-based statement index ('1', '2', …)",
-        "matchPairs values[0] = category letter (A, B, C…)"
+        "blankAcceptTexts is a non-empty dictionary of positive numeric keys to non-empty string arrays.",
+        "Every blank uses canonical [N] markers matching the answer dictionary exactly. Keys may continue paper-wide numbering; do not renumber them unnecessarily.",
+        "Do not emit underscores, spaced brackets or blank-q placeholders.",
+        "An imageUrl at question level is required. Reuse a supplied image asset; never invent an image URL. Existing [Diagram: ...]/[Map: ...] word-bank markers are supported.",
     ],
     "FLOW_CHART": [
-        "orderCorrects must be slug-like (lowercase, hyphenated)",
-        "must have at least 2 unique steps"
+        "FLOW_CHART is process sequencing, not fill-in-the-blank.",
+        "orderCorrects contains at least two distinct lowercase hyphenated step slugs in the correct order.",
+        "promptMd describes the task and lists available steps as A., B., C. in shuffled order. Do not reveal the correct sequence.",
+        "Do not include [N] blanks, blankAcceptTexts or matchPairs. Delivery generates shuffled flowChartNodes from orderCorrects.",
+    ],
+    "FORM_COMPLETION": [
+        "blankAcceptTexts is a non-empty dictionary of positive numeric keys to non-empty string arrays.",
+        "Every blank uses canonical [N] markers matching the answer dictionary exactly. Keys may continue paper-wide numbering; do not renumber them unnecessarily.",
+        "Do not emit underscores, spaced brackets or blank-q placeholders.",
+    ],
+    "MAP_LABEL": [
+        "blankAcceptTexts is a non-empty dictionary of positive numeric keys to non-empty string arrays.",
+        "Every blank uses canonical [N] markers matching the answer dictionary exactly. Keys may continue paper-wide numbering; do not renumber them unnecessarily.",
+        "Do not emit underscores, spaced brackets or blank-q placeholders.",
+        "An imageUrl at question level is required. Reuse a supplied image asset; never invent an image URL. Existing [Diagram: ...]/[Map: ...] word-bank markers are supported.",
+    ],
+    "MATCHING_ENDINGS": [
+        "Include a non-empty options[] choice pool; label each contentMd with its grading key (A., B. or i., ii.).",
+        "matchPairs keys are positive numeric strings matching numbered items in promptMd; they need not start at 1.",
+        "Each matchPairs value starts with an accepted key from options[]. Include a display label as value[1] for MATCHING_*; it is optional for CLASSIFICATION.",
+        "Every item to be matched must be visible in promptMd without revealing its answer.",
+    ],
+    "MATCHING_FEATURES": [
+        "Include a non-empty options[] choice pool; label each contentMd with its grading key (A., B. or i., ii.).",
+        "matchPairs keys are positive numeric strings matching numbered items in promptMd; they need not start at 1.",
+        "Each matchPairs value starts with an accepted key from options[]. Include a display label as value[1] for MATCHING_*; it is optional for CLASSIFICATION.",
+        "Every item to be matched must be visible in promptMd without revealing its answer.",
+    ],
+    "MATCHING_HEADING": [
+        "Include a non-empty options[] choice pool; label each contentMd with its grading key (A., B. or i., ii.).",
+        "matchPairs keys are positive numeric strings matching numbered items in promptMd; they need not start at 1.",
+        "Each matchPairs value starts with an accepted key from options[]. Include a display label as value[1] for MATCHING_*; it is optional for CLASSIFICATION.",
+        "Every item to be matched must be visible in promptMd without revealing its answer.",
+        "List paragraph targets as numbered items and include the Roman-numeral heading pool in promptMd and options[].",
+    ],
+    "MATCHING_INFORMATION": [
+        "Include a non-empty options[] choice pool; label each contentMd with its grading key (A., B. or i., ii.).",
+        "matchPairs keys are positive numeric strings matching numbered items in promptMd; they need not start at 1.",
+        "Each matchPairs value starts with an accepted key from options[]. Include a display label as value[1] for MATCHING_*; it is optional for CLASSIFICATION.",
+        "Every item to be matched must be visible in promptMd without revealing its answer.",
+    ],
+    "MULTIPLE_CHOICE_MULTIPLE": [
+        "Include at least two options with boolean isCorrect values and non-empty contentMd.",
+        "At least two correct options.",
+    ],
+    "MULTIPLE_CHOICE_SINGLE": [
+        "Include at least two options with boolean isCorrect values and non-empty contentMd.",
+        "Exactly one correct option.",
+    ],
+    "MULTIPLE_CHOICE_SINGLE_IMAGE": [
+        "Include at least two options with boolean isCorrect values and non-empty contentMd.",
+        "Exactly one correct option.",
+        "Images belong to options[].imageUrl with non-empty altText. A question-level imageUrl is optional when all options have images. Use supplied image assets, never invented URLs.",
+    ],
+    "NOTE_COMPLETION": [
+        "blankAcceptTexts is a non-empty dictionary of positive numeric keys to non-empty string arrays.",
+        "Every blank uses canonical [N] markers matching the answer dictionary exactly. Keys may continue paper-wide numbering; do not renumber them unnecessarily.",
+        "Do not emit underscores, spaced brackets or blank-q placeholders.",
+    ],
+    "SENTENCE_COMPLETION": [
+        "blankAcceptTexts is a non-empty dictionary of positive numeric keys to non-empty string arrays.",
+        "Every blank uses canonical [N] markers matching the answer dictionary exactly. Keys may continue paper-wide numbering; do not renumber them unnecessarily.",
+        "Do not emit underscores, spaced brackets or blank-q placeholders.",
+    ],
+    "SHORT_ANSWER": [
+        "shortAnswerAcceptTexts contains at least one non-empty accepted answer.",
+    ],
+    "SUMMARY_COMPLETION": [
+        "blankAcceptTexts is a non-empty dictionary of positive numeric keys to non-empty string arrays.",
+        "Every blank uses canonical [N] markers matching the answer dictionary exactly. Keys may continue paper-wide numbering; do not renumber them unnecessarily.",
+        "Do not emit underscores, spaced brackets or blank-q placeholders.",
+    ],
+    "TABLE_COMPLETION": [
+        "blankAcceptTexts is a non-empty dictionary of positive numeric keys to non-empty string arrays.",
+        "Every blank uses canonical [N] markers matching the answer dictionary exactly. Keys may continue paper-wide numbering; do not renumber them unnecessarily.",
+        "Do not emit underscores, spaced brackets or blank-q placeholders.",
+    ],
+    "TRUE_FALSE_NOT_GIVEN": [
+        "Exactly three distinct options labelled True, False, Not Given; exactly one isCorrect=true.",
+        "The answer must be unambiguous and grounded in the source passage.",
+    ],
+    "YES_NO_NOT_GIVEN": [
+        "Exactly three distinct options labelled Yes, No, Not Given; exactly one isCorrect=true.",
+        "The answer must be unambiguous and grounded in the source passage.",
     ],
 }
 
-
 def get_json_shape(qtype: str) -> str:
-    """Return the canonical JSON shape for a question type.
-
-    Args:
-        qtype: QuestionType enum value.
-
-    Returns:
-        JSON shape string.
-
-    Raises:
-        KeyError: if qtype is not in JSON_SHAPES.
-    """
+    """Return the canonical JSON shape for a question type."""
     if qtype not in JSON_SHAPES:
         raise KeyError(f"No JSON_SHAPES entry for type {qtype!r}")
     return JSON_SHAPES[qtype]
 
 
 def get_constraints(qtype: str) -> list[str]:
-    """Return the constraint strings for a question type.
-
-    Args:
-        qtype: QuestionType enum value.
-
-    Returns:
-        List of constraint strings (empty list if no constraints defined).
-    """
+    """Return the constraint strings for a question type."""
     return CONSTRAINTS.get(qtype, [])

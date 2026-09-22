@@ -49,8 +49,7 @@ JSON_SHAPES: dict[str, str] = {
   ]
 }""",
     # ... 17 more entries copied from questionSchemas.ts ...
-    # For Sprint 7, only the 8 existing LLM_PROMPTS entries need shapes (Phase 1
-    # refactor still works without the 11 new ones). Sprint 8 will add all 19.
+    # Sprint 7 extends prompt coverage to all 19 question types.
 }
 
 CONSTRAINTS: dict[str, list[str]] = {
@@ -217,8 +216,8 @@ async def autogen_questions(
     )
 
     result: dict[str, Any] = await groq_generate(
-        prompt_template="{user}",
-        variables={"user": user_prompt},
+        prompt_template="{system}\n\n{user}",
+        variables={"system": system_prompt, "user": user_prompt},
         expect_json=True,
         temperature=0.3,
         max_tokens=4096,
@@ -352,6 +351,11 @@ async def test_autogen_questions_returns_list_of_dicts():
         assert "questions" in body
         assert len(body["questions"]) == 2
         assert body["questions"][0]["type"] == "MULTIPLE_CHOICE_SINGLE"
+        mock_gen.assert_called_once()
+        _, kwargs = mock_gen.call_args
+        assert "{system}" in kwargs["prompt_template"]
+        assert "system" in kwargs["variables"]
+        assert "user" in kwargs["variables"]
 
 
 @pytest.mark.asyncio
