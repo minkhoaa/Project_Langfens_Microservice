@@ -8,16 +8,67 @@ import asyncio
 import json
 import logging
 import os
+import re
 import threading
 import time
 from collections import defaultdict
-from typing import Literal, Optional
-
+from typing import Any, Literal, Optional
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 from openai import APIError, OpenAI, RateLimitError
 
 logger = logging.getLogger(__name__)
+
+def _extract_json(text: str) -> Any:
+    text = (text or "").strip()
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, (dict, list)):
+            return parsed
+        return {"data": parsed}
+    except json.JSONDecodeError:
+        pass
+
+    # Strip markdown code fences if present (e.g. ```json ... ```)
+    if "```" in text:
+        match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
+        if match:
+            candidate = match.group(1).strip()
+            try:
+                parsed = json.loads(candidate)
+                if isinstance(parsed, (dict, list)):
+                    return parsed
+                return {"data": parsed}
+            except json.JSONDecodeError:
+                pass
+
+    # Extract outermost JSON object { ... } or array [ ... ] by scanning from the end
+    last_brace = text.rfind("}")
+    if last_brace != -1:
+        start_indices = [i for i, c in enumerate(text[:last_brace]) if c == "{"]
+        for start in start_indices:
+            candidate = text[start : last_brace + 1]
+            try:
+                parsed = json.loads(candidate)
+                if isinstance(parsed, (dict, list)):
+                    return parsed
+                return {"data": parsed}
+            except json.JSONDecodeError:
+                continue
+
+    last_bracket = text.rfind("]")
+    if last_bracket != -1:
+        start_indices = [i for i, c in enumerate(text[:last_bracket]) if c == "["]
+        for start in start_indices:
+            candidate = text[start : last_bracket + 1]
+            try:
+                parsed = json.loads(candidate)
+                if isinstance(parsed, (dict, list)):
+                    return parsed
+                return {"data": parsed}
+            except json.JSONDecodeError:
+                continue
+    raise json.JSONDecodeError("Could not parse JSON", text, 0)
 
 class KeyManager:
     """Manages multiple Groq API keys with automatic rotation on quota exhaustion."""
@@ -214,48 +265,60 @@ class GroqService:
                 attempts += 1
 
                 try:
+                    is_reasoning_model = model_size in ("large", "xlarge") or any(
+                        r in model_name for r in ("gpt-oss", "deepseek-r1", "qwq")
+                    )
                     create_kwargs = {
                         "model": model_name,
                         "messages": [{"role": "user", "content": formatted_prompt}],
                         "temperature": temperature,
                         "max_tokens": max_tokens,
                     }
-                    if expect_json:
+                    if expect_json and not is_reasoning_model:
                         create_kwargs["response_format"] = {"type": "json_object"}
 
                     response = await asyncio.to_thread(client.chat.completions.create, **create_kwargs)
-                    content = response.choices[0].message.content
+                    content = response.choices[0].message.content or ""
+
+                    if not expect_json:
+                        try:
+                            return _extract_json(content)
+                        except json.JSONDecodeError:
+                            return {"text": content, "provider": provider_name}
 
                     try:
-                        result = json.loads(content)
+                        result = _extract_json(content)
                         logger.info(f"✅ {provider_name.upper()} response OK (key #{key_index + 1})")
                         return result
                     except json.JSONDecodeError:
                         logger.warning(f"⚠️ {provider_name.upper()} response not valid JSON")
-                        if expect_json:
-                            retry_messages = [
-                                {"role": "system", "content": (
-                                    "Your previous response was not valid JSON. "
-                                    "Respond ONLY with a JSON object matching the requested schema. "
-                                    "No markdown, no commentary."
-                                )},
-                                {"role": "user", "content": formatted_prompt},
-                            ]
-                            try:
-                                retry_resp = await asyncio.to_thread(
-                                    client.chat.completions.create,
-                                    model=model_name,
-                                    messages=retry_messages,
-                                    temperature=0.1,
-                                    max_tokens=max_tokens,
-                                    response_format={"type": "json_object"},
-                                )
-                                retry_content = retry_resp.choices[0].message.content
-                                result = json.loads(retry_content)
-                                logger.info(f"✅ {provider_name.upper()} JSON OK on retry")
-                                return result
-                            except (json.JSONDecodeError, Exception) as retry_exc:
-                                logger.warning(f"⚠️ {provider_name.upper()} still not JSON on retry: {retry_exc}")
+                        retry_messages = [
+                            {"role": "system", "content": (
+                                "Your previous response was not valid JSON. "
+                                "Respond ONLY with a JSON object matching the requested schema. "
+                                "No markdown, no commentary."
+                            )},
+                            {"role": "user", "content": formatted_prompt},
+                        ]
+                        retry_kwargs = {
+                            "model": model_name,
+                            "messages": retry_messages,
+                            "temperature": 0.1,
+                            "max_tokens": max_tokens,
+                        }
+                        if not is_reasoning_model:
+                            retry_kwargs["response_format"] = {"type": "json_object"}
+                        try:
+                            retry_resp = await asyncio.to_thread(
+                                client.chat.completions.create,
+                                **retry_kwargs,
+                            )
+                            retry_content = retry_resp.choices[0].message.content or ""
+                            result = _extract_json(retry_content)
+                            logger.info(f"✅ {provider_name.upper()} JSON OK on retry")
+                            return result
+                        except (json.JSONDecodeError, Exception) as retry_exc:
+                            logger.warning(f"⚠️ {provider_name.upper()} still not JSON on retry: {retry_exc}")
                         return {"text": content, "provider": provider_name}
 
                 except RateLimitError as e:
