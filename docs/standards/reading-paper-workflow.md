@@ -10,7 +10,7 @@ The admin entry point is **Exams → Generate Reading paper** in the frontend re
 
 OpenAlex search is limited to recent open-access works. Each DOI is resolved to a PMCID through Europe PMC metadata, then checked for downloadable [Europe PMC full text XML](https://europepmc.org/RestfulWebService). The XML must contain at least 600 source words, author attribution, and a verifiable CC BY or CC0 license. The service reads a fixed Europe PMC URL from a validated PMCID; the client cannot supply a fetch URL. Candidate DOI values are deduplicated. Network failures remain visible as network failures rather than being reported as ineligible articles.
 
-In addition to Europe PMC academic articles, the system supports Universal Source Ingestion from arbitrary plain text, HTML documents, Markdown, and Web URLs. See [Universal Source Ingestion Specification](reading-paper-universal-source-ingestion.md) for data schemas and content sanitization rules.
+In addition to Europe PMC academic articles, the system supports Universal Source Ingestion from arbitrary plain text, HTML documents, Markdown, and Web URLs. See [Universal Source Ingestion Specification](../../reading-paper-universal-source-ingestion.md) for data schemas and content sanitization rules.
 
 ## Job and paper lifecycle
 
