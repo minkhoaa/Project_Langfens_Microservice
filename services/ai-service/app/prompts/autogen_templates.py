@@ -18,9 +18,9 @@ Required JSON shape:
 
 STRICT_JSON_SUFFIX: str = """
 Strict JSON mode:
-- Output ONLY a single JSON array (one item per question).
+- Output ONLY a single JSON object of the form: {"questions": [...]}.
 - No prose, no markdown fences outside the JSON block, no explanation.
-- Each item MUST match the jsonShape above exactly.
+- Each item in the "questions" array MUST match the jsonShape above exactly.
 - difficulty MUST be an integer in [1, 5].
 - If the JSON cannot be produced, output {"error": "reason"} instead."""
 
@@ -33,10 +33,10 @@ def build_user_prompt_template(qtype: str) -> str:
 
     Returns:
         The user prompt template with {passage}, {count}, {difficulty},
-        {extra_line} placeholders.
+        {skill}, {extra_line} placeholders.
     """
     return (
         "Source passage:\n\"\"\"\n{passage}\n\"\"\"\n\n"
-        f"Generate {{count}} {qtype} question(s) at difficulty {{difficulty}}.{{extra_line}}\n\n"
-        "Output: a JSON array of {count} item(s)."
+        f"Generate {{count}} {qtype} question(s) for skill {{skill}} at difficulty {{difficulty}}.{{extra_line}}\n\n"
+        "Output: a JSON object with a \"questions\" array containing {count} item(s)."
     )

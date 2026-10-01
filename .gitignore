@@ -29,7 +29,6 @@ WATCHDOG.yml
 *.pem
 *.key
 *.cert
-/docs/*
 !/docs/sprint*/
 !/docs/standards/
 # ------------------------------
@@ -94,6 +93,8 @@ npm-debug.log*
 tests
 !services/ai-service/tests/
 !services/ai-service/tests/*.py
+!services/generation-service/tests/
+!services/generation-service/tests/*.py
 # ------------------------------
 # Docker (local overrides/artifacts)
 # ------------------------------
@@ -117,7 +118,8 @@ services/speaking-service/Helper/whisper/models/*.bin
 **/__pycache__/
 *.pyc
 *.pyo
-
+*.whl
+**/wheels/
 # Log files
 **/logs/*.log
 **/*.log

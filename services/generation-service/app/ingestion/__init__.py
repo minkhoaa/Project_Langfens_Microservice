@@ -1,0 +1,123 @@
+"""Ingestion package for Langfens Loop Engine V2."""
+
+from app.ingestion.chunker import (
+    Chunk,
+    CoverageMap,
+    Span,
+    codepoint_to_utf16_offset,
+    codepoint_to_utf8_offset,
+    create_chunks,
+    extract_spans,
+    select_context,
+    utf16_to_codepoint_offset,
+    utf8_to_codepoint_offset,
+)
+from app.ingestion.cleaner import (
+    NORMALIZER_VERSION,
+    CleanerError,
+    SemanticHTMLCleaner,
+    clean_html,
+    clean_markdown,
+    clean_plain_text,
+    clean_xml_full_text,
+    normalize_source_content,
+)
+from app.ingestion.fetcher import (
+    ProgressCallback,
+    SourceError,
+    SourceNetworkError,
+    detect_source_type,
+    fetch_source,
+    fetch_web_url,
+    ingest_source,
+    resolve_pmcid,
+    search_sources,
+    source_excerpt,
+)
+from app.ingestion.license import (
+    APPROVED_UNIVERSAL_LICENSES,
+    MIN_READING_PASSAGE_WORDS,
+    LicenseError,
+    SourceLengthError,
+    count_words,
+    evaluate_universal_license,
+    validate_europe_pmc_license,
+    validate_source_length,
+)
+from app.ingestion.security import (
+    MAX_EXTRACTED_CHARS,
+    MAX_REDIRECTS,
+    MAX_RESPONSE_BYTES,
+    ResourceCapError,
+    SafeAsyncClient,
+    SecurityError,
+    SSRFError,
+    is_ip_restricted,
+    is_safe_url,
+    normalize_ip_string,
+    sanitize_untrusted_source,
+    validate_extracted_content_length,
+)
+from app.ingestion.source_pack import (
+    SourcePackBuilder,
+    compute_sha256,
+)
+
+__all__ = [
+    # Chunker & offsets
+    "Chunk",
+    "CoverageMap",
+    "Span",
+    "codepoint_to_utf16_offset",
+    "codepoint_to_utf8_offset",
+    "create_chunks",
+    "extract_spans",
+    "select_context",
+    "utf16_to_codepoint_offset",
+    "utf8_to_codepoint_offset",
+    # Cleaner
+    "NORMALIZER_VERSION",
+    "CleanerError",
+    "SemanticHTMLCleaner",
+    "clean_html",
+    "clean_markdown",
+    "clean_plain_text",
+    "clean_xml_full_text",
+    "normalize_source_content",
+    # Fetcher
+    "ProgressCallback",
+    "SourceError",
+    "SourceNetworkError",
+    "detect_source_type",
+    "fetch_source",
+    "fetch_web_url",
+    "ingest_source",
+    "resolve_pmcid",
+    "search_sources",
+    "source_excerpt",
+    # License
+    "APPROVED_UNIVERSAL_LICENSES",
+    "MIN_READING_PASSAGE_WORDS",
+    "LicenseError",
+    "SourceLengthError",
+    "count_words",
+    "evaluate_universal_license",
+    "validate_europe_pmc_license",
+    "validate_source_length",
+    # Security
+    "MAX_EXTRACTED_CHARS",
+    "MAX_REDIRECTS",
+    "MAX_RESPONSE_BYTES",
+    "ResourceCapError",
+    "SafeAsyncClient",
+    "SecurityError",
+    "SSRFError",
+    "is_ip_restricted",
+    "is_safe_url",
+    "normalize_ip_string",
+    "sanitize_untrusted_source",
+    "validate_extracted_content_length",
+    # SourcePack
+    "SourcePackBuilder",
+    "compute_sha256",
+]

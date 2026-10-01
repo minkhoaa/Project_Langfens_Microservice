@@ -7,6 +7,7 @@ using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
 using exam_service.Features.Exams.InternalEndpoint;
 using exam_service.Features.Exams.PublicEndpoint;
 using exam_service.Features.QuestionBank;
+using exam_service.Features.ReadingPaper;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -47,6 +48,15 @@ builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
+builder.Services.AddHttpClient<ReadingPaperAiClient>(client =>
+{
+    var url = Environment.GetEnvironmentVariable("GENERATION_SERVICE_URL")
+           ?? Environment.GetEnvironmentVariable("AI_SERVICE_URL")
+           ?? "http://generation-service:8080";
+    client.BaseAddress = new Uri(url.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromMinutes(45);
+});
+builder.Services.AddHostedService<ReadingPaperWorker>();
 
 // ── gRPC + HTTP ports ───────────────────────────────────────────────────
 // Under Aspire, ASPNETCORE_URLS is injected and Kestrel binds to those endpoints
@@ -113,7 +123,12 @@ app.MapAdminQuestionEndpoint();
 app.MapAdminOptionEndpoint();
 app.MapInternalExamEndpoint();
 app.MapQuestionBankEndpoints();
+app.MapReadingPaperEndpoints();
+app.MapCheckpointEndpoints();
 app.MapAdminUploadEndpoint();
 app.Run();
 
-public partial class Program { }
+namespace exam_service
+{
+    public partial class Program { }
+}

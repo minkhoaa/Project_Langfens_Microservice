@@ -70,6 +70,15 @@ var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/
     .WaitFor(redis)
     .WaitFor(qdrant)
     .WaitForCompletion(ollamaInit);
+// ── Generation Service (Python reading paper generator) ────────────────────
+var generationService = builder.AddDockerfile("generation-service", "../", "services/generation-service/Dockerfile")
+    .WithHttpEndpoint(targetPort: 8080, name: "http")
+    .WithBindMount("../services/generation-service/app", "/app/app")
+    .WithEntrypoint("uvicorn")
+    .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
+              "--reload", "--reload-dir", "/app/app")
+    .WithComposeEnvFile("ai");
+
 
 // ── Postgres servers (host ports kept for developer DX: psql/pgAdmin) ────
 // Credentials match compose.local.yaml exactly for standalone dev parity.
@@ -128,6 +137,9 @@ var exam = builder.AddProject("exam-service", "../services/exam-service/exam-ser
     .WithHttpEndpoint(name: "grpc", env: "Kestrel__GrpcPort")
     .WithComposeEnvFile("exam")
     .WaitFor(examDb);
+exam.WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"));
+exam.WithEnvironment("GENERATION_SERVICE_URL", generationService.GetEndpoint("http"));
+exam.WaitFor(generationService);
 
 // ── gamification-service ─────────────────────────────────────────────────
 var gamification = builder.AddProject("gamification-service", "../services/gamification-service/gamification-service.csproj")
@@ -255,6 +267,7 @@ var gateway = builder.AddProject("api-gateway", "../gateway/api-gateway/api-gate
     .WithEnvironment("ReverseProxy__Clusters__dictionary-cluster__Destinations__d1__Address", dictionary.GetEndpoint("http"))
     .WithEnvironment("ReverseProxy__Clusters__gamification-cluster__Destinations__d1__Address", gamification.GetEndpoint("http"))
     .WithEnvironment("ReverseProxy__Clusters__ai-cluster__Destinations__d1__Address", aiService.GetEndpoint("http"))
+    .WithEnvironment("ReverseProxy__Clusters__generation-cluster__Destinations__d1__Address", generationService.GetEndpoint("http"))
     .WaitFor(exam)
     .WaitFor(gamification)
     .WaitFor(speaking)
@@ -335,6 +348,7 @@ internal static class AppHostExtensions
                 key == "EXAMSERVICE__EXAM__ADDRESS" ||
                 key == "EXAMSERVICE__INTERNAL__API__KEY" ||
                 key == "AI_SERVICE_URL" ||
+                key == "GENERATION_SERVICE_URL" ||
                 key == "REDIS_HOST" ||
                 key == "REDIS_PORT" ||
                 key == "QDRANT_HOST" ||

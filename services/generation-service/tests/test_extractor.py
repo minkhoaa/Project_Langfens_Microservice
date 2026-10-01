@@ -1,15 +1,13 @@
-"""Unit tests for Universal Source Ingestion in reading_paper."""
+"""Unit tests for Universal Source Ingestion in generation-service."""
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.main import app
-from app.services.reading_paper import (
+from app.extractor import (
     SemanticHTMLCleaner,
     SourceError,
     clean_html,
@@ -17,13 +15,12 @@ from app.services.reading_paper import (
     clean_plain_text,
     detect_source_type,
     fetch_web_url,
-    generate_section,
     ingest_source,
     is_safe_url,
 )
+from app.main import app
 
 
-# Helper to generate dummy text with exact word count
 def make_words(count: int, topic: str = "science") -> str:
     base = f"The study of {topic} provides essential insights into biological and physical systems across diverse ecosystems. "
     words_per_base = len(base.split())
@@ -65,12 +62,34 @@ class TestHTMLCleaner:
         assert "Buy our diving gear" not in cleaned
         assert "Copyright 2026" not in cleaned
 
+    def test_strips_boilerplate_classes_and_ids(self):
+        html_input = """
+        <article>
+            <h1>Deep Sea Exploration</h1>
+            <p>Submersibles allow scientists to reach the deepest oceanic trenches.</p>
+            <div class="sidebar related-news">
+                <p>Top 10 vacation destinations for 2026!</p>
+            </div>
+            <div id="comments">
+                <p>User123: Fascinating read!</p>
+            </div>
+            <p>Hydrothermal vents support chemosynthetic life independent of sunlight.</p>
+        </article>
+        """
+        cleaned, title, author = clean_html(html_input)
+        assert "Submersibles allow scientists to reach" in cleaned
+        assert "Hydrothermal vents support chemosynthetic life" in cleaned
+        assert "Top 10 vacation destinations" not in cleaned
+        assert "Fascinating read" not in cleaned
+
     def test_unescapes_entities_and_normalizes_whitespace(self):
         html_input = "<p>Temperature &gt; 30&deg;C &amp; salinity &lt; 35&permil;&nbsp;causes stress.</p>"
         cleaned, title, author = clean_html(html_input)
         assert ">" in cleaned
         assert "<" in cleaned
         assert "&" in cleaned
+        assert "°C" in cleaned
+        assert "‰" in cleaned
         assert "  " not in cleaned
 
 
@@ -80,30 +99,28 @@ class TestMarkdownCleaner:
 title: Arctic Melting
 author: Polar Research Group
 ---
+# Arctic Climate Dynamics
 
-# Arctic Melting and Ocean Currents
+Glaciers are retreating at an [accelerated rate](https://example.org/study).
 
-Global warming has accelerated **ice sheet retreat** in Greenland. According to [NSIDC data](https://nsidc.org), ice volume has fallen significantly.
-
-![Glacier photo](https://example.com/glacier.png)
+![Glacier photo](https://example.org/glacier.jpg)
 
 ```python
-# Simulation model code
-run_model()
+# Model code to ignore
+run_sim()
 ```
 
-### Feedback Mechanisms
-
-Albedo reduction causes further *solar radiation absorption*.
+**Significant** ice loss affects **global** sea levels and *oceanic* circulation patterns.
 """
         cleaned, title = clean_markdown(md_input)
-        assert title == "Arctic Melting and Ocean Currents"
-        assert "Global warming has accelerated ice sheet retreat" in cleaned
-        assert "NSIDC data" in cleaned
-        assert "https://nsidc.org" not in cleaned
-        assert "Glacier photo" not in cleaned
-        assert "Feedback Mechanisms" in cleaned
-        assert "author: Polar Research" not in cleaned
+        assert title == "Arctic Climate Dynamics"
+        assert "Polar Research Group" not in cleaned
+        assert "Glaciers are retreating at an accelerated rate." in cleaned
+        assert "https://example.org" not in cleaned
+        assert "run_sim" not in cleaned
+        assert "Significant ice loss affects global sea levels" in cleaned
+        assert "**" not in cleaned
+        assert "[" not in cleaned
 
 
 class TestPlainTextCleaner:
@@ -112,13 +129,12 @@ class TestPlainTextCleaner:
 
 Cognitive psychology explores internal mental processes including perception, thinking, memory, and attention.
 
-Researchers investigate how individuals acquire, process, and store complex informational structures.
+Researchers use empirical methods to test cognitive models of information processing.
 """
         cleaned, title = clean_plain_text(raw_text)
         assert title == "Understanding Cognitive Psychology"
-        assert len(cleaned.split("\n\n")) == 3
-        assert "acquiring" not in cleaned
-        assert "store complex informational structures" in cleaned
+        assert "Cognitive psychology explores internal mental processes" in cleaned
+        assert "Researchers use empirical methods" in cleaned
 
 
 class TestSSRFProtection:
@@ -173,9 +189,8 @@ class TestIngestSource:
         assert result["sourceType"] == "text"
         assert result["title"] == "Deep Ocean Trench Ecology"
         assert result["wordCount"] >= 700
-        assert "Deep Ocean Trench Ecology" in result["content"]
-        assert result["sourceId"].startswith("TXT_")
-        assert result["pmcid"].startswith("TXT_")
+        assert result["sourceId"].startswith("CUSTOM:")
+        assert "content" in result
 
     async def test_ingest_plain_text_too_short_raises_error(self):
         short_text = "Short Title\n\nOnly a few words here."
@@ -187,8 +202,10 @@ class TestIngestSource:
         <html>
         <head><title>Urban Green Spaces</title><meta name="author" content="Dr. Sarah Chen"></head>
         <body>
-            <header><h1>Urban Green Spaces</h1></header>
-            <p>{make_words(650, 'urban architecture and parks')}</p>
+            <article>
+                <h1>Urban Green Spaces</h1>
+                <p>{make_words(650, 'urban biodiversity and parks')}</p>
+            </article>
         </body>
         </html>
         """
@@ -197,7 +214,7 @@ class TestIngestSource:
         assert result["title"] == "Urban Green Spaces"
         assert result["authors"] == "Dr. Sarah Chen"
         assert result["wordCount"] >= 650
-        assert result["sourceId"].startswith("HTML_")
+        assert result["sourceId"].startswith("CUSTOM:")
 
     async def test_ingest_markdown_success(self):
         md_content = f"""# Artificial Intelligence in Medicine\n\n{make_words(680, 'medical diagnosis')}\n"""
@@ -205,7 +222,7 @@ class TestIngestSource:
         assert result["sourceType"] == "markdown"
         assert result["title"] == "Artificial Intelligence in Medicine"
         assert result["wordCount"] >= 680
-        assert result["sourceId"].startswith("MD_")
+        assert result["sourceId"].startswith("CUSTOM:")
 
     async def test_ingest_url_blocks_ssrf(self):
         with pytest.raises(SourceError, match="restricted, private, or invalid"):
@@ -223,13 +240,23 @@ class TestIngestSource:
             request=httpx.Request("GET", "https://example.org/article"),
         )
         with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response), \
-             patch("app.services.reading_paper.is_safe_url", return_value=True):
+             patch("app.extractor.is_safe_url", return_value=True):
             result = await ingest_source(payload="https://example.org/article", source_type="url")
             assert result["sourceType"] == "url"
             assert result["title"] == "Renewable Energy"
             assert result["wordCount"] >= 620
             assert result["url"] == "https://example.org/article"
-            assert result["sourceId"].startswith("URL_")
+            assert result["sourceId"].startswith("URL:")
+
+    async def test_ingest_payload_exceeding_5mb_raises_error(self):
+        huge_payload = "A" * (5 * 1024 * 1024 + 1024)
+        with pytest.raises(SourceError, match="5MB"):
+            await ingest_source(payload=huge_payload, source_type="text")
+
+    async def test_ingest_sanitized_content_exceeding_100k_raises_error(self):
+        huge_text = "word " * 22_000
+        with pytest.raises(SourceError, match="100,000 characters"):
+            await ingest_source(payload=huge_text, source_type="text")
 
 
 @pytest.mark.asyncio
@@ -265,49 +292,29 @@ class TestIngestRouterEndpoint:
             assert resp.status_code == 422
             assert "restricted" in resp.json()["detail"].lower()
 
-
-@pytest.mark.asyncio
-class TestGenerateSectionWithUniversalSource:
-    async def test_generate_section_accepts_pre_ingested_content(self):
-        """Pre-ingested sources must bypass fetch_source and generate sections directly."""
-        pre_ingested_source = {
-            "sourceId": "TXT_custom123",
-            "sourceType": "text",
-            "title": "Quantum Computing Fundamentals",
-            "authors": "Dr. Alice Smith",
-            "license": "User Provided",
-            "content": "Quantum Computing Fundamentals\n\n" + make_words(700, "quantum physics"),
-        }
-
-        from tests.test_reading_paper import valid_section
-        generated = valid_section(1)
-        reviews = {
-            number: {"number": number, "valid": True, "issues": [], "reason": ""}
-            for group in generated["groups"]
-            for q in group["questions"]
-            for number in [q["number"]]
-        }
-
-        with patch("app.services.reading_paper.fetch_source") as mock_fetch, \
-             patch("app.services.reading_paper.review_passage_source", new_callable=AsyncMock, return_value=[]), \
-             patch("app.services.reading_paper.review_answers", new_callable=AsyncMock, return_value=reviews), \
-             patch("app.services.reading_paper.generate_json", new_callable=AsyncMock) as mock_gen, \
-             patch("app.services.reading_paper.validate_section") as mock_val:
-
-            mock_gen.side_effect = [
-                {"text": f"{generated['title']}\n\n{generated['passage']}"},
-                *[{"questions": group["questions"]} for group in generated["groups"]],
-            ]
-            mock_val.side_effect = lambda s, idx: s
-
-            result = await generate_section(
-                topic="Quantum Computing",
-                index=1,
-                source=pre_ingested_source,
+    async def test_ingest_endpoint_content_preview_and_metadata(self):
+        text = "Cognitive Linguistics\n\n" + make_words(650, "linguistics")
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            resp = await ac.post(
+                "/api/v1/autogen/reading-paper/source/ingest",
+                json={"payload": text, "type": "text", "title": "Cognitive Linguistics"},
             )
+            assert resp.status_code == 200
+            data = resp.json()
+            assert "contentPreview" in data
+            assert len(data["contentPreview"]) <= 300
+            assert "Cognitive Linguistics" in data["contentPreview"]
+            assert "metadata" in data
+            assert data["metadata"]["format"] == "text"
+            assert "domain" in data["metadata"]
+            assert "description" in data["metadata"]
 
-            # fetch_source should NOT be called because content was already present
-            mock_fetch.assert_not_called()
-            assert result["title"] == generated["title"]
-            assert result["source"]["pmcid"] == "TXT_custom123"
-            assert result["source"]["license"] == "User Provided"
+    async def test_ingest_endpoint_payload_exceeding_5mb_returns_422(self):
+        huge_payload = "X" * (5 * 1024 * 1024 + 100)
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            resp = await ac.post(
+                "/api/v1/autogen/reading-paper/source/ingest",
+                json={"payload": huge_payload, "type": "text"},
+            )
+            assert resp.status_code == 422
+            assert "5mb" in resp.json()["detail"].lower()

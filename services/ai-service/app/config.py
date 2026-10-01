@@ -46,6 +46,13 @@ class Settings(BaseSettings):
     groq_base_url: str = "https://api.groq.com/openai/v1"
     groq_model: str = "openai/gpt-oss-20b"
 
+
+    # --- MiniMax (LLM) ---
+    minimax_base_url: str = "https://api.minimaxi.chat/v1"
+    minimax_model: str = "MiniMax-Text-01"
+    minimax_api_key: str = ""
+    minimax_api_keys: str = ""
+    llm_provider_order: str = "minimax,groq"
     # --- Legacy / speaking-only ---
     # These fields are NOT used by the LLM-judge path (which is Groq-only).
     # They exist because out-of-scope speaking code still reads them:

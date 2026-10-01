@@ -225,6 +225,13 @@ namespace exam_service.Migrations
                     b.Property<string>("PassageMd")
                         .HasColumnType("text");
 
+                    b.Property<string>("SourcePmcid").HasColumnType("text");
+                    b.Property<string>("SourceTitle").HasColumnType("text");
+                    b.Property<string>("SourceAuthors").HasColumnType("text");
+                    b.Property<string>("SourceDoi").HasColumnType("text");
+                    b.Property<string>("SourceUrl").HasColumnType("text");
+                    b.Property<string>("SourceLicense").HasColumnType("text");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
@@ -237,6 +244,300 @@ namespace exam_service.Migrations
                     b.HasIndex("ExamId", "Idx");
 
                     b.ToTable("exam_sections", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperJob", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("Topic").IsRequired().HasColumnType("text");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text");
+                    b.Property<int>("CompletedSections").HasColumnType("integer");
+                    b.Property<string>("SourcesJson").IsRequired().HasColumnType("text");
+                    b.Property<string>("SectionsJson").IsRequired().HasColumnType("text");
+                    b.Property<string>("Logs").IsRequired().HasColumnType("text").HasDefaultValue("");
+                    b.Property<string>("Error").HasColumnType("text");
+                    b.Property<Guid?>("ExamId").HasColumnType("uuid");
+                    b.Property<DateTime?>("LeaseUntil").HasColumnType("timestamp with time zone");
+                    b.Property<Guid?>("LeaseOwner").HasColumnType("uuid");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<int>("Epoch").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(1);
+                    b.Property<int>("CancelVersion").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(0);
+                    b.Property<string>("EngineVersion").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("2.0.0");
+                    b.Property<string>("SchemaVersion").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("2.0.0");
+                    b.Property<string>("PolicyVersion").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("2.0.0");
+                    b.Property<string>("ActiveRunId").HasColumnType("text");
+                    b.HasKey("Id");
+                    b.HasIndex("Status", "LeaseUntil");
+                    b.HasIndex("ExamId").IsUnique();
+                    b.HasIndex("Id", "Epoch", "LeaseOwner");
+                    b.ToTable("reading_paper_jobs", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperRun", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<Guid>("JobId").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<int>("Epoch").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(1);
+                    b.Property<string>("Status").IsRequired().HasColumnType("text");
+                    b.Property<Guid?>("LeaseOwner").HasColumnType("uuid");
+                    b.Property<DateTime?>("LeaseUntil").HasColumnType("timestamp with time zone");
+                    b.Property<int>("CancelVersion").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(0);
+                    b.Property<string>("EngineVersion").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("2.0.0");
+                    b.Property<string>("SchemaVersion").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("2.0.0");
+                    b.Property<string>("PolicyVersion").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("2.0.0");
+                    b.Property<string>("SourceRevisionsJson").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("[]");
+                    b.Property<int>("BudgetCapCalls").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(25);
+                    b.Property<int>("BudgetCapTokens").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(150000);
+                    b.Property<int>("BudgetUsedCalls").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(0);
+                    b.Property<int>("BudgetUsedTokens").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(0);
+                    b.Property<int>("BudgetCapWallTimeSeconds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(900);
+
+                    b.Property<double>("BudgetUsedWallTimeSeconds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(0.0);
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("JobId", "RunId").IsUnique();
+                    b.HasIndex("RunId").IsUnique();
+                    b.HasIndex("Status");
+                    b.ToTable("reading_paper_runs", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperArtifact", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("ArtifactId").IsRequired().HasColumnType("text");
+                    b.Property<string>("ArtifactType").IsRequired().HasColumnType("text");
+                    b.Property<int>("Version").HasColumnType("integer");
+                    b.Property<string>("ContentHash").IsRequired().HasColumnType("text");
+                    b.Property<string>("PayloadJson").IsRequired().HasColumnType("text");
+                    b.Property<string>("ParentRefsJson").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("[]");
+                    b.Property<string>("EnvelopeJson").HasColumnType("text");
+                    b.Property<string>("ProducerVersion").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("2.0.0");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "ArtifactId", "Version").IsUnique();
+                    b.HasIndex("RunId", "ArtifactId");
+                    b.HasIndex("ContentHash");
+                    b.ToTable("reading_paper_artifacts", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperArtifactHead", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("ArtifactId").IsRequired().HasColumnType("text");
+                    b.Property<int>("AcceptedVersion").HasColumnType("integer");
+                    b.Property<string>("AcceptedHash").IsRequired().HasColumnType("text");
+                    b.Property<DateTime>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "ArtifactId").IsUnique();
+                    b.ToTable("reading_paper_artifact_heads", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperArtifactDependency", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("ArtifactId").IsRequired().HasColumnType("text");
+                    b.Property<int>("Version").HasColumnType("integer");
+                    b.Property<string>("ParentArtifactId").IsRequired().HasColumnType("text");
+                    b.Property<int>("ParentVersion").HasColumnType("integer");
+                    b.Property<string>("ParentContentHash").IsRequired().HasColumnType("text");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "ArtifactId", "Version");
+                    b.HasIndex("RunId", "ParentArtifactId", "ParentVersion");
+                    b.ToTable("reading_paper_artifact_dependencies", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperEvaluation", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("EvaluationId").IsRequired().HasColumnType("text");
+                    b.Property<string>("EvaluatorId").IsRequired().HasColumnType("text");
+                    b.Property<string>("EvaluatorVersion").IsRequired().ValueGeneratedOnAdd().HasColumnType("text").HasDefaultValue("1.0.0");
+                    b.Property<string>("TargetArtifactId").IsRequired().HasColumnType("text");
+                    b.Property<int>("TargetVersion").HasColumnType("integer");
+                    b.Property<string>("TargetContentHash").IsRequired().HasColumnType("text");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text");
+                    b.Property<bool>("IsPass").HasColumnType("boolean");
+                    b.Property<string>("PayloadJson").IsRequired().HasColumnType("text");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "EvaluationId").IsUnique();
+                    b.HasIndex("RunId", "TargetArtifactId", "TargetVersion");
+                    b.ToTable("reading_paper_evaluations", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperIssue", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("IssueId").IsRequired().HasColumnType("text");
+                    b.Property<string>("EvaluationId").IsRequired().HasColumnType("text");
+                    b.Property<string>("Code").IsRequired().HasColumnType("text");
+                    b.Property<string>("Severity").IsRequired().HasColumnType("text");
+                    b.Property<string>("Scope").IsRequired().HasColumnType("text");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text");
+                    b.Property<string>("Message").IsRequired().HasColumnType("text");
+                    b.Property<string>("Fingerprint").IsRequired().HasColumnType("text");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "IssueId").IsUnique();
+                    b.HasIndex("RunId", "EvaluationId");
+                    b.ToTable("reading_paper_issues", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperDecision", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("DecisionId").IsRequired().HasColumnType("text");
+                    b.Property<string>("Decision").IsRequired().HasColumnType("text");
+                    b.Property<string>("CurrentState").IsRequired().HasColumnType("text");
+                    b.Property<string>("NextState").IsRequired().HasColumnType("text");
+                    b.Property<string>("Reason").IsRequired().HasColumnType("text");
+                    b.Property<string>("TargetScope").IsRequired().HasColumnType("text");
+                    b.Property<string>("EvaluationRef").HasColumnType("text");
+                    b.Property<string>("BudgetReservationId").HasColumnType("text");
+                    b.Property<int?>("ExpectedVersion").HasColumnType("integer");
+                    b.Property<string>("PayloadJson").IsRequired().HasColumnType("text");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "DecisionId").IsUnique();
+                    b.HasIndex("RunId", "EvaluationRef");
+                    b.ToTable("reading_paper_decisions", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperOperation", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("OperationId").IsRequired().HasColumnType("text");
+                    b.Property<string>("OperationType").IsRequired().HasColumnType("text");
+                    b.Property<string>("RequestHash").IsRequired().HasColumnType("text");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text");
+                    b.Property<int>("TokenReservation").HasColumnType("integer");
+                    b.Property<int>("TokensUsed").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(0);
+                    b.Property<decimal>("CostReservationUsd").ValueGeneratedOnAdd().HasColumnType("numeric(12,4)").HasDefaultValue(0m);
+                    b.Property<decimal>("CostUsedUsd").ValueGeneratedOnAdd().HasColumnType("numeric(12,4)").HasDefaultValue(0m);
+                    b.Property<string>("ResultRefJson").HasColumnType("text");
+                    b.Property<string>("ErrorMessage").HasColumnType("text");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("SectionId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ArtifactId")
+                        .HasColumnType("text");
+                    b.Property<string>("ParentOperationId")
+                        .HasColumnType("text");
+
+
+                    b.Property<double>("WallTimeReservationSeconds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(60.0);
+
+                    b.Property<double>("WallTimeUsedSeconds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(0.0);
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "OperationId").IsUnique();
+                    b.HasIndex("RunId", "RequestHash");
+                    b.HasIndex("RunId", "SectionId");
+                    b.HasIndex("RunId", "ArtifactId");
+                    b.HasIndex("RunId", "ParentOperationId");
+                    b.ToTable("reading_paper_operations", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperLoopCursor", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("ArtifactId").IsRequired().HasColumnType("text");
+                    b.Property<int>("Revision").HasColumnType("integer");
+                    b.Property<string>("StateJson").IsRequired().HasColumnType("text");
+                    b.Property<string>("LastOperationId").HasColumnType("text");
+                    b.Property<DateTime>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "ArtifactId").IsUnique();
+                    b.ToTable("reading_paper_loop_cursors", (string)null);
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperEventOutbox", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<string>("RunId").IsRequired().HasColumnType("text");
+                    b.Property<string>("EventId").IsRequired().HasColumnType("text");
+                    b.Property<string>("EventType").IsRequired().HasColumnType("text");
+                    b.Property<string>("IdempotencyKey").IsRequired().HasColumnType("text");
+                    b.Property<int>("Epoch").ValueGeneratedOnAdd().HasColumnType("integer").HasDefaultValue(1);
+                    b.Property<string>("PayloadJson").IsRequired().HasColumnType("text");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTime?>("PublishedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "EventId").IsUnique();
+                    b.HasIndex("RunId", "IdempotencyKey").IsUnique();
+                    b.HasIndex("Status", "CreatedAt");
+                    b.ToTable("reading_paper_event_outbox", (string)null);
+                });
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperBudgetAllocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CallCap")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(5);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ParentScopeId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RunId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ScopeId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ScopeType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TokenCap")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WallTimeCapSeconds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(300);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RunId", "ParentScopeId");
+
+                    b.HasIndex("RunId", "ScopeId")
+                        .IsUnique();
+
+                    b.ToTable("reading_paper_budget_allocations", (string)null);
                 });
 
             modelBuilder.Entity("exam_service.Domains.Entities.ExamOption", b =>
@@ -310,6 +611,22 @@ namespace exam_service.Migrations
                     b.Navigation("QuestionGroups");
 
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperRun", b =>
+                {
+                    b.HasOne("exam_service.Domains.Entities.ReadingPaperJob", "Job")
+                        .WithMany("Runs")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+                });
+
+            modelBuilder.Entity("exam_service.Domains.Entities.ReadingPaperJob", b =>
+                {
+                    b.Navigation("Runs");
                 });
 #pragma warning restore 612, 618
         }

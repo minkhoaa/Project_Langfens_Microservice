@@ -129,6 +129,12 @@ public class AdminSectionService(ExamDbContext context) : IAdminSectionService
                 s.Title,
                 s.InstructionsMd,
                 s.PassageMd,
+                s.SourcePmcid,
+                s.SourceTitle,
+                s.SourceAuthors,
+                s.SourceDoi,
+                s.SourceUrl,
+                s.SourceLicense,
                 s.AudioUrl,
                 s.TranscriptMd
             })
