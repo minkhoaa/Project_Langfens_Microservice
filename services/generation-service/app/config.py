@@ -67,5 +67,14 @@ class Settings(BaseSettings):
     evaluation_cache_enabled: bool = True
     evaluation_cache_max_entries: int = 1000
 
+    # Candidate Pool & Selection Caps (Phase 09 / P09-03)
+    candidate_pool_limit_completion: int = 2
+    candidate_pool_limit_tfng: int = 3
+    candidate_pool_limit_mcq: int = 3
+    candidate_pool_limit_summary: int = 2
+    candidate_pool_limit_short_answer: int = 2
+    candidate_max_search_depth: int = 50
+    candidate_max_backtracking_steps: int = 100
+
 
 settings = Settings()

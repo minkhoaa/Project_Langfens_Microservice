@@ -1,0 +1,25 @@
+{
+  "notGivenSample": {
+    "questionNumber": 1,
+    "explanation": "The passage mentions observations began in 1957, with no mention of dates before 1950.",
+    "questionType": "TRUE_FALSE_NOT_GIVEN",
+    "statement": "Scientists measured solar activity in Antarctica before 1950.",
+    "answer": "NOT_GIVEN",
+    "evidenceQuote": null,
+    "absenceAssessment": {
+      "assessmentId": "abs_001",
+      "claimOrTopic": "Solar measurements prior to 1950",
+      "absenceReason": "The text discusses 1957 observations but mentions nothing before 1950.",
+      "topicalContextSpan": "In 1957, scientists recorded unprecedented solar observations",
+      "absenceConfirmed": true
+    }
+  },
+  "completionSample": {
+    "questionNumber": 2,
+    "explanation": "'ice cores' appears directly in the text and fits the blank.",
+    "questionType": "SENTENCE_COMPLETION",
+    "prompt": "The research team analyzed ancient _____ to measure carbon records.",
+    "answer": "ice cores",
+    "evidenceQuote": "The ancient Antarctic ice cores reveal detailed carbon atmospheric records."
+  }
+}

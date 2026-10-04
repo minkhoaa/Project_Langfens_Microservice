@@ -35,11 +35,11 @@ class PassageSentenceRepairer(BaseRepairer):
         super().__init__(
             RepairCapabilityMetadata(
                 repairer_id="rep_passage_sentence",
-                repairer_version="1.0.0",
+                repairer_version="2.0.0",
                 name="Passage Sentence & Fidelity Repairer",
                 description="Softens over-certain modals, corrects causal overstatements, and trims excessive word counts",
                 scope=RepairScope.PASSAGE,
-                target_artifact_types=[ArtifactType.SECTION],
+                target_artifact_types=[ArtifactType.SECTION, ArtifactType.PASSAGE],
                 handled_codes={
                     IssueCode.OVERSTATED_CERTAINTY,
                     IssueCode.CAUSAL_OVERSTATEMENT,
@@ -61,7 +61,7 @@ class PassageSentenceRepairer(BaseRepairer):
         version: int,
     ) -> ArtifactEnvelope:
         payload = unwrap_payload(artifact.payload)
-        passage_text = payload.get("passage", "") or payload.get("passageText", "")
+        passage_text = payload.get("passage", "") or payload.get("passageText", "") or payload.get("text", "")
 
         repaired_text = passage_text
 
@@ -82,24 +82,95 @@ class PassageSentenceRepairer(BaseRepairer):
                 repaired_text = re.sub(r"\bresults in\b", "correlates with", repaired_text, flags=re.IGNORECASE)
 
             elif iss.code == IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS:
-                words = repaired_text.split()
-                if len(words) > 915:
-                    # Trim excessive concluding words back to 900
-                    repaired_text = " ".join(words[:900]).rstrip(".") + "."
-                elif len(words) < 720:
-                    # Invariant: Never pad passage with generic fabricated facts
-                    raise RepairExecutionError(
-                        f"Cannot pad short passage ({len(words)} words < 720) without verified source evidence; requires regeneration"
-                    )
+                words = len(repaired_text.split())
+                if words > 915:
+                    # Sentence-aware trimming (P08-07): never slice mid-sentence!
+                    trimmed_candidate = None
+                    sentence_matches = list(re.finditer(r"[.!?](?:\s+|$)", repaired_text))
+                    for match in reversed(sentence_matches):
+                        candidate = repaired_text[:match.end()].strip()
+                        cand_words = len(candidate.split())
+                        if 750 <= cand_words <= 900:
+                            trimmed_candidate = candidate
+                            break
+                        elif 720 <= cand_words <= 915 and trimmed_candidate is None:
+                            trimmed_candidate = candidate
+                    if trimmed_candidate is not None:
+                        repaired_text = trimmed_candidate
+                    else:
+                        raise RepairExecutionError(
+                            f"Oversize passage ({words} words) cannot be trimmed cleanly at sentence boundaries "
+                            "within policy [720, 915]; requires bounded regeneration"
+                        )
+                elif words < 720:
+                    source_text = payload.get("sourceText") or payload.get("source_text") or ""
+                    if not source_text and hasattr(context, "input_dependencies"):
+                        for dep in getattr(context, "input_dependencies", ()):
+                            if hasattr(dep, "payload"):
+                                source_text = dep.payload.get("sourceText") or dep.payload.get("source_text") or ""
+                                if source_text:
+                                    break
 
+                    if not source_text or len(source_text.split()) < 20:
+                        raise RepairExecutionError(
+                            f"Cannot pad short passage ({words} words < 720) without verified source evidence; requires regeneration"
+                        )
+
+                    # Extract verified sentences from source text not yet expressed in repaired_text
+                    def _extract_ngrams(text_str: str, n: int = 4) -> set:
+                        toks = [w.lower() for w in re.findall(r"\b\w+\b", text_str)]
+                        return set(zip(*[toks[i:] for i in range(n)])) if len(toks) >= n else set()
+
+                    repaired_ngrams = _extract_ngrams(repaired_text, 4)
+
+                    src_sentences = [
+                        s.strip() for s in re.split(r"(?<=[.!?])\s+", source_text)
+                        if 8 <= len(s.strip().split()) <= 50
+                        and not s.strip().startswith(("This work", "Júnia", "Alexandre", "Address correspondence", "The authors declare"))
+                        and not any(term in s for term in ("http://", "https://", "BioProject", "BioSample", "SRX24", "Zenodo", "Grant number", "contract number", "Email:"))
+                    ]
+                    added_sentences = []
+                    curr_words = words
+                    for s in src_sentences:
+                        s_ngrams = _extract_ngrams(s, 4)
+                        # If 4-grams don't overlap, sentence is unexpressed
+                        if s_ngrams and not (s_ngrams & repaired_ngrams):
+                            s_cnt = len(s.split())
+                            if curr_words + s_cnt <= 915:
+                                added_sentences.append(s)
+                                curr_words += s_cnt
+                                # Update ngrams so we don't add duplicate source content
+                                repaired_ngrams.update(s_ngrams)
+                                if curr_words >= 750:
+                                    break
+
+                    if curr_words >= 720 and added_sentences:
+                        repaired_text = repaired_text.rstrip() + "\n\n" + " ".join(added_sentences)
+                    else:
+                        raise RepairExecutionError(
+                            f"Cannot expand short passage ({words} words < 720): insufficient verified unexpressed material in source"
+                        )
+
+            elif iss.code == IssueCode.UNMEASURED_OUTCOME:
+                # Invariant: Modal/causal replacement does not validate unmeasured outcomes.
+                raise RepairExecutionError(
+                    "Unmeasured outcome cannot be repaired without verified source material; requires bounded escalation"
+                )
         if repaired_text == passage_text:
             raise RepairExecutionError(
                 "No evidence-backed transformation could be applied to passage; no ungrounded mutation permitted"
             )
 
-        if "passage" in payload:
-            payload["passage"] = repaired_text
-        if "passageText" in payload:
-            payload["passageText"] = repaired_text
+        paragraphs = [p.strip() for p in repaired_text.split("\n\n") if p.strip()]
+        sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", repaired_text) if s.strip()]
+        new_sentences_list = [
+            {"sentenceId": f"s_{i}", "text": sent, "wordCount": len(sent.split())}
+            for i, sent in enumerate(sentences)
+        ]
 
+        payload["passage"] = repaired_text
+        payload["passageText"] = repaired_text
+        payload["wordCount"] = len(repaired_text.split())
+        payload["paragraphs"] = paragraphs
+        payload["sentences"] = new_sentences_list
         return artifact.create_next_version(new_payload=payload, producer_version="2.0.0")

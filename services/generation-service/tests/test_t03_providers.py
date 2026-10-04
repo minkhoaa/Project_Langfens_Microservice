@@ -8,8 +8,10 @@ import os
 import time
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
+import httpx
 import pytest
 from pydantic import BaseModel, Field
+from app.config import settings
 
 from app.persistence.client import CheckpointApiError, CheckpointClient
 from app.persistence.models import (
@@ -25,6 +27,7 @@ from app.persistence.models import (
 )
 from app.providers.adapters.groq import GroqProvider
 from app.providers.adapters.minimax import MiniMaxProvider
+from app.providers.adapters.openai_compatible import OpenAICompatibleProvider
 from app.providers.adapters.recording import FakeTransportProvider
 from app.providers.base import redact_secrets
 from app.providers.errors import (
@@ -589,8 +592,8 @@ async def test_t03_reconciliation_failure_propagates_and_fails_closed():
 @pytest.mark.asyncio
 async def test_t03_08_live_provider_smoke_or_not_run_external():
     """T03-08: Live smoke test when credentials provided; explicit NOT_RUN_EXTERNAL when missing."""
-    minimax_key = os.environ.get("MINIMAX_API_KEY") or os.environ.get("MINIMAX_API_KEYS")
-    groq_key = os.environ.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEYS")
+    minimax_key = os.environ.get("MINIMAX_API_KEY") or os.environ.get("MINIMAX_API_KEYS") or settings.minimax_api_key
+    groq_key = os.environ.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEYS") or settings.groq_api_key
 
     if not minimax_key and not groq_key:
         pytest.skip("NOT_RUN_EXTERNAL: No real MiniMax or Groq credentials configured in environment")
@@ -619,3 +622,212 @@ async def test_t03_08_live_provider_smoke_or_not_run_external():
     resp = await provider.call(req, api_key, deadline=time.time() + 15.0)
     assert resp.raw_text.strip()
     assert resp.usage.total_tokens > 0
+
+
+# ── AUDIT-NESTED-RETRIES: Real SDK with Fake Transport Attempts Bounds ──────
+
+@pytest.mark.asyncio
+async def test_audit_nested_retries_client_max_retries_zero():
+    """AUDIT-NESTED-RETRIES: OpenAICompatibleProvider client strictly sets max_retries=0."""
+    mock_transport = httpx.MockTransport(lambda req: httpx.Response(200, json={}))
+    async with httpx.AsyncClient(transport=mock_transport) as http_client:
+        provider = OpenAICompatibleProvider(
+            name="test_openai",
+            base_url="https://api.fake.test/v1",
+            models={"small": "test-model"},
+            http_client=http_client,
+            max_retries=0,
+        )
+        client = provider._get_client("fake_key_12345678")
+        assert client.max_retries == 0, f"Expected SDK max_retries=0, got {client.max_retries}"
+
+
+@pytest.mark.asyncio
+async def test_audit_nested_retries_rate_limit_bounded_under_gateway():
+    """AUDIT-NESTED-RETRIES: On 429 RateLimit, total transport requests strictly match Gateway cap."""
+    transport_calls = 0
+
+    def rate_limit_handler(request: httpx.Request) -> httpx.Response:
+        nonlocal transport_calls
+        transport_calls += 1
+        return httpx.Response(
+            status_code=429,
+            headers={"retry-after": "0.01"},
+            json={"error": {"message": "Rate limit reached", "type": "rate_limit_error"}},
+        )
+
+    mock_transport = httpx.MockTransport(rate_limit_handler)
+    async with httpx.AsyncClient(transport=mock_transport) as http_client:
+        provider = OpenAICompatibleProvider(
+            name="test_ratelimit",
+            base_url="https://api.fake.test/v1",
+            models={"small": "test-model"},
+            http_client=http_client,
+            max_retries=0,
+        )
+        registry = ProviderRegistry()
+        registry.register_provider(provider, keys=["fake_key_12345678"])
+
+        mock_checkpoint = MockCheckpointClient()
+        gateway = ProviderGateway(
+            registry=registry,
+            retry_policy=RetryPolicy(max_attempts=3, base_delay_seconds=0.01, max_delay_seconds=0.02),
+            checkpoint_client=mock_checkpoint,
+        )
+
+        req = ProviderRequest(
+            capability=Capability.GENERATE_TEXT,
+            messages=[ChatMessage(role="user", content="Hello")],
+            operation_id=f"op_rl_{uuid4().hex[:8]}",
+            run_id="run_test",
+            max_tokens=50,
+            timeout_seconds=5.0,
+            preferred_provider="test_ratelimit",
+        )
+
+        with pytest.raises((RateLimitedError, ProviderUnavailableError, DeadlineExceededError)):
+            await gateway.execute(req, epoch=1, lease_owner=uuid4())
+
+        # SDK retries must NOT multiply: total transport hits must equal exactly max_attempts (3), NOT 3 x 3 = 9!
+        assert transport_calls == 3, f"Expected exactly 3 transport requests under gateway, got {transport_calls}"
+
+
+@pytest.mark.asyncio
+async def test_audit_nested_retries_server_error_bounded_under_gateway():
+    """AUDIT-NESTED-RETRIES: On 503 Server Error, total transport requests strictly match Gateway cap."""
+    transport_calls = 0
+
+    def server_error_handler(request: httpx.Request) -> httpx.Response:
+        nonlocal transport_calls
+        transport_calls += 1
+        return httpx.Response(
+            status_code=503,
+            json={"error": {"message": "Service overloaded", "type": "server_error"}},
+        )
+
+    mock_transport = httpx.MockTransport(server_error_handler)
+    async with httpx.AsyncClient(transport=mock_transport) as http_client:
+        provider = OpenAICompatibleProvider(
+            name="test_503",
+            base_url="https://api.fake.test/v1",
+            models={"small": "test-model"},
+            http_client=http_client,
+            max_retries=0,
+        )
+        registry = ProviderRegistry()
+        registry.register_provider(provider, keys=["fake_key_12345678"])
+
+        mock_checkpoint = MockCheckpointClient()
+        gateway = ProviderGateway(
+            registry=registry,
+            retry_policy=RetryPolicy(max_attempts=3, base_delay_seconds=0.01, max_delay_seconds=0.02),
+            checkpoint_client=mock_checkpoint,
+        )
+
+        req = ProviderRequest(
+            capability=Capability.GENERATE_TEXT,
+            messages=[ChatMessage(role="user", content="Hello")],
+            operation_id=f"op_503_{uuid4().hex[:8]}",
+            run_id="run_test",
+            max_tokens=50,
+            timeout_seconds=5.0,
+            preferred_provider="test_503",
+        )
+
+        with pytest.raises(ProviderUnavailableError):
+            await gateway.execute(req, epoch=1, lease_owner=uuid4())
+
+        assert transport_calls == 3, f"Expected exactly 3 transport calls, got {transport_calls}"
+
+
+@pytest.mark.asyncio
+async def test_audit_nested_retries_unauthorized_never_retried():
+    """AUDIT-NESTED-RETRIES: On 401 Unauthorized, never retries against policy (exactly 1 call)."""
+    transport_calls = 0
+
+    def unauth_handler(request: httpx.Request) -> httpx.Response:
+        nonlocal transport_calls
+        transport_calls += 1
+        return httpx.Response(
+            status_code=401,
+            json={"error": {"message": "Invalid API key", "type": "invalid_request_error"}},
+        )
+
+    mock_transport = httpx.MockTransport(unauth_handler)
+    async with httpx.AsyncClient(transport=mock_transport) as http_client:
+        provider = OpenAICompatibleProvider(
+            name="test_unauth",
+            base_url="https://api.fake.test/v1",
+            models={"small": "test-model"},
+            http_client=http_client,
+            max_retries=0,
+        )
+        registry = ProviderRegistry()
+        registry.register_provider(provider, keys=["fake_key_12345678"])
+
+        mock_checkpoint = MockCheckpointClient()
+        gateway = ProviderGateway(
+            registry=registry,
+            retry_policy=RetryPolicy(max_attempts=3, base_delay_seconds=0.01, max_delay_seconds=0.02),
+            checkpoint_client=mock_checkpoint,
+        )
+
+        req = ProviderRequest(
+            capability=Capability.GENERATE_TEXT,
+            messages=[ChatMessage(role="user", content="Hello")],
+            operation_id=f"op_unauth_{uuid4().hex[:8]}",
+            run_id="run_test",
+            max_tokens=50,
+            timeout_seconds=5.0,
+            preferred_provider="test_unauth",
+        )
+
+        with pytest.raises(UnauthorizedError):
+            await gateway.execute(req, epoch=1, lease_owner=uuid4())
+
+        # Security violation: MUST NEVER RETRY (total transport calls must be 1)
+        assert transport_calls == 1, f"Expected exactly 1 call for 401 error, got {transport_calls}"
+
+
+@pytest.mark.asyncio
+async def test_audit_nested_retries_unknown_outcome_accounting():
+    """ADR-004: All attempts exhausted records UNKNOWN_OUTCOME without refunding/resetting token reservation."""
+    mock_checkpoint = MockCheckpointClient()
+    mock_transport = httpx.MockTransport(lambda req: httpx.Response(500, json={"error": "Server error"}))
+    async with httpx.AsyncClient(transport=mock_transport) as http_client:
+        provider = OpenAICompatibleProvider(
+            name="test_unk",
+            base_url="https://api.fake.test/v1",
+            models={"small": "test-model"},
+            http_client=http_client,
+            max_retries=0,
+        )
+        registry = ProviderRegistry()
+        registry.register_provider(provider, keys=["fake_key_12345678"])
+
+        gateway = ProviderGateway(
+            registry=registry,
+            retry_policy=RetryPolicy(max_attempts=2, base_delay_seconds=0.01, max_delay_seconds=0.02),
+            checkpoint_client=mock_checkpoint,
+        )
+
+        op_id = f"op_unk_{uuid4().hex[:8]}"
+        req = ProviderRequest(
+            capability=Capability.GENERATE_TEXT,
+            messages=[ChatMessage(role="user", content="Hello")],
+            operation_id=op_id,
+            run_id="run_test",
+            max_tokens=50,
+            timeout_seconds=5.0,
+            preferred_provider="test_unk",
+        )
+
+        with pytest.raises(ProviderUnavailableError):
+            await gateway.execute(req, epoch=1, lease_owner=uuid4())
+
+        # Checkpoint client must have recorded UNKNOWN_OUTCOME
+        assert len(mock_checkpoint.unknown_outcomes) == 1
+        unk = mock_checkpoint.unknown_outcomes[0]
+        assert unk.operationId == op_id
+        # Tokens reserved (50) must NOT be reset to 0
+        assert mock_checkpoint.run_used_tokens >= 50

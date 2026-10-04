@@ -1,0 +1,137 @@
+{
+  "kind": "prompt_pack_manifest",
+  "version": "2.0",
+  "created_at_utc": "2026-10-01T09:44:32.375055+00:00",
+  "scope": "prompt_documents_only",
+  "project_execution_verified": false,
+  "phase_count": 16,
+  "phase_prompt_count": 32,
+  "original_test_ids": 124,
+  "files": [
+    {
+      "path": "00-START-HERE.md",
+      "bytes": 4175,
+      "sha256": "60d0b31dfb4a20edfebade97fd273546e83c0f8cf1b104bb3f6167690e566edb"
+    },
+    {
+      "path": "01-ORCHESTRATOR-PROMPT.md",
+      "bytes": 10402,
+      "sha256": "524c79dc172e165fb1e74a1bc3526ead4b8995c13f02a56250a3969435f52d9b"
+    },
+    {
+      "path": "02-G07-G08-RECOVERY-PROMPT.md",
+      "bytes": 9892,
+      "sha256": "3768fdb224668ba8ea97a4d4cb92282ee9eea07ae3e616c2b251906800141f42"
+    },
+    {
+      "path": "03-OUTPUT-AND-GATE-CONTRACT.md",
+      "bytes": 11136,
+      "sha256": "6a2545abe974dc5805243389ecadb949842d892149d57ba9b931629e790bf105"
+    },
+    {
+      "path": "04-FINAL-VERIFICATION-PROMPT.md",
+      "bytes": 7288,
+      "sha256": "64928f6762fe3dbae894e3ff599951d36d820c14ca2679de023900bb21bfde98"
+    },
+    {
+      "path": "PROMPTS-ALL.md",
+      "bytes": 174596,
+      "sha256": "be219fcab3be8ec7197327ec750bcb4a9bed6d33dd8cec16214165810faf915a"
+    },
+    {
+      "path": "phases/phase-00-discovery-baseline.md",
+      "bytes": 6292,
+      "sha256": "e1a2d6ccb89659d3c02f033226e6b9775620d0d37793d0cee0796dfb8e04692c"
+    },
+    {
+      "path": "phases/phase-01-contracts-policies.md",
+      "bytes": 6457,
+      "sha256": "356d6efb68b08a5a61a6c3880bbc9c0349ac6ab8eacbd5fd37c6d0f917ee3b08"
+    },
+    {
+      "path": "phases/phase-02-durable-artifacts.md",
+      "bytes": 6410,
+      "sha256": "4048853eedb6e4afc1f23c8b98c91066b2a4516bbf0329c0831313bd1d33746d"
+    },
+    {
+      "path": "phases/phase-03-provider-budget.md",
+      "bytes": 6505,
+      "sha256": "5241fd08c0c1237e5415c845d0c0c9853ccf066d8569e9abb6bb6abbf3b09169"
+    },
+    {
+      "path": "phases/phase-04-ingestion-evidence.md",
+      "bytes": 7124,
+      "sha256": "aaa486aff250b4910ec90b2473b425492d6854a6a22d5086e068872bbc9b5721"
+    },
+    {
+      "path": "phases/phase-05-blueprint.md",
+      "bytes": 6741,
+      "sha256": "176c1a58272220cd5ad9165f9cb830ada262b5ba2e39cd414c366b935910734a"
+    },
+    {
+      "path": "phases/phase-06-loop-runtime.md",
+      "bytes": 8341,
+      "sha256": "1a3d381307ec1344994ceb9995aa405e1f604a60feaf9b734fceb51b953839e9"
+    },
+    {
+      "path": "phases/phase-07-evaluators-repairs.md",
+      "bytes": 10615,
+      "sha256": "6a6c12b320c557d659d40423ef6f2368d8d5d3f572fc9f7b0dce8388d917b50c"
+    },
+    {
+      "path": "phases/phase-08-passage-loop.md",
+      "bytes": 11176,
+      "sha256": "4d87aace5465f9bd5c82fb776cd946d11467ceedf17f1478aa9a5d79abac671c"
+    },
+    {
+      "path": "phases/phase-09-question-candidates.md",
+      "bytes": 10113,
+      "sha256": "0d9ee49b04878e61ecab1da8d8abf965e5a5e7e99e1b6454bae5cd5c25f61f25"
+    },
+    {
+      "path": "phases/phase-10-blind-solvers.md",
+      "bytes": 9965,
+      "sha256": "e8a26c686406f2c53d049423ebd1ec6ca0abf0e1f0d4277fca6783d530844304"
+    },
+    {
+      "path": "phases/phase-11-section-loop.md",
+      "bytes": 10265,
+      "sha256": "2842adaea7dfefee5b6a1d771473b34ea44a3d2bbbb82df013f80aa7b070b6c3"
+    },
+    {
+      "path": "phases/phase-12-paper-worker.md",
+      "bytes": 6823,
+      "sha256": "197c9c3f9207227355fd4d8d72eab6406cc5fe07b09654e479bc86c9d7392a6f"
+    },
+    {
+      "path": "phases/phase-13-api-events-observability.md",
+      "bytes": 6949,
+      "sha256": "9034c555086092fe5a37f1d577638b231b36d8da571f1d0667871ceb7894677a"
+    },
+    {
+      "path": "phases/phase-14-human-feedback.md",
+      "bytes": 7382,
+      "sha256": "5785b9c67bd903abef969b7ab0e3a65a273215a0241e9809843b8cf32ff3fb98"
+    },
+    {
+      "path": "phases/phase-15-cutover-cleanup.md",
+      "bytes": 7817,
+      "sha256": "3f96a129183cefe2aa2c6e5e482db4ae39d66d047149a502fc657927895cb895"
+    },
+    {
+      "path": "verification/build_and_check_pack.py",
+      "bytes": 9094,
+      "sha256": "eddb1b5c4dec4b4293ac8cdba11282e3141999d7cab1a03c7495199c189bb075"
+    },
+    {
+      "path": "verification/document-qa.json",
+      "bytes": 14714,
+      "sha256": "1793a31c87a6fd8ce33d074135236937fb94ee7b2b1a3208ea3ee01c66a3e68d"
+    },
+    {
+      "path": "verification/independent-pack-review.md",
+      "bytes": 10642,
+      "sha256": "06c413960f8876d54ae226f9b4e9d6e19f4d4a1f826641fc3a7ab4dd8155fcd4"
+    }
+  ]
+}

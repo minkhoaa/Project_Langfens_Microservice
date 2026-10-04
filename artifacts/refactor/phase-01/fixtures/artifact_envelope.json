@@ -1,0 +1,26 @@
+{
+  "artifactId": "art_passage_001",
+  "artifactType": "Passage",
+  "version": 1,
+  "runId": "run_test_001",
+  "sectionId": 1,
+  "schemaVersion": "1.0.0",
+  "contentHash": "d177f3c0d050e6351cb99dc4810a904e80da37c3ae4d29c0499cdcb08b07e386",
+  "createdAt": "2026-09-30T12:00:00Z",
+  "producerVersion": "loop-engine-v2@0.1.0",
+  "payload": {
+    "title": "Nghiên cứu về khí quyển cổ đại & nồng độ CO₂ trên Trái Đất",
+    "scientificSymbols": "λ = 532 nm, ΔT = 1.5°C, H₂O vapor",
+    "sampleCount": 42,
+    "isVerified": true,
+    "nullField": null
+  },
+  "parentRefs": [
+    {
+      "artifactId": "art_evidence_001",
+      "artifactType": "EvidenceGraph",
+      "version": 1,
+      "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

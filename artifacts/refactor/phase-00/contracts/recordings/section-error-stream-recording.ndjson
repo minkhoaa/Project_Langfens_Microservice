@@ -1,0 +1,4 @@
+{"type":"log","timestamp":"2026-09-30T10:00:00.000Z","level":"Information","message":"Passage 2 generation stream opened."}
+{"type":"log","timestamp":"2026-09-30T10:00:02.100Z","level":"Warning","message":"LLM rate limited the request; retrying after 65 seconds (attempt 2/3)."}
+{"type":"log","timestamp":"2026-09-30T10:01:10.500Z","level":"Error","message":"Passage generation returned an invalid title or 450 words"}
+{"type":"error","httpStatus":502,"message":"Passage generation returned an invalid title or 450 words","traceback":"Traceback (most recent call last):\n  File \"/app/app/pipeline.py\", line 589, in _generate_section_once\n    raise ValueError(f\"Passage generation returned an invalid title or {_words(passage)} words\")\nValueError: Passage generation returned an invalid title or 450 words\n"}

@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-09-30T08:49:49.302179+00:00",
+  "testId": "T03-05",
+  "description": "Concurrent candidate operations near budget limit executed with Task.WhenAll on PostgreSQL port 5433",
+  "sectionCapTokens": 5000,
+  "concurrentCandidates": [
+    {
+      "candidateId": "cand1",
+      "requestedTokens": 3000,
+      "outcome": "GRANTED",
+      "statusCode": 200
+    },
+    {
+      "candidateId": "cand2",
+      "requestedTokens": 3000,
+      "outcome": "REJECTED_OVER_ALLOCATION",
+      "statusCode": 422
+    }
+  ],
+  "atomicFencingGuarantee": "Conditional row lock on ReadingPaperJobs serialized in-transaction evaluations, preventing concurrent oversubscription.",
+  "verifiedOnPostgreSql": true
+}

@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-10-01T08:13:53.643223+00:00",
+  "targetDatabase": "exam_test_phase06",
+  "examServiceUrl": "http://127.0.0.1:5098",
+  "runId": "run_528ac8b80afc",
+  "jobId": "796c6390-5a3b-4d44-965b-90a271545a70",
+  "leaseOwner": "7188e58d-69ff-4e3e-bfbd-bb9e5420d580",
+  "iterations": {
+    "initialRun": {
+      "decision": "PASS",
+      "terminalState": "COMPLETED",
+      "versionsCreated": 2,
+      "repairsPerformed": 1,
+      "callsUsed": 4,
+      "tokensConsumed": 6000,
+      "acceptedVersion": 2,
+      "acceptedHash": "c89d571086d0d98986ab4e325db97d8c4d52d92c756822c1ea39659367e9dc6b"
+    },
+    "resumedRun": {
+      "decision": "PASS",
+      "terminalState": "COMPLETED",
+      "repeatedGenerations": 0,
+      "repeatedRepairs": 0,
+      "repeatedEvaluations": 0
+    }
+  },
+  "postgresAssertions": {
+    "immutableArtifactsCount": 2,
+    "acceptedHeadVersion": 2,
+    "cursorRevision": 8,
+    "operationsCount": 8,
+    "dependenciesEdgesCount": 4,
+    "issuesCount": 1,
+    "decisionsCount": 4,
+    "staleEpochFenced": true,
+    "cancelledWriterFenced": true,
+    "fiveCrashWindowsVerified": true
+  },
+  "status": "PASS"
+}

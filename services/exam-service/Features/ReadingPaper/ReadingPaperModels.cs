@@ -16,6 +16,12 @@ public sealed record ReadingGeneratedQuestion(int Number, string Prompt, string 
 public sealed record ReadingGeneratedGroup(string Type, string Instruction, List<ReadingGeneratedQuestion> Questions);
 public sealed record ReadingGeneratedSection(string Title, string Passage, ReadingSource Source,
     List<ReadingGeneratedGroup> Groups);
+public sealed record ReadingGeneratedQuestionsResult(
+    string Status,
+    int TotalQuestions,
+    int ResumedCount,
+    int GeneratedCount,
+    Dictionary<string, object>? Questions = null);
 
 public static class ReadingPaperRules
 {

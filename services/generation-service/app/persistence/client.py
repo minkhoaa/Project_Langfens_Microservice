@@ -21,6 +21,8 @@ from app.persistence.models import (
     SetBudgetAllocationsResult,
     OperationReconcileRequest,
     OperationReconcileResult,
+    UnknownOutcomeRequest,
+    UnknownOutcomeAck,
 )
 
 

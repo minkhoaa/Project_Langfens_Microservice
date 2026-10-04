@@ -143,7 +143,7 @@ class LoopContext(CanonicalBaseModel):
     accepted_artifact: Optional[ArtifactEnvelope] = Field(default=None, alias="acceptedArtifact")
     is_cancelled_func: Optional[Callable[[], bool]] = Field(default=None, exclude=True)
     open_issues: Tuple[Issue, ...] = Field(default_factory=tuple, alias="openIssues")
-
+    parent_operation_id: Optional[str] = Field(default=None, alias="parentOperationId")
     def is_cancelled(self) -> bool:
         """Checks if a cancellation signal has been raised."""
         if self.is_cancelled_func is not None:

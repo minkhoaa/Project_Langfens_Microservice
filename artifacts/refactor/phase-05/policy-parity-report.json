@@ -1,0 +1,69 @@
+{
+  "policyVersion": "v2.0.0",
+  "parityVerified": true,
+  "rules": {
+    "section1": {
+      "questionCount": 13,
+      "group0": {
+        "type": "TRUE_FALSE_NOT_GIVEN",
+        "count": 7,
+        "start": 1,
+        "end": 7
+      },
+      "group1": {
+        "type": "SENTENCE_COMPLETION",
+        "count": 6,
+        "start": 8,
+        "end": 13
+      },
+      "style": "Descriptive, factual, clear chronological or logical sequence"
+    },
+    "section2": {
+      "questionCount": 13,
+      "group0": {
+        "type": "MULTIPLE_CHOICE_SINGLE",
+        "count": 6,
+        "start": 14,
+        "end": 19
+      },
+      "group1": {
+        "type": "SUMMARY_COMPLETION",
+        "count": 7,
+        "start": 20,
+        "end": 26
+      },
+      "style": "Analytical, mechanisms, processes, causal relationships"
+    },
+    "section3": {
+      "questionCount": 14,
+      "group0": {
+        "type": "YES_NO_NOT_GIVEN",
+        "count": 7,
+        "start": 27,
+        "end": 33
+      },
+      "group1": {
+        "type": "SHORT_ANSWER",
+        "count": 7,
+        "start": 34,
+        "end": 40
+      },
+      "style": "Argumentative, hypotheses, opinions, perspectives, debate"
+    },
+    "wordCounts": {
+      "sectionMin": 720,
+      "sectionMax": 915,
+      "paperMin": 2150,
+      "paperMax": 2750
+    },
+    "difficultyPolicy": {
+      "prePilotCalibratedDifficultyAllowed": false,
+      "supportedHeuristicLevels": [
+        "FOUNDATION",
+        "MODERATE",
+        "ADVANCED"
+      ],
+      "rationaleRequired": true
+    }
+  }
+}

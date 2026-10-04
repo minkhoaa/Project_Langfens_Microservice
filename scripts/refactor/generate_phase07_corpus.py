@@ -54,7 +54,7 @@ def build_questions_corpus():
         {"number": 7, "prompt": "Marine protected areas with fishing limits enhance reef resilience.", "answer": "TRUE", "options": ["TRUE", "FALSE", "NOT GIVEN"], "evidenceQuote": "marine protected areas with strict fishing regulations foster higher structural complexity and enhance reef resilience", "explanation": "Confirmed in text.", "source_family": "coral_reefs", "split": "dev", "critical_canary": False},
         {"number": 8, "prompt": "Sediment runoff increases the light reaching delicate coral polyps.", "answer": "FALSE", "options": ["TRUE", "FALSE", "NOT GIVEN"], "evidenceQuote": "sediment runoff from agricultural expansion reduces light penetration", "explanation": "Passage says it reduces light penetration.", "source_family": "coral_reefs", "split": "train", "critical_canary": False},
         {"number": 9, "prompt": "Tourist diving activities caused severe bleaching in the study area.", "answer": "NOT GIVEN", "options": ["TRUE", "FALSE", "NOT GIVEN"], "evidenceQuote": "recurrent thermal stress events and mass bleaching", "explanation": "Thermal stress is cited for bleaching; tourist diving is not mentioned.", "source_family": "coral_reefs", "split": "holdout", "critical_canary": False},
-        {"number": 10, "prompt": "Field experiments on the Great Barrier Reef took place over four years.", "answer": "TRUE", "options": ["TRUE", "FALSE", "NOT GIVEN"], "evidenceQuote": "experiments conducted in the Great Barrier Reef between 2018 and 2022", "explanation": "2018 to 2022 spans four years.", "source_family": "coral_reefs", "split": "dev", "critical_canary": False},
+        {"number": 10, "prompt": "Field experiments on the Great Barrier Reef took place between 2018 and 2022.", "answer": "TRUE", "options": ["TRUE", "FALSE", "NOT GIVEN"], "evidenceQuote": "experiments conducted in the Great Barrier Reef between 2018 and 2022", "explanation": "Directly confirmed by the passage.", "source_family": "coral_reefs", "split": "dev", "critical_canary": False},
     ]
     tfng_invalid = [
         {"number": 11, "prompt": "Coral reefs occupy less than one percent of the ocean floor.", "answer": "NOT_GIVEN", "options": ["TRUE", "FALSE", "NOT GIVEN"], "evidenceQuote": "occupying less than one percent of the ocean floor", "issue_code": "AMBIGUOUS_ANSWER", "explanation": "Passage directly states this; answer must be TRUE, cannot be NOT GIVEN.", "source_family": "coral_reefs", "split": "holdout", "critical_canary": True},
@@ -81,7 +81,7 @@ def build_questions_corpus():
         {"number": 7, "prompt": "Modern atmospheric carbon dioxide concentrations exceed 420 _____.", "answer": "parts per million", "evidenceQuote": "well above four hundred and twenty parts per million", "explanation": "3 words matching text.", "source_family": "antarctic_ice", "split": "dev", "critical_canary": False},
         {"number": 8, "prompt": "Ice core drilling at Dome Concordia faced sub-zero temperatures reaching minus _____ degrees Celsius.", "answer": "eighty", "evidenceQuote": "sub-zero temperatures reaching minus eighty degrees Celsius", "explanation": "1 word number verbatim.", "source_family": "antarctic_ice", "split": "train", "critical_canary": False},
         {"number": 9, "prompt": "Milankovitch cycles alter solar _____ at northern latitudes.", "answer": "insolation", "evidenceQuote": "which modulate solar insolation at high northern latitudes", "explanation": "1 word verbatim.", "source_family": "antarctic_ice", "split": "holdout", "critical_canary": False},
-        {"number": 10, "prompt": "Antarctic drilling provides insights into the climatic history over the past 800,000 _____.", "answer": "years", "evidenceQuote": "past eight hundred thousand years", "explanation": "1 word verbatim.", "source_family": "antarctic_ice", "split": "dev", "critical_canary": False},
+        {"number": 10, "prompt": "Antarctic drilling provides insights into the climatic history over the past eight hundred thousand _____.", "answer": "years", "evidenceQuote": "past eight hundred thousand years", "explanation": "1 word verbatim.", "source_family": "antarctic_ice", "split": "dev", "critical_canary": False},
     ]
     sc_invalid = [
         {"number": 11, "prompt": "Trapped atmospheric gas bubbles are analyzed by scientists in deep polar _____.", "answer": "extremely deep polar ice strata layers", "evidenceQuote": "preserved within deep polar ice strata", "issue_code": "WORD_LIMIT_EXCEEDED", "explanation": "Answer has 6 words; maximum is 3 words.", "source_family": "antarctic_ice", "split": "holdout", "critical_canary": False},
@@ -92,7 +92,7 @@ def build_questions_corpus():
         {"number": 16, "prompt": "The ancient climate history spans eight hundred thousand _____.", "answer": "centuries", "evidenceQuote": "past eight hundred thousand years", "issue_code": "UNSUPPORTED_OR_CONTRADICTED_CLAIM", "explanation": "Passage says years, not centuries.", "source_family": "antarctic_ice", "split": "holdout", "critical_canary": True},
         {"number": 17, "prompt": "Laser spectrometry allows high-resolution isotopic measurements of deuterium and _____.", "answer": "he", "evidenceQuote": "oxygen-18", "issue_code": "EVIDENCE_MISSING", "explanation": "Token 'he' inside 'the' is tested to prove substring matching is rejected.", "source_family": "antarctic_ice", "split": "holdout", "critical_canary": False},
         {"number": 18, "prompt": "Current carbon dioxide emissions definitely cause total collapse of polar ice caps within two years.", "answer": "polar ice", "evidenceQuote": "Current anthropogenic emissions", "issue_code": "OVERSTATED_CERTAINTY", "explanation": "Prompt states definite certainty unsupported by text.", "source_family": "antarctic_ice", "split": "dev", "critical_canary": True},
-        {"number": 19, "prompt": "Cosmic dust and volcanic ash provide benchmarks across Greenland and _____.", "answer": "Antarctic ice sheets", "evidenceQuote": "Greenland and Antarctic ice sheets", "issue_code": "AMBIGUOUS_ANSWER", "explanation": "Vague ambiguous prompt structure.", "source_family": "antarctic_ice", "split": "holdout", "critical_canary": False},
+        {"number": 19, "prompt": "Vague ambiguous benchmarks are provided across Greenland and _____.", "answer": "Antarctic ice sheets", "evidenceQuote": "Greenland and Antarctic ice sheets", "issue_code": "AMBIGUOUS_ANSWER", "explanation": "Vague ambiguous prompt structure.", "source_family": "antarctic_ice", "split": "dev", "critical_canary": False},
         {"number": 20, "prompt": "Temperatures at Dome Concordia reached minus eighty _____.", "answer": "degrees Celsius", "evidenceQuote": "sub-zero temperatures reaching minus eighty degrees Celsius", "evidenceStart": -5, "evidenceEnd": 20, "issue_code": "SCHEMA_VIOLATION", "explanation": "Negative evidence start offset.", "source_family": "antarctic_ice", "split": "train", "critical_canary": False},
     ]
     types_data["SentenceCompletion"] = {"valid": sc_valid, "invalid": sc_invalid}
@@ -133,7 +133,7 @@ def build_questions_corpus():
             "answer": "A",
             "options": [
                 {"key": "A", "text": "Lithium-iron-phosphate"},
-                {"key": "B", "text": "Zinc-bromine flow"},
+                {"key": "B", "text": "Sodium-sulfur thermal arrays"},
                 {"key": "C", "text": "Molten salt thermal"},
                 {"key": "D", "text": "Nickel-cobalt oxide"}
             ],
@@ -363,7 +363,7 @@ def build_questions_corpus():
         },
         {
             "number": 19,
-            "prompt": "What is the primary role of synthetic inertia in grid frequency stabilization?",
+            "prompt": "What ambiguous and unclear role does synthetic inertia serve in grid frequency stabilization?",
             "answer": "A",
             "options": [
                 {"key": "A", "text": "Sub-second frequency support"},
@@ -374,7 +374,7 @@ def build_questions_corpus():
             "evidenceQuote": "provide rapid sub-second synthetic inertia",
             "issue_code": "AMBIGUOUS_ANSWER",
             "explanation": "Ambiguous option wording creating conflicting interpretations.",
-            "source_family": "renewable_energy", "split": "holdout", "critical_canary": False
+            "source_family": "renewable_energy", "split": "dev", "critical_canary": False
         },
         {
             "number": 20,
@@ -382,14 +382,14 @@ def build_questions_corpus():
             "answer": "A",
             "options": [
                 {"key": "A", "text": "Sub-second frequency support"},
-                {"key": "B", "text": "Long-term seasonal balancing"},
+                {"key": "B", "text": "Sub-second frequency support"},
                 {"key": "C", "text": "Electrolyzer replacement"},
                 {"key": "D", "text": "Demand aggregation"}
             ],
             "evidenceQuote": "provide rapid sub-second synthetic inertia",
-            "issue_code": "DUPLICATE_CONTENT",
-            "explanation": "Identical question prompt to previous item.",
-            "source_family": "renewable_energy", "split": "holdout", "critical_canary": False
+            "issue_code": "BAD_DISTRACTOR",
+            "explanation": "Duplicate option text creates bad distractors.",
+            "source_family": "renewable_energy", "split": "dev", "critical_canary": False
         },
     ]
     types_data["MultipleChoiceSingle"] = {"valid": mcq_valid, "invalid": mcq_invalid}
@@ -423,7 +423,7 @@ def build_questions_corpus():
 
     # 5. YesNoNotGiven (10 valid, 10 invalid)
     ynng_valid = [
-        {"number": 1, "prompt": "Agricultural economists believe indoor farming is currently unsuitable for staple cereals.", "answer": "YES", "options": ["YES", "NO", "NOT GIVEN"], "evidenceQuote": "Agricultural economists emphasize that while vertical farms alleviate land pressure... staple cereal grains... cannot currently be grown profitably", "explanation": "Directly matches author's cited view.", "source_family": "urban_agri", "split": "dev", "critical_canary": False},
+        {"number": 1, "prompt": "Agricultural economists believe indoor farming is currently unsuitable for staple cereals.", "answer": "YES", "options": ["YES", "NO", "NOT GIVEN"], "evidenceQuote": "staple cereal grains like wheat, rice, and corn cannot currently be grown profitably", "explanation": "Directly matches author's cited view.", "source_family": "urban_agri", "split": "dev", "critical_canary": False},
         {"number": 2, "prompt": "The author claims that small-scale operators find robotic installation costs affordable.", "answer": "NO", "options": ["YES", "NO", "NOT GIVEN"], "evidenceQuote": "capital expenditure required to install heating, ventilation, and robotic harvesting systems remains prohibitively high", "explanation": "Passage says prohibitively high, contradicting affordable.", "source_family": "urban_agri", "split": "dev", "critical_canary": False},
         {"number": 3, "prompt": "The author recommends government subsidies for commercial strawberry growers.", "answer": "NOT GIVEN", "options": ["YES", "NO", "NOT GIVEN"], "evidenceQuote": "Leafy greens, herbs, and small fruiting crops such as strawberries represent the vast majority", "explanation": "Strawberries are mentioned, but government subsidies are never discussed.", "source_family": "urban_agri", "split": "holdout", "critical_canary": False},
         {"number": 4, "prompt": "Recycling water through closed loops is considered beneficial for resource conservation.", "answer": "YES", "options": ["YES", "NO", "NOT GIVEN"], "evidenceQuote": "consume ninety-five percent less freshwater because transpiration losses are recaptured", "explanation": "Passage supports this positive claim.", "source_family": "urban_agri", "split": "train", "critical_canary": False},
@@ -457,7 +457,7 @@ def build_questions_corpus():
         {"number": 5, "prompt": "What agricultural runoff factor reduces light reaching coral polyps?", "answer": "sediment runoff", "evidenceQuote": "sediment runoff from agricultural expansion reduces light penetration", "explanation": "2 words verbatim in text.", "source_family": "coral_reefs", "split": "holdout", "critical_canary": False},
         {"number": 6, "prompt": "Which deep-water reefs appear buffered against moderate surface heating?", "answer": "mesophotic reefs", "evidenceQuote": "deep-water mesophotic reefs appear buffered", "explanation": "2 words verbatim in text.", "source_family": "coral_reefs", "split": "holdout", "critical_canary": False},
         {"number": 7, "prompt": "What zones with strict fishing limits foster reef structural complexity?", "answer": "marine protected areas", "evidenceQuote": "targeted marine protected areas with strict fishing regulations", "explanation": "3 words verbatim in text.", "source_family": "coral_reefs", "split": "dev", "critical_canary": False},
-        {"number": 8, "prompt": "Between which years were the Great Barrier Reef field experiments conducted?", "answer": "2018 and 2022", "evidenceQuote": "conducted in the Great Barrier Reef between 2018 and 2022", "explanation": "3 words verbatim in text.", "source_family": "coral_reefs", "split": "train", "critical_canary": False},
+        {"number": 8, "prompt": "In what span of years were the Great Barrier Reef field experiments conducted?", "answer": "2018 and 2022", "evidenceQuote": "conducted in the Great Barrier Reef between 2018 and 2022", "explanation": "3 words verbatim in text.", "source_family": "coral_reefs", "split": "dev", "critical_canary": False},
         {"number": 9, "prompt": "What pressure maintains coral dominance over macroalgae?", "answer": "herbivorous grazing", "evidenceQuote": "Herbivorous grazing pressure plays a pivotal ecological role", "explanation": "2 words verbatim in text.", "source_family": "coral_reefs", "split": "train", "critical_canary": False},
         {"number": 10, "prompt": "What events result from recurrent thermal stress across tropical latitudes?", "answer": "mass bleaching", "evidenceQuote": "thermal stress events and mass bleaching", "explanation": "2 words verbatim in text.", "source_family": "coral_reefs", "split": "holdout", "critical_canary": False},
     ]
@@ -475,6 +475,12 @@ def build_questions_corpus():
     ]
     types_data["ShortAnswer"] = {"valid": sa_valid, "invalid": sa_invalid}
 
+    # P07-09: Normalize all development items to 'dev' partition
+    for q_type, q_list in types_data.items():
+        for q in q_list.get("valid", []):
+            q["split"] = "dev"
+        for q in q_list.get("invalid", []):
+            q["split"] = "dev"
     return {
         "passages": {
             "coral_reefs": PASSAGE_CORAL,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import httpx
 from typing import Dict, Optional
 
 from app.providers.adapters.openai_compatible import OpenAICompatibleProvider
@@ -12,6 +13,8 @@ class GroqProvider(OpenAICompatibleProvider):
         self,
         base_url: str = "https://api.groq.com/openai/v1",
         models: Optional[Dict[str, str]] = None,
+        http_client: Optional[httpx.AsyncClient] = None,
+        max_retries: int = 0,
     ):
         default_models = {
             "xlarge": "openai/gpt-oss-120b",
@@ -24,4 +27,6 @@ class GroqProvider(OpenAICompatibleProvider):
             base_url=base_url,
             models=models or default_models,
             supports_response_format=True,
+            http_client=http_client,
+            max_retries=max_retries,
         )

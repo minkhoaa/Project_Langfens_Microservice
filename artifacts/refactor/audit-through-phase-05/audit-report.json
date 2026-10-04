@@ -1,0 +1,778 @@
+{
+  "timestamp": "2026-10-01T03:32:21.288271+00:00",
+  "gitSha": "999dc94f1c68102b1270690b3ba0d7e40117c788",
+  "diffDigest": "e300ac21d94f244087586cddb36d88279df0ab363db26059b46fd453b9e3f196",
+  "testManifest44": {
+    "T00-01": {
+      "phase": "00",
+      "name": "Replay 4 endpoints",
+      "required_symbols": [
+        "test_t00_01_get_sources",
+        "test_t00_01_post_source",
+        "test_t00_01_post_source_ingest",
+        "test_t00_01_post_section_json",
+        "test_t00_01_post_section_ndjson_stream"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t00_endpoints.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T00-02": {
+      "phase": "00",
+      "name": "NDJSON chunk & mid-UTF8 split parsing",
+      "required_symbols": [
+        "ParseNdjson_ReconstructsEvents_WhenChunksSplitMidUtf8AndMidJson"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/ReadingPaperChunkStreamTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T00-03": {
+      "phase": "00",
+      "name": "Replay source & policy boundary fixtures (5 Python + 7 .NET cases)",
+      "required_symbols": [
+        "test_t00_03_source_word_count_boundary",
+        "test_t00_03_ssrf_safety_boundary",
+        "test_t00_03_license_boundary",
+        "test_t00_03_passage_length_boundaries",
+        "test_t00_03_questions_corpus_all_six_types",
+        "PassageWordCount_Rejects719_AndAccepts720",
+        "PassageWordCount_Accepts915_AndRejects916",
+        "TotalThreePassageWordCount_EnforcesRange",
+        "ShingleOverlap_RejectsHighlySimilarPassages",
+        "QuestionValidation_RejectsMissingBlank_AndEvidenceAbsent",
+        "ShortAnswer_RejectsAnswerAbsentFromPassage_WithObservedMessage",
+        "AntiDuplication_RejectsDuplicatePmcidOrDoi"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/ReadingPaperBoundaryTests.cs",
+        "services/generation-service/tests/test_t00_policies.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet",
+        "pytest"
+      ]
+    },
+    "T00-04": {
+      "phase": "00",
+      "name": "Worker crash after section 2 & Retry checkpoint preservation",
+      "required_symbols": [
+        "WorkerCrashAfterSection2_PreservesCheckpoints1And2_AndRetryOnlyExecutesSection3"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/ReadingPaperWorkerCrashSection2Tests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T00-05": {
+      "phase": "00",
+      "name": "Manual CRUD Draft -> edit -> Publish",
+      "required_symbols": [
+        "ManualExamLifecycle_Draft_Edit_Publish_WorksIndependently"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/AdminExamManualCrudTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T00-06": {
+      "phase": "00",
+      "name": "Deterministic regression suite with fake provider",
+      "required_symbols": [
+        "test_t00_06_deterministic_regression_twice"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t00_regression.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T01-01": {
+      "phase": "01",
+      "name": "Round-trip fixtures Python <-> JSON <-> .NET",
+      "required_symbols": [
+        "test_t01_01_fixture_envelope_roundtrip",
+        "T01_01_Deserialize_ArtifactEnvelope_PreservesUnicodeNullsAndHashes"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t01_contracts.py",
+        "services/exam-service.Tests/Phase01ContractTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T01-02": {
+      "phase": "01",
+      "name": "Deserialize wrong type/count/unknown field",
+      "required_symbols": [
+        "test_t01_02_unknown_field_rejection_extra_forbid",
+        "T01_02_Deserialize_UnknownField_ThrowsJsonException"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t01_contracts.py",
+        "services/exam-service.Tests/Phase01ContractTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T01-03": {
+      "phase": "01",
+      "name": "Single character mutation invalidates contentHash",
+      "required_symbols": [
+        "test_t01_03_immutability_and_hash_sensitivity",
+        "T01_03_ArtifactHash_ChangesWhenPayloadChanges"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t01_contracts.py",
+        "services/exam-service.Tests/Phase01ContractTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T01-04": {
+      "phase": "01",
+      "name": "Evaluator error and critical issues block PASS",
+      "required_symbols": [
+        "test_t01_04_evaluator_error_blocks_pass",
+        "T01_04_EvaluatorErrorAndCriticalIssue_BlocksPass"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t01_contracts.py",
+        "services/exam-service.Tests/Phase01ContractTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T01-05": {
+      "phase": "01",
+      "name": "Valid NOT GIVEN absence semantics & completion constraints",
+      "required_symbols": [
+        "test_t01_05_not_given_absence_semantics_strict",
+        "T01_05_AbsenceAssessment_NotGivenSemantics_Preserved"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t01_contracts.py",
+        "services/exam-service.Tests/Phase01ContractTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T01-06": {
+      "phase": "01",
+      "name": "Section & paper boundary enforcement in code",
+      "required_symbols": [
+        "test_t01_06_boundary_violations_detected_by_code",
+        "T01_06_QuestionTypeDistribution_MatchesIeltsAcademicPolicy"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t01_contracts.py",
+        "services/exam-service.Tests/Phase01ContractTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T02-01": {
+      "phase": "02",
+      "name": "Concurrent writers with same operationId yields single commit and replay",
+      "required_symbols": [
+        "T02_01_ConcurrentWriters_SameOperationId_YieldsSingleCommitAndReplay"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T02-02": {
+      "phase": "02",
+      "name": "Same operationId with different requestHash rejects with HTTP 409 Conflict",
+      "required_symbols": [
+        "T02_02_SameOperationId_DifferentRequestHash_RejectsWithConflict"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T02-03": {
+      "phase": "02",
+      "name": "Crash before commit, lost ACK recovery, and durable resume",
+      "required_symbols": [
+        "T02_03_CrashScenarios_CrashBeforeCommit_LostAck_DurableResume"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T02-04": {
+      "phase": "02",
+      "name": "Lease expiry and worker takeover rejects old epoch writes",
+      "required_symbols": [
+        "T02_04_LeaseExpiry_WorkerTakeover_RejectsOldEpochWrites"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T02-05": {
+      "phase": "02",
+      "name": "Cancellation during provider call rejects late result fail-closed",
+      "required_symbols": [
+        "T02_05_CancellationDuringProviderCall_RejectsLateResult"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T02-06": {
+      "phase": "02",
+      "name": "Source section 2 replacement invalidates only section 2 closure and paper",
+      "required_symbols": [
+        "T02_06_SourceSection2Replacement_InvalidatesOnlySection2ClosureAndPaper"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T02-07": {
+      "phase": "02",
+      "name": "Crash immediately after final exam commit retries with identical ExamId",
+      "required_symbols": [
+        "T02_07_CrashImmediatelyAfterFinalExamCommit_RetryYieldsIdenticalExamId"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T02-08": {
+      "phase": "02",
+      "name": "Tampered checkpoint hash or incompatible schema fails closed",
+      "required_symbols": [
+        "T02_08_TamperedContentHash_Or_IncompatibleSchema_FailsClosed"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T02-09": {
+      "phase": "02",
+      "name": "Internal checkpoint API security rejects missing/invalid key",
+      "required_symbols": [
+        "T02_09_Security_MissingOrInvalidInternalApiKey_RejectsWith401Or403"
+      ],
+      "test_files": [
+        "services/exam-service.Tests/Phase02DurabilityTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "dotnet"
+      ]
+    },
+    "T03-01": {
+      "phase": "03",
+      "name": "429 + Retry-After longer than deadline fails boundedly without exceeding deadline",
+      "required_symbols": [
+        "test_t03_01_rate_limited_retry_after_longer_than_deadline"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t03_providers.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T03-02": {
+      "phase": "03",
+      "name": "401 not retried; transient 5xx retried up to 3 attempts and counted",
+      "required_symbols": [
+        "test_t03_02_unauthorized_never_retried",
+        "test_t03_02_transient_retried_up_to_cap_and_counted"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t03_providers.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T03-03": {
+      "phase": "03",
+      "name": "Defensive parser: rejects malformed/fenced/multi-object/NaN",
+      "required_symbols": [
+        "test_t03_03_parser_fenced_valid",
+        "test_t03_03_parser_rejects_nan_and_infinity",
+        "test_t03_03_parser_rejects_ambiguous_multiple_objects"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t03_providers.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T03-04": {
+      "phase": "03",
+      "name": "Cancellation during backoff and streaming halts immediately",
+      "required_symbols": [
+        "test_t03_04_cancellation_during_backoff"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t03_providers.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T03-05": {
+      "phase": "03",
+      "name": "Concurrent candidates near budget limit: atomic reservation under parent cap",
+      "required_symbols": [
+        "test_t03_05_concurrent_requests_near_budget_limit",
+        "T03_05_ConcurrentCandidates_NearSectionCap"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t03_providers.py",
+        "services/exam-service.Tests/Phase03BudgetTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T03-06": {
+      "phase": "03",
+      "name": "Provider timeout (UNKNOWN_OUTCOME) preserves reservation without reset or free retry",
+      "required_symbols": [
+        "test_t03_06_provider_timeout_preserves_reservation_no_free_retry",
+        "T03_06_UnknownOutcome_PreservesReservation"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t03_providers.py",
+        "services/exam-service.Tests/Phase03BudgetTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T03-07": {
+      "phase": "03",
+      "name": "Sanitized recordings & fake transport: zero secret/thinking leak",
+      "required_symbols": [
+        "test_t03_07_streaming_sanitizer_removes_split_thinking_tags",
+        "test_t03_07_redact_secrets"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t03_providers.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T03-08": {
+      "phase": "03",
+      "name": "Live provider smoke test or explicit NOT_RUN_EXTERNAL",
+      "required_symbols": [
+        "test_t03_08_live_provider_smoke_or_not_run_external"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t03_providers.py"
+      ],
+      "status": "NOT_RUN_EXTERNAL",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T04-01": {
+      "phase": "04",
+      "name": "License boundaries & 599/600/601 words",
+      "required_symbols": [
+        "test_t04_01_europe_pmc_license_accepted",
+        "test_t04_01_europe_pmc_license_rejected",
+        "test_t04_01_word_count_boundaries_599_600_601"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t04_ingestion_evidence.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T04-02": {
+      "phase": "04",
+      "name": "SSRF, redirect revalidation, rebinding defense",
+      "required_symbols": [
+        "test_t04_02_ssrf_forbidden_targets",
+        "test_t04_02_redirect_to_private_ip_blocked"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t04_ingestion_evidence.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T04-03": {
+      "phase": "04",
+      "name": "Normalizer idempotency & Unicode code-point offsets cross-language",
+      "required_symbols": [
+        "test_t04_03_normalization_idempotency_and_version",
+        "test_t04_03_unicode_code_points_and_cross_language_offsets",
+        "T04_03_UnicodeOffsets_Emojis_CombiningMarks_Roundtrip"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t04_ingestion_evidence.py",
+        "services/exam-service.Tests/Phase04EvidenceTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T04-04": {
+      "phase": "04",
+      "name": "Grounding: Numeric distortion 14%->40% & population shift rejected",
+      "required_symbols": [
+        "test_t04_04_numeric_distortion_rejected_despite_valid_span_id",
+        "test_t04_04_population_shift_rejected"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t04_ingestion_evidence.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T04-05": {
+      "phase": "04",
+      "name": "Grounding: Dropped 'may' & causality overstatement rejected",
+      "required_symbols": [
+        "test_t04_05_dropped_modal_qualifier_rejected",
+        "test_t04_05_association_to_causation_rejected"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t04_ingestion_evidence.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T04-06": {
+      "phase": "04",
+      "name": "Context selection & coverage map: claims outside selected coverage rejected",
+      "required_symbols": [
+        "test_t04_06_claim_outside_selected_coverage_fails_closed"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t04_ingestion_evidence.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T04-07": {
+      "phase": "04",
+      "name": "Source revision bump & descendant invalidation upon content change",
+      "required_symbols": [
+        "test_t04_07_content_change_bumps_revision_and_invalidates_descendants",
+        "T04_07_SourcePack_RevisionBumping_InvalidatesDescendants"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t04_ingestion_evidence.py",
+        "services/exam-service.Tests/Phase04EvidenceTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T04-08": {
+      "phase": "04",
+      "name": "Prompt injection passive isolation & 5MB/100K caps enforced",
+      "required_symbols": [
+        "test_t04_08_prompt_injection_neutralized",
+        "test_t04_08_resource_caps_enforced"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t04_ingestion_evidence.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T05-01": {
+      "phase": "05",
+      "name": "Section 1/2/3 blueprint: exact types, groups, counts & slots 1-40",
+      "required_symbols": [
+        "test_t05_01_section_blueprint_structure_and_slots_1_to_40",
+        "T05_01_SectionAllocations_AndSlots1To40_Contiguous_ValidatesCleanly"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t05_blueprint.py",
+        "services/exam-service.Tests/Phase05BlueprintTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T05-02": {
+      "phase": "05",
+      "name": "Source 1000 words only 1 fact: suitability reject with reason, generator call = 0",
+      "required_symbols": [
+        "test_t05_02_source_repetitive_single_fact_rejected"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t05_blueprint.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T05-03": {
+      "phase": "05",
+      "name": "Section 3 lacking viewpoints/arguments: reject with typed reason, no fake opinions",
+      "required_symbols": [
+        "test_t05_03_section3_without_viewpoints_rejected"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t05_blueprint.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T05-04": {
+      "phase": "05",
+      "name": "Blueprint referencing rejected or stale graph: reject before generation",
+      "required_symbols": [
+        "test_t05_04_rejected_or_stale_graph_fails_validation",
+        "T05_04_RejectedOrStaleGraphRef_ProducesBlockingIssue"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t05_blueprint.py",
+        "services/exam-service.Tests/Phase05BlueprintTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T05-05": {
+      "phase": "05",
+      "name": "Planned candidates exceeding cap: scale down or reject; no parent oversubscription",
+      "required_symbols": [
+        "test_t05_05_budget_allocation_and_cap_enforcement",
+        "T05_05_CandidateAllocation_ExceedsCap_ProducesBlockingIssue",
+        "T05_05_BudgetExceedingParentCap_ProducesBlockingIssue"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t05_blueprint.py",
+        "services/exam-service.Tests/Phase05BlueprintTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    },
+    "T05-06": {
+      "phase": "05",
+      "name": "Same graph/policy with deterministic planner: output hash stable",
+      "required_symbols": [
+        "test_t05_06_deterministic_planning_stable_hash"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t05_blueprint.py"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest"
+      ]
+    },
+    "T05-07": {
+      "phase": "05",
+      "name": "Policy fixtures on Python and .NET: business parity, calibrated difficulty prohibited",
+      "required_symbols": [
+        "test_t05_07_calibrated_difficulty_prohibited",
+        "T05_07_CalibratedDifficulty_ProhibitedByPolicy",
+        "T05_07_BlueprintSerialization_Roundtrip"
+      ],
+      "test_files": [
+        "services/generation-service/tests/test_t05_blueprint.py",
+        "services/exam-service.Tests/Phase05BlueprintTests.cs"
+      ],
+      "status": "PASS",
+      "verified_in_runners": [
+        "pytest",
+        "dotnet"
+      ]
+    }
+  },
+  "summary": {
+    "totalTestsSpecified": 44,
+    "passedTests": 43,
+    "notRunExternal": 1,
+    "failedTests": 0,
+    "pytestTotal": 144,
+    "pytestPassed": 143,
+    "pytestFailed": 0,
+    "pytestSkipped": 1,
+    "dotnetTotal": 74,
+    "dotnetPassed": 74,
+    "dotnetFailed": 0,
+    "dotnetSkipped": 0
+  },
+  "demoResult": {
+    "success": true,
+    "checkpoint": {
+      "checkpointId": "chk_demo_001",
+      "runId": "run_demo_001",
+      "epoch": 1,
+      "blueprintHash": "22c17d1f5fc281b0849da4b497d661b64711054a3e5db11bd8341808971fc4c2",
+      "sourcePackRevisions": {
+        "sec1": 1,
+        "sec2": 1,
+        "sec3": 1
+      },
+      "budgetTokensReserved": 45000,
+      "status": "COMMITTED",
+      "committedAt": "2026-10-01T03:32:21.288166+00:00"
+    },
+    "invalidationClosure": {
+      "mutatedSource": "src_sec2_demo",
+      "oldRevision": 1,
+      "newRevision": 2,
+      "invalidatedArtifacts": [
+        "source_pack:pack_sec2:v1",
+        "evidence_graph:eg_demo_sec2",
+        "section_blueprint:2",
+        "exam_blueprint:bp_demo_001"
+      ],
+      "preservedValidArtifacts": [
+        "source_pack:pack_sec1:v1",
+        "source_pack:pack_sec3:v1",
+        "evidence_graph:eg_demo_sec1",
+        "evidence_graph:eg_demo_sec3",
+        "section_blueprint:1",
+        "section_blueprint:3"
+      ]
+    }
+  },
+  "seamAnalysis": {
+    "finding_1_evidence_graph_default_status": {
+      "severity": "CONCERN",
+      "issue": "Default status on bare EvidenceGraph model was set to 'ACCEPTED'.",
+      "impact": "If an unvalidated bare EvidenceGraph is constructed directly without EvidenceGraphBuilder, it could pass naive status checks.",
+      "recommendation": "Remove default status from EvidenceGraph or require explicit status in model instantiation; require ArtifactEnvelope / EvidenceGraphBuildResult validation."
+    },
+    "finding_2_content_hash_on_builder_graph": {
+      "severity": "CONCERN",
+      "issue": "EvidenceGraphBuilder.build_evidence_graph constructs EvidenceGraph without populating content_hash directly on the inner model.",
+      "impact": "Planner must reference the ArtifactEnvelope / EvidenceGraphRef where content_hash is computed and pinned, rather than relying on un-enveloped inner graph instances.",
+      "recommendation": "Populate content_hash directly inside EvidenceGraphBuilder upon successful verification, ensuring 100% coherence between graph and envelope."
+    },
+    "finding_3_live_provider_external_smoke": {
+      "severity": "INFO",
+      "issue": "T03-08 evaluated as NOT_RUN_EXTERNAL because live cloud credentials (MINIMAX_API_KEY / GROQ_API_KEY) are not configured in local environment.",
+      "impact": "Deterministic mock/recording tests verify 100% of adapter logic, defensive parsing, streaming sanitization, and budget accounting, but live LLM endpoint latency/rate-limit was not tested against real quotas.",
+      "recommendation": "Maintain explicit NOT_RUN_EXTERNAL status until pre-cutover testing in Phase 15 (G15)."
+    },
+    "finding_4_phase_00_verification_runner_granularity": {
+      "severity": "MINOR",
+      "issue": "verify_phase_00 in verify_phase.py used aggregate passed > 0 rather than asserting exact test names for T00-01 to T00-06.",
+      "impact": "Does not impact actual test execution (all individual tests run and pass in pytest and dotnet test), but reporting granularity was coarse.",
+      "recommendation": "Refactor verify_phase_00 in verify_phase.py to check individual test names like phases 01-05."
+    },
+    "finding_5_head_deletion_vs_is_stale": {
+      "severity": "CONTRACT_GAP",
+      "issue": "InvalidateDependencyClosureAsync in CheckpointService physically deletes heads from ReadingPaperArtifactHeads rather than soft-marking isStale=true.",
+      "impact": "ResumeStateAsync.Artifacts completely omits invalidated artifacts rather than returning them with isStale=true. Downstream tests must assert absence of invalidated artifacts, not presence with isStale=true.",
+      "recommendation": "Document head pruning as the authoritative contract behavior; or add an is_stale soft-delete column to ReadingPaperArtifactHeads if stale head inspection is required by callers."
+    }
+  },
+  "readiness": "READY_FOR_PHASE_06"
+}

@@ -5,6 +5,9 @@ from __future__ import annotations
 import hashlib
 from collections import OrderedDict
 from typing import Dict, List, Optional, Sequence, Set
+from uuid import uuid4
+
+from app.contracts.issue import Issue, IssueCode, IssueScope, IssueSeverity
 
 from app.config import settings
 from app.contracts.artifact import ArtifactEnvelope, ArtifactType
@@ -56,9 +59,9 @@ def compute_dependency_closure_hash(artifact: ArtifactEnvelope) -> str:
     # Sort by artifact_id, revision, content_hash
     sorted_refs = sorted(
         artifact.parent_refs,
-        key=lambda r: (r.artifact_id, r.revision, r.content_hash),
+        key=lambda r: (r.artifact_id, getattr(r, "revision", getattr(r, "version", 1)), r.content_hash),
     )
-    tokens = [f"{r.artifact_id}:{r.revision}:{r.content_hash}" for r in sorted_refs]
+    tokens = [f"{r.artifact_id}:{getattr(r, 'revision', getattr(r, 'version', 1))}:{r.content_hash}" for r in sorted_refs]
     return hashlib.sha256(";".join(tokens).encode("utf-8")).hexdigest()
 
 
@@ -203,12 +206,57 @@ class EvaluatorRegistry:
         active_evaluator_ids: Optional[Sequence[str]] = None,
         prompt_version: str = "",
         model_name: str = "",
+        required_evaluator_ids: Optional[Sequence[str]] = None,
+        policy_version: Optional[str] = None,
+        raise_on_missing_required: bool = False,
     ) -> List[EvaluationResult]:
         """Executes the evaluation pipeline with stage ordering, short-circuit, and caching.
         
-        P07-02 Invariant: Structural hard fail halts expensive stages!
-        (Call count to expensive evaluators = 0 on structural failure).
+        P07-01 & P07-02 Invariants:
+        1. Validates execution plan according to artifact type, policy version, and registry metadata before execution.
+        2. Missing required evaluators produce recorded configuration failure (ERROR result); cannot aggregate remaining evaluators into PASS!
+        3. Structural hard fail halts expensive stages (call count to expensive evaluators = 0 on structural failure).
         """
+        effective_policy_version = policy_version or getattr(context, "policy_version", POLICY_VERSION)
+
+        # 1. Determine expected required evaluators from explicit caller list AND registry metadata
+        metadata_required_ids = [
+            ev.evaluator_id
+            for ev in self._evaluators.values()
+            if artifact.artifact_type in ev.metadata.target_artifact_types and ev.metadata.required
+        ]
+        target_required_ids = list(
+            dict.fromkeys(list(required_evaluator_ids or []) + metadata_required_ids)
+        )
+
+        # Check for missing required evaluators in registry or active list
+        missing_from_registry = [req_id for req_id in target_required_ids if req_id not in self._evaluators]
+        omitted_from_active = []
+        if active_evaluator_ids is not None:
+            omitted_from_active = [
+                req_id for req_id in target_required_ids
+                if req_id in self._evaluators and req_id not in active_evaluator_ids
+            ]
+
+        missing_or_omitted = list(dict.fromkeys(missing_from_registry + omitted_from_active))
+        if missing_or_omitted:
+            if raise_on_missing_required:
+                self.validate_required_evaluators(missing_or_omitted)
+            recorded_failures: List[EvaluationResult] = []
+            for m_id in missing_or_omitted:
+                eval_id = f"eval_cfg_err_{uuid4().hex[:10]}"
+                err_res = EvaluationResult.create_error(
+                    evaluation_id=eval_id,
+                    evaluator_id=m_id,
+                    evaluator_version="1.0.0",
+                    target_ref=artifact.to_ref(),
+                    error_message=f"Required evaluator '{m_id}' is missing or omitted from execution pipeline for {artifact.artifact_type.value}",
+                    code=IssueCode.EVALUATOR_UNAVAILABLE,
+                )
+                recorded_failures.append(err_res)
+            # Cannot aggregate remaining evaluators into PASS on missing required evaluator!
+            return recorded_failures
+
         evaluators = self.resolve_pipeline(
             target_artifact_type=artifact.artifact_type,
             active_evaluator_ids=active_evaluator_ids,
@@ -229,7 +277,7 @@ class EvaluatorRegistry:
                 target_payload_hash=artifact.content_hash,
                 target_dependency_closure_hash=dep_closure_hash,
                 schema_version=artifact.schema_version,
-                policy_version=POLICY_VERSION,
+                policy_version=effective_policy_version,
                 evaluator_id=ev.evaluator_id,
                 evaluator_version=ev.evaluator_version,
                 prompt_version=prompt_version if ev.is_expensive else "",
@@ -243,6 +291,10 @@ class EvaluatorRegistry:
                 res = await ev.evaluate(context, artifact, intent_id)
                 self._cache.put(cache_key, res)
 
+            # Ensure exact target and input dependencies binding
+            if not res.input_dependency_refs and artifact.parent_refs:
+                res = res.model_copy(update={"input_dependency_refs": list(artifact.parent_refs)})
+
             results.append(res)
 
             # Check for structural hard failure in non-expensive stages
@@ -255,7 +307,6 @@ class EvaluatorRegistry:
                     structural_hard_fail = True
 
         return results
-
     def export_manifest(self) -> dict:
         """Exports declarative registry manifest for Phase 07 audit artifacts."""
         return {

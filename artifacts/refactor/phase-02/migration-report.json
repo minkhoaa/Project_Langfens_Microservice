@@ -1,0 +1,78 @@
+{
+  "migrationName": "20260930120000_AddReadingPaperDurablePersistence",
+  "timestamp": "2026-09-30T08:49:19.857987+00:00",
+  "databaseEngine": "PostgreSQL 16+",
+  "orm": "Entity Framework Core 10.0.7 / Npgsql",
+  "migrationStrategy": "Expand-First Additive Migration",
+  "backwardCompatibility": {
+    "legacyTable": "reading_paper_jobs",
+    "preservedColumns": [
+      "Id",
+      "Topic",
+      "Status",
+      "CompletedSections",
+      "SourcesJson",
+      "SectionsJson",
+      "Logs",
+      "Error",
+      "ExamId",
+      "LeaseUntil",
+      "LeaseOwner"
+    ],
+    "newColumns": [
+      {
+        "name": "Epoch",
+        "type": "integer",
+        "nullable": false,
+        "defaultValue": 1
+      },
+      {
+        "name": "CancelVersion",
+        "type": "integer",
+        "nullable": false,
+        "defaultValue": 0
+      },
+      {
+        "name": "EngineVersion",
+        "type": "text",
+        "nullable": false,
+        "defaultValue": "2.0.0"
+      },
+      {
+        "name": "SchemaVersion",
+        "type": "text",
+        "nullable": false,
+        "defaultValue": "2.0.0"
+      },
+      {
+        "name": "PolicyVersion",
+        "type": "text",
+        "nullable": false,
+        "defaultValue": "2.0.0"
+      },
+      {
+        "name": "ActiveRunId",
+        "type": "text",
+        "nullable": true
+      }
+    ],
+    "appOldCompatibility": "Fully preserved. Existing SectionsJson sync maintained on section checkpoint commits; completed exams are not modified."
+  },
+  "newTables": [
+    "reading_paper_runs",
+    "reading_paper_artifacts",
+    "reading_paper_artifact_heads",
+    "reading_paper_artifact_dependencies",
+    "reading_paper_evaluations",
+    "reading_paper_issues",
+    "reading_paper_decisions",
+    "reading_paper_operations",
+    "reading_paper_event_outbox"
+  ],
+  "appFirstRollbackGuaranteed": true,
+  "destructiveDbRollbackBlocked": true,
+  "rollbackStrategy": "Application-first container rollback preserving additive tables and durable V2 state. Destructive schema rollback (Down) is blocked by policy to prevent artifact data loss.",
+  "rollbackTestEvidence": "exam_service.Tests.Phase02DurabilityTests.T02_Migration_AppFirstRollback_PreservesAdditiveData_And_RunsOldAppFlawlessly (Passed)",
+  "finalizationFenceTestPassed": true,
+  "finalizationFenceTestEvidence": "exam_service.Tests.Phase02DurabilityTests.T02_07_Race_TakeoverDuringFinalization_FailsAtConditionalCommitFence (Passed)"
+}

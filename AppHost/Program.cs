@@ -137,6 +137,7 @@ var exam = builder.AddProject("exam-service", "../services/exam-service/exam-ser
     .WithHttpEndpoint(name: "grpc", env: "Kestrel__GrpcPort")
     .WithComposeEnvFile("exam")
     .WaitFor(examDb);
+exam.WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod");
 exam.WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"));
 exam.WithEnvironment("GENERATION_SERVICE_URL", generationService.GetEndpoint("http"));
 exam.WaitFor(generationService);

@@ -1,0 +1,2325 @@
+{
+  "campaignId": "camp_g07_20261002_050034_abce4e",
+  "partition": "dev",
+  "updatedAt": "2026-10-02T05:00:53.922627+00:00",
+  "totalCompleted": 198,
+  "cases": {
+    "q_valid_TrueFalseNotGiven_3": {
+      "caseId": "q_valid_TrueFalseNotGiven_3",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 3.49,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:38.421901+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_2": {
+      "caseId": "q_valid_TrueFalseNotGiven_2",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 3.599,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:38.530173+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_4": {
+      "caseId": "q_valid_TrueFalseNotGiven_4",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 4.016,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:38.950085+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_1": {
+      "caseId": "q_valid_TrueFalseNotGiven_1",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 4.849,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:39.744546+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_5": {
+      "caseId": "q_valid_TrueFalseNotGiven_5",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 2.454,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:40.876458+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_8": {
+      "caseId": "q_valid_TrueFalseNotGiven_8",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 2.559,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:42.304113+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_7": {
+      "caseId": "q_valid_TrueFalseNotGiven_7",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 3.539,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:42.490109+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_6": {
+      "caseId": "q_valid_TrueFalseNotGiven_6",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 3.961,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:42.491441+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_9": {
+      "caseId": "q_valid_TrueFalseNotGiven_9",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 3.236,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:44.112518+00:00"
+    },
+    "q_valid_TrueFalseNotGiven_10": {
+      "caseId": "q_valid_TrueFalseNotGiven_10",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 2.331,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:44.635577+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_1": {
+      "caseId": "q_invalid_TrueFalseNotGiven_1",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 2.181,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:44.672753+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_2": {
+      "caseId": "q_invalid_TrueFalseNotGiven_2",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 2.554,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:45.047671+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_4": {
+      "caseId": "q_invalid_TrueFalseNotGiven_4",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "INSUFFICIENT_OPTIONS",
+      "isBlocking": true,
+      "issueCodes": [
+        "INSUFFICIENT_OPTIONS"
+      ],
+      "durationSeconds": 2.189,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:46.824943+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_3": {
+      "caseId": "q_invalid_TrueFalseNotGiven_3",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 2.787,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:46.899820+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_5": {
+      "caseId": "q_invalid_TrueFalseNotGiven_5",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 3.399,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:48.072076+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_6": {
+      "caseId": "q_invalid_TrueFalseNotGiven_6",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "durationSeconds": 3.163,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:48.211128+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_9": {
+      "caseId": "q_invalid_TrueFalseNotGiven_9",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "durationSeconds": 1.62,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:49.692114+00:00"
+    },
+    "q_valid_SentenceCompletion_1": {
+      "caseId": "q_valid_SentenceCompletion_1",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.693084+00:00"
+    },
+    "q_valid_SentenceCompletion_2": {
+      "caseId": "q_valid_SentenceCompletion_2",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.696024+00:00"
+    },
+    "q_valid_SentenceCompletion_3": {
+      "caseId": "q_valid_SentenceCompletion_3",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.696843+00:00"
+    },
+    "q_valid_SentenceCompletion_4": {
+      "caseId": "q_valid_SentenceCompletion_4",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.697580+00:00"
+    },
+    "q_valid_SentenceCompletion_5": {
+      "caseId": "q_valid_SentenceCompletion_5",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.698287+00:00"
+    },
+    "q_valid_SentenceCompletion_6": {
+      "caseId": "q_valid_SentenceCompletion_6",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.698995+00:00"
+    },
+    "q_valid_SentenceCompletion_7": {
+      "caseId": "q_valid_SentenceCompletion_7",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.699992+00:00"
+    },
+    "q_valid_SentenceCompletion_8": {
+      "caseId": "q_valid_SentenceCompletion_8",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.700764+00:00"
+    },
+    "q_valid_SentenceCompletion_9": {
+      "caseId": "q_valid_SentenceCompletion_9",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.701529+00:00"
+    },
+    "q_valid_SentenceCompletion_10": {
+      "caseId": "q_valid_SentenceCompletion_10",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.702629+00:00"
+    },
+    "q_invalid_SentenceCompletion_1": {
+      "caseId": "q_invalid_SentenceCompletion_1",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "WORD_LIMIT_EXCEEDED",
+      "isBlocking": true,
+      "issueCodes": [
+        "WORD_LIMIT_EXCEEDED",
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.703446+00:00"
+    },
+    "q_invalid_SentenceCompletion_2": {
+      "caseId": "q_invalid_SentenceCompletion_2",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "ANSWER_LEAKAGE",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.704126+00:00"
+    },
+    "q_invalid_SentenceCompletion_3": {
+      "caseId": "q_invalid_SentenceCompletion_3",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.704871+00:00"
+    },
+    "q_invalid_SentenceCompletion_4": {
+      "caseId": "q_invalid_SentenceCompletion_4",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "WORD_LIMIT_EXCEEDED",
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.705532+00:00"
+    },
+    "q_invalid_SentenceCompletion_5": {
+      "caseId": "q_invalid_SentenceCompletion_5",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.706559+00:00"
+    },
+    "q_invalid_SentenceCompletion_6": {
+      "caseId": "q_invalid_SentenceCompletion_6",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.708323+00:00"
+    },
+    "q_invalid_SentenceCompletion_7": {
+      "caseId": "q_invalid_SentenceCompletion_7",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING",
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.709658+00:00"
+    },
+    "q_invalid_SentenceCompletion_8": {
+      "caseId": "q_invalid_SentenceCompletion_8",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "OVERSTATED_CERTAINTY"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.710947+00:00"
+    },
+    "q_invalid_SentenceCompletion_9": {
+      "caseId": "q_invalid_SentenceCompletion_9",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.711778+00:00"
+    },
+    "q_invalid_SentenceCompletion_10": {
+      "caseId": "q_invalid_SentenceCompletion_10",
+      "questionType": "SentenceCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.712959+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_1": {
+      "caseId": "q_valid_MultipleChoiceSingle_1",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.714102+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_2": {
+      "caseId": "q_valid_MultipleChoiceSingle_2",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.715895+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_3": {
+      "caseId": "q_valid_MultipleChoiceSingle_3",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.716926+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_4": {
+      "caseId": "q_valid_MultipleChoiceSingle_4",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.717966+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_5": {
+      "caseId": "q_valid_MultipleChoiceSingle_5",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.719027+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_6": {
+      "caseId": "q_valid_MultipleChoiceSingle_6",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.720162+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_7": {
+      "caseId": "q_valid_MultipleChoiceSingle_7",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.721280+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_8": {
+      "caseId": "q_valid_MultipleChoiceSingle_8",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.722448+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_9": {
+      "caseId": "q_valid_MultipleChoiceSingle_9",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.723588+00:00"
+    },
+    "q_valid_MultipleChoiceSingle_10": {
+      "caseId": "q_valid_MultipleChoiceSingle_10",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.724704+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_1": {
+      "caseId": "q_invalid_MultipleChoiceSingle_1",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "INSUFFICIENT_OPTIONS",
+      "isBlocking": true,
+      "issueCodes": [
+        "INSUFFICIENT_OPTIONS"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.726179+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_2": {
+      "caseId": "q_invalid_MultipleChoiceSingle_2",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "BAD_DISTRACTOR",
+      "isBlocking": true,
+      "issueCodes": [
+        "BAD_DISTRACTOR",
+        "BAD_DISTRACTOR",
+        "BAD_DISTRACTOR"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.727505+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_3": {
+      "caseId": "q_invalid_MultipleChoiceSingle_3",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "BAD_DISTRACTOR",
+      "isBlocking": true,
+      "issueCodes": [
+        "BAD_DISTRACTOR",
+        "BAD_DISTRACTOR",
+        "BAD_DISTRACTOR"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.728817+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_4": {
+      "caseId": "q_invalid_MultipleChoiceSingle_4",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "BAD_DISTRACTOR",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.730248+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_5": {
+      "caseId": "q_invalid_MultipleChoiceSingle_5",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING",
+        "CAUSAL_OVERSTATEMENT"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.731723+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_6": {
+      "caseId": "q_invalid_MultipleChoiceSingle_6",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.732955+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_7": {
+      "caseId": "q_invalid_MultipleChoiceSingle_7",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.734223+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_8": {
+      "caseId": "q_invalid_MultipleChoiceSingle_8",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.735263+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_9": {
+      "caseId": "q_invalid_MultipleChoiceSingle_9",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.736709+00:00"
+    },
+    "q_invalid_MultipleChoiceSingle_10": {
+      "caseId": "q_invalid_MultipleChoiceSingle_10",
+      "questionType": "MultipleChoiceSingle",
+      "groundTruthValid": false,
+      "expectedIssueCode": "BAD_DISTRACTOR",
+      "isBlocking": true,
+      "issueCodes": [
+        "BAD_DISTRACTOR",
+        "BAD_DISTRACTOR"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.737819+00:00"
+    },
+    "q_valid_SummaryCompletion_1": {
+      "caseId": "q_valid_SummaryCompletion_1",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.739091+00:00"
+    },
+    "q_valid_SummaryCompletion_2": {
+      "caseId": "q_valid_SummaryCompletion_2",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.740419+00:00"
+    },
+    "q_valid_SummaryCompletion_3": {
+      "caseId": "q_valid_SummaryCompletion_3",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.741370+00:00"
+    },
+    "q_valid_SummaryCompletion_4": {
+      "caseId": "q_valid_SummaryCompletion_4",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.742331+00:00"
+    },
+    "q_valid_SummaryCompletion_5": {
+      "caseId": "q_valid_SummaryCompletion_5",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.743233+00:00"
+    },
+    "q_valid_SummaryCompletion_6": {
+      "caseId": "q_valid_SummaryCompletion_6",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.744205+00:00"
+    },
+    "q_valid_SummaryCompletion_7": {
+      "caseId": "q_valid_SummaryCompletion_7",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.745177+00:00"
+    },
+    "q_valid_SummaryCompletion_8": {
+      "caseId": "q_valid_SummaryCompletion_8",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.746196+00:00"
+    },
+    "q_valid_SummaryCompletion_9": {
+      "caseId": "q_valid_SummaryCompletion_9",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.747179+00:00"
+    },
+    "q_valid_SummaryCompletion_10": {
+      "caseId": "q_valid_SummaryCompletion_10",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.748097+00:00"
+    },
+    "q_invalid_SummaryCompletion_1": {
+      "caseId": "q_invalid_SummaryCompletion_1",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "WORD_LIMIT_EXCEEDED",
+      "isBlocking": true,
+      "issueCodes": [
+        "WORD_LIMIT_EXCEEDED",
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.749409+00:00"
+    },
+    "q_invalid_SummaryCompletion_2": {
+      "caseId": "q_invalid_SummaryCompletion_2",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "ANSWER_LEAKAGE",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.750669+00:00"
+    },
+    "q_invalid_SummaryCompletion_3": {
+      "caseId": "q_invalid_SummaryCompletion_3",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.751625+00:00"
+    },
+    "q_invalid_SummaryCompletion_4": {
+      "caseId": "q_invalid_SummaryCompletion_4",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.752871+00:00"
+    },
+    "q_invalid_SummaryCompletion_5": {
+      "caseId": "q_invalid_SummaryCompletion_5",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE",
+        "EVIDENCE_MISSING",
+        "UNMEASURED_OUTCOME"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.754612+00:00"
+    },
+    "q_invalid_SummaryCompletion_6": {
+      "caseId": "q_invalid_SummaryCompletion_6",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "CAUSAL_OVERSTATEMENT",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE",
+        "EVIDENCE_MISSING",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "CAUSAL_OVERSTATEMENT",
+        "UNMEASURED_OUTCOME"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.756118+00:00"
+    },
+    "q_invalid_SummaryCompletion_7": {
+      "caseId": "q_invalid_SummaryCompletion_7",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE",
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.757949+00:00"
+    },
+    "q_invalid_SummaryCompletion_8": {
+      "caseId": "q_invalid_SummaryCompletion_8",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.759068+00:00"
+    },
+    "q_invalid_SummaryCompletion_9": {
+      "caseId": "q_invalid_SummaryCompletion_9",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE",
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.760132+00:00"
+    },
+    "q_invalid_SummaryCompletion_10": {
+      "caseId": "q_invalid_SummaryCompletion_10",
+      "questionType": "SummaryCompletion",
+      "groundTruthValid": false,
+      "expectedIssueCode": "ANSWER_LEAKAGE",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:49.761328+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_7": {
+      "caseId": "q_invalid_TrueFalseNotGiven_7",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 2.951,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:49.776819+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_10": {
+      "caseId": "q_invalid_TrueFalseNotGiven_10",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 1.732,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:49.943648+00:00"
+    },
+    "q_invalid_TrueFalseNotGiven_8": {
+      "caseId": "q_invalid_TrueFalseNotGiven_8",
+      "questionType": "TrueFalseNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "INSUFFICIENT_OPTIONS"
+      ],
+      "durationSeconds": 3.278,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:50.178097+00:00"
+    },
+    "q_valid_YesNoNotGiven_1": {
+      "caseId": "q_valid_YesNoNotGiven_1",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.81,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:50.572225+00:00"
+    },
+    "q_valid_YesNoNotGiven_2": {
+      "caseId": "q_valid_YesNoNotGiven_2",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.806,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:50.583406+00:00"
+    },
+    "q_valid_YesNoNotGiven_3": {
+      "caseId": "q_valid_YesNoNotGiven_3",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.677,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:50.621625+00:00"
+    },
+    "q_valid_YesNoNotGiven_4": {
+      "caseId": "q_valid_YesNoNotGiven_4",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.791,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:50.970113+00:00"
+    },
+    "q_valid_YesNoNotGiven_7": {
+      "caseId": "q_valid_YesNoNotGiven_7",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.517,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:51.139788+00:00"
+    },
+    "q_valid_YesNoNotGiven_5": {
+      "caseId": "q_valid_YesNoNotGiven_5",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.682,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:51.255535+00:00"
+    },
+    "q_valid_YesNoNotGiven_6": {
+      "caseId": "q_valid_YesNoNotGiven_6",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.696,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:51.280750+00:00"
+    },
+    "q_valid_YesNoNotGiven_8": {
+      "caseId": "q_valid_YesNoNotGiven_8",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.694,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:51.664976+00:00"
+    },
+    "q_valid_YesNoNotGiven_9": {
+      "caseId": "q_valid_YesNoNotGiven_9",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.792,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:51.933189+00:00"
+    },
+    "q_valid_YesNoNotGiven_10": {
+      "caseId": "q_valid_YesNoNotGiven_10",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.761,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:52.017669+00:00"
+    },
+    "q_invalid_YesNoNotGiven_1": {
+      "caseId": "q_invalid_YesNoNotGiven_1",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.779,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:52.060383+00:00"
+    },
+    "q_invalid_YesNoNotGiven_2": {
+      "caseId": "q_invalid_YesNoNotGiven_2",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 0.756,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:52.422402+00:00"
+    },
+    "q_invalid_YesNoNotGiven_3": {
+      "caseId": "q_invalid_YesNoNotGiven_3",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 0.568,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:52.502288+00:00"
+    },
+    "q_invalid_YesNoNotGiven_4": {
+      "caseId": "q_invalid_YesNoNotGiven_4",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "INSUFFICIENT_OPTIONS",
+      "isBlocking": true,
+      "issueCodes": [
+        "INSUFFICIENT_OPTIONS"
+      ],
+      "durationSeconds": 0.63,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:52.648961+00:00"
+    },
+    "q_invalid_YesNoNotGiven_5": {
+      "caseId": "q_invalid_YesNoNotGiven_5",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.639,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:52.700542+00:00"
+    },
+    "q_invalid_YesNoNotGiven_6": {
+      "caseId": "q_invalid_YesNoNotGiven_6",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "CAUSAL_OVERSTATEMENT",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "durationSeconds": 0.782,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:53.205792+00:00"
+    },
+    "q_invalid_YesNoNotGiven_7": {
+      "caseId": "q_invalid_YesNoNotGiven_7",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "durationSeconds": 0.76,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:53.263327+00:00"
+    },
+    "q_valid_ShortAnswer_1": {
+      "caseId": "q_valid_ShortAnswer_1",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.264773+00:00"
+    },
+    "q_valid_ShortAnswer_2": {
+      "caseId": "q_valid_ShortAnswer_2",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.266502+00:00"
+    },
+    "q_valid_ShortAnswer_3": {
+      "caseId": "q_valid_ShortAnswer_3",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.268520+00:00"
+    },
+    "q_valid_ShortAnswer_4": {
+      "caseId": "q_valid_ShortAnswer_4",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.270221+00:00"
+    },
+    "q_valid_ShortAnswer_5": {
+      "caseId": "q_valid_ShortAnswer_5",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.271536+00:00"
+    },
+    "q_valid_ShortAnswer_6": {
+      "caseId": "q_valid_ShortAnswer_6",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.273229+00:00"
+    },
+    "q_valid_ShortAnswer_7": {
+      "caseId": "q_valid_ShortAnswer_7",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.274883+00:00"
+    },
+    "q_valid_ShortAnswer_8": {
+      "caseId": "q_valid_ShortAnswer_8",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.276282+00:00"
+    },
+    "q_valid_ShortAnswer_9": {
+      "caseId": "q_valid_ShortAnswer_9",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.277616+00:00"
+    },
+    "q_valid_ShortAnswer_10": {
+      "caseId": "q_valid_ShortAnswer_10",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": true,
+      "expectedIssueCode": "",
+      "isBlocking": false,
+      "issueCodes": [],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.278945+00:00"
+    },
+    "q_invalid_ShortAnswer_1": {
+      "caseId": "q_invalid_ShortAnswer_1",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "WORD_LIMIT_EXCEEDED",
+      "isBlocking": true,
+      "issueCodes": [
+        "WORD_LIMIT_EXCEEDED",
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.280449+00:00"
+    },
+    "q_invalid_ShortAnswer_2": {
+      "caseId": "q_invalid_ShortAnswer_2",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.282537+00:00"
+    },
+    "q_invalid_ShortAnswer_3": {
+      "caseId": "q_invalid_ShortAnswer_3",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "ANSWER_LEAKAGE",
+      "isBlocking": true,
+      "issueCodes": [
+        "ANSWER_LEAKAGE"
+      ],
+      "durationSeconds": 0.001,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.284824+00:00"
+    },
+    "q_invalid_ShortAnswer_4": {
+      "caseId": "q_invalid_ShortAnswer_4",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.286430+00:00"
+    },
+    "q_invalid_ShortAnswer_5": {
+      "caseId": "q_invalid_ShortAnswer_5",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "WORD_LIMIT_EXCEEDED",
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.287901+00:00"
+    },
+    "q_invalid_ShortAnswer_6": {
+      "caseId": "q_invalid_ShortAnswer_6",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.289890+00:00"
+    },
+    "q_invalid_ShortAnswer_7": {
+      "caseId": "q_invalid_ShortAnswer_7",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "EVIDENCE_MISSING",
+      "isBlocking": true,
+      "issueCodes": [
+        "EVIDENCE_MISSING"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.291521+00:00"
+    },
+    "q_invalid_ShortAnswer_8": {
+      "caseId": "q_invalid_ShortAnswer_8",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.293003+00:00"
+    },
+    "q_invalid_ShortAnswer_9": {
+      "caseId": "q_invalid_ShortAnswer_9",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.294886+00:00"
+    },
+    "q_invalid_ShortAnswer_10": {
+      "caseId": "q_invalid_ShortAnswer_10",
+      "questionType": "ShortAnswer",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 0.0,
+      "callsUsed": 0,
+      "timestamp": "2026-10-02T05:00:53.296517+00:00"
+    },
+    "q_invalid_YesNoNotGiven_8": {
+      "caseId": "q_invalid_YesNoNotGiven_8",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.65,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:53.299787+00:00"
+    },
+    "q_invalid_YesNoNotGiven_9": {
+      "caseId": "q_invalid_YesNoNotGiven_9",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "AMBIGUOUS_ANSWER",
+      "isBlocking": true,
+      "issueCodes": [
+        "AMBIGUOUS_ANSWER"
+      ],
+      "durationSeconds": 0.679,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:53.380617+00:00"
+    },
+    "q_invalid_YesNoNotGiven_10": {
+      "caseId": "q_invalid_YesNoNotGiven_10",
+      "questionType": "YesNoNotGiven",
+      "groundTruthValid": false,
+      "expectedIssueCode": "SCHEMA_VIOLATION",
+      "isBlocking": true,
+      "issueCodes": [
+        "SCHEMA_VIOLATION"
+      ],
+      "durationSeconds": 0.603,
+      "callsUsed": 1,
+      "timestamp": "2026-10-02T05:00:53.809767+00:00"
+    },
+    "canary_01_num_distortion": {
+      "caseId": "canary_01_num_distortion",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "timestamp": "2026-10-02T05:00:53.811865+00:00"
+    },
+    "canary_02_num_scale_shift": {
+      "caseId": "canary_02_num_scale_shift",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "timestamp": "2026-10-02T05:00:53.814456+00:00"
+    },
+    "canary_03_pop_shift_adults_children": {
+      "caseId": "canary_03_pop_shift_adults_children",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "OVERSTATED_CERTAINTY",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "OVERSTATED_CERTAINTY"
+      ],
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "timestamp": "2026-10-02T05:00:53.816034+00:00"
+    },
+    "canary_04_causality_flip": {
+      "caseId": "canary_04_causality_flip",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "CAUSAL_OVERSTATEMENT",
+        "CAUSAL_OVERSTATEMENT"
+      ],
+      "expectedIssueCode": "CAUSAL_OVERSTATEMENT",
+      "timestamp": "2026-10-02T05:00:53.817368+00:00"
+    },
+    "canary_05_certainty_escalation": {
+      "caseId": "canary_05_certainty_escalation",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY",
+        "OVERSTATED_CERTAINTY"
+      ],
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "timestamp": "2026-10-02T05:00:53.818641+00:00"
+    },
+    "canary_06_unmeasured_outcome": {
+      "caseId": "canary_06_unmeasured_outcome",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNMEASURED_OUTCOME",
+        "UNMEASURED_OUTCOME"
+      ],
+      "expectedIssueCode": "UNMEASURED_OUTCOME",
+      "timestamp": "2026-10-02T05:00:53.820050+00:00"
+    },
+    "canary_07_pop_shift_patients_athletes": {
+      "caseId": "canary_07_pop_shift_patients_athletes",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "timestamp": "2026-10-02T05:00:53.821403+00:00"
+    },
+    "canary_08_causality_association_to_proof": {
+      "caseId": "canary_08_causality_association_to_proof",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "CAUSAL_OVERSTATEMENT",
+        "CAUSAL_OVERSTATEMENT"
+      ],
+      "expectedIssueCode": "CAUSAL_OVERSTATEMENT",
+      "timestamp": "2026-10-02T05:00:53.822938+00:00"
+    },
+    "canary_09_certainty_booster": {
+      "caseId": "canary_09_certainty_booster",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY",
+        "OVERSTATED_CERTAINTY"
+      ],
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "timestamp": "2026-10-02T05:00:53.824358+00:00"
+    },
+    "canary_10_unmeasured_lifespan": {
+      "caseId": "canary_10_unmeasured_lifespan",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNMEASURED_OUTCOME",
+        "UNMEASURED_OUTCOME"
+      ],
+      "expectedIssueCode": "UNMEASURED_OUTCOME",
+      "timestamp": "2026-10-02T05:00:53.825692+00:00"
+    },
+    "canary_11_temporal_distortion": {
+      "caseId": "canary_11_temporal_distortion",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "timestamp": "2026-10-02T05:00:53.827134+00:00"
+    },
+    "canary_12_dropped_qualification": {
+      "caseId": "canary_12_dropped_qualification",
+      "groundTruthValid": false,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY",
+        "OVERSTATED_CERTAINTY"
+      ],
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "timestamp": "2026-10-02T05:00:53.828610+00:00"
+    },
+    "fid_valid_01": {
+      "caseId": "fid_valid_01",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.830300+00:00"
+    },
+    "fid_valid_02": {
+      "caseId": "fid_valid_02",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.831777+00:00"
+    },
+    "fid_valid_03": {
+      "caseId": "fid_valid_03",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.833129+00:00"
+    },
+    "fid_valid_04": {
+      "caseId": "fid_valid_04",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.834596+00:00"
+    },
+    "fid_valid_05": {
+      "caseId": "fid_valid_05",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.836024+00:00"
+    },
+    "fid_valid_06": {
+      "caseId": "fid_valid_06",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.837495+00:00"
+    },
+    "fid_valid_07": {
+      "caseId": "fid_valid_07",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.838832+00:00"
+    },
+    "fid_valid_08": {
+      "caseId": "fid_valid_08",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.840160+00:00"
+    },
+    "fid_valid_09": {
+      "caseId": "fid_valid_09",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.841566+00:00"
+    },
+    "fid_valid_10": {
+      "caseId": "fid_valid_10",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.843065+00:00"
+    },
+    "fid_valid_11": {
+      "caseId": "fid_valid_11",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.844480+00:00"
+    },
+    "fid_valid_12": {
+      "caseId": "fid_valid_12",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.845917+00:00"
+    },
+    "fid_valid_13": {
+      "caseId": "fid_valid_13",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.847413+00:00"
+    },
+    "fid_valid_14": {
+      "caseId": "fid_valid_14",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.848854+00:00"
+    },
+    "fid_valid_15": {
+      "caseId": "fid_valid_15",
+      "groundTruthValid": true,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": null,
+      "timestamp": "2026-10-02T05:00:53.850279+00:00"
+    },
+    "fid_inval_src_01": {
+      "caseId": "fid_inval_src_01",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "expectedIssueCode": "SOURCE_INSUFFICIENT",
+      "timestamp": "2026-10-02T05:00:53.851508+00:00"
+    },
+    "fid_inval_src_02": {
+      "caseId": "fid_inval_src_02",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": "SOURCE_INSUFFICIENT",
+      "timestamp": "2026-10-02T05:00:53.853187+00:00"
+    },
+    "fid_inval_src_03": {
+      "caseId": "fid_inval_src_03",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": "SOURCE_INSUFFICIENT",
+      "timestamp": "2026-10-02T05:00:53.854693+00:00"
+    },
+    "fid_inval_contra_01": {
+      "caseId": "fid_inval_contra_01",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "timestamp": "2026-10-02T05:00:53.856226+00:00"
+    },
+    "fid_inval_contra_02": {
+      "caseId": "fid_inval_contra_02",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": false,
+      "issueCodes": [],
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "timestamp": "2026-10-02T05:00:53.857626+00:00"
+    },
+    "fid_inval_contra_03": {
+      "caseId": "fid_inval_contra_03",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "timestamp": "2026-10-02T05:00:53.859094+00:00"
+    },
+    "fid_inval_causal_01": {
+      "caseId": "fid_inval_causal_01",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "CAUSAL_OVERSTATEMENT",
+        "CAUSAL_OVERSTATEMENT"
+      ],
+      "expectedIssueCode": "CAUSAL_OVERSTATEMENT",
+      "timestamp": "2026-10-02T05:00:53.860443+00:00"
+    },
+    "fid_inval_causal_02": {
+      "caseId": "fid_inval_causal_02",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "CAUSAL_OVERSTATEMENT",
+        "CAUSAL_OVERSTATEMENT"
+      ],
+      "expectedIssueCode": "CAUSAL_OVERSTATEMENT",
+      "timestamp": "2026-10-02T05:00:53.861819+00:00"
+    },
+    "fid_inval_causal_03": {
+      "caseId": "fid_inval_causal_03",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "CAUSAL_OVERSTATEMENT",
+        "UNMEASURED_OUTCOME",
+        "CAUSAL_OVERSTATEMENT",
+        "UNMEASURED_OUTCOME"
+      ],
+      "expectedIssueCode": "CAUSAL_OVERSTATEMENT",
+      "timestamp": "2026-10-02T05:00:53.863690+00:00"
+    },
+    "fid_inval_cert_01": {
+      "caseId": "fid_inval_cert_01",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY",
+        "OVERSTATED_CERTAINTY"
+      ],
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "timestamp": "2026-10-02T05:00:53.865207+00:00"
+    },
+    "fid_inval_cert_02": {
+      "caseId": "fid_inval_cert_02",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY",
+        "OVERSTATED_CERTAINTY"
+      ],
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "timestamp": "2026-10-02T05:00:53.866603+00:00"
+    },
+    "fid_inval_cert_03": {
+      "caseId": "fid_inval_cert_03",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY",
+        "OVERSTATED_CERTAINTY"
+      ],
+      "expectedIssueCode": "OVERSTATED_CERTAINTY",
+      "timestamp": "2026-10-02T05:00:53.868087+00:00"
+    },
+    "fid_inval_unm_01": {
+      "caseId": "fid_inval_unm_01",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNMEASURED_OUTCOME",
+        "UNMEASURED_OUTCOME"
+      ],
+      "expectedIssueCode": "UNMEASURED_OUTCOME",
+      "timestamp": "2026-10-02T05:00:53.869522+00:00"
+    },
+    "fid_inval_unm_02": {
+      "caseId": "fid_inval_unm_02",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNMEASURED_OUTCOME",
+        "UNMEASURED_OUTCOME"
+      ],
+      "expectedIssueCode": "UNMEASURED_OUTCOME",
+      "timestamp": "2026-10-02T05:00:53.870994+00:00"
+    },
+    "fid_inval_unm_03": {
+      "caseId": "fid_inval_unm_03",
+      "groundTruthValid": false,
+      "isCriticalCanary": false,
+      "isBlocking": true,
+      "issueCodes": [
+        "UNMEASURED_OUTCOME",
+        "UNMEASURED_OUTCOME"
+      ],
+      "expectedIssueCode": "UNMEASURED_OUTCOME",
+      "timestamp": "2026-10-02T05:00:53.872445+00:00"
+    },
+    "canary_r0_canary_01_num_distortion": {
+      "caseId": "canary_r0_canary_01_num_distortion",
+      "canaryId": "canary_01_num_distortion",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.873804+00:00"
+    },
+    "canary_r0_canary_02_num_scale_shift": {
+      "caseId": "canary_r0_canary_02_num_scale_shift",
+      "canaryId": "canary_02_num_scale_shift",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.875101+00:00"
+    },
+    "canary_r0_canary_03_pop_shift_adults_children": {
+      "caseId": "canary_r0_canary_03_pop_shift_adults_children",
+      "canaryId": "canary_03_pop_shift_adults_children",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.876312+00:00"
+    },
+    "canary_r0_canary_04_causality_flip": {
+      "caseId": "canary_r0_canary_04_causality_flip",
+      "canaryId": "canary_04_causality_flip",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.877535+00:00"
+    },
+    "canary_r0_canary_05_certainty_escalation": {
+      "caseId": "canary_r0_canary_05_certainty_escalation",
+      "canaryId": "canary_05_certainty_escalation",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.878870+00:00"
+    },
+    "canary_r0_canary_06_unmeasured_outcome": {
+      "caseId": "canary_r0_canary_06_unmeasured_outcome",
+      "canaryId": "canary_06_unmeasured_outcome",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.880172+00:00"
+    },
+    "canary_r0_canary_07_pop_shift_patients_athletes": {
+      "caseId": "canary_r0_canary_07_pop_shift_patients_athletes",
+      "canaryId": "canary_07_pop_shift_patients_athletes",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.881499+00:00"
+    },
+    "canary_r0_canary_08_causality_association_to_proof": {
+      "caseId": "canary_r0_canary_08_causality_association_to_proof",
+      "canaryId": "canary_08_causality_association_to_proof",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.882807+00:00"
+    },
+    "canary_r0_canary_09_certainty_booster": {
+      "caseId": "canary_r0_canary_09_certainty_booster",
+      "canaryId": "canary_09_certainty_booster",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.884093+00:00"
+    },
+    "canary_r0_canary_10_unmeasured_lifespan": {
+      "caseId": "canary_r0_canary_10_unmeasured_lifespan",
+      "canaryId": "canary_10_unmeasured_lifespan",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.885440+00:00"
+    },
+    "canary_r0_canary_11_temporal_distortion": {
+      "caseId": "canary_r0_canary_11_temporal_distortion",
+      "canaryId": "canary_11_temporal_distortion",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.886766+00:00"
+    },
+    "canary_r0_canary_12_dropped_qualification": {
+      "caseId": "canary_r0_canary_12_dropped_qualification",
+      "canaryId": "canary_12_dropped_qualification",
+      "repetition": 0,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.888094+00:00"
+    },
+    "canary_r1_canary_01_num_distortion": {
+      "caseId": "canary_r1_canary_01_num_distortion",
+      "canaryId": "canary_01_num_distortion",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.889365+00:00"
+    },
+    "canary_r1_canary_02_num_scale_shift": {
+      "caseId": "canary_r1_canary_02_num_scale_shift",
+      "canaryId": "canary_02_num_scale_shift",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.890665+00:00"
+    },
+    "canary_r1_canary_03_pop_shift_adults_children": {
+      "caseId": "canary_r1_canary_03_pop_shift_adults_children",
+      "canaryId": "canary_03_pop_shift_adults_children",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.891983+00:00"
+    },
+    "canary_r1_canary_04_causality_flip": {
+      "caseId": "canary_r1_canary_04_causality_flip",
+      "canaryId": "canary_04_causality_flip",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.893374+00:00"
+    },
+    "canary_r1_canary_05_certainty_escalation": {
+      "caseId": "canary_r1_canary_05_certainty_escalation",
+      "canaryId": "canary_05_certainty_escalation",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.894787+00:00"
+    },
+    "canary_r1_canary_06_unmeasured_outcome": {
+      "caseId": "canary_r1_canary_06_unmeasured_outcome",
+      "canaryId": "canary_06_unmeasured_outcome",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.896120+00:00"
+    },
+    "canary_r1_canary_07_pop_shift_patients_athletes": {
+      "caseId": "canary_r1_canary_07_pop_shift_patients_athletes",
+      "canaryId": "canary_07_pop_shift_patients_athletes",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.897433+00:00"
+    },
+    "canary_r1_canary_08_causality_association_to_proof": {
+      "caseId": "canary_r1_canary_08_causality_association_to_proof",
+      "canaryId": "canary_08_causality_association_to_proof",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.898787+00:00"
+    },
+    "canary_r1_canary_09_certainty_booster": {
+      "caseId": "canary_r1_canary_09_certainty_booster",
+      "canaryId": "canary_09_certainty_booster",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.900234+00:00"
+    },
+    "canary_r1_canary_10_unmeasured_lifespan": {
+      "caseId": "canary_r1_canary_10_unmeasured_lifespan",
+      "canaryId": "canary_10_unmeasured_lifespan",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.901667+00:00"
+    },
+    "canary_r1_canary_11_temporal_distortion": {
+      "caseId": "canary_r1_canary_11_temporal_distortion",
+      "canaryId": "canary_11_temporal_distortion",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.903055+00:00"
+    },
+    "canary_r1_canary_12_dropped_qualification": {
+      "caseId": "canary_r1_canary_12_dropped_qualification",
+      "canaryId": "canary_12_dropped_qualification",
+      "repetition": 1,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.904324+00:00"
+    },
+    "canary_r2_canary_01_num_distortion": {
+      "caseId": "canary_r2_canary_01_num_distortion",
+      "canaryId": "canary_01_num_distortion",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.906063+00:00"
+    },
+    "canary_r2_canary_02_num_scale_shift": {
+      "caseId": "canary_r2_canary_02_num_scale_shift",
+      "canaryId": "canary_02_num_scale_shift",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.907532+00:00"
+    },
+    "canary_r2_canary_03_pop_shift_adults_children": {
+      "caseId": "canary_r2_canary_03_pop_shift_adults_children",
+      "canaryId": "canary_03_pop_shift_adults_children",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.909015+00:00"
+    },
+    "canary_r2_canary_04_causality_flip": {
+      "caseId": "canary_r2_canary_04_causality_flip",
+      "canaryId": "canary_04_causality_flip",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.910366+00:00"
+    },
+    "canary_r2_canary_05_certainty_escalation": {
+      "caseId": "canary_r2_canary_05_certainty_escalation",
+      "canaryId": "canary_05_certainty_escalation",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.911843+00:00"
+    },
+    "canary_r2_canary_06_unmeasured_outcome": {
+      "caseId": "canary_r2_canary_06_unmeasured_outcome",
+      "canaryId": "canary_06_unmeasured_outcome",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.913464+00:00"
+    },
+    "canary_r2_canary_07_pop_shift_patients_athletes": {
+      "caseId": "canary_r2_canary_07_pop_shift_patients_athletes",
+      "canaryId": "canary_07_pop_shift_patients_athletes",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.915070+00:00"
+    },
+    "canary_r2_canary_08_causality_association_to_proof": {
+      "caseId": "canary_r2_canary_08_causality_association_to_proof",
+      "canaryId": "canary_08_causality_association_to_proof",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.916537+00:00"
+    },
+    "canary_r2_canary_09_certainty_booster": {
+      "caseId": "canary_r2_canary_09_certainty_booster",
+      "canaryId": "canary_09_certainty_booster",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.918027+00:00"
+    },
+    "canary_r2_canary_10_unmeasured_lifespan": {
+      "caseId": "canary_r2_canary_10_unmeasured_lifespan",
+      "canaryId": "canary_10_unmeasured_lifespan",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.919589+00:00"
+    },
+    "canary_r2_canary_11_temporal_distortion": {
+      "caseId": "canary_r2_canary_11_temporal_distortion",
+      "canaryId": "canary_11_temporal_distortion",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.921158+00:00"
+    },
+    "canary_r2_canary_12_dropped_qualification": {
+      "caseId": "canary_r2_canary_12_dropped_qualification",
+      "canaryId": "canary_12_dropped_qualification",
+      "repetition": 2,
+      "isCriticalCanary": true,
+      "isBlocking": true,
+      "issueCodes": [
+        "SOURCE_INSUFFICIENT"
+      ],
+      "timestamp": "2026-10-02T05:00:53.922601+00:00"
+    }
+  }
+}

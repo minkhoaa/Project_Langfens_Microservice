@@ -1,0 +1,31 @@
+{
+  "parentCapsEnforced": true,
+  "scenarios": [
+    {
+      "scenario": "STANDARD_ALLOCATION",
+      "parentBudgetCapTokens": 60000,
+      "success": true,
+      "status": "ACCEPTED",
+      "totalTokensAllocated": 45000
+    },
+    {
+      "scenario": "GRACEFUL_SCALE_DOWN",
+      "parentBudgetCapTokens": 50000,
+      "success": true,
+      "status": "ACCEPTED",
+      "totalTokensAllocated": 49998,
+      "candidatesPerSlot": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "scenario": "INFEASIBLE_OVERSUBSCRIPTION_REJECTED",
+      "parentBudgetCapTokens": 20000,
+      "success": false,
+      "status": "BUDGET_EXCEEDED",
+      "reason": "Total requested tokens 90000 exceeds parent cap 20000 beyond allowable scaling factor (0.5)."
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "timestamp": "2026-10-01T04:49:54.856528+00:00",
+  "phase": "06",
+  "blueprintFixture": {
+    "artifactId": "exam_blueprint:bp_demo",
+    "artifactType": "ExamBlueprint",
+    "version": 1,
+    "contentHash": "353c70da57fa867fee37cedf0bc20e2b3da1584b48f4340e45b7e4d929d359cf",
+    "parentRefs": [],
+    "status": "ACCEPTED"
+  },
+  "passageArtifactTransitions": [
+    {
+      "version": 1,
+      "type": "Passage",
+      "artifactId": "passage_01",
+      "contentHash": "13076a5c9265a0317fc1e6b7029009032aefe4bff5ead8a45d7040b7c49ecfea",
+      "parentRefs": [
+        {
+          "artifactId": "exam_blueprint:bp_demo",
+          "artifactType": "ExamBlueprint",
+          "version": 1,
+          "contentHash": "353c70da57fa867fee37cedf0bc20e2b3da1584b48f4340e45b7e4d929d359cf"
+        }
+      ],
+      "wordCount": 950,
+      "status": "DRAFT",
+      "evaluationOutcome": "FAIL (SECTION_WORD_COUNT_OUT_OF_BOUNDS: Exceeds 915 limit)",
+      "decision": "REPAIR"
+    },
+    {
+      "version": 2,
+      "type": "Passage",
+      "artifactId": "passage_01",
+      "contentHash": "31aa003f0869b3eda74bbbe568061e9b802c8bb259d55edf8292f633a2d0f847",
+      "parentRefs": [
+        {
+          "artifactId": "exam_blueprint:bp_demo",
+          "artifactType": "ExamBlueprint",
+          "version": 1,
+          "contentHash": "353c70da57fa867fee37cedf0bc20e2b3da1584b48f4340e45b7e4d929d359cf"
+        }
+      ],
+      "wordCount": 800,
+      "status": "ACCEPTED_HEAD",
+      "evaluationOutcome": "PASS (score 1.0, defect resolved)",
+      "decision": "PASS"
+    }
+  ],
+  "budgetSnapshots": {
+    "initialState": {
+      "callsUsed": 0,
+      "tokensUsed": 0,
+      "wallTimeUsedSeconds": 0.0,
+      "versionsUsed": 0,
+      "repairsUsed": 0
+    },
+    "afterGeneration": {
+      "callsUsed": 1,
+      "tokensUsed": 2500,
+      "wallTimeUsedSeconds": 30.0,
+      "versionsUsed": 1,
+      "repairsUsed": 0
+    },
+    "afterInitialEvaluation": {
+      "callsUsed": 2,
+      "tokensUsed": 3500,
+      "wallTimeUsedSeconds": 60.0,
+      "versionsUsed": 1,
+      "repairsUsed": 0
+    },
+    "afterRepairDraft": {
+      "callsUsed": 3,
+      "tokensUsed": 5000,
+      "wallTimeUsedSeconds": 90.0,
+      "versionsUsed": 2,
+      "repairsUsed": 1
+    },
+    "afterReevaluation": {
+      "callsUsed": 4,
+      "tokensUsed": 6000,
+      "wallTimeUsedSeconds": 120.0,
+      "versionsUsed": 2,
+      "repairsUsed": 1
+    },
+    "afterCommit": {
+      "callsUsed": 4,
+      "tokensUsed": 6000,
+      "wallTimeUsedSeconds": 120.0,
+      "versionsUsed": 2,
+      "repairsUsed": 1
+    },
+    "afterProcessRestart": {
+      "callsUsed": 4,
+      "tokensUsed": 6000,
+      "wallTimeUsedSeconds": 120.0,
+      "versionsUsed": 2,
+      "repairsUsed": 1,
+      "resetOccurred": false
+    }
+  }
+}

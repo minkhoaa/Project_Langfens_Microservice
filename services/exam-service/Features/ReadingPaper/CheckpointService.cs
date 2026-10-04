@@ -361,6 +361,14 @@ public static class CheckpointService
                 );
             }
 
+            // 2b. Hard execution deadline enforcement: CreatedAt + BudgetCapWallTimeSeconds
+            var hardDeadline = run.CreatedAt.AddSeconds(run.BudgetCapWallTimeSeconds);
+            if (DateTime.UtcNow > hardDeadline)
+            {
+                throw new CheckpointValidationException(422,
+                    $"Execution deadline exhausted: hard deadline {hardDeadline:O} elapsed in the past");
+            }
+
             // 3. Parent-Child Relationship Validation & Fencing
             ReadingPaperOperation? parentOp = null;
             if (!string.IsNullOrWhiteSpace(request.ParentOperationId))
@@ -1566,9 +1574,17 @@ public static class CheckpointService
             .Where(o => o.RunId == runId)
             .ToListAsync(ct);
         var workOps = ops.Where(o => o.OperationType != "CHECKPOINT_COMMIT").ToList();
-        var totalTokens = workOps.Sum(o => o.Status == "COMPLETED" ? o.TokensUsed : o.TokenReservation);
-        var totalWallTime = workOps.Sum(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds);
-        var totalCalls = workOps.Count(o => o.ParentOperationId == null);
+        var parentIds = ops.Where(o => o.ParentOperationId != null).Select(o => o.ParentOperationId!).ToHashSet();
+        var nonParentWorkOps = workOps.Where(o => !parentIds.Contains(o.OperationId)).ToList();
+        var totalTokens = nonParentWorkOps.Count > 0
+            ? nonParentWorkOps.Sum(o => o.Status == "COMPLETED" ? o.TokensUsed : o.TokenReservation)
+            : run.BudgetUsedTokens;
+        var totalWallTime = nonParentWorkOps.Count > 0
+            ? nonParentWorkOps.Sum(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds)
+            : run.BudgetUsedWallTimeSeconds;
+        var totalCalls = nonParentWorkOps.Count > 0
+            ? workOps.Count(o => o.ParentOperationId == null)
+            : run.BudgetUsedCalls;
 
         // Also collect unaccepted draft artifacts
         var allArts = await db.ReadingPaperArtifacts
@@ -1679,6 +1695,11 @@ public static class CheckpointService
             TokensUsed: totalTokens,
             CallsUsed: totalCalls,
             WallTimeUsedSeconds: totalWallTime,
+            BudgetCapCalls: run.BudgetCapCalls,
+            BudgetCapTokens: run.BudgetCapTokens,
+            BudgetCapWallTimeSeconds: run.BudgetCapWallTimeSeconds,
+            CreatedAt: run.CreatedAt,
+            HardDeadlineAt: run.CreatedAt.AddSeconds(run.BudgetCapWallTimeSeconds),
             DraftArtifacts: draftArtifacts,
             Issues: issues,
             Evaluations: evalResults,

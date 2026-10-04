@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 from abc import ABC, abstractmethod
+from uuid import uuid4
 from enum import Enum
 from typing import List, Optional, Sequence
 from pydantic import Field
@@ -15,6 +16,7 @@ from app.contracts.evaluation import EvaluationResult, EvaluationStatus
 from app.contracts.issue import Issue, IssueCode, IssueScope, IssueSeverity
 from app.loop.capabilities import EvaluatorCapability
 from app.loop.context import LoopContext
+from app.providers.base import redact_secrets
 
 
 class EvaluatorConfigurationError(Exception):
@@ -108,33 +110,99 @@ class BaseEvaluator(ABC, EvaluatorCapability):
     ) -> EvaluationResult:
         """Evaluates the target envelope with bounded timeout and fail-closed error handling."""
         start_time = time.perf_counter()
+        target_ref = artifact.to_ref()
+        scope = getattr(context, "scope", None) or (
+            IssueScope.QUESTION if artifact.artifact_type == ArtifactType.QUESTION
+            else IssueScope.PASSAGE if artifact.artifact_type == ArtifactType.PASSAGE
+            else IssueScope.SECTION
+        )
         try:
-            result = await asyncio.wait_for(
+            raw_result = await asyncio.wait_for(
                 self._evaluate_impl(context, artifact, intent_id),
                 timeout=self._metadata.timeout_seconds,
             )
             elapsed_ms = (time.perf_counter() - start_time) * 1000.0
-            if result.elapsed_ms is None:
-                # Update elapsed time if not already set by implementation
-                return result.model_copy(update={"elapsed_ms": elapsed_ms})
-            return result
+            if not isinstance(raw_result, EvaluationResult):
+                eval_id = f"eval_mal_{uuid4().hex[:12]}"
+                return EvaluationResult.create_error(
+                    evaluation_id=eval_id,
+                    evaluator_id=self.evaluator_id,
+                    evaluator_version=self.evaluator_version,
+                    target_ref=target_ref,
+                    error_message=(
+                        f"Evaluator '{self.evaluator_id}' returned malformed non-EvaluationResult output "
+                        f"of type {type(raw_result).__name__}"
+                    ),
+                    code=IssueCode.SCHEMA_VIOLATION,
+                    elapsed_ms=elapsed_ms,
+                    scope=scope,
+                )
+            if raw_result.status == EvaluationStatus.ERROR and not raw_result.issues:
+                eval_id = raw_result.evaluation_id or f"eval_err_{uuid4().hex[:12]}"
+                return EvaluationResult.create_error(
+                    evaluation_id=eval_id,
+                    evaluator_id=self.evaluator_id,
+                    evaluator_version=self.evaluator_version,
+                    target_ref=target_ref,
+                    error_message=f"Evaluator '{self.evaluator_id}' returned ERROR status with empty issues list",
+                    code=IssueCode.EVALUATOR_UNAVAILABLE,
+                    elapsed_ms=elapsed_ms,
+                    scope=scope,
+                )
+            updates: Dict[str, Any] = {}
+            if raw_result.elapsed_ms is None:
+                updates["elapsed_ms"] = elapsed_ms
+            if not raw_result.input_dependency_refs and artifact.parent_refs:
+                updates["input_dependency_refs"] = list(artifact.parent_refs)
+            if raw_result.status == EvaluationStatus.PASS and not raw_result.issues and context and getattr(context, "open_issues", None):
+                checked_codes = set(self._metadata.hard_checks) | set(self._metadata.soft_checks)
+                resolved_fps = list(raw_result.resolved_issue_fingerprints or [])
+                for oi in context.open_issues:
+                    if oi.evaluator_id == self.evaluator_id and (not checked_codes or oi.code in checked_codes):
+                        for ref in oi.affected_refs:
+                            if ref.artifact_id == artifact.artifact_id and artifact.version > ref.version:
+                                if oi.fingerprint not in resolved_fps:
+                                    resolved_fps.append(oi.fingerprint)
+                                break
+                if resolved_fps != (raw_result.resolved_issue_fingerprints or []):
+                    updates["resolved_issue_fingerprints"] = resolved_fps
+            if updates:
+                return raw_result.model_copy(update=updates)
+            return raw_result
         except asyncio.TimeoutError:
             elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+            eval_id = f"eval_tout_{uuid4().hex[:12]}"
             return EvaluationResult.create_error(
+                evaluation_id=eval_id,
                 evaluator_id=self.evaluator_id,
                 evaluator_version=self.evaluator_version,
-                target_ref=artifact.to_ref(),
-                message=f"Evaluator '{self.evaluator_id}' timed out after {self._metadata.timeout_seconds}s",
+                target_ref=target_ref,
+                error_message=f"Evaluator '{self.evaluator_id}' timed out after {self._metadata.timeout_seconds:.1f}s",
+                code=IssueCode.EVALUATOR_UNAVAILABLE,
                 elapsed_ms=elapsed_ms,
+                scope=scope,
             )
+        except asyncio.CancelledError:
+            # Cancellation MUST preserve runtime cancellation semantics: never swallow!
+            raise
         except Exception as ex:
             elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+            eval_id = f"eval_ex_{uuid4().hex[:12]}"
+            code = (
+                IssueCode.SCHEMA_VIOLATION
+                if isinstance(ex, (ValueError, KeyError, TypeError))
+                else IssueCode.EVALUATOR_UNAVAILABLE
+            )
+            sanitized_msg = redact_secrets(f"Evaluator '{self.evaluator_id}' raised unexpected exception: {type(ex).__name__}: {ex}")
             return EvaluationResult.create_error(
+                evaluation_id=eval_id,
                 evaluator_id=self.evaluator_id,
                 evaluator_version=self.evaluator_version,
-                target_ref=artifact.to_ref(),
-                message=f"Evaluator '{self.evaluator_id}' raised unexpected exception: {type(ex).__name__}: {ex}",
+                target_ref=target_ref,
+                error_message=sanitized_msg,
+                code=code,
                 elapsed_ms=elapsed_ms,
+                scope=scope,
             )
 
     @abstractmethod

@@ -1,0 +1,83 @@
+{
+  "phase": "08",
+  "gate": "G08",
+  "title": "Passage Loop and Grounding Engine",
+  "status": "PASS",
+  "evaluatedAt": "2026-10-04T11:42:00Z",
+  "gitSha": "7a4d0e7503710d3b87c95e15831829552ba7be8d",
+  "statusBreakdown": {
+    "g07RuntimeRemediation": "PASS",
+    "g07CorpusIntegrity": "PASS",
+    "g07LiveSmoke": "PASS",
+    "g07SemanticQuality": "PASS",
+    "g08Implementation": "PASS",
+    "g08DeterministicVerification": "PASS",
+    "g08RouteIntegration": "PASS",
+    "g08PairedBenchmark": "PASS",
+    "overallG08": "PASS"
+  },
+  "readinessForPhase09": "READY_FOR_PHASE_09",
+  "dependencies": [
+    "G03",
+    "G04",
+    "G05",
+    "G06",
+    "G07"
+  ],
+  "requiredTestIds": [
+    "T08-01",
+    "T08-02",
+    "T08-03",
+    "T08-04",
+    "T08-05",
+    "T08-06",
+    "T08-07",
+    "T08-08"
+  ],
+  "checks": {
+    "T08-01": {
+      "name": "Passage style profiles and word count boundaries (719, 720, 915, 916) & style evaluator",
+      "passed": true
+    },
+    "T08-02": {
+      "name": "Fidelity evaluator four core hard errors (quantity distortion, causal overstatement, overstated certainty, unmeasured outcome)",
+      "passed": true
+    },
+    "T08-03": {
+      "name": "Sentence-level immutable repair, paragraph-aware trim, and fresh sentence IDs",
+      "passed": true
+    },
+    "T08-04": {
+      "name": "Source-insufficient bounded escalation & missing source rejection (no self-grounding)",
+      "passed": true
+    },
+    "T08-05": {
+      "name": "Grounding canaries (sentence 1, 11, end), unaligned sentences coverage, rhetorical label defense",
+      "passed": true
+    },
+    "T08-06": {
+      "name": "Authoritative persistence, crash resumption without repeated work, and lease/fencing invariants",
+      "passed": true
+    },
+    "T08-07": {
+      "name": "Adversarial prompt injection defense via untrusted source data envelope",
+      "passed": true
+    },
+    "T08-08": {
+      "name": "Full PassageLoop end-to-end composition and paired baseline benchmark",
+      "passed": true
+    }
+  },
+  "remainingBlockers": [],
+  "evidencePaths": [
+    "artifacts/refactor/phase-08/phase-report.md",
+    "artifacts/refactor/phase-08/test-report.json",
+    "artifacts/refactor/phase-08/commands.jsonl",
+    "artifacts/refactor/phase-08/snapshot-manifest.json",
+    "artifacts/refactor/phase-08/fix-log.jsonl",
+    "artifacts/refactor/phase-08/independent-review.md",
+    "artifacts/refactor/phase-08/paired-passage-benchmark-report.json",
+    "artifacts/refactor/phase-08/resume.md"
+  ],
+  "conclusion": "Phase 08 implementation is 100% complete across work packages P08-01 through P08-08. All 8 required T08 tests pass cleanly. Paired benchmark harness converged on all 3 authentic Europe PMC articles with 100% word bounds compliance [720, 915], 100% sentence boundary coherence, and 100% authoritative CAS commits. All upstream G07 quality dependencies are verified PASS. Gate G08 is formally PASSED."
+}

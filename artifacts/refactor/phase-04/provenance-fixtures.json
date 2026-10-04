@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-09-30T09:06:59.688334+00:00",
+  "normalizerVersion": "v2.0.0",
+  "europePmc": [
+    {
+      "caseId": "pmc_cc_by_40",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "wordCount": 650,
+      "expectedOutcome": "ACCEPTED",
+      "notes": "Standard CC BY 4.0 license is approved for Europe PMC full text."
+    },
+    {
+      "caseId": "pmc_cc0_10",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "wordCount": 620,
+      "expectedOutcome": "ACCEPTED",
+      "notes": "CC0 Public Domain dedication is approved for Europe PMC full text."
+    },
+    {
+      "caseId": "pmc_missing_license",
+      "licenseUrl": null,
+      "wordCount": 650,
+      "expectedOutcome": "REJECTED",
+      "expectedError": "No verified CC BY or CC0 license in full text",
+      "notes": "Unlicensed Europe PMC full text fails closed."
+    },
+    {
+      "caseId": "pmc_proprietary_license",
+      "licenseUrl": "https://example.com/proprietary-terms",
+      "wordCount": 630,
+      "expectedOutcome": "REJECTED",
+      "expectedError": "No verified CC BY or CC0 license in full text",
+      "notes": "Proprietary or unknown license terms fail closed."
+    }
+  ],
+  "universalSources": [
+    {
+      "caseId": "univ_cc_by",
+      "license": "CC-BY-4.0",
+      "strictPolicy": true,
+      "expectedCleared": true,
+      "notes": "Explicit open-access license is cleared."
+    },
+    {
+      "caseId": "univ_public_domain",
+      "license": "Public Domain",
+      "strictPolicy": true,
+      "expectedCleared": true,
+      "notes": "Public Domain content is cleared."
+    },
+    {
+      "caseId": "univ_unspecified_strict",
+      "license": null,
+      "strictPolicy": true,
+      "expectedCleared": false,
+      "expectedError": "Universal source has unspecified license. Unknown rights are not automatically approved under policy.",
+      "notes": "Missing license in strict mode fails closed; rights are never guessed."
+    },
+    {
+      "caseId": "univ_all_rights_reserved",
+      "license": "All Rights Reserved",
+      "strictPolicy": true,
+      "expectedCleared": false,
+      "expectedError": "Universal source has ineligible rights ('All Rights Reserved'). Unknown rights are not automatically approved under policy.",
+      "notes": "Ineligible rights fail closed."
+    }
+  ],
+  "wordCountBoundaries": [
+    {
+      "caseId": "boundary_599_words",
+      "wordCount": 599,
+      "expectedOutcome": "REJECTED",
+      "expectedError": "Full text is too short for a Reading passage",
+      "notes": "Strict 600-word lower ceiling for IELTS Reading passage generation."
+    },
+    {
+      "caseId": "boundary_600_words",
+      "wordCount": 600,
+      "expectedOutcome": "ACCEPTED",
+      "notes": "Exact threshold word count."
+    },
+    {
+      "caseId": "boundary_601_words",
+      "wordCount": 601,
+      "expectedOutcome": "ACCEPTED",
+      "notes": "Above threshold word count."
+    }
+  ]
+}

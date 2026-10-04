@@ -1,0 +1,2295 @@
+{
+  "ArtifactEnvelope": {
+    "$defs": {
+      "ArtifactRef": {
+        "additionalProperties": false,
+        "description": "Exact reference to an immutable artifact version.",
+        "properties": {
+          "artifactId": {
+            "title": "Artifactid",
+            "type": "string"
+          },
+          "artifactType": {
+            "$ref": "#/$defs/ArtifactType"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "contentHash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Contenthash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifactId",
+          "artifactType",
+          "version",
+          "contentHash"
+        ],
+        "title": "ArtifactRef",
+        "type": "object"
+      },
+      "ArtifactType": {
+        "enum": [
+          "SourcePack",
+          "EvidenceGraph",
+          "ExamBlueprint",
+          "Passage",
+          "QuestionGroup",
+          "Question",
+          "Section",
+          "ReadingPaper"
+        ],
+        "title": "ArtifactType",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Immutable envelope enclosing an artifact's payload, lineage, and provenance.",
+    "properties": {
+      "artifactId": {
+        "title": "Artifactid",
+        "type": "string"
+      },
+      "artifactType": {
+        "$ref": "#/$defs/ArtifactType"
+      },
+      "version": {
+        "minimum": 1,
+        "title": "Version",
+        "type": "integer"
+      },
+      "runId": {
+        "title": "Runid",
+        "type": "string"
+      },
+      "sectionId": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Sectionid"
+      },
+      "schemaVersion": {
+        "default": "1.0.0",
+        "title": "Schemaversion",
+        "type": "string"
+      },
+      "contentHash": {
+        "maxLength": 64,
+        "minLength": 64,
+        "pattern": "^[0-9a-f]{64}$",
+        "title": "Contenthash",
+        "type": "string"
+      },
+      "createdAt": {
+        "format": "date-time",
+        "title": "Createdat",
+        "type": "string"
+      },
+      "producerVersion": {
+        "title": "Producerversion",
+        "type": "string"
+      },
+      "payload": {
+        "title": "Payload"
+      },
+      "parentRefs": {
+        "items": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "title": "Parentrefs",
+        "type": "array"
+      }
+    },
+    "required": [
+      "artifactId",
+      "artifactType",
+      "version",
+      "runId",
+      "contentHash",
+      "createdAt",
+      "producerVersion",
+      "payload"
+    ],
+    "title": "ArtifactEnvelope",
+    "type": "object"
+  },
+  "ArtifactRef": {
+    "$defs": {
+      "ArtifactType": {
+        "enum": [
+          "SourcePack",
+          "EvidenceGraph",
+          "ExamBlueprint",
+          "Passage",
+          "QuestionGroup",
+          "Question",
+          "Section",
+          "ReadingPaper"
+        ],
+        "title": "ArtifactType",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Exact reference to an immutable artifact version.",
+    "properties": {
+      "artifactId": {
+        "title": "Artifactid",
+        "type": "string"
+      },
+      "artifactType": {
+        "$ref": "#/$defs/ArtifactType"
+      },
+      "version": {
+        "minimum": 1,
+        "title": "Version",
+        "type": "integer"
+      },
+      "contentHash": {
+        "maxLength": 64,
+        "minLength": 64,
+        "pattern": "^[0-9a-f]{64}$",
+        "title": "Contenthash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "artifactId",
+      "artifactType",
+      "version",
+      "contentHash"
+    ],
+    "title": "ArtifactRef",
+    "type": "object"
+  },
+  "SourcePack": {
+    "$defs": {
+      "SourceDocument": {
+        "additionalProperties": false,
+        "description": "Cleaned extracted body of the source document.",
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "wordCount": {
+            "minimum": 0,
+            "title": "Wordcount",
+            "type": "integer"
+          },
+          "paragraphs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Paragraphs",
+            "type": "array"
+          },
+          "headings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Headings",
+            "type": "array"
+          },
+          "extractedAt": {
+            "format": "date-time",
+            "title": "Extractedat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "wordCount"
+        ],
+        "title": "SourceDocument",
+        "type": "object"
+      },
+      "SourceItem": {
+        "additionalProperties": false,
+        "description": "Single ingested source item with metadata and cleaned content.",
+        "properties": {
+          "sourceId": {
+            "title": "Sourceid",
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/$defs/SourceMetadata"
+          },
+          "document": {
+            "$ref": "#/$defs/SourceDocument"
+          }
+        },
+        "required": [
+          "sourceId",
+          "metadata",
+          "document"
+        ],
+        "title": "SourceItem",
+        "type": "object"
+      },
+      "SourceMetadata": {
+        "additionalProperties": false,
+        "description": "Metadata for an ingested scientific paper or open-access source.",
+        "properties": {
+          "pmid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pmid"
+          },
+          "pmcid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pmcid"
+          },
+          "doi": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Doi"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "journal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Journal"
+          },
+          "pubDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pubdate"
+          },
+          "sourceUrl": {
+            "title": "Sourceurl",
+            "type": "string"
+          },
+          "licenseType": {
+            "default": "Open Access",
+            "title": "Licensetype",
+            "type": "string"
+          },
+          "licenseCleared": {
+            "default": true,
+            "title": "Licensecleared",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "sourceUrl"
+        ],
+        "title": "SourceMetadata",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Normalized pack of sources providing grounded facts for a section or paper.",
+    "properties": {
+      "packId": {
+        "title": "Packid",
+        "type": "string"
+      },
+      "runId": {
+        "title": "Runid",
+        "type": "string"
+      },
+      "sectionId": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Sectionid"
+      },
+      "revision": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Revision",
+        "type": "integer"
+      },
+      "sources": {
+        "items": {
+          "$ref": "#/$defs/SourceItem"
+        },
+        "title": "Sources",
+        "type": "array"
+      },
+      "combinedWordCount": {
+        "minimum": 0,
+        "title": "Combinedwordcount",
+        "type": "integer"
+      },
+      "suitabilityScore": {
+        "default": 1.0,
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "title": "Suitabilityscore",
+        "type": "number"
+      },
+      "licenseCleared": {
+        "default": true,
+        "title": "Licensecleared",
+        "type": "boolean"
+      },
+      "createdAt": {
+        "format": "date-time",
+        "title": "Createdat",
+        "type": "string"
+      }
+    },
+    "required": [
+      "packId",
+      "runId",
+      "combinedWordCount"
+    ],
+    "title": "SourcePack",
+    "type": "object"
+  },
+  "EvidenceGraph": {
+    "$defs": {
+      "AbsenceAssessment": {
+        "additionalProperties": false,
+        "description": "Semantics for NOT GIVEN items: proves absence rather than forcing fake positive quote.",
+        "properties": {
+          "assessmentId": {
+            "title": "Assessmentid",
+            "type": "string"
+          },
+          "claimOrTopic": {
+            "title": "Claimortopic",
+            "type": "string"
+          },
+          "absenceReason": {
+            "title": "Absencereason",
+            "type": "string"
+          },
+          "topicalContextSpan": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topicalcontextspan"
+          },
+          "absenceConfirmed": {
+            "default": true,
+            "title": "Absenceconfirmed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "assessmentId",
+          "claimOrTopic",
+          "absenceReason"
+        ],
+        "title": "AbsenceAssessment",
+        "type": "object"
+      },
+      "EntailmentLabel": {
+        "enum": [
+          "ENTAILS",
+          "CONTRADICTS",
+          "NEUTRAL",
+          "UNVERIFIABLE"
+        ],
+        "title": "EntailmentLabel",
+        "type": "string"
+      },
+      "Qualifier": {
+        "enum": [
+          "DEFINITE",
+          "PROBABLE",
+          "POSSIBLE",
+          "HYPOTHETICAL",
+          "UNSUPPORTED"
+        ],
+        "title": "Qualifier",
+        "type": "string"
+      },
+      "SourceOffset": {
+        "additionalProperties": false,
+        "description": "Character offsets within a source document.",
+        "properties": {
+          "startChar": {
+            "minimum": 0,
+            "title": "Startchar",
+            "type": "integer"
+          },
+          "endChar": {
+            "minimum": 0,
+            "title": "Endchar",
+            "type": "integer"
+          },
+          "sourceId": {
+            "title": "Sourceid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "startChar",
+          "endChar",
+          "sourceId"
+        ],
+        "title": "SourceOffset",
+        "type": "object"
+      },
+      "VerifiedClaim": {
+        "additionalProperties": false,
+        "description": "Fact claim verified against source texts with exact provenance.",
+        "properties": {
+          "claimId": {
+            "title": "Claimid",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "sourceId": {
+            "title": "Sourceid",
+            "type": "string"
+          },
+          "offsets": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SourceOffset"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "confidence": {
+            "default": 1.0,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "entailment": {
+            "$ref": "#/$defs/EntailmentLabel",
+            "default": "ENTAILS"
+          },
+          "qualifier": {
+            "$ref": "#/$defs/Qualifier",
+            "default": "DEFINITE"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Keywords",
+            "type": "array"
+          }
+        },
+        "required": [
+          "claimId",
+          "text",
+          "sourceId"
+        ],
+        "title": "VerifiedClaim",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Graph of grounded factual claims and absence assessments.",
+    "properties": {
+      "graphId": {
+        "title": "Graphid",
+        "type": "string"
+      },
+      "runId": {
+        "title": "Runid",
+        "type": "string"
+      },
+      "sectionId": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Sectionid"
+      },
+      "claims": {
+        "items": {
+          "$ref": "#/$defs/VerifiedClaim"
+        },
+        "title": "Claims",
+        "type": "array"
+      },
+      "absenceAssessments": {
+        "items": {
+          "$ref": "#/$defs/AbsenceAssessment"
+        },
+        "title": "Absenceassessments",
+        "type": "array"
+      },
+      "verifiedAt": {
+        "format": "date-time",
+        "title": "Verifiedat",
+        "type": "string"
+      }
+    },
+    "required": [
+      "graphId",
+      "runId"
+    ],
+    "title": "EvidenceGraph",
+    "type": "object"
+  },
+  "ExamBlueprint": {
+    "$defs": {
+      "QuestionType": {
+        "enum": [
+          "TRUE_FALSE_NOT_GIVEN",
+          "SENTENCE_COMPLETION",
+          "MULTIPLE_CHOICE_SINGLE",
+          "SUMMARY_COMPLETION",
+          "YES_NO_NOT_GIVEN",
+          "SHORT_ANSWER"
+        ],
+        "title": "QuestionType",
+        "type": "string"
+      },
+      "QuestionTypeAllocation": {
+        "additionalProperties": false,
+        "description": "Allocation of question types within a section.",
+        "properties": {
+          "questionType": {
+            "$ref": "#/$defs/QuestionType"
+          },
+          "count": {
+            "minimum": 1,
+            "title": "Count",
+            "type": "integer"
+          },
+          "startQuestionNumber": {
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Startquestionnumber",
+            "type": "integer"
+          },
+          "endQuestionNumber": {
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Endquestionnumber",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "questionType",
+          "count",
+          "startQuestionNumber",
+          "endQuestionNumber"
+        ],
+        "title": "QuestionTypeAllocation",
+        "type": "object"
+      },
+      "SectionBlueprint": {
+        "additionalProperties": false,
+        "description": "Blueprint for a single reading section/passage.",
+        "properties": {
+          "sectionId": {
+            "maximum": 3,
+            "minimum": 1,
+            "title": "Sectionid",
+            "type": "integer"
+          },
+          "topic": {
+            "title": "Topic",
+            "type": "string"
+          },
+          "targetWordCount": {
+            "default": 800,
+            "maximum": 915,
+            "minimum": 720,
+            "title": "Targetwordcount",
+            "type": "integer"
+          },
+          "questionAllocations": {
+            "items": {
+              "$ref": "#/$defs/QuestionTypeAllocation"
+            },
+            "title": "Questionallocations",
+            "type": "array"
+          },
+          "totalQuestions": {
+            "maximum": 14,
+            "minimum": 1,
+            "title": "Totalquestions",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sectionId",
+          "topic",
+          "totalQuestions"
+        ],
+        "title": "SectionBlueprint",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Full reading paper blueprint specifying topics, types, and sequence.",
+    "properties": {
+      "blueprintId": {
+        "title": "Blueprintid",
+        "type": "string"
+      },
+      "runId": {
+        "title": "Runid",
+        "type": "string"
+      },
+      "sections": {
+        "items": {
+          "$ref": "#/$defs/SectionBlueprint"
+        },
+        "title": "Sections",
+        "type": "array"
+      },
+      "totalQuestions": {
+        "default": 40,
+        "maximum": 40,
+        "minimum": 1,
+        "title": "Totalquestions",
+        "type": "integer"
+      },
+      "targetWordCountMin": {
+        "default": 2150,
+        "title": "Targetwordcountmin",
+        "type": "integer"
+      },
+      "targetWordCountMax": {
+        "default": 2750,
+        "title": "Targetwordcountmax",
+        "type": "integer"
+      },
+      "createdAt": {
+        "format": "date-time",
+        "title": "Createdat",
+        "type": "string"
+      }
+    },
+    "required": [
+      "blueprintId",
+      "runId"
+    ],
+    "title": "ExamBlueprint",
+    "type": "object"
+  },
+  "EvaluationResult": {
+    "$defs": {
+      "ArtifactRef": {
+        "additionalProperties": false,
+        "description": "Exact reference to an immutable artifact version.",
+        "properties": {
+          "artifactId": {
+            "title": "Artifactid",
+            "type": "string"
+          },
+          "artifactType": {
+            "$ref": "#/$defs/ArtifactType"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "contentHash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Contenthash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifactId",
+          "artifactType",
+          "version",
+          "contentHash"
+        ],
+        "title": "ArtifactRef",
+        "type": "object"
+      },
+      "ArtifactType": {
+        "enum": [
+          "SourcePack",
+          "EvidenceGraph",
+          "ExamBlueprint",
+          "Passage",
+          "QuestionGroup",
+          "Question",
+          "Section",
+          "ReadingPaper"
+        ],
+        "title": "ArtifactType",
+        "type": "string"
+      },
+      "EvaluationStatus": {
+        "enum": [
+          "PASS",
+          "FAIL",
+          "ERROR",
+          "NOT_APPLICABLE"
+        ],
+        "title": "EvaluationStatus",
+        "type": "string"
+      },
+      "Issue": {
+        "additionalProperties": false,
+        "description": "Specific error or defect detected by an evaluator or policy validator.",
+        "properties": {
+          "issueId": {
+            "title": "Issueid",
+            "type": "string"
+          },
+          "code": {
+            "$ref": "#/$defs/IssueCode"
+          },
+          "severity": {
+            "$ref": "#/$defs/IssueSeverity"
+          },
+          "scope": {
+            "$ref": "#/$defs/IssueScope"
+          },
+          "affectedRefs": {
+            "items": {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            "title": "Affectedrefs",
+            "type": "array"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Evidence"
+          },
+          "proposedRepair": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Proposedrepair"
+          },
+          "status": {
+            "$ref": "#/$defs/IssueStatus",
+            "default": "OPEN"
+          },
+          "fingerprint": {
+            "title": "Fingerprint",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "resolvedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Resolvedat"
+          }
+        },
+        "required": [
+          "issueId",
+          "code",
+          "severity",
+          "scope",
+          "message",
+          "fingerprint"
+        ],
+        "title": "Issue",
+        "type": "object"
+      },
+      "IssueCode": {
+        "enum": [
+          "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+          "CAUSAL_OVERSTATEMENT",
+          "OVERSTATED_CERTAINTY",
+          "UNMEASURED_OUTCOME",
+          "SOURCE_INSUFFICIENT",
+          "EVIDENCE_MISSING",
+          "AMBIGUOUS_ANSWER",
+          "ANSWER_LEAKAGE",
+          "BAD_DISTRACTOR",
+          "WORD_LIMIT_EXCEEDED",
+          "DUPLICATE_CONTENT",
+          "EVALUATOR_UNAVAILABLE",
+          "STALE_DEPENDENCY",
+          "BUDGET_EXHAUSTED",
+          "SCHEMA_VIOLATION",
+          "INSUFFICIENT_OPTIONS",
+          "SECTION_WORD_COUNT_OUT_OF_BOUNDS",
+          "QUESTION_NUMBERING_INVALID",
+          "QUESTION_COUNT_MISMATCH"
+        ],
+        "title": "IssueCode",
+        "type": "string"
+      },
+      "IssueScope": {
+        "enum": [
+          "SOURCE",
+          "EVIDENCE",
+          "BLUEPRINT",
+          "PASSAGE",
+          "QUESTION_GROUP",
+          "QUESTION",
+          "SECTION",
+          "PAPER"
+        ],
+        "title": "IssueScope",
+        "type": "string"
+      },
+      "IssueSeverity": {
+        "enum": [
+          "CRITICAL",
+          "MAJOR",
+          "MINOR",
+          "INFO"
+        ],
+        "title": "IssueSeverity",
+        "type": "string"
+      },
+      "IssueStatus": {
+        "enum": [
+          "OPEN",
+          "RESOLVED",
+          "SUPERSEDED"
+        ],
+        "title": "IssueStatus",
+        "type": "string"
+      },
+      "UsageMetrics": {
+        "additionalProperties": false,
+        "description": "Token and resource consumption metrics.",
+        "properties": {
+          "promptTokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Prompttokens"
+          },
+          "completionTokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Completiontokens"
+          },
+          "totalTokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Totaltokens"
+          },
+          "costUsd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Costusd"
+          }
+        },
+        "title": "UsageMetrics",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Result of evaluating an artifact by a deterministic or semantic evaluator.",
+    "properties": {
+      "evaluationId": {
+        "title": "Evaluationid",
+        "type": "string"
+      },
+      "evaluatorId": {
+        "title": "Evaluatorid",
+        "type": "string"
+      },
+      "evaluatorVersion": {
+        "title": "Evaluatorversion",
+        "type": "string"
+      },
+      "targetRef": {
+        "$ref": "#/$defs/ArtifactRef"
+      },
+      "status": {
+        "$ref": "#/$defs/EvaluationStatus"
+      },
+      "issues": {
+        "items": {
+          "$ref": "#/$defs/Issue"
+        },
+        "title": "Issues",
+        "type": "array"
+      },
+      "score": {
+        "anyOf": [
+          {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Score"
+      },
+      "inputDependencyRefs": {
+        "items": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "title": "Inputdependencyrefs",
+        "type": "array"
+      },
+      "provider": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Provider"
+      },
+      "model": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Model"
+      },
+      "promptVersion": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Promptversion"
+      },
+      "elapsedMs": {
+        "anyOf": [
+          {
+            "minimum": 0.0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Elapsedms"
+      },
+      "usage": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/UsageMetrics"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "evaluatedAt": {
+        "format": "date-time",
+        "title": "Evaluatedat",
+        "type": "string"
+      }
+    },
+    "required": [
+      "evaluationId",
+      "evaluatorId",
+      "evaluatorVersion",
+      "targetRef",
+      "status"
+    ],
+    "title": "EvaluationResult",
+    "type": "object"
+  },
+  "Issue": {
+    "$defs": {
+      "ArtifactRef": {
+        "additionalProperties": false,
+        "description": "Exact reference to an immutable artifact version.",
+        "properties": {
+          "artifactId": {
+            "title": "Artifactid",
+            "type": "string"
+          },
+          "artifactType": {
+            "$ref": "#/$defs/ArtifactType"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "contentHash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Contenthash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifactId",
+          "artifactType",
+          "version",
+          "contentHash"
+        ],
+        "title": "ArtifactRef",
+        "type": "object"
+      },
+      "ArtifactType": {
+        "enum": [
+          "SourcePack",
+          "EvidenceGraph",
+          "ExamBlueprint",
+          "Passage",
+          "QuestionGroup",
+          "Question",
+          "Section",
+          "ReadingPaper"
+        ],
+        "title": "ArtifactType",
+        "type": "string"
+      },
+      "IssueCode": {
+        "enum": [
+          "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+          "CAUSAL_OVERSTATEMENT",
+          "OVERSTATED_CERTAINTY",
+          "UNMEASURED_OUTCOME",
+          "SOURCE_INSUFFICIENT",
+          "EVIDENCE_MISSING",
+          "AMBIGUOUS_ANSWER",
+          "ANSWER_LEAKAGE",
+          "BAD_DISTRACTOR",
+          "WORD_LIMIT_EXCEEDED",
+          "DUPLICATE_CONTENT",
+          "EVALUATOR_UNAVAILABLE",
+          "STALE_DEPENDENCY",
+          "BUDGET_EXHAUSTED",
+          "SCHEMA_VIOLATION",
+          "INSUFFICIENT_OPTIONS",
+          "SECTION_WORD_COUNT_OUT_OF_BOUNDS",
+          "QUESTION_NUMBERING_INVALID",
+          "QUESTION_COUNT_MISMATCH"
+        ],
+        "title": "IssueCode",
+        "type": "string"
+      },
+      "IssueScope": {
+        "enum": [
+          "SOURCE",
+          "EVIDENCE",
+          "BLUEPRINT",
+          "PASSAGE",
+          "QUESTION_GROUP",
+          "QUESTION",
+          "SECTION",
+          "PAPER"
+        ],
+        "title": "IssueScope",
+        "type": "string"
+      },
+      "IssueSeverity": {
+        "enum": [
+          "CRITICAL",
+          "MAJOR",
+          "MINOR",
+          "INFO"
+        ],
+        "title": "IssueSeverity",
+        "type": "string"
+      },
+      "IssueStatus": {
+        "enum": [
+          "OPEN",
+          "RESOLVED",
+          "SUPERSEDED"
+        ],
+        "title": "IssueStatus",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Specific error or defect detected by an evaluator or policy validator.",
+    "properties": {
+      "issueId": {
+        "title": "Issueid",
+        "type": "string"
+      },
+      "code": {
+        "$ref": "#/$defs/IssueCode"
+      },
+      "severity": {
+        "$ref": "#/$defs/IssueSeverity"
+      },
+      "scope": {
+        "$ref": "#/$defs/IssueScope"
+      },
+      "affectedRefs": {
+        "items": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "title": "Affectedrefs",
+        "type": "array"
+      },
+      "message": {
+        "title": "Message",
+        "type": "string"
+      },
+      "evidence": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Evidence"
+      },
+      "proposedRepair": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Proposedrepair"
+      },
+      "status": {
+        "$ref": "#/$defs/IssueStatus",
+        "default": "OPEN"
+      },
+      "fingerprint": {
+        "title": "Fingerprint",
+        "type": "string"
+      },
+      "createdAt": {
+        "format": "date-time",
+        "title": "Createdat",
+        "type": "string"
+      },
+      "resolvedAt": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Resolvedat"
+      }
+    },
+    "required": [
+      "issueId",
+      "code",
+      "severity",
+      "scope",
+      "message",
+      "fingerprint"
+    ],
+    "title": "Issue",
+    "type": "object"
+  },
+  "LoopDecision": {
+    "$defs": {
+      "DecisionType": {
+        "enum": [
+          "PASS",
+          "REPAIR",
+          "REGENERATE",
+          "ESCALATE",
+          "FAIL"
+        ],
+        "title": "DecisionType",
+        "type": "string"
+      },
+      "IssueScope": {
+        "enum": [
+          "SOURCE",
+          "EVIDENCE",
+          "BLUEPRINT",
+          "PASSAGE",
+          "QUESTION_GROUP",
+          "QUESTION",
+          "SECTION",
+          "PAPER"
+        ],
+        "title": "IssueScope",
+        "type": "string"
+      },
+      "LoopState": {
+        "enum": [
+          "INITIALIZED",
+          "INGESTING",
+          "EVIDENCE_EXTRACTING",
+          "BLUEPRINTING",
+          "DRAFTING",
+          "EVALUATING",
+          "REPAIRING",
+          "COMPLETED",
+          "FAILED",
+          "ABORTED"
+        ],
+        "title": "LoopState",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Explicit decision made by the loop controller directing the next state transition.",
+    "properties": {
+      "decisionId": {
+        "title": "Decisionid",
+        "type": "string"
+      },
+      "runId": {
+        "title": "Runid",
+        "type": "string"
+      },
+      "decision": {
+        "$ref": "#/$defs/DecisionType"
+      },
+      "currentState": {
+        "$ref": "#/$defs/LoopState"
+      },
+      "nextState": {
+        "$ref": "#/$defs/LoopState"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      },
+      "targetScope": {
+        "$ref": "#/$defs/IssueScope"
+      },
+      "budgetReservationId": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Budgetreservationid"
+      },
+      "expectedVersion": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expectedversion"
+      },
+      "evaluationRef": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Evaluationref"
+      },
+      "createdAt": {
+        "format": "date-time",
+        "title": "Createdat",
+        "type": "string"
+      }
+    },
+    "required": [
+      "decisionId",
+      "runId",
+      "decision",
+      "currentState",
+      "nextState",
+      "reason",
+      "targetScope"
+    ],
+    "title": "LoopDecision",
+    "type": "object"
+  },
+  "GenerationRun": {
+    "$defs": {
+      "BudgetReservation": {
+        "additionalProperties": false,
+        "description": "Bounded resource budget reservation enforcing hard caps across a run.",
+        "properties": {
+          "reservationId": {
+            "title": "Reservationid",
+            "type": "string"
+          },
+          "runId": {
+            "title": "Runid",
+            "type": "string"
+          },
+          "maxCalls": {
+            "minimum": 1,
+            "title": "Maxcalls",
+            "type": "integer"
+          },
+          "maxTokens": {
+            "minimum": 1,
+            "title": "Maxtokens",
+            "type": "integer"
+          },
+          "costCapUsd": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Costcapusd"
+          },
+          "callsConsumed": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Callsconsumed",
+            "type": "integer"
+          },
+          "tokensConsumed": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Tokensconsumed",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/$defs/BudgetStatus",
+            "default": "ACTIVE"
+          }
+        },
+        "required": [
+          "reservationId",
+          "runId",
+          "maxCalls",
+          "maxTokens"
+        ],
+        "title": "BudgetReservation",
+        "type": "object"
+      },
+      "BudgetStatus": {
+        "enum": [
+          "ACTIVE",
+          "EXHAUSTED",
+          "RELEASED"
+        ],
+        "title": "BudgetStatus",
+        "type": "string"
+      },
+      "RunIdentity": {
+        "additionalProperties": false,
+        "description": "Immutable identity identifying a generation run and fencing epoch.",
+        "properties": {
+          "runId": {
+            "title": "Runid",
+            "type": "string"
+          },
+          "jobId": {
+            "title": "Jobid",
+            "type": "string"
+          },
+          "epoch": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Epoch",
+            "type": "integer"
+          },
+          "leaseOwner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Leaseowner"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "runId",
+          "jobId"
+        ],
+        "title": "RunIdentity",
+        "type": "object"
+      },
+      "SectionSlot": {
+        "additionalProperties": false,
+        "description": "Slot for a specific section within the paper.",
+        "properties": {
+          "slotNumber": {
+            "maximum": 3,
+            "minimum": 1,
+            "title": "Slotnumber",
+            "type": "integer"
+          },
+          "topic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topic"
+          },
+          "status": {
+            "$ref": "#/$defs/SectionSlotStatus",
+            "default": "PENDING"
+          },
+          "completedArtifactId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Completedartifactid"
+          },
+          "completedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Completedat"
+          }
+        },
+        "required": [
+          "slotNumber"
+        ],
+        "title": "SectionSlot",
+        "type": "object"
+      },
+      "SectionSlotStatus": {
+        "enum": [
+          "PENDING",
+          "IN_PROGRESS",
+          "COMPLETED",
+          "FAILED"
+        ],
+        "title": "SectionSlotStatus",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "State tracking for a full generation run.",
+    "properties": {
+      "identity": {
+        "$ref": "#/$defs/RunIdentity"
+      },
+      "slots": {
+        "items": {
+          "$ref": "#/$defs/SectionSlot"
+        },
+        "title": "Slots",
+        "type": "array"
+      },
+      "budget": {
+        "$ref": "#/$defs/BudgetReservation"
+      },
+      "status": {
+        "default": "PENDING",
+        "title": "Status",
+        "type": "string"
+      },
+      "createdAt": {
+        "format": "date-time",
+        "title": "Createdat",
+        "type": "string"
+      }
+    },
+    "required": [
+      "identity",
+      "budget"
+    ],
+    "title": "GenerationRun",
+    "type": "object"
+  },
+  "DomainEvent": {
+    "$defs": {
+      "EventType": {
+        "enum": [
+          "RUN_STARTED",
+          "CHECKPOINT_SAVED",
+          "ARTIFACT_PRODUCED",
+          "EVALUATION_COMPLETED",
+          "ISSUE_RECORDED",
+          "LOOP_DECIDED",
+          "OPERATION_GRANTED",
+          "RUN_COMPLETED",
+          "RUN_FAILED"
+        ],
+        "title": "EventType",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Immutable domain event for telemetry, outbox streaming, and audit replay.",
+    "properties": {
+      "eventId": {
+        "title": "Eventid",
+        "type": "string"
+      },
+      "eventType": {
+        "$ref": "#/$defs/EventType"
+      },
+      "runId": {
+        "title": "Runid",
+        "type": "string"
+      },
+      "sectionId": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Sectionid"
+      },
+      "epoch": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Epoch",
+        "type": "integer"
+      },
+      "idempotencyKey": {
+        "title": "Idempotencykey",
+        "type": "string"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "data": {
+        "title": "Data"
+      }
+    },
+    "required": [
+      "eventId",
+      "eventType",
+      "runId",
+      "idempotencyKey",
+      "data"
+    ],
+    "title": "DomainEvent",
+    "type": "object"
+  },
+  "ReadingPaper": {
+    "$defs": {
+      "AbsenceAssessment": {
+        "additionalProperties": false,
+        "description": "Semantics for NOT GIVEN items: proves absence rather than forcing fake positive quote.",
+        "properties": {
+          "assessmentId": {
+            "title": "Assessmentid",
+            "type": "string"
+          },
+          "claimOrTopic": {
+            "title": "Claimortopic",
+            "type": "string"
+          },
+          "absenceReason": {
+            "title": "Absencereason",
+            "type": "string"
+          },
+          "topicalContextSpan": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topicalcontextspan"
+          },
+          "absenceConfirmed": {
+            "default": true,
+            "title": "Absenceconfirmed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "assessmentId",
+          "claimOrTopic",
+          "absenceReason"
+        ],
+        "title": "AbsenceAssessment",
+        "type": "object"
+      },
+      "MultipleChoiceSingleQuestion": {
+        "additionalProperties": false,
+        "description": "Question type 3: 4-Option Multiple Choice Single.",
+        "properties": {
+          "questionNumber": {
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Questionnumber",
+            "type": "integer"
+          },
+          "explanation": {
+            "minLength": 10,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "questionType": {
+            "const": "MULTIPLE_CHOICE_SINGLE",
+            "default": "MULTIPLE_CHOICE_SINGLE",
+            "title": "Questiontype",
+            "type": "string"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "title": "Options",
+            "type": "array"
+          },
+          "correctOption": {
+            "pattern": "^[A-D]$",
+            "title": "Correctoption",
+            "type": "string"
+          },
+          "evidenceQuote": {
+            "minLength": 10,
+            "title": "Evidencequote",
+            "type": "string"
+          }
+        },
+        "required": [
+          "questionNumber",
+          "explanation",
+          "prompt",
+          "options",
+          "correctOption",
+          "evidenceQuote"
+        ],
+        "title": "MultipleChoiceSingleQuestion",
+        "type": "object"
+      },
+      "QuestionGroup": {
+        "additionalProperties": false,
+        "description": "A cohesive group of questions sharing type, instructions, and optionally context.",
+        "properties": {
+          "groupId": {
+            "title": "Groupid",
+            "type": "string"
+          },
+          "questionType": {
+            "$ref": "#/$defs/QuestionType"
+          },
+          "instructions": {
+            "title": "Instructions",
+            "type": "string"
+          },
+          "questions": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "MULTIPLE_CHOICE_SINGLE": "#/$defs/MultipleChoiceSingleQuestion",
+                  "SENTENCE_COMPLETION": "#/$defs/SentenceCompletionQuestion",
+                  "SHORT_ANSWER": "#/$defs/ShortAnswerQuestion",
+                  "SUMMARY_COMPLETION": "#/$defs/SummaryCompletionQuestion",
+                  "TRUE_FALSE_NOT_GIVEN": "#/$defs/TrueFalseNotGivenQuestion",
+                  "YES_NO_NOT_GIVEN": "#/$defs/YesNoNotGivenQuestion"
+                },
+                "propertyName": "questionType"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/TrueFalseNotGivenQuestion"
+                },
+                {
+                  "$ref": "#/$defs/SentenceCompletionQuestion"
+                },
+                {
+                  "$ref": "#/$defs/MultipleChoiceSingleQuestion"
+                },
+                {
+                  "$ref": "#/$defs/SummaryCompletionQuestion"
+                },
+                {
+                  "$ref": "#/$defs/YesNoNotGivenQuestion"
+                },
+                {
+                  "$ref": "#/$defs/ShortAnswerQuestion"
+                }
+              ]
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "sharedContext": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sharedcontext"
+          }
+        },
+        "required": [
+          "groupId",
+          "questionType",
+          "instructions"
+        ],
+        "title": "QuestionGroup",
+        "type": "object"
+      },
+      "QuestionType": {
+        "enum": [
+          "TRUE_FALSE_NOT_GIVEN",
+          "SENTENCE_COMPLETION",
+          "MULTIPLE_CHOICE_SINGLE",
+          "SUMMARY_COMPLETION",
+          "YES_NO_NOT_GIVEN",
+          "SHORT_ANSWER"
+        ],
+        "title": "QuestionType",
+        "type": "string"
+      },
+      "ReadingSection": {
+        "additionalProperties": false,
+        "description": "A single reading section with a passage and question groups.",
+        "properties": {
+          "sectionId": {
+            "maximum": 3,
+            "minimum": 1,
+            "title": "Sectionid",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "passage": {
+            "title": "Passage",
+            "type": "string"
+          },
+          "wordCount": {
+            "minimum": 0,
+            "title": "Wordcount",
+            "type": "integer"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/$defs/QuestionGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sectionId",
+          "title",
+          "passage",
+          "wordCount"
+        ],
+        "title": "ReadingSection",
+        "type": "object"
+      },
+      "SentenceCompletionQuestion": {
+        "additionalProperties": false,
+        "description": "Question type 2: Sentence Completion.",
+        "properties": {
+          "questionNumber": {
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Questionnumber",
+            "type": "integer"
+          },
+          "explanation": {
+            "minLength": 10,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "questionType": {
+            "const": "SENTENCE_COMPLETION",
+            "default": "SENTENCE_COMPLETION",
+            "title": "Questiontype",
+            "type": "string"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "evidenceQuote": {
+            "minLength": 10,
+            "title": "Evidencequote",
+            "type": "string"
+          }
+        },
+        "required": [
+          "questionNumber",
+          "explanation",
+          "prompt",
+          "answer",
+          "evidenceQuote"
+        ],
+        "title": "SentenceCompletionQuestion",
+        "type": "object"
+      },
+      "ShortAnswerQuestion": {
+        "additionalProperties": false,
+        "description": "Question type 6: Short Answer Question.",
+        "properties": {
+          "questionNumber": {
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Questionnumber",
+            "type": "integer"
+          },
+          "explanation": {
+            "minLength": 10,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "questionType": {
+            "const": "SHORT_ANSWER",
+            "default": "SHORT_ANSWER",
+            "title": "Questiontype",
+            "type": "string"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "evidenceQuote": {
+            "minLength": 10,
+            "title": "Evidencequote",
+            "type": "string"
+          }
+        },
+        "required": [
+          "questionNumber",
+          "explanation",
+          "prompt",
+          "answer",
+          "evidenceQuote"
+        ],
+        "title": "ShortAnswerQuestion",
+        "type": "object"
+      },
+      "SummaryCompletionQuestion": {
+        "additionalProperties": false,
+        "description": "Question type 4: Summary Completion item within a group.",
+        "properties": {
+          "questionNumber": {
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Questionnumber",
+            "type": "integer"
+          },
+          "explanation": {
+            "minLength": 10,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "questionType": {
+            "const": "SUMMARY_COMPLETION",
+            "default": "SUMMARY_COMPLETION",
+            "title": "Questiontype",
+            "type": "string"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "evidenceQuote": {
+            "minLength": 10,
+            "title": "Evidencequote",
+            "type": "string"
+          }
+        },
+        "required": [
+          "questionNumber",
+          "explanation",
+          "prompt",
+          "answer",
+          "evidenceQuote"
+        ],
+        "title": "SummaryCompletionQuestion",
+        "type": "object"
+      },
+      "TrueFalseAnswer": {
+        "enum": [
+          "TRUE",
+          "FALSE",
+          "NOT_GIVEN"
+        ],
+        "title": "TrueFalseAnswer",
+        "type": "string"
+      },
+      "TrueFalseNotGivenQuestion": {
+        "additionalProperties": false,
+        "description": "Question type 1: TRUE / FALSE / NOT GIVEN.\n\nNOT GIVEN items strictly require AbsenceAssessment and must not provide a fake positive quote.\nTRUE / FALSE items strictly require evidenceQuote and must not provide AbsenceAssessment.",
+        "properties": {
+          "questionNumber": {
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Questionnumber",
+            "type": "integer"
+          },
+          "explanation": {
+            "minLength": 10,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "questionType": {
+            "const": "TRUE_FALSE_NOT_GIVEN",
+            "default": "TRUE_FALSE_NOT_GIVEN",
+            "title": "Questiontype",
+            "type": "string"
+          },
+          "statement": {
+            "title": "Statement",
+            "type": "string"
+          },
+          "answer": {
+            "$ref": "#/$defs/TrueFalseAnswer"
+          },
+          "evidenceQuote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Evidencequote"
+          },
+          "absenceAssessment": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AbsenceAssessment"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "questionNumber",
+          "explanation",
+          "statement",
+          "answer"
+        ],
+        "title": "TrueFalseNotGivenQuestion",
+        "type": "object"
+      },
+      "YesNoAnswer": {
+        "enum": [
+          "YES",
+          "NO",
+          "NOT_GIVEN"
+        ],
+        "title": "YesNoAnswer",
+        "type": "string"
+      },
+      "YesNoNotGivenQuestion": {
+        "additionalProperties": false,
+        "description": "Question type 5: YES / NO / NOT GIVEN.",
+        "properties": {
+          "questionNumber": {
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Questionnumber",
+            "type": "integer"
+          },
+          "explanation": {
+            "minLength": 10,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "questionType": {
+            "const": "YES_NO_NOT_GIVEN",
+            "default": "YES_NO_NOT_GIVEN",
+            "title": "Questiontype",
+            "type": "string"
+          },
+          "statement": {
+            "title": "Statement",
+            "type": "string"
+          },
+          "answer": {
+            "$ref": "#/$defs/YesNoAnswer"
+          },
+          "evidenceQuote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Evidencequote"
+          },
+          "absenceAssessment": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AbsenceAssessment"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "questionNumber",
+          "explanation",
+          "statement",
+          "answer"
+        ],
+        "title": "YesNoNotGivenQuestion",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Complete IELTS Reading paper with 1 to 3 sections.",
+    "properties": {
+      "paperId": {
+        "title": "Paperid",
+        "type": "string"
+      },
+      "runId": {
+        "title": "Runid",
+        "type": "string"
+      },
+      "title": {
+        "title": "Title",
+        "type": "string"
+      },
+      "sections": {
+        "items": {
+          "$ref": "#/$defs/ReadingSection"
+        },
+        "title": "Sections",
+        "type": "array"
+      },
+      "totalQuestions": {
+        "maximum": 40,
+        "minimum": 1,
+        "title": "Totalquestions",
+        "type": "integer"
+      },
+      "totalWordCount": {
+        "minimum": 0,
+        "title": "Totalwordcount",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "paperId",
+      "runId",
+      "title",
+      "totalQuestions",
+      "totalWordCount"
+    ],
+    "title": "ReadingPaper",
+    "type": "object"
+  }
+}

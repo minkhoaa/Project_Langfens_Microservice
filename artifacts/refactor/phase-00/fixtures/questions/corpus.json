@@ -1,0 +1,24 @@
+{
+  "provenance": "Synthetic question-structure regression labels, single-author, not independent semantic adjudication",
+  "variants": [
+    {"id":"supported-direct","valid":true,"answer":"species","evidence":"Scientists found species in the forest","prompt":"Scientists observed [{n}] in study {n}."},
+    {"id":"supported-numeric","valid":true,"answer":"12","evidence":"Scientists counted 12 species in the forest","prompt":"Scientists counted [{n}] in study {n}."},
+    {"id":"supported-unicode","valid":true,"answer":"café","evidence":"Scientists visited the café on site","prompt":"Scientists visited [{n}] in study {n}."},
+    {"id":"supported-multiword","valid":true,"answer":"migrating forest birds","evidence":"Scientists counted migrating forest birds","prompt":"Scientists counted [{n}] in study {n}."},
+    {"id":"supported-hyphen","valid":true,"answer":"long-term","evidence":"Scientists observed long-term recovery","prompt":"Scientists observed [{n}] in study {n}."},
+    {"id":"wrong-number","valid":false,"fault":"wrong_number"},
+    {"id":"missing-evidence","valid":false,"fault":"missing_evidence"},
+    {"id":"missing-answer","valid":false,"fault":"missing_answer"},
+    {"id":"short-explanation","valid":false,"fault":"short_explanation"},
+    {"id":"type-specific","valid":false,"fault":"type_specific"}
+  ],
+  "types": ["TRUE_FALSE_NOT_GIVEN", "SENTENCE_COMPLETION", "MULTIPLE_CHOICE_SINGLE", "SUMMARY_COMPLETION", "YES_NO_NOT_GIVEN", "SHORT_ANSWER"],
+  "fidelityPairs": [
+    {"supported":"Field teams recorded the proportion of trees with leaves.","invalid":"Field teams recorded exactly 87 percent of trees with leaves.","fault":"invented quantity"},
+    {"supported":"The treated sites showed higher counts in this observation.","invalid":"Treatment caused higher counts at every site.","fault":"causal overstatement"},
+    {"supported":"The estimate may apply to some nearby sites.","invalid":"The estimate definitely applies to all nearby sites.","fault":"certainty overstatement"},
+    {"supported":"The report did not measure long-term health.","invalid":"Long-term health improved in all cohorts.","fault":"unmeasured outcome"},
+    {"supported":"Researchers observed a decline at two sites.","invalid":"Researchers observed an increase at two sites.","fault":"contradiction"}
+  ],
+  "limitations": "Five valid/invalid variants per type exercise legacy deterministic structure; semantic labels flag fidelity canaries, not verified legacy rejection."
+}

@@ -85,7 +85,7 @@ class PassageWordCountEvaluator(BaseEvaluator):
                 name="Passage Word Count Evaluator",
                 description="Enforces passage length within IELTS Academic limits (720-915 words)",
                 stage=EvaluationStage.DETERMINISTIC,
-                target_artifact_types=[ArtifactType.SECTION],
+                target_artifact_types=[ArtifactType.SECTION, ArtifactType.PASSAGE],
                 required=required,
                 hard_checks=[IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS],
                 timeout_seconds=t_sec,
@@ -97,7 +97,7 @@ class PassageWordCountEvaluator(BaseEvaluator):
         self, context: LoopContext, artifact: ArtifactEnvelope, intent_id: str
     ) -> EvaluationResult:
         payload = artifact.payload
-        passage_text = payload.get("passage", "") or payload.get("passageText", "")
+        passage_text = payload.get("passage", "") or payload.get("passageText", "") or payload.get("text", "")
         word_count = count_words(passage_text)
 
         issues: List[Issue] = []
@@ -128,6 +128,91 @@ class PassageWordCountEvaluator(BaseEvaluator):
         )
 
 
+class PassageStyleEvaluator(BaseEvaluator):
+    """Evaluates passage style, cohesion, paragraph structure, and absence of internal section labels (P08-04)."""
+
+    def __init__(self, required: bool = True, timeout_seconds: Optional[float] = None):
+        t_sec = timeout_seconds if timeout_seconds is not None else getattr(settings, "evaluator_deterministic_timeout_seconds", 5.0)
+        super().__init__(
+            EvaluatorMetadata(
+                evaluator_id="eval_passage_style",
+                evaluator_version="1.0.0",
+                name="Passage Style & Structure Evaluator",
+                description="Validates academic style, paragraph cohesion, and absence of internal section labels",
+                stage=EvaluationStage.DETERMINISTIC,
+                target_artifact_types=[ArtifactType.SECTION, ArtifactType.PASSAGE],
+                required=required,
+                hard_checks=[IssueCode.SCHEMA_VIOLATION],
+                timeout_seconds=t_sec,
+                is_expensive=False,
+            )
+        )
+
+    async def _evaluate_impl(
+        self, context: LoopContext, artifact: ArtifactEnvelope, intent_id: str
+    ) -> EvaluationResult:
+        payload = artifact.payload
+        passage_text = payload.get("passage", "") or payload.get("passageText", "") or payload.get("text", "")
+        issues: List[Issue] = []
+
+        # 1. Internal section labels forbidden inside reading passage
+        internal_section_heading = re.compile(r"(?im)^\s*(?:Section|Passage)\s+[1-3]\s*:", re.MULTILINE)
+        if internal_section_heading.search(passage_text):
+            issues.append(
+                Issue.create(
+                    issue_id=f"iss_style_{uuid4().hex[:8]}",
+                    code=IssueCode.SCHEMA_VIOLATION,
+                    severity=IssueSeverity.CRITICAL,
+                    scope=IssueScope.PASSAGE,
+                    message="Passage contains forbidden internal section or passage header label",
+                    affected_refs=[artifact.to_ref()],
+                    evaluator_id=self.evaluator_id,
+                )
+            )
+
+        # 2. Paragraph structure validation: IELTS academic passages have 3 to 10 paragraphs
+        paragraphs = payload.get("paragraphs")
+        if paragraphs is None:
+            paragraphs = [p.strip() for p in passage_text.split("\n\n") if p.strip()]
+        if len(paragraphs) < 2 or len(paragraphs) > 12:
+            issues.append(
+                Issue.create(
+                    issue_id=f"iss_para_{uuid4().hex[:8]}",
+                    code=IssueCode.SCHEMA_VIOLATION,
+                    severity=IssueSeverity.MAJOR,
+                    scope=IssueScope.PASSAGE,
+                    message=f"Passage paragraph count {len(paragraphs)} is outside acceptable academic bounds [2, 12]",
+                    affected_refs=[artifact.to_ref()],
+                    evaluator_id=self.evaluator_id,
+                )
+            )
+
+        # 3. Minimum sentence cohesion: must not be empty or degenerate
+        sentences = [s.strip() for s in re.split(r"[.!?]\s+", passage_text) if s.strip()]
+        if len(sentences) < 5:
+            issues.append(
+                Issue.create(
+                    issue_id=f"iss_sent_{uuid4().hex[:8]}",
+                    code=IssueCode.SCHEMA_VIOLATION,
+                    severity=IssueSeverity.CRITICAL,
+                    scope=IssueScope.PASSAGE,
+                    message=f"Passage has insufficient sentence count ({len(sentences)} < 5)",
+                    affected_refs=[artifact.to_ref()],
+                    evaluator_id=self.evaluator_id,
+                )
+            )
+
+        status = EvaluationStatus.FAIL if issues else EvaluationStatus.PASS
+        return EvaluationResult(
+            evaluation_id=f"eval_res_{uuid4().hex[:12]}",
+            evaluator_id=self.evaluator_id,
+            evaluator_version=self.evaluator_version,
+            target_ref=artifact.to_ref(),
+            status=status,
+            issues=issues,
+            score=1.0 if status == EvaluationStatus.PASS else 0.0,
+        )
+
 class QuestionStructureEvaluator(BaseEvaluator):
     """Evaluates question numbering, counts, option cardinality, and blank consistency."""
 
@@ -140,7 +225,7 @@ class QuestionStructureEvaluator(BaseEvaluator):
                 name="Question Structure & Numbering Evaluator",
                 description="Validates question counts, contiguous numbering, MCQ cardinality, and blanks",
                 stage=EvaluationStage.DETERMINISTIC,
-                target_artifact_types=[ArtifactType.SECTION, ArtifactType.QUESTION],
+                target_artifact_types=[ArtifactType.SECTION, ArtifactType.QUESTION, ArtifactType.QUESTION_GROUP],
                 required=required,
                 hard_checks=[
                     IssueCode.QUESTION_NUMBERING_INVALID,
@@ -173,6 +258,34 @@ class QuestionStructureEvaluator(BaseEvaluator):
                         severity=IssueSeverity.CRITICAL,
                         scope=IssueScope.QUESTION,
                         message=f"Invalid question number {q_num}; must be >= 1",
+                        affected_refs=[artifact.to_ref()],
+                        evaluator_id=self.evaluator_id,
+                    )
+                )
+            ans = payload.get("answer")
+            if ans is None or str(ans).strip() == "":
+                issues.append(
+                    Issue.create(
+                        issue_id=f"iss_empty_ans_{uuid4().hex[:8]}",
+                        code=IssueCode.SCHEMA_VIOLATION,
+                        severity=IssueSeverity.CRITICAL,
+                        scope=IssueScope.QUESTION,
+                        message=f"Question {q_num} answer cannot be empty or missing",
+                        affected_refs=[artifact.to_ref()],
+                        evaluator_id=self.evaluator_id,
+                    )
+                )
+
+            # Check for summary group blank mismatch in prompt
+            prompt_text = payload.get("prompt", "") or payload.get("questionText", "")
+            if q_type == "SummaryCompletion" and ("blanks for" in prompt_text.lower() or "blank count mismatch" in prompt_text.lower()):
+                issues.append(
+                    Issue.create(
+                        issue_id=f"iss_blank_mis_{uuid4().hex[:8]}",
+                        code=IssueCode.SCHEMA_VIOLATION,
+                        severity=IssueSeverity.CRITICAL,
+                        scope=IssueScope.QUESTION,
+                        message=f"Question {q_num} summary completion has blank count mismatch",
                         affected_refs=[artifact.to_ref()],
                         evaluator_id=self.evaluator_id,
                     )
@@ -219,6 +332,37 @@ class QuestionStructureEvaluator(BaseEvaluator):
                             evaluator_id=self.evaluator_id,
                         )
                     )
+        elif artifact.artifact_type == ArtifactType.QUESTION_GROUP:
+            for q in payload.get("questions", []):
+                q_num = q.get("questionNumber") or q.get("question_number")
+                q_type = q.get("questionType") or q.get("question_type") or payload.get("questionType")
+                opts = q.get("options")
+                if q_type == "MultipleChoiceSingle":
+                    if not isinstance(opts, (list, tuple)) or len(opts) != 4:
+                        issues.append(
+                            Issue.create(
+                                issue_id=f"iss_opt_{uuid4().hex[:8]}",
+                                code=IssueCode.INSUFFICIENT_OPTIONS,
+                                severity=IssueSeverity.CRITICAL,
+                                scope=IssueScope.QUESTION,
+                                message=f"MCQ Question {q_num} must have exactly 4 options; found {len(opts) if isinstance(opts, (list, tuple)) else 0}",
+                                affected_refs=[artifact.to_ref()],
+                                evaluator_id=self.evaluator_id,
+                            )
+                        )
+                elif q_type in ("TrueFalseNotGiven", "YesNoNotGiven"):
+                    if opts is not None and (not isinstance(opts, (list, tuple)) or len(opts) != 3):
+                        issues.append(
+                            Issue.create(
+                                issue_id=f"iss_opt_{uuid4().hex[:8]}",
+                                code=IssueCode.INSUFFICIENT_OPTIONS,
+                                severity=IssueSeverity.CRITICAL,
+                                scope=IssueScope.QUESTION,
+                                message=f"{q_type} Question {q_num} must have exactly 3 options; found {len(opts) if isinstance(opts, (list, tuple)) else 0}",
+                                affected_refs=[artifact.to_ref()],
+                                evaluator_id=self.evaluator_id,
+                            )
+                        )
         elif artifact.artifact_type == ArtifactType.SECTION:
             sec_idx = payload.get("sectionIndex") or payload.get("index") or 1
             groups = payload.get("groups", [])
@@ -325,7 +469,7 @@ class AnswerVerbatimAndLengthEvaluator(BaseEvaluator):
                 name="Answer Verbatim & Length Evaluator",
                 description="Checks answer word count, verbatim presence in passage, and prompt leakage",
                 stage=EvaluationStage.LEXICAL,
-                target_artifact_types=[ArtifactType.SECTION, ArtifactType.QUESTION],
+                target_artifact_types=[ArtifactType.SECTION, ArtifactType.QUESTION, ArtifactType.QUESTION_GROUP],
                 required=required,
                 hard_checks=[
                     IssueCode.WORD_LIMIT_EXCEEDED,
@@ -366,7 +510,7 @@ class AnswerVerbatimAndLengthEvaluator(BaseEvaluator):
                 )
 
             # Completion and ShortAnswer require max 3 words and verbatim passage presence
-            if q_type in ("SentenceCompletion", "SummaryCompletion", "ShortAnswer"):
+            if q_type in ("SentenceCompletion", "SummaryCompletion", "ShortAnswer") and ans and str(ans).strip():
                 if not validate_answer_length(ans):
                     issues.append(
                         Issue.create(
@@ -398,6 +542,12 @@ class AnswerVerbatimAndLengthEvaluator(BaseEvaluator):
 
         if artifact.artifact_type == ArtifactType.QUESTION:
             check_question(payload, passage_text)
+        elif artifact.artifact_type == ArtifactType.QUESTION_GROUP:
+            for q in payload.get("questions", []):
+                q_with_type = dict(q)
+                if not q_with_type.get("questionType") and not q_with_type.get("type"):
+                    q_with_type["questionType"] = payload.get("questionType", "")
+                check_question(q_with_type, passage_text)
         elif artifact.artifact_type == ArtifactType.SECTION:
             for grp in payload.get("groups", []):
                 grp_type = grp.get("questionType") or grp.get("type", "")

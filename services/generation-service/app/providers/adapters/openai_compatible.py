@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+import httpx
 from typing import Any, Dict, List, Optional
 from openai import (
     AsyncOpenAI,
@@ -50,17 +51,27 @@ class OpenAICompatibleProvider(BaseProvider):
         base_url: str,
         models: Dict[str, str],
         supports_response_format: bool = True,
+        http_client: Optional[httpx.AsyncClient] = None,
+        max_retries: int = 0,
     ):
         super().__init__(name=name, base_url=base_url, models=models)
         self.supports_response_format = supports_response_format
+        self.http_client = http_client
+        self.max_retries = max_retries
         self._clients: Dict[str, AsyncOpenAI] = {}
 
     def _get_client(self, api_key: str) -> AsyncOpenAI:
         cache_key = f"{self.name}:{api_key[:8]}"
         if cache_key not in self._clients:
-            self._clients[cache_key] = AsyncOpenAI(api_key=api_key, base_url=self.base_url)
+            client_kwargs: Dict[str, Any] = {
+                "api_key": api_key,
+                "base_url": self.base_url,
+                "max_retries": self.max_retries,
+            }
+            if self.http_client is not None:
+                client_kwargs["http_client"] = self.http_client
+            self._clients[cache_key] = AsyncOpenAI(**client_kwargs)
         return self._clients[cache_key]
-
     def _build_create_kwargs(self, request: ProviderRequest, model_name: str) -> Dict[str, Any]:
         messages = [{"role": m.role, "content": m.content} for m in request.messages]
         kwargs: Dict[str, Any] = {

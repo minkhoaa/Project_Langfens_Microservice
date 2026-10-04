@@ -7,7 +7,7 @@ from enum import Enum
 from typing import List, Optional
 from pydantic import Field, field_validator
 
-from .artifact import ArtifactRef
+from .artifact import ArtifactRef, ArtifactType
 from .base import CanonicalBaseModel
 from .issue import Issue, IssueCode, IssueScope, IssueSeverity, IssueStatus
 
@@ -79,15 +79,29 @@ class EvaluationResult(CanonicalBaseModel):
         error_message: str,
         code: IssueCode = IssueCode.EVALUATOR_UNAVAILABLE,
         elapsed_ms: Optional[float] = None,
+        scope: Optional[IssueScope] = None,
     ) -> EvaluationResult:
         """Constructs an explicit ERROR evaluation result with an attached critical issue."""
+        if scope is None:
+            if target_ref.artifact_type == ArtifactType.QUESTION:
+                target_scope = IssueScope.QUESTION
+            elif target_ref.artifact_type == ArtifactType.PASSAGE:
+                target_scope = IssueScope.PASSAGE
+            elif target_ref.artifact_type == ArtifactType.SOURCE_PACK:
+                target_scope = IssueScope.SOURCE
+            else:
+                target_scope = IssueScope.SECTION
+        else:
+            target_scope = scope
+
         issue = Issue.create(
             issue_id=f"iss_{evaluation_id}",
             code=code,
             severity=IssueSeverity.CRITICAL,
-            scope=IssueScope.SECTION,
+            scope=target_scope,
             message=error_message,
             affected_refs=[target_ref],
+            evaluator_id=evaluator_id,
         )
         return cls(
             evaluationId=evaluation_id,

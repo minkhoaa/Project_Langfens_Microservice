@@ -1,0 +1,265 @@
+{
+  "timestamp": "2026-09-30T08:48:59.963724+00:00",
+  "source": "pg_catalog (live query against exam_test_phase02 on PostgreSQL port 5433)",
+  "uniqueConstraintsCount": 12,
+  "indexesCount": 39,
+  "constraints": [
+    {
+      "table": "reading_paper_artifact_dependencies",
+      "name": "PK_reading_paper_artifact_dependencies",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_artifact_heads",
+      "name": "PK_reading_paper_artifact_heads",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_artifacts",
+      "name": "PK_reading_paper_artifacts",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_budget_allocations",
+      "name": "PK_reading_paper_budget_allocations",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_decisions",
+      "name": "PK_reading_paper_decisions",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_evaluations",
+      "name": "PK_reading_paper_evaluations",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_event_outbox",
+      "name": "PK_reading_paper_event_outbox",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_issues",
+      "name": "PK_reading_paper_issues",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_jobs",
+      "name": "PK_reading_paper_jobs",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_operations",
+      "name": "PK_reading_paper_operations",
+      "definition": "PRIMARY KEY (\"Id\")"
+    },
+    {
+      "table": "reading_paper_runs",
+      "name": "FK_reading_paper_runs_reading_paper_jobs_JobId",
+      "definition": "FOREIGN KEY (\"JobId\") REFERENCES reading_paper_jobs(\"Id\") ON DELETE CASCADE"
+    },
+    {
+      "table": "reading_paper_runs",
+      "name": "PK_reading_paper_runs",
+      "definition": "PRIMARY KEY (\"Id\")"
+    }
+  ],
+  "indexes": [
+    {
+      "table": "reading_paper_artifact_dependencies",
+      "name": "IX_reading_paper_artifact_dependencies_RunId_ArtifactId_Version",
+      "definition": "CREATE INDEX \"IX_reading_paper_artifact_dependencies_RunId_ArtifactId_Version\" ON public.reading_paper_artifact_dependencies USING btree (\"RunId\", \"ArtifactId\", \"Version\")"
+    },
+    {
+      "table": "reading_paper_artifact_dependencies",
+      "name": "IX_reading_paper_artifact_dependencies_RunId_ParentArtifactId_P",
+      "definition": "CREATE INDEX \"IX_reading_paper_artifact_dependencies_RunId_ParentArtifactId_P\" ON public.reading_paper_artifact_dependencies USING btree (\"RunId\", \"ParentArtifactId\", \"ParentVersion\")"
+    },
+    {
+      "table": "reading_paper_artifact_dependencies",
+      "name": "PK_reading_paper_artifact_dependencies",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_artifact_dependencies\" ON public.reading_paper_artifact_dependencies USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_artifact_heads",
+      "name": "IX_reading_paper_artifact_heads_RunId_ArtifactId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_artifact_heads_RunId_ArtifactId\" ON public.reading_paper_artifact_heads USING btree (\"RunId\", \"ArtifactId\")"
+    },
+    {
+      "table": "reading_paper_artifact_heads",
+      "name": "PK_reading_paper_artifact_heads",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_artifact_heads\" ON public.reading_paper_artifact_heads USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_artifacts",
+      "name": "IX_reading_paper_artifacts_ContentHash",
+      "definition": "CREATE INDEX \"IX_reading_paper_artifacts_ContentHash\" ON public.reading_paper_artifacts USING btree (\"ContentHash\")"
+    },
+    {
+      "table": "reading_paper_artifacts",
+      "name": "IX_reading_paper_artifacts_RunId_ArtifactId",
+      "definition": "CREATE INDEX \"IX_reading_paper_artifacts_RunId_ArtifactId\" ON public.reading_paper_artifacts USING btree (\"RunId\", \"ArtifactId\")"
+    },
+    {
+      "table": "reading_paper_artifacts",
+      "name": "IX_reading_paper_artifacts_RunId_ArtifactId_Version",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_artifacts_RunId_ArtifactId_Version\" ON public.reading_paper_artifacts USING btree (\"RunId\", \"ArtifactId\", \"Version\")"
+    },
+    {
+      "table": "reading_paper_artifacts",
+      "name": "PK_reading_paper_artifacts",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_artifacts\" ON public.reading_paper_artifacts USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_budget_allocations",
+      "name": "IX_reading_paper_budget_allocations_RunId_ParentScopeId",
+      "definition": "CREATE INDEX \"IX_reading_paper_budget_allocations_RunId_ParentScopeId\" ON public.reading_paper_budget_allocations USING btree (\"RunId\", \"ParentScopeId\")"
+    },
+    {
+      "table": "reading_paper_budget_allocations",
+      "name": "IX_reading_paper_budget_allocations_RunId_ScopeId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_budget_allocations_RunId_ScopeId\" ON public.reading_paper_budget_allocations USING btree (\"RunId\", \"ScopeId\")"
+    },
+    {
+      "table": "reading_paper_budget_allocations",
+      "name": "PK_reading_paper_budget_allocations",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_budget_allocations\" ON public.reading_paper_budget_allocations USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_decisions",
+      "name": "IX_reading_paper_decisions_RunId_DecisionId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_decisions_RunId_DecisionId\" ON public.reading_paper_decisions USING btree (\"RunId\", \"DecisionId\")"
+    },
+    {
+      "table": "reading_paper_decisions",
+      "name": "IX_reading_paper_decisions_RunId_EvaluationRef",
+      "definition": "CREATE INDEX \"IX_reading_paper_decisions_RunId_EvaluationRef\" ON public.reading_paper_decisions USING btree (\"RunId\", \"EvaluationRef\")"
+    },
+    {
+      "table": "reading_paper_decisions",
+      "name": "PK_reading_paper_decisions",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_decisions\" ON public.reading_paper_decisions USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_evaluations",
+      "name": "IX_reading_paper_evaluations_RunId_EvaluationId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_evaluations_RunId_EvaluationId\" ON public.reading_paper_evaluations USING btree (\"RunId\", \"EvaluationId\")"
+    },
+    {
+      "table": "reading_paper_evaluations",
+      "name": "IX_reading_paper_evaluations_RunId_TargetArtifactId_TargetVersi",
+      "definition": "CREATE INDEX \"IX_reading_paper_evaluations_RunId_TargetArtifactId_TargetVersi\" ON public.reading_paper_evaluations USING btree (\"RunId\", \"TargetArtifactId\", \"TargetVersion\")"
+    },
+    {
+      "table": "reading_paper_evaluations",
+      "name": "PK_reading_paper_evaluations",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_evaluations\" ON public.reading_paper_evaluations USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_event_outbox",
+      "name": "IX_reading_paper_event_outbox_RunId_EventId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_event_outbox_RunId_EventId\" ON public.reading_paper_event_outbox USING btree (\"RunId\", \"EventId\")"
+    },
+    {
+      "table": "reading_paper_event_outbox",
+      "name": "IX_reading_paper_event_outbox_RunId_IdempotencyKey",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_event_outbox_RunId_IdempotencyKey\" ON public.reading_paper_event_outbox USING btree (\"RunId\", \"IdempotencyKey\")"
+    },
+    {
+      "table": "reading_paper_event_outbox",
+      "name": "IX_reading_paper_event_outbox_Status_CreatedAt",
+      "definition": "CREATE INDEX \"IX_reading_paper_event_outbox_Status_CreatedAt\" ON public.reading_paper_event_outbox USING btree (\"Status\", \"CreatedAt\")"
+    },
+    {
+      "table": "reading_paper_event_outbox",
+      "name": "PK_reading_paper_event_outbox",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_event_outbox\" ON public.reading_paper_event_outbox USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_issues",
+      "name": "IX_reading_paper_issues_RunId_EvaluationId",
+      "definition": "CREATE INDEX \"IX_reading_paper_issues_RunId_EvaluationId\" ON public.reading_paper_issues USING btree (\"RunId\", \"EvaluationId\")"
+    },
+    {
+      "table": "reading_paper_issues",
+      "name": "IX_reading_paper_issues_RunId_IssueId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_issues_RunId_IssueId\" ON public.reading_paper_issues USING btree (\"RunId\", \"IssueId\")"
+    },
+    {
+      "table": "reading_paper_issues",
+      "name": "PK_reading_paper_issues",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_issues\" ON public.reading_paper_issues USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_jobs",
+      "name": "IX_reading_paper_jobs_ExamId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_jobs_ExamId\" ON public.reading_paper_jobs USING btree (\"ExamId\")"
+    },
+    {
+      "table": "reading_paper_jobs",
+      "name": "IX_reading_paper_jobs_Id_Epoch_LeaseOwner",
+      "definition": "CREATE INDEX \"IX_reading_paper_jobs_Id_Epoch_LeaseOwner\" ON public.reading_paper_jobs USING btree (\"Id\", \"Epoch\", \"LeaseOwner\")"
+    },
+    {
+      "table": "reading_paper_jobs",
+      "name": "IX_reading_paper_jobs_Status_LeaseUntil",
+      "definition": "CREATE INDEX \"IX_reading_paper_jobs_Status_LeaseUntil\" ON public.reading_paper_jobs USING btree (\"Status\", \"LeaseUntil\")"
+    },
+    {
+      "table": "reading_paper_jobs",
+      "name": "PK_reading_paper_jobs",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_jobs\" ON public.reading_paper_jobs USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_operations",
+      "name": "IX_reading_paper_operations_RunId_ArtifactId",
+      "definition": "CREATE INDEX \"IX_reading_paper_operations_RunId_ArtifactId\" ON public.reading_paper_operations USING btree (\"RunId\", \"ArtifactId\")"
+    },
+    {
+      "table": "reading_paper_operations",
+      "name": "IX_reading_paper_operations_RunId_OperationId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_operations_RunId_OperationId\" ON public.reading_paper_operations USING btree (\"RunId\", \"OperationId\")"
+    },
+    {
+      "table": "reading_paper_operations",
+      "name": "IX_reading_paper_operations_RunId_ParentOperationId",
+      "definition": "CREATE INDEX \"IX_reading_paper_operations_RunId_ParentOperationId\" ON public.reading_paper_operations USING btree (\"RunId\", \"ParentOperationId\")"
+    },
+    {
+      "table": "reading_paper_operations",
+      "name": "IX_reading_paper_operations_RunId_RequestHash",
+      "definition": "CREATE INDEX \"IX_reading_paper_operations_RunId_RequestHash\" ON public.reading_paper_operations USING btree (\"RunId\", \"RequestHash\")"
+    },
+    {
+      "table": "reading_paper_operations",
+      "name": "IX_reading_paper_operations_RunId_SectionId",
+      "definition": "CREATE INDEX \"IX_reading_paper_operations_RunId_SectionId\" ON public.reading_paper_operations USING btree (\"RunId\", \"SectionId\")"
+    },
+    {
+      "table": "reading_paper_operations",
+      "name": "PK_reading_paper_operations",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_operations\" ON public.reading_paper_operations USING btree (\"Id\")"
+    },
+    {
+      "table": "reading_paper_runs",
+      "name": "IX_reading_paper_runs_JobId_RunId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_runs_JobId_RunId\" ON public.reading_paper_runs USING btree (\"JobId\", \"RunId\")"
+    },
+    {
+      "table": "reading_paper_runs",
+      "name": "IX_reading_paper_runs_RunId",
+      "definition": "CREATE UNIQUE INDEX \"IX_reading_paper_runs_RunId\" ON public.reading_paper_runs USING btree (\"RunId\")"
+    },
+    {
+      "table": "reading_paper_runs",
+      "name": "IX_reading_paper_runs_Status",
+      "definition": "CREATE INDEX \"IX_reading_paper_runs_Status\" ON public.reading_paper_runs USING btree (\"Status\")"
+    },
+    {
+      "table": "reading_paper_runs",
+      "name": "PK_reading_paper_runs",
+      "definition": "CREATE UNIQUE INDEX \"PK_reading_paper_runs\" ON public.reading_paper_runs USING btree (\"Id\")"
+    }
+  ]
+}

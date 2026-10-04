@@ -4,13 +4,15 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import time
+from datetime import datetime, timezone
 from collections.abc import Sequence
 from typing import Any
 from uuid import uuid4
 
 from pydantic import Field
 
-from app.contracts.artifact import ArtifactEnvelope, ArtifactRef
+from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
 from app.contracts.base import CanonicalBaseModel
 from app.contracts.evaluation import EvaluationResult, EvaluationStatus
 from app.contracts.issue import IssueCode, IssueLedger, IssueSeverity
@@ -20,7 +22,7 @@ from app.loop.context import BudgetTracker, LoopContext, ResumeCursor
 from app.loop.controller import LoopController
 from app.loop.dependencies import DependencyValidator
 from app.loop.detectors import OscillationDetector, StagnationDetector
-from app.loop.journal import OperationIntent, StepJournal
+from app.loop.journal import JournalEntry, OperationIntent, StepJournal
 from app.loop.ledger import IssueLedgerManager
 from app.loop.policy import LoopPolicy
 from app.persistence.client import CheckpointApiError, CheckpointClient
@@ -63,6 +65,7 @@ class BoundedLoopRuntime:
         persistence_client: CheckpointClient | None = None,
         accepted_dependencies: dict[str, ArtifactRef] | None = None,
         ledger_mgr: IssueLedgerManager | None = None, journal: StepJournal | None = None,
+        accept_head: bool = True,
     ):
         if persistence_client is None:
             raise ValueError("LoopRuntime requires an authoritative durable CheckpointClient")
@@ -75,6 +78,7 @@ class BoundedLoopRuntime:
         self.accepted_dependencies = accepted_dependencies if accepted_dependencies is not None else {}
         self.ledger_mgr = ledger_mgr or IssueLedgerManager(context.run_id)
         self.journal = journal or StepJournal(context.run_id)
+        self.accept_head = accept_head
         self.controller = LoopController(policy)
         self.stagnation_detector = StagnationDetector()
         self.oscillation_detector = OscillationDetector()
@@ -120,7 +124,7 @@ class BoundedLoopRuntime:
         if checkpoints:
             checkpoint = checkpoints[0]
             payload = json.loads(checkpoint.stateJson)
-            if (payload["policy"] != self.policy.model_dump(mode="json", by_alias=True) or
+            if (LoopPolicy.model_validate(payload["policy"]) != self.policy or
                 payload["targetArtifactId"] != self.context.target_artifact_id or
                 payload["scope"] != self.context.scope.value or
                 payload["policyVersion"] != self.context.policy_version):
@@ -144,6 +148,14 @@ class BoundedLoopRuntime:
                 if not self.context.current_artifact or self.context.current_artifact.to_ref() != ref:
                     raise ValueError("Cursor points to missing or mismatched durable artifact")
             self.context.input_dependencies = tuple(ArtifactRef.model_validate(r) for r in payload["inputDependencies"])
+            if "journal" in payload:
+                entries = [JournalEntry.model_validate(e) for e in payload["journal"]]
+                self.journal = StepJournal.from_entries(
+                    self.context.run_id,
+                    entries,
+                    persistence_client=self.persistence_client,
+                    authority=self.context.authority,
+                )
         elif (
             any(
                 op.artifactId == self.context.target_artifact_id
@@ -195,6 +207,7 @@ class BoundedLoopRuntime:
             "expectedHeadVersion": self._expected_head_version,
             "evaluations": [e.model_dump(mode="json", by_alias=True) for e in self._latest_evaluations],
             "decision": self._latest_decision.model_dump(mode="json", by_alias=True) if self._latest_decision else None,
+            "journal": [e.model_dump(mode="json", by_alias=True) for e in self.journal.entries],
             "currentRef": (self.context.current_artifact.to_ref().model_dump(mode="json", by_alias=True)
                            if self.context.current_artifact else None),
         }
@@ -246,7 +259,11 @@ class BoundedLoopRuntime:
             operation_id=op_id, operation_type=kind, run_id=self.context.run_id,
             target_artifact_id=self.context.target_artifact_id, expected_version=version,
             token_reservation=tokens,
-            wall_time_reservation_seconds=(self.policy.operation_wall_reservation_seconds if tokens else 0),
+            wall_time_reservation_seconds=(
+                self.policy.operation_wall_reservation_seconds
+                if kind in ("GENERATE", "REPAIR")
+                else (15.0 if kind == "EVALUATE" else 0.0)
+            ),
             payload_for_hash=json.dumps(extra, sort_keys=True, default=str),
         )
 
@@ -262,17 +279,23 @@ class BoundedLoopRuntime:
         if not self._authority():
             return False
         b = self.context.budget_tracker
+        parent_op = getattr(self.context, "parent_operation_id", None)
         if intent.operation_type != "CHECKPOINT_COMMIT":
-            if b.calls_used + 1 > self.policy.max_total_calls:
-                self._finish(LoopReason.CALL_CAP, "next operation exceeds shared call cap")
-                return False
+            if not parent_op:
+                if b.calls_used + 1 > self.policy.max_total_calls:
+                    self._finish(LoopReason.CALL_CAP, "next operation exceeds shared call cap")
+                    return False
             if b.tokens_used + intent.token_reservation > self.policy.max_total_tokens:
                 self._finish(LoopReason.TOKEN_CAP, "next reservation exceeds token cap")
                 return False
-            if b.get_elapsed_seconds() + intent.wall_time_reservation_seconds > self.policy.max_wall_time_seconds:
+            now_utc = datetime.now(timezone.utc)
+            actual_elapsed = (now_utc - b.started_at).total_seconds()
+            if actual_elapsed + intent.wall_time_reservation_seconds > self.policy.max_wall_time_seconds:
                 self._finish(LoopReason.WALL_TIME_CAP, "next reservation exceeds deadline")
                 return False
         self.journal.record_intent(intent, self.context.cursor.current_state)
+        sec_id = None
+        art_id = self.context.target_artifact_id
         try:
             grant = self.persistence_client.grant_operation(OperationGrantRequest(
                 runId=self.context.run_id, epoch=self.context.authority.epoch,
@@ -280,8 +303,9 @@ class BoundedLoopRuntime:
                 operationType=intent.operation_type, requestHash=intent.request_hash,
                 tokenReservation=intent.token_reservation,
                 wallTimeReservationSeconds=intent.wall_time_reservation_seconds,
-                sectionId=str(self.context.section_id) if self.context.section_id is not None else None,
-                artifactId=self.context.target_artifact_id,
+                sectionId=sec_id,
+                artifactId=art_id,
+                parentOperationId=parent_op,
             ))
         except CheckpointApiError as error:
             if error.status_code in (409, 403):
@@ -298,9 +322,11 @@ class BoundedLoopRuntime:
             self._finish(LoopReason.UNKNOWN_OUTCOME, "grant replay without committed outcome")
             return False
         if intent.operation_type != "CHECKPOINT_COMMIT":
-            b.calls_used += 1
+            if not parent_op:
+                b.calls_used += 1
             b.tokens_used += intent.token_reservation
-            b.wall_time_used_seconds += intent.wall_time_reservation_seconds
+            now_utc = datetime.now(timezone.utc)
+            b.wall_time_used_seconds = max(b.wall_time_used_seconds, (now_utc - b.started_at).total_seconds())
         self.journal.mark_execution_started(intent.operation_id)
         return True
 
@@ -354,7 +380,11 @@ class BoundedLoopRuntime:
             except asyncio.CancelledError:
                 raise
             except Exception as error:
-                self._finish(LoopReason.INVALID_OUTPUT, f"capability failed: {type(error).__name__}")
+                if repair and self._generated_versions < self.policy.max_generated_versions:
+                    self.context.cursor.advance(LoopState.DRAFTING)
+                    self._checkpoint()
+                    return
+                self._finish(LoopReason.INVALID_OUTPUT, f"capability failed: {type(error).__name__}: {error}")
                 return
             if not self._artifact_valid(art, version):
                 self._finish(LoopReason.INVALID_OUTPUT, "capability returned wrong target/version/hash/parents")
@@ -434,6 +464,7 @@ class BoundedLoopRuntime:
                     raise ValueError("Completed evaluation operation lacks matching durable result")
                 self.journal.record_intent(intent, self.context.cursor.current_state)
             else:
+                t_eval_start = time.perf_counter()
                 try:
                     result = await asyncio.wait_for(
                         evaluator.evaluate(self.context, art, intent.operation_id),
@@ -457,7 +488,7 @@ class BoundedLoopRuntime:
                         runId=self.context.run_id, epoch=self.context.authority.epoch,
                         leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
                         tokensUsed=intent.token_reservation,
-                        wallTimeUsedSeconds=intent.wall_time_reservation_seconds,
+                        wallTimeUsedSeconds=round(time.perf_counter() - t_eval_start, 4),
                         resultRefJson=result.model_dump_json(by_alias=True),
                         resolvedFingerprints=list(result.resolved_issue_fingerprints or []),
                     ))
@@ -483,11 +514,17 @@ class BoundedLoopRuntime:
         )
         self._latest_decision = decision
         if decision.decision == DecisionType.PASS:
-            if self._accepted_head and self._accepted_head.version != art.version:
-                self._expected_head_version = self._accepted_head.version
-            self._checkpoint()
-            await self._accept(art)
-            return
+            if self.accept_head:
+                if self._accepted_head and self._accepted_head.version != art.version:
+                    self._expected_head_version = self._accepted_head.version
+                self._checkpoint()
+                await self._accept(art)
+                return
+            else:
+                self.context.accepted_artifact = art
+                self.context.cursor.advance(LoopState.COMPLETED)
+                self._checkpoint()
+                return
         self.context.cursor.advance(decision.next_state)
         self._checkpoint()
 
@@ -506,6 +543,20 @@ class BoundedLoopRuntime:
             self.context.cursor.advance(again.next_state)
             self._checkpoint()
             return
+
+        # Pre-acceptance validation: coverage, version/refs fresh check, and no non-pass
+        eval_ids = {e.evaluator_id for e in self._latest_evaluations}
+        missing_req = set(self.policy.required_evaluator_ids) - eval_ids
+        if missing_req:
+            self._finish(LoopReason.MISSING_EVALUATOR, f"Cannot accept: missing required evaluations {sorted(missing_req)}")
+            return
+        for ev in self._latest_evaluations:
+            if ev.status != EvaluationStatus.PASS:
+                self._finish(LoopReason.EVALUATOR_ERROR, f"Cannot accept: evaluation {ev.evaluator_id} has non-passing status {ev.status.value}")
+                return
+            if ev.target_ref != art.to_ref() or set(ev.input_dependency_refs) != set(art.parent_refs):
+                self._finish(LoopReason.STALE_DEPENDENCY, f"Cannot accept: evaluation {ev.evaluator_id} target/parent refs do not match artifact")
+                return
         intent = self._intent("CHECKPOINT_COMMIT", art.version, 0, art.content_hash,
                               {"evaluations": [e.evaluation_id for e in self._latest_evaluations],
                                "head": self._expected_head_version})

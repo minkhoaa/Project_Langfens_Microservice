@@ -35,9 +35,15 @@ class QuestionItemRepairer(BaseRepairer):
     P07-08 / T07-08 Invariant: Answer changes must have passage evidence justification.
     """
 
-    def __init__(self, timeout_seconds: Optional[float] = None, estimated_tokens: Optional[int] = None):
+    def __init__(
+        self,
+        timeout_seconds: Optional[float] = None,
+        estimated_tokens: Optional[int] = None,
+        gateway: Optional[Any] = None,
+    ):
         t_sec = timeout_seconds if timeout_seconds is not None else getattr(settings, "repair_timeout_seconds", 30.0)
         tok = estimated_tokens if estimated_tokens is not None else getattr(settings, "repair_max_tokens_per_attempt", 1500)
+        self.gateway = gateway
         super().__init__(
             RepairCapabilityMetadata(
                 repairer_id="rep_question_item",
@@ -189,7 +195,7 @@ class QuestionItemRepairer(BaseRepairer):
                         payload=q_eval_payload,
                         producer_version="2.0.0",
                     )
-                    post_eval = AmbiguityAndDistractorEvaluator()
+                    post_eval = AmbiguityAndDistractorEvaluator(gateway=self.gateway or getattr(context, "gateway", None), required=False)
                     post_res = await post_eval.evaluate(context, temp_env, intent_id="post_rep_unique")
                     if any(iss.code in (IssueCode.BAD_DISTRACTOR, IssueCode.AMBIGUOUS_ANSWER) for iss in post_res.issues):
                         raise RepairJustificationError(
@@ -278,14 +284,12 @@ class QuestionItemRepairer(BaseRepairer):
                         payload=q_eval_payload,
                         producer_version="2.0.0",
                     )
-                    post_eval = AmbiguityAndDistractorEvaluator()
+                    post_eval = AmbiguityAndDistractorEvaluator(gateway=self.gateway or getattr(context, "gateway", None), required=False)
                     post_res = await post_eval.evaluate(context, temp_env, intent_id="post_rep_unique")
                     if any(iss.code in (IssueCode.BAD_DISTRACTOR, IssueCode.INSUFFICIENT_OPTIONS, IssueCode.AMBIGUOUS_ANSWER) for iss in post_res.issues):
                         raise RepairJustificationError(
                             "Post-repair uniqueness failed: added option violates single-answer uniqueness or option rules"
                         )
-                    prompt = q.get("prompt", "") or q.get("questionText", "")
-                    q["prompt"] = prompt.rstrip("?") + " specifically according to paragraph 2?"
 
             # Invariant: Item/option/answer repair must have passage evidence justification
             final_ans = q.get("answer", "")

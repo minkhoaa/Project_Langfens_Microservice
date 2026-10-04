@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using exam_service.Features.ReadingPaper.Contracts;
 
 namespace exam_service.Features.ReadingPaper;
 
@@ -16,6 +17,35 @@ public sealed class ReadingPaperAiClient(HttpClient http)
 
     public async Task<ReadingSource> IngestSourceAsync(IngestSourceRequest request, CancellationToken ct)
         => await PostAsync<ReadingSource>("api/v1/autogen/reading-paper/source/ingest", request, ct);
+    public async Task<ReadingGeneratedQuestionsResult> GenerateQuestionsAsync(
+        ArtifactRef passageRef,
+        ArtifactRef blueprintRef,
+        IReadOnlyList<object>? slots,
+        string runId,
+        Guid leaseOwner,
+        int epoch = 1,
+        int sectionIndex = 1,
+        CancellationToken ct = default)
+    {
+        var payload = new
+        {
+            passageRef,
+            blueprintRef,
+            slots = slots ?? Array.Empty<object>(),
+            runId,
+            leaseOwner,
+            epoch,
+            sectionIndex,
+            engine = "v2"
+        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/autogen/reading-paper/questions")
+        {
+            Content = JsonContent.Create(payload, options: ReadingPaperRules.Json)
+        };
+        using var response = await http.SendAsync(request, ct);
+        return await ReadAsync<ReadingGeneratedQuestionsResult>(response, ct);
+    }
+
 
     public async Task<ReadingGeneratedSection> GenerateSectionAsync(string topic, int index, ReadingSource source,
         Func<string, string, Task>? onProgress, CancellationToken ct, string? provider = null,

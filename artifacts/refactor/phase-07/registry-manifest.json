@@ -1,0 +1,314 @@
+{
+  "phase": "07",
+  "title": "EvaluatorRegistry and RepairRegistry Manifest",
+  "evaluatorRegistry": {
+    "evaluators": [
+      {
+        "evaluatorId": "eval_duplicate_shingle",
+        "evaluatorVersion": "1.0.0",
+        "name": "Duplicate & Shingle Overlap Evaluator",
+        "description": "Detects identical prompts and high Jaccard 5-word shingle overlaps (> 0.45)",
+        "stage": "DETERMINISTIC",
+        "targetArtifactTypes": [
+          "Section",
+          "ReadingPaper"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "DUPLICATE_CONTENT"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 5.0,
+        "estimatedCostUsd": 0.0,
+        "estimatedTokens": 0,
+        "isExpensive": false
+      },
+      {
+        "evaluatorId": "eval_evidence_offsets",
+        "evaluatorVersion": "1.0.0",
+        "name": "Evidence Offset & Span Evaluator",
+        "description": "Validates that evidence quotes and offsets match Unicode codepoints in passage text",
+        "stage": "DETERMINISTIC",
+        "targetArtifactTypes": [
+          "Section",
+          "Question"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "EVIDENCE_MISSING",
+          "SCHEMA_VIOLATION"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 5.0,
+        "estimatedCostUsd": 0.0,
+        "estimatedTokens": 0,
+        "isExpensive": false
+      },
+      {
+        "evaluatorId": "eval_paper_structure",
+        "evaluatorVersion": "1.0.0",
+        "name": "Reading Paper Structure Evaluator",
+        "description": "Validates 3 sections, 40 questions (1-40 contiguous), and 2150-2750 words",
+        "stage": "DETERMINISTIC",
+        "targetArtifactTypes": [
+          "ReadingPaper"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "QUESTION_COUNT_MISMATCH",
+          "QUESTION_NUMBERING_INVALID",
+          "SECTION_WORD_COUNT_OUT_OF_BOUNDS"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 5.0,
+        "estimatedCostUsd": 0.0,
+        "estimatedTokens": 0,
+        "isExpensive": false
+      },
+      {
+        "evaluatorId": "eval_passage_word_count",
+        "evaluatorVersion": "1.0.0",
+        "name": "Passage Word Count Evaluator",
+        "description": "Enforces passage length within IELTS Academic limits (720-915 words)",
+        "stage": "DETERMINISTIC",
+        "targetArtifactTypes": [
+          "Section"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "SECTION_WORD_COUNT_OUT_OF_BOUNDS"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 5.0,
+        "estimatedCostUsd": 0.0,
+        "estimatedTokens": 0,
+        "isExpensive": false
+      },
+      {
+        "evaluatorId": "eval_question_structure",
+        "evaluatorVersion": "1.0.0",
+        "name": "Question Structure & Numbering Evaluator",
+        "description": "Validates question counts, contiguous numbering, MCQ cardinality, and blanks",
+        "stage": "DETERMINISTIC",
+        "targetArtifactTypes": [
+          "Section",
+          "Question"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "QUESTION_NUMBERING_INVALID",
+          "QUESTION_COUNT_MISMATCH",
+          "INSUFFICIENT_OPTIONS",
+          "SCHEMA_VIOLATION"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 5.0,
+        "estimatedCostUsd": 0.0,
+        "estimatedTokens": 0,
+        "isExpensive": false
+      },
+      {
+        "evaluatorId": "eval_answer_verbatim_length",
+        "evaluatorVersion": "1.0.0",
+        "name": "Answer Verbatim & Length Evaluator",
+        "description": "Checks answer word count, verbatim presence in passage, and prompt leakage",
+        "stage": "LEXICAL",
+        "targetArtifactTypes": [
+          "Section",
+          "Question"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "WORD_LIMIT_EXCEEDED",
+          "EVIDENCE_MISSING",
+          "ANSWER_LEAKAGE"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 5.0,
+        "estimatedCostUsd": 0.0,
+        "estimatedTokens": 0,
+        "isExpensive": false
+      },
+      {
+        "evaluatorId": "eval_grounding_fidelity",
+        "evaluatorVersion": "1.0.0",
+        "name": "Grounding & Source Fidelity Evaluator",
+        "description": "Detects unsupported/contradicted claims, invented quantities, causality and certainty overstatements",
+        "stage": "GROUNDING",
+        "targetArtifactTypes": [
+          "Section",
+          "EvidenceGraph",
+          "Question"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+          "CAUSAL_OVERSTATEMENT",
+          "OVERSTATED_CERTAINTY",
+          "UNMEASURED_OUTCOME",
+          "SOURCE_INSUFFICIENT"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 30.0,
+        "estimatedCostUsd": 0.015,
+        "estimatedTokens": 4000,
+        "isExpensive": true
+      },
+      {
+        "evaluatorId": "eval_ambiguity_distractor",
+        "evaluatorVersion": "1.0.0",
+        "name": "Ambiguity & Distractor Evaluator",
+        "description": "Detects ambiguous questions with multiple answers and invalid/plausible distractors",
+        "stage": "SEMANTIC",
+        "targetArtifactTypes": [
+          "Section",
+          "Question"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "AMBIGUOUS_ANSWER",
+          "BAD_DISTRACTOR"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 30.0,
+        "estimatedCostUsd": 0.012,
+        "estimatedTokens": 4000,
+        "isExpensive": true
+      },
+      {
+        "evaluatorId": "eval_heuristic_quality_scorer",
+        "evaluatorVersion": "1.0.0",
+        "name": "Heuristic Quality & Difficulty Scorer",
+        "description": "Advisory score for lexical diversity and distribution; not an IELTS band score",
+        "stage": "SEMANTIC",
+        "targetArtifactTypes": [
+          "Section",
+          "ReadingPaper"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": false,
+        "hardChecks": [],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 5.0,
+        "estimatedCostUsd": 0.0,
+        "estimatedTokens": 0,
+        "isExpensive": false
+      },
+      {
+        "evaluatorId": "eval_not_given_semantics",
+        "evaluatorVersion": "1.0.0",
+        "name": "NOT GIVEN Semantics Evaluator",
+        "description": "Validates proposition non-entailment and non-contradiction across whole passage",
+        "stage": "SEMANTIC",
+        "targetArtifactTypes": [
+          "Section",
+          "Question"
+        ],
+        "prerequisiteEvaluatorIds": [],
+        "required": true,
+        "hardChecks": [
+          "AMBIGUOUS_ANSWER",
+          "SCHEMA_VIOLATION",
+          "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+        ],
+        "softChecks": [],
+        "conflictRules": [],
+        "timeoutSeconds": 30.0,
+        "estimatedCostUsd": 0.015,
+        "estimatedTokens": 4000,
+        "isExpensive": true
+      }
+    ],
+    "totalCount": 10
+  },
+  "repairRegistry": {
+    "repairers": [
+      {
+        "repairerId": "rep_summary_group",
+        "repairerVersion": "1.0.0",
+        "name": "Summary Group Coherence Repairer",
+        "description": "Aligns summary blank placeholders and re-evaluates the shared group",
+        "scope": "GROUP",
+        "targetArtifactTypes": [
+          "Section"
+        ],
+        "handledCodes": [
+          "AMBIGUOUS_ANSWER",
+          "SCHEMA_VIOLATION"
+        ],
+        "timeoutSeconds": 30.0,
+        "estimatedTokens": 3000,
+        "estimatedCostUsd": 0.015
+      },
+      {
+        "repairerId": "rep_passage_sentence",
+        "repairerVersion": "1.0.0",
+        "name": "Passage Sentence & Fidelity Repairer",
+        "description": "Softens over-certain modals, corrects causal overstatements, and trims excessive word counts",
+        "scope": "PASSAGE",
+        "targetArtifactTypes": [
+          "Section"
+        ],
+        "handledCodes": [
+          "CAUSAL_OVERSTATEMENT",
+          "UNMEASURED_OUTCOME",
+          "SECTION_WORD_COUNT_OUT_OF_BOUNDS",
+          "OVERSTATED_CERTAINTY"
+        ],
+        "timeoutSeconds": 30.0,
+        "estimatedTokens": 3000,
+        "estimatedCostUsd": 0.02
+      },
+      {
+        "repairerId": "rep_question_item",
+        "repairerVersion": "1.0.0",
+        "name": "Question Item Surgical Repairer",
+        "description": "Trims answers to 3 words, replaces bad distractors, clarifies prompts",
+        "scope": "QUESTION",
+        "targetArtifactTypes": [
+          "Section",
+          "Question"
+        ],
+        "handledCodes": [
+          "AMBIGUOUS_ANSWER",
+          "BAD_DISTRACTOR",
+          "WORD_LIMIT_EXCEEDED",
+          "INSUFFICIENT_OPTIONS"
+        ],
+        "timeoutSeconds": 30.0,
+        "estimatedTokens": 3000,
+        "estimatedCostUsd": 0.015
+      }
+    ],
+    "totalCount": 3,
+    "allowRepairCodes": [
+      "AMBIGUOUS_ANSWER",
+      "BAD_DISTRACTOR",
+      "CAUSAL_OVERSTATEMENT",
+      "INSUFFICIENT_OPTIONS",
+      "OVERSTATED_CERTAINTY",
+      "QUESTION_COUNT_MISMATCH",
+      "QUESTION_NUMBERING_INVALID",
+      "SECTION_WORD_COUNT_OUT_OF_BOUNDS",
+      "UNMEASURED_OUTCOME",
+      "WORD_LIMIT_EXCEEDED"
+    ]
+  }
+}

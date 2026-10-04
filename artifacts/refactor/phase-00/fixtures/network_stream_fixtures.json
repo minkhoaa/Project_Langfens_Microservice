@@ -1,0 +1,24 @@
+{
+  "mid_utf8_split": {
+    "description": "Stream split across chunk boundaries in the middle of a 3-byte UTF-8 quote character (U+201C)",
+    "chunk1_base64": "eyJ0eXBlIjoibG9nIiwibWVzc2FnZSI6IkV2aWRlbmNlOiDig",
+    "chunk2_base64": "nGNvcmFsIHJlZWZz4oCdIn0K"
+  },
+  "mid_json_split": {
+    "description": "Stream split across chunk boundaries in the middle of a JSON line",
+    "chunk1": "{\"type\":\"log\",\"timestamp\":\"2026-09-30T10:00:00Z\",\"message\":\"Passage 1 gen",
+    "chunk2": "eration stream opened.\"}\n{\"type\":\"log\",\"message\":\"Next step\"}\n"
+  },
+  "missing_terminal_eof": {
+    "description": "NDJSON stream that closes without sending result or error event",
+    "stream": "{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Working...\"}\n{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Still working...\"}\n"
+  },
+  "error_terminal_422": {
+    "description": "NDJSON stream that terminates with an unprocessable entity error (422)",
+    "stream": "{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Validating...\"}\n{\"type\":\"error\",\"httpStatus\":422,\"message\":\"Source content is too short (599 words)\",\"traceback\":\"\"}\n"
+  },
+  "error_terminal_502": {
+    "description": "NDJSON stream that terminates with a pipeline generation failure (502)",
+    "stream": "{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Generating...\"}\n{\"type\":\"error\",\"httpStatus\":502,\"message\":\"LLM model output malformed\",\"traceback\":\"Traceback...\"}\n"
+  }
+}

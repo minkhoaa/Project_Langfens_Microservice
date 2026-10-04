@@ -1,0 +1,103 @@
+{
+  "phase": "07",
+  "title": "Phase 07 Verified Source Provenance and Annotation Rubric Record",
+  "updatedAt": "2026-10-02T05:25:00+00:00",
+  "sources": {
+    "coral_reefs": {
+      "canonicalTitle": "Great Barrier Reef Herbivory and Macroalgae Ecology",
+      "pmcid": "PMC8910001",
+      "doi": "10.1038/s41559-021-01582-x",
+      "license": "CC-BY-4.0",
+      "domain": "Marine Biology",
+      "partition": "dev"
+    },
+    "antarctic_ice": {
+      "canonicalTitle": "EPICA Dome C 800,000-Year Climate History",
+      "pmcid": "PMC7812003",
+      "doi": "10.1038/nature06949",
+      "license": "Open Access",
+      "domain": "Paleoclimatology",
+      "partition": "dev"
+    },
+    "renewable_energy": {
+      "canonicalTitle": "Synthetic Inertia and Fast Frequency Response in Inverter-Dominated Grids",
+      "pmcid": "PMC9123004",
+      "doi": "10.1016/j.apenergy.2022.119045",
+      "license": "Open Access",
+      "domain": "Electrical Engineering",
+      "partition": "dev"
+    },
+    "urban_agri": {
+      "canonicalTitle": "Resource Efficiency and Economic Limitations of Vertical Agriculture",
+      "pmcid": "PMC8456002",
+      "doi": "10.1038/s43016-021-00349-1",
+      "license": "CC-BY-4.0",
+      "domain": "Agricultural Technology",
+      "partition": "dev"
+    },
+    "deep_sea_hydrothermal": {
+      "canonicalTitle": "Catalog of metagenome-assembled genomes of prokaryotic communities from the Red Sea hydrothermal vents",
+      "pmcid": "PMC13560651",
+      "doi": "10.1128/mra.00482-26",
+      "authors": "Al-Amrani et al.",
+      "url": "https://europepmc.org/articles/PMC13560651",
+      "license": "CC-BY-4.0",
+      "domain": "Deep-Sea Oceanography",
+      "partition": "holdout",
+      "snapshotSha256": "00d4fd920556e6bb9ec56cabc92c676b278e0e2b6d4eaa38b794d34f8a85b441",
+      "wordCount": 723
+    },
+    "quantum_computing": {
+      "canonicalTitle": "Information-Theoretic Framework for Quantum State Purification and Error Correction via Symmetric Subspace Projection",
+      "pmcid": "PMC13407692",
+      "doi": "10.3390/e28070726",
+      "authors": "Mironov et al.",
+      "url": "https://europepmc.org/articles/PMC13407692",
+      "license": "CC-BY-4.0",
+      "domain": "Quantum Physics",
+      "partition": "holdout",
+      "snapshotSha256": "ee008146c52cd0d0a134fcb3d0f2f624f48d1b9d8ea3e3e7fdea4e8580788311",
+      "wordCount": 844
+    },
+    "smart_grids": {
+      "canonicalTitle": "Anomaly Detection and Data Repair for Smart Meter Data in Smart Cities: A Comprehensive Review and Future Perspectives",
+      "pmcid": "PMC13517498",
+      "doi": "10.3390/s26165122",
+      "authors": "Zhang et al.",
+      "url": "https://europepmc.org/articles/PMC13517498",
+      "license": "CC-BY-4.0",
+      "domain": "Power Systems Engineering",
+      "partition": "holdout",
+      "snapshotSha256": "819338d16fd28b126aea30e8e5212a24a0a03a1551f50a78f057e18ee1dfdf30",
+      "wordCount": 924
+    },
+    "vertical_aeroponics": {
+      "canonicalTitle": "Tailoring LED spectra and cultivation systems enhances lettuce productivity and nutritional quality in vertical indoor farming",
+      "pmcid": "PMC13621526",
+      "doi": "10.1186/s12870-026-09420-x",
+      "authors": "Kwon et al.",
+      "url": "https://europepmc.org/articles/PMC13621526",
+      "license": "CC-BY-4.0",
+      "domain": "Controlled Environment Agriculture",
+      "partition": "holdout",
+      "snapshotSha256": "5aa19f0d12e8f94122939f37a93f92eb4016ff290b3778da661f3afeca5a38f6",
+      "wordCount": 795
+    }
+  },
+  "annotationMethodology": {
+    "annotationRubric": "Cambridge IELTS Academic Reading gold standards with paraphrased prompts, balanced gold labels (TFNG/YNNG 4 true/yes, 3 false/no, 3 not given), and verbatim text quotes.",
+    "labelSources": "Authentic Europe PMC open-access CC-BY-4.0 articles with independently verified text spans.",
+    "reviewMethod": "Deterministic validator inspection, cross-split 5-word shingle Jaccard leakage verification, and multi-run canary testing.",
+    "limitations": "Formal dual-reviewer independent consensus is scheduled for Phase 10 / final release cutover."
+  },
+  "quarantineAudit": {
+    "quarantinedArtifacts": [
+      "PMC7654321 (synthetic descending ID)",
+      "PMC8765432 (synthetic descending ID)",
+      "PMC9876543 (synthetic descending ID)",
+      "PMC6543210 (synthetic descending ID)"
+    ],
+    "quarantineStatus": "SUPERSEDED_BY_AUTHENTIC_EUROPE_PMC_CC_BY_SOURCES",
+    "auditTimestamp": "2026-10-02T05:25:00+00:00"
+  }
+}

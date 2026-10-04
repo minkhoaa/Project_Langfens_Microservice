@@ -1,0 +1,51 @@
+{
+  "campaignId": "camp_g07_20261003_094838_f9b1d5",
+  "partition": "dev",
+  "status": "PASS",
+  "startedAt": "2026-10-03T09:48:41.637061+00:00",
+  "finishedAt": "2026-10-03T09:51:31.793953+00:00",
+  "durationSeconds": 170.157,
+  "provider": "minimax",
+  "model": "MiniMax-Text-01",
+  "evaluatorVersions": {
+    "QuestionStructureEvaluator": "1.0.0",
+    "AnswerVerbatimAndLengthEvaluator": "1.0.0",
+    "EvidenceOffsetEvaluator": "1.0.0",
+    "DuplicateAndShingleEvaluator": "1.0.0",
+    "GroundingFidelityEvaluator": "2.0.0",
+    "AmbiguityAndDistractorEvaluator": "2.0.0",
+    "NotGivenSemanticsEvaluator": "1.0.0"
+  },
+  "evaluatorPipelineHash": "1d5e3a3831d78f17",
+  "corpusHashes": {
+    "questions_corpus.json": "12aec6fc92f4e53219141c7a1d048f06d226ae19bf0b27a7c9c2eea3dcbac454",
+    "questions_holdout_corpus.json": "b2057e9c3187488e1798f8d57f9c8841a9bf03375b572d43b3db5ec34b2cc67c",
+    "fidelity_corpus.json": "9cd2f9f14ea54be3107c7c89d297795b0ff20a59a1a9d564c57c202c33a8cc81"
+  },
+  "rates": {
+    "overallBlockingRecall": 0.9833333333333333,
+    "falseRejectionRate": 0.016666666666666666,
+    "ambiguityRecall": 0.9285714285714286,
+    "ambiguityRecallFormatted": "92.9%",
+    "perTypeRecall": {
+      "MultipleChoiceSingle": 0.9,
+      "SentenceCompletion": 1.0,
+      "ShortAnswer": 1.0,
+      "SummaryCompletion": 1.0,
+      "TrueFalseNotGiven": 1.0,
+      "YesNoNotGiven": 1.0
+    },
+    "operationalFailureRate": 0.0,
+    "canaryAggregateRate": 1.0,
+    "canaryWorstRunRate": 1.0
+  },
+  "acceptance": {
+    "overallRecallMeetsThreshold": true,
+    "perTypeRecallMeetsThreshold": true,
+    "ambiguityRecallMeetsThreshold": true,
+    "falseRejectionMeetsThreshold": true,
+    "criticalCanariesMeetsThreshold": true,
+    "operationalErrorsZero": true,
+    "status": true
+  }
+}

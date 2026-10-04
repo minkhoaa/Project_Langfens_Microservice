@@ -1,0 +1,50 @@
+{
+  "phase": "07",
+  "timestamp": "2026-10-02T05:25:00+00:00",
+  "status": "QUARANTINED_AND_SUPERSEDED",
+  "quarantinedSources": [
+    {
+      "pmcid": "PMC7654321",
+      "reason": "Fabricated sequential identifier"
+    },
+    {
+      "pmcid": "PMC8765432",
+      "reason": "Fabricated sequential identifier"
+    },
+    {
+      "pmcid": "PMC9876543",
+      "reason": "Fabricated sequential identifier"
+    },
+    {
+      "pmcid": "PMC6543210",
+      "reason": "Fabricated sequential identifier"
+    }
+  ],
+  "replacementSources": [
+    {
+      "pmcid": "PMC13560651",
+      "title": "Catalog of metagenome-assembled genomes of prokaryotic communities from the Red Sea hydrothermal vents",
+      "license": "CC-BY-4.0",
+      "doi": "10.1128/mra.00482-26"
+    },
+    {
+      "pmcid": "PMC13407692",
+      "title": "Information-Theoretic Framework for Quantum State Purification and Error Correction via Symmetric Subspace Projection",
+      "license": "CC-BY-4.0",
+      "doi": "10.3390/e28070726"
+    },
+    {
+      "pmcid": "PMC13517498",
+      "title": "Anomaly Detection and Data Repair for Smart Meter Data in Smart Cities: A Comprehensive Review and Future Perspectives",
+      "license": "CC-BY-4.0",
+      "doi": "10.3390/s26165122"
+    },
+    {
+      "pmcid": "PMC13621526",
+      "title": "Tailoring LED spectra and cultivation systems enhances lettuce productivity and nutritional quality in vertical indoor farming",
+      "license": "CC-BY-4.0",
+      "doi": "10.1186/s12870-026-09420-x"
+    }
+  ],
+  "compliance": "Phase-04 policy compliant (pure CC-BY-4.0 verified via official JATS XML from Europe PMC)."
+}

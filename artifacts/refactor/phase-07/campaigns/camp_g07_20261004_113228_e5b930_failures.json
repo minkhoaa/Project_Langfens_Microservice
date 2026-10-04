@@ -1,0 +1,57 @@
+[
+  {
+    "caseId": "q_invalid_MultipleChoiceSingle_1",
+    "failureType": "FALSE_NEGATIVE",
+    "partition": "holdout",
+    "questionType": "MultipleChoiceSingle",
+    "groundTruthValid": false,
+    "expectedIssueCode": "SCHEMA_VIOLATION",
+    "observedIssueCodes": [
+      "BAD_DISTRACTOR",
+      "BAD_DISTRACTOR",
+      "AMBIGUOUS_ANSWER"
+    ],
+    "isWrongFamily": true,
+    "durationSeconds": 11.284,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_SentenceCompletion_6",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "SentenceCompletion",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "OVERSTATED_CERTAINTY"
+    ],
+    "durationSeconds": 0.001,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_TrueFalseNotGiven_3",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "TrueFalseNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+    ],
+    "durationSeconds": 6.591,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_TrueFalseNotGiven_8",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "TrueFalseNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "AMBIGUOUS_ANSWER"
+    ],
+    "durationSeconds": 6.297,
+    "modelUsed": "MiniMax-Text-01"
+  }
+]

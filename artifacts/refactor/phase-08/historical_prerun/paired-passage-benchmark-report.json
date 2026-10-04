@@ -1,0 +1,289 @@
+{
+  "metadata": {
+    "title": "Phase 08 Paired Legacy vs V2 Passage Benchmark Report",
+    "evaluatedAt": "2026-10-02T06:18:49.157811+00:00",
+    "totalCases": 3,
+    "sourcesEvaluated": [
+      "PMC13560651",
+      "PMC13407692",
+      "PMC13517498"
+    ],
+    "styleProfilesCovered": [
+      "NARRATIVE_HISTORICAL",
+      "EXPOSITORY_SCIENTIFIC",
+      "DISCURSIVE_ANALYTICAL"
+    ]
+  },
+  "aggregateMetrics": {
+    "sentenceBoundaryCoherence": {
+      "v2": 0.3333333333333333,
+      "legacy": 1.0,
+      "differential": -0.6666666666666667
+    },
+    "authoritativeCASCommit": {
+      "v2": 1.0,
+      "legacy": 0.0
+    },
+    "sentenceIdTraceability": {
+      "v2": 1.0,
+      "legacy": 0.0
+    },
+    "groundingFidelityPassRate": {
+      "v2": 1.0,
+      "legacy": 1.0
+    },
+    "eligibleGenerationSuccess": {
+      "v2": 0.3333333333333333,
+      "legacy": 1.0,
+      "v2AcceptedRuns": 1,
+      "totalEligibleRuns": 3
+    },
+    "acceptedArtifactWordCountCompliance": {
+      "v2": 1.0,
+      "legacy": 1.0,
+      "v2PassagesInBounds": 1,
+      "totalV2AcceptedPassages": 1
+    },
+    "cumulativeSpend": {
+      "legacyTokens": 9042,
+      "legacyExecutionLatencySeconds": 104.817,
+      "v2Tokens": 44500,
+      "v2ExecutionLatencySeconds": 409.083
+    }
+  },
+  "adversarialInjectionSecurity": {
+    "injectionDetectedAndContained": true,
+    "systemPromptBoundaryIsolated": true,
+    "untrustedSourceSanitized": true,
+    "domainInvariantsIntact": true
+  },
+  "cases": [
+    {
+      "caseId": "case_paired_1_PMC13560651",
+      "sourceId": "PMC13560651",
+      "topic": "Prokaryotic Diversity in Red Sea Hydrothermal Vents",
+      "styleProfile": "NARRATIVE_HISTORICAL",
+      "legacy": {
+        "engine": "Legacy",
+        "title": "Prokaryotic Diversity in Red Sea Hydrothermal Vents",
+        "passage": "The exploration of hydrothermal vent ecosystems has unveiled a remarkable diversity of life forms thriving in some of the most extreme conditions on Earth. These environments, characterized by high temperatures, pressure, and unique chemical compositions, provide a window into the adaptability and resilience of microorganisms. While hydrothermal vent systems have been studied extensively in various oceanic regions, the Red Sea's hydrothermal vents have remained relatively under-researched, particularly in terms of genome-resolved studies. However, recent discoveries of active hydrothermal vent fields in the Red Sea, such as the Hatiba Mons, have opened new avenues for understanding the microbial communities that inhabit these unique ecosystems.\n\nIn a comprehensive study, researchers collected a total of 31 samples from five hydrothermal vents located at 22.28\u00b0N, 37.84\u00b0E in the Red Sea. The sampling expeditions took place in May and September 2022 and February 2023, yielding 19 sediment samples and 12 microbial mat samples. The sediment samples were obtained using gravity corers, while the microbial mats were collected using push cores, Niskin bottles, and box corers, with each sample collected in triplicate to ensure reproducibility. To preserve the integrity of the samples, they were immediately frozen at \u221220\u00b0C on board the research vessel and subsequently stored at \u221280\u00b0C in the laboratory until further processing. The meticulous sampling and preservation protocols were crucial for maintaining the quality of the genetic material, which was extracted using the DNeasy PowerMax Soil Kit (Qiagen, Germany). The extraction process included the addition of proteinase K during the lysis phase to enhance the yield of high-quality DNA. The concentration of the extracted DNA was measured using the Qubit dsDNA HS Assay on a Qubit 4.0 fluorometer (Thermo Fisher Scientific, USA).\n\nThe extracted DNA was then subjected to shotgun sequencing, with quantities ranging from 80 to 895 ng per sample. The sequencing was performed by Novogene Inc. (California, USA) using the NEBNext Ultra II DNA Library Prep Kit (New England Biolabs, USA). This process involved several steps, including DNA fragmentation, end repair, 5\u2032 phosphorylation, A-tailing, adapter ligation, and PCR amplification, to prepare the libraries for sequencing. The resulting libraries were sequenced on an Illumina NovaSeq platform, generating a total of 3,004,009,760 paired-end 150-bp reads across all samples. The number of reads per sample varied from 76,449,854 to 303,487,370, reflecting the diversity in microbial abundance and composition across the different samples.\n\nThe metagenomic sequencing data were processed using a series of bioinformatics tools to assemble and analyze the genetic material. Low-quality reads and adapters were removed using fastp v1.3.0, and the quality-filtered reads were assessed with FastQC v0.12.1. The reads were then assembled using MEGAHIT v1.2.9, resulting in 31 individual assemblies and 11 co-assemblies. Contigs longer than 1,000 bp were binned using MetaBAT2 v1.7, MaxBin2 v2.2.7, and VAMB v5.0.2, followed by bin aggregation with DAS Tool v1.1.7. The quality of the resulting genomes was evaluated using CheckM2 v1.1.0, and only high-quality and medium-quality metagenome-assembled genomes (MAGs) were retained for further analysis. These MAGs were taxonomically assigned using GTDB-Tk v2.4.1 (release 226), and protein-coding sequences were predicted from all MAGs using Prodigal.\n\nThe analysis of the recovered MAGs revealed a diverse array of prokaryotic life forms. A total of 1,217 dereplicated prokaryotic MAGs were identified, comprising 969 bacterial MAGs across 50 phyla and 248 archaeal MAGs across 15 phyla. The most abundant bacterial groups included Pseudomonadota, Chloroflexota, and Planctomycetota, while the dominant archaeal taxa were Thermoproteota, Thermoplasmatota, and Nanoarchaeota. Notably, approximately 70% of the MAGs likely represent novel taxa, as indicated by their GTDB RED (relative evolutionary divergence) scores. This high proportion of potentially novel taxa underscores the Hatiba Mons as a hotspot of microbial novelty and significantly expands the available genomic references for hydrothermal vent systems.\n\nThe findings from this study highlight the extraordinary diversity and novelty of prokaryotic life in the Red Sea hydrothermal vents. The identification of a large number of novel taxa not only enriches our understanding of the microbial world but also provides valuable genomic resources for future research. The Red Sea, with its unique geological and environmental conditions, offers a distinct ecological niche that supports a diverse array of microorganisms. The insights gained from this research contribute to the broader understanding of life in extreme environments and have implications for fields such as biotechnology, astrobiology, and the study of Earth's early life.\n\nIn conclusion, the exploration of the Red Sea hydrothermal vents has revealed a rich tapestry of prokaryotic diversity, with a significant proportion of potentially novel taxa. This study underscores the importance of continued research in underrepresented regions and the potential for discovering new forms of life that challenge our understanding of biology and evolution. The genomic data generated from this research will serve as a foundation for future studies, fostering a deeper understanding of the microbial ecosystems that thrive in some of the most extreme environments on our planet.",
+        "wordCount": 835,
+        "paragraphCount": 7,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "callsUsed": 1,
+        "tokensUsed": 3150,
+        "latencySeconds": 30.99,
+        "hasSentenceIds": false,
+        "hasAuthoritativeCAS": false,
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "v2": {
+        "engine": "V2_PassageLoop",
+        "decision": "FAIL",
+        "artifactId": null,
+        "title": "Prokaryotic Diversity in Red Sea Hydrothermal Vents",
+        "passage": "",
+        "wordCount": 0,
+        "paragraphCount": 0,
+        "sentenceCount": 0,
+        "cleanSentenceBoundary": false,
+        "blindSliced": false,
+        "callsUsed": 14,
+        "tokensUsed": 19500,
+        "latencySeconds": 178.098,
+        "hasSentenceIds": false,
+        "hasAuthoritativeCAS": false,
+        "terminalReason": "MAX_VERSIONS: 3 exact-target blockers; immutable version cap reached",
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "comparison": {
+        "wordCountCompliant": {
+          "legacy": true,
+          "v2": false
+        },
+        "cleanSentenceBoundary": {
+          "legacy": true,
+          "v2": false
+        },
+        "groundingStatus": {
+          "legacy": "PASS",
+          "v2": "PASS"
+        },
+        "authoritativeCAS": {
+          "legacy": false,
+          "v2": true
+        }
+      }
+    },
+    {
+      "caseId": "case_paired_2_PMC13407692",
+      "sourceId": "PMC13407692",
+      "topic": "Quantum State Purification and Error Correction",
+      "styleProfile": "EXPOSITORY_SCIENTIFIC",
+      "legacy": {
+        "engine": "Legacy",
+        "title": "Quantum State Purification and Error Correction",
+        "passage": "Quantum computing represents a transformative leap in computational capabilities, leveraging the principles of superposition and entanglement to achieve exponential speedups for specific problems. At the heart of this paradigm are qubits, the fundamental units of quantum information. However, the remarkable sensitivity of qubits to environmental noise poses a significant challenge. Decoherence and gate-operation errors accumulate as the depth of quantum circuits increases, severely limiting the capabilities of current quantum processors. To overcome these obstacles and pave the way for large-scale fault-tolerant quantum computing, quantum error correction (QEC) is widely regarded as an indispensable technology. QEC actively suppresses physical errors by encoding logical qubits into multiple physical qubits, employing syndrome measurements and recovery operations to maintain the integrity of quantum information.\n\nQuantum state purification is a technique that has garnered significant attention in the fields of quantum communication and quantum networks. It involves extracting high-fidelity pure states by performing local operations on multiple noisy copies of a state. Recent experimental demonstrations have showcased the potential of purification in achieving multi-node entanglement distribution and qubit teleportation between non-neighboring network nodes. From an information-theoretic perspective, purification can be viewed as an entropy-reduction operation, effectively filtering out noise entropy and concentrating quantum information. Despite these advancements, the intricate interplay between this entropy suppression process and quantum error correction remains largely unexplored. A critical challenge lies in integrating purification strategies with error-correction code structures within a unified framework, a task that is essential for overcoming the limitations of single-technique approaches and advancing near-term quantum computing toward practical utility.\n\nThe scope of the purification operation must be carefully delineated to circumvent conflicts with the no-cloning theorem, a fundamental principle in quantum mechanics that prohibits the creation of identical copies of an arbitrary unknown quantum state. The framework proposed here operates exclusively on quantum states where the target form is known a priori and is prepared through multiple independent applications of a noise channel to independently initialized copies. This approach encompasses three primary categories of states encountered in stabilizer-coded quantum computation: (i) data-block initialization states, such as encoded |0\u27e9L or |+\u27e9L codewords; (ii) ancilla preparation states, repeatedly prepared in |0\u27e9; and (iii) magic-state inputs |T\u27e9. In each case, multiple independent preparations of a known target are subjected to independent noise channel applications, aligning with the regime of the Cirac\u2013Ekert\u2013Macchiavello purification protocol. These categories cover the predominant points of noise injection within a stabilizer QEC cycle.\n\nRecent international research has yielded significant progress in both quantum state purification and quantum error correction. Systematic reviews of entanglement purification protocols have explored various approaches, including linear optical, cross-Kerr nonlinear, and measurement-based deterministic methods. Quantum error mitigation, inspired by purification concepts, has been successfully applied to electron pair-correlation simulations on superconducting processors, achieving error suppression one to two orders of magnitude lower than post-selection in 20-qubit systems. The Willow surface-code experiment demonstrated a logical error rate of 0.143% per round on a distance-7 codeword. Additionally, a fault-tolerant memory based on LDPC codes achieved a 0.7% threshold using 288 physical qubits to protect 12 logical qubits across nearly one million syndrome cycles. These developments highlight the potential of purity-constraint methods, which rely on the pure-output assumption, although their scalability is constrained under conditions of correlated noise and deep circuits. Quantum LDPC-based GHZ distillation and noise-guessing decoding-based purification have demonstrated integration feasibility, yet a unified framework that systematically integrates purification into QEC with algorithm-level adaptive optimization remains elusive.\n\nThis paper introduces a purification-assisted quantum error-correction framework that introduces core innovations at three distinct levels. At the architectural design level, a joint optimization model treats purification as an active noise-entropy suppression stage within the error-correction cycle. This approach reduces the effective noise of data qubits before syndrome extraction, enabling systematic entropy compression prior to encoding. In terms of algorithm design, an iterative purification error-correction (IPEC) algorithm dynamically adjusts purification rounds against error-correction strategies based on real-time syndrome information. This ensures a balance between fidelity gain and resource consumption. On the theoretical front, the framework derives analytical expressions for the fidelity improvement bound and the fault-tolerance threshold, elucidating the quantitative contribution of purification to the compound exponential suppression of logical error rates under ideal assumptions.\n\nThe subsequent sections of this paper are organized as follows. Section 2 provides a comprehensive review of recent advances and situates the proposed framework within the current landscape. Section 3 formulates the system model, establishes the framework architecture, and derives analytical performance bounds, including the fidelity improvement formula, the von Neumann entropy reduction relation, and the equivalent fault-tolerant threshold under both noiseless and circuit-level assumptions. Section 4 presents the IPEC algorithm, accompanied by complexity and stability analyses, and validates the approach through Monte Carlo simulations under multiple noise scenarios on both surface codes and quantum LDPC codes. Finally, Section 5 discusses the hardware feasibility, limitations, and future work, providing a roadmap for further exploration and development in this critical area of quantum computing research.",
+        "wordCount": 819,
+        "paragraphCount": 6,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "callsUsed": 1,
+        "tokensUsed": 2929,
+        "latencySeconds": 32.523,
+        "hasSentenceIds": false,
+        "hasAuthoritativeCAS": false,
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "v2": {
+        "engine": "V2_PassageLoop",
+        "decision": "PASS",
+        "artifactId": "art_passage_s1",
+        "title": "Quantum State Purification and Its Integration with Error Correction",
+        "passage": "Quantum computing represents a transformative paradigm in information processing, leveraging the principles of superposition and entanglement to achieve exponential speedups for specific computational problems. However, the practical implementation of quantum computing faces significant challenges due to the extreme sensitivity of qubits to environmental noise. Decoherence and gate-operation errors accumulate as quantum circuits increase in depth, posing a critical limitation to the scalability of current quantum processors. To address these challenges, quantum error correction (QEC) has emerged as an essential technology. It actively suppresses physical errors by encoding logical qubits into multiple physical qubits, employing syndrome measurements and recovery operations to maintain the integrity of quantum information.\n\nQuantum state purification is a related technique that has garnered attention for its potential to enhance the fidelity of quantum states. This method involves performing local operations on multiple noisy copies of a quantum state to extract a higher-fidelity pure state. Originally studied in the context of quantum communication and networks, purification has demonstrated success in multi-node entanglement distribution and qubit teleportation between non-neighboring nodes. From an information-theoretic perspective, purification can be viewed as an entropy-reduction process, filtering out noise entropy and concentrating quantum information. Despite its promise, the precise relationship between purification and QEC remains underexplored, particularly in terms of integrating these techniques within a unified framework to overcome the limitations of single approaches.\n\nThe scope of quantum state purification is constrained by the no-cloning theorem, which prohibits the creation of identical copies of an arbitrary quantum state. The purification framework operates under specific conditions: it requires prior knowledge of the target state and involves preparing multiple independent copies of the state, each subjected to an identical noise channel. This regime aligns with the Cirac\u2013Ekert\u2013Macchiavello purification protocol and encompasses three primary categories of states in stabilizer-coded quantum computation: (i) data-block initialization states such as encoded |0\u27e9L or |+\u27e9L codewords, (ii) ancilla preparation states repeatedly prepared in |0\u27e9, and (iii) magic-state inputs |T\u27e9. These categories cover the critical points where noise is introduced within a stabilizer QEC cycle.\n\nRecent advancements in quantum state purification and QEC highlight the growing synergy between these fields. Systematic reviews of entanglement purification protocols have explored various approaches, including linear optical, cross-Kerr nonlinear, and measurement-based deterministic methods. Quantum error mitigation, inspired by purification concepts, has been applied to superconducting processors, achieving error suppression one to two orders of magnitude lower than post-selection in 20-qubit systems. Notably, the Willow surface-code experiment achieved a logical error rate of 0.143% per round on a distance-7 codeword, while a fault-tolerant memory based on LDPC codes demonstrated a 0.7% threshold using 288 physical qubits to protect 12 logical qubits across nearly one million syndrome cycles. However, these methods often rely on the pure-output assumption and face scalability challenges under correlated noise and deep circuits. While quantum LDPC-based GHZ distillation and noise-guessing decoding-based purification show promise for integration, a comprehensive framework that systematically integrates purification into QEC with algorithm-level adaptive optimization is still lacking.\n\nThis paper proposes a novel purification-assisted quantum error-correction framework, introducing innovations at three distinct levels. Architecturally, a joint optimization model is proposed, which treats purification as an active noise-entropy suppression stage within the error-correction cycle. This approach reduces the effective noise of data qubits before syndrome extraction, enabling systematic entropy compression prior to encoding. In terms of algorithm design, an iterative purification error-correction (IPEC) algorithm is introduced. This algorithm dynamically adjusts purification rounds against error-correction strategies based on real-time syndrome information, balancing fidelity gains with resource consumption. The theoretical analysis provides analytical expressions for the fidelity improvement bound and the fault-tolerance threshold, quantitatively demonstrating the contribution of purification to the compound exponential suppression of logical error rates under ideal assumptions.\n\nThe proposed framework is positioned within the broader context of recent milestones in QEC. These include real-time fault-tolerant error correction with the color code on trapped-ion platforms, the realization of fault-tolerant universal gate sets on the seven-qubit code, and the achievement of quantum error correction beyond the break-even point with discrete-variable bosonic encodings. The surface code, a widely studied topological QEC code, has been successfully implemented on superconducting platforms, with distance-5 surface-code experiments demonstrating the suppression of logical-qubit error rates below the single-physical-qubit level. Additionally, real-time QEC beyond the break-even point has been achieved using model-free reinforcement learning for feedback optimization. On neutral atom platforms, reconfigurable atomic arrays offer flexible long-range connectivity, enabling the demonstration of surface codes, color codes, and fault-tolerant logical GHZ-state preparation on up to 280 physical qubits.",
+        "wordCount": 745,
+        "paragraphCount": 5,
+        "sentenceCount": 23,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "callsUsed": 4,
+        "tokensUsed": 5500,
+        "latencySeconds": 69.178,
+        "hasSentenceIds": true,
+        "hasAuthoritativeCAS": true,
+        "sentenceIdsSample": [
+          "s_0",
+          "s_1",
+          "s_2"
+        ],
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "comparison": {
+        "wordCountCompliant": {
+          "legacy": true,
+          "v2": true
+        },
+        "cleanSentenceBoundary": {
+          "legacy": true,
+          "v2": true
+        },
+        "groundingStatus": {
+          "legacy": "PASS",
+          "v2": "PASS"
+        },
+        "authoritativeCAS": {
+          "legacy": false,
+          "v2": true
+        }
+      }
+    },
+    {
+      "caseId": "case_paired_3_PMC13517498",
+      "sourceId": "PMC13517498",
+      "topic": "Smart Meter Data Repair and Urban Energy Distribution",
+      "styleProfile": "DISCURSIVE_ANALYTICAL",
+      "legacy": {
+        "engine": "Legacy",
+        "title": "Smart Meter Data Repair and Urban Energy Distribution",
+        "passage": "The rapid development of smart urban energy systems has brought about a significant transformation in the way cities manage their energy resources. These systems are characterized by the seamless integration of new energy sources and the coordinated interaction between urban power generation, grid management, energy load, and storage. This transformation has set new benchmarks for the accuracy, real-time performance, and integrity of measurement data at the terminal of urban distribution networks. As the cornerstone of power consumption information collection, smart meters have been widely deployed in cities worldwide, including numerous urban centers across China. These devices generate vast amounts of electric energy reading data at regular intervals\u2014typically every 15 minutes, with some regions adopting a 1-minute interval. This data is the lifeblood of various smart city energy applications, ranging from urban distribution network state awareness and load forecasting to demand response, refined line loss management, electricity theft detection, and the accommodation assessment of urban distributed photovoltaic power.\n\nThe value of smart meter data extends beyond the analysis of individual users' power consumption patterns. It plays a crucial role in achieving the observability, measurability, and controllability of urban distribution networks through data fusion at the transformer district level. For instance, the calculation of line loss in distribution network transformer districts, based on smart meter data, serves as a key indicator for the \"four-classified management\" of line loss implemented by power supply companies. This management approach, which categorizes line loss by region, voltage level, feeder line, and transformer district, directly impacts line loss assessment and the identification of suspected electricity theft. Furthermore, load forecasting and demand response initiatives rely on continuous and accurate user power profiles to facilitate power market clearing and the formulation of orderly power utilization schemes. Data-driven electricity theft detection algorithms, which identify abnormal power consumption patterns to assist on-site inspections, are a vital component of anti-electricity theft efforts in urban areas. Consequently, the quality of smart meter data is paramount to the effectiveness and reliability of these smart city energy applications.\n\nHowever, the deployment of smart meters in urban low-voltage distribution networks presents significant challenges due to the complex and harsh on-site conditions under which they operate. These devices are continuously exposed to environments characterized by high temperature, high humidity, and severe electromagnetic interference. Coupled with unstable communication links, including power line carrier, RS485, and public wireless networks, aging metering components within the meters, clock drift, man-made electricity theft, and wiring errors, the collected electric energy readings often suffer from various quality defects. According to statistics from a provincial branch of the State Grid Corporation of China, a medium-scale prefecture-level power company records tens of thousands of abnormal data entries daily, with the abnormal data rate in some transformer districts exceeding 5%. Such data quality issues severely impede data-driven analysis and decision-making for distribution networks and can lead to misjudgments and economic losses.\n\nThe data quality problems of smart meters manifest in five typical anomalies: sudden jump, reading stagnation, reverse reading, pulse spike, and gradual drift. These anomalies differ significantly in their data characteristics, duration, and physical mechanisms, making it impossible for a single method to effectively address all of them. In recent years, researchers worldwide have conducted extensive studies on anomaly detection and data recovery technologies for smart meter data, yielding a series of notable outcomes. In the realm of anomaly detection, studies have systematically reviewed mainstream technical routes for time-series anomaly detection in smart grids, including statistical methods, machine learning, and deep learning algorithms. While these studies have focused on comparing the performance of different methods, they often lack an in-depth discussion on the correlation between the physical causes and external manifestations of smart meter data anomalies.\n\nFor instance, one study proposed a CNN-LSTM method based on cross-layer feature fusion for intrusion detection in advanced metering infrastructure, achieving satisfactory performance in identifying anomalies from time-series data. However, it did not analyze the mapping relationship between the physical causes and data characteristics of various anomalies. Another study constructed a hybrid deep learning framework for smart meter anomaly detection, improving detection accuracy but failing to incorporate physical constraints of meter data into the model design. In terms of data recovery, researchers have presented methods based on improved multi-classifiers, which can effectively impute missing and abnormal data, yet they often do not verify the physical rationality of the recovered results. Other studies have investigated missing data imputation for power systems and developed smart meter data interpolation methods tailored for energy management systems, but these too lack validation on the physical feasibility of recovered data.\n\nIn summary, while significant progress has been made in smart meter data repair and anomaly detection, there is a pressing need for more comprehensive approaches that integrate physical constraints and ensure the practical applicability of recovered data. The development of collaborative optimization mechanisms between anomaly detection and data recovery processes is crucial for enhancing the reliability and effectiveness of smart city energy applications. As urban energy distribution networks become increasingly complex, the demand for high-quality, reliable smart meter data will only grow, underscoring the importance of continued research and innovation in this critical area.",
+        "wordCount": 850,
+        "paragraphCount": 6,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "callsUsed": 1,
+        "tokensUsed": 2963,
+        "latencySeconds": 41.304,
+        "hasSentenceIds": false,
+        "hasAuthoritativeCAS": false,
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "v2": {
+        "engine": "V2_PassageLoop",
+        "decision": "FAIL",
+        "artifactId": null,
+        "title": "Smart Meter Data Repair and Urban Energy Distribution",
+        "passage": "",
+        "wordCount": 0,
+        "paragraphCount": 0,
+        "sentenceCount": 0,
+        "cleanSentenceBoundary": false,
+        "blindSliced": false,
+        "callsUsed": 14,
+        "tokensUsed": 19500,
+        "latencySeconds": 161.807,
+        "hasSentenceIds": false,
+        "hasAuthoritativeCAS": false,
+        "terminalReason": "MAX_VERSIONS: 3 exact-target blockers; immutable version cap reached",
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "comparison": {
+        "wordCountCompliant": {
+          "legacy": true,
+          "v2": false
+        },
+        "cleanSentenceBoundary": {
+          "legacy": true,
+          "v2": false
+        },
+        "groundingStatus": {
+          "legacy": "PASS",
+          "v2": "PASS"
+        },
+        "authoritativeCAS": {
+          "legacy": false,
+          "v2": true
+        }
+      }
+    }
+  ],
+  "acceptanceStatus": {
+    "v2WordCountCompliant": false,
+    "v2SentenceBoundaryCoherence": false,
+    "v2AuthoritativeCASCompliant": true,
+    "adversarialInjectionContained": true,
+    "status": "FAIL_QUALITY_CRITERIA_NOT_MET"
+  }
+}

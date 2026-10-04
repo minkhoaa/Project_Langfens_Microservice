@@ -1,0 +1,43 @@
+{
+  "evaluationId": "eval_err_001",
+  "evaluatorId": "evaluator_semantic_fidelity",
+  "evaluatorVersion": "1.0.0",
+  "targetRef": {
+    "artifactId": "art_passage_001",
+    "artifactType": "Passage",
+    "version": 1,
+    "contentHash": "d177f3c0d050e6351cb99dc4810a904e80da37c3ae4d29c0499cdcb08b07e386"
+  },
+  "status": "ERROR",
+  "issues": [
+    {
+      "issueId": "iss_eval_err_001",
+      "code": "EVALUATOR_UNAVAILABLE",
+      "severity": "CRITICAL",
+      "scope": "SECTION",
+      "affectedRefs": [
+        {
+          "artifactId": "art_passage_001",
+          "artifactType": "Passage",
+          "version": 1,
+          "contentHash": "d177f3c0d050e6351cb99dc4810a904e80da37c3ae4d29c0499cdcb08b07e386"
+        }
+      ],
+      "message": "LLM provider gateway timed out after 60 seconds",
+      "evidence": null,
+      "proposedRepair": null,
+      "status": "OPEN",
+      "fingerprint": "049cb48e079484ca1eadfe6f59a1b10e29520348da283e5ab17c1ac45b6c1613",
+      "createdAt": "2026-09-30T05:22:40.883089Z",
+      "resolvedAt": null
+    }
+  ],
+  "score": 0.0,
+  "inputDependencyRefs": [],
+  "provider": null,
+  "model": null,
+  "promptVersion": null,
+  "elapsedMs": 60000.0,
+  "usage": null,
+  "evaluatedAt": "2026-09-30T05:22:40.883101Z"
+}

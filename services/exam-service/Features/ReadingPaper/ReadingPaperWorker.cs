@@ -196,6 +196,165 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                 throw new ReadingSourceUnavailableException("Source identity or license changed");
             }
 
+            // 3b. V2 QuestionCandidateLoop Integration: If V2 is active and questions are decoupled
+            var activeRun = await db.ReadingPaperRuns.FirstOrDefaultAsync(r => r.RunId == runId, ct);
+            var isV2Engine = (activeRun != null && string.Equals(activeRun.EngineVersion, "2.0.0", StringComparison.OrdinalIgnoreCase))
+                || string.Equals(source.Metadata?.GetValueOrDefault("engine"), "v2", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(Environment.GetEnvironmentVariable("READING_PAPER_ENGINE"), "v2", StringComparison.OrdinalIgnoreCase);
+
+            var requiredSectionQuestions = sourceNum switch { 1 => 13, 2 => 13, 3 => 14, _ => 13 };
+            var currentQuestionsCount = section.Groups?.Sum(g => g.Questions.Count) ?? 0;
+
+            if (isV2Engine && currentQuestionsCount < requiredSectionQuestions)
+            {
+                await AppendLogAsync(job.Id, "Information",
+                    $"Executing V2 QuestionCandidateLoop via AI service for section {sourceNum} (current: {currentQuestionsCount}/{requiredSectionQuestions} questions)...", ct);
+
+                var passageHead = await db.ReadingPaperArtifactHeads
+                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == $"art_passage_s{sourceNum}" || h.ArtifactId == $"art_passage_{sourceNum}"), ct);
+                var bpPrefix = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
+                var blueprintHead = await db.ReadingPaperArtifactHeads
+                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == bpPrefix || h.ArtifactId.StartsWith("art_blueprint_")), ct);
+                var passageRef = passageHead != null
+                    ? new ArtifactRef(passageHead.ArtifactId, ArtifactType.Passage, passageHead.AcceptedVersion, passageHead.AcceptedHash)
+                    : new ArtifactRef($"art_passage_s{sourceNum}", ArtifactType.Passage, 1, "0000000000000000000000000000000000000000000000000000000000000000");
+                var blueprintRef = blueprintHead != null
+                    ? new ArtifactRef(blueprintHead.ArtifactId, ArtifactType.ExamBlueprint, blueprintHead.AcceptedVersion, blueprintHead.AcceptedHash)
+                    : new ArtifactRef($"art_blueprint_{runId[..8]}", ArtifactType.ExamBlueprint, 1, "0000000000000000000000000000000000000000000000000000000000000000");
+
+                // Determine missing question slot indices
+                var existingNums = section.Groups?.SelectMany(g => g.Questions).Select(q => q.Number).ToHashSet() ?? new HashSet<int>();
+                var baseStart = sourceNum switch { 1 => 1, 2 => 14, 3 => 27, _ => 1 };
+                var missingSlots = new List<object>();
+                for (var qNum = baseStart; qNum < baseStart + requiredSectionQuestions; qNum++)
+                {
+                    if (!existingNums.Contains(qNum))
+                    {
+                        var slotType = (sourceNum, qNum - baseStart) switch
+                        {
+                            (1, < 7) => "TrueFalseNotGiven",
+                            (1, _) => "SentenceCompletion",
+                            (2, < 6) => "MultipleChoiceSingle",
+                            (2, _) => "SummaryCompletion",
+                            (3, < 7) => "YesNoNotGiven",
+                            (3, _) => "ShortAnswer",
+                            _ => "SentenceCompletion"
+                        };
+                        missingSlots.Add(new { number = qNum, type = slotType });
+                    }
+                }
+
+                var qResult = await ai.GenerateQuestionsAsync(
+                    passageRef, blueprintRef, missingSlots.Count > 0 ? missingSlots : null, runId, owner, job.Epoch, sourceNum, ct);
+
+                if (qResult.Questions != null && qResult.Questions.Count > 0)
+                {
+                    var extractedQuestions = new List<(int Number, string CanonicalType, ReadingGeneratedQuestion Question)>();
+                    foreach (var kv in qResult.Questions)
+                    {
+                        if (kv.Value is JsonElement qEl)
+                        {
+                            if (qEl.TryGetProperty("payload", out var pNode) && pNode.TryGetProperty("questions", out var qArray) && qArray.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var item in qArray.EnumerateArray())
+                                {
+                                    var num = item.TryGetProperty("questionNumber", out var nP) ? nP.GetInt32() : 1;
+                                    var rawType = item.TryGetProperty("questionType", out var tP) ? tP.GetString() ?? "TrueFalseNotGiven" : "TrueFalseNotGiven";
+                                    var cType = GetCanonicalGroupType(rawType);
+                                    var prompt = item.TryGetProperty("prompt", out var pP) ? pP.GetString() ?? "" : "";
+                                    var answer = item.TryGetProperty("answer", out var aP) ? aP.GetString() ?? "" : "";
+                                    var quote = item.TryGetProperty("evidenceQuote", out var eqP) ? eqP.GetString() ?? "" : "";
+                                    var expl = item.TryGetProperty("explanation", out var expP) ? expP.GetString() ?? "" : "";
+                                    var opts = new List<string>();
+                                    if (item.TryGetProperty("options", out var optNode) && optNode.ValueKind == JsonValueKind.Array)
+                                    {
+                                        foreach (var o in optNode.EnumerateArray())
+                                        {
+                                            if (o.ValueKind == JsonValueKind.String) opts.Add(o.GetString() ?? "");
+                                            else if (o.TryGetProperty("text", out var tText)) opts.Add(tText.GetString() ?? "");
+                                            else opts.Add(o.ToString());
+                                        }
+                                    }
+                                    extractedQuestions.Add((num, cType, new ReadingGeneratedQuestion(num, prompt, answer, opts, quote, expl)));
+                                }
+                            }
+                            else
+                            {
+                                var num = int.TryParse(kv.Key, out var parsedNum) ? parsedNum : 1;
+                                var rawType = qEl.TryGetProperty("questionType", out var tProp) ? tProp.GetString() ?? "TrueFalseNotGiven" : "TrueFalseNotGiven";
+                                var cType = GetCanonicalGroupType(rawType);
+                                var prompt = qEl.TryGetProperty("prompt", out var pProp) ? pProp.GetString() ?? "" : "";
+                                var answer = qEl.TryGetProperty("answer", out var aProp) ? aProp.GetString() ?? "" : "";
+                                var quote = qEl.TryGetProperty("evidenceQuote", out var eqP) ? eqP.GetString() ?? "" : "";
+                                var expl = qEl.TryGetProperty("explanation", out var expP) ? expP.GetString() ?? "" : "";
+                                var opts = new List<string>();
+                                if (qEl.TryGetProperty("options", out var optNode) && optNode.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var o in optNode.EnumerateArray())
+                                    {
+                                        if (o.ValueKind == JsonValueKind.String) opts.Add(o.GetString() ?? "");
+                                        else if (o.TryGetProperty("text", out var tText)) opts.Add(tText.GetString() ?? "");
+                                        else opts.Add(o.ToString());
+                                    }
+                                }
+                                extractedQuestions.Add((num, cType, new ReadingGeneratedQuestion(num, prompt, answer, opts, quote, expl)));
+                            }
+                        }
+                    }
+                    // Deduplicate newly extracted questions by Number
+                    var distinctQuestions = extractedQuestions
+                        .GroupBy(x => x.Number)
+                        .Select(g => g.First())
+                        .ToList();
+
+                    // Merge with any pre-existing questions
+                    if (section.Groups != null && section.Groups.Count > 0)
+                    {
+                        foreach (var existingGrp in section.Groups)
+                        {
+                            foreach (var eq in existingGrp.Questions)
+                            {
+                                if (!distinctQuestions.Any(x => x.Number == eq.Number))
+                                {
+                                    distinctQuestions.Add((eq.Number, GetCanonicalGroupType(existingGrp.Type), eq));
+                                }
+                            }
+                        }
+                    }
+
+                    distinctQuestions = distinctQuestions.OrderBy(x => x.Number).ToList();
+
+                    if (distinctQuestions.Count > 0)
+                    {
+                        var newGroups = new List<ReadingGeneratedGroup>();
+                        var currentType = "";
+                        var currentGroupQuestions = new List<ReadingGeneratedQuestion>();
+
+                        foreach (var item in distinctQuestions)
+                        {
+                            if (!string.Equals(currentType, item.CanonicalType, StringComparison.OrdinalIgnoreCase) && currentGroupQuestions.Count > 0)
+                            {
+                                newGroups.Add(new ReadingGeneratedGroup(currentType, GetGroupInstruction(currentType), currentGroupQuestions));
+                                currentGroupQuestions = new List<ReadingGeneratedQuestion>();
+                            }
+                            currentType = item.CanonicalType;
+                            currentGroupQuestions.Add(item.Question);
+                        }
+                        if (currentGroupQuestions.Count > 0)
+                        {
+                            newGroups.Add(new ReadingGeneratedGroup(currentType, GetGroupInstruction(currentType), currentGroupQuestions));
+                        }
+                        section = section with { Groups = newGroups };
+                    }
+                }
+            }
+
+            if (isV2Engine && (section.Groups == null || section.Groups.Sum(g => g.Questions.Count) < requiredSectionQuestions))
+            {
+                throw new InvalidOperationException(
+                    $"Section {sourceNum} question generation incomplete: expected {requiredSectionQuestions} questions, got {section.Groups?.Sum(g => g.Questions.Count) ?? 0}");
+            }
+
             await AppendLogAsync(job.Id, "Information",
                 $"Passage {sourceNum} generated and verified ({ReadingPaperRules.WordCount(section.Passage)} words, {section.Groups.Sum(g => g.Questions.Count)} questions). Committing durable checkpoint...", ct);
 
@@ -285,6 +444,32 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             .ExecuteUpdateAsync(x => x.SetProperty(j => j.LeaseUntil, DateTime.UtcNow.AddMinutes(3)), ct);
         if (updated != 1) throw new InvalidOperationException("Job lease was lost");
     }
+
+    private static string GetCanonicalGroupType(string rawType)
+    {
+        var norm = rawType.Replace("_", "").Replace(" ", "").ToUpperInvariant();
+        return norm switch
+        {
+            "TRUEFALSENOTGIVEN" or "TFNG" => "TRUE_FALSE_NOT_GIVEN",
+            "YESNONOTGIVEN" or "YNNG" => "YES_NO_NOT_GIVEN",
+            "MULTIPLECHOICESINGLE" or "MCQ" or "MULTIPLECHOICE" => "MULTIPLE_CHOICE_SINGLE",
+            "SENTENCECOMPLETION" => "SENTENCE_COMPLETION",
+            "SUMMARYCOMPLETION" => "SUMMARY_COMPLETION",
+            "SHORTANSWER" => "SHORT_ANSWER",
+            _ => rawType.ToUpperInvariant()
+        };
+    }
+
+    private static string GetGroupInstruction(string groupType) => groupType switch
+    {
+        "TRUE_FALSE_NOT_GIVEN" => "Do the following statements agree with the information given in the reading passage?",
+        "YES_NO_NOT_GIVEN" => "Do the following statements agree with the views/claims of the writer in the reading passage?",
+        "MULTIPLE_CHOICE_SINGLE" => "Choose the correct letter, A, B, C or D.",
+        "SENTENCE_COMPLETION" => "Complete the sentences below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+        "SUMMARY_COMPLETION" => "Complete the summary below. Choose NO MORE THAN TWO WORDS from the passage for each answer.",
+        "SHORT_ANSWER" => "Answer the questions below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+        _ => "Answer the questions below according to the reading passage."
+    };
 
     public static Exam BuildExam(ReadingPaperJob job, IReadOnlyList<ReadingGeneratedSection> sections)
     {

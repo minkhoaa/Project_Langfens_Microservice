@@ -12,6 +12,7 @@ Validates all G07 acceptance scenarios (T07-01 to T07-08) and P07-06 evaluator i
 - P07-06: Unrelated evaluator cannot resolve prior issues; requires corresponding evaluator identity
 """
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any, Dict, List
@@ -44,6 +45,7 @@ from app.evaluators.registry import (
     EvaluatorRegistry,
     compute_evaluation_cache_key,
 )
+from app.evaluators.metrics import calculate_semantic_benchmark_metrics
 from app.evaluators.semantic import (
     AmbiguityAndDistractorEvaluator,
     GroundingFidelityEvaluator,
@@ -308,48 +310,101 @@ async def test_t07_02_semantic_annotated_corpus_thresholds():
                 canary_rejected += 1
 
     # Compute Statistical Rates
-    overall_blocking_recall = invalid_detected / invalid_total if invalid_total else 0.0
-    false_rejection_rate = valid_rejected / valid_total if valid_total else 0.0
-    ambiguity_recall = ambiguous_detected / ambiguous_total if ambiguous_total else 0.0
-    canary_rejection_rate = canary_rejected / canary_total if canary_total else 0.0
+    records: Dict[str, Any] = {}
+    canary_records: List[Dict[str, Any]] = []
 
-    # Save Confusion Matrices to Artifacts
-    confusion_report = {
-        "evaluationSummary": {
-            "totalQuestionsEvaluated": valid_total + invalid_total,
-            "validQuestions": valid_total,
-            "invalidQuestions": invalid_total,
-            "criticalCanariesCount": canary_total,
-        },
-        "rates": {
-            "overallBlockingRecall": overall_blocking_recall,
-            "falseRejectionRate": false_rejection_rate,
-            "ambiguityRecall": ambiguity_recall,
-            "canaryRejectionRate": canary_rejection_rate,
-        },
-        "perTypeMetrics": per_type_metrics,
-        "acceptanceThresholds": {
-            "overallBlockingRecallMin": 0.95,
-            "perTypeBlockingRecallMin": 0.90,
-            "ambiguityRecallMin": 0.90,
-            "falseRejectionRateMax": 0.10,
-            "criticalCanaryRejectionRateMin": 1.00,
-        },
-        "benchmarkStatus": "CONTAMINATED_BENCHMARK_DEVELOPMENT_ONLY",
-        "quarantineRationale": (
-            "Corpus labels were exposed in session diagnostics. In accordance with P07-09 "
-            "and validation matrix, this dataset is quarantined as development evidence. "
-            "No semantic gate PASS is claimed until evaluated on an unseen, family-disjoint holdout."
-        ),
-    }
-    with open(ARTIFACTS_DIR / "confusion-matrices.json", "w") as f:
-        json.dump(confusion_report, f, indent=2)
+    for q_type, type_data in q_corpus["types"].items():
+        passages = q_corpus["passages"]
+        for q in type_data.get("valid", []):
+            case_id = f"q_v_{q_type}_{q.get('number')}"
+            # Evaluate with pipeline
+            src_fam = q.get("source_family", "coral_reefs")
+            payload = {
+                "passage": passages.get(src_fam, ""),
+                "questionNumber": q.get("number", 1),
+                "questionType": q_type,
+                "prompt": q.get("prompt"),
+                "answer": q.get("answer"),
+                "options": q.get("options", []),
+                "evidenceQuote": q.get("evidenceQuote", ""),
+            }
+            art = make_envelope(case_id, ArtifactType.QUESTION, 1, payload)
+            all_issues = []
+            for ev in pipeline_evaluators:
+                res = await ev.evaluate(ctx, art, intent_id="eval_test")
+                all_issues.extend(res.issues)
+            blocking = any(i.severity == IssueSeverity.CRITICAL or i.blocking for i in all_issues)
+            records[case_id] = {
+                "caseId": case_id,
+                "questionType": q_type,
+                "groundTruthValid": True,
+                "isBlocking": blocking,
+                "issueCodes": [i.code.value for i in all_issues],
+                "expectedIssueCode": "",
+            }
 
-    # Diagnostic verification: All 120 questions and 12 canaries were processed
-    assert valid_total + invalid_total == 120, "Must evaluate all 120 corpus questions"
-    assert canary_total == 12, "Must evaluate all 12 critical canaries"
-    assert canary_rejection_rate == 1.00, f"Critical canaries must be 100% rejected, got {canary_rejection_rate:.2%}"
-    assert overall_blocking_recall > 0.0, "Blocking recall must be non-zero"
+        for q in type_data.get("invalid", []):
+            case_id = f"q_i_{q_type}_{q.get('number')}"
+            src_fam = q.get("source_family", "coral_reefs")
+            payload = {
+                "passage": passages.get(src_fam, ""),
+                "questionNumber": q.get("number", 1),
+                "questionType": q_type,
+                "prompt": q.get("prompt"),
+                "answer": q.get("answer"),
+                "options": q.get("options", []),
+                "evidenceQuote": q.get("evidenceQuote", ""),
+                "evidenceStart": q.get("evidenceStart"),
+                "evidenceEnd": q.get("evidenceEnd"),
+            }
+            art = make_envelope(case_id, ArtifactType.QUESTION, 1, payload)
+            all_issues = []
+            for ev in pipeline_evaluators:
+                res = await ev.evaluate(ctx, art, intent_id="eval_test")
+                all_issues.extend(res.issues)
+            blocking = any(i.severity == IssueSeverity.CRITICAL or i.blocking for i in all_issues)
+            records[case_id] = {
+                "caseId": case_id,
+                "questionType": q_type,
+                "groundTruthValid": False,
+                "isBlocking": blocking,
+                "issueCodes": [i.code.value for i in all_issues],
+                "expectedIssueCode": q.get("issue_code"),
+            }
+
+    for f_case in f_corpus["cases"]:
+        if f_case.get("critical_canary"):
+            payload = {
+                "claims": [{"claimId": f_case["id"], "claimText": f_case["claim_text"]}],
+                "sourceText": f_case["source_text"],
+            }
+            art = make_envelope(f_case["id"], ArtifactType.EVIDENCE_GRAPH, 1, payload)
+            res = await sem_grounding.evaluate(ctx, art, intent_id="canary_test")
+            canary_records.append({
+                "caseId": f_case["id"],
+                "canaryId": f_case["id"],
+                "repetition": 0,
+                "isCriticalCanary": True,
+                "isBlocking": not res.is_pass(),
+                "issueCodes": [i.code.value for i in res.issues],
+            })
+
+    calc_result = calculate_semantic_benchmark_metrics(
+        records=records,
+        campaign_id="test_t07_02_diagnostic",
+        partition="dev",
+        canary_records=canary_records,
+        canary_repetitions=1,
+    )
+
+    summary = calc_result.to_canonical_summary()
+    with open(ARTIFACTS_DIR / "local-dev-test-confusion-matrices.json", "w") as f:
+        json.dump(summary, f, indent=2)
+
+    assert calc_result.overall.total == 120, "Must evaluate all 120 corpus questions"
+    assert len(canary_records) == 12, "Must evaluate all 12 critical canaries"
+    assert calc_result.canaries.worst_run_rate == 1.00, f"Critical canaries must be 100% rejected, got {calc_result.canaries.worst_run_rate:.2%}"
+    assert calc_result.overall.recall > 0.0, "Blocking recall must be non-zero"
 
 # ── T07-03: Independent Question Repair Preserves Unaffected Questions ───────
 
@@ -712,7 +767,38 @@ async def test_t07_08_option_repair_fails_closed_when_passage_has_no_concepts():
 async def test_t07_08_distractor_repair_with_evidence_and_uniqueness():
     """T07-08: Distractor repair with verifiable passage quote + wrongness rationale succeeds; duplicate fails uniqueness."""
     ctx = make_context()
-    repairer = QuestionItemRepairer()
+    class MockOptionGateway:
+        def __init__(self):
+            self.checkpoint_client = object()
+            self.last_response = None
+        async def execute(self, req, epoch=1, lease_owner=None):
+            user_msg = req.messages[-1].content
+            if "Advanced battery storage" in user_msg:
+                payload = {
+                    "options": [
+                        {"key": "A", "status": "SUPPORTED", "supporting_sentence": "Advanced battery storage provides long-duration backup.", "reason": "Explicitly stated in text"},
+                        {"key": "B", "status": "SUPPORTED", "supporting_sentence": "Hydro storage provides long-duration backup.", "reason": "Explicitly stated in text"},
+                        {"key": "C", "status": "REFUTED", "supporting_sentence": "", "reason": "Not stated"},
+                        {"key": "D", "status": "REFUTED", "supporting_sentence": "", "reason": "Not stated"},
+                    ]
+                }
+            else:
+                payload = {
+                    "options": [
+                        {"key": "A", "status": "REFUTED", "supporting_sentence": "Solar and wind installations expand rapidly.", "reason": "Variable generation, not backup"},
+                        {"key": "B", "status": "SUPPORTED", "supporting_sentence": "Hydro storage provides long-duration backup.", "reason": "Explicitly stated in text"},
+                        {"key": "C", "status": "REFUTED", "supporting_sentence": "", "reason": "Not stated"},
+                        {"key": "D", "status": "REFUTED", "supporting_sentence": "", "reason": "Not stated"},
+                    ]
+                }
+            return type("Resp", (), {
+                "parsed_payload": payload,
+                "raw_text": json.dumps(payload),
+                "provider_name": "mock",
+                "model_name": "mock-eval",
+            })()
+    mock_gw = MockOptionGateway()
+    repairer = QuestionItemRepairer(gateway=mock_gw)
     pass_text = "Solar and wind installations expand rapidly. Hydro storage provides long-duration backup."
     payload = {
         "passage": pass_text,
@@ -983,3 +1069,563 @@ def test_p07_01_metadata_settings_wiring_and_override():
     custom_rep = PassageSentenceRepairer(timeout_seconds=77.0, estimated_tokens=3200)
     assert custom_rep.metadata.timeout_seconds == 77.0
     assert custom_rep.metadata.estimated_tokens == 3200
+
+# ── Gate G07 Audit Remediation Regression Tests ──────────────────────────────
+
+class _SpyTimeoutEvaluator(BaseEvaluator):
+    def __init__(self, timeout_sec: float = 0.05):
+        super().__init__(
+            EvaluatorMetadata(
+                evaluator_id="spy_timeout",
+                evaluator_version="1.0.0",
+                name="Spy Timeout Evaluator",
+                stage=EvaluationStage.SEMANTIC,
+                target_artifact_types=[ArtifactType.QUESTION],
+                timeout_seconds=timeout_sec,
+                is_expensive=True,
+            )
+        )
+
+    async def _evaluate_impl(self, context: LoopContext, artifact: ArtifactEnvelope, intent_id: str) -> EvaluationResult:
+        await asyncio.sleep(0.3)
+        return EvaluationResult(
+            evaluationId="eval_never",
+            evaluatorId=self.evaluator_id,
+            evaluatorVersion=self.evaluator_version,
+            targetRef=artifact.to_ref(),
+            status=EvaluationStatus.PASS,
+        )
+
+
+class _SpyExceptionEvaluator(BaseEvaluator):
+    def __init__(self):
+        super().__init__(
+            EvaluatorMetadata(
+                evaluator_id="spy_exception",
+                evaluator_version="1.0.0",
+                name="Spy Exception Evaluator",
+                stage=EvaluationStage.SEMANTIC,
+                target_artifact_types=[ArtifactType.QUESTION],
+                timeout_seconds=10.0,
+                is_expensive=True,
+            )
+        )
+
+    async def _evaluate_impl(self, context: LoopContext, artifact: ArtifactEnvelope, intent_id: str) -> EvaluationResult:
+        raise RuntimeError("Simulated unhandled LLM transport disconnect")
+
+
+class _SpyMalformedEvaluator(BaseEvaluator):
+    def __init__(self, mode: str = "none"):
+        self.mode = mode
+        super().__init__(
+            EvaluatorMetadata(
+                evaluator_id="spy_malformed",
+                evaluator_version="1.0.0",
+                name="Spy Malformed Evaluator",
+                stage=EvaluationStage.SEMANTIC,
+                target_artifact_types=[ArtifactType.QUESTION],
+                timeout_seconds=10.0,
+                is_expensive=True,
+            )
+        )
+
+    async def _evaluate_impl(self, context: LoopContext, artifact: ArtifactEnvelope, intent_id: str) -> Any:
+        if self.mode == "none":
+            return None
+        if self.mode == "empty_error":
+            return EvaluationResult(
+                evaluationId="eval_empty_err",
+                evaluatorId=self.evaluator_id,
+                evaluatorVersion=self.evaluator_version,
+                targetRef=artifact.to_ref(),
+                status=EvaluationStatus.ERROR,
+                issues=[],
+            )
+        return {"raw": "dict_not_envelope"}
+
+
+@pytest.mark.asyncio
+async def test_audit_timeout_fail_closed_error_result():
+    """AUDIT-TIMEOUT-FAIL-CLOSED: BaseEvaluator timeout produces typed ERROR result without TypeError."""
+    ctx = make_context()
+    art = make_envelope("q_timeout_test", ArtifactType.QUESTION, 1, {"prompt": "Test prompt"})
+    evaluator = _SpyTimeoutEvaluator(timeout_sec=0.05)
+
+    res = await evaluator.evaluate(ctx, art, intent_id="intent_tout")
+
+    assert isinstance(res, EvaluationResult), "Result must be typed EvaluationResult"
+    assert res.status == EvaluationStatus.ERROR, f"Expected ERROR status, got {res.status}"
+    assert res.is_pass() is False, "ERROR result must not pass is_pass()"
+    assert res.evaluator_id == "spy_timeout"
+    assert res.evaluator_version == "1.0.0"
+    assert res.target_ref == art.to_ref()
+    assert len(res.issues) == 1, "Must contain exactly 1 attached critical issue"
+    issue = res.issues[0]
+    assert issue.code == IssueCode.EVALUATOR_UNAVAILABLE
+    assert issue.severity == IssueSeverity.CRITICAL
+    assert issue.scope == ctx.scope
+    assert issue.evaluator_id == "spy_timeout"
+    assert issue.affected_refs == [art.to_ref()]
+    assert "timed out after 0.1s" in issue.message or "timed out" in issue.message
+
+
+@pytest.mark.asyncio
+async def test_audit_exception_fail_closed_error_result():
+    """BaseEvaluator unhandled exception produces typed ERROR result with sanitized message."""
+    ctx = make_context()
+    art = make_envelope("q_ex_test", ArtifactType.QUESTION, 1, {"prompt": "Test prompt"})
+    evaluator = _SpyExceptionEvaluator()
+
+    res = await evaluator.evaluate(ctx, art, intent_id="intent_ex")
+
+    assert isinstance(res, EvaluationResult)
+    assert res.status == EvaluationStatus.ERROR
+    assert res.is_pass() is False
+    assert len(res.issues) == 1
+    issue = res.issues[0]
+    assert issue.code == IssueCode.EVALUATOR_UNAVAILABLE
+    assert issue.severity == IssueSeverity.CRITICAL
+    assert "Simulated unhandled LLM transport disconnect" in issue.message
+
+
+@pytest.mark.asyncio
+async def test_audit_malformed_output_fail_closed():
+    """BaseEvaluator malformed output produces typed ERROR result with MALFORMED_OUTPUT issue."""
+    ctx = make_context()
+    art = make_envelope("q_mal_test", ArtifactType.QUESTION, 1, {"prompt": "Test prompt"})
+
+    # 1. Returned None
+    ev_none = _SpyMalformedEvaluator(mode="none")
+    res_none = await ev_none.evaluate(ctx, art, intent_id="intent_mal1")
+    assert res_none.status == EvaluationStatus.ERROR
+    assert res_none.issues[0].code == IssueCode.SCHEMA_VIOLATION
+
+    # 2. Returned ERROR status without issues (must attach critical issue)
+    ev_empty = _SpyMalformedEvaluator(mode="empty_error")
+    res_empty = await ev_empty.evaluate(ctx, art, intent_id="intent_mal2")
+    assert res_empty.status == EvaluationStatus.ERROR
+    assert len(res_empty.issues) >= 1
+    assert res_empty.issues[0].code == IssueCode.EVALUATOR_UNAVAILABLE
+
+
+@pytest.mark.asyncio
+async def test_audit_cancellation_preserved_not_swallowed():
+    """BaseEvaluator preserves runtime cancellation semantics: never swallows CancelledError."""
+    ctx = make_context()
+    art = make_envelope("q_cancel_test", ArtifactType.QUESTION, 1, {"prompt": "Test prompt"})
+
+    class _CancellableEvaluator(BaseEvaluator):
+        def __init__(self):
+            super().__init__(
+                EvaluatorMetadata(
+                    evaluator_id="spy_cancellable",
+                    name="Cancellable Evaluator",
+                    stage=EvaluationStage.SEMANTIC,
+                    target_artifact_types=[ArtifactType.QUESTION],
+                    timeout_seconds=30.0,
+                )
+            )
+
+        async def _evaluate_impl(self, context: LoopContext, artifact: ArtifactEnvelope, intent_id: str) -> EvaluationResult:
+            await asyncio.sleep(10.0)
+            return EvaluationResult(
+                evaluationId="ev", evaluatorId=self.evaluator_id, evaluatorVersion="1.0.0",
+                targetRef=artifact.to_ref(), status=EvaluationStatus.PASS,
+            )
+
+    evaluator = _CancellableEvaluator()
+    task = asyncio.create_task(evaluator.evaluate(ctx, art, "intent_cancel"))
+    await asyncio.sleep(0.01)
+    task.cancel()
+
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+
+@pytest.mark.asyncio
+async def test_audit_required_evaluator_enforcement_in_pipeline():
+    """AUDIT-REQUIRED-WIRING: Missing required evaluator creates recorded failure and prevents PASS."""
+    ctx = make_context()
+    art = make_envelope("q_req_test", ArtifactType.QUESTION, 1, {"prompt": "Test prompt"})
+    registry = EvaluatorRegistry()
+    # Register one evaluator
+    det_eval = AnswerVerbatimAndLengthEvaluator()
+    registry.register(det_eval)
+
+    # 1. Pipeline called with required evaluator that is NOT in registry
+    results = await registry.evaluate_pipeline(
+        ctx,
+        art,
+        intent_id="intent_req",
+        required_evaluator_ids=["eval_not_given_semantics", "eval_answer_verbatim_length"],
+    )
+    assert len(results) == 1
+    res = results[0]
+    assert res.status == EvaluationStatus.ERROR
+    assert res.issues[0].code == IssueCode.EVALUATOR_UNAVAILABLE
+    assert "eval_not_given_semantics" in res.issues[0].message
+    assert res.is_pass() is False
+
+    # 2. Strict raise_on_missing_required raises EvaluatorConfigurationError
+    with pytest.raises(EvaluatorConfigurationError, match="missing required evaluator"):
+        await registry.evaluate_pipeline(
+            ctx,
+            art,
+            intent_id="intent_req",
+            required_evaluator_ids=["eval_not_given_semantics"],
+            raise_on_missing_required=True,
+        )
+
+
+@pytest.mark.asyncio
+async def test_audit_dynamic_closure_traversal_passage_and_sister_questions():
+    """AUDIT-REPAIR-CLOSURE: Traverses exact graph consumers; preserves unaffected sister questions."""
+    registry = RepairRegistry()
+    summary_repairer = SummaryGroupRepairer()
+    q_repairer = QuestionItemRepairer()
+    passage_repairer = PassageSentenceRepairer()
+    registry.register(summary_repairer)
+    registry.register(q_repairer)
+    registry.register(passage_repairer)
+    planner = RepairPlanner(registry)
+
+    # Setup lineage graph:
+    # Passage -> Q1, Q2 -> Section
+    passage_art = make_envelope("passage_01", ArtifactType.PASSAGE, 1, {"passageText": "The clinical trial lasted six weeks."})
+    q1_art = make_envelope(
+        "q1_item", ArtifactType.QUESTION, 1,
+        {"prompt": "Trial duration", "answer": "six weeks"},
+        parent_refs=[passage_art.to_ref()],
+    )
+    q2_art = make_envelope(
+        "q2_item", ArtifactType.QUESTION, 1,
+        {"prompt": "Patient outcomes", "answer": "improved sleep"},
+        parent_refs=[passage_art.to_ref()],
+    )
+    section_art = make_envelope(
+        "sec_01", ArtifactType.SECTION, 1,
+        {"sectionIndex": 1},
+        parent_refs=[passage_art.to_ref(), q1_art.to_ref(), q2_art.to_ref()],
+    )
+    artifacts_pool = [passage_art, q1_art, q2_art, section_art]
+
+    # 1. Repair single question Q1:
+    # Q1 changes -> section is invalidated (consumes Q1); sister Q2 is unaffected!
+    issue_q1 = Issue.create(
+        issue_id="iss_q1",
+        code=IssueCode.WORD_LIMIT_EXCEEDED,
+        severity=IssueSeverity.CRITICAL,
+        scope=IssueScope.QUESTION,
+        message="Answer exceeds word limit",
+        affected_refs=[q1_art.to_ref()],
+    )
+    plan_q = planner.plan_repair(q1_art, [issue_q1], artifacts_pool=artifacts_pool)
+    inv_ids = {r.artifact_id for r in plan_q.invalidated_dependency_refs}
+    unaff_ids = {r.artifact_id for r in plan_q.unaffected_accepted_refs}
+
+    assert "sec_01" in inv_ids, "Section aggregating Q1 must be invalidated"
+    assert "q2_item" in unaff_ids, "Sister question Q2 must remain unaffected"
+    assert "q2_item" not in inv_ids, "Sister question Q2 must not be invalidated"
+
+    # 2. Repair Passage:
+    # All consuming questions Q1, Q2, and Section must be in invalidated closure!
+    issue_p = Issue.create(
+        issue_id="iss_p",
+        code=IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS,
+        severity=IssueSeverity.CRITICAL,
+        scope=IssueScope.PASSAGE,
+        message="Passage word count out of bounds",
+        affected_refs=[passage_art.to_ref()],
+    )
+    plan_p = planner.plan_repair(passage_art, [issue_p], artifacts_pool=artifacts_pool)
+    inv_p_ids = {r.artifact_id for r in plan_p.invalidated_dependency_refs}
+    assert "q1_item" in inv_p_ids
+    assert "q2_item" in inv_p_ids
+    assert "sec_01" in inv_p_ids
+
+
+@pytest.mark.asyncio
+async def test_audit_dynamic_closure_cycle_and_missing_metadata_detection():
+    """AUDIT-REPAIR-CLOSURE: Detects malformed graphs, cycles, and missing metadata fail-closed."""
+    registry = RepairRegistry()
+    registry.register(PassageSentenceRepairer())
+    planner = RepairPlanner(registry)
+
+    art1 = make_envelope("art_a", ArtifactType.PASSAGE, 1, {"text": "A"})
+    art2 = make_envelope("art_b", ArtifactType.QUESTION, 1, {"text": "B"}, parent_refs=[art1.to_ref()])
+    # Create cycle: art1 references art2
+    art1_cycle = art1.model_copy(update={"parent_refs": (art2.to_ref(),)})
+
+    issue = Issue.create(
+        issue_id="iss_cycle",
+        code=IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS,
+        severity=IssueSeverity.CRITICAL,
+        scope=IssueScope.PASSAGE,
+        message="Word count issue",
+        affected_refs=[art1_cycle.to_ref()],
+    )
+
+    # Cycle must raise RepairExecutionError
+    with pytest.raises(RepairExecutionError, match="cycle detected"):
+        planner.plan_repair(art1_cycle, [issue], artifacts_pool=[art1_cycle, art2])
+
+    # Missing metadata on passage repair without pool or dependent refs must fail-closed
+    with pytest.raises(RepairExecutionError, match="Missing dependency metadata"):
+        planner.plan_repair(art1, [issue], artifacts_pool=None, dependent_question_refs=None)
+
+
+@pytest.mark.asyncio
+async def test_audit_not_given_semantics_polar_opposites_and_minimal_pairs():
+    """AUDIT-NOT-GIVEN-SEMANTICS: Validates polar opposites and all 4 annotated minimal pairs."""
+    ctx = make_context()
+    evaluator = NotGivenSemanticsEvaluator()
+
+    # 1. Audit Finding 3 Case: 'remained steady' vs 'declined significantly'
+    passage_fish = "Across surveyed marine reserves, herbivorous fish populations declined significantly due to warming."
+    q_fish_invalid = {
+        "questionNumber": 1,
+        "questionType": "TrueFalseNotGiven",
+        "prompt": "Herbivorous fish populations remained steady across all surveyed reefs.",
+        "answer": "NOT_GIVEN",  # Incorrectly labeled NOT_GIVEN when passage explicitly contradicts it!
+    }
+    art_fish = make_envelope("q_fish", ArtifactType.QUESTION, 1, {**q_fish_invalid, "passage": passage_fish})
+    res_fish = await evaluator.evaluate(ctx, art_fish, intent_id="eval_fish")
+    assert res_fish.status == EvaluationStatus.FAIL, "Contradicted statement labeled NOT_GIVEN must FAIL"
+    assert any(i.code == IssueCode.AMBIGUOUS_ANSWER for i in res_fish.issues)
+    assert "correct answer must be FALSE" in res_fish.issues[0].message
+
+    # 2. Minimal Pair 1: Passage 6 weeks vs Statement 10 weeks -> Contradiction!
+    passage_weeks = "In a controlled clinical trial lasting six weeks, researchers monitored patient sleep architecture."
+    q_pair1 = {
+        "questionNumber": 2,
+        "questionType": "TrueFalseNotGiven",
+        "prompt": "The clinical trial lasted ten weeks.",
+        "answer": "NOT_GIVEN",  # Contradicted by 6 weeks vs 10 weeks!
+    }
+    art_pair1 = make_envelope("q_pair1", ArtifactType.QUESTION, 1, {**q_pair1, "passage": passage_weeks})
+    res_pair1 = await evaluator.evaluate(ctx, art_pair1, intent_id="eval_p1")
+    assert res_pair1.status == EvaluationStatus.FAIL
+    assert any(i.code == IssueCode.AMBIGUOUS_ANSWER for i in res_pair1.issues)
+
+    # 3. Minimal Pair 2: Sleep improvement vs Statement cholesterol decreased (completely absent) -> Valid NOT_GIVEN!
+    q_pair2 = {
+        "questionNumber": 3,
+        "questionType": "TrueFalseNotGiven",
+        "prompt": "Participants' cholesterol decreased during the clinical trial.",
+        "answer": "NOT_GIVEN",
+    }
+    art_pair2 = make_envelope("q_pair2", ArtifactType.QUESTION, 1, {**q_pair2, "passage": passage_weeks})
+    res_pair2 = await evaluator.evaluate(ctx, art_pair2, intent_id="eval_p2")
+    assert res_pair2.status == EvaluationStatus.PASS, "Truly absent concept labeled NOT_GIVEN must PASS"
+
+    # 4. Minimal Pair 3: Author explicitly rejects compulsory participation vs Statement author supports it -> NO (contradiction)!
+    passage_stance = "The author explicitly rejects compulsory participation in community volunteer programs, favoring voluntary engagement."
+    q_pair3_ng = {
+        "questionNumber": 4,
+        "questionType": "YesNoNotGiven",
+        "prompt": "The author supports compulsory participation in community volunteer programs.",
+        "answer": "NOT_GIVEN",  # Rejected: Author explicitly rejects it, answer must be NO!
+    }
+    art_pair3_ng = make_envelope("q_pair3_ng", ArtifactType.QUESTION, 1, {**q_pair3_ng, "passage": passage_stance})
+    res_pair3_ng = await evaluator.evaluate(ctx, art_pair3_ng, intent_id="eval_p3_ng")
+    assert res_pair3_ng.status == EvaluationStatus.FAIL
+    assert any(i.code == IssueCode.AMBIGUOUS_ANSWER for i in res_pair3_ng.issues)
+    assert "correct answer must be NO" in res_pair3_ng.issues[0].message
+
+    q_pair3_yes = {
+        "questionNumber": 5,
+        "questionType": "YesNoNotGiven",
+        "prompt": "The author supports compulsory participation in community volunteer programs.",
+        "answer": "YES",  # Rejected: Contradicts author's explicit view!
+    }
+    art_pair3_yes = make_envelope("q_pair3_yes", ArtifactType.QUESTION, 1, {**q_pair3_yes, "passage": passage_stance})
+    res_pair3_yes = await evaluator.evaluate(ctx, art_pair3_yes, intent_id="eval_p3_yes")
+    assert res_pair3_yes.status == EvaluationStatus.FAIL
+    assert any(i.code == IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM for i in res_pair3_yes.issues)
+
+    # 5. Minimal Pair 4: Author discusses participation rates (no stance on compulsory) -> Valid NOT_GIVEN!
+    passage_rates = "The author discusses participation rates, noting that sixty percent of local residents engaged in programs."
+    q_pair4 = {
+        "questionNumber": 6,
+        "questionType": "YesNoNotGiven",
+        "prompt": "The author supports compulsory participation in community programs.",
+        "answer": "NOT_GIVEN",
+    }
+    art_pair4 = make_envelope("q_pair4", ArtifactType.QUESTION, 1, {**q_pair4, "passage": passage_rates})
+    res_pair4 = await evaluator.evaluate(ctx, art_pair4, intent_id="eval_p4")
+    assert res_pair4.status == EvaluationStatus.PASS, "Unstated author stance labeled NOT_GIVEN must PASS"
+
+
+@pytest.mark.asyncio
+async def test_not_given_semantics_gateway_execution_path():
+    """AUDIT-NOT-GIVEN-SEMANTICS: Verifies real Gateway request binding and canonical response parsing."""
+    from unittest.mock import AsyncMock
+    from app.providers.models import ProviderResponse, FinishReason, UsageReport
+
+    ctx = make_context()
+    ctx.section_id = 1
+    passage_text = "The committee strongly opposed the proposed regulation."
+    q_payload = {
+        "questionNumber": 7,
+        "questionType": "TrueFalseNotGiven",
+        "prompt": "The committee supported the regulation.",
+        "answer": "NOT_GIVEN",
+        "passage": passage_text,
+    }
+    art = make_envelope("q_gw_test", ArtifactType.QUESTION, 1, q_payload)
+
+    # Create mock gateway
+    mock_gateway = AsyncMock()
+    mock_gateway.checkpoint_client = object()  # non-None authority
+
+    # 1. Gateway returns CONTRADICTED via canonical raw_text and parsed_payload
+    mock_resp = ProviderResponse(
+        operation_id="op_test",
+        provider_name="mock_provider",
+        model_name="mock_model",
+        raw_text='{"relation": "CONTRADICTED", "reason": "Opposed contradicts supported"}',
+        parsed_payload={"relation": "CONTRADICTED", "reason": "Opposed contradicts supported"},
+        finish_reason=FinishReason.STOP,
+        usage=UsageReport(prompt_tokens=50, completion_tokens=20, total_tokens=70),
+    )
+    mock_gateway.execute.return_value = mock_resp
+
+    evaluator = NotGivenSemanticsEvaluator(gateway=mock_gateway)
+    res = await evaluator.evaluate(ctx, art, intent_id="intent_gw")
+
+    # Assert ProviderRequest was built with real context and artifact parameters
+    assert mock_gateway.execute.called
+    call_args = mock_gateway.execute.call_args[0]
+    req = call_args[0]
+    assert req.run_id == ctx.run_id
+    assert req.section_id == "1"
+    assert req.artifact_id == "q_gw_test"
+
+    # Assert relation was parsed and NOT_GIVEN was rejected because statement is CONTRADICTED
+    assert res.status == EvaluationStatus.FAIL
+    assert any(i.code == IssueCode.AMBIGUOUS_ANSWER for i in res.issues)
+
+    # 2. Gateway failure maps to INCONCLUSIVE_OR_ERROR -> EVALUATOR_UNAVAILABLE (never NOT_GIVEN or PASS)
+    mock_gateway.execute.side_effect = TimeoutError("Gateway timeout")
+    res_err = await evaluator.evaluate(ctx, art, intent_id="intent_gw_err")
+    assert res_err.status == EvaluationStatus.FAIL
+    assert any(i.code == IssueCode.EVALUATOR_UNAVAILABLE for i in res_err.issues)
+    assert "semantic relation evaluation failed or was inconclusive" in res_err.issues[0].message
+
+
+@pytest.mark.asyncio
+async def test_not_given_semantics_chunked_coverage_decisive_evidence_after_3000_chars():
+    """AUDIT-CHUNKED-COVERAGE: Decisive evidence occurring after 3,000 characters is evaluated, not truncated.
+
+    Ensures:
+    1. Passage with length > 3,500 chars is cleanly chunked with complete coverage.
+    2. Evidence in second chunk (char > 3000) is evaluated and aggregated into CONTRADICTED.
+    3. Eliminates old bug where passage[:3000] silently dropped evidence after 3,000 chars.
+    """
+    from unittest.mock import AsyncMock
+    from app.providers.models import ProviderResponse, FinishReason, UsageReport
+
+    ctx = make_context()
+    ctx.section_id = 1
+
+    # Create passage with 3,500+ chars: first 3,200 chars are neutral background, decisive evidence at char ~3300
+    neutral_intro = "This introductory paragraph discusses general oceanographic measurements and coastal geography. " * 35
+    assert len(neutral_intro) > 3000, f"Intro must exceed 3000 chars, got {len(neutral_intro)}"
+    decisive_evidence = " The research expedition conclusively disproved the hypothesis regarding thermal immunity."
+    full_passage = neutral_intro + decisive_evidence
+    assert len(full_passage) > 3400
+
+    q_payload = {
+        "questionNumber": 12,
+        "questionType": "TrueFalseNotGiven",
+        "prompt": "The research expedition confirmed the hypothesis regarding thermal immunity.",
+        "answer": "NOT_GIVEN",
+        "passage": full_passage,
+    }
+    art = make_envelope("q_gw_long_test", ArtifactType.QUESTION, 1, q_payload)
+
+    mock_gateway = AsyncMock()
+    mock_gateway.checkpoint_client = object()
+
+    async def mock_execute(req, **kwargs):
+        # Check user message text
+        user_msg = next(m.content for m in req.messages if m.role == "user")
+        if "disproved the hypothesis regarding thermal immunity" in user_msg:
+            rel = "CONTRADICTED"
+            reason = "Disproved contradicts confirmed"
+        else:
+            rel = "NEITHER"
+            reason = "Background text does not mention the hypothesis"
+        return ProviderResponse(
+            operation_id=req.operation_id,
+            provider_name="mock_provider",
+            model_name="mock_model",
+            raw_text=json.dumps({"relation": rel, "reason": reason}),
+            parsed_payload={"relation": rel, "reason": reason},
+            finish_reason=FinishReason.STOP,
+            usage=UsageReport(prompt_tokens=80, completion_tokens=25, total_tokens=105),
+        )
+
+    mock_gateway.execute.side_effect = mock_execute
+    evaluator = NotGivenSemanticsEvaluator(gateway=mock_gateway)
+    res = await evaluator.evaluate(ctx, art, intent_id="intent_long_passage")
+
+    # Under old passage[:3000] bug, decisive evidence was never sent, resulting in false PASS on NOT_GIVEN.
+    # With chunked coverage, mock_gateway is called for multiple chunks and Chunk 2 captures the contradiction!
+    assert mock_gateway.execute.call_count >= 2, f"Expected multiple chunks, got {mock_gateway.execute.call_count}"
+    assert res.status == EvaluationStatus.FAIL
+    assert any(i.code == IssueCode.AMBIGUOUS_ANSWER for i in res.issues)
+    assert "contradicts the proposition; correct answer must be FALSE" in res.issues[0].message
+
+
+@pytest.mark.asyncio
+async def test_not_given_semantics_chunked_coverage_incomplete_fails_closed():
+    """AUDIT-CHUNKED-COVERAGE: Incomplete chunk coverage (timeout/error) fails closed to INCONCLUSIVE_OR_ERROR."""
+    from unittest.mock import AsyncMock
+    from app.providers.models import ProviderResponse, FinishReason, UsageReport
+
+    ctx = make_context()
+    neutral_intro = "This introductory paragraph discusses general oceanographic measurements and coastal geography. " * 35
+    full_passage = neutral_intro + " Further experiments verified the chemical reaction."
+
+    q_payload = {
+        "questionNumber": 14,
+        "questionType": "TrueFalseNotGiven",
+        "prompt": "Further experiments verified the chemical reaction.",
+        "answer": "NOT_GIVEN",
+        "passage": full_passage,
+    }
+    art = make_envelope("q_gw_fail_test", ArtifactType.QUESTION, 1, q_payload)
+
+    mock_gateway = AsyncMock()
+    mock_gateway.checkpoint_client = object()
+
+    call_count = 0
+
+    async def mock_execute(req, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            # First chunk succeeds with NEITHER
+            return ProviderResponse(
+                operation_id=req.operation_id,
+                provider_name="mock_provider",
+                model_name="mock_model",
+                raw_text=json.dumps({"relation": "NEITHER", "reason": "Not in chunk 1"}),
+                parsed_payload={"relation": "NEITHER", "reason": "Not in chunk 1"},
+                finish_reason=FinishReason.STOP,
+                usage=UsageReport(prompt_tokens=80, completion_tokens=25, total_tokens=105),
+            )
+        # Second chunk times out
+        raise TimeoutError("Chunk 2 timeout under gateway")
+
+    mock_gateway.execute.side_effect = mock_execute
+    evaluator = NotGivenSemanticsEvaluator(gateway=mock_gateway)
+    res = await evaluator.evaluate(ctx, art, intent_id="intent_incomplete_coverage")
+
+    # Because coverage was incomplete, it MUST NOT conclude NEITHER (which would accept NOT_GIVEN)!
+    # It MUST fail closed with EVALUATOR_UNAVAILABLE!
+    assert res.status == EvaluationStatus.FAIL
+    assert any(i.code == IssueCode.EVALUATOR_UNAVAILABLE for i in res.issues)
+    assert "semantic relation evaluation failed or was inconclusive" in res.issues[0].message

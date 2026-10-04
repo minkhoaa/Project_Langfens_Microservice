@@ -24,7 +24,7 @@ from app.ingestion.chunker import Span
 
 # Patterns for extracting quantities and units
 QUANTITY_PATTERN = re.compile(
-    r"\b(\d+(?:\.\d+)?)\s*(%|percent|mg|g|kg|ml|l|km|m|cm|mm|years?|months?|days?|hours?|participants?|patients?|subjects?|cases?|fold)?\b",
+    r"\b(\d+(?:\.\d+)?)\s*(%|percent|mg|g|kg|ml|l|km|m|cm|mm|centuries?|century|decades?|years?|months?|weeks?|days?|hours?|participants?|patients?|subjects?|cases?|fold)?\b",
     re.IGNORECASE,
 )
 

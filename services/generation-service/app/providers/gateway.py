@@ -49,7 +49,7 @@ class ProviderGateway:
         self.registry = registry or provider_registry
         self.retry_policy = retry_policy or RetryPolicy(max_attempts=3)
         self.checkpoint_client = checkpoint_client
-
+        self.last_response: Optional[ProviderResponse] = None
     async def execute(
         self,
         request: ProviderRequest,
@@ -210,8 +210,8 @@ class ProviderGateway:
                         is_retryable=False,
                         operation_id=request.operation_id,
                     )
+                self.last_response = resp
                 return resp
-
             except UnauthorizedError as unauth_err:
                 last_error = unauth_err
                 # 401/403 Invalid API key: fail closed immediately; do NOT retry or rotate

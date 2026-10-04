@@ -128,7 +128,7 @@ class StreamingReasoningSanitizer:
 
 
 def _raw_decode_strict(content: str) -> Any:
-    decoder = json.JSONDecoder(parse_constant=_reject_constant)
+    decoder = json.JSONDecoder(parse_constant=_reject_constant, strict=False)
     idx = 0
     text_len = len(content)
     while idx < text_len and content[idx].isspace():

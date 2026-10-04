@@ -168,7 +168,7 @@ class OperationResumeInfo(CanonicalBaseModel):
     wallTimeReservationSeconds: float
     wallTimeUsedSeconds: float
     resultRefJson: Optional[str] = None
-
+    parentOperationId: Optional[str] = None
 class ResumeStateResult(CanonicalBaseModel):
     runId: str
     jobId: UUID
@@ -183,6 +183,11 @@ class ResumeStateResult(CanonicalBaseModel):
     tokensUsed: int = 0
     callsUsed: int = 0
     wallTimeUsedSeconds: float = 0.0
+    budgetCapCalls: int = 25
+    budgetCapTokens: int = 150000
+    budgetCapWallTimeSeconds: int = 900
+    createdAt: Optional[datetime] = None
+    hardDeadlineAt: Optional[datetime] = None
     draftArtifacts: Optional[List[ArtifactResumeInfo]] = None
     issues: Optional[List[Issue]] = None
     evaluations: Optional[List[EvaluationResult]] = None

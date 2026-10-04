@@ -1,0 +1,87 @@
+{
+  "caseId": "case_paired_3_PMC13517498",
+  "sourceId": "PMC13517498",
+  "topic": "Smart Meter Data Repair and Urban Energy Distribution",
+  "styleProfile": "DISCURSIVE_ANALYTICAL",
+  "legacy": {
+    "engine": "Legacy",
+    "title": "Smart Meter Data Repair and Urban Energy Distribution",
+    "passage": "The rapid development of smart urban energy systems has significantly transformed the landscape of energy distribution in modern cities. These systems, characterized by the seamless integration of new energy sources and the coordinated interaction of urban power generation, grid management, load balancing, and energy storage, have set new benchmarks for the accuracy, real-time performance, and integrity of measurement data at the terminal level of urban distribution networks [1,2,3,4,5,6]. At the heart of this transformation are smart meters, which have been widely deployed across numerous cities globally, including China [7,8,9]. These devices generate vast amounts of electric energy reading data at regular intervals\u2014typically every 15 minutes, though some regions adopt a 1-minute interval [10]. This data serves as the foundational support for a variety of smart city energy applications, ranging from urban distribution network state awareness [10] and load forecasting [11] to demand response, refined line loss management [12,13], electricity theft detection [14,15,16,17,18,19], and the accommodation assessment of urban distributed photovoltaic power [20,21].\n\nThe significance of smart meter data extends beyond the analysis of individual users' power consumption patterns. It plays a crucial role in enhancing the observability, measurability, and controllability of urban distribution networks through data fusion at the transformer district level [22,23,24,25]. For instance, the calculation of line loss in distribution network transformer districts, based on smart meter data, is a key indicator for the \"four-classified management\" of line loss implemented by power supply companies. This management approach, which categorizes line loss by region, voltage level, feeder line, and transformer district, directly influences line loss assessment and the identification of suspected electricity theft [26,27,28,29,30]. Furthermore, load forecasting and demand response rely on continuous and accurate user power profiles to facilitate power market clearing and the formulation of orderly power utilization schemes. Data-driven electricity theft detection algorithms, which identify abnormal power consumption patterns to assist on-site inspections, are a vital component of anti-electricity theft efforts in urban areas [26,27,28,29,30]. Consequently, the quality of smart meter data is paramount to the effectiveness and reliability of these smart city energy applications.\n\nHowever, the deployment of smart meters in urban low-voltage distribution networks presents significant challenges due to the complex and harsh on-site conditions under which they operate [31,32,33,34,35,36,37,38]. These devices are continuously exposed to environments characterized by high temperature, high humidity, and severe electromagnetic interference. Coupled with unstable communication links, including power line carrier, RS485, and public wireless networks [39,40,41], aging metering components within the meters [42], clock drift, man-made electricity theft, and wiring errors, the collected electric energy readings often suffer from various quality defects. According to statistics from a provincial branch of the State Grid Corporation of China, a medium-sized prefecture-level power company records tens of thousands of abnormal data entries daily [43]. In some transformer districts, the abnormal data rate even exceeds 5%. Such data quality issues severely impede data-driven analysis and decision-making for distribution networks and can lead to misjudgments and economic losses [44].\n\nThe data quality problems of smart meters, in terms of their physical causes and external manifestations, primarily include five typical anomalies: sudden jump, reading stagnation, reverse reading, pulse spike, and gradual drift [45,46]. These anomalies differ significantly in their data characteristics, duration, and physical mechanisms, making it impossible for a single method to effectively address all of them. In recent years, researchers worldwide have conducted extensive studies on anomaly detection and data recovery technologies for smart meter data, yielding a series of notable outcomes. In the realm of anomaly detection, Reference [47] provides a comprehensive review of the mainstream technical routes for time-series anomaly detection in smart grids, encompassing statistical methods, machine learning, deep learning, and other algorithms. However, this study primarily focuses on the performance comparison of different methods and does not delve deeply into the correlation between the physical causes and external manifestations of smart meter data anomalies. Reference [48] proposes a CNN-LSTM method based on cross-layer feature fusion for intrusion detection in advanced metering infrastructure, achieving satisfactory performance in identifying anomalies from time-series data. Yet, it also neglects to analyze the mapping relationship between the physical causes and data characteristics of various anomalies. Reference [49] constructs a hybrid deep learning framework for smart meter anomaly detection, improving detection accuracy but failing to incorporate physical constraints of meter data into the model design.\n\nIn the domain of data recovery, Reference [50] presents a data recovery method for user-side meter collected data based on an improved multi-classifier, which can effectively impute missing and abnormal data. However, it does not verify the physical rationality of the recovered results. Reference [51] investigates missing data imputation for power systems and develops a smart meter data interpolation method tailored for energy management systems, which similarly lacks validation on the physical feasibility of the recovered data. Reference [52] studies the cleaning and interpolation of power consumption data and realizes data reconstruction via robust non-negative matrix factorization. In this research, anomaly detection and data recovery are treated as two independent processes, and no collaborative optimization mechanism is established between them.",
+    "wordCount": 867,
+    "paragraphCount": 5,
+    "cleanSentenceBoundary": true,
+    "blindSliced": false,
+    "provider": "minimax",
+    "model": "MiniMax-Text-01",
+    "callsUsed": 1,
+    "tokensUsed": 3257,
+    "latencySeconds": 47.831,
+    "hasSentenceIds": false,
+    "hasAuthoritativeCAS": false,
+    "groundingEvaluation": {
+      "status": "FAIL",
+      "score": 0.75,
+      "totalIssues": 1,
+      "blockingIssues": 1,
+      "issueCodes": [
+        "OVERSTATED_CERTAINTY"
+      ]
+    }
+  },
+  "v2": {
+    "engine": "V2_PassageLoop",
+    "decision": "PASS",
+    "artifactId": "art_passage_s1",
+    "title": "Smart Meter Data Quality Challenges and Urban Energy Management",
+    "passage": "The advent of smart urban energy systems has revolutionized the landscape of power distribution, necessitating a seamless integration of renewable energy sources and coordinated interaction among generation, grid, load, and storage components. This transformation has placed significant emphasis on the accuracy, real-time performance, and integrity of data collected from the terminal points of urban distribution networks. At the heart of this data collection process are smart meters, which have been extensively deployed in cities worldwide, including numerous regions across China. These devices generate vast quantities of electric energy data at intervals as frequent as every 15 minutes (and in some areas, every minute), forming the backbone of various smart city applications such as distribution network state awareness, load forecasting, demand response, refined line loss management, and the detection of electricity theft.\n\nSmart meter data's significance extends beyond merely monitoring individual power consumption patterns; it plays a pivotal role in enhancing the observability, measurability, and controllability of urban distribution networks through data fusion at the transformer district level. For instance, the calculation of line loss in transformer districts, derived from smart meter data, serves as a critical metric for the 'four-classified management' of line loss implemented by power supply companies. This directly influences the assessment of line loss and the identification of potential electricity theft. Furthermore, accurate and continuous user power profiles, enabled by smart meter data, are essential for load forecasting and demand response, facilitating efficient power market clearing and the development of orderly power utilization schemes. However, the effectiveness of these applications is fundamentally tied to the quality of the smart meter data.\n\nDespite their critical role, smart meters in urban low-voltage distribution networks operate under challenging conditions that threaten data quality. These devices are exposed to high temperatures, humidity, and severe electromagnetic interference, compounded by unstable communication links such as power line carriers, RS485, and public wireless networks. Additionally, factors like aging metering components, clock drift, deliberate electricity theft, and wiring errors contribute to the degradation of data quality. Statistics from a provincial branch of the State Grid Corporation of China reveal that a medium-sized prefecture-level power company records tens of thousands of abnormal data entries daily, with some transformer districts experiencing abnormal data rates exceeding 5%. Such pervasive data quality issues severely impede data-driven analysis and decision-making processes, potentially leading to misjudgments and economic repercussions.\n\nThe data quality challenges of smart meters manifest in five primary anomaly types: sudden jumps, reading stagnation, reverse readings, pulse spikes, and gradual drift. Each of these anomalies exhibits distinct characteristics, durations, and underlying physical mechanisms, rendering a single approach insufficient for comprehensive resolution. Researchers globally have dedicated substantial efforts to developing anomaly detection and data recovery technologies tailored to smart meter data. In the realm of anomaly detection, studies have explored diverse technical routes, including statistical methods, machine learning, and deep learning algorithms. While these methods offer valuable performance comparisons, they often overlook the correlation between the physical causes and external manifestations of smart meter data anomalies.\n\nFor instance, a CNN-LSTM method based on cross-layer feature fusion has been proposed for intrusion detection in advanced metering infrastructure, demonstrating satisfactory performance in identifying anomalies within time-series data. However, it falls short of analyzing the mapping relationship between the physical causes and data characteristics of various anomalies. Similarly, hybrid deep learning frameworks have been constructed to enhance detection accuracy, yet they often neglect the incorporation of physical constraints into the model design. In the domain of data recovery, methods such as improved multi-classifiers have been developed to impute missing and abnormal data effectively. However, these methods frequently lack verification of the physical rationality of the recovered results.\n\nMoreover, while some studies have investigated missing data imputation tailored for energy management systems, they often fail to validate the physical feasibility of the recovered data. Other research has explored robust non-negative matrix factorization for data reconstruction, treating anomaly detection and data recovery as separate processes without establishing a collaborative optimization mechanism. Advanced interpolation approaches combining statistics and machine learning have been proposed, but they still struggle to achieve the collaborative processing of detection and recovery. Even generative adversarial networks with dual semantic perception, which boast powerful data imputation capabilities, often overlook the systematic embedding of physical constraints, thereby compromising the practical applicability of the recovered data.\n\nIn summary, while smart meter data is indispensable for modern urban energy management, the challenges associated with data quality are significant and multifaceted. Addressing these challenges requires the development of sophisticated anomaly detection and data recovery techniques that not only leverage advanced algorithms but also incorporate physical constraints and collaborative mechanisms to ensure the accuracy, reliability, and practicality of the recovered data. The success of smart urban energy systems hinges on the ability to overcome these data quality hurdles, thereby enabling more effective and efficient energy management and distribution.",
+    "wordCount": 800,
+    "paragraphCount": 7,
+    "sentenceCount": 31,
+    "cleanSentenceBoundary": true,
+    "blindSliced": false,
+    "callsUsed": 4,
+    "tokensUsed": 5500,
+    "latencySeconds": 43.359,
+    "hasSentenceIds": true,
+    "hasAuthoritativeCAS": true,
+    "sentenceIdsSample": [
+      "s_0",
+      "s_1",
+      "s_2"
+    ],
+    "versionTraces": [
+      {
+        "version": 1,
+        "wordCount": 800,
+        "requiredEvaluatorCodes": [],
+        "evaluatorStatus": "PASS",
+        "action": "ACCEPTED"
+      }
+    ],
+    "groundingEvaluation": {
+      "status": "PASS",
+      "score": 1.0,
+      "totalIssues": 0,
+      "blockingIssues": 0,
+      "issueCodes": []
+    }
+  },
+  "comparison": {
+    "wordCountCompliant": {
+      "legacy": true,
+      "v2": true
+    },
+    "cleanSentenceBoundary": {
+      "legacy": true,
+      "v2": true
+    },
+    "groundingStatus": {
+      "legacy": "FAIL",
+      "v2": "PASS"
+    },
+    "authoritativeCAS": {
+      "legacy": false,
+      "v2": true
+    }
+  }
+}
