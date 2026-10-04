@@ -1042,6 +1042,46 @@ def test_p07_06_find_resolvable_fingerprints_matches_evaluator_id():
     assert iss1.fingerprint not in resolvable_fidel
 
 
+@pytest.mark.asyncio
+async def test_base_evaluator_does_not_auto_resolve_other_evaluator_shared_code_issue():
+    """BaseEvaluator.evaluate() must not auto-resolve an open issue with shared code if owned by another evaluator."""
+    from app.evaluators.semantic import AmbiguityAndDistractorEvaluator, NotGivenSemanticsEvaluator
+    from app.loop.context import AuthorityGrant, LoopContext
+    from app.loop.ledger import IssueLedgerManager
+    from uuid import uuid4
+
+    owner = uuid4()
+    run_id = "run_shared_code_test"
+    ledger = IssueLedgerManager(run_id)
+    art_v1 = make_envelope("art_q_1", ArtifactType.QUESTION, 1, {"prompt": "Statement 1", "answer": "NOT_GIVEN"})
+    art_v2 = make_envelope("art_q_1", ArtifactType.QUESTION, 2, {"prompt": "Statement 1", "answer": "NOT_GIVEN"})
+
+    # NotGivenSemanticsEvaluator recorded AMBIGUOUS_ANSWER on v1
+    iss = ledger.record_issue(
+        code=IssueCode.AMBIGUOUS_ANSWER,
+        severity=IssueSeverity.CRITICAL,
+        scope=IssueScope.QUESTION,
+        message="Ambiguous answer from NOT_GIVEN contradiction",
+        affected_refs=[art_v1.to_ref()],
+        reported_by="eval_not_given_semantics",
+    )
+
+    ctx = LoopContext(
+        runId=run_id,
+        targetArtifactId="art_q_1",
+        targetArtifactType=ArtifactType.QUESTION,
+        scope="QUESTION",
+        authority=AuthorityGrant(leaseOwner=owner, epoch=1),
+        openIssues=(iss,),
+    )
+
+    # AmbiguityAndDistractorEvaluator evaluates v2 and passes
+    eval_ambig = AmbiguityAndDistractorEvaluator(required=False)
+    res = await eval_ambig.evaluate(ctx, art_v2, "intent_eval")
+
+    # Must NOT contain iss.fingerprint in resolved_issue_fingerprints because it belongs to eval_not_given_semantics
+    assert iss.fingerprint not in (res.resolved_issue_fingerprints or [])
+
 def test_p07_01_metadata_settings_wiring_and_override():
     """P07-01: Metadata timeouts and tokens default to runtime Settings and support explicit overrides."""
     from app.config import settings
