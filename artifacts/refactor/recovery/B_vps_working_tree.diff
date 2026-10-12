@@ -1,0 +1,279 @@
+# Verbatim VPS uncommitted working-tree diff
+
+Captured read-only from code@57.159.24.245 on 2026-10-12.
+HEAD = 04fdbd714eb4d9c71b6cf2d0a7985dea83286e4d, branch = refactor/sync-dotest-admin-renderer.
+Output of 'git diff'. Neither file is staged; 'git diff --cached' is empty.
+
+## File 1 - services/generation-service/tests/test_t06_loop_runtime.py
+
+```diff
+diff --git a/services/generation-service/tests/test_t06_loop_runtime.py b/services/generation-service/tests/test_t06_loop_runtime.py
+index 85b5e45..d959ade 100644
+--- a/services/generation-service/tests/test_t06_loop_runtime.py
++++ b/services/generation-service/tests/test_t06_loop_runtime.py
+@@ -47,37 +47,41 @@ def context(owner=None, parents=(), target="passage"):
+ 
+ 
+ def simulated_run_profile(policy):
+-    """Derive a simulated RUN budget profile from a loop policy's caps.
+-
+-    The run-level budget is a ceiling applied to the whole reading-paper run, so
+-    it must be at least as large as the per-operation caps the loop policy will
+-    spend. Deriving it from the policy keeps the two in step: raising a policy cap
+-    in a test automatically widens the simulated run ceiling instead of silently
+-    letting the run budget become the binding (and therefore misleading) limit.
++    """The pinned run cap profile a run of this policy would be created with.
++
++    This is the shape exam-service persists on the run row: a full cap snapshot
++    carrying `caps`, `profileVersion` and `profileSource` -- not a bare run
++    budget. `LoopPolicy.from_cap_snapshot` rejects anything else ("Pinned cap
++    profile lacks required runtime caps"), the runtime refuses to resume a run
++    without one, and tests widen individual bounds via `profile["caps"][...]`, so
++    the snapshot is rendered from the policy's own RESOURCE_CAP_FIELDS rather
++    than read back from `cap_profile_snapshot` (which is empty for a policy
++    constructed directly instead of via `from_settings`).
+     """
++    # `from_cap_snapshot` requires exact positive 32-bit integers; wall-time caps
++    # are modelled as floats on the policy, so coerce rather than emit 300.0.
++    caps = {key: int(getattr(policy, field))
++            for field, key in LoopPolicy.RESOURCE_CAP_FIELDS.items()}
++    caps["generateTokenReservation"] = int(policy.generate_token_reservation)
+     return {
+-        "budgetCapCalls": max(policy.max_total_calls * 10, policy.max_total_calls + 1),
+-        "budgetCapTokens": max(policy.max_total_tokens * 10, policy.max_total_tokens + 1),
+-        "budgetCapWallTimeSeconds": max(policy.max_wall_time_seconds * 10, policy.max_wall_time_seconds + 1),
++        "caps": caps,
++        "profileVersion": policy.cap_profile_version or "test-simulated-profile-v1",
++        "profileSource": policy.cap_profile_source or "test-simulated-run-profile",
+     }
+ 
+ 
+ def policy_for_profile(profile, required_evaluator_ids=("required",), **overrides):
+-    """Build a LoopPolicy whose caps come from a run budget profile.
++    """Rebuild the LoopPolicy a run pinned to `profile` would resume with.
+ 
+-    Used by cap/budget tests that exercise the "child cap must fit inside the run
+-    budget" admission rules. Any keyword override wins over the profile-derived
+-    value, so a single test can perturb one bound without restating the rest.
++    Used by cap/budget tests that exercise "a resumed run uses the profile it was
++    created with". Re-deriving through `from_cap_snapshot` keeps the policy and
++    the pinned profile in step; keyword overrides win over profile-derived values
++    so one test can perturb a single bound.
+     """
+-    from app.loop.policy import LoopPolicy
+-
+-    caps = {
+-        "max_total_calls": int(profile.get("budgetCapCalls", 25)),
+-        "max_total_tokens": int(profile.get("budgetCapTokens", 150000)),
+-        "max_wall_time_seconds": float(profile.get("budgetCapWallTimeSeconds", 900)),
+-    }
+-    caps.update(overrides)
+-    return LoopPolicy(required_evaluator_ids=tuple(required_evaluator_ids), **caps)
++    overrides.pop("required_evaluator_ids", None)
++    return LoopPolicy.from_cap_snapshot(profile, **overrides).model_copy(
++        update={"required_evaluator_ids": tuple(required_evaluator_ids)}
++    )
+ 
+ 
+ class Generator:
+@@ -162,23 +166,10 @@ class DurableStore:
+         # deployment's (R03/G06). The runtime rejects a run with no pinned profile and
+         # cross-checks the JSON against its own digest, version and source, so the
+         # fake persists exactly what the real checkpoint service does.
+-        self.run_profile = dict(run_profile or {})
+-        if not self.run_profile:
+-            self.run_profile = LoopPolicy.from_settings().cap_profile_snapshot
+-        elif "caps" not in self.run_profile:
+-            # A bare run budget (calls/tokens/wall-time) was supplied: fold it into a
+-            # real policy snapshot so the runtime's cross-check still passes.
+-            base = LoopPolicy.from_settings().cap_profile_snapshot
+-            base = dict(base)
+-            base["caps"] = dict(base.get("caps") or {})
+-            for profile_key, cap_key in (
+-                ("budgetCapCalls", "maxTotalCalls"),
+-                ("budgetCapTokens", "maxTotalTokens"),
+-                ("budgetCapWallTimeSeconds", "maxWallTimeSeconds"),
+-            ):
+-                if profile_key in self.run_profile and cap_key in base["caps"]:
+-                    base["caps"][cap_key] = self.run_profile[profile_key]
+-            self.run_profile = base
++        # A run persists a full cap snapshot (caps + profileVersion + profileSource);
++        # the runtime cross-checks the JSON digest against exactly those fields, so
++        # the fake stores what it was handed verbatim rather than re-deriving it.
++        self.run_profile = dict(run_profile or LoopPolicy.from_settings().cap_profile_snapshot)
+         canonical = json.dumps(self.run_profile, sort_keys=True, separators=(",", ":"))
+         self.run_profile_sha256 = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+         self.epoch = 1
+```
+
+## File 2 - artifacts/refactor/phase-07/local-dev-test-confusion-matrices.json
+
+```diff
+diff --git a/artifacts/refactor/phase-07/local-dev-test-confusion-matrices.json b/artifacts/refactor/phase-07/local-dev-test-confusion-matrices.json
+index 9584ed7..6d7ef1c 100644
+--- a/artifacts/refactor/phase-07/local-dev-test-confusion-matrices.json
++++ b/artifacts/refactor/phase-07/local-dev-test-confusion-matrices.json
+@@ -7,15 +7,15 @@
+     "durationSeconds": null,
+     "providerUsed": null,
+     "modelUsed": null,
+-    "metricEngineVersion": "2.3.0",
+-    "metricEngineHash": "e71b3c0e247f8430",
++    "metricEngineVersion": "2.3.1",
++    "metricEngineHash": "96d2ba2c214fd39a",
+     "totalQuestionsEvaluated": 120,
+     "validQuestions": 60,
+     "invalidQuestions": 60,
+     "operationalFailures": 20,
+-    "semanticFalsePositives": 0,
+-    "operationalRejectionsOfValid": 20,
+-    "totalValidRejected": 20,
++    "semanticFalsePositives": 2,
++    "operationalRejectionsOfValid": 10,
++    "totalValidRejected": 12,
+     "quarantinedNotice": null,
+     "totalFidelityCasesEvaluated": 0,
+     "totalCanariesEvaluated": 12,
+@@ -23,12 +23,12 @@
+   },
+   "rates": {
+     "overallBlockingRecall": 0.8333333333333334,
+-    "falseRejectionRate": 0.0,
+-    "semanticFalsePositivesCount": 0,
+-    "semanticFalsePositivesRate": 0.0,
+-    "operationalRejectionsOfValidCount": 20,
+-    "totalValidRejectedCount": 20,
+-    "totalValidRejectedRate": 0.3333333333333333,
++    "falseRejectionRate": 0.03333333333333333,
++    "semanticFalsePositivesCount": 2,
++    "semanticFalsePositivesRate": 0.03333333333333333,
++    "operationalRejectionsOfValidCount": 10,
++    "totalValidRejectedCount": 12,
++    "totalValidRejectedRate": 0.2,
+     "ambiguityRecall": 0.6428571428571429,
+     "ambiguityRecallFormatted": "64.3%",
+     "perTypeRecall": {
+@@ -59,11 +59,11 @@
+       "invalidTotal": 60,
+       "truePositives": 50,
+       "falseNegatives": 10,
+-      "trueNegatives": 50,
+-      "falsePositives": 0,
++      "trueNegatives": 48,
++      "falsePositives": 2,
+       "operationalFailures": 20,
+       "recall": 0.8333333333333334,
+-      "falseRejectionRate": 0.0
++      "falseRejectionRate": 0.03333333333333333
+     },
+     "perType": {
+       "MultipleChoiceSingle": {
+@@ -96,11 +96,11 @@
+         "invalidTotal": 10,
+         "tp": 10,
+         "fn": 0,
+-        "tn": 10,
+-        "fp": 0,
++        "tn": 9,
++        "fp": 1,
+         "operationalFailures": 0,
+         "recall": 1.0,
+-        "falseRejectionRate": 0.0
++        "falseRejectionRate": 0.1
+       },
+       "SummaryCompletion": {
+         "total": 20,
+@@ -108,11 +108,11 @@
+         "invalidTotal": 10,
+         "tp": 10,
+         "fn": 0,
+-        "tn": 10,
+-        "fp": 0,
++        "tn": 9,
++        "fp": 1,
+         "operationalFailures": 0,
+         "recall": 1.0,
+-        "falseRejectionRate": 0.0
++        "falseRejectionRate": 0.1
+       },
+       "TrueFalseNotGiven": {
+         "total": 20,
+@@ -188,11 +188,11 @@
+       "invalidTotal": 60,
+       "truePositives": 50,
+       "falseNegatives": 10,
+-      "trueNegatives": 50,
+-      "falsePositives": 0,
++      "trueNegatives": 48,
++      "falsePositives": 2,
+       "operationalFailures": 20,
+       "recall": 0.8333333333333334,
+-      "falseRejectionRate": 0.0
++      "falseRejectionRate": 0.03333333333333333
+     },
+     "perType": {
+       "MultipleChoiceSingle": {
+@@ -225,11 +225,11 @@
+         "invalidTotal": 10,
+         "tp": 10,
+         "fn": 0,
+-        "tn": 10,
+-        "fp": 0,
++        "tn": 9,
++        "fp": 1,
+         "operationalFailures": 0,
+         "recall": 1.0,
+-        "falseRejectionRate": 0.0
++        "falseRejectionRate": 0.1
+       },
+       "SummaryCompletion": {
+         "total": 20,
+@@ -237,11 +237,11 @@
+         "invalidTotal": 10,
+         "tp": 10,
+         "fn": 0,
+-        "tn": 10,
+-        "fp": 0,
++        "tn": 9,
++        "fp": 1,
+         "operationalFailures": 0,
+         "recall": 1.0,
+-        "falseRejectionRate": 0.0
++        "falseRejectionRate": 0.1
+       },
+       "TrueFalseNotGiven": {
+         "total": 20,
+@@ -390,7 +390,6 @@
+       "q_v_ShortAnswer_10",
+       "q_v_ShortAnswer_2",
+       "q_v_ShortAnswer_3",
+-      "q_v_ShortAnswer_4",
+       "q_v_ShortAnswer_5",
+       "q_v_ShortAnswer_6",
+       "q_v_ShortAnswer_7",
+@@ -404,7 +403,6 @@
+       "q_v_SummaryCompletion_5",
+       "q_v_SummaryCompletion_6",
+       "q_v_SummaryCompletion_7",
+-      "q_v_SummaryCompletion_8",
+       "q_v_SummaryCompletion_9",
+       "q_v_TrueFalseNotGiven_1",
+       "q_v_TrueFalseNotGiven_10",
+@@ -427,7 +425,10 @@
+       "q_v_YesNoNotGiven_8",
+       "q_v_YesNoNotGiven_9"
+     ],
+-    "falsePositives": [],
++    "falsePositives": [
++      "q_v_ShortAnswer_4",
++      "q_v_SummaryCompletion_8"
++    ],
+     "operationalErrorCases": [
+       "q_i_MultipleChoiceSingle_11",
+       "q_i_MultipleChoiceSingle_12",
+```
+
+## Staged diff (git diff --cached)
+
+```diff
+```
