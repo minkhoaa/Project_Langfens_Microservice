@@ -379,6 +379,20 @@ class BoundedLoopRuntime:
             if op.requestHash != intent.request_hash or op.artifactId != intent.target_artifact_id:
                 raise ValueError("Operation replay hash or target mismatch")
             if op.status != "COMPLETED":
+                # A CHECKPOINT_COMMIT reservation that never reached commit_checkpoint
+                # (process died mid-accept) leaves a RESERVED operation whose work is
+                # fully durable and whose retry is idempotent. The reservation already
+                # exists server-side, so go straight to the commit: re-granting would
+                # return isReplay and abort the accept, and re-journalling would double
+                # count an intent that was recorded before the crash. Any other
+                # operation type is an external side effect we cannot prove either ran
+                # or didn't, so it stays fail-closed.
+                if intent.operation_type == "CHECKPOINT_COMMIT" and op.status == "RESERVED":
+                    # The journal is process-local, so the pre-crash intent is gone:
+                    # re-record it so the ack below has an entry to close.
+                    self.journal.record_intent(intent, self.context.cursor.current_state)
+                    self.journal.mark_execution_started(intent.operation_id)
+                    return True
                 self._finish(LoopReason.UNKNOWN_OUTCOME, f"unacknowledged operation {intent.operation_id}")
                 return False
             return True
@@ -936,9 +950,16 @@ class BoundedLoopRuntime:
         if not self._reserve(intent):
             return
         op = self._operations.get(intent.operation_id)
-        if op:
+        # Only a durably COMPLETED operation is safe to skip committing for: that is
+        # the idempotent-replay case where a previous run already persisted this exact
+        # head. Any other op record (absent, or a RESERVED commit left behind by a
+        # crash mid-accept) still has to go through commit_checkpoint, otherwise the
+        # operation is stranded RESERVED and the cursor save below would reference a
+        # lastOperationId that is not COMPLETED.
+        if op is not None and op.status == "COMPLETED":
             if self._accepted_head is None or self._accepted_head.to_ref() != art.to_ref():
                 raise ValueError("Completed accept operation has no matching accepted head")
+            # _reserve returns early for an existing operation without journalling it.
             self.journal.record_intent(intent, self.context.cursor.current_state)
         else:
             try:

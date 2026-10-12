@@ -360,14 +360,26 @@ class DurableStore:
                 isStale=False, envelopeJson=json.dumps(payload),
             )
         work = [x for x in state["ops"].values() if x["operationType"] != "CHECKPOINT_COMMIT"]
+        # A legacy snapshotless run persists no cap profile at all. All four
+        # budgetProfile* fields are Optional on ResumeStateResult, so report them
+        # as absent rather than crashing here: the runtime is the component that
+        # owns the fail-closed decision and raises the legible
+        # "Run lacks a pinned cap profile" error the contract expects.
+        if self.run_profile is None:
+            profile_json = profile_sha = profile_version = profile_source = None
+        else:
+            profile_json = json.dumps(self.run_profile, sort_keys=True, separators=(",", ":"))
+            profile_sha = self.run_profile_sha256
+            profile_version = self.run_profile.get("profileVersion")
+            profile_source = self.run_profile.get("profileSource")
         return ResumeStateResult(
             runId=run_id, jobId=uuid4(), epoch=self.epoch, status="RUNNING",
             engineVersion="2.0.0", schemaVersion="2.0.0", policyVersion="2.0.0",
             isCompatible=True,
-            budgetProfileJson=json.dumps(self.run_profile, sort_keys=True, separators=(",", ":")),
-            budgetProfileSha256=self.run_profile_sha256,
-            budgetProfileVersion=self.run_profile.get("profileVersion"),
-            budgetProfileSource=self.run_profile.get("profileSource"),
+            budgetProfileJson=profile_json,
+            budgetProfileSha256=profile_sha,
+            budgetProfileVersion=profile_version,
+            budgetProfileSource=profile_source,
             artifacts=[info(a) for a in state["heads"].values()],
             draftArtifacts=[info(a) for a in state["drafts"].values()],
             loopCursors=[LoopCursorCheckpoint.model_validate(state["cursor"])] if state["cursor"] else [],

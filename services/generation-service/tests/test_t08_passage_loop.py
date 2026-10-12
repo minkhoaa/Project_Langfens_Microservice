@@ -49,6 +49,7 @@ from app.persistence.models import (
     ArtifactResumeInfo,
     CheckpointAck,
     LoopCursorCheckpoint,
+    OperationReconcileResult,
     OperationResumeInfo,
     ResumeStateResult,
 )
@@ -147,7 +148,19 @@ class DurableStoreFake:
             resultRefJson=getattr(req, "resultRefJson", None),
         )
         self._save(state)
-        return type("Reconcile", (), {"operationId": req.operationId, "tokensConsumed": req.tokensUsed, "refundedTokens": 0})()
+        # The gateway reads `reservationBreached`/`budgetBreachDetected` off this
+        # result (app/providers/gateway.py:483), so the fake must return the real
+        # contract model rather than a hand-rolled object that would drift again.
+        # The fake never simulates a breach, so both flags are False.
+        return OperationReconcileResult(
+            operationId=req.operationId,
+            status=op["status"],
+            tokensUsed=req.tokensUsed,
+            wallTimeUsedSeconds=req.wallTimeUsedSeconds,
+            reconciledAt=datetime.now(timezone.utc),
+            reservationBreached=False,
+            budgetBreachDetected=False,
+        )
 
     def commit_checkpoint(self, req: Any) -> CheckpointAck:
         self._fence(req)
