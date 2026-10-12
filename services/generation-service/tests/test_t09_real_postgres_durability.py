@@ -16,6 +16,7 @@ from datetime import datetime, timezone, timedelta
 import hashlib
 import re
 from pathlib import Path
+import os
 import subprocess
 import urllib.request
 from typing import Any, Dict, List, Tuple
@@ -42,19 +43,92 @@ from app.persistence.models import (
 REAL_SERVICE_URL = "http://127.0.0.1:5099"
 REAL_API_KEY = "test-only-ephemeral-secret-key-phase09"
 
+# The exam database is defined by the repository, not by any local container name:
+# deploy/compose.yaml declares the `exam-database` service on host port 5433 with
+# POSTGRES_USER/PASSWORD=exam and POSTGRES_DB=exam-db. AppHost reserves the same 5433
+# for its exam-db resource. Containers for this database are therefore identified by
+# running a PostgreSQL image and publishing that port, which holds for both the compose
+# container and an AppHost-provisioned one regardless of what either names itself.
+EXAM_DB_HOST_PORT = 5433
+EXAM_DB_IMAGE_PREFIX = "postgres"
+EXAM_DB_USER = "exam"
+EXAM_DB_PASSWORD = "exam"
+EXAM_DB_NAME = "exam-db"
+# Dedicated throwaway database for these durability tests; created idempotently.
+# These tests seed rows and then drive them through the live exam-service, so
+# exam-service must be provisioned against this same database. Override with
+# EXAM_DB_TEST_NAME when the service is wired to a different one.
+EXAM_DB_TEST_NAME = os.environ.get("EXAM_DB_TEST_NAME", "exam_test_phase09")
+
+
+def _docker_ps(fmt: str = "{{.Names}}\t{{.Image}}\t{{.Ports}}") -> str:
+    """Raw `docker ps` output for running containers. Raises on docker failure."""
+    res = subprocess.run(
+        ["docker", "ps", "--format", fmt], capture_output=True, text=True, timeout=30,
+    )
+    if res.returncode != 0:
+        raise subprocess.SubprocessError(res.stderr.strip() or "docker ps failed")
+    return res.stdout
+
+
+def find_exam_db_container() -> str | None:
+    """The running PostgreSQL container publishing the exam database port, if any.
+
+    Resolution order:
+      1. `EXAM_DB_CONTAINER` when that exact container is running (explicit override).
+      2. Any running container whose image is PostgreSQL and which publishes
+         EXAM_DB_HOST_PORT -- the rule the repo's own definition implies.
+
+    Returns None when nothing matches. This is the single definition shared by
+    `is_docker_postgres_available` and `get_exam_db_container` so the availability
+    guard and the container lookup cannot drift apart again.
+    """
+    try:
+        lines = [ln for ln in _docker_ps().splitlines() if ln.strip()]
+    except (OSError, subprocess.SubprocessError):
+        return None
+    running: dict[str, str] = {}
+    ports_by_name: dict[str, list[str]] = {}
+    for line in lines:
+        parts = line.split("\t")
+        if len(parts) >= 2:
+            running[parts[0]] = parts[1]
+            ports_by_name[parts[0]] = parts[2:]
+    override = os.environ.get("EXAM_DB_CONTAINER", "").strip()
+    if override:
+        return override if override in running else None
+    for name, image in running.items():
+        if not image.split(":")[0].startswith(EXAM_DB_IMAGE_PREFIX):
+            continue
+        # Docker publishes as `0.0.0.0:5433->5432/tcp` (optionally IPv6-bracketed).
+        for mapping in ports_by_name[name]:
+            for host_part in mapping.split(","):
+                host_port = host_part.strip().split("->")[0].rsplit(":", 1)[-1]
+                if host_port == str(EXAM_DB_HOST_PORT):
+                    return name
+    return None
+
 
 def is_service_available() -> bool:
     """Whether the live exam-service process is reachable on the real-test port.
 
     Used as a module-level skipif guard so a machine without the service running
     skips cleanly instead of erroring mid-test. Never raises.
+
+    exam-service (Shared.ServiceDefaults) maps /health and /alive; /healthz is the
+    generation-service endpoint, so probing /healthz here could be answered by the
+    wrong service. Require an actual success status rather than "any status < 500",
+    which a 404 from an unrelated process would satisfy.
     """
-    try:
-        req = urllib.request.Request(f"{REAL_SERVICE_URL}/healthz", method="GET")
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            return 200 <= resp.status < 500
-    except Exception:
-        return False
+    for path in ("/health", "/alive"):
+        try:
+            req = urllib.request.Request(f"{REAL_SERVICE_URL}{path}", method="GET")
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                if 200 <= resp.status < 300:
+                    return True
+        except Exception:
+            continue
+    return False
 
 
 def is_docker_postgres_available() -> bool:
@@ -64,45 +138,49 @@ def is_docker_postgres_available() -> bool:
     module-level ``@pytest.mark.skipif(not is_docker_postgres_available())`` still
     produces a clean skip rather than an error during collection. Never raises.
     """
-    try:
-        res = subprocess.run(
-            ["docker", "ps", "--format", "{{.Names}}"],
-            capture_output=True, text=True, timeout=30,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return False
-    if res.returncode != 0:
-        return False
-    names = res.stdout.split()
-    return any("exam-database" in n or "exam-db-server" in n or "exam_db" in n for n in names)
+    return find_exam_db_container() is not None
 
 
 def get_exam_db_container() -> str:
-    res = subprocess.run(
-        ["docker", "ps", "--filter", "name=exam-database", "--format", "{{.Names}}"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    names = res.stdout.strip().split()
-    if not names:
-        res2 = subprocess.run(
-            ["docker", "ps", "--filter", "name=exam-db-server", "--format", "{{.Names}}"],
-            capture_output=True,
-            text=True,
-            check=True,
+    """The exam database container, or a clean skip when it is not running."""
+    name = find_exam_db_container()
+    if name is None:
+        pytest.skip(
+            "No running PostgreSQL container publishing the exam database port "
+            f"{EXAM_DB_HOST_PORT} found in Docker; set EXAM_DB_CONTAINER to override"
         )
-        names = res2.stdout.strip().split()
-    if not names:
-        pytest.skip("No running exam database container found in Docker; skipping real PostgreSQL durability tests")
-    return names[0]
+    return name
+
+
+def _docker_psql(container: str, sql: str, database: str) -> str:
+    return subprocess.run(
+        ["docker", "exec", "-e", f"PGPASSWORD={EXAM_DB_PASSWORD}", container,
+         "psql", "-U", EXAM_DB_USER, "-d", database, "-t", "-A", "-c", sql],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+
+
+def ensure_exam_test_database() -> None:
+    """Idempotently create the dedicated durability-test database.
+
+    `run_psql` targets EXAM_DB_TEST_NAME, which must not be inherited from whatever
+    else happens to exist in the container. CREATE DATABASE has no IF NOT EXISTS, so
+    existence is checked against pg_database first and any other failure is raised
+    rather than swallowed.
+    """
+    container = get_exam_db_container()
+    exists = _docker_psql(
+        container,
+        f"SELECT 1 FROM pg_database WHERE datname = '{EXAM_DB_TEST_NAME}'",
+        EXAM_DB_NAME,
+    )
+    if exists.strip() == "1":
+        return
+    _docker_psql(container, f'CREATE DATABASE "{EXAM_DB_TEST_NAME}"', EXAM_DB_NAME)
 
 
 def run_psql(sql: str) -> str:
-    cname = get_exam_db_container()
-    cmd = ["docker", "exec", "-e", "PGPASSWORD=exam", cname, "psql", "-U", "exam", "-d", "exam_test_phase09", "-t", "-A", "-c", sql]
-    proc = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    return proc.stdout.strip()
+    return _docker_psql(get_exam_db_container(), sql, EXAM_DB_TEST_NAME)
 
 
 def seed_real_job_and_run(run_id: str, owner_id: UUID, epoch: int = 1) -> str:
@@ -227,6 +305,19 @@ def setup_upstream_and_precommitted_questions(
         q_hashes[q_art.artifact_id] = q_art.content_hash
 
     return passage_art, bp_art, q_hashes
+
+
+@pytest.fixture(autouse=True)
+def _ensure_exam_test_database():
+    """Guarantee the dedicated durability database exists before each node runs.
+
+    `run_psql` targets EXAM_DB_TEST_NAME, which must not be silently inherited from
+    whatever happens to exist in the container. Creation is idempotent and any
+    non-"already exists" failure propagates rather than being swallowed.
+    """
+    if not is_docker_postgres_available():
+        pytest.skip("No running PostgreSQL container publishing the exam database port")
+    ensure_exam_test_database()
 
 
 @pytest.mark.asyncio

@@ -380,7 +380,7 @@ async def test_section_endpoint_ndjson_streaming():
         "authors": "Ada Example",
         "content": "Source text.",
     }
-    with patch("app.router.generate_section", new_callable=AsyncMock) as mock_gen:
+    with patch("app.facade.GenerationFacade.generate_section", new_callable=AsyncMock) as mock_gen:
         async def fake_generate_section(topic, index, source, progress=None, **kwargs):
             if progress:
                 await progress("Information", "Step 1 complete")

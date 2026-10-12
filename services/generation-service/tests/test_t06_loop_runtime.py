@@ -12,6 +12,7 @@ from uuid import uuid4
 
 import pytest
 
+from app.config import cap_snapshot_json, cap_snapshot_sha256
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
 from app.contracts.evaluation import EvaluationResult, EvaluationStatus
 from app.contracts.issue import Issue, IssueCode, IssueScope, IssueSeverity, IssueStatus
@@ -58,9 +59,13 @@ def simulated_run_profile(policy):
     than read back from `cap_profile_snapshot` (which is empty for a policy
     constructed directly instead of via `from_settings`).
     """
-    # `from_cap_snapshot` requires exact positive 32-bit integers; wall-time caps
-    # are modelled as floats on the policy, so coerce rather than emit 300.0.
-    caps = {key: int(getattr(policy, field))
+    # `from_cap_snapshot` requires exact positive 32-bit integers, matching .NET's
+    # `ReadingPaperCapsProfile` `RequiredInt` admission (see CLAUDE.md). A sub-second
+    # wall reservation is not expressible in that contract, so clamp up to the smallest
+    # admissible value instead of truncating to 0, which would fail closed on a
+    # profile that is not corrupt. Sub-second evaluator bounds are carried by the
+    # optional float timeout fields, not by these integer caps.
+    caps = {key: max(1, int(getattr(policy, field)))
             for field, key in LoopPolicy.RESOURCE_CAP_FIELDS.items()}
     caps["generateTokenReservation"] = int(policy.generate_token_reservation)
     return {
@@ -169,9 +174,18 @@ class DurableStore:
         # A run persists a full cap snapshot (caps + profileVersion + profileSource);
         # the runtime cross-checks the JSON digest against exactly those fields, so
         # the fake stores what it was handed verbatim rather than re-deriving it.
+        #
+        # Serialization goes through `app.config.cap_snapshot_json`, the same
+        # canonical (sorted, compact, unescaped UTF-8) serializer production and the
+        # .NET side use. A plain `json.dumps` here defaults to `ensure_ascii=True`,
+        # so a non-ASCII `profileSource` would round-trip to different bytes and a
+        # different digest than the one the runtime recomputes.
+        #
+        # `run_profile` is a property because tests reassign it after construction to
+        # pin a wider/narrower profile; the digest must be recomputed on assignment or
+        # the store would keep serving the digest of the profile it no longer holds.
+        self._run_profile = None
         self.run_profile = dict(run_profile or LoopPolicy.from_settings().cap_profile_snapshot)
-        canonical = json.dumps(self.run_profile, sort_keys=True, separators=(",", ":"))
-        self.run_profile_sha256 = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
         self.epoch = 1
         self.cancelled = False
         self.fault = None
@@ -182,6 +196,17 @@ class DurableStore:
                 "ops": {}, "drafts": {}, "heads": {}, "cursor": None,
                 "evaluations": {}, "descendants": {},
             }),))
+
+    @property
+    def run_profile(self):
+        return self._run_profile
+
+    @run_profile.setter
+    def run_profile(self, value):
+        self._run_profile = value
+        self.run_profile_sha256 = (
+            cap_snapshot_sha256(value) if value is not None else None
+        )
 
     def _state(self):
         with sqlite3.connect(self.path) as db:
@@ -368,7 +393,7 @@ class DurableStore:
         if self.run_profile is None:
             profile_json = profile_sha = profile_version = profile_source = None
         else:
-            profile_json = json.dumps(self.run_profile, sort_keys=True, separators=(",", ":"))
+            profile_json = cap_snapshot_json(self.run_profile)
             profile_sha = self.run_profile_sha256
             profile_version = self.run_profile.get("profileVersion")
             profile_source = self.run_profile.get("profileSource")
@@ -401,8 +426,14 @@ def setup(tmp_path, policy=None, evaluator=None, generator=None, repairer=None, 
           store=None, owner=None):
     owner = owner or uuid4()
     ctx = context(owner, parents)
+    policy = policy or LoopPolicy(required_evaluator_ids=("required",))
     store = store or DurableStore(tmp_path / "loop.db", owner)
-    runtime = BoundedLoopRuntime(ctx, policy or LoopPolicy(required_evaluator_ids=("required",)),
+    # The run is created here, by this policy, so that is the profile it must be
+    # pinned to. Left on DurableStore's deployment-default the runtime correctly
+    # rebases onto `deploy/envs/loop-caps.env` on restore (R03/G06), which discards
+    # the per-test caps (e.g. max_total_calls=1) these tests are asserting on.
+    store.run_profile = simulated_run_profile(policy)
+    runtime = BoundedLoopRuntime(ctx, policy,
                                   generator or Generator(), [evaluator or Evaluator()],
                                   repairer=repairer, persistence_client=store,
                                   accepted_dependencies=deps or {})
@@ -450,7 +481,16 @@ async def test_t06_repair_attempt_cap_reached(tmp_path):
         targetRef=art.to_ref(), status=EvaluationStatus.FAIL, issues=ledger.get_open_issues(),
     )
     policy = LoopPolicy(required_evaluator_ids=("required",), max_versions=6,
-                        max_generated_versions=3, max_repair_attempts_per_version=2)
+                        max_generated_versions=3, max_repair_attempts_per_version=2,
+                        # The repair cap must be the binding constraint here, not the
+                        # token budget. At the default 15000/10000/15000 reservations
+                        # this four-version scenario reserves ~90k tokens and trips
+                        # TOKEN_CAP before regenerating to v4. Small reservations keep
+                        # the scenario inside the approved 60000 cap so the repair-cap
+                        # boundary is what is actually exercised.
+                        generate_token_reservation=2_000,
+                        evaluate_token_reservation=1_000,
+                        repair_token_reservation=2_000)
     ctrl = LoopController(policy)
 
     # When repair_attempts_this_version == 1 (< 2): decision is REPAIR
@@ -664,11 +704,16 @@ async def test_t06_05_missing_required_evaluator(tmp_path):
 async def test_t06_05_evaluator_timeout_fail_closed(tmp_path):
     class HangingEvaluator(Evaluator):
         async def evaluate(self, ctx, art, intent_id):
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(2.0)
             return await super().evaluate(ctx, art, intent_id)
 
     evaluator = HangingEvaluator()
-    policy = LoopPolicy(required_evaluator_ids=("required",), operation_wall_reservation_seconds=0.05)
+    # The effective bound is min(operation wall reservation, semantic timeout,
+    # evaluator-declared metadata timeout) at runtime.py. 1 s is the smallest value the
+    # pinned cap profile can carry (caps are positive 32-bit integers, matching .NET
+    # `RequiredInt`), and the semantic default is left at 30 s, so the operation
+    # reservation is the sole binding constraint that can time out a 2 s hang.
+    policy = LoopPolicy(required_evaluator_ids=("required",), operation_wall_reservation_seconds=1)
     rt, store = setup(tmp_path, evaluator=evaluator, policy=policy)
     result = await rt.run()
     assert result.decision == DecisionType.FAIL

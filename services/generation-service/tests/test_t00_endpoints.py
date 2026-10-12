@@ -38,7 +38,7 @@ async def test_t00_01_get_sources():
         "message": None,
     })
 
-    with patch("app.router.search_sources", mock_search):
+    with patch("app.facade.GenerationFacade.search_sources", mock_search):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/v1/autogen/reading-paper/sources", params={"topic": "marine biology"})
             assert resp.status_code == 200
@@ -68,7 +68,7 @@ async def test_t00_01_post_source():
     """T00-01.2: Replay POST /v1/autogen/reading-paper/source."""
     mock_fetch = AsyncMock(return_value=dict(MOCK_SOURCE))
 
-    with patch("app.router.fetch_source", mock_fetch):
+    with patch("app.facade.GenerationFacade.fetch_source", mock_fetch):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post("/v1/autogen/reading-paper/source", json={"pmcid": "PMC8910001"})
             assert resp.status_code == 200
@@ -106,7 +106,7 @@ async def test_t00_01_post_source_ingest():
         "metadata": {"domain": None, "description": None, "format": "text"},
     })
 
-    with patch("app.router.ingest_source", mock_ingest):
+    with patch("app.facade.GenerationFacade.ingest_source", mock_ingest):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/v1/autogen/reading-paper/source/ingest",
@@ -139,7 +139,7 @@ async def test_t00_01_post_section_json():
     section_data = valid_section(1)
     mock_gen = AsyncMock(return_value=section_data)
 
-    with patch("app.router.generate_section", mock_gen):
+    with patch("app.facade.GenerationFacade.generate_section", mock_gen):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/v1/autogen/reading-paper/section",
@@ -172,13 +172,13 @@ async def test_t00_01_post_section_ndjson_stream():
     """T00-01.5: Replay POST /v1/autogen/reading-paper/section with application/x-ndjson."""
     section_data = valid_section(1)
 
-    async def fake_gen(topic, index, source, progress=None, **kwargs):
+    async def fake_gen(self, topic, index, source, progress=None, **kwargs):
         if progress:
             await progress("Information", "Simulated step 1")
             await progress("Information", "Simulated step 2")
         return section_data
 
-    with patch("app.router.generate_section", fake_gen):
+    with patch("app.facade.GenerationFacade.generate_section", fake_gen):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/v1/autogen/reading-paper/section",

@@ -189,18 +189,25 @@ def test_phase15_v2rate_b_stagnation_detector_tracks_outcomes_across_regeneratio
 
 @pytest.mark.asyncio
 async def test_phase15_v2rate_b_hanging_evaluator_fails_closed_under_wall_reservation(tmp_path):
-    """A 0.5 s evaluator under a 0.05 s operation wall reservation must not PASS.
+    """A hanging evaluator under a tight operation wall reservation must not PASS.
 
     Pre-fix the effective timeout was `max(operation_wall_reservation, evaluator
-    metadata timeout, semantic timeout)`, so the 0.05 s reservation was silently
+    metadata timeout, semantic timeout)`, so the operation reservation was silently
     widened to the 30 s semantic default and a hanging evaluator returned PASS.
+
+    The reservation is 1 s (the smallest value the pinned cap profile can carry --
+    caps are positive 32-bit integers, matching .NET `RequiredInt`) against a 2 s
+    hang. The semantic default stays at its 30 s untouched, so `min` must select the
+    1 s operation reservation to time out, while the pre-fix `max` would have
+    admitted the whole 2 s hang. The wall reservation is therefore the sole binding
+    constraint here.
     """
     class HangingEvaluator(Evaluator):
         async def evaluate(self, ctx, art, intent_id):
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(2.0)
             return await super().evaluate(ctx, art, intent_id)
 
-    policy = LoopPolicy(required_evaluator_ids=("required",), operation_wall_reservation_seconds=0.05)
+    policy = LoopPolicy(required_evaluator_ids=("required",), operation_wall_reservation_seconds=1)
     rt, store = setup(tmp_path, evaluator=HangingEvaluator(), policy=policy)
     result = await rt.run()
 
