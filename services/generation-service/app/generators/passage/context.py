@@ -32,7 +32,9 @@ class PassageGenerationContext(CanonicalBaseModel):
     target_min_words: int = Field(default=PASSAGE_MIN_WORDS, alias="targetMinWords")
     target_max_words: int = Field(default=PASSAGE_MAX_WORDS, alias="targetMaxWords")
     constraints: Dict[str, Any] = Field(default_factory=dict)
-
+    last_attempt_word_count: Optional[int] = Field(default=None, alias="lastAttemptWordCount")
+    last_attempt_evaluator_issues: List[str] = Field(default_factory=list, alias="lastAttemptEvaluatorIssues")
+    length_feedback: Optional[str] = Field(default=None, alias="lengthFeedback")
     @field_validator("blueprint_ref")
     @classmethod
     def _validate_blueprint_ref(cls, v: ArtifactRef) -> ArtifactRef:

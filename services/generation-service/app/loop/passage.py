@@ -10,6 +10,8 @@ import logging
 from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
 
+from app.config import settings
+
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
 from app.contracts.policies import POLICY_VERSION, PASSAGE_MAX_WORDS, PASSAGE_MIN_WORDS
 from app.evaluators.base import BaseEvaluator
@@ -52,21 +54,35 @@ class PassageGeneratorAdapter(GeneratorCapability):
         epoch = getattr(context.authority, "epoch", 1)
         feedback = None
         if version > 1 and hasattr(context, "current_artifact") and context.current_artifact is not None:
+            feedback_parts: List[str] = []
             prev_w = context.current_artifact.payload.get("wordCount", 0)
             if 0 < prev_w < self._passage_context.target_min_words:
-                feedback = (
+                feedback_parts.append(
                     f"CRITICAL FEEDBACK FOR VERSION {version}: Your previous draft had only {prev_w} words, "
                     f"which was below the strict {self._passage_context.target_min_words}-word minimum.\n"
                     f"In this revision, expand each of the 5-6 paragraphs with more thorough, substantive academic detail "
                     f"and empirical discussion from the verified source text to ensure the total word count is strictly between 780 and 840 words."
                 )
             elif prev_w > self._passage_context.target_max_words:
-                feedback = (
+                feedback_parts.append(
                     f"CRITICAL FEEDBACK FOR VERSION {version}: Your previous draft had {prev_w} words, "
                     f"which exceeded the strict {self._passage_context.target_max_words}-word maximum.\n"
                     f"In this revision, tighten your phrasing while keeping all verified facts to ensure the total word count is strictly between 780 and 840 words."
                 )
-
+            open_issues = getattr(context, "open_issues", None) or ()
+            if open_issues:
+                issue_lines = [
+                    f"- [{iss.code.value if hasattr(iss.code, 'value') else iss.code}] {iss.message}"
+                    for iss in open_issues
+                ]
+                feedback_parts.append(
+                    f"CRITICAL QUALITY & GROUNDING ISSUES TO RESOLVE IN VERSION {version}:\n"
+                    + "\n".join(issue_lines)
+                    + "\nStrictly avoid any ungrounded numbers/years not present in the source facts, "
+                    "and never use extreme certainty boosters ('always', 'definitely', 'certainly', 'undoubtedly', 'proves', 'conclusively', 'indisputable', 'forever', 'permanently')."
+                )
+            if feedback_parts:
+                feedback = "\n\n".join(feedback_parts)
         envelope = await self._generator.generate(
             context=self._passage_context,
             run_id=context.run_id,
@@ -77,7 +93,7 @@ class PassageGeneratorAdapter(GeneratorCapability):
             parent_operation_id=intent_id,
             input_dependencies=context.input_dependencies,
             length_feedback=feedback,
-            timeout_seconds=120.0,
+            timeout_seconds=60.0,
         )
         if envelope.version != version:
             envelope = envelope.model_copy(update={"version": version})
@@ -94,30 +110,42 @@ class PassageLoop:
         evaluators: Optional[Sequence[BaseEvaluator]] = None,
         repairer: Optional[PassageSentenceRepairer] = None,
         policy: Optional[LoopPolicy] = None,
+        is_benchmark: bool = False,
     ):
         self.generator = generator
         self.persistence_client = persistence_client
+        self.is_benchmark = is_benchmark
+
+        if policy is not None:
+            self.policy = policy
+        else:
+            self.policy = LoopPolicy.from_settings(
+                is_benchmark=is_benchmark,
+                generate_reservation_cap="passageGenerateTokenReservation",
+            )
 
         # Default required evaluators for IELTS Academic Passage
         if evaluators is None:
             self.evaluators: List[BaseEvaluator] = [
-                PassageWordCountEvaluator(required=True),
-                PassageStyleEvaluator(required=True),
-                GroundingFidelityEvaluator(required=True),
+                PassageWordCountEvaluator(required=True, timeout_seconds=self.policy.evaluator_deterministic_timeout_seconds),
+                PassageStyleEvaluator(required=True, timeout_seconds=self.policy.evaluator_deterministic_timeout_seconds),
+                GroundingFidelityEvaluator(
+                    required=True,
+                    timeout_seconds=self.policy.evaluator_semantic_timeout_seconds,
+                    estimated_tokens=self.policy.evaluator_max_tokens_per_evaluation,
+                ),
             ]
         else:
             self.evaluators = list(evaluators)
 
-        self.repairer = repairer or PassageSentenceRepairer()
-
-        required_ids = tuple(ev.evaluator_id for ev in self.evaluators if ev.metadata.required)
-        self.policy = policy or LoopPolicy.from_settings(
-            required_evaluator_ids=required_ids,
-            min_score_threshold=0.8,
-            operation_wall_reservation_seconds=120.0,
-            max_wall_time_seconds=900.0,
+        self.repairer = repairer or PassageSentenceRepairer(
+            timeout_seconds=self.policy.repair_timeout_seconds,
+            estimated_tokens=self.policy.repair_max_tokens_per_attempt,
         )
 
+        required_ids = tuple(ev.evaluator_id for ev in self.evaluators if ev.metadata.required)
+        if self.policy.required_evaluator_ids != required_ids:
+            self.policy = self.policy.model_copy(update={"required_evaluator_ids": required_ids})
     async def run(
         self,
         passage_context: PassageGenerationContext,
@@ -125,6 +153,7 @@ class PassageLoop:
         lease_owner: UUID,
         epoch: int = 1,
         accepted_dependencies: Optional[Dict[str, ArtifactRef]] = None,
+        parent_operation_id: Optional[str] = None,
     ) -> LoopResult:
         """Executes the Passage Loop with authoritative persistence and crash resumption."""
         # 1. P08-08 Crash Resumption Check:
@@ -211,6 +240,7 @@ class PassageLoop:
             authority=AuthorityGrant(leaseOwner=lease_owner, epoch=epoch),
             inputDependencies=tuple(input_deps),
             policyVersion=passage_context.policy_version,
+            parent_operation_id=parent_operation_id,
         )
 
         if accepted_dependencies is None:

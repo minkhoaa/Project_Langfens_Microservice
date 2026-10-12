@@ -106,6 +106,7 @@ class InvalidJsonError(ProviderError):
         raw_text: Optional[str] = None,
         provider_name: Optional[str] = None,
         operation_id: Optional[str] = None,
+        usage: Optional[Any] = None,
     ):
         super().__init__(
             message=message,
@@ -115,6 +116,7 @@ class InvalidJsonError(ProviderError):
             operation_id=operation_id,
         )
         self.raw_text = raw_text
+        self.usage = usage
 
 
 class TruncatedOutputError(ProviderError):
@@ -126,6 +128,7 @@ class TruncatedOutputError(ProviderError):
         raw_text: Optional[str] = None,
         provider_name: Optional[str] = None,
         operation_id: Optional[str] = None,
+        usage: Optional[Any] = None,
     ):
         super().__init__(
             message=message,
@@ -135,7 +138,7 @@ class TruncatedOutputError(ProviderError):
             operation_id=operation_id,
         )
         self.raw_text = raw_text
-
+        self.usage = usage
 
 class SchemaMismatchError(ProviderError):
     """Parsed JSON does not conform to the expected target schema or type invariants."""

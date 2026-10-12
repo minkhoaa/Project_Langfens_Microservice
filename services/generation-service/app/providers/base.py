@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import json
 import logging
 import re
 from typing import Any, Dict, Optional
@@ -51,7 +52,23 @@ class BaseProvider(ABC):
         return self.models.get(model_size, self.models.get("large", next(iter(self.models.values()))))
 
     def estimate_tokens(self, text: str) -> int:
-        """Heuristic fallback token estimator (approx 4 chars per token) when provider doesn't report."""
+        """Heuristic estimator for diagnostics only; never used for budget admission."""
         if not text:
             return 0
         return max(1, len(text) // 4)
+
+    def completion_token_limit(self, request: ProviderRequest) -> int:
+        """Maximum visible-plus-reasoning completion tokens allowed by this adapter."""
+        return request.max_tokens
+
+    def conservative_token_reservation(self, request: ProviderRequest) -> int:
+        """Upper-bound prompt bytes plus the adapter's full completion allowance."""
+        prompt = {
+            "model": self.get_model_name(request.model_size),
+            "messages": [{"role": m.role, "content": m.content} for m in request.messages],
+            "response_schema": request.response_schema,
+        }
+        prompt_bytes = len(json.dumps(prompt, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode("ascii"))
+        prompt_bound = prompt_bytes + 128 + 64 * len(request.messages)
+        completion_bound = max(request.max_tokens, self.completion_token_limit(request))
+        return prompt_bound + completion_bound

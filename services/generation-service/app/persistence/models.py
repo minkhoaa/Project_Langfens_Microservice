@@ -33,8 +33,11 @@ class OperationReconcileRequest(CanonicalBaseModel):
     operationId: str
     tokensUsed: int
     wallTimeUsedSeconds: float
+    promptTokensUsed: Optional[int] = None
+    completionTokensUsed: Optional[int] = None
+    reasoningTokensUsed: Optional[int] = None
     costUsedUsd: float = 0.0
-    accountingType: str = "REPORTED"
+    accountingType: str = "UNKNOWN"
     resultRefJson: Optional[str] = None
     resolvedFingerprints: Optional[List[str]] = None
     supersededFingerprints: Optional[List[str]] = None
@@ -45,6 +48,8 @@ class OperationReconcileResult(CanonicalBaseModel):
     tokensUsed: int
     wallTimeUsedSeconds: float
     reconciledAt: datetime
+    reservationBreached: bool = False
+    budgetBreachDetected: bool = False
 
 
 class BudgetAllocationItem(CanonicalBaseModel):
@@ -76,6 +81,9 @@ class OperationGrantResult(CanonicalBaseModel):
     wallTimeReservationSeconds: float = 60.0
     grantedAt: datetime
     isReplay: bool = False
+    resultRefJson: Optional[str] = None
+    reservationBreached: bool = False
+    budgetBreachDetected: bool = False
 
 class CheckpointCommitRequest(CanonicalBaseModel):
     runId: str
@@ -139,6 +147,14 @@ class ArtifactResumeInfo(CanonicalBaseModel):
     isStale: bool = False
     envelopeJson: Optional[str] = None
 
+    def to_ref(self) -> ArtifactRef:
+        from app.contracts.artifact import ArtifactRef, ArtifactType
+        return ArtifactRef(
+            artifactId=self.artifactId,
+            artifactType=ArtifactType(self.artifactType),
+            version=self.acceptedVersion,
+            contentHash=self.acceptedHash,
+        )
 
 class LoopCursorCheckpointRequest(CanonicalBaseModel):
     runId: str
@@ -169,6 +185,11 @@ class OperationResumeInfo(CanonicalBaseModel):
     wallTimeUsedSeconds: float
     resultRefJson: Optional[str] = None
     parentOperationId: Optional[str] = None
+    promptTokensUsed: Optional[int] = None
+    completionTokensUsed: Optional[int] = None
+    reasoningTokensUsed: Optional[int] = None
+    accountingType: str = "UNKNOWN"
+    reservationBreached: bool = False
 class ResumeStateResult(CanonicalBaseModel):
     runId: str
     jobId: UUID
@@ -193,6 +214,11 @@ class ResumeStateResult(CanonicalBaseModel):
     evaluations: Optional[List[EvaluationResult]] = None
     loopCursors: Optional[List[LoopCursorCheckpoint]] = None
     operations: Optional[List[OperationResumeInfo]] = None
+    budgetProfileVersion: Optional[str] = None
+    budgetProfileSha256: Optional[str] = None
+    budgetProfileSource: Optional[str] = None
+    budgetProfileJson: Optional[str] = None
+    budgetBreachDetected: bool = False
 class InvalidateDependencyRequest(CanonicalBaseModel):
     runId: str
     epoch: int
@@ -218,3 +244,94 @@ class BuildExamInternalResult(CanonicalBaseModel):
     examId: UUID
     slug: str
     isExisting: bool = False
+
+
+class BenchmarkCampaignCreateRequest(CanonicalBaseModel):
+    campaignId: str
+    authorizationId: str
+    authorizedBy: str
+    corpusSha256: str
+    configSha256: str
+    budgetCapCalls: int
+    budgetCapTokens: int
+    budgetCapWallTimeSeconds: float
+
+
+class BenchmarkCaseProvisionRequest(CanonicalBaseModel):
+    campaignId: str
+    caseId: str
+    claimId: str
+    leaseOwner: UUID
+
+
+class BenchmarkCaseCompleteRequest(CanonicalBaseModel):
+    campaignId: str
+    caseId: str
+    claimId: str
+    epoch: int
+    leaseOwner: UUID
+
+
+class BenchmarkCaseProvisionResult(CanonicalBaseModel):
+    campaignId: str
+    caseId: str
+    runId: str
+    jobId: UUID
+    status: str
+    epoch: int
+    leaseOwner: UUID
+    claimId: str
+    leaseUntil: Optional[datetime] = None
+    alreadyCompleted: bool = False
+    operationCount: int = 0
+    unknownOperationCount: int = 0
+    completedOperationCount: int = 0
+
+
+class BenchmarkCaseStatus(CanonicalBaseModel):
+    caseId: str
+    runId: str
+    status: str
+    epoch: int
+    runCallCap: int
+    runCallsUsed: int
+    runTokenCap: int
+    runTokensUsed: int
+    runWallTimeCapSeconds: float
+    runWallTimeUsedSeconds: float
+    operationCount: int
+    unknownOperationCount: int
+    completedOperationCount: int
+
+
+class BenchmarkCampaignStatus(CanonicalBaseModel):
+    campaignId: str
+    authorizationId: str
+    authorizedBy: str
+    corpusSha256: str
+    configSha256: str
+    status: str
+    budgetCapCalls: int
+    budgetUsedCalls: int
+    budgetCapTokens: int
+    budgetUsedTokens: int
+    budgetCapWallTimeSeconds: float
+    budgetUsedWallTimeSeconds: float
+    createdAt: datetime
+    updatedAt: datetime
+    budgetBreachDetected: bool = False
+    budgetBreachReason: Optional[str] = None
+    cases: List[BenchmarkCaseStatus] = Field(default_factory=list)
+
+
+class OutboxEventRecord(CanonicalBaseModel):
+    id: UUID
+    runId: str
+    eventId: str
+    eventType: str
+    idempotencyKey: str
+    epoch: int
+    payloadJson: str
+    status: str
+    createdAt: datetime
+    sequence: int = 0

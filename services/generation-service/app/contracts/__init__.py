@@ -107,6 +107,31 @@ from .source import (
     SourceMetadata,
     SourcePack,
 )
+from .section import (
+    AuthoringSectionResult,
+    SectionGroupSnapshot,
+    SectionPayload,
+    SectionSnapshot,
+    SectionSourceInfo,
+    SectionStatus,
+    StudentVisibleGroup,
+    StudentVisibleOption,
+    StudentVisibleQuestion,
+    StudentVisibleSection,
+    assemble_immutable_section,
+    assert_student_visible_payload_isolated,
+    to_student_visible_section,
+)
+from .paper import (
+    AuthoringPaperResult,
+    PaperStatus,
+    ReadingPaperPayload,
+    ReadingPaperSnapshot,
+    StudentVisibleReadingPaper,
+    assemble_immutable_paper,
+    assert_student_visible_paper_isolated,
+    to_student_visible_paper,
+)
 
 __all__ = [
     # Base
@@ -202,4 +227,27 @@ __all__ = [
     "SourceItem",
     "SourceMetadata",
     "SourcePack",
+    # Section
+    "AuthoringSectionResult",
+    "SectionGroupSnapshot",
+    "SectionPayload",
+    "SectionSnapshot",
+    "SectionSourceInfo",
+    "SectionStatus",
+    "StudentVisibleGroup",
+    "StudentVisibleOption",
+    "StudentVisibleQuestion",
+    "StudentVisibleSection",
+    "assemble_immutable_section",
+    "assert_student_visible_payload_isolated",
+    "to_student_visible_section",
+    # Paper
+    "AuthoringPaperResult",
+    "PaperStatus",
+    "ReadingPaperPayload",
+    "ReadingPaperSnapshot",
+    "StudentVisibleReadingPaper",
+    "assemble_immutable_paper",
+    "assert_student_visible_paper_isolated",
+    "to_student_visible_paper",
 ]

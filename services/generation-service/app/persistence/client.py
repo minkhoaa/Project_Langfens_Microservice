@@ -17,12 +17,18 @@ from app.persistence.models import (
     InvalidateDependencyResult,
     BuildExamInternalRequest,
     BuildExamInternalResult,
+    BenchmarkCampaignCreateRequest,
+    BenchmarkCampaignStatus,
+    BenchmarkCaseProvisionRequest,
+    BenchmarkCaseCompleteRequest,
+    BenchmarkCaseProvisionResult,
     SetBudgetAllocationsRequest,
     SetBudgetAllocationsResult,
     OperationReconcileRequest,
     OperationReconcileResult,
     UnknownOutcomeRequest,
     UnknownOutcomeAck,
+    OutboxEventRecord,
 )
 
 
@@ -47,21 +53,37 @@ class CheckpointClient:
         internal_api_key: Optional[str] = None,
         timeout: float = 30.0,
     ):
-        self.base_url = (
-            base_url
-            or os.environ.get("EXAM_SERVICE_URL")
+        self._base_url = base_url
+        self._internal_api_key = internal_api_key
+        self.timeout = timeout
+        if not self.internal_api_key or not self.internal_api_key.strip():
+            raise ValueError("EXAMSERVICE__INTERNAL__API__KEY is not configured")
+
+    @property
+    def base_url(self) -> str:
+        return (
+            os.environ.get("EXAM_SERVICE_URL")
+            or os.environ.get("EXAMSERVICE__EXAM__ADDRESS")
+            or self._base_url
             or "http://localhost:5000"
         ).rstrip("/")
-        self.internal_api_key = (
-            internal_api_key
-            or os.environ.get("EXAMSERVICE__INTERNAL__API__KEY")
+
+    @base_url.setter
+    def base_url(self, value: Optional[str]) -> None:
+        self._base_url = value
+
+    @property
+    def internal_api_key(self) -> str:
+        return (
+            os.environ.get("EXAMSERVICE__INTERNAL__API__KEY")
             or os.environ.get("InternalApiKey")
+            or self._internal_api_key
+            or ""
         )
-        if not self.internal_api_key:
-            raise ValueError(
-                "EXAMSERVICE__INTERNAL__API__KEY is not configured; refusing to use insecure default."
-            )
-        self.timeout = timeout
+
+    @internal_api_key.setter
+    def internal_api_key(self, value: Optional[str]) -> None:
+        self._internal_api_key = value
 
     def _get_headers(self) -> Dict[str, str]:
         return {
@@ -197,6 +219,14 @@ class CheckpointClient:
                 self._handle_error(resp)
             return ResumeStateResult.model_validate(resp.json())
 
+    async def resume_state_async(self, run_id: str) -> ResumeStateResult:
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/resume/{run_id}"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.get(url, headers=self._get_headers())
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            return ResumeStateResult.model_validate(resp.json())
+
     def invalidate_dependencies(self, request: InvalidateDependencyRequest) -> InvalidateDependencyResult:
         url = f"{self.base_url}/api/internal/reading-paper/checkpoints/invalidate"
         with httpx.Client(timeout=self.timeout) as client:
@@ -213,6 +243,53 @@ class CheckpointClient:
                 self._handle_error(resp)
             return BuildExamInternalResult.model_validate(resp.json())
 
+    async def create_benchmark_campaign_async(self, request: BenchmarkCampaignCreateRequest) -> BenchmarkCampaignStatus:
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/campaigns"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(url, headers=self._get_headers(), json=request.model_dump(mode="json", by_alias=True))
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            return BenchmarkCampaignStatus.model_validate(resp.json())
+
+    async def get_benchmark_campaign_async(self, campaign_id: str) -> BenchmarkCampaignStatus:
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/campaigns/{campaign_id}"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.get(url, headers=self._get_headers())
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            return BenchmarkCampaignStatus.model_validate(resp.json())
+
+    async def provision_benchmark_case_async(self, request: BenchmarkCaseProvisionRequest) -> BenchmarkCaseProvisionResult:
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/campaigns/cases/provision"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(url, headers=self._get_headers(), json=request.model_dump(mode="json", by_alias=True))
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            return BenchmarkCaseProvisionResult.model_validate(resp.json())
+
+    async def complete_benchmark_case_async(self, request: BenchmarkCaseCompleteRequest) -> BenchmarkCaseProvisionResult:
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/campaigns/cases/complete"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(url, headers=self._get_headers(), json=request.model_dump(mode="json", by_alias=True))
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            return BenchmarkCaseProvisionResult.model_validate(resp.json())
+
+    def get_outbox_events(self, run_id: str, after_sequence: int = 0) -> list[dict[str, Any]]:
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/events/{run_id}?afterSequence={after_sequence}"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(url, headers=self._get_headers())
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            return resp.json()
+
+    async def get_outbox_events_async(self, run_id: str, after_sequence: int = 0) -> list[dict[str, Any]]:
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/events/{run_id}?afterSequence={after_sequence}"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.get(url, headers=self._get_headers())
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            return resp.json()
     def _verify_ack(self, request: Any, ack: CheckpointAck) -> None:
         if ack.runId != request.runId:
             raise ValueError(f"CheckpointAck runId mismatch: ack={ack.runId}, req={request.runId}")

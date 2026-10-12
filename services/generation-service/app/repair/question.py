@@ -1,7 +1,9 @@
 """Question-level and group-level surgical repairers for Langfens Loop Engine V2."""
 
 from __future__ import annotations
+from collections.abc import Mapping
 from types import MappingProxyType
+from typing import Any, Dict, Optional, Sequence, Set
 import copy
 import re
 from datetime import datetime, timezone
@@ -11,6 +13,7 @@ from app.config import settings
 from app.contracts.artifact import ArtifactEnvelope, ArtifactType, compute_content_hash
 from app.contracts.issue import Issue, IssueCode
 from app.contracts.policies import match_verbatim_in_passage
+from app.evaluators.deterministic import check_prompt_answer_leakage
 from app.repair.base import (
     BaseRepairer,
     RepairCapabilityMetadata,
@@ -57,6 +60,8 @@ class QuestionItemRepairer(BaseRepairer):
                     IssueCode.BAD_DISTRACTOR,
                     IssueCode.INSUFFICIENT_OPTIONS,
                     IssueCode.AMBIGUOUS_ANSWER,
+                    IssueCode.SCHEMA_VIOLATION,
+                    IssueCode.ANSWER_LEAKAGE,
                 },
                 timeout_seconds=t_sec,
                 estimated_tokens=tok,
@@ -82,13 +87,242 @@ class QuestionItemRepairer(BaseRepairer):
             if q_num_match:
                 target_q_nums.add(int(q_num_match.group(1)))
 
+        # P15: sibling answers already committed elsewhere in the artifact. A
+        # completion / summary group must carry mutually distinct answers, and a
+        # summary group's shared stem constrains every one of its blanks. Both are
+        # invariants of the GROUP, not of one slot, so salvage has to consult the
+        # whole artifact rather than only the slot being repaired. For a
+        # single-QUESTION artifact there are no siblings and no shared stem, so the
+        # sibling set is empty and only self-leakage applies.
+        #
+        # Read LIVE from the payload on every call rather than from a snapshot taken
+        # before repair began: `repair_single_q` mutates questions one at a time, so
+        # an earlier blank repaired in this same pass must be visible to the gates of
+        # the next one, otherwise two blanks in one group could both take the same
+        # newly-salvaged answer.
+        def _sibling_answers_for(q: Dict[str, Any]) -> Set[str]:
+            """Case-folded answers of the OTHER blanks in this slot's group."""
+            _qn = q.get("questionNumber") or q.get("number")
+            if _qn is None or not isinstance(payload, Mapping):
+                return set()
+            _qn = int(_qn)
+            _mine = str(q.get("answer") or "").strip().casefold()
+            _others: Set[str] = set()
+            for _grp in payload.get("groups", []) or []:
+                if not isinstance(_grp, Mapping):
+                    continue
+                for _q in _grp.get("questions", []) or []:
+                    if not isinstance(_q, Mapping):
+                        continue
+                    _qn2 = _q.get("questionNumber") or _q.get("number")
+                    if _qn2 is None or int(_qn2) == _qn:
+                        continue
+                    _a = str(_q.get("answer") or "").strip()
+                    if _a:
+                        _others.add(_a.casefold())
+            return _others - ({_mine} if _mine else set())
+
+        def _stem_for(q: Dict[str, Any]) -> str:
+            """The shared stem this slot belongs to, if the artifact has groups."""
+            _qn = q.get("questionNumber") or q.get("number")
+            if _qn is None or not isinstance(payload, Mapping):
+                return ""
+            _qn = int(_qn)
+            for _grp in payload.get("groups", []) or []:
+                if not isinstance(_grp, Mapping):
+                    continue
+                if any(
+                    isinstance(_q, Mapping) and int(_q.get("questionNumber") or _q.get("number") or 0) == _qn
+                    for _q in _grp.get("questions", []) or []
+                ):
+                    return str(_grp.get("sharedContext") or "")
+            return ""
+
         async def repair_single_q(q: Dict[str, Any]):
             q_type = q.get("questionType") or q.get("type", "")
-            orig_ans = q.get("answer", "")
+            q_type_norm = str(q_type).replace("_", "").replace("-", "").lower()
+            is_mcq = q_type_norm in ("multiplechoicesingle", "mcq", "multiplechoice")
+            is_completion_or_short = q_type_norm in ("sentencecompletion", "summarycompletion", "shortanswer")
+            orig_ans = str(q.get("answer") or "")
+            orig_prompt = str(q.get("prompt") or q.get("statement") or "")
             ans = orig_ans
 
+            def _try_apply_candidate(cand: Dict[str, Any], require_distinct: bool = False) -> bool:
+                if not isinstance(cand, (dict, MappingProxyType)):
+                    return False
+                cand_ans = str(cand.get("answer") or cand.get("correctOption") or "").strip()
+                if not cand_ans:
+                    return False
+                cand_prompt = str(cand.get("prompt") or cand.get("statement") or q.get("prompt") or "").strip()
+                if not cand_prompt:
+                    return False
+                if require_distinct and cand_ans == orig_ans.strip() and cand_prompt == orig_prompt.strip():
+                    return False
+                cand_options = cand.get("options")
+                if is_mcq:
+                    eff_opts = cand_options if isinstance(cand_options, list) and len(cand_options) >= 4 else q.get("options")
+                    if not isinstance(eff_opts, list) or len(eff_opts) < 4:
+                        return False
+                if is_completion_or_short:
+                    if len(cand_ans.split()) > 3:
+                        return False
+                    if passage_text and not match_verbatim_in_passage(cand_ans, passage_text):
+                        return False
+                # P15: salvaging a pooled candidate must satisfy EVERY invariant the
+                # generator satisfies before a candidate is usable, not just grounding
+                # and length. Two gates were missing, and each one let a *rejected*
+                # candidate be applied and returned as a repaired artifact:
+                #   1. anti-leakage -- a candidate whose answer appears verbatim inside
+                #      its own stem is not a usable question. Applying it produced a
+                #      "successfully repaired" artifact that the very next evaluation
+                #      pass re-flagged as ANSWER_LEAKAGE, so the repair consumed a
+                #      version and returned the loop to the same blocker set.
+                #   2. group distinctness -- a summary/completion group must carry
+                #      mutually distinct answers. A candidate duplicating a sibling
+                #      blank's answer violates the group contract even though nothing
+                #      local to this slot objects.
+                # Both are read from the artifact payload, so the gate is complete
+                # without any provider call. A candidate failing either is skipped
+                # and the search continues to the next pool member; exhausting the
+                # pool still raises RepairJustificationError (fail-closed).
+                if check_prompt_answer_leakage(cand_prompt, cand_ans):
+                    return False
+                # A summary group shares one stem across every blank, so an answer
+                # that appears in that stem is leaked for this blank too, whatever
+                # this slot's own prompt looks like.
+                _stem = _stem_for(q)
+                if _stem and check_prompt_answer_leakage(_stem, cand_ans):
+                    return False
+                if cand_ans.casefold() in _sibling_answers_for(q):
+                    return False
+                q["answer"] = cand_ans
+                q["prompt"] = cand_prompt
+                if "statement" in q:
+                    q["statement"] = cand_prompt
+                if is_mcq and isinstance(cand_options, list) and len(cand_options) >= 4:
+                    q["options"] = list(cand_options)[:4]
+                cand_quote = cand.get("evidenceQuote") or cand.get("evidence_quote")
+                if cand_quote:
+                    q["evidenceQuote"] = str(cand_quote)
+                cand_expl = cand.get("explanation")
+                if cand_expl:
+                    q["explanation"] = str(cand_expl)
+                cand_id = cand.get("candidateId") or cand.get("candidate_id")
+                if cand_id:
+                    q["candidateId"] = str(cand_id)
+                if cand.get("score") is not None:
+                    q["score"] = cand.get("score")
+                existing_cands = q.get("candidates")
+                if isinstance(existing_cands, list) and cand in existing_cands:
+                    updated_cand = dict(cand)
+                    updated_cand["answer"] = cand_ans
+                    updated_cand["prompt"] = cand_prompt
+                    q["candidates"] = [updated_cand] + [c for c in existing_cands if c is not cand]
+                return True
+
+            async def _try_gateway_regeneration(q_num_val: int) -> bool:
+                gw = self.gateway or getattr(context, "gateway", None)
+                if gw is None or not passage_text:
+                    return False
+                from app.contracts.artifact import ArtifactRef
+                from app.generators.question.generator import QuestionCandidateGenerator
+                p_ref = next(
+                    (r for r in artifact.parent_refs if r.artifact_type == ArtifactType.PASSAGE),
+                    ArtifactRef(artifactId="art_passage_s1", artifactType=ArtifactType.PASSAGE, version=1, contentHash="0" * 64),
+                )
+                bp_ref = next(
+                    (r for r in artifact.parent_refs if r.artifact_type == ArtifactType.EXAM_BLUEPRINT),
+                    ArtifactRef(artifactId="art_blueprint_01", artifactType=ArtifactType.EXAM_BLUEPRINT, version=1, contentHash="0" * 64),
+                )
+                q_gen = QuestionCandidateGenerator(gateway=gw)
+                sec_id_str = str(artifact.section_id or getattr(context, "section_id", None) or 1)
+                for try_q_type in ([q_type, "SentenceCompletion"] if q_type_norm == "summarycompletion" else [q_type]):
+                    try:
+                        regen_pool = await q_gen.generate_candidate_pool(
+                            passage_text=passage_text,
+                            question_type=try_q_type or "SentenceCompletion",
+                            question_number=q_num_val,
+                            passage_ref=p_ref,
+                            blueprint_ref=bp_ref,
+                            run_id=artifact.run_id,
+                            section_id=sec_id_str,
+                            context=context,
+                            parent_operation_id=intent_id,
+                        )
+                    except Exception:
+                        continue
+                    if regen_pool and regen_pool.candidates:
+                        dumped_cands = [c.model_dump(mode="json", by_alias=True) for c in regen_pool.candidates]
+                        q["candidates"] = dumped_cands
+                        for c_dict in dumped_cands:
+                            if _try_apply_candidate(c_dict):
+                                return True
+                return False
+
             for iss in issues:
-                if iss.code == IssueCode.WORD_LIMIT_EXCEEDED:
+                if iss.code == IssueCode.SCHEMA_VIOLATION:
+                    if iss.proposed_repair:
+                        prop_ans = iss.proposed_repair.strip()
+                        if passage_text and is_completion_or_short and not match_verbatim_in_passage(prop_ans, passage_text):
+                            raise RepairJustificationError(
+                                f"Proposed answer repair '{prop_ans}' is not supported by passage text"
+                            )
+                    cand_list = q.get("candidates") or []
+                    if not isinstance(cand_list, list):
+                        cand_list = []
+                    replaced = any(_try_apply_candidate(cand) for cand in cand_list)
+                    if not replaced:
+                        q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
+                        replaced = await _try_gateway_regeneration(q_num_val)
+                    if not replaced:
+                        raise RepairJustificationError(
+                            f"Question {q.get('questionNumber')} cannot repair schema violation: no valid candidate available in pool "
+                            "and no passage-grounded span found; slot generation must regenerate via gateway"
+                        )
+                elif iss.code == IssueCode.AMBIGUOUS_ANSWER:
+                    if iss.proposed_repair:
+                        if not iss.evidence or len(iss.evidence.strip()) < 5 or (passage_text and iss.evidence.strip() not in passage_text):
+                            raise RepairJustificationError(
+                                f"Ambiguous answer repair for Question {q.get('questionNumber')} rejected: missing or unsupported passage evidence justification"
+                            )
+                        prop_ans = iss.proposed_repair.strip()
+                        if passage_text and is_completion_or_short and not match_verbatim_in_passage(prop_ans, passage_text):
+                            raise RepairJustificationError(
+                                f"Ambiguous answer repair '{prop_ans}' rejected: not supported by passage text"
+                            )
+                        q["answer"] = prop_ans
+                    else:
+                        cand_list = q.get("candidates") or []
+                        replaced = any(_try_apply_candidate(cand, require_distinct=True) for cand in (cand_list if isinstance(cand_list, list) else []))
+                        if not replaced:
+                            q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
+                            replaced = await _try_gateway_regeneration(q_num_val)
+                        if not replaced:
+                            raise RepairJustificationError(
+                                f"Ambiguous answer repair for Question {q.get('questionNumber')} rejected: requires passage evidence justification or valid alternative candidate"
+                            )
+                elif iss.code == IssueCode.ANSWER_LEAKAGE:
+                    cand_list = q.get("candidates") or []
+                    replaced = False
+                    for cand in (cand_list if isinstance(cand_list, list) else []):
+                        c_ans = str(cand.get("answer") or "").strip()
+                        c_prompt = str(cand.get("prompt") or "").strip()
+                        if c_ans and c_prompt and c_ans.lower() not in c_prompt.lower():
+                            if _try_apply_candidate(cand, require_distinct=True):
+                                replaced = True
+                                break
+                    if not replaced and orig_ans and orig_prompt and orig_ans.lower() in orig_prompt.lower():
+                        sanitized = re.sub(re.escape(orig_ans), "the specified factor", orig_prompt, flags=re.IGNORECASE)
+                        if sanitized != orig_prompt:
+                            q["prompt"] = sanitized
+                            if "statement" in q:
+                                q["statement"] = sanitized
+                            replaced = True
+                    if not replaced:
+                        raise RepairJustificationError(
+                            f"Answer leakage repair for Question {q.get('questionNumber')} could not sanitize prompt without ungrounded mutation"
+                        )
+                elif iss.code == IssueCode.WORD_LIMIT_EXCEEDED:
                     words = ans.split()
                     if len(words) > 3:
                         # Identify candidates matching verbatim in passage
@@ -112,7 +346,7 @@ class QuestionItemRepairer(BaseRepairer):
                             )
                         q["answer"] = valid_span or " ".join(words[:3])
 
-                elif iss.code == IssueCode.BAD_DISTRACTOR and q_type == "MultipleChoiceSingle":
+                elif iss.code == IssueCode.BAD_DISTRACTOR and is_mcq:
                     # P07-08 Invariant: Distractor replacement requires verifiable evidence quote + wrongness rationale
                     # proving the option is contradicted/irrelevant to the question stem, followed by uniqueness re-evaluation.
                     if not iss.proposed_repair:
@@ -202,7 +436,7 @@ class QuestionItemRepairer(BaseRepairer):
                             "Post-repair uniqueness failed: replacement option is supported by passage as an answer, "
                             "violating single-answer uniqueness"
                         )
-                elif iss.code == IssueCode.INSUFFICIENT_OPTIONS and q_type == "MultipleChoiceSingle":
+                elif iss.code == IssueCode.INSUFFICIENT_OPTIONS and is_mcq:
                     if not iss.proposed_repair:
                         raise RepairJustificationError(
                             f"Adding options to Question {q.get('questionNumber')} rejected: "
@@ -293,7 +527,7 @@ class QuestionItemRepairer(BaseRepairer):
 
             # Invariant: Item/option/answer repair must have passage evidence justification
             final_ans = q.get("answer", "")
-            if final_ans != orig_ans and passage_text and q_type in ("SentenceCompletion", "SummaryCompletion", "ShortAnswer"):
+            if final_ans != orig_ans and passage_text and is_completion_or_short:
                 if not match_verbatim_in_passage(final_ans, passage_text):
                     raise RepairJustificationError(
                         f"Repaired answer '{final_ans}' lacks passage evidence justification (not verbatim in passage)"

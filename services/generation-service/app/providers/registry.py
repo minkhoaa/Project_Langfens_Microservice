@@ -21,6 +21,7 @@ class KeyInfo:
         self.exhausted = False
         self.exhausted_at: Optional[float] = None
         self.cooldown_seconds = cooldown_seconds
+        self.last_dispatched_at: float = 0.0
 
 
 class TokenBucket:
@@ -80,20 +81,23 @@ class ProviderRegistry:
         self._current_indices[name] = 0
 
     def get_provider(self, name: str) -> Optional[BaseProvider]:
+        if not self._providers and not self._initialized:
+            self.initialize_from_settings()
         return self._providers.get(name.lower())
 
     def get_provider_order(self, preferred: Optional[str] = None) -> List[str]:
+        if not self._providers and not self._initialized:
+            self.initialize_from_settings()
         configured_order = [p.strip().lower() for p in settings.llm_provider_order.split(",") if p.strip()]
         if not configured_order:
             configured_order = ["minimax", "groq"]
 
         # Only consider registered providers
-        active = [p for p in configured_order if p in self._providers]
+        active = [p for p in configured_order if p in self._providers and len(self._keys.get(p, [])) > 0]
         for p in self._providers:
-            if p not in active:
+            if p not in active and len(self._keys.get(p, [])) > 0:
                 active.append(p)
-
-        if preferred and preferred.lower() in self._providers:
+        if preferred and preferred.lower() in self._providers and len(self._keys.get(preferred.lower(), [])) > 0:
             pref = preferred.lower()
             return [pref] + [p for p in active if p != pref]
 
@@ -115,15 +119,32 @@ class ProviderRegistry:
                         k.exhausted_at = None
                         logger.info("Provider %s key #%d cooldown elapsed; re-enabled", name.upper(), k.index + 1)
 
+            min_key_interval = 60.0 if name == "groq" else 0.0
             start_idx = self._current_indices.get(name, 0)
             attempts = 0
             while attempts < len(keys):
                 idx = (start_idx + attempts) % len(keys)
                 k_info = keys[idx]
-                if not k_info.exhausted:
+                if not k_info.exhausted and (now - k_info.last_dispatched_at >= min_key_interval):
                     self._current_indices[name] = (idx + 1) % len(keys)
+                    k_info.last_dispatched_at = now
                     return k_info.key, idx
                 attempts += 1
+
+            if min_key_interval > 0:
+                # Find available non-exhausted keys
+                avail_keys = [k for k in keys if not k.exhausted]
+                if avail_keys:
+                    # Select the key that was dispatched furthest in the past
+                    oldest_k = min(avail_keys, key=lambda k: k.last_dispatched_at)
+                    wait_time = max(0.0, min_key_interval - (now - oldest_k.last_dispatched_at))
+                    if wait_time > 0 and wait_time <= 900.0:
+                        logger.info("Pacing %s: waiting %.2fs for next key TPM window", name.upper(), wait_time + 1.0)
+                        await asyncio.sleep(wait_time + 1.0)
+                    now = time.time()
+                    oldest_k.last_dispatched_at = now
+                    self._current_indices[name] = (oldest_k.index + 1) % len(keys)
+                    return oldest_k.key, oldest_k.index
 
             return None
 
@@ -207,13 +228,18 @@ class ProviderRegistry:
                 "xlarge": "openai/gpt-oss-120b",
                 "large": settings.groq_model,
                 "medium": "qwen-2.5-32b",
-                "small": "llama-3.1-8b-instant",
+                "small": "openai/gpt-oss-20b",
             },
         )
-        self.register_provider(groq_provider, keys=groq_keys, max_concurrency=6, rate_per_second=10.0)
+        groq_rate = 1.0 / 15.0
+        self.register_provider(groq_provider, keys=groq_keys, max_concurrency=1, rate_per_second=groq_rate)
+        if "groq" in self._rate_limiters:
+            self._rate_limiters["groq"].capacity = 1.0
+            self._rate_limiters["groq"].tokens = 1.0
 
         self._initialized = True
         logger.info("ProviderRegistry initialized: %s", self.get_status())
 
 
 provider_registry = ProviderRegistry()
+provider_registry.initialize_from_settings()

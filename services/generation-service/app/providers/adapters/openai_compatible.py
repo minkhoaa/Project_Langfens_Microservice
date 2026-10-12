@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import json
 import time
 import httpx
 from typing import Any, Dict, List, Optional
@@ -54,10 +55,12 @@ class OpenAICompatibleProvider(BaseProvider):
         http_client: Optional[httpx.AsyncClient] = None,
         max_retries: int = 0,
     ):
+        if max_retries != 0:
+            raise ValueError("SDK retries are disabled; ProviderGateway owns transport retries")
         super().__init__(name=name, base_url=base_url, models=models)
         self.supports_response_format = supports_response_format
         self.http_client = http_client
-        self.max_retries = max_retries
+        self.max_retries = 0
         self._clients: Dict[str, AsyncOpenAI] = {}
 
     def _get_client(self, api_key: str) -> AsyncOpenAI:
@@ -66,7 +69,7 @@ class OpenAICompatibleProvider(BaseProvider):
             client_kwargs: Dict[str, Any] = {
                 "api_key": api_key,
                 "base_url": self.base_url,
-                "max_retries": self.max_retries,
+                "max_retries": 0,
             }
             if self.http_client is not None:
                 client_kwargs["http_client"] = self.http_client
@@ -83,6 +86,11 @@ class OpenAICompatibleProvider(BaseProvider):
         if request.capability == Capability.GENERATE_JSON and self.supports_response_format:
             kwargs["response_format"] = {"type": "json_object"}
         return kwargs
+
+    def completion_token_limit(self, request: ProviderRequest) -> int:
+        """Use the exact wire completion cap; reasoning is included by these adapters."""
+        kwargs = self._build_create_kwargs(request, self.get_model_name(request.model_size))
+        return max(int(kwargs.get("max_tokens", 0)), int(kwargs.get("max_completion_tokens", 0)))
 
     async def call(self, request: ProviderRequest, api_key: str, deadline: float) -> ProviderResponse:
         t0 = time.perf_counter()
@@ -103,10 +111,14 @@ class OpenAICompatibleProvider(BaseProvider):
         try:
             if request.stream_callback is not None:
                 kwargs["stream"] = True
+                kwargs["stream_options"] = {"include_usage": True}
                 content_parts: List[str] = []
                 sanitizer = StreamingReasoningSanitizer()
+                resp_usage = None
+                request_id = None
 
                 async def _consume_stream() -> str:
+                    nonlocal resp_usage, request_id
                     stream_resp = await client.chat.completions.create(**kwargs)
                     async for chunk in stream_resp:
                         if time.time() > deadline:
@@ -115,6 +127,10 @@ class OpenAICompatibleProvider(BaseProvider):
                                 provider_name=self.name,
                                 operation_id=request.operation_id,
                             )
+                        if getattr(chunk, "usage", None) is not None:
+                            resp_usage = chunk.usage
+                        if getattr(chunk, "id", None) is not None:
+                            request_id = chunk.id
                         if not getattr(chunk, "choices", None):
                             continue
                         ch = chunk.choices[0]
@@ -146,8 +162,10 @@ class OpenAICompatibleProvider(BaseProvider):
 
                 raw_text = await asyncio.wait_for(_consume_stream(), timeout=timeout_for_call)
                 finish_reason_raw = "stop"
-                resp_usage = None
-                request_id = None
+                if resp_usage is None:
+                    p_tokens = max(1, len(json.dumps(request.messages[0].content)) // 4)
+                    c_tokens = max(1, len(raw_text) // 4)
+                    resp_usage = type("Usage", (), {"prompt_tokens": p_tokens, "completion_tokens": c_tokens, "total_tokens": p_tokens + c_tokens, "completion_tokens_details": None})()
             else:
                 response = await asyncio.wait_for(
                     client.chat.completions.create(**kwargs),
@@ -182,43 +200,46 @@ class OpenAICompatibleProvider(BaseProvider):
             # Clean reasoning tags: <think> tags must NEVER leak into business payload or logs
             cleaned_text = clean_reasoning_tags(raw_text)
 
-            # Resolve usage report
-            if resp_usage:
-                p_tokens = getattr(resp_usage, "prompt_tokens", 0) or 0
-                c_tokens = getattr(resp_usage, "completion_tokens", 0) or 0
-                t_tokens = getattr(resp_usage, "total_tokens", 0) or (p_tokens + c_tokens)
-                r_tokens = 0
+            # Preserve provider-reported usage exactly; missing usage remains explicitly unknown.
+            if resp_usage is not None:
+                p_tokens = getattr(resp_usage, "prompt_tokens", None)
+                c_tokens = getattr(resp_usage, "completion_tokens", None)
+                t_tokens = getattr(resp_usage, "total_tokens", None)
+                if t_tokens is None and p_tokens is not None and c_tokens is not None:
+                    t_tokens = p_tokens + c_tokens
                 details = getattr(resp_usage, "completion_tokens_details", None)
-                if details:
-                    r_tokens = getattr(details, "reasoning_tokens", 0) or 0
+                r_tokens = getattr(details, "reasoning_tokens", None) if details is not None else None
                 usage = UsageReport(
                     prompt_tokens=p_tokens,
                     completion_tokens=c_tokens,
-                    total_tokens=t_tokens,
+                    total_tokens=int(t_tokens) if t_tokens is not None else 0,
                     reasoning_tokens=r_tokens,
-                    accounting_type=UsageAccountingType.REPORTED,
+                    accounting_type=UsageAccountingType.REPORTED if t_tokens is not None else UsageAccountingType.UNKNOWN,
                 )
             else:
-                prompt_est = sum(self.estimate_tokens(m.content) for m in request.messages)
-                comp_est = self.estimate_tokens(cleaned_text)
-                usage = UsageReport(
-                    prompt_tokens=prompt_est,
-                    completion_tokens=comp_est,
-                    total_tokens=prompt_est + comp_est,
-                    reasoning_tokens=0,
-                    accounting_type=UsageAccountingType.ESTIMATED,
-                )
+                usage = UsageReport(total_tokens=0, accounting_type=UsageAccountingType.UNKNOWN)
 
             # Defensive parsing if JSON is expected
             parsed_payload = None
             if request.capability == Capability.GENERATE_JSON or request.response_schema is not None or request.target_model is not None:
-                parsed_payload = parse_defensive_json(
-                    raw_text=cleaned_text,
-                    max_response_bytes=request.max_response_bytes,
-                    target_model=request.target_model,
-                    response_schema=request.response_schema,
-                    allow_repair=request.allow_repair,
-                )
+                try:
+                    parsed_payload = parse_defensive_json(
+                        raw_text=cleaned_text,
+                        max_response_bytes=request.max_response_bytes,
+                        target_model=request.target_model,
+                        response_schema=request.response_schema,
+                        allow_repair=request.allow_repair,
+                    )
+                except InvalidJsonError as parse_err:
+                    parse_err.usage = usage
+                    parse_err.provider_name = self.name
+                    parse_err.operation_id = request.operation_id
+                    raise
+                except TruncatedOutputError as trunc_err:
+                    trunc_err.usage = usage
+                    trunc_err.provider_name = self.name
+                    trunc_err.operation_id = request.operation_id
+                    raise
 
             return ProviderResponse(
                 operation_id=request.operation_id,
@@ -305,6 +326,12 @@ class OpenAICompatibleProvider(BaseProvider):
                 raise ProviderUnavailableError(
                     message=msg,
                     status_code=status_code,
+                    provider_name=self.name,
+                    operation_id=request.operation_id,
+                )
+            elif status_code == 400 and ("json_validate_failed" in msg or "Failed to validate JSON" in msg):
+                raise InvalidJsonError(
+                    message=msg,
                     provider_name=self.name,
                     operation_id=request.operation_id,
                 )

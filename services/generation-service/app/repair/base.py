@@ -23,7 +23,7 @@ class RepairScope(str, Enum):
     SECTION = "SECTION"        # Section-level restructuring
 
 
-class RepairExecutionError(Exception):
+class RepairExecutionError(ValueError):
     """Raised when a repair action fails to execute or violates contracts."""
 
 

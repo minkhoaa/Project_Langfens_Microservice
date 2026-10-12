@@ -1,4 +1,10 @@
-"""Task-aware prompt text for IELTS Academic Reading generation."""
+"""Legacy task-aware prompt text for IELTS Academic Reading generation.
+
+DEPRECATION NOTICE (Phase 15 Cutover & Legacy Deletion):
+Canonical V2 prompt templates and blueprint configurations are managed in `app.generators`
+and `app.blueprint`. This module is retained as a living adapter for legacy test suites.
+Status: MIGRATED_TO_V2 (Closed Phase 15).
+"""
 from __future__ import annotations
 
 SECTION_PROFILES = {
@@ -52,12 +58,14 @@ def build_passage_prompt(topic: str, index: int, source_title: str) -> str:
         "measured academic voice; preserve the study's limitations, uncertainty, population, and "
         "outcomes actually measured. Do not turn correlation into causation or make claims about "
         "effects the study did not measure. Do not add outside facts or invented findings. "
+        "Avoid ungrounded intensifiers or exaggerated adjectives (e.g. 'significant', 'revolutionary', 'rapid and uniform') unless verbatim in the source. "
+        "Strictly report all dates, years, study ranges, and numerical figures exactly as given in the SOURCE EXCERPTS (e.g. if the source states 2009 to 2026, do not change it). "
         "Confine the passage strictly to the specific facts, dates, entities, materials, and mechanisms explicitly described in the SOURCE EXCERPTS. "
         "Under no circumstances should you extrapolate beyond the text, invent future developments, or introduce external historical technologies, events, or outcomes not explicitly documented in the source. "
         "Strictly adhere to entity attributes in the source: do not misattribute headquarters or nationality (e.g. do not group non-US institutions under US entities), and do not assert broader patterns or strategy without direct source evidence. "
         "Do not guess or invent expansions for abbreviations or acronyms (retain verbatim or omit if undefined in the source). "
         "Do not include internal section labels, generation instructions, question numbers, or commentary in the title or passage. "
-        "Return only plain text. Begin the final answer immediately and keep internal reasoning brief. "
+        "Return only plain text. Begin the final answer immediately and keep internal reasoning brief."
         f"Topic: {topic}. Section: {index}. Source: {source_title}."
     )
 
@@ -88,9 +96,9 @@ def build_passage_revision_prompt(topic: str, index: int) -> str:
         f"Revise the IELTS Academic Reading passage about {topic} to fix only the listed source-fidelity problems. "
         f"Keep its existing title and follow the Section {index} profile: {SECTION_PROFILES[index]} "
         "Use only claims supported by the supplied source excerpts. Preserve the study's limitations, "
-        "uncertainty, population, methods, and outcomes actually measured. Do not turn correlation into "
-        "causation, overstate findings, add outside facts, or remove supported details. "
+        "uncertainty, population, methods, and outcomes actually measured. Do not turn correlation into causation. "
         "For each finding in REVIEW FINDINGS, you must explicitly eliminate the flagged issue: "
+        "for contradicted_claim, fix dates, years, and facts to match the SOURCE EXCERPTS verbatim; "
         "for causal_overstatement and overstated_certainty, replace strong causal assertions or dramatic verbs ('spurred', 'revolutionized', 'transformed') with neutral, measured phrasing strictly supported by the source; "
         "for unsupported_claim or unmeasured_outcome, remove the ungrounded assertion completely and substitute verified details from the SOURCE EXCERPTS. "
         "Verify entity attributes (including company or bank headquarters and nationality) strictly against the source, and avoid asserting ungrounded strategic patterns. "
@@ -121,14 +129,14 @@ def build_question_prompt(kind: str, count: int, first: int, last: int,
             f"Replace only question {first} of type {kind}; its previous version failed quality review. "
             "Use a different, unambiguous fact from the passage. Return JSON object "
             "{\"question\":{\"number\":integer,\"prompt\":string,\"answer\":string,"
-            "\"options\":[string],\"evidenceQuote\":string,\"explanation\":string}}. "
+            "\"options\":[string],\"evidenceQuote\":string,\"explanation\":string}} with no text, explanations, or commentary outside the JSON. "
             "The evidence quote must be a verbatim passage span of at least 15 characters; the explanation "
             "must be at least 25 characters and show how that evidence supports the answer. "
         )
     else:
         instruction = (
             f"Create exactly {count} separate IELTS Academic Reading question objects of type {kind}, "
-            f"numbered {first}–{last}. Return one JSON object {{\"questions\":[...]}}. Each object must "
+            f"numbered {first}–{last}. Return ONLY a single raw JSON object {{\"questions\":[...]}} with no text, explanations, or commentary outside the JSON. Each object must "
             "contain number (integer), prompt (string), answer (string), options (array of strings), "
             "evidenceQuote (string), and explanation (string). Number every question continuously from "
             f"{first} to {last} with no gaps, no duplicates, and no sub-parts. Set options to "

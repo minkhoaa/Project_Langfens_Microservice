@@ -65,22 +65,68 @@ class PassageSentenceRepairer(BaseRepairer):
 
         repaired_text = passage_text
 
+        def _soften_certainty(txt: str) -> str:
+            out = re.sub(r"\b(proves|conclusively proves)\b", "suggests", txt, flags=re.IGNORECASE)
+            out = re.sub(r"\b(definitely|certainly|undoubtedly|indisputably|conclusively)\b", "likely", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bwill definitely\b", "may", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bclearly established\b", "indicated", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bindisputable\b", "plausible", out, flags=re.IGNORECASE)
+            out = re.sub(r"\balways\b", "frequently", out, flags=re.IGNORECASE)
+            out = re.sub(r"\b(permanently|forever)\b", "consistently", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bwill\b", "may", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bcan be\b", "may be", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bis known to\b", "is believed to", out, flags=re.IGNORECASE)
+            return out
+
+        def _soften_causality(txt: str) -> str:
+            out = re.sub(r"\bcauses\b", "is associated with", txt, flags=re.IGNORECASE)
+            out = re.sub(r"\bcaused\b", "was associated with", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bleads to\b", "is linked to", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bled to\b", "was linked to", out, flags=re.IGNORECASE)
+            out = re.sub(r"\bresults in\b", "correlates with", out, flags=re.IGNORECASE)
+            return out
+
+        claims_modified = False
         for iss in issues:
             if iss.code == IssueCode.OVERSTATED_CERTAINTY:
-                # Soften certainty terms into tentative academic modals
-                repaired_text = re.sub(r"\bproves\b", "suggests", repaired_text, flags=re.IGNORECASE)
-                repaired_text = re.sub(r"\bwill definitely\b", "may", repaired_text, flags=re.IGNORECASE)
-                repaired_text = re.sub(r"\bclearly established\b", "indicated", repaired_text, flags=re.IGNORECASE)
-                repaired_text = re.sub(r"\bindisputable\b", "plausible", repaired_text, flags=re.IGNORECASE)
-
+                repaired_text = _soften_certainty(repaired_text)
+                if isinstance(payload.get("claims"), list):
+                    for clm in payload["claims"]:
+                        if isinstance(clm, dict):
+                            for k in ("claimText", "text", "claim_text"):
+                                if k in clm and isinstance(clm[k], str):
+                                    new_c = _soften_certainty(clm[k])
+                                    if new_c != clm[k]:
+                                        clm[k] = new_c
+                                        claims_modified = True
             elif iss.code == IssueCode.CAUSAL_OVERSTATEMENT:
-                # Soften direct causation into correlation/association
-                repaired_text = re.sub(r"\bcauses\b", "is associated with", repaired_text, flags=re.IGNORECASE)
-                repaired_text = re.sub(r"\bcaused\b", "was associated with", repaired_text, flags=re.IGNORECASE)
-                repaired_text = re.sub(r"\bleads to\b", "is linked to", repaired_text, flags=re.IGNORECASE)
-                repaired_text = re.sub(r"\bled to\b", "was linked to", repaired_text, flags=re.IGNORECASE)
-                repaired_text = re.sub(r"\bresults in\b", "correlates with", repaired_text, flags=re.IGNORECASE)
+                repaired_text = _soften_causality(repaired_text)
+                if isinstance(payload.get("claims"), list):
+                    for clm in payload["claims"]:
+                        if isinstance(clm, dict):
+                            for k in ("claimText", "text", "claim_text"):
+                                if k in clm and isinstance(clm[k], str):
+                                    new_c = _soften_causality(clm[k])
+                                    if new_c != clm[k]:
+                                        clm[k] = new_c
+                                        claims_modified = True
 
+            elif iss.code == IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM:
+                m_inv = re.search(r"Invented quantity detected: claim asserts '([^']+)'", iss.message)
+                if m_inv:
+                    inv_quant = m_inv.group(1).strip()
+                    if inv_quant:
+                        repaired_text = re.sub(
+                            r"\s*\([^)]*\b" + re.escape(inv_quant) + r"\b[^)]*\)",
+                            "",
+                            repaired_text,
+                        )
+                        repaired_text = re.sub(
+                            r"\b(?:in\s+)?" + re.escape(inv_quant) + r"\b",
+                            "",
+                            repaired_text,
+                        )
+                        repaired_text = re.sub(r"  +", " ", repaired_text)
             elif iss.code == IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS:
                 words = len(repaired_text.split())
                 if words > 915:
@@ -133,19 +179,24 @@ class PassageSentenceRepairer(BaseRepairer):
                     curr_words = words
                     for s in src_sentences:
                         s_ngrams = _extract_ngrams(s, 4)
-                        # If 4-grams don't overlap, sentence is unexpressed
-                        if s_ngrams and not (s_ngrams & repaired_ngrams):
-                            s_cnt = len(s.split())
-                            if curr_words + s_cnt <= 915:
-                                added_sentences.append(s)
-                                curr_words += s_cnt
-                                # Update ngrams so we don't add duplicate source content
-                                repaired_ngrams.update(s_ngrams)
-                                if curr_words >= 750:
-                                    break
+                        if s_ngrams:
+                            overlap = len(s_ngrams & repaired_ngrams) / len(s_ngrams)
+                            if overlap < 0.40:
+                                s_soft = _soften_certainty(s)
+                                s_cnt = len(s_soft.split())
+                                if curr_words + s_cnt <= 915:
+                                    added_sentences.append(s_soft)
+                                    curr_words += s_cnt
+                                    repaired_ngrams.update(s_ngrams)
+                                    if curr_words >= 750:
+                                        break
 
                     if curr_words >= 720 and added_sentences:
-                        repaired_text = repaired_text.rstrip() + "\n\n" + " ".join(added_sentences)
+                        chunked_paras = [
+                            " ".join(added_sentences[i : i + 4])
+                            for i in range(0, len(added_sentences), 4)
+                        ]
+                        repaired_text = _soften_certainty(repaired_text.rstrip()) + "\n\n" + "\n\n".join(chunked_paras)
                     else:
                         raise RepairExecutionError(
                             f"Cannot expand short passage ({words} words < 720): insufficient verified unexpressed material in source"
@@ -156,7 +207,7 @@ class PassageSentenceRepairer(BaseRepairer):
                 raise RepairExecutionError(
                     "Unmeasured outcome cannot be repaired without verified source material; requires bounded escalation"
                 )
-        if repaired_text == passage_text:
+        if repaired_text == passage_text and not claims_modified:
             raise RepairExecutionError(
                 "No evidence-backed transformation could be applied to passage; no ungrounded mutation permitted"
             )
@@ -170,6 +221,8 @@ class PassageSentenceRepairer(BaseRepairer):
 
         payload["passage"] = repaired_text
         payload["passageText"] = repaired_text
+        if "text" in payload:
+            payload["text"] = repaired_text
         payload["wordCount"] = len(repaired_text.split())
         payload["paragraphs"] = paragraphs
         payload["sentences"] = new_sentences_list

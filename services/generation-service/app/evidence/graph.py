@@ -173,19 +173,14 @@ class EvidenceGraphBuilder:
         source_pack_ref: ArtifactRef,
     ) -> ArtifactEnvelope:
         """Encapsulates the verified EvidenceGraph for Phase 02 durable storage."""
-        raw_json = graph.model_dump_json(by_alias=True)
-        content_hash = hashlib.sha256(raw_json.encode()).hexdigest()
-
-        return ArtifactEnvelope(
-            artifactId=graph.graph_id,
-            artifactType=ArtifactType.EVIDENCE_GRAPH,
+        return ArtifactEnvelope.create(
+            artifact_id=graph.graph_id,
+            artifact_type=ArtifactType.EVIDENCE_GRAPH,
+            run_id=graph.run_id,
+            section_id=graph.section_id,
             version=1,
-            runId=graph.run_id,
-            sectionId=graph.section_id,
-            schemaVersion="1.0.0",
-            contentHash=content_hash,
-            createdAt=graph.verified_at,
-            producerVersion="v2.0.0",
-            payload=graph.model_dump(by_alias=True),
-            parentRefs=[source_pack_ref],
+            producer_version="EvidenceGraphBuilder:2.0.0",
+            payload=graph.model_dump(mode="json", by_alias=True),
+            parent_refs=[source_pack_ref],
+            created_at=graph.verified_at,
         )

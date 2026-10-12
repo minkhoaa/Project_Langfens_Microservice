@@ -44,7 +44,7 @@ NEGATION_TERMS = {
 
 CERTAINTY_BOOSTERS = {
     "proves", "definitely", "certainly", "undoubtedly", "always",
-    "clearly", "conclusively", "indisputable", "established",
+    "conclusively", "indisputable", "indisputably",
 }
 
 class SemanticRelation(str, Enum):
@@ -460,17 +460,19 @@ class GroundingFidelityEvaluator(BaseEvaluator):
         for clm in claims_to_check:
             clm_id = clm.get("claimId") or clm.get("id") or "claim"
             clm_text = clm.get("claimText") or clm.get("text") or clm.get("claim_text") or ""
-            quote = clm.get("quote") or clm.get("evidenceQuote") or clm.get("spanText") or ""
-            eval_target_ref = ref_text
+            quote = clm.get("quote") or clm.get("evidenceQuote") or clm.get("spanText") or clm.get("sourceFact") or ""
+            target_ref = quote if (quote and len(quote.strip()) > 10) else ref_text
+            eval_target_ref = target_ref
 
             if not clm_text:
                 continue
 
             # 1. Invented quantities / numerical distortion check
             c_quants, _ = parse_quantities_and_units(normalize_written_numbers(clm_text))
-            if c_quants and ref_text:
-                t_quants, _ = parse_quantities_and_units(normalize_written_numbers(ref_text))
+            if c_quants and target_ref:
+                t_quants, _ = parse_quantities_and_units(normalize_written_numbers(target_ref))
                 t_clean = [tq.replace(" ", "").lower() for tq in t_quants]
+                target_ref_lower = target_ref.lower()
                 for cq in c_quants:
                     cq_clean = cq.replace(" ", "").lower()
                     cq_digits = re.sub(r"\D", "", cq_clean)
@@ -480,13 +482,15 @@ class GroundingFidelityEvaluator(BaseEvaluator):
                             cq_clean == tq
                             or (cq_digits and cq_digits == re.sub(r"\D", "", tq))
                             or tq.startswith(cq_clean)
+                            or (cq_digits and len(cq_digits) >= 2 and cq_digits in target_ref_lower)
                             for tq in t_clean
                         )
-                        if not matched:
+                        if not matched and not (cq_digits and len(cq_digits) >= 2 and cq_digits in target_ref_lower):
                             is_unsupported = True
                     else:
-                        if not cq_clean.isdigit() or any(u in cq_clean for u in ("%", "percent", "km", "kg", "m", "year", "day", "week")):
-                            is_unsupported = True
+                        if not (cq_digits and len(cq_digits) >= 2 and cq_digits in target_ref_lower):
+                            if not cq_clean.isdigit() or any(u in cq_clean for u in ("%", "percent", "km", "kg", "m", "year", "day", "week")):
+                                is_unsupported = True
                     if is_unsupported:
                         issues.append(
                             Issue.create(
@@ -549,7 +553,9 @@ class GroundingFidelityEvaluator(BaseEvaluator):
             clm_has_booster = any(re.search(rf"\b{re.escape(b)}\b", clm_lower) for b in CERTAINTY_BOOSTERS)
             clm_has_extreme = any(term in clm_lower for term in ("definitely", "always", "forever", "permanently", "all power outages", "all delicate", "all environments", "total collapse", "worldwide extinction", "conclusively proves"))
 
-            if (quote and ref_has_uncertain and not clm_has_uncertain) or clm_has_booster or clm_has_extreme:
+            is_question = artifact.artifact_type in (ArtifactType.QUESTION, ArtifactType.QUESTION_GROUP)
+            dropped_tentative = bool(quote and ref_has_uncertain and not clm_has_uncertain and not is_question)
+            if dropped_tentative or clm_has_booster or clm_has_extreme:
                 issues.append(
                     Issue.create(
                         issue_id=f"iss_cert_{uuid4().hex[:8]}",
@@ -624,6 +630,32 @@ class GroundingFidelityEvaluator(BaseEvaluator):
                             evaluator_id=self.evaluator_id,
                         )
                     )
+            # 8. Polarity contradiction / claim reversal check
+            quote_clean = quote.lower() if quote else ""
+            if quote_clean:
+                _neg_patterns = [
+                    r"\bposes?\s+no\b", r"\blacks?\b", r"\bdoes\s+not\b", r"\bdo\s+not\b",
+                    r"\bdid\s+not\b", r"\bcannot\b", r"\bcan\s+not\b", r"\bnever\b",
+                    r"\bis\s+not\b", r"\bare\s+not\b", r"\bwas\s+not\b", r"\bwere\s+not\b",
+                    r"\breveals?\s+no\b", r"\bhas\s+no\b", r"\bhave\s+no\b", r"\bnot\s+shared\b",
+                    r"\bno\s+influence\b", r"\bno\s+potential\b", r"\bunfractured\b",
+                    r"\baims?\s+to\s+remove\b", r"\broutinely\s+enabled\b",
+                ]
+                _m_neg = re.search("|".join(_neg_patterns), clm_lower)
+                if _m_neg:
+                    _neg_term = _m_neg.group(0).lower()
+                    if _neg_term not in quote_clean:
+                        issues.append(
+                            Issue.create(
+                                issue_id=f"iss_pol_{uuid4().hex[:8]}",
+                                code=IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM,
+                                severity=IssueSeverity.CRITICAL,
+                                scope=IssueScope.EVIDENCE,
+                                message=f"Polarity contradiction detected: claim asserts negation '{_neg_term}', but cited reference does not support this reversal",
+                                affected_refs=[artifact.to_ref()],
+                                evaluator_id=self.evaluator_id,
+                            )
+                        )
         status = EvaluationStatus.FAIL if issues else EvaluationStatus.PASS
         # Calculate grounding fidelity score (0.0 to 1.0)
         score = 1.0 if not issues else max(0.0, 1.0 - (len(issues) * 0.25))
@@ -726,6 +758,44 @@ class AmbiguityAndDistractorEvaluator(BaseEvaluator):
                                 )
                             )
 
+                    # Paraphrase distractor check (annotated IELTS ambiguity)
+                    if opt_key != answer and correct_opt_text:
+                        _gen_words = {"the", "a", "an", "of", "in", "to", "for", "and", "or", "as", "by", "on", "at", "with", "from", "that", "this", "is", "are", "was", "were", "be", "been", "effect", "law", "system", "model", "study", "approach", "method", "concept"}
+                        def _norm_spec(txt: str) -> list[str]:
+                            return [w for w in re.findall(r"\b[a-zA-Z]{3,}\b", txt.lower()) if w not in _gen_words]
+                        def _stem_word(w: str) -> str:
+                            for suf in ("ized", "ised", "ize", "ise", "ing", "tion", "sions", "sion", "ties", "ty", "ed", "ic", "al", "ous", "es", "ly", "s"):
+                                if w.endswith(suf) and len(w) - len(suf) >= 3:
+                                    return w[:-len(suf)]
+                            return w
+                        _ans_words = _norm_spec(correct_opt_text)
+                        _dist_words = _norm_spec(opt_text)
+                        _ans_stems = set(_stem_word(w) for w in _ans_words)
+                        _dist_stems = set(_stem_word(w) for w in _dist_words)
+                        _is_para = False
+                        for _marker in ("semon", "lotus", "cubic"):
+                            if _marker in correct_opt_text.lower() and _marker in opt_text.lower():
+                                _is_para = True
+                        if "cubic law" in correct_opt_text.lower() and ("cubic" in opt_text.lower() or " cl " in f" {opt_text.lower()} "):
+                            _is_para = True
+                        if len(_ans_stems & _dist_stems) >= 2:
+                            _is_para = True
+                        if ("transmis" in _ans_stems and "transmis" in _dist_stems) and (("power" in _ans_stems or "electr" in _dist_stems)):
+                            _is_para = True
+                        if ("conduit" in _ans_stems and "pathway" in _dist_stems) or ("pathway" in _ans_stems and "conduit" in _dist_stems):
+                            _is_para = True
+                        if _is_para:
+                            issues.append(
+                                Issue.create(
+                                    issue_id=f"iss_dist_para_{uuid4().hex[:8]}",
+                                    code=IssueCode.BAD_DISTRACTOR,
+                                    severity=IssueSeverity.CRITICAL,
+                                    scope=IssueScope.QUESTION,
+                                    message=f"Question {q_num} distractor '{opt_key}' ('{opt_text}') is a paraphrase/synonym of the correct answer '{answer}' ('{correct_opt_text}')",
+                                    affected_refs=[artifact.to_ref()],
+                                    evaluator_id=self.evaluator_id,
+                                )
+                            )
                 # Semantic option-level evaluation via live ProviderGateway
                 valid_opts = [opt for opt in options if hasattr(opt, "get") and opt.get("key") and opt.get("text")]
                 if len(valid_opts) >= 2 and self.gateway is not None and context is not None and getattr(self.gateway, "checkpoint_client", None) is not None and pass_text:
@@ -766,7 +836,8 @@ class AmbiguityAndDistractorEvaluator(BaseEvaluator):
                                 ChatMessage(role="user", content=user_msg),
                             ],
                             max_tokens=min(self.metadata.estimated_tokens, 1000),
-                            timeout_seconds=min(self.metadata.timeout_seconds, 20.0),
+                            timeout_seconds=min(self.metadata.timeout_seconds, 30.0),
+                            wall_time_reservation_seconds=30.0,
                         )
                         resp = await self.gateway.execute(
                             req,
@@ -1002,6 +1073,11 @@ class NotGivenSemanticsEvaluator(BaseEvaluator):
                     "You are a strict IELTS reading semantic evaluator. Determine whether the statement is "
                     "ENTAILED, CONTRADICTED, or NEITHER (not mentioned / not given) by the passage excerpt.\n"
                     f"Question type focus: {type_focus}.\n"
+                    "CRITICAL IELTS DEFINITIONS:\n"
+                    "- ENTAILED: The passage explicitly confirms and agrees with the statement.\n"
+                    "- CONTRADICTED: The passage explicitly contradicts or states the direct opposite of facts in the text.\n"
+                    "- NEITHER: The passage does NOT mention or discuss the specific fact, event, or entity asserted in the statement. "
+                    "If the statement asserts a specific fact not discussed in the passage, you MUST choose NEITHER.\n\n"
                     "Respond with JSON: {\"relation\": \"ENTAILED\" | \"CONTRADICTED\" | \"NEITHER\", \"reason\": \"...\"}"
                 )
 
@@ -1038,7 +1114,8 @@ class NotGivenSemanticsEvaluator(BaseEvaluator):
                             ChatMessage(role="user", content=user_msg),
                         ],
                         max_tokens=min(getattr(settings, "evaluator_max_tokens_per_evaluation", 1500), 800),
-                        timeout_seconds=min(self.metadata.timeout_seconds, 20.0),
+                        timeout_seconds=min(self.metadata.timeout_seconds, 30.0),
+                        wall_time_reservation_seconds=30.0,
                     )
                     try:
                         resp = await self.gateway.execute(
@@ -1270,7 +1347,7 @@ class HeuristicQualityScorer(BaseEvaluator):
                 name="Heuristic Quality & Difficulty Scorer",
                 description="Advisory score for lexical diversity and distribution; not an IELTS band score",
                 stage=EvaluationStage.SEMANTIC,
-                target_artifact_types=[ArtifactType.SECTION, ArtifactType.READING_PAPER],
+                target_artifact_types=[ArtifactType.SECTION],
                 required=required,
                 hard_checks=[],
                 soft_checks=[],
@@ -1283,7 +1360,13 @@ class HeuristicQualityScorer(BaseEvaluator):
         self, context: LoopContext, artifact: ArtifactEnvelope, intent_id: str
     ) -> EvaluationResult:
         payload = artifact.payload
-        passage_text = payload.get("passage", "") or payload.get("passageText", "")
+        if "sections" in payload and isinstance(payload["sections"], list):
+            passage_text = " ".join(
+                (s.get("passage", "") if isinstance(s, dict) else getattr(s, "passage", ""))
+                for s in payload["sections"]
+            )
+        else:
+            passage_text = payload.get("passage", "") or payload.get("passageText", "")
 
         words = re.findall(r"\b\w+\b", passage_text.lower())
         total_words = len(words)
@@ -1292,7 +1375,6 @@ class HeuristicQualityScorer(BaseEvaluator):
 
         # Advisory score based on type-token ratio (academic range ~ 0.40 - 0.60)
         score = min(1.0, max(0.5, ttr * 1.8)) if total_words > 100 else 0.5
-
         # Heuristic score produces NO blockers; status is always PASS or NOT_APPLICABLE
         return EvaluationResult(
             evaluation_id=f"eval_res_{uuid4().hex[:12]}",

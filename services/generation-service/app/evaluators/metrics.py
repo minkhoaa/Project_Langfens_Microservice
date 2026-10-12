@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from app.contracts.issue import IssueCode
 
 # Implementation version hash for auditability
-METRIC_ENGINE_VERSION = "2.3.0"
+METRIC_ENGINE_VERSION = "2.3.1"
 METRIC_ENGINE_HASH = hashlib.sha256(f"LangfensMetricEngine:{METRIC_ENGINE_VERSION}".encode()).hexdigest()[:16]
 
 # 1. Canonical Domain Semantic Issue Codes (Valid detections)
@@ -231,7 +231,8 @@ class MetricCalculationResult:
             }
 
         sem_fp_count = len(self.overall.fp_cases)
-        op_rej_count = len(self.overall.operational_error_cases)
+        # Only operational failures on valid questions count as valid rejections.
+        op_rej_count = self.overall.valid_total - self.overall.tn - sem_fp_count
         total_valid_rej = sem_fp_count + op_rej_count
 
         metadata = {
@@ -395,6 +396,11 @@ def calculate_semantic_benchmark_metrics(
                 overall.fn_cases.append(case_id)
                 per_type[q_type].invalid_total += 1
                 per_type[q_type].fn += 1
+            expected_issue_code = exp_meta.get("expectedIssueCode", "")
+            if expected_issue_code in AMBIGUITY_GOLD_CODES:
+                ambiguity.total += 1
+                ambiguity.missed += 1
+                ambiguity.missed_cases.append(case_id)
             continue
 
         q_type = record.get("questionType", "Unknown")
@@ -546,7 +552,8 @@ def calculate_semantic_benchmark_metrics(
     }
 
     sem_fp_count = len(overall.fp_cases)
-    op_rej_count = len(overall.operational_error_cases)
+    # Invalid-question operational failures are failures, not valid-item rejections.
+    op_rej_count = overall.valid_total - overall.tn - sem_fp_count
     total_valid_rejected = sem_fp_count + op_rej_count
     total_valid_rejected_rate = total_valid_rejected / overall.valid_total if overall.valid_total > 0 else 0.0
 

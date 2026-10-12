@@ -18,7 +18,7 @@ class GroqProvider(OpenAICompatibleProvider):
     ):
         default_models = {
             "xlarge": "openai/gpt-oss-120b",
-            "large": "openai/gpt-oss-20b",
+            "large": "openai/gpt-oss-120b",
             "medium": "qwen-2.5-32b",
             "small": "llama-3.1-8b-instant",
         }

@@ -30,27 +30,24 @@ class ArtifactType(str, Enum):
 
 def canonical_json_dump(obj: Any) -> str:
     """Produces deterministic canonical JSON serialization for hashing."""
-    if isinstance(obj, MappingProxyType):
-        obj = dict(obj)
-    if isinstance(obj, CanonicalBaseModel):
-        obj = obj.model_dump(mode="json", exclude_none=False)
-    elif isinstance(obj, (tuple, list)):
-        obj = [canonical_json_dump_prep(x) for x in obj]
-    elif isinstance(obj, dict):
-        obj = {k: canonical_json_dump_prep(v) for k, v in obj.items()}
-    return json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    prep = canonical_json_dump_prep(obj)
+    return json.dumps(prep, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
 
 
 def canonical_json_dump_prep(obj: Any) -> Any:
     if isinstance(obj, MappingProxyType):
         return {k: canonical_json_dump_prep(v) for k, v in obj.items()}
+    if isinstance(obj, dict):
+        return {k: canonical_json_dump_prep(v) for k, v in obj.items()}
     if isinstance(obj, (tuple, list)):
         return [canonical_json_dump_prep(x) for x in obj]
     if isinstance(obj, CanonicalBaseModel):
         return obj.model_dump(mode="json", exclude_none=False)
+    if hasattr(obj, "isoformat"):
+        return obj.isoformat()
+    if hasattr(obj, "hex") and isinstance(getattr(obj, "hex", None), str):
+        return str(obj)
     return obj
-
-
 def freeze_container(val: Any) -> Any:
     """Recursively freezes dicts and lists to guarantee deep immutability."""
     if isinstance(val, dict):

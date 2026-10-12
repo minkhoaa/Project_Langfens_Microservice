@@ -5,8 +5,9 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from app.observability.dashboard import build_prometheus_payload
 
 from app.config import settings
 from app.router import router as reading_paper_router
@@ -46,3 +47,9 @@ app.include_router(reading_paper_router)
 @app.get("/api/healthz", tags=["health"])
 async def healthz() -> dict[str, str]:
     return {"status": "ok", "service": "generation-service"}
+
+@app.get("/metrics", tags=["observability"])
+@app.get("/api/metrics", tags=["observability"])
+async def metrics() -> Response:
+    payload = build_prometheus_payload()
+    return Response(content=payload, media_type="text/plain")

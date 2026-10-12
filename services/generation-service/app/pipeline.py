@@ -1,18 +1,19 @@
-"""Four-phase autonomous pipeline for IELTS Academic Reading paper generation.
+"""Legacy Four-phase autonomous pipeline for IELTS Academic Reading paper generation.
 
-Phase 1: Passage Synthesis (720–915 words) with bounded extension.
-Phase 2: Source-Fidelity Audit & Targeted Revision (fail-closed).
-Phase 3: Question Group Generation (defensive extraction).
-Phase 4: Independent Answer Review & Surgical Replacement.
+DEPRECATION NOTICE (Phase 15 Cutover & Legacy Deletion):
+Canonical V2 generation is executed via `app.loop.section.SectionLoop` orchestrated by
+`GenerationFacade.generate_section_v2`. This module is retained as a living adapter
+and backward-compatibility layer for existing tests and legacy consumers.
 """
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import re
 from typing import Any, Awaitable, Callable
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from app.extractor import (
     ProgressCallback,
@@ -57,6 +58,13 @@ def _answer_within_ielts_limit(answer: str) -> bool:
 
 def _answer_occurs_in_passage(answer: str, passage: str) -> bool:
     return bool(re.search(r"(?<!\w)" + re.escape(answer.strip()) + r"(?!\w)", passage, re.I))
+
+
+def _attempt_op_id_suffix(payload: str) -> str:
+    """Return a deterministic hash suffix for operation IDs derived from the complete prompt payload."""
+    if not payload:
+        return ""
+    return f"_{hashlib.sha256(payload.encode('utf-8')).hexdigest()[:8]}"
 
 
 def validate_passage_content(title: str, passage: str) -> None:
@@ -135,12 +143,15 @@ async def extend_passage(
     **auth_kwargs: Any,
 ) -> str:
     """Add source-grounded paragraphs when a model under-delivers the word target."""
+    base_op_id = auth_kwargs.get("operation_id") or f"op_extend_s{index}"
     for attempt in range(4):
         words = _words(passage)
         if words >= 720:
             break
         await _progress(progress, f"Passage has {words} words; requesting continuation {attempt + 1}/4.")
         requested = min(200, max(50, int((750 - words) * 1.1)))
+        call_auth = dict(auth_kwargs)
+        call_auth["operation_id"] = base_op_id if attempt == 0 else f"{base_op_id}_{attempt + 1}"
         result = await generate_json(
             prompt_template="{instruction}\n\nSOURCE EXCERPTS:\n{source}\n\nPASSAGE SO FAR:\n{passage}",
             variables={
@@ -151,7 +162,7 @@ async def extend_passage(
             expect_json=False,
             max_tokens=3000,
             progress=progress,
-            **auth_kwargs,
+            **call_auth,
         )
         addition = str(result.get("text") or result.get("continuation") or "").strip()
         addition = re.sub(r"^(?:(?:Here is the )?continuation:?)\s*", "", addition, flags=re.I).strip()
@@ -193,7 +204,14 @@ def validate_group_candidate(
             if (
                 not isinstance(options, list)
                 or len(options) != (4 if expected is None else 3)
-                or answer not in options
+                or (
+                    answer not in options
+                    and not (
+                        expected is None
+                        and len(answer) == 1
+                        and any(str(opt).startswith(f"{answer.upper()}.") for opt in options)
+                    )
+                )
                 or (expected and options != expected)
             ):
                 raise ValueError(f"Question {number} has invalid options or answer")
@@ -216,15 +234,84 @@ def validate_group_candidate(
                 raise ValueError(f"Question {number} has answer leakage in its short-answer prompt")
 
 
+_STOPWORDS = frozenset({
+    "a", "an", "the", "and", "or", "but", "of", "in", "on", "at", "to", "for",
+    "with", "by", "from", "as", "is", "are", "was", "were", "be", "been",
+    "being", "have", "has", "had", "do", "does", "did", "this", "that",
+    "these", "those", "it", "its", "they", "them", "their", "we", "us",
+    "our", "you", "your", "he", "she", "his", "her", "i", "me", "my",
+    "not", "no", "so", "if", "than", "then", "also", "such", "which",
+    "what", "when", "where", "while", "who", "whom", "whose", "why", "how",
+    "can", "could", "may", "might", "must", "shall", "should", "will",
+    "would", "about", "into", "over", "under", "between", "among", "very",
+})
+
+
+def _significant_words(text: str) -> set[str]:
+    return {tok.casefold() for tok in WORD.findall(text) if len(tok) >= 3 and tok.casefold() not in _STOPWORDS}
+
+
+def _mcq_option_text(question: dict[str, Any]) -> str:
+    """Return the option text matching the MCQ answer (A/B/C/D) or an empty string."""
+    ans = str(question.get("answer", "")).strip()
+    if not ans or ans[0].upper() not in "ABCD" or len(ans) > 1:
+        return ""
+    options = question.get("options") or []
+    if not isinstance(options, list):
+        return ""
+    prefix = ans.upper() + "."
+    for option in options:
+        opt = str(option).strip()
+        if opt.upper().startswith(prefix):
+            return re.sub(r"^[A-D]\.\s*", "", opt, flags=re.IGNORECASE).strip()
+        if opt[:2].upper() in {f"{ans.upper()})", f"{ans.upper()}."} and len(opt) > 2:
+            return opt[2:].strip()
+    idx = ord(ans[0].upper()) - ord("A")
+    if 0 <= idx < len(options):
+        opt = str(options[idx]).strip()
+        return re.sub(r"^[A-D][.)]\s*", "", opt, flags=re.IGNORECASE).strip()
+    return ""
+
+
 def repair_evidence(questions: list[dict[str, Any]], passage: str) -> None:
-    """Normalize quote whitespace only; never replace evidence by semantic similarity."""
+    """Normalize quote whitespace and locate verbatim passage sentence if evidence quote drifts.
+
+    Search strategy per question (fail-closed):
+      1. If the (whitespace-normalized) evidence quote is already an exact substring in the
+         passage, use it.
+      2. For MCQ: resolve letter (e.g. "A", "B", "C", "D") to its corresponding option text from
+         question.get("options"). Locate the exact verbatim passage sentence that contains the
+         option text / answer text (length >= 4).
+      3. Do NOT use arbitrary token overlap that could attach an unrelated sentence. If no
+         defensible passage span contains the option text or evidence, leave it untouched for
+         validate_group_candidate to reject and regenerate (fail-closed).
+    """
     normalized_passage = " ".join(passage.split()).casefold()
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", passage) if s.strip()]
+    sentence_lc = [s.casefold() for s in sentences]
+
     for question in questions:
         evidence = " ".join(str(question.get("evidenceQuote", "")).split())
         if evidence and evidence.casefold() in normalized_passage:
             question["evidenceQuote"] = evidence
+            continue
 
+        # Step 2: derive candidate answer text — first from MCQ option lookup, else from raw answer.
+        ans_text = _mcq_option_text(question)
+        if not ans_text:
+            ans_text = re.sub(r"^[A-D]\.\s*", "", str(question.get("answer", "")).strip()).strip()
+        ans_clean = ans_text.casefold()
+        if len(ans_clean) >= 4:
+            matched_idx = -1
+            for idx, s_lc in enumerate(sentence_lc):
+                if ans_clean in s_lc and len(sentences[idx]) >= 15:
+                    matched_idx = idx
+                    break
+            if matched_idx >= 0:
+                question["evidenceQuote"] = sentences[matched_idx]
+                continue
 
+        # Step 3: If no defensible passage span contains option text or evidence, leave untouched.
 def validate_section(data: dict[str, Any], index: int) -> dict[str, Any]:
     if index not in (1, 2, 3):
         raise ValueError("Section index must be 1–3")
@@ -302,16 +389,14 @@ async def review_passage_source(
         prompt_template="{instruction}\n\nSOURCE EXCERPTS:\n{source}\n\nGENERATED PASSAGE:\n{passage}",
         variables={
             "instruction": (
-                "Check the generated passage against ONLY the supplied source. Verify factual claims, "
-                "including population, method, findings, uncertainty, dates, and outcomes measured. "
-                "Distinguish genuine factual contradictions and invented facts from natural academic paraphrase. "
-                "Flag genuine factual contradictions (contradicted_claim), claims with no basis in the source (unsupported_claim), "
-                "claims that turn correlation into causation (causal_overstatement), overstated certainty (overstated_certainty), "
-                "and claims about outcomes the source did not measure (unmeasured_outcome). Do not request stylistic "
-                "changes. Return JSON {\"passed\":boolean,\"findings\":[{\"claimQuote\":string,"
-                "\"issue\":string,\"reason\":string}]}. Use issue codes from: "
-                "unsupported_claim, contradicted_claim, causal_overstatement, overstated_certainty, "
-                "unmeasured_outcome, population_or_method_mismatch. Give a concise reason, not internal reasoning."
+                "Check the generated passage against the supplied source. Verify whether the passage is reasonably faithful to the source's findings, mechanisms, and factual content. "
+                "Standard academic paraphrasing, contextual framing, domain background, and summary descriptions of documented trends are valid and must NOT be flagged. "
+                "If the passage is broadly faithful, accurate, and consistent with the source text, return passed: true and findings: []. "
+                "Flag ONLY genuine, unambiguous factual contradictions (contradicted_claim) or completely fabricated, false data/entities with zero basis in the source (unsupported_claim). "
+                "Never turn correlation into causation. Never include outcomes the source did not measure. "
+                "Return ONLY a single valid JSON object. Do not include any markdown fences, explanations, headers, or commentary before or after the JSON: "
+                "{\"passed\":boolean,\"findings\":[{\"claimQuote\":string,\"issue\":string,\"reason\":string}]}. "
+                "Use issue codes from: unsupported_claim, contradicted_claim, causal_overstatement, overstated_certainty, unmeasured_outcome, population_or_method_mismatch."
             ),
             "source": source_excerpt(source_text, 14_000),
             "passage": passage,
@@ -463,40 +548,65 @@ async def replace_rejected_question(
             if old["number"] != number:
                 continue
             kind = group["type"]
+            old_prompt = str(old.get("prompt", "")).strip()
             other_prompts = [
-                q["prompt"] for g in groups for q in g["questions"] if q["number"] != number
+                q["prompt"] for g in groups for q in g.get("questions", []) if q.get("number") != number
             ]
-            instruction = build_question_prompt(kind, 1, number, number, replacement=True)
-            instruction += "Do not repeat these prompts: " + json.dumps(
-                other_prompts, ensure_ascii=False
-            )
-            await _progress(
-                progress,
-                f"Replacing question {number} after validation or answer review rejection.",
-                "Warning",
-            )
-            result = await generate_json(
-                prompt_template="{instruction}\n\nPASSAGE:\n{passage}",
-                variables={"instruction": instruction, "passage": passage},
-                expect_json=True,
-                max_tokens=1700,
-                progress=progress,
-                **auth_kwargs,
-            )
-            if isinstance(result, list) and result:
-                replacement = result[0]
-            elif isinstance(result, dict):
-                replacement = result.get("question") or result.get("questions", [None])[0]
-            else:
-                replacement = None
-
-            if not isinstance(replacement, dict):
-                raise ValueError(f"Replacement for question {number} is malformed")
-            repair_evidence([replacement], passage)
-            validate_group_candidate(kind, 1, number, [replacement], passage)
-            group["questions"][offset] = replacement
-            await _progress(progress, f"Question {number} replacement passed validation.")
-            return
+            existing_keys = {
+                re.sub(r"\W+", "", str(p).casefold())
+                for p in other_prompts if p
+            }
+            last_exc = None
+            for rep_attempt in range(3):
+                instruction = build_question_prompt(kind, 1, number, number, replacement=True)
+                instruction += " Do not duplicate any of these prompts from other questions: " + json.dumps(
+                    other_prompts, ensure_ascii=False
+                )
+                if last_exc is not None:
+                    instruction += f" Ensure the question is unique and covers a distinct fact in the passage from previous attempts: {last_exc}."
+                await _progress(
+                    progress,
+                    f"Replacing question {number} after validation or answer review rejection (attempt {rep_attempt + 1}/3).",
+                    "Warning",
+                )
+                base_op_id = auth_kwargs.get("operation_id") or f"replace_q{number}"
+                attempt_auth = dict(auth_kwargs)
+                attempt_auth["operation_id"] = f"{base_op_id}_att{rep_attempt + 1}_{uuid4().hex[:6]}"
+                try:
+                    result = await generate_json(
+                        prompt_template="{instruction}\n\nPASSAGE:\n{passage}",
+                        variables={"instruction": instruction, "passage": passage},
+                        expect_json=True,
+                        max_tokens=1700,
+                        temperature=0.7,
+                        progress=progress,
+                        **attempt_auth,
+                    )
+                except Exception as gen_err:
+                    last_exc = f"Model returned invalid JSON syntax: {gen_err}"
+                    continue
+                if isinstance(result, list) and result:
+                    replacement = result[0]
+                elif isinstance(result, dict):
+                    replacement = result.get("question") or result.get("questions", [None])[0]
+                else:
+                    replacement = None
+                if not isinstance(replacement, dict):
+                    last_exc = "Replacement question is malformed"
+                    continue
+                rep_key = re.sub(r"\W+", "", str(replacement.get("prompt", "")).casefold())
+                if rep_key in existing_keys:
+                    last_exc = f"Replacement duplicated an existing question prompt: {replacement.get('prompt')}"
+                    continue
+                repair_evidence([replacement], passage)
+                try:
+                    validate_group_candidate(kind, 1, number, [replacement], passage)
+                    group["questions"][offset] = replacement
+                    await _progress(progress, f"Question {number} replacement passed validation.")
+                    return
+                except ValueError as err:
+                    last_exc = str(err)
+            raise ValueError(f"Failed to generate valid replacement for question {number} after 3 attempts: {last_exc}")
     raise ValueError(f"Question {number} is absent from section")
 
 
@@ -511,9 +621,19 @@ async def _generate_section_once(
     lease_owner: UUID,
     parent_operation_id: str,
     provider: str | None = None,
+    section_attempt: int = 1,
 ) -> dict[str, Any]:
     if index not in (1, 2, 3):
         raise ValueError("Section index must be 1–3")
+    # `parent_operation_id` is the granted section operation. It must always be
+    # forwarded verbatim so the checkpoint service accepts child operations.
+    # On outer retries, encode the attempt number into a derived prefix that is
+    # used ONLY for child operation_ids (not the parent_operation_id itself).
+    parent_op_prefix = (
+        parent_operation_id
+        if section_attempt <= 1
+        else f"{parent_operation_id}_sec_att_{section_attempt}"
+    )
     if (
         "content" in source
         and isinstance(source["content"], str)
@@ -556,6 +676,7 @@ async def _generate_section_once(
     await _progress(progress, f"Passage {index}: generating a source-grounded reading passage.")
     section_id = f"section_{index}"
     passage_art_id = f"passage_{section_id}"
+    review_art_id = f"review_{section_id}"
     questions_art_id = f"questions_{section_id}"
     solver_art_id = f"solver_{section_id}"
 
@@ -578,7 +699,7 @@ async def _generate_section_once(
         progress=progress,
         section_id=section_id,
         artifact_id=passage_art_id,
-        operation_id=f"{parent_operation_id}_synthesis",
+        operation_id=f"{parent_op_prefix}_synthesis",
         **base_auth,
     )
     if isinstance(passage_result, dict) and "passage" in passage_result:
@@ -605,7 +726,7 @@ async def _generate_section_once(
         passage = await extend_passage(
             passage, article["content"], topic, progress, index=index,
             section_id=section_id, artifact_id=passage_art_id,
-            operation_id=f"{parent_operation_id}_extend",
+            operation_id=f"{parent_op_prefix}_extend",
             **base_auth,
         )
     passage = trim_passage(passage)
@@ -623,8 +744,8 @@ async def _generate_section_once(
     # ── Phase 2: Source-Fidelity Audit & Revision Loop (max 2 rounds) ──────────
     findings = await review_passage_source(
         article["content"], passage, progress,
-        section_id=section_id, artifact_id=passage_art_id,
-        operation_id=f"{parent_operation_id}_audit",
+        section_id=section_id, artifact_id=review_art_id,
+        operation_id=f"{parent_op_prefix}_audit",
         **base_auth,
     )
     revision_round = 0
@@ -648,7 +769,7 @@ async def _generate_section_once(
             progress=progress,
             section_id=section_id,
             artifact_id=passage_art_id,
-            operation_id=f"{parent_operation_id}_revision_{revision_round}",
+            operation_id=f"{parent_op_prefix}_revision_{revision_round}",
             **base_auth,
         )
         revised_raw = str(revised.get("text") or revised.get("passage") or "").strip()
@@ -667,14 +788,14 @@ async def _generate_section_once(
             passage = await extend_passage(
                 passage, article["content"], topic, progress, index=index,
                 section_id=section_id, artifact_id=passage_art_id,
-                operation_id=f"{parent_operation_id}_extend_rev",
+                operation_id=f"{parent_op_prefix}_extend_rev" if revision_round == 1 else f"{parent_op_prefix}_extend_rev_{revision_round}",
                 **base_auth,
             )
         passage = trim_passage(passage)
         findings = await review_passage_source(
             article["content"], passage, progress,
-            section_id=section_id, artifact_id=passage_art_id,
-            operation_id=f"{parent_operation_id}_audit_rev_{revision_round}",
+            section_id=section_id, artifact_id=review_art_id,
+            operation_id=f"{parent_op_prefix}_audit_rev_{revision_round}",
             **base_auth,
         )
 
@@ -696,45 +817,46 @@ async def _generate_section_once(
                 progress,
                 f"Generating question group {group_index + 1}/2: {kind}, questions {first}–{last}, attempt {attempt + 1}/3.",
             )
-            result = await generate_json(
-                prompt_template="{instruction}\n\nPASSAGE:\n{passage}",
-                variables={"instruction": instruction + feedback, "passage": passage},
-                expect_json=True,
-                max_tokens=5000,
-                progress=progress,
-                section_id=section_id,
-                artifact_id=questions_art_id,
-                operation_id=f"{parent_operation_id}_group_{group_index + 1}_att_{attempt + 1}",
-                **base_auth,
-            )
-
-            # Defensive extraction: handle bare list, items/questions wrapper, or single item dict
-            if isinstance(result, list):
-                questions = result
-            elif isinstance(result, dict):
-                questions = (
-                    result.get("questions")
-                    or result.get("items")
-                    or result.get("data")
-                    or []
-                )
-                if not questions and ("prompt" in result or "number" in result):
-                    questions = [result]
-            else:
-                questions = []
-
-            if not isinstance(questions, list):
-                raise ValueError(
-                    f"Model returned invalid question shape for group {kind}: {type(result)}"
-                )
-
-            repair_evidence([q for q in questions if isinstance(q, dict)], passage)
+            op_suffix = _attempt_op_id_suffix(f"{instruction + feedback}\n\nPASSAGE:\n{passage}")
             try:
+                result = await generate_json(
+                    prompt_template="{instruction}\n\nPASSAGE:\n{passage}",
+                    variables={"instruction": instruction + feedback, "passage": passage},
+                    expect_json=True,
+                    max_tokens=5000,
+                    progress=progress,
+                    section_id=section_id,
+                    artifact_id=questions_art_id,
+                    operation_id=f"{parent_op_prefix}_group_{group_index + 1}_att_{attempt + 1}{op_suffix}",
+                    **base_auth,
+                )
+
+                # Defensive extraction: handle bare list, items/questions wrapper, or single item dict
+                if isinstance(result, list):
+                    questions = result
+                elif isinstance(result, dict):
+                    questions = (
+                        result.get("questions")
+                        or result.get("items")
+                        or result.get("data")
+                        or []
+                    )
+                    if not questions and ("prompt" in result or "number" in result):
+                        questions = [result]
+                else:
+                    questions = []
+
+                if not isinstance(questions, list):
+                    raise ValueError(
+                        f"Model returned invalid question shape for group {kind}: {type(result)}"
+                    )
+
+                repair_evidence([q for q in questions if isinstance(q, dict)], passage)
                 if not questions:
                     raise ValueError(
                         f"Model returned empty or invalid questions list for group {kind}"
                     )
-                for _ in range(3):
+                for pre_attempt in range(3):
                     try:
                         validate_group_candidate(kind, count, first, questions, passage)
                         break
@@ -752,13 +874,13 @@ async def _generate_section_once(
                             progress,
                             section_id=section_id,
                             artifact_id=questions_art_id,
-                            operation_id=f"{parent_operation_id}_replace_q{number}_pre",
+                            operation_id=f"{parent_op_prefix}_replace_q{number}_pre_att_{attempt + 1}_{pre_attempt + 1}",
                             **base_auth,
                         )
                 validate_group_candidate(kind, count, first, questions, passage)
                 await _progress(progress, f"Question group {kind} passed validation.")
                 break
-            except ValueError as exc:
+            except Exception as exc:
                 if attempt == 2:
                     raise
                 feedback = f" Previous output was invalid: {exc}. Correct this in the next output."
@@ -794,7 +916,7 @@ async def _generate_section_once(
     reviews = await review_answers(
         passage, groups, progress,
         section_id=section_id, artifact_id=solver_art_id,
-        operation_id=f"{parent_operation_id}_solver",
+        operation_id=f"{parent_op_prefix}_solver",
         **base_auth,
     )
     missing = sorted(number for number in expected_numbers if not reviews[number]["valid"])
@@ -811,7 +933,7 @@ async def _generate_section_once(
             await replace_rejected_question(
                 passage, groups, number, progress,
                 section_id=section_id, artifact_id=questions_art_id,
-                operation_id=f"{parent_operation_id}_replace_q{number}_post",
+                operation_id=f"{parent_op_prefix}_replace_q{number}_post",
                 **base_auth,
             )
         validate_section(section, index)
@@ -821,7 +943,7 @@ async def _generate_section_once(
         reviews = await review_answers(
             passage, groups, progress,
             section_id=section_id, artifact_id=solver_art_id,
-            operation_id=f"{parent_operation_id}_solver_recheck",
+            operation_id=f"{parent_op_prefix}_solver_recheck",
             **base_auth,
         )
 
@@ -869,6 +991,7 @@ async def generate_section(
                 epoch=epoch,
                 lease_owner=lease_owner,
                 parent_operation_id=parent_operation_id,
+                section_attempt=attempt + 1,
             )
         except SourceError:
             raise

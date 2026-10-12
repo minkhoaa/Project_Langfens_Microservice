@@ -1,6 +1,6 @@
-"""Backward-compatible wrapper for source extraction and ingestion in Langfens Loop Engine V2.
+"""Backward-compatible living adapter for source extraction and ingestion in Langfens Loop Engine V2.
 
-Delegates core capabilities to modular components in `app.ingestion`:
+Delegates core capabilities to canonical modular components in `app.ingestion`:
 - `app.ingestion.security`: SSRF protection, IP/DNS validation, connection pinning, resource caps
 - `app.ingestion.license`: Europe PMC CC-BY/CC0 verification, universal source policy, word counts
 - `app.ingestion.cleaner`: XML, HTML, Markdown, and text normalizers with version tracking
@@ -8,7 +8,7 @@ Delegates core capabilities to modular components in `app.ingestion`:
 - `app.ingestion.source_pack`: Canonical SourcePack generation and revision invalidation
 - `app.ingestion.fetcher`: Network fetching and format dispatching
 
-Maintained as a compatibility facade until G15 cutover.
+Status: LIVING_PUBLIC_ADAPTER_PRESERVED (Closed Phase 15).
 """
 
 from __future__ import annotations

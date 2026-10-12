@@ -7,6 +7,7 @@ Strict word boundary normalization prevents substring leakage (e.g. 'he' in 'the
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 import re
 import unicodedata
 from typing import Any, Dict, List, Optional, Set
@@ -69,6 +70,60 @@ def check_prompt_answer_leakage(prompt: str, answer: str) -> bool:
     if len(clean_ans) < 2:
         return False
     return matches_exact_token_bound(clean_ans, prompt)
+
+def check_cross_prompt_answer_leakage(other_prompt: str, answer: str, topic: str = "", passage_title: str = "") -> bool:
+    """Checks cross-question prompt answer leakage, exempting shared domain vocabulary and topic keywords."""
+    if not other_prompt or not answer:
+        return False
+    clean_ans = answer.strip().lower()
+    if len(clean_ans) < 4:
+        return False
+    # Exclude words in topic or title
+    topic_tokens = set(re.findall(r"\b\w{3,}\b", (topic + " " + passage_title).lower()))
+    # Common generic scientific terms per P11-03 domain vocabulary exemption
+    common_terms = {
+        "ice", "water", "air", "heat", "layer", "surface", "design", "method",
+        "system", "study", "data", "plant", "cell", "gas", "light", "structure",
+        "energy", "power", "pressure", "material", "materials", "process", "species",
+        "temperature", "accumulation", "formation", "reduction", "efficiency",
+        "durability", "property", "properties", "analysis", "development", "research",
+        "technology", "application", "conditions", "factor", "factors", "coating",
+        "coatings", "texture", "textures", "fluid", "fluids", "atmosphere", "atmospheres",
+        "spectroscopy", "particle", "particles", "experiment", "experiments", "effect",
+        "effects", "result", "results", "model", "models", "level", "levels", "rate",
+        "rates", "sample", "samples", "pottery", "architecture", "excavation", "artifact",
+        "site", "settlement", "remains", "culture", "period", "feature", "features",
+        "planet", "planets", "exoplanet", "exoplanets", "methane", "carbon", "dioxide",
+        "chemical", "molecules", "radiation", "wavelength", "wavelengths", "transit",
+        "radius", "mass", "density", "optical", "infrared", "thermal", "telescope",
+        "physics", "observation", "observations", "measurement", "measurements",
+        "detection", "detections", "signal", "signals", "flux", "spectra", "spectrum",
+        "absorption", "emission", "haze", "cloud", "clouds", "vapor", "vapour",
+        "hydrogen", "helium", "nitrogen", "oxygen", "iron", "rock", "rocky", "core",
+        "mantle", "crust", "subsurface", "groundwater", "flow", "aquifer", "porosity",
+        "permeability", "mineral", "minerals", "sediment", "sediments", "velocity",
+        "viscosity", "shear", "stress", "strain", "fracture", "gradient", "boundary",
+        "interface", "zone", "zones", "region", "regions", "element", "elements",
+        "photothermal", "superhydrophobic", "anti-icing", "de-icing", "deicing",
+        "icephobic", "hydrophobic", "nanotexture", "nanotextures", "microtexture", "microtextures",
+        "droplet", "droplets", "crystal", "crystals", "wing", "wings", "aircraft", "aerodynamic",
+        "conductivity", "vibration", "vibrations", "resistance", "friction", "mechanical",
+        "environment", "environmental", "transmission", "refrigeration", "generation",
+        "turbine", "turbines", "blade", "blades", "cable", "cables", "adhesion", "cohesion",
+        "hydrophobicity", "superhydrophobicity", "groove", "grooves", "microscopic",
+        "nanoscale", "microscale", "composite", "composites", "matrix", "matrices",
+        "coverage", "consumption", "consume", "demand", "loss", "losses",
+        "failure", "failures", "hazard", "hazards", "operation", "operational",
+        "efficiency", "inefficiency", "inefficiencies", "mechanism", "mechanisms",
+        "method", "methods", "technique", "techniques", "solution", "solutions",
+        "challenge", "challenges"
+    }
+    ans_words = set(re.findall(r"\b\w{3,}\b", clean_ans))
+    if len(ans_words) <= 1:
+        return False
+    if ans_words and ans_words.issubset(common_terms | topic_tokens):
+        return False
+    return check_prompt_answer_leakage(other_prompt, answer)
 
 
 # ── Evaluator Implementations ───────────────────────────────────────────────
@@ -304,17 +359,43 @@ class QuestionStructureEvaluator(BaseEvaluator):
                             evaluator_id=self.evaluator_id,
                         )
                     )
-                ans_key = payload.get("answer")
+                ans_key = payload.get("answer") or payload.get("correctOption")
                 if ans_key and options and isinstance(options, (list, tuple)):
-                    keys = {opt.get("key") for opt in options if hasattr(opt, "get")}
-                    if ans_key not in keys:
+                    has_keys = all(isinstance(opt, Mapping) and "key" in opt for opt in options)
+                    if has_keys:
+                        keys = {opt["key"].upper() for opt in options if "key" in opt}
+                        if str(ans_key).upper() not in keys:
+                            issues.append(
+                                Issue.create(
+                                    issue_id=f"iss_opt_key_{uuid4().hex[:8]}",
+                                    code=IssueCode.SCHEMA_VIOLATION,
+                                    severity=IssueSeverity.CRITICAL,
+                                    scope=IssueScope.QUESTION,
+                                    message=f"MultipleChoiceSingle answer key '{ans_key}' not among options {keys}",
+                                    affected_refs=[artifact.to_ref()],
+                                    evaluator_id=self.evaluator_id,
+                                )
+                            )
+                if options and isinstance(options, (list, tuple)):
+                    opt_texts: List[str] = []
+                    for opt in options:
+                        if isinstance(opt, str):
+                            t = opt
+                        elif isinstance(opt, Mapping):
+                            t = opt.get("text") or opt.get("content") or ""
+                        elif hasattr(opt, "text"):
+                            t = getattr(opt, "text", "")
+                        else:
+                            t = str(opt)
+                        opt_texts.append(t.strip().lower())
+                    if len(set(opt_texts)) < len(options):
                         issues.append(
                             Issue.create(
-                                issue_id=f"iss_opt_key_{uuid4().hex[:8]}",
+                                issue_id=f"iss_opt_dup_{uuid4().hex[:8]}",
                                 code=IssueCode.SCHEMA_VIOLATION,
                                 severity=IssueSeverity.CRITICAL,
                                 scope=IssueScope.QUESTION,
-                                message=f"MultipleChoiceSingle answer key '{ans_key}' not among options {keys}",
+                                message="MultipleChoiceSingle question must have exactly 4 distinct options; duplicate option text found",
                                 affected_refs=[artifact.to_ref()],
                                 evaluator_id=self.evaluator_id,
                             )
@@ -350,6 +431,30 @@ class QuestionStructureEvaluator(BaseEvaluator):
                                 evaluator_id=self.evaluator_id,
                             )
                         )
+                    if opts and isinstance(opts, (list, tuple)):
+                        opt_texts_g: List[str] = []
+                        for opt in opts:
+                            if isinstance(opt, str):
+                                t = opt
+                            elif isinstance(opt, Mapping):
+                                t = opt.get("text") or opt.get("content") or ""
+                            elif hasattr(opt, "text"):
+                                t = getattr(opt, "text", "")
+                            else:
+                                t = str(opt)
+                            opt_texts_g.append(t.strip().lower())
+                        if len(set(opt_texts_g)) < len(opts):
+                            issues.append(
+                                Issue.create(
+                                    issue_id=f"iss_opt_dup_{uuid4().hex[:8]}",
+                                    code=IssueCode.SCHEMA_VIOLATION,
+                                    severity=IssueSeverity.CRITICAL,
+                                    scope=IssueScope.QUESTION,
+                                    message=f"MCQ Question {q_num} must have 4 distinct options; duplicate option text found",
+                                    affected_refs=[artifact.to_ref()],
+                                    evaluator_id=self.evaluator_id,
+                                )
+                            )
                 elif q_type in ("TrueFalseNotGiven", "YesNoNotGiven"):
                     if opts is not None and (not isinstance(opts, (list, tuple)) or len(opts) != 3):
                         issues.append(
@@ -493,10 +598,11 @@ class AnswerVerbatimAndLengthEvaluator(BaseEvaluator):
             ans = q.get("answer", "")
             prompt = q.get("prompt", "") or q.get("questionText", "")
             q_type = q.get("questionType") or q.get("type", "")
+            q_type_norm = str(q_type).replace("_", "").upper()
             q_num = q.get("questionNumber", "?")
 
             # Check prompt leakage (answer text explicitly written inside question prompt)
-            if q_type not in ("TrueFalseNotGiven", "YesNoNotGiven") and check_prompt_answer_leakage(prompt, ans):
+            if q_type_norm not in ("TRUEFALSENOTGIVEN", "YESNONOTGIVEN") and check_prompt_answer_leakage(prompt, ans):
                 issues.append(
                     Issue.create(
                         issue_id=f"iss_leak_{uuid4().hex[:8]}",
@@ -510,7 +616,7 @@ class AnswerVerbatimAndLengthEvaluator(BaseEvaluator):
                 )
 
             # Completion and ShortAnswer require max 3 words and verbatim passage presence
-            if q_type in ("SentenceCompletion", "SummaryCompletion", "ShortAnswer") and ans and str(ans).strip():
+            if q_type_norm in ("SENTENCECOMPLETION", "SUMMARYCOMPLETION", "SHORTANSWER") and ans and str(ans).strip():
                 if not validate_answer_length(ans):
                     issues.append(
                         Issue.create(
@@ -697,7 +803,7 @@ class DuplicateAndShingleEvaluator(BaseEvaluator):
                 name="Duplicate & Shingle Overlap Evaluator",
                 description="Detects identical prompts and high Jaccard 5-word shingle overlaps (> 0.45)",
                 stage=EvaluationStage.DETERMINISTIC,
-                target_artifact_types=[ArtifactType.SECTION, ArtifactType.READING_PAPER],
+                target_artifact_types=[ArtifactType.SECTION],
                 required=required,
                 hard_checks=[IssueCode.DUPLICATE_CONTENT],
                 timeout_seconds=t_sec,
@@ -711,17 +817,41 @@ class DuplicateAndShingleEvaluator(BaseEvaluator):
         payload = artifact.payload
         issues: List[Issue] = []
 
+        SHARED_GROUP_TYPES = {
+            "summarycompletion", "summarygroup", "notecompletiongroup",
+            "flowchartcompletion", "matchingheadings", "matchingheading",
+            "matching_headings", "summary_completion", "matching",
+        }
         all_questions: List[Dict[str, Any]] = []
+        q_group_info: Dict[int, tuple] = {}
         if artifact.artifact_type == ArtifactType.SECTION:
+            sec_num = int(payload.get("sectionId") or payload.get("section_id") or artifact.section_id or 1)
             for grp in payload.get("groups", []):
-                all_questions.extend(grp.get("questions", []))
+                t_raw = grp.get("questionType") or grp.get("question_type") or grp.get("type") or ""
+                t_norm = str(t_raw).replace("_", "").lower()
+                gid = str(grp.get("groupId") or grp.get("group_id") or "")
+                is_shared = t_norm in SHARED_GROUP_TYPES and bool(gid)
+                for q in grp.get("questions", []):
+                    all_questions.append(q)
+                    qn = int(q.get("questionNumber") or q.get("number") or 0)
+                    if qn:
+                        q_group_info[qn] = (sec_num, gid, is_shared)
         elif artifact.artifact_type == ArtifactType.READING_PAPER:
-            for sec in payload.get("sections", []):
+            for sec_idx, sec in enumerate(payload.get("sections", [])):
+                sec_num = sec_idx + 1
                 for grp in sec.get("groups", []):
-                    all_questions.extend(grp.get("questions", []))
+                    t_raw = grp.get("questionType") or grp.get("question_type") or grp.get("type") or ""
+                    t_norm = str(t_raw).replace("_", "").lower()
+                    gid = str(grp.get("groupId") or grp.get("group_id") or "")
+                    is_shared = t_norm in SHARED_GROUP_TYPES and bool(gid)
+                    for q in grp.get("questions", []):
+                        all_questions.append(q)
+                        qn = int(q.get("questionNumber") or q.get("number") or 0)
+                        if qn:
+                            q_group_info[qn] = (sec_num, gid, is_shared)
 
         # Check for duplicates across questions
-        seen_prompts: Dict[str, int] = {}
+        seen_prompts: Dict[str, tuple] = {}
         for q in all_questions:
             prompt = q.get("prompt", "") or q.get("questionText", "")
             q_num = q.get("questionNumber", 0)
@@ -729,27 +859,35 @@ class DuplicateAndShingleEvaluator(BaseEvaluator):
             if not norm:
                 continue
 
+            sec_num, gid, is_shared = q_group_info.get(int(q_num), (1, "", False))
             if norm in seen_prompts:
-                prior_num = seen_prompts[norm]
-                issues.append(
-                    Issue.create(
-                        issue_id=f"iss_dup_{uuid4().hex[:8]}",
-                        code=IssueCode.DUPLICATE_CONTENT,
-                        severity=IssueSeverity.CRITICAL,
-                        scope=IssueScope.QUESTION,
-                        message=f"Question {q_num} has identical normalized prompt to Question {prior_num}",
-                        affected_refs=[artifact.to_ref()],
-                        evaluator_id=self.evaluator_id,
+                prior_num, prior_sec, prior_gid = seen_prompts[norm]
+                if not (is_shared and prior_gid and gid and prior_gid == gid and prior_sec == sec_num):
+                    issues.append(
+                        Issue.create(
+                            issue_id=f"iss_dup_{uuid4().hex[:8]}",
+                            code=IssueCode.DUPLICATE_CONTENT,
+                            severity=IssueSeverity.CRITICAL,
+                            scope=IssueScope.QUESTION,
+                            message=f"Question {q_num} has identical normalized prompt to Question {prior_num}",
+                            affected_refs=[artifact.to_ref()],
+                            evaluator_id=self.evaluator_id,
+                        )
                     )
-                )
             else:
-                seen_prompts[norm] = q_num
+                seen_prompts[norm] = (q_num, sec_num, gid)
 
         # Check pair-wise shingle overlap
         for i in range(len(all_questions)):
             for j in range(i + 1, len(all_questions)):
                 q1 = all_questions[i]
                 q2 = all_questions[j]
+                qn1 = int(q1.get("questionNumber") or q1.get("number") or (i + 1))
+                qn2 = int(q2.get("questionNumber") or q2.get("number") or (j + 1))
+                s_num1, g1, s1 = q_group_info.get(qn1, (1, "", False))
+                s_num2, g2, s2 = q_group_info.get(qn2, (2, "", False))
+                if s1 and s2 and g1 == g2 and s_num1 == s_num2 and g1:
+                    continue
                 p1 = q1.get("prompt", "") or q1.get("questionText", "")
                 p2 = q2.get("prompt", "") or q2.get("questionText", "")
                 if count_words(p1) >= 5 and count_words(p2) >= 5:

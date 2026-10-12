@@ -2,7 +2,7 @@
 
 Maintains backward-compatibility for callers expecting llm_generate() or LLMService
 while delegating all routing, rate-limiting, and retries to ProviderGateway.
-Logs all legacy invocations into the deletion inventory for retirement in Phase 15.
+Status: MIGRATED_TO_V2 (Closed Phase 15).
 """
 from __future__ import annotations
 

@@ -60,27 +60,28 @@ class QuestionCandidate(CanonicalBaseModel):
 
     @model_validator(mode="after")
     def validate_type_specific_invariants(self) -> QuestionCandidate:
-        q_type = self.question_type
+        family = QuestionPromptFamily.from_raw(self.question_type)
         ans = self.answer.strip()
 
         # 1. TrueFalseNotGiven invariants
-        if q_type == QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN.value:
+        if family == QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN:
             norm = ans.upper().replace("_", " ")
             if norm not in ("TRUE", "FALSE", "NOT GIVEN"):
                 self.rejected = True
                 self.rejection_reasons.append(f"Invalid TFNG answer '{ans}'; must be TRUE, FALSE, or NOT GIVEN")
 
         # 2. YesNoNotGiven invariants
-        elif q_type == QuestionPromptFamily.YES_NO_NOT_GIVEN.value:
+        elif family == QuestionPromptFamily.YES_NO_NOT_GIVEN:
             norm = ans.upper().replace("_", " ")
             if norm not in ("YES", "NO", "NOT GIVEN"):
                 self.rejected = True
                 self.rejection_reasons.append(f"Invalid YNNG answer '{ans}'; must be YES, NO, or NOT GIVEN")
 
-        # 3. SentenceCompletion & ShortAnswer invariants: <= 3 words
-        elif q_type in (
-            QuestionPromptFamily.SENTENCE_COMPLETION.value,
-            QuestionPromptFamily.SHORT_ANSWER.value,
+        # 3. SentenceCompletion, SummaryCompletion & ShortAnswer invariants: <= 3 words
+        elif family in (
+            QuestionPromptFamily.SENTENCE_COMPLETION,
+            QuestionPromptFamily.SUMMARY_COMPLETION,
+            QuestionPromptFamily.SHORT_ANSWER,
         ):
             w_count = count_words(ans)
             if w_count > 3:
@@ -88,17 +89,22 @@ class QuestionCandidate(CanonicalBaseModel):
                 self.rejection_reasons.append(
                     f"Answer exceeds maximum of 3 words: '{ans}' ({w_count} words)"
                 )
-            if q_type == QuestionPromptFamily.SENTENCE_COMPLETION.value:
+            from app.evaluators.deterministic import check_prompt_answer_leakage
+            if check_prompt_answer_leakage(self.prompt, ans):
+                self.rejected = True
+                self.rejection_reasons.append(
+                    f"Answer '{ans}' leaks verbatim inside question prompt"
+                )
+            if family == QuestionPromptFamily.SENTENCE_COMPLETION:
                 if "______" not in self.prompt and "[blank]" not in self.prompt.lower():
                     self.rejected = True
                     self.rejection_reasons.append("Sentence completion prompt missing blank marker '______'")
-            elif q_type == QuestionPromptFamily.SHORT_ANSWER.value:
+            elif family == QuestionPromptFamily.SHORT_ANSWER:
                 if " and " in ans.lower() and re.match(r"^(what|which|where|when|who)\b", self.prompt.lower()):
                     self.rejected = True
                     self.rejection_reasons.append(f"Conjoined answer '{ans}' for singular question prompt")
-
         # 4. MultipleChoiceSingle invariants: exactly 4 options A-D, answer in options, no duplicate texts
-        elif q_type == QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE.value:
+        elif family == QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE:
             if not self.options or len(self.options) != 4:
                 self.rejected = True
                 self.rejection_reasons.append(
@@ -138,8 +144,12 @@ class QuestionCandidatePool(CanonicalBaseModel):
     question_number: int = Field(..., alias="questionNumber")
     question_type: str = Field(..., alias="questionType")
     pool_limit: int = Field(default=3, alias="poolLimit")
+    tokens_used: int = Field(default=0, alias="tokensUsed")
+    wall_time_used_seconds: float = Field(default=0.0, alias="wallTimeUsedSeconds")
     candidates: List[QuestionCandidate] = Field(default_factory=list)
     selected_candidate_id: Optional[str] = Field(default=None, alias="selectedCandidateId")
+    dropped_blank_reasons: Dict[int, str] = Field(default_factory=dict, alias="droppedBlankReasons")
+    attempted_blank_count: int = Field(default=0, alias="attemptedBlankCount")
 
     def get_eligible_candidates(self) -> List[QuestionCandidate]:
         return [c for c in self.candidates if c.is_eligible()]
@@ -178,5 +188,5 @@ class CandidateSelectionCriteria(CanonicalBaseModel):
     lexical_diversity_weight: float = 0.20
     length_compliance_weight: float = 0.15
     max_search_depth: int = 50
-    max_backtracking_steps: int = 100
+    max_backtracking_steps: int = 5000
     allow_redundant_evidence_spans: bool = False

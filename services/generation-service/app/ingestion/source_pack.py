@@ -176,19 +176,14 @@ class SourcePackBuilder:
         parent_refs: Optional[List[ArtifactRef]] = None,
     ) -> ArtifactEnvelope:
         """Packages a SourcePack into an immutable ArtifactEnvelope for Phase 02 persistence."""
-        payload_dict = pack.model_dump(by_alias=True)
-        content_hash = compute_sha256(pack.model_dump_json(by_alias=True))
-
-        return ArtifactEnvelope(
-            artifactId=pack.pack_id,
-            artifactType=ArtifactType.SOURCE_PACK,
+        return ArtifactEnvelope.create(
+            artifact_id=pack.pack_id,
+            artifact_type=ArtifactType.SOURCE_PACK,
+            run_id=pack.run_id,
+            section_id=pack.section_id,
             version=pack.revision,
-            runId=pack.run_id,
-            sectionId=pack.section_id,
-            schemaVersion="1.0.0",
-            contentHash=content_hash,
-            createdAt=pack.created_at,
-            producerVersion=NORMALIZER_VERSION,
-            payload=payload_dict,
-            parentRefs=parent_refs or [],
+            producer_version=NORMALIZER_VERSION,
+            payload=pack.model_dump(mode="json", by_alias=True),
+            parent_refs=parent_refs or [],
+            created_at=pack.created_at,
         )

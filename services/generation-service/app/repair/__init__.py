@@ -12,6 +12,20 @@ from app.repair.passage import PassageSentenceRepairer
 from app.repair.planner import RepairPlan, RepairPlanner
 from app.repair.question import QuestionItemRepairer, SummaryGroupRepairer
 from app.repair.registry import RepairRegistry
+from app.repair.section import (
+    SectionRepairActionType,
+    SectionRepairRoute,
+    SectionRepairRouter,
+    SectionSurgicalRepairer,
+)
+from app.repair.paper import (
+    PaperRepairActionType,
+    PaperRepairDirective,
+    PaperRepairResult,
+    PaperRepairRoute,
+    PaperRepairRouter,
+    PaperSurgicalRepairer,
+)
 
 __all__ = [
     "BaseRepairer",
@@ -26,4 +40,14 @@ __all__ = [
     "RepairRegistry",
     "RepairScope",
     "SummaryGroupRepairer",
+    "SectionRepairActionType",
+    "SectionRepairRoute",
+    "SectionRepairRouter",
+    "SectionSurgicalRepairer",
+    "PaperRepairActionType",
+    "PaperRepairDirective",
+    "PaperRepairResult",
+    "PaperRepairRoute",
+    "PaperRepairRouter",
+    "PaperSurgicalRepairer",
 ]

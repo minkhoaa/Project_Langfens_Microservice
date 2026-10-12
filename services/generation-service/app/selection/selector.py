@@ -84,7 +84,7 @@ class CandidateSelector:
 
         # 3. Length compliance
         l_score = 1.0
-        if candidate.question_type in ("SentenceCompletion", "ShortAnswer"):
+        if str(candidate.question_type).replace("_", "").upper() in ("SENTENCECOMPLETION", "SUMMARYCOMPLETION", "SHORTANSWER"):
             w_cnt = count_words(candidate.answer)
             if w_cnt > 3:
                 l_score = 0.0
@@ -120,6 +120,9 @@ class CandidateSelector:
     def select_joint_group(
         self,
         pools: List[QuestionCandidatePool],
+        external_prompts: Optional[List[str]] = None,
+        topic: str = "",
+        passage_title: str = "",
     ) -> List[QuestionCandidate]:
         """Solves joint constraints across all question slots in order with finite backtracking."""
         if not pools:
@@ -140,6 +143,55 @@ class CandidateSelector:
 
         steps = 0
         max_steps = self.criteria.max_backtracking_steps
+        from app.evaluators.deterministic import (
+            check_cross_prompt_answer_leakage,
+            check_prompt_answer_leakage,
+        )
+        from app.evaluators.paper import (
+            STANDARD_CHOICE_LABELS,
+            _answer_tokens_present_in_prompt,
+            _extract_question_predicate,
+            _quote_appears_in_prompt,
+        )
+        from app.contracts.policies import calculate_shingle_overlap, normalize_prompt
+
+        SHARED_GROUP_TYPES = {
+            "summarycompletion", "summarygroup", "notecompletiongroup",
+            "flowchartcompletion", "matchingheadings", "matchingheading",
+            "matching_headings", "summary_completion", "matching",
+        }
+
+        def _are_same_group_siblings(c1: QuestionCandidate, c2: QuestionCandidate) -> bool:
+            t1 = str(getattr(c1, "question_type", "")).replace("_", "").lower()
+            t2 = str(getattr(c2, "question_type", "")).replace("_", "").lower()
+            if t1 not in SHARED_GROUP_TYPES or t1 != t2:
+                return False
+            g1 = str(c1.group_id or "").strip().lower()
+            g2 = str(c2.group_id or "").strip().lower()
+            return bool(g1 and g2 and g1 == g2)
+
+        def _leaks_into_prompt(q_cand: QuestionCandidate, other_prompt: str) -> bool:
+            if not other_prompt:
+                return False
+            ans_str = str(q_cand.answer or "").strip()
+            if ans_str and ans_str.upper() not in STANDARD_CHOICE_LABELS:
+                if check_cross_prompt_answer_leakage(other_prompt, ans_str, topic=topic, passage_title=passage_title):
+                    return True
+                ans_words = ans_str.split()
+                q_pred = _extract_question_predicate(q_cand.prompt)
+                o_pred = _extract_question_predicate(other_prompt)
+                if len(ans_words) >= 2:
+                    if check_prompt_answer_leakage(other_prompt, ans_str):
+                        return True
+                    if q_pred and o_pred and q_pred == o_pred and _answer_tokens_present_in_prompt(ans_str, other_prompt):
+                        return True
+                elif len(ans_words) == 1 and len(ans_str) >= 4:
+                    if q_pred and o_pred and q_pred == o_pred and check_prompt_answer_leakage(other_prompt, ans_str):
+                        return True
+            ev_q = str(q_cand.evidence_quote or "").strip()
+            if ev_q and (len(ev_q.split()) >= 2 or len(ev_q) >= 8) and _quote_appears_in_prompt(ev_q, other_prompt):
+                return True
+            return False
 
         # Backtracking search for combination satisfying joint constraints
         def backtrack(
@@ -161,31 +213,78 @@ class CandidateSelector:
                 return current_selection
 
             for cand in sorted_pools[pool_idx]:
-                ev_fp = compute_evidence_fingerprint(cand.evidence_quote)
+                c_type_norm = str(getattr(cand, "question_type", "")).replace("_", "").lower()
+                is_group_shared_type = c_type_norm in SHARED_GROUP_TYPES
 
+                def is_same_group_sibling(prev_cand: QuestionCandidate) -> bool:
+                    return _are_same_group_siblings(cand, prev_cand)
+
+                # Self-leakage guard for non-fixed-choice types
+                if cand.answer and str(cand.answer).strip().upper() not in STANDARD_CHOICE_LABELS:
+                    if c_type_norm not in ("truefalsenotgiven", "yesnonotgiven") and check_prompt_answer_leakage(cand.prompt, str(cand.answer)):
+                        logger.info("Candidate %s rejected: self-leakage of answer %r in prompt", cand.candidate_id, cand.answer)
+                        continue
+                if external_prompts and any(_leaks_into_prompt(cand, ep) for ep in external_prompts if ep):
+                    logger.info("Candidate %s (Q%s %s ans=%r) rejected: leaks in external prompt", cand.candidate_id, cand.question_number, cand.question_type, cand.answer)
+                    continue
+                if current_selection and any(
+                    not is_same_group_sibling(prev)
+                    and (_leaks_into_prompt(cand, prev.prompt) or _leaks_into_prompt(prev, cand.prompt))
+                    for prev in current_selection
+                ):
+                    logger.info("Candidate %s (Q%s %s ans=%r) rejected: leaks with current selection prompt", cand.candidate_id, cand.question_number, cand.question_type, cand.answer)
+                    continue
+                if current_selection:
+                    # Group blanks must have distinct answers (e.g. for Summary Completion with explicit matching group ID)
+                    if is_group_shared_type and any(
+                        is_same_group_sibling(prev)
+                        and cand.answer and prev.answer and str(cand.answer).strip().lower() == str(prev.answer).strip().lower()
+                        for prev in current_selection
+                    ):
+                        logger.info("Candidate %s rejected: duplicate group answer %r", cand.candidate_id, cand.answer)
+                        continue
+                # Constraint 0: Prompt uniqueness & 5-word shingle overlap (<= 0.45) against external and current selection
+                cand_p_norm = normalize_prompt(cand.prompt)
+                if cand_p_norm:
+                    if not is_group_shared_type and external_prompts and any(
+                        cand_p_norm == normalize_prompt(ep) or calculate_shingle_overlap(cand.prompt, ep) > 0.45
+                        for ep in external_prompts if ep
+                    ):
+                        logger.info("Candidate %s rejected: duplicate prompt or shingle overlap >0.45 with external", cand.candidate_id)
+                        continue
+                    if current_selection and any(
+                        not is_same_group_sibling(prev)
+                        and (cand_p_norm == normalize_prompt(prev.prompt) or calculate_shingle_overlap(cand.prompt, prev.prompt) > 0.45)
+                        for prev in current_selection if prev.prompt
+                    ):
+                        logger.info("Candidate %s rejected: duplicate prompt or shingle overlap >0.45 with current selection", cand.candidate_id)
+                        continue
+                ev_fp = compute_evidence_fingerprint(cand.evidence_quote)
                 # Constraint 1: Anti-redundancy (no duplicate evidence facts across questions)
                 if not self.criteria.allow_redundant_evidence_spans:
-                    if ev_fp in used_evidence_fingerprints:
-                        # Check jaccard similarity with existing selections
+                    if ev_fp and ev_fp in used_evidence_fingerprints:
+                        # Check jaccard similarity with existing selections for non-group questions
                         has_high_overlap = any(
-                            jaccard_similarity(cand.evidence_quote, prev.evidence_quote) > 0.70
-                            for prev in current_selection
+                            not is_same_group_sibling(prev)
+                            and (cand.evidence_quote.strip().lower() == prev.evidence_quote.strip().lower()
+                                 or jaccard_similarity(cand.evidence_quote, prev.evidence_quote) > 0.85)
+                            for prev in current_selection if prev.evidence_quote
                         )
                         if has_high_overlap:
+                            logger.info("Candidate %s rejected: high evidence overlap", cand.candidate_id)
                             continue
-
-                # Constraint 2: MCQ answer distribution (prevent 3 identical consecutive answers)
-                if cand.options and cand.answer:
-                    if len(mcq_answers) >= 2 and mcq_answers[-1] == mcq_answers[-2] == cand.answer:
+                # Constraint 2: Answer distribution balance (prevent 4 identical consecutive answers in MCQ, TFNG, YNNG)
+                norm_ans = str(cand.answer).strip().upper()
+                if norm_ans in {"A", "B", "C", "D", "TRUE", "FALSE", "NOT GIVEN", "NOT_GIVEN", "YES", "NO"}:
+                    if len(mcq_answers) >= 3 and mcq_answers[-1] == mcq_answers[-2] == mcq_answers[-3] == norm_ans:
                         continue
-
                 # Recursive advance
                 new_ev_fps = set(used_evidence_fingerprints)
                 if ev_fp:
                     new_ev_fps.add(ev_fp)
                 new_mcqs = list(mcq_answers)
-                if cand.options and cand.answer:
-                    new_mcqs.append(cand.answer)
+                if norm_ans in {"A", "B", "C", "D", "TRUE", "FALSE", "NOT GIVEN", "NOT_GIVEN", "YES", "NO"}:
+                    new_mcqs.append(norm_ans)
 
                 result = backtrack(
                     pool_idx + 1,
@@ -206,12 +305,82 @@ class CandidateSelector:
         )
 
         if selected is None:
-            raise SelectionInfeasibleError(
-                "Could not satisfy joint constraints across question pools",
-                step_count=steps,
-                reason="JOINT_CONSTRAINTS_UNSATISFIABLE",
-            )
+            # Graceful fallback pass: select the top eligible candidate for each pool,
+            # ensuring no exact prompt duplicates across the selection or with external prompts
+            from app.contracts.policies import normalize_prompt
+            logger.warning("Backtracking failed to satisfy joint constraints; executing graceful fallback pass")
+            fallback_selection: List[QuestionCandidate] = []
+            used_prompts: Set[str] = set()
+            used_ev_fps: Set[str] = set()
+            if external_prompts:
+                for ep in external_prompts:
+                    if ep:
+                        used_prompts.add(normalize_prompt(ep))
 
+            for p_idx, pool_cands in enumerate(sorted_pools):
+                chosen = None
+                for relax_ev_redundancy in (False, True):
+                    for cand in pool_cands:
+                        c_type_norm = str(getattr(cand, "question_type", "")).replace("_", "").lower()
+                        is_group_shared_type = c_type_norm in SHARED_GROUP_TYPES
+                        if relax_ev_redundancy and not (is_group_shared_type or self.criteria.allow_redundant_evidence_spans):
+                            continue
+                        c_p_norm = normalize_prompt(cand.prompt) if cand.prompt else ""
+                        if not is_group_shared_type and c_p_norm and c_p_norm in used_prompts:
+                            continue
+                        if not is_group_shared_type and external_prompts and any(
+                            calculate_shingle_overlap(cand.prompt, ep) > 0.45 for ep in external_prompts if ep
+                        ):
+                            continue
+                        if not is_group_shared_type and any(
+                            not _are_same_group_siblings(cand, prev)
+                            and calculate_shingle_overlap(cand.prompt, prev.prompt) > 0.45
+                            for prev in fallback_selection if prev.prompt
+                        ):
+                            continue
+                        cand_ans_str = str(getattr(cand, "answer", "") or "").strip()
+                        if cand_ans_str and cand_ans_str.upper() not in STANDARD_CHOICE_LABELS:
+                            if c_type_norm not in ("truefalsenotgiven", "yesnonotgiven") and check_prompt_answer_leakage(cand.prompt, cand_ans_str):
+                                continue
+                        if external_prompts and any(_leaks_into_prompt(cand, ep) for ep in external_prompts if ep):
+                            continue
+                        if any(
+                            not _are_same_group_siblings(cand, prev)
+                            and (_leaks_into_prompt(cand, prev.prompt) or _leaks_into_prompt(prev, cand.prompt))
+                            for prev in fallback_selection
+                        ):
+                            continue
+                        ev_fp = compute_evidence_fingerprint(cand.evidence_quote)
+                        if not relax_ev_redundancy and not is_group_shared_type and not self.criteria.allow_redundant_evidence_spans and ev_fp and ev_fp in used_ev_fps:
+                            continue
+                        # If shared group type and prompt was seen, ensure sibling answer is distinct
+                        if is_group_shared_type:
+                            cand_ans = cand_ans_str.lower()
+                            if cand_ans and any(
+                                str(getattr(prev, "answer", "") or "").strip().lower() == cand_ans
+                                for prev in fallback_selection
+                            ):
+                                continue
+                        chosen = cand
+                        break
+                    if chosen is not None:
+                        break
+                if chosen is not None:
+                    fallback_selection.append(chosen)
+                    c_p_norm_chosen = normalize_prompt(chosen.prompt) if chosen.prompt else ""
+                    if c_p_norm_chosen:
+                        used_prompts.add(c_p_norm_chosen)
+                    ev_fp_chosen = compute_evidence_fingerprint(chosen.evidence_quote)
+                    if ev_fp_chosen:
+                        used_ev_fps.add(ev_fp_chosen)
+            if len(fallback_selection) == len(sorted_pools):
+                selected = fallback_selection
+            else:
+                raise SelectionInfeasibleError(
+                    "Could not satisfy joint constraints across question pools",
+                    step_count=steps,
+                    reason="JOINT_CONSTRAINTS_UNSATISFIABLE",
+                )
         # Update selectedCandidateId on pools
         for pool, cand in zip(pools, selected):
             pool.selected_candidate_id = cand.candidate_id

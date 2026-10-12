@@ -87,17 +87,50 @@ def validate_answer_length(answer: str) -> bool:
     return True
 
 
+# A hyphen or an apostrophe after a span continues the same token, so an answer
+# ending in a word character must not match inside 'huntingtin-like' or "don'ts".
+# This is the single source of truth for what continues a token: the boundary
+# regexes and the "is this answer self-delimited?" test both read it.
+_TOKEN_CONTINUATION = r"[\w'-]"
+
+# What a trailing token-continuation character must NOT be. A successor word
+# character is the only thing that can turn a span into a prefix of a longer
+# word; punctuation and whitespace cannot.
+_WORD_CHAR = r"\w"
+
+_TOKEN_CONTINUATION_RE = re.compile(_TOKEN_CONTINUATION)
+
+
 def match_verbatim_in_passage(answer: str, passage: str) -> bool:
     """Verifies that the answer appears as a full-token verbatim span in the passage.
-    
+
     Rejects partial-word matches (e.g. 'rat' inside 'strata').
+
+    The leading guard is always the full token-continuation class: nothing may
+    precede the span that would make it the tail of a longer token. The
+    trailing guard depends on the answer itself:
+
+    * An answer ending in a token-continuation character (word character,
+      apostrophe or hyphen) is not self-delimited, so the successor must not
+      continue the token -- otherwise 'huntingtin' would match inside
+      'huntingtin-like'.
+    * An answer ending in punctuation (e.g. 'mutant huntingtin (mHTT)') is
+      already delimited by its own final character. Only a successor word
+      character could make it a prefix of a longer word, so demanding a
+      non-continuation character here would reject a genuinely verbatim span
+      every time the passage went on to hyphenate or inflect a compound
+      ('(mHTT)-related', "(mHTT)'s").
     """
     if not answer or not passage:
         return False
     clean_ans = answer.strip()
-    # Word boundary on both ends using lookbehind and lookahead to avoid partial-token match
-    pattern = r"(?<![\w'-])" + re.escape(clean_ans) + r"(?![\w'-])"
-    return bool(re.search(pattern, passage, re.IGNORECASE))
+    if not clean_ans:
+        return False
+    leading = rf"(?<!{_TOKEN_CONTINUATION})"
+    body = re.escape(clean_ans)
+    self_delimited = _TOKEN_CONTINUATION_RE.fullmatch(clean_ans[-1]) is None
+    trailing = rf"(?!{_WORD_CHAR})" if self_delimited else rf"(?!{_TOKEN_CONTINUATION})"
+    return bool(re.search(leading + body + trailing, passage, re.IGNORECASE))
 
 
 def validate_reading_section_policies(

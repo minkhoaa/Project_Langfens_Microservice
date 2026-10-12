@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 from pydantic import BaseModel, Field, ConfigDict
 
+from app.config import settings
 from app.contracts.base import CanonicalBaseModel
 
 
@@ -30,11 +31,11 @@ class UsageAccountingType(str, Enum):
 
 
 class UsageReport(CanonicalBaseModel):
-    prompt_tokens: int = 0
-    completion_tokens: int = 0
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
     total_tokens: int = 0
-    reasoning_tokens: int = 0
-    accounting_type: UsageAccountingType = UsageAccountingType.REPORTED
+    reasoning_tokens: Optional[int] = None
+    accounting_type: UsageAccountingType = UsageAccountingType.UNKNOWN
     estimated_cost_usd: float = 0.0
 
 
@@ -59,15 +60,15 @@ class ProviderRequest(CanonicalBaseModel):
     temperature: float = 0.3
     max_tokens: int = 4096
     timeout_seconds: float = 60.0
-    wall_time_reservation_seconds: float = 60.0
+    wall_time_reservation_seconds: float = settings.loop_operation_wall_reservation_seconds
     model_config_version: str = "2.0.0"
     prompt_hash: str = ""
     target_model: Optional[Type[BaseModel]] = Field(default=None, exclude=True)
     response_schema: Optional[Dict[str, Any]] = None
-    max_response_bytes: int = 500_000
+    max_response_bytes: int = settings.loop_max_response_bytes
     allow_repair: bool = True
+    is_unlimited: Optional[bool] = None
     stream_callback: Optional[Any] = Field(default=None, exclude=True)
-
 
 class ProviderResponse(CanonicalBaseModel):
     model_config = ConfigDict(frozen=False, extra="forbid")

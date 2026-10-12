@@ -26,6 +26,19 @@ from app.evaluators.semantic import (
     HeuristicQualityScorer,
     NotGivenSemanticsEvaluator,
 )
+from app.evaluators.coverage import SectionCoverageEvaluator
+from app.evaluators.solver import BlindSolverEvaluator
+from app.evaluators.section import (
+    SectionDuplicateAndConcentrationEvaluator,
+    SectionEditorialEvaluator,
+    SectionStructureEvaluator,
+)
+from app.evaluators.paper import (
+    PaperCrossSectionEvaluator,
+    PaperLeakageEvaluator,
+    PaperMonotonyEvaluator,
+    PaperStructureEvaluator,
+)
 from app.evaluators.registry import (
     EvaluationCache,
     EvaluatorRegistry,
@@ -39,6 +52,7 @@ __all__ = [
     "DuplicateAndShingleEvaluator",
     "EvaluationCache",
     "EvaluationStage",
+    "BlindSolverEvaluator",
     "EvaluatorConfigurationError",
     "EvaluatorConflictError",
     "EvaluatorMetadata",
@@ -48,10 +62,17 @@ __all__ = [
     "GroundingFidelityEvaluator",
     "HeuristicQualityScorer",
     "NotGivenSemanticsEvaluator",
+    "PaperCrossSectionEvaluator",
+    "PaperLeakageEvaluator",
+    "PaperMonotonyEvaluator",
     "PaperStructureEvaluator",
     "PassageWordCountEvaluator",
     "PassageStyleEvaluator",
     "QuestionStructureEvaluator",
+    "SectionDuplicateAndConcentrationEvaluator",
+    "SectionCoverageEvaluator",
+    "SectionEditorialEvaluator",
+    "SectionStructureEvaluator",
     "check_prompt_answer_leakage",
     "compute_evaluation_cache_key",
     "matches_exact_token_bound",
