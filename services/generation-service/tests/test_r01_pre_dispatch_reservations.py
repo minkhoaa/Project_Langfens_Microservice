@@ -33,11 +33,17 @@ from tests.test_t03_providers import MockCheckpointClient
 from tests.test_t09_real_postgres_durability import (
     REAL_API_KEY,
     REAL_SERVICE_URL,
+    ensure_exam_test_database,
     get_exam_db_container,
     is_docker_postgres_available,
     is_service_available,
 )
 
+
+@pytest.fixture(scope="module", autouse=True)
+def _ensure_test_database():
+    if is_docker_postgres_available():
+        ensure_exam_test_database()
 
 def _request(run_id="r01_memory", **updates):
     return ProviderRequest(

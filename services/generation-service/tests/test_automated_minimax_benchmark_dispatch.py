@@ -35,6 +35,7 @@ from app.providers.models import Capability, ChatMessage, ProviderRequest
 from app.providers.registry import ProviderRegistry
 from app.providers.retry import RetryPolicy
 from tests.test_t09_real_postgres_durability import (
+    ensure_exam_test_database,
     is_docker_postgres_available,
     is_service_available,
 )
@@ -47,6 +48,11 @@ def checkpoint_client():
     key = os.environ.get("EXAMSERVICE__INTERNAL__API__KEY", "test-only-ephemeral-secret-key-phase09")
     return CheckpointClient(base_url=REAL_SERVICE_URL, internal_api_key=key)
 
+
+@pytest.fixture(scope="module", autouse=True)
+def _ensure_test_database():
+    if is_docker_postgres_available():
+        ensure_exam_test_database()
 
 @pytest.mark.asyncio
 @pytest.mark.skipif(not is_service_available(), reason="exam-service live process not reachable on port 5099")

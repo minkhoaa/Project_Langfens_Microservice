@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone, timedelta
 import hashlib
+import os
 import re
 from pathlib import Path
 import subprocess
@@ -64,38 +65,101 @@ def is_docker_postgres_available() -> bool:
     module-level ``@pytest.mark.skipif(not is_docker_postgres_available())`` still
     produces a clean skip rather than an error during collection. Never raises.
     """
+    env_cname = os.environ.get("EXAM_DB_CONTAINER")
     try:
         res = subprocess.run(
-            ["docker", "ps", "--format", "{{.Names}}"],
+            ["docker", "ps", "--format", "{{.Names}}\t{{.Ports}}"],
             capture_output=True, text=True, timeout=30,
         )
     except (OSError, subprocess.SubprocessError):
         return False
     if res.returncode != 0:
         return False
-    names = res.stdout.split()
-    return any("exam-database" in n or "exam-db-server" in n or "exam_db" in n for n in names)
+    for line in res.stdout.strip().splitlines():
+        if not line:
+            continue
+        parts = line.split("\t")
+        name = parts[0]
+        ports = parts[1] if len(parts) > 1 else ""
+        if env_cname and (env_cname == name or env_cname in name):
+            return True
+        if any(target in name for target in ("exam-db-port5433", "exam-database", "exam-db-server", "exam_db")):
+            return True
+        if "5433" in ports and "exam" in name:
+            return True
+    return False
 
 
 def get_exam_db_container() -> str:
-    res = subprocess.run(
-        ["docker", "ps", "--filter", "name=exam-database", "--format", "{{.Names}}"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    names = res.stdout.strip().split()
-    if not names:
-        res2 = subprocess.run(
-            ["docker", "ps", "--filter", "name=exam-db-server", "--format", "{{.Names}}"],
+    env_cname = os.environ.get("EXAM_DB_CONTAINER")
+    if env_cname:
+        res = subprocess.run(
+            ["docker", "ps", "--filter", f"name={env_cname}", "--format", "{{.Names}}"],
             capture_output=True,
             text=True,
             check=True,
         )
-        names = res2.stdout.strip().split()
-    if not names:
-        pytest.skip("No running exam database container found in Docker; skipping real PostgreSQL durability tests")
-    return names[0]
+        names = [n for n in res.stdout.strip().split() if n == env_cname or env_cname in n]
+        if names:
+            return names[0]
+
+    for candidate in ("exam-db-port5433", "exam-database", "exam-db-server"):
+        res = subprocess.run(
+            ["docker", "ps", "--filter", f"name={candidate}", "--format", "{{.Names}}"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        names = res.stdout.strip().split()
+        if names:
+            return names[0]
+
+    try:
+        res = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}\t{{.Ports}}"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        for line in res.stdout.strip().splitlines():
+            if not line:
+                continue
+            parts = line.split("\t")
+            name = parts[0]
+            ports = parts[1] if len(parts) > 1 else ""
+            if ("5433" in ports and "exam" in name) or "exam_db" in name:
+                return name
+    except Exception:
+        pass
+
+    pytest.skip("No running exam database container found in Docker; skipping real PostgreSQL durability tests")
+
+
+def ensure_exam_test_database() -> None:
+    """Ensures that the exam_test_phase09 database exists in the target container."""
+    cname = get_exam_db_container()
+    for maintenance_db in ("postgres", "exam-db"):
+        check_cmd = [
+            "docker", "exec", "-e", "PGPASSWORD=exam", cname,
+            "psql", "-U", "exam", "-d", maintenance_db, "-t", "-A",
+            "-c", "SELECT 1 FROM pg_database WHERE datname = 'exam_test_phase09';"
+        ]
+        res = subprocess.run(check_cmd, capture_output=True, text=True)
+        if res.returncode == 0:
+            if "1" not in res.stdout:
+                create_cmd = [
+                    "docker", "exec", "-e", "PGPASSWORD=exam", cname,
+                    "psql", "-U", "exam", "-d", maintenance_db,
+                    "-c", "CREATE DATABASE exam_test_phase09 OWNER exam;"
+                ]
+                subprocess.run(create_cmd, capture_output=True, text=True, check=True)
+            return
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _ensure_real_postgres_exam_test_database():
+    if is_docker_postgres_available():
+        ensure_exam_test_database()
 
 
 def run_psql(sql: str) -> str:

@@ -36,6 +36,7 @@ from tests.test_t08_passage_loop import FakePassageProvider, _generate_academic_
 from tests.test_t09_real_postgres_durability import (
     REAL_API_KEY,
     REAL_SERVICE_URL,
+    ensure_exam_test_database,
     is_docker_postgres_available,
     is_service_available,
     run_psql,
@@ -47,6 +48,11 @@ pytestmark = [
     pytest.mark.skipif(not is_service_available(), reason="exam-service live process not reachable on port 5099"),
     pytest.mark.skipif(not is_docker_postgres_available(), reason="docker exam-database not running"),
 ]
+
+@pytest.fixture(scope="module", autouse=True)
+def _ensure_test_database():
+    if is_docker_postgres_available():
+        ensure_exam_test_database()
 
 
 def _ref_key(ref: ArtifactRef) -> tuple[str, str, int, str]:

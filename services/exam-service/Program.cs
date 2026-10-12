@@ -109,6 +109,15 @@ using (var scope = app.Services.CreateScope())
 
 app.MapDefaultEndpoints();
 
+// `/healthz` alias over the same health checks (including the exam-db Npgsql check).
+// Test/ops harnesses probe `/healthz` specifically — see
+// services/generation-service/tests/test_t09_real_postgres_durability.py:53 and
+// scripts/refactor/run_browser_e2e.py:531 — and generation-service (app/main.py:46)
+// and ai-service (app/routers/health.py:9) both already serve it. Without this alias
+// exam-service 404s on `/healthz`, and `urllib.request.urlopen` raises HTTPError on
+// 404, so those reachability guards report "not reachable" even while the service is live.
+app.MapHealthChecks("/healthz").AllowAnonymous();
+
 // Static files (serves /uploads/images/...). Placed before auth so the
 // images are publicly readable; the upload endpoint itself still requires Admin.
 var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");

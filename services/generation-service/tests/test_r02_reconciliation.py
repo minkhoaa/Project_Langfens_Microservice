@@ -17,6 +17,7 @@ from app.persistence.models import (
 from tests.test_t09_real_postgres_durability import (
     REAL_API_KEY,
     REAL_SERVICE_URL,
+    ensure_exam_test_database,
     get_exam_db_container,
     is_docker_postgres_available,
     is_service_available,
@@ -28,6 +29,11 @@ pytestmark = [
     pytest.mark.skipif(not is_service_available(), reason="exam-service live process not reachable on port 5099"),
     pytest.mark.skipif(not is_docker_postgres_available(), reason="docker exam-database not running"),
 ]
+
+@pytest.fixture(scope="module", autouse=True)
+def _ensure_test_database():
+    if is_docker_postgres_available():
+        ensure_exam_test_database()
 
 def _client():
     return CheckpointClient(base_url=REAL_SERVICE_URL, internal_api_key=REAL_API_KEY)
