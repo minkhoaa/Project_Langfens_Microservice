@@ -1,0 +1,38 @@
+{
+  "caseIndex": 16,
+  "engine": "Legacy_V1",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LEGACY_SHADOW",
+  "campaignId": "camp_G15_022943e248ec",
+  "seed": 101,
+  "runId": "bench_daf0edb0242e9cd50ba52a639fb0bb6e",
+  "jobId": "7aab3447-8815-48f4-a9b9-e83880ed4011",
+  "sourceTriple": [
+    "PMC13583341",
+    "PMC13560651",
+    "PMC13407692"
+  ],
+  "status": "FAILED",
+  "validDraft": false,
+  "failureReason": "Failed to generate valid replacement for question 7 after 3 attempts: Replacement duplicated an existing question prompt: The temporal dynamics of engram activation during memory retrieval reveal a sequential pattern of activation that mirrors the temporal sequence of the original experience.",
+  "versionsCount": 1,
+  "evaluatorIssues": [
+    "LEGACY_FAILURE: Failed to generate valid replacement for question 7 after 3 attempts: Replacement duplicated an existing question prompt: The temporal dynamics of engram activa"
+  ],
+  "latencySeconds": 488.4925,
+  "totalTokens": 117855,
+  "reportedTokens": 117855,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 46,
+  "uniqueProviderDispatches": 46,
+  "estimatedCostUsd": 0.294637,
+  "persistedExamId": null,
+  "draftExamId": null,
+  "isPrimaryPersisted": false,
+  "legacyCallsCount": 47,
+  "totalQuestions": 0,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}
