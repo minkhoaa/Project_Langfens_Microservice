@@ -7,15 +7,15 @@
     "durationSeconds": null,
     "providerUsed": null,
     "modelUsed": null,
-    "metricEngineVersion": "2.3.0",
-    "metricEngineHash": "e71b3c0e247f8430",
+    "metricEngineVersion": "2.3.1",
+    "metricEngineHash": "96d2ba2c214fd39a",
     "totalQuestionsEvaluated": 120,
     "validQuestions": 60,
     "invalidQuestions": 60,
     "operationalFailures": 20,
-    "semanticFalsePositives": 0,
-    "operationalRejectionsOfValid": 20,
-    "totalValidRejected": 20,
+    "semanticFalsePositives": 2,
+    "operationalRejectionsOfValid": 10,
+    "totalValidRejected": 12,
     "quarantinedNotice": null,
     "totalFidelityCasesEvaluated": 0,
     "totalCanariesEvaluated": 12,
@@ -23,12 +23,12 @@
   },
   "rates": {
     "overallBlockingRecall": 0.8333333333333334,
-    "falseRejectionRate": 0.0,
-    "semanticFalsePositivesCount": 0,
-    "semanticFalsePositivesRate": 0.0,
-    "operationalRejectionsOfValidCount": 20,
-    "totalValidRejectedCount": 20,
-    "totalValidRejectedRate": 0.3333333333333333,
+    "falseRejectionRate": 0.03333333333333333,
+    "semanticFalsePositivesCount": 2,
+    "semanticFalsePositivesRate": 0.03333333333333333,
+    "operationalRejectionsOfValidCount": 10,
+    "totalValidRejectedCount": 12,
+    "totalValidRejectedRate": 0.2,
     "ambiguityRecall": 0.6428571428571429,
     "ambiguityRecallFormatted": "64.3%",
     "perTypeRecall": {
@@ -59,11 +59,11 @@
       "invalidTotal": 60,
       "truePositives": 50,
       "falseNegatives": 10,
-      "trueNegatives": 50,
-      "falsePositives": 0,
+      "trueNegatives": 48,
+      "falsePositives": 2,
       "operationalFailures": 20,
       "recall": 0.8333333333333334,
-      "falseRejectionRate": 0.0
+      "falseRejectionRate": 0.03333333333333333
     },
     "perType": {
       "MultipleChoiceSingle": {
@@ -96,11 +96,11 @@
         "invalidTotal": 10,
         "tp": 10,
         "fn": 0,
-        "tn": 10,
-        "fp": 0,
+        "tn": 9,
+        "fp": 1,
         "operationalFailures": 0,
         "recall": 1.0,
-        "falseRejectionRate": 0.0
+        "falseRejectionRate": 0.1
       },
       "SummaryCompletion": {
         "total": 20,
@@ -108,11 +108,11 @@
         "invalidTotal": 10,
         "tp": 10,
         "fn": 0,
-        "tn": 10,
-        "fp": 0,
+        "tn": 9,
+        "fp": 1,
         "operationalFailures": 0,
         "recall": 1.0,
-        "falseRejectionRate": 0.0
+        "falseRejectionRate": 0.1
       },
       "TrueFalseNotGiven": {
         "total": 20,
@@ -188,11 +188,11 @@
       "invalidTotal": 60,
       "truePositives": 50,
       "falseNegatives": 10,
-      "trueNegatives": 50,
-      "falsePositives": 0,
+      "trueNegatives": 48,
+      "falsePositives": 2,
       "operationalFailures": 20,
       "recall": 0.8333333333333334,
-      "falseRejectionRate": 0.0
+      "falseRejectionRate": 0.03333333333333333
     },
     "perType": {
       "MultipleChoiceSingle": {
@@ -225,11 +225,11 @@
         "invalidTotal": 10,
         "tp": 10,
         "fn": 0,
-        "tn": 10,
-        "fp": 0,
+        "tn": 9,
+        "fp": 1,
         "operationalFailures": 0,
         "recall": 1.0,
-        "falseRejectionRate": 0.0
+        "falseRejectionRate": 0.1
       },
       "SummaryCompletion": {
         "total": 20,
@@ -237,11 +237,11 @@
         "invalidTotal": 10,
         "tp": 10,
         "fn": 0,
-        "tn": 10,
-        "fp": 0,
+        "tn": 9,
+        "fp": 1,
         "operationalFailures": 0,
         "recall": 1.0,
-        "falseRejectionRate": 0.0
+        "falseRejectionRate": 0.1
       },
       "TrueFalseNotGiven": {
         "total": 20,
@@ -390,7 +390,6 @@
       "q_v_ShortAnswer_10",
       "q_v_ShortAnswer_2",
       "q_v_ShortAnswer_3",
-      "q_v_ShortAnswer_4",
       "q_v_ShortAnswer_5",
       "q_v_ShortAnswer_6",
       "q_v_ShortAnswer_7",
@@ -404,7 +403,6 @@
       "q_v_SummaryCompletion_5",
       "q_v_SummaryCompletion_6",
       "q_v_SummaryCompletion_7",
-      "q_v_SummaryCompletion_8",
       "q_v_SummaryCompletion_9",
       "q_v_TrueFalseNotGiven_1",
       "q_v_TrueFalseNotGiven_10",
@@ -427,7 +425,10 @@
       "q_v_YesNoNotGiven_8",
       "q_v_YesNoNotGiven_9"
     ],
-    "falsePositives": [],
+    "falsePositives": [
+      "q_v_ShortAnswer_4",
+      "q_v_SummaryCompletion_8"
+    ],
     "operationalErrorCases": [
       "q_i_MultipleChoiceSingle_11",
       "q_i_MultipleChoiceSingle_12",

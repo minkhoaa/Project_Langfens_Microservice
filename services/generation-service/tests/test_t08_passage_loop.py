@@ -166,7 +166,10 @@ class DurableStoreFake:
         self._fence(req)
         state = self._state()
         state["heads"][req.artifact.artifact_id] = req.artifact.model_dump(by_alias=True, mode="json")
-        for ev in req.evaluations:
+        # `CheckpointCommitRequest.evaluations` is declared Optional (default None),
+        # so a commit that carries no evaluations is valid. Treat an absent list as
+        # empty rather than iterating None.
+        for ev in (req.evaluations or []):
             state["evaluations"][f"{ev.evaluator_id}_{req.artifact.version}"] = ev.model_dump_json(by_alias=True)
         self._save(state)
         return CheckpointAck(

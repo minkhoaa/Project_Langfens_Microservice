@@ -43,7 +43,7 @@ class DeterministicFakeProvider:
             }
 
         # 2. Source-Fidelity Review
-        elif "Check the generated passage against ONLY" in instruction:
+        elif "Check the generated passage against" in instruction:
             result = {"passed": True, "findings": []}
 
         # 3. Question Group 1 (TRUE_FALSE_NOT_GIVEN: 7 questions, 1-7)

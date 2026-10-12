@@ -30,7 +30,11 @@ from app.pipeline import (
 )
 from tests.test_pipeline import xml_with_license
 
-FIXTURES_DIR = Path("artifacts/refactor/phase-00/fixtures")
+# Anchor fixture paths to the repository root. A bare relative path resolves against
+# the pytest working directory (services/generation-service), so the corpus lookup
+# reported "Missing questions_corpus.json" for a fixture that is committed.
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+FIXTURES_DIR = REPO_ROOT / "artifacts" / "refactor" / "phase-00" / "fixtures"
 
 
 def test_t00_03_source_word_count_boundary():

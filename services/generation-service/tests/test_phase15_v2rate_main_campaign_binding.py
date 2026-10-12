@@ -19,7 +19,15 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 HARNESS_PATH = REPO_ROOT / "scripts" / "refactor" / "run_phase15_benchmarks.py"
-REPORT_PATH = REPO_ROOT / "artifacts" / "refactor" / "phase-15" / "benchmarks" / "paired-benchmark-report.json"
+# The authoritative campaign report is the acceptance-v3 acceptance run, the same
+# evidence test_t15_benchmarks.py binds to. Pointing at the stale `phase-15/benchmarks/`
+# tree made this guard skip, silently dropping the engineBinding assertion that is the
+# whole point of the node. The report exists and is committed, so the guard now
+# evaluates and the binding is actually verified.
+REPORT_PATH = (
+    REPO_ROOT / "artifacts" / "refactor" / "phase-15" / "benchmarks-acceptance-v3"
+    / "campaigns" / "camp_G15_022943e248ec" / "paired-benchmark-report.json"
+)
 
 
 @pytest.fixture(scope="module")

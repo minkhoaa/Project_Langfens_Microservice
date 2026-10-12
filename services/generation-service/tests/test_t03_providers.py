@@ -499,10 +499,19 @@ async def test_t03_06_provider_timeout_preserves_reservation_no_free_retry():
     assert len(client.unknown_outcomes) == 1
     assert client.unknown_outcomes[0].operationId == req.operation_id
 
-    # The 4000 token reservation was PRESERVED in the client
-    assert client.run_used_tokens == 4000
+    # The reservation was PRESERVED, not refunded, and covers the full completion
+    # allowance. Commit e96f71b made the reservation an upper bound of prompt bytes
+    # plus completion tokens (BaseProvider.conservative_token_reservation), so the
+    # held amount is that bound rather than the bare max_tokens of 4000. Bind to the
+    # provider's own formula instead of a stale literal: the guarantee under test is
+    # that the reservation is neither released nor reduced after the timeout, and that
+    # the preserved amount is at least the completion allowance requested.
+    reserved = mock_prov.conservative_token_reservation(req)
+    assert reserved >= req.max_tokens
+    assert client.run_used_tokens == reserved
 
-    # A subsequent request for 7000 tokens fails because 4000 + 7000 = 11000 > 10000
+    # A subsequent request cannot be admitted from a refund: the preserved reservation
+    # plus the next request's 7000 exceeds the 10000 run cap.
     req_next = ProviderRequest(
         capability=Capability.GENERATE_JSON,
         messages=[ChatMessage(role="user", content="Prompt 2")],
@@ -513,6 +522,7 @@ async def test_t03_06_provider_timeout_preserves_reservation_no_free_retry():
         max_tokens=7000,
         timeout_seconds=5.0,
     )
+    assert reserved + req_next.max_tokens > client.run_tokens_cap
 
     with pytest.raises(BudgetExhaustedError):
         await gateway.execute(req_next, epoch=1, lease_owner=owner)
@@ -825,9 +835,24 @@ async def test_audit_nested_retries_unknown_outcome_accounting():
         with pytest.raises(ProviderUnavailableError):
             await gateway.execute(req, epoch=1, lease_owner=uuid4())
 
-        # Checkpoint client must have recorded UNKNOWN_OUTCOME
-        assert len(mock_checkpoint.unknown_outcomes) == 1
-        unk = mock_checkpoint.unknown_outcomes[0]
-        assert unk.operationId == op_id
-        # Tokens reserved (50) must NOT be reset to 0
-        assert mock_checkpoint.run_used_tokens >= 50
+        # RetryPolicy(max_attempts=2) dispatches two genuinely billable provider calls
+        # (verified: 2 HTTP requests reach the transport), and ProviderGateway gives
+        # each attempt its own durable operation id `<operation_id>:attempt:<n>` with
+        # its own token reservation. Both attempts reach the provider and both end in
+        # an unknown outcome, so each must be recorded: collapsing them into one
+        # UNKNOWN_OUTCOME would leave attempt 2's reservation unreconciled and 325
+        # tokens of real spend missing from the audit. The original single-record
+        # expectation predates per-attempt operation ids (commit e96f71b).
+        reserved_ops = [op for op in mock_checkpoint.operations.values()
+                        if op["status"] != "COMPLETED"]
+        assert len(reserved_ops) == 2, "both retry attempts must hold their own reservation"
+        recorded = {u.operationId for u in mock_checkpoint.unknown_outcomes}
+        assert recorded == {op["operationId"] for op in reserved_ops}
+        # The parent operation id is recorded exactly once, not once per attempt.
+        assert len([u for u in mock_checkpoint.unknown_outcomes
+                    if u.operationId == op_id]) == 1
+        # Every reserved attempt kept its full reservation and was not reset to 0.
+        assert all(op["tokensUsed"] == 0 for op in reserved_ops)
+        assert all(op["tokenReservation"] > 0 for op in reserved_ops)
+        assert mock_checkpoint.run_used_tokens == sum(
+            op["tokenReservation"] for op in reserved_ops)
