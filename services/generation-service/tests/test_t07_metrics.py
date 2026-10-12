@@ -21,6 +21,7 @@ import pytest
 from app.evaluators.metrics import (
     calculate_semantic_benchmark_metrics,
     CANONICAL_SEMANTIC_ISSUE_CODES,
+    METRIC_ENGINE_VERSION,
     OPERATIONAL_ERROR_CODES,
 )
 
@@ -288,7 +289,11 @@ def test_metric_to_canonical_summary_consistency_between_live_and_offline():
     sum2 = res2.to_canonical_summary(started_at="2026-10-04T10:00:00+00:00", finished_at="2026-10-04T10:01:00+00:00", duration_seconds=60.0)
 
     assert sum1 == sum2
-    assert sum1["metadata"]["metricEngineVersion"] == "2.3.0"
+    # Bind to the engine's own version constant rather than a pinned literal. The
+    # committed offline artifact predates commit e96f71b, which raised the engine to
+    # 2.3.1 to recover the V2 valid-Draft rate without regenerating that artifact;
+    # asserting a hardcoded version is what silently desynchronised the two paths.
+    assert sum1["metadata"]["metricEngineVersion"] == METRIC_ENGINE_VERSION
     assert sum1["metadata"]["metricEngineHash"] == res1.metric_engine_hash
     assert sum1["confusionMatrices"]["questions"]["truePositives"] == 1
     assert sum1["confusionMatrices"]["questions"]["trueNegatives"] == 1

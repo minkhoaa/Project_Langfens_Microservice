@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 from pathlib import Path
 import time
 from typing import Any, Dict, List, Optional
@@ -54,6 +55,10 @@ from app.generators.question.prompts import (
 )
 from app.loop.context import AuthorityGrant, LoopContext
 from app.loop.question import QuestionCandidateLoop
+from app.providers.base import BaseProvider
+from app.providers.gateway import ProviderGateway
+from app.providers.models import ProviderResponse, UsageReport
+from app.providers.registry import ProviderRegistry
 from app.selection.selector import (
     CandidateSelector,
     SelectionInfeasibleError,
@@ -486,8 +491,49 @@ async def test_t09_07_persistence_crash_resumption_q17(tmp_path: Path):
     }
     assert len(original_heads) == 3, f"Expected 3 pre-committed heads, found {len(original_heads)}"
 
-    # Initialize GenerationFacade with persistence store
-    facade = GenerationFacade(persistence_client=store)
+    # Initialize GenerationFacade with persistence store.
+    # This node is about durable resume and post-commit idempotent replay, not about
+    # live LLM output. `GenerationFacade()` with no gateway falls back to
+    # `initialize_from_settings()`, which finds no provider credentials in the test
+    # environment, so every slot fails with ProviderUnavailableError before the
+    # persistence path is reached. `generate_questions_v2` builds its generator from
+    # `self._gateway`, so inject a gateway backed by an offline provider -- the same
+    # pattern the other QuestionCandidateLoop nodes here use (gateway=None + an
+    # overridden candidate pool).
+    class _OfflineProvider(BaseProvider):
+        def __init__(self):
+            super().__init__(name="offline_t09", base_url="http://offline.test",
+                             models={"large": "offline-model", "small": "offline-model"})
+
+        async def check_health(self, api_key: str | None = None) -> bool:
+            return True
+
+        async def call(self, request, api_key, deadline):
+            payload = {
+                "candidates": [
+                    {
+                        "prompt": "Archaeological excavations documented ancient ______.",
+                        "answer": "architecture",
+                        "evidenceQuote": "Archaeological excavations documented ancient architecture.",
+                        "explanation": "Excavations documented ancient architecture.",
+                    }
+                ]
+            }
+            return ProviderResponse(
+                operation_id=request.operation_id,
+                provider_name="offline_t09",
+                model_name="offline-model",
+                raw_text=json.dumps(payload),
+                parsed_payload=payload,
+                usage=UsageReport(prompt_tokens=10, completion_tokens=10, total_tokens=20),
+            )
+
+    offline_registry = ProviderRegistry()
+    offline_registry.register_provider(_OfflineProvider(), keys=["offline_key_12345678"])
+    facade = GenerationFacade(
+        gateway=ProviderGateway(registry=offline_registry, checkpoint_client=store),
+        persistence_client=store,
+    )
 
     # Request slots 14, 15, 16, 17
     slots = [

@@ -368,7 +368,9 @@ def test_overlong_passage_is_trimmed():
 
 
 @pytest.mark.asyncio
-async def test_section_endpoint_ndjson_streaming():
+async def test_section_endpoint_ndjson_streaming(monkeypatch):
+    monkeypatch.setenv("EXAMSERVICE__INTERNAL__API__KEY", "test-pipeline-key")
+    auth_headers = {"X-Internal-Service-Key": "test-pipeline-key"}
     generated = valid_section(1)
     article = {
         "pmcid": "PMC123",
@@ -380,7 +382,7 @@ async def test_section_endpoint_ndjson_streaming():
         "authors": "Ada Example",
         "content": "Source text.",
     }
-    with patch("app.router.generate_section", new_callable=AsyncMock) as mock_gen:
+    with patch("app.facade.GenerationFacade.generate_section", new_callable=AsyncMock) as mock_gen:
         async def fake_generate_section(topic, index, source, progress=None, **kwargs):
             if progress:
                 await progress("Information", "Step 1 complete")
@@ -389,7 +391,7 @@ async def test_section_endpoint_ndjson_streaming():
 
         mock_gen.side_effect = fake_generate_section
 
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/section",
                 json={

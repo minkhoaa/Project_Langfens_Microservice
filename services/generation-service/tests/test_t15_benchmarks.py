@@ -22,7 +22,15 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-BENCHMARKS_DIR = REPO_ROOT / "artifacts" / "refactor" / "phase-15" / "benchmarks"
+# The authoritative paired-benchmark evidence is the acceptance-v3 campaign, which
+# carries the full 18 paired papers / 36 runs that phase-15 gate P15-02 requires. The
+# older `phase-15/benchmarks/` tree holds a stale 11-case report that predates the
+# acceptance run and omits fields this suite asserts on (e.g. repetitionsCount).
+# Thresholds below are unchanged; only the evidence binding moves.
+BENCHMARKS_DIR = (
+    REPO_ROOT / "artifacts" / "refactor" / "phase-15"
+    / "benchmarks-acceptance-v3" / "campaigns" / "camp_G15_022943e248ec"
+)
 REPORT_PATH = BENCHMARKS_DIR / "paired-benchmark-report.json"
 DISTRIBUTIONS_PATH = BENCHMARKS_DIR / "distributions.json"
 TOKEN_ACCOUNTING_PATH = BENCHMARKS_DIR / "token-accounting.json"

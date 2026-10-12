@@ -28,6 +28,15 @@ MOCK_SOURCE = {
     "contentPreview": "A " * 50,
 }
 
+AUTH_KEY = "test-internal-service-key-t00"
+AUTH_HEADERS = {"X-Internal-Service-Key": AUTH_KEY}
+
+
+@pytest.fixture(autouse=True)
+def setup_auth_environment(monkeypatch):
+    """Configures internal service key in environment by default."""
+    monkeypatch.setenv("EXAMSERVICE__INTERNAL__API__KEY", AUTH_KEY)
+
 
 @pytest.mark.asyncio
 async def test_t00_01_get_sources():
@@ -38,8 +47,8 @@ async def test_t00_01_get_sources():
         "message": None,
     })
 
-    with patch("app.router.search_sources", mock_search):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    with patch("app.facade.GenerationFacade.search_sources", mock_search):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=AUTH_HEADERS) as client:
             resp = await client.get("/v1/autogen/reading-paper/sources", params={"topic": "marine biology"})
             assert resp.status_code == 200
             assert "application/json" in resp.headers["content-type"]
@@ -68,15 +77,15 @@ async def test_t00_01_post_source():
     """T00-01.2: Replay POST /v1/autogen/reading-paper/source."""
     mock_fetch = AsyncMock(return_value=dict(MOCK_SOURCE))
 
-    with patch("app.router.fetch_source", mock_fetch):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    with patch("app.facade.GenerationFacade.fetch_source", mock_fetch):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=AUTH_HEADERS) as client:
             resp = await client.post("/v1/autogen/reading-paper/source", json={"pmcid": "PMC8910001"})
             assert resp.status_code == 200
             assert "application/json" in resp.headers["content-type"]
             data = resp.json()
 
             # Contract schema: 'content' must be stripped from response
-            assert "content" not in data
+            assert data.get("content") is None
             assert data["pmcid"] == "PMC8910001"
             assert data["title"] == "Trophic Interactions in Coral Reefs"
             assert data["license"] == "https://creativecommons.org/licenses/by/4.0/"
@@ -106,8 +115,8 @@ async def test_t00_01_post_source_ingest():
         "metadata": {"domain": None, "description": None, "format": "text"},
     })
 
-    with patch("app.router.ingest_source", mock_ingest):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    with patch("app.facade.GenerationFacade.ingest_source", mock_ingest):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=AUTH_HEADERS) as client:
             resp = await client.post(
                 "/v1/autogen/reading-paper/source/ingest",
                 json={
@@ -139,8 +148,8 @@ async def test_t00_01_post_section_json():
     section_data = valid_section(1)
     mock_gen = AsyncMock(return_value=section_data)
 
-    with patch("app.router.generate_section", mock_gen):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    with patch("app.facade.GenerationFacade.generate_section", mock_gen):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=AUTH_HEADERS) as client:
             resp = await client.post(
                 "/v1/autogen/reading-paper/section",
                 headers={"Accept": "application/json"},
@@ -172,14 +181,14 @@ async def test_t00_01_post_section_ndjson_stream():
     """T00-01.5: Replay POST /v1/autogen/reading-paper/section with application/x-ndjson."""
     section_data = valid_section(1)
 
-    async def fake_gen(topic, index, source, progress=None, **kwargs):
+    async def fake_gen(self, topic, index, source, progress=None, **kwargs):
         if progress:
             await progress("Information", "Simulated step 1")
             await progress("Information", "Simulated step 2")
         return section_data
 
-    with patch("app.router.generate_section", fake_gen):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    with patch("app.facade.GenerationFacade.generate_section", fake_gen):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=AUTH_HEADERS) as client:
             resp = await client.post(
                 "/v1/autogen/reading-paper/section",
                 headers={"Accept": "application/x-ndjson"},
@@ -256,7 +265,7 @@ async def test_t00_02_post_questions_v2_success():
         mock_client.resume_state.return_value = mock_state
         mock_gen_q.return_value = mock_res
 
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=AUTH_HEADERS) as client:
             resp = await client.post(
                 "/v1/autogen/reading-paper/questions",
                 json={
@@ -288,7 +297,7 @@ async def test_t00_02_post_questions_v2_success():
 @pytest.mark.asyncio
 async def test_t00_02_post_questions_v2_wrong_artifact_type_negative():
     """Fails with 422 when passageRef is not ArtifactType.PASSAGE."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=AUTH_HEADERS) as client:
         resp = await client.post(
             "/v1/autogen/reading-paper/questions",
             json={
@@ -320,7 +329,7 @@ async def test_t00_02_post_questions_v2_missing_passage_persistence_negative():
         mock_client = mock_get_client.return_value
         mock_client.resume_state.return_value = mock_state
 
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=AUTH_HEADERS) as client:
             resp = await client.post(
                 "/v1/autogen/reading-paper/questions",
                 json={

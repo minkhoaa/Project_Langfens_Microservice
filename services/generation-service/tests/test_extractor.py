@@ -261,9 +261,16 @@ class TestIngestSource:
 
 @pytest.mark.asyncio
 class TestIngestRouterEndpoint:
+    AUTH_KEY = "test-extractor-auth-key"
+    AUTH_HEADERS = {"X-Internal-Service-Key": AUTH_KEY}
+
+    @pytest.fixture(autouse=True)
+    def setup_auth(self, monkeypatch):
+        monkeypatch.setenv("EXAMSERVICE__INTERNAL__API__KEY", self.AUTH_KEY)
+
     async def test_ingest_endpoint_valid_text(self):
         text = "Linguistic Relativity Hypothesis\n\n" + make_words(650, "linguistics")
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/source/ingest",
                 json={"payload": text, "type": "text", "title": "Custom Title"},
@@ -275,7 +282,7 @@ class TestIngestRouterEndpoint:
             assert data["sourceType"] == "text"
 
     async def test_ingest_endpoint_too_short_returns_422(self):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/source/ingest",
                 json={"payload": "Too short content", "type": "text"},
@@ -284,7 +291,7 @@ class TestIngestRouterEndpoint:
             assert "too short" in resp.json()["detail"].lower()
 
     async def test_ingest_endpoint_ssrf_returns_422(self):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/source/ingest",
                 json={"payload": "http://127.0.0.1/private", "type": "url"},
@@ -294,7 +301,7 @@ class TestIngestRouterEndpoint:
 
     async def test_ingest_endpoint_content_preview_and_metadata(self):
         text = "Cognitive Linguistics\n\n" + make_words(650, "linguistics")
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/source/ingest",
                 json={"payload": text, "type": "text", "title": "Cognitive Linguistics"},
@@ -311,7 +318,7 @@ class TestIngestRouterEndpoint:
 
     async def test_ingest_endpoint_payload_exceeding_5mb_returns_422(self):
         huge_payload = "X" * (5 * 1024 * 1024 + 100)
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/source/ingest",
                 json={"payload": huge_payload, "type": "text"},
