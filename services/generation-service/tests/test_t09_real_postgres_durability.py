@@ -17,6 +17,7 @@ import hashlib
 import re
 from pathlib import Path
 import subprocess
+import urllib.request
 from typing import Any, Dict, List, Tuple
 from uuid import UUID, uuid4
 
@@ -40,6 +41,40 @@ from app.persistence.models import (
 
 REAL_SERVICE_URL = "http://127.0.0.1:5099"
 REAL_API_KEY = "test-only-ephemeral-secret-key-phase09"
+
+
+def is_service_available() -> bool:
+    """Whether the live exam-service process is reachable on the real-test port.
+
+    Used as a module-level skipif guard so a machine without the service running
+    skips cleanly instead of erroring mid-test. Never raises.
+    """
+    try:
+        req = urllib.request.Request(f"{REAL_SERVICE_URL}/healthz", method="GET")
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return 200 <= resp.status < 500
+    except Exception:
+        return False
+
+
+def is_docker_postgres_available() -> bool:
+    """Whether a real PostgreSQL exam database is reachable for these durability tests.
+
+    Returns False instead of skipping when docker itself is missing or errors, so a
+    module-level ``@pytest.mark.skipif(not is_docker_postgres_available())`` still
+    produces a clean skip rather than an error during collection. Never raises.
+    """
+    try:
+        res = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}"],
+            capture_output=True, text=True, timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    if res.returncode != 0:
+        return False
+    names = res.stdout.split()
+    return any("exam-database" in n or "exam-db-server" in n or "exam_db" in n for n in names)
 
 
 def get_exam_db_container() -> str:

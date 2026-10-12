@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-10-11T11:27:14.277650+00:00",
+  "persistenceDbIdentity": {
+    "target": "ISOLATED_STAGING_TEST",
+    "requestedDatabase": "exam_test_phase15",
+    "resolvedDatabase": "exam_test_phase15",
+    "host": "localhost",
+    "port": 5433,
+    "user": "exam",
+    "isIsolatedStagingTarget": true
+  },
+  "v2TotalTokensUsed": 25076,
+  "legacyTotalTokensUsed": 100775,
+  "v2AverageTokensPerPaper": 25076.0,
+  "legacyAverageTokensPerPaper": 100775.0,
+  "v2ReportedTokens": 25076,
+  "v2EstimatedTokens": 0,
+  "v2UnknownTokens": 0,
+  "legacyReportedTokens": 100775,
+  "legacyEstimatedTokens": 0,
+  "legacyUnknownTokens": 0,
+  "pricingModel": {
+    "inputPricePerMillion": 2.0,
+    "outputPricePerMillion": 5.0,
+    "blendedPerThousandTokens": 0.0025
+  },
+  "v2TotalEstimatedCostUsd": 0.0627,
+  "legacyTotalEstimatedCostUsd": 0.2519,
+  "priorAndIncompleteCampaigns": [
+    {
+      "campaignId": "camp_G15_72751c8f84be",
+      "status": "INCOMPLETE",
+      "casesCount": 19,
+      "providerCallsCount": 45,
+      "tokensUsed": 118451,
+      "wallTimeUsedSeconds": 0.0,
+      "directory": "artifacts/refactor/phase-15/benchmarks-diagnostic-replay/campaigns/camp_G15_72751c8f84be"
+    }
+  ]
+}

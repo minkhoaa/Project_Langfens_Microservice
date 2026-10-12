@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-10-07T21:52:25.637991+00:00",
+  "totalChecks": 10,
+  "passedChecks": 10,
+  "allPassed": true,
+  "checks": [
+    {
+      "test": "exam_service_health_unauthenticated",
+      "target": "http://127.0.0.1:5199/health",
+      "expectedStatus": 200,
+      "observedStatus": 200,
+      "passed": true
+    },
+    {
+      "test": "generation_service_healthz_unauthenticated",
+      "target": "http://127.0.0.1:8192/healthz",
+      "expectedStatus": 200,
+      "observedStatus": 200,
+      "passed": true
+    },
+    {
+      "test": "dotnet_checkpoint_missing_key",
+      "target": "http://127.0.0.1:5199/api/internal/reading-paper/checkpoints/grant-operation",
+      "expectedStatus": 401,
+      "observedStatus": 401,
+      "passed": true
+    },
+    {
+      "test": "dotnet_checkpoint_wrong_key",
+      "target": "http://127.0.0.1:5199/api/internal/reading-paper/checkpoints/grant-operation",
+      "expectedStatus": 403,
+      "observedStatus": 403,
+      "passed": true
+    },
+    {
+      "test": "dotnet_checkpoint_valid_key",
+      "target": "http://127.0.0.1:5199/api/internal/reading-paper/checkpoints/grant-operation",
+      "expectedNotStatus": [
+        401,
+        403
+      ],
+      "observedStatus": 404,
+      "passed": true
+    },
+    {
+      "test": "dotnet_admin_missing_jwt",
+      "target": "http://127.0.0.1:5199/api/admin/exam/all",
+      "expectedStatus": 401,
+      "observedStatus": 401,
+      "passed": true
+    },
+    {
+      "test": "dotnet_admin_wrong_key_jwt",
+      "target": "http://127.0.0.1:5199/api/admin/exam/all",
+      "expectedStatus": 401,
+      "observedStatus": 401,
+      "passed": true
+    },
+    {
+      "test": "dotnet_admin_student_role_jwt",
+      "target": "http://127.0.0.1:5199/api/admin/exam/all",
+      "expectedStatus": 403,
+      "observedStatus": 403,
+      "passed": true
+    },
+    {
+      "test": "dotnet_admin_valid_jwt",
+      "target": "http://127.0.0.1:5199/api/admin/exam/all",
+      "expectedStatus": 200,
+      "observedStatus": 200,
+      "passed": true
+    },
+    {
+      "test": "python_gen_router_auth_enforcement_probe",
+      "target": "http://127.0.0.1:8192/api/v1/autogen/reading-paper/paper-v2",
+      "observedStatusWithoutKey": 401,
+      "serverAuthEnforced": true,
+      "passed": true
+    }
+  ]
+}

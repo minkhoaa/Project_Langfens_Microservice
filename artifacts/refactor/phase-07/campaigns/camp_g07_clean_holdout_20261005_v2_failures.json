@@ -1,0 +1,104 @@
+[
+  {
+    "caseId": "q_valid_TrueFalseNotGiven_10",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "TrueFalseNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "AMBIGUOUS_ANSWER"
+    ],
+    "durationSeconds": 10.693,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_TrueFalseNotGiven_8",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "TrueFalseNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "AMBIGUOUS_ANSWER"
+    ],
+    "durationSeconds": 12.076,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_TrueFalseNotGiven_9",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "TrueFalseNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "AMBIGUOUS_ANSWER"
+    ],
+    "durationSeconds": 7.803,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_YesNoNotGiven_10",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "YesNoNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "AMBIGUOUS_ANSWER"
+    ],
+    "durationSeconds": 9.193,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_YesNoNotGiven_4",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "YesNoNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "OVERSTATED_CERTAINTY"
+    ],
+    "durationSeconds": 10.109,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_YesNoNotGiven_8",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "YesNoNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "AMBIGUOUS_ANSWER"
+    ],
+    "durationSeconds": 11.303,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_YesNoNotGiven_9",
+    "failureType": "FALSE_POSITIVE",
+    "partition": "holdout",
+    "questionType": "YesNoNotGiven",
+    "groundTruthValid": true,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [
+      "AMBIGUOUS_ANSWER"
+    ],
+    "durationSeconds": 6.515,
+    "modelUsed": "MiniMax-Text-01"
+  },
+  {
+    "caseId": "q_valid_MultipleChoiceSingle_6",
+    "failureType": "OPERATIONAL_ERROR",
+    "partition": "holdout",
+    "questionType": "Unknown",
+    "groundTruthValid": null,
+    "expectedIssueCode": null,
+    "observedIssueCodes": [],
+    "durationSeconds": null,
+    "modelUsed": null
+  }
+]

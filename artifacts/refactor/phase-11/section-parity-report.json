@@ -1,0 +1,51 @@
+{
+  "campaignId": "camp_g11_section_parity_20261007_v1",
+  "evaluatedAt": "2026-10-07T06:46:14.709648+00:00",
+  "provider": "minimax (benchmark unlimited policy)",
+  "sectionsEvaluated": 3,
+  "totalQuestions": 40,
+  "totalPassageWords": 2470,
+  "wordCountBoundsCompliance": "100.0%",
+  "groupStructureCompliance": "100.0%",
+  "questionDistributionCompliance": "100.0%",
+  "duplicateAndLeakageRate": "0.0%",
+  "studentPayloadIsolationCompliance": "100.0%",
+  "sections": [
+    {
+      "sectionIndex": 1,
+      "title": "Academic Section 1: Multilingual Neuroscience",
+      "wordCount": 800,
+      "groupsCount": 2,
+      "questionsCount": 13,
+      "structureEvaluation": "PASS",
+      "duplicateAndConcentrationEvaluation": "PASS",
+      "editorialEvaluation": "PASS",
+      "heuristicConfidenceScore": 0.996923076923077,
+      "contentHash": "e2c2b2943e3987e3cee672e0b7582b94164d82401a795fcc2dfffe954fcc4ca9"
+    },
+    {
+      "sectionIndex": 2,
+      "title": "Academic Section 2: Cognitive Flexibility",
+      "wordCount": 820,
+      "groupsCount": 2,
+      "questionsCount": 13,
+      "structureEvaluation": "PASS",
+      "duplicateAndConcentrationEvaluation": "PASS",
+      "editorialEvaluation": "PASS",
+      "heuristicConfidenceScore": 0.9815384615384616,
+      "contentHash": "192ac1e3cc257be601b6f57c6ecb2ad56fdfbc5825629d8cde7fdb18b7464b00"
+    },
+    {
+      "sectionIndex": 3,
+      "title": "Academic Section 3: Neurodegenerative Mitigation",
+      "wordCount": 850,
+      "groupsCount": 2,
+      "questionsCount": 14,
+      "structureEvaluation": "PASS",
+      "duplicateAndConcentrationEvaluation": "PASS",
+      "editorialEvaluation": "PASS",
+      "heuristicConfidenceScore": 0.9885714285714287,
+      "contentHash": "1a7ac867f4ced9e7a67240b29d9f5d096545f1b10ffa14609ac3aeaeb1deafb9"
+    }
+  ]
+}

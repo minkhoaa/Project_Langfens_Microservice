@@ -56,6 +56,56 @@ from app.providers.models import Capability, ChatMessage, ProviderRequest
 from app.providers.registry import ProviderRegistry
 from tests.test_t08_passage_loop import DurableStoreFake
 
+
+def _new_campaign_store(client: Any, ledger: Any) -> Any:
+    from benchmark_campaign import CampaignCheckpointClient
+    if getattr(ledger, "is_unlimited", False):
+        return CampaignCheckpointClient(
+            inner=client,
+            ledger=ledger,
+            run_calls_cap=-1,
+            run_tokens_cap=-1,
+            run_wall_time_cap=-1,
+            artifact_tokens_cap=-1,
+            artifact_wall_time_cap=-1,
+        )
+    return CampaignCheckpointClient(
+        inner=client,
+        ledger=ledger,
+    )
+
+
+def _require_fresh_case(provision: Any) -> None:
+    from benchmark_campaign import CampaignAuthorizationError
+    if getattr(provision, "alreadyCompleted", False):
+        raise CampaignAuthorizationError(
+            f"Campaign case {getattr(provision, 'caseId', 'unknown')} is already completed; replay rejected."
+        )
+    if getattr(provision, "operationCount", 0) > 0:
+        raise CampaignAuthorizationError(
+            f"Campaign case {getattr(provision, 'caseId', 'unknown')} has already been used ({provision.operationCount} operations); replay rejected."
+        )
+
+def load_live_credentials() -> bool:
+    """Silently loads MiniMax credentials from deploy/envs/ai.env into environment."""
+    direct = os.environ.get("E2E_MINIMAX_API_KEY") or os.environ.get("MINIMAX_API_KEY")
+    if direct:
+        os.environ["MINIMAX_API_KEY"] = direct
+    env_file = BASE_DIR / "deploy" / "envs" / "ai.env"
+    if env_file.exists():
+        try:
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    k = k.strip()
+                    v = v.strip().strip('"').strip("'")
+                    if k and (k not in os.environ or not os.environ[k]):
+                        os.environ[k] = v
+        except OSError:
+            pass
+    return bool(os.environ.get("MINIMAX_API_KEY"))
+
 PHASE_DIR = BASE_DIR / "artifacts" / "refactor" / "phase-08"
 PHASE_DIR.mkdir(parents=True, exist_ok=True)
 CASES_DIR = PHASE_DIR / "paired-cases"
@@ -354,6 +404,7 @@ async def test_adversarial_prompt_injection(facade: GenerationFacade, tmp_db: Pa
 
 async def main():
     print(f"\n{'='*70}\nSTARTING G08 PAIRED PASSAGE BENCHMARK (LEGACY vs V2)\n{'='*70}")
+    load_live_credentials()
     tmp_db = PHASE_DIR / "paired_benchmark_temp.db"
     tmp_db.unlink(missing_ok=True)
 

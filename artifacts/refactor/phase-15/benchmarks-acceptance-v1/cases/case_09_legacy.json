@@ -1,0 +1,38 @@
+{
+  "caseIndex": 9,
+  "engine": "Legacy_V1",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LEGACY_SHADOW",
+  "campaignId": "camp_G15_d2c833c1c04f",
+  "seed": 303,
+  "runId": "bench_eafb253f728cd171152717dc4086cab4",
+  "jobId": "01c5fc43-df0b-467e-93a8-aba417dfc3b4",
+  "sourceTriple": [
+    "PMC13517498",
+    "PMC13621526",
+    "PMC13503497"
+  ],
+  "status": "FAILED",
+  "validDraft": false,
+  "failureReason": "Question 40 answer must appear in passage",
+  "versionsCount": 1,
+  "evaluatorIssues": [
+    "LEGACY_FAILURE: Question 40 answer must appear in passage"
+  ],
+  "latencySeconds": 836.2932,
+  "totalTokens": 165978,
+  "reportedTokens": 165978,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 63,
+  "uniqueProviderDispatches": 63,
+  "estimatedCostUsd": 0.414945,
+  "persistedExamId": null,
+  "draftExamId": null,
+  "isPrimaryPersisted": false,
+  "legacyCallsCount": 66,
+  "totalQuestions": 26,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

@@ -1,0 +1,38 @@
+{
+  "caseIndex": 14,
+  "engine": "Legacy_V1",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LEGACY_SHADOW",
+  "campaignId": "camp_G15_eef49d5aff21",
+  "seed": 202,
+  "runId": "bench_c3ba11fa7365d24f3514429e2558501a",
+  "jobId": "8d83156f-a2aa-4252-a580-0531851800db",
+  "sourceTriple": [
+    "PMC13503497",
+    "PMC13583341",
+    "PMC13560651"
+  ],
+  "status": "FAILED",
+  "validDraft": false,
+  "failureReason": "HTTP 422: Question 34 has an invalid short answer",
+  "versionsCount": 1,
+  "evaluatorIssues": [
+    "LEGACY_FAILURE: HTTP 422: Question 34 has an invalid short answer"
+  ],
+  "latencySeconds": 573.0031,
+  "totalTokens": 130299,
+  "reportedTokens": 130299,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 47,
+  "uniqueProviderDispatches": 47,
+  "estimatedCostUsd": 0.325748,
+  "persistedExamId": null,
+  "draftExamId": null,
+  "isPrimaryPersisted": false,
+  "legacyCallsCount": 50,
+  "totalQuestions": 40,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

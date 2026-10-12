@@ -1,0 +1,38 @@
+{
+  "caseIndex": 9,
+  "engine": "Legacy_V1",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LEGACY_SHADOW",
+  "campaignId": "camp_G15_dde0f9bd38d4",
+  "seed": 303,
+  "runId": "bench_59f71e6daa762ab818e6702e227ac239",
+  "jobId": "542defb3-0e2c-4c1a-b2d8-b4f5b3f4b2ad",
+  "sourceTriple": [
+    "PMC13517498",
+    "PMC13621526",
+    "PMC13503497"
+  ],
+  "status": "FAILED",
+  "validDraft": false,
+  "failureReason": "Failed to generate valid replacement for question 34 after 3 attempts: Replacement duplicated an existing question prompt: What is the resolution of JWST's SOSS mode?",
+  "versionsCount": 1,
+  "evaluatorIssues": [
+    "LEGACY_FAILURE: Failed to generate valid replacement for question 34 after 3 attempts: Replacement duplicated an existing question prompt: What is the resolution of JWST's SOSS"
+  ],
+  "latencySeconds": 889.0693,
+  "totalTokens": 195413,
+  "reportedTokens": 195413,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 73,
+  "uniqueProviderDispatches": 73,
+  "estimatedCostUsd": 0.488533,
+  "persistedExamId": null,
+  "draftExamId": null,
+  "isPrimaryPersisted": false,
+  "legacyCallsCount": 76,
+  "totalQuestions": 26,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

@@ -2,13 +2,14 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using exam_service.Features.ReadingPaper;
+using exam_service.Features.ReadingPaper.Contracts;
 using Xunit;
 
 namespace exam_service.Tests;
 
 public class ReadingPaperChunkStreamTests
 {
-    private sealed class ChunkedStream(List<byte[]> chunks) : Stream
+    private sealed class ChunkedStream(List<byte[]> chunks, int delayPerChunkMs = 0) : Stream
     {
         private int _chunkIndex;
         private int _chunkOffset;
@@ -28,6 +29,10 @@ public class ReadingPaperChunkStreamTests
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (_chunkIndex >= chunks.Count) return 0;
+            if (delayPerChunkMs > 0 && _chunkOffset == 0)
+            {
+                Thread.Sleep(delayPerChunkMs);
+            }
             var currentChunk = chunks[_chunkIndex];
             var available = currentChunk.Length - _chunkOffset;
             var toRead = Math.Min(available, count);
@@ -44,9 +49,13 @@ public class ReadingPaperChunkStreamTests
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct)
             => Task.FromResult(Read(buffer, offset, count));
 
-        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default)
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default)
         {
-            if (_chunkIndex >= chunks.Count) return ValueTask.FromResult(0);
+            if (_chunkIndex >= chunks.Count) return 0;
+            if (delayPerChunkMs > 0 && _chunkOffset == 0)
+            {
+                await Task.Delay(delayPerChunkMs, ct);
+            }
             var currentChunk = chunks[_chunkIndex];
             var available = currentChunk.Length - _chunkOffset;
             var toRead = Math.Min(available, buffer.Length);
@@ -57,7 +66,7 @@ public class ReadingPaperChunkStreamTests
                 _chunkIndex++;
                 _chunkOffset = 0;
             }
-            return ValueTask.FromResult(toRead);
+            return toRead;
         }
 
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
@@ -68,8 +77,11 @@ public class ReadingPaperChunkStreamTests
     private sealed class ChunkedHttpHandler(Func<Stream> streamFactory, HttpStatusCode status = HttpStatusCode.OK, string mediaType = "application/x-ndjson")
         : HttpMessageHandler
     {
+        public List<HttpRequestMessage> RecordedRequests { get; } = new();
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
+            RecordedRequests.Add(request);
             var content = new StreamContent(streamFactory());
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType);
             var response = new HttpResponseMessage(status) { Content = content };
@@ -127,6 +139,71 @@ public class ReadingPaperChunkStreamTests
     }
 
     [Fact]
+    public async Task ParseNdjson_HandlesMultipleBlankLines_AndWhitespaceBetweenChunks()
+    {
+        var expectedSection = ReadingPaperTests.Paper()[0];
+        var serializedSection = JsonSerializer.Serialize(expectedSection, ReadingPaperRules.Json);
+
+        var blankLine1 = Encoding.UTF8.GetBytes("\n\n");
+        var line1 = Encoding.UTF8.GetBytes("{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Step 1\"}\n");
+        var whitespaceOnly = Encoding.UTF8.GetBytes("   \r\n\t  \n");
+        var line2 = Encoding.UTF8.GetBytes("{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Step 2\"}\n");
+        var terminalLine = Encoding.UTF8.GetBytes($"{{\"type\":\"result\",\"section\":{serializedSection}}}\n\n");
+
+        var chunks = new List<byte[]> { blankLine1, line1, whitespaceOnly, line2, terminalLine };
+
+        var handler = new ChunkedHttpHandler(() => new ChunkedStream(chunks));
+        var http = new HttpClient(handler) { BaseAddress = new Uri("http://localhost:8080/") };
+        var client = new ReadingPaperAiClient(http);
+
+        var messages = new List<string>();
+        var result = await client.GenerateSectionAsync(
+            "test topic",
+            1,
+            expectedSection.Source,
+            (level, msg) => { messages.Add(msg); return Task.CompletedTask; },
+            CancellationToken.None
+        );
+
+        Assert.NotNull(result);
+        Assert.Equal(2, messages.Count);
+        Assert.Equal("Step 1", messages[0]);
+        Assert.Equal("Step 2", messages[1]);
+    }
+
+    [Fact]
+    public async Task ParseNdjson_IgnoresHeartbeatAndProgressLogs_UntilTerminalResult()
+    {
+        var expectedSection = ReadingPaperTests.Paper()[0];
+        var serializedSection = JsonSerializer.Serialize(expectedSection, ReadingPaperRules.Json);
+
+        var startLine = Encoding.UTF8.GetBytes("{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Run started\"}\n");
+        var hb1 = Encoding.UTF8.GetBytes("{\"type\":\"log\",\"level\":\"Debug\",\"message\":\"Heartbeat for run run_123\"}\n");
+        var hb2 = Encoding.UTF8.GetBytes("{\"type\":\"log\",\"level\":\"Debug\",\"message\":\"Heartbeat for run run_123\"}\n");
+        var terminalLine = Encoding.UTF8.GetBytes($"{{\"type\":\"result\",\"section\":{serializedSection}}}\n");
+
+        var chunks = new List<byte[]> { startLine, hb1, hb2, terminalLine };
+
+        var handler = new ChunkedHttpHandler(() => new ChunkedStream(chunks));
+        var http = new HttpClient(handler) { BaseAddress = new Uri("http://localhost:8080/") };
+        var client = new ReadingPaperAiClient(http);
+
+        var messages = new List<string>();
+        var result = await client.GenerateSectionAsync(
+            "test topic",
+            1,
+            expectedSection.Source,
+            (level, msg) => { messages.Add(msg); return Task.CompletedTask; },
+            CancellationToken.None
+        );
+
+        Assert.NotNull(result);
+        Assert.Equal(3, messages.Count);
+        Assert.Contains("Heartbeat", messages[1]);
+        Assert.Contains("Heartbeat", messages[2]);
+    }
+
+    [Fact]
     public async Task ParseNdjson_ThrowsJsonException_WhenEofReachedWithoutTerminalEvent()
     {
         var line1 = Encoding.UTF8.GetBytes("{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Working...\"}\n");
@@ -175,5 +252,69 @@ public class ReadingPaperChunkStreamTests
             client.GenerateSectionAsync("topic", 1, ReadingPaperTests.Paper()[0].Source, null, CancellationToken.None));
 
         Assert.Contains("Model returned empty response", ex.Message);
+    }
+
+    [Fact]
+    public async Task ParseNdjson_SlowClientBackpressure_DoesNotDropTerminalResult()
+    {
+        var expectedSection = ReadingPaperTests.Paper()[0];
+        var serializedSection = JsonSerializer.Serialize(expectedSection, ReadingPaperRules.Json);
+
+        var chunks = new List<byte[]>();
+        // Simulate high stream volume before terminal
+        for (int i = 0; i < 50; i++)
+        {
+            chunks.Add(Encoding.UTF8.GetBytes($"{{\"type\":\"log\",\"level\":\"Information\",\"message\":\"Progress tick {i}\"}}\n"));
+        }
+        chunks.Add(Encoding.UTF8.GetBytes($"{{\"type\":\"result\",\"section\":{serializedSection}}}\n"));
+
+        // Add 2ms artificial delay per chunk
+        var handler = new ChunkedHttpHandler(() => new ChunkedStream(chunks, delayPerChunkMs: 2));
+        var http = new HttpClient(handler) { BaseAddress = new Uri("http://localhost:8080/") };
+        var client = new ReadingPaperAiClient(http);
+
+        var msgCount = 0;
+        var result = await client.GenerateSectionAsync(
+            "topic",
+            1,
+            expectedSection.Source,
+            (level, msg) => { Interlocked.Increment(ref msgCount); return Task.CompletedTask; },
+            CancellationToken.None
+        );
+
+        Assert.NotNull(result);
+        Assert.Equal(expectedSection.Title, result.Title);
+        Assert.Equal(50, msgCount);
+    }
+
+    [Fact]
+    public void EventEnvelope_DeserializesRichV2TaxonomyAndPayloads()
+    {
+        var json = """
+        {
+            "eventId": "evt_abc12345",
+            "sequence": 42,
+            "timestamp": "2026-10-08T12:00:00Z",
+            "runId": "run_999",
+            "eventType": "RUN_COMPLETED",
+            "schemaVersion": "2.0.0",
+            "engineVersion": "2.0.0",
+            "payload": {
+                "status": "COMPLETED",
+                "runId": "run_999",
+                "finalScore": 8.5
+            }
+        }
+        """;
+
+        var envelope = JsonSerializer.Deserialize<EventEnvelope>(json);
+        Assert.NotNull(envelope);
+        Assert.Equal("evt_abc12345", envelope.EventId);
+        Assert.Equal(42, envelope.Sequence);
+        Assert.Equal(EventType.RUN_COMPLETED, envelope.EventType);
+        Assert.Equal("2.0.0", envelope.SchemaVersion);
+        Assert.Equal("2.0.0", envelope.EngineVersion);
+        Assert.Equal("COMPLETED", envelope.Payload.GetProperty("status").GetString());
+        Assert.Equal(8.5, envelope.Payload.GetProperty("finalScore").GetDouble());
     }
 }

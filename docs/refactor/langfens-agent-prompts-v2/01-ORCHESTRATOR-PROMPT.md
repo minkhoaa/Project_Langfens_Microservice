@@ -54,10 +54,16 @@ Mỗi delegation phải có: exact scope, files được sửa, canonical inputs
 
 Giữ tests/builds/benchmarks trong managed sessions hoặc thực sự await foreground commands. Record task/session IDs, logs và exit codes. Poll/wait theo tools hiện có với khoảng ngắn đủ để gửi progress khoảng 60 giây; không busy-poll vô ích, không fire-and-forget rồi report PASS.
 
-Benchmark có frozen campaign/case IDs, source-family-clean corpus, model/prompt/evaluator/caps hashes, cumulative budget và persisted reservations/status. Reconcile lost output/restart trước rerun; không lặp toàn corpus gây phí vì terminal transcript bị mất. Respect user/production hard caps; agent chạy lâu không có quyền tăng các caps đó.
+Benchmark có frozen campaign/case IDs, source-family-clean corpus, model/prompt/evaluator/caps hashes và persisted reservations/status. Reconcile lost output/restart trước rerun; không lặp toàn corpus gây phí vì terminal transcript bị mất.
+
+Chính sách benchmark MiniMax tự động và caps (mặc định cho tất cả các phase):
+1. Live benchmarks bắt buộc tự động khởi chạy và resume bằng provider MiniMax đã được cấu hình; loại bỏ hoàn toàn phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget và trạng thái chờ PENDING_AUTHORIZATION.
+2. Vô hiệu hóa toàn bộ call, token, monetary và wall-time caps do ứng dụng áp đặt cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn fallback về 15 calls / 60k tokens / 300s). Production và các provider khác giữ nguyên hard caps (15 calls / 60k tokens / 300s).
+3. Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request output/context limits; tôn trọng giới hạn thực tế phía provider.
+4. Tách biệt phục hồi cục bộ và gate: R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt.
+5. Chính sách này áp dụng mặc định cho tất cả các phase còn lại, ngăn quy trình phê duyệt thủ công tái diễn.
 
 Nếu live smoke gần đây đã PASS, inspect actual environment/config/quota trước khi ghi thiếu API key. Smoke PASS không thay semantic benchmark. Harness chưa viết là implementation task, corpus leakage là integrity failure, code exception là bug; không gom các lỗi đó vào NOT_RUN_EXTERNAL.
-
 ## E. Standards bắt buộc
 
 Giữ microservice boundaries, public routes/NDJSON, .NET authoritative durable orchestration/final persistence, accepted exact refs, immutable artifacts, writer fencing/cancel, atomic reservation/idempotency, unknown-outcome accounting, source protections và Draft/manual Publish.

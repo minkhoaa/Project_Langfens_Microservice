@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-10-10T07:44:38.115582+00:00",
+  "totalPairedPapers": 18,
+  "distinctSourceTriples": 6,
+  "v2Latency": {
+    "min": 1.059,
+    "p50": 1.378,
+    "p95": 1.903,
+    "max": 2.904
+  },
+  "legacyLatency": {
+    "min": 1.042,
+    "p50": 1.221,
+    "p95": 1.572,
+    "max": 1.933
+  },
+  "v2Tokens": {
+    "min": 149,
+    "median": 152,
+    "p95": 155,
+    "max": 155
+  },
+  "legacyTokens": {
+    "min": 48851,
+    "median": 49822,
+    "p95": 50635,
+    "max": 50635
+  },
+  "ratios": {
+    "p95LatencyRatio": 1.21,
+    "p95LatencyThreshold": 1.5,
+    "p95LatencyPass": true,
+    "medianTokenCostRatio": 0.003,
+    "medianTokenCostThreshold": 2.0,
+    "medianTokenCostPass": true
+  }
+}

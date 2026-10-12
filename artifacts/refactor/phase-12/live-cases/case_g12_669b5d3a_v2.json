@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_669b5d3a_v2",
+  "campaignId": "camp_g12_paper_minimax_669b5d3a32f8_v2",
+  "jobId": "0cebc5d1-88de-4839-9777-8962b89045b8",
+  "runId": "bench_5a3732aeb892a7ccc5a425ee6ba0bd4d",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T18:35:07.310711+00:00",
+  "error": "AI service returned 500: {\"detail\":\"Durable work exists without a pinned loop cursor\"}"
+}

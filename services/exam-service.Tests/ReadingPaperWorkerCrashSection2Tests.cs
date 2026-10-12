@@ -10,42 +10,217 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Npgsql;
 using Shared.ExamDto.Contracts.Exam.Enums;
+using exam_service.Features.ReadingPaper.Contracts;
 using Xunit;
-
 namespace exam_service.Tests;
 [Collection("DatabaseTests")]
 public class ReadingPaperWorkerCrashSection2Tests
 {
     private const string DefaultConn = "Host=localhost;Port=5433;Database=exam_test_crash_t004;Username=exam;Password=exam";
 
-    private sealed class SectionCrashHandler(List<ReadingGeneratedSection> sections) : HttpMessageHandler
+    private sealed class SectionCrashHandler(List<ReadingGeneratedSection> sections, string? connectionString = null) : HttpMessageHandler
     {
         public Dictionary<int, int> Calls { get; } = new() { [1] = 0, [2] = 0, [3] = 0 };
         public bool FailOnSection3 { get; set; } = true;
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
+            var uri = request.RequestUri?.ToString() ?? "";
             var body = request.Content?.ReadAsStringAsync(ct).GetAwaiter().GetResult() ?? "";
-            using var doc = JsonDocument.Parse(body);
-            var index = doc.RootElement.GetProperty("index").GetInt32();
-            Calls[index]++;
+            using var doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(body) ? "{}" : body);
 
-            if (index == 3 && FailOnSection3)
+            if (doc.RootElement.TryGetProperty("index", out var idxProp))
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadGateway)
+                var index = idxProp.GetInt32();
+                Calls[index]++;
+
+                if (index == 3 && FailOnSection3)
                 {
-                    Content = new StringContent("{\"error\":\"Simulated crash after section 2 during section 3\"}", Encoding.UTF8, "application/json")
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadGateway)
+                    {
+                        Content = new StringContent("{\"error\":\"Simulated crash after section 2 during section 3\"}", Encoding.UTF8, "application/json")
+                    });
+                }
+
+                var section = sections[index - 1];
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(section, ReadingPaperRules.Json), Encoding.UTF8, "application/json")
                 });
             }
 
-            var section = sections[index - 1];
+            if (uri.Contains("paper-v2"))
+            {
+                var runId = doc.RootElement.TryGetProperty("runId", out var rP) ? rP.GetString() ?? "" : "";
+                var epoch = doc.RootElement.TryGetProperty("epoch", out var eP) ? eP.GetInt32() : 1;
+                var leaseOwner = doc.RootElement.TryGetProperty("leaseOwner", out var lP) && lP.TryGetGuid(out var lGuid) ? lGuid : Guid.Empty;
+
+                var conn = connectionString ?? Environment.GetEnvironmentVariable("READING_TEST_POSTGRES") ?? DefaultConn;
+                var options = new DbContextOptionsBuilder<ExamDbContext>()
+                    .UseNpgsql(conn, npg => {
+                        npg.ConfigureDataSource(dataSource => dataSource.EnableDynamicJson());
+                        npg.EnableRetryOnFailure();
+                    }).Options;
+                using var db = new ExamDbContext(options);
+
+                var allHeads = db.ReadingPaperArtifactHeads.AsNoTracking().Where(h => h.RunId == runId).ToDictionary(h => h.ArtifactId);
+                var bpId = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
+                var bpHead = allHeads.TryGetValue(bpId, out var bph) ? bph : allHeads.Values.First(h => h.ArtifactId.StartsWith("art_blueprint_"));
+                var bpRef = new ArtifactRef(bpHead.ArtifactId, ArtifactType.ExamBlueprint, bpHead.AcceptedVersion, bpHead.AcceptedHash);
+
+                var s1Head = allHeads["art_section_1"];
+                var s2Head = allHeads["art_section_2"];
+                var s3Head = allHeads["art_section_3"];
+                var secRefs = new List<ArtifactRef>
+                {
+                    new(s1Head.ArtifactId, ArtifactType.Section, s1Head.AcceptedVersion, s1Head.AcceptedHash),
+                    new(s2Head.ArtifactId, ArtifactType.Section, s2Head.AcceptedVersion, s2Head.AcceptedHash),
+                    new(s3Head.ArtifactId, ArtifactType.Section, s3Head.AcceptedVersion, s3Head.AcceptedHash),
+                };
+
+                var pRefs = new List<ArtifactRef>();
+                for (int i = 1; i <= 3; i++)
+                {
+                    var pHead = allHeads.TryGetValue($"art_passage_s{i}", out var ph) ? ph : allHeads[$"art_passage_{i}"];
+                    pRefs.Add(new ArtifactRef(pHead.ArtifactId, ArtifactType.Passage, pHead.AcceptedVersion, pHead.AcceptedHash));
+                }
+
+                var qRefs = new List<ArtifactRef>();
+                for (int i = 1; i <= 40; i++)
+                {
+                    var qHead = allHeads[$"art_q_{i}"];
+                    qRefs.Add(new ArtifactRef(qHead.ArtifactId, ArtifactType.Question, qHead.AcceptedVersion, qHead.AcceptedHash));
+                }
+
+                var pParents = new List<ArtifactRef> { bpRef }.Concat(secRefs).Concat(pRefs).Concat(qRefs).ToList();
+
+                var secArtifacts = db.ReadingPaperArtifacts.AsNoTracking()
+                    .Where(a => a.RunId == runId && a.ArtifactType == "Section")
+                    .OrderBy(a => a.ArtifactId)
+                    .ToList();
+                var secPayloads = secArtifacts.Select(a => JsonDocument.Parse(a.PayloadJson).RootElement.Clone()).ToList();
+
+                var paperId = $"art_paper_{runId[..Math.Min(8, runId.Length)]}";
+                var payload = new
+                {
+                    paperId,
+                    runId,
+                    title = "Marine Ecosystem Dynamics",
+                    totalQuestions = 40,
+                    blueprintRef = bpRef,
+                    sectionRefs = secRefs,
+                    passageRefs = pRefs,
+                    questionRefs = qRefs,
+                    sections = secPayloads
+                };
+                var pDoc = JsonDocument.Parse(JsonSerializer.Serialize(payload, ReadingPaperRules.Json));
+                var pHash = ArtifactEnvelope.ComputeContentHash(pDoc.RootElement, pParents);
+                var pEnv = new ArtifactEnvelope(paperId, ArtifactType.ReadingPaper, 1, runId, null, "2.0.0", pHash, DateTime.UtcNow, "2.0.0", pDoc.RootElement.Clone(), pParents);
+
+                var existingPaper = db.ReadingPaperArtifacts.FirstOrDefault(a => a.RunId == runId && a.ArtifactId == paperId);
+                if (existingPaper == null)
+                {
+                    db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+                    {
+                        Id = Guid.NewGuid(),
+                        RunId = runId,
+                        ArtifactId = paperId,
+                        ArtifactType = ArtifactType.ReadingPaper.ToString(),
+                        Version = 1,
+                        ContentHash = pHash,
+                        PayloadJson = pDoc.RootElement.GetRawText(),
+                        ParentRefsJson = JsonSerializer.Serialize(pParents, LoopEngineJson.Options),
+                        EnvelopeJson = JsonSerializer.Serialize(pEnv, LoopEngineJson.Options),
+                        CreatedAt = pEnv.CreatedAt
+                    });
+                }
+                var existingHead = db.ReadingPaperArtifactHeads.FirstOrDefault(h => h.RunId == runId && h.ArtifactId == paperId);
+                if (existingHead == null)
+                {
+                    db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+                    {
+                        Id = Guid.NewGuid(),
+                        RunId = runId,
+                        ArtifactId = paperId,
+                        AcceptedVersion = 1,
+                        AcceptedHash = pHash,
+                        UpdatedAt = pEnv.CreatedAt
+                    });
+                }
+                db.SaveChanges();
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(pEnv, LoopEngineJson.Options), Encoding.UTF8, "application/json")
+                });
+            }
+
+            if (uri.Contains("paper-evaluate"))
+            {
+                var paperEnvObj = JsonSerializer.Deserialize<ArtifactEnvelope>(doc.RootElement.GetProperty("paperEnvelope").GetRawText(), LoopEngineJson.Options)!;
+                var targetRef = paperEnvObj.ToRef();
+                var inputDeps = paperEnvObj.ParentRefs;
+
+                var evals = ReadingPaperFinalSnapshot.RequiredEvaluators.Select(kv => new EvaluationResult(
+                    EvaluationId: $"eval_{kv.Key}_{Guid.NewGuid():N}"[..24],
+                    EvaluatorId: kv.Key,
+                    EvaluatorVersion: kv.Value,
+                    TargetRef: targetRef,
+                    Status: EvaluationStatus.PASS,
+                    Issues: new List<Issue>(),
+                    Score: 1.0,
+                    InputDependencyRefs: inputDeps,
+                    Provider: "test-provider",
+                    Model: "test-model",
+                    PromptVersion: "1.0.0",
+                    ElapsedMs: 100.0,
+                    Usage: new UsageMetrics(100, 50, 150, 0.001),
+                    EvaluatedAt: DateTime.UtcNow
+                )).ToList();
+
+                var conn = connectionString ?? Environment.GetEnvironmentVariable("READING_TEST_POSTGRES") ?? DefaultConn;
+                var options = new DbContextOptionsBuilder<ExamDbContext>()
+                    .UseNpgsql(conn, npg => {
+                        npg.ConfigureDataSource(dataSource => dataSource.EnableDynamicJson());
+                        npg.EnableRetryOnFailure();
+                    }).Options;
+                using var db = new ExamDbContext(options);
+
+                var runId = doc.RootElement.TryGetProperty("runId", out var rP) ? rP.GetString() ?? "" : "";
+                foreach (var eval in evals)
+                {
+                    if (!db.ReadingPaperEvaluations.Any(e => e.RunId == runId && e.EvaluationId == eval.EvaluationId))
+                    {
+                        db.ReadingPaperEvaluations.Add(new ReadingPaperEvaluation
+                        {
+                            Id = Guid.NewGuid(),
+                            RunId = runId,
+                            EvaluationId = eval.EvaluationId,
+                            EvaluatorId = eval.EvaluatorId,
+                            EvaluatorVersion = eval.EvaluatorVersion,
+                            TargetArtifactId = eval.TargetRef.ArtifactId,
+                            TargetVersion = eval.TargetRef.Version,
+                            TargetContentHash = eval.TargetRef.ContentHash,
+                            Status = eval.Status.ToString(),
+                            IsPass = eval.Status == EvaluationStatus.PASS,
+                            PayloadJson = JsonSerializer.Serialize(eval, LoopEngineJson.Options),
+                            CreatedAt = eval.EvaluatedAt
+                        });
+                    }
+                }
+                db.SaveChanges();
+
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(evals, LoopEngineJson.Options), Encoding.UTF8, "application/json")
+                });
+            }
+
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(JsonSerializer.Serialize(section, ReadingPaperRules.Json), Encoding.UTF8, "application/json")
+                Content = new StringContent("{}", Encoding.UTF8, "application/json")
             });
         }
     }
-
     [Fact]
     public async Task WorkerCrashAfterSection2_PreservesCheckpoints1And2_AndRetryOnlyExecutesSection3()
     {
@@ -60,7 +235,7 @@ public class ReadingPaperWorkerCrashSection2Tests
         }
 
         var fixture = ReadingPaperTests.Paper();
-        var handler = new SectionCrashHandler(fixture);
+        var handler = new SectionCrashHandler(fixture, connection);
 
         var services = new ServiceCollection();
         services.AddDbContext<ExamDbContext>(options => options.UseNpgsql(connection, npg =>
@@ -100,7 +275,8 @@ public class ReadingPaperWorkerCrashSection2Tests
 
         var worker = new ReadingPaperWorker(
             provider.GetRequiredService<IServiceScopeFactory>(),
-            NullLogger<ReadingPaperWorker>.Instance
+            NullLogger<ReadingPaperWorker>.Instance,
+            R03CapsProfileTests.ApprovedFromDeployEnvFile()
         );
 
         await worker.StartAsync(CancellationToken.None);
@@ -190,7 +366,7 @@ public class ReadingPaperWorkerCrashSection2Tests
         List<int> RequestedSlots
     );
 
-    private sealed class V2QuestionConsumerHandler : HttpMessageHandler
+    private sealed class V2QuestionConsumerHandler(string? connectionString = null) : HttpMessageHandler
     {
         public int QuestionCalls { get; private set; }
         public List<string> RequestedPassageRefs { get; } = [];
@@ -324,16 +500,269 @@ public class ReadingPaperWorkerCrashSection2Tests
             }
 
             // Section generation
-            using var sDoc = JsonDocument.Parse(body);
-            var index = sDoc.RootElement.TryGetProperty("index", out var idxP) ? idxP.GetInt32() : 1;
-            var passageText = index switch
+            using var sDoc = JsonDocument.Parse(string.IsNullOrWhiteSpace(body) ? "{}" : body);
+
+            if (uri.Contains("paper-v2"))
+            {
+                var pRunId = sDoc.RootElement.TryGetProperty("runId", out var rP) ? rP.GetString() ?? "" : "";
+                var epoch = sDoc.RootElement.TryGetProperty("epoch", out var eP) ? eP.GetInt32() : 1;
+                var leaseOwner = sDoc.RootElement.TryGetProperty("leaseOwner", out var lP) && lP.TryGetGuid(out var lGuid) ? lGuid : Guid.Empty;
+
+                var conn = connectionString ?? Environment.GetEnvironmentVariable("READING_TEST_POSTGRES") ?? DefaultConn;
+                var options = new DbContextOptionsBuilder<ExamDbContext>()
+                    .UseNpgsql(conn, npg => {
+                        npg.ConfigureDataSource(dataSource => dataSource.EnableDynamicJson());
+                        npg.EnableRetryOnFailure();
+                    }).Options;
+                using var db = new ExamDbContext(options);
+
+                var allHeads = db.ReadingPaperArtifactHeads.AsNoTracking().Where(h => h.RunId == pRunId).ToDictionary(h => h.ArtifactId);
+                var bpId = $"art_blueprint_{pRunId[..Math.Min(8, pRunId.Length)]}";
+                var bpHead = allHeads.TryGetValue(bpId, out var bph) ? bph : allHeads.Values.First(h => h.ArtifactId.StartsWith("art_blueprint_"));
+                var bpRef = new ArtifactRef(bpHead.ArtifactId, ArtifactType.ExamBlueprint, bpHead.AcceptedVersion, bpHead.AcceptedHash);
+
+                var s1Head = allHeads["art_section_1"];
+                var secRefs = new List<ArtifactRef>
+                {
+                    new(s1Head.ArtifactId, ArtifactType.Section, s1Head.AcceptedVersion, s1Head.AcceptedHash),
+                };
+                if (allHeads.TryGetValue("art_section_2", out var s2Head))
+                {
+                    secRefs.Add(new ArtifactRef(s2Head.ArtifactId, ArtifactType.Section, s2Head.AcceptedVersion, s2Head.AcceptedHash));
+                }
+                if (allHeads.TryGetValue("art_section_3", out var s3Head))
+                {
+                    secRefs.Add(new ArtifactRef(s3Head.ArtifactId, ArtifactType.Section, s3Head.AcceptedVersion, s3Head.AcceptedHash));
+                }
+
+                var pRefs = new List<ArtifactRef>();
+                for (int i = 1; i <= secRefs.Count; i++)
+                {
+                    var pHead = allHeads.TryGetValue($"art_passage_s{i}", out var ph) ? ph : allHeads[$"art_passage_{i}"];
+                    pRefs.Add(new ArtifactRef(pHead.ArtifactId, ArtifactType.Passage, pHead.AcceptedVersion, pHead.AcceptedHash));
+                }
+
+                var totalQs = secRefs.Count == 1 ? 13 : 40;
+                var qRefs = new List<ArtifactRef>();
+                for (int i = 1; i <= totalQs; i++)
+                {
+                    var qHead = allHeads[$"art_q_{i}"];
+                    qRefs.Add(new ArtifactRef(qHead.ArtifactId, ArtifactType.Question, qHead.AcceptedVersion, qHead.AcceptedHash));
+                }
+
+                var pParents = new List<ArtifactRef> { bpRef }.Concat(secRefs).Concat(pRefs).Concat(qRefs).ToList();
+
+                var secArtifacts = db.ReadingPaperArtifacts.AsNoTracking()
+                    .Where(a => a.RunId == pRunId && a.ArtifactType == "Section")
+                    .OrderBy(a => a.ArtifactId)
+                    .ToList();
+                var secPayloads = secArtifacts.Select(a => JsonDocument.Parse(a.PayloadJson).RootElement.Clone()).ToList();
+
+                var paperId = $"art_paper_{pRunId[..Math.Min(8, pRunId.Length)]}";
+                var payload = new
+                {
+                    paperId,
+                    runId = pRunId,
+                    title = "Cross-Disciplinary Three Section Full Paper",
+                    totalQuestions = totalQs,
+                    blueprintRef = bpRef,
+                    sectionRefs = secRefs,
+                    passageRefs = pRefs,
+                    questionRefs = qRefs,
+                    sections = secPayloads
+                };
+                var pDoc = JsonDocument.Parse(JsonSerializer.Serialize(payload, ReadingPaperRules.Json));
+                var pHash = ArtifactEnvelope.ComputeContentHash(pDoc.RootElement, pParents);
+                var pEnv = new ArtifactEnvelope(paperId, ArtifactType.ReadingPaper, 1, pRunId, null, "2.0.0", pHash, DateTime.UtcNow, "2.0.0", pDoc.RootElement.Clone(), pParents);
+
+                var existingPaper = db.ReadingPaperArtifacts.FirstOrDefault(a => a.RunId == pRunId && a.ArtifactId == paperId);
+                if (existingPaper == null)
+                {
+                    db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+                    {
+                        Id = Guid.NewGuid(),
+                        RunId = pRunId,
+                        ArtifactId = paperId,
+                        ArtifactType = ArtifactType.ReadingPaper.ToString(),
+                        Version = 1,
+                        ContentHash = pHash,
+                        PayloadJson = pDoc.RootElement.GetRawText(),
+                        ParentRefsJson = JsonSerializer.Serialize(pParents, LoopEngineJson.Options),
+                        EnvelopeJson = JsonSerializer.Serialize(pEnv, LoopEngineJson.Options),
+                        CreatedAt = pEnv.CreatedAt
+                    });
+                }
+                var existingHead = db.ReadingPaperArtifactHeads.FirstOrDefault(h => h.RunId == pRunId && h.ArtifactId == paperId);
+                if (existingHead == null)
+                {
+                    db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+                    {
+                        Id = Guid.NewGuid(),
+                        RunId = pRunId,
+                        ArtifactId = paperId,
+                        AcceptedVersion = 1,
+                        AcceptedHash = pHash,
+                        UpdatedAt = pEnv.CreatedAt
+                    });
+                }
+                db.SaveChanges();
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(pEnv, LoopEngineJson.Options), Encoding.UTF8, "application/json")
+                });
+            }
+
+            if (uri.Contains("paper-evaluate"))
+            {
+                var paperEnvObj = JsonSerializer.Deserialize<ArtifactEnvelope>(sDoc.RootElement.GetProperty("paperEnvelope").GetRawText(), LoopEngineJson.Options)!;
+                var targetRef = paperEnvObj.ToRef();
+                var inputDeps = paperEnvObj.ParentRefs;
+
+                var evals = ReadingPaperFinalSnapshot.RequiredEvaluators.Select(kv => new EvaluationResult(
+                    EvaluationId: $"eval_{kv.Key}_{Guid.NewGuid():N}"[..24],
+                    EvaluatorId: kv.Key,
+                    EvaluatorVersion: kv.Value,
+                    TargetRef: targetRef,
+                    Status: EvaluationStatus.PASS,
+                    Issues: new List<Issue>(),
+                    Score: 1.0,
+                    InputDependencyRefs: inputDeps,
+                    Provider: "test-provider",
+                    Model: "test-model",
+                    PromptVersion: "1.0.0",
+                    ElapsedMs: 100.0,
+                    Usage: new UsageMetrics(100, 50, 150, 0.001),
+                    EvaluatedAt: DateTime.UtcNow
+                )).ToList();
+
+                var conn = connectionString ?? Environment.GetEnvironmentVariable("READING_TEST_POSTGRES") ?? DefaultConn;
+                var options = new DbContextOptionsBuilder<ExamDbContext>()
+                    .UseNpgsql(conn, npg => {
+                        npg.ConfigureDataSource(dataSource => dataSource.EnableDynamicJson());
+                        npg.EnableRetryOnFailure();
+                    }).Options;
+                using var db = new ExamDbContext(options);
+
+                var runId = sDoc.RootElement.TryGetProperty("runId", out var rP) ? rP.GetString() ?? "" : "";
+                foreach (var eval in evals)
+                {
+                    if (!db.ReadingPaperEvaluations.Any(e => e.RunId == runId && e.EvaluationId == eval.EvaluationId))
+                    {
+                        db.ReadingPaperEvaluations.Add(new ReadingPaperEvaluation
+                        {
+                            Id = Guid.NewGuid(),
+                            RunId = runId,
+                            EvaluationId = eval.EvaluationId,
+                            EvaluatorId = eval.EvaluatorId,
+                            EvaluatorVersion = eval.EvaluatorVersion,
+                            TargetArtifactId = eval.TargetRef.ArtifactId,
+                            TargetVersion = eval.TargetRef.Version,
+                            TargetContentHash = eval.TargetRef.ContentHash,
+                            Status = eval.Status.ToString(),
+                            IsPass = eval.Status == EvaluationStatus.PASS,
+                            PayloadJson = JsonSerializer.Serialize(eval, LoopEngineJson.Options),
+                            CreatedAt = eval.EvaluatedAt
+                        });
+                    }
+                }
+                db.SaveChanges();
+
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(evals, LoopEngineJson.Options), Encoding.UTF8, "application/json")
+                });
+            }
+
+            if (uri.Contains("section-v2"))
+            {
+                var secIdx = sDoc.RootElement.TryGetProperty("sectionIndex", out var sIdx) ? sIdx.GetInt32() : (sDoc.RootElement.TryGetProperty("index", out var iIdx) ? iIdx.GetInt32() : 1);
+                var passageText = secIdx switch
+                {
+                    1 => string.Join(" ", Enumerable.Repeat("Academic research discusses marine ecosystem and ocean biodiversity.", 100)),
+                    2 => string.Join(" ", Enumerable.Repeat("Quantum processor executes syndrome measurements for logical qubits.", 100)),
+                    3 => string.Join(" ", Enumerable.Repeat("Smart meters deployed in low-voltage distribution networks operate under harsh conditions.", 80)),
+                    _ => string.Join(" ", Enumerable.Repeat("Academic research discusses marine ecosystem and ocean biodiversity.", 100))
+                };
+                var pmc = secIdx switch
+                {
+                    1 => "PMC13560651",
+                    2 => "PMC13407692",
+                    3 => "PMC13517498",
+                    _ => "PMC13560651"
+                };
+
+                List<ReadingGeneratedGroup> secGroups;
+                if (secIdx == 3)
+                {
+                    var ynngOptions = new List<string> { "YES", "NO", "NOT GIVEN" };
+                    var s3Quote = "Smart meters deployed in low-voltage distribution networks operate under harsh conditions.";
+                    var s3Ans = "harsh conditions";
+                    var g1Qs = Enumerable.Range(27, 7).Select(n =>
+                        new ReadingGeneratedQuestion(n, $"Do smart meter conditions in grid district [{n}] affect measurement reliability?", n % 3 == 0 ? "YES" : n % 3 == 1 ? "NO" : "NOT GIVEN", ynngOptions, s3Quote, s3Quote)
+                    ).ToList();
+                    var g2Qs = Enumerable.Range(34, 7).Select(n =>
+                        new ReadingGeneratedQuestion(n, $"Under what conditions do low-voltage smart meters operate in district [{n}]?", s3Ans, new List<string>(), s3Quote, s3Quote)
+                    ).ToList();
+                    secGroups = new List<ReadingGeneratedGroup>
+                    {
+                        new("YES_NO_NOT_GIVEN", "Do the following statements agree with the views/claims of the writer in the reading passage?", g1Qs),
+                        new("SHORT_ANSWER", "Answer the questions below. Choose NO MORE THAN THREE WORDS from the passage for each answer.", g2Qs)
+                    };
+                }
+                else if (secIdx == 2)
+                {
+                    var mcqOpts = new List<string> { "A. First choice", "B. Second choice", "C. Third choice", "D. Fourth choice" };
+                    var s2Quote = "Quantum processor executes syndrome measurements for logical qubits.";
+                    var g1Qs = Enumerable.Range(14, 6).Select(n =>
+                        new ReadingGeneratedQuestion(n, $"Which architecture applies to physical qubit [{n}]?", "A. First choice", mcqOpts, s2Quote, s2Quote)
+                    ).ToList();
+                    var g2Qs = Enumerable.Range(20, 7).Select(n =>
+                        new ReadingGeneratedQuestion(n, $"Syndrome measurements evaluate [{n}].", "logical qubits", new List<string>(), s2Quote, s2Quote)
+                    ).ToList();
+                    secGroups = new List<ReadingGeneratedGroup>
+                    {
+                        new("MULTIPLE_CHOICE_SINGLE", "Choose the correct letter, A, B, C or D.", g1Qs),
+                        new("SUMMARY_COMPLETION", "Complete the summary below. Choose NO MORE THAN TWO WORDS from the passage for each answer.", g2Qs)
+                    };
+                }
+                else
+                {
+                    var quoteStr = "Academic research discusses marine ecosystem and ocean biodiversity.";
+                    var tfngOptions = new List<string> { "TRUE", "FALSE", "NOT GIVEN" };
+                    var g1Qs = Enumerable.Range(1, 7).Select(n =>
+                        new ReadingGeneratedQuestion(n, $"Statement {n} discusses marine biodiversity.", n % 3 == 1 ? "TRUE" : n % 3 == 2 ? "FALSE" : "NOT GIVEN", tfngOptions, quoteStr, "Detailed research confirms that marine biodiversity is actively studied in the ocean.")
+                    ).ToList();
+                    var g2Qs = Enumerable.Range(8, 6).Select(n =>
+                        new ReadingGeneratedQuestion(n, $"Academic research analyzes marine [{n}].", "ocean biodiversity", new List<string>(), quoteStr, "The passage explicitly notes that research focuses on ocean biodiversity in ecosystems.")
+                    ).ToList();
+                    secGroups = new List<ReadingGeneratedGroup>
+                    {
+                        new("TRUE_FALSE_NOT_GIVEN", "Do the following statements agree with the information given in the reading passage?", g1Qs),
+                        new("SENTENCE_COMPLETION", "Complete the sentences below. Choose NO MORE THAN THREE WORDS from the passage for each answer.", g2Qs)
+                    };
+                }
+
+                var secResult = new ReadingGeneratedSection(
+                    $"Passage {secIdx} Title",
+                    passageText,
+                    new ReadingSource(pmc, $"Title {secIdx}", null, "https://url", "CC-BY-4.0", 800),
+                    secGroups
+                );
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(secResult, ReadingPaperRules.Json), Encoding.UTF8, "application/json")
+                });
+            }
+
+            var index = sDoc.RootElement.TryGetProperty("index", out var idxP) ? idxP.GetInt32() : (sDoc.RootElement.TryGetProperty("sectionIndex", out var secIdxP) ? secIdxP.GetInt32() : 1);
+            var passageTextDefault = index switch
             {
                 1 => string.Join(" ", Enumerable.Repeat("Academic research discusses marine ecosystem and ocean biodiversity.", 100)),
                 2 => string.Join(" ", Enumerable.Repeat("Quantum processor executes syndrome measurements for logical qubits.", 100)),
                 3 => string.Join(" ", Enumerable.Repeat("Smart meters deployed in low-voltage distribution networks operate under harsh conditions.", 80)),
                 _ => string.Join(" ", Enumerable.Repeat("Academic research discusses marine ecosystem and ocean biodiversity.", 100))
             };
-            var pmc = index switch
+            var pmcDefault = index switch
             {
                 1 => "PMC13560651",
                 2 => "PMC13407692",
@@ -354,8 +783,8 @@ public class ReadingPaperWorkerCrashSection2Tests
 
             var section = new ReadingGeneratedSection(
                 $"Passage {index} Title",
-                passageText,
-                new ReadingSource(pmc, $"Title {index}", null, "https://url", "CC-BY-4.0", 800),
+                passageTextDefault,
+                new ReadingSource(pmcDefault, $"Title {index}", null, "https://url", "CC-BY-4.0", 800),
                 initialGroups
             );
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
@@ -364,12 +793,11 @@ public class ReadingPaperWorkerCrashSection2Tests
             });
         }
     }
-
     [Fact]
     public async Task WorkerV2QuestionConsumer_MultiSection_SelectsDistinctSectionPassageRefs()
     {
         var connection = Environment.GetEnvironmentVariable("READING_TEST_POSTGRES") ?? DefaultConn;
-        var handler = new V2QuestionConsumerHandler();
+        var handler = new V2QuestionConsumerHandler(connection);
 
         var services = new ServiceCollection();
         services.AddDbContext<ExamDbContext>(options => options.UseNpgsql(connection, npg =>
@@ -389,10 +817,10 @@ public class ReadingPaperWorkerCrashSection2Tests
         Guid jobId;
         string expectedRunId;
         string expectedBpId;
-        var expectedBpHash = "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1";
-        var s1PassageHash = "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1";
-        var s2PassageHash = "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2";
-        var s3PassageHash = "a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3";
+        string expectedBpHash;
+        string s1PassageHash;
+        string s2PassageHash;
+        string s3PassageHash;
 
         using (var scope = provider.CreateScope())
         {
@@ -415,7 +843,16 @@ public class ReadingPaperWorkerCrashSection2Tests
             };
             db.ReadingPaperJobs.Add(job);
 
-            // Seed exact PostgreSQL heads for blueprint and all 3 section passages!
+            var bpDoc = JsonDocument.Parse(JsonSerializer.Serialize(new { totalQuestions = 40, targetWordCountMin = 2150, targetWordCountMax = 2750 }, ReadingPaperRules.Json));
+            var bpParents = new List<ArtifactRef>();
+            expectedBpHash = ArtifactEnvelope.ComputeContentHash(bpDoc.RootElement, bpParents);
+            var bpEnv = new ArtifactEnvelope(expectedBpId, ArtifactType.ExamBlueprint, 1, expectedRunId, null, "2.0.0", expectedBpHash, DateTime.UtcNow, "2.0.0", bpDoc.RootElement.Clone(), bpParents);
+            db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+            {
+                Id = Guid.NewGuid(), RunId = expectedRunId, ArtifactId = expectedBpId, ArtifactType = ArtifactType.ExamBlueprint.ToString(),
+                Version = 1, ContentHash = expectedBpHash, PayloadJson = bpDoc.RootElement.GetRawText(), ParentRefsJson = "[]",
+                EnvelopeJson = JsonSerializer.Serialize(bpEnv, LoopEngineJson.Options), CreatedAt = DateTime.UtcNow
+            });
             db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
             {
                 RunId = expectedRunId,
@@ -424,36 +861,55 @@ public class ReadingPaperWorkerCrashSection2Tests
                 AcceptedHash = expectedBpHash,
                 UpdatedAt = DateTime.UtcNow
             });
-            db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+
+            var passageSources = new[] {
+                new ReadingSource("PMC13560651", "Marine Title", null, "https://url/1", "CC-BY-4.0", 800),
+                new ReadingSource("PMC13407692", "Quantum Title", null, "https://url/2", "CC-BY-4.0", 800),
+                new ReadingSource("PMC13517498", "Smart Grid Title", null, "https://url/3", "CC-BY-4.0", 800)
+            };
+            var passageTexts = new[] {
+                string.Join(" ", Enumerable.Repeat("Academic research discusses marine ecosystem and ocean biodiversity.", 100)),
+                string.Join(" ", Enumerable.Repeat("Quantum processor executes syndrome measurements for logical qubits.", 100)),
+                string.Join(" ", Enumerable.Repeat("Smart meters deployed in low-voltage distribution networks operate under harsh conditions.", 80))
+            };
+            var passageHashes = new string[3];
+
+            for (int i = 1; i <= 3; i++)
             {
-                RunId = expectedRunId,
-                ArtifactId = "art_passage_s1",
-                AcceptedVersion = 1,
-                AcceptedHash = s1PassageHash,
-                UpdatedAt = DateTime.UtcNow
-            });
-            db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
-            {
-                RunId = expectedRunId,
-                ArtifactId = "art_passage_s2",
-                AcceptedVersion = 1,
-                AcceptedHash = s2PassageHash,
-                UpdatedAt = DateTime.UtcNow
-            });
-            db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
-            {
-                RunId = expectedRunId,
-                ArtifactId = "art_passage_s3",
-                AcceptedVersion = 1,
-                AcceptedHash = s3PassageHash,
-                UpdatedAt = DateTime.UtcNow
-            });
+                var pId = $"art_passage_s{i}";
+                var pDoc = JsonDocument.Parse(JsonSerializer.Serialize(new { text = passageTexts[i - 1], passage = passageTexts[i - 1], wordCount = 800, source = passageSources[i - 1] }, ReadingPaperRules.Json));
+                var pParents = new List<ArtifactRef> { bpEnv.ToRef() };
+                var pHash = ArtifactEnvelope.ComputeContentHash(pDoc.RootElement, pParents);
+                passageHashes[i - 1] = pHash;
+                var pEnv = new ArtifactEnvelope(pId, ArtifactType.Passage, 1, expectedRunId, i, "2.0.0", pHash, DateTime.UtcNow, "2.0.0", pDoc.RootElement.Clone(), pParents);
+
+                db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+                {
+                    Id = Guid.NewGuid(), RunId = expectedRunId, ArtifactId = pId, ArtifactType = ArtifactType.Passage.ToString(),
+                    Version = 1, ContentHash = pHash, PayloadJson = pDoc.RootElement.GetRawText(),
+                    ParentRefsJson = JsonSerializer.Serialize(pParents, LoopEngineJson.Options),
+                    EnvelopeJson = JsonSerializer.Serialize(pEnv, LoopEngineJson.Options), CreatedAt = DateTime.UtcNow
+                });
+                db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+                {
+                    RunId = expectedRunId,
+                    ArtifactId = pId,
+                    AcceptedVersion = 1,
+                    AcceptedHash = pHash,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            s1PassageHash = passageHashes[0];
+            s2PassageHash = passageHashes[1];
+            s3PassageHash = passageHashes[2];
 
             await db.SaveChangesAsync();
         }
         var worker = new ReadingPaperWorker(
             provider.GetRequiredService<IServiceScopeFactory>(),
-            NullLogger<ReadingPaperWorker>.Instance
+            NullLogger<ReadingPaperWorker>.Instance,
+            R03CapsProfileTests.ApprovedFromDeployEnvFile()
         );
 
         await worker.StartAsync(CancellationToken.None);
@@ -567,7 +1023,7 @@ public class ReadingPaperWorkerCrashSection2Tests
     public async Task WorkerV2QuestionConsumer_MultiPass_ResumesPartialGroups_AndBindsPersistedPassageHead()
     {
         var connection = Environment.GetEnvironmentVariable("READING_TEST_POSTGRES") ?? DefaultConn;
-        var handler = new V2QuestionConsumerHandler
+        var handler = new V2QuestionConsumerHandler(connection)
         {
             SeedPartialGroupOnSection1 = true,
             FailQuestionsOnFirstAttempt = true
@@ -607,7 +1063,8 @@ public class ReadingPaperWorkerCrashSection2Tests
         // Attempt 1: Worker 1 starts, generates passage, but encounters network failure on questions
         var worker1 = new ReadingPaperWorker(
             provider.GetRequiredService<IServiceScopeFactory>(),
-            NullLogger<ReadingPaperWorker>.Instance
+            NullLogger<ReadingPaperWorker>.Instance,
+            R03CapsProfileTests.ApprovedFromDeployEnvFile()
         );
 
         await worker1.StartAsync(CancellationToken.None);
@@ -622,6 +1079,7 @@ public class ReadingPaperWorkerCrashSection2Tests
 
         // Verify state after Worker 1 crash:
         // Section 1 passage head is durably committed in PostgreSQL!
+        string expectedPassageHash;
         using (var scope = provider.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
@@ -633,17 +1091,11 @@ public class ReadingPaperWorkerCrashSection2Tests
                 .FirstOrDefaultAsync(o => o.RunId == runId && o.OperationType == "GENERATE_SECTION");
             Assert.NotNull(sectionOp);
 
-            // Seed durable passage head into PostgreSQL to verify Worker 2 picks it up on resume
-            db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
-            {
-                RunId = runId,
-                ArtifactId = "art_passage_s1",
-                AcceptedVersion = 1,
-                AcceptedHash = "a1b2c3d4e5f60000a1b2c3d4e5f60000a1b2c3d4e5f60000a1b2c3d4e5f60000",
-                UpdatedAt = DateTime.UtcNow
-            });
-            await db.SaveChangesAsync();
-
+            // Verify Section 1 passage head is durably committed in PostgreSQL from Attempt 1!
+            var persistedPassageHead = await db.ReadingPaperArtifactHeads.AsNoTracking()
+                .SingleAsync(h => h.RunId == runId && h.ArtifactId == "art_passage_s1");
+            Assert.Equal(1, persistedPassageHead.AcceptedVersion);
+            expectedPassageHash = persistedPassageHead.AcceptedHash;
             // Reset job to Pending with Epoch 2 for Worker 2 takeover/retry
             await db.ReadingPaperJobs.Where(x => x.Id == jobId)
                 .ExecuteUpdateAsync(x => x.SetProperty(j => j.Status, "Pending")
@@ -654,7 +1106,8 @@ public class ReadingPaperWorkerCrashSection2Tests
         handler.FailQuestionsOnFirstAttempt = false;
         var worker2 = new ReadingPaperWorker(
             provider.GetRequiredService<IServiceScopeFactory>(),
-            NullLogger<ReadingPaperWorker>.Instance
+            NullLogger<ReadingPaperWorker>.Instance,
+            R03CapsProfileTests.ApprovedFromDeployEnvFile()
         );
 
         await worker2.StartAsync(CancellationToken.None);
@@ -671,7 +1124,7 @@ public class ReadingPaperWorkerCrashSection2Tests
             var resumeRec = handler.QuestionCallRecords.Last();
             Assert.Equal(4, resumeRec.Epoch);
             Assert.Equal("art_passage_s1", resumeRec.PassageArtifactId);
-            Assert.Equal("a1b2c3d4e5f60000a1b2c3d4e5f60000a1b2c3d4e5f60000a1b2c3d4e5f60000", resumeRec.PassageHash);
+            Assert.Equal(expectedPassageHash, resumeRec.PassageHash);
             Assert.Equal(Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(resumeRec.RawBody))), resumeRec.RequestHash);
             using (var scope = provider.CreateScope())
             {

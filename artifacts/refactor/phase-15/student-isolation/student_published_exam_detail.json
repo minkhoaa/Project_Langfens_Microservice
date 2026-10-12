@@ -1,0 +1,959 @@
+{
+  "isSuccess": true,
+  "message": "Success",
+  "data": {
+    "id": "4e12d4e1-60b5-4879-b48c-22c10cd6ee11",
+    "slug": "reading-0841849020cb4d0a89db2c62b55c74bd",
+    "title": "IELTS Academic Reading: Advances in Materials Science, Exoplanet Atmospheres and Subsurface Fluid Dynamics",
+    "descriptionMd": "AI-assisted draft generated from open scientific articles. Review passages, answers and source attribution before publishing.",
+    "category": "IELTS",
+    "level": "B2",
+    "durationMin": 60,
+    "imageUrl": null,
+    "sections": [
+      {
+        "idx": 1,
+        "title": "Advances in Materials Science, Exoplanet Atmospheres and Subsurface Fluid Dynamics",
+        "instructionMd": "Read the passage and answer questions 1\u201313.",
+        "passageMd": "The persistent challenge of surface icing has long plagued numerous industrial sectors, including aerospace, power transmission, refrigeration, and renewable energy generation. Ice accumulation on critical infrastructure components, such as aircraft wings, wind turbine blades, and power lines, leads to severe operational inefficiencies and safety hazards. For instance, ice on aircraft wings disrupts aerodynamic profiles, compromising maneuverability and fuel efficiency, while ice accretion on wind turbines significantly diminishes power output. Traditional deicing methods, including electrothermal systems, chemical deicers, and mechanical removal, have been widely employed yet suffer from notable drawbacks. These conventional approaches often demand high energy consumption, pose environmental risks due to chemical runoff, and are constrained by geographical and climatic conditions, highlighting the urgent need for more sustainable and efficient anti-icing solutions [1,2,3,4,5].\n\nIn response to these challenges, the development of advanced anti-icing technologies has gained significant momentum, particularly in the realm of bionic engineering and photothermal materials. Researchers have increasingly turned to nature for inspiration, drawing on the evolutionary adaptations of various organisms that exhibit remarkable ice-resistant properties. A prime example is the lotus leaf, which possesses a dual-layer structure of micro-nano textures and waxy coatings that confer superhydrophobicity, causing water droplets to roll off before ice can form\u2014a phenomenon known as the 'lotus effect' [6,7]. Similarly, certain butterfly wings combine superhydrophobic characteristics with photonic structures that efficiently capture solar radiation, generating localized heat through photothermal effects to prevent ice adhesion [8]. These natural designs have catalyzed the exploration of bionic photothermal anti-icing surfaces that integrate superhydrophobicity with solar-driven thermal mechanisms, aiming to achieve both passive ice suppression and active ice removal [9,10].\n\nRecent advancements in this field have focused on embedding photothermal materials, such as carbon nanotubes, graphene, metallic nanoparticles, and MXene, into bionic micro-nano architectures. This integration allows for the rapid and uniform conversion of solar energy into thermal energy, resulting in a swift rise in surface temperature when exposed to sunlight [11,12]. The superhydrophobic micro-nano textures create trapped air pockets that inhibit ice nucleation and reduce ice adhesion, providing a passive anti-icing effect [13]. Simultaneously, the embedded photothermal fillers actively melt accumulated ice by converting solar light into heat, enabling efficient deicing [8,14]. This dual-mode strategy, combining passive and active mechanisms, offers significant advantages in terms of energy conservation and environmental compatibility. Furthermore, it addresses the critical limitation of pure superhydrophobic surfaces, which tend to lose functionality in harsh conditions, such as high humidity and subzero temperatures, when micro-nano cavities become filled with ice crystals [9,10].\n\nThe development of bionic photothermal anti-icing surfaces encompasses several key dimensions, each critical to their practical implementation. Firstly, the fundamental design principles involve a deep understanding of superhydrophobic theories, photothermal conversion pathways, and the synergistic interplay between these mechanisms [12,15]. Secondly, the selection of materials is paramount; researchers have identified a range of promising candidates, including carbon-based fillers, metals and their derivatives, semiconductors, and polymer substrates, each offering unique properties and benefits [8,16]. The fabrication techniques, such as spray coating, laser ablation, layer-by-layer self-assembly, and template replication, are equally important, with each method presenting distinct advantages and challenges [4,17]. Performance optimization strategies, such as hierarchical and Janus structural designs, as well as the incorporation of phase change materials, have also been explored to enhance the efficacy of these surfaces [18,19].\n\nThe potential applications of bionic photothermal anti-icing surfaces are vast and promising. In the aerospace sector, these surfaces could significantly improve aircraft safety and efficiency by reducing ice accumulation on wings and other critical components. In the power grid industry, they offer a sustainable solution to the problem of ice-induced power outages, particularly in regions prone to severe winter weather. Additionally, the transportation sector could benefit from these surfaces, with applications in roadways, bridges, and vehicles. As research in this field continues to evolve, the integration of bionic photothermal anti-icing technologies promises to revolutionize the way we address the pervasive and persistent challenge of surface icing, offering a more efficient, eco-friendly, and reliable approach to ice management [20].\n\nSurface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation not only raises energy consumption and deteriorates the operational efficiency of facilities, but also may trigger structural failure and even catastrophic safety hazards [1,2]. For instance, ice coverage on aircraft wings distorts aerodynamic profiles, impairing aircraft maneuverability and flight mileage. Ice accretion on wind turbine blades drastically cuts power output, while ice load on power transmission lines may lead to wire breakage and tower collapse [1,3]. Conventional anti-icing approaches, such as electrothermal deicing, chemical deicer spraying and mechanical ice removal, are partially functional yet plagued by inherent limitations: excessive power consumption, severe environmental pollution, low working efficiency, as well as strict constraints from geographical and climatic conditions [4,5].\n\nSource adapted from: , Surface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation n. . License: User Provided.",
+        "audioUrl": null,
+        "transcriptMd": null,
+        "questions": [],
+        "questionGroups": [
+          {
+            "id": "b26ecec2-a6e9-4ebc-b15f-c18d4e0bfaf8",
+            "idx": 1,
+            "startIdx": 1,
+            "endIdx": 7,
+            "instructionMd": "Do the following statements agree with the information given in Reading Passage? In boxes on your answer sheet, write TRUE, FALSE, or NOT GIVEN.",
+            "questions": [
+              {
+                "id": "984d247f-8e9f-4202-b506-b6f8eb3fa5d8",
+                "idx": 1,
+                "type": "TRUE_FALSE_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Surface icing is a problem that affects only the aerospace industry.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "TRUE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "FALSE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "7da37940-e0ed-41e7-850d-96a96d499cb3",
+                "idx": 2,
+                "type": "TRUE_FALSE_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "The 'lotus effect' refers to the phenomenon where water droplets roll off lotus leaves before ice can form due to their superhydrophobic properties.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "TRUE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "FALSE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "95115215-3b68-4581-b02d-2f5edd950e9c",
+                "idx": 3,
+                "type": "TRUE_FALSE_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Bionic photothermal anti-icing surfaces utilize a dual-mode strategy that combines passive and active mechanisms to prevent ice formation and remove existing ice.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "TRUE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "FALSE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "5dc4359f-90ec-43f5-a50c-1ad9def61995",
+                "idx": 4,
+                "type": "TRUE_FALSE_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "The development of bionic photothermal anti-icing surfaces relies solely on the understanding of superhydrophobic theories.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "TRUE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "FALSE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "b15d2dd0-daa3-4a93-bd10-e04cb4f08547",
+                "idx": 5,
+                "type": "TRUE_FALSE_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Bionic photothermal anti-icing surfaces are expected to improve aircraft safety and efficiency by reducing ice accumulation on wings and critical components.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "TRUE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "FALSE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "9381311e-93e5-448b-9b72-f7ab3e2d53fd",
+                "idx": 6,
+                "type": "TRUE_FALSE_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Surface icing is only a minor inconvenience for the aerospace and wind power sectors.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "TRUE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "FALSE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "8252b01b-cb4c-4309-beb7-f2b2d05815a1",
+                "idx": 7,
+                "type": "TRUE_FALSE_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Traditional deicing methods such as electrothermal systems, chemical deicers, and mechanical removal are widely used but have significant drawbacks.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "TRUE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "FALSE",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              }
+            ]
+          },
+          {
+            "id": "30855f61-faa6-41e3-8d7c-e348f0a0a3f5",
+            "idx": 2,
+            "startIdx": 8,
+            "endIdx": 13,
+            "instructionMd": "Complete the sentences below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+            "questions": [
+              {
+                "id": "68bb7dcd-b45e-4632-9209-465e21dfed23",
+                "idx": 8,
+                "type": "SENTENCE_COMPLETION",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Certain butterfly wings combine superhydrophobic characteristics with photonic structures that efficiently capture solar radiation, generating localized heat through [8] to prevent ice adhesion.",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "40cbd3fc-019a-4645-9ab8-ee0b6ec1b56b",
+                "idx": 9,
+                "type": "SENTENCE_COMPLETION",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Superhydrophobic micro-nano textures create trapped air pockets that inhibit ice nucleation and [9].",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "8d07912a-849a-4f74-bc38-c4f04be7af05",
+                "idx": 10,
+                "type": "SENTENCE_COMPLETION",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "The development of bionic photothermal anti-icing surfaces requires a deep understanding of [10] theories.",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "2a037a66-f413-463c-a82e-f4a3cc49d248",
+                "idx": 11,
+                "type": "SENTENCE_COMPLETION",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "In the power grid industry, these surfaces provide a [11] to ice-induced power outages.",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "498c596b-fd6a-4340-a294-994908137231",
+                "idx": 12,
+                "type": "SENTENCE_COMPLETION",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Conventional anti-icing methods face limitations such as excessive power consumption and severe [12].",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "2ae103ec-4be4-4bba-826a-1e6e18782dab",
+                "idx": 13,
+                "type": "SENTENCE_COMPLETION",
+                "skill": "READING",
+                "difficulty": 1,
+                "promptMd": "Ice accumulation on critical infrastructure components, such as aircraft wings and wind turbines, leads to severe [13] and safety hazards.",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "idx": 2,
+        "title": "Advances in Materials Science, Exoplanet Atmospheres and Subsurface Fluid Dynamics",
+        "instructionMd": "Read the passage and answer questions 14\u201326.",
+        "passageMd": "The study of exoplanet atmospheres has emerged as a pivotal field in astrophysics, offering profound insights into the origins, evolutionary pathways, and potential destinies of planets beyond our solar system. This discipline not only enhances our understanding of the diverse array of exoplanets, ranging from scorching hot-Jupiters to temperate, potentially Earth-like worlds, but also contextualizes our own solar system within the broader galactic planetary census. The foundational work in this area began over two decades ago with the discovery of the first transiting exoplanet (Charbonneau et al. 2000), which catalyzed a shift from mere detection to comprehensive atmospheric characterization. Space-based observatories, particularly the Hubble Space Telescope (HST) and the Spitzer Space Telescope, have been instrumental in this endeavor (e.g., Pont et al. 2009; Stevenson et al. 2010; Berta et al. 2012; Kreidberg et al. 2015; Spake et al. 2018; Wakeford et al. 2018). However, these early efforts were constrained by limitations in precision and wavelength coverage, which often impeded detailed assessments of exoplanetary atmospheric compositions.\n\nAtmospheric spectroscopy of exoplanets provides a unique window into the physical and chemical processes that govern a planet\u2019s origins, evolution, and potentially even their fate. As we seek to better understand the diverse population of exoplanets \u2014 from hot-Jupiters to rocky, potential Earth-twins \u2014 we also gain insights into our own solar system. Ultimately, a key goal of exoplanet science is to place our own solar system in the broader context of all known planets in the galaxy. 2000), the field has made major advances, moving from the detection of planets to in-depth studies of their atmospheres. Particularly for atmosphere studies, space-based observatories like the Hubble (HST) and Spitzer Space Telescopes have played a key role (e.g., Pont et al. However, although fundamental in their own right, atmosphere studies with HST and Spitzer were limited by their precision and wavelength coverage, which in many cases prevented thorough assessments of the chemical inventories of exoplanet atmospheres. Since its launch in December 2021, JWST has truly lived up to its promise to revolutionize the manner in which we study the atmospheres of transiting exoplanets. 2024), and enabled the first in-depth studies of smaller and colder worlds like temperate sub-Neptunes (e.g., Madhusudhan et al. 2024; Holmberg and Madhusudhan 2024; Schmidt et al. 2025) and rocky planets (e.g., Greene et al. In this review, I present an overview of some of the first exoplanet atmosphere studies with JWST. 2, I outline pre-launch, preparatory work on the development of modelling and analysis tools for JWST time series observations (TSOs) of transiting exoplanets. I then apply these tools to early JWST observations of a benchmark hot-Saturn and rocky, Venus analogue in Sect. 4, I use the combined powers of JWST and HST to shed new light on a benchmark planet in the hot-Neptune desert \u2014 one of the most unique and puzzling demographic features of the exoplanet population. I then conclude and outline some potential future directions for the field in Sect. New observatories may frequently present users with new challenges; no two observatories, or even detectors, are exactly alike. Although, in some cases, data analysis techniques developed for previous observatories may be largely applicable to new ones, in others routines and analysis pipelines must be developed entirely from scratch; this section outlines key contributions in this area. Spectral extraction, i.e., the processes of converting 2D detector images into 1D spectra, is one of the most important aspects of data analysis. Ultimately, the 1D spectra are the key observable from any exoplanet dataset. Two commonly employed methods are simple aperture extraction, in which one sums up the flux within a given aperture, and optimal extraction, where the summation is weighted by the instrument point spread function (PSF) to increase signal-to-noise and better reject outliers (Horne 1986). However, both algorithms implicitly assume that the target spectrum is isolated on the detector. This assumption is axiomatically not valid in the case of the Single Object Slitless Spectroscopy (SOSS; Albert et al. 2023) mode of JWST\u2019s Near Infrared Imager and Slitless Spectrograph (NIRISS; Doyon et al. SOSS is one of JWST\u2019s major workhorse modes for exoplanet TSOs providing wavelength coverage from 0.6\u20132.85 \u03bcm at a resolution of R\u223c700. However, since SOSS is a cross-dispersed mode, multiple spectral orders fall onto the detector, two of which partially overlap (e.g., Fig. 3) potentially resulting in strong self-contamination if extracted with usual aperture or optimal extraction routines. The ATOCA (Algorithm to Treat Order ContAmination; Darveau-Bernier et al. 2022) algorithm was developed explicitly to \u201cdecontaminate\u201d the SOSS detector, isolating the contributions of the overlapping diffraction orders to a given pixel, and thereby enabling standard extraction techniques to be applied free of self-contamination.\n\nSource adapted from: , Atmospheric spectroscopy of exoplanets provides a unique window into the physical and chemical processes that govern a planet\u2019s origins, evolution, and potentially even their fate.. . License: User Provided.",
+        "audioUrl": null,
+        "transcriptMd": null,
+        "questions": [],
+        "questionGroups": [
+          {
+            "id": "85db2aa9-13a3-4e82-a775-3a6566932790",
+            "idx": 1,
+            "startIdx": 14,
+            "endIdx": 19,
+            "instructionMd": "Choose the correct letter, A, B, C or D. Write the correct letter in boxes on your answer sheet.",
+            "questions": [
+              {
+                "id": "b9080a5d-4aad-4dd5-9440-72c2659dc858",
+                "idx": 14,
+                "type": "MULTIPLE_CHOICE_SINGLE",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "What is the primary goal of atmospheric spectroscopy of exoplanets?",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "A. To detect the presence of exoplanets in distant star systems.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "B. To measure the precise distances between exoplanets and their host stars.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "C. To understand the physical and chemical processes that govern a planet\u2019s origins, evolution, and fate.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 4,
+                    "contentMd": "D. To determine the exact age of exoplanetary systems.",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "6da25abb-4cd5-4517-a470-28a89013f98b",
+                "idx": 15,
+                "type": "MULTIPLE_CHOICE_SINGLE",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "What catalyzed a shift from the mere detection of exoplanets to comprehensive atmospheric characterization?",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "A. The launch of the Hubble Space Telescope (HST).",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "B. The development of space-based observatories like Spitzer.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "C. The introduction of advanced spectroscopic techniques.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 4,
+                    "contentMd": "D. The discovery of the first transiting exoplanet in 2000.",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "6b325920-d08b-4628-bb6c-b325fe3af33c",
+                "idx": 16,
+                "type": "MULTIPLE_CHOICE_SINGLE",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "What is the key goal of exoplanet science as mentioned in the passage?",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "A. To place our solar system in the broader context of all known planets in the galaxy.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "B. To discover as many exoplanets as possible.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "C. To focus solely on studying Earth-like exoplanets.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 4,
+                    "contentMd": "D. To prioritize the study of hot-Jupiters over other exoplanets.",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "104e39c8-d859-41be-a924-08c4b4c81155",
+                "idx": 17,
+                "type": "MULTIPLE_CHOICE_SINGLE",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "Updated prompt for question 17 in live E2E verification",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "A. The James Webb Space Telescope (JWST) and the Kepler Space Telescope",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "B. The Spitzer Space Telescope and the Chandra X-ray Observatory",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "C. The Hubble Space Telescope (HST) and the Spitzer Space Telescope",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 4,
+                    "contentMd": "D. The Hubble Space Telescope (HST) and the Chandra X-ray Observatory",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "9a4f97b1-6562-4bbc-a66f-1bb3afd46c82",
+                "idx": 18,
+                "type": "MULTIPLE_CHOICE_SINGLE",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "What is the key observable from any exoplanet dataset?",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "A. 2D detector images",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "B. Planet density measurements",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "C. Surface temperature readings",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 4,
+                    "contentMd": "D. 1D spectra",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "76c00fbd-2a96-4b56-bf3b-a6bf0f5fab8e",
+                "idx": 19,
+                "type": "MULTIPLE_CHOICE_SINGLE",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "What was a limitation of early studies in exoplanet atmospheric characterization?",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "A. The inability to detect smaller exoplanets.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "B. Insufficient precision and limited wavelength coverage.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "C. The lack of advanced computational tools for data analysis.",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 4,
+                    "contentMd": "D. The absence of space-based observatories.",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              }
+            ]
+          },
+          {
+            "id": "7b976801-5c50-42b4-9fde-0eddd9bda905",
+            "idx": 2,
+            "startIdx": 20,
+            "endIdx": 26,
+            "instructionMd": "Complete the summary below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+            "questions": [
+              {
+                "id": "b2cf5a91-8df4-4fe6-88d3-46e94ab5673a",
+                "idx": 20,
+                "type": "SUMMARY_COMPLETION",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "Question [20]: The study of exoplanet atmospheres has evolved significantly since the first transiting exoplanet was discovered in [1]. This milestone catalyzed the shift from mere planet detection to comprehensive atmospheric characterization. Early space-based observatories like the Hubble (HST) and Spitzer Space Telescopes played a crucial role in these advancements but faced limitations in [2] and [3], which hindered detailed assessments of exoplanetary atmospheres. The launch of the James Webb Space Telescope (JWST) in [4] marked a transformative leap, enabling in-depth studies of a diverse range of exoplanets, including smaller and colder worlds such as [5] and rocky planets. JWST's unique capabilities have addressed previous challenges, particularly in the context of the [6] mode of its Near Infrared Imager and Slitless Spectrograph (NIRISS), where overlapping spectral orders posed issues for traditional extraction methods. To tackle this, the [7] algorithm was developed to isolate overlapping diffraction orders, ensuring accurate spectral extraction. [20]",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "b9bc8cc3-b81e-48a3-b274-d59dd779dc74",
+                "idx": 21,
+                "type": "SUMMARY_COMPLETION",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "Question [21]: The study of exoplanet atmospheres has evolved significantly since the first transiting exoplanet was discovered in [1]. This milestone catalyzed the shift from mere planet detection to comprehensive atmospheric characterization. Early space-based observatories like the Hubble (HST) and Spitzer Space Telescopes played a crucial role in these advancements but faced limitations in [2] and [3], which hindered detailed assessments of exoplanetary atmospheres. The launch of the James Webb Space Telescope (JWST) in [4] marked a transformative leap, enabling in-depth studies of a diverse range of exoplanets, including smaller and colder worlds such as [5] and rocky planets. JWST's unique capabilities have addressed previous challenges, particularly in the context of the [6] mode of its Near Infrared Imager and Slitless Spectrograph (NIRISS), where overlapping spectral orders posed issues for traditional extraction methods. To tackle this, the [7] algorithm was developed to isolate overlapping diffraction orders, ensuring accurate spectral extraction. [21]",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "8650637f-053c-49dd-a0f3-c32e1db721ac",
+                "idx": 22,
+                "type": "SUMMARY_COMPLETION",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "Question [22]: The study of exoplanet atmospheres has evolved significantly since the first transiting exoplanet was discovered in [1]. This milestone catalyzed the shift from mere planet detection to comprehensive atmospheric characterization. Early space-based observatories like the Hubble (HST) and Spitzer Space Telescopes played a crucial role in these advancements but faced limitations in [2] and [3], which hindered detailed assessments of exoplanetary atmospheres. The launch of the James Webb Space Telescope (JWST) in [4] marked a transformative leap, enabling in-depth studies of a diverse range of exoplanets, including smaller and colder worlds such as [5] and rocky planets. JWST's unique capabilities have addressed previous challenges, particularly in the context of the [6] mode of its Near Infrared Imager and Slitless Spectrograph (NIRISS), where overlapping spectral orders posed issues for traditional extraction methods. To tackle this, the [7] algorithm was developed to isolate overlapping diffraction orders, ensuring accurate spectral extraction. [22]",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "5763d0a4-c40c-494d-9be2-7094370d4844",
+                "idx": 23,
+                "type": "SUMMARY_COMPLETION",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "Question [23]: The study of exoplanet atmospheres has evolved significantly since the first transiting exoplanet was discovered in [1]. This milestone catalyzed the shift from mere planet detection to comprehensive atmospheric characterization. Early space-based observatories like the Hubble (HST) and Spitzer Space Telescopes played a crucial role in these advancements but faced limitations in [2] and [3], which hindered detailed assessments of exoplanetary atmospheres. The launch of the James Webb Space Telescope (JWST) in [4] marked a transformative leap, enabling in-depth studies of a diverse range of exoplanets, including smaller and colder worlds such as [5] and rocky planets. JWST's unique capabilities have addressed previous challenges, particularly in the context of the [6] mode of its Near Infrared Imager and Slitless Spectrograph (NIRISS), where overlapping spectral orders posed issues for traditional extraction methods. To tackle this, the [7] algorithm was developed to isolate overlapping diffraction orders, ensuring accurate spectral extraction. [23]",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "93f0ba2d-b91f-4c8d-8b1c-bb13c5d64470",
+                "idx": 24,
+                "type": "SUMMARY_COMPLETION",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "Question [24]: The study of exoplanet atmospheres has evolved significantly since the first transiting exoplanet was discovered in [1]. This milestone catalyzed the shift from mere planet detection to comprehensive atmospheric characterization. Early space-based observatories like the Hubble (HST) and Spitzer Space Telescopes played a crucial role in these advancements but faced limitations in [2] and [3], which hindered detailed assessments of exoplanetary atmospheres. The launch of the James Webb Space Telescope (JWST) in [4] marked a transformative leap, enabling in-depth studies of a diverse range of exoplanets, including smaller and colder worlds such as [5] and rocky planets. JWST's unique capabilities have addressed previous challenges, particularly in the context of the [6] mode of its Near Infrared Imager and Slitless Spectrograph (NIRISS), where overlapping spectral orders posed issues for traditional extraction methods. To tackle this, the [7] algorithm was developed to isolate overlapping diffraction orders, ensuring accurate spectral extraction. [24]",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "7120c614-ba2d-48dd-bb27-64ee88afb754",
+                "idx": 25,
+                "type": "SUMMARY_COMPLETION",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "Question [25]: The study of exoplanet atmospheres has evolved significantly since the first transiting exoplanet was discovered in [1]. This milestone catalyzed the shift from mere planet detection to comprehensive atmospheric characterization. Early space-based observatories like the Hubble (HST) and Spitzer Space Telescopes played a crucial role in these advancements but faced limitations in [2] and [3], which hindered detailed assessments of exoplanetary atmospheres. The launch of the James Webb Space Telescope (JWST) in [4] marked a transformative leap, enabling in-depth studies of a diverse range of exoplanets, including smaller and colder worlds such as [5] and rocky planets. JWST's unique capabilities have addressed previous challenges, particularly in the context of the [6] mode of its Near Infrared Imager and Slitless Spectrograph (NIRISS), where overlapping spectral orders posed issues for traditional extraction methods. To tackle this, the [7] algorithm was developed to isolate overlapping diffraction orders, ensuring accurate spectral extraction. [25]",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "a645b808-95a0-4f08-86c9-bfbc02e9300c",
+                "idx": 26,
+                "type": "SUMMARY_COMPLETION",
+                "skill": "READING",
+                "difficulty": 2,
+                "promptMd": "Question [26]: The study of exoplanet atmospheres has evolved significantly since the first transiting exoplanet was discovered in [1]. This milestone catalyzed the shift from mere planet detection to comprehensive atmospheric characterization. Early space-based observatories like the Hubble (HST) and Spitzer Space Telescopes played a crucial role in these advancements but faced limitations in [2] and [3], which hindered detailed assessments of exoplanetary atmospheres. The launch of the James Webb Space Telescope (JWST) in [4] marked a transformative leap, enabling in-depth studies of a diverse range of exoplanets, including smaller and colder worlds such as [5] and rocky planets. JWST's unique capabilities have addressed previous challenges, particularly in the context of the [6] mode of its Near Infrared Imager and Slitless Spectrograph (NIRISS), where overlapping spectral orders posed issues for traditional extraction methods. To tackle this, the [7] algorithm was developed to isolate overlapping diffraction orders, ensuring accurate spectral extraction. [26]",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "idx": 3,
+        "title": "Advances in Materials Science, Exoplanet Atmospheres and Subsurface Fluid Dynamics",
+        "instructionMd": "Read the passage and answer questions 27\u201340.",
+        "passageMd": "The study of subsurface fluid dynamics is fundamental to various scientific and engineering disciplines, including groundwater management, nuclear waste disposal, and geothermal energy exploitation. A critical factor in these applications is the role of fractures within subsurface systems, which often serve as the primary pathways for fluid flow, heat transfer, and solute transport. This is particularly significant in the context of Enhanced Geothermal Systems (EGS), where the efficiency of heat extraction is heavily dependent on the hydraulic properties of fractured reservoirs. These systems rely on the ability to achieve high flow rates at low pressures, which is typically facilitated by the presence of fractures in otherwise impermeable rock formations. The concentrated flow within these fractures often results in high Reynolds numbers, leading to nonlinear hydraulic behavior that deviates from the linear flow-pressure relationships observed in porous media.\n\nThe development and management of fractured reservoirs require sophisticated numerical models capable of simulating complex flow and transport phenomena. Reservoir engineering employs a range of models, from relatively simple to highly complex coupled systems such as thermo-hydro-mechanical-chemical (THMC) models. These models are essential for understanding and predicting the behavior of fracture networks under various operational conditions. However, the computational cost of simulating large-scale reservoirs necessitates the use of simplified approaches. One such approach is the Cubic Law (CL), which assumes laminar flow between parallel plates and provides a linear analytic solution for flow rate and pressure drop. While the CL is computationally efficient, it fails to capture the complexities of fracture geometry and the nonlinear hydraulic behavior observed in high-flow scenarios typical of EGS. To address these limitations, modifications to the CL have been proposed, incorporating factors such as fracture roughness to provide more accurate local hydraulic descriptions.\n\nEmpirical observations from field flow tests have revealed significant deviations from the linear hydraulic assumptions of the CL, particularly in fractured settings where flow rates and pressure gradients exhibit nonlinear relationships. These findings underscore the need for more refined models that can account for the complex geometries and high flow rates encountered in EGS. Among these, the large-scale Forchheimer equation represents an improvement by incorporating an additional quadratic flow rate term that captures nonlinear hydraulic behavior. This model uses two coefficients to account for average roughness, but these coefficients are typically derived from specific experimental data and may not be universally applicable. More detailed simulations using the Navier\u2013Stokes equations can account for the full complexity of fracture flow, including channeling and local turbulence, but these calculations are computationally intensive and often impractical for large-scale reservoir domains.\n\nThe accuracy of hydraulic and fluid dynamic simulations is fundamentally tied to the description of fracture roughness. However, the choice of roughness quantification model introduces a significant degree of uncertainty. The comparison between different models and the extent to which they influence fracture hydraulics remain poorly understood. Two prevalent approaches are the micro-/macro roughness concept and the self-affine description. The micro-/macro roughness model posits that roughness is a superposition of distinct large- and small-scale wavinesses, whereas the self-affine description suggests that rock fracture roughness spans all frequencies and exhibits a fractal nature. This self-affine behavior implies that roughness statistics are highly dependent on the sample size, necessitating a multi-parameter description for accurate representation. The Hurst exponent is commonly used to characterize the fractal nature of roughness, but it lacks amplitude information, requiring additional parameters such as the height standard deviation or the prefactor from the power spectrum calculation.\n\nIn conclusion, while significant advances have been made in the modeling of subsurface fluid dynamics and fracture flow, several challenges persist. The development of more accurate and computationally efficient models remains a priority, particularly for the simulation of large-scale reservoirs. The choice of roughness model and the parameters used to describe fracture geometry are critical factors that influence the reliability of these simulations. Future research should focus on refining these models and developing new methodologies that can better capture the complex interplay of factors affecting subsurface fluid flow. The implications of these advancements extend beyond geothermal energy, with potential applications in environmental protection, resource management, and the safe disposal of nuclear waste. As our understanding of subsurface processes continues to evolve, so too will our ability to harness and manage Earth's natural resources sustainably.\n\nThe study of subsurface fluid dynamics is crucial across various research fields, including groundwater contamination1,2, nuclear waste repositories3, and geothermal energy production4. In all these applications, the role of fractures cannot be overstated, as they often act as primary conduits, dominating the overall subsurface flow behavior and transport of heat and solutes.\n\nSource adapted from: , The study of subsurface fluid dynamics is crucial across various research fields, including groundwater contamination1,2, nuclear waste repositories3, and geothermal energy product. . License: User Provided.",
+        "audioUrl": null,
+        "transcriptMd": null,
+        "questions": [],
+        "questionGroups": [
+          {
+            "id": "d30fc9d8-3ac2-4977-904e-d4446823677e",
+            "idx": 1,
+            "startIdx": 27,
+            "endIdx": 33,
+            "instructionMd": "Do the following statements agree with the claims of the writer in Reading Passage? In boxes on your answer sheet, write YES, NO, or NOT GIVEN.",
+            "questions": [
+              {
+                "id": "8fd0e92e-b856-4407-b948-f267bd4deaeb",
+                "idx": 27,
+                "type": "YES_NO_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "The large-scale Forchheimer equation is described as an improvement over the Cubic Law for modeling nonlinear hydraulic behavior in fractured settings.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "YES",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "NO",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "263b39d6-3f0a-4efa-9778-29eaa1d1646f",
+                "idx": 28,
+                "type": "YES_NO_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "The accuracy of hydraulic and fluid dynamic simulations depends primarily on the description of fracture roughness.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "YES",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "NO",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "bf508374-70ea-43fb-91a0-2c4d04f563c0",
+                "idx": 29,
+                "type": "YES_NO_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "The passage suggests that the development of more accurate models for subsurface fluid dynamics is not a priority.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "YES",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "NO",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "b64ba312-0511-4a22-91bc-629052bfcdaa",
+                "idx": 30,
+                "type": "YES_NO_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "The study of subsurface fluid dynamics is important for groundwater contamination research.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "YES",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "NO",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "124dfa9b-05d6-4481-be4d-941e9005d53b",
+                "idx": 31,
+                "type": "YES_NO_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "The study of subsurface fluid dynamics is only relevant to geothermal energy production.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "YES",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "NO",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "621b9c64-8565-4c0f-bbaf-f97770df5d28",
+                "idx": 32,
+                "type": "YES_NO_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "The Cubic Law (CL) is considered an effective model for capturing the complexities of fracture geometry in Enhanced Geothermal Systems (EGS).",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "YES",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "NO",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              },
+              {
+                "id": "2f110b8a-21dc-4fdc-b409-fea245bf9f05",
+                "idx": 33,
+                "type": "YES_NO_NOT_GIVEN",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "The coefficients used in the large-scale Forchheimer equation are universally applicable to all fractured reservoirs.",
+                "imageUrl": null,
+                "options": [
+                  {
+                    "idx": 1,
+                    "contentMd": "YES",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 2,
+                    "contentMd": "NO",
+                    "imageUrl": null,
+                    "altText": null
+                  },
+                  {
+                    "idx": 3,
+                    "contentMd": "NOT GIVEN",
+                    "imageUrl": null,
+                    "altText": null
+                  }
+                ],
+                "wordList": null
+              }
+            ]
+          },
+          {
+            "id": "be7308ad-c52a-47c7-88d1-64af5c3435f4",
+            "idx": 2,
+            "startIdx": 34,
+            "endIdx": 40,
+            "instructionMd": "Answer the questions below. Choose NO MORE THAN THREE WORDS AND/OR A NUMBER from the passage for each answer.",
+            "questions": [
+              {
+                "id": "01948268-05fb-4017-a6e3-820316016976",
+                "idx": 34,
+                "type": "SHORT_ANSWER",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "What concept suggests rock fracture roughness spans all frequencies?",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "87aaf7f6-c762-4782-a453-6b53e8e2dc6e",
+                "idx": 35,
+                "type": "SHORT_ANSWER",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "What influences the reliability of fracture flow simulations?",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "0200ea58-7740-4cc3-98fa-7c23c5603e61",
+                "idx": 36,
+                "type": "SHORT_ANSWER",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "What is crucial across various research fields?",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "a82d9a7e-632c-4e95-95d2-dabc81ad9d7e",
+                "idx": 37,
+                "type": "SHORT_ANSWER",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "What is crucial for heat extraction in EGS?",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "3a413a5a-e4cb-4e1b-afb9-96733b7f93a9",
+                "idx": 38,
+                "type": "SHORT_ANSWER",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "What is the purpose of THMC models?",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "82ae215e-d84f-4fbc-9c05-b9a57674ddbb",
+                "idx": 39,
+                "type": "SHORT_ANSWER",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "What type of behavior do flow rates and pressure gradients exhibit in fractured settings?",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              },
+              {
+                "id": "e7ef6b1c-8316-4d4b-80c4-bdbb48baa1b7",
+                "idx": 40,
+                "type": "SHORT_ANSWER",
+                "skill": "READING",
+                "difficulty": 3,
+                "promptMd": "What exponent characterizes the fractal nature of roughness?",
+                "imageUrl": null,
+                "options": [],
+                "wordList": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

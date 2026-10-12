@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import itertools
+import hashlib
 import json
 import sqlite3
 from datetime import datetime, timezone
@@ -43,6 +44,40 @@ def context(owner=None, parents=(), target="passage"):
                        targetArtifactType=ArtifactType.PASSAGE, scope=IssueScope.SECTION,
                        inputDependencies=tuple(parents),
                        authority=AuthorityGrant(leaseOwner=owner or uuid4(), epoch=1))
+
+
+def simulated_run_profile(policy):
+    """Derive a simulated RUN budget profile from a loop policy's caps.
+
+    The run-level budget is a ceiling applied to the whole reading-paper run, so
+    it must be at least as large as the per-operation caps the loop policy will
+    spend. Deriving it from the policy keeps the two in step: raising a policy cap
+    in a test automatically widens the simulated run ceiling instead of silently
+    letting the run budget become the binding (and therefore misleading) limit.
+    """
+    return {
+        "budgetCapCalls": max(policy.max_total_calls * 10, policy.max_total_calls + 1),
+        "budgetCapTokens": max(policy.max_total_tokens * 10, policy.max_total_tokens + 1),
+        "budgetCapWallTimeSeconds": max(policy.max_wall_time_seconds * 10, policy.max_wall_time_seconds + 1),
+    }
+
+
+def policy_for_profile(profile, required_evaluator_ids=("required",), **overrides):
+    """Build a LoopPolicy whose caps come from a run budget profile.
+
+    Used by cap/budget tests that exercise the "child cap must fit inside the run
+    budget" admission rules. Any keyword override wins over the profile-derived
+    value, so a single test can perturb one bound without restating the rest.
+    """
+    from app.loop.policy import LoopPolicy
+
+    caps = {
+        "max_total_calls": int(profile.get("budgetCapCalls", 25)),
+        "max_total_tokens": int(profile.get("budgetCapTokens", 150000)),
+        "max_wall_time_seconds": float(profile.get("budgetCapWallTimeSeconds", 900)),
+    }
+    caps.update(overrides)
+    return LoopPolicy(required_evaluator_ids=tuple(required_evaluator_ids), **caps)
 
 
 class Generator:
@@ -120,9 +155,32 @@ class Repairer:
 
 class DurableStore:
     """SQLite-backed fake of the authenticated exam-service protocol, reopened between crashes."""
-    def __init__(self, path: Path, owner, cap_calls=50, cap_tokens=100000):
+    def __init__(self, path: Path, owner, cap_calls=50, cap_tokens=100000, run_profile=None):
         self.path, self.owner = path, owner
         self.cap_calls, self.cap_tokens = cap_calls, cap_tokens
+        # A resumed run must use the cap profile it was created with, not the current
+        # deployment's (R03/G06). The runtime rejects a run with no pinned profile and
+        # cross-checks the JSON against its own digest, version and source, so the
+        # fake persists exactly what the real checkpoint service does.
+        self.run_profile = dict(run_profile or {})
+        if not self.run_profile:
+            self.run_profile = LoopPolicy.from_settings().cap_profile_snapshot
+        elif "caps" not in self.run_profile:
+            # A bare run budget (calls/tokens/wall-time) was supplied: fold it into a
+            # real policy snapshot so the runtime's cross-check still passes.
+            base = LoopPolicy.from_settings().cap_profile_snapshot
+            base = dict(base)
+            base["caps"] = dict(base.get("caps") or {})
+            for profile_key, cap_key in (
+                ("budgetCapCalls", "maxTotalCalls"),
+                ("budgetCapTokens", "maxTotalTokens"),
+                ("budgetCapWallTimeSeconds", "maxWallTimeSeconds"),
+            ):
+                if profile_key in self.run_profile and cap_key in base["caps"]:
+                    base["caps"][cap_key] = self.run_profile[profile_key]
+            self.run_profile = base
+        canonical = json.dumps(self.run_profile, sort_keys=True, separators=(",", ":"))
+        self.run_profile_sha256 = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
         self.epoch = 1
         self.cancelled = False
         self.fault = None
@@ -303,6 +361,10 @@ class DurableStore:
             runId=run_id, jobId=uuid4(), epoch=self.epoch, status="RUNNING",
             engineVersion="2.0.0", schemaVersion="2.0.0", policyVersion="2.0.0",
             isCompatible=True,
+            budgetProfileJson=json.dumps(self.run_profile, sort_keys=True, separators=(",", ":")),
+            budgetProfileSha256=self.run_profile_sha256,
+            budgetProfileVersion=self.run_profile.get("profileVersion"),
+            budgetProfileSource=self.run_profile.get("profileSource"),
             artifacts=[info(a) for a in state["heads"].values()],
             draftArtifacts=[info(a) for a in state["drafts"].values()],
             loopCursors=[LoopCursorCheckpoint.model_validate(state["cursor"])] if state["cursor"] else [],

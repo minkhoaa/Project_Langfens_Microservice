@@ -1,0 +1,1376 @@
+{
+  "metadata": {
+    "title": "Phase 08 Authorized Paired Legacy vs V2 Passage Benchmark",
+    "evaluatedAt": "2026-10-05T16:37:57.156245+00:00",
+    "measurementId": "20261005T163351.240888Z_369146ff",
+    "campaignId": "camp_g08_clean_holdout_20261005_v2",
+    "authorizationId": "auto-minimax-camp_g08_clean_holdout_20261005_v2",
+    "authorizationStatus": "AUTHORIZED",
+    "totalCases": 3,
+    "sourcesEvaluated": [
+      "PMC13560651",
+      "PMC13407692",
+      "PMC13517498"
+    ],
+    "corpusSha256": "43fd15d60e2893ee1b23581a33e8785a9ccb66794ab43a55202623b552cbec99",
+    "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+    "effectiveConfig": {
+      "providerOrder": [
+        "minimax",
+        "groq"
+      ],
+      "providerModels": {
+        "minimax": "MiniMax-Text-01",
+        "groq": "openai/gpt-oss-20b"
+      },
+      "passagePromptVersion": "2.1.0",
+      "wordCountBounds": {
+        "minimum": 720,
+        "maximum": 915
+      },
+      "loopCapsProfile": {
+        "version": "phase06-production-v1",
+        "source": "deploy/envs/loop-caps.env"
+      },
+      "loopCaps": {
+        "calls": 15,
+        "tokens": 60000,
+        "wallTimeSeconds": 300,
+        "generateTokenReservation": 15000,
+        "passageGenerateTokenReservation": 9000,
+        "passageGenerateMaxTokens": 2500,
+        "evaluateTokenReservation": 10000,
+        "repairTokenReservation": 15000,
+        "operationWallReservationSeconds": 60
+      },
+      "styleProfiles": [
+        "NARRATIVE_HISTORICAL",
+        "EXPOSITORY_SCIENTIFIC",
+        "DISCURSIVE_ANALYTICAL"
+      ]
+    },
+    "testedFileSha256": {
+      "scripts/refactor/run_phase08_paired_passage_benchmark.py": "163701c3aa944cddb7b55fadc9f424543e1295a6eab28248ba3995b924d3b65c",
+      "scripts/refactor/benchmark_campaign.py": "36531e995f6edd46f97d3cd6adcfb5bd702588809269c8a74df2fda345e240b7",
+      "services/generation-service/app/config.py": "c6d4b74047494da6cadba5f889af2a3f85cc0ef39b6b9762f436235ed7e12deb",
+      "services/generation-service/app/facade.py": "461bc23340f6677906a78a4e2e32022457e41d95542ad5aa64ad47ec867fa2f9",
+      "services/generation-service/app/loop/passage.py": "ebf0f6d74f15f65ec0620403023c08940ff07752cff3f2e469f0a4deba1b0f76",
+      "services/generation-service/app/persistence/client.py": "c087bd2b20d3734cd66368e5088747fe6179be966e9f4e04a9113fc85f48b25e",
+      "services/generation-service/app/providers/gateway.py": "7cce0468713ad3ea595b28c97ea5125b2de92491112f506226a6437edb489af1",
+      "services/generation-service/app/generators/passage/generator.py": "412d58e2ef1db9efe58aa0fa92910d2aaff77f2eb0ca4b8ac62060bac1c7c4a1",
+      "services/generation-service/app/generators/passage/prompts.py": "625bf21c37c481f7854d8529df0beba65af9f91d78bf79a7337e8fe227aa389b",
+      "services/exam-service/Features/ReadingPaper/CheckpointEndpoints.cs": "93ca4c67f9887ad80f59bd4dd7272f1061e7b67dd1417a5ce1e022d5dc7fbcee",
+      "services/exam-service/Features/ReadingPaper/CheckpointService.cs": "1ee22806a7d1c366afce2000a020777d846466066cdb7ef55f35eadec1744dc1",
+      "services/generation-service/tests/test_t08_passage_loop.py": "dbc833b265fe38af7ddd3a0afeff7e0e38b58681750793542df24660a7500518",
+      "services/generation-service/tests/test_t09_real_postgres_durability.py": "4f46511719c956e46f5c87ac05a4beee64e6a548d113f2bb010cc25095621f87"
+    },
+    "gitHead": "f56a0970bbf6190ea7e3af58d2ec8db9e5c9714f",
+    "campaignStatus": "AUTHORIZED",
+    "campaignBudgetUsed": {
+      "calls": 6,
+      "tokens": 18227,
+      "wallTimeSeconds": 224.4374
+    },
+    "persistenceBoundary": "authenticated .NET checkpoint API; accepted V2 heads read back from exam-service",
+    "qualityScope": "live provider measurements; real-PostgreSQL persistence proof is recorded by the targeted integration suite"
+  },
+  "aggregateMetrics": {
+    "eligibleGenerationSuccess": {
+      "v2": {
+        "numerator": 3,
+        "denominator": 3
+      },
+      "legacy": {
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    "acceptedArtifactWordCountCompliance": {
+      "v2": {
+        "numerator": 3,
+        "denominator": 3
+      },
+      "legacy": {
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    "groundingFidelityPassRate": {
+      "v2": {
+        "numerator": 3,
+        "denominator": 3
+      },
+      "legacy": {
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    "providerUsage": {
+      "legacy": {
+        "calls": 3,
+        "tokens": 9224,
+        "providerReportedCostUsd": 0.0,
+        "meanLatencySeconds": 33.78066666666667,
+        "providerModelsByCase": [
+          {
+            "caseId": "g08_PMC13560651_legacy",
+            "responses": [
+              {
+                "provider": "minimax",
+                "model": "MiniMax-Text-01",
+                "promptTokens": 2048,
+                "completionTokens": 1047,
+                "totalTokens": 3095,
+                "accountingType": "reported",
+                "costUsdFromProviderUsage": 0.0,
+                "providerLatencySeconds": 24.1473,
+                "attempts": 1
+              }
+            ]
+          },
+          {
+            "caseId": "g08_PMC13407692_legacy",
+            "responses": [
+              {
+                "provider": "minimax",
+                "model": "MiniMax-Text-01",
+                "promptTokens": 1924,
+                "completionTokens": 1166,
+                "totalTokens": 3090,
+                "accountingType": "reported",
+                "costUsdFromProviderUsage": 0.0,
+                "providerLatencySeconds": 39.4875,
+                "attempts": 1
+              }
+            ]
+          },
+          {
+            "caseId": "g08_PMC13517498_legacy",
+            "responses": [
+              {
+                "provider": "minimax",
+                "model": "MiniMax-Text-01",
+                "promptTokens": 1978,
+                "completionTokens": 1061,
+                "totalTokens": 3039,
+                "accountingType": "reported",
+                "costUsdFromProviderUsage": 0.0,
+                "providerLatencySeconds": 37.303,
+                "attempts": 1
+              }
+            ]
+          }
+        ]
+      },
+      "v2": {
+        "calls": 20,
+        "tokens": 207000,
+        "providerReportedCostUsd": 0.0,
+        "meanLatencySeconds": 42.50566666666666,
+        "providerModelsByCase": [
+          {
+            "caseId": "g08_PMC13560651_v2",
+            "responses": [
+              {
+                "provider": "minimax",
+                "model": "MiniMax-Text-01",
+                "promptTokens": 1873,
+                "completionTokens": 1269,
+                "totalTokens": 3142,
+                "accountingType": "reported",
+                "costUsdFromProviderUsage": 0.0,
+                "providerLatencySeconds": 42.9279,
+                "attempts": 1
+              }
+            ]
+          },
+          {
+            "caseId": "g08_PMC13407692_v2",
+            "responses": [
+              {
+                "provider": "minimax",
+                "model": "MiniMax-Text-01",
+                "promptTokens": 1745,
+                "completionTokens": 1121,
+                "totalTokens": 2866,
+                "accountingType": "reported",
+                "costUsdFromProviderUsage": 0.0,
+                "providerLatencySeconds": 38.2509,
+                "attempts": 1
+              }
+            ]
+          },
+          {
+            "caseId": "g08_PMC13517498_v2",
+            "responses": [
+              {
+                "provider": "minimax",
+                "model": "MiniMax-Text-01",
+                "promptTokens": 1802,
+                "completionTokens": 1193,
+                "totalTokens": 2995,
+                "accountingType": "reported",
+                "costUsdFromProviderUsage": 0.0,
+                "providerLatencySeconds": 42.3208,
+                "attempts": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "sentenceIdTraceability": {
+      "v2CasesWithSentenceIds": 3,
+      "totalCases": 3
+    }
+  },
+  "simulationEvidence": {
+    "classification": "SIMULATION_ONLY",
+    "pairedCaseCounted": false,
+    "sqliteStoreUsedForCampaignPersistence": false,
+    "promptInjectionProbe": "covered separately by T08 simulation tests; not run as live-case evidence"
+  },
+  "cases": [
+    {
+      "caseId": "paired_1_PMC13560651",
+      "sourceId": "PMC13560651",
+      "sourceSha256": "00d4fd920556e6bb9ec56cabc92c676b278e0e2b6d4eaa38b794d34f8a85b441",
+      "topic": "Prokaryotic Diversity in Red Sea Hydrothermal Vents",
+      "styleProfile": "NARRATIVE_HISTORICAL",
+      "corpusSha256": "43fd15d60e2893ee1b23581a33e8785a9ccb66794ab43a55202623b552cbec99",
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "inputArtifactRefs": {
+        "sourcePackRef": {
+          "artifactId": "art_source_PMC13560651_bench_b5",
+          "artifactType": "SourcePack",
+          "version": 1,
+          "contentHash": "2a0a460a37ff1bd8d9a7460ebcc50c6eeb8e0ee9881ee6c77df572812bec2fd0"
+        },
+        "evidenceGraphRef": {
+          "artifactId": "art_evidence_PMC13560651_bench_b5",
+          "artifactType": "EvidenceGraph",
+          "version": 1,
+          "contentHash": "463765a542572d82124e3735ee3b99e8332ebc0315f18698434abf13c8840487"
+        },
+        "blueprintRef": {
+          "artifactId": "art_blueprint_PMC13560651_bench_b5",
+          "artifactType": "ExamBlueprint",
+          "version": 1,
+          "contentHash": "b28e010bb9c3e9ee8b13ecc7fde1a195f7ebcc78140ebd6bd2db0b8c38a5cd1e"
+        }
+      },
+      "legacy": {
+        "campaignCaseId": "g08_PMC13560651_legacy",
+        "runId": "bench_ccc23b5b048ea9f557ccccc3f05dbaa5",
+        "engine": "Legacy",
+        "title": "Prokaryotic Diversity in Red Sea Hydrothermal Vents",
+        "passage": "The exploration of hydrothermal vent ecosystems has long been a focal point for understanding the limits of life on Earth, particularly in environments characterized by extreme conditions such as high pressure, temperature, and chemical toxicity. While these ecosystems have been extensively studied in various oceanic regions, the Red Sea's hydrothermal systems have remained relatively understudied, particularly in terms of their microbial diversity and genomic potential. The recent discovery of active hydrothermal vent fields in the Red Sea, particularly at Hatiba Mons, has opened new avenues for research, offering a unique opportunity to investigate the prokaryotic communities that thrive in these extreme environments.\n\nDuring expeditions conducted in May and September 2022 and February 2023, researchers collected a total of 31 samples from five hydrothermal vents located at 22.28°N, 37.84°E. These samples included 19 sediment samples and 12 microbial mat samples. The sediment samples were obtained using gravity corers, while the microbial mats were sampled using push cores, Niskin bottles, and box corers, with each sample collected in triplicate to ensure reproducibility. To preserve the integrity of the samples, they were immediately frozen at −20°C onboard the research vessel and subsequently stored at −80°C in the laboratory until further processing. The meticulous sampling and preservation protocols were crucial for maintaining the quality of the genetic material, which was essential for the subsequent metagenomic analyses.\n\nThe extraction of DNA from the samples was performed using the DNeasy PowerMax Soil Kit, following the manufacturer's protocol. To enhance the lysis of cells and the release of DNA, proteinase K was added during the lysis phase. The concentration of the extracted DNA was measured using the Qubit dsDNA HS Assay on a Qubit 4.0 fluorometer, ensuring that the samples contained sufficient DNA for sequencing. The DNA samples, ranging from 80 to 895 ng per sample, were then sent to Novogene Inc. in California, USA, for shotgun sequencing. The sequencing library was prepared using the NEBNext Ultra II DNA Library Prep Kit, which involved DNA fragmentation, end repair, 5′ phosphorylation, A-tailing, adapter ligation, and PCR amplification. The resulting libraries were sequenced on an Illumina NovaSeq platform, generating paired-end 150-bp reads.\n\nThe metagenomic sequencing yielded a staggering 3,004,009,760 paired-end reads across all samples, with the number of reads per sample ranging from 76,449,854 to 303,487,370. To ensure the quality of the data, low-quality reads and adapters were removed using fastp v1.3.0. The quality-filtered reads were then assessed with FastQC v0.12.1 and assembled using MEGAHIT v1.2.9, resulting in 31 individual assemblies and 11 co-assemblies. Contigs longer than 1,000 bp were binned using MetaBAT2 v1.7, MaxBin2 v2.2.7, and VAMB v5.0.2, followed by bin aggregation with DAS Tool v1.1.7. The quality of the genomes was assessed using CheckM2 v1.1.0, and only high-quality and medium-quality metagenome-assembled genomes (MAGs) were retained for further analysis.\n\nFrom the microbial mats and sediments, a total of 1,217 dereplicated prokaryotic MAGs were recovered. Among these, 969 were bacterial MAGs, representing 50 different phyla. The most abundant bacterial groups included Pseudomonadota, Chloroflexota, and Planctomycetota. Additionally, 248 archaeal MAGs were identified, spanning 15 phyla, with Thermoproteota, Thermoplasmatota, and Nanoarchaeota being the dominant taxa. Based on the GTDB RED (relative evolutionary divergence), approximately 70% of the MAGs likely represent novel taxa, a proportion that surpasses or matches reports from other hydrothermal vent systems. This finding underscores the Hatiba Mons as a hotspot of microbial novelty and significantly expands the available genomic references for these extremophiles.\n\nThe discovery of such a diverse array of prokaryotic MAGs in the Red Sea hydrothermal vents highlights the unique nature of these ecosystems and their potential to harbor novel microbial life. The high proportion of potentially novel taxa suggests that these environments may harbor species that have adapted to the extreme conditions in ways that are not yet fully understood. This research not only enhances our understanding of the microbial diversity in the Red Sea but also provides valuable insights into the functional potential of these microorganisms, which could have implications for biotechnology and our understanding of life in extreme environments.\n\nIn conclusion, the exploration of the Red Sea hydrothermal vents has revealed a rich tapestry of prokaryotic diversity, with a significant number of potentially novel taxa. This study underscores the importance of continued research in underrepresented regions and the potential for discovering new forms of life that may hold the key to understanding the limits of life on Earth and beyond. The findings from Hatiba Mons contribute to the growing body of knowledge on extremophiles and provide a foundation for future studies on the functional roles of these microorganisms in their unique ecosystems.",
+        "wordCount": 790,
+        "paragraphCount": 7,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "callsUsed": 1,
+        "tokensUsed": 3095,
+        "usage": {
+          "callsObserved": 1,
+          "promptTokensFromResponses": 2048,
+          "completionTokensFromResponses": 1047,
+          "totalTokensFromResponses": 3095,
+          "costUsdFromProviderUsage": 0.0,
+          "providerModelByCall": [
+            {
+              "provider": "minimax",
+              "model": "MiniMax-Text-01",
+              "promptTokens": 2048,
+              "completionTokens": 1047,
+              "totalTokens": 3095,
+              "accountingType": "reported",
+              "costUsdFromProviderUsage": 0.0,
+              "providerLatencySeconds": 24.1473,
+              "attempts": 1
+            }
+          ]
+        },
+        "latencySeconds": 24.283,
+        "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+        "config": {
+          "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+          "styleProfile": "NARRATIVE_HISTORICAL",
+          "wordCountBounds": {
+            "minimum": 720,
+            "maximum": 915
+          }
+        },
+        "hasSentenceIds": false,
+        "hasAuthoritativeCAS": false,
+        "persistenceEvidence": {
+          "classification": "LEGACY_NO_ACCEPTED_V2_ARTIFACT",
+          "authoritativeCasProven": false
+        },
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "v2": {
+        "campaignCaseId": "g08_PMC13560651_v2",
+        "runId": "bench_b5b0f71ee9f13e4250406a22807472e8",
+        "engine": "V2_PassageLoop",
+        "decision": "PASS",
+        "callsUsed": 4,
+        "tokensUsed": 39000,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "config": {
+          "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+          "styleProfile": "NARRATIVE_HISTORICAL",
+          "promptVersion": "2.1.0",
+          "wordCountBounds": {
+            "minimum": 720,
+            "maximum": 915
+          },
+          "loopCapsProfile": {
+            "version": "phase06-production-v1",
+            "source": "deploy/envs/loop-caps.env"
+          }
+        },
+        "usage": {
+          "callsObserved": 1,
+          "promptTokensFromResponses": 1873,
+          "completionTokensFromResponses": 1269,
+          "totalTokensFromResponses": 3142,
+          "costUsdFromProviderUsage": 0.0,
+          "providerModelByCall": [
+            {
+              "provider": "minimax",
+              "model": "MiniMax-Text-01",
+              "promptTokens": 1873,
+              "completionTokens": 1269,
+              "totalTokens": 3142,
+              "accountingType": "reported",
+              "costUsdFromProviderUsage": 0.0,
+              "providerLatencySeconds": 42.9279,
+              "attempts": 1
+            }
+          ]
+        },
+        "latencySeconds": 43.91,
+        "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+        "authoritativeOperations": [
+          {
+            "operationId": "g08-input-1a46cb10112045a1880a3c8658b4ae2e",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "2a0a460a37ff1bd8d9a7460ebcc50c6eeb8e0ee9881ee6c77df572812bec2fd0"
+          },
+          {
+            "operationId": "g08-input-d30e5bd076024117a34df251fe11a9fc",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "463765a542572d82124e3735ee3b99e8332ebc0315f18698434abf13c8840487"
+          },
+          {
+            "operationId": "g08-input-1fc0ca06e9fd479daa7fd5ef818a0556",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "b28e010bb9c3e9ee8b13ecc7fde1a195f7ebcc78140ebd6bd2db0b8c38a5cd1e"
+          },
+          {
+            "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:GENERATE:1:2.0.0",
+            "operationType": "GENERATE",
+            "status": "COMPLETED",
+            "tokenReservation": 9000,
+            "tokensUsed": 9000,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "223a5518bbe7d3f0a998c92bf42fb5ae2371817792b433045e75c9da10dd83dc"
+          },
+          {
+            "operationId": "op_pass_gen_dc25643c",
+            "operationType": "PROVIDER_CALL",
+            "status": "COMPLETED",
+            "tokenReservation": 11191,
+            "tokensUsed": 3142,
+            "tokensPrompt": 1873,
+            "tokensCompletion": 1269,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "395f8b354f27320918cb4276f51d32a627418886bc183bccf26c7d781bd178af"
+          },
+          {
+            "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:EVALUATE:1:eval_passage_word_count:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "ac7f765ae489b6a5adc480ab7fae20a6ed0b2639b85ee4eee09fa6e4e2b2c3f0"
+          },
+          {
+            "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:EVALUATE:1:eval_passage_style:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "a73a5729ea7cc2abbd9207b4a46cb07c4b6a83b9e1672a25ecfefdfa84bccf38"
+          },
+          {
+            "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:EVALUATE:1:eval_grounding_fidelity:2.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "2f0c5767dfceb92442e951436327c837944bacd4d3a44386b3f7da37b003dfef"
+          },
+          {
+            "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:CHECKPOINT_COMMIT:1:75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "0afcc5845cadf2fdb7ea624842395f07a1ec4c1e3fc61710308dd1143747228e"
+          }
+        ],
+        "versionTraces": [
+          {
+            "version": 1,
+            "contentHash": "75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd",
+            "wordCount": 772,
+            "evaluatorIssueCodes": [],
+            "isAcceptedHead": true
+          }
+        ],
+        "artifactId": "art_passage_s1",
+        "acceptedArtifactRef": {
+          "artifactId": "art_passage_s1",
+          "artifactType": "Passage",
+          "version": 1,
+          "contentHash": "75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd"
+        },
+        "acceptedParentRefs": [
+          {
+            "artifactId": "art_blueprint_PMC13560651_bench_b5",
+            "artifactType": "ExamBlueprint",
+            "version": 1,
+            "contentHash": "b28e010bb9c3e9ee8b13ecc7fde1a195f7ebcc78140ebd6bd2db0b8c38a5cd1e"
+          },
+          {
+            "artifactId": "art_evidence_PMC13560651_bench_b5",
+            "artifactType": "EvidenceGraph",
+            "version": 1,
+            "contentHash": "463765a542572d82124e3735ee3b99e8332ebc0315f18698434abf13c8840487"
+          },
+          {
+            "artifactId": "art_source_PMC13560651_bench_b5",
+            "artifactType": "SourcePack",
+            "version": 1,
+            "contentHash": "2a0a460a37ff1bd8d9a7460ebcc50c6eeb8e0ee9881ee6c77df572812bec2fd0"
+          }
+        ],
+        "title": "Prokaryotic Diversity in Red Sea Hydrothermal Vents: A Historical Perspective",
+        "passage": "The study of hydrothermal vent ecosystems has long fascinated scientists due to their unique conditions and the remarkable diversity of life they support. Historically, research on these extreme environments has primarily focused on regions such as the East Pacific Rise and the Mid-Atlantic Ridge, leaving other areas, like the Red Sea, relatively understudied. The Red Sea, despite its geological significance as a young oceanic rift, has only recently begun to reveal its hydrothermal vent systems. The discovery of active hydrothermal vent fields in the Red Sea, particularly at Hatiba Mons, has opened new avenues for understanding the microbial communities that thrive in these harsh conditions. This emerging area of research aims to address the gap in knowledge regarding the composition and functional potential of prokaryotic life in these unique ecosystems.\n\nThe methodological framework for investigating these vent systems involves a meticulous approach to sample collection and analysis. During expeditions conducted in May and September 2022 and February 2023, researchers collected a total of 31 samples from five hydrothermal vents at Hatiba Mons (22.28°N, 37.84°E). These samples included 19 sediment samples, gathered using gravity corers, and 12 microbial mat samples, obtained using push cores, Niskin bottles, and box corers. To preserve the integrity of the samples, they were immediately frozen at −20°C on board the research vessel and subsequently stored at −80°C in the laboratory. DNA extraction was performed using the DNeasy PowerMax Soil Kit, with the addition of proteinase K during the lysis phase to enhance the yield. The quality and concentration of the extracted DNA were assessed using the Qubit dsDNA HS Assay on a Qubit 4.0 fluorometer. The DNA was then prepared for shotgun sequencing using the NEBNext Ultra II DNA Library Prep Kit, which involved fragmentation, end repair, adapter ligation, and PCR amplification. The sequencing was carried out on an Illumina NovaSeq platform, generating paired-end 150-bp reads.\n\nThe metagenomic sequencing yielded a substantial dataset, with a total of 3,004,009,760 paired-end reads across all samples. These reads were processed using a series of bioinformatics tools to ensure data quality and assembly. Low-quality reads and adapters were removed using fastp v1.3.0, and the quality-filtered reads were assessed with FastQC v0.12.1. The assembly of the reads was performed using MEGAHIT v1.2.9, resulting in 31 individual assemblies and 11 co-assemblies. Contigs longer than 1,000 bp were binned using MetaBAT2 v1.7, MaxBin2 v2.2.7, and VAMB v5.0.2, followed by bin aggregation with DAS Tool v1.1.7. The quality of the resulting genomes was evaluated using CheckM2 v1.1.0, and only high-quality and medium-quality metagenome-assembled genomes (MAGs) were retained for further analysis. Taxonomic assignment of these bins was conducted using GTDB-Tk v2.4.1, and protein-coding sequences were predicted from all MAGs using Prodigal.\n\nThe analysis of the recovered MAGs revealed a diverse array of prokaryotic life within the Red Sea hydrothermal vents. A total of 1,217 dereplicated prokaryotic MAGs were identified, comprising 969 bacterial MAGs across 50 phyla and 248 archaeal MAGs across 15 phyla. The most abundant bacterial groups included Pseudomonadota, Chloroflexota, and Planctomycetota, while the dominant archaeal taxa were Thermoproteota, Thermoplasmatota, and Nanoarchaeota. Notably, approximately 70% of the MAGs are likely to represent novel taxa, a proportion that surpasses or matches findings from other hydrothermal vent systems. This underscores the Hatiba Mons as a hotspot of microbial novelty and significantly expands the available genomic references for these environments.\n\nDespite the richness of the data, several operational constraints and limitations were encountered during the study. The complexity of the microbial communities and the diversity of the samples posed challenges for accurate taxonomic assignment and functional annotation. Additionally, the high proportion of potentially novel taxa suggests that current genomic databases may not fully capture the diversity of life in these environments. These findings highlight the need for further research and the development of more comprehensive genomic resources to better understand the functional roles of these microorganisms in their ecosystems.\n\nIn conclusion, the exploration of the Red Sea hydrothermal vents at Hatiba Mons has provided valuable insights into the diversity of prokaryotic life in extreme environments. The study not only highlights the novelty of the microbial communities but also emphasizes the importance of continued research in underrepresented regions. The findings contribute to a broader understanding of the ecological and evolutionary dynamics of life in hydrothermal vents and have implications for the development of biotechnological applications. The study was supported by Prof. Alexandre Soares Rosado’s KAUST Baseline Grant and various other research grants, underscoring the collaborative nature of this scientific endeavor.",
+        "wordCount": 772,
+        "paragraphCount": 6,
+        "sentenceCount": 34,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "hasSentenceIds": true,
+        "sentenceIdsSample": [
+          "s_0",
+          "s_1",
+          "s_2"
+        ],
+        "hasAuthoritativeCAS": true,
+        "claimAlignmentCount": 4,
+        "persistedEvaluationIds": [
+          "eval_res_7f0aea083804",
+          "eval_res_307d091afee1",
+          "eval_res_98b6782e42da"
+        ],
+        "persistedDecision": "PASS",
+        "persistenceEvidence": {
+          "classification": "AUTHENTICATED_DOTNET_CHECKPOINT_API",
+          "acceptedHeadVerified": true,
+          "exactPayloadReadBack": true,
+          "exactParentRefsReadBack": true,
+          "evaluationsReadBack": true,
+          "decisionAcceptedByCheckpoint": "PASS",
+          "acceptedArtifactRef": {
+            "artifactId": "art_passage_s1",
+            "artifactType": "Passage",
+            "version": 1,
+            "contentHash": "75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd"
+          },
+          "authoritativeCasProven": true,
+          "operationCount": 9
+        },
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "comparison": {
+        "wordCountInBounds": {
+          "legacy": true,
+          "v2": true
+        },
+        "cleanSentenceBoundary": {
+          "legacy": true,
+          "v2": true
+        },
+        "groundingStatus": {
+          "legacy": "PASS",
+          "v2": "PASS"
+        },
+        "v2AcceptedArtifactRef": {
+          "artifactId": "art_passage_s1",
+          "artifactType": "Passage",
+          "version": 1,
+          "contentHash": "75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd"
+        }
+      }
+    },
+    {
+      "caseId": "paired_2_PMC13407692",
+      "sourceId": "PMC13407692",
+      "sourceSha256": "ee008146c52cd0d0a134fcb3d0f2f624f48d1b9d8ea3e3e7fdea4e8580788311",
+      "topic": "Quantum State Purification and Error Correction",
+      "styleProfile": "EXPOSITORY_SCIENTIFIC",
+      "corpusSha256": "43fd15d60e2893ee1b23581a33e8785a9ccb66794ab43a55202623b552cbec99",
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "inputArtifactRefs": {
+        "sourcePackRef": {
+          "artifactId": "art_source_PMC13407692_bench_a9",
+          "artifactType": "SourcePack",
+          "version": 1,
+          "contentHash": "39ffaf4fab09bb25e5865efd9d9c7d4589a9ced7916ebb53636fd545a3c0809c"
+        },
+        "evidenceGraphRef": {
+          "artifactId": "art_evidence_PMC13407692_bench_a9",
+          "artifactType": "EvidenceGraph",
+          "version": 1,
+          "contentHash": "94de5a63daf43b9068b64dc3dfeeb134e00e0755275368d37ac21edf41657ce8"
+        },
+        "blueprintRef": {
+          "artifactId": "art_blueprint_PMC13407692_bench_a9",
+          "artifactType": "ExamBlueprint",
+          "version": 1,
+          "contentHash": "5bb29205b056d994b193e63fa8fda351cdac5fa1d990f984bd22a177e9f47aaa"
+        }
+      },
+      "legacy": {
+        "campaignCaseId": "g08_PMC13407692_legacy",
+        "runId": "bench_fad04dcd2a9ae751911a9a31fe629976",
+        "engine": "Legacy",
+        "title": "Quantum State Purification and Error Correction",
+        "passage": "Quantum computing represents a paradigm shift in computational capabilities, leveraging the principles of superposition and entanglement to achieve exponential speedups for specific problems. At the heart of this technology are qubits, the fundamental units of quantum information. However, qubits are notoriously susceptible to environmental noise, which leads to decoherence and gate-operation errors. As quantum circuits increase in depth, these errors accumulate, posing a significant challenge to the development of large-scale, fault-tolerant quantum computers. To address this, quantum error correction (QEC) has emerged as an indispensable technology, actively suppressing physical errors by encoding logical qubits into multiple physical qubits. This encoding is accompanied by syndrome measurements and recovery operations, which are crucial for maintaining the integrity of quantum information.\n\nQuantum state purification is a technique that has been extensively studied in the context of quantum communication and quantum networks. It involves extracting high-fidelity pure states from multiple noisy copies through local operations. Recent experimental demonstrations have shown its potential in achieving multi-node entanglement distribution and qubit teleportation between non-neighboring network nodes. From an information-theoretic perspective, purification can be viewed as an entropy-reduction operation, effectively filtering out noise entropy and concentrating quantum information. Despite these advancements, the intricate relationship between this entropy suppression process and quantum error correction remains largely unexplored. Integrating purification strategies with error-correction code structures within a unified framework is a critical challenge that must be addressed to advance near-term quantum computing toward practical applications.\n\nThe scope of purification operations must be carefully defined to avoid violating the no-cloning theorem, which prohibits the creation of identical copies of an arbitrary quantum state. The framework operates exclusively on quantum states where the target form is known a priori and is prepared by multiple independent applications of a noise channel to independently initialized copies. This includes three categories of states relevant to stabilizer-coded quantum computation: (i) data-block initialization states such as encoded |0⟩L or |+⟩L codewords, (ii) ancilla preparation states repeatedly prepared in |0⟩, and (iii) magic-state inputs |T⟩. These categories encompass the primary points where noise is injected within a stabilizer QEC cycle.\n\nRecent international research has yielded significant progress in both quantum state purification and quantum error correction. Systematic reviews of entanglement purification protocols have explored various approaches, including linear optical, cross-Kerr nonlinear, and measurement-based deterministic methods. Quantum error mitigation, inspired by purification concepts, has been applied to electron pair-correlation simulations on superconducting processors, achieving error suppression one to two orders of magnitude lower than post-selection in 20-qubit systems. The Willow surface-code experiment demonstrated a logical error rate of 0.143% per round on a distance-7 codeword. Additionally, a fault-tolerant memory based on LDPC codes achieved a 0.7% threshold using 288 physical qubits to protect 12 logical qubits across nearly one million syndrome cycles. However, these purity-constraint methods rely on the pure-output assumption, and their scalability is limited under conditions of correlated noise and deep circuits. While quantum LDPC-based GHZ distillation and noise-guessing decoding-based purification show promise for integration, a unified framework that systematically integrates purification into QEC with algorithm-level adaptive optimization is still lacking.\n\nThis paper proposes a purification-assisted quantum error-correction framework that introduces core innovations at three levels. At the architectural design level, a joint optimization model treats purification as an active noise-entropy suppression stage within the error-correction cycle. This approach reduces the effective noise of data qubits before syndrome extraction, enabling systematic entropy compression prior to encoding. In terms of algorithm design, an iterative purification error-correction (IPEC) algorithm dynamically adjusts purification rounds versus error-correction strategy based on real-time syndrome information. This allows for a balance between fidelity gain and resource consumption. On the theoretical analysis front, analytical expressions for the fidelity improvement bound and the fault-tolerance threshold are derived. These expressions reveal the quantitative contribution of purification to the compound exponential suppression of logical error rates under ideal assumptions.\n\nThe paper is structured as follows. Section 2 reviews recent advances and positions the proposed framework within the current landscape. Section 3 formulates the system model, establishes the framework architecture, and derives analytical performance bounds, including the fidelity improvement formula, the von Neumann entropy reduction relation, and the equivalent fault-tolerant threshold under both noiseless and circuit-level assumptions. Section 4 presents the IPEC algorithm, analyzes its complexity and stability, and provides Monte Carlo validation under multiple noise scenarios on both surface codes and quantum LDPC codes. Finally, Section 5 discusses hardware feasibility, limitations, and future work.\n\nThe core objective of quantum error correction is to protect quantum information through encoding redundancy. Recent milestones include real-time fault-tolerant error correction with the color code on trapped-ion platforms, fault-tolerant universal gate sets on the seven-qubit code, and quantum error correction beyond the break-even point with discrete-variable bosonic encodings. The surface code, the most deeply studied topological QEC code, has a two-dimensional lattice structure that requires only nearest-neighbor coupling, making it naturally suited for implementation on superconducting platforms. Distance-5 surface-code experiments have confirmed that logical-qubit error rates can be suppressed below the single-physical-qubit level, effectively breaking the 'break-even point'. Real-time QEC beyond break-even has also been demonstrated using model-free reinforcement learning for feedback optimization. On neutral atom platforms, reconfigurable atomic arrays provide flexible long-range connectivity; a logical quantum processor on up to 280 physical qubits has demonstrated surface codes, color codes, and fault-tolerant logical GHZ-state preparation.\n\nIn conclusion, the integration of quantum state purification with error-correction techniques holds significant promise for advancing quantum computing.",
+        "wordCount": 894,
+        "paragraphCount": 8,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "callsUsed": 1,
+        "tokensUsed": 3090,
+        "usage": {
+          "callsObserved": 1,
+          "promptTokensFromResponses": 1924,
+          "completionTokensFromResponses": 1166,
+          "totalTokensFromResponses": 3090,
+          "costUsdFromProviderUsage": 0.0,
+          "providerModelByCall": [
+            {
+              "provider": "minimax",
+              "model": "MiniMax-Text-01",
+              "promptTokens": 1924,
+              "completionTokens": 1166,
+              "totalTokens": 3090,
+              "accountingType": "reported",
+              "costUsdFromProviderUsage": 0.0,
+              "providerLatencySeconds": 39.4875,
+              "attempts": 1
+            }
+          ]
+        },
+        "latencySeconds": 39.622,
+        "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+        "config": {
+          "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+          "styleProfile": "EXPOSITORY_SCIENTIFIC",
+          "wordCountBounds": {
+            "minimum": 720,
+            "maximum": 915
+          }
+        },
+        "hasSentenceIds": false,
+        "hasAuthoritativeCAS": false,
+        "persistenceEvidence": {
+          "classification": "LEGACY_NO_ACCEPTED_V2_ARTIFACT",
+          "authoritativeCasProven": false
+        },
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "v2": {
+        "campaignCaseId": "g08_PMC13407692_v2",
+        "runId": "bench_a9e15044047ee9fd31b91932c1c4c5ad",
+        "engine": "V2_PassageLoop",
+        "decision": "PASS",
+        "callsUsed": 8,
+        "tokensUsed": 84000,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "config": {
+          "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+          "styleProfile": "EXPOSITORY_SCIENTIFIC",
+          "promptVersion": "2.1.0",
+          "wordCountBounds": {
+            "minimum": 720,
+            "maximum": 915
+          },
+          "loopCapsProfile": {
+            "version": "phase06-production-v1",
+            "source": "deploy/envs/loop-caps.env"
+          }
+        },
+        "usage": {
+          "callsObserved": 1,
+          "promptTokensFromResponses": 1745,
+          "completionTokensFromResponses": 1121,
+          "totalTokensFromResponses": 2866,
+          "costUsdFromProviderUsage": 0.0,
+          "providerModelByCall": [
+            {
+              "provider": "minimax",
+              "model": "MiniMax-Text-01",
+              "promptTokens": 1745,
+              "completionTokens": 1121,
+              "totalTokens": 2866,
+              "accountingType": "reported",
+              "costUsdFromProviderUsage": 0.0,
+              "providerLatencySeconds": 38.2509,
+              "attempts": 1
+            }
+          ]
+        },
+        "latencySeconds": 39.857,
+        "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+        "authoritativeOperations": [
+          {
+            "operationId": "g08-input-3b0eed3a2513429190d0b92522969af1",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "39ffaf4fab09bb25e5865efd9d9c7d4589a9ced7916ebb53636fd545a3c0809c"
+          },
+          {
+            "operationId": "g08-input-f7faf8b23b42474c8a4074d1bae7d0bf",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "94de5a63daf43b9068b64dc3dfeeb134e00e0755275368d37ac21edf41657ce8"
+          },
+          {
+            "operationId": "g08-input-734548f8e4fd4b0781715d8a01f52443",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "5bb29205b056d994b193e63fa8fda351cdac5fa1d990f984bd22a177e9f47aaa"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:GENERATE:1:2.0.0",
+            "operationType": "GENERATE",
+            "status": "COMPLETED",
+            "tokenReservation": 9000,
+            "tokensUsed": 9000,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "1cb83451c00e95db5a8e9f76c46b23728a521feeb3fad581e14e794f7573534d"
+          },
+          {
+            "operationId": "op_pass_gen_5ee1e597",
+            "operationType": "PROVIDER_CALL",
+            "status": "COMPLETED",
+            "tokenReservation": 12566,
+            "tokensUsed": 2866,
+            "tokensPrompt": 1745,
+            "tokensCompletion": 1121,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "dc23480e35f21bb4d6027487beccee49b1ac474e08af5e1284d4c9cb50cb9466"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:EVALUATE:1:eval_passage_word_count:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "d6b465f12b29a4edf9f0d01efa9740d56b00227fa7eceae943c1b7df408b2970"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:EVALUATE:1:eval_passage_style:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "1b38ac9394e788c2704ad57907dfbcc688b2e474661d1f019bd1b5f560ea4b72"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:EVALUATE:1:eval_grounding_fidelity:2.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "4a6694652232eee36deed2ad5053734d08c4505170fdc68c4f09630691e9088e"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:REPAIR:2:2.0.0",
+            "operationType": "REPAIR",
+            "status": "COMPLETED",
+            "tokenReservation": 15000,
+            "tokensUsed": 15000,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "b0451faccd47c17b6368233ac338d3a8958827269a8fa57cd2468bd6fb98c93b"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:EVALUATE:2:eval_passage_word_count:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "036e82a47305c4d1001dc954fc8072195172a72ea17b8a7cab8ba217a63de06b"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:EVALUATE:2:eval_passage_style:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "5050446376ccaf46ec310073bf876cb4222d0e670984f5ea511d8d9997744ff1"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:EVALUATE:2:eval_grounding_fidelity:2.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "b2fff577ca3850a7115a78426bb71752282850d4717cf6c497eb29b402f9ef53"
+          },
+          {
+            "operationId": "loop:bench_a9e15044047ee9fd31b91932c1c4c5ad:art_passage_s1:CHECKPOINT_COMMIT:2:d0ec0bcd41b72624a0ec3769f6ec88593701a2721a2e0bee03946b4aab80dc17",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "0341a1a852878a6351f81db21ca22a833e45461bd16c3620cc5dfd11bd7b1289"
+          }
+        ],
+        "versionTraces": [
+          {
+            "version": 1,
+            "contentHash": "4ab43b331eb569e8e9db7fd51148375b020fc24d0ff202baefc74129516a91a8",
+            "wordCount": 160,
+            "evaluatorIssueCodes": [
+              "SECTION_WORD_COUNT_OUT_OF_BOUNDS",
+              "SCHEMA_VIOLATION"
+            ],
+            "isAcceptedHead": false
+          },
+          {
+            "version": 2,
+            "contentHash": "d0ec0bcd41b72624a0ec3769f6ec88593701a2721a2e0bee03946b4aab80dc17",
+            "wordCount": 752,
+            "evaluatorIssueCodes": [],
+            "isAcceptedHead": true
+          }
+        ],
+        "artifactId": "art_passage_s1",
+        "acceptedArtifactRef": {
+          "artifactId": "art_passage_s1",
+          "artifactType": "Passage",
+          "version": 2,
+          "contentHash": "d0ec0bcd41b72624a0ec3769f6ec88593701a2721a2e0bee03946b4aab80dc17"
+        },
+        "acceptedParentRefs": [
+          {
+            "artifactId": "art_blueprint_PMC13407692_bench_a9",
+            "artifactType": "ExamBlueprint",
+            "version": 1,
+            "contentHash": "5bb29205b056d994b193e63fa8fda351cdac5fa1d990f984bd22a177e9f47aaa"
+          },
+          {
+            "artifactId": "art_evidence_PMC13407692_bench_a9",
+            "artifactType": "EvidenceGraph",
+            "version": 1,
+            "contentHash": "94de5a63daf43b9068b64dc3dfeeb134e00e0755275368d37ac21edf41657ce8"
+          },
+          {
+            "artifactId": "art_source_PMC13407692_bench_a9",
+            "artifactType": "SourcePack",
+            "version": 1,
+            "contentHash": "39ffaf4fab09bb25e5865efd9d9c7d4589a9ced7916ebb53636fd545a3c0809c"
+          }
+        ],
+        "title": "Quantum State Purification and Error Correction: Advancements and Challenges",
+        "passage": "Quantum computing represents a paradigm shift in computational capabilities, leveraging the principles of superposition and entanglement to achieve exponential speedups for specific problems. However, the practical implementation of quantum processors is severely hindered by the extreme sensitivity of qubits to environmental noise, which leads to decoherence and gate-operation errors that accumulate with circuit depth. To address these challenges, quantum error correction (QEC) has emerged as an essential technology. It actively suppresses physical errors by encoding logical qubits into multiple physical qubits, employing syndrome measurements and recovery operations to maintain the integrity of quantum information. Alongside QEC, quantum state purification has garnered significant attention, particularly in the realms of quantum communication and networks. This technique extracts high-fidelity pure states from multiple noisy copies through local operations, effectively reducing noise entropy and concentrating quantum information. Despite its potential, the intricate interplay between purification and QEC mechanisms remains underexplored, posing a critical challenge to the advancement of near-term quantum computing toward practical applications.\n\nQuantum computing, as a revolutionary computing paradigm, achieves exponential speedup for specific problems through superposition and entanglement of qubits. However, the deep synergistic mechanism between this entropy suppression process and quantum error correction has not been systematically elucidated. The scope of the purification operation must be clarified to avoid conflict with the no-cloning theorem [5]. The framework operates exclusively on quantum states in which the target form is known a priori and prepared by m independent applications of the noise channel to m independently initialized copies. Three categories of states arising in stabilizer-coded quantum computation fall within this scope: (i) data-block initialization states such as encoded |0⟩L or |+⟩L codewords; (ii) ancilla preparation states repeatedly prepared in |0⟩; and (iii) magic-state inputs |T⟩. In all three cases, m independent preparations of a known target are passed through m independent noise channel applications—precisely the regime of the Cirac–Ekert–Macchiavello purification protocol [6]. The three categories cover the dominant noise-injection points within a stabilizer QEC cycle. Systematic reviews of entanglement purification protocols have surveyed linear optical, cross-Kerr nonlinear, and measurement-based deterministic approaches [7]. Quantum error mitigation based on purification ideas has been applied to electron pair-correlation simulations on superconducting processors, achieving error suppression one to two orders of magnitude lower than post-selection in 20-qubit systems [8]. The Willow surface-code experiment achieved a logical error rate of 0.143% per round on a distance-7 codeword [9]. A fault-tolerant memory based on LDPC codes achieved a 0.7% threshold using 288 physical qubits to protect 12 logical qubits across nearly one million syndrome cycles [10]. Reviews note that purity-constraint methods rely on the pure-output assumption, with scalability limited under correlated noise and deep circuits [11]. Quantum LDPC-based GHZ distillation and noise-guessing decoding-based purification demonstrate integration feasibility [12,13]; however, a unified framework systematically embedding purification into QEC with algorithm-level adaptive optimization is still lacking. This paper proposes a purification-assisted quantum error-correction framework with core innovations at three levels. In architectural design, a joint optimization model treats purification as an active noise-entropy suppression stage within the error-correction cycle, reducing the effective noise of data qubits before syndrome extraction and enabling systematic entropy compression prior to encoding. In algorithm design, an iterative purification error-correction (IPEC) algorithm dynamically adjusts purification rounds versus error-correction strategy based on real-time syndrome information, achieving balance between fidelity gain and resource consumption. In theoretical analysis, analytical expressions for the fidelity improvement bound and the fault-tolerance threshold are derived, revealing the quantitative contribution of purification to the compound exponential suppression of logical error rates under ideal assumptions. The remainder of this paper is organized as follows. Section 2 reviews recent advances and positions the proposed framework. Section 3 formulates the system model, establishes the framework architecture, and derives analytical performance bounds including the fidelity improvement formula, the von Neumann entropy reduction relation, and the equivalent fault-tolerant threshold under both noiseless and circuit-level assumptions. Section 4 presents the IPEC algorithm with its complexity and stability analysis, and Monte Carlo validation under multiple noise scenarios on both surface codes and quantum LDPC codes. Section 5 discusses hardware feasibility, limitations, and future work. The core objective of quantum error correction is to protect quantum information through encoding redundancy. The surface code, the most deeply studied topological QEC code, has a two-dimensional lattice structure requiring only nearest-neighbor coupling—a feature giving it natural implementation advantages on superconducting platforms. Distance-5 surface-code experiments confirmed that logical-qubit error rates can be suppressed below the single-physical-qubit level [17], breaking the ‘break-even point’. Real-time QEC beyond break-even has also been demonstrated using model-free reinforcement learning for feedback optimization [18].",
+        "wordCount": 752,
+        "paragraphCount": 2,
+        "sentenceCount": 33,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "hasSentenceIds": true,
+        "sentenceIdsSample": [
+          "s_0",
+          "s_1",
+          "s_2"
+        ],
+        "hasAuthoritativeCAS": true,
+        "claimAlignmentCount": 0,
+        "persistedEvaluationIds": [
+          "eval_res_c66ba9d3733f",
+          "eval_res_1ad7719ad647",
+          "eval_res_28643d422e3b"
+        ],
+        "persistedDecision": "PASS",
+        "persistenceEvidence": {
+          "classification": "AUTHENTICATED_DOTNET_CHECKPOINT_API",
+          "acceptedHeadVerified": true,
+          "exactPayloadReadBack": true,
+          "exactParentRefsReadBack": true,
+          "evaluationsReadBack": true,
+          "decisionAcceptedByCheckpoint": "PASS",
+          "acceptedArtifactRef": {
+            "artifactId": "art_passage_s1",
+            "artifactType": "Passage",
+            "version": 2,
+            "contentHash": "d0ec0bcd41b72624a0ec3769f6ec88593701a2721a2e0bee03946b4aab80dc17"
+          },
+          "authoritativeCasProven": true,
+          "operationCount": 13
+        },
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "comparison": {
+        "wordCountInBounds": {
+          "legacy": true,
+          "v2": true
+        },
+        "cleanSentenceBoundary": {
+          "legacy": true,
+          "v2": true
+        },
+        "groundingStatus": {
+          "legacy": "PASS",
+          "v2": "PASS"
+        },
+        "v2AcceptedArtifactRef": {
+          "artifactId": "art_passage_s1",
+          "artifactType": "Passage",
+          "version": 2,
+          "contentHash": "d0ec0bcd41b72624a0ec3769f6ec88593701a2721a2e0bee03946b4aab80dc17"
+        }
+      }
+    },
+    {
+      "caseId": "paired_3_PMC13517498",
+      "sourceId": "PMC13517498",
+      "sourceSha256": "819338d16fd28b126aea30e8e5212a24a0a03a1551f50a78f057e18ee1dfdf30",
+      "topic": "Smart Meter Data Repair and Urban Energy Distribution",
+      "styleProfile": "DISCURSIVE_ANALYTICAL",
+      "corpusSha256": "43fd15d60e2893ee1b23581a33e8785a9ccb66794ab43a55202623b552cbec99",
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "inputArtifactRefs": {
+        "sourcePackRef": {
+          "artifactId": "art_source_PMC13517498_bench_50",
+          "artifactType": "SourcePack",
+          "version": 1,
+          "contentHash": "d077b9c6484f0c51cb90b8229c7be29830ce1d5a143b02f2d678591b413ff4ea"
+        },
+        "evidenceGraphRef": {
+          "artifactId": "art_evidence_PMC13517498_bench_50",
+          "artifactType": "EvidenceGraph",
+          "version": 1,
+          "contentHash": "09b16d7b224895580da8051cd03f6906b3226eec5be9b6c377ed5a1ade9995ba"
+        },
+        "blueprintRef": {
+          "artifactId": "art_blueprint_PMC13517498_bench_50",
+          "artifactType": "ExamBlueprint",
+          "version": 1,
+          "contentHash": "dd720661727825850dc4aaaf8646b90e353608b728f388a70788a76e0abec3a2"
+        }
+      },
+      "legacy": {
+        "campaignCaseId": "g08_PMC13517498_legacy",
+        "runId": "bench_84132a0b22668489e4404d4d4aec1574",
+        "engine": "Legacy",
+        "title": "Smart Meter Data Repair and Urban Energy Distribution",
+        "passage": "The advent of smart urban energy systems has revolutionized the way cities manage their energy resources, integrating new energy sources and optimizing the interaction between generation, grid, load, and energy storage. This transformation has placed significant emphasis on the accuracy, real-time performance, and integrity of measurement data at the terminal of urban distribution networks. As the cornerstone of these systems, smart meters have been widely deployed globally, including in numerous cities across China. These devices generate vast amounts of electric energy reading data at regular intervals—typically every 15 minutes, though some regions adopt a 1-minute interval. This data is crucial for a variety of smart city energy applications, ranging from state awareness of urban distribution networks and load forecasting to demand response, refined line loss management, electricity theft detection, and the accommodation assessment of urban distributed photovoltaic power.\n\nThe utility of smart meter data extends beyond individual user consumption analysis. It plays a pivotal role in enhancing the observability, measurability, and controllability of urban distribution networks through data fusion at the transformer district level. For instance, the calculation of line loss in distribution network transformer districts, based on smart meter data, serves as a key indicator for the \"four-classified management\" of line loss implemented by power supply companies. This management approach, which categorizes line loss by region, voltage level, feeder line, and transformer district, directly influences line loss assessment and the identification of suspected electricity theft. Furthermore, load forecasting and demand response rely on continuous and accurate user power profiles to facilitate power market clearing and the formulation of orderly power utilization schemes. Data-driven electricity theft detection algorithms, which identify abnormal power consumption patterns to assist on-site inspections, are a critical component of anti-electricity theft efforts in urban areas. Consequently, the quality of smart meter data is fundamental to the effectiveness and reliability of these smart city energy applications.\n\nHowever, the deployment of smart meters in urban low-voltage distribution networks presents significant challenges due to the complex and harsh on-site conditions under which they operate. These devices are continuously exposed to environments characterized by high temperature, high humidity, and severe electromagnetic interference. Coupled with unstable communication links—such as power line carrier, RS485, and public wireless network—and issues like aging metering components, clock drift, man-made electricity theft, and wiring errors, the collected electric energy readings often suffer from various quality defects. Data from a provincial branch of the State Grid Corporation of China reveals that a medium-scale prefecture-level power company records tens of thousands of abnormal data entries daily, with some transformer districts experiencing an abnormal data rate exceeding 5%. Such data quality issues severely impede data-driven analysis and decision-making for distribution networks, potentially leading to misjudgments and economic losses.\n\nSmart meter data quality problems manifest in five typical anomalies: sudden jump, reading stagnation, reverse reading, pulse spike, and gradual drift. These anomalies differ significantly in their data characteristics, duration, and physical mechanisms, necessitating tailored approaches for effective resolution. In recent years, researchers worldwide have extensively studied anomaly detection and data recovery technologies for smart meter data, yielding several notable outcomes. In the realm of anomaly detection, studies have systematically reviewed mainstream technical routes for time-series anomaly detection in smart grids, including statistical methods, machine learning, and deep learning algorithms. While these studies have provided valuable insights into the performance comparison of different methods, they often lack an in-depth exploration of the correlation between the physical causes and external manifestations of smart meter data anomalies.\n\nFor instance, one study proposed a CNN-LSTM method based on cross-layer feature fusion for intrusion detection in advanced metering infrastructure, achieving satisfactory performance in identifying anomalies from time-series data. However, it did not delve into the mapping relationship between the physical causes and data characteristics of various anomalies. Another research effort constructed a hybrid deep learning framework for smart meter anomaly detection, improving detection accuracy but failing to incorporate physical constraints of meter data into the model design. Similarly, in the domain of data recovery, researchers have presented methods based on improved multi-classifiers and developed interpolation methods tailored for energy management systems. While these approaches can effectively impute missing and abnormal data, they often overlook the physical rationality of the recovered results.\n\nDespite these advancements, current research often treats anomaly detection and data recovery as separate processes, without establishing a collaborative optimization mechanism between them. Some studies have explored advanced interpolation approaches for bad and missing smart meter data, proposing recovery strategies that combine statistics and machine learning. However, these methods still fall short of achieving the seamless integration of detection and recovery. Other research has proposed reconstruction methods for missing distribution network measurement data based on generative adversarial networks and dual semantic perception. While these methods boast powerful data imputation capabilities, they often fail to systematically embed physical constraints into the recovery process, thereby compromising the practical applicability of the recovered data.\n\nIn conclusion, while significant progress has been made in smart meter data repair and urban energy distribution, there remains a critical need for more comprehensive and integrated approaches that address both the detection and recovery of data anomalies. Future research should focus on developing methods that not only improve the accuracy and efficiency of anomaly detection and data recovery but also ensure the physical rationality and practical applicability of the recovered data.",
+        "wordCount": 882,
+        "paragraphCount": 7,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "callsUsed": 1,
+        "tokensUsed": 3039,
+        "usage": {
+          "callsObserved": 1,
+          "promptTokensFromResponses": 1978,
+          "completionTokensFromResponses": 1061,
+          "totalTokensFromResponses": 3039,
+          "costUsdFromProviderUsage": 0.0,
+          "providerModelByCall": [
+            {
+              "provider": "minimax",
+              "model": "MiniMax-Text-01",
+              "promptTokens": 1978,
+              "completionTokens": 1061,
+              "totalTokens": 3039,
+              "accountingType": "reported",
+              "costUsdFromProviderUsage": 0.0,
+              "providerLatencySeconds": 37.303,
+              "attempts": 1
+            }
+          ]
+        },
+        "latencySeconds": 37.437,
+        "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+        "config": {
+          "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+          "styleProfile": "DISCURSIVE_ANALYTICAL",
+          "wordCountBounds": {
+            "minimum": 720,
+            "maximum": 915
+          }
+        },
+        "hasSentenceIds": false,
+        "hasAuthoritativeCAS": false,
+        "persistenceEvidence": {
+          "classification": "LEGACY_NO_ACCEPTED_V2_ARTIFACT",
+          "authoritativeCasProven": false
+        },
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "v2": {
+        "campaignCaseId": "g08_PMC13517498_v2",
+        "runId": "bench_50e5d0aaa3663c31afce5eaf7e5fe6c6",
+        "engine": "V2_PassageLoop",
+        "decision": "PASS",
+        "callsUsed": 8,
+        "tokensUsed": 84000,
+        "provider": "minimax",
+        "model": "MiniMax-Text-01",
+        "config": {
+          "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+          "styleProfile": "DISCURSIVE_ANALYTICAL",
+          "promptVersion": "2.1.0",
+          "wordCountBounds": {
+            "minimum": 720,
+            "maximum": 915
+          },
+          "loopCapsProfile": {
+            "version": "phase06-production-v1",
+            "source": "deploy/envs/loop-caps.env"
+          }
+        },
+        "usage": {
+          "callsObserved": 1,
+          "promptTokensFromResponses": 1802,
+          "completionTokensFromResponses": 1193,
+          "totalTokensFromResponses": 2995,
+          "costUsdFromProviderUsage": 0.0,
+          "providerModelByCall": [
+            {
+              "provider": "minimax",
+              "model": "MiniMax-Text-01",
+              "promptTokens": 1802,
+              "completionTokens": 1193,
+              "totalTokens": 2995,
+              "accountingType": "reported",
+              "costUsdFromProviderUsage": 0.0,
+              "providerLatencySeconds": 42.3208,
+              "attempts": 1
+            }
+          ]
+        },
+        "latencySeconds": 43.75,
+        "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+        "authoritativeOperations": [
+          {
+            "operationId": "g08-input-daee2222f6004b1fa2d1ef53278b1aef",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "d077b9c6484f0c51cb90b8229c7be29830ce1d5a143b02f2d678591b413ff4ea"
+          },
+          {
+            "operationId": "g08-input-e7904f2bd2e14c2b8da66faaa65f11b6",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "09b16d7b224895580da8051cd03f6906b3226eec5be9b6c377ed5a1ade9995ba"
+          },
+          {
+            "operationId": "g08-input-5fea2d9525574ab1b5b226758876e112",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "dd720661727825850dc4aaaf8646b90e353608b728f388a70788a76e0abec3a2"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:GENERATE:1:2.0.0",
+            "operationType": "GENERATE",
+            "status": "COMPLETED",
+            "tokenReservation": 9000,
+            "tokensUsed": 9000,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "8ebf9f12752ea06a2d4f45ba78b93053f60a2dafe22123fb1df148a417400884"
+          },
+          {
+            "operationId": "op_pass_gen_f1ec2446",
+            "operationType": "PROVIDER_CALL",
+            "status": "COMPLETED",
+            "tokenReservation": 12753,
+            "tokensUsed": 2995,
+            "tokensPrompt": 1802,
+            "tokensCompletion": 1193,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "c2b1b2c9c930254e48ffb7acd3159ed72f24337da628eaa668b5c4f3c3bad89b"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:EVALUATE:1:eval_passage_word_count:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "f17f378f1100b3b289c2c85d949d1b1db95af4c99b6355f785b8471b03029bc3"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:EVALUATE:1:eval_passage_style:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "3269a23acb663d8d754cda7971abd05b539968ed3516af991317841d85f58827"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:EVALUATE:1:eval_grounding_fidelity:2.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "2f357c700383be55f839ed90ba70dde3f84d501d439c3ae7f3720dbce88249be"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:REPAIR:2:2.0.0",
+            "operationType": "REPAIR",
+            "status": "COMPLETED",
+            "tokenReservation": 15000,
+            "tokensUsed": 15000,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "ed1404a42bb017f3d86e14c54bb03862669bcc4283dd32f23d02c453361de693"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:EVALUATE:2:eval_passage_word_count:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "bb7e850774a738f97c04dbdb1dc28147e392dea012f33d8d4f6423a95cd6508c"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:EVALUATE:2:eval_passage_style:1.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "2480bb13e89a394c7ab4ca8ac9699386c4c0366a6e0ff23053a5056033c9442e"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:EVALUATE:2:eval_grounding_fidelity:2.0.0",
+            "operationType": "EVALUATE",
+            "status": "COMPLETED",
+            "tokenReservation": 10000,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "REPORTED",
+            "isReplay": false,
+            "requestHash": "4c7bb296794d04b9534ed8cb7afe119837000dbbbb0bc8fa2e914227e1907207"
+          },
+          {
+            "operationId": "loop:bench_50e5d0aaa3663c31afce5eaf7e5fe6c6:art_passage_s1:CHECKPOINT_COMMIT:2:3a3fdeeb2d9c82a6ca9494d0a62630852e530225cffbd6042753b13d3897c9d0",
+            "operationType": "CHECKPOINT_COMMIT",
+            "status": "COMPLETED",
+            "tokenReservation": 0,
+            "tokensUsed": 0,
+            "tokensPrompt": 0,
+            "tokensCompletion": 0,
+            "accountingType": "UNKNOWN",
+            "isReplay": false,
+            "requestHash": "82ccc4125f74793ea5cb0745f48fd7c3a7a5e0155058f5d65a86aca1e1fa8c34"
+          }
+        ],
+        "versionTraces": [
+          {
+            "version": 1,
+            "contentHash": "cb2abe552991f4feffd035106b0e84a6f5a7443087d4d2348f6a8abce075faef",
+            "wordCount": 953,
+            "evaluatorIssueCodes": [
+              "SECTION_WORD_COUNT_OUT_OF_BOUNDS"
+            ],
+            "isAcceptedHead": false
+          },
+          {
+            "version": 2,
+            "contentHash": "3a3fdeeb2d9c82a6ca9494d0a62630852e530225cffbd6042753b13d3897c9d0",
+            "wordCount": 813,
+            "evaluatorIssueCodes": [],
+            "isAcceptedHead": true
+          }
+        ],
+        "artifactId": "art_passage_s1",
+        "acceptedArtifactRef": {
+          "artifactId": "art_passage_s1",
+          "artifactType": "Passage",
+          "version": 2,
+          "contentHash": "3a3fdeeb2d9c82a6ca9494d0a62630852e530225cffbd6042753b13d3897c9d0"
+        },
+        "acceptedParentRefs": [
+          {
+            "artifactId": "art_blueprint_PMC13517498_bench_50",
+            "artifactType": "ExamBlueprint",
+            "version": 1,
+            "contentHash": "dd720661727825850dc4aaaf8646b90e353608b728f388a70788a76e0abec3a2"
+          },
+          {
+            "artifactId": "art_evidence_PMC13517498_bench_50",
+            "artifactType": "EvidenceGraph",
+            "version": 1,
+            "contentHash": "09b16d7b224895580da8051cd03f6906b3226eec5be9b6c377ed5a1ade9995ba"
+          },
+          {
+            "artifactId": "art_source_PMC13517498_bench_50",
+            "artifactType": "SourcePack",
+            "version": 1,
+            "contentHash": "d077b9c6484f0c51cb90b8229c7be29830ce1d5a143b02f2d678591b413ff4ea"
+          }
+        ],
+        "title": "Academic Reading: Smart Meter Data Repair and Urban Energy Distribution",
+        "passage": "\"Smart Meter Data Quality Challenges and Urban Energy System Implications\",\n  \"passage\": \"The emergence of smart urban energy systems has revolutionized the way cities manage their energy resources, integrating new energy sources and enabling coordinated interactions between generation, grid, load, and storage. This transformation has placed significant emphasis on the accuracy, real-time performance, and integrity of measurement data collected at the terminal points of urban distribution networks. Smart meters, as the primary devices for collecting power consumption data, have been widely deployed globally, including in numerous cities across China. These devices generate vast amounts of electric energy data at intervals as frequent as every 15 minutes (or even every minute in some regions), forming the backbone of various smart city applications such as distribution network state awareness, load forecasting, demand response, refined line loss management, and electricity theft detection.\n\nThe significance of smart meter data extends beyond individual user behavior analysis; it is crucial for achieving observability, measurability, and controllability of urban distribution networks through data fusion at the transformer district level. For instance, the calculation of line loss in distribution network transformer districts, based on smart meter data, serves as a key indicator for the 'four-classified management' of line loss implemented by power supply companies. This directly influences assessments of line loss and the identification of potential electricity theft. Similarly, load forecasting and demand response initiatives rely on continuous and precise user power profiles to facilitate power market clearing and the development of efficient power utilization strategies. Furthermore, data-driven algorithms for detecting electricity theft analyze abnormal power consumption patterns to guide on-site inspections, forming a critical component of anti-theft efforts in urban areas. Consequently, the quality of smart meter data is paramount to the effectiveness and reliability of these smart city energy applications.\n\nDespite their importance, smart meters in urban low-voltage distribution networks operate in challenging environments that threaten data quality. These devices are exposed to high temperatures, humidity, and severe electromagnetic interference, compounded by unstable communication links such as power line carriers, RS485, and public wireless networks. Additionally, factors like aging metering components, clock drift, deliberate electricity theft, and wiring errors contribute to the degradation of data quality. Statistics from a provincial branch of the State Grid Corporation of China reveal that a medium-sized prefecture-level power company records tens of thousands of abnormal data entries daily, with some transformer districts experiencing abnormal data rates exceeding 5%. Such pervasive data quality issues severely impede data-driven analysis and decision-making for distribution networks, potentially leading to misjudgments and economic losses.\n\nSmart meter data anomalies manifest in various physical forms and can be categorized into five primary types: sudden jumps, reading stagnation, reverse readings, pulse spikes, and gradual drift. Each type exhibits distinct data characteristics, durations, and underlying physical mechanisms, rendering a single method insufficient for addressing all anomalies. Researchers worldwide have dedicated substantial efforts to developing anomaly detection and data recovery technologies for smart meter data, yielding several notable advancements. In the realm of anomaly detection, studies have explored statistical methods, machine learning, and deep learning algorithms, as detailed in a comprehensive review of time-series anomaly detection in smart grids. However, these studies often prioritize performance comparisons over analyzing the correlation between physical causes and the external manifestations of anomalies. Other research has proposed methods like CNN-LSTM for intrusion detection in advanced metering infrastructure, achieving commendable results in identifying anomalies within time-series data but often neglecting the mapping between physical causes and data characteristics.\n\nIn terms of data recovery, various approaches have been proposed, such as methods based on improved multi-classifiers for imputing missing and abnormal data. While these methods can effectively recover data, they frequently overlook the physical rationality of the results. Similarly, studies on missing data imputation for power systems have developed interpolation methods tailored for energy management systems but lack validation on the physical feasibility of the recovered data. Other research has explored robust non-negative matrix factorization for data reconstruction, treating anomaly detection and data recovery as separate processes without establishing a collaborative optimization mechanism. Advanced interpolation approaches combining statistics and machine learning have also been proposed, yet they struggle to achieve the seamless integration of detection and recovery processes.\n\nIn conclusion, while significant progress has been made in addressing smart meter data quality issues, challenges remain in developing comprehensive solutions that integrate physical constraints and ensure the practical applicability of recovered data. The complexity of anomalies and the diversity of their underlying causes necessitate the development of sophisticated, multi-faceted approaches that not only detect and recover data but also embed physical rationality into the recovery process. As smart urban energy systems continue to evolve, the importance of high-quality, reliable data will only grow, underscoring the need for ongoing research and innovation in this critical area.\"\n  \"styleProfile\": \"DISCURSIVE_ANALYTICAL\",\n  \"claimAlignments\": [\n    {\n      \"claim\": \"Smart meters are crucial for the functionality of smart urban energy systems.\",\n      \"sourceFact\": \"The construction of smart urban energy systems...",
+        "wordCount": 813,
+        "paragraphCount": 6,
+        "sentenceCount": 29,
+        "cleanSentenceBoundary": true,
+        "blindSliced": false,
+        "hasSentenceIds": true,
+        "sentenceIdsSample": [
+          "s_0",
+          "s_1",
+          "s_2"
+        ],
+        "hasAuthoritativeCAS": true,
+        "claimAlignmentCount": 0,
+        "persistedEvaluationIds": [
+          "eval_res_65d56bd5f923",
+          "eval_res_8e0ea95ca04a",
+          "eval_res_0167dc11d554"
+        ],
+        "persistedDecision": "PASS",
+        "persistenceEvidence": {
+          "classification": "AUTHENTICATED_DOTNET_CHECKPOINT_API",
+          "acceptedHeadVerified": true,
+          "exactPayloadReadBack": true,
+          "exactParentRefsReadBack": true,
+          "evaluationsReadBack": true,
+          "decisionAcceptedByCheckpoint": "PASS",
+          "acceptedArtifactRef": {
+            "artifactId": "art_passage_s1",
+            "artifactType": "Passage",
+            "version": 2,
+            "contentHash": "3a3fdeeb2d9c82a6ca9494d0a62630852e530225cffbd6042753b13d3897c9d0"
+          },
+          "authoritativeCasProven": true,
+          "operationCount": 13
+        },
+        "groundingEvaluation": {
+          "status": "PASS",
+          "score": 1.0,
+          "totalIssues": 0,
+          "blockingIssues": 0,
+          "issueCodes": []
+        }
+      },
+      "comparison": {
+        "wordCountInBounds": {
+          "legacy": true,
+          "v2": true
+        },
+        "cleanSentenceBoundary": {
+          "legacy": true,
+          "v2": true
+        },
+        "groundingStatus": {
+          "legacy": "PASS",
+          "v2": "PASS"
+        },
+        "v2AcceptedArtifactRef": {
+          "artifactId": "art_passage_s1",
+          "artifactType": "Passage",
+          "version": 2,
+          "contentHash": "3a3fdeeb2d9c82a6ca9494d0a62630852e530225cffbd6042753b13d3897c9d0"
+        }
+      }
+    }
+  ]
+}

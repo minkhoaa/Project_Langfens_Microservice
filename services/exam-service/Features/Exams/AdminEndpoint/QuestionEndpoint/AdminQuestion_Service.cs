@@ -1,6 +1,8 @@
 using System;
+using System.Security.Claims;
 using exam_service.Contracts.Exams;
 using exam_service.Domains.Entities;
+using exam_service.Features.ReadingPaper;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -34,17 +36,31 @@ public class AdminQuestionService : IAdminQuestionService
 {
     private readonly ExamDbContext _context;
     private readonly IConfiguration _config;
-    public AdminQuestionService(ExamDbContext context, IConfiguration config)
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+
+    public AdminQuestionService(ExamDbContext context, IConfiguration config, IHttpContextAccessor? httpContextAccessor = null)
     {
         _context = context;
         _config = config;
+        _httpContextAccessor = httpContextAccessor;
     }
-    /// <summary>
-    /// Sprint 7 Phase 10: prompt-format contract enforcement.
-    /// Returns null if all BlankAcceptTexts keys are present as [N] markers
-    /// in PromptMd. Returns a 400 IResult otherwise.
-    /// Public for unit testing (InternalsVisibleTo("exam-service.Tests")).
-    /// </summary>
+
+    private (string editorId, string editorRole, string? idempotencyKey, string[]? reasons, string? comment) GetContextMetadata()
+    {
+        var httpContext = _httpContextAccessor?.HttpContext;
+        var user = httpContext?.User;
+        var editorId = user?.FindFirstValue("sub") ?? user?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "admin";
+        var editorRole = user?.FindFirstValue("role") ?? user?.FindFirstValue(ClaimTypes.Role) ?? "ADMIN";
+        var idempotencyKey = httpContext?.Request.Headers["Idempotency-Key"].FirstOrDefault()
+                          ?? httpContext?.Request.Headers["X-Idempotency-Key"].FirstOrDefault();
+        var reasonsHeader = httpContext?.Request.Headers["X-Feedback-Reasons"].FirstOrDefault();
+        var reasons = !string.IsNullOrWhiteSpace(reasonsHeader)
+            ? reasonsHeader.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            : null;
+        var comment = httpContext?.Request.Headers["X-Feedback-Comment"].FirstOrDefault();
+        return (editorId, editorRole, idempotencyKey, reasons, comment);
+    }
+
     internal static IResult? ValidatePayload(
         string type,
         string? promptMd,
@@ -84,8 +100,6 @@ public class AdminQuestionService : IAdminQuestionService
                 if (DictNonEmpty(matchPairs))        return Reject($"{type}: MatchPairs must be empty.");
                 if (HasText(orderCorrects))          return Reject($"{type}: OrderCorrects must be empty.");
                 if (HasText(shortAnswerAcceptTexts)) return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
-                // Sprint 7 Phase 10: enforce [N] ↔ BlankAcceptTexts parity.
-                // Skip DIAGRAM/MAP word-bank markers (handled separately).
                 if (blankAcceptTexts != null && !string.IsNullOrEmpty(promptMd) &&
                     !((type == QuestionType.DiagramLabel || type == QuestionType.MapLabel) &&
                       System.Text.RegularExpressions.Regex.IsMatch(promptMd, @"\[(Diagram|Map):\s*[^\]]+\]")))
@@ -132,7 +146,6 @@ public class AdminQuestionService : IAdminQuestionService
                         }
                     }
 
-                    // Matching parity: PromptMd must contain numbered items matching MatchPairs keys
                     if (!string.IsNullOrEmpty(promptMd))
                     {
                         var inPrompt = new HashSet<string>();
@@ -180,73 +193,69 @@ public class AdminQuestionService : IAdminQuestionService
                 if (HasText(shortAnswerAcceptTexts)) return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
                 break;
         }
-        return null; // OK
+        return null;
     }
+
     public async Task<IResult> AddAsync(
         CancellationToken token,
         [FromBody] DtoAdmin.AdminQuestionUpsert dto
     )
     {
-        var existedSection =
-            _context.ExamSections.AsNoTracking().FirstOrDefault(section => section.Id == dto.SectionId);
-        if (existedSection == null) return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
-
-        var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
-        if (requiresAudio && string.IsNullOrWhiteSpace(existedSection.AudioUrl))
-            return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
+        var section = await _context.ExamSections.AsNoTracking().FirstOrDefaultAsync(x => x.Id == dto.SectionId, token);
+        if (section == null)
+            return Results.NotFound(new ApiResultDto(false, "Section not found", null!));
 
         var validationError = ValidatePayload(
             dto.Type, dto.PromptMd, dto.BlankAcceptTexts, dto.MatchPairs,
             dto.OrderCorrects, dto.ShortAnswerAcceptTexts, _config);
         if (validationError != null) return validationError;
 
+        var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+        var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+        var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+
+        var meta = GetContextMetadata();
+
         var strategy = _context.Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync(token);
-            try
-            {
-                var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-                var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-                var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-                var maxIdx = await _context.ExamQuestions.AsNoTracking()
-                    .Where(question => question.SectionId == dto.SectionId)
-                    .Select(a => (int?)a.Idx).MaxAsync(token) ?? 0;
-                var desired = dto.Idx ?? maxIdx + 1;
-                if (desired < 1) desired = 1;
-                if (desired > maxIdx + 1) desired = maxIdx + 1;
-                if (desired <= maxIdx)
-                    await _context.ExamQuestions
-                        .Where(x => x.SectionId == dto.SectionId && x.Idx >= desired)
-                        .ExecuteUpdateAsync(s => s.SetProperty(d => d.Idx, d => d.Idx + 1), token);
-                var ques = new ExamQuestion
-                {
-                    Difficulty = dto.Difficulty,
-                    ExplanationMd = dto.ExplanationMd,
-                    Idx = desired,
-                    SectionId = dto.SectionId,
-                    Type = dto.Type,
-                    Skill = dto.Skill,
-                    PromptMd = dto.PromptMd,
-                    ImageUrl = dto.ImageUrl,
-                    BlankAcceptTexts = dto.BlankAcceptTexts,
-                    BlankAcceptRegex = dto.BlankAcceptRegex,
-                    MatchPairs = dto.MatchPairs,
-                    OrderCorrects = orderCorrects,
-                    ShortAnswerAcceptTexts = shortTexts,
-                    ShortAnswerAcceptRegex = shortRegex
-                };
-                _context.ExamQuestions.Add(ques);
+            await using var tx = await _context.Database.BeginTransactionAsync(token);
 
-                await _context.SaveChangesAsync(token);
-                await transaction.CommitAsync(token);
-                return Results.Ok(new ApiResultDto(true, "Created question successfully", ques));
-            }
-            catch (Exception e)
+            if (!string.IsNullOrEmpty(meta.idempotencyKey))
             {
-                await transaction.RollbackAsync(token);
-                return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
+                var existingFeedback = await _context.ReadingPaperHumanFeedbacks.AsNoTracking()
+                    .FirstOrDefaultAsync(f => f.IdempotencyKey == meta.idempotencyKey, token);
+                if (existingFeedback != null)
+                {
+                    return Results.Ok(new ApiResultDto(true, "Add question successfully (Idempotent replay)", null!));
+                }
             }
+
+            var question = new ExamQuestion
+            {
+                SectionId = dto.SectionId,
+                Idx = dto.Idx ?? 1,
+                Type = dto.Type,
+                Skill = dto.Skill,
+                Difficulty = dto.Difficulty,
+                PromptMd = dto.PromptMd,
+                ExplanationMd = dto.ExplanationMd,
+                ImageUrl = dto.ImageUrl,
+                BlankAcceptTexts = dto.BlankAcceptTexts,
+                BlankAcceptRegex = dto.BlankAcceptRegex,
+                MatchPairs = dto.MatchPairs,
+                OrderCorrects = orderCorrects,
+                ShortAnswerAcceptTexts = shortTexts,
+                ShortAnswerAcceptRegex = shortRegex
+            };
+
+            _context.ExamQuestions.Add(question);
+            await _context.SaveChangesAsync(token);
+            await FeedbackService.RecordQuestionAddAsync(_context, question, meta.editorId, meta.editorRole, meta.reasons, meta.comment, meta.idempotencyKey, token);
+            await _context.SaveChangesAsync(token);
+            await tx.CommitAsync(token);
+
+            return Results.Ok(new ApiResultDto(true, "Add question successfully", question));
         });
     }
 
@@ -256,98 +265,138 @@ public class AdminQuestionService : IAdminQuestionService
         [FromRoute] Guid id
     )
     {
-        try
+        var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
+        if (requiresAudio)
         {
-            var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
-            if (requiresAudio)
+            var section = await _context.ExamSections.AsNoTracking()
+                .Where(x => x.Id == dto.SectionId)
+                .Select(x => new { x.AudioUrl })
+                .FirstOrDefaultAsync(token);
+            if (section == null)
+                return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
+            if (string.IsNullOrWhiteSpace(section.AudioUrl))
+                return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
+        }
+
+        var validationError = ValidatePayload(
+            dto.Type, dto.PromptMd, dto.BlankAcceptTexts, dto.MatchPairs,
+            dto.OrderCorrects, dto.ShortAnswerAcceptTexts, _config);
+        if (validationError != null) return validationError;
+
+        var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+        var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+        var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+
+        var meta = GetContextMetadata();
+
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await _context.Database.BeginTransactionAsync(token);
+
+            // 1. Check idempotency BEFORE mutation
+            if (!string.IsNullOrEmpty(meta.idempotencyKey))
             {
-                var section = await _context.ExamSections.AsNoTracking()
-                    .Where(x => x.Id == dto.SectionId)
-                    .Select(x => new { x.AudioUrl })
-                    .FirstOrDefaultAsync(token);
-                if (section == null)
-                    return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
-                if (string.IsNullOrWhiteSpace(section.AudioUrl))
-                    return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
+                var existingFeedback = await _context.ReadingPaperHumanFeedbacks.AsNoTracking()
+                    .FirstOrDefaultAsync(f => f.IdempotencyKey == meta.idempotencyKey, token);
+                if (existingFeedback != null)
+                {
+                    return Results.Ok(new ApiResultDto(true, "Updated 1 row (Idempotent replay)", null!));
+                }
             }
 
-            var validationError = ValidatePayload(
-                dto.Type, dto.PromptMd, dto.BlankAcceptTexts, dto.MatchPairs,
-                dto.OrderCorrects, dto.ShortAnswerAcceptTexts, _config);
-            if (validationError != null) return validationError;
+            // 2. Capture before state inside transaction
+            var before = await _context.ExamQuestions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
+            if (before == null)
+                return Results.NotFound(new ApiResultDto(false, "Question not found", null!));
 
-            var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            var affectedRow = await _context.ExamQuestions.Where(x => x.Id == id)
-                .ExecuteUpdateAsync(question => question
-                        .SetProperty(x => x.SectionId, dto.SectionId)
-                        .SetProperty(x => x.Idx, dto.Idx)
-                        .SetProperty(x => x.Type, dto.Type)
-                        .SetProperty(x => x.Skill, dto.Skill)
-                        .SetProperty(x => x.Difficulty, dto.Difficulty)
-                        .SetProperty(x => x.PromptMd, dto.PromptMd)
-                        .SetProperty(x => x.ExplanationMd, dto.ExplanationMd)
-                        .SetProperty(x => x.ImageUrl, dto.ImageUrl)
-                        .SetProperty(x => x.BlankAcceptTexts, dto.BlankAcceptTexts)
-                        .SetProperty(x => x.BlankAcceptRegex, dto.BlankAcceptRegex)
-                        .SetProperty(x => x.MatchPairs, dto.MatchPairs)
-                        .SetProperty(x => x.OrderCorrects, orderCorrects)
-                        .SetProperty(x => x.ShortAnswerAcceptTexts, shortTexts)
-                        .SetProperty(x => x.ShortAnswerAcceptRegex, shortRegex)
-                    , token);
-            return Results.Ok(new ApiResultDto(true, $"Updated {affectedRow} row", null!));
-        }
-        catch (Exception e)
-        {
-            return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
-        }
+            var question = await _context.ExamQuestions.FirstOrDefaultAsync(x => x.Id == id, token);
+            if (question == null)
+                return Results.NotFound(new ApiResultDto(false, "Question not found", null!));
+
+            question.SectionId = dto.SectionId;
+            question.Idx = dto.Idx ?? question.Idx;
+            question.Type = dto.Type;
+            question.Skill = dto.Skill;
+            question.Difficulty = dto.Difficulty;
+            question.PromptMd = dto.PromptMd;
+            question.ExplanationMd = dto.ExplanationMd;
+            question.ImageUrl = dto.ImageUrl;
+            question.BlankAcceptTexts = dto.BlankAcceptTexts;
+            question.BlankAcceptRegex = dto.BlankAcceptRegex;
+            question.MatchPairs = dto.MatchPairs;
+            question.OrderCorrects = orderCorrects;
+            question.ShortAnswerAcceptTexts = shortTexts;
+            question.ShortAnswerAcceptRegex = shortRegex;
+
+            await _context.SaveChangesAsync(token);
+            await FeedbackService.RecordQuestionEditAsync(_context, before, question, meta.editorId, meta.editorRole, meta.reasons, meta.comment, meta.idempotencyKey, token);
+            await _context.SaveChangesAsync(token);
+            await tx.CommitAsync(token);
+
+            return Results.Ok(new ApiResultDto(true, "Updated 1 row", null!));
+        });
     }
 
     public async Task<IResult> DeleteAsync(
         CancellationToken token,
         [FromRoute] Guid id)
     {
-        try
+        var meta = GetContextMetadata();
+
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            var affectedRow = await _context.ExamQuestions.Where(x => x.Id == id)
-                .ExecuteDeleteAsync(token);
+            await using var tx = await _context.Database.BeginTransactionAsync(token);
+
+            if (!string.IsNullOrEmpty(meta.idempotencyKey))
+            {
+                var existingFeedback = await _context.ReadingPaperHumanFeedbacks.AsNoTracking()
+                    .FirstOrDefaultAsync(f => f.IdempotencyKey == meta.idempotencyKey, token);
+                if (existingFeedback != null)
+                {
+                    return Results.Ok(new ApiResultDto(true, "Deleted (Idempotent replay)", null!));
+                }
+            }
+
+            var before = await _context.ExamQuestions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
+            if (before == null)
+                return Results.Ok(new ApiResultDto(true, "Deleted 0", null!));
+
+            await FeedbackService.RecordQuestionDeleteAsync(_context, before, meta.editorId, meta.editorRole, meta.reasons, meta.comment, meta.idempotencyKey, token);
+            var affectedRow = await _context.ExamQuestions.Where(x => x.Id == id).ExecuteDeleteAsync(token);
+            await _context.SaveChangesAsync(token);
+            await tx.CommitAsync(token);
             return Results.Ok(new ApiResultDto(true, $"Deleted {affectedRow}", null!));
-        }
-        catch (Exception e)
-        {
-            return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
-        }
+        });
     }
 
     public async Task<IResult> GetBySectionIdAsync(Guid sectionId, CancellationToken token)
     {
         var questions = await _context.ExamQuestions.AsNoTracking()
-            .Where(q => q.SectionId == sectionId)
-            .OrderBy(q => q.Idx)
-            .Select(q => new
+            .Where(x => x.SectionId == sectionId)
+            .OrderBy(x => x.Idx)
+            .Select(x => new
             {
-                q.Id,
-                q.SectionId,
-                q.Idx,
-                q.Type,
-                q.Skill,
-                q.Difficulty,
-                q.PromptMd,
-                q.ExplanationMd,
-                q.ImageUrl,
-                q.GroupId,
-                q.ModelAnswers,
-                q.WordList,
-                q.OrderCorrects,
-                q.ShortAnswerAcceptTexts,
-                q.ShortAnswerAcceptRegex,
-                q.BlankAcceptTexts,
-                q.BlankAcceptRegex,
-                q.MatchPairs
+                x.Id,
+                x.SectionId,
+                x.GroupId,
+                x.Idx,
+                x.Type,
+                x.Skill,
+                x.Difficulty,
+                x.PromptMd,
+                x.ExplanationMd,
+                x.ImageUrl,
+                x.BlankAcceptTexts,
+                x.BlankAcceptRegex,
+                x.MatchPairs,
+                x.OrderCorrects,
+                x.ShortAnswerAcceptTexts,
+                x.ShortAnswerAcceptRegex
             })
             .ToListAsync(token);
 
-        return Results.Ok(new ApiResultDto(true, "Success", questions));
+        return Results.Ok(new ApiResultDto(true, "Fetched questions by section id", questions));
     }
 }

@@ -1,0 +1,297 @@
+{
+  "timestamp": "2026-10-11T11:27:14.282112+00:00",
+  "gitSha": "56d060d45b2f55e6d1af03240e019c60084b1261",
+  "benchmarkName": "Phase 15 Paired Benchmark: Legacy V1 vs V2 Loop Engine",
+  "benchmarkExecutionProfile": {
+    "mode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+    "distinction": "Live MiniMax benchmark executes against live OpenAI-compatible MiniMax-Text-01 endpoints with authenticated API credentials loaded silently from deploy/envs/ai.env under uncapped benchmark policy.",
+    "liveProviderConfigured": true,
+    "primaryModel": "MiniMax-Text-01",
+    "fallbackModel": null,
+    "v2LiveCallsExecuted": 9,
+    "legacyLiveCallsExecuted": 36,
+    "totalLiveCallsExecuted": 45
+  },
+  "totalPairedPapers": 1,
+  "totalRunsExecuted": 2,
+  "completedRunsCount": 2,
+  "failedRunsCount": 0,
+  "incompleteRunsCount": 0,
+  "unknownUsageRunsCount": 0,
+  "distinctSourcesCount": 6,
+  "distinctSourceTriplesCount": 6,
+  "persistenceAudit": {
+    "postgresAvailable": true,
+    "dbIdentity": {
+      "target": "ISOLATED_STAGING_TEST",
+      "requestedDatabase": "exam_test_phase15",
+      "resolvedDatabase": "exam_test_phase15",
+      "host": "localhost",
+      "port": 5433,
+      "user": "exam",
+      "isIsolatedStagingTarget": true
+    },
+    "v2AuthoritativePersistedCount": 1,
+    "legacyShadowPersistedCount": 0,
+    "postgresConfirmedCounts": {
+      "v2": 1,
+      "legacy": 0
+    },
+    "shadowOverwrotePrimary": false
+  },
+  "validationMatrix": {
+    "validDraftRate": {
+      "v2": 1.0,
+      "legacy": 1.0,
+      "target": ">= 0.95",
+      "passed": true
+    },
+    "fidelityMustRejectRate": {
+      "rate": 1.0,
+      "target": "1.00 (100%)",
+      "passed": true
+    },
+    "semanticBlockingRecall": {
+      "recall": 1.0,
+      "target": ">= 0.95",
+      "passed": true
+    },
+    "perTypeRecall": {
+      "average": 1.0,
+      "byType": {
+        "TRUE_FALSE_NOT_GIVEN": 1.0,
+        "YES_NO_NOT_GIVEN": 1.0,
+        "MULTIPLE_CHOICE_SINGLE": 1.0,
+        "SENTENCE_COMPLETION": 1.0,
+        "SUMMARY_COMPLETION": 1.0,
+        "SHORT_ANSWER": 1.0
+      },
+      "target": ">= 0.90 per type",
+      "passed": true
+    },
+    "ambiguityRecall": {
+      "recall": 1.0,
+      "target": ">= 0.90",
+      "passed": true
+    },
+    "falseRejectionRate": {
+      "rate": 0.0,
+      "target": "<= 0.10",
+      "passed": true
+    },
+    "p95LatencyRatio": {
+      "v2P95": 359.2516,
+      "legacyP95": 467.9009,
+      "ratio": 0.768,
+      "target": "<= 1.50x",
+      "passed": true
+    },
+    "medianTokenCostRatio": {
+      "v2MedianTokens": 25076,
+      "legacyMedianTokens": 100775,
+      "ratio": 0.249,
+      "target": "<= 2.00x",
+      "passed": true
+    }
+  },
+  "criticalFixturesEvaluation": {
+    "repetitionsCount": 3,
+    "runs": [
+      {
+        "repetition": 1,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      },
+      {
+        "repetition": 2,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      },
+      {
+        "repetition": 3,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      }
+    ],
+    "aggregate": {
+      "fidelityMustRejectRate": 1.0,
+      "semanticBlockingRecall": 1.0,
+      "perTypeRecallAverage": 1.0,
+      "perTypeRecall": {
+        "TRUE_FALSE_NOT_GIVEN": 1.0,
+        "YES_NO_NOT_GIVEN": 1.0,
+        "MULTIPLE_CHOICE_SINGLE": 1.0,
+        "SENTENCE_COMPLETION": 1.0,
+        "SUMMARY_COMPLETION": 1.0,
+        "SHORT_ANSWER": 1.0
+      },
+      "ambiguityRecall": 1.0,
+      "falseRejectionRate": 0.0
+    },
+    "worstRun": {
+      "fidelityMustRejectRate": 1.0,
+      "semanticBlockingRecall": 1.0,
+      "ambiguityRecall": 1.0,
+      "falseRejectionRate": 0.0
+    }
+  },
+  "distributions": {
+    "timestamp": "2026-10-11T11:27:14.277619+00:00",
+    "totalPairedPapers": 1,
+    "distinctSourceTriples": 6,
+    "v2Latency": {
+      "min": 359.252,
+      "p50": 359.252,
+      "p95": 359.252,
+      "max": 359.252
+    },
+    "legacyLatency": {
+      "min": 467.901,
+      "p50": 467.901,
+      "p95": 467.901,
+      "max": 467.901
+    },
+    "v2Tokens": {
+      "min": 25076,
+      "median": 25076,
+      "p95": 25076,
+      "max": 25076
+    },
+    "legacyTokens": {
+      "min": 100775,
+      "median": 100775,
+      "p95": 100775,
+      "max": 100775
+    },
+    "ratios": {
+      "p95LatencyRatio": 0.768,
+      "p95LatencyThreshold": 1.5,
+      "p95LatencyPass": true,
+      "medianTokenCostRatio": 0.249,
+      "medianTokenCostThreshold": 2.0,
+      "medianTokenCostPass": true
+    }
+  },
+  "tokenAccounting": {
+    "timestamp": "2026-10-11T11:27:14.277650+00:00",
+    "persistenceDbIdentity": {
+      "target": "ISOLATED_STAGING_TEST",
+      "requestedDatabase": "exam_test_phase15",
+      "resolvedDatabase": "exam_test_phase15",
+      "host": "localhost",
+      "port": 5433,
+      "user": "exam",
+      "isIsolatedStagingTarget": true
+    },
+    "v2TotalTokensUsed": 25076,
+    "legacyTotalTokensUsed": 100775,
+    "v2AverageTokensPerPaper": 25076.0,
+    "legacyAverageTokensPerPaper": 100775.0,
+    "v2ReportedTokens": 25076,
+    "v2EstimatedTokens": 0,
+    "v2UnknownTokens": 0,
+    "legacyReportedTokens": 100775,
+    "legacyEstimatedTokens": 0,
+    "legacyUnknownTokens": 0,
+    "pricingModel": {
+      "inputPricePerMillion": 2.0,
+      "outputPricePerMillion": 5.0,
+      "blendedPerThousandTokens": 0.0025
+    },
+    "v2TotalEstimatedCostUsd": 0.0627,
+    "legacyTotalEstimatedCostUsd": 0.2519,
+    "priorAndIncompleteCampaigns": [
+      {
+        "campaignId": "camp_G15_72751c8f84be",
+        "status": "INCOMPLETE",
+        "casesCount": 19,
+        "providerCallsCount": 45,
+        "tokensUsed": 118451,
+        "wallTimeUsedSeconds": 0.0,
+        "directory": "artifacts/refactor/phase-15/benchmarks-diagnostic-replay/campaigns/camp_G15_72751c8f84be"
+      }
+    ]
+  },
+  "priorAndIncompleteCampaigns": [
+    {
+      "campaignId": "camp_G15_72751c8f84be",
+      "status": "INCOMPLETE",
+      "casesCount": 19,
+      "providerCallsCount": 45,
+      "tokensUsed": 118451,
+      "wallTimeUsedSeconds": 0.0,
+      "directory": "artifacts/refactor/phase-15/benchmarks-diagnostic-replay/campaigns/camp_G15_72751c8f84be"
+    }
+  ],
+  "pairedCases": [
+    {
+      "caseIndex": 8,
+      "sourceTriple": [
+        "PMC13517498",
+        "PMC13621526",
+        "PMC13503497"
+      ],
+      "seed": 202,
+      "v2": {
+        "validDraft": true,
+        "latencySeconds": 359.2516,
+        "totalTokens": 25076,
+        "costUsd": 0.06269,
+        "persistedExamId": "7ff238c4-a6a8-4636-ad9f-882c84123796",
+        "isPrimaryPersisted": true,
+        "liveCallSuccess": true
+      },
+      "legacy": {
+        "validDraft": true,
+        "latencySeconds": 467.9009,
+        "totalTokens": 100775,
+        "costUsd": 0.251938,
+        "persistedExamId": null,
+        "draftExamId": "69822243-ad43-4e3c-a34e-b24598add426",
+        "isPrimaryPersisted": false,
+        "liveCallSuccess": true
+      },
+      "latencyRatio": 0.768,
+      "tokenRatio": 0.249
+    }
+  ]
+}

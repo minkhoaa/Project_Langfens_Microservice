@@ -14,6 +14,7 @@ Verifies:
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import re
 import sqlite3
@@ -67,13 +68,30 @@ from app.repair.passage import PassageSentenceRepairer
 
 # ── Durable SQLite Persistence Test Double ──────────────────────────────────
 
+def _default_cap_snapshot() -> Dict[str, Any]:
+    """The loop policy's own cap snapshot -- exactly what the real checkpoint service pins.
+
+    A resumed run must use the cap profile it was created with, not the current
+    deployment's (R03/G06). The runtime validates the pinned JSON against its own
+    digest, profileVersion and profileSource, so the fake has to emit a genuine
+    snapshot rather than an ad-hoc dict.
+    """
+    from app.loop.policy import LoopPolicy
+    return LoopPolicy.from_settings().cap_profile_snapshot
+
+
 class DurableStoreFake:
     """SQLite-backed fake of the authoritative exam-service persistence protocol."""
 
-    def __init__(self, db_path: Path, owner: UUID, epoch: int = 1):
+    def __init__(self, db_path: Path, owner: UUID, epoch: int = 1, cap_profile: Dict[str, Any] | None = None):
         self.path = db_path
         self.owner = owner
         self.epoch = epoch
+        self._cap_profile = dict(cap_profile or _default_cap_snapshot())
+        canonical = json.dumps(self._cap_profile, sort_keys=True, separators=(",", ":"))
+        self._cap_profile_sha256 = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+        self._cap_profile_version = self._cap_profile.get("profileVersion")
+        self._cap_profile_source = self._cap_profile.get("profileSource")
         with sqlite3.connect(self.path) as db:
             db.execute("CREATE TABLE IF NOT EXISTS state (id INTEGER PRIMARY KEY, value TEXT NOT NULL)")
             db.execute(
@@ -220,6 +238,15 @@ class DurableStoreFake:
             schemaVersion="2.0.0",
             policyVersion="2.0.0",
             isCompatible=True,
+            # The runtime refuses to resume a run that has no pinned cap profile
+            # (R03/G06: a resumed run must use the profile it was created with, not
+            # the current deployment's). The fake has to honour the same contract as
+            # the real checkpoint service, so it returns a pinned, self-consistent
+            # profile and its digest.
+            budgetProfileJson=json.dumps(self._cap_profile, sort_keys=True, separators=(",", ":")),
+            budgetProfileSha256=self._cap_profile_sha256,
+            budgetProfileVersion=self._cap_profile_version,
+            budgetProfileSource=self._cap_profile_source,
             artifacts=[to_info(a) for a in state["heads"].values() if a.get("runId") == run_id or a.get("run_id") == run_id],
             draftArtifacts=[to_info(a) for a in state["drafts"].values() if a.get("runId") == run_id or a.get("run_id") == run_id],
             loopCursors=[LoopCursorCheckpoint.model_validate({k: v for k, v in c.items() if not k.startswith("_")}) for c in state.get("cursors", {}).values() if c.get("_runId") == run_id],
@@ -232,6 +259,17 @@ class DurableStoreFake:
 
 
 # ── Fake LLM Provider for Deterministic Passage Generation ──────────────────
+
+# Historical alias. This helper was named `SQLiteCheckpointSimulation` before it
+# was renamed to `DurableStoreFake` to match the persistence protocol it fakes.
+# Several loop test modules still import the older name, so it is kept as an alias
+# rather than forcing every importer to be rewritten. The two names have an
+# identical method surface (`__init__, _state, _save, _fence, grant_operation,
+# reconcile_operation, commit_checkpoint, save_draft_checkpoint` and their async
+# counterparts, plus `record_unknown_outcome_async`, `save_loop_cursor`,
+# `resume_state`).
+SQLiteCheckpointSimulation = DurableStoreFake
+
 
 class FakePassageProvider(BaseProvider):
     """Predictable provider returning structured IELTS passage responses."""

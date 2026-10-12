@@ -1,0 +1,277 @@
+{
+  "timestamp": "2026-10-11T10:59:27.172665+00:00",
+  "gitSha": "56d060d45b2f55e6d1af03240e019c60084b1261",
+  "benchmarkName": "Phase 15 Paired Benchmark: Legacy V1 vs V2 Loop Engine",
+  "benchmarkExecutionProfile": {
+    "mode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+    "distinction": "Live MiniMax benchmark executes against live OpenAI-compatible MiniMax-Text-01 endpoints with authenticated API credentials loaded silently from deploy/envs/ai.env under uncapped benchmark policy.",
+    "liveProviderConfigured": true,
+    "primaryModel": "MiniMax-Text-01",
+    "fallbackModel": null,
+    "v2LiveCallsExecuted": 10,
+    "legacyLiveCallsExecuted": 35,
+    "totalLiveCallsExecuted": 45
+  },
+  "totalPairedPapers": 1,
+  "totalRunsExecuted": 2,
+  "completedRunsCount": 2,
+  "failedRunsCount": 0,
+  "incompleteRunsCount": 0,
+  "unknownUsageRunsCount": 0,
+  "distinctSourcesCount": 6,
+  "distinctSourceTriplesCount": 6,
+  "persistenceAudit": {
+    "postgresAvailable": true,
+    "dbIdentity": {
+      "target": "ISOLATED_STAGING_TEST",
+      "requestedDatabase": "exam_test_phase15",
+      "resolvedDatabase": "exam_test_phase15",
+      "host": "localhost",
+      "port": 5433,
+      "user": "exam",
+      "isIsolatedStagingTarget": true
+    },
+    "v2AuthoritativePersistedCount": 1,
+    "legacyShadowPersistedCount": 0,
+    "postgresConfirmedCounts": {
+      "v2": 1,
+      "legacy": 0
+    },
+    "shadowOverwrotePrimary": false
+  },
+  "validationMatrix": {
+    "validDraftRate": {
+      "v2": 1.0,
+      "legacy": 1.0,
+      "target": ">= 0.95",
+      "passed": true
+    },
+    "fidelityMustRejectRate": {
+      "rate": 1.0,
+      "target": "1.00 (100%)",
+      "passed": true
+    },
+    "semanticBlockingRecall": {
+      "recall": 1.0,
+      "target": ">= 0.95",
+      "passed": true
+    },
+    "perTypeRecall": {
+      "average": 1.0,
+      "byType": {
+        "TRUE_FALSE_NOT_GIVEN": 1.0,
+        "YES_NO_NOT_GIVEN": 1.0,
+        "MULTIPLE_CHOICE_SINGLE": 1.0,
+        "SENTENCE_COMPLETION": 1.0,
+        "SUMMARY_COMPLETION": 1.0,
+        "SHORT_ANSWER": 1.0
+      },
+      "target": ">= 0.90 per type",
+      "passed": true
+    },
+    "ambiguityRecall": {
+      "recall": 1.0,
+      "target": ">= 0.90",
+      "passed": true
+    },
+    "falseRejectionRate": {
+      "rate": 0.0,
+      "target": "<= 0.10",
+      "passed": true
+    },
+    "p95LatencyRatio": {
+      "v2P95": 336.7405,
+      "legacyP95": 501.6373,
+      "ratio": 0.671,
+      "target": "<= 1.50x",
+      "passed": true
+    },
+    "medianTokenCostRatio": {
+      "v2MedianTokens": 26237,
+      "legacyMedianTokens": 92214,
+      "ratio": 0.285,
+      "target": "<= 2.00x",
+      "passed": true
+    }
+  },
+  "criticalFixturesEvaluation": {
+    "repetitionsCount": 3,
+    "runs": [
+      {
+        "repetition": 1,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      },
+      {
+        "repetition": 2,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      },
+      {
+        "repetition": 3,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      }
+    ],
+    "aggregate": {
+      "fidelityMustRejectRate": 1.0,
+      "semanticBlockingRecall": 1.0,
+      "perTypeRecallAverage": 1.0,
+      "perTypeRecall": {
+        "TRUE_FALSE_NOT_GIVEN": 1.0,
+        "YES_NO_NOT_GIVEN": 1.0,
+        "MULTIPLE_CHOICE_SINGLE": 1.0,
+        "SENTENCE_COMPLETION": 1.0,
+        "SUMMARY_COMPLETION": 1.0,
+        "SHORT_ANSWER": 1.0
+      },
+      "ambiguityRecall": 1.0,
+      "falseRejectionRate": 0.0
+    },
+    "worstRun": {
+      "fidelityMustRejectRate": 1.0,
+      "semanticBlockingRecall": 1.0,
+      "ambiguityRecall": 1.0,
+      "falseRejectionRate": 0.0
+    }
+  },
+  "distributions": {
+    "timestamp": "2026-10-11T10:59:27.169860+00:00",
+    "totalPairedPapers": 1,
+    "distinctSourceTriples": 6,
+    "v2Latency": {
+      "min": 336.74,
+      "p50": 336.74,
+      "p95": 336.74,
+      "max": 336.74
+    },
+    "legacyLatency": {
+      "min": 501.637,
+      "p50": 501.637,
+      "p95": 501.637,
+      "max": 501.637
+    },
+    "v2Tokens": {
+      "min": 26237,
+      "median": 26237,
+      "p95": 26237,
+      "max": 26237
+    },
+    "legacyTokens": {
+      "min": 92214,
+      "median": 92214,
+      "p95": 92214,
+      "max": 92214
+    },
+    "ratios": {
+      "p95LatencyRatio": 0.671,
+      "p95LatencyThreshold": 1.5,
+      "p95LatencyPass": true,
+      "medianTokenCostRatio": 0.285,
+      "medianTokenCostThreshold": 2.0,
+      "medianTokenCostPass": true
+    }
+  },
+  "tokenAccounting": {
+    "timestamp": "2026-10-11T10:59:27.169890+00:00",
+    "persistenceDbIdentity": {
+      "target": "ISOLATED_STAGING_TEST",
+      "requestedDatabase": "exam_test_phase15",
+      "resolvedDatabase": "exam_test_phase15",
+      "host": "localhost",
+      "port": 5433,
+      "user": "exam",
+      "isIsolatedStagingTarget": true
+    },
+    "v2TotalTokensUsed": 26237,
+    "legacyTotalTokensUsed": 92214,
+    "v2AverageTokensPerPaper": 26237.0,
+    "legacyAverageTokensPerPaper": 92214.0,
+    "v2ReportedTokens": 26237,
+    "v2EstimatedTokens": 0,
+    "v2UnknownTokens": 0,
+    "legacyReportedTokens": 92214,
+    "legacyEstimatedTokens": 0,
+    "legacyUnknownTokens": 0,
+    "pricingModel": {
+      "inputPricePerMillion": 2.0,
+      "outputPricePerMillion": 5.0,
+      "blendedPerThousandTokens": 0.0025
+    },
+    "v2TotalEstimatedCostUsd": 0.0656,
+    "legacyTotalEstimatedCostUsd": 0.2305,
+    "priorAndIncompleteCampaigns": []
+  },
+  "priorAndIncompleteCampaigns": [],
+  "pairedCases": [
+    {
+      "caseIndex": 4,
+      "sourceTriple": [
+        "PMC13407692",
+        "PMC13517498",
+        "PMC13621526"
+      ],
+      "seed": 101,
+      "v2": {
+        "validDraft": true,
+        "latencySeconds": 336.7405,
+        "totalTokens": 26237,
+        "costUsd": 0.065592,
+        "persistedExamId": "14cd5961-c857-424d-a1e3-295656a5afc1",
+        "isPrimaryPersisted": true,
+        "liveCallSuccess": true
+      },
+      "legacy": {
+        "validDraft": true,
+        "latencySeconds": 501.6373,
+        "totalTokens": 92214,
+        "costUsd": 0.230535,
+        "persistedExamId": null,
+        "draftExamId": "0d4b4703-bb0a-45cb-9303-e47e6cf34ae0",
+        "isPrimaryPersisted": false,
+        "liveCallSuccess": true
+      },
+      "latencyRatio": 0.671,
+      "tokenRatio": 0.285
+    }
+  ]
+}

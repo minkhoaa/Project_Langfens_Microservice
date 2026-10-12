@@ -45,7 +45,12 @@ Long-running không có nghĩa chạy vô hạn: supervise tiến độ, đổi 
 
 G07 còn upstream quality blocker; G08 được báo chưa có generator/prompts/tests và tồn tại false-PASS paths ở grounding. MiniMax transport smoke đã PASS ở snapshot báo cáo. Agent phải kiểm lại current code trước hành động, không suy đoán thiếu credential hoặc áp dụng máy móc findings đã được sửa.
 
-Có thể coding phần độc lập khi external evidence thiếu theo plan; gate acceptance/promote/production output vẫn giữ required prerequisites. Production vẫn dùng explicit migration routing tới cutover có evidence/authorization phù hợp.
+Chính sách mặc định cho toàn bộ các phase:
+- **Live Benchmark tự động:** Mọi live benchmark bắt buộc tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign budget và các trạng thái chờ PENDING_AUTHORIZATION.
+- **Unlimited Caps cho MiniMax Benchmarks:** Vô hiệu hóa toàn bộ call, token, monetary và wall-time caps do ứng dụng áp đặt cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s). Profile production và các provider khác giữ nguyên.
+- **Bảo toàn guardrails & truthful accounting:** Giữ nguyên xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request output/context limits; tôn trọng giới hạn thực tế từ phía provider.
+- **Tách biệt phục hồi cục bộ và gate:** R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã gỡ bỏ rào cản phê duyệt.
+- **Mặc định toàn hệ thống:** Chính sách này áp dụng mặc định cho tất cả các phase còn lại, ngăn quy trình phê duyệt thủ công xuất hiện lại.
 
 <!-- END SOURCE: 00-START-HERE.md -->
 
@@ -75,10 +80,14 @@ Spawn agent cho nhiệm vụ cụ thể với inputs, files ownership, invariant
 
 Theo dõi running sessions/task IDs của tools; poll/await kết quả và exit codes. Tránh waits đơn lẻ vượt 60 giây; có update ngắn mỗi khoảng 60 giây về kết quả và bước xử lý. Không fire-and-forget tests/agents, không gọi process running là PASS, không hứa tiếp tục sau khi phiên kết thúc khi chưa có cơ chế chạy nền thực sự.
 
-Agent execution dài không làm tăng runtime caps của production. Mỗi provider call, retry, repair và benchmark vẫn dùng budgets/deadlines được cấu hình.
+Agent execution dài không làm tăng runtime caps của production (vẫn giữ nguyên hard caps 15 calls / 60k tokens / 300s cho production và các provider khác).
 
-Live campaigns có campaignId/caseId, manifest/status và reservation persisted. Sau lost output/agent restart, reconcile status/checkpoints trước retry; không chạy lại nguyên batch vì thiếu terminal transcript. Khi hết benchmark budget/deadline, checkpoint partial results, giữ gate non-pass và đưa kế hoạch cấp/resume budget cụ thể. Quan sát canary dài phải dùng cơ chế scheduling/monitoring thực sự được môi trường hỗ trợ; không sleep nhiều giờ hoặc tự ghi observation chưa diễn ra.
-
+Chính sách benchmark MiniMax tự động và caps (mặc định toàn bộ các phase):
+1. Live benchmark bắt buộc tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ hoàn toàn phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget và trạng thái chờ PENDING_AUTHORIZATION.
+2. Vô hiệu hóa toàn bộ call, token, monetary và wall-time caps do ứng dụng áp đặt cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn fallback về 15 calls / 60k tokens / 300s).
+3. Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request output/context limits; tôn trọng giới hạn thực tế phía provider.
+4. Live campaigns có campaignId/caseId, manifest/status và reservation persisted; sau restart/lost transcript thì reconcile status trước retry, không lặp lại tốn phí.
+5. Chính sách này áp dụng mặc định cho tất cả các phase còn lại, ngăn quy trình phê duyệt thủ công xuất hiện lại.
 ## 3. Preflight và snapshot thật
 
 Đọc AGENTS.md/CLAUDE.md áp dụng; khám phá actual paths/scripts/lockfiles; giữ changes của user. Không tự reset/stash/clean. Trước sửa, bind PNN work packages và TNN IDs vào symbols/tests thực tế.
@@ -95,6 +104,7 @@ Tách implementation, deterministic/integration, corpus integrity, live smoke, s
 
 Thiếu external quality evidence vẫn có thể coding phần downstream độc lập bằng fakes theo plan, nhưng không promote gate, không accept production artifact/final Draft từ unverified dependency và không gọi downstream đã nghiệm thu. Fake artifacts được dùng trong test environment phải ghi rõ simulation.
 
+Tách biệt phục hồi cục bộ và gate: Kết quả phục hồi độ bền cục bộ (như R05 QuestionCandidateLoop durability trên PostgreSQL thật) có thể PASS độc lập trong khi gate tổng thể (G09) vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites). Tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt; việc đạt gate vẫn bắt buộc có bằng chứng live benchmark đạt ngưỡng chất lượng.
 ## 5. Đầu ra bắt buộc của một phase
 
 Lưu theo conventions hiện có trong `artifacts/refactor/phase-NN/`. Cần có:
@@ -199,10 +209,16 @@ Mỗi delegation phải có: exact scope, files được sửa, canonical inputs
 
 Giữ tests/builds/benchmarks trong managed sessions hoặc thực sự await foreground commands. Record task/session IDs, logs và exit codes. Poll/wait theo tools hiện có với khoảng ngắn đủ để gửi progress khoảng 60 giây; không busy-poll vô ích, không fire-and-forget rồi report PASS.
 
-Benchmark có frozen campaign/case IDs, source-family-clean corpus, model/prompt/evaluator/caps hashes, cumulative budget và persisted reservations/status. Reconcile lost output/restart trước rerun; không lặp toàn corpus gây phí vì terminal transcript bị mất. Respect user/production hard caps; agent chạy lâu không có quyền tăng các caps đó.
+Benchmark có frozen campaign/case IDs, source-family-clean corpus, model/prompt/evaluator/caps hashes và persisted reservations/status. Reconcile lost output/restart trước rerun; không lặp toàn corpus gây phí vì terminal transcript bị mất.
+
+Chính sách benchmark MiniMax tự động và caps (mặc định cho tất cả các phase):
+1. Live benchmarks bắt buộc tự động khởi chạy và resume bằng provider MiniMax đã được cấu hình; loại bỏ hoàn toàn phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget và trạng thái chờ PENDING_AUTHORIZATION.
+2. Vô hiệu hóa toàn bộ call, token, monetary và wall-time caps do ứng dụng áp đặt cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn fallback về 15 calls / 60k tokens / 300s). Production và các provider khác giữ nguyên hard caps (15 calls / 60k tokens / 300s).
+3. Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request output/context limits; tôn trọng giới hạn thực tế phía provider.
+4. Tách biệt phục hồi cục bộ và gate: R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt.
+5. Chính sách này áp dụng mặc định cho tất cả các phase còn lại, ngăn quy trình phê duyệt thủ công tái diễn.
 
 Nếu live smoke gần đây đã PASS, inspect actual environment/config/quota trước khi ghi thiếu API key. Smoke PASS không thay semantic benchmark. Harness chưa viết là implementation task, corpus leakage là integrity failure, code exception là bug; không gom các lỗi đó vào NOT_RUN_EXTERNAL.
-
 ## E. Standards bắt buộc
 
 Giữ microservice boundaries, public routes/NDJSON, .NET authoritative durable orchestration/final persistence, accepted exact refs, immutable artifacts, writer fencing/cancel, atomic reservation/idempotency, unknown-outcome accounting, source protections và Draft/manual Publish.
@@ -303,8 +319,12 @@ Triển khai/map/chạy T07-01..08 và T08-01..08 cùng impacted G03/G06/persist
 
 Báo cáo cũ có MiniMax smoke PASS: inspect current configured model/credential/quota và recent compatibility trước khi ghi thiếu key. Smoke không chứng minh semantic quality. Harness thiếu là code work; leaked corpus là integrity failure; external missing input phải được chứng minh.
 
-Khi configured credentials/budget available, thực sự run capped pinned G07 semantic benchmark và G08 full-passage/paired benchmark. Campaign/case IDs, manifest/status/reservations persisted; reconcile lost output trước retry, không chạy lại batch tốn phí vô ích. Không tự mua plan/thay model routing/tăng caps để có PASS.
-
+Chính sách benchmark MiniMax tự động và caps (mặc định toàn hệ thống):
+1. Live G07 semantic benchmark và G08 paired passage benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ hoàn toàn phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget và trạng thái chờ PENDING_AUTHORIZATION.
+2. Vô hiệu hóa toàn bộ call, token, monetary và wall-time caps do ứng dụng áp đặt cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn fallback về 15 calls / 60k tokens / 300s). Production và các provider khác giữ nguyên hard caps.
+3. Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request output/context limits; tôn trọng giới hạn thực tế phía provider.
+4. Tách biệt phục hồi cục bộ và gate: R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt.
+5. Chiến dịch lưu campaignId/caseId, manifest/status/reservations; reconcile output trước retry, không lặp lại tốn phí. Chính sách này áp dụng mặc định cho tất cả các phase còn lại.
 Giữ thresholds, enough denominators và frozen clean holdout; critical fixtures ≥3 lần, aggregate/worst run. Passage benchmark không thay full-paper benchmark tương lai. Failed measurements tạo fix tasks trên dev và fresh/versioned holdout policy, không tune để ăn test đang nghiệm thu.
 
 ## 7. Reviewer loop và đầu ra
@@ -549,6 +569,12 @@ Retry cap/profile phải được declared/versioned trong Settings và effectiv
 
 Budget run→section→artifact: atomically reserve trước actual send, gồm retries/evaluator/candidates; persist via G02. Parent không oversubscribe concurrent requests. Completion limit gồm reasoning khi provider tính vậy. UNKNOWN_OUTCOME giữ conservative reservation; restart/replay không reset. Missing usage unknown, không0. Dollar hard cap chỉ claim khi pricing snapshot/bounded accounting đủ; estimates không billed actual.
 
+Chính sách benchmark MiniMax tự động và caps (mặc định toàn hệ thống):
+- Live benchmarks bắt buộc tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ hoàn toàn phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION.
+- Vô hiệu hóa toàn bộ application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn fallback về 15 calls / 60k tokens / 300s). Production và các provider khác giữ nguyên hard caps.
+- Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider.
+- Tách biệt phục hồi cục bộ và gate: R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
+
 Actual composition/client factories phải dùng injected config/gateway, không direct SDK outside providers. New calls fail closed nếu budget/authority thiếu. Keep rate/concurrency buckets/key rotation bounded, không lách account quota.
 
 Chạy T03-01..08: deadline+429; auth/transient attempts; JSON edge cases; cancel backoff/stream; atomic budget race; unknown-outcome resume; adapter recordings/parity/redaction; configured live model smoke. Count requests bằng SDK thật+fake transport để lộ nested retries, không chỉ mocks constructor.
@@ -751,8 +777,14 @@ Ledger fingerprints/lifecycle durable: issue cũ không disappear chỉ vì eval
 
 Caps inventory bắt buộc: generations/repairs/total versions, runtime steps/no-progress/oscillation, transport attempts, calls/tokens/output cap, per-artifact/section/run/concurrency/candidate pool và deadlines. Units/count semantics tách generation vs repair, network vs domain attempts, reservation/reported/estimated/unknown. Các3-generated/2-repair/2-no-progress trong plan chỉ proposals.
 
-Profile có nguồn quyết định rõ: dùng approved versioned profile hiện có nếu đủ evidence; nếu chưa có, task này giao supervisor chốt profile mới trong scope code/config reversible bằng explicit values/ADR/rationale và boundary tests. Starting3-generated/2-repair/2-no-progress phải khai báo như quyết định mới, không giả defaults đã approved từ trước. Remaining caps có concrete values từ budget/deadline/feasibility evidence, được pin trước measurement. Không tạo approval blocker nếu repo/session không yêu cầu. Configured profile không tự chứng minh actual deployment hoặc production tuning; report limitations và cách điều chỉnh sau measurement.
+Profile có nguồn quyết định rõ: dùng approved versioned profile hiện có nếu đủ evidence; nếu chưa có, task này giao supervisor chốt profile mới trong scope code/config reversible bằng explicit values/ADR/rationale và boundary tests. Starting 3-generated/2-repair/2-no-progress phải khai báo như quyết định mới, không giả defaults đã approved từ trước. Remaining caps có concrete values từ budget/deadline/feasibility evidence, được pin trước measurement.
 
+Phân biệt rõ ràng giữa production caps và benchmark caps (chính sách mặc định toàn hệ thống):
+- Profile production và các provider khác giữ nguyên hard caps nghiêm ngặt (15 calls / 60,000 tokens / 300s).
+- Đối với MiniMax BENCHMARKS, toàn bộ application-imposed call, cumulative token, monetary và wall-time caps bị vô hiệu hóa ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn tuyệt đối fallback về 15 calls / 60k tokens / 300s).
+- Live benchmarks tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION.
+- Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider.
+- Tách biệt phục hồi cục bộ và gate: R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt.
 Typed Settings validate missing/empty/nonfinite/nonpositive/bad types/child-parent relations. Production không fallback silent development defaults. Khai báo trong effective deploy resolver, không chỉ .env.example. Trace injected policy từ composition tới runtime/gateway/budget admission; redacted effective dump/profile version/hash. Cap mới không tồn tại chỉ trong class.
 
 Persist effective caps snapshot/version/hash/source khi run tạo, counters/grants transactionally. Resume dùng snapshot cũ dù env đổi; new config chỉ new runs. Old run thiếu snapshot có compatible migration/pause, không fabricate lịch sử từ current env. Backoff/timeouts/concurrency dùng remaining parent deadline/budget. UNKNOWN_OUTCOME không refund/free retry; accepted-output reuse vẫn authority check.
@@ -824,11 +856,13 @@ Hoàn thành mọi work package:
 
 Map/chạy T07-01..08: structural reject/zero expensive calls; held-out semantic metrics; independent-Q repair locality; summary-group closure; passage invalidation; cache versions; lexical-supported nhưng semantic-unsupported claim; evidence-backed answer repair. Thêm regression cho timeout/cancel/malformed, missing required coverage, SDK thật + fake HTTP transport đếm attempts, dynamic closure và bốn false-PASS findings. Canary 40% vs14% ở câu đầu/11/cuối; valid controls; fixture integration đúng schema/word range để không reject vì lý do khác. Chạy impacted G03/G06 và real PostgreSQL khi persistence changes.
 
-Khảo sát configured live provider trước khi kết luận thiếu credentials: audit từng ghi MiniMax smoke PASS. Viết/run harness smoke rồi held-out benchmark riêng, pinned model/prompt/evaluator/config/corpus và capped budget. Recall ≥95% tổng, ≥90% từng type; ambiguity ≥90%; false rejection ≤10%; critical canaries 100%, ≥3 runs với aggregate/worst run. Tuning dùng dev; không đổi threshold/labels sau đo để mở gate.
+Khảo sát configured live provider: audit từng ghi MiniMax smoke PASS. Live semantic benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION). Vô hiệu hóa toàn bộ application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên). Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider.
 
-Khi test/review FAIL: reproduce → root cause → patch → regression → rerun impacted checks → reviewer xác nhận. Chưa viết harness/dataset là work còn phải làm, không external blocker. Nếu thực sự thiếu external input, hoàn tất phần độc lập, ghi exact missing input, config location an toàn, setup steps và next executable command đã bind vào repo; không yêu cầu key trong chat hoặc chỉ nói “đợi Phase 10”.
+Giữ nguyên các ngưỡng chất lượng: Recall ≥95% tổng, ≥90% từng type; ambiguity ≥90%; false rejection ≤10%; critical canaries 100%, ≥3 runs với aggregate/worst run trên clean frozen holdout. Tuning dùng dev; không đổi threshold/labels sau đo để mở gate. G07 PASS chỉ khi có bằng chứng live benchmark đạt ngưỡng; không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
 
-Live campaigns phải persist campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch. Hết budget/deadline thì checkpoint partial results và kế hoạch resume có cap. Nếu nhiều fixes không tiến triển, review root cause/đổi hypothesis; không còn hướng khả thi thì handoff unresolved INTERNAL với experiments đã thử và next executable experiment, không giả external hay lặp vô hạn.
+Khi test/review FAIL: reproduce → root cause → patch → regression → rerun impacted checks → reviewer xác nhận. Chưa viết harness/dataset là work còn phải làm, không external blocker. Nếu thực sự thiếu external input, hoàn tất phần độc lập, ghi exact missing input, config location an toàn, setup steps và next executable command đã bind vào repo.
+
+Live campaigns lưu campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch.
 
 Đầu ra artifacts/refactor/phase-07/: gate.json canonical, phase-report, T07 mapping/test-report, commands.jsonl/exit codes, snapshot-manifest, fix-log, registry/prompt manifests, repair diffs/closure, corpus/split hashes/leakage report, confusion matrices, independent-review và resume.md. Không giả tests/reviewers đã chạy. Tách implementation/runtime/corpus/live smoke/semantic quality. G07 PASS chỉ khi required evidence đủ; external gap cho phép coding downstream bằng fakes, không promote acceptance. Bàn giao fixes, remaining blocker remedies và Phase 08 coding/acceptance readiness riêng.
 ```
@@ -891,11 +925,11 @@ Wire capability vào service entrypoint/GenerationFacade V2 thực sự với re
 
 Viết/map/chạy T08-01..08 đầy đủ: 3 profiles/719–720–915–916; quantity/causality/qualifier/outcome fidelity; local repair immutable; source-insufficient bounded; unaligned facts; kill/resume accepted; adversarial injection; clean semantic + paired benchmark. Fixtures integration hợp lệ schema/length, assert actual fidelity codes để không “pass” nhờ word rejection. Canaries câu 1/11/cuối, partial batch timeout, misleading rhetorical labels, missing/valid source hydration, stale cache. T08-07 gồm forged closing envelope/schema override; assert trusted config/output/acceptance không đổi, không chỉ tìm tag. Impacted G03/G06/G07 và real PostgreSQL checkpoint harness.
 
-Audit từng ghi MiniMax smoke PASS: khảo sát current safe credential/config và harness trước gán NOT_RUN_EXTERNAL. Viết harness/corpus nếu thiếu; smoke riêng, semantic benchmark riêng. Freeze corpus/labels/prompts/model/config/caps trước measurement; no leakage/no evaluator-as-gold. Thresholds Matrix: critical 100%, recall 95% overall/90% each type, ambiguity 90%, false rejection≤10%; critical ≥3 repeats aggregate/worst. Passage-stage metrics đủ scope; release ratios ở G15.
+Audit từng ghi MiniMax smoke PASS. Live paired passage benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION). Vô hiệu hóa toàn bộ application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên). Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider.
 
-Findings → reproduce/root cause/fix/regression/reverify liên tục; không tự giảm thresholds hoặc weaken tests. External gap thật: hoàn tất independent code/tests/harness, exact missing input + secure config/setup + next actual command + cap/estimate có cơ sở + owner/resume. “Chưa viết test” không external.
+Freeze corpus/labels/prompts/model/config/caps trước measurement; no leakage/no evaluator-as-gold. Thresholds Matrix: critical 100%, recall 95% overall/90% each type, ambiguity 90%, false rejection≤10%; critical ≥3 repeats aggregate/worst. G08 PASS chỉ khi có bằng chứng live benchmark đạt ngưỡng; không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
 
-Live campaigns phải persist campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch. Hết budget/deadline thì checkpoint partial results và kế hoạch resume có cap. Nếu nhiều fixes không tiến triển, review root cause/đổi hypothesis; không còn hướng khả thi thì handoff unresolved INTERNAL với experiments đã thử và next executable experiment, không giả external hay lặp vô hạn.
+Findings → reproduce/root cause/fix/regression/reverify liên tục; không tự giảm thresholds hoặc weaken tests. External gap thật: hoàn tất independent code/tests/harness, exact missing input + secure config/setup + next actual command + cap/estimate có cơ sở + owner/resume. Live campaigns lưu campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch.
 
 Đầu ra artifacts/refactor/phase-08/: canonical gate/report, P08→files, T08→tests/commands/case counts/exits, snapshot, fix-log, prompt inventory, sentence coverage, lineage/repair diffs, wired-entrypoint trace, caps accounting, DB crash/resume, paired/live quality, independent-review/resume. G08 PASS cần dependencies + required evidence; tách implementation/integration/G07 quality/G08 quality/readiness 09. Không gọi independent fake composition là approved production passage.
 ```
@@ -955,11 +989,11 @@ Viết/map/chạy T09-01..08: six-type valid/invalid encodings; 4-word/absent/le
 
 Test meaningful boundaries: pool N/N+1/group variants, node cap, parallel admission, invalid option member, lexical false positives, wrong passage refs, required evaluator ERROR/stale, malicious source/question output, coherent/ incoherent summary controls. Structural failures zero semantic calls. Test actual wired service composition and real PostgreSQL cursor/heads/operations where persistence changes; impacted G06/G07/G08 regressions.
 
-G09 fake solver tests chứng minh input/composition behavior, không benchmark live solver quality. Nếu live check cần cho other required semantic coverage, khảo sát configured provider, dùng clean frozen corpus/pinned model/prompt/caps/budget. Không lấy evaluator output làm gold, không tune final holdout. Làm harness/corpus trong scope trước viện external gap.
+G09 fake solver tests chứng minh input/composition behavior, không benchmark live solver quality. Khi live check cần thiết cho semantic coverage, tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION). Vô hiệu hóa application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên). Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider.
 
-Loop thực thi: reproduce failure → root cause → fix → regression → rerun impacted checks → independent reviewer xác nhận. Không weaken constraints/tests/thresholds hoặc tự optionalize. External input thật thiếu: hoàn tất độc lập, exact missing input/config location/setup/next repo command/owner và bounded execution plan, không mỗi report “blocked”.
+Tách biệt phục hồi cục bộ và gate: R05 QuestionCandidateLoop durability trên PostgreSQL thật có thể PASS độc lập trong khi gate tổng thể (G09) vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites). Tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. G09 PASS cần đầy đủ bằng chứng predecessor và candidate quality; final solver/adversary quality ghi pending G10. Chính sách này áp dụng mặc định cho tất cả các phase.
 
-Live campaigns phải persist campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch. Hết budget/deadline thì checkpoint partial results và kế hoạch resume có cap. Nếu nhiều fixes không tiến triển, review root cause/đổi hypothesis; không còn hướng khả thi thì handoff unresolved INTERNAL với experiments đã thử và next executable experiment, không giả external hay lặp vô hạn.
+Loop thực thi: reproduce failure → root cause → fix → regression → rerun impacted checks → independent reviewer xác nhận. Không weaken constraints/tests/thresholds hoặc tự optionalize. Live campaigns lưu campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch.
 
 Đầu ra artifacts/refactor/phase-09/: gate.json canonical; P09 files/symbols; test-report T09 mappings+cases; commands/exits; snapshot; fix-log; prompt manifests; sanitized candidate pools/rejections; selection traces/counters; invalidation/repair diffs; DB crash/resume; independent-review/resume. Tất cả paths tồn tại. Bàn giao behavior, fixes và G09/readiness 10 trên actual hashes. G09 PASS cần required predecessor/candidate evidence; final solver/adversary quality ghi pending G10, không pretend final exam ready.
 ```
@@ -1022,11 +1056,11 @@ Viết/map/chạy T10-01..08: hidden-key/evidence canary absent serialized paylo
 
 Thêm adversarial hidden nested fields, metadata concatenation/logging, stable answer-policy normalization, malicious option text, stale refs, partial coverage, gateway retries0 accounting, cancellation/lease loss. Inspect SDK thật + fake HTTP recording trên transport; secret canary không public logs. Real PostgreSQL khi checkpoint/cache durability changes. Impacted G03/G06/G07/G09 checks.
 
-Live smoke và held-out benchmark riêng. Kiểm configured providers/caps trước nói thiếu keys. Harness/data thiếu thì viết trong scope. Freeze clean source-family/near-duplicate split, provenance, labels/annotations độc lập evaluator, prompt/model/caps trước measurement. Tuning dùng dev. Thresholds Matrix: blocking recall≥95% total/≥90% each type; ambiguity≥90%; false rejection≤10% trên ≥60 valid; critical 100%≥3 runs aggregate/worst. Corpus/small sample limitations minh bạch. Fake payload proof không thay live quality.
+Live smoke và held-out benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION). Vô hiệu hóa application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên). Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider.
 
-Failure loop: reproduce/root cause/fix/regression/reverify. Không lower thresholds/required flags/labels. External gap thật: complete code/tests/harness, exact missing credential/environment/data/budget, secure config steps và actual next command+owner/bounded plan. Không yêu cầu keys paste chat, không fabricate labels/reviewers/measurements.
+Freeze clean source-family/near-duplicate split, provenance, labels/annotations độc lập evaluator, prompt/model/caps trước measurement. Tuning dùng dev. Thresholds Matrix: blocking recall≥95% total/≥90% each type; ambiguity≥90%; false rejection≤10% trên ≥60 valid; critical 100%≥3 runs aggregate/worst. G10 PASS chỉ khi có bằng chứng live quality đạt ngưỡng; không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
 
-Live campaigns phải persist campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch. Hết budget/deadline thì checkpoint partial results và kế hoạch resume có cap. Nếu nhiều fixes không tiến triển, review root cause/đổi hypothesis; không còn hướng khả thi thì handoff unresolved INTERNAL với experiments đã thử và next executable experiment, không giả external hay lặp vô hạn.
+Failure loop: reproduce/root cause/fix/regression/reverify. Không lower thresholds/required flags/labels. Live campaigns lưu campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch.
 
 Đầu ra artifacts/refactor/phase-10/: gate/report, P10 map, T10 tests/case counts/commands/exits, snapshot, fix-log, sanitized serialized requests/hashes, key-swap proof, cache/adjudication/repair examples, confusion matrices/per-type metrics/usage, diversity report, independent-review/resume. G10 PASS khi dependencies/deterministic/live required evidence đạt; output implementation, isolation proof, live quality, gate và readiness 11 riêng. Không khẳng định zero ambiguity từ finite corpus.
 ```
@@ -1086,11 +1120,11 @@ Viết/map/chạy T11-01..08: three sections count/types; Q23 duplicate Q18 scop
 
 Integration/fault harness Python+.NET+PostgreSQL thật: crash before commit/after commit-before-ack, cancel/lease takeover/late provider result, source swap/resume và budget pin. Assert accepted refs/hash/counters/history, no completed section checkpoint when invalid. Public payload fixtures parse với real consumer, numbering/answers/options giữ nguyên; not mock DTO-only.
 
-Section parity/regression và paired quality evidence theo Matrix trên frozen clean source-family/near-duplicate split, same conditions. Independent gold/annotation method thật, pinned model/prompts/caps. Live quality cần G07–G10 evidence; simulation no substitute. Critical≥3 repeats/worst, semantic thresholds nguyên; cost/latency báo stage metrics, full-paper release ratios ở G15. Làm harness/data/label provenance trước gọi external gap.
+Section parity/regression và paired quality benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION). Vô hiệu hóa application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên). Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider.
 
-Corrective loop reproduce/root cause/patch/regression/independent reverify tới đạt. Không weaken distributions/evaluators/thresholds hoặc bỏ hard issues. External blocker thật: exact missing input/setup/secure config/next actual command+owner+bounded plan; hoàn tất độc lập và resume checkpoint. Implementation/harness thiếu không phải external.
+Independent gold/annotation method thật, pinned model/prompts/caps. G11 PASS chỉ khi có bằng chứng live quality đạt ngưỡng và dependencies G07–G10 đạt; simulation không thay thế; không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. Critical≥3 repeats/worst, semantic thresholds nguyên. Chính sách này áp dụng mặc định cho tất cả các phase.
 
-Live campaigns phải persist campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch. Hết budget/deadline thì checkpoint partial results và kế hoạch resume có cap. Nếu nhiều fixes không tiến triển, review root cause/đổi hypothesis; không còn hướng khả thi thì handoff unresolved INTERNAL với experiments đã thử và next executable experiment, không giả external hay lặp vô hạn.
+Corrective loop reproduce/root cause/patch/regression/independent reverify tới đạt. Live campaigns lưu campaignId/caseId, manifest/status và reservations; mất output hoặc agent restart thì reconcile trước retry, không chạy lại nguyên batch.
 
 Đầu ra artifacts/refactor/phase-11/: canonical gate/report, P11 map, T11→tests/commands/counts/exits, snapshot, fix-log, exact section/dependency snapshots, repair/invalidation diffs, workflow mapping, SectionsJson transaction evidence, crash/resume, quality/parity reports, independent-review/resume. G11 PASS cần dependencies và required evidence đạt. Bàn giao implementation/DB-contract/live quality/gate/readiness 12 riêng; accepted sections là inputs cho Phase12, chưa tự tạo/publish exam.
 ```
@@ -1146,9 +1180,9 @@ Map và hoàn thành P12-01..09:
 
 Giữ canonical contracts, immutable versions, CAS, cancellation, caps snapshot và cache/dependency freshness. Không tạo retry loop hoặc writer store thứ hai.
 
-Implement/map rồi chạy T12-01..08 trên Python+.NET+PostgreSQL thật: numbering; word-policy parity; duplicate/locality; leakage boundaries; stale lease/cancel; transaction failure; post-commit crash/replay; source→Draft→manual Publish/CRUD. Fake provider cho fault injection; live quality evidence riêng theo matrix. Tests dùng real worker/service boundary, không chỉ instantiate PaperLoop.
+Implement/map rồi chạy T12-01..08 trên Python+.NET+PostgreSQL thật: numbering; word-policy parity; duplicate/locality; leakage boundaries; stale lease/cancel; transaction failure; post-commit crash/replay; source→Draft→manual Publish/CRUD. Fake provider cho fault injection; live quality benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION).
 
-Fix mọi actionable findings và rerun impacted G02/G06/G11, shared-contract/attempt-grading regressions. Missing harness là việc phải implement, không external blocker. Reviewer verify candidate mới sau fixes.
+Vô hiệu hóa application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên). Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider. G12 PASS chỉ khi required dependencies/checks và live quality evidence đạt; không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
 
 Lưu artifacts/refactor/phase-12/: gate.json, phase-report.md, native/test-report, commands.jsonl, snapshot-manifest.json, fix-log.jsonl, independent-review.md, resume.md theo canonical schemas. Snapshot gồm HEAD + dirty/untracked hashes, caps/config/model/prompt/corpus versions. Thêm route/DTO wiring trace, SQL constraint/transaction proof, final graph fixtures và repair closure diffs.
 
@@ -1269,7 +1303,7 @@ Hoàn thành/map P14-01..10:
 - P14-06: raw→annotated/reviewed/conflict-resolved→curated workflow có audit; publish/edit không tự trở thành ground truth.
 - P14-07: reproducible export có dataset version/hash, exact lineage, source rights, labels, partition manifest; remove secrets/unneeded PII. Solver benchmark view không lộ expected keys.
 - P14-08: split source-family/hash/near-duplicate connected groups trước tuning; related edits/variants cùng partition. Không đổi family IDs để che leakage.
-- P14-09: old/candidate prompt/evaluator/model paired comparison trên frozen corpus cùng configured capped budget; report regressions, denominators và hard-gate failures.
+- P14-09: old/candidate prompt/evaluator/model paired comparison trên frozen corpus; live benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công, authorization-file hay chờ PENDING_AUTHORIZATION; unlimited benchmark caps; production profile giữ nguyên); report regressions, denominators và hard-gate failures.
 - P14-10: reviewed code/config promotion có version pinning/rollback; new runs nhận version mới, in-flight/cache giữ pinned inputs. Không production job/endpoint tự deploy prompts từ raw edits.
 
 Giữ canonical models, authoritative .NET persistence, immutable versions/CAS, writer fencing, cancellation, budgets/deadlines và manual Draft/Publish. Offline execution dài vẫn có caps, không free cloud retries. Heuristic/evaluator đang test không làm gold labels; giữ annotation provenance và reviewer limitation thật.
@@ -1329,8 +1363,8 @@ Supervisor giao release test engineer, benchmark worker, deletion worker và rea
 Hoàn thành P15-01..10:
 P15-01 freeze SHA/dirty/untracked hashes, image digest, schema/policy/caps/prompt/evaluator/model/corpus/pricing versions. Changes sau freeze invalidate impacted evidence.
 P15-02 run required matrix: 124 IDs gốc + bổ sung, unit/contract/security/DB-fault/semantic/E2E. Required skip/NOT_RUN/zero collected chặn release; harness thiếu phải viết.
-P15-03 shadow staging, frozen sources legacy/V2; chỉ primary persist final exam, shadow budget riêng bounded. ≥18 paired papers/engine, ≥6 distinct source triples; cùng env/providers/corpus/settings, đổi provider thì report experiment riêng. Eligibility denominators, raw distributions, annotation rubric/source-family holdout rõ. Critical semantic cases ≥3 runs, aggregate và worst run. Không tuning holdout hoặc fake independent labels.
-P15-04 staging rồi authorized new-run canary 10%→50%→100%, run pin engine/config. Proposed minimum ≥20 completed eligible jobs +≥24 giờ phải freeze trước rollout, điều chỉnh theo volume có rationale trước measurement. Không tăng production quyền từ code task; hoàn tất reversible code/staging/rehearsal trước bước bị giới hạn.
+P15-03 shadow staging, frozen sources legacy/V2; chỉ primary persist final exam, shadow budget riêng bounded. Paired release benchmarks tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION). Vô hiệu hóa application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên). Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider. ≥18 paired papers/engine, ≥6 distinct source triples; cùng env/providers/corpus/settings, đổi provider thì report experiment riêng. Eligibility denominators, raw distributions, annotation rubric/source-family holdout rõ. Critical semantic cases ≥3 runs, aggregate và worst run. Không tuning holdout hoặc fake independent labels.
+P15-04 staging rồi authorized new-run canary 10%→50%→100%, run pin engine/config. Proposed minimum ≥20 completed eligible jobs +≥24 giờ phải freeze trước rollout, điều chỉnh theo volume có rationale trước measurement. Quyền triển khai production thực tế phân biệt riêng với benchmark execution; hoàn tất reversible code/staging/rehearsal trước bước bị giới hạn.
 P15-05 abort/pause/rollback khi stale commit, duplicate exam, accepted grounding blocker, unauthorized access hoặc contract break. Không trade hard gates lấy latency/cost.
 P15-06 drain/migrate legacy in-flight runs có evidence, compatible old-data readers; không xóa code chúng còn cần.
 P15-07/P15-08 delete exact confirmed obsolete generation paths/symbols: old responsibility→new location→caller/import search→behavior tests→data compatibility→drained-run proof. Không xóa file cùng tên service khác hoặc behavior regression tests; giữ living public adapters/readers.
@@ -1418,8 +1452,9 @@ Apply Validation Matrix: critical canaries100%; semantic recall≥95% tổng và
 
 Paired release benchmark≥18 papers/engine và≥6 source triples, consistent conditions, actual valid-Draft rate/fidelity/ambiguity không kém legacy theo rubric. P95 latency≤1.5× legacy và hard deadline; median cost/token≤2× theo accounting policy. Report distributions/sample size/unknown usages và limitation, không statistical superiority claim từ mẫu nhỏ.
 
-Smoke không thay semantic benchmark; real DB + fake provider không thay live quality. Benchmark campaign/status/reservation persisted, attempts và cumulative budgets hợp lệ. Không fabricate billed cost hoặc provider model independence.
-
+Smoke không thay semantic benchmark; real DB + fake provider không thay live quality.
+Benchmark campaigns tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công, authorization-file, duyệt campaign-budget hay chờ PENDING_AUTHORIZATION). Vô hiệu hóa application-imposed caps cho MiniMax benchmarks ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên).
+Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits. Tách biệt phục hồi cục bộ (R05 durability PASS trên PostgreSQL thật) khỏi gate tổng thể (G09 nợ live quality upstream); không promote gate chỉ vì dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
 ## 6. Feedback, cleanup, canary và rollback
 
 Durable edit capture/curation/export/split/offline comparison/reviewed version promotion; new runs vs in-flight pins đúng. Raw admin edits không tự deploy prompt/model hoặc thành gold.

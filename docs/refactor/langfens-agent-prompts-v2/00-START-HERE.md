@@ -36,4 +36,9 @@ Long-running không có nghĩa chạy vô hạn: supervise tiến độ, đổi 
 
 G07 còn upstream quality blocker; G08 được báo chưa có generator/prompts/tests và tồn tại false-PASS paths ở grounding. MiniMax transport smoke đã PASS ở snapshot báo cáo. Agent phải kiểm lại current code trước hành động, không suy đoán thiếu credential hoặc áp dụng máy móc findings đã được sửa.
 
-Có thể coding phần độc lập khi external evidence thiếu theo plan; gate acceptance/promote/production output vẫn giữ required prerequisites. Production vẫn dùng explicit migration routing tới cutover có evidence/authorization phù hợp.
+Chính sách mặc định cho toàn bộ các phase:
+- **Live Benchmark tự động:** Mọi live benchmark bắt buộc tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign budget và các trạng thái chờ PENDING_AUTHORIZATION.
+- **Unlimited Caps cho MiniMax Benchmarks:** Vô hiệu hóa toàn bộ call, token, monetary và wall-time caps do ứng dụng áp đặt cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s). Profile production và các provider khác giữ nguyên.
+- **Bảo toàn guardrails & truthful accounting:** Giữ nguyên xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request output/context limits; tôn trọng giới hạn thực tế từ phía provider.
+- **Tách biệt phục hồi cục bộ và gate:** R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã gỡ bỏ rào cản phê duyệt.
+- **Mặc định toàn hệ thống:** Chính sách này áp dụng mặc định cho tất cả các phase còn lại, ngăn quy trình phê duyệt thủ công xuất hiện lại.

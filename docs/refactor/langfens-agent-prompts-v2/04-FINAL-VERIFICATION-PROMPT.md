@@ -40,8 +40,9 @@ Apply Validation Matrix: critical canaries100%; semantic recall≥95% tổng và
 
 Paired release benchmark≥18 papers/engine và≥6 source triples, consistent conditions, actual valid-Draft rate/fidelity/ambiguity không kém legacy theo rubric. P95 latency≤1.5× legacy và hard deadline; median cost/token≤2× theo accounting policy. Report distributions/sample size/unknown usages và limitation, không statistical superiority claim từ mẫu nhỏ.
 
-Smoke không thay semantic benchmark; real DB + fake provider không thay live quality. Benchmark campaign/status/reservation persisted, attempts và cumulative budgets hợp lệ. Không fabricate billed cost hoặc provider model independence.
-
+Smoke không thay semantic benchmark; real DB + fake provider không thay live quality.
+Benchmark campaigns tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công, authorization-file, duyệt campaign-budget hay chờ PENDING_AUTHORIZATION). Vô hiệu hóa application-imposed caps cho MiniMax benchmarks ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên).
+Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits. Tách biệt phục hồi cục bộ (R05 durability PASS trên PostgreSQL thật) khỏi gate tổng thể (G09 nợ live quality upstream); không promote gate chỉ vì dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
 ## 6. Feedback, cleanup, canary và rollback
 
 Durable edit capture/curation/export/split/offline comparison/reviewed version promotion; new runs vs in-flight pins đúng. Raw admin edits không tự deploy prompt/model hoặc thành gold.

@@ -1,0 +1,141 @@
+{
+  "acceptance": {
+    "ambiguityRecallMeetsThreshold": false,
+    "criticalCanariesMeetsThreshold": false,
+    "falseRejectionMeetsThreshold": false,
+    "operationalErrorsZero": true,
+    "overallRecallMeetsThreshold": false,
+    "perTypeRecallMeetsThreshold": false,
+    "status": false
+  },
+  "authoritativeCampaignStatus": "AUTHORIZED",
+  "authorization": {
+    "authorizationId": "auto-minimax-camp_g07_clean_holdout_20261005_144207",
+    "authorizedBy": "system-auto-minimax-benchmark",
+    "sha256": "6e4f53da220a9076ce3876d91d80ad17d5ff100b7e7d587de3fdc63f3a145029"
+  },
+  "availableProviders": [
+    "minimax",
+    "groq"
+  ],
+  "budget": {
+    "authoritative": {
+      "callsCap": -1,
+      "callsUsed": 127,
+      "tokensCap": -1,
+      "tokensUsed": 107586,
+      "wallTimeCapSeconds": -1.0,
+      "wallTimeUsedSeconds": 631.5538999999998
+    },
+    "local": {
+      "accountedTokens": 107586,
+      "budgetBreachDetected": false,
+      "budgetBreachReason": null,
+      "caps": {
+        "accountedTokens": -1,
+        "gatewayOperations": -1,
+        "wallTimeSeconds": -1
+      },
+      "gatewayOperations": 127,
+      "operationStatuses": {
+        "COMPLETED": 127
+      },
+      "wallTimeSeconds": 689
+    },
+    "recoveredReservations": 0
+  },
+  "campaignComplete": true,
+  "campaignId": "camp_g07_clean_holdout_20261005_144207",
+  "completedChildRuns": 184,
+  "configSha256": "7d93fda97c6c4e6b542a030981f508ac460621b08239b14c1f66cfaf19f6bbe8",
+  "configuredProviderOrder": [
+    "minimax",
+    "groq"
+  ],
+  "corpusHashes": {
+    "fidelity_corpus.json": "e4ae0987939f02bddadf048786b12451957af24373d107af95784ba7f78d4e31",
+    "questions_corpus.json": "12aec6fc92f4e53219141c7a1d048f06d226ae19bf0b27a7c9c2eea3dcbac454",
+    "questions_holdout_corpus.json": "2d8362ff84853e70e7cb07840e672ec0948aa5381355686cd8ae326a4c4955bc"
+  },
+  "corpusSha256": "2d8362ff84853e70e7cb07840e672ec0948aa5381355686cd8ae326a4c4955bc",
+  "criticalCanaries": {
+    "aggregateRate": 0.08333333333333333,
+    "allPass": false,
+    "perCanaryRejections": {
+      "clean_critical_01": 0,
+      "clean_critical_02": 0,
+      "clean_critical_03": 0,
+      "clean_critical_04": 0,
+      "clean_critical_05": 0,
+      "clean_critical_06": 0,
+      "clean_critical_07": 0,
+      "clean_critical_08": 0,
+      "clean_critical_09": 0,
+      "clean_critical_10": 0,
+      "clean_critical_11": 0,
+      "clean_critical_12": 3
+    },
+    "repetitions": 3,
+    "runComplete": [
+      true,
+      true,
+      true
+    ],
+    "runRates": [
+      0.08333333333333333,
+      0.08333333333333333,
+      0.08333333333333333
+    ],
+    "totalCanaries": 12,
+    "worstRunRate": 0.08333333333333333
+  },
+  "durationSeconds": 377.073,
+  "evaluatorPipelineHash": "1d5e3a3831d78f17",
+  "evaluatorVersions": {
+    "AmbiguityAndDistractorEvaluator": "2.0.0",
+    "AnswerVerbatimAndLengthEvaluator": "1.0.0",
+    "DuplicateAndShingleEvaluator": "1.0.0",
+    "EvidenceOffsetEvaluator": "1.0.0",
+    "GroundingFidelityEvaluator": "2.0.0",
+    "NotGivenSemanticsEvaluator": "1.0.0",
+    "QuestionStructureEvaluator": "1.0.0"
+  },
+  "expectedChildRuns": 184,
+  "fidelityCorpusSha256": "e4ae0987939f02bddadf048786b12451957af24373d107af95784ba7f78d4e31",
+  "finishedAt": "2026-10-05T14:48:33.283418+00:00",
+  "freezeId": "g07-g10-clean-holdout-candidate-v2",
+  "incompleteCaseCount": 0,
+  "metricGateStatus": "FAIL",
+  "observedModels": [
+    "MiniMax-Text-01"
+  ],
+  "observedProviders": [
+    "minimax"
+  ],
+  "partition": "holdout",
+  "rates": {
+    "ambiguityRecall": 0.4,
+    "ambiguityRecallFormatted": "40.0%",
+    "canaryAggregateRate": 0.08333333333333333,
+    "canaryWorstRunRate": 0.08333333333333333,
+    "falseRejectionRate": 0.11666666666666667,
+    "operationalFailureRate": 0.0,
+    "operationalRejectionsOfValidCount": 0,
+    "overallBlockingRecall": 0.9,
+    "perTypeRecall": {
+      "MultipleChoiceSingle": 0.4,
+      "SentenceCompletion": 1.0,
+      "ShortAnswer": 1.0,
+      "SummaryCompletion": 1.0,
+      "TrueFalseNotGiven": 1.0,
+      "YesNoNotGiven": 1.0
+    },
+    "semanticFalsePositivesCount": 7,
+    "semanticFalsePositivesRate": 0.11666666666666667,
+    "totalValidRejectedCount": 7,
+    "totalValidRejectedRate": 0.11666666666666667
+  },
+  "startedAt": "2026-10-05T14:42:16.210789+00:00",
+  "status": "FAIL",
+  "totalFailuresLogged": 13
+}

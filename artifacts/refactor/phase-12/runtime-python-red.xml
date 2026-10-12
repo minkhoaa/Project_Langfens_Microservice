@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.846" timestamp="2026-10-07T08:50:22.906443+00:00" hostname="code"><testcase classname="tests.test_t12_paper_loop" name="test_t12_default_paper_policy_uses_production_settings" time="0.001"><failure message="AssertionError: assert 25 == 15&#10; +  where 25 = LoopPolicy(max_versions=3, max_generated_versions=3, max_repair_attempts_per_version=2, max_total_repairs=5, max_conse...alate_codes={&lt;IssueCode.EVIDENCE_MISSING: 'EVIDENCE_MISSING'&gt;, &lt;IssueCode.SOURCE_INSUFFICIENT: 'SOURCE_INSUFFICIENT'&gt;}).max_total_calls&#10; +  and   15 = LoopPolicy(max_versions=3, max_generated_versions=3, max_repair_attempts_per_version=2, max_total_repairs=5, max_conse...alate_codes={&lt;IssueCode.EVIDENCE_MISSING: 'EVIDENCE_MISSING'&gt;, &lt;IssueCode.SOURCE_INSUFFICIENT: 'SOURCE_INSUFFICIENT'&gt;}).max_total_calls">def test_t12_default_paper_policy_uses_production_settings():
+        from app.config import settings
+        expected = LoopPolicy.from_settings(settings)
+        actual = PaperLoop().policy
+&gt;       assert actual.max_total_calls == expected.max_total_calls
+E       AssertionError: assert 25 == 15
+E        +  where 25 = LoopPolicy(max_versions=3, max_generated_versions=3, max_repair_attempts_per_version=2, max_total_repairs=5, max_conse...alate_codes={&lt;IssueCode.EVIDENCE_MISSING: 'EVIDENCE_MISSING'&gt;, &lt;IssueCode.SOURCE_INSUFFICIENT: 'SOURCE_INSUFFICIENT'&gt;}).max_total_calls
+E        +  and   15 = LoopPolicy(max_versions=3, max_generated_versions=3, max_repair_attempts_per_version=2, max_total_repairs=5, max_conse...alate_codes={&lt;IssueCode.EVIDENCE_MISSING: 'EVIDENCE_MISSING'&gt;, &lt;IssueCode.SOURCE_INSUFFICIENT: 'SOURCE_INSUFFICIENT'&gt;}).max_total_calls
+
+services/generation-service/tests/test_t12_paper_loop.py:789: AssertionError</failure></testcase><testcase classname="tests.test_t12_paper_loop" name="test_t12_empty_required_paper_pipeline_never_accepts" time="0.011"><failure message="AssertionError: assert &lt;DecisionType.PASS: 'PASS'&gt; != &lt;DecisionType.PASS: 'PASS'&gt;&#10; +  where &lt;DecisionType.PASS: 'PASS'&gt; = LoopResult(run_id='run_t12_missing_pipeline', decision=&lt;DecisionType.PASS: 'PASS'&gt;, terminal_state=&lt;LoopState.COMPLETE...ueLedger(ledger_id='led_run_t12_missing_pipeline', run_id='run_t12_missing_pipeline', issues=[]), latest_decision=None).decision&#10; +  and   &lt;DecisionType.PASS: 'PASS'&gt; = DecisionType.PASS">@pytest.mark.asyncio
+    async def test_t12_empty_required_paper_pipeline_never_accepts():
+        run_id = "run_t12_missing_pipeline"
+        bp = ArtifactRef(artifactId="art_bp", artifactType=ArtifactType.EXAM_BLUEPRINT, version=1, contentHash="0" * 64)
+        result = await PaperLoop(evaluator_registry=EvaluatorRegistry()).run(
+            run_id, bp, [create_mock_section_envelope(i, 800, run_id) for i in (1, 2, 3)]
+        )
+&gt;       assert result.decision != DecisionType.PASS
+E       AssertionError: assert &lt;DecisionType.PASS: 'PASS'&gt; != &lt;DecisionType.PASS: 'PASS'&gt;
+E        +  where &lt;DecisionType.PASS: 'PASS'&gt; = LoopResult(run_id='run_t12_missing_pipeline', decision=&lt;DecisionType.PASS: 'PASS'&gt;, terminal_state=&lt;LoopState.COMPLETE...ueLedger(ledger_id='led_run_t12_missing_pipeline', run_id='run_t12_missing_pipeline', issues=[]), latest_decision=None).decision
+E        +  and   &lt;DecisionType.PASS: 'PASS'&gt; = DecisionType.PASS
+
+services/generation-service/tests/test_t12_paper_loop.py:802: AssertionError</failure></testcase><testcase classname="tests.test_t12_paper_loop" name="test_t12_empty_paper_patch_is_not_a_repair" time="0.012"><failure message="Failed: DID NOT RAISE ValueError">def test_t12_empty_paper_patch_is_not_a_repair():
+        run_id = "run_t12_empty_patch"
+        bp = ArtifactRef(artifactId="art_bp", artifactType=ArtifactType.EXAM_BLUEPRINT, version=1, contentHash="0" * 64)
+        paper = assemble_immutable_paper([create_mock_section_envelope(i, 800, run_id) for i in (1, 2, 3)], bp, run_id)
+&gt;       with pytest.raises(ValueError, match="patch"):
+E       Failed: DID NOT RAISE ValueError
+
+services/generation-service/tests/test_t12_paper_loop.py:810: Failed</failure></testcase></testsuite></testsuites>

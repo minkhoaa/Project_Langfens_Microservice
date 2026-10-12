@@ -1,0 +1,52 @@
+{
+  "active_pinned_version": "prompts_v2_0_0",
+  "pin_history": [
+    {
+      "is_rollback": false,
+      "pinned_at": "2026-10-10T21:35:35.469139+00:00",
+      "pinned_by": "system",
+      "reason": "Initial system bootstrap",
+      "version": "prompts_v2_0_0"
+    },
+    {
+      "is_rollback": false,
+      "pinned_at": "2026-10-10T21:35:35.470590+00:00",
+      "pinned_by": "curator_live",
+      "reason": "Promoted: G14 Gate Passed (Report eval_report_42235d6962a6)",
+      "version": "prompts_v2_1_0"
+    },
+    {
+      "is_rollback": true,
+      "pinned_at": "2026-10-10T21:35:35.472066+00:00",
+      "pinned_by": "admin_live",
+      "reason": "Rollback from prompts_v2_1_0: Rollback verification",
+      "version": "prompts_v2_0_0"
+    }
+  ],
+  "run_bindings": {
+    "run_session_alpha_live": "prompts_v2_0_0",
+    "run_session_beta_live": "prompts_v2_1_0"
+  },
+  "schema_version": "phase14.v1",
+  "versions": {
+    "prompts_v2_0_0": {
+      "benchmark_report_id": null,
+      "config": {
+        "model": "default",
+        "prompt_strategy": "baseline_v2"
+      },
+      "description": "Baseline Phase 14 generation prompts",
+      "registered_at": "2026-10-10T21:35:35.468355+00:00",
+      "registered_by": "system",
+      "version": "prompts_v2_0_0"
+    },
+    "prompts_v2_1_0": {
+      "benchmark_report_id": "eval_report_42235d6962a6",
+      "config": {},
+      "description": "Phase 14 Promoted Model",
+      "registered_at": "2026-10-10T21:35:35.469506+00:00",
+      "registered_by": "curator_live",
+      "version": "prompts_v2_1_0"
+    }
+  }
+}

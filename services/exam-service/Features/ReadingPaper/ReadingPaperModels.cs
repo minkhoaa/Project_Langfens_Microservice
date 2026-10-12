@@ -90,11 +90,19 @@ public static class ReadingPaperRules
                                 .All(valid => valid))
                             throw new InvalidOperationException($"Question {next} needs A–D options");
                     }
-                    else if ((group.Type is "SENTENCE_COMPLETION" or "SUMMARY_COMPLETION"
-                              && !q.Prompt.Contains($"[{next}]", StringComparison.Ordinal))
-                             || Words.Matches(q.Answer).Count is < 1 or > 3
-                             || !Regex.IsMatch(section.Passage, $@"(?<!\w){Regex.Escape(q.Answer)}(?!\w)", RegexOptions.IgnoreCase))
-                        throw new InvalidOperationException($"Question {next} has an invalid completion answer");
+                    else if (group.Type == "SHORT_ANSWER")
+                    {
+                        if (Words.Matches(q.Answer).Count is < 1 or > 3
+                            || !Regex.IsMatch(section.Passage, $@"(?<!\w){Regex.Escape(q.Answer)}(?!\w)", RegexOptions.IgnoreCase))
+                            throw new InvalidOperationException($"Question {next} has an invalid short answer");
+                    }
+                    else if (group.Type is "SENTENCE_COMPLETION" or "SUMMARY_COMPLETION")
+                    {
+                        if (!q.Prompt.Contains($"[{next}]", StringComparison.Ordinal)
+                            || Words.Matches(q.Answer).Count is < 1 or > 3
+                            || !Regex.IsMatch(section.Passage, $@"(?<!\w){Regex.Escape(q.Answer)}(?!\w)", RegexOptions.IgnoreCase))
+                            throw new InvalidOperationException($"Question {next} has an invalid completion answer");
+                    }
                     next++;
                 }
             }

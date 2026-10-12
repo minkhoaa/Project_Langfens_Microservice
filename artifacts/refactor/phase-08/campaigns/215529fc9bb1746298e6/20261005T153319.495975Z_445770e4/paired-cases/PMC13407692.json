@@ -1,0 +1,272 @@
+{
+  "caseId": "paired_2_PMC13407692",
+  "sourceId": "PMC13407692",
+  "sourceSha256": "ee008146c52cd0d0a134fcb3d0f2f624f48d1b9d8ea3e3e7fdea4e8580788311",
+  "topic": "Quantum State Purification and Error Correction",
+  "styleProfile": "EXPOSITORY_SCIENTIFIC",
+  "corpusSha256": "43fd15d60e2893ee1b23581a33e8785a9ccb66794ab43a55202623b552cbec99",
+  "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+  "inputArtifactRefs": {
+    "sourcePackRef": {
+      "artifactId": "art_source_PMC13407692_bench_1c",
+      "artifactType": "SourcePack",
+      "version": 1,
+      "contentHash": "39ffaf4fab09bb25e5865efd9d9c7d4589a9ced7916ebb53636fd545a3c0809c"
+    },
+    "evidenceGraphRef": {
+      "artifactId": "art_evidence_PMC13407692_bench_1c",
+      "artifactType": "EvidenceGraph",
+      "version": 1,
+      "contentHash": "f9b602abb0eb7cf92bcdb4498a9b5a193fe22c7b1e1acbc184abd9b1c97a008c"
+    },
+    "blueprintRef": {
+      "artifactId": "art_blueprint_PMC13407692_bench_1c",
+      "artifactType": "ExamBlueprint",
+      "version": 1,
+      "contentHash": "5bb29205b056d994b193e63fa8fda351cdac5fa1d990f984bd22a177e9f47aaa"
+    }
+  },
+  "legacy": {
+    "campaignCaseId": "g08_PMC13407692_legacy",
+    "runId": "bench_36d09922210072dc51efa43b64c86ac6",
+    "engine": "Legacy",
+    "title": "Quantum State Purification and Error Correction",
+    "passage": "Quantum computing represents a paradigm shift in computational capabilities, leveraging the principles of superposition and entanglement to achieve exponential speedups for specific problems. At the heart of this technology are qubits, the fundamental units of quantum information. However, the practical implementation of quantum computing is fraught with challenges, primarily due to the extreme sensitivity of qubits to environmental noise. Decoherence and gate-operation errors accumulate as the quantum circuit depth increases, posing significant constraints on the scalability and reliability of current quantum processors. To overcome these hurdles, quantum error correction (QEC) has emerged as an indispensable technology, offering a systematic approach to suppress physical errors by encoding logical qubits into multiple physical qubits. This encoding is accompanied by syndrome measurements and recovery operations, which are crucial for maintaining the integrity of quantum information.\n\nQuantum state purification is a technique that has garnered significant attention in the fields of quantum communication and quantum networks. It involves extracting high-fidelity pure states from multiple noisy copies through local operations. Recent experimental demonstrations have showcased the potential of purification in achieving multi-node entanglement distribution and qubit teleportation between non-neighboring network nodes. From an information-theoretic perspective, purification can be viewed as an entropy-reduction operation, effectively filtering out noise entropy and concentrating quantum information. Despite these advancements, the intricate interplay between this entropy suppression process and quantum error correction remains underexplored. Integrating purification strategies with error-correction code structures within a unified framework is a critical challenge that must be addressed to advance near-term quantum computing toward practical utility.\n\nThe scope of the purification operation must be carefully delineated to circumvent conflicts with the no-cloning theorem, which prohibits the creation of identical copies of an arbitrary quantum state. The framework operates exclusively on quantum states where the target form is known a priori and is prepared by multiple independent applications of the noise channel to independently initialized copies. This regime encompasses three primary categories of states in stabilizer-coded quantum computation: (i) data-block initialization states such as encoded |0⟩L or |+⟩L codewords, (ii) ancilla preparation states repeatedly prepared in |0⟩, and (iii) magic-state inputs |T⟩. These categories cover the predominant points of noise injection within a stabilizer QEC cycle, aligning with the Cirac–Ekert–Macchiavello purification protocol.\n\nRecent international research has yielded significant progress in both quantum state purification and quantum error correction. Systematic reviews of entanglement purification protocols have explored various approaches, including linear optical, cross-Kerr nonlinear, and measurement-based deterministic methods. Quantum error mitigation, inspired by purification concepts, has been successfully applied to electron pair-correlation simulations on superconducting processors, achieving error suppression one to two orders of magnitude lower than post-selection in 20-qubit systems. The Willow surface-code experiment achieved a logical error rate of 0.143% per round on a distance-7 codeword. Additionally, a fault-tolerant memory based on LDPC codes demonstrated a 0.7% threshold using 288 physical qubits to protect 12 logical qubits across nearly one million syndrome cycles. However, these advancements also highlight limitations, such as the reliance of purity-constraint methods on the pure-output assumption, which restricts scalability under correlated noise and deep circuits. While quantum LDPC-based GHZ distillation and noise-guessing decoding-based purification show promise for integration, a unified framework that systematically integrates purification into QEC with algorithm-level adaptive optimization is still lacking.\n\nThis paper proposes a novel purification-assisted quantum error-correction framework, introducing core innovations at three distinct levels. At the architectural design level, a joint optimization model is proposed, which treats purification as an active noise-entropy suppression stage within the error-correction cycle. This approach reduces the effective noise of data qubits before syndrome extraction, enabling systematic entropy compression prior to encoding. In terms of algorithm design, an iterative purification error-correction (IPEC) algorithm is introduced. This algorithm dynamically adjusts purification rounds versus error-correction strategy based on real-time syndrome information, striking a balance between fidelity gain and resource consumption. On the theoretical front, the framework derives analytical expressions for the fidelity improvement bound and the fault-tolerance threshold, elucidating the quantitative contribution of purification to the compound exponential suppression of logical error rates under ideal assumptions.\n\nThe paper is structured as follows: Section 2 provides a comprehensive review of recent advances and situates the proposed framework within the current landscape. Section 3 formulates the system model, establishes the framework architecture, and derives analytical performance bounds, including the fidelity improvement formula, the von Neumann entropy reduction relation, and the equivalent fault-tolerant threshold under both noiseless and circuit-level assumptions. Section 4 presents the IPEC algorithm, accompanied by complexity and stability analyses, and validates the algorithm through Monte Carlo simulations under multiple noise scenarios on both surface codes and quantum LDPC codes. Finally, Section 5 discusses the hardware feasibility, limitations, and future work, paving the way for further research and development in this critical area of quantum computing.\n\nIn summary, the core objective of quantum error correction is to protect quantum information through encoding redundancy. Recent milestones, such as real-time fault-tolerant error correction with the color code on trapped-ion platforms, fault-tolerant universal gate sets on the seven-qubit code, and quantum error correction beyond the break-even point with discrete-variable bosonic encodings, underscore the rapid progress being made. The surface code, the most extensively studied topological QEC code, boasts a two-dimensional lattice structure that requires only nearest-neighbor coupling, making it naturally suited for implementation on superconducting platforms. Experiments with distance-5 surface codes have confirmed that logical-qubit error rates can be suppressed below the single-physical-qubit level, effectively breaking the 'break-even point'.",
+    "wordCount": 898,
+    "paragraphCount": 7,
+    "cleanSentenceBoundary": true,
+    "blindSliced": false,
+    "provider": "minimax",
+    "model": "MiniMax-Text-01",
+    "callsUsed": 1,
+    "tokensUsed": 3148,
+    "usage": {
+      "callsObserved": 1,
+      "promptTokensFromResponses": 1924,
+      "completionTokensFromResponses": 1224,
+      "totalTokensFromResponses": 3148,
+      "costUsdFromProviderUsage": 0.0,
+      "providerModelByCall": [
+        {
+          "provider": "minimax",
+          "model": "MiniMax-Text-01",
+          "promptTokens": 1924,
+          "completionTokens": 1224,
+          "totalTokens": 3148,
+          "accountingType": "reported",
+          "costUsdFromProviderUsage": 0.0,
+          "providerLatencySeconds": 37.9422,
+          "attempts": 1
+        }
+      ]
+    },
+    "latencySeconds": 38.096,
+    "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+    "config": {
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "styleProfile": "EXPOSITORY_SCIENTIFIC",
+      "wordCountBounds": {
+        "minimum": 720,
+        "maximum": 915
+      }
+    },
+    "hasSentenceIds": false,
+    "hasAuthoritativeCAS": false,
+    "persistenceEvidence": {
+      "classification": "LEGACY_NO_ACCEPTED_V2_ARTIFACT",
+      "authoritativeCasProven": false
+    },
+    "groundingEvaluation": {
+      "status": "PASS",
+      "score": 1.0,
+      "totalIssues": 0,
+      "blockingIssues": 0,
+      "issueCodes": []
+    }
+  },
+  "v2": {
+    "campaignCaseId": "g08_PMC13407692_v2",
+    "runId": "bench_1c3c81c783f0697f43713a662a342a5a",
+    "engine": "V2_PassageLoop",
+    "decision": "FAIL",
+    "callsUsed": 4,
+    "tokensUsed": 39000,
+    "provider": "minimax",
+    "model": "MiniMax-Text-01",
+    "config": {
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "styleProfile": "EXPOSITORY_SCIENTIFIC",
+      "promptVersion": "2.1.0",
+      "wordCountBounds": {
+        "minimum": 720,
+        "maximum": 915
+      },
+      "loopCapsProfile": {
+        "version": "phase06-production-v1",
+        "source": "deploy/envs/loop-caps.env"
+      }
+    },
+    "usage": {
+      "callsObserved": 1,
+      "promptTokensFromResponses": 1745,
+      "completionTokensFromResponses": 1224,
+      "totalTokensFromResponses": 2969,
+      "costUsdFromProviderUsage": 0.0,
+      "providerModelByCall": [
+        {
+          "provider": "minimax",
+          "model": "MiniMax-Text-01",
+          "promptTokens": 1745,
+          "completionTokens": 1224,
+          "totalTokens": 2969,
+          "accountingType": "reported",
+          "costUsdFromProviderUsage": 0.0,
+          "providerLatencySeconds": 36.9178,
+          "attempts": 1
+        }
+      ]
+    },
+    "latencySeconds": 37.775,
+    "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+    "authoritativeOperations": [
+      {
+        "operationId": "g08-input-f6e87a5b9d194398887a6240e2ec8692",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "39ffaf4fab09bb25e5865efd9d9c7d4589a9ced7916ebb53636fd545a3c0809c"
+      },
+      {
+        "operationId": "g08-input-e0ee6df55eb6490e8e40904254e0d474",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "f9b602abb0eb7cf92bcdb4498a9b5a193fe22c7b1e1acbc184abd9b1c97a008c"
+      },
+      {
+        "operationId": "g08-input-d57f485d37784a45a3663e1885d5780e",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "5bb29205b056d994b193e63fa8fda351cdac5fa1d990f984bd22a177e9f47aaa"
+      },
+      {
+        "operationId": "loop:bench_1c3c81c783f0697f43713a662a342a5a:art_passage_s1:GENERATE:1:2.0.0",
+        "operationType": "GENERATE",
+        "status": "COMPLETED",
+        "tokenReservation": 9000,
+        "tokensUsed": 9000,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "ca94f7c60b44457b9e30da5fa4239233f0065efa7008433bcb3daead3e799066"
+      },
+      {
+        "operationId": "op_pass_gen_24461843",
+        "operationType": "PROVIDER_CALL",
+        "status": "COMPLETED",
+        "tokenReservation": 12566,
+        "tokensUsed": 2969,
+        "tokensPrompt": 1745,
+        "tokensCompletion": 1224,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "dc23480e35f21bb4d6027487beccee49b1ac474e08af5e1284d4c9cb50cb9466"
+      },
+      {
+        "operationId": "loop:bench_1c3c81c783f0697f43713a662a342a5a:art_passage_s1:EVALUATE:1:eval_passage_word_count:1.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "c54e8cef07efcb78ca61148614d4db552f5cd1338b012085e71ec89329007385"
+      },
+      {
+        "operationId": "loop:bench_1c3c81c783f0697f43713a662a342a5a:art_passage_s1:EVALUATE:1:eval_passage_style:1.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "bba501bcd9d4e02b90095d703d53e9f4c1e8182aa74e5eae18e50cd357d30251"
+      },
+      {
+        "operationId": "loop:bench_1c3c81c783f0697f43713a662a342a5a:art_passage_s1:EVALUATE:1:eval_grounding_fidelity:2.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "1f9c188617abdd8a53d1f358a6d1049bb3e936a8bf3caa3fc62b0874e3b54dbc"
+      }
+    ],
+    "versionTraces": [],
+    "artifactId": null,
+    "acceptedArtifactRef": null,
+    "acceptedParentRefs": [],
+    "title": "Quantum State Purification and Error Correction",
+    "passage": "",
+    "wordCount": 0,
+    "paragraphCount": 0,
+    "sentenceCount": 0,
+    "cleanSentenceBoundary": false,
+    "blindSliced": false,
+    "hasSentenceIds": false,
+    "hasAuthoritativeCAS": false,
+    "persistenceEvidence": {
+      "classification": "AUTHENTICATED_DOTNET_CHECKPOINT_API",
+      "acceptedHeadVerified": false,
+      "authoritativeCasProven": false,
+      "operationCount": 8
+    },
+    "terminalReason": "WALL_TIME_CAP: deadline exhausted",
+    "groundingEvaluation": {
+      "status": "PASS",
+      "score": 1.0,
+      "totalIssues": 0,
+      "blockingIssues": 0,
+      "issueCodes": []
+    }
+  },
+  "comparison": {
+    "wordCountInBounds": {
+      "legacy": true,
+      "v2": false
+    },
+    "cleanSentenceBoundary": {
+      "legacy": true,
+      "v2": false
+    },
+    "groundingStatus": {
+      "legacy": "PASS",
+      "v2": "PASS"
+    },
+    "v2AcceptedArtifactRef": null
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "caseIndex": 9,
+  "engine": "Legacy_V1",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LEGACY_SHADOW",
+  "campaignId": "camp_G15_eef49d5aff21",
+  "seed": 303,
+  "runId": "bench_135953ae0120b86684e446414a6bd06a",
+  "jobId": "5432643c-7da0-4d55-b964-1e05b71105f0",
+  "sourceTriple": [
+    "PMC13517498",
+    "PMC13621526",
+    "PMC13503497"
+  ],
+  "status": "FAILED",
+  "validDraft": false,
+  "failureReason": "Failed to generate valid replacement for question 35 after 3 attempts: Question 35 answer must appear in passage",
+  "versionsCount": 1,
+  "evaluatorIssues": [
+    "LEGACY_FAILURE: Failed to generate valid replacement for question 35 after 3 attempts: Question 35 answer must appear in passage"
+  ],
+  "latencySeconds": 825.8561,
+  "totalTokens": 161666,
+  "reportedTokens": 161666,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 60,
+  "uniqueProviderDispatches": 60,
+  "estimatedCostUsd": 0.404165,
+  "persistedExamId": null,
+  "draftExamId": null,
+  "isPrimaryPersisted": false,
+  "legacyCallsCount": 63,
+  "totalQuestions": 26,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

@@ -1,0 +1,62 @@
+{
+  "gate": "G13",
+  "phase": "Phase 13 — API, Events, Observability và UI",
+  "status": "PASS",
+  "evaluatedAt": "2026-10-08T17:15:00.000000+00:00",
+  "gitSha": "f56a0970bbf6190ea7e3af58d2ec8db9e5c9714f",
+  "dependencies": {
+    "G01": "PASS",
+    "G02": "PASS",
+    "G03": "PASS",
+    "G11": "PASS",
+    "G12": "PASS"
+  },
+  "workPackages": {
+    "P13-01": "PASS",
+    "P13-02": "PASS",
+    "P13-03": "PASS",
+    "P13-04": "PASS",
+    "P13-05": "PASS",
+    "P13-06": "PASS",
+    "P13-07": "PASS",
+    "P13-08": "PASS",
+    "P13-09": "PASS",
+    "P13-10": "PASS"
+  },
+  "testResults": {
+    "T13-01": "PASS",
+    "T13-02": "PASS",
+    "T13-03": "PASS",
+    "T13-04": "PASS",
+    "T13-05": "PASS",
+    "T13-06": "PASS",
+    "T13-07": "PASS",
+    "T13-08": "PASS"
+  },
+  "deterministicVerification": {
+    "pythonTestsPassed": 73,
+    "pythonTestsTotal": 73,
+    "csharpTestsPassed": 17,
+    "csharpTestsTotal": 17,
+    "frontendUnitTestsPassed": 177,
+    "frontendUnitSuitesPassed": 11,
+    "liveBrowserGenerationJobId": "16895531-8a45-4c1c-9334-edaf59f3b54f",
+    "liveBrowserGeneratedExamId": "d4d18cbb-e8a8-4c6a-82d5-bfc73f193321",
+    "liveBrowserGeneratedSlug": "reading-168955318a454c1c9334edaf59f3b54f"
+  },
+  "resolvedGaps": [
+    {
+      "id": "UNRESOLVED_VALIDATION_MATRIX_PROVENANCE",
+      "description": "Validation Matrix provenance resolved by recovering authentic 00-master-plan.md (SHA-256 44dbfcd50f0bee0c4ff2701ab2f94e6d0c2b308c563adc9d35e1d02643379ebf) and authentic 01-validation-matrix.md (SHA-256 97710cfff1bcb7f0e7ccf04ee551e3781d2bf8f4fc7b98ed10e27d4940396cfe).",
+      "resolution": "test_validation_matrix_provenance.py passes 3/3 tests verifying SHA-256 binding, 16-gate coverage (G00-G15), and non-negotiable threshold preservation."
+    },
+    {
+      "id": "UNRESOLVED_LIVE_FULL_STACK_BROWSER_E2E",
+      "description": "Full live cloud MiniMax generation driven from the browser UI reaching terminal Completed state, validated with exact 3-section/40-question graph, draft review rendering, feedback taxonomy question edit, draft shielding (404), and UI manual publish to public HTTP 200.",
+      "resolution": "Executed via scripts/refactor/run_browser_e2e.py and playwright_browser_e2e.mjs. Job 16895531-8a45-4c1c-9334-edaf59f3b54f reached Completed; Exam d4d18cbb-e8a8-4c6a-82d5-bfc73f193321 transitioned Draft -> Published."
+    }
+  ],
+  "unresolvedGaps": [],
+  "conclusion": "Phase 13 core implementation and live E2E verification across all 10 work packages (P13-01 through P13-10) is complete. Full live cloud MiniMax generation through browser UI to terminal Completed state and valid Draft publishing is verified.",
+  "readinessForPhase14": "READY_FOR_PHASE_14"
+}

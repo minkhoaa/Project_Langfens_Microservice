@@ -80,9 +80,24 @@ public sealed class ExamApiFactory : WebApplicationFactory<exam_service.Program>
         builder.UseSetting("JwtSettings__Audience", "langfens-api");
         builder.UseSetting("JwtSettings__SignKey", "SuperSecretTestingKeyAtLeast32BytesLong!!");
         builder.UseSetting("ConnectionStrings__exam-db", _connection);
+        builder.UseSetting("EXAMSERVICE__INTERNAL__API__KEY", Phase02DurabilityTests.TestInternalApiKey);
+
+        var envPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../deploy/envs/loop-caps.env"));
+        if (!File.Exists(envPath))
+            envPath = Path.GetFullPath("deploy/envs/loop-caps.env");
+        if (File.Exists(envPath))
+        {
+            foreach (var line in File.ReadAllLines(envPath))
+            {
+                var trimmed = line.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("#")) continue;
+                var eqIdx = trimmed.IndexOf('=');
+                if (eqIdx > 0)
+                    builder.UseSetting(trimmed[..eqIdx].Trim(), trimmed[(eqIdx + 1)..].Trim());
+            }
+        }
         builder.ConfigureServices(services =>
         {
-            // Remove background polling worker to keep HTTP integration tests deterministic
             var workerDescriptors = services.Where(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(ReadingPaperWorker)).ToList();
             foreach (var w in workerDescriptors) services.Remove(w);
 
@@ -304,6 +319,27 @@ public class Phase02DurabilityTests
         );
     }
 
+    private static (string Version, string Source, string Json, string Sha256) BuildTestCapProfile(int calls, int tokens, int wallTime)
+    {
+        const string version = "phase02-test-v1";
+        const string source = "Phase02DurabilityTests";
+        var caps = new SortedDictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["standaloneRunBudgetCapCalls"] = calls,
+            ["standaloneRunBudgetCapTokens"] = tokens,
+            ["standaloneRunBudgetCapWallTimeSeconds"] = wallTime
+        };
+        var snapshot = new SortedDictionary<string, object>(StringComparer.Ordinal)
+        {
+            ["caps"] = caps,
+            ["profileSource"] = source,
+            ["profileVersion"] = version
+        };
+        var json = JsonSerializer.Serialize(snapshot);
+        var sha = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json))).ToLowerInvariant();
+        return (version, source, json, sha);
+    }
+
     private static async Task<(ReadingPaperJob Job, ReadingPaperRun Run)> CreateJobAndRunAsync(
         ExamDbContext db,
         Guid owner,
@@ -332,6 +368,7 @@ public class Phase02DurabilityTests
         var runId = $"run_{job.Id:N}";
         job.ActiveRunId = runId;
 
+        var (pVer, pSrc, pJson, pSha) = BuildTestCapProfile(25, 150000, 900);
         var run = new ReadingPaperRun
         {
             Id = Guid.NewGuid(),
@@ -347,6 +384,11 @@ public class Phase02DurabilityTests
             PolicyVersion = "2.0.0",
             BudgetCapCalls = 25,
             BudgetCapTokens = 150000,
+            BudgetCapWallTimeSeconds = 900,
+            BudgetProfileVersion = pVer,
+            BudgetProfileSha256 = pSha,
+            BudgetProfileSource = pSrc,
+            BudgetProfileJson = pJson,
             BudgetUsedCalls = 0,
             BudgetUsedTokens = 0,
             CreatedAt = DateTime.UtcNow,
@@ -356,6 +398,208 @@ public class Phase02DurabilityTests
 
         await db.SaveChangesAsync();
         return (job, run);
+    }
+    private static async Task<(ArtifactEnvelope PaperEnvelope, List<EvaluationResult> ValidEvaluations)> SeedFullAcceptedPaperGraphAsync(
+        ExamDbContext db, ReadingPaperRun run, List<ReadingGeneratedSection> sections)
+    {
+        var runId = run.RunId;
+        var sources = sections.Select(s => s.Source).ToList();
+        run.SourceRevisionsJson = JsonSerializer.Serialize(sources, ReadingPaperRules.Json);
+        await db.SaveChangesAsync();
+
+        // 1. Blueprint
+        var bpId = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
+        var bpPayload = new { totalQuestions = 40, targetWordCountMin = 2150, targetWordCountMax = 2750 };
+        var bpDoc = JsonDocument.Parse(JsonSerializer.Serialize(bpPayload, ReadingPaperRules.Json));
+        var bpHash = ArtifactEnvelope.ComputeContentHash(bpDoc.RootElement, Array.Empty<ArtifactRef>());
+        var bpEnv = new ArtifactEnvelope(bpId, ArtifactType.ExamBlueprint, 1, runId, null, "2.0.0", bpHash, DateTime.UtcNow.AddMinutes(-5), "2.0.0", bpDoc.RootElement.Clone(), Array.Empty<ArtifactRef>());
+
+        db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+        {
+            Id = Guid.NewGuid(), RunId = runId, ArtifactId = bpId, ArtifactType = ArtifactType.ExamBlueprint.ToString(),
+            Version = 1, ContentHash = bpHash, PayloadJson = bpDoc.RootElement.GetRawText(), ParentRefsJson = "[]",
+            EnvelopeJson = JsonSerializer.Serialize(bpEnv, LoopEngineJson.Options), CreatedAt = bpEnv.CreatedAt
+        });
+        db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+        {
+            Id = Guid.NewGuid(), RunId = runId, ArtifactId = bpId, AcceptedVersion = 1, AcceptedHash = bpHash, UpdatedAt = bpEnv.CreatedAt
+        });
+
+        var bpRef = bpEnv.ToRef();
+
+        // 2. Passages & Questions for each section
+        var passageRefs = new List<ArtifactRef>();
+        var sectionRefs = new List<ArtifactRef>();
+        var allQuestionRefs = new List<ArtifactRef>();
+        var sectionEnvelopes = new List<ArtifactEnvelope>();
+
+        for (int i = 0; i < 3; i++)
+        {
+            var secIdx = i + 1;
+            var sec = sections[i];
+
+            // Passage
+            var pId = $"art_passage_s{secIdx}";
+            var pPayload = new { text = sec.Passage, passage = sec.Passage, wordCount = ReadingPaperRules.WordCount(sec.Passage), source = sec.Source };
+            var pDoc = JsonDocument.Parse(JsonSerializer.Serialize(pPayload, ReadingPaperRules.Json));
+            var pParents = new List<ArtifactRef> { bpRef };
+            var pHash = ArtifactEnvelope.ComputeContentHash(pDoc.RootElement, pParents);
+            var pEnv = new ArtifactEnvelope(pId, ArtifactType.Passage, 1, runId, secIdx, "2.0.0", pHash, DateTime.UtcNow.AddMinutes(-4), "2.0.0", pDoc.RootElement.Clone(), pParents);
+
+            db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+            {
+                Id = Guid.NewGuid(), RunId = runId, ArtifactId = pId, ArtifactType = ArtifactType.Passage.ToString(),
+                Version = 1, ContentHash = pHash, PayloadJson = pDoc.RootElement.GetRawText(),
+                ParentRefsJson = JsonSerializer.Serialize(pParents, LoopEngineJson.Options),
+                EnvelopeJson = JsonSerializer.Serialize(pEnv, LoopEngineJson.Options), CreatedAt = pEnv.CreatedAt
+            });
+            db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+            {
+                Id = Guid.NewGuid(), RunId = runId, ArtifactId = pId, AcceptedVersion = 1, AcceptedHash = pHash, UpdatedAt = pEnv.CreatedAt
+            });
+
+            var pRef = pEnv.ToRef();
+            passageRefs.Add(pRef);
+
+            // Questions in this section
+            var secQuestionRefs = new List<ArtifactRef>();
+            var secQuestions = sec.Groups.SelectMany(g => g.Questions).ToList();
+            foreach (var q in secQuestions)
+            {
+                var qId = $"art_q_{q.Number}";
+                var qPayload = new
+                {
+                    number = q.Number,
+                    questionNumber = q.Number,
+                    prompt = q.Prompt,
+                    answer = q.Answer,
+                    options = q.Options,
+                    evidenceQuote = q.EvidenceQuote,
+                    explanation = q.Explanation
+                };
+                var qDoc = JsonDocument.Parse(JsonSerializer.Serialize(qPayload, ReadingPaperRules.Json));
+                var qParents = new List<ArtifactRef> { pRef, bpRef };
+                var qHash = ArtifactEnvelope.ComputeContentHash(qDoc.RootElement, qParents);
+                var qEnv = new ArtifactEnvelope(qId, ArtifactType.Question, 1, runId, secIdx, "2.0.0", qHash, DateTime.UtcNow.AddMinutes(-3), "2.0.0", qDoc.RootElement.Clone(), qParents);
+
+                db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+                {
+                    Id = Guid.NewGuid(), RunId = runId, ArtifactId = qId, ArtifactType = ArtifactType.Question.ToString(),
+                    Version = 1, ContentHash = qHash, PayloadJson = qDoc.RootElement.GetRawText(),
+                    ParentRefsJson = JsonSerializer.Serialize(qParents, LoopEngineJson.Options),
+                    EnvelopeJson = JsonSerializer.Serialize(qEnv, LoopEngineJson.Options), CreatedAt = qEnv.CreatedAt
+                });
+                db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+                {
+                    Id = Guid.NewGuid(), RunId = runId, ArtifactId = qId, AcceptedVersion = 1, AcceptedHash = qHash, UpdatedAt = qEnv.CreatedAt
+                });
+
+                var qRef = qEnv.ToRef();
+                secQuestionRefs.Add(qRef);
+                allQuestionRefs.Add(qRef);
+            }
+
+            // Section envelope
+            var secId = $"art_section_{secIdx}";
+            var secPayloadObj = new
+            {
+                sectionId = secIdx,
+                title = sec.Title,
+                passage = sec.Passage,
+                source = sec.Source,
+                passageRef = pRef,
+                blueprintRef = bpRef,
+                questionRefs = secQuestionRefs,
+                groups = sec.Groups.Select(g => new
+                {
+                    type = g.Type,
+                    instruction = g.Instruction,
+                    questions = g.Questions.Select(q => new
+                    {
+                        number = q.Number,
+                        questionNumber = q.Number,
+                        prompt = q.Prompt,
+                        answer = q.Answer,
+                        options = q.Options,
+                        evidenceQuote = q.EvidenceQuote,
+                        explanation = q.Explanation
+                    }).ToList()
+                }).ToList()
+            };
+            var secDoc = JsonDocument.Parse(JsonSerializer.Serialize(secPayloadObj, ReadingPaperRules.Json));
+            var secParents = new List<ArtifactRef> { pRef, bpRef }.Concat(secQuestionRefs).ToList();
+            var secHash = ArtifactEnvelope.ComputeContentHash(secDoc.RootElement, secParents);
+            var secEnv = new ArtifactEnvelope(secId, ArtifactType.Section, 1, runId, secIdx, "2.0.0", secHash, DateTime.UtcNow.AddMinutes(-2), "2.0.0", secDoc.RootElement.Clone(), secParents);
+
+            db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+            {
+                Id = Guid.NewGuid(), RunId = runId, ArtifactId = secId, ArtifactType = ArtifactType.Section.ToString(),
+                Version = 1, ContentHash = secHash, PayloadJson = secDoc.RootElement.GetRawText(),
+                ParentRefsJson = JsonSerializer.Serialize(secParents, LoopEngineJson.Options),
+                EnvelopeJson = JsonSerializer.Serialize(secEnv, LoopEngineJson.Options), CreatedAt = secEnv.CreatedAt
+            });
+            db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+            {
+                Id = Guid.NewGuid(), RunId = runId, ArtifactId = secId, AcceptedVersion = 1, AcceptedHash = secHash, UpdatedAt = secEnv.CreatedAt
+            });
+
+            var secRef = secEnv.ToRef();
+            sectionRefs.Add(secRef);
+            sectionEnvelopes.Add(secEnv);
+        }
+
+        // 3. Paper Envelope
+        var paperId = $"art_paper_{runId[..Math.Min(8, runId.Length)]}";
+        var paperPayloadObj = new
+        {
+            paperId = paperId,
+            runId = runId,
+            title = "IELTS Academic Reading Paper",
+            totalQuestions = 40,
+            blueprintRef = bpRef,
+            sectionRefs = sectionRefs,
+            passageRefs = passageRefs,
+            questionRefs = allQuestionRefs,
+            sections = sectionEnvelopes.Select(s => s.Payload).ToList()
+        };
+        var paperDoc = JsonDocument.Parse(JsonSerializer.Serialize(paperPayloadObj, ReadingPaperRules.Json));
+        var paperParents = new List<ArtifactRef> { bpRef }.Concat(sectionRefs).Concat(passageRefs).Concat(allQuestionRefs).ToList();
+        var paperHash = ArtifactEnvelope.ComputeContentHash(paperDoc.RootElement, paperParents);
+        var paperEnv = new ArtifactEnvelope(paperId, ArtifactType.ReadingPaper, 1, runId, null, "2.0.0", paperHash, DateTime.UtcNow.AddMinutes(-1), "2.0.0", paperDoc.RootElement.Clone(), paperParents);
+
+        db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+        {
+            Id = Guid.NewGuid(), RunId = runId, ArtifactId = paperId, ArtifactType = ArtifactType.ReadingPaper.ToString(),
+            Version = 1, ContentHash = paperHash, PayloadJson = paperDoc.RootElement.GetRawText(),
+            ParentRefsJson = JsonSerializer.Serialize(paperParents, LoopEngineJson.Options),
+            EnvelopeJson = JsonSerializer.Serialize(paperEnv, LoopEngineJson.Options), CreatedAt = paperEnv.CreatedAt
+        });
+        db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+        {
+            Id = Guid.NewGuid(), RunId = runId, ArtifactId = paperId, AcceptedVersion = 1, AcceptedHash = paperHash, UpdatedAt = paperEnv.CreatedAt
+        });
+
+        await db.SaveChangesAsync();
+
+        // 4. Default Valid Evaluations
+        var validEvaluations = ReadingPaperFinalSnapshot.RequiredEvaluators.Select(kv => new EvaluationResult(
+            EvaluationId: $"eval_{kv.Key}_{Guid.NewGuid():N}"[..24],
+            EvaluatorId: kv.Key,
+            EvaluatorVersion: kv.Value,
+            TargetRef: paperEnv.ToRef(),
+            Status: EvaluationStatus.PASS,
+            Issues: new List<Issue>(),
+            Score: 1.0,
+            InputDependencyRefs: paperParents,
+            Provider: "test-provider",
+            Model: "test-model",
+            PromptVersion: "1.0.0",
+            ElapsedMs: 120.0,
+            Usage: new UsageMetrics(100, 50, 150, 0.001),
+            EvaluatedAt: DateTime.UtcNow
+        )).ToList();
+
+        return (paperEnv, validEvaluations);
     }
 
     [Fact]
@@ -473,6 +717,9 @@ public class Phase02DurabilityTests
 
             // Set tight cap: 5000 tokens
             run.BudgetCapTokens = 5000;
+            var (pVer, pSrc, pJson, pSha) = BuildTestCapProfile(25, 5000, 900);
+            run.BudgetProfileJson = pJson;
+            run.BudgetProfileSha256 = pSha;
             await db.SaveChangesAsync();
         }
 
@@ -734,6 +981,7 @@ public class Phase02DurabilityTests
             await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(runId, 1, owner, opEvalId, "EVALUATE", reqEvalHash, 1000), CancellationToken.None);
             await CheckpointService.ReconcileOperationAsync(db, new OperationReconcileRequest(
                 runId, 1, owner, opEvalId, TokensUsed: 500, WallTimeUsedSeconds: 0.2,
+                AccountingType: "REPORTED",
                 ResultRefJson: JsonSerializer.Serialize(evalResult, LoopEngineJson.Options)
             ), CancellationToken.None);
         }
@@ -747,6 +995,7 @@ public class Phase02DurabilityTests
             await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(runId, 1, owner, opEval2Id, "EVALUATE", reqEval2Hash, 1000), CancellationToken.None);
             await CheckpointService.ReconcileOperationAsync(db, new OperationReconcileRequest(
                 runId, 1, owner, opEval2Id, TokensUsed: 400, WallTimeUsedSeconds: 0.1,
+                AccountingType: "REPORTED",
                 ResolvedFingerprints: new List<string> { fp }
             ), CancellationToken.None);
         }
@@ -1117,8 +1366,9 @@ public class Phase02DurabilityTests
             job.SectionsJson = JsonSerializer.Serialize(fixture, ReadingPaperRules.Json);
             job.CompletedSections = 3;
             await db.SaveChangesAsync();
+            var (paperEnv, validEvaluations) = await SeedFullAcceptedPaperGraphAsync(db, run, fixture);
 
-            var req = new BuildExamInternalRequest(runId, 1, owner, jobId);
+            var req = new BuildExamInternalRequest(runId, 1, owner, jobId, FinalEvaluations: validEvaluations);
             var res1 = await CheckpointService.BuildExamIdempotentAsync(db, req, CancellationToken.None);
             Assert.NotEqual(Guid.Empty, res1.ExamId);
             Assert.False(res1.IsExisting);
@@ -1171,8 +1421,9 @@ public class Phase02DurabilityTests
             job.SectionsJson = JsonSerializer.Serialize(fixture, ReadingPaperRules.Json);
             job.CompletedSections = 3;
             await db.SaveChangesAsync();
+            var (paperEnv, validEvaluations) = await SeedFullAcceptedPaperGraphAsync(db, run, fixture);
 
-            var req = new BuildExamInternalRequest(runId, 1, workerA, jobId);
+            var req = new BuildExamInternalRequest(runId, 1, workerA, jobId, FinalEvaluations: validEvaluations);
 
             // Hook intercepts execution AFTER initial authority validation succeeds,
             // but BEFORE the in-transaction conditional lock executes!
@@ -1190,8 +1441,7 @@ public class Phase02DurabilityTests
                 }));
 
             Assert.Equal(409, ex.StatusCode);
-            Assert.Contains("Epoch fencing violation", ex.Message);
-
+            Assert.Contains("fencing violation", ex.Message);
             var takenOverJob = await db.ReadingPaperJobs.AsNoTracking().SingleAsync(j => j.Id == jobId);
             var takenOverRun = await db.ReadingPaperRuns.AsNoTracking().SingleAsync(r => r.RunId == runId);
             Assert.Equal(2, takenOverJob.Epoch);

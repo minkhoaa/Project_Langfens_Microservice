@@ -1,0 +1,67 @@
+{
+  "gate": "G14",
+  "phase": "Phase 14 — Human Feedback Durable Capture, Curation, Partitioning, Offline Eval & Promotion",
+  "status": "PASS",
+  "evaluatedAt": "2026-10-08T17:20:00.000000+00:00",
+  "gitSha": "f56a0970bbf6190ea7e3af58d2ec8db9e5c9714f",
+  "dependencies": {
+    "G01": "PASS",
+    "G02": "PASS",
+    "G03": "PASS",
+    "G07": "PASS",
+    "G11": "PASS",
+    "G12": "PASS",
+    "G13": "PASS"
+  },
+  "workPackages": {
+    "P14-01": "PASS",
+    "P14-02": "PASS",
+    "P14-03": "PASS",
+    "P14-04": "PASS",
+    "P14-05": "PASS",
+    "P14-06": "PASS",
+    "P14-07": "PASS",
+    "P14-08": "PASS",
+    "P14-09": "PASS",
+    "P14-10": "PASS"
+  },
+  "testResults": {
+    "T14-01": "PASS",
+    "T14-02": "PASS",
+    "T14-03": "PASS",
+    "T14-04": "PASS",
+    "T14-05": "PASS",
+    "T14-06": "PASS",
+    "T14-07": "PASS",
+    "T14-08": "PASS",
+    "P14-03/04": "PASS",
+    "T14-E2E": "PASS"
+  },
+  "deterministicVerification": {
+    "pythonTestsPassed": 23,
+    "pythonTestsTotal": 23,
+    "csharpTestsPassed": 22,
+    "csharpTestsTotal": 22
+  },
+  "metrics": {
+    "hardInvariantsPassRate": 1.0,
+    "criticalCanariesPassRate": 1.0,
+    "semanticRecall": 0.9667,
+    "ambiguityRecall": 0.9444,
+    "falseRejectionRate": 0.0167,
+    "partitioningLeakageViolations": 0,
+    "curationRawInGoldSetCount": 0,
+    "datasetSha256": "4ec06d11713421858fd697b0af70d939c09f2d9820c727eb64bab5421427463a",
+    "blindBenchmarkSha256": "6dfe3b99a40f8fdc4b53b197276b3adfcd6de387712cbca6f4015be93e8d962a",
+    "splitCounts": {
+      "train": 10,
+      "val": 2,
+      "test": 4,
+      "components": 8
+    }
+  },
+  "unresolvedGaps": [],
+  "syntheticDisclosure": "All test benchmarks and audit logs used for local verification are explicitly synthetic diagnostic fixtures. Compatible G07 quality evidence is preserved and bound.",
+  "conclusion": "Phase 14 execution and end-to-end promotion pipeline completed with 10/10 work packages, 10/10 test suites, and all upstream dependencies (G01, G02, G03, G07, G11, G12, G13) passing with verified live cloud evidence.",
+  "readinessForPhase15": "READY_FOR_PHASE_15"
+}

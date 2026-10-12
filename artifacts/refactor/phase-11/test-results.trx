@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="3eabc9b1-4c76-4de7-9914-cb85804042c4" name="@code 2026-10-07 06:46:14" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-07T06:46:14.2124767+00:00" queuing="2026-10-07T06:46:14.2124768+00:00" start="2026-10-07T06:46:08.1085957+00:00" finish="2026-10-07T06:46:14.5986328+00:00" />
+  <TestSettings name="default" id="f75d6902-9e47-474b-b177-a5e3e1dee57e">
+    <Deployment runDeploymentRoot="_code_2026-10-07_06_46_14" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="a04c08ae-d4c3-4b12-bbed-c66f68428ed3" testId="6f2aec00-6bc3-d36e-7545-395095626469" testName="exam_service.Tests.Phase11SectionLoopTests.SectionAcceptance_DoesNotBuildExam_PreservesJobRunning" computerName="code" duration="00:00:00.3272152" startTime="2026-10-07T06:46:14.1915453+00:00" endTime="2026-10-07T06:46:14.4862374+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a04c08ae-d4c3-4b12-bbed-c66f68428ed3" />
+    <UnitTestResult executionId="7d6d2784-3a6e-4319-ab2b-031e9f2a4683" testId="0757d796-fcd8-2216-727a-0d9585b86d0e" testName="exam_service.Tests.Phase11SectionLoopTests.CommitSectionCheckpoint_SynchronizesIntoSectionsJson_Idempotently" computerName="code" duration="00:00:04.7815513" startTime="2026-10-07T06:46:09.3460430+00:00" endTime="2026-10-07T06:46:14.1478959+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7d6d2784-3a6e-4319-ab2b-031e9f2a4683" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="exam_service.Tests.Phase11SectionLoopTests.SectionAcceptance_DoesNotBuildExam_PreservesJobRunning" storage="/home/code/workspaces/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="6f2aec00-6bc3-d36e-7545-395095626469">
+      <Execution id="a04c08ae-d4c3-4b12-bbed-c66f68428ed3" />
+      <TestMethod codeBase="/home/code/workspaces/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Phase11SectionLoopTests" name="SectionAcceptance_DoesNotBuildExam_PreservesJobRunning" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Phase11SectionLoopTests.CommitSectionCheckpoint_SynchronizesIntoSectionsJson_Idempotently" storage="/home/code/workspaces/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="0757d796-fcd8-2216-727a-0d9585b86d0e">
+      <Execution id="7d6d2784-3a6e-4319-ab2b-031e9f2a4683" />
+      <TestMethod codeBase="/home/code/workspaces/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Phase11SectionLoopTests" name="CommitSectionCheckpoint_SynchronizesIntoSectionsJson_Idempotently" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="6f2aec00-6bc3-d36e-7545-395095626469" executionId="a04c08ae-d4c3-4b12-bbed-c66f68428ed3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0757d796-fcd8-2216-727a-0d9585b86d0e" executionId="7d6d2784-3a6e-4319-ab2b-031e9f2a4683" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.0.0+e341b939fe (64-bit .NET 10.0.12)
+[xUnit.net 00:00:00.13]   Discovering: exam-service.Tests
+[xUnit.net 00:00:00.24]   Discovered:  exam-service.Tests
+[xUnit.net 00:00:00.30]   Starting:    exam-service.Tests
+[xUnit.net 00:00:05.55]   Finished:    exam-service.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

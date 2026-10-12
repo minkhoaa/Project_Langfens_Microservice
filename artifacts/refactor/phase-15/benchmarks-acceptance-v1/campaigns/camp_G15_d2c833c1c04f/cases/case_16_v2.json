@@ -1,0 +1,33 @@
+{
+  "caseIndex": 16,
+  "engine": "V2_LoopEngine",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LIVE_MINIMAX",
+  "campaignId": "camp_G15_d2c833c1c04f",
+  "seed": 101,
+  "runId": "bench_adc6cec1099fda44df71ac0326ec0134",
+  "jobId": "6088bff7-2cff-4e77-a164-0631ba22cec3",
+  "sourceTriple": [
+    "PMC13583341",
+    "PMC13560651",
+    "PMC13407692"
+  ],
+  "status": "FAILED",
+  "validDraft": false,
+  "failureReason": "Candidate generation/evaluation failed for slot Q9: SOURCE_INSUFFICIENT: source/evidence requires editorial or source review | issues: [\"EVIDENCE_MISSING: Question 9 completion answer 'mutant huntingtin (mHTT)' does not appear as a full-token verbatim span in passage\"]",
+  "versionsCount": 1,
+  "evaluatorIssues": [],
+  "latencySeconds": 136.1084,
+  "totalTokens": 8057,
+  "reportedTokens": 8057,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 3,
+  "uniqueProviderDispatches": 3,
+  "estimatedCostUsd": 0.020143,
+  "persistedExamId": null,
+  "isPrimaryPersisted": false,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

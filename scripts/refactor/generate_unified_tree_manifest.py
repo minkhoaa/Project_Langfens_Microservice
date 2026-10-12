@@ -54,19 +54,15 @@ def get_git_sha() -> str:
 
 def get_diff_hashes() -> Dict[str, str]:
     """Computes explicit, distinct diff hashes for staged, unstaged, scoped, and full worktree."""
-    # 1. Unstaged tracked changes across entire repo
     res_unstaged = subprocess.run(["git", "diff"], capture_output=True, cwd=BASE_DIR, check=True)
     unstaged_hash = hashlib.sha256(res_unstaged.stdout).hexdigest()
 
-    # 2. Staged changes
     res_staged = subprocess.run(["git", "diff", "--cached"], capture_output=True, cwd=BASE_DIR, check=True)
     staged_hash = hashlib.sha256(res_staged.stdout).hexdigest()
 
-    # 3. Scoped tracked diff (services/, scripts/, docs/)
     res_scoped = subprocess.run(["git", "diff", "--", "services/", "scripts/", "docs/"], capture_output=True, cwd=BASE_DIR, check=True)
     scoped_hash = hashlib.sha256(res_scoped.stdout).hexdigest()
 
-    # 4. Full worktree diff relative to HEAD (staged + unstaged combined)
     res_head = subprocess.run(["git", "diff", "HEAD"], capture_output=True, cwd=BASE_DIR, check=True)
     full_worktree_hash = hashlib.sha256(res_head.stdout).hexdigest()
 
@@ -173,23 +169,85 @@ def main():
 
     now_utc = datetime.now(timezone.utc).isoformat()
 
+    files_list = [
+        {"path": path, "sha256": meta["sha256"], "sizeBytes": meta["bytes"]}
+        for path, meta in bound_files.items()
+    ]
+
+    from app.facade import GenerationFacade
+    from app.observability.accounting import MODEL_PRICING_PER_1K
+    from app.observability.redaction import ModelKind
+
+    facade = GenerationFacade()
+    evaluator_versions = {
+        ev.__class__.__name__: ev.evaluator_version
+        for ev in facade._evaluator_registry.list_evaluators()
+    }
+    evaluator_registry_ids = {
+        ev.evaluator_id: ev.evaluator_version
+        for ev in facade._evaluator_registry.list_evaluators()
+    }
+
+    minimax_prompt_1k, minimax_comp_1k = MODEL_PRICING_PER_1K[ModelKind.MINIMAX_TEXT_01.value]
+    groq_prompt_1k, groq_comp_1k = MODEL_PRICING_PER_1K[ModelKind.GROQ_LLAMA.value]
+
+    pricing_profiles = {
+        "minimax": {
+            "model": ModelKind.MINIMAX_TEXT_01.value,
+            "costPer1kTokensUsd": {
+                "prompt": minimax_prompt_1k,
+                "completion": minimax_comp_1k,
+                "blendedReference": round((minimax_prompt_1k + minimax_comp_1k) / 2.0, 6),
+            },
+            "costPer1mTokensUsd": {
+                "prompt": round(minimax_prompt_1k * 1000.0, 4),
+                "completion": round(minimax_comp_1k * 1000.0, 4),
+            },
+            "promptTokenCostPer1M": round(minimax_prompt_1k * 1000.0, 4),
+            "completionTokenCostPer1M": round(minimax_comp_1k * 1000.0, 4),
+            "currency": "USD",
+        },
+        "groq": {
+            "model": ModelKind.GROQ_LLAMA.value,
+            "costPer1kTokensUsd": {
+                "prompt": groq_prompt_1k,
+                "completion": groq_comp_1k,
+                "blendedReference": round((groq_prompt_1k + groq_comp_1k) / 2.0, 6),
+            },
+            "costPer1mTokensUsd": {
+                "prompt": round(groq_prompt_1k * 1000.0, 4),
+                "completion": round(groq_comp_1k * 1000.0, 4),
+            },
+            "promptTokenCostPer1M": round(groq_prompt_1k * 1000.0, 4),
+            "completionTokenCostPer1M": round(groq_comp_1k * 1000.0, 4),
+            "currency": "USD",
+        },
+    }
+    untracked_input = "".join(f"{path}:{meta['sha256']}\n" for path, meta in untracked_files.items())
+    untracked_files_hash = hashlib.sha256(untracked_input.encode("utf-8")).hexdigest()
+
     manifest_payload = {
         "timestamp": now_utc,
+        "releaseVersion": "2.0.0",
         "gitSha": git_sha,
         "diffHashes": diff_hashes,
         "trackedDiffHash": diff_hashes["scopedTrackedDiffHash"],
+        "untrackedFilesHash": untracked_files_hash,
         "fullWorktreeDiffHash": diff_hashes["fullWorktreeDiffHash"],
         "combinedTreeHash": combined_tree_hash,
-        "totalFilesBound": len(bound_files),
+        "totalFilesBound": len(files_list),
         "totalUntrackedRelevant": len(untracked_files),
         "versions": {
             "primaryModel": "MiniMax-Text-01",
-            "fallbackModel": "openai/gpt-oss-20b",
+            "fallbackModel": "openai/gpt-oss-120b",
             "evaluatorFramework": "2.0.0",
-            "metricEngineVersion": "2.1.0",
+            "metricEngineVersion": "2.3.1",
+            "metricEngineHash": "a958e94e77341398",
             "loopRuntimeEngine": "2.0.0",
         },
+        "evaluatorVersions": evaluator_versions,
         "effectiveCaps": caps,
+        "pricingProfiles": pricing_profiles,
         "corpusHashes": {
             "questions_corpus.json": bound_files.get("artifacts/refactor/phase-07/corpus/questions_corpus.json", {}).get("sha256"),
             "questions_holdout_corpus.json": bound_files.get("artifacts/refactor/phase-07/corpus/questions_holdout_corpus.json", {}).get("sha256"),
@@ -198,20 +256,46 @@ def main():
             "leakage_report.json": bound_files.get("artifacts/refactor/phase-07/corpus/leakage_report.json", {}).get("sha256"),
             "provenance.json": bound_files.get("artifacts/refactor/phase-07/corpus/provenance.json", {}).get("sha256"),
         },
-        "files": bound_files,
+        "files": files_list,
         "untrackedRelevantFiles": untracked_files,
     }
 
-    # Write manifests to Phase 07, 08, 09
-    for phase_dir in ["phase-07", "phase-08", "phase-09"]:
-        out_path = BASE_DIR / "artifacts" / "refactor" / phase_dir / "snapshot-manifest.json"
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(manifest_payload, f, indent=2)
-        print(f"[+] Wrote {out_path}")
+    out_path = BASE_DIR / "artifacts" / "refactor" / "phase-15" / "snapshot-manifest.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(manifest_payload, f, indent=2)
+    print(f"[+] Wrote {out_path}")
+
+    snap_sha256 = hashlib.sha256(out_path.read_bytes()).hexdigest()
+
+    rel_path = BASE_DIR / "artifacts" / "refactor" / "phase-15" / "release-manifest.json"
+    if rel_path.exists():
+        with open(rel_path, "r", encoding="utf-8") as f:
+            rel_data = json.load(f)
+        rel_data["snapshotManifestSha256"] = snap_sha256
+        rel_data["status"] = "BLOCKED_AT_GATE"
+        rel_data["gitSha"] = git_sha
+        rel_data["timestamp"] = now_utc
+        rel_data["evaluatorVersions"] = evaluator_versions
+        rel_data["evaluatorRegistryIds"] = evaluator_registry_ids
+        if "pricingAndCapsProfile" in rel_data and "pricingProfiles" in rel_data["pricingAndCapsProfile"]:
+            rel_data["pricingAndCapsProfile"]["pricingProfiles"] = {
+                "minimax": {
+                    "inputPricePerMillion": round(minimax_prompt_1k * 1000.0, 4),
+                    "outputPricePerMillion": round(minimax_comp_1k * 1000.0, 4),
+                    "blendedPerThousandTokens": round((minimax_prompt_1k + minimax_comp_1k) / 2.0, 6),
+                },
+                "groq": {
+                    "inputPricePerMillion": round(groq_prompt_1k * 1000.0, 4),
+                    "outputPricePerMillion": round(groq_comp_1k * 1000.0, 4),
+                    "blendedPerThousandTokens": round((groq_prompt_1k + groq_comp_1k) / 2.0, 6),
+                }
+            }
+        with open(rel_path, "w", encoding="utf-8") as f:
+            json.dump(rel_data, f, indent=2)
+        print(f"[+] Updated {rel_path} with snapshot sha {snap_sha256}")
 
     return combined_tree_hash
-
 
 if __name__ == "__main__":
     main()

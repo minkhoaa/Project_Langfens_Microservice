@@ -20,7 +20,7 @@ Hoàn thành/map P14-01..10:
 - P14-06: raw→annotated/reviewed/conflict-resolved→curated workflow có audit; publish/edit không tự trở thành ground truth.
 - P14-07: reproducible export có dataset version/hash, exact lineage, source rights, labels, partition manifest; remove secrets/unneeded PII. Solver benchmark view không lộ expected keys.
 - P14-08: split source-family/hash/near-duplicate connected groups trước tuning; related edits/variants cùng partition. Không đổi family IDs để che leakage.
-- P14-09: old/candidate prompt/evaluator/model paired comparison trên frozen corpus cùng configured capped budget; report regressions, denominators và hard-gate failures.
+- P14-09: old/candidate prompt/evaluator/model paired comparison trên frozen corpus; live benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công, authorization-file hay chờ PENDING_AUTHORIZATION; unlimited benchmark caps; production profile giữ nguyên); report regressions, denominators và hard-gate failures.
 - P14-10: reviewed code/config promotion có version pinning/rollback; new runs nhận version mới, in-flight/cache giữ pinned inputs. Không production job/endpoint tự deploy prompts từ raw edits.
 
 Giữ canonical models, authoritative .NET persistence, immutable versions/CAS, writer fencing, cancellation, budgets/deadlines và manual Draft/Publish. Offline execution dài vẫn có caps, không free cloud retries. Heuristic/evaluator đang test không làm gold labels; giữ annotation provenance và reviewer limitation thật.

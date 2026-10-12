@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Npgsql;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
+using Shared.Bootstrap;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +30,7 @@ builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key))
 builder.Services.AddExamAuthorization();
 builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Exam Service");
+builder.Services.AddHttpContextAccessor();
 
 // ── Database ───────────────────────────────────────────────────────────────
 // Npgsql 8+ requires explicit opt-in for jsonb → CLR type mapping (Dictionary, List, etc.)
@@ -38,6 +39,7 @@ builder.Services.AddLangfensSwagger("Exam Service");
 builder.AddNpgsqlDbContext<ExamDbContext>("exam-db", configureDbContextOptions: opts =>
 {
     opts.UseNpgsql(o => o.ConfigureDataSource(ds => ds.EnableDynamicJson()));
+    opts.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
 // ── Services ─────────────────────────────────────────────────────────────
@@ -48,6 +50,9 @@ builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
+builder.Services.AddSingleton<ReadingPaperCapsProfile>(_ =>
+    ReadingPaperCapsProfile.FromConfiguration(builder.Configuration));
+builder.Services.AddSingleton<CanaryRoutingService>();
 builder.Services.AddHttpClient<ReadingPaperAiClient>(client =>
 {
     var url = Environment.GetEnvironmentVariable("GENERATION_SERVICE_URL")
@@ -55,6 +60,13 @@ builder.Services.AddHttpClient<ReadingPaperAiClient>(client =>
            ?? "http://generation-service:8080";
     client.BaseAddress = new Uri(url.TrimEnd('/') + "/");
     client.Timeout = TimeSpan.FromMinutes(45);
+    var internalKey = builder.Configuration["EXAMSERVICE__INTERNAL__API__KEY"]
+                      ?? builder.Configuration["INTERNAL_API_KEY"]
+                      ?? "";
+    if (!string.IsNullOrEmpty(internalKey))
+    {
+        client.DefaultRequestHeaders.Add(CheckpointService.InternalApiKeyHeader, internalKey);
+    }
 });
 builder.Services.AddHostedService<ReadingPaperWorker>();
 
@@ -92,9 +104,7 @@ using (var scope = app.Services.CreateScope())
     }
 
     // Seed canonical IELTS Reading practice exams (idempotent — skipped when slug present).
-    // GeneratedReadingSeeder disabled: only 11111111 standard exam should exist per Sprint 7 Phase 2.
     await exam_service.Data.ReadingSeeder.SeedReadingExamAsync(db);
-    // await exam_service.Data.GeneratedReadingSeeder.SeedAsync(db);
 }
 
 app.MapDefaultEndpoints();
@@ -103,6 +113,11 @@ app.MapDefaultEndpoints();
 // images are publicly readable; the upload endpoint itself still requires Admin.
 var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "images"));
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -125,6 +140,7 @@ app.MapInternalExamEndpoint();
 app.MapQuestionBankEndpoints();
 app.MapReadingPaperEndpoints();
 app.MapCheckpointEndpoints();
+app.MapFeedbackEndpoints();
 app.MapAdminUploadEndpoint();
 app.Run();
 

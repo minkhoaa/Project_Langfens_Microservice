@@ -70,8 +70,12 @@ Triển khai/map/chạy T07-01..08 và T08-01..08 cùng impacted G03/G06/persist
 
 Báo cáo cũ có MiniMax smoke PASS: inspect current configured model/credential/quota và recent compatibility trước khi ghi thiếu key. Smoke không chứng minh semantic quality. Harness thiếu là code work; leaked corpus là integrity failure; external missing input phải được chứng minh.
 
-Khi configured credentials/budget available, thực sự run capped pinned G07 semantic benchmark và G08 full-passage/paired benchmark. Campaign/case IDs, manifest/status/reservations persisted; reconcile lost output trước retry, không chạy lại batch tốn phí vô ích. Không tự mua plan/thay model routing/tăng caps để có PASS.
-
+Chính sách benchmark MiniMax tự động và caps (mặc định toàn hệ thống):
+1. Live G07 semantic benchmark và G08 paired passage benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ hoàn toàn phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget và trạng thái chờ PENDING_AUTHORIZATION.
+2. Vô hiệu hóa toàn bộ call, token, monetary và wall-time caps do ứng dụng áp đặt cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn fallback về 15 calls / 60k tokens / 300s). Production và các provider khác giữ nguyên hard caps.
+3. Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request output/context limits; tôn trọng giới hạn thực tế phía provider.
+4. Tách biệt phục hồi cục bộ và gate: R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt.
+5. Chiến dịch lưu campaignId/caseId, manifest/status/reservations; reconcile output trước retry, không lặp lại tốn phí. Chính sách này áp dụng mặc định cho tất cả các phase còn lại.
 Giữ thresholds, enough denominators và frozen clean holdout; critical fixtures ≥3 lần, aggregate/worst run. Passage benchmark không thay full-paper benchmark tương lai. Failed measurements tạo fix tasks trên dev và fresh/versioned holdout policy, không tune để ăn test đang nghiệm thu.
 
 ## 7. Reviewer loop và đầu ra

@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_d58ea958",
+  "campaignId": "camp_g12_paper_minimax_d58ea958e237_v1",
+  "jobId": "52d3bc73-1dc8-4368-92a4-b6948ce76c23",
+  "runId": "bench_5a6fe9bc927b443dc8e977217ef2ec23",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T09:42:31.635386+00:00",
+  "error": "AI generation failed: No registered LLM providers available\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 862, in generate_section\n    return await _generate_section_once(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 570, in _generate_section_once\n    passage_result = await generate_json(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 115, in generate_json\n    result = await llm_generate(**call_kwargs)\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/llm.py\", line 165, in llm_generate\n    return await _llm_service.gener"
+}

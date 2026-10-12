@@ -1,0 +1,27 @@
+{
+  "caseIndex": 2,
+  "engine": "V2_LoopEngine",
+  "executionMode": "SYNTHETIC_SIMULATION",
+  "benchmarkProfile": "CALIBRATED_MINIMAX",
+  "seed": 202,
+  "runId": "bench_v2_case_02_s202",
+  "sourceTriple": [
+    "PMC13560651",
+    "PMC13407692",
+    "PMC13517498"
+  ],
+  "status": "ACCEPTED",
+  "validDraft": true,
+  "versionsCount": 1,
+  "evaluatorIssues": [],
+  "latencySeconds": 0.0266,
+  "totalTokens": 18800,
+  "estimatedCostUsd": 0.047,
+  "persistedExamId": "exam_v2_c02_202",
+  "isPrimaryPersisted": true,
+  "liveCallSuccess": false,
+  "liveTokens": 0,
+  "liveLatencySeconds": 0.0,
+  "actualProviderUsed": null,
+  "actualModelUsed": null
+}

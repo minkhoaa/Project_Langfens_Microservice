@@ -1,0 +1,20 @@
+{
+  "headSha": "f56a0970bbf6190ea7e3af58d2ec8db9e5c9714f",
+  "dirtyDiffSha256": "47f0a7e2a620225c0a58ba558657d79d0e938e1d9544f78a3a123b1a0e292f91",
+  "untrackedFilesCount": 123,
+  "untrackedFilesSample": [
+    "artifacts/refactor/campaign_allocation_request.json",
+    "artifacts/refactor/campaign_allocation_request_candidate_v2.json",
+    "artifacts/refactor/phase-07/campaigns/camp_g07_clean_holdout_20261005_111218_budget_ledger.json",
+    "artifacts/refactor/phase-07/campaigns/camp_g07_clean_holdout_20261005_111218_budget_ledger.json.lock",
+    "artifacts/refactor/phase-07/campaigns/camp_g07_clean_holdout_20261005_111226_budget_ledger.json",
+    "artifacts/refactor/phase-07/campaigns/camp_g07_clean_holdout_20261005_111226_budget_ledger.json.lock",
+    "artifacts/refactor/phase-07/campaigns/camp_g07_clean_holdout_20261005_111226_execution.lock",
+    "artifacts/refactor/phase-07/campaigns/camp_g07_clean_holdout_20261005_144207_budget_ledger.json",
+    "artifacts/refactor/phase-07/campaigns/camp_g07_clean_holdout_20261005_144207_budget_ledger.json.lock",
+    "artifacts/refactor/phase-07/campaigns/camp_g07_clean_holdout_20261005_144207_checkpoint.json"
+  ],
+  "capsProfileVersion": "2.0.0",
+  "policyVersion": "1.0.0",
+  "timestamp": "2026-10-07T06:38:43.852317+00:00"
+}

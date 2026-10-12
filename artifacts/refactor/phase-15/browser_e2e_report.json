@@ -1,0 +1,86 @@
+{
+  "phase": "15",
+  "suite": "Live Browser & Microservice HTTP E2E Pipeline",
+  "executed_at": "2026-10-10T21:35:35.473374+00:00",
+  "browser_execution": {
+    "playwright_runner": "Chromium Headless",
+    "target_question_idx": 17,
+    "target_question_id": "104e39c8-d859-41be-a924-08c4b4c81155",
+    "target_exam_id": "4e12d4e1-60b5-4879-b48c-22c10cd6ee11",
+    "target_exam_slug": "reading-0841849020cb4d0a89db2c62b55c74bd",
+    "retried_failed_job_id": "a03c7bc4-4fd1-4b4f-9eeb-9e10edfdf8db",
+    "actions_performed": [
+      "RESUME_EXISTING_IN_FLIGHT_JOB",
+      "JOB_COMPLETED_LIVE_GENERATION",
+      "RETRY_FAILED_JOB_VIA_UI_CLICK",
+      "CANCEL_JOB_VIA_UI_CLICK",
+      "RELOAD_AFTER_COMPLETION_VERIFIED",
+      "NAVIGATE_TO_EXAM_EDITOR_UI",
+      "SUBMIT_QUESTION_EDIT_LIVE",
+      "ACCEPT_PAPER_VIA_FEEDBACK_MODAL_UI",
+      "DRAFT_SHIELDING_VERIFIED_IN_STUDENT_SESSION",
+      "PUBLISH_EXAM_VIA_UI"
+    ],
+    "verified_steps": {
+      "navigation_ok": true,
+      "live_ingest_ok": true,
+      "create_job_ok": true,
+      "job_completed_ok": true,
+      "question_edit_ok": true,
+      "question_edited_ok": true,
+      "publish_action_ok": true,
+      "public_endpoint_published_ok": true,
+      "minimax_provider_payload_ok": true,
+      "retry_action_ok": true,
+      "cancel_action_ok": true,
+      "reload_after_completion_ok": true,
+      "exam_editor_navigation_ok": true,
+      "curation_accept_ok": true,
+      "draft_shielded_pre_publish": true,
+      "student_zero_answer_leakage": true
+    },
+    "real_entities": {
+      "created_job_id": "08418490-20cb-4d0a-89db-2c62b55c74bd",
+      "requested_provider": "minimax",
+      "exam_id": "4e12d4e1-60b5-4879-b48c-22c10cd6ee11",
+      "edited_question_id": "104e39c8-d859-41be-a924-08c4b4c81155",
+      "edited_section_id": "9542439b-6a65-492b-b61c-5bc177320d00",
+      "edited_question_idx": 17,
+      "published_exam_id": "4e12d4e1-60b5-4879-b48c-22c10cd6ee11"
+    },
+    "screenshots_captured": [
+      "03_draft_completed_live.png",
+      "04_draft_review_view.png",
+      "05_published_state.png"
+    ],
+    "intercepted_network_events": 72
+  },
+  "assertions": {
+    "dotnet_phase14_tests": "NOT_RUN",
+    "dotnet_phase13_tests": "NOT_RUN",
+    "python_pytest_suites": "NOT_RUN",
+    "playwright_browser_e2e": "PASSED (Full UI Flow + Live Generation + Question Edit + Exam Publishing)",
+    "draft_shielding_pre_publish": "PASSED (HTTP 404 Shielded)",
+    "postgres_lineage_and_idempotency": "PASSED (Single feedback row, single outbox event)",
+    "postgres_exam_published_status": "PASSED (Status: PUBLISHED)",
+    "public_endpoint_post_publish": "PASSED (HTTP 200 OK)",
+    "student_isolation": "PASSED (Published only, Draft shielded HTTP 404, Admin 403 Forbidden)",
+    "curated_dataset_export_sha256": "7c288cf99e42b3a8ebf9774973b38ee6cc07b31c74d7bb6664181f7541705aa5",
+    "blind_solver_benchmark_sha256": "6406972477c29a99dbcc189a96fd42576d2bec572d677a4736e4c8a15cee0bea",
+    "leak_free_split_violations": 0,
+    "paired_offline_eval_verdict": "PASSED",
+    "version_promotion_decision": "PROMOTED",
+    "version_rollback_status": "ROLLED_BACK"
+  },
+  "artifacts_generated": [
+    "artifacts/refactor/phase-15/exports/curated-dataset-v2.json",
+    "artifacts/refactor/phase-15/exports/blind-solver-benchmark-v2.json",
+    "artifacts/refactor/phase-15/exports/split-manifest.json",
+    "artifacts/refactor/phase-15/paired-comparisons/paired-comparison-report.json",
+    "artifacts/refactor/phase-15/staging-promotion-evidence.json",
+    "artifacts/refactor/phase-15/network-events-sanitized.jsonl",
+    "artifacts/refactor/phase-15/provider-dispatch.jsonl",
+    "artifacts/refactor/phase-15/student-isolation"
+  ],
+  "status": "LIVE_BROWSER_E2E_PASSED_WITH_REUSED_COMPATIBLE_UNIT_EVIDENCE"
+}

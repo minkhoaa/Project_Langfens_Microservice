@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_4b7b437d",
+  "campaignId": "camp_g12_paper_minimax_4b7b437d0417_v1",
+  "jobId": "f9d28342-80ee-4b94-be18-555ab6b04bb9",
+  "runId": "bench_22be86b37ff9fbd705355272c431770a",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T10:44:29.575339+00:00",
+  "error": "Missing accepted passage or blueprint head for V2 section assembly"
+}

@@ -1,0 +1,342 @@
+{
+  "caseId": "paired_1_PMC13560651",
+  "sourceId": "PMC13560651",
+  "sourceSha256": "00d4fd920556e6bb9ec56cabc92c676b278e0e2b6d4eaa38b794d34f8a85b441",
+  "topic": "Prokaryotic Diversity in Red Sea Hydrothermal Vents",
+  "styleProfile": "NARRATIVE_HISTORICAL",
+  "corpusSha256": "43fd15d60e2893ee1b23581a33e8785a9ccb66794ab43a55202623b552cbec99",
+  "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+  "inputArtifactRefs": {
+    "sourcePackRef": {
+      "artifactId": "art_source_PMC13560651_bench_b5",
+      "artifactType": "SourcePack",
+      "version": 1,
+      "contentHash": "2a0a460a37ff1bd8d9a7460ebcc50c6eeb8e0ee9881ee6c77df572812bec2fd0"
+    },
+    "evidenceGraphRef": {
+      "artifactId": "art_evidence_PMC13560651_bench_b5",
+      "artifactType": "EvidenceGraph",
+      "version": 1,
+      "contentHash": "463765a542572d82124e3735ee3b99e8332ebc0315f18698434abf13c8840487"
+    },
+    "blueprintRef": {
+      "artifactId": "art_blueprint_PMC13560651_bench_b5",
+      "artifactType": "ExamBlueprint",
+      "version": 1,
+      "contentHash": "b28e010bb9c3e9ee8b13ecc7fde1a195f7ebcc78140ebd6bd2db0b8c38a5cd1e"
+    }
+  },
+  "legacy": {
+    "campaignCaseId": "g08_PMC13560651_legacy",
+    "runId": "bench_ccc23b5b048ea9f557ccccc3f05dbaa5",
+    "engine": "Legacy",
+    "title": "Prokaryotic Diversity in Red Sea Hydrothermal Vents",
+    "passage": "The exploration of hydrothermal vent ecosystems has long been a focal point for understanding the limits of life on Earth, particularly in environments characterized by extreme conditions such as high pressure, temperature, and chemical toxicity. While these ecosystems have been extensively studied in various oceanic regions, the Red Sea's hydrothermal systems have remained relatively understudied, particularly in terms of their microbial diversity and genomic potential. The recent discovery of active hydrothermal vent fields in the Red Sea, particularly at Hatiba Mons, has opened new avenues for research, offering a unique opportunity to investigate the prokaryotic communities that thrive in these extreme environments.\n\nDuring expeditions conducted in May and September 2022 and February 2023, researchers collected a total of 31 samples from five hydrothermal vents located at 22.28°N, 37.84°E. These samples included 19 sediment samples and 12 microbial mat samples. The sediment samples were obtained using gravity corers, while the microbial mats were sampled using push cores, Niskin bottles, and box corers, with each sample collected in triplicate to ensure reproducibility. To preserve the integrity of the samples, they were immediately frozen at −20°C onboard the research vessel and subsequently stored at −80°C in the laboratory until further processing. The meticulous sampling and preservation protocols were crucial for maintaining the quality of the genetic material, which was essential for the subsequent metagenomic analyses.\n\nThe extraction of DNA from the samples was performed using the DNeasy PowerMax Soil Kit, following the manufacturer's protocol. To enhance the lysis of cells and the release of DNA, proteinase K was added during the lysis phase. The concentration of the extracted DNA was measured using the Qubit dsDNA HS Assay on a Qubit 4.0 fluorometer, ensuring that the samples contained sufficient DNA for sequencing. The DNA samples, ranging from 80 to 895 ng per sample, were then sent to Novogene Inc. in California, USA, for shotgun sequencing. The sequencing library was prepared using the NEBNext Ultra II DNA Library Prep Kit, which involved DNA fragmentation, end repair, 5′ phosphorylation, A-tailing, adapter ligation, and PCR amplification. The resulting libraries were sequenced on an Illumina NovaSeq platform, generating paired-end 150-bp reads.\n\nThe metagenomic sequencing yielded a staggering 3,004,009,760 paired-end reads across all samples, with the number of reads per sample ranging from 76,449,854 to 303,487,370. To ensure the quality of the data, low-quality reads and adapters were removed using fastp v1.3.0. The quality-filtered reads were then assessed with FastQC v0.12.1 and assembled using MEGAHIT v1.2.9, resulting in 31 individual assemblies and 11 co-assemblies. Contigs longer than 1,000 bp were binned using MetaBAT2 v1.7, MaxBin2 v2.2.7, and VAMB v5.0.2, followed by bin aggregation with DAS Tool v1.1.7. The quality of the genomes was assessed using CheckM2 v1.1.0, and only high-quality and medium-quality metagenome-assembled genomes (MAGs) were retained for further analysis.\n\nFrom the microbial mats and sediments, a total of 1,217 dereplicated prokaryotic MAGs were recovered. Among these, 969 were bacterial MAGs, representing 50 different phyla. The most abundant bacterial groups included Pseudomonadota, Chloroflexota, and Planctomycetota. Additionally, 248 archaeal MAGs were identified, spanning 15 phyla, with Thermoproteota, Thermoplasmatota, and Nanoarchaeota being the dominant taxa. Based on the GTDB RED (relative evolutionary divergence), approximately 70% of the MAGs likely represent novel taxa, a proportion that surpasses or matches reports from other hydrothermal vent systems. This finding underscores the Hatiba Mons as a hotspot of microbial novelty and significantly expands the available genomic references for these extremophiles.\n\nThe discovery of such a diverse array of prokaryotic MAGs in the Red Sea hydrothermal vents highlights the unique nature of these ecosystems and their potential to harbor novel microbial life. The high proportion of potentially novel taxa suggests that these environments may harbor species that have adapted to the extreme conditions in ways that are not yet fully understood. This research not only enhances our understanding of the microbial diversity in the Red Sea but also provides valuable insights into the functional potential of these microorganisms, which could have implications for biotechnology and our understanding of life in extreme environments.\n\nIn conclusion, the exploration of the Red Sea hydrothermal vents has revealed a rich tapestry of prokaryotic diversity, with a significant number of potentially novel taxa. This study underscores the importance of continued research in underrepresented regions and the potential for discovering new forms of life that may hold the key to understanding the limits of life on Earth and beyond. The findings from Hatiba Mons contribute to the growing body of knowledge on extremophiles and provide a foundation for future studies on the functional roles of these microorganisms in their unique ecosystems.",
+    "wordCount": 790,
+    "paragraphCount": 7,
+    "cleanSentenceBoundary": true,
+    "blindSliced": false,
+    "provider": "minimax",
+    "model": "MiniMax-Text-01",
+    "callsUsed": 1,
+    "tokensUsed": 3095,
+    "usage": {
+      "callsObserved": 1,
+      "promptTokensFromResponses": 2048,
+      "completionTokensFromResponses": 1047,
+      "totalTokensFromResponses": 3095,
+      "costUsdFromProviderUsage": 0.0,
+      "providerModelByCall": [
+        {
+          "provider": "minimax",
+          "model": "MiniMax-Text-01",
+          "promptTokens": 2048,
+          "completionTokens": 1047,
+          "totalTokens": 3095,
+          "accountingType": "reported",
+          "costUsdFromProviderUsage": 0.0,
+          "providerLatencySeconds": 24.1473,
+          "attempts": 1
+        }
+      ]
+    },
+    "latencySeconds": 24.283,
+    "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+    "config": {
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "styleProfile": "NARRATIVE_HISTORICAL",
+      "wordCountBounds": {
+        "minimum": 720,
+        "maximum": 915
+      }
+    },
+    "hasSentenceIds": false,
+    "hasAuthoritativeCAS": false,
+    "persistenceEvidence": {
+      "classification": "LEGACY_NO_ACCEPTED_V2_ARTIFACT",
+      "authoritativeCasProven": false
+    },
+    "groundingEvaluation": {
+      "status": "PASS",
+      "score": 1.0,
+      "totalIssues": 0,
+      "blockingIssues": 0,
+      "issueCodes": []
+    }
+  },
+  "v2": {
+    "campaignCaseId": "g08_PMC13560651_v2",
+    "runId": "bench_b5b0f71ee9f13e4250406a22807472e8",
+    "engine": "V2_PassageLoop",
+    "decision": "PASS",
+    "callsUsed": 4,
+    "tokensUsed": 39000,
+    "provider": "minimax",
+    "model": "MiniMax-Text-01",
+    "config": {
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "styleProfile": "NARRATIVE_HISTORICAL",
+      "promptVersion": "2.1.0",
+      "wordCountBounds": {
+        "minimum": 720,
+        "maximum": 915
+      },
+      "loopCapsProfile": {
+        "version": "phase06-production-v1",
+        "source": "deploy/envs/loop-caps.env"
+      }
+    },
+    "usage": {
+      "callsObserved": 1,
+      "promptTokensFromResponses": 1873,
+      "completionTokensFromResponses": 1269,
+      "totalTokensFromResponses": 3142,
+      "costUsdFromProviderUsage": 0.0,
+      "providerModelByCall": [
+        {
+          "provider": "minimax",
+          "model": "MiniMax-Text-01",
+          "promptTokens": 1873,
+          "completionTokens": 1269,
+          "totalTokens": 3142,
+          "accountingType": "reported",
+          "costUsdFromProviderUsage": 0.0,
+          "providerLatencySeconds": 42.9279,
+          "attempts": 1
+        }
+      ]
+    },
+    "latencySeconds": 43.91,
+    "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+    "authoritativeOperations": [
+      {
+        "operationId": "g08-input-1a46cb10112045a1880a3c8658b4ae2e",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "2a0a460a37ff1bd8d9a7460ebcc50c6eeb8e0ee9881ee6c77df572812bec2fd0"
+      },
+      {
+        "operationId": "g08-input-d30e5bd076024117a34df251fe11a9fc",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "463765a542572d82124e3735ee3b99e8332ebc0315f18698434abf13c8840487"
+      },
+      {
+        "operationId": "g08-input-1fc0ca06e9fd479daa7fd5ef818a0556",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "b28e010bb9c3e9ee8b13ecc7fde1a195f7ebcc78140ebd6bd2db0b8c38a5cd1e"
+      },
+      {
+        "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:GENERATE:1:2.0.0",
+        "operationType": "GENERATE",
+        "status": "COMPLETED",
+        "tokenReservation": 9000,
+        "tokensUsed": 9000,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "223a5518bbe7d3f0a998c92bf42fb5ae2371817792b433045e75c9da10dd83dc"
+      },
+      {
+        "operationId": "op_pass_gen_dc25643c",
+        "operationType": "PROVIDER_CALL",
+        "status": "COMPLETED",
+        "tokenReservation": 11191,
+        "tokensUsed": 3142,
+        "tokensPrompt": 1873,
+        "tokensCompletion": 1269,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "395f8b354f27320918cb4276f51d32a627418886bc183bccf26c7d781bd178af"
+      },
+      {
+        "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:EVALUATE:1:eval_passage_word_count:1.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "ac7f765ae489b6a5adc480ab7fae20a6ed0b2639b85ee4eee09fa6e4e2b2c3f0"
+      },
+      {
+        "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:EVALUATE:1:eval_passage_style:1.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "a73a5729ea7cc2abbd9207b4a46cb07c4b6a83b9e1672a25ecfefdfa84bccf38"
+      },
+      {
+        "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:EVALUATE:1:eval_grounding_fidelity:2.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "2f0c5767dfceb92442e951436327c837944bacd4d3a44386b3f7da37b003dfef"
+      },
+      {
+        "operationId": "loop:bench_b5b0f71ee9f13e4250406a22807472e8:art_passage_s1:CHECKPOINT_COMMIT:1:75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "0afcc5845cadf2fdb7ea624842395f07a1ec4c1e3fc61710308dd1143747228e"
+      }
+    ],
+    "versionTraces": [
+      {
+        "version": 1,
+        "contentHash": "75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd",
+        "wordCount": 772,
+        "evaluatorIssueCodes": [],
+        "isAcceptedHead": true
+      }
+    ],
+    "artifactId": "art_passage_s1",
+    "acceptedArtifactRef": {
+      "artifactId": "art_passage_s1",
+      "artifactType": "Passage",
+      "version": 1,
+      "contentHash": "75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd"
+    },
+    "acceptedParentRefs": [
+      {
+        "artifactId": "art_blueprint_PMC13560651_bench_b5",
+        "artifactType": "ExamBlueprint",
+        "version": 1,
+        "contentHash": "b28e010bb9c3e9ee8b13ecc7fde1a195f7ebcc78140ebd6bd2db0b8c38a5cd1e"
+      },
+      {
+        "artifactId": "art_evidence_PMC13560651_bench_b5",
+        "artifactType": "EvidenceGraph",
+        "version": 1,
+        "contentHash": "463765a542572d82124e3735ee3b99e8332ebc0315f18698434abf13c8840487"
+      },
+      {
+        "artifactId": "art_source_PMC13560651_bench_b5",
+        "artifactType": "SourcePack",
+        "version": 1,
+        "contentHash": "2a0a460a37ff1bd8d9a7460ebcc50c6eeb8e0ee9881ee6c77df572812bec2fd0"
+      }
+    ],
+    "title": "Prokaryotic Diversity in Red Sea Hydrothermal Vents: A Historical Perspective",
+    "passage": "The study of hydrothermal vent ecosystems has long fascinated scientists due to their unique conditions and the remarkable diversity of life they support. Historically, research on these extreme environments has primarily focused on regions such as the East Pacific Rise and the Mid-Atlantic Ridge, leaving other areas, like the Red Sea, relatively understudied. The Red Sea, despite its geological significance as a young oceanic rift, has only recently begun to reveal its hydrothermal vent systems. The discovery of active hydrothermal vent fields in the Red Sea, particularly at Hatiba Mons, has opened new avenues for understanding the microbial communities that thrive in these harsh conditions. This emerging area of research aims to address the gap in knowledge regarding the composition and functional potential of prokaryotic life in these unique ecosystems.\n\nThe methodological framework for investigating these vent systems involves a meticulous approach to sample collection and analysis. During expeditions conducted in May and September 2022 and February 2023, researchers collected a total of 31 samples from five hydrothermal vents at Hatiba Mons (22.28°N, 37.84°E). These samples included 19 sediment samples, gathered using gravity corers, and 12 microbial mat samples, obtained using push cores, Niskin bottles, and box corers. To preserve the integrity of the samples, they were immediately frozen at −20°C on board the research vessel and subsequently stored at −80°C in the laboratory. DNA extraction was performed using the DNeasy PowerMax Soil Kit, with the addition of proteinase K during the lysis phase to enhance the yield. The quality and concentration of the extracted DNA were assessed using the Qubit dsDNA HS Assay on a Qubit 4.0 fluorometer. The DNA was then prepared for shotgun sequencing using the NEBNext Ultra II DNA Library Prep Kit, which involved fragmentation, end repair, adapter ligation, and PCR amplification. The sequencing was carried out on an Illumina NovaSeq platform, generating paired-end 150-bp reads.\n\nThe metagenomic sequencing yielded a substantial dataset, with a total of 3,004,009,760 paired-end reads across all samples. These reads were processed using a series of bioinformatics tools to ensure data quality and assembly. Low-quality reads and adapters were removed using fastp v1.3.0, and the quality-filtered reads were assessed with FastQC v0.12.1. The assembly of the reads was performed using MEGAHIT v1.2.9, resulting in 31 individual assemblies and 11 co-assemblies. Contigs longer than 1,000 bp were binned using MetaBAT2 v1.7, MaxBin2 v2.2.7, and VAMB v5.0.2, followed by bin aggregation with DAS Tool v1.1.7. The quality of the resulting genomes was evaluated using CheckM2 v1.1.0, and only high-quality and medium-quality metagenome-assembled genomes (MAGs) were retained for further analysis. Taxonomic assignment of these bins was conducted using GTDB-Tk v2.4.1, and protein-coding sequences were predicted from all MAGs using Prodigal.\n\nThe analysis of the recovered MAGs revealed a diverse array of prokaryotic life within the Red Sea hydrothermal vents. A total of 1,217 dereplicated prokaryotic MAGs were identified, comprising 969 bacterial MAGs across 50 phyla and 248 archaeal MAGs across 15 phyla. The most abundant bacterial groups included Pseudomonadota, Chloroflexota, and Planctomycetota, while the dominant archaeal taxa were Thermoproteota, Thermoplasmatota, and Nanoarchaeota. Notably, approximately 70% of the MAGs are likely to represent novel taxa, a proportion that surpasses or matches findings from other hydrothermal vent systems. This underscores the Hatiba Mons as a hotspot of microbial novelty and significantly expands the available genomic references for these environments.\n\nDespite the richness of the data, several operational constraints and limitations were encountered during the study. The complexity of the microbial communities and the diversity of the samples posed challenges for accurate taxonomic assignment and functional annotation. Additionally, the high proportion of potentially novel taxa suggests that current genomic databases may not fully capture the diversity of life in these environments. These findings highlight the need for further research and the development of more comprehensive genomic resources to better understand the functional roles of these microorganisms in their ecosystems.\n\nIn conclusion, the exploration of the Red Sea hydrothermal vents at Hatiba Mons has provided valuable insights into the diversity of prokaryotic life in extreme environments. The study not only highlights the novelty of the microbial communities but also emphasizes the importance of continued research in underrepresented regions. The findings contribute to a broader understanding of the ecological and evolutionary dynamics of life in hydrothermal vents and have implications for the development of biotechnological applications. The study was supported by Prof. Alexandre Soares Rosado’s KAUST Baseline Grant and various other research grants, underscoring the collaborative nature of this scientific endeavor.",
+    "wordCount": 772,
+    "paragraphCount": 6,
+    "sentenceCount": 34,
+    "cleanSentenceBoundary": true,
+    "blindSliced": false,
+    "hasSentenceIds": true,
+    "sentenceIdsSample": [
+      "s_0",
+      "s_1",
+      "s_2"
+    ],
+    "hasAuthoritativeCAS": true,
+    "claimAlignmentCount": 4,
+    "persistedEvaluationIds": [
+      "eval_res_7f0aea083804",
+      "eval_res_307d091afee1",
+      "eval_res_98b6782e42da"
+    ],
+    "persistedDecision": "PASS",
+    "persistenceEvidence": {
+      "classification": "AUTHENTICATED_DOTNET_CHECKPOINT_API",
+      "acceptedHeadVerified": true,
+      "exactPayloadReadBack": true,
+      "exactParentRefsReadBack": true,
+      "evaluationsReadBack": true,
+      "decisionAcceptedByCheckpoint": "PASS",
+      "acceptedArtifactRef": {
+        "artifactId": "art_passage_s1",
+        "artifactType": "Passage",
+        "version": 1,
+        "contentHash": "75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd"
+      },
+      "authoritativeCasProven": true,
+      "operationCount": 9
+    },
+    "groundingEvaluation": {
+      "status": "PASS",
+      "score": 1.0,
+      "totalIssues": 0,
+      "blockingIssues": 0,
+      "issueCodes": []
+    }
+  },
+  "comparison": {
+    "wordCountInBounds": {
+      "legacy": true,
+      "v2": true
+    },
+    "cleanSentenceBoundary": {
+      "legacy": true,
+      "v2": true
+    },
+    "groundingStatus": {
+      "legacy": "PASS",
+      "v2": "PASS"
+    },
+    "v2AcceptedArtifactRef": {
+      "artifactId": "art_passage_s1",
+      "artifactType": "Passage",
+      "version": 1,
+      "contentHash": "75ca8caaaff76c393709dcf043e52e101080b29c39bef339fe2314008bf2d1cd"
+    }
+  }
+}

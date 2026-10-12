@@ -1,0 +1,88 @@
+{
+  "phase": "14",
+  "suite": "Live Browser & Microservice HTTP E2E Pipeline",
+  "executed_at": "2026-10-08T18:19:26.247370+00:00",
+  "browser_execution": {
+    "playwright_runner": "Chromium Headless",
+    "target_question_idx": 1,
+    "target_question_id": "b5e3c3ed-4e63-4532-84fe-eda05feef0d1",
+    "target_exam_id": "d4d18cbb-e8a8-4c6a-82d5-bfc73f193321",
+    "target_exam_slug": "reading-168955318a454c1c9334edaf59f3b54f",
+    "retried_failed_job_id": "8628a5fa-cae6-47d7-b5a4-00c8511986c5",
+    "actions_performed": [
+      "NAVIGATE_TO_ADMIN_PAGE",
+      "FILL_TOPIC",
+      "INGEST_3_PMC_SOURCES_VIA_UI",
+      "CREATE_READING_JOB_VIA_UI",
+      "JOB_COMPLETED_LIVE_GENERATION",
+      "RETRY_FAILED_JOB_LIVE",
+      "SUBMIT_QUESTION_EDIT_LIVE",
+      "DRAFT_SHIELDING_VERIFIED_PRE_PUBLISH",
+      "PUBLISH_EXAM_VIA_UI"
+    ],
+    "verified_steps": {
+      "navigation_ok": true,
+      "live_ingest_ok": true,
+      "create_job_ok": true,
+      "job_completed_ok": true,
+      "question_edit_ok": true,
+      "question_edited_ok": true,
+      "publish_action_ok": true,
+      "public_endpoint_published_ok": true,
+      "retry_action_ok": true,
+      "draft_shielded_pre_publish": true
+    },
+    "real_entities": {
+      "pmc_source_files": [
+        "/home/code/workspaces/langfens/Project_Langfens_Microservice/artifacts/refactor/phase-07/corpus/sources/PMC13604763.txt",
+        "/home/code/workspaces/langfens/Project_Langfens_Microservice/artifacts/refactor/phase-07/corpus/sources/PMC13503497.txt",
+        "/home/code/workspaces/langfens/Project_Langfens_Microservice/artifacts/refactor/phase-07/corpus/sources/PMC12804876.txt"
+      ],
+      "pmc_topic": "Advances in Materials Science, Exoplanet Atmospheres and Subsurface Fluid Dynamics",
+      "created_job_id": "16895531-8a45-4c1c-9334-edaf59f3b54f",
+      "exam_id": "d4d18cbb-e8a8-4c6a-82d5-bfc73f193321",
+      "edited_question_id": "b5e3c3ed-4e63-4532-84fe-eda05feef0d1",
+      "edited_section_id": "7ab9f6ee-4696-45c0-a5d5-866b7db906bd",
+      "edited_question_idx": 1,
+      "draft_shield_check": {
+        "status": 404,
+        "slug": "reading-168955318a454c1c9334edaf59f3b54f",
+        "path": "http://localhost:5050/api-exams/public/exam/getby/reading-168955318a454c1c9334edaf59f3b54f"
+      },
+      "published_exam_id": "d4d18cbb-e8a8-4c6a-82d5-bfc73f193321"
+    },
+    "screenshots_captured": [
+      "01a_pmc_sources_ingested.png",
+      "02_job_created_live.png",
+      "03_draft_completed_live.png",
+      "04_draft_review_view.png",
+      "05_published_state.png"
+    ],
+    "intercepted_network_events": 338
+  },
+  "assertions": {
+    "dotnet_phase14_tests": "22/22 PASSED",
+    "dotnet_phase13_tests": "17/17 PASSED",
+    "python_pytest_suites": "96/96 PASSED",
+    "playwright_browser_e2e": "PASSED (Full UI Flow + Live Generation + Question Edit + Exam Publishing)",
+    "draft_shielding_pre_publish": "PASSED (HTTP 404 Shielded)",
+    "postgres_lineage_and_idempotency": "PASSED (Single feedback row, single outbox event)",
+    "postgres_exam_published_status": "PASSED (Status: PUBLISHED)",
+    "public_endpoint_post_publish": "PASSED (HTTP 200 OK)",
+    "curation_state_machine": "PASSED (RAW -> ANNOTATED -> REVIEWED -> CURATED)",
+    "curated_dataset_export_sha256": "f1d833659cee22ab67af8221143f7585a46ea87b58fa9892012e9f921723cd88",
+    "blind_solver_benchmark_sha256": "4cc9bf9a79c939f0ddc39a06b669d24137ad0f211c6f236442b5471be3bfe6c3",
+    "leak_free_split_violations": 0,
+    "paired_offline_eval_verdict": "PASSED",
+    "version_promotion_decision": "PROMOTED",
+    "version_rollback_status": "ROLLED_BACK"
+  },
+  "artifacts_generated": [
+    "artifacts/refactor/phase-14/exports/curated-dataset-v2.json",
+    "artifacts/refactor/phase-14/exports/blind-solver-benchmark-v2.json",
+    "artifacts/refactor/phase-14/exports/split-manifest.json",
+    "artifacts/refactor/phase-14/paired-comparisons/paired-comparison-report.json",
+    "artifacts/refactor/phase-14/staging-promotion-evidence.json"
+  ],
+  "status": "ALL_GREEN_100_PERCENT"
+}

@@ -45,6 +45,107 @@ public sealed class ReadingPaperAiClient(HttpClient http)
         using var response = await http.SendAsync(request, ct);
         return await ReadAsync<ReadingGeneratedQuestionsResult>(response, ct);
     }
+    public async Task<ReadingGeneratedSection> GenerateSectionV2Async(
+        int sectionIndex,
+        string title,
+        ArtifactRef passageRef,
+        ArtifactRef blueprintRef,
+        IReadOnlyList<ArtifactRef> questionRefs,
+        string runId,
+        Guid leaseOwner,
+        int epoch = 1,
+        CancellationToken ct = default)
+    {
+        var payload = new
+        {
+            sectionIndex,
+            title,
+            passageRef,
+            blueprintRef,
+            questionRefs,
+            runId,
+            leaseOwner,
+            epoch,
+            engine = "v2"
+        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/autogen/reading-paper/section-v2")
+        {
+            Content = JsonContent.Create(payload, options: ReadingPaperRules.Json)
+        };
+        using var response = await http.SendAsync(request, ct);
+        return await ReadAsync<ReadingGeneratedSection>(response, ct);
+    }
+
+    public async Task<JsonElement> GeneratePaperV2Async(
+        ArtifactRef blueprintRef,
+        IReadOnlyList<ArtifactRef> sectionRefs,
+        string runId,
+        Guid leaseOwner,
+        int epoch = 1,
+        string title = "IELTS Academic Reading Paper",
+        string? paperId = null,
+        string? parentOperationId = null,
+        CancellationToken ct = default)
+    {
+        var payload = new
+        {
+            blueprintRef,
+            sectionRefs,
+            runId,
+            leaseOwner,
+            epoch,
+            title,
+            paperId,
+            parentOperationId,
+            engine = "v2"
+        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/autogen/reading-paper/paper-v2")
+        {
+            Content = JsonContent.Create(payload, options: ReadingPaperRules.Json)
+        };
+        using var response = await http.SendAsync(request, ct);
+        return await ReadAsync<JsonElement>(response, ct);
+    }
+
+    public async Task<JsonElement> EvaluatePaperAsync(
+        ArtifactEnvelope paperEnvelope,
+        string? runId = null,
+        Guid? leaseOwner = null,
+        int epoch = 1,
+        CancellationToken ct = default)
+    {
+        var payload = new
+        {
+            paperEnvelope,
+            runId,
+            leaseOwner,
+            epoch
+        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/autogen/reading-paper/paper-evaluate")
+        {
+            Content = JsonContent.Create(payload, options: ReadingPaperRules.Json)
+        };
+        using var response = await http.SendAsync(request, ct);
+        return await ReadAsync<JsonElement>(response, ct);
+    }
+
+    public async Task<JsonElement> RepairPaperAsync(
+        ArtifactEnvelope paperEnvelope,
+        object directive,
+        CancellationToken ct = default)
+    {
+        var payload = new
+        {
+            paperEnvelope,
+            directive
+        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/autogen/reading-paper/paper-repair")
+        {
+            Content = JsonContent.Create(payload, options: ReadingPaperRules.Json)
+        };
+        using var response = await http.SendAsync(request, ct);
+        return await ReadAsync<JsonElement>(response, ct);
+    }
 
 
     public async Task<ReadingGeneratedSection> GenerateSectionAsync(string topic, int index, ReadingSource source,

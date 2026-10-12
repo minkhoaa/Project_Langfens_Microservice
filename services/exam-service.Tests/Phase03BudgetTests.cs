@@ -29,6 +29,26 @@ public class Phase03BudgetTests
         }));
         return services.BuildServiceProvider();
     }
+    private static (string Version, string Source, string Json, string Sha256) BuildTestCapProfile(int calls, int tokens, int wallTime)
+    {
+        const string version = "phase03-test-v1";
+        const string source = "Phase03BudgetTests";
+        var caps = new SortedDictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["standaloneRunBudgetCapCalls"] = calls,
+            ["standaloneRunBudgetCapTokens"] = tokens,
+            ["standaloneRunBudgetCapWallTimeSeconds"] = wallTime
+        };
+        var snapshot = new SortedDictionary<string, object>(StringComparer.Ordinal)
+        {
+            ["caps"] = caps,
+            ["profileSource"] = source,
+            ["profileVersion"] = version
+        };
+        var json = JsonSerializer.Serialize(snapshot);
+        var sha = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json))).ToLowerInvariant();
+        return (version, source, json, sha);
+    }
 
     private static async Task<(string RunId, Guid Owner, ReadingPaperJob Job, ReadingPaperRun Run)> SeedJobAndRunAsync(
         ExamDbContext db,
@@ -36,6 +56,7 @@ public class Phase03BudgetTests
         int budgetCapCalls = 25,
         int budgetCapWallTime = 900)
     {
+        var testProfile = BuildTestCapProfile(budgetCapCalls, budgetCapTokens, budgetCapWallTime);
         var owner = Guid.NewGuid();
         var job = new ReadingPaperJob
         {
@@ -77,6 +98,10 @@ public class Phase03BudgetTests
             BudgetCapCalls = budgetCapCalls,
             BudgetCapTokens = budgetCapTokens,
             BudgetCapWallTimeSeconds = budgetCapWallTime,
+            BudgetProfileVersion = testProfile.Version,
+            BudgetProfileSha256 = testProfile.Sha256,
+            BudgetProfileSource = testProfile.Source,
+            BudgetProfileJson = testProfile.Json,
             BudgetUsedCalls = 0,
             BudgetUsedTokens = 0,
             BudgetUsedWallTimeSeconds = 0.0,
@@ -331,7 +356,15 @@ public class Phase03BudgetTests
         );
         Assert.True(unkAck.ReservationPreserved);
         Assert.Equal("UNKNOWN_OUTCOME", unkAck.Status);
-
+        using var restartScope = provider.CreateScope();
+        var restartDb = restartScope.ServiceProvider.GetRequiredService<ExamDbContext>();
+        var resumed = await CheckpointService.ResumeStateAsync(restartDb, runId, default);
+        Assert.True(resumed.IsCompatible);
+        Assert.Equal(2500, resumed.TokensUsed);
+        Assert.Equal(1, resumed.CallsUsed);
+        var resumedOperation = Assert.Single(resumed.Operations!.Where(item => item.OperationId == opId));
+        Assert.Equal("UNKNOWN_OUTCOME", resumedOperation.Status);
+        Assert.Equal(2500, resumedOperation.TokenReservation);
         // A second request for 2,000 tokens must FAIL because remaining allowance is 4,000 - 2,500 = 1,500 < 2,000
         // (UNKNOWN_OUTCOME does NOT refund the tokens or give a free retry)
         var exSubsequent = await Assert.ThrowsAsync<CheckpointValidationException>(
@@ -370,10 +403,10 @@ public class Phase03BudgetTests
         );
         Assert.False(parentGrant.IsReplay);
 
-        // Verify run token usage after parent grant is exactly 5,000
+        // Logical parent intents allocate child capacity but do not consume provider call or token counters.
         var runAfterParent = await db.ReadingPaperRuns.AsNoTracking().FirstAsync(r => r.RunId == runId);
-        Assert.Equal(5000, runAfterParent.BudgetUsedTokens);
-        Assert.Equal(1, runAfterParent.BudgetUsedCalls);
+        Assert.Equal(0, runAfterParent.BudgetUsedTokens);
+        Assert.Equal(0, runAfterParent.BudgetUsedCalls);
 
         // Child operations under parentOperationId:
         // Child 1: passage synthesis (1,200 tokens used)
@@ -389,16 +422,18 @@ public class Phase03BudgetTests
             default
         );
 
-        // Child grant under parent should NOT double-charge run tokens
+        // Each physical provider attempt charges the run when granted, even under a parent intent.
         var runAfterChild1 = await db.ReadingPaperRuns.AsNoTracking().FirstAsync(r => r.RunId == runId);
-        Assert.Equal(5000, runAfterChild1.BudgetUsedTokens); // Still 5000!
+        Assert.Equal(1500, runAfterChild1.BudgetUsedTokens);
+        Assert.Equal(1, runAfterChild1.BudgetUsedCalls);
 
         // Reconcile child 1
         var rec1 = await CheckpointService.ReconcileOperationAsync(
             db,
             new OperationReconcileRequest(
                 runId, 1, owner, child1Id,
-                TokensUsed: 1200, WallTimeUsedSeconds: 18.5, AccountingType: "REPORTED"
+                TokensUsed: 1200, WallTimeUsedSeconds: 18.5, AccountingType: "REPORTED",
+                PromptTokensUsed: 800, CompletionTokensUsed: 400, ReasoningTokensUsed: 100
             ),
             default
         );
@@ -422,7 +457,8 @@ public class Phase03BudgetTests
             db,
             new OperationReconcileRequest(
                 runId, 1, owner, child2Id,
-                TokensUsed: 1600, WallTimeUsedSeconds: 22.0, AccountingType: "REPORTED"
+                TokensUsed: 1600, WallTimeUsedSeconds: 22.0, AccountingType: "REPORTED",
+                PromptTokensUsed: 1100, CompletionTokensUsed: 500, ReasoningTokensUsed: 200
             ),
             default
         );
@@ -455,9 +491,119 @@ public class Phase03BudgetTests
         );
         Assert.Equal(1, ack.Version);
 
-        // Verify run token usage reconciled from parent reservation (5000) to actual (2800)
+        // The run total is the sum of reported usage for both physical provider attempts.
         var finalRun = await db.ReadingPaperRuns.AsNoTracking().FirstAsync(r => r.RunId == runId);
-        Assert.Equal(2800, finalRun.BudgetUsedTokens); // 5000 + (2800 - 5000) = 2800! Exactly reconciled!
+        Assert.Equal(2800, finalRun.BudgetUsedTokens);
+        Assert.Equal(2, finalRun.BudgetUsedCalls);
+    }
+
+    [Fact]
+    public async Task T03_05_ConcurrentProviderAttempts_ReserveRunCapAtomically()
+    {
+        using var provider = CreateTestProvider();
+        using var scope = provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+        await db.Database.MigrateAsync();
+        var (runId, owner, _, _) = await SeedJobAndRunAsync(db, budgetCapTokens: 10000, budgetCapCalls: 10, budgetCapWallTime: 600);
+
+        var attempts = Enumerable.Range(0, 2).Select(index => Task.Run(async () =>
+        {
+            using var attemptScope = provider.CreateScope();
+            var attemptDb = attemptScope.ServiceProvider.GetRequiredService<ExamDbContext>();
+            try
+            {
+                await CheckpointService.GrantOperationAsync(
+                    attemptDb,
+                    new OperationGrantRequest(
+                        runId, 1, owner, $"run_cap_attempt_{index}_{Guid.NewGuid():N}", "PROVIDER_CALL", $"hash_{index}",
+                        TokenReservation: 6000, WallTimeReservationSeconds: 15),
+                    default);
+                return 200;
+            }
+            catch (CheckpointValidationException ex)
+            {
+                return ex.StatusCode;
+            }
+        })).ToArray();
+        var statuses = await Task.WhenAll(attempts);
+        Assert.Equal(1, statuses.Count(status => status == 200));
+        Assert.Equal(1, statuses.Count(status => status == 422));
+
+        var run = await db.ReadingPaperRuns.AsNoTracking().SingleAsync(item => item.RunId == runId);
+        Assert.Equal(1, run.BudgetUsedCalls);
+        Assert.Equal(6000, run.BudgetUsedTokens);
+        Assert.Equal(1, await db.ReadingPaperOperations.CountAsync(item => item.RunId == runId && item.OperationType == "PROVIDER_CALL"));
+    }
+
+    [Fact]
+    public async Task T03_UnexpectedUsageOverage_IsPersistedAndBlocksDispatchAcrossRestart()
+    {
+        using var provider = CreateTestProvider();
+        using var scope = provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+        await db.Database.MigrateAsync();
+        var (runId, owner, _, _) = await SeedJobAndRunAsync(db, budgetCapTokens: 10000, budgetCapCalls: 10, budgetCapWallTime: 600);
+        var operationId = $"overage_{Guid.NewGuid():N}";
+        var request = new OperationGrantRequest(
+            runId, 1, owner, operationId, "PROVIDER_CALL", "overage-hash",
+            TokenReservation: 1000, WallTimeReservationSeconds: 10);
+        await CheckpointService.GrantOperationAsync(db, request, default);
+        var resultJson = JsonSerializer.Serialize(new { text = "durably replayable response" });
+
+        var reconciliation = await CheckpointService.ReconcileOperationAsync(
+            db,
+            new OperationReconcileRequest(
+                runId, 1, owner, operationId,
+                TokensUsed: 1500,
+                WallTimeUsedSeconds: 2.5,
+                AccountingType: "REPORTED",
+                ResultRefJson: resultJson,
+                PromptTokensUsed: 1100,
+                CompletionTokensUsed: 400,
+                ReasoningTokensUsed: 100),
+            default);
+        Assert.True(reconciliation.ReservationBreached);
+        Assert.True(reconciliation.BudgetBreachDetected);
+        Assert.Equal(1500, reconciliation.TokensUsed);
+
+        using var restartScope = provider.CreateScope();
+        var restartDb = restartScope.ServiceProvider.GetRequiredService<ExamDbContext>();
+        var replay = await CheckpointService.GrantOperationAsync(restartDb, request, default);
+        Assert.True(replay.IsReplay);
+        Assert.Equal("COMPLETED", replay.Status);
+        Assert.Equal(resultJson, replay.ResultRefJson);
+        Assert.True(replay.ReservationBreached);
+        Assert.True(replay.BudgetBreachDetected);
+
+        var persisted = await restartDb.ReadingPaperOperations.AsNoTracking()
+            .SingleAsync(item => item.RunId == runId && item.OperationId == operationId);
+        Assert.Equal(1000, persisted.TokenReservation);
+        Assert.Equal(1500, persisted.TokensUsed);
+        Assert.Equal(1100, persisted.PromptTokensUsed);
+        Assert.Equal(400, persisted.CompletionTokensUsed);
+        Assert.Equal(100, persisted.ReasoningTokensUsed);
+        Assert.Equal("REPORTED", persisted.AccountingType);
+        Assert.True(persisted.ReservationBreached);
+        Assert.False(string.IsNullOrWhiteSpace(persisted.BudgetBreachReason));
+
+        var resumed = await CheckpointService.ResumeStateAsync(restartDb, runId, default);
+        Assert.True(resumed.IsCompatible);
+        Assert.True(resumed.BudgetBreachDetected);
+        Assert.Equal(1500, resumed.TokensUsed);
+        Assert.Equal(1, resumed.CallsUsed);
+        var resumedOperation = Assert.Single(resumed.Operations!.Where(item => item.OperationId == operationId));
+        Assert.Equal(1100, resumedOperation.PromptTokensUsed);
+        Assert.Equal(400, resumedOperation.CompletionTokensUsed);
+
+        var blocked = await Assert.ThrowsAsync<CheckpointValidationException>(() =>
+            CheckpointService.GrantOperationAsync(
+                restartDb,
+                new OperationGrantRequest(
+                    runId, 1, owner, $"after_breach_{Guid.NewGuid():N}", "PROVIDER_CALL", "next-hash",
+                    TokenReservation: 100, WallTimeReservationSeconds: 1),
+                default));
+        Assert.Equal(422, blocked.StatusCode);
+        Assert.Contains("breach", blocked.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

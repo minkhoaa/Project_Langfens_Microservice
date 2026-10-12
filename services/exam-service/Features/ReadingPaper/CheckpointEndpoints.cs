@@ -140,6 +140,36 @@ public static class CheckpointEndpoints
             catch (CheckpointValidationException ex)
             { return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode); }
         });
+        group.MapPost("/campaigns", async (
+            [FromBody] BenchmarkCampaignCreateRequest request,
+            ExamDbContext db,
+            CancellationToken ct) =>
+        {
+            try { return Results.Ok(await BenchmarkCampaignService.CreateAsync(db, request, ct)); }
+            catch (CheckpointValidationException ex)
+            { return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode); }
+        });
+        group.MapGet("/campaigns/{campaignId}", async (
+            string campaignId, ExamDbContext db, CancellationToken ct) =>
+        {
+            try { return Results.Ok(await BenchmarkCampaignService.GetAsync(db, campaignId, ct)); }
+            catch (CheckpointValidationException ex)
+            { return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode); }
+        });
+        group.MapPost("/campaigns/cases/provision", async (
+            [FromBody] BenchmarkCaseProvisionRequest request, ExamDbContext db, ReadingPaperCapsProfile caps, CancellationToken ct) =>
+        {
+            try { return Results.Ok(await BenchmarkCampaignService.ProvisionCaseAsync(db, request, caps, ct)); }
+            catch (CheckpointValidationException ex)
+            { return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode); }
+        });
+        group.MapPost("/campaigns/cases/complete", async (
+            [FromBody] BenchmarkCaseCompleteRequest request, ExamDbContext db, CancellationToken ct) =>
+        {
+            try { return Results.Ok(await BenchmarkCampaignService.CompleteCaseAsync(db, request, ct)); }
+            catch (CheckpointValidationException ex)
+            { return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode); }
+        });
         group.MapGet("/resume/{runId}", async (
             string runId,
             ExamDbContext db,
@@ -186,6 +216,24 @@ public static class CheckpointEndpoints
             {
                 return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode);
             }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Json(new { error = ex.Message }, statusCode: StatusCodes.Status422UnprocessableEntity);
+            }
+            catch (Exception ex)
+            {
+                return Results.Json(new { error = ex.Message }, statusCode: StatusCodes.Status500InternalServerError);
+            }
+        });
+
+        group.MapGet("/events/{runId}", async (
+            [FromRoute] string runId,
+            [FromQuery] long? afterSequence,
+            ExamDbContext db,
+            CancellationToken ct) =>
+        {
+            var events = await CheckpointService.GetOutboxEventsAsync(db, runId, afterSequence ?? 0, ct);
+            return Results.Ok(events);
         });
     }
 }

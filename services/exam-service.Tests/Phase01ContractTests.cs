@@ -1,5 +1,8 @@
 using System.Text.Json;
 using exam_service.Features.ReadingPaper.Contracts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace exam_service.Tests;
@@ -48,6 +51,17 @@ public class Phase01ContractTests
         // Export .NET-serialized JSON for Python true roundtrip verification
         var outPath = Path.Combine(FixturesDir, "dotnet_roundtrip_envelope.json");
         File.WriteAllText(outPath, reserialized);
+    }
+    [Fact]
+    public void T01_04_QuestionCandidate_Payload_HashParity()
+    {
+        var tmpPath = "/tmp/test_parity_env.json";
+        if (!File.Exists(tmpPath)) return;
+        var json = File.ReadAllText(tmpPath);
+        var envelope = JsonSerializer.Deserialize<ArtifactEnvelope>(json, LoopEngineJson.Options);
+        Assert.NotNull(envelope);
+        var computedHash = ArtifactEnvelope.ComputeContentHash(envelope.Payload, envelope.ParentRefs);
+        Assert.Equal(envelope.ContentHash, computedHash);
     }
 
     [Fact]

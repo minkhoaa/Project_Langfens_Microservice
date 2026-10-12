@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_b38ed5a5",
+  "campaignId": "camp_g12_paper_minimax_b38ed5a5dff7_v1",
+  "jobId": "1d72f28f-8b5e-446d-85bb-2a7033e0c047",
+  "runId": "bench_9efb5fe9247dc8dcdd0d6abc884feac8",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T10:04:38.029100+00:00",
+  "error": "AI generation failed: Source-fidelity review rejected the revised passage: overstated_certainty: The source only mentions trends in publication output and citation frequency without explicitly stating a 'clear upward trend' in both aspects.; unsupported_claim: The source does not explicitly discuss the exploration of practical applications in power grids and transportation sectors, only mentioning aerospace, power grids, and transportati; unmeasured_outcome: The source does not measure or quantify the benefits in terms of safety, maneuverability, or accident reduction.; unmeasured_outcome: The source does not measure or discuss the impact on downtime and maintenance costs.; unsupported_claim: While the source mentions the need for evaluating long-term ecological effects, it does not state that environmental impact is a 'critical consideration' in the current research or\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/gene"
+}

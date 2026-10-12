@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-10-10T07:44:38.115602+00:00",
+  "persistenceDbIdentity": {
+    "target": "ISOLATED_STAGING_TEST",
+    "requestedDatabase": "exam_test_phase15",
+    "resolvedDatabase": "exam_test_phase15",
+    "host": "localhost",
+    "port": 5433,
+    "user": "exam",
+    "isIsolatedStagingTarget": true
+  },
+  "v2TotalTokensUsed": 2736,
+  "legacyTotalTokensUsed": 895548,
+  "v2AverageTokensPerPaper": 152.0,
+  "legacyAverageTokensPerPaper": 49752.7,
+  "pricingModel": {
+    "inputPricePerMillion": 2.0,
+    "outputPricePerMillion": 5.0,
+    "blendedPerThousandTokens": 0.0025
+  },
+  "v2TotalEstimatedCostUsd": 0.0068,
+  "legacyTotalEstimatedCostUsd": 1.7313
+}

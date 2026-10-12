@@ -1,0 +1,224 @@
+{
+  "drainBatchId": "drain_batch_6f41883fecfa",
+  "timestamp": "2026-10-09T07:59:33.933766+00:00",
+  "drainingPolicy": "PINNED_ENGINE_DRAIN_TO_COMPLETION",
+  "totalLegacyRuns": 5,
+  "successfulDrains": 5,
+  "failedDrains": 0,
+  "initialCheckpointsCount": 4,
+  "finalCheckpointsCount": 14,
+  "zeroLostCheckpointsVerified": true,
+  "compatibleReadersVerified": {
+    "dotNetCompatibleReader": {
+      "status": "PASS",
+      "version": "1.0.0 and 2.0.0 dual deserialization",
+      "testedCheckpoints": 14,
+      "deserializationErrors": 0
+    },
+    "pythonCompatibleReader": {
+      "status": "PASS",
+      "version": "1.0.0 and 2.0.0 dual deserialization",
+      "testedCheckpoints": 14,
+      "deserializationErrors": 0
+    }
+  },
+  "drainedRuns": [
+    {
+      "runId": "legacy_run_9e37f277",
+      "jobId": "d2c4d576-10cb-47c7-bbbb-26e2f8d44aa7",
+      "topic": "Urban Architecture in Ancient Rome",
+      "engineVersion": "1.0.0",
+      "initialCompletedSections": 0,
+      "finalCompletedSections": 3,
+      "finalStatus": "COMPLETED",
+      "checkpoints": [
+        {
+          "sectionNumber": 1,
+          "title": "Section 1: Urban Architecture in Ancient Rome",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_ee04ce0abf834f85",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 2,
+          "title": "Section 2: Urban Architecture in Ancient Rome",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_5440c1be1df14fe6",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 3,
+          "title": "Section 3: Urban Architecture in Ancient Rome",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_7aa2732370df453e",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 14
+        }
+      ],
+      "checkpointCount": 3,
+      "zeroCheckpointsLost": true,
+      "payloadDecodedSuccessfully": true
+    },
+    {
+      "runId": "legacy_run_09182a43",
+      "jobId": "54e42291-e878-4f2d-9ba4-d5f8844301ae",
+      "topic": "Renewable Energy Transition in Northern Europe",
+      "engineVersion": "1.0.0",
+      "initialCompletedSections": 1,
+      "finalCompletedSections": 3,
+      "finalStatus": "COMPLETED",
+      "checkpoints": [
+        {
+          "sectionNumber": 1,
+          "title": "Section 1: Renewable Energy Transition in Northern Europe",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_49bb651875144dbf",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 2,
+          "title": "Section 2: Renewable Energy Transition in Northern Europe",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_18932e624bed4d7b",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 3,
+          "title": "Section 3: Renewable Energy Transition in Northern Europe",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_10c5a354e9054221",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 14
+        }
+      ],
+      "checkpointCount": 3,
+      "zeroCheckpointsLost": true,
+      "payloadDecodedSuccessfully": true
+    },
+    {
+      "runId": "legacy_run_e18399e5",
+      "jobId": "a350c1ca-02ac-4e56-823f-2a0c3c4a3046",
+      "topic": "Cognitive Psychology and Memory Retention",
+      "engineVersion": "1.0.0",
+      "initialCompletedSections": 2,
+      "finalCompletedSections": 3,
+      "finalStatus": "COMPLETED",
+      "checkpoints": [
+        {
+          "sectionNumber": 1,
+          "title": "Section 1: Cognitive Psychology and Memory Retention",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_fb056812d9b74664",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 2,
+          "title": "Section 2: Cognitive Psychology and Memory Retention",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_ab51f91bdf8d4411",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 3,
+          "title": "Section 3: Cognitive Psychology and Memory Retention",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_78fe0f1d840b4d16",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 14
+        }
+      ],
+      "checkpointCount": 3,
+      "zeroCheckpointsLost": true,
+      "payloadDecodedSuccessfully": true
+    },
+    {
+      "runId": "legacy_run_52f22bac",
+      "jobId": "6b801eba-51fa-4a68-8c9e-678fe47cf81d",
+      "topic": "Agricultural Practices in Arid Climates",
+      "engineVersion": "1.0.0",
+      "initialCompletedSections": 1,
+      "finalCompletedSections": 2,
+      "finalStatus": "COMPLETED",
+      "checkpoints": [
+        {
+          "sectionNumber": 1,
+          "title": "Section 1: Agricultural Practices in Arid Climates",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_f4b0ec8fc4d34af5",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 2,
+          "title": "Section 2: Agricultural Practices in Arid Climates",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_cdc92de3abf04da9",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        }
+      ],
+      "checkpointCount": 2,
+      "zeroCheckpointsLost": true,
+      "payloadDecodedSuccessfully": true
+    },
+    {
+      "runId": "legacy_run_f40e9ef8",
+      "jobId": "f19b050c-6de5-41da-b4a8-e8535e1c66ba",
+      "topic": "Deep Sea Hydrothermal Vent Communities",
+      "engineVersion": "1.0.0",
+      "initialCompletedSections": 0,
+      "finalCompletedSections": 3,
+      "finalStatus": "COMPLETED",
+      "checkpoints": [
+        {
+          "sectionNumber": 1,
+          "title": "Section 1: Deep Sea Hydrothermal Vent Communities",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_7d40dbdba2c94427",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 2,
+          "title": "Section 2: Deep Sea Hydrothermal Vent Communities",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_65e944a5cc0f46e1",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 13
+        },
+        {
+          "sectionNumber": 3,
+          "title": "Section 3: Deep Sea Hydrothermal Vent Communities",
+          "status": "COMPLETED",
+          "checkpointHash": "ckpt_hash_33d581d5930b4f28",
+          "createdAt": "2026-10-09T07:59:33.933766+00:00",
+          "isLegacyFormat": true,
+          "questionCount": 14
+        }
+      ],
+      "checkpointCount": 3,
+      "zeroCheckpointsLost": true,
+      "payloadDecodedSuccessfully": true
+    }
+  ],
+  "verdict": "DRAIN_SUCCESSFUL_ZERO_LOST_CHECKPOINTS"
+}

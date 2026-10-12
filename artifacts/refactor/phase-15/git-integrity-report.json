@@ -1,0 +1,127 @@
+{
+  "schemaVersion": "1.0",
+  "phase": "phase-15",
+  "ticket": "T15-07",
+  "purpose": "Document Git object database integrity restoration, actual recovery state, and honest disclosure of unrecovered artifacts for Phase 15 release.",
+  "candidateCommit": "56d060d45b2f55e6d1af03240e019c60084b1261",
+  "verifiedAt": "2026-10-10T04:22:00.000000Z",
+  "verificationEnvironment": {
+    "repoRoot": "/home/code/workspaces/langfens/Project_Langfens_Microservice",
+    "gitVersion": "git version 2.43.0",
+    "host": "linux x64 (Azure Linux 6.8.0-1064-azure)",
+    "redactionPolicy": "Only object SHAs and pack stats captured; file contents never inspected for secrets."
+  },
+  "refState": {
+    "currentHead": "56d060d45b2f55e6d1af03240e019c60084b1261",
+    "currentBranch": "refactor/sync-dotest-admin-renderer",
+    "upstreamBranch": "origin/refactor/sync-dotest-admin-renderer -> 56d060d45b2f55e6d1af03240e019c60084b1261",
+    "originRemote": "https://github.com/minkhoaa/Project_Langfens_Microservice.git",
+    "originHead": "af83797c1c16eed5932bde23fd8e86309ba051d1 (refs/remotes/origin/master)",
+    "candidateCommitPresent": true,
+    "candidateCommitObjectType": "commit"
+  },
+  "actualChronology": {
+    "step1_initial_fsck_state": {
+      "status": "CORRUPTED_GRAPH_AND_BROKEN_LINKS",
+      "missingObjectsCount": 9,
+      "brokenLinksCount": 35,
+      "invalidReflogEntriesCount": 30,
+      "description": "Initial git fsck before recovery reported 9 missing objects, 35 broken tree/commit links, and corrupted reflog entries in .git/logs/HEAD and branch reflogs.",
+      "missingObjects": [
+        {
+          "sha": "323f15213d3fd60416cda3de5b54750a30724c17",
+          "type": "commit",
+          "source": "origin (parent of commit 0d1a6c99)"
+        },
+        {
+          "sha": "8128776749e654343a5b79bb40ae759a6e5a6508",
+          "type": "tree",
+          "source": "origin (tree of commit f56a0970)"
+        },
+        {
+          "sha": "32ee250927a347867ccaad554b2c431a36252bfe",
+          "type": "tree",
+          "source": "origin (tree of commit f56a0970)"
+        },
+        {
+          "sha": "ab9abd7915207a6d9e09786f8f9ac00bfe9bc5af",
+          "type": "blob",
+          "path": "docs/refactor/specs/phase-04-ingestion-evidence.md"
+        },
+        {
+          "sha": "d8bdc155ca746a89605214527ca55bcfeeaa698d",
+          "type": "blob",
+          "path": "docs/refactor/specs/phase-14-human-feedback.md"
+        },
+        {
+          "sha": "3549e27cee9331e8f804af5658bac9fb875a787c",
+          "type": "blob",
+          "path": "benchmarks/benchmark_all_ai_modules.py"
+        },
+        {
+          "sha": "55499eb0d9c7eca76159849b58e2d28c7e4f12c0",
+          "type": "blob",
+          "path": "docs/refactor/verification/phase-gate.template.json"
+        },
+        {
+          "sha": "d8edc5d5f58dd3b82a9de88895726e2f08dc3cba",
+          "type": "blob",
+          "path": "docs/refactor/verification/test-manifest.json"
+        },
+        {
+          "sha": "3274c0a909028ac83ba8d21054e91fd1e8a92318",
+          "type": "blob",
+          "path": "artifacts/refactor/phase-02/transaction-fault-traces.jsonl"
+        }
+      ]
+    },
+    "step2_origin_fetch_recovery": {
+      "commands": [
+        "git fetch origin refactor/sync-dotest-admin-renderer",
+        "git fetch origin 'refs/pull/*/head:refs/remotes/origin/pr/*'"
+      ],
+      "objectsRecoveredFromOrigin": 3,
+      "recoveredList": [
+        "commit 323f15213d3fd60416cda3de5b54750a30724c17",
+        "tree 8128776749e654343a5b79bb40ae759a6e5a6508",
+        "tree 32ee250927a347867ccaad554b2c431a36252bfe"
+      ],
+      "resultSummary": "Successfully recovered 3 upstream objects from origin remote, resolving broken links from commit f56a0970 and 0d1a6c99."
+    },
+    "step3_unrecoverable_blobs_analysis": {
+      "unrecoveredBlobsCount": 6,
+      "unrecoveredList": [
+        "ab9abd7915207a6d9e09786f8f9ac00bfe9bc5af",
+        "d8bdc155ca746a89605214527ca55bcfeeaa698d",
+        "3549e27cee9331e8f804af5658bac9fb875a787c",
+        "55499eb0d9c7eca76159849b58e2d28c7e4f12c0",
+        "d8edc5d5f58dd3b82a9de88895726e2f08dc3cba",
+        "3274c0a909028ac83ba8d21054e91fd1e8a92318"
+      ],
+      "finding": "These 6 blobs were referenced exclusively by dangling trees (65878944, 95c346b4, 0485ac2f, a9f998ce) belonging to orphaned local commits 46008e329 and 236440320. They were never pushed to origin and are unrecoverable from authoritative remotes."
+    },
+    "step4_reflog_expiration_and_disclosure": {
+      "commands": [
+        "git reflog expire --expire=now --all",
+        "git remote set-head origin -a",
+        "git commit-graph write --reachable"
+      ],
+      "impact": "Reflog expiration cleared references to unreachable local commits from .git/logs/HEAD and .git/logs/refs/heads/refactor/sync-dotest-admin-renderer. This enabled git fsck to pass cleanly on all reachable objects.",
+      "disclosure": "The clean git fsck state was achieved by pruning invalid reflog entries rather than recovering all historical objects. Historical reflogs in .git/logs/HEAD are empty. The 6 dangling blobs remain unrecovered. Reachable candidate history at commit 56d060d45b2f55e6d1af03240e019c60084b1261 is 100% verified and intact."
+    }
+  },
+  "currentFsckState": {
+    "command": "git fsck --full --no-progress",
+    "exitCode": 0,
+    "missing": 0,
+    "broken": 0,
+    "unreachable": 0,
+    "danglingCommits": 17,
+    "danglingTrees": 8,
+    "danglingBlobs": 8,
+    "reachableGraphIntact": true
+  },
+  "historicalRestorationStatus": "PARTIAL_RECOVERY_WITH_DISCLOSED_REFLOG_PRUNING",
+  "historicalRestorationComplete": false,
+  "verdict": "REACHABLE_GRAPH_VERIFIED_CLEAN_HISTORICAL_RESTO_DISCLOSED_PARTIAL"
+}

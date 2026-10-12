@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_e15283cd",
+  "campaignId": "camp_g12_paper_minimax_e15283cdabfe_v1",
+  "jobId": "dbbe83ea-6f70-4291-8dfc-af7ce2944fec",
+  "runId": "bench_9e2eb34568277b844c79c87cafccf888",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T10:48:55.288307+00:00",
+  "error": "Cannot proceed with PaperLoop: missing authoritative blueprint (False) or section heads count mismatch (expected 3, found 3)"
+}

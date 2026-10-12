@@ -113,7 +113,7 @@ public class ReadingPaperBoundaryTests
         sections[2].Groups[1].Questions[0] = shortQ with { Answer = "nonexistent phrase" };
 
         var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperRules.Validate(sections));
-        // Verifies the observed behavior: exception says "invalid completion answer" even for short answer
-        Assert.Contains("has an invalid completion answer", ex.Message);
+        // Verifies the observed behavior: exception says "invalid short answer" for short answer
+        Assert.Contains("has an invalid short answer", ex.Message);
     }
 }

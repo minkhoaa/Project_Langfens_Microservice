@@ -1,0 +1,33 @@
+{
+  "caseIndex": 16,
+  "engine": "V2_LoopEngine",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LIVE_MINIMAX",
+  "campaignId": "camp_G15_c9750f53d6b5",
+  "seed": 101,
+  "runId": "bench_ddae2e6e88887f76eec1f6ac0eedf060",
+  "jobId": "d4adcf9a-69ab-4d9d-b5df-82e148bc1250",
+  "sourceTriple": [
+    "PMC13583341",
+    "PMC13560651",
+    "PMC13407692"
+  ],
+  "status": "FAILED",
+  "validDraft": false,
+  "failureReason": "Candidate generation/evaluation failed for slot Q20: MAX_VERSIONS: 3 unresolved blockers or repair cap; immutable version cap reached | issues: ['SCHEMA_VIOLATION: Question 20 answer cannot be empty or missing', 'SCHEMA_VIOLATION: Question 20 answer cannot be empty or missing', 'SCHEMA_VIOLATION: Question 20 answer cannot be empty or missing']",
+  "versionsCount": 1,
+  "evaluatorIssues": [],
+  "latencySeconds": 307.9919,
+  "totalTokens": 20942,
+  "reportedTokens": 20942,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 8,
+  "uniqueProviderDispatches": 8,
+  "estimatedCostUsd": 0.052355,
+  "persistedExamId": null,
+  "isPrimaryPersisted": false,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

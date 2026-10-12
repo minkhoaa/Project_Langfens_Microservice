@@ -1,0 +1,272 @@
+{
+  "caseId": "paired_3_PMC13517498",
+  "sourceId": "PMC13517498",
+  "sourceSha256": "819338d16fd28b126aea30e8e5212a24a0a03a1551f50a78f057e18ee1dfdf30",
+  "topic": "Smart Meter Data Repair and Urban Energy Distribution",
+  "styleProfile": "DISCURSIVE_ANALYTICAL",
+  "corpusSha256": "43fd15d60e2893ee1b23581a33e8785a9ccb66794ab43a55202623b552cbec99",
+  "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+  "inputArtifactRefs": {
+    "sourcePackRef": {
+      "artifactId": "art_source_PMC13517498_bench_1c",
+      "artifactType": "SourcePack",
+      "version": 1,
+      "contentHash": "d077b9c6484f0c51cb90b8229c7be29830ce1d5a143b02f2d678591b413ff4ea"
+    },
+    "evidenceGraphRef": {
+      "artifactId": "art_evidence_PMC13517498_bench_1c",
+      "artifactType": "EvidenceGraph",
+      "version": 1,
+      "contentHash": "d17ec9e8f72d0f703700f71132ac4991fe67997e22d7b233658cfa6aeed7ad61"
+    },
+    "blueprintRef": {
+      "artifactId": "art_blueprint_PMC13517498_bench_1c",
+      "artifactType": "ExamBlueprint",
+      "version": 1,
+      "contentHash": "dd720661727825850dc4aaaf8646b90e353608b728f388a70788a76e0abec3a2"
+    }
+  },
+  "legacy": {
+    "campaignCaseId": "g08_PMC13517498_legacy",
+    "runId": "bench_9589b92a858aa6101844b39107638221",
+    "engine": "Legacy",
+    "title": "Smart Meter Data Repair and Urban Energy Distribution",
+    "passage": "The advent of smart urban energy systems has revolutionized the way cities manage and distribute energy, necessitating a high degree of accuracy, real-time performance, and integrity in the measurement data collected from urban distribution networks. At the heart of this transformation are smart meters, which have been widely deployed in cities worldwide, including numerous regions across China. These devices generate vast amounts of electric energy reading data at regular intervals, typically every 15 minutes, and in some areas, even every minute. This data is crucial for a variety of smart city energy applications, ranging from state awareness of urban distribution networks and load forecasting to demand response, refined line loss management, electricity theft detection, and the accommodation assessment of urban distributed photovoltaic power.\n\nThe significance of smart meter data extends beyond individual user consumption patterns. It plays a pivotal role in enhancing the observability, measurability, and controllability of urban distribution networks through data fusion at the transformer district level. For instance, the calculation of line loss in distribution network transformer districts, based on smart meter data, serves as a key indicator for the \"four-classified management\" of line loss implemented by power supply companies. This management approach, which categorizes line loss by region, voltage level, feeder line, and transformer district, directly influences line loss assessment and the identification of suspected electricity theft. Furthermore, load forecasting and demand response rely heavily on continuous and accurate user power profiles to facilitate power market clearing and the formulation of orderly power utilization schemes. Data-driven electricity theft detection algorithms, which identify abnormal power consumption patterns to assist on-site inspections, are also a critical component of anti-electricity theft efforts in urban areas.\n\nHowever, the deployment of smart meters in urban low-voltage distribution networks presents several challenges. These devices often operate under complex and harsh on-site conditions, which threaten the quality of the data they collect. Factors such as high temperature, high humidity, and severe electromagnetic interference, coupled with unstable communication links like power line carriers, RS485, and public wireless networks, contribute to data quality issues. Additionally, aging metering components within the meters, clock drift, man-made electricity theft, and wiring errors further exacerbate these problems. According to statistics from a provincial branch of the State Grid Corporation of China, a medium-sized prefecture-level power company records tens of thousands of abnormal data entries daily, with some transformer districts experiencing an abnormal data rate exceeding 5%. These data quality issues severely impede data-driven analysis and decision-making for distribution networks, potentially leading to misjudgments and economic losses.\n\nThe data quality problems of smart meters can be categorized into five typical anomalies based on their physical causes and external manifestations: sudden jump, reading stagnation, reverse reading, pulse spike, and gradual drift. Each of these anomalies has distinct data characteristics, duration, and physical mechanisms, making it impossible for a single method to effectively address all of them. In recent years, researchers have extensively studied anomaly detection and data recovery technologies for smart meter data, yielding several significant outcomes.\n\nIn the realm of anomaly detection, various technical routes have been explored, including statistical methods, machine learning, and deep learning algorithms. For example, one study systematically reviews the mainstream techniques for time-series anomaly detection in smart grids, while another proposes a CNN-LSTM method based on cross-layer feature fusion for intrusion detection in advanced metering infrastructure. These methods have shown promising results in identifying anomalies from time-series data. However, they often fall short in analyzing the correlation between the physical causes and external manifestations of smart meter data anomalies. Similarly, hybrid deep learning frameworks have been developed to improve detection accuracy, but they often overlook the physical constraints of meter data in model design.\n\nData recovery methods have also been a focus of research. One study presents a data recovery method for user-side meter collected data based on an improved multi-classifier, which can effectively impute missing and abnormal data. Another investigates missing data imputation for power systems and develops a smart meter data interpolation method tailored for energy management systems. These methods, while effective, often lack validation on the physical feasibility of the recovered data. Other research explores advanced interpolation approaches for bad and missing smart meter data, combining statistics and machine learning, but still struggles to achieve collaborative processing of detection and recovery.\n\nIn conclusion, while significant progress has been made in smart meter data repair and anomaly detection, there is a pressing need for methods that not only detect and recover data but also ensure the physical rationality and feasibility of the results. Future research should focus on developing collaborative optimization mechanisms that integrate physical constraints into the recovery process, thereby enhancing the reliability and applicability of smart meter data in urban energy distribution networks.",
+    "wordCount": 782,
+    "paragraphCount": 7,
+    "cleanSentenceBoundary": true,
+    "blindSliced": false,
+    "provider": "minimax",
+    "model": "MiniMax-Text-01",
+    "callsUsed": 1,
+    "tokensUsed": 2905,
+    "usage": {
+      "callsObserved": 1,
+      "promptTokensFromResponses": 1978,
+      "completionTokensFromResponses": 927,
+      "totalTokensFromResponses": 2905,
+      "costUsdFromProviderUsage": 0.0,
+      "providerModelByCall": [
+        {
+          "provider": "minimax",
+          "model": "MiniMax-Text-01",
+          "promptTokens": 1978,
+          "completionTokens": 927,
+          "totalTokens": 2905,
+          "accountingType": "reported",
+          "costUsdFromProviderUsage": 0.0,
+          "providerLatencySeconds": 26.9524,
+          "attempts": 1
+        }
+      ]
+    },
+    "latencySeconds": 27.08,
+    "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+    "config": {
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "styleProfile": "DISCURSIVE_ANALYTICAL",
+      "wordCountBounds": {
+        "minimum": 720,
+        "maximum": 915
+      }
+    },
+    "hasSentenceIds": false,
+    "hasAuthoritativeCAS": false,
+    "persistenceEvidence": {
+      "classification": "LEGACY_NO_ACCEPTED_V2_ARTIFACT",
+      "authoritativeCasProven": false
+    },
+    "groundingEvaluation": {
+      "status": "PASS",
+      "score": 1.0,
+      "totalIssues": 0,
+      "blockingIssues": 0,
+      "issueCodes": []
+    }
+  },
+  "v2": {
+    "campaignCaseId": "g08_PMC13517498_v2",
+    "runId": "bench_1cbf3503c2b7ee5ec553957d83ff0d5f",
+    "engine": "V2_PassageLoop",
+    "decision": "FAIL",
+    "callsUsed": 4,
+    "tokensUsed": 39000,
+    "provider": "minimax",
+    "model": "MiniMax-Text-01",
+    "config": {
+      "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+      "styleProfile": "DISCURSIVE_ANALYTICAL",
+      "promptVersion": "2.1.0",
+      "wordCountBounds": {
+        "minimum": 720,
+        "maximum": 915
+      },
+      "loopCapsProfile": {
+        "version": "phase06-production-v1",
+        "source": "deploy/envs/loop-caps.env"
+      }
+    },
+    "usage": {
+      "callsObserved": 1,
+      "promptTokensFromResponses": 1802,
+      "completionTokensFromResponses": 1203,
+      "totalTokensFromResponses": 3005,
+      "costUsdFromProviderUsage": 0.0,
+      "providerModelByCall": [
+        {
+          "provider": "minimax",
+          "model": "MiniMax-Text-01",
+          "promptTokens": 1802,
+          "completionTokens": 1203,
+          "totalTokens": 3005,
+          "accountingType": "reported",
+          "costUsdFromProviderUsage": 0.0,
+          "providerLatencySeconds": 39.5488,
+          "attempts": 1
+        }
+      ]
+    },
+    "latencySeconds": 40.363,
+    "configSha256": "3e9881741d32ffc5a6bfa6e75e910099b2d84446ab53e344e6c98cc3c0dc51b4",
+    "authoritativeOperations": [
+      {
+        "operationId": "g08-input-6582cf0c94ae4f779e4c765aec0a3290",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "d077b9c6484f0c51cb90b8229c7be29830ce1d5a143b02f2d678591b413ff4ea"
+      },
+      {
+        "operationId": "g08-input-56f20c85f9c34fb9841433ab713dea9c",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "d17ec9e8f72d0f703700f71132ac4991fe67997e22d7b233658cfa6aeed7ad61"
+      },
+      {
+        "operationId": "g08-input-d098c53000ab455da82f7fb8579b49e1",
+        "operationType": "CHECKPOINT_COMMIT",
+        "status": "COMPLETED",
+        "tokenReservation": 0,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "UNKNOWN",
+        "isReplay": false,
+        "requestHash": "dd720661727825850dc4aaaf8646b90e353608b728f388a70788a76e0abec3a2"
+      },
+      {
+        "operationId": "loop:bench_1cbf3503c2b7ee5ec553957d83ff0d5f:art_passage_s1:GENERATE:1:2.0.0",
+        "operationType": "GENERATE",
+        "status": "COMPLETED",
+        "tokenReservation": 9000,
+        "tokensUsed": 9000,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "7c825abcfb7ede299e4a65efcc6edf71cfa450dba895ca460baa91bacd88d86c"
+      },
+      {
+        "operationId": "op_pass_gen_23faf8ba",
+        "operationType": "PROVIDER_CALL",
+        "status": "COMPLETED",
+        "tokenReservation": 12753,
+        "tokensUsed": 3005,
+        "tokensPrompt": 1802,
+        "tokensCompletion": 1203,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "c2b1b2c9c930254e48ffb7acd3159ed72f24337da628eaa668b5c4f3c3bad89b"
+      },
+      {
+        "operationId": "loop:bench_1cbf3503c2b7ee5ec553957d83ff0d5f:art_passage_s1:EVALUATE:1:eval_passage_word_count:1.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "b26f61e9f565fec9aacae875c2de3f7995c2c3d87c8f747e88126abf28dffdd8"
+      },
+      {
+        "operationId": "loop:bench_1cbf3503c2b7ee5ec553957d83ff0d5f:art_passage_s1:EVALUATE:1:eval_passage_style:1.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "9e0fd03398513eae5d76fd6e9995bc920c4f85318b97d6dbce68d9d5a2907f7a"
+      },
+      {
+        "operationId": "loop:bench_1cbf3503c2b7ee5ec553957d83ff0d5f:art_passage_s1:EVALUATE:1:eval_grounding_fidelity:2.0.0",
+        "operationType": "EVALUATE",
+        "status": "COMPLETED",
+        "tokenReservation": 10000,
+        "tokensUsed": 0,
+        "tokensPrompt": 0,
+        "tokensCompletion": 0,
+        "accountingType": "REPORTED",
+        "isReplay": false,
+        "requestHash": "512012746b4910ea2df789c2300cfdbf49d9501c12aa837bbce646021d4d8dbd"
+      }
+    ],
+    "versionTraces": [],
+    "artifactId": null,
+    "acceptedArtifactRef": null,
+    "acceptedParentRefs": [],
+    "title": "Smart Meter Data Repair and Urban Energy Distribution",
+    "passage": "",
+    "wordCount": 0,
+    "paragraphCount": 0,
+    "sentenceCount": 0,
+    "cleanSentenceBoundary": false,
+    "blindSliced": false,
+    "hasSentenceIds": false,
+    "hasAuthoritativeCAS": false,
+    "persistenceEvidence": {
+      "classification": "AUTHENTICATED_DOTNET_CHECKPOINT_API",
+      "acceptedHeadVerified": false,
+      "authoritativeCasProven": false,
+      "operationCount": 8
+    },
+    "terminalReason": "WALL_TIME_CAP: deadline exhausted",
+    "groundingEvaluation": {
+      "status": "PASS",
+      "score": 1.0,
+      "totalIssues": 0,
+      "blockingIssues": 0,
+      "issueCodes": []
+    }
+  },
+  "comparison": {
+    "wordCountInBounds": {
+      "legacy": true,
+      "v2": false
+    },
+    "cleanSentenceBoundary": {
+      "legacy": true,
+      "v2": false
+    },
+    "groundingStatus": {
+      "legacy": "PASS",
+      "v2": "PASS"
+    },
+    "v2AcceptedArtifactRef": null
+  }
+}

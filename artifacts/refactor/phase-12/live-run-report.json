@@ -1,0 +1,104 @@
+{
+  "campaignId": "camp_g12_paper_minimax_0d34d9121c35_v2",
+  "caseId": "case_g12_0d34d912_v2",
+  "examId": null,
+  "slug": null,
+  "jobId": "aa4a4778-ca4e-49c3-864e-1de1363c36ae",
+  "runId": "bench_e6014f9fcdee6a7b5b0b7a37620f7b57",
+  "manifestHash": "d266b38e6003105d905b2e2e00efd6d7a975df4f81c55267e0b42c544a6a8136",
+  "manifestPath": "/home/code/workspaces/langfens/Project_Langfens_Microservice/artifacts/refactor/phase-12/campaigns/camp_g12_paper_minimax_0d34d9121c35_v2_manifest.json",
+  "liveCampaignManifest": {
+    "manifestVersion": "2.1.0",
+    "bindingHash": "0d34d9121c35",
+    "corpusSha256": "1c010632bc69356fe9f73cd074f1a53c5885311d400b623158c34f8e00216e1d",
+    "configSha256": "26ece7ee20f40b0257c1158c7a33aeea26d320d3eddf87e8cf1159d634c106ab",
+    "model": "MiniMax-Text-01",
+    "policy": "EXPLICIT_UNLIMITED_BENCHMARK_NO_MANUAL_AUTH",
+    "examPort": 5199,
+    "genPort": 8192,
+    "dbName": "exam_test_phase12_g12"
+  },
+  "status": "FAILED",
+  "startedAt": "2026-10-07T19:53:56.756962+00:00",
+  "durationSeconds": 491.2,
+  "rawOutcomes": [
+    {
+      "check": 1,
+      "name": "authoritative_dotnet_worker_completes_job",
+      "result": "FAIL",
+      "detail": "ReadingPaperWorker threw InvalidOperationException: Paper generation failed: invalid paper envelope response from AI service. Generation-service paper loop terminated with non-accepted envelope (ANSWER_LEAKAGE CRITICAL on Question 37 persisted across all 3 versions / 30 cursor revisions within LOOP_MAX_VERSIONS and LOOP_MAX_TOTAL_REPAIRS caps)."
+    },
+    {
+      "check": 2,
+      "name": "draft_exam_structure_3_sections_40_questions_13_13_14",
+      "result": "NOT_RUN",
+      "detail": "Not reached: worker never produced accepted Draft Exam (slip-link to fixture failing check 1)."
+    },
+    {
+      "check": 3,
+      "name": "word_policies_per_section_720_915_total_2150_2750",
+      "result": "NOT_RUN",
+      "detail": "Not reached."
+    },
+    {
+      "check": 4,
+      "name": "admin_publish_put_api_admin_exam_update_id_returns_200",
+      "result": "NOT_RUN",
+      "detail": "Not reached: no ExamId produced."
+    },
+    {
+      "check": 5,
+      "name": "student_projection_isolation_get_api_public_exam_getby_slug",
+      "result": "NOT_RUN",
+      "detail": "Not reached."
+    },
+    {
+      "check": 6,
+      "name": "idempotent_replay_returns_same_examid_with_isExisting_true",
+      "result": "NOT_RUN",
+      "detail": "Not reached."
+    },
+    {
+      "check": 7,
+      "name": "sanitized_transport_evidence_recorded",
+      "result": "PASS",
+      "detail": "artifacts/refactor/phase-12/sanitized-transport-evidence.jsonl contains 73 sanitized records (35 from this run, all provider=minimax model=MiniMax-Text-01); no API keys, bearer tokens, or Authorization headers leaked (regex scan clean)."
+    }
+  ],
+  "providerCallCounts": {
+    "allRuns_total": 73,
+    "thisRun_total": 35,
+    "allRuns_byProvider": {
+      "minimax": 73
+    },
+    "thisRun_byProvider": {
+      "minimax": 35
+    }
+  },
+  "transportEvidence": {
+    "path": "/home/code/workspaces/langfens/Project_Langfens_Microservice/artifacts/refactor/phase-12/sanitized-transport-evidence.jsonl",
+    "totalRecords": 73,
+    "thisRunRecords": 35,
+    "scan": {
+      "secretLeakRegexHits": 0,
+      "secretsPresent": false
+    }
+  },
+  "services": {
+    "exam-service": {
+      "url": "http://127.0.0.1:5199",
+      "health": "Healthy",
+      "binary_sha": "fa34a67bab20"
+    },
+    "generation-service": {
+      "url": "http://127.0.0.1:8192",
+      "health": "Healthy"
+    }
+  },
+  "rootCause": {
+    "stage": "ReadingPaperWorker.Process (services/exam-service/Features/ReadingPaper/ReadingPaperWorker.cs:671)",
+    "exception": "System.InvalidOperationException: Paper generation failed: invalid paper envelope response from AI service",
+    "cause": "Generation-service paper-v2 loop reached terminal decision with no accepted artifact envelope (LOOP_MAX_VERSIONS=3, LOOP_MAX_TOTAL_REPAIRS=5 caps reached; eval_paper_leakage reported persistent ANSWER_LEAKAGE CRITICAL on Question 37 across all paper revisions). Worker requires artifactId in response; terminal decision shape {decision, terminalReason, terminalReasonCode} lacks it."
+  },
+  "endedAt": "2026-10-07T20:02:08+00:00"
+}

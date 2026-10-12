@@ -1,0 +1,38 @@
+{
+  "caseIndex": 16,
+  "engine": "Legacy_V1",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LEGACY_SHADOW",
+  "campaignId": "camp_G15_d2c833c1c04f",
+  "seed": 101,
+  "runId": "bench_5426986f097e48ae50c05db4406ddedf",
+  "jobId": "c51578a5-1ed6-49cb-a142-2b8ed60f096d",
+  "sourceTriple": [
+    "PMC13583341",
+    "PMC13560651",
+    "PMC13407692"
+  ],
+  "status": "FAILED",
+  "validDraft": false,
+  "failureReason": "Failed to generate valid replacement for question 4 after 3 attempts: Question 4 Evidence quote is absent from passage",
+  "versionsCount": 1,
+  "evaluatorIssues": [
+    "LEGACY_FAILURE: Failed to generate valid replacement for question 4 after 3 attempts: Question 4 Evidence quote is absent from passage"
+  ],
+  "latencySeconds": 448.4784,
+  "totalTokens": 106989,
+  "reportedTokens": 106989,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 43,
+  "uniqueProviderDispatches": 43,
+  "estimatedCostUsd": 0.267473,
+  "persistedExamId": null,
+  "draftExamId": null,
+  "isPrimaryPersisted": false,
+  "legacyCallsCount": 44,
+  "totalQuestions": 0,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

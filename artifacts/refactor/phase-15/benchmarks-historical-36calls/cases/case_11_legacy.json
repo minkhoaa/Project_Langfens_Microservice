@@ -1,0 +1,29 @@
+{
+  "caseIndex": 11,
+  "engine": "Legacy_V1",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LEGACY_SHADOW",
+  "seed": 202,
+  "runId": "bench_legacy_case_11_s202",
+  "sourceTriple": [
+    "PMC13621526",
+    "PMC13503497",
+    "PMC13583341"
+  ],
+  "status": "ACCEPTED",
+  "validDraft": true,
+  "versionsCount": 1,
+  "evaluatorIssues": [],
+  "latencySeconds": 1.1389,
+  "totalTokens": 49349,
+  "estimatedCostUsd": 0.098698,
+  "persistedExamId": null,
+  "isPrimaryPersisted": false,
+  "legacyCallsCount": 15,
+  "totalQuestions": 40,
+  "liveCallSuccess": true,
+  "liveTokens": 132,
+  "liveLatencySeconds": 1.0916,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

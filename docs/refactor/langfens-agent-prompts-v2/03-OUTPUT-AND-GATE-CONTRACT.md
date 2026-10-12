@@ -22,10 +22,14 @@ Spawn agent cho nhiệm vụ cụ thể với inputs, files ownership, invariant
 
 Theo dõi running sessions/task IDs của tools; poll/await kết quả và exit codes. Tránh waits đơn lẻ vượt 60 giây; có update ngắn mỗi khoảng 60 giây về kết quả và bước xử lý. Không fire-and-forget tests/agents, không gọi process running là PASS, không hứa tiếp tục sau khi phiên kết thúc khi chưa có cơ chế chạy nền thực sự.
 
-Agent execution dài không làm tăng runtime caps của production. Mỗi provider call, retry, repair và benchmark vẫn dùng budgets/deadlines được cấu hình.
+Agent execution dài không làm tăng runtime caps của production (vẫn giữ nguyên hard caps 15 calls / 60k tokens / 300s cho production và các provider khác).
 
-Live campaigns có campaignId/caseId, manifest/status và reservation persisted. Sau lost output/agent restart, reconcile status/checkpoints trước retry; không chạy lại nguyên batch vì thiếu terminal transcript. Khi hết benchmark budget/deadline, checkpoint partial results, giữ gate non-pass và đưa kế hoạch cấp/resume budget cụ thể. Quan sát canary dài phải dùng cơ chế scheduling/monitoring thực sự được môi trường hỗ trợ; không sleep nhiều giờ hoặc tự ghi observation chưa diễn ra.
-
+Chính sách benchmark MiniMax tự động và caps (mặc định toàn bộ các phase):
+1. Live benchmark bắt buộc tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ hoàn toàn phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget và trạng thái chờ PENDING_AUTHORIZATION.
+2. Vô hiệu hóa toàn bộ call, token, monetary và wall-time caps do ứng dụng áp đặt cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn fallback về 15 calls / 60k tokens / 300s).
+3. Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request output/context limits; tôn trọng giới hạn thực tế phía provider.
+4. Live campaigns có campaignId/caseId, manifest/status và reservation persisted; sau restart/lost transcript thì reconcile status trước retry, không lặp lại tốn phí.
+5. Chính sách này áp dụng mặc định cho tất cả các phase còn lại, ngăn quy trình phê duyệt thủ công xuất hiện lại.
 ## 3. Preflight và snapshot thật
 
 Đọc AGENTS.md/CLAUDE.md áp dụng; khám phá actual paths/scripts/lockfiles; giữ changes của user. Không tự reset/stash/clean. Trước sửa, bind PNN work packages và TNN IDs vào symbols/tests thực tế.
@@ -42,6 +46,7 @@ Tách implementation, deterministic/integration, corpus integrity, live smoke, s
 
 Thiếu external quality evidence vẫn có thể coding phần downstream độc lập bằng fakes theo plan, nhưng không promote gate, không accept production artifact/final Draft từ unverified dependency và không gọi downstream đã nghiệm thu. Fake artifacts được dùng trong test environment phải ghi rõ simulation.
 
+Tách biệt phục hồi cục bộ và gate: Kết quả phục hồi độ bền cục bộ (như R05 QuestionCandidateLoop durability trên PostgreSQL thật) có thể PASS độc lập trong khi gate tổng thể (G09) vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites). Tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt; việc đạt gate vẫn bắt buộc có bằng chứng live benchmark đạt ngưỡng chất lượng.
 ## 5. Đầu ra bắt buộc của một phase
 
 Lưu theo conventions hiện có trong `artifacts/refactor/phase-NN/`. Cần có:

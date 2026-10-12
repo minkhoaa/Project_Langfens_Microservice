@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_0bb1136c",
+  "campaignId": "camp_g12_paper_minimax_0bb1136cf3fd_v1",
+  "jobId": "211e1173-7fd8-4ca5-9e28-ef90ec5dc17a",
+  "runId": "bench_054b977cdae805ef3b4166eb83772264",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T11:00:37.064197+00:00",
+  "error": "AI service returned 500: {\"detail\":\"'passageRef'\"}"
+}

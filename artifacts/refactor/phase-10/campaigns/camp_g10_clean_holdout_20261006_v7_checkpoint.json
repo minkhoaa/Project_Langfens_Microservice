@@ -1,0 +1,1486 @@
+{
+  "authorizationId": "auto-minimax-camp_g10_clean_holdout_20261006_v7",
+  "authorizationSha256": "ea8223fc9c6cef7d33911d21aa7fafe916c1e194a1fee9e7351411b16df82c0e",
+  "authorizedBy": "system-auto-minimax-benchmark",
+  "campaignId": "camp_g10_clean_holdout_20261006_v7",
+  "cases": {
+    "q_invalid_TrueFalseNotGiven_1": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "comparisonDetails": {
+            "mode": "TFNG_CANONICAL",
+            "questionType": "TrueFalseNotGiven"
+          },
+          "expectedAnswer": "TRUE",
+          "message": "Solver disagreed with expected key (expected 'TRUE', got 'FALSE') with valid cited passage evidence. Item is blocked from acceptance; answer key cannot be automatically changed.",
+          "solverAnswer": "FALSE"
+        },
+        "questionNumber": 1,
+        "resolutionAction": "REPAIR_KEY_OR_REGENERATE_ITEM",
+        "severity": "HIGH",
+        "solverMatch": false,
+        "verdict": "KEY_CONTRADICTED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_invalid_TrueFalseNotGiven_1",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "goldRefs": {
+        "criticalCanary": true,
+        "labelRationale": "The stem reverses or denies the source statement, so TRUE is a contradicted gold key.",
+        "sourceFamily": "surface_icing"
+      },
+      "groundTruthValid": false,
+      "inputHash": "71d5330ef71335c43d5faf966b09bc74343797f4354d8acf0c896d186b3bc20d",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "24a36da6b5feb3b77ad92e2ef03774dd3899d90f2f8aae98bd9b3627a8e97ec2",
+      "resultStatus": "FAIL",
+      "runId": "bench_23dc49277e4f9cb0376e8747b9046a28",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:45:54.289263+00:00",
+      "tokensReservedOrUsed": 3819
+    },
+    "q_invalid_TrueFalseNotGiven_2": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "comparisonDetails": {
+            "mode": "TFNG_CANONICAL",
+            "questionType": "TrueFalseNotGiven"
+          },
+          "expectedAnswer": "TRUE",
+          "message": "Solver disagreed with expected key (expected 'TRUE', got 'FALSE') with valid cited passage evidence. Item is blocked from acceptance; answer key cannot be automatically changed.",
+          "solverAnswer": "FALSE"
+        },
+        "questionNumber": 2,
+        "resolutionAction": "REPAIR_KEY_OR_REGENERATE_ITEM",
+        "severity": "HIGH",
+        "solverMatch": false,
+        "verdict": "KEY_CONTRADICTED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_invalid_TrueFalseNotGiven_2",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "goldRefs": {
+        "criticalCanary": true,
+        "labelRationale": "The stem reverses or denies the source statement, so TRUE is a contradicted gold key.",
+        "sourceFamily": "surface_icing"
+      },
+      "groundTruthValid": false,
+      "inputHash": "fc8af7695eb3f20e6dedd4ecbe0da3f24d0c7245cd8df3d4eca252bf590aa11c",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "db15cd7e6bc1b394cc6a95d40047e3866082db3071a0896d894578528705e956",
+      "resultStatus": "FAIL",
+      "runId": "bench_61024887e1797bd23452afb3a220b8df",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:46:10.012690+00:00",
+      "tokensReservedOrUsed": 3819
+    },
+    "q_invalid_TrueFalseNotGiven_3": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "comparisonDetails": {
+            "mode": "TFNG_CANONICAL",
+            "questionType": "TrueFalseNotGiven"
+          },
+          "expectedAnswer": "TRUE",
+          "message": "Solver disagreed with expected key (expected 'TRUE', got 'FALSE') with valid cited passage evidence. Item is blocked from acceptance; answer key cannot be automatically changed.",
+          "solverAnswer": "FALSE"
+        },
+        "questionNumber": 3,
+        "resolutionAction": "REPAIR_KEY_OR_REGENERATE_ITEM",
+        "severity": "HIGH",
+        "solverMatch": false,
+        "verdict": "KEY_CONTRADICTED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_invalid_TrueFalseNotGiven_3",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The stem reverses or denies the source statement, so TRUE is a contradicted gold key.",
+        "sourceFamily": "surface_icing"
+      },
+      "groundTruthValid": false,
+      "inputHash": "2bcb7e076fd8477d5a25700293e1ea53911e3b4bf6ea57131dba6a43a24afb11",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "1745ac00464f81e77947d95ba2c66bba3668d7739672882a1b63c4714a214aea",
+      "resultStatus": "FAIL",
+      "runId": "bench_2e529ccfa6fa1ee2ad3ecbd42a743704",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:46:24.142336+00:00",
+      "tokensReservedOrUsed": 3591
+    },
+    "q_invalid_TrueFalseNotGiven_4": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "comparisonDetails": {
+            "mode": "TFNG_CANONICAL",
+            "questionType": "TrueFalseNotGiven"
+          },
+          "expectedAnswer": "TRUE",
+          "message": "Solver disagreed with expected key (expected 'TRUE', got 'FALSE') with valid cited passage evidence. Item is blocked from acceptance; answer key cannot be automatically changed.",
+          "solverAnswer": "FALSE"
+        },
+        "questionNumber": 4,
+        "resolutionAction": "REPAIR_KEY_OR_REGENERATE_ITEM",
+        "severity": "HIGH",
+        "solverMatch": false,
+        "verdict": "KEY_CONTRADICTED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_invalid_TrueFalseNotGiven_4",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The stem reverses or denies the source statement, so TRUE is a contradicted gold key.",
+        "sourceFamily": "exoplanet_atmospheres"
+      },
+      "groundTruthValid": false,
+      "inputHash": "633365df5a9ab1e00fcfbe9b9fce02848e47d66b51f043ddb6dd9d2f2458edf6",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "444552b10292c7badcdf6e83eca3601398a6e33f8061cd755f3ebd4325db3b25",
+      "resultStatus": "FAIL",
+      "runId": "bench_a1c3e57a1f7413e3a82a59b2d713ccb7",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:46:39.015121+00:00",
+      "tokensReservedOrUsed": 3796
+    },
+    "q_invalid_TrueFalseNotGiven_5": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "comparisonDetails": {
+            "mode": "TFNG_CANONICAL",
+            "questionType": "TrueFalseNotGiven"
+          },
+          "expectedAnswer": "TRUE",
+          "message": "Solver disagreed with expected key (expected 'TRUE', got 'FALSE') with valid cited passage evidence. Item is blocked from acceptance; answer key cannot be automatically changed.",
+          "solverAnswer": "FALSE"
+        },
+        "questionNumber": 5,
+        "resolutionAction": "REPAIR_KEY_OR_REGENERATE_ITEM",
+        "severity": "HIGH",
+        "solverMatch": false,
+        "verdict": "KEY_CONTRADICTED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_invalid_TrueFalseNotGiven_5",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The stem reverses or denies the source statement, so TRUE is a contradicted gold key.",
+        "sourceFamily": "exoplanet_atmospheres"
+      },
+      "groundTruthValid": false,
+      "inputHash": "1084bba4608e98e87b828d145cffff6bbe55e3eeb41e4b74d6771547639a3645",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "60f9f7698e2be2e30c17005a2ce5d0907b0e7ee920a644730360e851a3fb1bcc",
+      "resultStatus": "FAIL",
+      "runId": "bench_0f78beef7224558e44cc6b5183b1016f",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:46:54.097800+00:00",
+      "tokensReservedOrUsed": 3802
+    },
+    "q_invalid_TrueFalseNotGiven_6": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "comparisonDetails": {
+            "mode": "TFNG_CANONICAL",
+            "questionType": "TrueFalseNotGiven"
+          },
+          "expectedAnswer": "TRUE",
+          "message": "Solver disagreed with expected key (expected 'TRUE', got 'FALSE') with valid cited passage evidence. Item is blocked from acceptance; answer key cannot be automatically changed.",
+          "solverAnswer": "FALSE"
+        },
+        "questionNumber": 6,
+        "resolutionAction": "REPAIR_KEY_OR_REGENERATE_ITEM",
+        "severity": "HIGH",
+        "solverMatch": false,
+        "verdict": "KEY_CONTRADICTED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_invalid_TrueFalseNotGiven_6",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The stem reverses or denies the source statement, so TRUE is a contradicted gold key.",
+        "sourceFamily": "exoplanet_atmospheres"
+      },
+      "groundTruthValid": false,
+      "inputHash": "8e083088abdd1bbd12dbd89ade3e77cb39aaa20a384299d852c18c3739b5b975",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "45f5bb617a264a9426f29aa6cc11c8f5f895b1eb47d1820a15fabe246fe534e3",
+      "resultStatus": "FAIL",
+      "runId": "bench_1562a482ebecdb2b6d14a1209b3ba652",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:47:09.527473+00:00",
+      "tokensReservedOrUsed": 4188
+    },
+    "q_invalid_TrueFalseNotGiven_7": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "comparisonDetails": {
+            "mode": "TFNG_CANONICAL",
+            "questionType": "TrueFalseNotGiven"
+          },
+          "expectedAnswer": "TRUE",
+          "message": "Solver disagreed with expected key (expected 'TRUE', got 'FALSE') with valid cited passage evidence. Item is blocked from acceptance; answer key cannot be automatically changed.",
+          "solverAnswer": "FALSE"
+        },
+        "questionNumber": 7,
+        "resolutionAction": "REPAIR_KEY_OR_REGENERATE_ITEM",
+        "severity": "HIGH",
+        "solverMatch": false,
+        "verdict": "KEY_CONTRADICTED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_invalid_TrueFalseNotGiven_7",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The stem reverses or denies the source statement, so TRUE is a contradicted gold key.",
+        "sourceFamily": "subsurface_fracture_hydraulics"
+      },
+      "groundTruthValid": false,
+      "inputHash": "df6b7dd46fd20e4c1ba85777b4a3f9f7ea40e2791ce373ca8f31a250ea9efabc",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "ee21c3f0868ba1f3f285382ad2d3fe03883bd2cc42ac1b7398a13d129fdc1cab",
+      "resultStatus": "FAIL",
+      "runId": "bench_daed502473cb3511afac58653b4728d4",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:47:24.268043+00:00",
+      "tokensReservedOrUsed": 4242
+    },
+    "q_invalid_TrueFalseNotGiven_8": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "comparisonDetails": {
+            "mode": "TFNG_CANONICAL",
+            "questionType": "TrueFalseNotGiven"
+          },
+          "expectedAnswer": "TRUE",
+          "message": "Solver disagreed with expected key (expected 'TRUE', got 'FALSE') with valid cited passage evidence. Item is blocked from acceptance; answer key cannot be automatically changed.",
+          "solverAnswer": "FALSE"
+        },
+        "questionNumber": 8,
+        "resolutionAction": "REPAIR_KEY_OR_REGENERATE_ITEM",
+        "severity": "HIGH",
+        "solverMatch": false,
+        "verdict": "KEY_CONTRADICTED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_invalid_TrueFalseNotGiven_8",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "UNSUPPORTED_OR_CONTRADICTED_CLAIM",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The stem reverses or denies the source statement, so TRUE is a contradicted gold key.",
+        "sourceFamily": "subsurface_fracture_hydraulics"
+      },
+      "groundTruthValid": false,
+      "inputHash": "39e2992b1fd68d5bef058469cdb03c25348c205883e89f09ef438345ae678489",
+      "isBlocking": true,
+      "issueCodes": [
+        "UNSUPPORTED_OR_CONTRADICTED_CLAIM"
+      ],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "c06bbfc682a3022c31dd6433b79f843f4ab1af991aae4f08705a15bd9a69902a",
+      "resultStatus": "FAIL",
+      "runId": "bench_135a5d68411516e95dcc15aa52067967",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:47:39.635812+00:00",
+      "tokensReservedOrUsed": 4562
+    },
+    "q_valid_TrueFalseNotGiven_1": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "TRUE"
+        },
+        "questionNumber": 1,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_1",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The passage directly lists those sectors.",
+        "sourceFamily": "surface_icing"
+      },
+      "groundTruthValid": true,
+      "inputHash": "1f0638a97989035ad804c3349e1507dcd11b9c528d32e069539fb75d019f2669",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "cc29105c2d674100e54eb925b8a7791c31664784a30607eb975a64e00deef7c3",
+      "resultStatus": "PASS",
+      "runId": "bench_b32b8d54955112295df0bc2739ff97a4",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:43:23.828806+00:00",
+      "tokensReservedOrUsed": 3654
+    },
+    "q_valid_TrueFalseNotGiven_10": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "NOT_GIVEN"
+        },
+        "questionNumber": 10,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_10",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The source passage is a research perspective and reports no such patient trial or sample size.",
+        "sourceFamily": "engram_memory"
+      },
+      "groundTruthValid": true,
+      "inputHash": "b9986d16c198d80005c0703ee8ffd9ed60406f03889f6b401ca1f39d8a9a197f",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "54a716cae4bec438b8b3344b65310f5f793cc7a2157dd44db124152397d3987e",
+      "resultStatus": "PASS",
+      "runId": "bench_7b9990561d4ca74eaf2a7262caa6fac6",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:45:39.731788+00:00",
+      "tokensReservedOrUsed": 4263
+    },
+    "q_valid_TrueFalseNotGiven_2": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "TRUE"
+        },
+        "questionNumber": 2,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_2",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The excerpt explicitly names the lotus effect and its water-droplet behavior.",
+        "sourceFamily": "surface_icing"
+      },
+      "groundTruthValid": true,
+      "inputHash": "cd241d88d070b34bd0ab608531e3e1ee4e216c6f75fc25faa5e4e1fd245a1192",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "10fb225743ea7d55d3ff31063db38b3aa9359b58c31a264d7fb69e911d6b5ba6",
+      "resultStatus": "PASS",
+      "runId": "bench_07073fbd0bedfa9fb891a2f7109c1a93",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:43:38.902553+00:00",
+      "tokensReservedOrUsed": 3572
+    },
+    "q_valid_TrueFalseNotGiven_3": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "TRUE"
+        },
+        "questionNumber": 3,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_3",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The opening sentence directly states this.",
+        "sourceFamily": "exoplanet_atmospheres"
+      },
+      "groundTruthValid": true,
+      "inputHash": "314f9a806008c2e10014173e7270c7ffaa77990db0f0174b4679fb0793f04134",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "583b1e8a3f253a7bf1d7b94e6aca4f169a43350e9f13ff376f643c981b785112",
+      "resultStatus": "PASS",
+      "runId": "bench_665e30de2dc71c5da0219575b5890b50",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:43:53.913737+00:00",
+      "tokensReservedOrUsed": 3872
+    },
+    "q_valid_TrueFalseNotGiven_4": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "TRUE"
+        },
+        "questionNumber": 4,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_4",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The source sentence states that fractures often act as primary conduits.",
+        "sourceFamily": "subsurface_fracture_hydraulics"
+      },
+      "groundTruthValid": true,
+      "inputHash": "2f53f62242a3195c2f0f71deb3d7ad8bc26e258125226777a49396b31c7229ee",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "f52af26382c13c3cdea7573f373d34c8e8d39348d5c27cdddbea5492902aa9c6",
+      "resultStatus": "PASS",
+      "runId": "bench_f69e3c91f134cad2dfc50e25bdd90170",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:44:08.789509+00:00",
+      "tokensReservedOrUsed": 4168
+    },
+    "q_valid_TrueFalseNotGiven_5": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "FALSE"
+        },
+        "questionNumber": 5,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_5",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The quoted text explicitly says that they harvest solar radiation.",
+        "sourceFamily": "surface_icing"
+      },
+      "groundTruthValid": true,
+      "inputHash": "69d28dd6f4983380e747f057e02b0d18c0db7498d993537d777236e3f2cdf7cc",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "454a0250201f1ccc5ba823530e905dcb27a8dcbe0c0264faf020dcb725d53ef2",
+      "resultStatus": "PASS",
+      "runId": "bench_bd736802d944358fcaa820053731a4f9",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:44:24.015030+00:00",
+      "tokensReservedOrUsed": 3659
+    },
+    "q_valid_TrueFalseNotGiven_6": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "FALSE"
+        },
+        "questionNumber": 6,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_6",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The source says those limitations often prevented thorough assessments.",
+        "sourceFamily": "exoplanet_atmospheres"
+      },
+      "groundTruthValid": true,
+      "inputHash": "2c59f43efe0458f0355b55ece4eacbbcbb331495accef5a9147e91294bdee215",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "43f3059c3c56697382b515b833fc253238c1a747605080a1bc8e8126c03d7449",
+      "resultStatus": "PASS",
+      "runId": "bench_bafdabdccf0a680fa2d38590ae63fbb9",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:44:38.992114+00:00",
+      "tokensReservedOrUsed": 3810
+    },
+    "q_valid_TrueFalseNotGiven_7": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "FALSE"
+        },
+        "questionNumber": 7,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_7",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The source explicitly says EGS rely on fractured reservoir systems.",
+        "sourceFamily": "subsurface_fracture_hydraulics"
+      },
+      "groundTruthValid": true,
+      "inputHash": "f211af62f66ab5f2f1c28313ba9e2afc44d606ce4da0678da15250980c8c19b6",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "4396eadd388d2ce611e68a6d0b041826f3a5c93c2dedb32fc4ee7d9f59766260",
+      "resultStatus": "PASS",
+      "runId": "bench_d14d96eba6d71d82c0e90cf98f0bd4e2",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:44:54.029784+00:00",
+      "tokensReservedOrUsed": 4197
+    },
+    "q_valid_TrueFalseNotGiven_8": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "NOT_GIVEN"
+        },
+        "questionNumber": 8,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_8",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The provided article excerpt discusses icing sectors and mechanisms but gives no such flight-trial result.",
+        "sourceFamily": "surface_icing"
+      },
+      "groundTruthValid": true,
+      "inputHash": "aaa6fa16cb53263a002fd0b83c2b5748fedd2d8ac1cb85aacdb6dddb89f7d3e0",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "cf1cd5804dfa6d3353705979386c1f27230961e7c1397f98473198478d0708a7",
+      "resultStatus": "PASS",
+      "runId": "bench_069fca5703a2a778df565cce58dae129",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:45:09.431790+00:00",
+      "tokensReservedOrUsed": 4143
+    },
+    "q_valid_TrueFalseNotGiven_9": {
+      "adjudication": {
+        "adversaryAmbiguityFound": false,
+        "details": {
+          "message": "Item passed blind solver verification and adversary review with zero ambiguity.",
+          "normalizedAnswer": "NOT_GIVEN"
+        },
+        "questionNumber": 9,
+        "resolutionAction": "ACCEPT_ITEM",
+        "severity": "NONE",
+        "solverMatch": true,
+        "verdict": "KEY_CONFIRMED"
+      },
+      "adversaryModel": "openai/gpt-oss-20b",
+      "adversaryPromptVersion": "v1.0.0",
+      "adversaryProvider": "groq",
+      "callsUsed": 2,
+      "caseId": "q_valid_TrueFalseNotGiven_9",
+      "completionStatus": "COMPLETED",
+      "evaluatorVersion": "1.0.0",
+      "expectedIssueCode": "",
+      "goldRefs": {
+        "criticalCanary": false,
+        "labelRationale": "The provided exoplanet excerpt gives no such universal distance measurement.",
+        "sourceFamily": "exoplanet_atmospheres"
+      },
+      "groundTruthValid": true,
+      "inputHash": "89c123867795c2c91bfcee39c2e639706354c725deda7539bf85436fca0b6385",
+      "isBlocking": false,
+      "issueCodes": [],
+      "operationalCodes": [],
+      "providersIndependent": true,
+      "questionType": "TrueFalseNotGiven",
+      "requestTraceHash": "62c20a3a8d5b733a0dd86e6a9285ebe7e128ffb7923f46ddf6bd8e268030506a",
+      "resultStatus": "PASS",
+      "runId": "bench_689db2fa9899bf4f8a98583170ab2b69",
+      "solverModel": "MiniMax-Text-01",
+      "solverPromptVersion": "v1.0.0",
+      "solverProvider": "minimax",
+      "sourceCaseId": null,
+      "suite": "clean_question_holdout",
+      "timestamp": "2026-10-06T01:45:25.634086+00:00",
+      "tokensReservedOrUsed": 5104
+    }
+  },
+  "claimId": "796a4326e9e74830a47cd97098022d86",
+  "configSha256": "379b60c8141e2a3f338ddd72ddbcafa5e19c0e7799f5ab52128bdf1b198939c7",
+  "fidelityCorpusSha256": "e4ae0987939f02bddadf048786b12451957af24373d107af95784ba7f78d4e31",
+  "freezeId": "g07-g10-clean-holdout-candidate-v3",
+  "incompleteCases": {},
+  "questionCorpusSha256": "2d8362ff84853e70e7cb07840e672ec0948aa5381355686cd8ae326a4c4955bc",
+  "requestTraces": {
+    "q_invalid_TrueFalseNotGiven_1": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "862a61f3428fb54a04e042bdfec076ec72def35913fbba853ce0943e3c496d64",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "71d5330ef71335c43d5faf966b09bc74343797f4354d8acf0c896d186b3bc20d",
+      "caseId": "q_invalid_TrueFalseNotGiven_1",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "a3cc38724a2db7c207c1996f6d43ad6483cb5feac7a4c2ba112cc0618bd558c5",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Surface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation not only raises energy consumption and deteriorates the operational efficiency of facilities, but also may trigger structural failure and even catastrophic safety hazards [1,2]. For instance, ice coverage on aircraft wings distorts aerodynamic profiles, impairing aircraft maneuverability and flight mileage. Ice accretion on wind turbine blades drastically cuts power output, while ice load on power transmission lines may lead to wire breakage and tower collapse [1,3]. Conventional anti-icing approaches, such as electrothermal deicing, chemical deicer spraying and mechanical ice removal, are partially functional yet plagued by inherent limitations: excessive power consumption, severe environmental pollution, low working efficiency, as well as strict constraints from geographical and climatic conditions [4,5]. Accordingly, novel eco-friendly and high-efficiency anti-icing technologies are urgently required to satisfy the growing demands from industrial and civil applications. Driven by the growing demand for functional surfaces capable of ice prevention and ice suppression, research on superhydrophobic photothermal anti-icing coatings and bionic ice-resistant surfaces has attracted extensive attention from scholars worldwide in recent years (Figure 1). The bibliometric data presented in Figure 1 were retrieved from the Web of Science Core Collection using the search keywords “biomimetic” OR “bioinspired” OR “bionic” combined with “superhydrophob” OR “super-hydrophob” and “anti-icing” OR “deicing” OR “icephob” and “photothermal” OR “solar-thermal”, covering the period from 2009 to 2026. The search was restricted to peer-reviewed journal articles and review papers written in English. Duplicate records were removed, and the titles and abstracts of the retrieved papers were screened to exclude studies not relevant to photothermal anti-icing surfaces. The reference lists of key review articles were also manually checked to identify any additional studies not captured by the database search. The extracted records were analyzed by publication year to illustrate the temporal growth trend in this research field. Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces. Over hundreds of millions of years of natural evolution, numerous biological surfaces have evolved outstanding ice-resistant capabilities, serving as abundant sources of inspiration for bionic engineering design [6]. For example, the combination of micro-nano rough textures and low-surface-energy waxy coatings on lotus leaves endows the surfaces with superhydrophobicity known as the lotus effect, which allows water droplets to slide off readily and removes liquid water before ice formation occurs [7]. Moreover, the scale architectures on certain butterfly wings not only exhibit superhydrophobic characteristics, but also efficiently harvest solar radiation through unique photonic configurations to generate localized heat via photothermal effects [8]. These sophisticated natural architectures have inspired researchers to integrate superhydrophobicity with photothermal performance for fabricating bionic photothermal anti-icing surfaces, so as to achieve synergistic passive ice suppression and active ice removal [9,10]. In recent years, embedding photothermal substances (carbon nanotubes, graphene, metallic nanoparticles, MXene, etc.) into bionic micro-nano architectures to achieve rapid and uniform local temperature rise via solar energy utilization has emerged as a cutting-edge research focus within the anti-icing field [11,12]. Benefiting from trapped air pockets generated by superhydrophobic micro-nano textures, such surfaces suppress ice nucleation and weaken ice adhesion force, delivering passive ice inhibition performance [13]. Once ice forms on the surface, embedded photothermal fillers swiftly convert incident solar light into thermal energy under sunlight irradiation, elevating surface temperature to melt accumulated ice and realize active deicing [8,14]. The dual-mode strategy integrating passive anti-icing and solar-driven active deicing features outstanding energy conservation and environmental compatibility. More importantly, it remedies the fatal shortcoming of pure superhydrophobic surfaces, which readily lose functionality under harsh conditions (high humidity, subzero temperatures) when micro-nano cavities are filled and locked by ice crystals [9,10]. Centered on bionic photothermal anti-icing surfaces, this review systematically summarizes state-of-the-art research advances from five dimensions: fundamental design principles, material systems, fabrication techniques, performance optimization strategies and practical engineering applications. To begin with, core design mechanisms of photothermal anti-icing surfaces are elaborated, involving superhydrophobic theories, photothermal conversion pathways and synergistic anti-icing principles [12,15]. Afterward, representative material candidates for constructing such functional surfaces are categorized and illustrated, including carbon-based fillers (carbon nanotubes, graphene), metals and their derivatives (nanoparticles, MXene), semiconductors and polymer substrates [8,16]. Widely adopted manufacturing routes including spray coating, laser ablation, layer-by-layer self-assembly and template replication, are further summarized, with their respective merits and drawbacks thoroughly analyzed [4,17]. On this basis, performance enhancement approaches are discussed, including hierarchical and Janus structural design as well as multicomponent composite modification via phase change material incorporation [18,19]. Ultimately, the practical application potential of bionic photothermal anti-icing surfaces in aerospace, power grids and transportation sectors is prospected.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Surface icing poses no challenge to aerospace, power transmission, refrigeration equipment, or wind power generation.",
+          "questionNumber": 1,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "24a36da6b5feb3b77ad92e2ef03774dd3899d90f2f8aae98bd9b3627a8e97ec2",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_10": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "a36faa6bbe3d254bcd3013af3cbcfb4dfee7e7d806ab160a126d33513994d6ca",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "f3a0707fc4e611bdca0c4e1fb77efc51507e0213b2b3a3a8a5a54e5d83f2a7b0",
+      "caseId": "q_invalid_TrueFalseNotGiven_10",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "7cbdeee0ecad17a232702f5dd975069e975f0b7554434d2ec0cf8c86c7c0b81f",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Unraveling the neural substrates of learning and memory is a fundamental pursuit in neuroscience, with engram cells emerging as a cornerstone of contemporary memory research. The concept of the “engram” was first articulated by Richard Semon in the early 20th century, however, its experimental validation awaited nearly a century of technological and conceptual advancements. Seminal research led by Tonegawa and colleagues provided compelling evidence that memory can be traced to discrete neuronal ensembles, whose selective reactivation is sufficient to drive the encoding, storage, and retrieval of specific memory traces (Josselyn and Tonegawa, 2020; Tonegawa et al., 2015). This framework has not only reshaped mechanistic models of memory, but also opened a transformative avenue for interrogating cognitive decline in brain disorders. Progressive memory impairment is a shared clinical feature of AD, PD, and HD. Comparative neuropsychological studies indicate that all three disorders exhibit significant deficits in explicit and episodic memory, although they differ in the specific profiles of new learning and memory performance (Pillon et al., 1993; Aretouli and Brandt, 2010). Despite this shared phenotype, the primary pathogenic mechanisms diverge: AD is primarily associated with Aβ and tau pathology, PD is characterized by α-syn pathology and dopaminergic degeneration, and HD is driven by mHTT-related cellular and synaptic dysfunction. Notably, memory decline can occur in the absence of widespread neuronal loss, which aligns with the early disruption of engram ensembles that facilitate memory encoding and retrieval. Of the three disorders discussed herein, AD provides the strongest experimental support for our engram-centered framework, with abundant preclinical and clinical data confirming early engram impairment. In AD, this phenomenon has been validated by multiple animal and human studies as a result of early engram disruption, consistent with the broader “silent engram” concept originally established in physiological memory studies and subsequently extended to AD models (Roy et al., 2016; Ryan et al., 2015). In PD and HD, impaired memory is inferred to arise from dysfunction of memory-related ensembles, based on observed synaptic and circuit deficits (Iemolo et al., 2023; Lahr et al., 2018). Furthermore, microglia-mediated neuroinflammation may exacerbate engram dysfunction across these diseases (Wang et al., 2020; Wilton et al., 2023; Stoll et al., 2024). Recent evidence suggests that engrams may not be limited to neurons alone. While neuronal engrams have been extensively studied, research on astrocyte-derived functional ensembles (astroengrams) remains an emerging field. Existing preliminary findings shown that astrocytes can create learning-induced functional ensembles known as astroengrams, which interact bidirectionally with neuronal engrams and play a crucial role in memory recall. This perspective extends the engram concept to encompass a multicellular framework (Sánchez Romero and Navarrete, 2026). This broader perspective implies that memory deterioration could result from the synchronized malfunction of neuronal-glial ensembles rather than isolated neuronal impairments, thereby expanding the range of potential therapeutic interventions. Despite significant advancements in identifying engram cells and developing tools for their labeling and manipulation, a comprehensive synthesis of the selective vulnerability of engram ensembles in neurodegenerative diseases and the translation of this vulnerability into actionable therapeutic strategies remains scarce (Josselyn and Tonegawa, 2020; Balmer et al., 2025; Lazarov et al., 2024). In addition, current engram research faces prominent challenges, including inconsistent labelling methodologies, interspecies gaps and multiple clinical hurdles for cutting-edge neuromodulation techniques such as optogenetics. This review aims to address this gap. We begin by examining disease-specific pathways of vulnerability, detailing how key pathogenic factors (e.g., Aβ, α-syn, mHTT) preferentially disrupt the synaptic and cellular programs that support engrams. Building on this mechanistic understanding, we propose a cross-disease framework that correlates pathology-associated engram vulnerability with a tiered therapeutic strategy, which includes upstream pathology attenuation, engram protection, and circuit restoration. It should be emphasized that these multi-tiered therapeutic approaches act on the full spectrum of neural cells rather than only memory engram ensembles, and cognitive rescue arises from a multifactorial regulatory process. Finally, drawing on insights from innovative methodologies such as optogenetics and single-cell/multi-omics profiling, we outline translational priorities for an engram-centered roadmap. This roadmap encompasses enhanced in vivo tracking of ensemble dynamics, multicellular (neuron-glia) engram biomarkers, and rational combinatorial interventions designed to preserve memory function. Engram cells are specialized neuronal assemblies that encode specific memories, offering a mechanistic framework for understanding selective memory disruption in neurodegenerative disorders. According to Josselyn and Tonegawa, engram cells are activated during memory acquisition, reactivated during retrieval, and exhibit functional specificity in associating an experience with subsequent recall (Josselyn and Tonegawa, 2020; Lau et al., 2020). Conceptually, memory processing encompasses engram formation, consolidation, retrieval, and forgetting. The allocation of engrams is influenced by intrinsic cellular properties. Neurons characterized by higher baseline excitability and enhanced synaptic connectivity are preferentially integrated into engram circuits, supporting the notion that these attributes promote the rapid recruitment and stabilization of memory-specific assemblies (Ghandour et al., 2019; Tonegawa et al., 2018; Lau et al., 2020).",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Richard Semon did not articulate the engram concept in the early twentieth century.",
+          "questionNumber": 10,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "b08dacb1f3e7632044a1649e4b7a2158c160a6509fddbf6bb76f32afe2cb0ff1",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_2": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "83c2c0024c8944ca46f02ace85ad278e6ff530d57f50cd771d2fcc7047331ee6",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "fc8af7695eb3f20e6dedd4ecbe0da3f24d0c7245cd8df3d4eca252bf590aa11c",
+      "caseId": "q_invalid_TrueFalseNotGiven_2",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "78fd69e7524950e49dd82fc1dec2b0baa007492e6555d4118b0db4610a33be8f",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Surface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation not only raises energy consumption and deteriorates the operational efficiency of facilities, but also may trigger structural failure and even catastrophic safety hazards [1,2]. For instance, ice coverage on aircraft wings distorts aerodynamic profiles, impairing aircraft maneuverability and flight mileage. Ice accretion on wind turbine blades drastically cuts power output, while ice load on power transmission lines may lead to wire breakage and tower collapse [1,3]. Conventional anti-icing approaches, such as electrothermal deicing, chemical deicer spraying and mechanical ice removal, are partially functional yet plagued by inherent limitations: excessive power consumption, severe environmental pollution, low working efficiency, as well as strict constraints from geographical and climatic conditions [4,5]. Accordingly, novel eco-friendly and high-efficiency anti-icing technologies are urgently required to satisfy the growing demands from industrial and civil applications. Driven by the growing demand for functional surfaces capable of ice prevention and ice suppression, research on superhydrophobic photothermal anti-icing coatings and bionic ice-resistant surfaces has attracted extensive attention from scholars worldwide in recent years (Figure 1). The bibliometric data presented in Figure 1 were retrieved from the Web of Science Core Collection using the search keywords “biomimetic” OR “bioinspired” OR “bionic” combined with “superhydrophob” OR “super-hydrophob” and “anti-icing” OR “deicing” OR “icephob” and “photothermal” OR “solar-thermal”, covering the period from 2009 to 2026. The search was restricted to peer-reviewed journal articles and review papers written in English. Duplicate records were removed, and the titles and abstracts of the retrieved papers were screened to exclude studies not relevant to photothermal anti-icing surfaces. The reference lists of key review articles were also manually checked to identify any additional studies not captured by the database search. The extracted records were analyzed by publication year to illustrate the temporal growth trend in this research field. Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces. Over hundreds of millions of years of natural evolution, numerous biological surfaces have evolved outstanding ice-resistant capabilities, serving as abundant sources of inspiration for bionic engineering design [6]. For example, the combination of micro-nano rough textures and low-surface-energy waxy coatings on lotus leaves endows the surfaces with superhydrophobicity known as the lotus effect, which allows water droplets to slide off readily and removes liquid water before ice formation occurs [7]. Moreover, the scale architectures on certain butterfly wings not only exhibit superhydrophobic characteristics, but also efficiently harvest solar radiation through unique photonic configurations to generate localized heat via photothermal effects [8]. These sophisticated natural architectures have inspired researchers to integrate superhydrophobicity with photothermal performance for fabricating bionic photothermal anti-icing surfaces, so as to achieve synergistic passive ice suppression and active ice removal [9,10]. In recent years, embedding photothermal substances (carbon nanotubes, graphene, metallic nanoparticles, MXene, etc.) into bionic micro-nano architectures to achieve rapid and uniform local temperature rise via solar energy utilization has emerged as a cutting-edge research focus within the anti-icing field [11,12]. Benefiting from trapped air pockets generated by superhydrophobic micro-nano textures, such surfaces suppress ice nucleation and weaken ice adhesion force, delivering passive ice inhibition performance [13]. Once ice forms on the surface, embedded photothermal fillers swiftly convert incident solar light into thermal energy under sunlight irradiation, elevating surface temperature to melt accumulated ice and realize active deicing [8,14]. The dual-mode strategy integrating passive anti-icing and solar-driven active deicing features outstanding energy conservation and environmental compatibility. More importantly, it remedies the fatal shortcoming of pure superhydrophobic surfaces, which readily lose functionality under harsh conditions (high humidity, subzero temperatures) when micro-nano cavities are filled and locked by ice crystals [9,10]. Centered on bionic photothermal anti-icing surfaces, this review systematically summarizes state-of-the-art research advances from five dimensions: fundamental design principles, material systems, fabrication techniques, performance optimization strategies and practical engineering applications. To begin with, core design mechanisms of photothermal anti-icing surfaces are elaborated, involving superhydrophobic theories, photothermal conversion pathways and synergistic anti-icing principles [12,15]. Afterward, representative material candidates for constructing such functional surfaces are categorized and illustrated, including carbon-based fillers (carbon nanotubes, graphene), metals and their derivatives (nanoparticles, MXene), semiconductors and polymer substrates [8,16]. Widely adopted manufacturing routes including spray coating, laser ablation, layer-by-layer self-assembly and template replication, are further summarized, with their respective merits and drawbacks thoroughly analyzed [4,17]. On this basis, performance enhancement approaches are discussed, including hierarchical and Janus structural design as well as multicomponent composite modification via phase change material incorporation [18,19]. Ultimately, the practical application potential of bionic photothermal anti-icing surfaces in aerospace, power grids and transportation sectors is prospected.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The lotus-leaf example lacks rough micro-nano textures and does not produce superhydrophobicity.",
+          "questionNumber": 2,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "db15cd7e6bc1b394cc6a95d40047e3866082db3071a0896d894578528705e956",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_3": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "3f00dacf0130b12416f4978964155cec8c98ed5e474f7d656e243cf7f9455e02",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "2bcb7e076fd8477d5a25700293e1ea53911e3b4bf6ea57131dba6a43a24afb11",
+      "caseId": "q_invalid_TrueFalseNotGiven_3",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "02d78a7d5ab597eb2259a9efc3d9b5d9cbc880177942d1478ca8635bfd27cfbd",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Surface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation not only raises energy consumption and deteriorates the operational efficiency of facilities, but also may trigger structural failure and even catastrophic safety hazards [1,2]. For instance, ice coverage on aircraft wings distorts aerodynamic profiles, impairing aircraft maneuverability and flight mileage. Ice accretion on wind turbine blades drastically cuts power output, while ice load on power transmission lines may lead to wire breakage and tower collapse [1,3]. Conventional anti-icing approaches, such as electrothermal deicing, chemical deicer spraying and mechanical ice removal, are partially functional yet plagued by inherent limitations: excessive power consumption, severe environmental pollution, low working efficiency, as well as strict constraints from geographical and climatic conditions [4,5]. Accordingly, novel eco-friendly and high-efficiency anti-icing technologies are urgently required to satisfy the growing demands from industrial and civil applications. Driven by the growing demand for functional surfaces capable of ice prevention and ice suppression, research on superhydrophobic photothermal anti-icing coatings and bionic ice-resistant surfaces has attracted extensive attention from scholars worldwide in recent years (Figure 1). The bibliometric data presented in Figure 1 were retrieved from the Web of Science Core Collection using the search keywords “biomimetic” OR “bioinspired” OR “bionic” combined with “superhydrophob” OR “super-hydrophob” and “anti-icing” OR “deicing” OR “icephob” and “photothermal” OR “solar-thermal”, covering the period from 2009 to 2026. The search was restricted to peer-reviewed journal articles and review papers written in English. Duplicate records were removed, and the titles and abstracts of the retrieved papers were screened to exclude studies not relevant to photothermal anti-icing surfaces. The reference lists of key review articles were also manually checked to identify any additional studies not captured by the database search. The extracted records were analyzed by publication year to illustrate the temporal growth trend in this research field. Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces. Over hundreds of millions of years of natural evolution, numerous biological surfaces have evolved outstanding ice-resistant capabilities, serving as abundant sources of inspiration for bionic engineering design [6]. For example, the combination of micro-nano rough textures and low-surface-energy waxy coatings on lotus leaves endows the surfaces with superhydrophobicity known as the lotus effect, which allows water droplets to slide off readily and removes liquid water before ice formation occurs [7]. Moreover, the scale architectures on certain butterfly wings not only exhibit superhydrophobic characteristics, but also efficiently harvest solar radiation through unique photonic configurations to generate localized heat via photothermal effects [8]. These sophisticated natural architectures have inspired researchers to integrate superhydrophobicity with photothermal performance for fabricating bionic photothermal anti-icing surfaces, so as to achieve synergistic passive ice suppression and active ice removal [9,10]. In recent years, embedding photothermal substances (carbon nanotubes, graphene, metallic nanoparticles, MXene, etc.) into bionic micro-nano architectures to achieve rapid and uniform local temperature rise via solar energy utilization has emerged as a cutting-edge research focus within the anti-icing field [11,12]. Benefiting from trapped air pockets generated by superhydrophobic micro-nano textures, such surfaces suppress ice nucleation and weaken ice adhesion force, delivering passive ice inhibition performance [13]. Once ice forms on the surface, embedded photothermal fillers swiftly convert incident solar light into thermal energy under sunlight irradiation, elevating surface temperature to melt accumulated ice and realize active deicing [8,14]. The dual-mode strategy integrating passive anti-icing and solar-driven active deicing features outstanding energy conservation and environmental compatibility. More importantly, it remedies the fatal shortcoming of pure superhydrophobic surfaces, which readily lose functionality under harsh conditions (high humidity, subzero temperatures) when micro-nano cavities are filled and locked by ice crystals [9,10]. Centered on bionic photothermal anti-icing surfaces, this review systematically summarizes state-of-the-art research advances from five dimensions: fundamental design principles, material systems, fabrication techniques, performance optimization strategies and practical engineering applications. To begin with, core design mechanisms of photothermal anti-icing surfaces are elaborated, involving superhydrophobic theories, photothermal conversion pathways and synergistic anti-icing principles [12,15]. Afterward, representative material candidates for constructing such functional surfaces are categorized and illustrated, including carbon-based fillers (carbon nanotubes, graphene), metals and their derivatives (nanoparticles, MXene), semiconductors and polymer substrates [8,16]. Widely adopted manufacturing routes including spray coating, laser ablation, layer-by-layer self-assembly and template replication, are further summarized, with their respective merits and drawbacks thoroughly analyzed [4,17]. On this basis, performance enhancement approaches are discussed, including hierarchical and Janus structural design as well as multicomponent composite modification via phase change material incorporation [18,19]. Ultimately, the practical application potential of bionic photothermal anti-icing surfaces in aerospace, power grids and transportation sectors is prospected.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The butterfly-wing scales described do not harvest solar radiation or generate localized heat.",
+          "questionNumber": 3,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "1745ac00464f81e77947d95ba2c66bba3668d7739672882a1b63c4714a214aea",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_4": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "b9bcd6714b961cd5aeee6edda43e7e00a7d09b96f5c0726c1ecd8e82d28a8690",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "633365df5a9ab1e00fcfbe9b9fce02848e47d66b51f043ddb6dd9d2f2458edf6",
+      "caseId": "q_invalid_TrueFalseNotGiven_4",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "72794af2cd44e37e2b38b4ea28dcf021af896df47963c6e49282e9c68c59a3ec",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Atmospheric spectroscopy of exoplanets provides a unique window into the physical and chemical processes that govern a planet’s origins, evolution, and potentially even their fate. As we seek to better understand the diverse population of exoplanets — from hot-Jupiters to rocky, potential Earth-twins — we also gain insights into our own solar system. Ultimately, a key goal of exoplanet science is to place our own solar system in the broader context of all known planets in the galaxy. Since the discovery of the first transiting exoplanet over two decades ago (Charbonneau et al. 2000), the field has made major advances, moving from the detection of planets to in-depth studies of their atmospheres. Particularly for atmosphere studies, space-based observatories like the Hubble (HST) and Spitzer Space Telescopes have played a key role (e.g., Pont et al. 2009; Stevenson et al. 2010; Berta et al. 2012; Kreidberg et al. 2015; Spake et al. 2018; Wakeford et al. 2018). However, although fundamental in their own right, atmosphere studies with HST and Spitzer were limited by their precision and wavelength coverage, which in many cases prevented thorough assessments of the chemical inventories of exoplanet atmospheres. Since its launch in December 2021, JWST has truly lived up to its promise to revolutionize the manner in which we study the atmospheres of transiting exoplanets. With its wide wavelength coverage (∼0.6–12 μm across the instruments most commonly used for exoplanet observations, compared to ∼0.4–1.6 μm for HST), and impeccable spectrophotometric precision (compare spectroscopic errors of ∼400 ppm from HST/WFC3 and <80 ppm for NIRISS/SOSS in 0.025 μm bins for WASP-96 b), JWST has enabled unprecedented insights into the atmospheres of hot giant planets (e.g., JWST Transiting Exoplanet Community Early Release Science Team et al. 2022; Feinstein et al. 2023; Alderson et al. 2023; Rustamkulov et al. 2023; Bell et al. 2024), and enabled the first in-depth studies of smaller and colder worlds like temperate sub-Neptunes (e.g., Madhusudhan et al. 2023; Benneke et al. 2024; Holmberg and Madhusudhan 2024; Schmidt et al. 2025) and rocky planets (e.g., Greene et al. 2023; Lim et al. 2023; Zieba et al. 2023; Moran et al. 2023). In this review, I present an overview of some of the first exoplanet atmosphere studies with JWST. In Sect. 2, I outline pre-launch, preparatory work on the development of modelling and analysis tools for JWST time series observations (TSOs) of transiting exoplanets. I then apply these tools to early JWST observations of a benchmark hot-Saturn and rocky, Venus analogue in Sect. 3. In Sect. 4, I use the combined powers of JWST and HST to shed new light on a benchmark planet in the hot-Neptune desert — one of the most unique and puzzling demographic features of the exoplanet population. I then conclude and outline some potential future directions for the field in Sect. 5. New observatories will always present users with new challenges; no two observatories, or even detectors, are exactly alike. Although, in some cases, data analysis techniques developed for previous observatories may be largely applicable to new ones, in others routines and analysis pipelines must be developed entirely from scratch; this section outlines key contributions in this area. Spectral extraction, i.e., the processes of converting 2D detector images into 1D spectra, is one of the most important aspects of data analysis. Ultimately, the 1D spectra are the key observable from any exoplanet dataset. Two commonly employed methods are simple aperture extraction, in which one sums up the flux within a given aperture, and optimal extraction, where the summation is weighted by the instrument point spread function (PSF) to increase signal-to-noise and better reject outliers (Horne 1986). However, both algorithms implicitly assume that the target spectrum is isolated on the detector. This assumption is axiomatically not valid in the case of the Single Object Slitless Spectroscopy (SOSS; Albert et al. 2023) mode of JWST’s Near Infrared Imager and Slitless Spectrograph (NIRISS; Doyon et al. 2023). SOSS is one of JWST’s major workhorse modes for exoplanet TSOs providing wavelength coverage from 0.6–2.85 μm at a resolution of R∼700. However, since SOSS is a cross-dispersed mode, multiple spectral orders fall onto the detector, two of which partially overlap (e.g., Fig. 3) potentially resulting in strong self-contamination if extracted with usual aperture or optimal extraction routines. The ATOCA (Algorithm to Treat Order ContAmination; Darveau-Bernier et al. 2022) algorithm was developed explicitly to “decontaminate” the SOSS detector, isolating the contributions of the overlapping diffraction orders to a given pixel, and thereby enabling standard extraction techniques to be applied free of self-contamination. However, a key input for this algorithm is the 2D, wavelength-dependent PSF of the SOSS mode.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Exoplanet atmospheric spectroscopy reveals no physical or chemical processes related to planetary origins or evolution.",
+          "questionNumber": 4,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "444552b10292c7badcdf6e83eca3601398a6e33f8061cd755f3ebd4325db3b25",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_5": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "fa706ac52b35b1911a5b290a7c036bad6dfdbcfeec4372a5caf2263f4b96e8ad",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "1084bba4608e98e87b828d145cffff6bbe55e3eeb41e4b74d6771547639a3645",
+      "caseId": "q_invalid_TrueFalseNotGiven_5",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "2ee6932a7827a9abf26368c5e778bbfdb22db9358a22935f6120efa463a2bd1b",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Atmospheric spectroscopy of exoplanets provides a unique window into the physical and chemical processes that govern a planet’s origins, evolution, and potentially even their fate. As we seek to better understand the diverse population of exoplanets — from hot-Jupiters to rocky, potential Earth-twins — we also gain insights into our own solar system. Ultimately, a key goal of exoplanet science is to place our own solar system in the broader context of all known planets in the galaxy. Since the discovery of the first transiting exoplanet over two decades ago (Charbonneau et al. 2000), the field has made major advances, moving from the detection of planets to in-depth studies of their atmospheres. Particularly for atmosphere studies, space-based observatories like the Hubble (HST) and Spitzer Space Telescopes have played a key role (e.g., Pont et al. 2009; Stevenson et al. 2010; Berta et al. 2012; Kreidberg et al. 2015; Spake et al. 2018; Wakeford et al. 2018). However, although fundamental in their own right, atmosphere studies with HST and Spitzer were limited by their precision and wavelength coverage, which in many cases prevented thorough assessments of the chemical inventories of exoplanet atmospheres. Since its launch in December 2021, JWST has truly lived up to its promise to revolutionize the manner in which we study the atmospheres of transiting exoplanets. With its wide wavelength coverage (∼0.6–12 μm across the instruments most commonly used for exoplanet observations, compared to ∼0.4–1.6 μm for HST), and impeccable spectrophotometric precision (compare spectroscopic errors of ∼400 ppm from HST/WFC3 and <80 ppm for NIRISS/SOSS in 0.025 μm bins for WASP-96 b), JWST has enabled unprecedented insights into the atmospheres of hot giant planets (e.g., JWST Transiting Exoplanet Community Early Release Science Team et al. 2022; Feinstein et al. 2023; Alderson et al. 2023; Rustamkulov et al. 2023; Bell et al. 2024), and enabled the first in-depth studies of smaller and colder worlds like temperate sub-Neptunes (e.g., Madhusudhan et al. 2023; Benneke et al. 2024; Holmberg and Madhusudhan 2024; Schmidt et al. 2025) and rocky planets (e.g., Greene et al. 2023; Lim et al. 2023; Zieba et al. 2023; Moran et al. 2023). In this review, I present an overview of some of the first exoplanet atmosphere studies with JWST. In Sect. 2, I outline pre-launch, preparatory work on the development of modelling and analysis tools for JWST time series observations (TSOs) of transiting exoplanets. I then apply these tools to early JWST observations of a benchmark hot-Saturn and rocky, Venus analogue in Sect. 3. In Sect. 4, I use the combined powers of JWST and HST to shed new light on a benchmark planet in the hot-Neptune desert — one of the most unique and puzzling demographic features of the exoplanet population. I then conclude and outline some potential future directions for the field in Sect. 5. New observatories will always present users with new challenges; no two observatories, or even detectors, are exactly alike. Although, in some cases, data analysis techniques developed for previous observatories may be largely applicable to new ones, in others routines and analysis pipelines must be developed entirely from scratch; this section outlines key contributions in this area. Spectral extraction, i.e., the processes of converting 2D detector images into 1D spectra, is one of the most important aspects of data analysis. Ultimately, the 1D spectra are the key observable from any exoplanet dataset. Two commonly employed methods are simple aperture extraction, in which one sums up the flux within a given aperture, and optimal extraction, where the summation is weighted by the instrument point spread function (PSF) to increase signal-to-noise and better reject outliers (Horne 1986). However, both algorithms implicitly assume that the target spectrum is isolated on the detector. This assumption is axiomatically not valid in the case of the Single Object Slitless Spectroscopy (SOSS; Albert et al. 2023) mode of JWST’s Near Infrared Imager and Slitless Spectrograph (NIRISS; Doyon et al. 2023). SOSS is one of JWST’s major workhorse modes for exoplanet TSOs providing wavelength coverage from 0.6–2.85 μm at a resolution of R∼700. However, since SOSS is a cross-dispersed mode, multiple spectral orders fall onto the detector, two of which partially overlap (e.g., Fig. 3) potentially resulting in strong self-contamination if extracted with usual aperture or optimal extraction routines. The ATOCA (Algorithm to Treat Order ContAmination; Darveau-Bernier et al. 2022) algorithm was developed explicitly to “decontaminate” the SOSS detector, isolating the contributions of the overlapping diffraction orders to a given pixel, and thereby enabling standard extraction techniques to be applied free of self-contamination. However, a key input for this algorithm is the 2D, wavelength-dependent PSF of the SOSS mode.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Exoplanet science aims to remove the solar system from the context of known planets in the galaxy.",
+          "questionNumber": 5,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "60f9f7698e2be2e30c17005a2ce5d0907b0e7ee920a644730360e851a3fb1bcc",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_6": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "44457ec07f1c58456b785455eca45a21f58f61fbf4d31c29fb573fbe90615bfb",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "8e083088abdd1bbd12dbd89ade3e77cb39aaa20a384299d852c18c3739b5b975",
+      "caseId": "q_invalid_TrueFalseNotGiven_6",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "08e95d6c2cb94c005d1f6482e4053c61c4ce0c47587d438cc9bfc0b79b672f6e",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Atmospheric spectroscopy of exoplanets provides a unique window into the physical and chemical processes that govern a planet’s origins, evolution, and potentially even their fate. As we seek to better understand the diverse population of exoplanets — from hot-Jupiters to rocky, potential Earth-twins — we also gain insights into our own solar system. Ultimately, a key goal of exoplanet science is to place our own solar system in the broader context of all known planets in the galaxy. Since the discovery of the first transiting exoplanet over two decades ago (Charbonneau et al. 2000), the field has made major advances, moving from the detection of planets to in-depth studies of their atmospheres. Particularly for atmosphere studies, space-based observatories like the Hubble (HST) and Spitzer Space Telescopes have played a key role (e.g., Pont et al. 2009; Stevenson et al. 2010; Berta et al. 2012; Kreidberg et al. 2015; Spake et al. 2018; Wakeford et al. 2018). However, although fundamental in their own right, atmosphere studies with HST and Spitzer were limited by their precision and wavelength coverage, which in many cases prevented thorough assessments of the chemical inventories of exoplanet atmospheres. Since its launch in December 2021, JWST has truly lived up to its promise to revolutionize the manner in which we study the atmospheres of transiting exoplanets. With its wide wavelength coverage (∼0.6–12 μm across the instruments most commonly used for exoplanet observations, compared to ∼0.4–1.6 μm for HST), and impeccable spectrophotometric precision (compare spectroscopic errors of ∼400 ppm from HST/WFC3 and <80 ppm for NIRISS/SOSS in 0.025 μm bins for WASP-96 b), JWST has enabled unprecedented insights into the atmospheres of hot giant planets (e.g., JWST Transiting Exoplanet Community Early Release Science Team et al. 2022; Feinstein et al. 2023; Alderson et al. 2023; Rustamkulov et al. 2023; Bell et al. 2024), and enabled the first in-depth studies of smaller and colder worlds like temperate sub-Neptunes (e.g., Madhusudhan et al. 2023; Benneke et al. 2024; Holmberg and Madhusudhan 2024; Schmidt et al. 2025) and rocky planets (e.g., Greene et al. 2023; Lim et al. 2023; Zieba et al. 2023; Moran et al. 2023). In this review, I present an overview of some of the first exoplanet atmosphere studies with JWST. In Sect. 2, I outline pre-launch, preparatory work on the development of modelling and analysis tools for JWST time series observations (TSOs) of transiting exoplanets. I then apply these tools to early JWST observations of a benchmark hot-Saturn and rocky, Venus analogue in Sect. 3. In Sect. 4, I use the combined powers of JWST and HST to shed new light on a benchmark planet in the hot-Neptune desert — one of the most unique and puzzling demographic features of the exoplanet population. I then conclude and outline some potential future directions for the field in Sect. 5. New observatories will always present users with new challenges; no two observatories, or even detectors, are exactly alike. Although, in some cases, data analysis techniques developed for previous observatories may be largely applicable to new ones, in others routines and analysis pipelines must be developed entirely from scratch; this section outlines key contributions in this area. Spectral extraction, i.e., the processes of converting 2D detector images into 1D spectra, is one of the most important aspects of data analysis. Ultimately, the 1D spectra are the key observable from any exoplanet dataset. Two commonly employed methods are simple aperture extraction, in which one sums up the flux within a given aperture, and optimal extraction, where the summation is weighted by the instrument point spread function (PSF) to increase signal-to-noise and better reject outliers (Horne 1986). However, both algorithms implicitly assume that the target spectrum is isolated on the detector. This assumption is axiomatically not valid in the case of the Single Object Slitless Spectroscopy (SOSS; Albert et al. 2023) mode of JWST’s Near Infrared Imager and Slitless Spectrograph (NIRISS; Doyon et al. 2023). SOSS is one of JWST’s major workhorse modes for exoplanet TSOs providing wavelength coverage from 0.6–2.85 μm at a resolution of R∼700. However, since SOSS is a cross-dispersed mode, multiple spectral orders fall onto the detector, two of which partially overlap (e.g., Fig. 3) potentially resulting in strong self-contamination if extracted with usual aperture or optimal extraction routines. The ATOCA (Algorithm to Treat Order ContAmination; Darveau-Bernier et al. 2022) algorithm was developed explicitly to “decontaminate” the SOSS detector, isolating the contributions of the overlapping diffraction orders to a given pixel, and thereby enabling standard extraction techniques to be applied free of self-contamination. However, a key input for this algorithm is the 2D, wavelength-dependent PSF of the SOSS mode.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "HST and Spitzer routinely enabled complete chemical inventories of exoplanet atmospheres without precision or wavelength limits.",
+          "questionNumber": 6,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "45f5bb617a264a9426f29aa6cc11c8f5f895b1eb47d1820a15fabe246fe534e3",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_7": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "036e49119edc0c903aa1b84755b122bff87b77ee3a06244b533a956be6a571e3",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "df6b7dd46fd20e4c1ba85777b4a3f9f7ea40e2791ce373ca8f31a250ea9efabc",
+      "caseId": "q_invalid_TrueFalseNotGiven_7",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "81935520976a1c00172c3e4cb36e17a1ff4002656d7707345ba22fcaf1631cf5",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "The study of subsurface fluid dynamics is crucial across various research fields, including groundwater contamination 1 , 2 , nuclear waste repositories 3 , and geothermal energy production 4 . In all these applications, the role of fractures cannot be overstated, as they often act as primary conduits, dominating the overall subsurface flow behavior and transport of heat and solutes. This is particularly relevant for the development of Enhanced Geothermal Systems (EGS), which rely on fractured reservoir systems and offer great potential for sustainable energy supply. The efficiency of these reservoirs depends on a reliable quantification of their hydraulic behavior, whereby high flow rates and low pressures are desired. In EGS where the rock matrix is virtually tight, flow is concentrated almost completely in fractures 4 , causing significantly higher local flow rates than in porous reservoirs. These locally high flow rates in fractures lead to high Reynolds numbers \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$Re$$\\end{document} , potentially resulting in disproportionately high pressure gradients referred to as nonlinear hydraulic behavior. Field flow tests 5 , 6 in specific fractured settings have found significant deviations from linear hydraulic reservoir response, where the flow rate is proportional to the pressure, thereby demonstrating the occurrence of nonlinear hydraulic behavior at field-scale. For detailed reservoir analysis, reservoir development, and targeted reservoir management, reservoir engineering relies on numerical simulations of varying complexity, including coupled systems such as thermo-hydro-mechanical-chemical (THMC) models to simulate flow and transport phenomena in fracture networks. Depending on the objective, required problem complexity and domain size, different hydraulic models are established. To minimize the computational cost for hydraulic calculations of large-scale reservoir simulations, the simplified Cubic Law (CL) is often used. However, this linear analytic solution based on laminar flow between parallel plates is idealized and neglects the complex geometry and nonlinear high flow rate hydraulics in EGS. Addressing this, refinements have been made to the CL, incorporating fracture roughness, leading to various versions of modified or local CLs 7 . In contrast to the CL, which is parametrized with mean aperture values, pressure drop and flow rate across the entire domain scale, these localized laws account for small-scale fracture aperture variations and incorporate hydraulically effective aperture definitions. This enables the resolution of the local hydrodynamics for a known or measured fracture geometry. The large-scale Forchheimer Eq. 8 – 10 includes the average roughness by means of two coefficients and captures nonlinear hydraulic behavior by an additional quadric flow rate term. However, the coefficients for the roughness are predominantly derived from fitting to specific experimental data, thus representing a particular single fracture or fracture network and are not generally applicable. All details of fracture flow, such as channeling phenomena or local eddies/turbulence, which increase pressure losses, can be numerically simulated with the Navier–Stokes Equations by including the rough fracture surface details. These calculations provide precise local information on flow and pressure within the fracture, but they remain computationally highly expensive. This makes combining detailed fracture flow with large-scale reservoir domains prohibitive and already leads to restrictions in laboratory-scale models such as a reduced grid resolution 11 or dimensional reduction 12 . The accuracy of all hydraulic and fluid dynamic simulations heavily relies on the roughness descriptions. However, the choice of the roughness quantification model still introduces an unclear degree of uncertainty into these simulations. It remains poorly understood how different models can be compared and to what extent the chosen roughness description influences fracture hydraulics. Two examples of the most commonly used models are the concept of micro-/macro roughness, also referred to as primary and secondary roughness (Fig. 1 a), and the self-affine description, related to a fractal approach (Fig. 1 b). The micro-/macro roughness concept assumes the roughness consists of a superposition of distinct large- and small-scale wavinesses 13 , 14 . In contrast, it is shown that most rock fracture roughness spans over all frequencies and exhibits a self-affine nature 15 , 16 , which leads to strongly sample size dependent statistics 17 . To statistically describe the roughness, the Hurst exponent \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} is frequently used 15 , 16 , 18 , which is directly proportional to the slope of the roughness power spectrum. However, it lacks the roughness amplitude information, which leads to the necessity for at least a second parameter for the full roughness description. This is often the height standard deviation 19 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\sigma$$\\end{document} or the prefactor 16 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\widetilde{c}$$\\end{document} from the calculation of \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} by the use of the Power Spectrum. Fig. 1 Different roughness model example profiles. The model of micro-/macro roughness with a roughness at just two frequencies a) and an example of a self-affine rough line where the roughness spans over the full frequency range.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Fractures are not conduits and have no influence on subsurface flow, heat, or solute transport.",
+          "questionNumber": 7,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "ee21c3f0868ba1f3f285382ad2d3fe03883bd2cc42ac1b7398a13d129fdc1cab",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_8": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "68716ee158dd065c7b79e78a3ed2f212074e46bbe885e822595539a1d1b9e81a",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "39e2992b1fd68d5bef058469cdb03c25348c205883e89f09ef438345ae678489",
+      "caseId": "q_invalid_TrueFalseNotGiven_8",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "ffce01c995b3b40bdcdc2eeca5b0a00d3fc3d45c5d89aee167ea1bf44956a53f",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "The study of subsurface fluid dynamics is crucial across various research fields, including groundwater contamination 1 , 2 , nuclear waste repositories 3 , and geothermal energy production 4 . In all these applications, the role of fractures cannot be overstated, as they often act as primary conduits, dominating the overall subsurface flow behavior and transport of heat and solutes. This is particularly relevant for the development of Enhanced Geothermal Systems (EGS), which rely on fractured reservoir systems and offer great potential for sustainable energy supply. The efficiency of these reservoirs depends on a reliable quantification of their hydraulic behavior, whereby high flow rates and low pressures are desired. In EGS where the rock matrix is virtually tight, flow is concentrated almost completely in fractures 4 , causing significantly higher local flow rates than in porous reservoirs. These locally high flow rates in fractures lead to high Reynolds numbers \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$Re$$\\end{document} , potentially resulting in disproportionately high pressure gradients referred to as nonlinear hydraulic behavior. Field flow tests 5 , 6 in specific fractured settings have found significant deviations from linear hydraulic reservoir response, where the flow rate is proportional to the pressure, thereby demonstrating the occurrence of nonlinear hydraulic behavior at field-scale. For detailed reservoir analysis, reservoir development, and targeted reservoir management, reservoir engineering relies on numerical simulations of varying complexity, including coupled systems such as thermo-hydro-mechanical-chemical (THMC) models to simulate flow and transport phenomena in fracture networks. Depending on the objective, required problem complexity and domain size, different hydraulic models are established. To minimize the computational cost for hydraulic calculations of large-scale reservoir simulations, the simplified Cubic Law (CL) is often used. However, this linear analytic solution based on laminar flow between parallel plates is idealized and neglects the complex geometry and nonlinear high flow rate hydraulics in EGS. Addressing this, refinements have been made to the CL, incorporating fracture roughness, leading to various versions of modified or local CLs 7 . In contrast to the CL, which is parametrized with mean aperture values, pressure drop and flow rate across the entire domain scale, these localized laws account for small-scale fracture aperture variations and incorporate hydraulically effective aperture definitions. This enables the resolution of the local hydrodynamics for a known or measured fracture geometry. The large-scale Forchheimer Eq. 8 – 10 includes the average roughness by means of two coefficients and captures nonlinear hydraulic behavior by an additional quadric flow rate term. However, the coefficients for the roughness are predominantly derived from fitting to specific experimental data, thus representing a particular single fracture or fracture network and are not generally applicable. All details of fracture flow, such as channeling phenomena or local eddies/turbulence, which increase pressure losses, can be numerically simulated with the Navier–Stokes Equations by including the rough fracture surface details. These calculations provide precise local information on flow and pressure within the fracture, but they remain computationally highly expensive. This makes combining detailed fracture flow with large-scale reservoir domains prohibitive and already leads to restrictions in laboratory-scale models such as a reduced grid resolution 11 or dimensional reduction 12 . The accuracy of all hydraulic and fluid dynamic simulations heavily relies on the roughness descriptions. However, the choice of the roughness quantification model still introduces an unclear degree of uncertainty into these simulations. It remains poorly understood how different models can be compared and to what extent the chosen roughness description influences fracture hydraulics. Two examples of the most commonly used models are the concept of micro-/macro roughness, also referred to as primary and secondary roughness (Fig. 1 a), and the self-affine description, related to a fractal approach (Fig. 1 b). The micro-/macro roughness concept assumes the roughness consists of a superposition of distinct large- and small-scale wavinesses 13 , 14 . In contrast, it is shown that most rock fracture roughness spans over all frequencies and exhibits a self-affine nature 15 , 16 , which leads to strongly sample size dependent statistics 17 . To statistically describe the roughness, the Hurst exponent \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} is frequently used 15 , 16 , 18 , which is directly proportional to the slope of the roughness power spectrum. However, it lacks the roughness amplitude information, which leads to the necessity for at least a second parameter for the full roughness description. This is often the height standard deviation 19 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\sigma$$\\end{document} or the prefactor 16 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\widetilde{c}$$\\end{document} from the calculation of \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} by the use of the Power Spectrum. Fig. 1 Different roughness model example profiles. The model of micro-/macro roughness with a roughness at just two frequencies a) and an example of a self-affine rough line where the roughness spans over the full frequency range.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Enhanced Geothermal Systems rely on unfractured reservoirs and have no potential for sustainable energy supply.",
+          "questionNumber": 8,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "c06bbfc682a3022c31dd6433b79f843f4ab1af991aae4f08705a15bd9a69902a",
+      "suite": "clean_question_holdout"
+    },
+    "q_invalid_TrueFalseNotGiven_9": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "19412ea0abf40bc82235221cfa5a6db026de6cad57c03e2b2b76c63bc1e4aa48",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "23de5171cc430fec816fddcdc1b1366055ab55cbcbf5544860aade3dd6cbe560",
+      "caseId": "q_invalid_TrueFalseNotGiven_9",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "652e6128b340a595b5cba3b329a2ccfb527b192bdd7cf57c1ba42d62a6cd3e7d",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "The study of subsurface fluid dynamics is crucial across various research fields, including groundwater contamination 1 , 2 , nuclear waste repositories 3 , and geothermal energy production 4 . In all these applications, the role of fractures cannot be overstated, as they often act as primary conduits, dominating the overall subsurface flow behavior and transport of heat and solutes. This is particularly relevant for the development of Enhanced Geothermal Systems (EGS), which rely on fractured reservoir systems and offer great potential for sustainable energy supply. The efficiency of these reservoirs depends on a reliable quantification of their hydraulic behavior, whereby high flow rates and low pressures are desired. In EGS where the rock matrix is virtually tight, flow is concentrated almost completely in fractures 4 , causing significantly higher local flow rates than in porous reservoirs. These locally high flow rates in fractures lead to high Reynolds numbers \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$Re$$\\end{document} , potentially resulting in disproportionately high pressure gradients referred to as nonlinear hydraulic behavior. Field flow tests 5 , 6 in specific fractured settings have found significant deviations from linear hydraulic reservoir response, where the flow rate is proportional to the pressure, thereby demonstrating the occurrence of nonlinear hydraulic behavior at field-scale. For detailed reservoir analysis, reservoir development, and targeted reservoir management, reservoir engineering relies on numerical simulations of varying complexity, including coupled systems such as thermo-hydro-mechanical-chemical (THMC) models to simulate flow and transport phenomena in fracture networks. Depending on the objective, required problem complexity and domain size, different hydraulic models are established. To minimize the computational cost for hydraulic calculations of large-scale reservoir simulations, the simplified Cubic Law (CL) is often used. However, this linear analytic solution based on laminar flow between parallel plates is idealized and neglects the complex geometry and nonlinear high flow rate hydraulics in EGS. Addressing this, refinements have been made to the CL, incorporating fracture roughness, leading to various versions of modified or local CLs 7 . In contrast to the CL, which is parametrized with mean aperture values, pressure drop and flow rate across the entire domain scale, these localized laws account for small-scale fracture aperture variations and incorporate hydraulically effective aperture definitions. This enables the resolution of the local hydrodynamics for a known or measured fracture geometry. The large-scale Forchheimer Eq. 8 – 10 includes the average roughness by means of two coefficients and captures nonlinear hydraulic behavior by an additional quadric flow rate term. However, the coefficients for the roughness are predominantly derived from fitting to specific experimental data, thus representing a particular single fracture or fracture network and are not generally applicable. All details of fracture flow, such as channeling phenomena or local eddies/turbulence, which increase pressure losses, can be numerically simulated with the Navier–Stokes Equations by including the rough fracture surface details. These calculations provide precise local information on flow and pressure within the fracture, but they remain computationally highly expensive. This makes combining detailed fracture flow with large-scale reservoir domains prohibitive and already leads to restrictions in laboratory-scale models such as a reduced grid resolution 11 or dimensional reduction 12 . The accuracy of all hydraulic and fluid dynamic simulations heavily relies on the roughness descriptions. However, the choice of the roughness quantification model still introduces an unclear degree of uncertainty into these simulations. It remains poorly understood how different models can be compared and to what extent the chosen roughness description influences fracture hydraulics. Two examples of the most commonly used models are the concept of micro-/macro roughness, also referred to as primary and secondary roughness (Fig. 1 a), and the self-affine description, related to a fractal approach (Fig. 1 b). The micro-/macro roughness concept assumes the roughness consists of a superposition of distinct large- and small-scale wavinesses 13 , 14 . In contrast, it is shown that most rock fracture roughness spans over all frequencies and exhibits a self-affine nature 15 , 16 , which leads to strongly sample size dependent statistics 17 . To statistically describe the roughness, the Hurst exponent \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} is frequently used 15 , 16 , 18 , which is directly proportional to the slope of the roughness power spectrum. However, it lacks the roughness amplitude information, which leads to the necessity for at least a second parameter for the full roughness description. This is often the height standard deviation 19 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\sigma$$\\end{document} or the prefactor 16 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\widetilde{c}$$\\end{document} from the calculation of \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} by the use of the Power Spectrum. Fig. 1 Different roughness model example profiles. The model of micro-/macro roughness with a roughness at just two frequencies a) and an example of a self-affine rough line where the roughness spans over the full frequency range.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The simplified Cubic Law is never used for large-scale hydraulic calculations and does not reduce computational cost.",
+          "questionNumber": 9,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "efe64b9fdef8cff2b22142e7a18e8090799a994c98cdd2ed3c292f275bb4d445",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_1": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "6ae73c9c7b27d2b8727bff0e3f9f78c36bf6e01204ce5060dfbd1da0f24adf71",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "1f0638a97989035ad804c3349e1507dcd11b9c528d32e069539fb75d019f2669",
+      "caseId": "q_valid_TrueFalseNotGiven_1",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "8e0ddc1a0eace0be918e1010930f16fc05da4ec6e4a063a3978718d494a980b4",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Surface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation not only raises energy consumption and deteriorates the operational efficiency of facilities, but also may trigger structural failure and even catastrophic safety hazards [1,2]. For instance, ice coverage on aircraft wings distorts aerodynamic profiles, impairing aircraft maneuverability and flight mileage. Ice accretion on wind turbine blades drastically cuts power output, while ice load on power transmission lines may lead to wire breakage and tower collapse [1,3]. Conventional anti-icing approaches, such as electrothermal deicing, chemical deicer spraying and mechanical ice removal, are partially functional yet plagued by inherent limitations: excessive power consumption, severe environmental pollution, low working efficiency, as well as strict constraints from geographical and climatic conditions [4,5]. Accordingly, novel eco-friendly and high-efficiency anti-icing technologies are urgently required to satisfy the growing demands from industrial and civil applications. Driven by the growing demand for functional surfaces capable of ice prevention and ice suppression, research on superhydrophobic photothermal anti-icing coatings and bionic ice-resistant surfaces has attracted extensive attention from scholars worldwide in recent years (Figure 1). The bibliometric data presented in Figure 1 were retrieved from the Web of Science Core Collection using the search keywords “biomimetic” OR “bioinspired” OR “bionic” combined with “superhydrophob” OR “super-hydrophob” and “anti-icing” OR “deicing” OR “icephob” and “photothermal” OR “solar-thermal”, covering the period from 2009 to 2026. The search was restricted to peer-reviewed journal articles and review papers written in English. Duplicate records were removed, and the titles and abstracts of the retrieved papers were screened to exclude studies not relevant to photothermal anti-icing surfaces. The reference lists of key review articles were also manually checked to identify any additional studies not captured by the database search. The extracted records were analyzed by publication year to illustrate the temporal growth trend in this research field. Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces. Over hundreds of millions of years of natural evolution, numerous biological surfaces have evolved outstanding ice-resistant capabilities, serving as abundant sources of inspiration for bionic engineering design [6]. For example, the combination of micro-nano rough textures and low-surface-energy waxy coatings on lotus leaves endows the surfaces with superhydrophobicity known as the lotus effect, which allows water droplets to slide off readily and removes liquid water before ice formation occurs [7]. Moreover, the scale architectures on certain butterfly wings not only exhibit superhydrophobic characteristics, but also efficiently harvest solar radiation through unique photonic configurations to generate localized heat via photothermal effects [8]. These sophisticated natural architectures have inspired researchers to integrate superhydrophobicity with photothermal performance for fabricating bionic photothermal anti-icing surfaces, so as to achieve synergistic passive ice suppression and active ice removal [9,10]. In recent years, embedding photothermal substances (carbon nanotubes, graphene, metallic nanoparticles, MXene, etc.) into bionic micro-nano architectures to achieve rapid and uniform local temperature rise via solar energy utilization has emerged as a cutting-edge research focus within the anti-icing field [11,12]. Benefiting from trapped air pockets generated by superhydrophobic micro-nano textures, such surfaces suppress ice nucleation and weaken ice adhesion force, delivering passive ice inhibition performance [13]. Once ice forms on the surface, embedded photothermal fillers swiftly convert incident solar light into thermal energy under sunlight irradiation, elevating surface temperature to melt accumulated ice and realize active deicing [8,14]. The dual-mode strategy integrating passive anti-icing and solar-driven active deicing features outstanding energy conservation and environmental compatibility. More importantly, it remedies the fatal shortcoming of pure superhydrophobic surfaces, which readily lose functionality under harsh conditions (high humidity, subzero temperatures) when micro-nano cavities are filled and locked by ice crystals [9,10]. Centered on bionic photothermal anti-icing surfaces, this review systematically summarizes state-of-the-art research advances from five dimensions: fundamental design principles, material systems, fabrication techniques, performance optimization strategies and practical engineering applications. To begin with, core design mechanisms of photothermal anti-icing surfaces are elaborated, involving superhydrophobic theories, photothermal conversion pathways and synergistic anti-icing principles [12,15]. Afterward, representative material candidates for constructing such functional surfaces are categorized and illustrated, including carbon-based fillers (carbon nanotubes, graphene), metals and their derivatives (nanoparticles, MXene), semiconductors and polymer substrates [8,16]. Widely adopted manufacturing routes including spray coating, laser ablation, layer-by-layer self-assembly and template replication, are further summarized, with their respective merits and drawbacks thoroughly analyzed [4,17]. On this basis, performance enhancement approaches are discussed, including hierarchical and Janus structural design as well as multicomponent composite modification via phase change material incorporation [18,19]. Ultimately, the practical application potential of bionic photothermal anti-icing surfaces in aerospace, power grids and transportation sectors is prospected.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Surface icing challenges the industrial sectors named in the passage.",
+          "questionNumber": 1,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "cc29105c2d674100e54eb925b8a7791c31664784a30607eb975a64e00deef7c3",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_10": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "b495e74e1cf3e8282c7fbcf5465ad33a8afbdee84fd23f5e3fe7d67738038532",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "b9986d16c198d80005c0703ee8ffd9ed60406f03889f6b401ca1f39d8a9a197f",
+      "caseId": "q_valid_TrueFalseNotGiven_10",
+      "expectedAnswerSha256": "d7a3efb83c71550e7060464887488d786195babfc16e43c026a74ce9f913a2bc",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "ab9e516b5ee6e1760acff6d4cd2652468f132bd724a8ddddc031227b3d062d5f",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Unraveling the neural substrates of learning and memory is a fundamental pursuit in neuroscience, with engram cells emerging as a cornerstone of contemporary memory research. The concept of the “engram” was first articulated by Richard Semon in the early 20th century, however, its experimental validation awaited nearly a century of technological and conceptual advancements. Seminal research led by Tonegawa and colleagues provided compelling evidence that memory can be traced to discrete neuronal ensembles, whose selective reactivation is sufficient to drive the encoding, storage, and retrieval of specific memory traces (Josselyn and Tonegawa, 2020; Tonegawa et al., 2015). This framework has not only reshaped mechanistic models of memory, but also opened a transformative avenue for interrogating cognitive decline in brain disorders. Progressive memory impairment is a shared clinical feature of AD, PD, and HD. Comparative neuropsychological studies indicate that all three disorders exhibit significant deficits in explicit and episodic memory, although they differ in the specific profiles of new learning and memory performance (Pillon et al., 1993; Aretouli and Brandt, 2010). Despite this shared phenotype, the primary pathogenic mechanisms diverge: AD is primarily associated with Aβ and tau pathology, PD is characterized by α-syn pathology and dopaminergic degeneration, and HD is driven by mHTT-related cellular and synaptic dysfunction. Notably, memory decline can occur in the absence of widespread neuronal loss, which aligns with the early disruption of engram ensembles that facilitate memory encoding and retrieval. Of the three disorders discussed herein, AD provides the strongest experimental support for our engram-centered framework, with abundant preclinical and clinical data confirming early engram impairment. In AD, this phenomenon has been validated by multiple animal and human studies as a result of early engram disruption, consistent with the broader “silent engram” concept originally established in physiological memory studies and subsequently extended to AD models (Roy et al., 2016; Ryan et al., 2015). In PD and HD, impaired memory is inferred to arise from dysfunction of memory-related ensembles, based on observed synaptic and circuit deficits (Iemolo et al., 2023; Lahr et al., 2018). Furthermore, microglia-mediated neuroinflammation may exacerbate engram dysfunction across these diseases (Wang et al., 2020; Wilton et al., 2023; Stoll et al., 2024). Recent evidence suggests that engrams may not be limited to neurons alone. While neuronal engrams have been extensively studied, research on astrocyte-derived functional ensembles (astroengrams) remains an emerging field. Existing preliminary findings shown that astrocytes can create learning-induced functional ensembles known as astroengrams, which interact bidirectionally with neuronal engrams and play a crucial role in memory recall. This perspective extends the engram concept to encompass a multicellular framework (Sánchez Romero and Navarrete, 2026). This broader perspective implies that memory deterioration could result from the synchronized malfunction of neuronal-glial ensembles rather than isolated neuronal impairments, thereby expanding the range of potential therapeutic interventions. Despite significant advancements in identifying engram cells and developing tools for their labeling and manipulation, a comprehensive synthesis of the selective vulnerability of engram ensembles in neurodegenerative diseases and the translation of this vulnerability into actionable therapeutic strategies remains scarce (Josselyn and Tonegawa, 2020; Balmer et al., 2025; Lazarov et al., 2024). In addition, current engram research faces prominent challenges, including inconsistent labelling methodologies, interspecies gaps and multiple clinical hurdles for cutting-edge neuromodulation techniques such as optogenetics. This review aims to address this gap. We begin by examining disease-specific pathways of vulnerability, detailing how key pathogenic factors (e.g., Aβ, α-syn, mHTT) preferentially disrupt the synaptic and cellular programs that support engrams. Building on this mechanistic understanding, we propose a cross-disease framework that correlates pathology-associated engram vulnerability with a tiered therapeutic strategy, which includes upstream pathology attenuation, engram protection, and circuit restoration. It should be emphasized that these multi-tiered therapeutic approaches act on the full spectrum of neural cells rather than only memory engram ensembles, and cognitive rescue arises from a multifactorial regulatory process. Finally, drawing on insights from innovative methodologies such as optogenetics and single-cell/multi-omics profiling, we outline translational priorities for an engram-centered roadmap. This roadmap encompasses enhanced in vivo tracking of ensemble dynamics, multicellular (neuron-glia) engram biomarkers, and rational combinatorial interventions designed to preserve memory function. Engram cells are specialized neuronal assemblies that encode specific memories, offering a mechanistic framework for understanding selective memory disruption in neurodegenerative disorders. According to Josselyn and Tonegawa, engram cells are activated during memory acquisition, reactivated during retrieval, and exhibit functional specificity in associating an experience with subsequent recall (Josselyn and Tonegawa, 2020; Lau et al., 2020). Conceptually, memory processing encompasses engram formation, consolidation, retrieval, and forgetting. The allocation of engrams is influenced by intrinsic cellular properties. Neurons characterized by higher baseline excitability and enhanced synaptic connectivity are preferentially integrated into engram circuits, supporting the notion that these attributes promote the rapid recruitment and stabilization of memory-specific assemblies (Ghandour et al., 2019; Tonegawa et al., 2018; Lau et al., 2020).",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The memory article reports that 87 patients were recruited for a clinical trial.",
+          "questionNumber": 10,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "54a716cae4bec438b8b3344b65310f5f793cc7a2157dd44db124152397d3987e",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_2": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "14370140ab3b8b7fa30604ae2c1f9d42f1a7a05c9893cea6633a55e9dae983b8",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "cd241d88d070b34bd0ab608531e3e1ee4e216c6f75fc25faa5e4e1fd245a1192",
+      "caseId": "q_valid_TrueFalseNotGiven_2",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "dbeac77cd58f31566d9236ecfb836d8ba7090d90c3c1f47600186dbb1699140d",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Surface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation not only raises energy consumption and deteriorates the operational efficiency of facilities, but also may trigger structural failure and even catastrophic safety hazards [1,2]. For instance, ice coverage on aircraft wings distorts aerodynamic profiles, impairing aircraft maneuverability and flight mileage. Ice accretion on wind turbine blades drastically cuts power output, while ice load on power transmission lines may lead to wire breakage and tower collapse [1,3]. Conventional anti-icing approaches, such as electrothermal deicing, chemical deicer spraying and mechanical ice removal, are partially functional yet plagued by inherent limitations: excessive power consumption, severe environmental pollution, low working efficiency, as well as strict constraints from geographical and climatic conditions [4,5]. Accordingly, novel eco-friendly and high-efficiency anti-icing technologies are urgently required to satisfy the growing demands from industrial and civil applications. Driven by the growing demand for functional surfaces capable of ice prevention and ice suppression, research on superhydrophobic photothermal anti-icing coatings and bionic ice-resistant surfaces has attracted extensive attention from scholars worldwide in recent years (Figure 1). The bibliometric data presented in Figure 1 were retrieved from the Web of Science Core Collection using the search keywords “biomimetic” OR “bioinspired” OR “bionic” combined with “superhydrophob” OR “super-hydrophob” and “anti-icing” OR “deicing” OR “icephob” and “photothermal” OR “solar-thermal”, covering the period from 2009 to 2026. The search was restricted to peer-reviewed journal articles and review papers written in English. Duplicate records were removed, and the titles and abstracts of the retrieved papers were screened to exclude studies not relevant to photothermal anti-icing surfaces. The reference lists of key review articles were also manually checked to identify any additional studies not captured by the database search. The extracted records were analyzed by publication year to illustrate the temporal growth trend in this research field. Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces. Over hundreds of millions of years of natural evolution, numerous biological surfaces have evolved outstanding ice-resistant capabilities, serving as abundant sources of inspiration for bionic engineering design [6]. For example, the combination of micro-nano rough textures and low-surface-energy waxy coatings on lotus leaves endows the surfaces with superhydrophobicity known as the lotus effect, which allows water droplets to slide off readily and removes liquid water before ice formation occurs [7]. Moreover, the scale architectures on certain butterfly wings not only exhibit superhydrophobic characteristics, but also efficiently harvest solar radiation through unique photonic configurations to generate localized heat via photothermal effects [8]. These sophisticated natural architectures have inspired researchers to integrate superhydrophobicity with photothermal performance for fabricating bionic photothermal anti-icing surfaces, so as to achieve synergistic passive ice suppression and active ice removal [9,10]. In recent years, embedding photothermal substances (carbon nanotubes, graphene, metallic nanoparticles, MXene, etc.) into bionic micro-nano architectures to achieve rapid and uniform local temperature rise via solar energy utilization has emerged as a cutting-edge research focus within the anti-icing field [11,12]. Benefiting from trapped air pockets generated by superhydrophobic micro-nano textures, such surfaces suppress ice nucleation and weaken ice adhesion force, delivering passive ice inhibition performance [13]. Once ice forms on the surface, embedded photothermal fillers swiftly convert incident solar light into thermal energy under sunlight irradiation, elevating surface temperature to melt accumulated ice and realize active deicing [8,14]. The dual-mode strategy integrating passive anti-icing and solar-driven active deicing features outstanding energy conservation and environmental compatibility. More importantly, it remedies the fatal shortcoming of pure superhydrophobic surfaces, which readily lose functionality under harsh conditions (high humidity, subzero temperatures) when micro-nano cavities are filled and locked by ice crystals [9,10]. Centered on bionic photothermal anti-icing surfaces, this review systematically summarizes state-of-the-art research advances from five dimensions: fundamental design principles, material systems, fabrication techniques, performance optimization strategies and practical engineering applications. To begin with, core design mechanisms of photothermal anti-icing surfaces are elaborated, involving superhydrophobic theories, photothermal conversion pathways and synergistic anti-icing principles [12,15]. Afterward, representative material candidates for constructing such functional surfaces are categorized and illustrated, including carbon-based fillers (carbon nanotubes, graphene), metals and their derivatives (nanoparticles, MXene), semiconductors and polymer substrates [8,16]. Widely adopted manufacturing routes including spray coating, laser ablation, layer-by-layer self-assembly and template replication, are further summarized, with their respective merits and drawbacks thoroughly analyzed [4,17]. On this basis, performance enhancement approaches are discussed, including hierarchical and Janus structural design as well as multicomponent composite modification via phase change material incorporation [18,19]. Ultimately, the practical application potential of bionic photothermal anti-icing surfaces in aerospace, power grids and transportation sectors is prospected.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The lotus-leaf example is described as producing the lotus effect.",
+          "questionNumber": 2,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "10fb225743ea7d55d3ff31063db38b3aa9359b58c31a264d7fb69e911d6b5ba6",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_3": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "4f7a162569c50c906364f503b1aee824eab08b791957c565198221c859c9fe39",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "314f9a806008c2e10014173e7270c7ffaa77990db0f0174b4679fb0793f04134",
+      "caseId": "q_valid_TrueFalseNotGiven_3",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "85f746bf450f6191276bb0e3ef8d85a6401bd59ffdd2baef5d88e1e8dba15978",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Atmospheric spectroscopy of exoplanets provides a unique window into the physical and chemical processes that govern a planet’s origins, evolution, and potentially even their fate. As we seek to better understand the diverse population of exoplanets — from hot-Jupiters to rocky, potential Earth-twins — we also gain insights into our own solar system. Ultimately, a key goal of exoplanet science is to place our own solar system in the broader context of all known planets in the galaxy. Since the discovery of the first transiting exoplanet over two decades ago (Charbonneau et al. 2000), the field has made major advances, moving from the detection of planets to in-depth studies of their atmospheres. Particularly for atmosphere studies, space-based observatories like the Hubble (HST) and Spitzer Space Telescopes have played a key role (e.g., Pont et al. 2009; Stevenson et al. 2010; Berta et al. 2012; Kreidberg et al. 2015; Spake et al. 2018; Wakeford et al. 2018). However, although fundamental in their own right, atmosphere studies with HST and Spitzer were limited by their precision and wavelength coverage, which in many cases prevented thorough assessments of the chemical inventories of exoplanet atmospheres. Since its launch in December 2021, JWST has truly lived up to its promise to revolutionize the manner in which we study the atmospheres of transiting exoplanets. With its wide wavelength coverage (∼0.6–12 μm across the instruments most commonly used for exoplanet observations, compared to ∼0.4–1.6 μm for HST), and impeccable spectrophotometric precision (compare spectroscopic errors of ∼400 ppm from HST/WFC3 and <80 ppm for NIRISS/SOSS in 0.025 μm bins for WASP-96 b), JWST has enabled unprecedented insights into the atmospheres of hot giant planets (e.g., JWST Transiting Exoplanet Community Early Release Science Team et al. 2022; Feinstein et al. 2023; Alderson et al. 2023; Rustamkulov et al. 2023; Bell et al. 2024), and enabled the first in-depth studies of smaller and colder worlds like temperate sub-Neptunes (e.g., Madhusudhan et al. 2023; Benneke et al. 2024; Holmberg and Madhusudhan 2024; Schmidt et al. 2025) and rocky planets (e.g., Greene et al. 2023; Lim et al. 2023; Zieba et al. 2023; Moran et al. 2023). In this review, I present an overview of some of the first exoplanet atmosphere studies with JWST. In Sect. 2, I outline pre-launch, preparatory work on the development of modelling and analysis tools for JWST time series observations (TSOs) of transiting exoplanets. I then apply these tools to early JWST observations of a benchmark hot-Saturn and rocky, Venus analogue in Sect. 3. In Sect. 4, I use the combined powers of JWST and HST to shed new light on a benchmark planet in the hot-Neptune desert — one of the most unique and puzzling demographic features of the exoplanet population. I then conclude and outline some potential future directions for the field in Sect. 5. New observatories will always present users with new challenges; no two observatories, or even detectors, are exactly alike. Although, in some cases, data analysis techniques developed for previous observatories may be largely applicable to new ones, in others routines and analysis pipelines must be developed entirely from scratch; this section outlines key contributions in this area. Spectral extraction, i.e., the processes of converting 2D detector images into 1D spectra, is one of the most important aspects of data analysis. Ultimately, the 1D spectra are the key observable from any exoplanet dataset. Two commonly employed methods are simple aperture extraction, in which one sums up the flux within a given aperture, and optimal extraction, where the summation is weighted by the instrument point spread function (PSF) to increase signal-to-noise and better reject outliers (Horne 1986). However, both algorithms implicitly assume that the target spectrum is isolated on the detector. This assumption is axiomatically not valid in the case of the Single Object Slitless Spectroscopy (SOSS; Albert et al. 2023) mode of JWST’s Near Infrared Imager and Slitless Spectrograph (NIRISS; Doyon et al. 2023). SOSS is one of JWST’s major workhorse modes for exoplanet TSOs providing wavelength coverage from 0.6–2.85 μm at a resolution of R∼700. However, since SOSS is a cross-dispersed mode, multiple spectral orders fall onto the detector, two of which partially overlap (e.g., Fig. 3) potentially resulting in strong self-contamination if extracted with usual aperture or optimal extraction routines. The ATOCA (Algorithm to Treat Order ContAmination; Darveau-Bernier et al. 2022) algorithm was developed explicitly to “decontaminate” the SOSS detector, isolating the contributions of the overlapping diffraction orders to a given pixel, and thereby enabling standard extraction techniques to be applied free of self-contamination. However, a key input for this algorithm is the 2D, wavelength-dependent PSF of the SOSS mode.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The article presents atmospheric spectroscopy as a way to study exoplanet processes.",
+          "questionNumber": 3,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "583b1e8a3f253a7bf1d7b94e6aca4f169a43350e9f13ff376f643c981b785112",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_4": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "e50913116d2c6aa83f29ae30ba869208604131e3d4375b59d7363e91e2747d5b",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "2f53f62242a3195c2f0f71deb3d7ad8bc26e258125226777a49396b31c7229ee",
+      "caseId": "q_valid_TrueFalseNotGiven_4",
+      "expectedAnswerSha256": "dfe88090c5ed7ac2f32571f0fc822fda4d8cd281fc7138c7cd6db656f6e2d081",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "c582e566894fbf24b2bf88c3eff7c459e6f00ed24746f59fbbea06d2ae528af9",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "The study of subsurface fluid dynamics is crucial across various research fields, including groundwater contamination 1 , 2 , nuclear waste repositories 3 , and geothermal energy production 4 . In all these applications, the role of fractures cannot be overstated, as they often act as primary conduits, dominating the overall subsurface flow behavior and transport of heat and solutes. This is particularly relevant for the development of Enhanced Geothermal Systems (EGS), which rely on fractured reservoir systems and offer great potential for sustainable energy supply. The efficiency of these reservoirs depends on a reliable quantification of their hydraulic behavior, whereby high flow rates and low pressures are desired. In EGS where the rock matrix is virtually tight, flow is concentrated almost completely in fractures 4 , causing significantly higher local flow rates than in porous reservoirs. These locally high flow rates in fractures lead to high Reynolds numbers \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$Re$$\\end{document} , potentially resulting in disproportionately high pressure gradients referred to as nonlinear hydraulic behavior. Field flow tests 5 , 6 in specific fractured settings have found significant deviations from linear hydraulic reservoir response, where the flow rate is proportional to the pressure, thereby demonstrating the occurrence of nonlinear hydraulic behavior at field-scale. For detailed reservoir analysis, reservoir development, and targeted reservoir management, reservoir engineering relies on numerical simulations of varying complexity, including coupled systems such as thermo-hydro-mechanical-chemical (THMC) models to simulate flow and transport phenomena in fracture networks. Depending on the objective, required problem complexity and domain size, different hydraulic models are established. To minimize the computational cost for hydraulic calculations of large-scale reservoir simulations, the simplified Cubic Law (CL) is often used. However, this linear analytic solution based on laminar flow between parallel plates is idealized and neglects the complex geometry and nonlinear high flow rate hydraulics in EGS. Addressing this, refinements have been made to the CL, incorporating fracture roughness, leading to various versions of modified or local CLs 7 . In contrast to the CL, which is parametrized with mean aperture values, pressure drop and flow rate across the entire domain scale, these localized laws account for small-scale fracture aperture variations and incorporate hydraulically effective aperture definitions. This enables the resolution of the local hydrodynamics for a known or measured fracture geometry. The large-scale Forchheimer Eq. 8 – 10 includes the average roughness by means of two coefficients and captures nonlinear hydraulic behavior by an additional quadric flow rate term. However, the coefficients for the roughness are predominantly derived from fitting to specific experimental data, thus representing a particular single fracture or fracture network and are not generally applicable. All details of fracture flow, such as channeling phenomena or local eddies/turbulence, which increase pressure losses, can be numerically simulated with the Navier–Stokes Equations by including the rough fracture surface details. These calculations provide precise local information on flow and pressure within the fracture, but they remain computationally highly expensive. This makes combining detailed fracture flow with large-scale reservoir domains prohibitive and already leads to restrictions in laboratory-scale models such as a reduced grid resolution 11 or dimensional reduction 12 . The accuracy of all hydraulic and fluid dynamic simulations heavily relies on the roughness descriptions. However, the choice of the roughness quantification model still introduces an unclear degree of uncertainty into these simulations. It remains poorly understood how different models can be compared and to what extent the chosen roughness description influences fracture hydraulics. Two examples of the most commonly used models are the concept of micro-/macro roughness, also referred to as primary and secondary roughness (Fig. 1 a), and the self-affine description, related to a fractal approach (Fig. 1 b). The micro-/macro roughness concept assumes the roughness consists of a superposition of distinct large- and small-scale wavinesses 13 , 14 . In contrast, it is shown that most rock fracture roughness spans over all frequencies and exhibits a self-affine nature 15 , 16 , which leads to strongly sample size dependent statistics 17 . To statistically describe the roughness, the Hurst exponent \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} is frequently used 15 , 16 , 18 , which is directly proportional to the slope of the roughness power spectrum. However, it lacks the roughness amplitude information, which leads to the necessity for at least a second parameter for the full roughness description. This is often the height standard deviation 19 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\sigma$$\\end{document} or the prefactor 16 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\widetilde{c}$$\\end{document} from the calculation of \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} by the use of the Power Spectrum. Fig. 1 Different roughness model example profiles. The model of micro-/macro roughness with a roughness at just two frequencies a) and an example of a self-affine rough line where the roughness spans over the full frequency range.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Fractures can dominate subsurface flow and the transport of heat and solutes.",
+          "questionNumber": 4,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "f52af26382c13c3cdea7573f373d34c8e8d39348d5c27cdddbea5492902aa9c6",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_5": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "42f707836ded153749953a69a702f33f632813b4523dff5c2c9a0f73871de001",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "69d28dd6f4983380e747f057e02b0d18c0db7498d993537d777236e3f2cdf7cc",
+      "caseId": "q_valid_TrueFalseNotGiven_5",
+      "expectedAnswerSha256": "4e523a5ae5b4636c75901b79fafbd3912e41dc7987414e688b09d4b436ff22b3",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "1e4a9a71606c12160ccc4362206b98bfea136d28bf3385ad0f0cdbccaba17c08",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Surface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation not only raises energy consumption and deteriorates the operational efficiency of facilities, but also may trigger structural failure and even catastrophic safety hazards [1,2]. For instance, ice coverage on aircraft wings distorts aerodynamic profiles, impairing aircraft maneuverability and flight mileage. Ice accretion on wind turbine blades drastically cuts power output, while ice load on power transmission lines may lead to wire breakage and tower collapse [1,3]. Conventional anti-icing approaches, such as electrothermal deicing, chemical deicer spraying and mechanical ice removal, are partially functional yet plagued by inherent limitations: excessive power consumption, severe environmental pollution, low working efficiency, as well as strict constraints from geographical and climatic conditions [4,5]. Accordingly, novel eco-friendly and high-efficiency anti-icing technologies are urgently required to satisfy the growing demands from industrial and civil applications. Driven by the growing demand for functional surfaces capable of ice prevention and ice suppression, research on superhydrophobic photothermal anti-icing coatings and bionic ice-resistant surfaces has attracted extensive attention from scholars worldwide in recent years (Figure 1). The bibliometric data presented in Figure 1 were retrieved from the Web of Science Core Collection using the search keywords “biomimetic” OR “bioinspired” OR “bionic” combined with “superhydrophob” OR “super-hydrophob” and “anti-icing” OR “deicing” OR “icephob” and “photothermal” OR “solar-thermal”, covering the period from 2009 to 2026. The search was restricted to peer-reviewed journal articles and review papers written in English. Duplicate records were removed, and the titles and abstracts of the retrieved papers were screened to exclude studies not relevant to photothermal anti-icing surfaces. The reference lists of key review articles were also manually checked to identify any additional studies not captured by the database search. The extracted records were analyzed by publication year to illustrate the temporal growth trend in this research field. Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces. Over hundreds of millions of years of natural evolution, numerous biological surfaces have evolved outstanding ice-resistant capabilities, serving as abundant sources of inspiration for bionic engineering design [6]. For example, the combination of micro-nano rough textures and low-surface-energy waxy coatings on lotus leaves endows the surfaces with superhydrophobicity known as the lotus effect, which allows water droplets to slide off readily and removes liquid water before ice formation occurs [7]. Moreover, the scale architectures on certain butterfly wings not only exhibit superhydrophobic characteristics, but also efficiently harvest solar radiation through unique photonic configurations to generate localized heat via photothermal effects [8]. These sophisticated natural architectures have inspired researchers to integrate superhydrophobicity with photothermal performance for fabricating bionic photothermal anti-icing surfaces, so as to achieve synergistic passive ice suppression and active ice removal [9,10]. In recent years, embedding photothermal substances (carbon nanotubes, graphene, metallic nanoparticles, MXene, etc.) into bionic micro-nano architectures to achieve rapid and uniform local temperature rise via solar energy utilization has emerged as a cutting-edge research focus within the anti-icing field [11,12]. Benefiting from trapped air pockets generated by superhydrophobic micro-nano textures, such surfaces suppress ice nucleation and weaken ice adhesion force, delivering passive ice inhibition performance [13]. Once ice forms on the surface, embedded photothermal fillers swiftly convert incident solar light into thermal energy under sunlight irradiation, elevating surface temperature to melt accumulated ice and realize active deicing [8,14]. The dual-mode strategy integrating passive anti-icing and solar-driven active deicing features outstanding energy conservation and environmental compatibility. More importantly, it remedies the fatal shortcoming of pure superhydrophobic surfaces, which readily lose functionality under harsh conditions (high humidity, subzero temperatures) when micro-nano cavities are filled and locked by ice crystals [9,10]. Centered on bionic photothermal anti-icing surfaces, this review systematically summarizes state-of-the-art research advances from five dimensions: fundamental design principles, material systems, fabrication techniques, performance optimization strategies and practical engineering applications. To begin with, core design mechanisms of photothermal anti-icing surfaces are elaborated, involving superhydrophobic theories, photothermal conversion pathways and synergistic anti-icing principles [12,15]. Afterward, representative material candidates for constructing such functional surfaces are categorized and illustrated, including carbon-based fillers (carbon nanotubes, graphene), metals and their derivatives (nanoparticles, MXene), semiconductors and polymer substrates [8,16]. Widely adopted manufacturing routes including spray coating, laser ablation, layer-by-layer self-assembly and template replication, are further summarized, with their respective merits and drawbacks thoroughly analyzed [4,17]. On this basis, performance enhancement approaches are discussed, including hierarchical and Janus structural design as well as multicomponent composite modification via phase change material incorporation [18,19]. Ultimately, the practical application potential of bionic photothermal anti-icing surfaces in aerospace, power grids and transportation sectors is prospected.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The butterfly-wing scales described do not harvest solar radiation.",
+          "questionNumber": 5,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "454a0250201f1ccc5ba823530e905dcb27a8dcbe0c0264faf020dcb725d53ef2",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_6": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "b43d6d8cbd40372c45e916dd61e1268d5440f3c052f5e27a931bf8950bbaa26f",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "2c59f43efe0458f0355b55ece4eacbbcbb331495accef5a9147e91294bdee215",
+      "caseId": "q_valid_TrueFalseNotGiven_6",
+      "expectedAnswerSha256": "4e523a5ae5b4636c75901b79fafbd3912e41dc7987414e688b09d4b436ff22b3",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "68ecd8afe8f0d95a3c430e01684c880f443169f794bbc26660b5b71d8ed311d7",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Atmospheric spectroscopy of exoplanets provides a unique window into the physical and chemical processes that govern a planet’s origins, evolution, and potentially even their fate. As we seek to better understand the diverse population of exoplanets — from hot-Jupiters to rocky, potential Earth-twins — we also gain insights into our own solar system. Ultimately, a key goal of exoplanet science is to place our own solar system in the broader context of all known planets in the galaxy. Since the discovery of the first transiting exoplanet over two decades ago (Charbonneau et al. 2000), the field has made major advances, moving from the detection of planets to in-depth studies of their atmospheres. Particularly for atmosphere studies, space-based observatories like the Hubble (HST) and Spitzer Space Telescopes have played a key role (e.g., Pont et al. 2009; Stevenson et al. 2010; Berta et al. 2012; Kreidberg et al. 2015; Spake et al. 2018; Wakeford et al. 2018). However, although fundamental in their own right, atmosphere studies with HST and Spitzer were limited by their precision and wavelength coverage, which in many cases prevented thorough assessments of the chemical inventories of exoplanet atmospheres. Since its launch in December 2021, JWST has truly lived up to its promise to revolutionize the manner in which we study the atmospheres of transiting exoplanets. With its wide wavelength coverage (∼0.6–12 μm across the instruments most commonly used for exoplanet observations, compared to ∼0.4–1.6 μm for HST), and impeccable spectrophotometric precision (compare spectroscopic errors of ∼400 ppm from HST/WFC3 and <80 ppm for NIRISS/SOSS in 0.025 μm bins for WASP-96 b), JWST has enabled unprecedented insights into the atmospheres of hot giant planets (e.g., JWST Transiting Exoplanet Community Early Release Science Team et al. 2022; Feinstein et al. 2023; Alderson et al. 2023; Rustamkulov et al. 2023; Bell et al. 2024), and enabled the first in-depth studies of smaller and colder worlds like temperate sub-Neptunes (e.g., Madhusudhan et al. 2023; Benneke et al. 2024; Holmberg and Madhusudhan 2024; Schmidt et al. 2025) and rocky planets (e.g., Greene et al. 2023; Lim et al. 2023; Zieba et al. 2023; Moran et al. 2023). In this review, I present an overview of some of the first exoplanet atmosphere studies with JWST. In Sect. 2, I outline pre-launch, preparatory work on the development of modelling and analysis tools for JWST time series observations (TSOs) of transiting exoplanets. I then apply these tools to early JWST observations of a benchmark hot-Saturn and rocky, Venus analogue in Sect. 3. In Sect. 4, I use the combined powers of JWST and HST to shed new light on a benchmark planet in the hot-Neptune desert — one of the most unique and puzzling demographic features of the exoplanet population. I then conclude and outline some potential future directions for the field in Sect. 5. New observatories will always present users with new challenges; no two observatories, or even detectors, are exactly alike. Although, in some cases, data analysis techniques developed for previous observatories may be largely applicable to new ones, in others routines and analysis pipelines must be developed entirely from scratch; this section outlines key contributions in this area. Spectral extraction, i.e., the processes of converting 2D detector images into 1D spectra, is one of the most important aspects of data analysis. Ultimately, the 1D spectra are the key observable from any exoplanet dataset. Two commonly employed methods are simple aperture extraction, in which one sums up the flux within a given aperture, and optimal extraction, where the summation is weighted by the instrument point spread function (PSF) to increase signal-to-noise and better reject outliers (Horne 1986). However, both algorithms implicitly assume that the target spectrum is isolated on the detector. This assumption is axiomatically not valid in the case of the Single Object Slitless Spectroscopy (SOSS; Albert et al. 2023) mode of JWST’s Near Infrared Imager and Slitless Spectrograph (NIRISS; Doyon et al. 2023). SOSS is one of JWST’s major workhorse modes for exoplanet TSOs providing wavelength coverage from 0.6–2.85 μm at a resolution of R∼700. However, since SOSS is a cross-dispersed mode, multiple spectral orders fall onto the detector, two of which partially overlap (e.g., Fig. 3) potentially resulting in strong self-contamination if extracted with usual aperture or optimal extraction routines. The ATOCA (Algorithm to Treat Order ContAmination; Darveau-Bernier et al. 2022) algorithm was developed explicitly to “decontaminate” the SOSS detector, isolating the contributions of the overlapping diffraction orders to a given pixel, and thereby enabling standard extraction techniques to be applied free of self-contamination. However, a key input for this algorithm is the 2D, wavelength-dependent PSF of the SOSS mode.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "HST and Spitzer were not limited by precision or wavelength coverage when assessing atmospheric chemistry.",
+          "questionNumber": 6,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "43f3059c3c56697382b515b833fc253238c1a747605080a1bc8e8126c03d7449",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_7": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "e3f466733b46bea3ead419b3b390ca0e30901e8bdbb04fad6a7902e162707dc0",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "f211af62f66ab5f2f1c28313ba9e2afc44d606ce4da0678da15250980c8c19b6",
+      "caseId": "q_valid_TrueFalseNotGiven_7",
+      "expectedAnswerSha256": "4e523a5ae5b4636c75901b79fafbd3912e41dc7987414e688b09d4b436ff22b3",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "9cee3242c374a4787bf672e89aac5853efca5d8ca23c3a81273358a8aaf006ae",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "The study of subsurface fluid dynamics is crucial across various research fields, including groundwater contamination 1 , 2 , nuclear waste repositories 3 , and geothermal energy production 4 . In all these applications, the role of fractures cannot be overstated, as they often act as primary conduits, dominating the overall subsurface flow behavior and transport of heat and solutes. This is particularly relevant for the development of Enhanced Geothermal Systems (EGS), which rely on fractured reservoir systems and offer great potential for sustainable energy supply. The efficiency of these reservoirs depends on a reliable quantification of their hydraulic behavior, whereby high flow rates and low pressures are desired. In EGS where the rock matrix is virtually tight, flow is concentrated almost completely in fractures 4 , causing significantly higher local flow rates than in porous reservoirs. These locally high flow rates in fractures lead to high Reynolds numbers \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$Re$$\\end{document} , potentially resulting in disproportionately high pressure gradients referred to as nonlinear hydraulic behavior. Field flow tests 5 , 6 in specific fractured settings have found significant deviations from linear hydraulic reservoir response, where the flow rate is proportional to the pressure, thereby demonstrating the occurrence of nonlinear hydraulic behavior at field-scale. For detailed reservoir analysis, reservoir development, and targeted reservoir management, reservoir engineering relies on numerical simulations of varying complexity, including coupled systems such as thermo-hydro-mechanical-chemical (THMC) models to simulate flow and transport phenomena in fracture networks. Depending on the objective, required problem complexity and domain size, different hydraulic models are established. To minimize the computational cost for hydraulic calculations of large-scale reservoir simulations, the simplified Cubic Law (CL) is often used. However, this linear analytic solution based on laminar flow between parallel plates is idealized and neglects the complex geometry and nonlinear high flow rate hydraulics in EGS. Addressing this, refinements have been made to the CL, incorporating fracture roughness, leading to various versions of modified or local CLs 7 . In contrast to the CL, which is parametrized with mean aperture values, pressure drop and flow rate across the entire domain scale, these localized laws account for small-scale fracture aperture variations and incorporate hydraulically effective aperture definitions. This enables the resolution of the local hydrodynamics for a known or measured fracture geometry. The large-scale Forchheimer Eq. 8 – 10 includes the average roughness by means of two coefficients and captures nonlinear hydraulic behavior by an additional quadric flow rate term. However, the coefficients for the roughness are predominantly derived from fitting to specific experimental data, thus representing a particular single fracture or fracture network and are not generally applicable. All details of fracture flow, such as channeling phenomena or local eddies/turbulence, which increase pressure losses, can be numerically simulated with the Navier–Stokes Equations by including the rough fracture surface details. These calculations provide precise local information on flow and pressure within the fracture, but they remain computationally highly expensive. This makes combining detailed fracture flow with large-scale reservoir domains prohibitive and already leads to restrictions in laboratory-scale models such as a reduced grid resolution 11 or dimensional reduction 12 . The accuracy of all hydraulic and fluid dynamic simulations heavily relies on the roughness descriptions. However, the choice of the roughness quantification model still introduces an unclear degree of uncertainty into these simulations. It remains poorly understood how different models can be compared and to what extent the chosen roughness description influences fracture hydraulics. Two examples of the most commonly used models are the concept of micro-/macro roughness, also referred to as primary and secondary roughness (Fig. 1 a), and the self-affine description, related to a fractal approach (Fig. 1 b). The micro-/macro roughness concept assumes the roughness consists of a superposition of distinct large- and small-scale wavinesses 13 , 14 . In contrast, it is shown that most rock fracture roughness spans over all frequencies and exhibits a self-affine nature 15 , 16 , which leads to strongly sample size dependent statistics 17 . To statistically describe the roughness, the Hurst exponent \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} is frequently used 15 , 16 , 18 , which is directly proportional to the slope of the roughness power spectrum. However, it lacks the roughness amplitude information, which leads to the necessity for at least a second parameter for the full roughness description. This is often the height standard deviation 19 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\sigma$$\\end{document} or the prefactor 16 \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$\\widetilde{c}$$\\end{document} from the calculation of \\documentclass[12pt]{minimal} \\usepackage{amsmath} \\usepackage{wasysym} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{amsbsy} \\usepackage{mathrsfs} \\usepackage{upgreek} \\setlength{\\oddsidemargin}{-69pt} \\begin{document}$$H$$\\end{document} by the use of the Power Spectrum. Fig. 1 Different roughness model example profiles. The model of micro-/macro roughness with a roughness at just two frequencies a) and an example of a self-affine rough line where the roughness spans over the full frequency range.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The passage says Enhanced Geothermal Systems depend on unfractured reservoirs.",
+          "questionNumber": 7,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "4396eadd388d2ce611e68a6d0b041826f3a5c93c2dedb32fc4ee7d9f59766260",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_8": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "99ba4af1da3c37cd508b1aaeaf3366e7d3a5fa566421dcbe119b9f62061029df",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "aaa6fa16cb53263a002fd0b83c2b5748fedd2d8ac1cb85aacdb6dddb89f7d3e0",
+      "caseId": "q_valid_TrueFalseNotGiven_8",
+      "expectedAnswerSha256": "d7a3efb83c71550e7060464887488d786195babfc16e43c026a74ce9f913a2bc",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "95b9db4661d6a71883f5eb107f9fc7b435c5788d4e7c9ea5733c4797b940f596",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Surface icing poses a severe challenge to numerous industrial sectors including aerospace, power transmission, refrigeration equipment and wind power generation. Ice accumulation not only raises energy consumption and deteriorates the operational efficiency of facilities, but also may trigger structural failure and even catastrophic safety hazards [1,2]. For instance, ice coverage on aircraft wings distorts aerodynamic profiles, impairing aircraft maneuverability and flight mileage. Ice accretion on wind turbine blades drastically cuts power output, while ice load on power transmission lines may lead to wire breakage and tower collapse [1,3]. Conventional anti-icing approaches, such as electrothermal deicing, chemical deicer spraying and mechanical ice removal, are partially functional yet plagued by inherent limitations: excessive power consumption, severe environmental pollution, low working efficiency, as well as strict constraints from geographical and climatic conditions [4,5]. Accordingly, novel eco-friendly and high-efficiency anti-icing technologies are urgently required to satisfy the growing demands from industrial and civil applications. Driven by the growing demand for functional surfaces capable of ice prevention and ice suppression, research on superhydrophobic photothermal anti-icing coatings and bionic ice-resistant surfaces has attracted extensive attention from scholars worldwide in recent years (Figure 1). The bibliometric data presented in Figure 1 were retrieved from the Web of Science Core Collection using the search keywords “biomimetic” OR “bioinspired” OR “bionic” combined with “superhydrophob” OR “super-hydrophob” and “anti-icing” OR “deicing” OR “icephob” and “photothermal” OR “solar-thermal”, covering the period from 2009 to 2026. The search was restricted to peer-reviewed journal articles and review papers written in English. Duplicate records were removed, and the titles and abstracts of the retrieved papers were screened to exclude studies not relevant to photothermal anti-icing surfaces. The reference lists of key review articles were also manually checked to identify any additional studies not captured by the database search. The extracted records were analyzed by publication year to illustrate the temporal growth trend in this research field. Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces. Over hundreds of millions of years of natural evolution, numerous biological surfaces have evolved outstanding ice-resistant capabilities, serving as abundant sources of inspiration for bionic engineering design [6]. For example, the combination of micro-nano rough textures and low-surface-energy waxy coatings on lotus leaves endows the surfaces with superhydrophobicity known as the lotus effect, which allows water droplets to slide off readily and removes liquid water before ice formation occurs [7]. Moreover, the scale architectures on certain butterfly wings not only exhibit superhydrophobic characteristics, but also efficiently harvest solar radiation through unique photonic configurations to generate localized heat via photothermal effects [8]. These sophisticated natural architectures have inspired researchers to integrate superhydrophobicity with photothermal performance for fabricating bionic photothermal anti-icing surfaces, so as to achieve synergistic passive ice suppression and active ice removal [9,10]. In recent years, embedding photothermal substances (carbon nanotubes, graphene, metallic nanoparticles, MXene, etc.) into bionic micro-nano architectures to achieve rapid and uniform local temperature rise via solar energy utilization has emerged as a cutting-edge research focus within the anti-icing field [11,12]. Benefiting from trapped air pockets generated by superhydrophobic micro-nano textures, such surfaces suppress ice nucleation and weaken ice adhesion force, delivering passive ice inhibition performance [13]. Once ice forms on the surface, embedded photothermal fillers swiftly convert incident solar light into thermal energy under sunlight irradiation, elevating surface temperature to melt accumulated ice and realize active deicing [8,14]. The dual-mode strategy integrating passive anti-icing and solar-driven active deicing features outstanding energy conservation and environmental compatibility. More importantly, it remedies the fatal shortcoming of pure superhydrophobic surfaces, which readily lose functionality under harsh conditions (high humidity, subzero temperatures) when micro-nano cavities are filled and locked by ice crystals [9,10]. Centered on bionic photothermal anti-icing surfaces, this review systematically summarizes state-of-the-art research advances from five dimensions: fundamental design principles, material systems, fabrication techniques, performance optimization strategies and practical engineering applications. To begin with, core design mechanisms of photothermal anti-icing surfaces are elaborated, involving superhydrophobic theories, photothermal conversion pathways and synergistic anti-icing principles [12,15]. Afterward, representative material candidates for constructing such functional surfaces are categorized and illustrated, including carbon-based fillers (carbon nanotubes, graphene), metals and their derivatives (nanoparticles, MXene), semiconductors and polymer substrates [8,16]. Widely adopted manufacturing routes including spray coating, laser ablation, layer-by-layer self-assembly and template replication, are further summarized, with their respective merits and drawbacks thoroughly analyzed [4,17]. On this basis, performance enhancement approaches are discussed, including hierarchical and Janus structural design as well as multicomponent composite modification via phase change material incorporation [18,19]. Ultimately, the practical application potential of bionic photothermal anti-icing surfaces in aerospace, power grids and transportation sectors is prospected.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "The anti-icing article reports tests of its coatings on 40 commercial flights in 2023.",
+          "questionNumber": 8,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "cf1cd5804dfa6d3353705979386c1f27230961e7c1397f98473198478d0708a7",
+      "suite": "clean_question_holdout"
+    },
+    "q_valid_TrueFalseNotGiven_9": {
+      "adversaryMessageRoles": [
+        "system",
+        "user"
+      ],
+      "adversaryMessageSha256": "8c46a7bdf5a56bae2b05b03633cf8c9f1b77a0505f3c63c192e0d66aef3ded48",
+      "adversaryPromptVersion": "v1.0.0",
+      "answerKeyPresentInStudentPayload": false,
+      "blindInputHash": "89c123867795c2c91bfcee39c2e639706354c725deda7539bf85436fca0b6385",
+      "caseId": "q_valid_TrueFalseNotGiven_9",
+      "expectedAnswerSha256": "d7a3efb83c71550e7060464887488d786195babfc16e43c026a74ce9f913a2bc",
+      "solverMessageRoles": [
+        "system",
+        "user"
+      ],
+      "solverMessageSha256": "cf5a09a7052f873a52681ce6b7880d8d3e2398ad64b70133a5d6d6e1b13906bb",
+      "solverPromptVersion": "v1.0.0",
+      "studentVisiblePayload": {
+        "passageText": "Atmospheric spectroscopy of exoplanets provides a unique window into the physical and chemical processes that govern a planet’s origins, evolution, and potentially even their fate. As we seek to better understand the diverse population of exoplanets — from hot-Jupiters to rocky, potential Earth-twins — we also gain insights into our own solar system. Ultimately, a key goal of exoplanet science is to place our own solar system in the broader context of all known planets in the galaxy. Since the discovery of the first transiting exoplanet over two decades ago (Charbonneau et al. 2000), the field has made major advances, moving from the detection of planets to in-depth studies of their atmospheres. Particularly for atmosphere studies, space-based observatories like the Hubble (HST) and Spitzer Space Telescopes have played a key role (e.g., Pont et al. 2009; Stevenson et al. 2010; Berta et al. 2012; Kreidberg et al. 2015; Spake et al. 2018; Wakeford et al. 2018). However, although fundamental in their own right, atmosphere studies with HST and Spitzer were limited by their precision and wavelength coverage, which in many cases prevented thorough assessments of the chemical inventories of exoplanet atmospheres. Since its launch in December 2021, JWST has truly lived up to its promise to revolutionize the manner in which we study the atmospheres of transiting exoplanets. With its wide wavelength coverage (∼0.6–12 μm across the instruments most commonly used for exoplanet observations, compared to ∼0.4–1.6 μm for HST), and impeccable spectrophotometric precision (compare spectroscopic errors of ∼400 ppm from HST/WFC3 and <80 ppm for NIRISS/SOSS in 0.025 μm bins for WASP-96 b), JWST has enabled unprecedented insights into the atmospheres of hot giant planets (e.g., JWST Transiting Exoplanet Community Early Release Science Team et al. 2022; Feinstein et al. 2023; Alderson et al. 2023; Rustamkulov et al. 2023; Bell et al. 2024), and enabled the first in-depth studies of smaller and colder worlds like temperate sub-Neptunes (e.g., Madhusudhan et al. 2023; Benneke et al. 2024; Holmberg and Madhusudhan 2024; Schmidt et al. 2025) and rocky planets (e.g., Greene et al. 2023; Lim et al. 2023; Zieba et al. 2023; Moran et al. 2023). In this review, I present an overview of some of the first exoplanet atmosphere studies with JWST. In Sect. 2, I outline pre-launch, preparatory work on the development of modelling and analysis tools for JWST time series observations (TSOs) of transiting exoplanets. I then apply these tools to early JWST observations of a benchmark hot-Saturn and rocky, Venus analogue in Sect. 3. In Sect. 4, I use the combined powers of JWST and HST to shed new light on a benchmark planet in the hot-Neptune desert — one of the most unique and puzzling demographic features of the exoplanet population. I then conclude and outline some potential future directions for the field in Sect. 5. New observatories will always present users with new challenges; no two observatories, or even detectors, are exactly alike. Although, in some cases, data analysis techniques developed for previous observatories may be largely applicable to new ones, in others routines and analysis pipelines must be developed entirely from scratch; this section outlines key contributions in this area. Spectral extraction, i.e., the processes of converting 2D detector images into 1D spectra, is one of the most important aspects of data analysis. Ultimately, the 1D spectra are the key observable from any exoplanet dataset. Two commonly employed methods are simple aperture extraction, in which one sums up the flux within a given aperture, and optimal extraction, where the summation is weighted by the instrument point spread function (PSF) to increase signal-to-noise and better reject outliers (Horne 1986). However, both algorithms implicitly assume that the target spectrum is isolated on the detector. This assumption is axiomatically not valid in the case of the Single Object Slitless Spectroscopy (SOSS; Albert et al. 2023) mode of JWST’s Near Infrared Imager and Slitless Spectrograph (NIRISS; Doyon et al. 2023). SOSS is one of JWST’s major workhorse modes for exoplanet TSOs providing wavelength coverage from 0.6–2.85 μm at a resolution of R∼700. However, since SOSS is a cross-dispersed mode, multiple spectral orders fall onto the detector, two of which partially overlap (e.g., Fig. 3) potentially resulting in strong self-contamination if extracted with usual aperture or optimal extraction routines. The ATOCA (Algorithm to Treat Order ContAmination; Darveau-Bernier et al. 2022) algorithm was developed explicitly to “decontaminate” the SOSS detector, isolating the contributions of the overlapping diffraction orders to a given pixel, and thereby enabling standard extraction techniques to be applied free of self-contamination. However, a key input for this algorithm is the 2D, wavelength-dependent PSF of the SOSS mode.",
+        "question": {
+          "instructions": null,
+          "options": null,
+          "prompt": "Every exoplanet discussed in the article is stated to orbit within five parsecs of Earth.",
+          "questionNumber": 9,
+          "questionType": "TrueFalseNotGiven",
+          "sharedContext": null
+        }
+      },
+      "studentVisiblePayloadSha256": "62c20a3a8d5b733a0dd86e6a9285ebe7e128ffb7923f46ddf6bd8e268030506a",
+      "suite": "clean_question_holdout"
+    }
+  },
+  "startedAt": "2026-10-06T01:43:17.932719+00:00",
+  "updatedAt": "2026-10-06T01:47:39.716688+00:00"
+}

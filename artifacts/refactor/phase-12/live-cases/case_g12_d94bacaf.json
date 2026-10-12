@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_d94bacaf",
+  "campaignId": "camp_g12_paper_minimax_d94bacaf68e0_v1",
+  "jobId": "4a1374b7-2b82-4acb-8a15-330db2ea1a5a",
+  "runId": "bench_0da97a66e6fb9f2760897112fa27750f",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T10:34:20.549920+00:00",
+  "error": "AI generation failed: Malformed JSON syntax: Expecting ',' delimiter: line 22 column 7 (char 1318)\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/providers/parser.py\", line 140, in _raw_decode_strict\n    obj, end = decoder.raw_decode(content, idx)\n  File \"/usr/lib/python3.10/json/decoder.py\", line 353, in raw_decode\n    obj, end = self.scan_once(s, idx)\njson.decoder.JSONDecodeError: Expecting ',' delimiter: line 22 column 7 (char 1318)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 890, in generate_section\n    return await _generate_section_once(\n  File \"/home/"
+}

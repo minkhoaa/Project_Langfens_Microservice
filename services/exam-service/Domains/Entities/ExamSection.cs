@@ -18,14 +18,16 @@ public class ExamSection
 
     public string? InstructionsMd { get; set; }
     public string? PassageMd { get; set; }  // Reading passage text (separate from instructions)
+    public string? AudioUrl { get; set; }
+    public string? TranscriptMd { get; set; }
+
+    // Phase 12/14 V2 Source provenance fields
     public string? SourcePmcid { get; set; }
     public string? SourceTitle { get; set; }
     public string? SourceAuthors { get; set; }
     public string? SourceDoi { get; set; }
     public string? SourceUrl { get; set; }
     public string? SourceLicense { get; set; }
-    public string? AudioUrl { get; set; }
-    public string? TranscriptMd { get; set; }
 
     public List<ExamQuestionGroup> QuestionGroups { get; set; } = new();
     public List<ExamQuestion> Questions { get; set; } = new();

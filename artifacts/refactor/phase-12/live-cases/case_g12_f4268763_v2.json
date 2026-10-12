@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_f4268763_v2",
+  "campaignId": "camp_g12_paper_minimax_f4268763b33b_v2",
+  "jobId": "818d93c4-e62c-45b6-a514-d1ffd7a4f888",
+  "runId": "bench_0e7651a1d55367898b5761c26346bde1",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T20:15:47.782093+00:00",
+  "error": "AI generation failed: Failed to generate valid replacement for question 14 after 3 attempts: Question 14 Evidence quote is absent from passage\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 787, in _generate_section_once\n    validate_group_candidate(kind, count, first, questions, passage)\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 191, in validate_group_candidate\n    raise ValueError(f\"Question {number} Evidence quote is absent from passage\")\nValueError: Question 14 Evidence quote is absent from passage\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 672, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langf"
+}

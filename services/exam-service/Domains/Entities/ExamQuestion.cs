@@ -76,7 +76,7 @@ public class ExamQuestion
     /// Structured word list for MATCHING_INFORMATION type questions.
     /// Stored as JSONB array of strings.
     /// </summary>
-    [Column(TypeName = "jsonb")]
+    [Column(TypeName = "text[]")]
     public List<string>? WordList { get; set; }
 
     public List<ExamOption> Options { get; set; } = new();

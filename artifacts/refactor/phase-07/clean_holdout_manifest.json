@@ -1,0 +1,161 @@
+{
+  "status": "PASS_CORPUS_INTEGRITY_PENDING_LIVE_GATES",
+  "questionCount": 120,
+  "fidelityCaseCount": 40,
+  "criticalCanaryCount": 12,
+  "sourcePmcids": [
+    "PMC12804876",
+    "PMC13503497",
+    "PMC13583341",
+    "PMC13604763"
+  ],
+  "sourceEvidence": {
+    "PMC13604763": {
+      "pmcid": "PMC13604763",
+      "title": "Research Progress on Bioinspired Superhydrophobic Photothermal Anti-/Deicing Coatings",
+      "doi": "10.3390/biomimetics11090617",
+      "journal": "Biomimetics",
+      "authors": [
+        "Zhimin Cao",
+        "Shuilin Wang",
+        "Chuanwang Yang"
+      ],
+      "license": "CC BY 4.0",
+      "licenseHref": "https://creativecommons.org/licenses/by/4.0/",
+      "licenseText": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license .",
+      "wordCount": 774,
+      "candidateTextPath": "artifacts/refactor/phase-07/corpus/sources/PMC13604763.txt",
+      "candidateTextSha256": "f3272e93f3436d61deacfbbf7ef704eeb1d1e5959bdd1ed3446bbcd8ee4c64ea",
+      "candidateExcerptBodyShingleCoverage": 1.0,
+      "textPath": "artifacts/refactor/phase-07/corpus/sources/PMC13604763.txt",
+      "textSha256": "f3272e93f3436d61deacfbbf7ef704eeb1d1e5959bdd1ed3446bbcd8ee4c64ea",
+      "excerptMethod": "Existing local TXT excerpt; exact five-word shingle support checked against JATS body paragraphs.",
+      "excerptBodyShingleCoverage": 1.0,
+      "excerptBodyJaccard": 0.03884,
+      "sourceFamily": "surface_icing",
+      "xmlPath": "artifacts/refactor/phase-07/corpus/sources/PMC13604763.xml",
+      "xmlSha256": "01d4c8685bc3b60ce5e0d9ad2b0e69a86225ffe0b4ddcec2347f6b51bf67bf1b",
+      "xmlBytes": 455560
+    },
+    "PMC13503497": {
+      "pmcid": "PMC13503497",
+      "title": "Insights into the diversity of exoplanet atmospheres in the era of JWST",
+      "doi": "10.1007/s10509-026-04624-x",
+      "journal": "Astrophysics and Space Science",
+      "authors": [
+        "Michael Radica"
+      ],
+      "license": "CC BY 4.0",
+      "licenseHref": "https://creativecommons.org/licenses/by/4.0/",
+      "licenseText": "https://creativecommons.org/licenses/by/4.0/ Open Access This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons licence, and indicate if changes were made. The images or other third party material in this article are included in the article’s Creative Commons licence, unless indicated otherwise in a credit line to the material. If material is not included in the article’s Creative Commons licence and your intended use is not permitted by statutory regulation or exceeds the permitted use, you will need to obtain permission directly from the copyright holder. To view a copy of this licence, visit http://creativecommons.org/licenses/by/4.0/ .",
+      "wordCount": 785,
+      "candidateTextPath": "artifacts/refactor/phase-07/corpus/sources/PMC13503497.txt",
+      "candidateTextSha256": "52cdc3b6bd9303cff40745e579a11dba59df3ed95aebe89df96ed800b8eff00f",
+      "candidateExcerptBodyShingleCoverage": 1.0,
+      "textPath": "artifacts/refactor/phase-07/corpus/sources/PMC13503497.txt",
+      "textSha256": "52cdc3b6bd9303cff40745e579a11dba59df3ed95aebe89df96ed800b8eff00f",
+      "excerptMethod": "Existing local TXT excerpt; exact five-word shingle support checked against JATS body paragraphs.",
+      "excerptBodyShingleCoverage": 1.0,
+      "excerptBodyJaccard": 0.172635,
+      "sourceFamily": "exoplanet_atmospheres",
+      "xmlPath": "artifacts/refactor/phase-07/corpus/sources/PMC13503497.xml",
+      "xmlSha256": "872407de4c3f05a30b9ba3d34f99c8b3bb729429a78d60f69c6b34abd0cbc1a5",
+      "xmlBytes": 153813
+    },
+    "PMC12804876": {
+      "pmcid": "PMC12804876",
+      "title": "Implementation and validation of the F 4 aT laboratory for flow in rough fractures",
+      "doi": "10.1038/s41598-025-34648-2",
+      "journal": "Scientific Reports",
+      "authors": [
+        "Carola M. Buness",
+        "Fabian Nitschke",
+        "Thomas Kohl"
+      ],
+      "license": "CC BY 4.0",
+      "licenseHref": "https://creativecommons.org/licenses/by/4.0/",
+      "licenseText": "https://creativecommons.org/licenses/by/4.0/ Open Access This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons licence, and indicate if changes were made. The images or other third party material in this article are included in the article’s Creative Commons licence, unless indicated otherwise in a credit line to the material. If material is not included in the article’s Creative Commons licence and your intended use is not permitted by statutory regulation or exceeds the permitted use, you will need to obtain permission directly from the copyright holder. To view a copy of this licence, visit http://creativecommons.org/licenses/by/4.0/ .",
+      "wordCount": 882,
+      "candidateTextPath": "artifacts/refactor/phase-07/corpus/sources/PMC12804876.txt",
+      "candidateTextSha256": "42d9e0b1cbaa962bd3b09c572146ed1192111c063bfcef7a08354ca1f16f53a9",
+      "candidateExcerptBodyShingleCoverage": 0.896947,
+      "textPath": "artifacts/refactor/phase-07/corpus/sources/PMC12804876.g07-body-excerpt.txt",
+      "textSha256": "c2d0413dc75477a503b5f87545c32074fad6ce899d1126c17c7b562c2a4ee016",
+      "excerptMethod": "Generated from exact JATS body paragraphs 0-2; original candidate TXT retained and hash-bound because its supported shingle ratio was 0.896947.",
+      "excerptBodyShingleCoverage": 1.0,
+      "excerptBodyJaccard": 0.128152,
+      "sourceFamily": "subsurface_fracture_hydraulics",
+      "xmlPath": "artifacts/refactor/phase-07/corpus/sources/PMC12804876.xml",
+      "xmlSha256": "cb07ca154065e0d426d1f63e4b7bc91b6032d938c3d5121ca2a2493c8bf06873",
+      "xmlBytes": 220652
+    },
+    "PMC13583341": {
+      "pmcid": "PMC13583341",
+      "title": "Engram cell vulnerability in neurodegeneration: from mechanistic insights to therapeutic horizons",
+      "doi": "10.3389/fnagi.2026.1873893",
+      "journal": "Frontiers in Aging Neuroscience",
+      "authors": [
+        "Qingyu Bai",
+        "Yan Yan",
+        "Chao Zeng",
+        "Xue Li",
+        "Guihua Zeng",
+        "Aleena Saidova",
+        "Hui Li",
+        "Hong Qing"
+      ],
+      "license": "CC BY 4.0",
+      "licenseHref": "https://creativecommons.org/licenses/by/4.0/",
+      "licenseText": "https://creativecommons.org/licenses/by/4.0/ This is an open-access article distributed under the terms of the Creative Commons Attribution License (CC BY) . The use, distribution or reproduction in other forums is permitted, provided the original author(s) and the copyright owner(s) are credited and that the original publication in this journal is cited, in accordance with accepted academic practice. No use, distribution or reproduction is permitted which does not comply with these terms.",
+      "wordCount": 799,
+      "candidateTextPath": "artifacts/refactor/phase-07/corpus/sources/PMC13583341.txt",
+      "candidateTextSha256": "6362de6fad8388031290f0a169753005604819444e6c2273751805c4e6d772ad",
+      "candidateExcerptBodyShingleCoverage": 1.0,
+      "textPath": "artifacts/refactor/phase-07/corpus/sources/PMC13583341.txt",
+      "textSha256": "6362de6fad8388031290f0a169753005604819444e6c2273751805c4e6d772ad",
+      "excerptMethod": "Existing local TXT excerpt; exact five-word shingle support checked against JATS body paragraphs.",
+      "excerptBodyShingleCoverage": 1.0,
+      "excerptBodyJaccard": 0.061824,
+      "sourceFamily": "engram_memory",
+      "xmlPath": "artifacts/refactor/phase-07/corpus/sources/PMC13583341.xml",
+      "xmlSha256": "2a692b558c312e148d197a464b9fa8cd0e70d4a361eaadbdc822db25e2f79a01",
+      "xmlBytes": 450230
+    }
+  },
+  "questionTypeCounts": {
+    "TrueFalseNotGiven": {
+      "valid": 10,
+      "invalid": 10
+    },
+    "SentenceCompletion": {
+      "valid": 10,
+      "invalid": 10
+    },
+    "MultipleChoiceSingle": {
+      "valid": 10,
+      "invalid": 10
+    },
+    "SummaryCompletion": {
+      "valid": 10,
+      "invalid": 10
+    },
+    "YesNoNotGiven": {
+      "valid": 10,
+      "invalid": 10
+    },
+    "ShortAnswer": {
+      "valid": 10,
+      "invalid": 10
+    }
+  },
+  "ambiguityCoverageCount": 10,
+  "questionCorpusSha256": "2d8362ff84853e70e7cb07840e672ec0948aa5381355686cd8ae326a4c4955bc",
+  "fidelityCorpusSha256": "e4ae0987939f02bddadf048786b12451957af24373d107af95784ba7f78d4e31",
+  "g07ConfigSha256": "13429f2d05f525b7f0d2767804dc8910149ee7eec5ea3ec92e6c4e63fef85711",
+  "g10ConfigSha256": "c0238021c4cf3d0025986ee3a3ee4ecc59aa20d58fa4a439149fca7d69e8dfb5",
+  "provenancePath": "artifacts/refactor/phase-07/corpus/provenance.json",
+  "splitManifestPath": "artifacts/refactor/phase-07/corpus/split_manifest.json",
+  "leakageReportPath": "artifacts/refactor/phase-07/corpus/leakage_report.json",
+  "freezePath": "artifacts/refactor/phase-07/corpus/clean_holdout_freeze_candidate_v2.json",
+  "annotationLimitations": "No second independent label reviewer or adjudicator was available. The single-reviewer corpus is not dual-consensus evidence; this limitation is disclosed rather than represented as independent review."
+}

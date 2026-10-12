@@ -26,6 +26,12 @@ Retry cap/profile phải được declared/versioned trong Settings và effectiv
 
 Budget run→section→artifact: atomically reserve trước actual send, gồm retries/evaluator/candidates; persist via G02. Parent không oversubscribe concurrent requests. Completion limit gồm reasoning khi provider tính vậy. UNKNOWN_OUTCOME giữ conservative reservation; restart/replay không reset. Missing usage unknown, không0. Dollar hard cap chỉ claim khi pricing snapshot/bounded accounting đủ; estimates không billed actual.
 
+Chính sách benchmark MiniMax tự động và caps (mặc định toàn hệ thống):
+- Live benchmarks bắt buộc tự động khởi chạy và resume bằng provider MiniMax đã cấu hình; loại bỏ hoàn toàn phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION.
+- Vô hiệu hóa toàn bộ application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; ngăn chặn fallback về 15 calls / 60k tokens / 300s). Production và các provider khác giữ nguyên hard caps.
+- Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider.
+- Tách biệt phục hồi cục bộ và gate: R05 durability trên PostgreSQL thật có thể PASS độc lập trong khi G09 vẫn giữ nợ chất lượng upstream/live-quality (G07/G08 prerequisites); tuyệt đối không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
+
 Actual composition/client factories phải dùng injected config/gateway, không direct SDK outside providers. New calls fail closed nếu budget/authority thiếu. Keep rate/concurrency buckets/key rotation bounded, không lách account quota.
 
 Chạy T03-01..08: deadline+429; auth/transient attempts; JSON edge cases; cancel backoff/stream; atomic budget race; unknown-outcome resume; adapter recordings/parity/redaction; configured live model smoke. Count requests bằng SDK thật+fake transport để lộ nested retries, không chỉ mocks constructor.

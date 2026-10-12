@@ -1,0 +1,141 @@
+{
+  "acceptance": {
+    "ambiguityRecallMeetsThreshold": true,
+    "criticalCanariesMeetsThreshold": true,
+    "falseRejectionMeetsThreshold": true,
+    "operationalErrorsZero": true,
+    "overallRecallMeetsThreshold": true,
+    "perTypeRecallMeetsThreshold": true,
+    "status": true
+  },
+  "authoritativeCampaignStatus": "AUTHORIZED",
+  "authorization": {
+    "authorizationId": "auto-minimax-camp_g07_clean_holdout_20261005_v4",
+    "authorizedBy": "system-auto-minimax-benchmark",
+    "sha256": "f1ba9c41d70f20a0a9bac5dada8b871c469bae85d18cc41f4dfe64d8ef55a76f"
+  },
+  "availableProviders": [
+    "minimax",
+    "groq"
+  ],
+  "budget": {
+    "authoritative": {
+      "callsCap": -1,
+      "callsUsed": 127,
+      "tokensCap": -1,
+      "tokensUsed": 116614,
+      "wallTimeCapSeconds": -1.0,
+      "wallTimeUsedSeconds": 679.6226999999997
+    },
+    "local": {
+      "accountedTokens": 116614,
+      "budgetBreachDetected": false,
+      "budgetBreachReason": null,
+      "caps": {
+        "accountedTokens": -1,
+        "gatewayOperations": -1,
+        "wallTimeSeconds": -1
+      },
+      "gatewayOperations": 127,
+      "operationStatuses": {
+        "COMPLETED": 127
+      },
+      "wallTimeSeconds": 748
+    },
+    "recoveredReservations": 0
+  },
+  "campaignComplete": true,
+  "campaignId": "camp_g07_clean_holdout_20261005_v4",
+  "completedChildRuns": 184,
+  "configSha256": "13429f2d05f525b7f0d2767804dc8910149ee7eec5ea3ec92e6c4e63fef85711",
+  "configuredProviderOrder": [
+    "minimax",
+    "groq"
+  ],
+  "corpusHashes": {
+    "fidelity_corpus.json": "e4ae0987939f02bddadf048786b12451957af24373d107af95784ba7f78d4e31",
+    "questions_corpus.json": "12aec6fc92f4e53219141c7a1d048f06d226ae19bf0b27a7c9c2eea3dcbac454",
+    "questions_holdout_corpus.json": "2d8362ff84853e70e7cb07840e672ec0948aa5381355686cd8ae326a4c4955bc"
+  },
+  "corpusSha256": "2d8362ff84853e70e7cb07840e672ec0948aa5381355686cd8ae326a4c4955bc",
+  "criticalCanaries": {
+    "aggregateRate": 1.0,
+    "allPass": true,
+    "perCanaryRejections": {
+      "clean_critical_01": 3,
+      "clean_critical_02": 3,
+      "clean_critical_03": 3,
+      "clean_critical_04": 3,
+      "clean_critical_05": 3,
+      "clean_critical_06": 3,
+      "clean_critical_07": 3,
+      "clean_critical_08": 3,
+      "clean_critical_09": 3,
+      "clean_critical_10": 3,
+      "clean_critical_11": 3,
+      "clean_critical_12": 3
+    },
+    "repetitions": 3,
+    "runComplete": [
+      true,
+      true,
+      true
+    ],
+    "runRates": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "totalCanaries": 12,
+    "worstRunRate": 1.0
+  },
+  "durationSeconds": 398.019,
+  "evaluatorPipelineHash": "1d5e3a3831d78f17",
+  "evaluatorVersions": {
+    "AmbiguityAndDistractorEvaluator": "2.0.0",
+    "AnswerVerbatimAndLengthEvaluator": "1.0.0",
+    "DuplicateAndShingleEvaluator": "1.0.0",
+    "EvidenceOffsetEvaluator": "1.0.0",
+    "GroundingFidelityEvaluator": "2.0.0",
+    "NotGivenSemanticsEvaluator": "1.0.0",
+    "QuestionStructureEvaluator": "1.0.0"
+  },
+  "expectedChildRuns": 184,
+  "fidelityCorpusSha256": "e4ae0987939f02bddadf048786b12451957af24373d107af95784ba7f78d4e31",
+  "finishedAt": "2026-10-05T16:58:56.398234+00:00",
+  "freezeId": "g07-g10-clean-holdout-candidate-v2",
+  "incompleteCaseCount": 0,
+  "metricGateStatus": "PASS",
+  "observedModels": [
+    "MiniMax-Text-01"
+  ],
+  "observedProviders": [
+    "minimax"
+  ],
+  "partition": "holdout",
+  "rates": {
+    "ambiguityRecall": 1.0,
+    "ambiguityRecallFormatted": "100.0%",
+    "canaryAggregateRate": 1.0,
+    "canaryWorstRunRate": 1.0,
+    "falseRejectionRate": 0.06666666666666667,
+    "operationalFailureRate": 0.0,
+    "operationalRejectionsOfValidCount": 0,
+    "overallBlockingRecall": 1.0,
+    "perTypeRecall": {
+      "MultipleChoiceSingle": 1.0,
+      "SentenceCompletion": 1.0,
+      "ShortAnswer": 1.0,
+      "SummaryCompletion": 1.0,
+      "TrueFalseNotGiven": 1.0,
+      "YesNoNotGiven": 1.0
+    },
+    "semanticFalsePositivesCount": 4,
+    "semanticFalsePositivesRate": 0.06666666666666667,
+    "totalValidRejectedCount": 4,
+    "totalValidRejectedRate": 0.06666666666666667
+  },
+  "startedAt": "2026-10-05T16:52:18.378768+00:00",
+  "status": "PASS",
+  "totalFailuresLogged": 4
+}

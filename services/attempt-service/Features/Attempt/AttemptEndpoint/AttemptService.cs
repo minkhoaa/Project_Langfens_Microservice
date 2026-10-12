@@ -3,6 +3,7 @@ using attempt_service.Contracts.Attempt;
 using attempt_service.Domain.Entities;
 using attempt_service.Domain.Enums;
 using attempt_service.Features.Helpers;
+using Grpc.Core;
 using attempt_service.Features.Helpers.RagExplainer;
 using attempt_service.Infrastructure.Persistence;
 using Google.Protobuf;
@@ -91,39 +92,20 @@ public class AttemptService(
                 }
                 catch
                 {
-                    try
-                    {
-                        var dto = existedStartedAttempt.PaperJson.RootElement
-                            .Deserialize<InternalExamDto.InternalDeliveryExam>(new JsonSerializerOptions
-                            { PropertyNameCaseInsensitive = true });
-                        if (dto == null) return Results.NotFound(new ApiResultDto(false, "Not found", null!));
-                        using var sanitized =
-                            JsonSerializer.SerializeToDocument(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-                        var safeEl = PaperWideNormalizer.NormalizeJsonElement(sanitized.RootElement);
-
-                        //time left
-                        var deadline = existedStartedAttempt.StartedAt.AddSeconds(existedStartedAttempt.DurationSec);
-                        var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
-                        return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
-                            new AttemptStartResponse(
-                                existedStartedAttempt.Id,
-                                safeEl,
-                                existedStartedAttempt.StartedAt,
-                                existedStartedAttempt.DurationSec,
-                                timeLeft
-                                )
-                        ));
-                    }
-                    catch
-                    {
-                        return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
-                            PaperWideNormalizer.NormalizeJsonElement(existedStartedAttempt.PaperJson.RootElement)));
-                    }
+                    return Results.BadRequest(new ApiResultDto(false, "Failed to load attempt snapshot safely", null!));
                 }
             }
         }
 
-        var snapShot = await gateway.GetExamSnapshotAsync(request.ExamId, token);
+        InternalDeliveryExam snapShot;
+        try
+        {
+            snapShot = await gateway.GetExamSnapshotAsync(request.ExamId, token);
+        }
+        catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
+        {
+            return Results.NotFound(new ApiResultDto(false, "Exam not found or not published", null!));
+        }
         var json = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(snapShot));
         using var doc = JsonDocument.Parse(json!);
         var safeElement = PaperWideNormalizer.NormalizeJsonElement(doc.RootElement);

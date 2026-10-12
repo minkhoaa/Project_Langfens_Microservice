@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-10-07T06:46:19.067740+00:00",
+  "phase": "11",
+  "gate": "G11",
+  "gitSha": "f56a0970bbf6190ea7e3af58d2ec8db9e5c9714f",
+  "diffHash": "ac78468d8b68dbd6a499f82cc4cf18da9abc95b9713b15ffb308f3308146171d",
+  "engineVersion": "2.0.0",
+  "schemaVersion": "2.0.0",
+  "policyVersion": "2.0.0",
+  "capsProfile": {
+    "version": "phase06-production-v1",
+    "source": "deploy/envs/loop-caps.env",
+    "mode": "LIMITED_PRODUCTION"
+  },
+  "predecessors": [
+    "G06",
+    "G07",
+    "G08",
+    "G09",
+    "G10"
+  ]
+}

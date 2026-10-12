@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-10-12T09:31:53.096792+00:00",
+  "persistenceDbIdentity": {
+    "target": "ISOLATED_STAGING_TEST",
+    "requestedDatabase": "exam_test_phase15",
+    "resolvedDatabase": "exam_test_phase15",
+    "host": "localhost",
+    "port": 5433,
+    "user": "exam",
+    "isIsolatedStagingTarget": true
+  },
+  "v2TotalTokensUsed": 546837,
+  "legacyTotalTokensUsed": 2231854,
+  "v2AverageTokensPerPaper": 30379.8,
+  "legacyAverageTokensPerPaper": 123991.9,
+  "v2ReportedTokens": 546837,
+  "v2EstimatedTokens": 0,
+  "v2UnknownTokens": 0,
+  "legacyReportedTokens": 2231854,
+  "legacyEstimatedTokens": 0,
+  "legacyUnknownTokens": 0,
+  "pricingModel": {
+    "inputPricePerMillion": 2.0,
+    "outputPricePerMillion": 5.0,
+    "blendedPerThousandTokens": 0.0025
+  },
+  "v2TotalEstimatedCostUsd": 1.3671,
+  "legacyTotalEstimatedCostUsd": 5.5796,
+  "priorAndIncompleteCampaigns": []
+}

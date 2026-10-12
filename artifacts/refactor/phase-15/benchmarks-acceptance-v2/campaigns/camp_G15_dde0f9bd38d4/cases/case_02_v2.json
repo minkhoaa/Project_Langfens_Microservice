@@ -1,0 +1,33 @@
+{
+  "caseIndex": 2,
+  "engine": "V2_LoopEngine",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LIVE_MINIMAX",
+  "campaignId": "camp_G15_dde0f9bd38d4",
+  "seed": 202,
+  "runId": "bench_215be8b792b8dc233010b54b18d008a4",
+  "jobId": "74b30849-af13-42dd-aee2-c1b5576c8df2",
+  "sourceTriple": [
+    "PMC13560651",
+    "PMC13407692",
+    "PMC13517498"
+  ],
+  "status": "ACCEPTED",
+  "validDraft": true,
+  "failureReason": null,
+  "versionsCount": 1,
+  "evaluatorIssues": [],
+  "latencySeconds": 497.7175,
+  "totalTokens": 40675,
+  "reportedTokens": 40675,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 17,
+  "uniqueProviderDispatches": 17,
+  "estimatedCostUsd": 0.101688,
+  "persistedExamId": "bc71a54a-49f1-4972-8f82-ae289ddfa04f",
+  "isPrimaryPersisted": true,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01"
+}

@@ -26,6 +26,67 @@ public static class ReadingPaperEndpoints
         routes.MapGet("/jobs/{id:guid}", Get);
         routes.MapPut("/jobs/{id:guid}/sources", ReplaceSources);
         routes.MapPost("/jobs/{id:guid}/retry", Retry);
+        routes.MapPost("/jobs/{id:guid}/cancel", Cancel);
+
+        // Canary & Rollout Controls
+        var canaryRoutes = routes.MapGroup("/canary");
+        canaryRoutes.MapGet("", GetCanaryStatus);
+        canaryRoutes.MapPost("/percentage", SetCanaryPercentage);
+        canaryRoutes.MapPost("/pause", PauseCanary);
+        canaryRoutes.MapPost("/resume", ResumeCanary);
+        canaryRoutes.MapPost("/abort", AbortCanaryRun);
+    }
+
+    public record SetCanaryPercentageRequest(int Percentage);
+    public record CanaryPauseRequest(string? Reason);
+    public record CanaryAbortRequest(string RunId, string Reason, string? Details = null);
+
+    private static IResult GetCanaryStatus(CanaryRoutingService canary)
+        => Results.Ok(canary.GetStatus());
+
+    private static IResult SetCanaryPercentage(SetCanaryPercentageRequest request, CanaryRoutingService canary)
+    {
+        if (request.Percentage is < 0 or > 100)
+            return Results.BadRequest(new { error = "Percentage must be between 0 and 100" });
+        canary.SetCanaryPercentage(request.Percentage);
+        return Results.Ok(canary.GetStatus());
+    }
+
+    private static IResult PauseCanary(CanaryPauseRequest request, CanaryRoutingService canary)
+    {
+        canary.Pause(request.Reason ?? "Admin pause requested");
+        return Results.Ok(canary.GetStatus());
+    }
+
+    private static IResult ResumeCanary(CanaryRoutingService canary)
+    {
+        canary.Resume();
+        return Results.Ok(canary.GetStatus());
+    }
+
+    private static async Task<IResult> AbortCanaryRun(CanaryAbortRequest request, CanaryRoutingService canary, ExamDbContext db, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.RunId))
+            return Results.BadRequest(new { error = "RunId is required" });
+
+        canary.TriggerAbort(request.RunId, CanaryAbortReason.ManualAbort, request.Details ?? request.Reason);
+
+        var run = await db.ReadingPaperRuns.FirstOrDefaultAsync(r => r.RunId == request.RunId, ct);
+        if (run != null)
+        {
+            run.Status = "ABORTED";
+            run.UpdatedAt = DateTime.UtcNow;
+            var job = await db.ReadingPaperJobs.FirstOrDefaultAsync(j => j.Id == run.JobId, ct);
+            if (job != null)
+            {
+                job.Status = "Aborted";
+                job.Error = $"Manually aborted: {request.Reason}";
+                job.UpdatedAt = DateTime.UtcNow;
+            }
+            await db.SaveChangesAsync(ct);
+        }
+
+        return Results.Ok(new { status = "ABORTED", runId = request.RunId, reason = request.Reason });
     }
 
     private static async Task<IResult> IngestSource(IngestSourceRequest request,
@@ -232,7 +293,47 @@ public static class ReadingPaperEndpoints
         return Results.Ok(View(job));
     }
 
-    private static (List<ReadingSource>, string?) ValidateSources(List<ReadingSource>? sources)
+    private static async Task<IResult> Cancel(Guid id, ExamDbContext db, CancellationToken ct)
+    {
+        var job = await db.ReadingPaperJobs.FirstOrDefaultAsync(x => x.Id == id, ct);
+        if (job is null) return Results.NotFound();
+        if (job.Status is "Completed" or "Cancelled" or "Aborted")
+            return Results.Conflict(new { error = $"Job in terminal status '{job.Status}' cannot be cancelled" });
+
+        var expectedCancelVersion = job.CancelVersion;
+        var now = DateTime.UtcNow;
+        var cancellationLog = SerializeLog("Information", "Cancellation requested by admin. In-flight worker operations fenced.");
+
+        var rows = await db.ReadingPaperJobs
+            .Where(x => x.Id == id && (x.Status == "Pending" || x.Status == "Running" || x.Status == "NeedsSources") && x.CancelVersion == expectedCancelVersion)
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(j => j.Status, "Cancelled")
+                .SetProperty(j => j.CancelVersion, j => j.CancelVersion + 1)
+                .SetProperty(j => j.Error, "Cancelled by user")
+                .SetProperty(j => j.LeaseUntil, (DateTime?)null)
+                .SetProperty(j => j.LeaseOwner, (Guid?)null)
+                .SetProperty(j => j.UpdatedAt, now)
+                .SetProperty(j => j.Logs, j => j.Logs + cancellationLog),
+                ct);
+
+        if (rows == 0)
+        {
+            var refreshed = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+            return Results.Conflict(new { error = $"Job status changed concurrently to '{refreshed?.Status}' and could not be cancelled" });
+        }
+
+        await db.ReadingPaperRuns
+            .Where(r => r.JobId == id && r.Status == "RUNNING")
+            .ExecuteUpdateAsync(r => r
+                .SetProperty(x => x.Status, "CANCELLED")
+                .SetProperty(x => x.UpdatedAt, now),
+                ct);
+
+        var updatedJob = await db.ReadingPaperJobs.AsNoTracking().FirstAsync(x => x.Id == id, ct);
+        return Results.Ok(View(updatedJob));
+    }
+
+    internal static (List<ReadingSource>, string?) ValidateSources(List<ReadingSource>? sources)
     {
         if (sources is null || sources.Count is < 1 or > 3
             || sources.Select(s => s.Pmcid).Distinct(StringComparer.OrdinalIgnoreCase).Count() != sources.Count

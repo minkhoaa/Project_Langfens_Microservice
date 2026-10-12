@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_89b24698_v2",
+  "campaignId": "camp_g12_paper_minimax_89b24698d649_v2",
+  "jobId": "e73a8324-5bc8-45bd-bd53-8ceafc745efc",
+  "runId": "bench_286b49e7194a2f3971477ffa307dbce3",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T21:00:41.236102+00:00",
+  "error": "CAS rejection: expected initial head (no prior head), but artifact 'art_paper_paper_d87639de96381d8d2775020b' already has an accepted head"
+}

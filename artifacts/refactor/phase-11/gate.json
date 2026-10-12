@@ -1,0 +1,153 @@
+{
+  "phase": "11",
+  "gate": "G11",
+  "title": "Section Loop, Exact Resume, and Scoped Repairs",
+  "status": "PASS",
+  "evaluatedAt": "2026-10-07T06:46:19.068311+00:00",
+  "gitSha": "f56a0970bbf6190ea7e3af58d2ec8db9e5c9714f",
+  "diffHash": "ac78468d8b68dbd6a499f82cc4cf18da9abc95b9713b15ffb308f3308146171d",
+  "dependencies": [
+    "G06",
+    "G07",
+    "G08",
+    "G09",
+    "G10"
+  ],
+  "requiredTestIds": [
+    "T11-01",
+    "T11-02",
+    "T11-03",
+    "T11-04",
+    "T11-05",
+    "T11-06",
+    "T11-07",
+    "T11-08"
+  ],
+  "checks": {
+    "T11-01": {
+      "name": "Three sections counts (13/13/14), distributions (S1/S2/S3), contiguous numbering 1-40, passage word bounds [720, 915]",
+      "passed": true,
+      "evidence": "test_t11_01_three_sections_count_types_and_word_bounds"
+    },
+    "T11-02": {
+      "name": "Hard validators for accepted/fresh dependencies, zero missing/stale evaluations, blind solver & adversary coverage",
+      "passed": true,
+      "evidence": "test_t11_02_fresh_evaluations_zero_missing_stale_solver_adversary_coverage"
+    },
+    "T11-03": {
+      "name": "Section-wide duplicate detection (Q23 vs Q18), shingle overlap >0.45, prompt answer leakage, span concentration",
+      "passed": true,
+      "evidence": "test_t11_03_section_wide_duplicate_q23_q18_concentration_leakage"
+    },
+    "T11-04": {
+      "name": "Editorial style and skill diversity distribution, separate warnings vs blockers, diagnostic heuristic confidence",
+      "passed": true,
+      "evidence": "test_t11_04_editorial_style_skill_diversity_separate_warnings_blockers"
+    },
+    "T11-05": {
+      "name": "SectionLoop on generic BoundedLoopRuntime, scoped repair routing, dynamic closure invalidation",
+      "passed": true,
+      "evidence": "test_t11_05_section_loop_generic_runtime_scoped_repairs_invalidation"
+    },
+    "T11-06": {
+      "name": "Accept transaction persistence via authoritative boundary, atomic SectionsJson bridge, CAS/fencing, idempotent replay",
+      "passed": true,
+      "evidence": "test_t11_06_accept_transaction_persist_sections_json_bridge_cas_fencing & CommitSectionCheckpoint_SynchronizesIntoSectionsJson_Idempotently"
+    },
+    "T11-07": {
+      "name": "Exact durable cursor resume across sections, crash resumption, Section 3 source replacement preserving Section 1-2",
+      "passed": true,
+      "evidence": "test_t11_07_durable_cursor_resume_kill_at_acceptance_source_replacement & verify_real_postgres_durability_and_faults"
+    },
+    "T11-08": {
+      "name": "Typed workflow mapping, .NET consumer round-trip, student payload isolation without secret leakage, no premature exam creation",
+      "passed": true,
+      "evidence": "test_t11_08_typed_workflow_mapping_dotnet_roundtrip_payload_isolation & SectionAcceptance_DoesNotBuildExam_PreservesJobRunning"
+    }
+  },
+  "testsSummary": {
+    "python": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 1.665,
+      "testcases": [
+        {
+          "name": "test_t11_01_three_sections_count_types_and_word_bounds",
+          "classname": "tests.test_t11_section_loop",
+          "status": "passed"
+        },
+        {
+          "name": "test_t11_02_fresh_evaluations_zero_missing_stale_solver_adversary_coverage",
+          "classname": "tests.test_t11_section_loop",
+          "status": "passed"
+        },
+        {
+          "name": "test_t11_03_section_wide_duplicate_q23_q18_concentration_leakage",
+          "classname": "tests.test_t11_section_loop",
+          "status": "passed"
+        },
+        {
+          "name": "test_t11_04_editorial_style_skill_diversity_separate_warnings_blockers",
+          "classname": "tests.test_t11_section_loop",
+          "status": "passed"
+        },
+        {
+          "name": "test_t11_05_section_loop_generic_runtime_scoped_repairs_invalidation",
+          "classname": "tests.test_t11_section_loop",
+          "status": "passed"
+        },
+        {
+          "name": "test_t11_06_accept_transaction_persist_sections_json_bridge_cas_fencing",
+          "classname": "tests.test_t11_section_loop",
+          "status": "passed"
+        },
+        {
+          "name": "test_t11_07_durable_cursor_resume_kill_at_acceptance_source_replacement",
+          "classname": "tests.test_t11_section_loop",
+          "status": "passed"
+        },
+        {
+          "name": "test_t11_08_typed_workflow_mapping_dotnet_roundtrip_payload_isolation",
+          "classname": "tests.test_t11_section_loop",
+          "status": "passed"
+        }
+      ]
+    },
+    "dotnet": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "testcases": [
+        {
+          "name": "exam_service.Tests.Phase11SectionLoopTests.SectionAcceptance_DoesNotBuildExam_PreservesJobRunning",
+          "status": "passed"
+        },
+        {
+          "name": "exam_service.Tests.Phase11SectionLoopTests.CommitSectionCheckpoint_SynchronizesIntoSectionsJson_Idempotently",
+          "status": "passed"
+        }
+      ]
+    },
+    "totalPassed": 10,
+    "totalFailed": 0,
+    "totalSkipped": 0
+  },
+  "evidencePaths": [
+    "artifacts/refactor/phase-11/gate.json",
+    "artifacts/refactor/phase-11/phase-report.md",
+    "artifacts/refactor/phase-11/test-report.json",
+    "artifacts/refactor/phase-11/commands.jsonl",
+    "artifacts/refactor/phase-11/snapshot-manifest.json",
+    "artifacts/refactor/phase-11/fix-log.jsonl",
+    "artifacts/refactor/phase-11/section-snapshot.json",
+    "artifacts/refactor/phase-11/section-parity-report.json",
+    "artifacts/refactor/phase-11/repair-traces.jsonl",
+    "artifacts/refactor/phase-11/independent-review.md",
+    "artifacts/refactor/phase-11/resume.md"
+  ],
+  "conclusion": "Phase 11 implementation, deterministic verification (8/8 Python T11 tests green, .NET SectionLoop tests green), live section parity benchmark (3/3 sections 100% compliant), authoritative .NET SectionsJson bridge, and real PostgreSQL durability achieve full PASS. Predecessor gates G06-G10 are verified and PASS. Readiness for Phase 12 is READY_FOR_PHASE_12.",
+  "readinessForPhase12": "READY_FOR_PHASE_12"
+}

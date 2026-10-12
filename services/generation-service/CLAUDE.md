@@ -53,3 +53,12 @@ All endpoints are mounted with prefix `/v1/autogen/reading-paper` and `/api/v1/a
 cd services/generation-service
 pytest tests/
 ```
+
+## Versioned Runtime Caps (R03 / G06)
+
+- `deploy/envs/loop-caps.env` is the production resource-cap declaration shared by generation-service and exam-service. Compose requires it for both services; AppHost loads it via `WithComposeEnvFile("loop-caps")`. Do not duplicate resource caps in `ai.env`.
+- Settings loads the repository cap profile, then the explicit `GENERATION_SERVICE_ENV_FILE` (or `AI_SERVICE_ENV_FILE`) override; process environment overrides dotenv values. Production requires every resource cap and explicit profile version/source; missing values never use development class defaults.
+- Cap counts, token/byte limits and seconds use positive 32-bit integers, matching .NET configuration admission. Fractional/nonfinite values and inconsistent child/parent allocations are rejected. `READING_PAPER_*` allocation variables map explicitly to their Python Settings fields.
+- `LoopPolicy.from_settings()` carries the effective cap profile into loop composition. Passage generation selects its declared passage reservation; question composition must not override the declared 60,000-token / 300-second child limits.
+- New .NET runs persist profile JSON/version/source/SHA-256 and budget ceilings. Profile JSON uses sorted keys and canonical UTF-8 on both runtimes. Before the first loop cursor, Python takes the run's original cap profile, not a changed deployment profile. Saved cursors preserve the full loop policy and counters; new configuration affects only new runs. Missing/corrupt historical snapshots require pause/migration, never reconstruction from current environment.
+- Runtime tests include `tests/test_r03_config_caps.py`, `tests/test_r03_runtime_caps.py` and `tests/test_t06_loop_runtime.py`. Local simulation and real-PostgreSQL diagnostics do not certify live model quality or promote G06.

@@ -23,9 +23,9 @@ Map và hoàn thành P12-01..09:
 
 Giữ canonical contracts, immutable versions, CAS, cancellation, caps snapshot và cache/dependency freshness. Không tạo retry loop hoặc writer store thứ hai.
 
-Implement/map rồi chạy T12-01..08 trên Python+.NET+PostgreSQL thật: numbering; word-policy parity; duplicate/locality; leakage boundaries; stale lease/cancel; transaction failure; post-commit crash/replay; source→Draft→manual Publish/CRUD. Fake provider cho fault injection; live quality evidence riêng theo matrix. Tests dùng real worker/service boundary, không chỉ instantiate PaperLoop.
+Implement/map rồi chạy T12-01..08 trên Python+.NET+PostgreSQL thật: numbering; word-policy parity; duplicate/locality; leakage boundaries; stale lease/cancel; transaction failure; post-commit crash/replay; source→Draft→manual Publish/CRUD. Fake provider cho fault injection; live quality benchmark tự động khởi chạy và resume bằng provider MiniMax đã cấu hình (loại bỏ phê duyệt thủ công của operator, authorization-file, phê duyệt campaign-budget hay chờ PENDING_AUTHORIZATION).
 
-Fix mọi actionable findings và rerun impacted G02/G06/G11, shared-contract/attempt-grading regressions. Missing harness là việc phải implement, không external blocker. Reviewer verify candidate mới sau fixes.
+Vô hiệu hóa application-imposed call, token, monetary và wall-time caps cho MiniMax BENCHMARKS ở cả campaign và child-run level (cấu hình explicit unlimited; cấm fallback về 15 calls / 60k tokens / 300s; production profiles giữ nguyên). Duy trì xác thực service, CAS/fencing, cancellation, truthful usage accounting, checkpoints, idempotent resume, bounded retries và per-request limits; tôn trọng giới hạn thực tế phía provider. G12 PASS chỉ khi required dependencies/checks và live quality evidence đạt; không promote gate chỉ vì đã dỡ bỏ rào cản phê duyệt. Chính sách này áp dụng mặc định cho tất cả các phase.
 
 Lưu artifacts/refactor/phase-12/: gate.json, phase-report.md, native/test-report, commands.jsonl, snapshot-manifest.json, fix-log.jsonl, independent-review.md, resume.md theo canonical schemas. Snapshot gồm HEAD + dirty/untracked hashes, caps/config/model/prompt/corpus versions. Thêm route/DTO wiring trace, SQL constraint/transaction proof, final graph fixtures và repair closure diffs.
 

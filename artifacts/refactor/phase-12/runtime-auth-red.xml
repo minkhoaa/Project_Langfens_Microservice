@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.034" timestamp="2026-10-07T08:51:02.761736+00:00" hostname="code"><testcase classname="tests.test_t12_paper_loop" name="test_t12_internal_generation_requires_service_auth[]" time="0.205"><failure message="assert 422 == 401&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x723d79d1e9b0&gt;
+prefix = ''
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("prefix", ["", "/api"])
+    async def test_t12_internal_generation_requires_service_auth(monkeypatch, prefix):
+        from httpx import ASGITransport, AsyncClient
+        from app.main import app
+        monkeypatch.setenv("EXAMSERVICE__INTERNAL__API__KEY", "runtime-test-key")
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            for route in ("/paper-v2", "/paper-evaluate", "/paper-repair"):
+                url = prefix + "/v1/autogen/reading-paper" + route
+&gt;               assert (await client.post(url, json={})).status_code == 401
+E               assert 422 == 401
+E                +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+services/generation-service/tests/test_t12_paper_loop.py:825: AssertionError</failure></testcase><testcase classname="tests.test_t12_paper_loop" name="test_t12_internal_generation_requires_service_auth[/api]" time="0.003"><failure message="assert 422 == 401&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x723d796fdd50&gt;
+prefix = '/api'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("prefix", ["", "/api"])
+    async def test_t12_internal_generation_requires_service_auth(monkeypatch, prefix):
+        from httpx import ASGITransport, AsyncClient
+        from app.main import app
+        monkeypatch.setenv("EXAMSERVICE__INTERNAL__API__KEY", "runtime-test-key")
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            for route in ("/paper-v2", "/paper-evaluate", "/paper-repair"):
+                url = prefix + "/v1/autogen/reading-paper" + route
+&gt;               assert (await client.post(url, json={})).status_code == 401
+E               assert 422 == 401
+E                +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+services/generation-service/tests/test_t12_paper_loop.py:825: AssertionError</failure></testcase></testsuite></testsuites>

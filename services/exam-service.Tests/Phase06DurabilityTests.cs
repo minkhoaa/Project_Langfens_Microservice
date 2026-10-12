@@ -15,11 +15,15 @@ namespace exam_service.Tests;
 public class Phase06DurabilityTests
 {
     private const string DefaultConn = "Host=localhost;Port=5433;Database=exam_test_phase06;Username=exam;Password=exam";
+    private static string ConnectionString =>
+        Environment.GetEnvironmentVariable("READING_TEST_POSTGRES")
+        ?? Environment.GetEnvironmentVariable("ConnectionStrings__exam-db")
+        ?? DefaultConn;
 
-    private static ServiceProvider CreateTestProvider(string connection = DefaultConn)
+    private static ServiceProvider CreateTestProvider(string? connection = null)
     {
         var services = new ServiceCollection();
-        services.AddDbContext<ExamDbContext>(options => options.UseNpgsql(connection, npg =>
+        services.AddDbContext<ExamDbContext>(options => options.UseNpgsql(connection ?? ConnectionString, npg =>
         {
             npg.ConfigureDataSource(dataSource => dataSource.EnableDynamicJson());
             npg.EnableRetryOnFailure();
@@ -54,7 +58,7 @@ public class Phase06DurabilityTests
 
         var runId = $"run_{job.Id:N}";
         job.ActiveRunId = runId;
-
+        var profile = R03CapsProfileTests.ApprovedFromDeployEnvFile();
         var run = new ReadingPaperRun
         {
             Id = Guid.NewGuid(),
@@ -68,8 +72,13 @@ public class Phase06DurabilityTests
             EngineVersion = "2.0.0",
             SchemaVersion = "2.0.0",
             PolicyVersion = "2.0.0",
-            BudgetCapCalls = 25,
-            BudgetCapTokens = 150000,
+            BudgetCapCalls = profile.RunBudgetCapCalls,
+            BudgetCapTokens = profile.RunBudgetCapTokens,
+            BudgetCapWallTimeSeconds = profile.RunBudgetCapWallTimeSeconds,
+            BudgetProfileVersion = profile.Version,
+            BudgetProfileSha256 = profile.Sha256,
+            BudgetProfileSource = profile.Source,
+            BudgetProfileJson = profile.SnapshotJson,
             BudgetUsedCalls = 0,
             BudgetUsedTokens = 0,
             CreatedAt = DateTime.UtcNow,
@@ -77,7 +86,6 @@ public class Phase06DurabilityTests
         };
         db.ReadingPaperRuns.Add(run);
         await db.SaveChangesAsync();
-
         return (job, run);
     }
 

@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_2199796e_v2",
+  "campaignId": "camp_g12_paper_minimax_2199796e158c_v2",
+  "jobId": "a5b78364-c6fd-40d1-ae01-b12ebc83deee",
+  "runId": "bench_4dcc66a323d7cae8888328e6d440d5ad",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T19:20:10.068287+00:00",
+  "error": "AI generation failed: Overall deadline of 60.0s exceeded for operation 'op_bench_4dcc66a323d7cae8888328e6d440d5ad_sec_3_38EDE8B8F2D6_sec_att_2_solver'\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 672, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 910, in generate_section\n    return await _generate_section_once(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 842, in _generate_section_once\n    reviews = await review_answers(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 392, in review_answers\n    review = await generate_json(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/a"
+}

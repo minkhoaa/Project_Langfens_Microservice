@@ -1,0 +1,345 @@
+{
+  "timestamp": "2026-10-11T14:41:42.955015+00:00",
+  "gitSha": "56d060d45b2f55e6d1af03240e019c60084b1261",
+  "benchmarkName": "Phase 15 Paired Benchmark: Legacy V1 vs V2 Loop Engine",
+  "benchmarkExecutionProfile": {
+    "mode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+    "distinction": "Live MiniMax benchmark executes against live OpenAI-compatible MiniMax-Text-01 endpoints with authenticated API credentials loaded silently from deploy/envs/ai.env under uncapped benchmark policy.",
+    "liveProviderConfigured": true,
+    "primaryModel": "MiniMax-Text-01",
+    "fallbackModel": null,
+    "v2LiveCallsExecuted": 41,
+    "legacyLiveCallsExecuted": 79,
+    "totalLiveCallsExecuted": 120
+  },
+  "totalPairedPapers": 2,
+  "totalRunsExecuted": 4,
+  "completedRunsCount": 2,
+  "failedRunsCount": 2,
+  "incompleteRunsCount": 0,
+  "unknownUsageRunsCount": 0,
+  "distinctSourcesCount": 6,
+  "distinctSourceTriplesCount": 6,
+  "persistenceAudit": {
+    "postgresAvailable": true,
+    "dbIdentity": {
+      "target": "ISOLATED_STAGING_TEST",
+      "requestedDatabase": "exam_test_phase15",
+      "resolvedDatabase": "exam_test_phase15",
+      "host": "localhost",
+      "port": 5433,
+      "user": "exam",
+      "isIsolatedStagingTarget": true
+    },
+    "v2AuthoritativePersistedCount": 2,
+    "legacyShadowPersistedCount": 0,
+    "postgresConfirmedCounts": {
+      "v2": 2,
+      "legacy": 0
+    },
+    "shadowOverwrotePrimary": false
+  },
+  "validationMatrix": {
+    "validDraftRate": {
+      "v2": 1.0,
+      "legacy": 0.0,
+      "target": ">= 0.95",
+      "passed": true
+    },
+    "fidelityMustRejectRate": {
+      "rate": 1.0,
+      "target": "1.00 (100%)",
+      "passed": true
+    },
+    "semanticBlockingRecall": {
+      "recall": 1.0,
+      "target": ">= 0.95",
+      "passed": true
+    },
+    "perTypeRecall": {
+      "average": 1.0,
+      "byType": {
+        "TRUE_FALSE_NOT_GIVEN": 1.0,
+        "YES_NO_NOT_GIVEN": 1.0,
+        "MULTIPLE_CHOICE_SINGLE": 1.0,
+        "SENTENCE_COMPLETION": 1.0,
+        "SUMMARY_COMPLETION": 1.0,
+        "SHORT_ANSWER": 1.0
+      },
+      "target": ">= 0.90 per type",
+      "passed": true
+    },
+    "ambiguityRecall": {
+      "recall": 1.0,
+      "target": ">= 0.90",
+      "passed": true
+    },
+    "falseRejectionRate": {
+      "rate": 0.0,
+      "target": "<= 0.10",
+      "passed": true
+    },
+    "p95LatencyRatio": {
+      "v2P95": 651.2889899999999,
+      "legacyP95": 707.836785,
+      "ratio": 0.92,
+      "target": "<= 1.50x",
+      "passed": true
+    },
+    "medianTokenCostRatio": {
+      "v2MedianTokens": 47808.5,
+      "legacyMedianTokens": 109521.0,
+      "ratio": 0.437,
+      "target": "<= 2.00x",
+      "passed": true
+    }
+  },
+  "criticalFixturesEvaluation": {
+    "repetitionsCount": 3,
+    "runs": [
+      {
+        "repetition": 1,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      },
+      {
+        "repetition": 2,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      },
+      {
+        "repetition": 3,
+        "fidelityMustRejectHits": 5,
+        "fidelityMustRejectTotal": 5,
+        "fidelityMustRejectRate": 1.0,
+        "semanticBlockingRecall": 1.0,
+        "perTypeRecall": {
+          "TRUE_FALSE_NOT_GIVEN": 1.0,
+          "YES_NO_NOT_GIVEN": 1.0,
+          "MULTIPLE_CHOICE_SINGLE": 1.0,
+          "SENTENCE_COMPLETION": 1.0,
+          "SUMMARY_COMPLETION": 1.0,
+          "SHORT_ANSWER": 1.0
+        },
+        "perTypeRecallAverage": 1.0,
+        "ambiguityRecall": 1.0,
+        "falseRejectionRate": 0.0
+      }
+    ],
+    "aggregate": {
+      "fidelityMustRejectRate": 1.0,
+      "semanticBlockingRecall": 1.0,
+      "perTypeRecallAverage": 1.0,
+      "perTypeRecall": {
+        "TRUE_FALSE_NOT_GIVEN": 1.0,
+        "YES_NO_NOT_GIVEN": 1.0,
+        "MULTIPLE_CHOICE_SINGLE": 1.0,
+        "SENTENCE_COMPLETION": 1.0,
+        "SUMMARY_COMPLETION": 1.0,
+        "SHORT_ANSWER": 1.0
+      },
+      "ambiguityRecall": 1.0,
+      "falseRejectionRate": 0.0
+    },
+    "worstRun": {
+      "fidelityMustRejectRate": 1.0,
+      "semanticBlockingRecall": 1.0,
+      "ambiguityRecall": 1.0,
+      "falseRejectionRate": 0.0
+    }
+  },
+  "distributions": {
+    "timestamp": "2026-10-11T14:41:42.951703+00:00",
+    "totalPairedPapers": 2,
+    "distinctSourceTriples": 6,
+    "v2Latency": {
+      "min": 489.454,
+      "p50": 574.63,
+      "p95": 651.289,
+      "max": 659.807
+    },
+    "legacyLatency": {
+      "min": 439.553,
+      "p50": 580.755,
+      "p95": 707.837,
+      "max": 721.957
+    },
+    "v2Tokens": {
+      "min": 38736,
+      "median": 47808,
+      "p95": 55973,
+      "max": 56881
+    },
+    "legacyTokens": {
+      "min": 80854,
+      "median": 109521,
+      "p95": 135321,
+      "max": 138188
+    },
+    "ratios": {
+      "p95LatencyRatio": 0.92,
+      "p95LatencyThreshold": 1.5,
+      "p95LatencyPass": true,
+      "medianTokenCostRatio": 0.437,
+      "medianTokenCostThreshold": 2.0,
+      "medianTokenCostPass": true
+    }
+  },
+  "tokenAccounting": {
+    "timestamp": "2026-10-11T14:41:42.951733+00:00",
+    "persistenceDbIdentity": {
+      "target": "ISOLATED_STAGING_TEST",
+      "requestedDatabase": "exam_test_phase15",
+      "resolvedDatabase": "exam_test_phase15",
+      "host": "localhost",
+      "port": 5433,
+      "user": "exam",
+      "isIsolatedStagingTarget": true
+    },
+    "v2TotalTokensUsed": 95617,
+    "legacyTotalTokensUsed": 219042,
+    "v2AverageTokensPerPaper": 47808.5,
+    "legacyAverageTokensPerPaper": 109521.0,
+    "v2ReportedTokens": 95617,
+    "v2EstimatedTokens": 0,
+    "v2UnknownTokens": 0,
+    "legacyReportedTokens": 219042,
+    "legacyEstimatedTokens": 0,
+    "legacyUnknownTokens": 0,
+    "pricingModel": {
+      "inputPricePerMillion": 2.0,
+      "outputPricePerMillion": 5.0,
+      "blendedPerThousandTokens": 0.0025
+    },
+    "v2TotalEstimatedCostUsd": 0.239,
+    "legacyTotalEstimatedCostUsd": 0.5476,
+    "priorAndIncompleteCampaigns": [
+      {
+        "campaignId": "camp_G15_72751c8f84be",
+        "status": "INCOMPLETE",
+        "casesCount": 19,
+        "providerCallsCount": 45,
+        "tokensUsed": 118451,
+        "wallTimeUsedSeconds": 0.0,
+        "directory": "artifacts/refactor/phase-15/benchmarks-diagnostic-replay/campaigns/camp_G15_72751c8f84be"
+      },
+      {
+        "campaignId": "camp_G15_988f6f521bdb",
+        "status": "INCOMPLETE",
+        "casesCount": 2,
+        "providerCallsCount": 45,
+        "tokensUsed": 125851,
+        "wallTimeUsedSeconds": 0.0,
+        "directory": "artifacts/refactor/phase-15/benchmarks-diagnostic-replay/campaigns/camp_G15_988f6f521bdb"
+      }
+    ]
+  },
+  "priorAndIncompleteCampaigns": [
+    {
+      "campaignId": "camp_G15_72751c8f84be",
+      "status": "INCOMPLETE",
+      "casesCount": 19,
+      "providerCallsCount": 45,
+      "tokensUsed": 118451,
+      "wallTimeUsedSeconds": 0.0,
+      "directory": "artifacts/refactor/phase-15/benchmarks-diagnostic-replay/campaigns/camp_G15_72751c8f84be"
+    },
+    {
+      "campaignId": "camp_G15_988f6f521bdb",
+      "status": "INCOMPLETE",
+      "casesCount": 2,
+      "providerCallsCount": 45,
+      "tokensUsed": 125851,
+      "wallTimeUsedSeconds": 0.0,
+      "directory": "artifacts/refactor/phase-15/benchmarks-diagnostic-replay/campaigns/camp_G15_988f6f521bdb"
+    }
+  ],
+  "pairedCases": [
+    {
+      "caseIndex": 9,
+      "sourceTriple": [
+        "PMC13517498",
+        "PMC13621526",
+        "PMC13503497"
+      ],
+      "seed": 303,
+      "v2": {
+        "validDraft": true,
+        "latencySeconds": 489.4544,
+        "totalTokens": 38736,
+        "costUsd": 0.09684,
+        "persistedExamId": "bea22313-a0bb-4cbf-bcc8-9fa45d99a249",
+        "isPrimaryPersisted": true,
+        "liveCallSuccess": true
+      },
+      "legacy": {
+        "validDraft": false,
+        "latencySeconds": 721.957,
+        "totalTokens": 138188,
+        "costUsd": 0.34547,
+        "persistedExamId": null,
+        "draftExamId": null,
+        "isPrimaryPersisted": false,
+        "liveCallSuccess": true
+      },
+      "latencyRatio": 0.678,
+      "tokenRatio": 0.28
+    },
+    {
+      "caseIndex": 14,
+      "sourceTriple": [
+        "PMC13503497",
+        "PMC13583341",
+        "PMC13560651"
+      ],
+      "seed": 202,
+      "v2": {
+        "validDraft": true,
+        "latencySeconds": 659.8066,
+        "totalTokens": 56881,
+        "costUsd": 0.142203,
+        "persistedExamId": "b05dd74d-b82d-4834-9655-44f204c12a3f",
+        "isPrimaryPersisted": true,
+        "liveCallSuccess": true
+      },
+      "legacy": {
+        "validDraft": false,
+        "latencySeconds": 439.5527,
+        "totalTokens": 80854,
+        "costUsd": 0.202135,
+        "persistedExamId": null,
+        "draftExamId": null,
+        "isPrimaryPersisted": false,
+        "liveCallSuccess": true
+      },
+      "latencyRatio": 1.501,
+      "tokenRatio": 0.704
+    }
+  ]
+}

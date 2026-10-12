@@ -60,7 +60,8 @@ public class ReadingPaperIntegrationTests
         }
 
         var worker = new ReadingPaperWorker(provider.GetRequiredService<IServiceScopeFactory>(),
-            NullLogger<ReadingPaperWorker>.Instance);
+            NullLogger<ReadingPaperWorker>.Instance,
+            R03CapsProfileTests.ApprovedFromDeployEnvFile());
         await worker.StartAsync(CancellationToken.None);
         try
         {

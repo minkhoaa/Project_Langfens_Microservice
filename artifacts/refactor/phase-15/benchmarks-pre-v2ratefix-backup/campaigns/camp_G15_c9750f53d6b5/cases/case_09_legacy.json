@@ -1,0 +1,43 @@
+{
+  "caseIndex": 9,
+  "engine": "Legacy_V1",
+  "executionMode": "LIVE_MINIMAX_PAIRED_BENCHMARK",
+  "benchmarkProfile": "LEGACY_SHADOW",
+  "campaignId": "camp_G15_c9750f53d6b5",
+  "seed": 303,
+  "runId": "bench_524fe368cc0ea9ecb5fe0ff1c6667292",
+  "jobId": "b743b2e7-f5e8-468a-b336-0272cdd28c37",
+  "sourceTriple": [
+    "PMC13517498",
+    "PMC13621526",
+    "PMC13503497"
+  ],
+  "status": "ACCEPTED",
+  "validDraft": true,
+  "failureReason": null,
+  "versionsCount": 1,
+  "evaluatorIssues": [],
+  "latencySeconds": 831.6801,
+  "totalTokens": 170179,
+  "reportedTokens": 170179,
+  "estimatedTokens": 0,
+  "unknownTokens": 0,
+  "providerCallsCount": 63,
+  "uniqueProviderDispatches": 63,
+  "estimatedCostUsd": 0.425448,
+  "persistedExamId": null,
+  "draftExamId": "ab376e68-3cef-4e86-849f-92dfdd5c9d93",
+  "isPrimaryPersisted": false,
+  "legacyCallsCount": 66,
+  "totalQuestions": 40,
+  "liveCallSuccess": true,
+  "actualProviderUsed": "minimax",
+  "actualModelUsed": "MiniMax-Text-01",
+  "provenance": {
+    "importedBaseline": true,
+    "sourceCampaignId": "camp_G15_855da04e41ba",
+    "legacyCodeUnchanged": true,
+    "pipelineSha256": "a2e686ab711c3cfd0f43bb9db02ab81dc2c77e8b2346ee5e26ca09cfc49a8697",
+    "model": "MiniMax-Text-01"
+  }
+}

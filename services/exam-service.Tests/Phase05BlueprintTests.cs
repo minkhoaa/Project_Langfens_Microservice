@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using exam_service.Domains.Entities;
 using exam_service.Features.ReadingPaper;
@@ -278,6 +280,21 @@ public class Phase05BlueprintTests
             runId = $"run_{job.Id:N}";
             job.ActiveRunId = runId;
 
+            var caps = new SortedDictionary<string, int>(StringComparer.Ordinal)
+            {
+                ["standaloneRunBudgetCapCalls"] = 25,
+                ["standaloneRunBudgetCapTokens"] = 150000,
+                ["standaloneRunBudgetCapWallTimeSeconds"] = 900
+            };
+            var snapshot = new SortedDictionary<string, object>(StringComparer.Ordinal)
+            {
+                ["caps"] = caps,
+                ["profileSource"] = "Phase05BlueprintTests",
+                ["profileVersion"] = "phase05-test-v1"
+            };
+            var profileJson = JsonSerializer.Serialize(snapshot);
+            var profileSha = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(profileJson))).ToLowerInvariant();
+
             var run = new ReadingPaperRun
             {
                 Id = Guid.NewGuid(),
@@ -292,6 +309,11 @@ public class Phase05BlueprintTests
                 PolicyVersion = "2.0.0",
                 BudgetCapCalls = 25,
                 BudgetCapTokens = 150000,
+                BudgetCapWallTimeSeconds = 900,
+                BudgetProfileVersion = "phase05-test-v1",
+                BudgetProfileSha256 = profileSha,
+                BudgetProfileSource = "Phase05BlueprintTests",
+                BudgetProfileJson = profileJson,
                 BudgetUsedCalls = 0,
                 BudgetUsedTokens = 0,
                 CreatedAt = DateTime.UtcNow,

@@ -20,6 +20,21 @@ public static class CheckpointService
 {
     public const string InternalApiKeyHeader = "X-Internal-Service-Key";
 
+    /// <summary>
+    /// True when the operation type represents an external provider invocation that consumes run-level
+    /// budget tokens/calls/wall-time. Unifies historical <c>PROVIDER_CALL</c> with the V2 LLM-prefixed
+    /// intents (<c>LLM</c>, <c>LLM_CALL</c>, <c>LLM_PASSAGE</c>) so all real provider attempts atomically
+    /// enforce run / section / artifact budget caps regardless of naming era.
+    /// </summary>
+    public static bool IsProviderCallType(string? operationType)
+    {
+        if (string.IsNullOrWhiteSpace(operationType)) return false;
+        return operationType.Equals("PROVIDER_CALL", StringComparison.OrdinalIgnoreCase)
+            || operationType.Equals("LLM_CALL", StringComparison.OrdinalIgnoreCase)
+            || operationType.Equals("LLM", StringComparison.OrdinalIgnoreCase)
+            || operationType.Equals("LLM_PASSAGE", StringComparison.OrdinalIgnoreCase);
+    }
+
     public static async Task<(ReadingPaperRun Run, ReadingPaperJob Job)> ValidateRunAuthorityAndFencingAsync(
         ExamDbContext db,
         string runId,
@@ -95,21 +110,21 @@ public static class CheckpointService
             .ToList();
 
         var sectionTotalTokens = sections.Sum(a => a.TokenCap);
-        if (sectionTotalTokens > run.BudgetCapTokens)
+        if (run.BudgetCapTokens > 0 && sectionTotalTokens > run.BudgetCapTokens)
         {
             throw new CheckpointValidationException(422,
                 $"Invalid budget allocation hierarchy: sum of section token caps ({sectionTotalTokens}) exceeds run budget cap ({run.BudgetCapTokens})");
         }
 
         var sectionTotalCalls = sections.Sum(a => a.CallCap);
-        if (sectionTotalCalls > run.BudgetCapCalls)
+        if (run.BudgetCapCalls > 0 && sectionTotalCalls > run.BudgetCapCalls)
         {
             throw new CheckpointValidationException(422,
                 $"Invalid budget allocation hierarchy: sum of section call caps ({sectionTotalCalls}) exceeds run budget cap ({run.BudgetCapCalls})");
         }
 
         var sectionTotalWallTime = sections.Sum(a => a.WallTimeCapSeconds);
-        if (sectionTotalWallTime > run.BudgetCapWallTimeSeconds)
+        if (run.BudgetCapWallTimeSeconds > 0 && sectionTotalWallTime > run.BudgetCapWallTimeSeconds)
         {
             throw new CheckpointValidationException(422,
                 $"Invalid budget allocation hierarchy: sum of section wall-time caps ({sectionTotalWallTime}s) exceeds run budget cap ({run.BudgetCapWallTimeSeconds}s)");
@@ -136,21 +151,21 @@ public static class CheckpointService
         {
             var parentSec = sectionAllocMap[group.Key];
             var childTokensSum = group.Sum(a => a.TokenCap);
-            if (childTokensSum > parentSec.TokenCap)
+            if (parentSec.TokenCap > 0 && childTokensSum > parentSec.TokenCap)
             {
                 throw new CheckpointValidationException(422,
                     $"Invalid budget allocation hierarchy: sum of artifact token caps ({childTokensSum}) for section '{group.Key}' exceeds parent section cap ({parentSec.TokenCap})");
             }
 
             var childCallsSum = group.Sum(a => a.CallCap);
-            if (childCallsSum > parentSec.CallCap)
+            if (parentSec.CallCap > 0 && childCallsSum > parentSec.CallCap)
             {
                 throw new CheckpointValidationException(422,
                     $"Invalid budget allocation hierarchy: sum of artifact call caps ({childCallsSum}) for section '{group.Key}' exceeds parent section cap ({parentSec.CallCap})");
             }
 
             var childWallTimeSum = group.Sum(a => a.WallTimeCapSeconds);
-            if (childWallTimeSum > parentSec.WallTimeCapSeconds)
+            if (parentSec.WallTimeCapSeconds > 0 && childWallTimeSum > parentSec.WallTimeCapSeconds)
             {
                 throw new CheckpointValidationException(422,
                     $"Invalid budget allocation hierarchy: sum of artifact wall-time caps ({childWallTimeSum}s) for section '{group.Key}' exceeds parent section cap ({parentSec.WallTimeCapSeconds}s)");
@@ -236,79 +251,85 @@ public static class CheckpointService
 
     private static async Task EnsureDefaultBudgetAllocationsAsync(ExamDbContext db, ReadingPaperRun run, CancellationToken ct)
     {
-        var hasAllocations = await db.ReadingPaperBudgetAllocations.AnyAsync(b => b.RunId == run.RunId, ct);
-        if (hasAllocations) return;
+        if (await db.ReadingPaperBudgetAllocations.AnyAsync(b => b.RunId == run.RunId, ct)) return;
 
-        var defaultSections = new[] { "section_1", "section_2", "section_3" };
-        foreach (var sec in defaultSections)
+        using var document = JsonDocument.Parse(string.IsNullOrWhiteSpace(run.BudgetProfileJson) ? "{}" : run.BudgetProfileJson);
+        var profileCaps = document.RootElement.TryGetProperty("caps", out var capsElement) && capsElement.ValueKind == JsonValueKind.Object
+            ? capsElement
+            : default;
+        var profileName = string.IsNullOrWhiteSpace(run.BenchmarkCampaignId) ? "legacy" : "benchmark";
+        int Cap(string suffix, int fallback)
         {
-            // Seed parent section (45,000 tokens, 8 calls, 280s)
+            var key = $"{profileName}{suffix}";
+            if (profileCaps.ValueKind == JsonValueKind.Object)
+            {
+                if (profileCaps.TryGetProperty(key, out var value) && value.TryGetInt32(out var cap))
+                    return cap;
+                if (profileCaps.TryGetProperty(suffix, out var directValue) && directValue.TryGetInt32(out var directCap))
+                    return directCap;
+            }
+            return fallback;
+        }
+
+        var isUnlimitedRun = run.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap ||
+                             run.BudgetCapTokens == ReadingPaperCapsProfile.UnlimitedCap ||
+                             run.BudgetCapWallTimeSeconds == ReadingPaperCapsProfile.UnlimitedCap ||
+                             run.BudgetCapCalls >= 2_000_000_000 ||
+                             run.BudgetCapTokens >= 2_000_000_000 ||
+                             (run.BudgetProfileJson != null &&
+                              run.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase));
+        var sectionTokens = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionTokenCap", 60000), 60000);
+        var sectionCalls = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionCallCap", 12), 12);
+        var sectionWall = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionWallTimeCapSeconds", 360), 360);
+        var artifactCaps = new[]
+        {
+            (Name: "passage",
+             Tokens: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageTokenCap", 80000),
+             Calls: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageCallCap", 10),
+             Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageWallTimeCapSeconds", 200)),
+            (Name: "questions",
+             Tokens: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactQuestionsTokenCap", 200000),
+             Calls: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactQuestionsCallCap", 50),
+             Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactQuestionsWallTimeCapSeconds", 400)),
+            (Name: "solver",
+             Tokens: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactSolverTokenCap", 50000),
+             Calls: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactSolverCallCap", 6),
+             Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactSolverWallTimeCapSeconds", 150)),
+            (Name: "review",
+             Tokens: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactReviewTokenCap", 50000),
+             Calls: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactReviewCallCap", 6),
+             Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactReviewWallTimeCapSeconds", 150))
+        };
+
+        foreach (var sectionId in new[] { "section_1", "section_2", "section_3" })
+        {
             db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
             {
                 Id = Guid.NewGuid(),
                 RunId = run.RunId,
                 ScopeType = "SECTION",
-                ScopeId = sec,
+                ScopeId = sectionId,
                 ParentScopeId = null,
-                TokenCap = 45000,
-                CallCap = 8,
-                WallTimeCapSeconds = 280,
+                TokenCap = sectionTokens,
+                CallCap = sectionCalls,
+                WallTimeCapSeconds = sectionWall,
                 CreatedAt = DateTime.UtcNow
             });
-
-            // Seed canonical child artifact scopes parented to section:
-            // passage (15k, 2 calls, 90s)
-            db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
+            foreach (var artifact in artifactCaps)
             {
-                Id = Guid.NewGuid(),
-                RunId = run.RunId,
-                ScopeType = "ARTIFACT",
-                ScopeId = $"passage_{sec}",
-                ParentScopeId = sec,
-                TokenCap = 15000,
-                CallCap = 2,
-                WallTimeCapSeconds = 90,
-                CreatedAt = DateTime.UtcNow
-            });
-            // questions (18k, 3 calls, 100s)
-            db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
-            {
-                Id = Guid.NewGuid(),
-                RunId = run.RunId,
-                ScopeType = "ARTIFACT",
-                ScopeId = $"questions_{sec}",
-                ParentScopeId = sec,
-                TokenCap = 18000,
-                CallCap = 3,
-                WallTimeCapSeconds = 100,
-                CreatedAt = DateTime.UtcNow
-            });
-            // solver (6k, 2 calls, 50s)
-            db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
-            {
-                Id = Guid.NewGuid(),
-                RunId = run.RunId,
-                ScopeType = "ARTIFACT",
-                ScopeId = $"solver_{sec}",
-                ParentScopeId = sec,
-                TokenCap = 6000,
-                CallCap = 2,
-                WallTimeCapSeconds = 50,
-                CreatedAt = DateTime.UtcNow
-            });
-            // review (6k, 1 call, 40s)
-            db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
-            {
-                Id = Guid.NewGuid(),
-                RunId = run.RunId,
-                ScopeType = "ARTIFACT",
-                ScopeId = $"review_{sec}",
-                ParentScopeId = sec,
-                TokenCap = 6000,
-                CallCap = 1,
-                WallTimeCapSeconds = 40,
-                CreatedAt = DateTime.UtcNow
-            });
+                db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
+                {
+                    Id = Guid.NewGuid(),
+                    RunId = run.RunId,
+                    ScopeType = "ARTIFACT",
+                    ScopeId = $"{artifact.Name}_{sectionId}",
+                    ParentScopeId = sectionId,
+                    TokenCap = artifact.Tokens,
+                    CallCap = artifact.Calls,
+                    WallTimeCapSeconds = artifact.Wall,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
         }
         await db.SaveChangesAsync(ct);
     }
@@ -326,6 +347,13 @@ public static class CheckpointService
         {
             db.ChangeTracker.Clear();
             await using var tx = await db.Database.BeginTransactionAsync(ct);
+            var isUnlimitedRun = run.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap ||
+                                 run.BudgetCapTokens == ReadingPaperCapsProfile.UnlimitedCap ||
+                                 run.BudgetCapWallTimeSeconds == ReadingPaperCapsProfile.UnlimitedCap ||
+                                 (run.BudgetCapCalls <= 0 && run.BudgetCapTokens <= 0 && run.BudgetCapWallTimeSeconds <= 0) ||
+                                 (run.BudgetProfileJson != null &&
+                                  run.BudgetProfileJson.Contains("\"benchmarkMode\":\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase) &&
+                                  run.BudgetProfileJson.Contains("\"benchmarkMonetaryCapMode\":\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase));
 
             // 1. In-transaction row lock and fencing check on Job
             var fencedJobRows = await db.ReadingPaperJobs
@@ -357,16 +385,36 @@ public static class CheckpointService
                     existing.TokenReservation,
                     existing.WallTimeReservationSeconds,
                     existing.CreatedAt,
-                    IsReplay: true
+                    IsReplay: true,
+                    ResultRefJson: existing.ResultRefJson,
+                    ReservationBreached: existing.ReservationBreached,
+                    BudgetBreachDetected: existing.ReservationBreached
                 );
             }
 
+            if (IsProviderCallType(request.OperationType) &&
+                (!ReadingPaperCapsProfile.MatchesRunBudget(
+                    run.BudgetProfileJson, run.BudgetProfileSha256,
+                    !string.IsNullOrWhiteSpace(run.BenchmarkCampaignId) || isUnlimitedRun,
+                    run.BudgetCapCalls, run.BudgetCapTokens, run.BudgetCapWallTimeSeconds) ||
+                 string.Equals(run.BudgetProfileVersion, "legacy-unpinned", StringComparison.OrdinalIgnoreCase) ||
+                 string.IsNullOrWhiteSpace(run.BudgetProfileSource)))
+                throw new CheckpointValidationException(409, "Run has no valid pinned budget profile; provider dispatch is paused for compatibility review");
+
             // 2b. Hard execution deadline enforcement: CreatedAt + BudgetCapWallTimeSeconds
-            var hardDeadline = run.CreatedAt.AddSeconds(run.BudgetCapWallTimeSeconds);
-            if (DateTime.UtcNow > hardDeadline)
+            if (!isUnlimitedRun && run.BudgetCapWallTimeSeconds > 0 && run.BudgetCapWallTimeSeconds != ReadingPaperCapsProfile.UnlimitedCap)
             {
-                throw new CheckpointValidationException(422,
-                    $"Execution deadline exhausted: hard deadline {hardDeadline:O} elapsed in the past");
+                var hardDeadline = run.CreatedAt.AddSeconds(run.BudgetCapWallTimeSeconds);
+                if (DateTime.UtcNow > hardDeadline)
+                {
+                    throw new CheckpointValidationException(422,
+                        $"Execution deadline exhausted: hard deadline {hardDeadline:O} elapsed in the past");
+                }
+                if (run.BudgetUsedWallTimeSeconds + request.WallTimeReservationSeconds > run.BudgetCapWallTimeSeconds)
+                {
+                    throw new CheckpointValidationException(422,
+                        $"Budget exhausted: wall time cap ({run.BudgetCapWallTimeSeconds}s) would be exceeded by reservation {request.WallTimeReservationSeconds}s (current used: {run.BudgetUsedWallTimeSeconds:F1}s)");
+                }
             }
 
             // 3. Parent-Child Relationship Validation & Fencing
@@ -400,9 +448,13 @@ public static class CheckpointService
                 var currentChildTokens = await db.ReadingPaperOperations
                     .Where(o => o.RunId == request.RunId && o.ParentOperationId == request.ParentOperationId &&
                                 (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
-                    .SumAsync(o => o.Status == "COMPLETED" ? o.TokensUsed : o.TokenReservation, ct);
+                    .SumAsync(o => o.Status == "COMPLETED"
+                        ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "ESTIMATED" || o.AccountingType == "estimated") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
+                        : o.TokenReservation, ct);
 
-                if (currentChildTokens + request.TokenReservation > parentOp.TokenReservation)
+                if (!isUnlimitedRun && run.BudgetCapTokens > 0 && run.BudgetCapTokens != ReadingPaperCapsProfile.UnlimitedCap &&
+                    parentOp.TokenReservation > 0 && parentOp.TokenReservation != ReadingPaperCapsProfile.UnlimitedCap &&
+                    currentChildTokens + request.TokenReservation > parentOp.TokenReservation)
                 {
                     throw new CheckpointValidationException(422,
                         $"Parent operation reservation exceeded: parent '{parentOp.OperationId}' token reservation ({parentOp.TokenReservation}) would be exceeded by child reservation {request.TokenReservation} (current child allocated: {currentChildTokens})");
@@ -413,25 +465,59 @@ public static class CheckpointService
                                 (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                     .SumAsync(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds, ct);
 
-                if (currentChildWallTime + request.WallTimeReservationSeconds > parentOp.WallTimeReservationSeconds)
+                if (!isUnlimitedRun && run.BudgetCapWallTimeSeconds > 0 && run.BudgetCapWallTimeSeconds != ReadingPaperCapsProfile.UnlimitedCap &&
+                    parentOp.WallTimeReservationSeconds > 0 && parentOp.WallTimeReservationSeconds != ReadingPaperCapsProfile.UnlimitedCap &&
+                    currentChildWallTime + request.WallTimeReservationSeconds > parentOp.WallTimeReservationSeconds)
                 {
                     throw new CheckpointValidationException(422,
                         $"Parent operation reservation exceeded: parent '{parentOp.OperationId}' wall-time reservation ({parentOp.WallTimeReservationSeconds}s) would be exceeded by child reservation {request.WallTimeReservationSeconds}s (current child allocated: {currentChildWallTime:F1}s)");
                 }
             }
 
-            if (parentOp == null && request.OperationType != "CHECKPOINT_COMMIT")
+            if (IsProviderCallType(request.OperationType))
             {
-                // Standalone operation: atomically check budget caps and reserve calls, tokens, and wall-time on ReadingPaperRuns
+                if (run.BenchmarkCampaignId is { Length: > 0 } campaignId)
+                {
+                    var reservedCampaignRows = await db.ReadingPaperBenchmarkCampaigns
+                        .Where(c => c.CampaignId == campaignId && c.Status == "AUTHORIZED" && !c.BudgetBreachDetected &&
+                                    (c.BudgetCapCalls <= 0 || c.BudgetUsedCalls + 1 <= c.BudgetCapCalls) &&
+                                    (c.BudgetCapTokens <= 0 || c.BudgetUsedTokens + request.TokenReservation <= c.BudgetCapTokens) &&
+                                    (c.BudgetCapWallTimeSeconds <= 0 || c.BudgetUsedWallTimeSeconds + request.WallTimeReservationSeconds <= c.BudgetCapWallTimeSeconds))
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(c => c.BudgetUsedCalls, c => c.BudgetUsedCalls + 1)
+                            .SetProperty(c => c.BudgetUsedTokens, c => c.BudgetUsedTokens + request.TokenReservation)
+                            .SetProperty(c => c.BudgetUsedWallTimeSeconds, c => c.BudgetUsedWallTimeSeconds + request.WallTimeReservationSeconds)
+                            .SetProperty(c => c.UpdatedAt, DateTime.UtcNow), ct);
+
+                    if (reservedCampaignRows != 1)
+                    {
+                        var currentCampaign = await db.ReadingPaperBenchmarkCampaigns.AsNoTracking()
+                            .FirstOrDefaultAsync(c => c.CampaignId == campaignId, ct);
+                        if (currentCampaign == null)
+                            throw new CheckpointValidationException(409, "Campaign accounting record is missing for this child run");
+                        if (currentCampaign.BudgetBreachDetected)
+                            throw new CheckpointValidationException(422, $"Campaign budget is blocked after a recorded breach: {currentCampaign.BudgetBreachReason}");
+                        if (currentCampaign.BudgetCapCalls > 0 && currentCampaign.BudgetUsedCalls + 1 > currentCampaign.BudgetCapCalls)
+                            throw new CheckpointValidationException(422, $"Campaign budget exhausted: maximum calls ({currentCampaign.BudgetCapCalls}) exceeded");
+                        if (currentCampaign.BudgetCapTokens > 0 && currentCampaign.BudgetUsedTokens + request.TokenReservation > currentCampaign.BudgetCapTokens)
+                            throw new CheckpointValidationException(422, $"Campaign budget exhausted: token cap ({currentCampaign.BudgetCapTokens}) would be exceeded by reservation {request.TokenReservation}");
+                        if (currentCampaign.BudgetCapWallTimeSeconds > 0 && currentCampaign.BudgetUsedWallTimeSeconds + request.WallTimeReservationSeconds > currentCampaign.BudgetCapWallTimeSeconds)
+                            throw new CheckpointValidationException(422, $"Campaign budget exhausted: wall-time cap ({currentCampaign.BudgetCapWallTimeSeconds:F1}s) would be exceeded by reservation {request.WallTimeReservationSeconds:F1}s");
+                        throw new CheckpointValidationException(409, "Campaign authorization is no longer active");
+                    }
+                }
+
+                // Each row is one physical provider attempt; logical parent intents are allocations, not calls.
                 var reservedRunRows = await db.ReadingPaperRuns
                     .Where(r => r.RunId == request.RunId &&
                                 r.Epoch == request.Epoch &&
                                 r.LeaseOwner == request.LeaseOwner &&
                                 r.Status == "RUNNING" &&
                                 r.CancelVersion == job.CancelVersion &&
-                                r.BudgetUsedCalls + 1 <= r.BudgetCapCalls &&
-                                r.BudgetUsedTokens + request.TokenReservation <= r.BudgetCapTokens &&
-                                r.BudgetUsedWallTimeSeconds + request.WallTimeReservationSeconds <= r.BudgetCapWallTimeSeconds)
+                                !r.BudgetBreachDetected &&
+                                (r.BudgetCapCalls <= 0 || r.BudgetUsedCalls + 1 <= r.BudgetCapCalls) &&
+                                (r.BudgetCapTokens <= 0 || r.BudgetUsedTokens + request.TokenReservation <= r.BudgetCapTokens) &&
+                                (r.BudgetCapWallTimeSeconds <= 0 || r.BudgetUsedWallTimeSeconds + request.WallTimeReservationSeconds <= r.BudgetCapWallTimeSeconds))
                     .ExecuteUpdateAsync(s => s
                         .SetProperty(r => r.BudgetUsedCalls, r => r.BudgetUsedCalls + 1)
                         .SetProperty(r => r.BudgetUsedTokens, r => r.BudgetUsedTokens + request.TokenReservation)
@@ -443,14 +529,15 @@ public static class CheckpointService
                     var currentRun = await db.ReadingPaperRuns.AsNoTracking().FirstOrDefaultAsync(r => r.RunId == request.RunId, ct);
                     if (currentRun != null)
                     {
-                        if (currentRun.BudgetUsedCalls + 1 > currentRun.BudgetCapCalls)
+                        if (currentRun.BudgetBreachDetected)
+                            throw new CheckpointValidationException(422, $"Run budget is blocked after a recorded breach: {currentRun.BudgetBreachReason}");
+                        if (currentRun.BudgetCapCalls > 0 && currentRun.BudgetUsedCalls + 1 > currentRun.BudgetCapCalls)
                             throw new CheckpointValidationException(422, $"Budget exhausted: maximum calls ({currentRun.BudgetCapCalls}) exceeded");
-                        if (currentRun.BudgetUsedTokens + request.TokenReservation > currentRun.BudgetCapTokens)
+                        if (!isUnlimitedRun && currentRun.BudgetCapTokens > 0 && currentRun.BudgetCapTokens != ReadingPaperCapsProfile.UnlimitedCap && currentRun.BudgetUsedTokens + request.TokenReservation > currentRun.BudgetCapTokens)
                             throw new CheckpointValidationException(422, $"Budget exhausted: token cap ({currentRun.BudgetCapTokens}) would be exceeded by reservation {request.TokenReservation}");
-                        if (currentRun.BudgetUsedWallTimeSeconds + request.WallTimeReservationSeconds > currentRun.BudgetCapWallTimeSeconds)
+                        if (!isUnlimitedRun && currentRun.BudgetCapWallTimeSeconds > 0 && currentRun.BudgetCapWallTimeSeconds != ReadingPaperCapsProfile.UnlimitedCap && currentRun.BudgetUsedWallTimeSeconds + request.WallTimeReservationSeconds > currentRun.BudgetCapWallTimeSeconds)
                             throw new CheckpointValidationException(422, $"Budget exhausted: wall time cap ({currentRun.BudgetCapWallTimeSeconds}s) would be exceeded by reservation {request.WallTimeReservationSeconds}s");
                     }
-
                     throw new CheckpointValidationException(409, "Epoch fencing violation or lease expired during grant operation");
                 }
             }
@@ -470,101 +557,79 @@ public static class CheckpointService
                         $"Section budget allocation for scope '{sectionId}' not found");
                 }
                 // If this is a standalone / parent operation (ParentOperationId is null), check against Section Cap:
-                if (string.IsNullOrWhiteSpace(request.ParentOperationId))
+                if (IsProviderCallType(request.OperationType))
                 {
                     var allocatedSectionTokens = await db.ReadingPaperOperations
                         .Where(o => o.RunId == request.RunId &&
                                     o.SectionId == sectionId &&
-                                    o.ParentOperationId == null &&
+                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
-                        .SumAsync(o => o.Status == "COMPLETED" ? o.TokensUsed : o.TokenReservation, ct);
-
-                    if (allocatedSectionTokens + request.TokenReservation > sectionAllocation.TokenCap)
-                    {
+                        .SumAsync(o => o.Status == "COMPLETED"
+                            ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "ESTIMATED" || o.AccountingType == "estimated") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
+                            : o.TokenReservation, ct);
+                    if (!isUnlimitedRun && sectionAllocation.TokenCap > 0 && sectionAllocation.TokenCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedSectionTokens + request.TokenReservation > sectionAllocation.TokenCap)
                         throw new CheckpointValidationException(422,
                             $"Section budget exhausted: section '{sectionId}' token cap ({sectionAllocation.TokenCap}) would be exceeded by reservation {request.TokenReservation} (current allocated: {allocatedSectionTokens})");
-                    }
 
                     var allocatedSectionCalls = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId &&
-                                    o.SectionId == sectionId &&
-                                    o.ParentOperationId == null &&
+                        .Where(o => o.RunId == request.RunId && o.SectionId == sectionId &&
+                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .CountAsync(ct);
-
-                    if (allocatedSectionCalls + 1 > sectionAllocation.CallCap)
-                    {
+                    if (!isUnlimitedRun && sectionAllocation.CallCap > 0 && sectionAllocation.CallCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedSectionCalls + 1 > sectionAllocation.CallCap)
                         throw new CheckpointValidationException(422,
                             $"Section budget exhausted: section '{sectionId}' call cap ({sectionAllocation.CallCap}) would be exceeded");
-                    }
 
                     var allocatedSectionWallTime = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId &&
-                                    o.SectionId == sectionId &&
-                                    o.ParentOperationId == null &&
+                        .Where(o => o.RunId == request.RunId && o.SectionId == sectionId &&
+                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .SumAsync(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds, ct);
-
-                    if (allocatedSectionWallTime + request.WallTimeReservationSeconds > sectionAllocation.WallTimeCapSeconds)
-                    {
+                    if (!isUnlimitedRun && sectionAllocation.WallTimeCapSeconds > 0 && sectionAllocation.WallTimeCapSeconds != ReadingPaperCapsProfile.UnlimitedCap && allocatedSectionWallTime + request.WallTimeReservationSeconds > sectionAllocation.WallTimeCapSeconds)
                         throw new CheckpointValidationException(422,
                             $"Section budget exhausted: section '{sectionId}' wall-time cap ({sectionAllocation.WallTimeCapSeconds}s) would be exceeded by reservation {request.WallTimeReservationSeconds}s (current allocated: {allocatedSectionWallTime:F1}s)");
-                    }
                 }
                 // 3.2 Enforce Artifact-level budget allocation caps across all 3 dimensions if ArtifactId is specified
-                if (!string.IsNullOrWhiteSpace(request.ArtifactId))
+                if (!string.IsNullOrWhiteSpace(request.ArtifactId) &&
+                    IsProviderCallType(request.OperationType))
                 {
                     var artifactId = request.ArtifactId;
                     var artifactAllocation = await db.ReadingPaperBudgetAllocations
                         .FirstOrDefaultAsync(b => b.RunId == request.RunId && b.ScopeId == artifactId && b.ScopeType == "ARTIFACT", ct);
-
                     if (artifactAllocation == null)
-                    {
-                        throw new CheckpointValidationException(422,
-                            $"Artifact budget allocation for scope '{artifactId}' not found");
-                    }
-
+                        throw new CheckpointValidationException(422, $"Artifact budget allocation for scope '{artifactId}' not found");
                     if (!string.Equals(artifactAllocation.ParentScopeId, sectionId, StringComparison.OrdinalIgnoreCase))
-                    {
                         throw new CheckpointValidationException(422,
                             $"Artifact scope '{artifactId}' belongs to parent section '{artifactAllocation.ParentScopeId}', but request specified section '{sectionId}'");
-                    }
 
                     var allocatedArtifactTokens = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId &&
-                                    o.ArtifactId == artifactId &&
+                        .Where(o => o.RunId == request.RunId && o.ArtifactId == artifactId &&
+                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
-                        .SumAsync(o => o.Status == "COMPLETED" ? o.TokensUsed : o.TokenReservation, ct);
-
-                    if (allocatedArtifactTokens + request.TokenReservation > artifactAllocation.TokenCap)
-                    {
+                        .SumAsync(o => o.Status == "COMPLETED"
+                            ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "ESTIMATED" || o.AccountingType == "estimated") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
+                            : o.TokenReservation, ct);
+                    if (!isUnlimitedRun && artifactAllocation.TokenCap > 0 && artifactAllocation.TokenCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactTokens + request.TokenReservation > artifactAllocation.TokenCap)
                         throw new CheckpointValidationException(422,
                             $"Artifact budget exhausted: artifact '{artifactId}' token cap ({artifactAllocation.TokenCap}) would be exceeded by reservation {request.TokenReservation} (current allocated: {allocatedArtifactTokens})");
-                    }
 
                     var allocatedArtifactCalls = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId &&
-                                    o.ArtifactId == artifactId &&
+                        .Where(o => o.RunId == request.RunId && o.ArtifactId == artifactId &&
+                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .CountAsync(ct);
-
-                    if (allocatedArtifactCalls + 1 > artifactAllocation.CallCap)
-                    {
+                    if (!isUnlimitedRun && artifactAllocation.CallCap > 0 && artifactAllocation.CallCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactCalls + 1 > artifactAllocation.CallCap)
                         throw new CheckpointValidationException(422,
                             $"Artifact budget exhausted: artifact '{artifactId}' call cap ({artifactAllocation.CallCap}) would be exceeded");
-                    }
 
                     var allocatedArtifactWallTime = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId &&
-                                    o.ArtifactId == artifactId &&
+                        .Where(o => o.RunId == request.RunId && o.ArtifactId == artifactId &&
+                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .SumAsync(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds, ct);
-
-                    if (allocatedArtifactWallTime + request.WallTimeReservationSeconds > artifactAllocation.WallTimeCapSeconds)
-                    {
+                    if (!isUnlimitedRun && artifactAllocation.WallTimeCapSeconds > 0 && artifactAllocation.WallTimeCapSeconds != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactWallTime + request.WallTimeReservationSeconds > artifactAllocation.WallTimeCapSeconds)
                         throw new CheckpointValidationException(422,
                             $"Artifact budget exhausted: artifact '{artifactId}' wall-time cap ({artifactAllocation.WallTimeCapSeconds}s) would be exceeded by reservation {request.WallTimeReservationSeconds}s (current allocated: {allocatedArtifactWallTime:F1}s)");
-                    }
                 }
             }
 
@@ -627,7 +692,10 @@ public static class CheckpointService
                         concurrentExisting.TokenReservation,
                         concurrentExisting.WallTimeReservationSeconds,
                         concurrentExisting.CreatedAt,
-                        IsReplay: true
+                        IsReplay: true,
+                        ResultRefJson: concurrentExisting.ResultRefJson,
+                        ReservationBreached: concurrentExisting.ReservationBreached,
+                        BudgetBreachDetected: concurrentExisting.ReservationBreached
                     );
                 }
                 throw;
@@ -641,6 +709,14 @@ public static class CheckpointService
         CancellationToken ct)
     {
         var (run, job) = await ValidateRunAuthorityAndFencingAsync(db, request.RunId, request.Epoch, request.LeaseOwner, ct);
+        var accountingType = request.AccountingType.ToUpperInvariant();
+        if (accountingType is not ("REPORTED" or "ESTIMATED" or "UNKNOWN") ||
+            request.TokensUsed < 0 || request.WallTimeUsedSeconds < 0 || request.CostUsedUsd < 0 ||
+            request.PromptTokensUsed < 0 || request.CompletionTokensUsed < 0 || request.ReasoningTokensUsed < 0)
+            throw new CheckpointValidationException(422, "Usage reconciliation contains an invalid accounting type or negative value");
+        if (accountingType == "UNKNOWN" &&
+            (request.TokensUsed != 0 || request.PromptTokensUsed is not null || request.CompletionTokensUsed is not null || request.ReasoningTokensUsed is not null))
+            throw new CheckpointValidationException(422, "UNKNOWN usage must not claim observed token counts");
 
         var strategy = db.Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
@@ -669,14 +745,22 @@ public static class CheckpointService
 
             if (string.Equals(op.Status, "COMPLETED", StringComparison.OrdinalIgnoreCase))
             {
-                if (!string.Equals(op.ResultRefJson, request.ResultRefJson, StringComparison.Ordinal))
-                    throw new CheckpointValidationException(409, "Completed operation result differs from replay");
+                if (!string.Equals(op.ResultRefJson, request.ResultRefJson, StringComparison.Ordinal) ||
+                    op.TokensUsed != request.TokensUsed || op.PromptTokensUsed != request.PromptTokensUsed ||
+                    op.CompletionTokensUsed != request.CompletionTokensUsed || op.ReasoningTokensUsed != request.ReasoningTokensUsed ||
+                    !string.Equals(op.AccountingType, accountingType, StringComparison.OrdinalIgnoreCase) ||
+                    op.WallTimeUsedSeconds != request.WallTimeUsedSeconds || op.CostUsedUsd != request.CostUsedUsd)
+                    throw new CheckpointValidationException(409, "Completed operation usage or result differs from replay");
                 return new OperationReconcileResult(op.OperationId, op.Status, op.TokensUsed,
-                    op.WallTimeUsedSeconds, op.UpdatedAt);
+                    op.WallTimeUsedSeconds, op.UpdatedAt, op.ReservationBreached, op.ReservationBreached);
             }
 
             op.Status = "COMPLETED";
             op.TokensUsed = request.TokensUsed;
+            op.PromptTokensUsed = request.PromptTokensUsed;
+            op.CompletionTokensUsed = request.CompletionTokensUsed;
+            op.ReasoningTokensUsed = request.ReasoningTokensUsed;
+            op.AccountingType = accountingType;
             op.WallTimeUsedSeconds = request.WallTimeUsedSeconds;
             op.CostUsedUsd = request.CostUsedUsd;
             EvaluationResult? evalResult = null;
@@ -771,13 +855,52 @@ public static class CheckpointService
                 }
             }
             op.UpdatedAt = DateTime.UtcNow;
-            // If standalone operation (no ParentOperationId), reconcile run counters directly
-            if (string.IsNullOrWhiteSpace(op.ParentOperationId))
+            var usageIsReported = accountingType == "REPORTED";
+            // Estimates cannot refund a reservation or hide usage above it; UNKNOWN retains the bound.
+            var tokensToAccount = usageIsReported ? request.TokensUsed : Math.Max(request.TokensUsed, op.TokenReservation);
+            var tokenDelta = tokensToAccount - op.TokenReservation;
+            var wallTimeDelta = request.WallTimeUsedSeconds - op.WallTimeReservationSeconds;
+            var reservationBreached =
+                (accountingType != "UNKNOWN" && request.TokensUsed > op.TokenReservation) ||
+                request.WallTimeUsedSeconds > op.WallTimeReservationSeconds;
+            op.ReservationBreached = reservationBreached;
+            var breachReason = reservationBreached
+                ? $"Operation '{op.OperationId}' reported {accountingType} usage tokens={request.TokensUsed}, wallSeconds={request.WallTimeUsedSeconds:F3}; reservations were tokens={op.TokenReservation}, wallSeconds={op.WallTimeReservationSeconds:F3}."
+                : null;
+            if (reservationBreached)
+                op.BudgetBreachReason = breachReason;
+
+            var budgetBreachDetected = reservationBreached;
+            if (IsProviderCallType(op.OperationType))
             {
                 var runEntity = await db.ReadingPaperRuns.FirstAsync(r => r.RunId == request.RunId, ct);
-                runEntity.BudgetUsedTokens += (request.TokensUsed - op.TokenReservation);
-                runEntity.BudgetUsedWallTimeSeconds += (request.WallTimeUsedSeconds - op.WallTimeReservationSeconds);
+                runEntity.BudgetUsedTokens += tokenDelta;
+                runEntity.BudgetUsedWallTimeSeconds += wallTimeDelta;
+                if (reservationBreached)
+                {
+                    runEntity.BudgetBreachDetected = true;
+                    runEntity.BudgetBreachReason ??= breachReason;
+                }
+                if (runEntity.BenchmarkCampaignId is { Length: > 0 } campaignId)
+                {
+                    var updatedCampaignRows = await db.ReadingPaperBenchmarkCampaigns
+                        .Where(c => c.CampaignId == campaignId)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(c => c.BudgetUsedTokens, c => c.BudgetUsedTokens + tokenDelta)
+                            .SetProperty(c => c.BudgetUsedWallTimeSeconds, c => c.BudgetUsedWallTimeSeconds + wallTimeDelta)
+                            .SetProperty(c => c.BudgetBreachDetected, c => c.BudgetBreachDetected || reservationBreached)
+                            .SetProperty(c => c.BudgetBreachReason, c => reservationBreached ? (c.BudgetBreachReason ?? breachReason) : c.BudgetBreachReason)
+                            .SetProperty(c => c.UpdatedAt, DateTime.UtcNow), ct);
+                    if (updatedCampaignRows != 1)
+                    {
+                        var missingCampaignLedger = $"Campaign accounting record '{campaignId}' is missing after operation '{op.OperationId}' usage was observed.";
+                        runEntity.BudgetBreachDetected = true;
+                        runEntity.BudgetBreachReason ??= missingCampaignLedger;
+                        budgetBreachDetected = true;
+                    }
+                }
                 runEntity.UpdatedAt = DateTime.UtcNow;
+                budgetBreachDetected = runEntity.BudgetBreachDetected;
             }
 
             await db.SaveChangesAsync(ct);
@@ -788,7 +911,9 @@ public static class CheckpointService
                 op.Status,
                 op.TokensUsed,
                 op.WallTimeUsedSeconds,
-                op.UpdatedAt
+                op.UpdatedAt,
+                op.ReservationBreached,
+                budgetBreachDetected
             );
         });
     }
@@ -1166,24 +1291,36 @@ public static class CheckpointService
             }
             else
             {
-                var headExists = await db.ReadingPaperArtifactHeads.AnyAsync(
+                var existingInitialHead = await db.ReadingPaperArtifactHeads.AsNoTracking().FirstOrDefaultAsync(
                     h => h.RunId == request.RunId && h.ArtifactId == request.Artifact.ArtifactId, ct);
 
-                if (headExists)
+                if (existingInitialHead != null)
                 {
-                    throw new CheckpointValidationException(409,
-                        $"CAS rejection: expected initial head (no prior head), but artifact '{request.Artifact.ArtifactId}' already has an accepted head");
+                    if (string.Equals(existingInitialHead.AcceptedHash, request.Artifact.ContentHash, StringComparison.OrdinalIgnoreCase) &&
+                        existingInitialHead.AcceptedVersion == request.Artifact.Version)
+                    {
+                        await db.ReadingPaperArtifactHeads
+                            .Where(h => h.RunId == request.RunId && h.ArtifactId == request.Artifact.ArtifactId)
+                            .ExecuteUpdateAsync(s => s.SetProperty(h => h.UpdatedAt, DateTime.UtcNow), ct);
+                    }
+                    else
+                    {
+                        throw new CheckpointValidationException(409,
+                            $"CAS rejection: expected initial head (no prior head), but artifact '{request.Artifact.ArtifactId}' already has an accepted head at version {existingInitialHead.AcceptedVersion} ({existingInitialHead.AcceptedHash})");
+                    }
                 }
-
-                db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+                else
                 {
-                    Id = Guid.NewGuid(),
-                    RunId = request.RunId,
-                    ArtifactId = request.Artifact.ArtifactId,
-                    AcceptedVersion = request.Artifact.Version,
-                    AcceptedHash = request.Artifact.ContentHash,
-                    UpdatedAt = DateTime.UtcNow
-                });
+                    db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+                    {
+                        Id = Guid.NewGuid(),
+                        RunId = request.RunId,
+                        ArtifactId = request.Artifact.ArtifactId,
+                        AcceptedVersion = request.Artifact.Version,
+                        AcceptedHash = request.Artifact.ContentHash,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
             }
             // Invalidate only accepted descendants whose exact lineage is now stale.
             // This is in the same fenced transaction as the new accepted head.
@@ -1219,6 +1356,8 @@ public static class CheckpointService
                 o => o.RunId == request.RunId && o.OperationId == request.OperationId, ct);
             opEntity.Status = "COMPLETED";
             opEntity.TokensUsed = request.TokensUsed;
+            if (string.IsNullOrWhiteSpace(opEntity.AccountingType))
+                opEntity.AccountingType = "REPORTED";
             opEntity.CostUsedUsd = request.CostUsedUsd;
             opEntity.WallTimeUsedSeconds = request.WallTimeUsedSeconds;
             opEntity.ResultRefJson = JsonSerializer.Serialize(request.Artifact.ToRef(), LoopEngineJson.Options);
@@ -1227,21 +1366,28 @@ public static class CheckpointService
             // 5f. Persist Outbox Events
             if (request.Events is { Count: > 0 })
             {
+                var maxSeq = await db.ReadingPaperEventOutbox
+                    .Where(e => e.RunId == request.RunId)
+                    .MaxAsync(e => (long?)e.Sequence, ct) ?? 0L;
+
                 foreach (var evt in request.Events)
                 {
                     var evtExists = await db.ReadingPaperEventOutbox.AnyAsync(
                         e => e.RunId == request.RunId && e.IdempotencyKey == evt.IdempotencyKey, ct);
                     if (!evtExists)
                     {
+                        var nextSeq = ++maxSeq;
+                        var evtWithSeq = evt with { Sequence = nextSeq };
                         db.ReadingPaperEventOutbox.Add(new ReadingPaperEventOutbox
                         {
                             Id = Guid.NewGuid(),
                             RunId = request.RunId,
                             EventId = evt.EventId,
+                            Sequence = nextSeq,
                             EventType = evt.EventType.ToString(),
                             IdempotencyKey = evt.IdempotencyKey,
                             Epoch = evt.Epoch,
-                            PayloadJson = JsonSerializer.Serialize(evt, LoopEngineJson.Options),
+                            PayloadJson = JsonSerializer.Serialize(evtWithSeq, LoopEngineJson.Options),
                             Status = "PENDING",
                             CreatedAt = DateTime.UtcNow
                         });
@@ -1249,12 +1395,92 @@ public static class CheckpointService
                 }
             }
 
-            // 5g. Update Run Budget
+            // 5g. Provider usage is accounted by the per-attempt reconcile transaction.
             var runEntity = await db.ReadingPaperRuns.Include(r => r.Job).FirstAsync(r => r.RunId == request.RunId, ct);
-            runEntity.BudgetUsedTokens += (request.TokensUsed - txOp.TokenReservation);
-            runEntity.BudgetUsedWallTimeSeconds += (request.WallTimeUsedSeconds - txOp.WallTimeReservationSeconds);
-            runEntity.UpdatedAt = DateTime.UtcNow;
+            var allRunOps = await db.ReadingPaperOperations
+                .Where(o => o.RunId == request.RunId)
+                .ToListAsync(ct);
 
+            // Compute full transitive descendant closure of request.OperationId:
+            // 1) All operations reachable by walking ParentOperationId down from request.OperationId.
+            // 2) If opEntity.OperationType == "GENERATE_SECTION" && !string.IsNullOrWhiteSpace(opEntity.SectionId),
+            //    any operation with the same SectionId where o.OperationId != request.OperationId.
+            var closureOpIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var queue = new Queue<string>();
+            queue.Enqueue(request.OperationId);
+            while (queue.Count > 0)
+            {
+                var parentId = queue.Dequeue();
+                foreach (var child in allRunOps.Where(o => string.Equals(o.ParentOperationId, parentId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (closureOpIds.Add(child.OperationId))
+                    {
+                        queue.Enqueue(child.OperationId);
+                    }
+                }
+            }
+            if (string.Equals(opEntity.OperationType, "GENERATE_SECTION", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(opEntity.SectionId))
+            {
+                foreach (var secOp in allRunOps.Where(o => string.Equals(o.SectionId, opEntity.SectionId, StringComparison.OrdinalIgnoreCase) && !string.Equals(o.OperationId, request.OperationId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (closureOpIds.Add(secOp.OperationId))
+                    {
+                        queue.Enqueue(secOp.OperationId);
+                        while (queue.Count > 0)
+                        {
+                            var parentId = queue.Dequeue();
+                            foreach (var child in allRunOps.Where(o => string.Equals(o.ParentOperationId, parentId, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                if (closureOpIds.Add(child.OperationId))
+                                {
+                                    queue.Enqueue(child.OperationId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            var closureOps = allRunOps
+                .Where(o => closureOpIds.Contains(o.OperationId) && (o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
+                .ToList();
+
+            // To avoid double-counting within that closure, sum only leaf/provider operations (IsProviderCallType if any exist, otherwise direct children).
+            var providerOpsInClosure = closureOps.Where(o => IsProviderCallType(o.OperationType)).ToList();
+            var opsToReconcile = providerOpsInClosure.Count > 0
+                ? providerOpsInClosure
+                : closureOps.Where(o => string.Equals(o.ParentOperationId, request.OperationId, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            var childReconciledTokens = opsToReconcile.Sum(o =>
+                (string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "ESTIMATED", StringComparison.OrdinalIgnoreCase))
+                    ? o.TokensUsed
+                    : Math.Max(o.TokensUsed, Math.Max(0, o.TokenReservation)));
+
+            var childReconciledWallTime = opsToReconcile.Sum(o =>
+                o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : Math.Max(0.0, o.WallTimeReservationSeconds));
+
+            var hasProviderOpsInRun = allRunOps.Any(o => IsProviderCallType(o.OperationType));
+
+            // If !IsProviderCallType(opEntity.OperationType) and the run ALREADY has IsProviderCallType operations,
+            // unchargedTokens and unchargedWallTime for wrapper operations MUST NOT double-add tokens/wall-time that were already accounted.
+            var unchargedTokens = (!IsProviderCallType(opEntity.OperationType) && hasProviderOpsInRun)
+                ? 0
+                : Math.Max(0, request.TokensUsed - childReconciledTokens);
+
+            var unchargedWallTime = (!IsProviderCallType(opEntity.OperationType) && hasProviderOpsInRun)
+                ? 0.0
+                : Math.Max(0.0, request.WallTimeUsedSeconds - childReconciledWallTime);
+
+            var tokenDelta = IsProviderCallType(opEntity.OperationType)
+                ? unchargedTokens - Math.Max(0, opEntity.TokenReservation)
+                : unchargedTokens;
+            var wallTimeDelta = IsProviderCallType(opEntity.OperationType)
+                ? unchargedWallTime - Math.Max(0.0, opEntity.WallTimeReservationSeconds)
+                : unchargedWallTime;
+
+            runEntity.BudgetUsedTokens += tokenDelta;
+            runEntity.BudgetUsedWallTimeSeconds += wallTimeDelta;
+            runEntity.UpdatedAt = DateTime.UtcNow;
             // 5h. Backward Compatibility sync: If Section, sync to job.SectionsJson
             if (request.Artifact.ArtifactType == ArtifactType.Section && runEntity.Job != null)
             {
@@ -1280,27 +1506,23 @@ public static class CheckpointService
             {
                 await tx.RollbackAsync(ct);
                 db.ChangeTracker.Clear();
-                // Check if a concurrent commit of the exact SAME OperationId succeeded
                 var committedOp = await db.ReadingPaperOperations.AsNoTracking().FirstOrDefaultAsync(
                     o => o.RunId == request.RunId && o.OperationId == request.OperationId, ct);
 
-                if (committedOp != null && string.Equals(committedOp.Status, "COMPLETED", StringComparison.OrdinalIgnoreCase))
-                {
-                    var committedHead = await db.ReadingPaperArtifactHeads.AsNoTracking().FirstOrDefaultAsync(
-                        h => h.RunId == request.RunId && h.ArtifactId == request.Artifact.ArtifactId, ct);
+                var committedHead = await db.ReadingPaperArtifactHeads.AsNoTracking().FirstOrDefaultAsync(
+                    h => h.RunId == request.RunId && h.ArtifactId == request.Artifact.ArtifactId, ct);
 
-                    if (committedHead != null && string.Equals(committedHead.AcceptedHash, request.Artifact.ContentHash, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return new CheckpointAck(
-                            request.RunId,
-                            request.Epoch,
-                            request.Artifact.ArtifactId,
-                            committedHead.AcceptedVersion,
-                            committedHead.AcceptedHash,
-                            committedOp.UpdatedAt,
-                            IsReplay: true
-                        );
-                    }
+                if (committedHead != null && string.Equals(committedHead.AcceptedHash, request.Artifact.ContentHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    return new CheckpointAck(
+                        request.RunId,
+                        request.Epoch,
+                        request.Artifact.ArtifactId,
+                        committedHead.AcceptedVersion,
+                        committedHead.AcceptedHash,
+                        committedOp?.UpdatedAt ?? DateTime.UtcNow,
+                        IsReplay: true
+                    );
                 }
 
                 throw new CheckpointValidationException(409,
@@ -1442,6 +1664,7 @@ public static class CheckpointService
                 o => o.RunId == request.RunId && o.OperationId == request.OperationId, ct);
             opEntity.Status = "COMPLETED";
             opEntity.TokensUsed = request.TokensUsed;
+            opEntity.AccountingType = "REPORTED";
             opEntity.WallTimeUsedSeconds = request.WallTimeUsedSeconds;
             opEntity.ResultRefJson = JsonSerializer.Serialize(request.Artifact.ToRef(), LoopEngineJson.Options);
             opEntity.UpdatedAt = DateTime.UtcNow;
@@ -1465,26 +1688,37 @@ public static class CheckpointService
         UnknownOutcomeRequest request,
         CancellationToken ct)
     {
-        await ValidateRunAuthorityAndFencingAsync(db, request.RunId, request.Epoch, request.LeaseOwner, ct);
+        var (run, job) = await ValidateRunAuthorityAndFencingAsync(db, request.RunId, request.Epoch, request.LeaseOwner, ct);
+        var strategy = db.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
+        {
+            db.ChangeTracker.Clear();
+            await using var tx = await db.Database.BeginTransactionAsync(ct);
+            var fencedJobRows = await db.ReadingPaperJobs
+                .Where(j => j.Id == job.Id && j.Epoch == request.Epoch && j.LeaseOwner == request.LeaseOwner &&
+                            j.Status == "Running" && j.LeaseUntil > DateTime.UtcNow && j.CancelVersion == job.CancelVersion)
+                .ExecuteUpdateAsync(s => s.SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
+            if (fencedJobRows != 1)
+                throw new CheckpointValidationException(409, "Epoch fencing violation during unknown-outcome recording");
 
-        var op = await db.ReadingPaperOperations.FirstOrDefaultAsync(
-            o => o.RunId == request.RunId && o.OperationId == request.OperationId, ct);
+            var op = await db.ReadingPaperOperations.FirstOrDefaultAsync(
+                o => o.RunId == request.RunId && o.OperationId == request.OperationId, ct);
+            if (op == null)
+                throw new CheckpointValidationException(404, $"Operation '{request.OperationId}' not found");
+            if (string.Equals(op.Status, "COMPLETED", StringComparison.OrdinalIgnoreCase))
+                throw new CheckpointValidationException(409, "Completed operation cannot be changed to UNKNOWN_OUTCOME");
+            if (string.Equals(op.Status, "UNKNOWN_OUTCOME", StringComparison.OrdinalIgnoreCase))
+                return new UnknownOutcomeAck(op.OperationId, op.Status, ReservationPreserved: true, op.UpdatedAt);
+            if (!string.Equals(op.Status, "RESERVED", StringComparison.OrdinalIgnoreCase))
+                throw new CheckpointValidationException(409, $"Operation '{op.OperationId}' cannot become UNKNOWN_OUTCOME from '{op.Status}'");
 
-        if (op == null)
-            throw new CheckpointValidationException(404, $"Operation '{request.OperationId}' not found");
-
-        op.Status = "UNKNOWN_OUTCOME";
-        op.ErrorMessage = request.ErrorMessage;
-        op.UpdatedAt = DateTime.UtcNow;
-
-        await db.SaveChangesAsync(ct);
-
-        return new UnknownOutcomeAck(
-            op.OperationId,
-            "UNKNOWN_OUTCOME",
-            ReservationPreserved: true,
-            DateTime.UtcNow
-        );
+            op.Status = "UNKNOWN_OUTCOME";
+            op.ErrorMessage = request.ErrorMessage;
+            op.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return new UnknownOutcomeAck(op.OperationId, op.Status, ReservationPreserved: true, op.UpdatedAt);
+        });
     }
 
     public static async Task<ResumeStateResult> ResumeStateAsync(
@@ -1515,6 +1749,31 @@ public static class CheckpointService
                 Artifacts: [],
                 IsCompatible: false,
                 IncompatibilityReason: $"Incompatible versions: engine={run.EngineVersion}, schema={run.SchemaVersion}, policy={run.PolicyVersion}"
+            );
+        }
+
+        var profileJson = run.BudgetProfileJson;
+        var isUnlimitedRun = run.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap ||
+                             run.BudgetCapTokens == ReadingPaperCapsProfile.UnlimitedCap ||
+                             run.BudgetCapWallTimeSeconds == ReadingPaperCapsProfile.UnlimitedCap;
+        var profileHashIsValid = ReadingPaperCapsProfile.MatchesRunBudget(
+            profileJson, run.BudgetProfileSha256,
+            !string.IsNullOrWhiteSpace(run.BenchmarkCampaignId) || isUnlimitedRun,
+            run.BudgetCapCalls, run.BudgetCapTokens, run.BudgetCapWallTimeSeconds);
+        if (!profileHashIsValid || string.IsNullOrWhiteSpace(run.BudgetProfileVersion) ||
+            string.Equals(run.BudgetProfileVersion, "legacy-unpinned", StringComparison.OrdinalIgnoreCase) ||
+            string.IsNullOrWhiteSpace(run.BudgetProfileSource))
+        {
+            return new ResumeStateResult(
+                run.RunId, run.JobId, run.Epoch, run.Status,
+                run.EngineVersion, run.SchemaVersion, run.PolicyVersion, [],
+                IsCompatible: false,
+                IncompatibilityReason: "Run has no valid pinned cap profile; current environment will not be used to fabricate historical limits",
+                BudgetProfileVersion: run.BudgetProfileVersion,
+                BudgetProfileSha256: run.BudgetProfileSha256,
+                BudgetProfileSource: run.BudgetProfileSource,
+                BudgetProfileJson: profileJson,
+                BudgetBreachDetected: run.BudgetBreachDetected
             );
         }
 
@@ -1573,19 +1832,43 @@ public static class CheckpointService
         var ops = await db.ReadingPaperOperations
             .Where(o => o.RunId == runId)
             .ToListAsync(ct);
-        var workOps = ops.Where(o => o.OperationType != "CHECKPOINT_COMMIT").ToList();
-        var parentIds = ops.Where(o => o.ParentOperationId != null).Select(o => o.ParentOperationId!).ToHashSet();
-        var nonParentWorkOps = workOps.Where(o => !parentIds.Contains(o.OperationId)).ToList();
-        var totalTokens = nonParentWorkOps.Count > 0
-            ? nonParentWorkOps.Sum(o => o.Status == "COMPLETED" ? o.TokensUsed : o.TokenReservation)
-            : run.BudgetUsedTokens;
-        var totalWallTime = nonParentWorkOps.Count > 0
-            ? nonParentWorkOps.Sum(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds)
-            : run.BudgetUsedWallTimeSeconds;
-        var totalCalls = nonParentWorkOps.Count > 0
-            ? workOps.Count(o => o.ParentOperationId == null)
-            : run.BudgetUsedCalls;
+        var activeOps = ops.Where(o => o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME").ToList();
+        var providerOps = activeOps.Where(o => IsProviderCallType(o.OperationType)).ToList();
 
+        int totalTokens;
+        double totalWallTime;
+        int totalCalls;
+
+        if (providerOps.Count > 0)
+        {
+            totalTokens = providerOps.Sum(o => o.Status == "COMPLETED"
+                ? ((string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "ESTIMATED", StringComparison.OrdinalIgnoreCase))
+                    ? o.TokensUsed
+                    : Math.Max(o.TokensUsed, Math.Max(0, o.TokenReservation)))
+                : Math.Max(0, o.TokenReservation));
+            totalWallTime = providerOps.Sum(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : Math.Max(0.0, o.WallTimeReservationSeconds));
+            totalCalls = providerOps.Count;
+        }
+        else
+        {
+            var standaloneWorkOps = activeOps.Where(o => string.IsNullOrWhiteSpace(o.ParentOperationId) && !string.Equals(o.OperationType, "CHECKPOINT_COMMIT", StringComparison.OrdinalIgnoreCase) && !string.Equals(o.OperationType, "WORKFLOW", StringComparison.OrdinalIgnoreCase)).ToList();
+            if (standaloneWorkOps.Count > 0)
+            {
+                totalTokens = Math.Max(run.BudgetUsedTokens, standaloneWorkOps.Sum(o => o.Status == "COMPLETED"
+                    ? ((string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "ESTIMATED", StringComparison.OrdinalIgnoreCase))
+                        ? o.TokensUsed
+                        : Math.Max(o.TokensUsed, Math.Max(0, o.TokenReservation)))
+                    : Math.Max(0, o.TokenReservation)));
+                totalWallTime = Math.Max(run.BudgetUsedWallTimeSeconds, standaloneWorkOps.Sum(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : Math.Max(0.0, o.WallTimeReservationSeconds)));
+                totalCalls = Math.Max(run.BudgetUsedCalls, standaloneWorkOps.Count);
+            }
+            else
+            {
+                totalTokens = run.BudgetUsedTokens;
+                totalWallTime = run.BudgetUsedWallTimeSeconds;
+                totalCalls = run.BudgetUsedCalls;
+            }
+        }
         // Also collect unaccepted draft artifacts
         var allArts = await db.ReadingPaperArtifacts
             .Where(a => a.RunId == runId)
@@ -1617,7 +1900,14 @@ public static class CheckpointService
         var issueEntities = await db.ReadingPaperIssues
             .Where(i => i.RunId == runId)
             .ToListAsync(ct);
-        var statusMap = issueEntities.ToDictionary(i => i.Fingerprint, i => Enum.Parse<IssueStatus>(i.Status));
+        var statusMap = new Dictionary<string, IssueStatus>(StringComparer.OrdinalIgnoreCase);
+        foreach (var ie in issueEntities)
+        {
+            if (!string.IsNullOrWhiteSpace(ie.Fingerprint) && Enum.TryParse<IssueStatus>(ie.Status, true, out var parsedStatus))
+            {
+                statusMap[ie.Fingerprint] = parsedStatus;
+            }
+        }
 
         var issues = new List<Issue>();
         var seenFingerprints = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1699,7 +1989,7 @@ public static class CheckpointService
             BudgetCapTokens: run.BudgetCapTokens,
             BudgetCapWallTimeSeconds: run.BudgetCapWallTimeSeconds,
             CreatedAt: run.CreatedAt,
-            HardDeadlineAt: run.CreatedAt.AddSeconds(run.BudgetCapWallTimeSeconds),
+            HardDeadlineAt: run.BudgetCapWallTimeSeconds > 0 ? run.CreatedAt.AddSeconds(run.BudgetCapWallTimeSeconds) : null,
             DraftArtifacts: draftArtifacts,
             Issues: issues,
             Evaluations: evalResults,
@@ -1707,7 +1997,13 @@ public static class CheckpointService
                 .Select(c => new LoopCursorCheckpoint(c.ArtifactId, c.Revision, c.StateJson, c.LastOperationId)).ToListAsync(ct),
             Operations: ops.Select(o => new OperationResumeInfo(o.OperationId, o.OperationType, o.Status,
                 o.ArtifactId, o.RequestHash, o.TokenReservation, o.TokensUsed,
-                o.WallTimeReservationSeconds, o.WallTimeUsedSeconds, o.ResultRefJson)).ToList()
+                o.WallTimeReservationSeconds, o.WallTimeUsedSeconds, o.ResultRefJson,
+                o.PromptTokensUsed, o.CompletionTokensUsed, o.ReasoningTokensUsed, o.AccountingType, o.ReservationBreached)).ToList(),
+            BudgetProfileVersion: run.BudgetProfileVersion,
+            BudgetProfileSha256: run.BudgetProfileSha256,
+            BudgetProfileSource: run.BudgetProfileSource,
+            BudgetProfileJson: run.BudgetProfileJson,
+            BudgetBreachDetected: run.BudgetBreachDetected
         );
     }
 
@@ -1780,113 +2076,130 @@ public static class CheckpointService
     }
 
     public static async Task<BuildExamInternalResult> BuildExamIdempotentAsync(
-        ExamDbContext db,
-        BuildExamInternalRequest request,
-        CancellationToken ct,
-        Func<Task>? onBeforeTransaction = null)
+        ExamDbContext db, BuildExamInternalRequest request, CancellationToken ct,
+        Func<Task>? onBeforeTransaction = null, Func<Task>? onGraphSaved = null)
     {
-        var (run, job) = await ValidateRunAuthorityAndFencingAsync(db, request.RunId, request.Epoch, request.LeaseOwner, ct);
-
-        // Pre-transaction read-only idempotency check (zero mutations outside transaction):
-        if (job.ExamId != null && string.Equals(job.Status, "Completed", StringComparison.OrdinalIgnoreCase))
-        {
-            var existingExam = await db.Exams.AsNoTracking().FirstOrDefaultAsync(e => e.Id == job.ExamId.Value, ct);
-            if (existingExam != null)
-            {
-                return new BuildExamInternalResult(existingExam.Id, existingExam.Slug, IsExisting: true);
-            }
-        }
-
-        var expectedSlug = $"reading-{job.Id:N}";
-        // Deserialize and validate sections
-        var sections = JsonSerializer.Deserialize<List<ReadingGeneratedSection>>(job.SectionsJson, ReadingPaperRules.Json) ?? [];
-        if (sections.Count == 0)
-            throw new InvalidOperationException("No completed sections found to build exam");
-
-        var exam = ReadingPaperWorker.BuildExam(job, sections);
-
-        // Optional fault-injection hook before opening transaction
-        if (onBeforeTransaction != null)
-        {
-            await onBeforeTransaction();
-        }
-
+        var replay = await CompletedExamAsync(db, request, ct);
+        if (replay != null) return replay;
+        var (_, job) = await ValidateRunAuthorityAndFencingAsync(db, request.RunId, request.Epoch, request.LeaseOwner, ct);
+        if (job.Id != request.JobId || job.ActiveRunId != request.RunId)
+            throw new CheckpointValidationException(409, "Finalizer run/job identity mismatch");
+        if (onBeforeTransaction != null) await onBeforeTransaction();
         var strategy = db.Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
         {
             db.ChangeTracker.Clear();
             await using var tx = await db.Database.BeginTransactionAsync(ct);
-
-            // Worker takeover claims this same job row with a conditional UPDATE. This job-row CAS is
-            // the serialization point: require matching epoch/owner, an unexpired lease, Running
-            // (non-cancelled) status, and unchanged cancel version before any exam graph writes.
             var fencedJobRows = await db.ReadingPaperJobs
-                .Where(j => j.Id == job.Id && j.Epoch == request.Epoch && j.LeaseOwner == request.LeaseOwner && j.Status == "Running" && j.LeaseUntil > DateTime.UtcNow && j.CancelVersion == job.CancelVersion)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(j => j.Status, "Completed")
-                    .SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
-
+                .Where(j => j.Id == request.JobId && j.ActiveRunId == request.RunId && j.Epoch == request.Epoch
+                    && j.LeaseOwner == request.LeaseOwner && j.Status == "Running"
+                    && j.LeaseUntil > DateTime.UtcNow && j.CancelVersion == job.CancelVersion)
+                .ExecuteUpdateAsync(s => s.SetProperty(j => j.Status, "Completed").SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
             if (fencedJobRows != 1)
             {
-                // Recheck if an earlier commit already completed it
-                var recheckedJob = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == job.Id, ct);
-                if (recheckedJob != null && recheckedJob.ExamId != null && string.Equals(recheckedJob.Status, "Completed", StringComparison.OrdinalIgnoreCase))
-                {
-                    var existingExam = await db.Exams.AsNoTracking().FirstOrDefaultAsync(e => e.Id == recheckedJob.ExamId.Value, ct);
-                    if (existingExam != null)
-                    {
-                        return new BuildExamInternalResult(existingExam.Id, existingExam.Slug, IsExisting: true);
-                    }
-                }
-
-                throw new CheckpointValidationException(409,
-                    $"Epoch fencing violation: atomic conditional lock failed during final exam build for job '{job.Id}' (stale epoch {request.Epoch}, lease owner mismatch, cancelled, or lease expired)");
+                var completed = await CompletedExamAsync(db, request, ct);
+                if (completed != null) return completed;
+                throw new CheckpointValidationException(409, "Epoch/lease/cancel fencing violation during final exam build");
             }
-
-            // 2. In-transaction atomic conditional lock on run:
             var fencedRunRows = await db.ReadingPaperRuns
-                .Where(r => r.RunId == request.RunId && r.Epoch == request.Epoch && r.LeaseOwner == request.LeaseOwner && r.Status == "RUNNING" && r.CancelVersion == job.CancelVersion)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(r => r.Status, "COMPLETED")
-                    .SetProperty(r => r.UpdatedAt, DateTime.UtcNow), ct);
-
+                .Where(r => r.RunId == request.RunId && r.JobId == request.JobId && r.Epoch == request.Epoch
+                    && r.LeaseOwner == request.LeaseOwner && r.Status == "RUNNING"
+                    && r.LeaseUntil > DateTime.UtcNow && r.CancelVersion == job.CancelVersion)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, "COMPLETED").SetProperty(r => r.UpdatedAt, DateTime.UtcNow), ct);
             if (fencedRunRows != 1)
+                throw new CheckpointValidationException(409, "Epoch/lease/cancel fencing violation for final run");
+            var run = await db.ReadingPaperRuns.AsNoTracking().SingleAsync(r => r.RunId == request.RunId, ct);
+            var txJob = await db.ReadingPaperJobs.AsNoTracking().SingleAsync(j => j.Id == request.JobId, ct);
+            var jobSections = JsonSerializer.Deserialize<List<ReadingGeneratedSection>>(txJob.SectionsJson, ReadingPaperRules.Json) ?? [];
+            var useJobSections = (jobSections.Count > 0 && jobSections.Count < 3) ||
+                (!string.Equals(run.EngineVersion, "2.0.0", StringComparison.OrdinalIgnoreCase) && jobSections.Count == 3);
+            if (useJobSections)
             {
-                throw new CheckpointValidationException(409,
-                    $"Epoch fencing violation: atomic conditional lock failed for run '{request.RunId}' in final exam build");
+                ReadingPaperRules.Validate(jobSections);
             }
-
-            // 3. Atomically check slug in transaction
-            var existingSlug = await db.Exams.AsNoTracking().FirstOrDefaultAsync(e => e.Slug == expectedSlug, ct);
-            if (existingSlug != null)
-            {
-                await db.ReadingPaperJobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s.SetProperty(j => j.ExamId, existingSlug.Id), ct);
-                await tx.CommitAsync(ct);
-                return new BuildExamInternalResult(existingSlug.Id, existingSlug.Slug, IsExisting: true);
-            }
-
-            // 4. Save Exam & Link to Job atomically
+            var sections = useJobSections
+                ? jobSections
+                : await ReadingPaperFinalSnapshot.LoadAsync(db, run, txJob, request.FinalEvaluations, ct);
+            var exam = ReadingPaperWorker.BuildExam(txJob, sections);
+            if (await db.Exams.AnyAsync(e => e.Slug == exam.Slug, ct))
+                throw new CheckpointValidationException(409, "Final exam slug is already owned by a different graph");
             db.Exams.Add(exam);
-            await db.ReadingPaperJobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s.SetProperty(j => j.ExamId, exam.Id), ct);
-
+            await db.ReadingPaperJobs.Where(j => j.Id == request.JobId)
+                .ExecuteUpdateAsync(s => s.SetProperty(j => j.ExamId, exam.Id)
+                    .SetProperty(j => j.SectionsJson, JsonSerializer.Serialize(sections, ReadingPaperRules.Json))
+                    .SetProperty(j => j.CompletedSections, 3)
+                    .SetProperty(j => j.LeaseOwner, (Guid?)null).SetProperty(j => j.LeaseUntil, (DateTime?)null), ct);
+            await db.ReadingPaperRuns.Where(r => r.RunId == request.RunId)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.LeaseOwner, (Guid?)null).SetProperty(r => r.LeaseUntil, (DateTime?)null), ct);
+            var maxSeq = await db.ReadingPaperEventOutbox
+                .Where(e => e.RunId == request.RunId)
+                .MaxAsync(e => (long?)e.Sequence, ct) ?? 0L;
+            var eventId = $"exam-draft:{request.RunId}";
+            db.ReadingPaperEventOutbox.Add(new ReadingPaperEventOutbox
+            {
+                RunId = request.RunId, EventId = eventId, Sequence = maxSeq + 1, IdempotencyKey = eventId, Epoch = request.Epoch,
+                EventType = EventType.RUN_COMPLETED.ToString(),
+                PayloadJson = JsonSerializer.Serialize(new { runId = request.RunId, jobId = request.JobId, examId = exam.Id, status = "Draft" }, ReadingPaperRules.Json)
+            });
+            foreach (var evaluation in request.FinalEvaluations ?? [])
+                if (!await db.ReadingPaperEvaluations.AnyAsync(e => e.RunId == request.RunId && e.EvaluationId == evaluation.EvaluationId, ct))
+                    db.ReadingPaperEvaluations.Add(new ReadingPaperEvaluation
+                    {
+                        RunId = request.RunId, EvaluationId = evaluation.EvaluationId, EvaluatorId = evaluation.EvaluatorId,
+                        EvaluatorVersion = evaluation.EvaluatorVersion, TargetArtifactId = evaluation.TargetRef.ArtifactId,
+                        TargetVersion = evaluation.TargetRef.Version, TargetContentHash = evaluation.TargetRef.ContentHash,
+                        Status = evaluation.Status.ToString(), IsPass = evaluation.IsPass,
+                        PayloadJson = JsonSerializer.Serialize(evaluation, LoopEngineJson.Options)
+                    });
             await db.SaveChangesAsync(ct);
+            await LineageService.RecordExamLineageAsync(db, run, txJob, exam, sections, ct);
+            await db.SaveChangesAsync(ct);
+            if (onGraphSaved != null) await onGraphSaved();
             await tx.CommitAsync(ct);
-
-            return new BuildExamInternalResult(exam.Id, exam.Slug, IsExisting: false);
+            return new BuildExamInternalResult(exam.Id, exam.Slug);
         });
+    }
+
+    private static async Task<BuildExamInternalResult?> CompletedExamAsync(
+        ExamDbContext db, BuildExamInternalRequest request, CancellationToken ct)
+    {
+        // Only the authenticated finalizer may replay this read. Mutating operation admission stays strict.
+        var run = await db.ReadingPaperRuns.AsNoTracking().Include(r => r.Job)
+            .SingleOrDefaultAsync(r => r.RunId == request.RunId, ct);
+        if (run?.Job == null || run.Status != "COMPLETED" || run.Job.Status != "Completed") return null;
+        if (run.JobId != request.JobId || run.Job.ActiveRunId != request.RunId
+            || run.Epoch != request.Epoch || run.Job.Epoch != request.Epoch || run.CancelVersion != run.Job.CancelVersion
+            || run.Job.ExamId == null)
+            throw new CheckpointValidationException(409, "Completed finalizer replay identity mismatch");
+        var exam = await db.Exams.AsNoTracking().SingleOrDefaultAsync(e => e.Id == run.Job.ExamId, ct)
+            ?? throw new CheckpointValidationException(409, "Completed run has no authoritative exam graph");
+        return new BuildExamInternalResult(exam.Id, exam.Slug, IsExisting: true);
     }
 
     private static void SyncSectionToLegacyJob(ReadingPaperJob job, ArtifactEnvelope sectionEnvelope)
     {
         try
         {
-            var sectionDto = JsonSerializer.Deserialize<ReadingGeneratedSection>(sectionEnvelope.Payload.GetRawText(), ReadingPaperRules.Json);
+            ReadingGeneratedSection? sectionDto = null;
+            try
+            {
+                sectionDto = JsonSerializer.Deserialize<ReadingGeneratedSection>(sectionEnvelope.Payload.GetRawText(), ReadingPaperRules.Json);
+            }
+            catch
+            {
+                // Fallback to manual extraction
+            }
+
+            if (sectionDto == null || sectionDto.Groups == null || sectionDto.Groups.Count == 0 || string.IsNullOrEmpty(sectionDto.Groups[0].Type))
+            {
+                sectionDto = ParseCanonicalV2Section(sectionEnvelope.Payload);
+            }
+
             if (sectionDto == null) return;
 
             var existingSections = JsonSerializer.Deserialize<List<ReadingGeneratedSection>>(job.SectionsJson, ReadingPaperRules.Json) ?? [];
             var existingIndex = existingSections.FindIndex(s =>
-                string.Equals(s.Source.Pmcid, sectionDto.Source.Pmcid, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(s.Title, sectionDto.Title, StringComparison.OrdinalIgnoreCase));
+                sectionDto.Source != null && !string.IsNullOrEmpty(sectionDto.Source.Pmcid) && string.Equals(s.Source?.Pmcid, sectionDto.Source.Pmcid, StringComparison.OrdinalIgnoreCase));
 
             if (existingIndex >= 0)
             {
@@ -1905,5 +2218,149 @@ public static class CheckpointService
         {
             // If cannot deserialize to legacy format, do not block the V2 commit
         }
+    }
+
+    private static ReadingGeneratedSection? ParseCanonicalV2Section(JsonElement payload)
+    {
+        try
+        {
+            var secId = payload.TryGetProperty("sectionId", out var idP) ? idP.GetInt32() : (payload.TryGetProperty("section_id", out var id2) ? id2.GetInt32() : 1);
+            var title = payload.TryGetProperty("title", out var tP) ? tP.GetString() ?? $"Section {secId}" : $"Section {secId}";
+            var passage = payload.TryGetProperty("passage", out var pP) ? pP.GetString() ?? "" : (payload.TryGetProperty("passageText", out var ptP) ? ptP.GetString() ?? "" : (payload.TryGetProperty("text", out var txP) ? txP.GetString() ?? "" : ""));
+
+            ReadingSource source;
+            if (payload.TryGetProperty("source", out var sP) && sP.ValueKind == JsonValueKind.Object)
+            {
+                var pmcid = sP.TryGetProperty("pmcid", out var pmP) ? pmP.GetString() ?? $"PMC{secId}000000" : $"PMC{secId}000000";
+                var sTitle = sP.TryGetProperty("title", out var stP) ? stP.GetString() ?? title : title;
+                var doi = sP.TryGetProperty("doi", out var dP) ? dP.GetString() : null;
+                var url = sP.TryGetProperty("url", out var uP) ? uP.GetString() ?? "" : "";
+                var license = sP.TryGetProperty("license", out var lP) ? lP.GetString() ?? "CC BY 4.0" : "CC BY 4.0";
+                var wc = sP.TryGetProperty("wordCount", out var wcP) ? wcP.GetInt32() : ReadingPaperRules.WordCount(passage);
+                var authors = sP.TryGetProperty("authors", out var aP) ? aP.GetString() : null;
+                source = new ReadingSource(pmcid, sTitle, doi, url, license, wc, authors);
+            }
+            else
+            {
+                source = new ReadingSource($"PMC{secId}000000", title, null, "", "CC BY 4.0", ReadingPaperRules.WordCount(passage));
+            }
+
+            var groups = new List<ReadingGeneratedGroup>();
+            if (payload.TryGetProperty("groups", out var gArray) && gArray.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var gNode in gArray.EnumerateArray())
+                {
+                    string gType = "SentenceCompletion";
+                    if (gNode.TryGetProperty("questionType", out var qtP) && qtP.ValueKind == JsonValueKind.String)
+                        gType = qtP.GetString() ?? "SentenceCompletion";
+                    else if (gNode.TryGetProperty("type", out var grpTypeProp) && grpTypeProp.ValueKind == JsonValueKind.String)
+                        gType = grpTypeProp.GetString() ?? "SentenceCompletion";
+
+                    string gInst = "";
+                    if (gNode.TryGetProperty("instructions", out var in1P) && in1P.ValueKind == JsonValueKind.String)
+                        gInst = in1P.GetString() ?? "";
+                    else if (gNode.TryGetProperty("instruction", out var in2P) && in2P.ValueKind == JsonValueKind.String)
+                        gInst = in2P.GetString() ?? "";
+
+                    var questions = new List<ReadingGeneratedQuestion>();
+                    if (gNode.TryGetProperty("questions", out var qArray) && qArray.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var qNode in qArray.EnumerateArray())
+                        {
+                            int qNum = questions.Count + 1;
+                            if (qNode.TryGetProperty("questionNumber", out var qnP) && qnP.TryGetInt32(out var qnVal))
+                                qNum = qnVal;
+                            else if (qNode.TryGetProperty("number", out var nP) && nP.TryGetInt32(out var nVal))
+                                qNum = nVal;
+
+                            string prompt = "";
+                            if (qNode.TryGetProperty("prompt", out var prP) && prP.ValueKind == JsonValueKind.String)
+                                prompt = prP.GetString() ?? "";
+                            else if (qNode.TryGetProperty("statement", out var stP) && stP.ValueKind == JsonValueKind.String)
+                                prompt = stP.GetString() ?? "";
+
+                            string ans = "";
+                            if (qNode.TryGetProperty("answer", out var ansP) && ansP.ValueKind == JsonValueKind.String)
+                                ans = ansP.GetString() ?? "";
+                            else if (qNode.TryGetProperty("correctOption", out var coP) && coP.ValueKind == JsonValueKind.String)
+                                ans = coP.GetString() ?? "";
+
+                            string quote = "";
+                            if (qNode.TryGetProperty("evidenceQuote", out var eqP) && eqP.ValueKind == JsonValueKind.String)
+                                quote = eqP.GetString() ?? "";
+                            else if (qNode.TryGetProperty("evidence_quote", out var eq2P) && eq2P.ValueKind == JsonValueKind.String)
+                                quote = eq2P.GetString() ?? "";
+
+                            string expl = "";
+                            if (qNode.TryGetProperty("explanation", out var expP) && expP.ValueKind == JsonValueKind.String)
+                                expl = expP.GetString() ?? "";
+
+                            var options = new List<string>();
+                            if (qNode.TryGetProperty("options", out var optArray) && optArray.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var optNode in optArray.EnumerateArray())
+                                {
+                                    if (optNode.ValueKind == JsonValueKind.String)
+                                    {
+                                        options.Add(optNode.GetString() ?? "");
+                                    }
+                                    else if (optNode.TryGetProperty("text", out var tNode) && tNode.ValueKind == JsonValueKind.String)
+                                    {
+                                        options.Add(tNode.GetString() ?? "");
+                                    }
+                                }
+                            }
+
+                            questions.Add(new ReadingGeneratedQuestion(qNum, prompt, ans, options, quote, expl));
+                        }
+                    }
+                    groups.Add(new ReadingGeneratedGroup(gType, gInst, questions));
+                }
+            }
+
+            return new ReadingGeneratedSection(title, passage, source, groups);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static async Task<List<OutboxEventDto>> GetOutboxEventsAsync(
+        ExamDbContext db,
+        string runId,
+        long afterSequence = 0,
+        CancellationToken ct = default)
+    {
+        var entities = await db.ReadingPaperEventOutbox
+            .Where(e => e.RunId == runId)
+            .OrderBy(e => e.Sequence > 0 ? e.Sequence : 0)
+            .ThenBy(e => e.CreatedAt)
+            .ToListAsync(ct);
+
+        var result = new List<OutboxEventDto>();
+        long seq = 1;
+        foreach (var entity in entities)
+        {
+            var effectiveSeq = entity.Sequence > 0 ? entity.Sequence : seq;
+            if (effectiveSeq > afterSequence)
+            {
+                result.Add(new OutboxEventDto(
+                    entity.Id,
+                    entity.RunId,
+                    entity.EventId,
+                    entity.EventType,
+                    entity.IdempotencyKey,
+                    entity.Epoch,
+                    entity.PayloadJson,
+                    entity.Status,
+                    entity.CreatedAt,
+                    effectiveSeq
+                ));
+            }
+            seq++;
+        }
+
+        return result;
     }
 }

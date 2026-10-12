@@ -13,7 +13,7 @@ public static class LoopCursorService
         ExamDbContext db, LoopCursorCheckpointRequest request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.ArtifactId) || request.ExpectedRevision < 0 ||
-            string.IsNullOrWhiteSpace(request.StateJson) || request.StateJson.Length > 262144)
+            string.IsNullOrWhiteSpace(request.StateJson) || request.StateJson.Length > 1048576)
             throw new CheckpointValidationException(422, "Invalid loop cursor target, revision or payload");
         try
         {

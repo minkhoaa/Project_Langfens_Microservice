@@ -1,0 +1,9 @@
+{
+  "caseId": "case_g12_7279c16a",
+  "campaignId": "camp_g12_paper_minimax_7279c16a9308_v1",
+  "jobId": "bc7f73ce-f0b7-471d-b605-1c34b4b7b5ae",
+  "runId": "bench_7e426e354ea98c7b24cb92735938e64e",
+  "status": "FAILED",
+  "startedAt": "2026-10-07T10:14:13.630891+00:00",
+  "error": "AI generation failed: Duplicate question\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 867, in generate_section\n    return await _generate_section_once(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 786, in _generate_section_once\n    section = validate_section(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 266, in validate_section\n    raise ValueError(\"Duplicate question\")\nValueError: Duplicate question\n"
+}
