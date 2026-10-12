@@ -26,8 +26,8 @@ from app.loop.runtime import BoundedLoopRuntime
 from app.persistence.client import CheckpointApiError
 from app.persistence.models import (
     ArtifactResumeInfo, CheckpointAck, InvalidateDependencyRequest,
-    InvalidateDependencyResult, LoopCursorCheckpoint, OperationResumeInfo,
-    ResumeStateResult,
+    InvalidateDependencyResult, LoopCursorCheckpoint, OperationReconcileResult,
+    OperationResumeInfo, ResumeStateResult,
 )
 
 
@@ -47,37 +47,41 @@ def context(owner=None, parents=(), target="passage"):
 
 
 def simulated_run_profile(policy):
-    """Derive a simulated RUN budget profile from a loop policy's caps.
+    """The pinned run cap profile a run of this policy would be created with.
 
-    The run-level budget is a ceiling applied to the whole reading-paper run, so
-    it must be at least as large as the per-operation caps the loop policy will
-    spend. Deriving it from the policy keeps the two in step: raising a policy cap
-    in a test automatically widens the simulated run ceiling instead of silently
-    letting the run budget become the binding (and therefore misleading) limit.
+    This is the shape exam-service persists on the run row: a full cap snapshot
+    carrying `caps`, `profileVersion` and `profileSource` -- not a bare run
+    budget. `LoopPolicy.from_cap_snapshot` rejects anything else ("Pinned cap
+    profile lacks required runtime caps"), the runtime refuses to resume a run
+    without one, and tests widen individual bounds via `profile["caps"][...]`, so
+    the snapshot is rendered from the policy's own RESOURCE_CAP_FIELDS rather
+    than read back from `cap_profile_snapshot` (which is empty for a policy
+    constructed directly instead of via `from_settings`).
     """
+    # `from_cap_snapshot` requires exact positive 32-bit integers; wall-time caps
+    # are modelled as floats on the policy, so coerce rather than emit 300.0.
+    caps = {key: int(getattr(policy, field))
+            for field, key in LoopPolicy.RESOURCE_CAP_FIELDS.items()}
+    caps["generateTokenReservation"] = int(policy.generate_token_reservation)
     return {
-        "budgetCapCalls": max(policy.max_total_calls * 10, policy.max_total_calls + 1),
-        "budgetCapTokens": max(policy.max_total_tokens * 10, policy.max_total_tokens + 1),
-        "budgetCapWallTimeSeconds": max(policy.max_wall_time_seconds * 10, policy.max_wall_time_seconds + 1),
+        "caps": caps,
+        "profileVersion": policy.cap_profile_version or "test-simulated-profile-v1",
+        "profileSource": policy.cap_profile_source or "test-simulated-run-profile",
     }
 
 
 def policy_for_profile(profile, required_evaluator_ids=("required",), **overrides):
-    """Build a LoopPolicy whose caps come from a run budget profile.
+    """Rebuild the LoopPolicy a run pinned to `profile` would resume with.
 
-    Used by cap/budget tests that exercise the "child cap must fit inside the run
-    budget" admission rules. Any keyword override wins over the profile-derived
-    value, so a single test can perturb one bound without restating the rest.
+    Used by cap/budget tests that exercise "a resumed run uses the profile it was
+    created with". Re-deriving through `from_cap_snapshot` keeps the policy and
+    the pinned profile in step; keyword overrides win over profile-derived values
+    so one test can perturb a single bound.
     """
-    from app.loop.policy import LoopPolicy
-
-    caps = {
-        "max_total_calls": int(profile.get("budgetCapCalls", 25)),
-        "max_total_tokens": int(profile.get("budgetCapTokens", 150000)),
-        "max_wall_time_seconds": float(profile.get("budgetCapWallTimeSeconds", 900)),
-    }
-    caps.update(overrides)
-    return LoopPolicy(required_evaluator_ids=tuple(required_evaluator_ids), **caps)
+    overrides.pop("required_evaluator_ids", None)
+    return LoopPolicy.from_cap_snapshot(profile, **overrides).model_copy(
+        update={"required_evaluator_ids": tuple(required_evaluator_ids)}
+    )
 
 
 class Generator:
@@ -162,23 +166,10 @@ class DurableStore:
         # deployment's (R03/G06). The runtime rejects a run with no pinned profile and
         # cross-checks the JSON against its own digest, version and source, so the
         # fake persists exactly what the real checkpoint service does.
-        self.run_profile = dict(run_profile or {})
-        if not self.run_profile:
-            self.run_profile = LoopPolicy.from_settings().cap_profile_snapshot
-        elif "caps" not in self.run_profile:
-            # A bare run budget (calls/tokens/wall-time) was supplied: fold it into a
-            # real policy snapshot so the runtime's cross-check still passes.
-            base = LoopPolicy.from_settings().cap_profile_snapshot
-            base = dict(base)
-            base["caps"] = dict(base.get("caps") or {})
-            for profile_key, cap_key in (
-                ("budgetCapCalls", "maxTotalCalls"),
-                ("budgetCapTokens", "maxTotalTokens"),
-                ("budgetCapWallTimeSeconds", "maxWallTimeSeconds"),
-            ):
-                if profile_key in self.run_profile and cap_key in base["caps"]:
-                    base["caps"][cap_key] = self.run_profile[profile_key]
-            self.run_profile = base
+        # A run persists a full cap snapshot (caps + profileVersion + profileSource);
+        # the runtime cross-checks the JSON digest against exactly those fields, so
+        # the fake stores what it was handed verbatim rather than re-deriving it.
+        self.run_profile = dict(run_profile or LoopPolicy.from_settings().cap_profile_snapshot)
         canonical = json.dumps(self.run_profile, sort_keys=True, separators=(",", ":"))
         self.run_profile_sha256 = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
         self.epoch = 1
@@ -269,7 +260,19 @@ class DurableStore:
         op.update(status="COMPLETED", tokensUsed=req.tokensUsed,
                   wallTimeUsedSeconds=req.wallTimeUsedSeconds, resultRefJson=req.resultRefJson)
         self._save(state, "evaluate")
-        return type("Reconcile", (), {"status": "COMPLETED"})()
+        # The gateway reads `reservationBreached`/`budgetBreachDetected` off this
+        # result (app/providers/gateway.py:483), so the fake must return the real
+        # contract model rather than a hand-rolled object that would drift again.
+        # The fake never simulates a breach, so both flags are False.
+        return OperationReconcileResult(
+            operationId=req.operationId,
+            status=op["status"],
+            tokensUsed=req.tokensUsed,
+            wallTimeUsedSeconds=req.wallTimeUsedSeconds,
+            reconciledAt=datetime.now(timezone.utc),
+            reservationBreached=False,
+            budgetBreachDetected=False,
+        )
     def invalidate_dependencies(self, req: InvalidateDependencyRequest) -> InvalidateDependencyResult:
         self._fence(req)
         state = self._state()
