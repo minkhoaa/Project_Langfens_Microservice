@@ -1,0 +1,130 @@
+{
+  "gate": "G15",
+  "phase": "Phase 15 \u2014 Release Verification, Cutover & Legacy Deletion",
+  "status": "BLOCKED",
+  "evaluatedAt": "2026-10-12T00:00:00.000000+00:00",
+  "gitSha": "56d060d45b2f55e6d1af03240e019c60084b1261",
+  "snapshotManifestSha256": "1471711d3b17dbdc9114cbaee2581f47eb0c3895f6728ae833150b89ff80898e",
+  "benchmarkReportSha256": "601fe8655257b6903f05c45ae3217909b31f90c43d4106f2296ea1db3883f72b",
+  "blockingReason": "G15 remains BLOCKED. The V2 valid-Draft blocker is RESOLVED: live MiniMax-Text-01 campaign camp_G15_022943e248ec produced 18/18 valid Drafts (100%) against the >= 95% threshold, all persisted, with fidelity must-reject 100%, semantic blocking recall 100%, P95 latency ratio 0.709x and median token ratio 0.235x. Two blockers remain, neither satisfiable by code change and neither advanced here: (1) T15-06 production canary is BLOCKED_ON_PRODUCTION_OBSERVATION -- it requires the actual staged 10%->50%->100% rollout on production traffic with >= 20 completed eligible jobs and a >= 24h bake on a pinned engine/config; a benchmark campaign is NOT a substitute and no synthetic canary was recorded; (2) T15-07 container rollback across version boundaries remains BLOCKED_PARTIAL -- rollback onto the pinned previous image on the current additive schema and a DB clone is rehearsed, but the executed migration/drain path for historical checkpoint formats across the version boundary is still unproven.",
+  "dependencies": {
+    "G00": "PASS",
+    "G01": "PASS",
+    "G02": "PASS",
+    "G03": "PASS",
+    "G04": "PASS",
+    "G05": "PASS",
+    "G06": "PASS",
+    "G07": "PASS",
+    "G08": "PASS",
+    "G09": "PASS",
+    "G10": "PASS",
+    "G11": "PASS",
+    "G12": "BLOCKED_PENDING_LIVE_CAMPAIGN",
+    "G13": "PASS",
+    "G14": "PASS"
+  },
+  "workPackages": {
+    "P15-01": "PASS_MANIFEST_MAPPED",
+    "P15-02": "PASS_BUILD_AND_STARTUP_VERIFIED",
+    "P15-03": "LIVE_PAIRED_BENCHMARK_EXECUTED_MINIMAX_ONLY (V2_VALID_DRAFT_18_18=100%_PASS_TARGET_GE_95%; LEGACY_10_18=55.6%; P95_LATENCY_RATIO_0.709X_PASS; MEDIAN_TOKEN_RATIO_0.235X_PASS; FIDELITY_MUST_REJECT_100%; SEMANTIC_BLOCKING_RECALL_100%)",
+    "P15-04": "BLOCKED_ON_CANARY_OBSERVATION",
+    "P15-05": "PASS_CHAOS_MATRIX",
+    "P15-06": "PASS_FRONTEND_ROUTING",
+    "P15-07": "BLOCKED_PARTIAL_CONTAINER_REHEARSAL",
+    "P15-08": "PASS_INVENTORY_CLOSED",
+    "P15-09": "PASS_LIVING_ADAPTERS",
+    "P15-10": "PASS_RUNBOOK_AUTHORED"
+  },
+  "testResults": {
+    "T15-01": "PASS",
+    "T15-02": "PASS",
+    "T15-03": "PASS",
+    "T15-04": "BLOCKED_ON_LIVE_GENERATION_TERMINAL_COMPLETION",
+    "T15-05": "PASS",
+    "T15-06": "BLOCKED_ON_PRODUCTION_OBSERVATION",
+    "T15-07": "BLOCKED_PARTIAL_CONTAINER_REHEARSAL",
+    "T15-08": "PASS"
+  },
+  "deterministicVerification": {
+    "legacySymbolsTotal": 37,
+    "retiredConfirmedCount": 6,
+    "migratedToV2Count": 16,
+    "livingPublicAdaptersPreservedCount": 15,
+    "brokenPublicAdaptersCount": 0,
+    "brokenExternalCallersCount": 0,
+    "totalAutomatedTestsPassed": 732,
+    "pythonTestsPassed": 542,
+    "dotnetTestsPassed": 190
+  },
+  "metrics": {
+    "hardInvariantsPassRate": 1.0,
+    "criticalCanariesPassRate": 1.0,
+    "semanticRecall": 1.0,
+    "ambiguityRecall": 1.0,
+    "falseRejectionRate": 0.0,
+    "v2P95LatencyRatioVsLegacy": 1.944,
+    "v2MedianCostRatioVsLegacy": 0.376,
+    "benchmarkExecutionMode": "SYNTHETIC_DIAGNOSTIC_ONLY_ZERO_LIVE_CALLS",
+    "acceptedGraphInvariantsPassRate": 1.0,
+    "latencyDiagnosticPassed": false,
+    "v2ValidDraftRate": {
+      "value": "18/18",
+      "rate": 1.0,
+      "target": ">= 0.95",
+      "passed": true,
+      "campaignId": "camp_G15_022943e248ec",
+      "note": "live MiniMax-Text-01; all 18 persisted as exams"
+    },
+    "legacyValidDraftRate": {
+      "value": "10/18",
+      "rate": 0.5555,
+      "note": "rerun in the same campaign; prior legacy rows were not reusable (see fix log section 7)"
+    },
+    "v2P95LatencyRatio": {
+      "value": 0.709,
+      "target": "<= 1.5",
+      "passed": true
+    },
+    "medianTokenRatio": {
+      "value": 0.235,
+      "target": "<= 2.0",
+      "passed": true
+    },
+    "fidelityMustRejectRate": {
+      "value": 1.0,
+      "target": "1.00",
+      "passed": true
+    },
+    "semanticBlockingRecall": {
+      "value": 1.0,
+      "target": ">= 0.95",
+      "passed": true
+    }
+  },
+  "legacyCleanupSummary": {
+    "inventoryClosed": true,
+    "inventoryPath": "artifacts/refactor/phase-15/deletion-inventory.jsonl",
+    "symbolMapClosedPath": "artifacts/refactor/phase-15/legacy-symbol-map-closed.csv",
+    "operationalRunbookPath": "docs/refactor/runbooks/operational-runbook.md",
+    "finalAcceptanceReportPath": "artifacts/refactor/phase-15/final-acceptance-report.md"
+  },
+  "externalBlockers": [
+    {
+      "id": "T15-06",
+      "state": "BLOCKED_ON_PRODUCTION_OBSERVATION",
+      "missing": "production traffic rollout 10%->50%->100% with >= 20 completed eligible jobs and >= 24h observation on a pinned engine/config",
+      "nextCommand": "run the authorized staged canary against the pinned release candidate; do not substitute a synthetic or benchmark canary",
+      "note": "explicitly retained; not advanced by this remediation"
+    },
+    {
+      "id": "T15-07",
+      "state": "BLOCKED_PARTIAL",
+      "missing": "executed migration/drain path proving historical checkpoint/artifact formats remain readable across the version boundary",
+      "nextCommand": "python3 scripts/refactor/rehearse_container_rollback.py on a DB clone with pre-boundary-format data",
+      "note": "explicitly retained; rollback requirements unchanged"
+    }
+  ],
+  "conclusion": "Implementation and the code-remediation-scope gate are complete and evidence-backed: the V2 valid-Draft rate moved 11/18 (61.1%) -> 18/18 (100%) on live MiniMax-Text-01 across three successive full campaigns, with every fix verified RED before / GREEN after and no evaluator threshold, cap, or source-isolation rule relaxed. Release-candidate readiness is evidenced; production rollout is NOT complete and G15 stays BLOCKED on T15-06 and T15-07.",
+  "releaseVerdict": "BLOCKED"
+}

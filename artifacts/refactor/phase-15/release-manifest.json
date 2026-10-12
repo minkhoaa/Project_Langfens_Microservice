@@ -1,0 +1,124 @@
+{
+  "releaseVersion": "2.0.0",
+  "releaseName": "Langfens Generation Service Loop Engine V2",
+  "phase": "Phase 15 Cutover & Release",
+  "timestamp": "2026-10-12T04:20:27.769497+00:00",
+  "gitSha": "56d060d45b2f55e6d1af03240e019c60084b1261",
+  "schemaVersion": "2.0.0",
+  "policyVersion": "v2.0.0",
+  "promptVersion": "prompts_v2_0_0",
+  "modelVersions": {
+    "primaryModel": "MiniMax-Text-01",
+    "primaryProvider": "minimax",
+    "fallbackModel": "openai/gpt-oss-120b",
+    "fallbackProvider": "groq"
+  },
+  "metricEngineVersion": "2.3.1",
+  "metricEngineHash": "a958e94e77341398",
+  "imageDigests": {
+    "postgres": "postgres:16-alpine@sha256:721873c34ceb",
+    "redis": "redis:7-alpine@sha256:858f009f9709",
+    "rabbitmq": "rabbitmq:4.2-management@sha256:9e9fd21d60f0",
+    "generationServiceSourceTree": "3949d5f3bc3fdf5ed25fc72c8088b86c5ada36a055a082f65a43dad41a41b8e2"
+  },
+  "snapshotManifestSha256": "07e60b4c707178d887f9664c42a2c238afa953be9484d60f0dc6b3076a9a9f35",
+  "benchmarkReportSha256": "601fe8655257b6903f05c45ae3217909b31f90c43d4106f2296ea1db3883f72b",
+  "status": "BLOCKED_AT_GATE",
+  "statusReason": "Deterministic test suites (542 pytest + 190 .NET passed), PostgreSQL durability (14/14 chaos matrix scenarios), legacy drain (0 lost checkpoints), and 37/37 closed legacy deletion inventory PASS. Gate G15 is held as BLOCKED pending live 24-hour production canary observation window, unconstrained live generation campaign, and container rollback verification.",
+  "validationMatrixThresholds": {
+    "validDraftRateMin": 0.95,
+    "fidelityMustRejectRate": 1.0,
+    "semanticBlockingRecallMin": 0.95,
+    "perTypeRecallMin": 0.9,
+    "ambiguityRecallMin": 0.9,
+    "falseRejectionRateMax": 0.1,
+    "p95LatencyRatioMax": 1.5,
+    "medianTokenCostRatioMax": 2.0,
+    "criticalFixturesMinRepetitions": 3
+  },
+  "gatePreconditions": {
+    "p15_01_manifests_frozen": true,
+    "p15_02_benchmarks_passed": false,
+    "p15_03_test_suites_passed": true,
+    "owned_t15_tests_passed": true,
+    "zero_missing_hashes": true,
+    "version_immutability_verified": true
+  },
+  "evaluatorVersions": {
+    "PassageWordCountEvaluator": "1.0.0",
+    "PassageStyleEvaluator": "1.0.0",
+    "QuestionStructureEvaluator": "1.0.0",
+    "AnswerVerbatimAndLengthEvaluator": "1.0.0",
+    "EvidenceOffsetEvaluator": "1.0.0",
+    "DuplicateAndShingleEvaluator": "1.0.0",
+    "GroundingFidelityEvaluator": "2.0.0",
+    "AmbiguityAndDistractorEvaluator": "2.0.0",
+    "NotGivenSemanticsEvaluator": "1.0.0",
+    "HeuristicQualityScorer": "1.0.0",
+    "SectionStructureEvaluator": "1.0.0",
+    "SectionDuplicateAndConcentrationEvaluator": "1.0.0",
+    "SectionEditorialEvaluator": "1.0.0",
+    "PaperStructureEvaluator": "2.0.0",
+    "PaperCrossSectionEvaluator": "2.0.0",
+    "PaperLeakageEvaluator": "2.1.0",
+    "PaperMonotonyEvaluator": "2.0.0",
+    "BlindSolverEvaluator": "1.0.0"
+  },
+  "evaluatorRegistryIds": {
+    "eval_passage_word_count": "1.0.0",
+    "eval_passage_style": "1.0.0",
+    "eval_question_structure": "1.0.0",
+    "eval_answer_verbatim_length": "1.0.0",
+    "eval_evidence_offsets": "1.0.0",
+    "eval_duplicate_shingle": "1.0.0",
+    "eval_grounding_fidelity": "2.0.0",
+    "eval_ambiguity_distractor": "2.0.0",
+    "eval_not_given_semantics": "1.0.0",
+    "eval_heuristic_quality_scorer": "1.0.0",
+    "eval_section_structure": "1.0.0",
+    "eval_section_duplicate_concentration": "1.0.0",
+    "eval_section_editorial": "1.0.0",
+    "eval_paper_structure": "2.0.0",
+    "eval_paper_cross_section": "2.0.0",
+    "eval_paper_leakage": "2.1.0",
+    "eval_paper_monotony": "2.0.0",
+    "eval_blind_solver_adversary": "1.0.0"
+  },
+  "corpusHashes": {
+    "PMC12804876.g07-body-excerpt.txt": "c2d0413dc75477a503b5f87545c32074fad6ce899d1126c17c7b562c2a4ee016",
+    "PMC12804876.txt": "42d9e0b1cbaa962bd3b09c572146ed1192111c063bfcef7a08354ca1f16f53a9",
+    "PMC13407692.txt": "ee008146c52cd0d0a134fcb3d0f2f624f48d1b9d8ea3e3e7fdea4e8580788311",
+    "PMC13503497.txt": "52cdc3b6bd9303cff40745e579a11dba59df3ed95aebe89df96ed800b8eff00f",
+    "PMC13517498.txt": "819338d16fd28b126aea30e8e5212a24a0a03a1551f50a78f057e18ee1dfdf30",
+    "PMC13560651.txt": "00d4fd920556e6bb9ec56cabc92c676b278e0e2b6d4eaa38b794d34f8a85b441",
+    "PMC13583341.txt": "6362de6fad8388031290f0a169753005604819444e6c2273751805c4e6d772ad",
+    "PMC13604763.txt": "f3272e93f3436d61deacfbbf7ef704eeb1d1e5959bdd1ed3446bbcd8ee4c64ea",
+    "PMC13621526.txt": "5aa19f0d12e8f94122939f37a93f92eb4016ff290b3778da661f3afeca5a38f6"
+  },
+  "pricingAndCapsProfile": {
+    "productionCaps": {
+      "loop_max_versions": 3,
+      "loop_max_generated_versions": 3,
+      "loop_max_repair_attempts_per_version": 2,
+      "loop_max_total_repairs": 5,
+      "loop_max_total_calls": 15,
+      "loop_max_total_tokens": 60000,
+      "loop_max_wall_time_seconds": 300.0,
+      "evaluator_deterministic_timeout_seconds": 5.0,
+      "evaluator_semantic_timeout_seconds": 30.0,
+      "evaluator_max_tokens_per_evaluation": 4000
+    },
+    "pricingProfiles": {
+      "minimax": {
+        "inputPricePerMillion": 0.2,
+        "outputPricePerMillion": 1.1,
+        "blendedPerThousandTokens": 0.00065
+      },
+      "groq": {
+        "inputPricePerMillion": 0.59,
+        "outputPricePerMillion": 0.79,
+        "blendedPerThousandTokens": 0.00069
+      }
+    }
+  }
+}
