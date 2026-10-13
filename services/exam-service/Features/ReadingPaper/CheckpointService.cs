@@ -449,7 +449,7 @@ public static class CheckpointService
                     .Where(o => o.RunId == request.RunId && o.ParentOperationId == request.ParentOperationId &&
                                 (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                     .SumAsync(o => o.Status == "COMPLETED"
-                        ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "ESTIMATED" || o.AccountingType == "estimated") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
+                        ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "RECONCILED" || o.AccountingType == "reconciled") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
                         : o.TokenReservation, ct);
 
                 if (!isUnlimitedRun && run.BudgetCapTokens > 0 && run.BudgetCapTokens != ReadingPaperCapsProfile.UnlimitedCap &&
@@ -565,7 +565,7 @@ public static class CheckpointService
                                     (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .SumAsync(o => o.Status == "COMPLETED"
-                            ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "ESTIMATED" || o.AccountingType == "estimated") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
+                            ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "RECONCILED" || o.AccountingType == "reconciled") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
                             : o.TokenReservation, ct);
                     if (!isUnlimitedRun && sectionAllocation.TokenCap > 0 && sectionAllocation.TokenCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedSectionTokens + request.TokenReservation > sectionAllocation.TokenCap)
                         throw new CheckpointValidationException(422,
@@ -607,7 +607,7 @@ public static class CheckpointService
                                     (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .SumAsync(o => o.Status == "COMPLETED"
-                            ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "ESTIMATED" || o.AccountingType == "estimated") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
+                            ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "RECONCILED" || o.AccountingType == "reconciled") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
                             : o.TokenReservation, ct);
                     if (!isUnlimitedRun && artifactAllocation.TokenCap > 0 && artifactAllocation.TokenCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactTokens + request.TokenReservation > artifactAllocation.TokenCap)
                         throw new CheckpointValidationException(422,
@@ -710,7 +710,7 @@ public static class CheckpointService
     {
         var (run, job) = await ValidateRunAuthorityAndFencingAsync(db, request.RunId, request.Epoch, request.LeaseOwner, ct);
         var accountingType = request.AccountingType.ToUpperInvariant();
-        if (accountingType is not ("REPORTED" or "ESTIMATED" or "UNKNOWN") ||
+        if (accountingType is not ("REPORTED" or "ESTIMATED" or "UNKNOWN" or "RECONCILED") ||
             request.TokensUsed < 0 || request.WallTimeUsedSeconds < 0 || request.CostUsedUsd < 0 ||
             request.PromptTokensUsed < 0 || request.CompletionTokensUsed < 0 || request.ReasoningTokensUsed < 0)
             throw new CheckpointValidationException(422, "Usage reconciliation contains an invalid accounting type or negative value");
@@ -855,8 +855,7 @@ public static class CheckpointService
                 }
             }
             op.UpdatedAt = DateTime.UtcNow;
-            var usageIsReported = accountingType == "REPORTED";
-            // Estimates cannot refund a reservation or hide usage above it; UNKNOWN retains the bound.
+            var usageIsReported = accountingType is "REPORTED" or "RECONCILED";
             var tokensToAccount = usageIsReported ? request.TokensUsed : Math.Max(request.TokensUsed, op.TokenReservation);
             var tokenDelta = tokensToAccount - op.TokenReservation;
             var wallTimeDelta = request.WallTimeUsedSeconds - op.WallTimeReservationSeconds;
@@ -1452,7 +1451,7 @@ public static class CheckpointService
                 : closureOps.Where(o => string.Equals(o.ParentOperationId, request.OperationId, StringComparison.OrdinalIgnoreCase)).ToList();
 
             var childReconciledTokens = opsToReconcile.Sum(o =>
-                (string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "ESTIMATED", StringComparison.OrdinalIgnoreCase))
+                (string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "RECONCILED", StringComparison.OrdinalIgnoreCase))
                     ? o.TokensUsed
                     : Math.Max(o.TokensUsed, Math.Max(0, o.TokenReservation)));
 
@@ -1842,7 +1841,7 @@ public static class CheckpointService
         if (providerOps.Count > 0)
         {
             totalTokens = providerOps.Sum(o => o.Status == "COMPLETED"
-                ? ((string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "ESTIMATED", StringComparison.OrdinalIgnoreCase))
+                ? ((string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "RECONCILED", StringComparison.OrdinalIgnoreCase))
                     ? o.TokensUsed
                     : Math.Max(o.TokensUsed, Math.Max(0, o.TokenReservation)))
                 : Math.Max(0, o.TokenReservation));
@@ -1855,7 +1854,7 @@ public static class CheckpointService
             if (standaloneWorkOps.Count > 0)
             {
                 totalTokens = Math.Max(run.BudgetUsedTokens, standaloneWorkOps.Sum(o => o.Status == "COMPLETED"
-                    ? ((string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "ESTIMATED", StringComparison.OrdinalIgnoreCase))
+                    ? ((string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "RECONCILED", StringComparison.OrdinalIgnoreCase))
                         ? o.TokensUsed
                         : Math.Max(o.TokensUsed, Math.Max(0, o.TokenReservation)))
                     : Math.Max(0, o.TokenReservation)));

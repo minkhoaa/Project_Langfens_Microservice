@@ -26,7 +26,7 @@ DB_HOST = os.environ.get("PGHOST", "localhost")
 DB_PORT = os.environ.get("PGPORT", "5433")
 DB_USER = os.environ.get("PGUSER", "exam")
 DB_PASS = os.environ.get("PGPASSWORD", "exam")
-DB_NAME = os.environ.get("PGDATABASE", "exam_test_phase14_lineage")
+DB_NAME = os.environ.get("PGDATABASE", "exam_test_rollback_clone")
 
 
 def run_psql(sql: str, db: str = DB_NAME) -> str:
@@ -204,8 +204,10 @@ def execute_rollback_rehearsal() -> dict:
         "rehearsalId": rehearsal_id,
         "timestamp": timestamp,
         "databaseTarget": f"{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}",
-        "targetPreviousImage": "langfens/exam-service:v1.9.4",
-        "currentV2Image": "langfens/exam-service:v2.0.0",
+        "targetPreviousImage": "langfens-exam:v1.9.4-compat",
+        "targetPreviousImageId": "b2198148a2b7",
+        "targetPreviousImageDigest": "sha256:b2198148a2b7ea22164c6c9cbe407581f251267420c8c1b9e0915d0f26734b43",
+        "currentV2Image": "langfens-exam:v2.0.0-compat",
         "verdict": "VERIFIED_COMPATIBLE_AND_NON_DESTRUCTIVE",
         "summary": {
             "totalTestCases": len(test_cases),

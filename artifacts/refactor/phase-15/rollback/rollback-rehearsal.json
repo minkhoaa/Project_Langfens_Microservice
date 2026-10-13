@@ -1,9 +1,11 @@
 {
-  "rehearsalId": "rehearsal_3e8f518b5d3a",
-  "timestamp": "2026-10-10T05:12:28.575422+00:00",
-  "databaseTarget": "exam@localhost:5433/exam_test_phase14_lineage",
-  "targetPreviousImage": "langfens/exam-service:v1.9.4",
-  "currentV2Image": "langfens/exam-service:v2.0.0",
+  "rehearsalId": "rehearsal_59dd776fae8a",
+  "timestamp": "2026-10-13T01:52:39.697410+00:00",
+  "databaseTarget": "exam@localhost:5433/exam_test_rollback_clone",
+  "targetPreviousImage": "langfens-exam:v1.9.4-compat",
+  "targetPreviousImageId": "b2198148a2b7",
+  "targetPreviousImageDigest": "sha256:b2198148a2b7ea22164c6c9cbe407581f251267420c8c1b9e0915d0f26734b43",
+  "currentV2Image": "langfens-exam:v2.0.0-compat",
   "verdict": "VERIFIED_COMPATIBLE_AND_NON_DESTRUCTIVE",
   "summary": {
     "totalTestCases": 5,
@@ -17,26 +19,26 @@
     {
       "test": "TC-ROLLBACK-01: Additive PostgreSQL Schema Real Query Compatibility",
       "status": "PASS",
-      "sqlVerified": "SELECT on reading_paper_jobs WHERE Id = '294329b8-9b81-4bdd-9c56-928b076690e3'",
+      "sqlVerified": "SELECT on reading_paper_jobs WHERE Id = 'ede0fdc9-f228-4aa9-aa7d-21d2ce908698'",
       "evidence": "Successfully retrieved job record (Phase 15 Rollback Rehearsal Topic) using legacy column projection."
     },
     {
       "test": "TC-ROLLBACK-02: Checkpoint & Run Record Compatibility on Real PostgreSQL",
       "status": "PASS",
-      "sqlVerified": "SELECT on reading_paper_runs WHERE RunId = 'run_5a68c7a0d139'",
-      "evidence": "Successfully retrieved run (run_5a68c7a0d139) with budget stats (3 calls, 8500 tokens)."
+      "sqlVerified": "SELECT on reading_paper_runs WHERE RunId = 'run_f06f6341366d'",
+      "evidence": "Successfully retrieved run (run_f06f6341366d) with budget stats (3 calls, 8500 tokens)."
     },
     {
       "test": "TC-ROLLBACK-03: Artifact Payload Readability across Rollback Boundary",
       "status": "PASS",
-      "sqlVerified": "SELECT on reading_paper_artifacts WHERE ArtifactId = 'art_passage_20f2aff3'",
+      "sqlVerified": "SELECT on reading_paper_artifacts WHERE ArtifactId = 'art_passage_54d42431'",
       "evidence": "Successfully parsed JSON payload with title 'Passage 1: Coral Reefs' and word count 850."
     },
     {
       "test": "TC-ROLLBACK-04: Human Feedback & Curation Record Integrity on Real DB",
       "status": "PASS",
-      "sqlVerified": "SELECT on reading_paper_human_feedback WHERE FeedbackId = 'fb_c06315f5'",
-      "evidence": "Feedback record 'fb_c06315f5' verified with status 'CURATED' and comment 'Preserved human feedback comment'."
+      "sqlVerified": "SELECT on reading_paper_human_feedback WHERE FeedbackId = 'fb_de33b955'",
+      "evidence": "Feedback record 'fb_de33b955' verified with status 'CURATED' and comment 'Preserved human feedback comment'."
     },
     {
       "test": "TC-ROLLBACK-05: Non-Destructive Additive Schema Verification",
@@ -46,9 +48,9 @@
     }
   ],
   "verifiedRecords": {
-    "jobId": "294329b8-9b81-4bdd-9c56-928b076690e3",
-    "runId": "run_5a68c7a0d139",
-    "artifactId": "art_passage_20f2aff3",
-    "feedbackId": "fb_c06315f5"
+    "jobId": "ede0fdc9-f228-4aa9-aa7d-21d2ce908698",
+    "runId": "run_f06f6341366d",
+    "artifactId": "art_passage_54d42431",
+    "feedbackId": "fb_de33b955"
   }
 }

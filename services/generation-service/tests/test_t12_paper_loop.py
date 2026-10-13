@@ -822,7 +822,10 @@ async def test_t12_internal_generation_requires_service_auth(monkeypatch, prefix
             assert (await client.post(url, json={}, headers={"X-Internal-Service-Key": "wrong"})).status_code == 403
             assert (await client.post(url, json={}, headers={"X-Internal-Service-Key": "runtime-test-key"})).status_code == 422
         assert (await client.get(prefix + "/healthz")).status_code == 200
-    monkeypatch.delenv("EXAMSERVICE__INTERNAL__API__KEY")
+    monkeypatch.delenv("EXAMSERVICE__INTERNAL__API__KEY", raising=False)
+    monkeypatch.delenv("INTERNAL_API_KEY", raising=False)
+    from app.config import settings
+    monkeypatch.setattr(settings, "internal_api_key", "")
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         assert (await client.post(prefix + "/v1/autogen/reading-paper/paper-v2", json={})).status_code == 503
 

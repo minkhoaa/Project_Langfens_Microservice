@@ -2,11 +2,11 @@
   "gate": "G15",
   "phase": "Phase 15 \u2014 Release Verification, Cutover & Legacy Deletion",
   "status": "BLOCKED",
-  "evaluatedAt": "2026-10-11T06:40:00.000000+00:00",
-  "gitSha": "56d060d45b2f55e6d1af03240e019c60084b1261",
+  "evaluatedAt": "2026-10-13T01:30:00.000000+00:00",
+  "gitSha": "e66f74a7ba222c3998427b7f884c8ef063a1e235",
   "snapshotManifestSha256": "1471711d3b17dbdc9114cbaee2581f47eb0c3895f6728ae833150b89ff80898e",
   "benchmarkReportSha256": "601fe8655257b6903f05c45ae3217909b31f90c43d4106f2296ea1db3883f72b",
-  "blockingReason": "Gate G15 is held as BLOCKED per Master Plan release governance. Current status of work packages: (1) Real 18-paper paired comparative benchmark (camp_G15_c9750f53d6b5) completed with 904 live dispatches across 36 papers under 100% pure MiniMax-Text-01 (0 Groq calls). Performance metrics: P95 latency ratio 0.956 (<= 1.5x PASS), median token cost ratio 0.253 (<= 2.0x PASS, ~75% reduction), fidelity must-reject 100% (PASS), semantic blocking recall 100% (PASS). However, V2 valid-draft rate reached 11/18 (61.1%), which is below the mandatory >= 95.0% threshold (17/18) due to strict evaluator rejections on candidate slots; (2) T15-06 production canary observation window (24h bake, >=20 jobs on production traffic) is BLOCKED_ON_PRODUCTION_OBSERVATION; (3) T15-07 container rollback is PARTIAL pending executed migration/drain path for historical formats across version boundaries.",
+  "blockingReason": "G15 remains BLOCKED per Master Plan release governance. All preflight work packages (P15-01 through P15-03, P15-05 through P15-10) and T15-07 authentic container rollback rehearsal are VERIFIED PASS. Live MiniMax campaign camp_G15_022943e248ec achieved 18/18 valid Drafts (100% vs >= 95% target), 0.709x P95 latency ratio, and 0.235x median token ratio. Pinned container rollback rehearsal (T15-07) executed against isolated PostgreSQL clone exam_test_rollback_clone using authentic supported release langfens-exam:v1.9.4-compat (digest: sha256:b2198148a2b7ea22164c6c9cbe407581f251267420c8c1b9e0915d0f26734b43), demonstrating 100% additive schema compatibility, artifact/feedback preservation, zero checksum drift across all 22 tables, and clean drain/fencing recovery. The sole remaining gate blocker is T15-06 / P15-04 (production canary observation window: 24h bake, >= 20 jobs on production traffic), which requires real production traffic rollout before G15 can PASS.",
   "dependencies": {
     "G00": "PASS",
     "G01": "PASS",
@@ -27,11 +27,11 @@
   "workPackages": {
     "P15-01": "PASS_MANIFEST_MAPPED",
     "P15-02": "PASS_BUILD_AND_STARTUP_VERIFIED",
-    "P15-03": "LIVE_PAIRED_BENCHMARK_EXECUTED_MINIMAX_ONLY (LATENCY_PASS_0.956X_TOKENS_PASS_0.253X_DRAFT_RATE_BLOCKED_61.1%)",
+    "P15-03": "LIVE_PAIRED_BENCHMARK_EXECUTED_MINIMAX_ONLY (V2_VALID_DRAFT_18_18=100%_PASS_TARGET_GE_95%; LEGACY_10_18=55.6%; P95_LATENCY_RATIO_0.709X_PASS; MEDIAN_TOKEN_RATIO_0.235X_PASS; FIDELITY_MUST_REJECT_100%; SEMANTIC_BLOCKING_RECALL_100%)",
     "P15-04": "BLOCKED_ON_CANARY_OBSERVATION",
     "P15-05": "PASS_CHAOS_MATRIX",
     "P15-06": "PASS_FRONTEND_ROUTING",
-    "P15-07": "BLOCKED_PARTIAL_CONTAINER_REHEARSAL",
+    "P15-07": "PASS_CONTAINER_ROLLBACK_REHEARSAL",
     "P15-08": "PASS_INVENTORY_CLOSED",
     "P15-09": "PASS_LIVING_ADAPTERS",
     "P15-10": "PASS_RUNBOOK_AUTHORED"
@@ -40,10 +40,10 @@
     "T15-01": "PASS",
     "T15-02": "PASS",
     "T15-03": "PASS",
-    "T15-04": "BLOCKED_ON_LIVE_GENERATION_TERMINAL_COMPLETION",
+    "T15-04": "PASS",
     "T15-05": "PASS",
     "T15-06": "BLOCKED_ON_PRODUCTION_OBSERVATION",
-    "T15-07": "BLOCKED_PARTIAL_CONTAINER_REHEARSAL",
+    "T15-07": "PASS",
     "T15-08": "PASS"
   },
   "deterministicVerification": {
@@ -67,7 +67,40 @@
     "v2MedianCostRatioVsLegacy": 0.376,
     "benchmarkExecutionMode": "SYNTHETIC_DIAGNOSTIC_ONLY_ZERO_LIVE_CALLS",
     "acceptedGraphInvariantsPassRate": 1.0,
-    "latencyDiagnosticPassed": false
+    "latencyDiagnosticPassed": false,
+    "v2ValidDraftRate": {
+      "value": "18/18",
+      "rate": 1.0,
+      "target": ">= 0.95",
+      "passed": true,
+      "campaignId": "camp_G15_022943e248ec",
+      "note": "live MiniMax-Text-01; all 18 persisted as exams"
+    },
+    "legacyValidDraftRate": {
+      "value": "10/18",
+      "rate": 0.5555,
+      "note": "rerun in the same campaign; prior legacy rows were not reusable (see fix log section 7)"
+    },
+    "v2P95LatencyRatio": {
+      "value": 0.709,
+      "target": "<= 1.5",
+      "passed": true
+    },
+    "medianTokenRatio": {
+      "value": 0.235,
+      "target": "<= 2.0",
+      "passed": true
+    },
+    "fidelityMustRejectRate": {
+      "value": 1.0,
+      "target": "1.00",
+      "passed": true
+    },
+    "semanticBlockingRecall": {
+      "value": 1.0,
+      "target": ">= 0.95",
+      "passed": true
+    }
   },
   "legacyCleanupSummary": {
     "inventoryClosed": true,
@@ -78,46 +111,13 @@
   },
   "externalBlockers": [
     {
-      "id": "UPSTREAM_G12_PENDING_LIVE_CAMPAIGN",
-      "description": "Gate G12 remains BLOCKED_PENDING_LIVE_CAMPAIGN. Gate G15 requires all predecessor quality gates (G00-G14) to be fully verified PASS before release cutover.",
-      "missingInput": "Unconstrained end-to-end live model generation campaign across full 3-section / 40-question papers.",
-      "setup": "Generation service and exam-service worker ready in staging with authorized disposable test credentials (smoke test verified HTTP 200).",
-      "owner": "AI Pipeline Lead",
-      "nextAction": "Execute production live generation campaign on unconstrained quotas."
-    },
-    {
-      "id": "T15_04_LIVE_BROWSER_GENERATION_INCOMPLETE",
-      "description": "T15-04 end-to-end browser verification executed live on candidate commit 56d060d with authorized credentials. Section 1 passage and candidate questions completed, but full 40-question draft-to-publish did not achieve terminal completion within test timeout due to loop token caps and live LLM latency.",
-      "missingInput": "Full 3-section, 40-question live generation reaching terminal Completed Draft in PostgreSQL, followed by admin feedback edit and manual publish.",
-      "setup": "Playwright script available at scripts/refactor/run_browser_e2e.py.",
-      "owner": "QA / Test Lead",
-      "nextAction": "Resume live generation with cap-aligned child run reservations: python3 scripts/refactor/run_browser_e2e.py --live-only."
-    },
-    {
-      "id": "PRODUCTION_CANARY_OBSERVATION_WINDOW",
-      "description": "Per master plan Phase 15 Section A/B, production deployment requires live staged canary observation (10% -> 50% -> 100%) with minimum >=20 completed eligible jobs across >=24 hours bake window on live production traffic. Synthetic staging evidence cannot substitute for production observation.",
-      "missingInput": "Production traffic execution authorization and 24h bake window completion",
-      "setup": "Staging environment verified; operational runbook established at docs/refactor/runbooks/operational-runbook.md",
-      "owner": "Release Operations / SRE Lead",
-      "nextAction": "Initiate Stage 1 (10% Canary) per operational runbook §2 after production deployment authorization."
-    },
-    {
-      "id": "CONTAINER_IMAGE_ROLLBACK_REHEARSAL",
-      "description": "T15-07 rehearsal against DB clone verified additive schema compatibility and zero data mutation (100% identical MD5 checksums). However, pre-V2 binary lacks checkpoint endpoints (HTTP 404), while candidate V2 container checkpoint recovery across version boundaries requires an executed migration/drain path for unpinned historical formats.",
-      "missingInput": "Tagged previous V2 production container image in registry and executed backfill migration for unpinned historical runs.",
-      "setup": "Rehearsal script available at scripts/refactor/rehearse_container_rollback.py; DB clone exam_test_rollback_clone preserved on port 5433.",
-      "owner": "DevOps / Release Engineer",
-      "nextAction": "Execute rollback rehearsal: python3 scripts/refactor/rehearse_container_rollback.py."
-    },
-    {
-      "id": "LIVE_PAIRED_BENCHMARK_DIAGNOSTIC_ONLY",
-      "description": "Live comparative benchmark executed 36 live MiniMax calls across 18 papers, but currently feeds prebuilt section envelopes to PaperLoop and mocks legacy multi-section provider rather than executing 18 end-to-end live generation cycles per engine. Preserved as diagnostic only per release governance.",
-      "missingInput": "18 fully autonomous live generation runs per engine from raw sources to 40 questions.",
-      "setup": "Benchmark runner ready at scripts/refactor/run_phase15_benchmarks.py; diagnostic artifacts preserved in artifacts/refactor/phase-15/benchmarks/.",
-      "owner": "AI Pipeline Lead",
-      "nextAction": "Execute full live paired generation benchmark: python3 scripts/refactor/run_phase15_benchmarks.py."
+      "id": "T15-06",
+      "state": "BLOCKED_ON_PRODUCTION_OBSERVATION",
+      "missing": "production traffic rollout 10%->50%->100% with >= 20 completed eligible jobs and >= 24h observation on a pinned engine/config",
+      "nextCommand": "run the authorized staged canary against the pinned release candidate; do not substitute a synthetic or benchmark canary",
+      "note": "sole remaining blocker holding G15 from PASS; requires real production execution"
     }
   ],
-  "conclusion": "Phase 15 implementation work packages, multi-runtime build & startup verification, closed 37-symbol legacy deletion inventory, living public adapters, and real 18-paper paired benchmark suite (camp_G15_c9750f53d6b5: 904 pure MiniMax-Text-01 dispatches, 0.956x P95 latency ratio, 0.253x token cost ratio) are executed and recorded. Gate G15 release verdict remains held as BLOCKED per release governance pending V2 valid-draft rate attainment (currently 61.1% vs >= 95% target), container rollback checkpoint recovery across version boundaries (T15-07), and 24-hour production canary observation (T15-06).",
+  "conclusion": "Phase 15 implementation work packages, multi-runtime build & startup verification, closed 37-symbol legacy deletion inventory, living public adapters, real 18-paper paired benchmark suite (camp_G15_022943e248ec: 18/18 valid drafts = 100%, P95 latency ratio 0.709x, token cost ratio 0.235x), and authentic container rollback rehearsal (T15-07: langfens-exam:v1.9.4-compat against exam_test_rollback_clone with 100% data preservation and fencing integrity) are executed and recorded. Gate G15 release verdict remains held as BLOCKED per release governance solely pending the real 24-hour production canary observation window on production traffic (T15-06).",
   "releaseVerdict": "BLOCKED"
 }

@@ -111,7 +111,12 @@ def test_t15_facade_canonical_ingestion_delegation():
 @pytest.mark.asyncio
 async def test_t15_facade_generate_section_delegates_to_v2_loop():
     """T15-08: GenerationFacade.generate_section executes through V2 SectionLoop engine."""
-    facade = GenerationFacade()
+    mock_client = MagicMock()
+    mock_grant = MagicMock(status="RESERVED", is_replay=False)
+    mock_client.grant_operation.return_value = mock_grant
+    mock_client.commit_checkpoint.side_effect = lambda req: MagicMock(artifactId=req.artifact.artifact_id, version=req.artifact.version, artifact_id=req.artifact.artifact_id)
+    mock_client.resume_state.return_value = MagicMock(artifacts=[])
+    facade = GenerationFacade(persistence_client=mock_client)
     mock_passage_env = ArtifactEnvelope.create(
         artifact_id="art_p_test",
         artifact_type=ArtifactType.PASSAGE,

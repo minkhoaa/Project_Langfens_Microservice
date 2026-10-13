@@ -695,12 +695,10 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                 .Sum(o => o.WallTimeUsedSeconds);
 
             // Retain full reservation if child operations were not separately reconciled (e.g. unknown outcome / test mock);
-            // never substitute an arbitrary fabricated constant like 2200.
+            // never substitute an arbitrary fabricated constant like 2200, and never clamp reservations that retain the bound.
             var tokensToCommit = actualSectionTokens > 0
                 ? actualSectionTokens
-                : (providerOpsForRunCount == 0 && grant.TokenReservation > 0 && !isUnlimitedRun
-                    ? (caps.RunBudgetCapTokens > 0 && grant.TokenReservation > caps.RunBudgetCapTokens / 3 ? caps.RunBudgetCapTokens / 3 : grant.TokenReservation)
-                    : 0);
+                : (providerOpsForRunCount == 0 && grant.TokenReservation > 0 && !isUnlimitedRun ? grant.TokenReservation : 0);
             var wallTimeToCommit = actualSectionWallTime > 0
                 ? actualSectionWallTime
                 : (providerOpsForRunCount == 0 && grant.WallTimeReservationSeconds > 0 && !isUnlimitedRun ? grant.WallTimeReservationSeconds : 0.0);
@@ -791,8 +789,16 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             var paperOpId = $"op_paper_{runId[..Math.Min(8, runId.Length)]}";
             var rawReq = $"{runId}:paper:{job.Topic}";
             var reqHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawReq)));
-            var paperTokenReservation = 300000;
-            var paperWallReservation = 600.0;
+            activeRun = await db.ReadingPaperRuns.AsNoTracking().FirstOrDefaultAsync(r => r.RunId == runId, ct) ?? activeRun;
+            var isUnlimitedPaper = caps.IsBenchmarkUnlimited || (activeRun != null && (activeRun.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap || (activeRun.BudgetProfileJson != null && activeRun.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase))));
+            var paperTokenReservation = isUnlimitedPaper ? ReadingPaperCapsProfile.UnlimitedCap
+                : (caps.RunBudgetCapTokens > 0 && activeRun != null && activeRun.BudgetUsedTokens < caps.RunBudgetCapTokens
+                    ? Math.Min(300000, caps.RunBudgetCapTokens - activeRun.BudgetUsedTokens)
+                    : 300000);
+            var paperWallReservation = isUnlimitedPaper ? ReadingPaperCapsProfile.UnlimitedCap
+                : (caps.RunBudgetCapWallTimeSeconds > 0 && activeRun != null && activeRun.BudgetUsedWallTimeSeconds < caps.RunBudgetCapWallTimeSeconds
+                    ? Math.Min(600.0, caps.RunBudgetCapWallTimeSeconds - activeRun.BudgetUsedWallTimeSeconds)
+                    : 600.0);
 
             var paperGrant = await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(
                 runId, job.Epoch, owner, paperOpId, "GENERATE_PAPER", reqHash, paperTokenReservation, 0m, paperWallReservation, null, null), ct);

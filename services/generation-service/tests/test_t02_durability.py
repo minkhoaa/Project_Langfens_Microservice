@@ -76,7 +76,9 @@ def test_t02_01_models_extra_forbid():
 # ---------------------------------------------------------------------------
 # T02-02: Checkpoint Ack Verification & Fail-Closed Mismatch
 # ---------------------------------------------------------------------------
-def test_t02_02_client_verify_ack_strict():
+def test_t02_02_client_verify_ack_strict(monkeypatch):
+    monkeypatch.delenv("EXAMSERVICE__INTERNAL__API__KEY", raising=False)
+    monkeypatch.delenv("InternalApiKey", raising=False)
     # Fail closed check: missing key must raise ValueError
     with pytest.raises(ValueError, match="EXAMSERVICE__INTERNAL__API__KEY is not configured"):
         CheckpointClient()

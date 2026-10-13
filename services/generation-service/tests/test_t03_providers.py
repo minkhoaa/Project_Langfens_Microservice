@@ -633,7 +633,6 @@ async def test_t03_08_live_provider_smoke_or_not_run_external():
     assert resp.raw_text.strip()
     assert resp.usage.total_tokens > 0
 
-
 # ── AUDIT-NESTED-RETRIES: Real SDK with Fake Transport Attempts Bounds ──────
 
 @pytest.mark.asyncio

@@ -98,7 +98,6 @@ class ProviderGateway:
             request.is_unlimited is True
             or float(request.wall_time_reservation_seconds) <= 0
             or (request.preferred_provider and request.preferred_provider.lower() == "minimax")
-            or (request.run_id and ("bench_" in request.run_id.lower() or "benchmark" in request.run_id.lower()))
         )
         if not is_unlimited_profile and self.checkpoint_client and request.run_id:
             try:

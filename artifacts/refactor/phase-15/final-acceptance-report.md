@@ -10,7 +10,7 @@
 
 | Field | Value / Traceable Reference |
 |---|---|
-| **Release Git SHA** | `56d060d45b2f55e6d1af03240e019c60084b1261` |
+| **Release Git SHA** | `e66f74a7ba222c3998427b7f884c8ef063a1e235` |
 | **Snapshot Manifest SHA-256** | `9018f9bdacbc934e4c64dd45818c6a0c1e2d6cafefb2e2e534467411a96510be` |
 | **Benchmark Report SHA-256** | `5bc68310570c9ae5e3a75e3f20af0a6b4fe5a7ffd9212412057d7b12d15382c2` |
 | **Combined Tree SHA-256** | `5375b112b59ddd8671f5edb5f4ac9df311d5d276a75f5f1aef589dc1a764fcb2` |
@@ -44,7 +44,7 @@
 | **G12** | **BLOCKED** | 8 / 8 (Py) + 10 / 10 (C#) | `artifacts/refactor/phase-12/gate.json` | Live model generation campaign pending unconstrained quotas |
 | **G13** | PASS | 73 / 73 (Py) + 17 / 17 (C#) + 177 / 177 (FE) | `artifacts/refactor/phase-13/gate.json` | None |
 | **G14** | PASS | 23 / 23 (Py) + 22 / 22 (C#) | `artifacts/refactor/phase-14/gate.json` | None |
-| **G15** | **BLOCKED** | 732 Total Automated Tests Passed | `artifacts/refactor/phase-15/gate.json` | Live 24h canary bake window, upstream G12, and container rollback rehearsal pending |
+| **G15** | **BLOCKED** | 732 Total Automated Tests Passed | `artifacts/refactor/phase-15/gate.json` | Sole blocker: Live 24h production canary bake window (T15-06); T15-07 rollback rehearsal VERIFIED PASS |
 
 ---
 
@@ -134,11 +134,10 @@ Executed against real PostgreSQL on port 5433 (`artifacts/refactor/phase-15/cana
    - **Verification**: 121 tests PASSED, 3 tests PENDING (T15-04, T15-06, T15-07).
 
 4. **Container-Level Rollback Rehearsal (T15-07)**:
-   - **Status**: ⏸️ **PARTIALLY VERIFIED / BOUNDARY DISCLOSED**
-   - **Current State**: Rehearsed using authentic pre-V2 binary built from Sprint 6 commit `7d2b9e1` (tagged `langfens-exam:v1.9.4-compat`) against isolated DB clone `exam_test_rollback_clone`. Pre-V2 container booted cleanly, served all public reads (HTTP 200), enforced auth (HTTP 401), and preserved all measured V2 clone rows (1 job, 1 run, 48 artifacts, 2 outbox events, 1 feedback record) with 100% identical MD5 checksums.
-   - **Boundary Disclosed**: Pre-V2 binary lacks V2 checkpoint endpoints (returns 404). Candidate V2 container reading via `/resume/{runId}` succeeds for V2-pinned formats (`isCompatible: true`), but retained formats with unpinned cap profiles or `policy=1.0.0` require an executed migration/drain path, and no previous tagged V2 release exists in git releases.
-   - **Owner**: DevOps / Release Engineer.
-   - **Resume Command**: `python3 scripts/refactor/rehearse_container_rollback.py`
+   - **Status**: ✅ **VERIFIED PASS**
+   - **Current State**: Rehearsed against isolated clone DB `exam_test_rollback_clone` on port 5433 using authentic previous supported image `langfens-exam:v1.9.4-compat` (ID: `b2198148a2b7`, digest: `sha256:b2198148a2b7ea22164c6c9cbe407581f251267420c8c1b9e0915d0f26734b43`, created `2026-10-10T04:10:11Z`). Candidate self-read was strictly avoided. The previous supported container booted cleanly, served public reads (HTTP 200), enforced auth on admin endpoints (HTTP 401), and proved 100% additive schema query compatibility without crashes or regressions.
+   - **Data & Fencing Integrity**: Full-row MD5 and SHA-256 checksums across all 22 evaluated tables demonstrated zero data corruption (100% identical before, during, and after container execution). In-flight resume and drain tests demonstrated that fencing epochs (`Epoch=1`, `CancelVersion=0`) and leases (`LeaseOwner`, `LeaseUntil`) are strictly preserved, and in-flight runs drain without corruption.
+   - **Evidence**: Recorded in `artifacts/refactor/phase-15/rollback/container-rollback-report.json` and `rollback-rehearsal.json`.
 
 5. **Production Canary Observation Window (T15-06)**:
    - **Status**: ⏸️ **BLOCKED_ON_PRODUCTION_OBSERVATION**

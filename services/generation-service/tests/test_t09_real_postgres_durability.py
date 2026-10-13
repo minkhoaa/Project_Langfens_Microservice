@@ -14,10 +14,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone, timedelta
 import hashlib
+import json
 import os
 import re
 from pathlib import Path
-import os
 import subprocess
 import urllib.request
 from typing import Any, Dict, List, Tuple
@@ -40,7 +40,7 @@ from app.persistence.models import (
     OperationGrantRequest,
     OperationReconcileRequest,
 )
-
+from app.config import settings
 REAL_SERVICE_URL = "http://127.0.0.1:5099"
 REAL_API_KEY = "test-only-ephemeral-secret-key-phase09"
 
@@ -195,6 +195,14 @@ def seed_real_job_and_run(run_id: str, owner_id: UUID, epoch: int = 1) -> str:
     now = datetime.now(timezone.utc).isoformat()
     lease_until = datetime.now(timezone.utc).replace(year=2030).isoformat()
 
+    snap = settings.loop_caps_snapshot()
+    snap["caps"]["standaloneRunBudgetCapCalls"] = 50
+    snap["caps"]["standaloneRunBudgetCapTokens"] = 100000
+    snap["caps"]["standaloneRunBudgetCapWallTimeSeconds"] = 900
+    snap_json = json.dumps(snap, sort_keys=True, separators=(",", ":"))
+    snap_sha = hashlib.sha256(snap_json.encode("utf-8")).hexdigest()
+    snap_json_sql = snap_json.replace("'", "''")
+
     sql_job = f"""
     INSERT INTO reading_paper_jobs (
         "Id", "Topic", "Status", "Epoch", "CancelVersion", "LeaseOwner",
@@ -210,13 +218,17 @@ def seed_real_job_and_run(run_id: str, owner_id: UUID, epoch: int = 1) -> str:
     INSERT INTO reading_paper_runs (
         "Id", "JobId", "RunId", "Epoch", "CancelVersion", "Status",
         "LeaseOwner", "LeaseUntil", "EngineVersion", "SchemaVersion",
-        "PolicyVersion", "BudgetCapCalls", "BudgetCapTokens",
-        "BudgetUsedCalls", "BudgetUsedTokens", "CreatedAt", "UpdatedAt"
+        "PolicyVersion", "BudgetCapCalls", "BudgetCapTokens", "BudgetCapWallTimeSeconds",
+        "BudgetUsedCalls", "BudgetUsedTokens", "BudgetUsedWallTimeSeconds",
+        "BudgetProfileVersion", "BudgetProfileSha256", "BudgetProfileSource", "BudgetProfileJson",
+        "CreatedAt", "UpdatedAt"
     ) VALUES (
         '{uuid4()}', '{job_id}', '{run_id}', {epoch}, 0, 'RUNNING',
         '{owner_id}', '{lease_until}', '2.0.0', '2.0.0',
-        '2.0.0', 50, 100000,
-        0, 0, '{now}', '{now}'
+        '2.0.0', 50, 100000, 900,
+        0, 0, 0.0,
+        '{settings.loop_caps_profile_version}', '{snap_sha}', '{settings.loop_caps_profile_source}', '{snap_json_sql}',
+        '{now}', '{now}'
     );
     """
     run_psql(sql_job)
@@ -1079,7 +1091,7 @@ async def test_real_postgres_t09_09_hard_execution_deadline_vs_lease_until():
     assert ops_after == ops_before, "Completed replay generated new operations in PostgreSQL!"
 
 @pytest.mark.asyncio
-async def test_real_postgres_t09_10_dotnet_worker_consumer_group_mapping_and_partial_groups():
+async def test_real_postgres_t09_10_dotnet_worker_consumer_group_mapping_and_partial_groups(monkeypatch):
     """Scenario 10: .NET Worker Consumer scenario with typed answer encodings, group mapping, and partial groups.
 
     Validates that:
@@ -1090,9 +1102,8 @@ async def test_real_postgres_t09_10_dotnet_worker_consumer_group_mapping_and_par
     """
     from fastapi.testclient import TestClient
     from app.main import app
-    import os
-    os.environ["EXAMSERVICE__INTERNAL__API__KEY"] = REAL_API_KEY
-    os.environ["EXAM_SERVICE_URL"] = REAL_SERVICE_URL
+    monkeypatch.setenv("EXAMSERVICE__INTERNAL__API__KEY", REAL_API_KEY)
+    monkeypatch.setenv("EXAM_SERVICE_URL", REAL_SERVICE_URL)
     owner_id = uuid4()
     run_id = f"run_worker_consumer_{uuid4().hex[:10]}"
     seed_real_job_and_run(run_id, owner_id)
@@ -1117,7 +1128,8 @@ async def test_real_postgres_t09_10_dotnet_worker_consumer_group_mapping_and_par
         ],
     }
 
-    resp = test_client.post("/api/v1/autogen/reading-paper/questions", json=req_payload)
+    auth_headers = {"X-Internal-Service-Key": REAL_API_KEY}
+    resp = test_client.post("/api/v1/autogen/reading-paper/questions", json=req_payload, headers=auth_headers)
     assert resp.status_code == 200, f"Expected 200 from /questions, got {resp.status_code}: {resp.text}"
     data = resp.json()
     assert data["status"] == "COMPLETED"
@@ -1137,7 +1149,7 @@ async def test_real_postgres_t09_10_dotnet_worker_consumer_group_mapping_and_par
         "version": 1,
         "contentHash": "0" * 64,
     }
-    resp_err = test_client.post("/api/v1/autogen/reading-paper/questions", json=invalid_payload)
+    resp_err = test_client.post("/api/v1/autogen/reading-paper/questions", json=invalid_payload, headers=auth_headers)
     assert resp_err.status_code == 422
     assert "ArtifactType.PASSAGE" in resp_err.text
 
