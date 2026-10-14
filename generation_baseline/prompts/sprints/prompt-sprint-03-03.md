@@ -44,3 +44,24 @@ The sprint is acceptable only if the deliverable is inspectable in the actual ow
 For live or DB-dependent behaviors, mock-only evidence is insufficient to close the real-environment gate; a blocked external prerequisite remains explicit. For documentation-only requirements, inspectable files and offline validation are appropriate evidence.
 
 **Acceptance fails or remains BLOCKED** on missing evidence, wrong scope, stale acceptance hashes, leaked answers/gold, silently omitted failed assignments or changed immutable datasets.
+
+## Self-contained native execution pipeline — RG03-S03
+
+**Act as the coding agent for this sprint only.** This file is the exact task boundary; it requires no external planning skill, execution skill, slash command or orchestration framework. [Native protocol](../../AGENT_PIPELINE.md) and [parent gate](../prompt-phase-03.md) remain normative.
+
+**Implementation target:** Blind solve and answer verification — Separate answer-free solve, recorded solver result, then compare proposal against evidence; gold held apart.
+
+**Domain strategy:** Isolation-first: construct adversarial/leakage/uncertainty fixtures, implement evaluator boundary minimal, then check rubric and split integrity without letting internal verdicts or gold labels affect blind judgement.
+
+1. **Inspect and ground:** examine `AGENTS.md`, source HEAD and dirty work, prior sprint record and relevant contract; resolve the true code owner/route/schema from current source. Stop rather than guess if an external prerequisite is missing.
+2. **Local micro-plan:** inside `RG03-S03`'s own status record, list ≤4 concrete work items, named files, input/output behavior, one likely failure mode and focused commands/tests. This is part of execution, not a separate planning workflow or another sprint.
+3. **Implement narrow change:** reuse established source components. For executable behavior, capture a failing check for the missing requirement when practical, then implement a minimal fix. For audit/doc-only sprint, create only its owned auditable artifact. No other sprint's implementation, production rollout, legacy cleanup or unapproved provider campaign.
+4. **Verify with real outcomes:**
+   - Positive `POS-RG03-S03`: Leakage canaries and TFNG/NOT GIVEN contradictions detected
+   - Negative `NEG-RG03-S03`: Gold/proposed answer never enters SolverView through options or metadata
+   - Edge `EDGE-RG03-S03`: run an applicable malformed/missing/stale/interrupted/duplicate case; explicitly identify any non-applicable case and why.
+   - Regression `REG-RG03-S03`: run touched API/DTO/ACL/strict V2 or experiment-isolation checks as applicable.
+   - Phase-domain verification emphasis: Blind input canary, no generator answer in solver, evaluator arms independence, wrong-answer regression.
+5. **Checkpoint and close:** write `generation_baseline/.execution/RG03/RG03-S03.json` (see [status schema template](../../templates/SPRINT_STATUS_TEMPLATE.json)) with `source_sha`, file diffs, tests & exit results, mock/DB/live distinction, evidence links and blockers. Mark PASS only when expected behavior and mandatory checks are supported. Else BLOCKED/FAILED/PARTIAL and stop with an exact resume point.
+
+**Required response:** concise Vietnamese or repo-preferred language: what changed, why this scoped change, concrete tests and statuses, source SHA, files and unresolved risks. Do not claim a passing phase because this individual sprint passed.

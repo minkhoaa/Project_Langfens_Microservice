@@ -1,0 +1,19 @@
+{
+  "kind": "sprint_status",
+  "sprint_id": "RGXX-SYY",
+  "phase_id": "RGXX",
+  "status": "NOT_RUN",
+  "source_sha": null,
+  "worktree_path": null,
+  "plan_steps": [],
+  "changed_files": [],
+  "evidence": {
+    "tests": [],
+    "report_refs": [],
+    "config_hashes": {},
+    "environment": "NOT_RUN"
+  },
+  "blockers": [],
+  "next_resume_action": null,
+  "completed_at": null
+}
