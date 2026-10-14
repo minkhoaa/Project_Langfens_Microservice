@@ -43,8 +43,8 @@ class CheckpointApiError(Exception):
 class CheckpointClient:
     """Authenticated persistence client for Loop Engine V2 communicating with exam-service.
     
-    Adheres strictly to ADR-001 (Authoritative Persistence Ownership) and
-    ADR-002 (Fencing Epoch & Checkpoint Ack).
+    Adheres strictly to Authoritative Persistence Ownership and
+    Fencing Epoch & Checkpoint Ack principles.
     """
 
     def __init__(

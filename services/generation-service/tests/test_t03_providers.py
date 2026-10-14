@@ -63,7 +63,7 @@ from app.providers.retry import RetryPolicy
 
 
 class MockCheckpointClient(CheckpointClient):
-    """In-memory mock checkpoint client adhering to ADR-001/002/004 contracts."""
+    """In-memory mock checkpoint client adhering to persistence and reservation contracts."""
 
     def __init__(self, run_tokens_cap: int = 150_000, run_calls_cap: int = 25, run_wall_time_cap: int = 900):
         self.run_tokens_cap = run_tokens_cap
@@ -800,7 +800,7 @@ async def test_audit_nested_retries_unauthorized_never_retried():
 
 @pytest.mark.asyncio
 async def test_audit_nested_retries_unknown_outcome_accounting():
-    """ADR-004: All attempts exhausted records UNKNOWN_OUTCOME without refunding/resetting token reservation."""
+    """All attempts exhausted records UNKNOWN_OUTCOME without refunding/resetting token reservation."""
     mock_checkpoint = MockCheckpointClient()
     mock_transport = httpx.MockTransport(lambda req: httpx.Response(500, json={"error": "Server error"}))
     async with httpx.AsyncClient(transport=mock_transport) as http_client:
