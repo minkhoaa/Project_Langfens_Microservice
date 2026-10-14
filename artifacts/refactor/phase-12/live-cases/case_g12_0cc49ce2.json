@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_0cc49ce2",
-  "campaignId": "camp_g12_paper_minimax_0cc49ce205d5_v1",
-  "jobId": "eb865aa4-3b37-44d5-94a1-b657d3c9b719",
-  "runId": "bench_869eeff5a80d581f561287b49f14a0d4",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T11:24:33.387830+00:00",
-  "error": "AI generation failed: Epoch fencing violation or request hash conflict: OperationId 'op_bench_869eeff5a80d581f561287b49f14a0d4_sec_1_2E944098CBC5_group_1_att_3' already exists with a different request hash; mutation forbidden\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/providers/gateway.py\", line 205, in execute\n    grant = await self.checkpoint_client.grant_operation_async(grant_request)\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/persistence/client.py\", line 91, in grant_operation_async\n    self._handle_error(resp)\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/persistence/client.py\", line 280, in _handle_error\n    raise CheckpointApiError(status_code=resp.status_code, message=message)\napp.persistence.client.CheckpointApiError: HTTP 409: OperationId 'op_bench_869eeff5a80d581f561287b49"
-}

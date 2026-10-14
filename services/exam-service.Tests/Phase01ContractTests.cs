@@ -10,7 +10,7 @@ namespace exam_service.Tests;
 public class Phase01ContractTests
 {
     private static readonly string FixturesDir = Path.GetFullPath(
-        Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/refactor/phase-01/fixtures")
+        Path.Combine(AppContext.BaseDirectory, "../../../../../services/generation-service/tests/fixtures/contracts")
     );
 
     [Fact]

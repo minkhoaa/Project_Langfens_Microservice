@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_a94c8ea4",
-  "campaignId": "camp_g12_paper_minimax_a94c8ea42c9a_v1",
-  "jobId": "c77a897d-777a-4f78-a167-c00d19b376af",
-  "runId": "bench_10f1c2fb6e0e815cd06a0a33d7abd55d",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T10:19:50.721900+00:00",
-  "error": "AI generation failed: name 'base_op_id' is not defined\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 763, in _generate_section_once\n    validate_group_candidate(kind, count, first, questions, passage)\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 183, in validate_group_candidate\n    raise ValueError(f\"Question {number} Evidence quote is absent from passage\")\nValueError: Question 2 Evidence quote is absent from passage\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 886,"
-}

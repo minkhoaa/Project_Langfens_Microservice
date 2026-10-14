@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_3d0429a0",
-  "campaignId": "camp_g12_paper_minimax_3d0429a07830_v1",
-  "jobId": "cd8f1570-b274-41e7-b8a0-f433164089ae",
-  "runId": "bench_503de0d573b8c85f5dee41f996701687",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T09:52:27.671903+00:00",
-  "error": "The response ended prematurely. (ResponseEnded)"
-}

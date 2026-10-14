@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import tempfile
 import time
 from pathlib import Path
 from unittest.mock import patch
@@ -19,7 +20,7 @@ import pytest
 
 from app.pipeline import generate_section
 
-BASELINE_LOG = Path("artifacts/refactor/phase-00/baseline.jsonl")
+BASELINE_LOG = Path(tempfile.gettempdir()) / "baseline.jsonl"
 
 
 class DeterministicFakeProvider:

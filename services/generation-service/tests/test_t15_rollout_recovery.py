@@ -17,11 +17,6 @@ from pathlib import Path
 import struct
 import pytest
 
-ROOT = Path(__file__).resolve().parent.parent.parent.parent
-ROLLBACK_ARTIFACT = ROOT / "artifacts" / "refactor" / "phase-15" / "rollback" / "rollback-rehearsal.json"
-DRAIN_ARTIFACT = ROOT / "artifacts" / "refactor" / "phase-15" / "drain" / "drain-report.json"
-CHAOS_ARTIFACT = ROOT / "artifacts" / "refactor" / "phase-15" / "canary" / "chaos-matrix-report.json"
-
 
 def compute_hash_bucket(run_id: str) -> int:
     """Deterministic hash bucket computation matching .NET CanaryRoutingService."""
@@ -158,41 +153,3 @@ def test_t15_04_compatible_reader_deserialization():
     assert d2["title"] == "Passage 1"
     assert d2["extendedMetrics"]["cohesion"] == 0.92
 
-
-def test_t15_05_rollback_rehearsal_artifact_exists_and_passes():
-    assert ROLLBACK_ARTIFACT.exists(), f"Rollback rehearsal artifact missing at {ROLLBACK_ARTIFACT}"
-    with open(ROLLBACK_ARTIFACT, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    assert data["verdict"] == "VERIFIED_COMPATIBLE_AND_NON_DESTRUCTIVE"
-    summary = data["summary"]
-    assert summary["failed"] == 0
-    assert summary["dataLossDetected"] is False
-    assert summary["schemaDestructionDetected"] is False
-    assert len(data["testCases"]) >= 5
-
-
-def test_t15_06_drain_report_zero_lost_checkpoints():
-    assert DRAIN_ARTIFACT.exists(), f"Drain artifact missing at {DRAIN_ARTIFACT}"
-    with open(DRAIN_ARTIFACT, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    assert data["verdict"] == "DRAIN_SUCCESSFUL_ZERO_LOST_CHECKPOINTS"
-    assert data["zeroLostCheckpointsVerified"] is True
-    assert data["failedDrains"] == 0
-    assert data["successfulDrains"] > 0
-    assert data["compatibleReadersVerified"]["dotNetCompatibleReader"]["status"] == "PASS"
-    assert data["compatibleReadersVerified"]["pythonCompatibleReader"]["status"] == "PASS"
-
-
-def test_t15_07_chaos_matrix_report_durability_verified():
-    assert CHAOS_ARTIFACT.exists(), f"Chaos artifact missing at {CHAOS_ARTIFACT}"
-    with open(CHAOS_ARTIFACT, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    assert data["overallVerdict"] == "DURABILITY_VERIFIED_ALL_CHAOS_SCENARIOS_PASSED"
-    assert data["failedScenarios"] == 0
-    assert data["totalScenarios"] >= 14
-    assert len(data["scenarios"]) >= 14
-    for sc in data["scenarios"]:
-        assert sc["durabilityVerdict"] == "PASS"

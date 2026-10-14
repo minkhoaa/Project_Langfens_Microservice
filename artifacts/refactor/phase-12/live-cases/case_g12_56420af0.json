@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_56420af0",
-  "campaignId": "camp_g12_paper_minimax_56420af0a938_v1",
-  "jobId": "50969132-9970-4654-b01f-4b34a5fdd8fd",
-  "runId": "bench_c881a592739164ee82fb1ef74e0d0250",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T10:17:39.587327+00:00",
-  "error": "AI generation failed: Epoch fencing violation or request hash conflict: OperationId 'op_bench_c881a592739164ee82fb1ef74e0d0250_sec_1_2E944098CBC5_replace_q1_pre' already exists with a different request hash; mutation forbidden\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 761, in _generate_section_once\n    validate_group_candidate(kind, count, first, questions, passage)\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 183, in validate_group_candidate\n    raise ValueError(f\"Question {number} Evidence quote is absent from passage\")\nValueError: Question 1 Evidence quote is absent from passage\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/providers/gateway"
-}

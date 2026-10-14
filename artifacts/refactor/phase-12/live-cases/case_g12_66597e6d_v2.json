@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_66597e6d_v2",
-  "campaignId": "camp_g12_paper_minimax_66597e6d4bf4_v2",
-  "jobId": "7a752c84-bdcf-41e6-b797-03d85c0afeed",
-  "runId": "bench_4f82a0abb2c38a205cf71b004915a67b",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T22:25:24.799010+00:00",
-  "error": "Paper section payload differs from its exact authoritative section"
-}

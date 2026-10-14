@@ -22,9 +22,9 @@ namespace exam_service.Tests;
 public static class FaultTraceRecorder
 {
     private static readonly object FileLock = new();
-    private static readonly string TraceFilePath = Path.GetFullPath(Path.Combine(
-        AppContext.BaseDirectory,
-        "../../../../../artifacts/refactor/phase-02/transaction-fault-traces.jsonl"));
+    private static readonly string TraceFilePath = Path.Combine(
+        Path.GetTempPath(),
+        "transaction-fault-traces.jsonl");
     public static void RecordTrace(
         string testId,
         string scenario,

@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_0cc49ce2_v2",
-  "campaignId": "camp_g12_paper_minimax_0cc49ce205d5_v2",
-  "jobId": "5726768e-dfae-4133-ad4b-582681c72fd6",
-  "runId": "bench_7486945c44a91de367e12e71cbe27b67",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T16:58:24.618821+00:00",
-  "error": "AI generation failed: Failed to generate valid replacement for question 19 after 3 attempts: Replacement duplicated an existing question prompt: What is the primary observable from any exoplanet dataset?\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 766, in _generate_section_once\n    f\"Model returned invalid question shape for group {kind}: {type(result)}\"\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 183, in validate_group_candidate\n    raise ValueError(f\"Question numbers must run from {first} to {first + count - 1}\")\nValueError: Question 19 Evidence quote is absent from passage\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in"
-}

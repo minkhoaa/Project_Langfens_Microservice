@@ -49,10 +49,9 @@ def _record_transport_log(
         return
 
     if env_val.lower() in ("1", "true", "yes", "on"):
-        log_path = Path("artifacts/refactor/phase-12/sanitized-transport-evidence.jsonl")
+        log_path = Path("sanitized-transport-evidence.jsonl")
     else:
         log_path = Path(env_val)
-
     entry = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "operationId": operation_id,

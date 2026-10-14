@@ -224,66 +224,6 @@ public class Phase15RollbackAndCanaryTests
         Assert.Single(v2Section.Groups[0].Questions);
     }
     [Fact]
-    public void T15_06_RollbackRehearsalArtifact_ValidAndIntact()
-    {
-        var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
-        var artifactPath = Path.Combine(root, "artifacts/refactor/phase-15/rollback/rollback-rehearsal.json");
-
-        Assert.True(File.Exists(artifactPath), $"Artifact file not found at: {artifactPath}");
-
-        var json = File.ReadAllText(artifactPath);
-        using var doc = JsonDocument.Parse(json);
-        var rootElem = doc.RootElement;
-
-        var verdict = rootElem.GetProperty("verdict").GetString();
-        Assert.Equal("VERIFIED_COMPATIBLE_AND_NON_DESTRUCTIVE", verdict);
-
-        var summary = rootElem.GetProperty("summary");
-        Assert.Equal(0, summary.GetProperty("failed").GetInt32());
-        Assert.False(summary.GetProperty("dataLossDetected").GetBoolean());
-        Assert.False(summary.GetProperty("schemaDestructionDetected").GetBoolean());
-    }
-
-    [Fact]
-    public void T15_07_DrainReport_ZeroLostCheckpointsVerified()
-    {
-        var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
-        var artifactPath = Path.Combine(root, "artifacts/refactor/phase-15/drain/drain-report.json");
-
-        Assert.True(File.Exists(artifactPath), $"Artifact file not found at: {artifactPath}");
-
-        var json = File.ReadAllText(artifactPath);
-        using var doc = JsonDocument.Parse(json);
-        var rootElem = doc.RootElement;
-
-        var verdict = rootElem.GetProperty("verdict").GetString();
-        Assert.Equal("DRAIN_SUCCESSFUL_ZERO_LOST_CHECKPOINTS", verdict);
-
-        Assert.True(rootElem.GetProperty("zeroLostCheckpointsVerified").GetBoolean());
-        Assert.Equal(0, rootElem.GetProperty("failedDrains").GetInt32());
-        Assert.True(rootElem.GetProperty("successfulDrains").GetInt32() > 0);
-    }
-
-    [Fact]
-    public void T15_08_ChaosMatrixReport_DurabilityVerified()
-    {
-        var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
-        var artifactPath = Path.Combine(root, "artifacts/refactor/phase-15/canary/chaos-matrix-report.json");
-
-        Assert.True(File.Exists(artifactPath), $"Artifact file not found at: {artifactPath}");
-
-        var json = File.ReadAllText(artifactPath);
-        using var doc = JsonDocument.Parse(json);
-        var rootElem = doc.RootElement;
-
-        var verdict = rootElem.GetProperty("overallVerdict").GetString();
-        Assert.Equal("DURABILITY_VERIFIED_ALL_CHAOS_SCENARIOS_PASSED", verdict);
-
-        Assert.Equal(0, rootElem.GetProperty("failedScenarios").GetInt32());
-        Assert.True(rootElem.GetProperty("totalScenarios").GetInt32() >= 14);
-    }
-
-    [Fact]
     public async Task T15_09_RealPostgres_CancelJob_AtomicFencing_FencesActiveRunAndRejectsLateFinalizer()
     {
         var provider = CreateTestProvider();

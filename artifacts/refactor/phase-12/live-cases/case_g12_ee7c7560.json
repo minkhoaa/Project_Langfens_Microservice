@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_ee7c7560",
-  "campaignId": "camp_g12_paper_minimax_ee7c75603ea8_v1",
-  "jobId": "525ff994-25e4-458d-b7d8-ea6d82ac6052",
-  "runId": "bench_aa5ef7ff2963e6a26dcf4efa10da1987",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T10:00:15.016625+00:00",
-  "error": "AI generation failed: Source-fidelity review rejected the revised passage: contradicted_claim: The source states that the bibliometric data covers the period from 2009 to 2026, not 2023.; unsupported_claim: The source does not explicitly mention challenges in translating laboratory advancements to real-world applications, although it discusses concerns about durability, cost-effective; unsupported_claim: The source does not specifically discuss the susceptibility of micro-nano structures to mechanical wear and chemical degradation.; causal_overstatement: The source does not explicitly establish a direct causal relationship between limited sunlight or frequent snowfall and the reliability of photothermal effects for deicing.; unsupported_claim: The source does not mention the development of smart materials and responsive technologies in relation to these surfaces.\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-"
-}

@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_2ed29002_v2",
-  "campaignId": "camp_g12_paper_minimax_2ed290022685_v2",
-  "jobId": "c3129e91-91a2-484d-adcf-1540e9bcbc5d",
-  "runId": "bench_95b8b8d06c6de48f3067089e465d1a18",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T17:56:53.196662+00:00",
-  "error": "AI service returned 500: {\"detail\":\"Section envelope 'art_section_1' missing passageRef in payload and parent_refs\"}"
-}

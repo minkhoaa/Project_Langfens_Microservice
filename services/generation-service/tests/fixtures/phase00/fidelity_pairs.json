@@ -1,0 +1,82 @@
+[
+  {
+    "id": "FID_01_CONTRADICTED",
+    "issueType": "contradicted_claim",
+    "valid": false,
+    "sourceText": "Coral cover declined by 17% across surveyed locations over the six-year observation window.",
+    "generatedText": "Coral cover expanded by 17% across all surveyed locations during the six-year study.",
+    "reason": "Reverses the direction of measured change from decline to expansion."
+  },
+  {
+    "id": "FID_02_UNSUPPORTED",
+    "issueType": "unsupported_claim",
+    "valid": false,
+    "sourceText": "Autonomous acoustic sensors monitored avian biodiversity in temperate rainforests across 45 field stations.",
+    "generatedText": "Autonomous acoustic sensors tracked humpback whale vocalizations in the North Atlantic.",
+    "reason": "Introduces whale tracking and oceanic setting completely absent from the source."
+  },
+  {
+    "id": "FID_03_CAUSAL_OVERSTATEMENT",
+    "issueType": "causal_overstatement",
+    "valid": false,
+    "sourceText": "Herbivore abundance was positively correlated with juvenile coral spat density (r = 0.68, p < 0.01).",
+    "generatedText": "High herbivore density directly caused juvenile coral spat numbers to triple within days.",
+    "reason": "Transforms an empirical correlation into an unproven direct causal claim with exaggerated speed."
+  },
+  {
+    "id": "FID_04_OVERSTATED_CERTAINTY",
+    "issueType": "overstated_certainty",
+    "valid": false,
+    "sourceText": "Preliminary flume models suggest that rugose colony morphologies may alter localized fluid dynamics.",
+    "generatedText": "Rugose colony morphologies undeniably and completely eliminate all turbulence in marine currents.",
+    "reason": "Eliminates scientific uncertainty and asserts absolute elimination of turbulence."
+  },
+  {
+    "id": "FID_05_UNMEASURED_OUTCOME",
+    "issueType": "unmeasured_outcome",
+    "valid": false,
+    "sourceText": "The authors measured photosynthetic efficiency and skeletal calcification rates in Acropora millepora.",
+    "generatedText": "The study conclusively demonstrated a 40% rise in tourism revenue for coastal dive resorts.",
+    "reason": "Asserts economic tourism findings that were never measured by the biological study."
+  },
+  {
+    "id": "FID_06_POPULATION_MISMATCH",
+    "issueType": "population_or_method_mismatch",
+    "valid": false,
+    "sourceText": "The experiment tested juvenile Acropora millepora recruits in controlled closed-circuit laboratory flumes.",
+    "generatedText": "Field trials across adult Porites colonies in open pelagic zones confirmed the hypothesis.",
+    "reason": "Substitutes laboratory juvenile Acropora with wild adult Porites."
+  },
+  {
+    "id": "FID_07_VALID_PARAPHRASE_1",
+    "issueType": "none",
+    "valid": true,
+    "sourceText": "Coral reefs support approximately twenty-five percent of all marine organisms despite occupying less than one percent of the ocean floor.",
+    "generatedText": "Although covering under one percent of benthic marine territory, coral reefs provide habitat for nearly a quarter of all sea creatures.",
+    "reason": "Faithful academic paraphrase preserving proportions and scope."
+  },
+  {
+    "id": "FID_08_VALID_PARAPHRASE_2",
+    "issueType": "none",
+    "valid": true,
+    "sourceText": "Sediment accumulation posed an enduring challenge, requiring systematic dredging regimes by coordinated municipal workforces.",
+    "generatedText": "Managing silt buildup remained a persistent operational hurdle that demanded regular clearing by organized civic labor teams.",
+    "reason": "Faithful academic paraphrase preserving meaning and nuance."
+  },
+  {
+    "id": "FID_09_VALID_PARAPHRASE_3",
+    "issueType": "none",
+    "valid": true,
+    "sourceText": "Subglacial water pressure decreases as channels mature into efficient conduits, resulting in observed mid-summer deceleration of ice flow.",
+    "generatedText": "When meltwater channels evolve into effective drainage tunnels, subglacial pressures decline and ice movement decelerates later in summer.",
+    "reason": "Accurate physical explanation maintaining causal sequence."
+  },
+  {
+    "id": "FID_10_VALID_PARAPHRASE_4",
+    "issueType": "none",
+    "valid": true,
+    "sourceText": "Under acute volatility, market participants disproportionately overweight low-probability catastrophic scenarios.",
+    "generatedText": "During periods of intense market fluctuations, traders tend to assign excessive importance to unlikely disastrous events.",
+    "reason": "Accurate behavioral economics terminology preservation."
+  }
+]

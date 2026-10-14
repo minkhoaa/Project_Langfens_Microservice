@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_ec16415e_v2",
-  "campaignId": "camp_g12_paper_minimax_ec16415e75d6_v2",
-  "jobId": "c2c239bf-5987-430a-a147-8beb8a0f8853",
-  "runId": "bench_57e8daa24393dbde6cdb4076aba34ad8",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T17:33:31.556201+00:00",
-  "error": "AI service returned 500: {\"detail\":\"1 validation error for ArtifactRef\\n  Input should be a valid dictionary or instance of ArtifactRef [type=model_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.13/v/model_type\"}"
-}

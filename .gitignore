@@ -31,7 +31,6 @@ WATCHDOG.yml
 *.cert
 !/docs/sprint*/
 !/docs/standards/
-!/docs/refactor/
 # ------------------------------
 # Node / JS / TS
 # ------------------------------

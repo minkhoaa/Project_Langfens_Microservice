@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_7520f64e",
-  "campaignId": "camp_g12_paper_minimax_7520f64ed8dc_v1",
-  "jobId": "79c1a068-fbf4-4728-a7ac-ae2d86fb8c46",
-  "runId": "bench_2125c2f37609e64309d84165450f1c20",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T10:29:20.562622+00:00",
-  "error": "AI generation failed: name 'uuid4' is not defined\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 764, in _generate_section_once\n    validate_group_candidate(kind, count, first, questions, passage)\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 183, in validate_group_candidate\n    raise ValueError(f\"Question {number} Evidence quote is absent from passage\")\nValueError: Question 2 Evidence quote is absent from passage\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 887, in g"
-}

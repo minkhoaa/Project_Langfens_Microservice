@@ -937,25 +937,6 @@ async def run_offline_comparison(request: RunComparisonRequest) -> dict[str, str
 
     items = list(request.benchmark_items)
     if not items:
-        holdout_path = Path("artifacts/refactor/phase-07/corpus/questions_holdout_corpus.json")
-        if holdout_path.exists():
-            try:
-                cdata = json.loads(holdout_path.read_text(encoding="utf-8"))
-                passages = cdata.get("passages", {})
-                for q_type, q_groups in cdata.get("types", {}).items():
-                    for q in q_groups.get("valid", [])[:10]:
-                        items.append({
-                            "id": f"{q.get('source_family', 'sf')}_{q_type}_{q.get('number', len(items))}",
-                            "prompt": q.get("prompt", ""),
-                            "answer": q.get("answer", ""),
-                            "evidenceQuote": q.get("evidenceQuote", ""),
-                            "passage": passages.get(q.get("source_family", ""), ""),
-                            "is_canary": q.get("critical_canary", False),
-                            "is_ambiguity_item": q_type in ("TrueFalseNotGiven", "YesNoNotGiven"),
-                        })
-            except Exception:
-                pass
-    if not items:
         items = [{"id": f"item_{i:02d}", "is_canary": (i < 5)} for i in range(20)]
 
     def b_eval(it: dict) -> ItemEvalResult:

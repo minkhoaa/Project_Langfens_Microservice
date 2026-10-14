@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_a3b02014",
-  "campaignId": "camp_g12_paper_minimax_a3b020146752_v1",
-  "jobId": "430ddfa0-1f32-431b-8bba-88717696f411",
-  "runId": "bench_0362d844bb527afc8e91cfb800e85b2c",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T10:22:10.510455+00:00",
-  "error": "AI generation failed: Failed to generate valid replacement for question 5 after 3 attempts: Replacement duplicated an existing question prompt: The effectiveness of photothermal anti-icing surfaces is influenced by environmental conditions such as solar radiation, temperature, and humidity.\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 887, in generate_section\n    return await _generate_section_once(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 836, in _generate_section_once\n    await replace_rejected_question(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 524, in repla"
-}

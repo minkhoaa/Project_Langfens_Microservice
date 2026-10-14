@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_3ded9308",
-  "campaignId": "camp_g12_paper_minimax_3ded9308c1e6_v1",
-  "jobId": "75a6d8da-5987-4f10-90de-f3753dd17e59",
-  "runId": "bench_cf6db16aef22cd71a6c8f2020c02848d",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T10:08:15.786330+00:00",
-  "error": "AI generation failed: Unexpected trailing prose after fenced JSON: ### Explanation:\nThe generated passage is broadly faithful t\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 858, in generate_section\n    return await _generate_section_once(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 620, in _generate_section_once\n    findings = await review_passage_source(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 301, in review_passage_source\n    review = await generate_json(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipel"
-}

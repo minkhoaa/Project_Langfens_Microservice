@@ -1,2 +1,0 @@
-{"test": "T03-07-stream", "input": "<th...ink>private thought</th...ink>Hello", "output": "Hello", "secretsLeaked": false, "thinkingLeaked": false}
-{"test": "T03-07-redact", "input": "Bearer gsk_999888777666", "output": "Bearer [REDACTED]", "secretsLeaked": false, "thinkingLeaked": false}

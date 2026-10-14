@@ -64,9 +64,9 @@ from app.repair.planner import RepairPlan, RepairPlanner
 from app.repair.question import QuestionItemRepairer, SummaryGroupRepairer
 from app.repair.registry import RepairRegistry
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-CORPUS_DIR = BASE_DIR / "artifacts" / "refactor" / "phase-07" / "corpus"
-ARTIFACTS_DIR = BASE_DIR / "artifacts" / "refactor" / "phase-07"
+import tempfile
+CORPUS_DIR = Path(__file__).resolve().parent / "fixtures" / "corpus"
+ARTIFACTS_DIR = Path(tempfile.gettempdir())
 
 def make_context(owner_id: str | None = None, parents: tuple = (), target: str = "sec_test") -> LoopContext:
     owner = uuid4()

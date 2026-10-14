@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_99fd9343_v2",
-  "campaignId": "camp_g12_paper_minimax_99fd934333c1_v2",
-  "jobId": "8091f5b6-cd3b-4078-8c0b-cc1011ebdf66",
-  "runId": "bench_eed06aefb234bfe0a558668ebc72a752",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T18:42:03.555900+00:00",
-  "error": "Paper generation failed: invalid paper envelope response from AI service"
-}

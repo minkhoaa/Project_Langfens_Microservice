@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_a7e631e3",
-  "campaignId": "camp_g12_paper_minimax_a7e631e3458c_v1",
-  "jobId": "6d61d967-be3d-4504-b659-bab3e7104571",
-  "runId": "bench_787c352118736f139a422797516300be",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T09:58:29.772486+00:00",
-  "error": "AI generation failed: Source-fidelity review rejected the revised passage: overstated_certainty: While the bibliometric data shows an increasing trend, the source does not explicitly state that the trend is 'significant' or highlights the field's 'importance and growth' to thi; overstated_certainty: The source does not claim that the review 'begins' with these explanations, only that it 'systematically summarizes' these aspects among others.; overstated_certainty: The source does not make claims about the 'significant' potential for addressing current industrial needs or future innovations, only that practical applications are 'prospected.'; unsupported_claim: The source does not provide evidence or claims about the 'rapid and uniform' temperature elevation specifically.; causal_overstatement: The source mentions limitations of traditional methods but does not explicitly state that the new advancement is 'crucial' for overcoming them.\nTraceback (most recent call last):\n  File \"/home/co"
-}

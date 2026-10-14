@@ -48,7 +48,7 @@ from app.contracts import (
 )
 
 FIXTURES_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../../../artifacts/refactor/phase-01/fixtures")
+    os.path.join(os.path.dirname(__file__), "fixtures/contracts")
 )
 
 

@@ -1,9 +1,0 @@
-{
-  "caseId": "case_g12_98937f42",
-  "campaignId": "camp_g12_paper_minimax_98937f42b44d_v1",
-  "jobId": "bd652e71-cfdf-45cc-a420-afbbc4b097c2",
-  "runId": "bench_5bee2f0de188ef363b39f68dd3dc3000",
-  "status": "FAILED",
-  "startedAt": "2026-10-07T10:31:26.246836+00:00",
-  "error": "AI generation failed: Malformed JSON syntax: Expecting ',' delimiter: line 1 column 2720 (char 2719)\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 764, in _generate_section_once\n    validate_group_candidate(kind, count, first, questions, passage)\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/pipeline.py\", line 211, in validate_group_candidate\n    raise ValueError(f\"Question {number} has answer leakage in its completion prompt\")\nValueError: Question 12 has answer leakage in its completion prompt\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 641, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microserv"
-}
