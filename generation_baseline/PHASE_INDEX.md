@@ -1,5 +1,8 @@
 # Phase Index — 14 canonical requirement specifications
 
+**Execution:** open the phase prompt directly with a coding agent; it executes five micro-sprints with independent evidence and closes the phase only after a verified gate. See [native pipeline](AGENT_PIPELINE.md).
+
+
 | Phase | Goal | Dependencies | Required sprint specs |
 |---|---|---|---|
 | [RG00](prompts/prompt-phase-00.md) | Freeze research proposal and nonnegotiable requirements | none | 5 |

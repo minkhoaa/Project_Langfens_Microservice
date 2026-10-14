@@ -1,9 +1,9 @@
 {
   "package": "generation_baseline",
-  "version": "3.0",
+  "version": "4.0",
   "scope": "OFFLINE_ONLY",
-  "checks": 1600,
-  "passed": 1600,
+  "checks": 1999,
+  "passed": 1999,
   "failed": 0,
   "failures": [],
   "source_repo_verified": false,

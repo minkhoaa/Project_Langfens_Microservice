@@ -44,3 +44,24 @@ The sprint is acceptable only if the deliverable is inspectable in the actual ow
 For live or DB-dependent behaviors, mock-only evidence is insufficient to close the real-environment gate; a blocked external prerequisite remains explicit. For documentation-only requirements, inspectable files and offline validation are appropriate evidence.
 
 **Acceptance fails or remains BLOCKED** on missing evidence, wrong scope, stale acceptance hashes, leaked answers/gold, silently omitted failed assignments or changed immutable datasets.
+
+## Self-contained native execution pipeline — RG12-S01
+
+**Act as the coding agent for this sprint only.** This file is the exact task boundary; it requires no external planning skill, execution skill, slash command or orchestration framework. [Native protocol](../../AGENT_PIPELINE.md) and [parent gate](../prompt-phase-12.md) remain normative.
+
+**Implementation target:** Learner product baseline and scope — Read-only map of publish/attempt/grading/history code before modifications.
+
+**Domain strategy:** Authorization-first: use published snapshot identity and negative ACL/redaction tests, then connect only minimal persistence/API/UI boundaries.
+
+1. **Inspect and ground:** examine `AGENTS.md`, source HEAD and dirty work, prior sprint record and relevant contract; resolve the true code owner/route/schema from current source. Stop rather than guess if an external prerequisite is missing.
+2. **Local micro-plan:** inside `RG12-S01`'s own status record, list ≤4 concrete work items, named files, input/output behavior, one likely failure mode and focused commands/tests. This is part of execution, not a separate planning workflow or another sprint.
+3. **Implement narrow change:** reuse established source components. For executable behavior, capture a failing check for the missing requirement when practical, then implement a minimal fix. For audit/doc-only sprint, create only its owned auditable artifact. No other sprint's implementation, production rollout, legacy cleanup or unapproved provider campaign.
+4. **Verify with real outcomes:**
+   - Positive `POS-RG12-S01`: Reuse existing modules, preserve tenant/privacy boundaries
+   - Negative `NEG-RG12-S01`: No blanket schema rewrite or history deletion
+   - Edge `EDGE-RG12-S01`: run an applicable malformed/missing/stale/interrupted/duplicate case; explicitly identify any non-applicable case and why.
+   - Regression `REG-RG12-S01`: run touched API/DTO/ACL/strict V2 or experiment-isolation checks as applicable.
+   - Phase-domain verification emphasis: Admin ACL, published snapshot immutability, answer-free DTO, pinned attempt/grading version.
+5. **Checkpoint and close:** write `generation_baseline/.execution/RG12/RG12-S01.json` (see [status schema template](../../templates/SPRINT_STATUS_TEMPLATE.json)) with `source_sha`, file diffs, tests & exit results, mock/DB/live distinction, evidence links and blockers. Mark PASS only when expected behavior and mandatory checks are supported. Else BLOCKED/FAILED/PARTIAL and stop with an exact resume point.
+
+**Required response:** concise Vietnamese or repo-preferred language: what changed, why this scoped change, concrete tests and statuses, source SHA, files and unresolved risks. Do not claim a passing phase because this individual sprint passed.

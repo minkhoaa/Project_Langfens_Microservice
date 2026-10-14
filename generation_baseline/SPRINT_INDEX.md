@@ -1,5 +1,8 @@
 # Micro-Sprint Index — 70 bounded requirement specifications
 
+**Execution:** open one sprint prompt directly for a bounded inspect/plan/implement/verify/close scope. No external skill required. See [native pipeline](AGENT_PIPELINE.md).
+
+
 | Sprint | Required outcome | Parent |
 |---|---|---|
 | [RG00-S01](prompts/sprints/prompt-sprint-00-01.md) | Research scope and unchanged thesis title | RG00 |

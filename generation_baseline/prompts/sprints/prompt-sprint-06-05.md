@@ -44,3 +44,24 @@ The sprint is acceptable only if the deliverable is inspectable in the actual ow
 For live or DB-dependent behaviors, mock-only evidence is insufficient to close the real-environment gate; a blocked external prerequisite remains explicit. For documentation-only requirements, inspectable files and offline validation are appropriate evidence.
 
 **Acceptance fails or remains BLOCKED** on missing evidence, wrong scope, stale acceptance hashes, leaked answers/gold, silently omitted failed assignments or changed immutable datasets.
+
+## Self-contained native execution pipeline — RG06-S05
+
+**Act as the coding agent for this sprint only.** This file is the exact task boundary; it requires no external planning skill, execution skill, slash command or orchestration framework. [Native protocol](../../AGENT_PIPELINE.md) and [parent gate](../prompt-phase-06.md) remain normative.
+
+**Implementation target:** Grammar research persistence and surface — Resumable research outputs, canonical failure traces, safe admin review and compatible storage.
+
+**Domain strategy:** Grounding-first: trace provenance and answer dependencies; add a typed fixture for invalid/ambiguous content, use smallest compatible generation/validation adapter, then verify acceptance and regression.
+
+1. **Inspect and ground:** examine `AGENTS.md`, source HEAD and dirty work, prior sprint record and relevant contract; resolve the true code owner/route/schema from current source. Stop rather than guess if an external prerequisite is missing.
+2. **Local micro-plan:** inside `RG06-S05`'s own status record, list ≤4 concrete work items, named files, input/output behavior, one likely failure mode and focused commands/tests. This is part of execution, not a separate planning workflow or another sprint.
+3. **Implement narrow change:** reuse established source components. For executable behavior, capture a failing check for the missing requirement when practical, then implement a minimal fix. For audit/doc-only sprint, create only its owned auditable artifact. No other sprint's implementation, production rollout, legacy cleanup or unapproved provider campaign.
+4. **Verify with real outcomes:**
+   - Positive `POS-RG06-S05`: Failed/partial/replayed grammar cases are durable and access controlled
+   - Negative `NEG-RG06-S05`: Research grammar item cannot publish directly or leak private answers
+   - Edge `EDGE-RG06-S05`: run an applicable malformed/missing/stale/interrupted/duplicate case; explicitly identify any non-applicable case and why.
+   - Regression `REG-RG06-S05`: run touched API/DTO/ACL/strict V2 or experiment-isolation checks as applicable.
+   - Phase-domain verification emphasis: Rule provenance, contextual gold, ambiguous grammar, multiple-choice distractor uniqueness.
+5. **Checkpoint and close:** write `generation_baseline/.execution/RG06/RG06-S05.json` (see [status schema template](../../templates/SPRINT_STATUS_TEMPLATE.json)) with `source_sha`, file diffs, tests & exit results, mock/DB/live distinction, evidence links and blockers. Mark PASS only when expected behavior and mandatory checks are supported. Else BLOCKED/FAILED/PARTIAL and stop with an exact resume point.
+
+**Required response:** concise Vietnamese or repo-preferred language: what changed, why this scoped change, concrete tests and statuses, source SHA, files and unresolved risks. Do not claim a passing phase because this individual sprint passed.

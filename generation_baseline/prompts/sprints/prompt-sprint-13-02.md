@@ -44,3 +44,24 @@ The sprint is acceptable only if the deliverable is inspectable in the actual ow
 For live or DB-dependent behaviors, mock-only evidence is insufficient to close the real-environment gate; a blocked external prerequisite remains explicit. For documentation-only requirements, inspectable files and offline validation are appropriate evidence.
 
 **Acceptance fails or remains BLOCKED** on missing evidence, wrong scope, stale acceptance hashes, leaked answers/gold, silently omitted failed assignments or changed immutable datasets.
+
+## Self-contained native execution pipeline — RG13-S02
+
+**Act as the coding agent for this sprint only.** This file is the exact task boundary; it requires no external planning skill, execution skill, slash command or orchestration framework. [Native protocol](../../AGENT_PIPELINE.md) and [parent gate](../prompt-phase-13.md) remain normative.
+
+**Implementation target:** End-to-end functional/security regression — Reading full paper, research reading, grammar, evaluation, A/B/C and product roles tested.
+
+**Domain strategy:** Artifact-first: produce bounded, versioned source/protocol/evidence document; validate links/data/hash/statistical assumptions using inspectable fixtures; never invent production results.
+
+1. **Inspect and ground:** examine `AGENTS.md`, source HEAD and dirty work, prior sprint record and relevant contract; resolve the true code owner/route/schema from current source. Stop rather than guess if an external prerequisite is missing.
+2. **Local micro-plan:** inside `RG13-S02`'s own status record, list ≤4 concrete work items, named files, input/output behavior, one likely failure mode and focused commands/tests. This is part of execution, not a separate planning workflow or another sprint.
+3. **Implement narrow change:** reuse established source components. For executable behavior, capture a failing check for the missing requirement when practical, then implement a minimal fix. For audit/doc-only sprint, create only its owned auditable artifact. No other sprint's implementation, production rollout, legacy cleanup or unapproved provider campaign.
+4. **Verify with real outcomes:**
+   - Positive `POS-RG13-S02`: Checkpoints, forbidden publish, ACL and source isolation remain intact
+   - Negative `NEG-RG13-S02`: No regression hidden by skipping live required tests
+   - Edge `EDGE-RG13-S02`: run an applicable malformed/missing/stale/interrupted/duplicate case; explicitly identify any non-applicable case and why.
+   - Regression `REG-RG13-S02`: run touched API/DTO/ACL/strict V2 or experiment-isolation checks as applicable.
+   - Phase-domain verification emphasis: Exact SHA/evidence consistency, reproducibility, end-to-end regression and honest status claims.
+5. **Checkpoint and close:** write `generation_baseline/.execution/RG13/RG13-S02.json` (see [status schema template](../../templates/SPRINT_STATUS_TEMPLATE.json)) with `source_sha`, file diffs, tests & exit results, mock/DB/live distinction, evidence links and blockers. Mark PASS only when expected behavior and mandatory checks are supported. Else BLOCKED/FAILED/PARTIAL and stop with an exact resume point.
+
+**Required response:** concise Vietnamese or repo-preferred language: what changed, why this scoped change, concrete tests and statuses, source SHA, files and unresolved risks. Do not claim a passing phase because this individual sprint passed.

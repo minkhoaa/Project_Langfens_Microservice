@@ -27,7 +27,8 @@ for path in phase_files:
   ('gate','Phase acceptance and evidence requirements' in text),
   ('five referenced sprints',all(f'prompt-sprint-{phase:02d}-{j:02d}.md' in text for j in range(1,6))),
   ('no old skills','/my_'+'plan_skill' not in text and '/my_'+'implement_skill' not in text),
-  ('no execution commands','/brainstorming' not in text),
+  ('autonomous phase prompt','Autonomous RG' in text and 'run this phase end to end' in text),
+  ('micro-sprint checkpoints','Between sprints' in text and 'PHASE_STATUS.json' in text),
  ]:check(f'{path.relative_to(BASE)} {label}',criterion)
 for path in sprint_files:
  text=path.read_text(encoding='utf8');m=re.fullmatch(r'prompt-sprint-(\d\d)-(\d\d)\.md',path.name)
@@ -45,7 +46,9 @@ for path in sprint_files:
   ('evidence','Acceptance and required evidence' in text),
   ('links',f'../prompt-phase-{pid:02d}.md' in text),
   ('no old skills','/my_'+'plan_skill' not in text and '/my_'+'implement_skill' not in text),
-  ('no execution command','/brainstorming' not in text),
+  ('self-contained sprint execution','Self-contained native execution pipeline' in text),
+  ('named tests in execution',all(f'{k}-{sid}' in text for k in ['POS','NEG','EDGE','REG'])),
+  ('sprint checkpoint',f'{sid}.json' in text),
  ]:check(f'{path.relative_to(BASE)} {label}',criterion)
 
 files=list(BASE.rglob('*.md'))
@@ -101,10 +104,12 @@ for p in phase_files:
 for node,values in deps.items():
  for v in values:check('valid upstream '+node+' '+v,v in deps and int(v[2:])<int(node[2:]))
 
-check('README unified command', '/brainstorming @generation_baseline/prompts/prompt-phase-00.md' in load('README.md'))
-check('README single sprint', '/brainstorming @generation_baseline/prompts/sprints/prompt-sprint-00-01.md' in load('README.md'))
+check('README native phase', '@generation_baseline/prompts/prompt-phase-00.md' in load('README.md'))
+check('README native sprint', '@generation_baseline/prompts/sprints/prompt-sprint-03-01.md' in load('README.md'))
+check('agent pipeline present', 'Autonomous internal pipeline' in load('AGENT_PIPELINE.md'))
+check('no old third-party skills', all(x not in p.read_text(encoding='utf8') for p in BASE.rglob('*.md') for x in ['/brainstorming', '/my_plan_skill', '/my_implement_skill', 'superpowers']))
 check('no old skill in package', all('/my_'+'plan_skill' not in p.read_text(encoding='utf8') and '/my_'+'implement_skill' not in p.read_text(encoding='utf8') for p in BASE.rglob('*.md')))
-report={'package':'generation_baseline','version':'3.0','scope':'OFFLINE_ONLY','checks':checks,'passed':checks-len(issues),'failed':len(issues),'failures':issues,'source_repo_verified':False,'live_provider_tests':'NOT_RUN','db_integration_tests':'NOT_RUN','scientific_campaign':'NOT_RUN','all_implementation_gates':'NOT_RUN'}
+report={'package':'generation_baseline','version':'4.0','scope':'OFFLINE_ONLY','checks':checks,'passed':checks-len(issues),'failed':len(issues),'failures':issues,'source_repo_verified':False,'live_provider_tests':'NOT_RUN','db_integration_tests':'NOT_RUN','scientific_campaign':'NOT_RUN','all_implementation_gates':'NOT_RUN'}
 (BASE/'verification/PACKAGE_VALIDATION_REPORT.json').write_text(json.dumps(report,indent=2)+chr(10),encoding='utf8')
 print(f'Offline package checks: {checks-len(issues)}/{checks} PASS')
 for issue in issues[:30]:print('FAIL:',issue)

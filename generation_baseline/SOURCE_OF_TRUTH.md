@@ -4,10 +4,10 @@
 
 1. User-approved unchanged KLTN topic, research scope, RQ2 and explicit safety constraints govern goals.
 2. This document and `MASTER_PROPOSAL.md` govern feature invariants and cross-phase behavior.
-3. `contracts/CONTRACT_REGISTRY.md`, `research/RQ2_PROTOCOL.md` and `research/RUBRIC.md` govern their respective semantics.
-4. An individual `prompt-phase-XX.md` defines phase acceptance; a `prompt-sprint-XX-YY.md` narrows only its named sprint without weakening any higher rule.
+3. `AGENT_PIPELINE.md` governs internal agent execution without overriding feature, security or scientific constraints. `contracts/CONTRACT_REGISTRY.md`, `research/RQ2_PROTOCOL.md` and `research/RUBRIC.md` govern their respective semantics.
+4. An individual `prompt-phase-XX.md` defines the bounded phase execution and acceptance; a `prompt-sprint-XX-YY.md` narrows only its named sprint without weakening any higher rule.
 5. Audited current source establishes **existing implementation reality**, not a license to silently change target requirements. Conflicts require explicit documented decisions; unknowns remain UNKNOWN.
-6. Historical handoff is background evidence only, not a new instruction to clean the source or call old skills.
+6. Historical handoff is background evidence only, not an instruction to clean the source or adopt another orchestration workflow.
 
 This baseline's artifact schemas are **target interfaces**, not proof of the existing code's wire format. A different concrete DTO name is acceptable if an explicit tested mapping preserves semantics and compatibility.
 
@@ -37,3 +37,7 @@ This baseline's artifact schemas are **target interfaces**, not proof of the exi
 `TARGET_SPEC`, `UNKNOWN`, `NOT_RUN`, `VERIFIED`, `PARTIAL`, `BLOCKED`, `FAILED`, `PASS` are distinct. `PASS` for a gate requires executed, source/config-bound evidence and its mandatory criteria. `NOT_RUN` is never silently upgraded. A source snapshot that differs from evidence build must be disclosed.
 
 **No side effects authorized by this package:** do not infer permission to push, deploy, migrate production data, publish exams, rotate credentials, destroy docs or run an expensive live research campaign merely because a phase is described.
+
+## Native agent workflow authority
+
+Every phase and sprint prompt is an executable **coding-agent task instruction** in addition to an immutable feature specification. Each embeds the autonomous inspect → small plan → minimal implement → positive/negative/edge/regression verify → durable checkpoint → gate close cycle from `AGENT_PIPELINE.md`. No external planning/execution skills are prerequisites. Successful offline package checks never upgrade source-verification status.
