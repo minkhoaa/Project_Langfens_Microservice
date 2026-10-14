@@ -29,7 +29,6 @@ WATCHDOG.yml
 *.pem
 *.key
 *.cert
-!/docs/sprint*/
 !/docs/standards/
 # ------------------------------
 # Node / JS / TS
@@ -196,9 +195,4 @@ models/**/*.pth
 models/**/*.ckpt
 models/**/*.bin
 
-
-
-.superpowers/
-
 benchmarks/
-LANGFENS_METRICS_REPORT.md

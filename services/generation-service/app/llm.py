@@ -7,7 +7,6 @@ Status: MIGRATED_TO_V2 (Closed Phase 15).
 from __future__ import annotations
 
 import datetime
-import inspect
 import json
 import logging
 import os
@@ -29,36 +28,6 @@ from app.providers.models import (
 from app.providers.parser import clean_reasoning_tags, parse_defensive_json
 
 logger = logging.getLogger(__name__)
-
-DELETION_INVENTORY_PATH = (
-    Path(__file__).resolve().parent.parent.parent.parent
-    / "artifacts"
-    / "refactor"
-    / "phase-03"
-    / "deletion-inventory.jsonl"
-)
-
-
-def _log_legacy_call(symbol: str, operation_id: str, prompt_sample: str) -> None:
-    try:
-        stack = inspect.stack()
-        caller_frame = stack[2] if len(stack) > 2 else stack[1]
-        caller_file = caller_frame.filename
-        caller_line = caller_frame.lineno
-
-        DELETION_INVENTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-        entry = {
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "legacySymbol": symbol,
-            "caller": f"{caller_file}:{caller_line}",
-            "operationId": operation_id,
-            "promptSample": prompt_sample[:100],
-            "retirementPhase": "Phase 15 (Cutover & Legacy Deletion)",
-        }
-        with open(DELETION_INVENTORY_PATH, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception as exc:
-        logger.debug("Failed to record deletion inventory: %s", exc)
 
 
 def _clean_text_content(text: str) -> str:
@@ -115,7 +84,6 @@ class LLMService:
     ) -> Any:
         formatted_prompt = format_prompt(prompt_template, variables)
         op_id = operation_id or f"op_{uuid4().hex[:16]}"
-        _log_legacy_call("LLMService.generate", op_id, formatted_prompt)
 
         if not run_id:
             raise ProviderError("run_id is required: every provider request must obtain an authenticated durable grant before dispatch")

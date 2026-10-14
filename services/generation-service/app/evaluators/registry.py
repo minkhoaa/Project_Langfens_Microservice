@@ -308,7 +308,7 @@ class EvaluatorRegistry:
 
         return results
     def export_manifest(self) -> dict:
-        """Exports declarative registry manifest for Phase 07 audit artifacts."""
+        """Exports declarative registry manifest of registered evaluators."""
         return {
             "evaluators": [
                 {

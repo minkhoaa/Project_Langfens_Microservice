@@ -33,44 +33,6 @@ from app.providers.retry import RetryPolicy
 logger = logging.getLogger(__name__)
 
 
-def _record_transport_log(
-    *,
-    operation_id: str,
-    run_id: Optional[str],
-    provider: str,
-    model: str,
-    tokens_used: int,
-    latency_seconds: float,
-    request_sha256: str,
-    response_sha256: str,
-) -> None:
-    env_val = os.getenv("PROVIDER_GATEWAY_TRANSPORT_LOG", "").strip()
-    if not env_val or env_val.lower() in ("0", "false", "no", "off"):
-        return
-
-    if env_val.lower() in ("1", "true", "yes", "on"):
-        log_path = Path("sanitized-transport-evidence.jsonl")
-    else:
-        log_path = Path(env_val)
-    entry = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "operationId": operation_id,
-        "runId": run_id or "",
-        "provider": provider,
-        "model": model,
-        "tokensUsed": int(tokens_used),
-        "latencyMs": round(latency_seconds * 1000.0, 2),
-        "requestSha256": request_sha256,
-        "responseSha256": response_sha256,
-    }
-
-    try:
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        with log_path.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception as ex:
-        logger.warning("Failed to append to transport log %s: %s", log_path, ex)
-
 
 class ProviderGateway:
     """Common gateway; every physical provider transport is durably budgeted."""
@@ -419,21 +381,6 @@ class ProviderGateway:
                         usage = response.usage
                         usage_known = usage.accounting_type != UsageAccountingType.UNKNOWN
                         result_json = response.model_dump_json(by_alias=True)
-                        try:
-                            req_sha = hashlib.sha256(attempt_request.model_dump_json().encode("utf-8")).hexdigest()
-                            resp_sha = hashlib.sha256(result_json.encode("utf-8")).hexdigest()
-                            _record_transport_log(
-                                operation_id=attempt_operation_id,
-                                run_id=request.run_id,
-                                provider=provider_name,
-                                model=response.model_name or model_name,
-                                tokens_used=usage.total_tokens if usage_known else 0,
-                                latency_seconds=response.latency_seconds,
-                                request_sha256=req_sha,
-                                response_sha256=resp_sha,
-                            )
-                        except Exception as log_err:
-                            logger.warning("Failed to record transport evidence: %s", log_err)
                         try:
                             from app.observability.accounting import get_token_accountant
                             rep_tokens = usage.total_tokens if usage.accounting_type == UsageAccountingType.REPORTED_ACTUAL else 0

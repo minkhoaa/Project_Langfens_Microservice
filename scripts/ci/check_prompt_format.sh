@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/ci/check_prompt_format.sh — Sprint 7 Phase 10 anti-regression guard.
+# scripts/ci/check_prompt_format.sh — Prompt format canonical placeholder anti-regression guard.
 #
 # Checks:
 #   1. No legacy placeholders (___/blank-qN/[ N ]) in source-tree seeder files.
