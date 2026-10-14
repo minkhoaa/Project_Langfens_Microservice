@@ -1,0 +1,18 @@
+{
+  "requirement_id": "RQ2-A05",
+  "phase_id": "RG07",
+  "sprint_id": "RG07-S01",
+  "evidence_status": "NOT_RUN",
+  "source_commit_sha": null,
+  "config_hash": null,
+  "dataset_hash": null,
+  "test_name": null,
+  "command_or_method": null,
+  "environment_kind": null,
+  "exit_code": null,
+  "expected_behavior": null,
+  "observed_behavior": null,
+  "redacted_artifact_ref": null,
+  "blocker": null,
+  "timestamp": null
+}

@@ -165,6 +165,42 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     await db.Database.MigrateAsync();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+
+    if (!await roleManager.RoleExistsAsync(Roles.Admin))
+    {
+        await roleManager.CreateAsync(new Role { Name = Roles.Admin });
+    }
+
+    var admin = await userManager.FindByEmailAsync("admin@gmail.com");
+    if (admin is null)
+    {
+        admin = new User
+        {
+            Id = Guid.NewGuid().ToString(),
+            Email = "admin@gmail.com",
+            NormalizedEmail = "ADMIN@GMAIL.COM",
+            UserName = "admin@gmail.com",
+            NormalizedUserName = "ADMIN@GMAIL.COM",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString()
+        };
+        admin.PasswordHash = hasher.HashPassword(admin, "admin");
+        await userManager.CreateAsync(admin);
+    }
+    else
+    {
+        admin.PasswordHash = hasher.HashPassword(admin, "admin");
+        await userManager.UpdateAsync(admin);
+    }
+
+    if (!await userManager.IsInRoleAsync(admin, Roles.Admin))
+    {
+        await userManager.AddToRoleAsync(admin, Roles.Admin);
+    }
 }
 
 app.UseSwagger();

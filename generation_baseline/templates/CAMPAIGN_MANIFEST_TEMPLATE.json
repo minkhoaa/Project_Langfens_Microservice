@@ -1,0 +1,25 @@
+{
+  "state": "TARGET_TEMPLATE_NOT_FROZEN",
+  "experiment_id": null,
+  "dataset_version": null,
+  "split": "FINAL_EVAL",
+  "domain_item_counts": {
+    "reading": null,
+    "grammar": null
+  },
+  "arms": [
+    "A",
+    "B",
+    "C"
+  ],
+  "foundation_model_id": null,
+  "model_revision": null,
+  "code_commit_sha": null,
+  "rubric_hash": null,
+  "analysis_plan_hash": null,
+  "assignment_manifest_hash": null,
+  "source_family_disjointness_evidence": null,
+  "sampling_policy": null,
+  "missing_data_rule": "missing/failed/abstained not counted primary PASS",
+  "notes": "Never use this template as evidence a real campaign was executed."
+}

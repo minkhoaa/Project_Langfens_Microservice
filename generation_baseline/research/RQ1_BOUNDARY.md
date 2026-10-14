@@ -1,0 +1,3 @@
+# RQ1 and KLTN whole-project boundary
+
+The KLTN includes Speaking, STT/TTS, phoneme-level acoustic pronunciation detection (not merely transcript comparison), RAG-assisted language feedback, Writing/Grammar learning aids and learning history. This `generation_baseline/` covers **RQ2 specialized Multi-Agent content generation** plus the learner integration needed to demonstrate it; it does not provide a finished experimental design or verification for RQ1. Do not claim that Reading/Grammar content generation proves GOP/forced-alignment error detection or pedagogical efficacy of Speaking feedback. Other non-RQ2 modules may be reused if actually present, but no unrelated major feature scope is authorized implicitly.
