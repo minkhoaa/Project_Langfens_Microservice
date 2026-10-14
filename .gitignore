@@ -196,3 +196,4 @@ models/**/*.ckpt
 models/**/*.bin
 
 benchmarks/
+scripts/crawler/_cache_writing_images/
