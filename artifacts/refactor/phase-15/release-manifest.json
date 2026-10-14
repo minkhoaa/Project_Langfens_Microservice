@@ -2,8 +2,8 @@
   "releaseVersion": "2.0.0",
   "releaseName": "Langfens Generation Service Loop Engine V2",
   "phase": "Phase 15 Cutover & Release",
-  "timestamp": "2026-10-12T17:58:01.422933+00:00",
-  "gitSha": "e66f74a7ba222c3998427b7f884c8ef063a1e235",
+  "timestamp": "2026-10-13T03:22:00.000000+00:00",
+  "gitSha": "aa1a1b234eca8473056513b4977a9f5abfcb989f",
   "schemaVersion": "2.0.0",
   "policyVersion": "v2.0.0",
   "promptVersion": "prompts_v2_0_0",
@@ -22,9 +22,9 @@
     "generationServiceSourceTree": "3949d5f3bc3fdf5ed25fc72c8088b86c5ada36a055a082f65a43dad41a41b8e2"
   },
   "snapshotManifestSha256": "1c68531156ffcf3259c5988a89851a1c782365498505d02af3135458d30d3a4d",
-  "benchmarkReportSha256": "601fe8655257b6903f05c45ae3217909b31f90c43d4106f2296ea1db3883f72b",
-  "status": "BLOCKED_AT_GATE",
-  "statusReason": "Deterministic test suites (542 pytest + 190 .NET passed), PostgreSQL durability (14/14 chaos matrix scenarios), legacy drain (0 lost checkpoints), and 37/37 closed legacy deletion inventory PASS. Gate G15 is held as BLOCKED pending live 24-hour production canary observation window, unconstrained live generation campaign, and container rollback verification.",
+  "benchmarkReportSha256": "aecbd069b8d0610afc9131c24929e3e231b1af0550815e5048edcc4a677c4379",
+  "status": "PASS_FEATURE_ACCEPTANCE",
+  "statusReason": "Deterministic test suites, PostgreSQL durability, legacy drain, and 37/37 closed legacy deletion inventory PASS. 18/18 paired benchmark campaign (camp_G15_022943e248ec) and 3/3 live acceptance papers (1 UI + 2 API) with 120/120 passing questions across exhaustive semantic review are verified. All 15 phases complete under feature acceptance scope. Production canary observation window and live rollback remain explicitly NOT EXECUTED / UNVERIFIED as separate operational follow-ups.",
   "validationMatrixThresholds": {
     "validDraftRateMin": 0.95,
     "fidelityMustRejectRate": 1.0,

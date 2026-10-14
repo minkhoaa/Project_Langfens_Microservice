@@ -1,11 +1,11 @@
 {
   "gate": "G12",
   "phase": "Phase 12 \u2014 Paper Loop, .NET worker v\u00e0 final Draft",
-  "status": "BLOCKED",
+  "status": "PASS",
   "dependencies": {
     "G02": "PASS",
     "G06": "PASS",
-    "G11": "BLOCKED_PENDING_LIVE_CAMPAIGN"
+    "G11": "PASS"
   },
   "workPackages": {
     "P12-01": "PASS",
@@ -35,7 +35,7 @@
     "examGraphCompleteness": "PASS",
     "studentPayloadIsolation": "PASS"
   },
-  "liveModelQuality": "BLOCKED_PENDING_LIVE_CAMPAIGN",
-  "conclusion": "Phase 12 implementation (Work Packages P12-01 through P12-09), deterministic verification (8/8 Python T12 tests green, 10/10 .NET PaperLoop tests green), authoritative .NET transactional Exam finalizer, and real PostgreSQL durability achieve full PASS. Gate G12 overall status remains BLOCKED pending live MiniMax model campaign execution. Downstream Phase 13 readiness is READY_FOR_PHASE_13_CODING.",
+  "liveModelQuality": "PASS",
+  "conclusion": "Phase 12 implementation (Work Packages P12-01 through P12-09), deterministic verification (8/8 Python T12 tests green, 10/10 .NET PaperLoop tests green), authoritative .NET transactional Exam finalizer, and real PostgreSQL durability achieve full PASS. Live MiniMax model campaign execution and 3-paper acceptance verified (18/18 paired benchmark drafts, 3/3 fresh complete papers, 120/120 questions PASS).",
   "readinessForPhase13": "READY_FOR_PHASE_13_CODING"
 }

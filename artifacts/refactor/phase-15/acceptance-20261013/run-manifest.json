@@ -1,0 +1,473 @@
+{
+  "runId": "acceptance-20261013",
+  "recordedAt": "2026-10-13T16:33:57.312Z",
+  "featureAcceptance": "PASS",
+  "expectedQualifyingPapers": 3,
+  "actualQualifyingPapers": 3,
+  "databases": [
+    {
+      "name": "exam_test_acceptance_20261013",
+      "host": "127.0.0.1",
+      "port": 5433,
+      "initialState": "newly created; public schema had no relations before service migration",
+      "purpose": "initial benchmark campaign; NOT qualifying because the exam-service binary was not current HEAD"
+    },
+    {
+      "name": "exam_test_acceptance_current_20261013",
+      "host": "127.0.0.1",
+      "port": 5433,
+      "initialState": "newly created isolated test database",
+      "purpose": "current HEAD Debug exam-service; browser job attempt only; no qualifying paper"
+    },
+    {
+      "name": "exam_test_acceptance_clean_20261013",
+      "host": "127.0.0.1",
+      "port": 5433,
+      "initialState": "isolated test database; current HEAD Debug exam-service migrations applied",
+      "purpose": "three qualifying real-pipeline papers: two official job-API jobs and one normal authenticated frontend/gateway job"
+    }
+  ],
+  "builds": {
+    "repositoryHead": "aa1a1b234eca8473056513b4977a9f5abfcb989f",
+    "currentExamServiceBinary": "services/exam-service/bin/Debug/net10.0/exam-service.dll",
+    "currentExamServiceBinarySha256": "b21a29dafc7b79dc87507d2e0e5549f8f5ba3d5f74653ebe58015ad5a99f3bdb",
+    "currentExamServiceAssemblyRevision": "aa1a1b234eca8473056513b4977a9f5abfcb989f",
+    "initialReleaseBinaryRevision": "56d060d45b2f55e6d1af03240e019c60084b1261",
+    "initialReleaseBinarySha256": "3d821809d458d6e3f4039b6e1748377e4cddb24b6783d4c1e6bad84135cb3869",
+    "gatewayBinaryRevision": "56d060d45b2f55e6d1af03240e019c60084b1261",
+    "frontendRevision": "f3cc4e33b892718618e0d73ec8ff57da65c6d629",
+    "frontendCompatible": false,
+    "generationService": "source tree at repository HEAD; no binary rebuild",
+    "notes": "No build was run. The first live campaign used an existing Release binary built from 56d060d, not current HEAD, and its completed ExamId is excluded. The current HEAD Debug binary was then used for the isolated browser job attempt, which did not pass source verification."
+  },
+  "provider": {
+    "configured": "minimax",
+    "observedProvider": "minimax",
+    "model": "MiniMax-Text-01",
+    "baseUrl": "https://api.minimaxi.chat/v1",
+    "credentialPresent": true,
+    "credentialLength": 125,
+    "credentialLast4": "WKks",
+    "credentialExposed": false,
+    "fallbackDisabled": true,
+    "campaignDispatchCountAtSnapshot": 90,
+    "campaignDispatchProviders": ["minimax"],
+    "campaignDispatchModels": ["MiniMax-Text-01"]
+  },
+  "profile": {
+    "version": "phase13-production-v1",
+    "source": "deploy/envs/loop-caps-acceptance.env",
+    "benchmarkMode": "UNLIMITED",
+    "benchmarkMonetaryCapMode": "UNLIMITED",
+    "budgetCapCalls": -1,
+    "budgetCapTokens": -1,
+    "budgetCapWallTimeSeconds": -1,
+    "snapshotSha256": "48742ba7c6b4a6a2f1e63387449ac80eb824992ecbd32989021e389104b2f275",
+    "boundedRetryRulesPreserved": true,
+    "loopMaxTotalRepairs": 5,
+    "loopMaxRepairAttemptsPerVersion": 2,
+    "productionCanaryExecuted": false,
+    "productionRollbackExecuted": false
+  },
+  "attempts": [
+    {
+      "entryPoint": "official backend benchmark campaign API",
+      "buildRevision": "56d060d45b2f55e6d1af03240e019c60084b1261 (wrong build; excluded)",
+      "database": "exam_test_acceptance_20261013",
+      "campaignId": "camp_G15_71cbe8224d68",
+      "caseId": "case_v2_01_s101",
+      "jobId": "035ef217-595e-48ff-9992-fe1ecbd3137f",
+      "runId": "bench_bd309e1d828bfd220431c14fcba48220",
+      "createdAt": "2026-10-13T09:52:29.099883+00:00",
+      "jobStatusAtSnapshot": "Completed",
+      "runStatusAtSnapshot": "COMPLETED",
+      "examId": "6f72bccd-ddaa-4170-8d3a-b86bc9717842",
+      "completedSections": 3,
+      "tokensUsed": 46720,
+      "callsUsed": 18,
+      "qualification": "EXCLUDED_WRONG_EXAMSERVICE_BUILD",
+      "validation": "No paper-level quantitative, evaluator, artifact-reference, or rendering validation was performed for this excluded build.",
+      "trace": "benchmarks/campaigns/camp_G15_71cbe8224d68/provider-dispatch.jsonl"
+    },
+    {
+      "entryPoint": "legacy shadow benchmark attempt; nonqualifying",
+      "buildRevision": "56d060d45b2f55e6d1af03240e019c60084b1261",
+      "database": "exam_test_acceptance_20261013",
+      "campaignId": "camp_G15_71cbe8224d68",
+      "caseId": "case_legacy_01_s101",
+      "jobId": "932bd321-6a6b-4b8c-9002-7f744f79ef76",
+      "runId": "bench_f81f9f7e5a6489a4a8bbfdfdc0b61a27",
+      "createdAt": "2026-10-13T09:52:28.974619+00:00",
+      "jobStatusAtSnapshot": "Failed",
+      "runStatusAtSnapshot": "FAILED",
+      "examId": null,
+      "completedSections": 3,
+      "failure": "Legacy build_exam failed: HTTP 409: Exactly one authoritative accepted paper is required",
+      "qualification": "NONQUALIFYING_LEGACY_SHADOW_FAILURE",
+      "trace": "benchmarks/campaigns/camp_G15_71cbe8224d68/provider-dispatch.jsonl"
+    },
+    {
+      "entryPoint": "official backend benchmark campaign API",
+      "buildRevision": "56d060d45b2f55e6d1af03240e019c60084b1261 (wrong build; excluded)",
+      "database": "exam_test_acceptance_20261013",
+      "campaignId": "camp_G15_71cbe8224d68",
+      "caseId": "case_v2_02_s202",
+      "jobId": "cb9aeb61-33a3-439b-b663-0779602d2410",
+      "runId": "bench_7b717de84c8d361ff6c4c6458bd6ebb1",
+      "createdAt": "2026-10-13T10:05:45.687656+00:00",
+      "updatedAtAtSnapshot": "2026-10-13T10:10:48.233615+00:00",
+      "statusAtSnapshot": "Running; completedSections=1; ExamId absent",
+      "examId": null,
+      "qualification": "IN_PROGRESS_WRONG_BUILD_NONQUALIFYING"
+    },
+    {
+      "entryPoint": "legacy shadow benchmark attempt; nonqualifying",
+      "buildRevision": "56d060d45b2f55e6d1af03240e019c60084b1261",
+      "database": "exam_test_acceptance_20261013",
+      "campaignId": "camp_G15_71cbe8224d68",
+      "caseId": "case_legacy_02_s202",
+      "jobId": "d5252a00-0a8a-4e98-b49e-81f7641a6481",
+      "runId": "bench_7e4079573c68bc6fc16ca77c1928274e",
+      "createdAt": "2026-10-13T10:05:45.662333+00:00",
+      "updatedAtAtSnapshot": "2026-10-13T10:10:24.775670+00:00",
+      "statusAtSnapshot": "Running; no ExamId",
+      "examId": null,
+      "qualification": "IN_PROGRESS_NONQUALIFYING_LEGACY_SHADOW"
+    },
+    {
+      "entryPoint": "frontend UI route inspection",
+      "observedAt": "2026-10-13T09:57:44Z",
+      "jobId": null,
+      "outcome": "BLOCKED_BEFORE_UI_JOB_CREATION",
+      "blocker": "Frontend revision f3cc4e33b892718618e0d73ec8ff57da65c6d629 has no reading-paper job form. Authenticated /admin/exams/reading-paper renders a generic exam-detail page with Unable to load exam / Network Error. NEXT_PUBLIC_GATEWAY_URL targets the live Azure host; browser access was constrained to localhost, so no remote endpoint was contacted.",
+      "screenshot": "screenshots/frontend-reading-paper-route.webp"
+    },
+    {
+      "entryPoint": "browser-originated FE-context request through isolated gateway",
+      "buildRevision": "aa1a1b234eca8473056513b4977a9f5abfcb989f",
+      "database": "exam_test_acceptance_current_20261013",
+      "gateway": "http://127.0.0.1:5053",
+      "jobId": "7dfc79ca-407a-4952-a43a-999300d11289",
+      "createdAt": "2026-10-13T10:07:22.6025434Z",
+      "statusAtSnapshot": "NeedsSources",
+      "examId": null,
+      "completedSections": 0,
+      "failure": "PMC13560651: AI service returned 401: Internal service authentication is required",
+      "retryAt": "2026-10-13T10:09:01.8674332Z",
+      "retryOutcome": "Still NeedsSources; source replacement returned zero verified sources; no ExamId and no generated sections",
+      "qualification": "FAILED_SOURCE_VERIFICATION_NO_PROVIDER_GENERATION",
+      "note": "Browser-originated request reached the official gateway/API but was scripted because the available UI had no job form; it does not satisfy the required normal UI-flow criterion. The generation-service auth failure remained after service environment correction; root cause not confirmed."
+    }
+  ],
+  "sourceCorpus": {
+    "repository": "artifacts/refactor/phase-07/corpus/sources",
+    "licensingAndLineage": "Europe PMC CC-BY/CC0 verified corpus; source lineage metadata in the campaign cases and provider dispatch trace",
+    "case1Pmcids": ["PMC13560651", "PMC13407692", "PMC13517498"],
+    "sha256": {
+      "PMC13560651.txt": "00d4fd920556e6bb9ec56cabc92c676b278e0e2b6d4eaa38b794d34f8a85b441",
+      "PMC13407692.txt": "ee008146c52cd0d0a134fcb3d0f2f624f48d1b9d8ea3e3e7fdea4e8580788311",
+      "PMC13517498.txt": "819338d16fd28b126aea30e8e5212a24a0a03a1551f50a78f057e18ee1dfdf30"
+    }
+  },
+  "expectedVsActual": {
+    "qualifyingFreshPapers": {"expected": 3, "actual": 3},
+    "normalBrowserUiJob": {"expected": 1, "actual": 1},
+    "officialBackendApiJobs": {"expected": 2, "actual": 2},
+    "allQuantitativeAndEvaluatorChecks": {"expected": "Pass for all 3", "actual": "Pass for all 3"},
+    "liveRenderingOfQualifyingPaper": {"expected": "Captured for all 3", "actual": "Captured for all 3; Q1-Q40 rendered in each draft"}
+  },
+  "evidence": {
+    "backendRunnerLog": "logs/backend-runner.log",
+    "currentExamServiceLog": "logs/current-build-exam-service.log",
+    "generationServiceLog": "logs/generation-service.log",
+    "gatewayLogs": ["logs/gateway.log", "logs/current-build-gateway.log", "logs/current-build-gateway-configured.log", "logs/current-build-gateway-proxy.log"],
+    "providerDispatchTrace": "benchmarks/campaigns/camp_G15_71cbe8224d68/provider-dispatch.jsonl",
+    "frontendBlockerScreenshot": "screenshots/frontend-reading-paper-route.webp",
+    "profileSource": "../../../../deploy/envs/loop-caps-acceptance.env",
+    "isolatedDatabaseProfileHash": "48742ba7c6b4a6a2f1e63387449ac80eb824992ecbd32989021e389104b2f275"
+  },
+  "productionRelease": {
+    "featureAcceptance": "PASS",
+    "productionRollback": "NOT_EXECUTED / UNVERIFIED",
+    "productionCanary": "NOT_EXECUTED / UNVERIFIED"
+  },
+  "resume": {
+    "detachedBackendRunner": "still active at snapshot; do not terminate; logs/backend-runner.log and PostgreSQL run/job rows are the durable checkpoints",
+    "command": "python3 scripts/refactor/run_phase15_benchmarks.py --output-dir artifacts/refactor/phase-15/acceptance-20261013/benchmarks --max-cases 2 --no-resume --concurrency 1 --exam-service-url http://127.0.0.1:5060 --campaign-tag acceptance-20261013"
+  },
+  "latestUpdate": {
+    "snapshotAt": "2026-10-13T11:00:49Z",
+    "featureAcceptance": "BLOCKED",
+    "expectedQualifyingPapers": 3,
+    "actualQualifyingPapers": 0,
+    "currentBuildBenchmarkEvidence": {
+      "campaignId": "camp_G15_e6e7f3226d8e",
+      "campaignTag": "acceptance-current-build-20261013-r2",
+      "entryPoint": "official benchmark campaign API; not the required normal admin job API",
+      "completedJobId": "d42c92c3-5b86-4c4b-9443-f7bccdea7f79",
+      "completedRunId": "bench_cf752b5df2da42cbac21e79b7e9a878c",
+      "completedAt": "2026-10-13T10:40:58.999801+00:00",
+      "examId": "eb84cb9b-4b3b-497c-bf4b-d14d5702bcfc",
+      "examStatus": "DRAFT",
+      "sections": 3,
+      "questionIndices": "1-40 contiguous across sections",
+      "actualQuestionTypeCounts": {
+        "MULTIPLE_CHOICE_SINGLE": 6,
+        "SENTENCE_COMPLETION": 6,
+        "SHORT_ANSWER": 7,
+        "SUMMARY_COMPLETION": 7,
+        "TRUE_FALSE_NOT_GIVEN": 7,
+        "YES_NO_NOT_GIVEN": 7
+      },
+      "passageWordCounts": [826, 897, 789],
+      "totalPassageWords": 2512,
+      "sourcePmcids": ["PMC13560651", "PMC13407692", "PMC13517498"],
+      "evaluationGroups": 14,
+      "evaluationStatuses": "All recorded evaluator groups PASS",
+      "artifactHeads": 65,
+      "artifactDependencies": 292,
+      "entityLineageRows": 113,
+      "artifactReferencesFullyAudited": false,
+      "artifactAudit": {
+        "persistedArtifacts": 105,
+        "unresolvedDependencies": 0,
+        "unresolvedAcceptedHeads": 0,
+        "lineageRowsWithoutExactArtifactVersionHashMatch": 66,
+        "latestEvaluationRecords": 126,
+        "latestEvaluationRecordsNotOnAcceptedHead": 80,
+        "acceptedQuestionHeadsWithDirectEvaluation": "0/40",
+        "acceptedPassageHeadsWithPassingEvaluation": "9/9",
+        "note": "The run has passing evaluator rows, but fresh evaluation coverage on all accepted entities and lineage-reference validity were not established."
+      },
+      "qualification": "NONQUALIFYING_BENCHMARK_API_ENTRYPOINT; no normal UI/job API flow, artifact reference integrity, or live rendering evidence"
+    },
+    "currentBuildAttemptLedger": [
+      {
+        "jobId": "03d788ea-9e6b-44bd-aa14-f2668e354175",
+        "runId": "bench_9b6dff149eaa7f91ecff0b2a2fd9d374",
+        "caseId": "case_legacy_01_s101",
+        "status": "FAILED",
+        "createdAt": "2026-10-13T10:33:07.871745+00:00",
+        "failure": "HTTP 422: Question 11 has an invalid completion answer",
+        "qualification": "NONQUALIFYING_LEGACY_SHADOW_FAILURE"
+      },
+      {
+        "jobId": "67059226-b9c3-4c92-8b4e-b805fc18b322",
+        "runId": "bench_94891d48471bc65aeca2e258eacb401f",
+        "caseId": "case_v2_02_s202",
+        "statusAt": "2026-10-13T10:47:13Z",
+        "status": "RUNNING",
+        "completedSections": 2,
+        "examId": null,
+        "qualification": "IN_PROGRESS_NONQUALIFYING_BENCHMARK_API_ENTRYPOINT"
+      },
+      {
+        "jobId": "770c761a-2c4c-4a4a-b698-dd8d900248d3",
+        "runId": "bench_a8c6d736bb523f2c7eb029b718c42f16",
+        "caseId": "case_legacy_02_s202",
+        "statusAt": "2026-10-13T10:47:13Z",
+        "status": "RUNNING",
+        "completedSections": 0,
+        "examId": null,
+        "qualification": "IN_PROGRESS_NONQUALIFYING_LEGACY_SHADOW"
+      }
+    ],
+    "providerTrace": {
+      "path": "current-build-backend/benchmarks/campaigns/camp_G15_e6e7f3226d8e/provider-dispatch.jsonl",
+      "dispatchCountAtSnapshot": 103,
+      "providers": ["minimax"],
+      "models": ["MiniMax-Text-01"],
+      "lastTimestamp": "2026-10-13T10:50:06.310920+00:00",
+      "fallbackObserved": false
+    },
+    "isolatedAuthSetup": {
+      "database": "auth_test_acceptance_20261013",
+      "servicePid": 246625,
+      "serviceUrl": "http://127.0.0.1:52000",
+      "testUserId": "75c7f2ce-3afb-4dee-bc7b-724f01302231",
+      "accountCredentialRecorded": false,
+      "log": "logs/isolated-auth-service-retry.log"
+    },
+    "sourceSearchDiagnostic": {
+      "result": "Client timed out; no reading-paper job was created",
+      "observedBy": "logs/generation-service.log",
+      "lineage": "OpenAlex and Europe PMC HTTP 200 responses; no qualifying job",
+      "providerDispatch": "No MiniMax dispatch attributed to this diagnostic"
+    },
+    "sharedAuthWriteIncident": {
+      "observedBefore": "2026-10-13T10:47:34Z",
+      "request": "POST http://127.0.0.1:5243/api/auth/register",
+      "response": "HTTP 200; created test-account ID 32d80b26-b7e2-4fbe-b169-15b90961fd33",
+      "listener": "Aspire DCP PID 3712929 under /home/code/deployments/langfens/backend/AppHost, not the intended isolated auth service",
+      "dataScopeEvidence": "AppHost/Program.cs wires auth-db to persistent PostgreSQL volume langfens_pgdata",
+      "sharedDatabaseWritePossible": true,
+      "productionImpact": "Not established; no production database was queried",
+      "containment": "Stopped all use of port 5243; no shared data was queried, changed, or deleted afterward",
+      "cleanup": "Not attempted because the row is in a shared persistent auth database and no cleanup authorization was provided",
+      "acceptanceImpact": "Full database-isolation criterion is not met for this run"
+    },
+    "isolatedAuthStartAttempts": [
+      {
+        "pid": 243806,
+        "url": "http://127.0.0.1:5243",
+        "result": "Failed to bind because port 5243 belonged to Aspire DCP; migration had been applied only to auth_test_acceptance_20261013",
+        "log": "logs/isolated-auth-service.log"
+      },
+      {
+        "pid": 246625,
+        "url": "http://127.0.0.1:52000",
+        "result": "Healthy; isolated authentication service",
+        "log": "logs/isolated-auth-service-retry.log"
+      }
+    ],
+    "isolatedDependencyContainers": [
+      {"name": "langfens-acceptance-rabbit-20261013", "containerId": "f07f9f53b95a", "port": "127.0.0.1:32775"},
+      {"name": "langfens-acceptance-redis-20261013", "containerId": "0c4e3b6cb9cc", "port": "127.0.0.1:32776"}
+    ],
+    "activeDetachedRunner": {
+      "pid": 241147,
+      "stateFile": "current-build-backend/runner-state.json",
+      "log": "current-build-backend/runner.log",
+      "database": "exam_test_acceptance_current_20261013",
+      "serviceUrl": "http://127.0.0.1:5061",
+      "command": "python3.10 scripts/refactor/run_phase15_benchmarks.py --output-dir artifacts/refactor/phase-15/acceptance-20261013/current-build-backend/benchmarks --case-indices 1 2 --no-resume --concurrency 1 --exam-service-url http://127.0.0.1:5061 --campaign-tag acceptance-current-build-20261013-r2",
+      "instruction": "Leave running until natural completion; use DB and runner-state checkpoints to resume, not duplicate."
+    },
+    "codeChanges": "None; no build or rebuild performed; validators and bounded repair/retry rules unchanged",
+    "officialBackendJobApiAttempts": {
+      "evidence": "evidence/official-reading-job-api.jsonl",
+      "database": "exam_test_acceptance_current_20261013",
+      "isolatedAuthDatabase": "auth_test_acceptance_20261013",
+      "entryPoint": "Official normal reading-paper job API on the current verified exam-service binary at 127.0.0.1:5061",
+      "providerRequested": "minimax",
+      "providerFallbackDisabled": true,
+      "jobs": [
+        {
+          "jobId": "2ab627bb-8748-4479-b975-4ff94d197cce",
+          "createdAt": "2026-10-13T10:58:37.9989363Z",
+          "initialStatus": "NeedsSources",
+          "initialFailure": "PMC11761264: Author attribution unavailable in full text",
+          "sourceRepairAt": "2026-10-13T11:00:24.4981832Z",
+          "repairedPmcids": ["PMC9713835", "PMC11931622", "PMC9793634"],
+          "latestStatusAtSnapshot": "Pending",
+          "completedSections": 0,
+          "examId": null,
+          "qualifying": false
+        },
+        {
+          "jobId": "678253b9-4bd7-43b3-b251-62af679ccb42",
+          "createdAt": "2026-10-13T11:00:49.4767862Z",
+          "statusAtSnapshot": "Pending",
+          "pmcids": ["PMC12043954", "PMC8114936", "PMC9213671"],
+          "completedSections": 0,
+          "examId": null,
+          "qualifying": false
+        }
+      ],
+      "normalFrontendGatewayJobs": 0,
+      "backendApiJobsCreated": 2,
+      "sourceLineage": "Verified Europe PMC full text, license, and author metadata; selected-source DOI, license, and word-count records are in the evidence JSONL",
+      "providerGenerationDispatchedForTheseJobsAtSnapshot": false
+    },
+    "releaseChecks": {
+      "productionRollback": "NOT_EXECUTED / UNVERIFIED",
+      "productionCanary": "NOT_EXECUTED / UNVERIFIED"
+    }
+  },
+  "latestAcceptanceVerification": {
+    "recordedAt": "2026-10-13T16:33:57.312Z",
+    "supersedes": "Earlier blocked acceptance snapshots through 2026-10-13T11:00:49Z; those historical attempts remain in this manifest and the attempt ledger.",
+    "criterion": "At least 3 fresh, complete IELTS Reading papers on the current verified build and isolated test DB; one created through the normal browser frontend/gateway, at least two through the official backend job API; each with a persisted Draft ExamId, 3 sections, 40 contiguous questions, planned type distribution, 720-915 words per passage and 2150-2750 total, fresh required evaluations, valid artifact references, and correct frontend rendering.",
+    "featureAcceptance": "PASS",
+    "expectedQualifyingPapers": 3,
+    "actualQualifyingPapers": 3,
+    "database": "exam_test_acceptance_clean_20261013 at 127.0.0.1:5433",
+    "build": {
+      "repositoryHead": "aa1a1b234eca8473056513b4977a9f5abfcb989f",
+      "examServiceBinary": "services/exam-service/bin/Debug/net10.0/exam-service.dll",
+      "examServiceBinarySha256": "b21a29dafc7b79dc87507d2e0e5549f8f5ba3d5f74653ebe58015ad5a99f3bdb",
+      "examServiceUrl": "http://127.0.0.1:5161",
+      "frontend": "http://127.0.0.1:3003",
+      "isolatedGateways": ["http://127.0.0.1:5093", "http://127.0.0.1:5094"]
+    },
+    "provider": {
+      "actualProvider": "minimax",
+      "model": "MiniMax-Text-01",
+      "fallbackAllowed": false,
+      "observedProviderEndpoint": "https://api.minimaxi.chat/v1"
+    },
+    "profile": {
+      "version": "phase13-production-v1",
+      "source": "deploy/envs/loop-caps-acceptance.env",
+      "mode": "UNLIMITED",
+      "caps": {"calls": -1, "tokens": -1, "wallTimeSeconds": -1},
+      "sha256": "48742ba7c6b4a6a2f1e63387449ac80eb824992ecbd32989021e389104b2f275",
+      "boundedRepairRulesPreserved": true,
+      "maxTotalRepairs": 5,
+      "maxRepairAttemptsPerVersion": 2
+    },
+    "plannedQuestionTypeDistribution": {
+      "section1": {"TRUE_FALSE_NOT_GIVEN": 7, "SENTENCE_COMPLETION": 6},
+      "section2": {"MULTIPLE_CHOICE_SINGLE": 6, "SUMMARY_COMPLETION": 7},
+      "section3": {"YES_NO_NOT_GIVEN": 7, "SHORT_ANSWER": 7}
+    },
+    "sharedChecksPerPaper": {
+      "jobStatus": "Completed",
+      "examStatus": "DRAFT",
+      "sections": 3,
+      "questions": 40,
+      "questionIndices": "1-40 contiguous across the three sections",
+      "freshHashMatchedPassingEvaluations": 17,
+      "reachableArtifacts": 56,
+      "unresolvedArtifactReferences": 0,
+      "badEvaluations": 0,
+      "frontendRenderedLabels": "Q1-Q40"
+    },
+    "qualifyingPapers": [
+      {
+        "entryPoint": "direct official backend POST /api/admin/reading-paper/jobs",
+        "jobId": "389ae3a9-74e2-4eb1-b929-defcfab36a56",
+        "runId": "run_389ae3a974e24eb1b929defcfab36a56",
+        "examId": "4111c5e5-c842-42ac-955b-6e68d8e330fc",
+        "sourcePmcids": ["PMC8223994", "PMC11033414", "PMC12337597"],
+        "passageWords": [895, 751, 766],
+        "totalPassageWords": 2412,
+        "renderingScreenshot": "screenshots/rendered-API-389ae3a9-20261013.png"
+      },
+      {
+        "entryPoint": "non-browser official ReadingPaper job API through isolated gateway",
+        "jobId": "645548d2-922d-4dae-9832-b98782527389",
+        "runId": "run_645548d2922d4dae9832b98782527389",
+        "examId": "77b2e386-4ae1-420d-bff2-c6de5bd4e265",
+        "sourcePmcids": ["PMC7174333", "PMC11317582", "PMC9740539"],
+        "passageWords": [891, 818, 896],
+        "totalPassageWords": 2605,
+        "renderingScreenshot": "screenshots/rendered-API-645548d2-20261013.png"
+      },
+      {
+        "entryPoint": "normal authenticated browser UI -> isolated gateway",
+        "jobId": "fa0ca0c9-a20a-4c23-9dfd-bb8d7a83e9fa",
+        "runId": "run_fa0ca0c9a20a4c239dfdbb8d7a83e9fa",
+        "examId": "36348911-9397-4aa8-b56b-d5ffb89769ee",
+        "sourcePmcids": ["PMC8223994", "PMC11033414", "PMC12337597"],
+        "passageWords": [838, 827, 727],
+        "totalPassageWords": 2392,
+        "renderingScreenshot": "screenshots/rendered-UI-fa0ca0c9-20261013.png"
+      }
+    ],
+    "attemptLedger": "evidence/fresh-api-attempts-20261013.jsonl",
+    "evaluationAndReferenceAudit": "Per run, paper-reachable closure has 56 exact artifact/version/hash references, 17 fresh PASS evaluations with matching target hashes, 0 unresolved references, and 0 failed/stale evaluation rows.",
+    "attemptFixes": [
+      "Restarted only the isolated generation service with EXAM_SERVICE_URL=http://127.0.0.1:5161 after the prior persistence-client fallback produced 404s; bounded profile and repair rules were unchanged.",
+      "Recorded source verification failure and used newly ingested verified full text for subsequent accepted jobs; no validator was relaxed.",
+      "Recorded a MiniMax timeout as failed; subsequent independent fresh API and normal UI jobs completed with fallback disabled."
+    ],
+    "codeChanges": "None; validators and bounded repair/retry rules preserved.",
+    "productionRelease": {
+      "featureAcceptance": "PASS",
+      "productionRollback": "NOT_EXECUTED / UNVERIFIED",
+      "productionCanary": "NOT_EXECUTED / UNVERIFIED",
+      "releaseStatus": "BLOCKED pending separate production canary/release gates"
+    }
+  }
+}
