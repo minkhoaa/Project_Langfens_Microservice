@@ -390,6 +390,22 @@ async def test_paper_generator_resolves_section_id_convention_divergence():
     )
 
 
+@pytest.mark.asyncio
+async def test_same_version_hash_mismatch_is_not_rebound():
+    """A tampered same-ID, same-version snapshot must still fail closed."""
+    blueprint = _blueprint_ref()
+    snapshot = _sections()
+    store = RecordingStore(_full_chain({i: section for i, section in enumerate(snapshot, 1)}))
+    tampered = list(snapshot)
+    tampered[1] = snapshot[1].model_copy(update={"content_hash": "f" * 64})
+
+    with pytest.raises(ValueError, match="different content hash"):
+        await PaperGeneratorAdapter(
+            paper_id="p1", title="T", blueprint_ref=blueprint,
+            section_envelopes=tampered, persistence_client=store,
+        ).generate(_make_context(tampered, blueprint, uuid.uuid4()), "intent_tamper", version=1)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # (b) A STALE / regressed head is still refused. RC-7 must keep rejecting.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -633,19 +649,24 @@ async def test_regressed_head_is_not_resynced_from_the_snapshot():
 
 
 @pytest.mark.asyncio
-async def test_paper_loop_declares_live_section_heads_as_input_dependencies(monkeypatch):
-    """`PaperLoop.run` must declare input deps resolved against the live chain.
+async def test_paper_loop_declares_and_generates_from_same_live_alias_resolved_sections(monkeypatch):
+    """PaperLoop must give the generator the exact canonical heads used for its dependencies.
 
-    `PaperLoop.run` builds `input_deps` from the caller's snapshot envelopes
-    (paper.py:793). If it declares the snapshot while the generator binds the live
-    head, the runtime's declared deps and the artifact's parent refs disagree by
-    construction and the admission check fires. Both sides must read the same head.
+    A fallback-ID snapshot can have a different hash from the accepted canonical
+    head after its section sub-loop advances. The paper generator must receive the
+    already-resolved envelope, not re-resolve the old alias snapshot on a later
+    generation/repair attempt.
     """
     blueprint = _blueprint_ref()
-    snapshot = _sections()
-    _, section_v3 = _advance_section_two(snapshot, blueprint)
-    chain = _full_chain({1: snapshot[0], 2: section_v3, 3: snapshot[2]})
+    canonical_snapshot = _sections()
+    _, section_v3 = _advance_section_two(canonical_snapshot, blueprint)
+    chain = _full_chain({1: canonical_snapshot[0], 2: section_v3, 3: canonical_snapshot[2]})
     store = RecordingStore(chain)
+    alias_snapshot = [
+        section.model_copy(update={"artifact_id": f"art_section_{index}"})
+        for index, section in enumerate(canonical_snapshot, 1)
+    ]
+    assert alias_snapshot[1].content_hash != section_v3.content_hash
 
     captured: Dict[str, Any] = {}
 
@@ -672,7 +693,7 @@ async def test_paper_loop_declares_live_section_heads_as_input_dependencies(monk
 
     paper_loop = PaperLoop(persistence_client=store)
     await paper_loop.run(
-        run_id=RUN_ID, blueprint_ref=blueprint, section_envelopes=list(snapshot),
+        run_id=RUN_ID, blueprint_ref=blueprint, section_envelopes=alias_snapshot,
         title="Live Heads", paper_id="p_live", owner=uuid.uuid4(), epoch=1,
     )
 
@@ -682,6 +703,21 @@ async def test_paper_loop_declares_live_section_heads_as_input_dependencies(monk
         if r.artifact_type == ArtifactType.SECTION
     }
     assert declared.get(section_v3.artifact_id) == section_v3.version, (
-        f"PaperLoop.run must declare the LIVE section head v{section_v3.version}, got "
-        f"{declared} (pre-fix it declares the snapshot's v1)"
+        f"PaperLoop.run must declare the LIVE section head v{section_v3.version}, got {declared}"
+    )
+    generator_sections = captured["generator"].section_envelopes
+    assert [section.artifact_id for section in generator_sections] == [
+        canonical_snapshot[0].artifact_id, section_v3.artifact_id, canonical_snapshot[2].artifact_id
+    ]
+    assert generator_sections[1].content_hash == section_v3.content_hash
+    paper = await captured["generator"].generate(captured["context"], "intent_live_heads", version=1)
+
+    def refs_by_identity(refs):
+        return sorted(
+            (ref.artifact_id, ref.version, ref.content_hash, ref.artifact_type.value)
+            for ref in refs
+        )
+
+    assert refs_by_identity(paper.parent_refs) == refs_by_identity(
+        captured["context"].input_dependencies
     )

@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
@@ -24,9 +25,34 @@ using Xunit;
 
 namespace exam_service.Tests;
 
+public sealed class RunLoadPauseInterceptor : DbCommandInterceptor
+{
+    private int _paused;
+    public TaskCompletionSource ReachedRunLoad { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public TaskCompletionSource ResumeRunLoad { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public override async ValueTask<DbDataReader> ReaderExecutedAsync(
+        DbCommand command,
+        CommandExecutedEventData eventData,
+        DbDataReader result,
+        CancellationToken cancellationToken = default)
+    {
+        if (command.CommandText.Contains("reading_paper_runs", StringComparison.OrdinalIgnoreCase) &&
+            Interlocked.Exchange(ref _paused, 1) == 0)
+        {
+            ReachedRunLoad.TrySetResult();
+            await ResumeRunLoad.Task.WaitAsync(cancellationToken);
+        }
+
+        return result;
+    }
+}
+
+
 public sealed class Phase13ExamApiFactory : WebApplicationFactory<exam_service.Program>
 {
     private readonly string _connection;
+    private readonly DbCommandInterceptor? _dbInterceptor;
     private readonly HttpMessageHandler? _aiHandler;
     public const string TestSigningKey = "SuperSecretTestingKeyPhase13MustBe32BytesLong!";
     public const string TestInternalApiKey = "test-phase13-internal-api-key-32chars";
@@ -63,10 +89,14 @@ public sealed class Phase13ExamApiFactory : WebApplicationFactory<exam_service.P
         }
     }
 
-    public Phase13ExamApiFactory(string connection, HttpMessageHandler? aiHandler = null)
+    public Phase13ExamApiFactory(
+        string connection,
+        HttpMessageHandler? aiHandler = null,
+        DbCommandInterceptor? dbInterceptor = null)
     {
         _connection = connection;
         _aiHandler = aiHandler;
+        _dbInterceptor = dbInterceptor;
         Environment.SetEnvironmentVariable("JwtSettings__Issuer", "https://auth.langfens.local");
         Environment.SetEnvironmentVariable("JwtSettings__Audience", "langfens-api");
         Environment.SetEnvironmentVariable("JwtSettings__SignKey", TestSigningKey);
@@ -107,6 +137,7 @@ public sealed class Phase13ExamApiFactory : WebApplicationFactory<exam_service.P
                     npg.EnableRetryOnFailure();
                 });
                 options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                if (_dbInterceptor is not null) options.AddInterceptors(_dbInterceptor);
             });
 
             // Replace ReadingPaperAiClient with mock handler if supplied
@@ -651,5 +682,117 @@ public class Phase13E2EWorkflowTests
         Assert.NotNull(status);
         Assert.Contains(status, validStatuses);
         Assert.DoesNotContain("%", status);
+    }
+    [Fact]
+    public async Task CancelJob_FencesRunAndReturnsLogsForLegacyPlainText()
+    {
+        await using var factory = new Phase13ExamApiFactory(ConnectionString);
+        await factory.ResetJobsAsync();
+        using var client = factory.CreateAdminClient();
+        var owner = Guid.NewGuid();
+        var job = new ReadingPaperJob
+        {
+            Topic = "Cancellation authority regression",
+            Status = "Running",
+            Epoch = 1,
+            CancelVersion = 0,
+            LeaseOwner = owner,
+            LeaseUntil = DateTime.UtcNow.AddMinutes(5),
+            ActiveRunId = "cancel-authority-regression",
+            SourcesJson = "[]",
+            SectionsJson = "[]",
+            Logs = "Acceptance benchmark child run"
+        };
+        var run = new ReadingPaperRun
+        {
+            JobId = job.Id,
+            RunId = job.ActiveRunId,
+            Epoch = 1,
+            Status = "RUNNING",
+            LeaseOwner = owner,
+            LeaseUntil = job.LeaseUntil,
+            CancelVersion = 0
+        };
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+            db.ReadingPaperJobs.Add(job);
+            db.ReadingPaperRuns.Add(run);
+            await db.SaveChangesAsync();
+        }
+
+        var cancelResponse = await client.PostAsync($"/api/admin/reading-paper/jobs/{job.Id}/cancel", null);
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+        using var responseJson = JsonDocument.Parse(await cancelResponse.Content.ReadAsStringAsync());
+        Assert.Contains("Acceptance benchmark child run", responseJson.RootElement.GetProperty("logs").ToString());
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+            var cancelledJob = await db.ReadingPaperJobs.AsNoTracking().SingleAsync(x => x.Id == job.Id);
+            var cancelledRun = await db.ReadingPaperRuns.AsNoTracking().SingleAsync(x => x.RunId == run.RunId);
+            Assert.Equal(cancelledJob.Epoch, cancelledRun.Epoch);
+            Assert.Equal(cancelledJob.CancelVersion, cancelledRun.CancelVersion);
+            Assert.Null(cancelledJob.LeaseOwner);
+            Assert.Null(cancelledRun.LeaseOwner);
+            Assert.Null(cancelledJob.LeaseUntil);
+            Assert.Null(cancelledRun.LeaseUntil);
+
+            client.DefaultRequestHeaders.Add(CheckpointService.InternalApiKeyHeader, Phase13ExamApiFactory.TestInternalApiKey);
+            var staleWrite = new OperationGrantRequest(run.RunId, 1, owner, "late-cancel-write", "INGEST",
+                Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes("late"))).ToLowerInvariant(), 0);
+            var staleResponse = await client.PostAsJsonAsync(
+                "/api/internal/reading-paper/checkpoints/grant-operation", staleWrite, ReadingPaperRules.Json);
+            Assert.Equal(HttpStatusCode.Conflict, staleResponse.StatusCode);
+            Assert.Contains("epoch fencing", await staleResponse.Content.ReadAsStringAsync(), StringComparison.OrdinalIgnoreCase);
+            Assert.False(await db.ReadingPaperOperations.AnyAsync(x => x.RunId == run.RunId && x.OperationId == "late-cancel-write"));
+        }
+    }
+    [Fact]
+    public async Task Worker_DoesNotResurrectRunWhenCancellationWinsDuringRunLoad()
+    {
+        var pause = new RunLoadPauseInterceptor();
+        await using var factory = new Phase13ExamApiFactory(ConnectionString, dbInterceptor: pause);
+        await factory.ResetJobsAsync();
+        using var client = factory.CreateAdminClient();
+        var job = new ReadingPaperJob
+        {
+            Topic = "Worker cancellation race regression",
+            Status = "Pending",
+            SourcesJson = "[]",
+            SectionsJson = "[]"
+        };
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+            db.ReadingPaperJobs.Add(job);
+            await db.SaveChangesAsync();
+        }
+
+        var worker = new ReadingPaperWorker(
+            factory.Services.GetRequiredService<IServiceScopeFactory>(),
+            NullLogger<ReadingPaperWorker>.Instance,
+            R03CapsProfileTests.ApprovedFromDeployEnvFile());
+        await worker.StartAsync(CancellationToken.None);
+        try
+        {
+            await pause.ReachedRunLoad.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            var cancelResponse = await client.PostAsync($"/api/admin/reading-paper/jobs/{job.Id}/cancel", null);
+            Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+        }
+        finally
+        {
+            pause.ResumeRunLoad.TrySetResult();
+            await worker.StopAsync(CancellationToken.None);
+        }
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+            var cancelledJob = await db.ReadingPaperJobs.AsNoTracking().SingleAsync(x => x.Id == job.Id);
+            Assert.Equal("Cancelled", cancelledJob.Status);
+            Assert.Null(cancelledJob.LeaseOwner);
+            Assert.False(await db.ReadingPaperRuns.AnyAsync(x => x.JobId == job.Id));
+        }
     }
 }

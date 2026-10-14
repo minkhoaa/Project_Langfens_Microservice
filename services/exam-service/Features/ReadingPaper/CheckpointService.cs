@@ -53,26 +53,26 @@ public static class CheckpointService
         if (job == null)
             throw new CheckpointValidationException(404, $"Job '{run.JobId}' not found");
 
-        // 1. Cancellation check
-        if (string.Equals(job.Status, "Cancelled", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(run.Status, "CANCELLED", StringComparison.OrdinalIgnoreCase) ||
-            job.CancelVersion != run.CancelVersion)
-        {
-            throw new CheckpointValidationException(409, "Run or Job has been cancelled; late operations rejected fail-closed");
-        }
-
-        // 2. Epoch fencing check
+        // 1. Epoch fencing check
         if (run.Epoch != epoch || job.Epoch != epoch)
         {
             throw new CheckpointValidationException(409,
                 $"Epoch fencing violation: requested epoch {epoch} does not match authoritative epoch (run: {run.Epoch}, job: {job.Epoch})");
         }
 
-        // 3. Lease ownership check
+        // 2. Lease ownership check
         if (run.LeaseOwner != leaseOwner || job.LeaseOwner != leaseOwner)
         {
             throw new CheckpointValidationException(409,
                 $"Lease fencing violation: requested leaseOwner '{leaseOwner}' does not match active lease owner");
+        }
+
+        // 3. Cancellation check, after authority checks so stale workers are identified as fenced.
+        if (string.Equals(job.Status, "Cancelled", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(run.Status, "CANCELLED", StringComparison.OrdinalIgnoreCase) ||
+            job.CancelVersion != run.CancelVersion)
+        {
+            throw new CheckpointValidationException(409, "Run or Job has been cancelled; late operations rejected fail-closed");
         }
 
         // 4. Lease expiration check

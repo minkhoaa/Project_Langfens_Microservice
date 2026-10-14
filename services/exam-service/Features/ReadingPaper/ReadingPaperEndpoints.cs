@@ -295,42 +295,83 @@ public static class ReadingPaperEndpoints
 
     private static async Task<IResult> Cancel(Guid id, ExamDbContext db, CancellationToken ct)
     {
-        var job = await db.ReadingPaperJobs.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (job is null) return Results.NotFound();
-        if (job.Status is "Completed" or "Cancelled" or "Aborted")
-            return Results.Conflict(new { error = $"Job in terminal status '{job.Status}' cannot be cancelled" });
+        var initialJob = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+        if (initialJob is null) return Results.NotFound();
+        if (initialJob.Status is "Completed" or "Cancelled" or "Aborted")
+            return Results.Conflict(new { error = $"Job in terminal status '{initialJob.Status}' cannot be cancelled" });
 
-        var expectedCancelVersion = job.CancelVersion;
-        var now = DateTime.UtcNow;
-        var cancellationLog = SerializeLog("Information", "Cancellation requested by admin. In-flight worker operations fenced.");
-
-        var rows = await db.ReadingPaperJobs
-            .Where(x => x.Id == id && (x.Status == "Pending" || x.Status == "Running" || x.Status == "NeedsSources") && x.CancelVersion == expectedCancelVersion)
-            .ExecuteUpdateAsync(x => x
-                .SetProperty(j => j.Status, "Cancelled")
-                .SetProperty(j => j.CancelVersion, j => j.CancelVersion + 1)
-                .SetProperty(j => j.Error, "Cancelled by user")
-                .SetProperty(j => j.LeaseUntil, (DateTime?)null)
-                .SetProperty(j => j.LeaseOwner, (Guid?)null)
-                .SetProperty(j => j.UpdatedAt, now)
-                .SetProperty(j => j.Logs, j => j.Logs + cancellationLog),
-                ct);
-
-        if (rows == 0)
+        var expectedEpoch = initialJob.Epoch;
+        var expectedCancelVersion = initialJob.CancelVersion;
+        var strategy = db.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            var refreshed = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
-            return Results.Conflict(new { error = $"Job status changed concurrently to '{refreshed?.Status}' and could not be cancelled" });
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
+            var job = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+            if (job is null) return Results.NotFound();
+            if (job.Status == "Cancelled" && job.Error == "Cancelled by user" &&
+                job.Epoch == expectedEpoch + 1 && job.CancelVersion == expectedCancelVersion + 1)
+                return Results.Ok(View(job));
+            if (job.Status is "Completed" or "Cancelled" or "Aborted")
+                return Results.Conflict(new { error = $"Job in terminal status '{job.Status}' cannot be cancelled" });
+
+            var now = DateTime.UtcNow;
+            var cancellationLog = SerializeLog("Information", "Cancellation requested by admin. In-flight worker operations fenced.");
+            var rows = await db.ReadingPaperJobs
+                .Where(x => x.Id == id &&
+                            (x.Status == "Pending" || x.Status == "Running" || x.Status == "NeedsSources") &&
+                            x.CancelVersion == expectedCancelVersion && x.Epoch == expectedEpoch)
+                .ExecuteUpdateAsync(x => x
+                    .SetProperty(j => j.Status, "Cancelled")
+                    .SetProperty(j => j.Epoch, j => j.Epoch + 1)
+                    .SetProperty(j => j.CancelVersion, j => j.CancelVersion + 1)
+                    .SetProperty(j => j.Error, "Cancelled by user")
+                    .SetProperty(j => j.LeaseUntil, (DateTime?)null)
+                    .SetProperty(j => j.LeaseOwner, (Guid?)null)
+                    .SetProperty(j => j.UpdatedAt, now)
+                    .SetProperty(j => j.Logs, j => j.Logs + "\n" + cancellationLog),
+                    ct);
+
+            if (rows == 0)
+            {
+                var refreshed = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+                return Results.Conflict(new { error = $"Job status changed concurrently to '{refreshed?.Status}' and could not be cancelled" });
+            }
+
+            await db.ReadingPaperRuns
+                .Where(r => r.JobId == id && r.Status == "RUNNING")
+                .ExecuteUpdateAsync(r => r
+                    .SetProperty(x => x.Status, "CANCELLED")
+                    .SetProperty(x => x.Epoch, expectedEpoch + 1)
+                    .SetProperty(x => x.CancelVersion, expectedCancelVersion + 1)
+                    .SetProperty(x => x.LeaseOwner, (Guid?)null)
+                    .SetProperty(x => x.LeaseUntil, (DateTime?)null)
+                    .SetProperty(x => x.UpdatedAt, now),
+                    ct);
+
+            var updatedJob = await db.ReadingPaperJobs.AsNoTracking().FirstAsync(x => x.Id == id, ct);
+            var response = Results.Ok(View(updatedJob));
+            await transaction.CommitAsync(ct);
+            return response;
+        });
+    }
+
+    private static IReadOnlyList<ReadingPaperLog> ReadLogs(string logs)
+    {
+        var entries = new List<ReadingPaperLog>();
+        foreach (var line in logs.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+        {
+            try
+            {
+                var entry = JsonSerializer.Deserialize<ReadingPaperLog>(line, ReadingPaperRules.Json);
+                if (entry is not null) entries.Add(entry);
+            }
+            catch (JsonException)
+            {
+                entries.Add(new ReadingPaperLog(DateTime.UtcNow, "Warning", $"Legacy log entry: {line}"));
+            }
         }
 
-        await db.ReadingPaperRuns
-            .Where(r => r.JobId == id && r.Status == "RUNNING")
-            .ExecuteUpdateAsync(r => r
-                .SetProperty(x => x.Status, "CANCELLED")
-                .SetProperty(x => x.UpdatedAt, now),
-                ct);
-
-        var updatedJob = await db.ReadingPaperJobs.AsNoTracking().FirstAsync(x => x.Id == id, ct);
-        return Results.Ok(View(updatedJob));
+        return entries;
     }
 
     internal static (List<ReadingSource>, string?) ValidateSources(List<ReadingSource>? sources)
@@ -378,10 +419,4 @@ public static class ReadingPaperEndpoints
     private static string SerializeLog(string level, string message)
         => JsonSerializer.Serialize(new ReadingPaperLog(DateTime.UtcNow, level, message), ReadingPaperRules.Json) + "\n";
 
-    private static IReadOnlyList<ReadingPaperLog> ReadLogs(string logs)
-        => logs.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-            .Select(line => JsonSerializer.Deserialize<ReadingPaperLog>(line, ReadingPaperRules.Json))
-            .Where(entry => entry is not null)
-            .Select(entry => entry!)
-            .ToList();
 }

@@ -14,7 +14,7 @@ Invariants:
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Union
 from uuid import UUID, uuid4
 
 from app.config import settings
@@ -279,13 +279,25 @@ class SectionGeneratorAdapter(GeneratorCapability):
                 parent_refs=parent_refs,
                 schema_version="2.0.0",
             )
+        source_info = self.source_info
+        if source_info is None and context.current_artifact is not None:
+            current_payload = context.current_artifact.payload
+            if isinstance(current_payload, Mapping):
+                current_source = current_payload.get("source")
+            else:
+                current_source = getattr(current_payload, "source", None)
+            if isinstance(current_source, SectionSourceInfo):
+                source_info = current_source
+            elif current_source is not None:
+                source_info = SectionSourceInfo.model_validate(current_source)
+
         envelope = assemble_immutable_section(
             section_index=self.section_index,
             title=self.title,
             passage_envelope=self.passage_envelope,
             blueprint_ref=self.blueprint_ref,
             question_envelopes=self.question_envelopes,
-            source_info=self.source_info,
+            source_info=source_info,
             evaluations_summary=eval_summary,
             run_id=context.run_id,
             version=version,

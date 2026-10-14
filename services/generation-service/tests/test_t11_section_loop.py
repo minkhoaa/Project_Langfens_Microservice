@@ -627,6 +627,80 @@ async def test_t11_05_section_loop_generic_runtime_scoped_repairs_invalidation()
 
 
 @pytest.mark.asyncio
+async def test_section_generation_preserves_source_from_current_accepted_artifact():
+    """Section regeneration keeps the source identity pinned on the accepted head."""
+    from app.loop.section import SectionGeneratorAdapter
+
+    run_id = "run_section_source_resume"
+    passage_with_source = create_mock_passage_envelope(2, 800, run_id)
+    passage_payload = dict(passage_with_source.payload)
+    passage_payload.pop("source")
+    passage_payload.pop("pmcid")
+    passage = ArtifactEnvelope.create(
+        artifact_id=passage_with_source.artifact_id,
+        artifact_type=ArtifactType.PASSAGE,
+        run_id=run_id,
+        payload=passage_payload,
+        producer_version="2.0.0",
+        version=1,
+        section_id=2,
+        parent_refs=[],
+        schema_version="2.0.0",
+    )
+    blueprint_ref = ArtifactRef(
+        artifactId="art_blueprint_02",
+        version=1,
+        artifactType=ArtifactType.EXAM_BLUEPRINT,
+        contentHash="b" * 64,
+    )
+    questions = create_mock_question_envelopes(2, run_id)
+    pinned_source = SectionSourceInfo(
+        pmcid="PMC9988776",
+        title="Pinned section source",
+        doi="10.1000/pinned.source",
+        url="https://example.org/pinned-source",
+        license="CC BY 4.0",
+        wordCount=800,
+        authors="Research team",
+    )
+    accepted_section = assemble_immutable_section(
+        section_index=2,
+        title="Section 2",
+        passage_envelope=passage,
+        blueprint_ref=blueprint_ref,
+        question_envelopes=questions,
+        source_info=pinned_source,
+        run_id=run_id,
+    )
+    owner = uuid4()
+    context = LoopContext(
+        runId=run_id,
+        scope=IssueScope.SECTION,
+        targetArtifactId="art_section_s2",
+        targetArtifactType=ArtifactType.SECTION,
+        sectionId=2,
+        authority=AuthorityGrant(leaseOwner=owner, epoch=1),
+        inputDependencies=tuple(
+            [passage.to_ref(), blueprint_ref, *(question.to_ref() for question in questions)]
+        ),
+        currentArtifact=accepted_section,
+    )
+    generator = SectionGeneratorAdapter(
+        section_index=2,
+        title="Section 2",
+        passage_envelope=passage,
+        blueprint_ref=blueprint_ref,
+        question_envelopes=questions,
+    )
+
+    regenerated = await generator.generate(context, "intent_section_source", version=2)
+    payload = regenerated.payload
+    if hasattr(payload, "model_dump"):
+        payload = payload.model_dump(mode="json", by_alias=True)
+    assert payload["source"]["pmcid"] == pinned_source.pmcid
+
+
+@pytest.mark.asyncio
 async def test_t11_06_accept_transaction_persist_sections_json_bridge_cas_fencing():
     """T11-06: Verifies authenticated checkpoint persistence, CAS/fencing, and atomic SectionsJson bridge."""
     db_path = Path(f"/tmp/test_t11_06_simulation_{uuid4().hex}.db")

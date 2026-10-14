@@ -999,7 +999,7 @@ class PaperLoop:
             paper_id=p_id,
             title=p_title,
             blueprint_ref=blueprint_ref,
-            section_envelopes=section_envelopes,
+            section_envelopes=resolved_sections,
             persistence_client=self.persistence_client,
         )
 

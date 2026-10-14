@@ -60,9 +60,7 @@ builder.Services.AddHttpClient<ReadingPaperAiClient>(client =>
            ?? "http://generation-service:8080";
     client.BaseAddress = new Uri(url.TrimEnd('/') + "/");
     client.Timeout = TimeSpan.FromMinutes(45);
-    var internalKey = builder.Configuration["EXAMSERVICE__INTERNAL__API__KEY"]
-                      ?? builder.Configuration["INTERNAL_API_KEY"]
-                      ?? "";
+    var internalKey = ReadingPaperAiClientConfiguration.ResolveInternalApiKey(builder.Configuration);
     if (!string.IsNullOrEmpty(internalKey))
     {
         client.DefaultRequestHeaders.Add(CheckpointService.InternalApiKeyHeader, internalKey);
@@ -111,9 +109,9 @@ app.MapDefaultEndpoints();
 
 // `/healthz` alias over the same health checks (including the exam-db Npgsql check).
 // Test/ops harnesses probe `/healthz` specifically — see
-// services/generation-service/tests/test_t09_real_postgres_durability.py:53 and
-// scripts/refactor/run_browser_e2e.py:531 — and generation-service (app/main.py:46)
-// and ai-service (app/routers/health.py:9) both already serve it. Without this alias
+// services/generation-service/tests/test_t09_real_postgres_durability.py:53 —
+// and generation-service (app/main.py:46) and ai-service (app/routers/health.py:9)
+// both already serve it. Without this alias
 // exam-service 404s on `/healthz`, and `urllib.request.urlopen` raises HTTPError on
 // 404, so those reachability guards report "not reachable" even while the service is live.
 app.MapHealthChecks("/healthz").AllowAnonymous();

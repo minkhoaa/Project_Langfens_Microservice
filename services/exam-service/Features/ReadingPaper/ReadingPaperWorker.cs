@@ -46,101 +46,115 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                 .SetProperty(j => j.LeaseUntil, DateTime.UtcNow.AddMinutes(3))
                 .SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
         if (claimed == 0) return true;
-        var job = await db.ReadingPaperJobs.FirstAsync(x => x.Id == id, ct);
-
-        // Ensure ReadingPaperRun is stable across epochs for this job
-        var runId = string.IsNullOrWhiteSpace(job.ActiveRunId) ? $"run_{job.Id:N}" : job.ActiveRunId;
-        job.ActiveRunId = runId;
-        var run = await db.ReadingPaperRuns.FirstOrDefaultAsync(r => r.JobId == job.Id, ct);
-        if (run == null)
+        ReadingPaperJob? job = null;
+        var strategy = db.Database.CreateExecutionStrategy();
+        var persisted = await strategy.ExecuteAsync(async () =>
         {
-            // Route new jobs through canary selection.
-            // Explicit override is only used if user specifically configured source metadata
-            string? userRequestedEngine = null;
-            if (!string.IsNullOrWhiteSpace(job.SourcesJson))
+            db.ChangeTracker.Clear();
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
+            var currentJob = await db.ReadingPaperJobs.FirstAsync(x => x.Id == id, ct);
+            if (currentJob.Status != "Running" || currentJob.LeaseOwner != owner ||
+                currentJob.LeaseUntil <= DateTime.UtcNow)
             {
-                if (job.SourcesJson.Contains("\"engine\":\"v1\"", StringComparison.OrdinalIgnoreCase) ||
-                    job.SourcesJson.Contains("\"engine\": \"v1\"", StringComparison.OrdinalIgnoreCase))
-                {
-                    userRequestedEngine = CanaryRoutingService.V1Engine;
-                }
-                else if (job.SourcesJson.Contains("\"engine\":\"v2\"", StringComparison.OrdinalIgnoreCase) ||
-                         job.SourcesJson.Contains("\"engine\": \"v2\"", StringComparison.OrdinalIgnoreCase))
-                {
-                    userRequestedEngine = CanaryRoutingService.V2Engine;
-                }
+                await transaction.RollbackAsync(ct);
+                return false;
             }
 
-            var routing = canary?.RouteRun(runId, requestedEngine: userRequestedEngine, existingRun: null);
-            var engineVersion = routing?.EngineVersion ?? "2.0.0";
-            job.EngineVersion = engineVersion;
-            var isMiniMaxOrBenchmark = (!string.IsNullOrWhiteSpace(job.SourcesJson) && (
-                job.SourcesJson.Contains("\"provider\":\"minimax\"", StringComparison.OrdinalIgnoreCase) ||
-                job.SourcesJson.Contains("\"provider\": \"minimax\"", StringComparison.OrdinalIgnoreCase)))
-                || job.Topic.Contains("Benchmark", StringComparison.OrdinalIgnoreCase)
-                || job.Topic.Contains("MiniMax", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(Environment.GetEnvironmentVariable("LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase);
-
-            var runProfile = isMiniMaxOrBenchmark
-                ? (caps.IsBenchmarkUnlimited ? caps : caps.ToUnlimitedBenchmarkProfile())
-                : caps;
-
-            run = new ReadingPaperRun
+            var runId = string.IsNullOrWhiteSpace(currentJob.ActiveRunId)
+                ? $"run_{currentJob.Id:N}"
+                : currentJob.ActiveRunId;
+            currentJob.ActiveRunId = runId;
+            var run = await db.ReadingPaperRuns.FirstOrDefaultAsync(r => r.JobId == currentJob.Id, ct);
+            if (run is null)
             {
-                Id = Guid.NewGuid(),
-                JobId = job.Id,
-                RunId = runId,
-                Epoch = job.Epoch,
-                Status = "RUNNING",
-                LeaseOwner = owner,
-                LeaseUntil = job.LeaseUntil,
-                CancelVersion = job.CancelVersion,
-                EngineVersion = engineVersion,
-                SchemaVersion = job.SchemaVersion,
-                PolicyVersion = job.PolicyVersion,
-                SourceRevisionsJson = job.SourcesJson,
-                BudgetCapCalls = isMiniMaxOrBenchmark ? ReadingPaperCapsProfile.UnlimitedCap : caps.RunBudgetCapCalls,
-                BudgetCapTokens = isMiniMaxOrBenchmark ? ReadingPaperCapsProfile.UnlimitedCap : caps.RunBudgetCapTokens,
-                BudgetCapWallTimeSeconds = isMiniMaxOrBenchmark ? ReadingPaperCapsProfile.UnlimitedCap : caps.RunBudgetCapWallTimeSeconds,
-                BudgetProfileVersion = runProfile.Version,
-                BudgetProfileSha256 = runProfile.Sha256,
-                BudgetProfileSource = runProfile.Source,
-                BudgetProfileJson = runProfile.SnapshotJson,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            db.ReadingPaperRuns.Add(run);
-        }
-        else
-        {
-            // Keep pinned to existing run engine version
-            job.EngineVersion = run.EngineVersion;
-            run.Epoch = job.Epoch;
-            run.LeaseOwner = owner;
-            run.LeaseUntil = job.LeaseUntil;
-            run.Status = "RUNNING";
-            var isExistingMiniMaxOrBenchmark = (!string.IsNullOrWhiteSpace(job.SourcesJson) && (
-                job.SourcesJson.Contains("\"provider\":\"minimax\"", StringComparison.OrdinalIgnoreCase) ||
-                job.SourcesJson.Contains("\"provider\": \"minimax\"", StringComparison.OrdinalIgnoreCase)))
-                || job.Topic.Contains("Benchmark", StringComparison.OrdinalIgnoreCase)
-                || job.Topic.Contains("MiniMax", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(Environment.GetEnvironmentVariable("LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase);
-            if (isExistingMiniMaxOrBenchmark && run.BudgetCapTokens > 0)
-            {
-                var runProfile = caps.IsBenchmarkUnlimited ? caps : caps.ToUnlimitedBenchmarkProfile();
-                run.BudgetCapCalls = ReadingPaperCapsProfile.UnlimitedCap;
-                run.BudgetCapTokens = ReadingPaperCapsProfile.UnlimitedCap;
-                run.BudgetCapWallTimeSeconds = ReadingPaperCapsProfile.UnlimitedCap;
-                run.BudgetProfileVersion = runProfile.Version;
-                run.BudgetProfileSha256 = runProfile.Sha256;
-                run.BudgetProfileSource = runProfile.Source;
-                run.BudgetProfileJson = runProfile.SnapshotJson;
+                string? userRequestedEngine = null;
+                if (!string.IsNullOrWhiteSpace(currentJob.SourcesJson))
+                {
+                    if (currentJob.SourcesJson.Contains("\"engine\":\"v1\"", StringComparison.OrdinalIgnoreCase) ||
+                        currentJob.SourcesJson.Contains("\"engine\": \"v1\"", StringComparison.OrdinalIgnoreCase))
+                    {
+                        userRequestedEngine = CanaryRoutingService.V1Engine;
+                    }
+                    else if (currentJob.SourcesJson.Contains("\"engine\":\"v2\"", StringComparison.OrdinalIgnoreCase) ||
+                             currentJob.SourcesJson.Contains("\"engine\": \"v2\"", StringComparison.OrdinalIgnoreCase))
+                    {
+                        userRequestedEngine = CanaryRoutingService.V2Engine;
+                    }
+                }
+
+                var routing = canary?.RouteRun(runId, requestedEngine: userRequestedEngine, existingRun: null);
+                var engineVersion = routing?.EngineVersion ?? "2.0.0";
+                currentJob.EngineVersion = engineVersion;
+                var isMiniMaxOrBenchmark = IsMiniMaxOrBenchmark(currentJob);
+                var runProfile = isMiniMaxOrBenchmark
+                    ? (caps.IsBenchmarkUnlimited ? caps : caps.ToUnlimitedBenchmarkProfile())
+                    : caps;
+                run = new ReadingPaperRun
+                {
+                    Id = Guid.NewGuid(),
+                    JobId = currentJob.Id,
+                    RunId = runId,
+                    Epoch = currentJob.Epoch,
+                    Status = "RUNNING",
+                    LeaseOwner = owner,
+                    LeaseUntil = currentJob.LeaseUntil,
+                    CancelVersion = currentJob.CancelVersion,
+                    EngineVersion = engineVersion,
+                    SchemaVersion = currentJob.SchemaVersion,
+                    PolicyVersion = currentJob.PolicyVersion,
+                    SourceRevisionsJson = currentJob.SourcesJson,
+                    BudgetCapCalls = isMiniMaxOrBenchmark ? ReadingPaperCapsProfile.UnlimitedCap : caps.RunBudgetCapCalls,
+                    BudgetCapTokens = isMiniMaxOrBenchmark ? ReadingPaperCapsProfile.UnlimitedCap : caps.RunBudgetCapTokens,
+                    BudgetCapWallTimeSeconds = isMiniMaxOrBenchmark ? ReadingPaperCapsProfile.UnlimitedCap : caps.RunBudgetCapWallTimeSeconds,
+                    BudgetProfileVersion = runProfile.Version,
+                    BudgetProfileSha256 = runProfile.Sha256,
+                    BudgetProfileSource = runProfile.Source,
+                    BudgetProfileJson = runProfile.SnapshotJson,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                db.ReadingPaperRuns.Add(run);
             }
-            run.UpdatedAt = DateTime.UtcNow;
-        }
-        await db.SaveChangesAsync(ct);
+            else
+            {
+                currentJob.EngineVersion = run.EngineVersion;
+                run.Epoch = currentJob.Epoch;
+                run.LeaseOwner = owner;
+                run.LeaseUntil = currentJob.LeaseUntil;
+                run.CancelVersion = currentJob.CancelVersion;
+                run.Status = "RUNNING";
+                if (IsMiniMaxOrBenchmark(currentJob) && run.BudgetCapTokens > 0)
+                {
+                    var runProfile = caps.IsBenchmarkUnlimited ? caps : caps.ToUnlimitedBenchmarkProfile();
+                    run.BudgetCapCalls = ReadingPaperCapsProfile.UnlimitedCap;
+                    run.BudgetCapTokens = ReadingPaperCapsProfile.UnlimitedCap;
+                    run.BudgetCapWallTimeSeconds = ReadingPaperCapsProfile.UnlimitedCap;
+                    run.BudgetProfileVersion = runProfile.Version;
+                    run.BudgetProfileSha256 = runProfile.Sha256;
+                    run.BudgetProfileSource = runProfile.Source;
+                    run.BudgetProfileJson = runProfile.SnapshotJson;
+                }
+
+                run.UpdatedAt = DateTime.UtcNow;
+            }
+
+            var claimStillActive = await db.ReadingPaperJobs
+                .Where(x => x.Id == currentJob.Id && x.Status == "Running" &&
+                            x.Epoch == currentJob.Epoch && x.LeaseOwner == owner &&
+                            x.CancelVersion == currentJob.CancelVersion && x.LeaseUntil > DateTime.UtcNow)
+                .ExecuteUpdateAsync(x => x.SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
+            if (claimStillActive != 1)
+            {
+                await transaction.RollbackAsync(ct);
+                return false;
+            }
+
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+            job = currentJob;
+            return true;
+        });
+        if (!persisted || job is null) return true;
 
         await AppendLogAsync(id, "Information",
             $"Worker claimed job for topic '{job.Topic}' with {JsonSerializer.Deserialize<List<ReadingSource>>(job.SourcesJson, ReadingPaperRules.Json)?.Count ?? 0} source(s) [Epoch {job.Epoch}].", ct);
@@ -1168,6 +1182,15 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
         "SHORT_ANSWER" => "Answer the questions below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
         _ => "Answer the questions below according to the reading passage."
     };
+
+    private static bool IsMiniMaxOrBenchmark(ReadingPaperJob job)
+        => (!string.IsNullOrWhiteSpace(job.SourcesJson) &&
+            (job.SourcesJson.Contains("\"provider\":\"minimax\"", StringComparison.OrdinalIgnoreCase) ||
+             job.SourcesJson.Contains("\"provider\": \"minimax\"", StringComparison.OrdinalIgnoreCase))) ||
+           job.Topic.Contains("Benchmark", StringComparison.OrdinalIgnoreCase) ||
+           job.Topic.Contains("MiniMax", StringComparison.OrdinalIgnoreCase) ||
+           string.Equals(Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase) ||
+           string.Equals(Environment.GetEnvironmentVariable("LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase);
 
     public static Exam BuildExam(ReadingPaperJob job, IReadOnlyList<ReadingGeneratedSection> sections)
     {
