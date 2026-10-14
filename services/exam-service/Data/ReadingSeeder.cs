@@ -156,27 +156,59 @@ Write ONE OR TWO WORDS from the passage for each answer.
             }
         };
 
-        // Q5: SentenceCompletion (reclassified from FlowChart — prompt is fill-in-blanks only,
-        // no reorder; OrderCorrects was null, only BlankAcceptTexts used. FlowChart semantics
-        // require reorderable steps + per-step text, which Q5 lacks.)
+        // Q5: FlowChart — 4 papermaking process steps in chronological order.
+        // Real FLOW_CHART semantics (sequence order matching, exactly like Q12).
         var q5Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q5");
         var q5 = new ExamQuestion
         {
             Id = q5Id, SectionId = s1Id, Idx = 5,
-            Type = QuestionType.SentenceCompletion, Skill = "READING", Difficulty = 2,
-            PromptMd = @"Complete the flow chart showing the papermaking process described in the passage.
-Write ONE OR TWO WORDS from the passage for each answer.
+            Type = QuestionType.FlowChart, Skill = "READING", Difficulty = 2,
+            PromptMd = @"The flow chart below illustrates the traditional papermaking process invented by Cai Lun as described in the passage.
 
-Process:
-1. Collect raw materials such as rags, hemp and fishnets
-2. [8] the fibres in water
-3. Press the fibres into a [9]
-4. Dry the resulting [10] in the sun",
-            BlankAcceptTexts = new Dictionary<string, string[]?>
+```
+┌─────────────────────────────────────────────────────────────┐
+│                           STAGE 1                           │
+│   Collect raw materials such as rags, hemp, and fishnets    │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                           STAGE 2                           │
+│          Soak the raw fibres in water to soften them        │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                           STAGE 3                           │
+│         Press the fibres together into a fibrous mat        │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                           STAGE 4                           │
+│             Dry the resulting sheets in the sun             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Look at the four steps of the papermaking process below and put them into the correct chronological order:
+
+Available steps:
+
+A. Soak the raw fibres in water to soften them
+
+B. Dry the resulting sheets in the sun
+
+C. Collect raw materials such as rags, hemp, and fishnets
+
+D. Press the fibres together into a fibrous mat
+
+Arrange steps in the correct chronological order:",
+            OrderCorrects = new List<string>
             {
-                { "8", new[] { "soak", "soaking", "break down" } },
-                { "9", new[] { "mat", "fibrous mat" } },
-                { "10", new[] { "sheet", "paper sheet" } }
+                "collect-raw-materials-such-as-rags-hemp-and-fishnets",
+                "soak-the-raw-fibres-in-water-to-soften-them",
+                "press-the-fibres-together-into-a-fibrous-mat",
+                "dry-the-resulting-sheets-in-the-sun"
             }
         };
 
@@ -215,14 +247,21 @@ In response to these pressures, many museums have redefined their role as commun
             PromptMd = @"The reading passage has five paragraphs, 1–5.
 Choose the correct heading for each paragraph from the list of headings below.
 
-List of Headings
-i.  How museum purposes have changed over time
-ii.  The economic model of major international exhibitions
-iii.  Digital technology and its effect on visitor experience
-iv.  Disputes over the ownership of cultural artefacts
-v.  Museums as neighbourhood service centres
-vi.  The difference between local visitors and tourists
-vii. Funding challenges for smaller cultural institutions",
+List of Headings:
+i. How museum purposes have changed over time
+ii. The economic model of major international exhibitions
+iii. Digital technology and its effect on visitor experience
+iv. Disputes over the ownership of cultural artefacts
+v. Museums as neighbourhood service centres
+vi. The difference between local visitors and tourists
+vii. Funding challenges for smaller cultural institutions
+
+Paragraphs:
+1. Paragraph 1
+2. Paragraph 2
+3. Paragraph 3
+4. Paragraph 4
+5. Paragraph 5",
             Options = new List<ExamOption>
             {
                 new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 1, ContentMd = "i. How museum purposes have changed over time" },
@@ -254,7 +293,14 @@ vii. Funding challenges for smaller cultural institutions",
             PromptMd = @"The reading passage has five paragraphs, A–E.
 Which paragraph contains the following information?
 
-Note: Each paragraph letter may be used more than once. Four of the results will be used.",
+Write the correct letter, A–E, on your answer sheet.
+NB You may use any letter more than once.
+
+Questions 1–4:
+1. Commercial pressures and blockbuster exhibitions
+2. Technology reshaping the museum experience
+3. Ethical complexities of colonial-era collections
+4. Community outreach and social programmes",
             Options = new List<ExamOption>
             {
                 new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 1, ContentMd = "A. Paragraph A" },
@@ -297,9 +343,15 @@ Note: Each paragraph letter may be used more than once. Four of the results will
         {
             Id = q9Id, SectionId = s2Id, Idx = 4,
             Type = QuestionType.MatchingFeatures, Skill = "READING", Difficulty = 3,
-            PromptMd = @"Each statement below lists characteristics of a museum initiative.
+            PromptMd = @"Look at the following museum initiatives and the list of features below.
 Match each initiative (1–4) with the correct feature (A–E).
-Note: Two statements will NOT be matched.",
+Note: One feature will NOT be matched.
+
+Initiatives:
+1. Blockbuster exhibitions
+2. Digital technology
+3. Repatriation debates
+4. Community programmes",
             Options = new List<ExamOption>
             {
                 new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 1, ContentMd = "A. Generates significant income" },
@@ -324,8 +376,14 @@ Note: Two statements will NOT be matched.",
         {
             Id = q10Id, SectionId = s2Id, Idx = 5,
             Type = QuestionType.MatchingEndings, Skill = "READING", Difficulty = 3,
-            PromptMd = @"Complete each sentence with the correct ending, A–F.
-Write the correct letter on your answer sheet.",
+            PromptMd = @"Complete each sentence with the correct ending, A–F, below.
+Write the correct letter on your answer sheet.
+
+Sentence beginnings:
+1. While blockbuster exhibitions attract large numbers of visitors…
+2. When a museum shares a high-resolution digital image online…
+3. Revenue from commercial activities can be reinvested…
+4. Modern museums increasingly see themselves as having…",
             Options = new List<ExamOption>
             {
                 new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 1, ContentMd = "A. …the crowds they draw can overshadow the museum's educational mission" },
@@ -397,9 +455,13 @@ Critics point to significant limitations. Vertical farming consumes enormous amo
             PromptMd = @"Look at the four steps of the vertical farming process below and put them in the correct chronological order.
 
 Available steps:
+
 A. LED lights simulate natural sunlight
+
 B. Sensors monitor plant health in real time
+
 C. Hydroponic systems deliver nutrients to plant roots
+
 D. Workers harvest and package the produce for supermarkets
 
 Arrange steps in the correct chronological order:",
@@ -551,7 +613,12 @@ Remote Work: Key Findings
             Id = q20Id, SectionId = s4Id, Idx = 4,
             Type = QuestionType.MatchingFeatures, Skill = "READING", Difficulty = 3,
             PromptMd = @"Match each group (1–3) with the correct feature (A–E).
-Note: Two features will NOT be used.",
+Note: Two features will NOT be used.
+
+Groups:
+1. Remote workers
+2. Technology companies
+3. Four-day work week companies",
             Options = new List<ExamOption>
             {
                 new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 1, ContentMd = "A. Developed digital tools for distributed teams" },
@@ -614,8 +681,14 @@ Modern reconstruction efforts have attracted significant international interest.
         {
             Id = q22Id, SectionId = s5Id, Idx = 2,
             Type = QuestionType.MatchingEndings, Skill = "READING", Difficulty = 3,
-            PromptMd = @"Complete each sentence with the correct ending, A–F.
-Write the correct letter on your answer sheet.",
+            PromptMd = @"Complete each sentence with the correct ending, A–F, below.
+Write the correct letter on your answer sheet.
+
+Sentence beginnings:
+1. The ancient library held…
+2. Alongside books, the institution housed…
+3. The library's decline was caused by…
+4. The modern Bibliotheca Alexandrina now contains…",
             Options = new List<ExamOption>
             {
                 new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 1, ContentMd = "A. …400,000 scrolls containing works by the greatest authors of antiquity" },
@@ -678,19 +751,20 @@ Write ONE OR TWO WORDS from the passage for each answer.
 LIBRARY OF ALEXANDRIA — INFORMATION SHEET
 
 Founded: [26] century BCE
-Location: Alexandria, Egypt
-Supported by: [27] dynasty
+Location: [27], Egypt
+Supported by: [28] dynasty
 Purpose: Collect all human knowledge in one place
-Peak collection: [28] scrolls
-Modern successor: [29] (opened 2002)
-Modern collection size: [30] titles",
+Peak collection: [29] scrolls
+Modern successor: [30] (opened 2002)
+Modern collection size: [31] titles",
             BlankAcceptTexts = new Dictionary<string, string[]?>
             {
                 { "26", new[] { "3rd", "third" } },
-                { "27", new[] { "Ptolemaic" } },
-                { "28", new[] { "400,000" } },
-                { "29", new[] { "Bibliotheca Alexandrina" } },
-                { "30", new[] { "8 million", "eight million" } }
+                { "27", new[] { "Alexandria" } },
+                { "28", new[] { "Ptolemaic" } },
+                { "29", new[] { "400,000" } },
+                { "30", new[] { "Bibliotheca Alexandrina" } },
+                { "31", new[] { "8 million", "eight million" } }
             }
         };
 

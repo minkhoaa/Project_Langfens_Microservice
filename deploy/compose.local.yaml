@@ -66,6 +66,8 @@ services:
     build:
       context: ..
       dockerfile: services/exam-service/Dockerfile
+    environment:
+      AI_SERVICE_URL: http://ai-service:8080
     env_file:
       - path: ./envs/exam.env
         required: false

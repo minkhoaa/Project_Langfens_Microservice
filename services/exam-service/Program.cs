@@ -7,13 +7,14 @@ using exam_service.Features.Exams.AdminEndpoint.SectionEndpoint;
 using exam_service.Features.Exams.InternalEndpoint;
 using exam_service.Features.Exams.PublicEndpoint;
 using exam_service.Features.QuestionBank;
+using exam_service.Features.ReadingPaper;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Npgsql;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
+using Shared.Bootstrap;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.Services.AddLangfensAuth(key => Environment.GetEnvironmentVariable(key))
 builder.Services.AddExamAuthorization();
 builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Exam Service");
+builder.Services.AddHttpContextAccessor();
 
 // ── Database ───────────────────────────────────────────────────────────────
 // Npgsql 8+ requires explicit opt-in for jsonb → CLR type mapping (Dictionary, List, etc.)
@@ -37,6 +39,7 @@ builder.Services.AddLangfensSwagger("Exam Service");
 builder.AddNpgsqlDbContext<ExamDbContext>("exam-db", configureDbContextOptions: opts =>
 {
     opts.UseNpgsql(o => o.ConfigureDataSource(ds => ds.EnableDynamicJson()));
+    opts.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
 // ── Services ─────────────────────────────────────────────────────────────
@@ -47,6 +50,23 @@ builder.Services.AddScoped<IAdminSectionService, AdminSectionService>();
 builder.Services.AddScoped<IInternalExamService, InternalExamService>();
 builder.Services.AddScoped<IAdminQuestionService, AdminQuestionService>();
 builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
+builder.Services.AddSingleton<ReadingPaperCapsProfile>(_ =>
+    ReadingPaperCapsProfile.FromConfiguration(builder.Configuration));
+builder.Services.AddSingleton<CanaryRoutingService>();
+builder.Services.AddHttpClient<ReadingPaperAiClient>(client =>
+{
+    var url = Environment.GetEnvironmentVariable("GENERATION_SERVICE_URL")
+           ?? Environment.GetEnvironmentVariable("AI_SERVICE_URL")
+           ?? "http://generation-service:8080";
+    client.BaseAddress = new Uri(url.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromMinutes(45);
+    var internalKey = ReadingPaperAiClientConfiguration.ResolveInternalApiKey(builder.Configuration);
+    if (!string.IsNullOrEmpty(internalKey))
+    {
+        client.DefaultRequestHeaders.Add(CheckpointService.InternalApiKeyHeader, internalKey);
+    }
+});
+builder.Services.AddHostedService<ReadingPaperWorker>();
 
 // ── gRPC + HTTP ports ───────────────────────────────────────────────────
 // Under Aspire, ASPNETCORE_URLS is injected and Kestrel binds to those endpoints
@@ -83,15 +103,28 @@ using (var scope = app.Services.CreateScope())
 
     // Seed canonical IELTS Reading practice exams (idempotent — skipped when slug present).
     await exam_service.Data.ReadingSeeder.SeedReadingExamAsync(db);
-    await exam_service.Data.GeneratedReadingSeeder.SeedAsync(db);
 }
 
 app.MapDefaultEndpoints();
+
+// `/healthz` alias over the same health checks (including the exam-db Npgsql check).
+// Test/ops harnesses probe `/healthz` specifically — see
+// services/generation-service/tests/test_t09_real_postgres_durability.py:53 —
+// and generation-service (app/main.py:46) and ai-service (app/routers/health.py:9)
+// both already serve it. Without this alias
+// exam-service 404s on `/healthz`, and `urllib.request.urlopen` raises HTTPError on
+// 404, so those reachability guards report "not reachable" even while the service is live.
+app.MapHealthChecks("/healthz").AllowAnonymous();
 
 // Static files (serves /uploads/images/...). Placed before auth so the
 // images are publicly readable; the upload endpoint itself still requires Admin.
 var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "images"));
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -112,7 +145,13 @@ app.MapAdminQuestionEndpoint();
 app.MapAdminOptionEndpoint();
 app.MapInternalExamEndpoint();
 app.MapQuestionBankEndpoints();
+app.MapReadingPaperEndpoints();
+app.MapCheckpointEndpoints();
+app.MapFeedbackEndpoints();
 app.MapAdminUploadEndpoint();
 app.Run();
 
-public partial class Program { }
+namespace exam_service
+{
+    public partial class Program { }
+}

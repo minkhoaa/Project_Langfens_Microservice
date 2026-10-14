@@ -1,7 +1,7 @@
 FROM python:3.12-slim AS deps
 WORKDIR /app
 COPY services/ai-service/requirements.txt .
-RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+RUN pip install --default-timeout=1000 --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 
 FROM python:3.12-slim AS runtime
 WORKDIR /app

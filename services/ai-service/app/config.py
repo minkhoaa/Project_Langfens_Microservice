@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     # The ai-service uses Ollama only for embeddings (BGE-M3). LLM calls go to
     # Groq (see groq_base_url / groq_model below). The Ollama container must
     # remain in deploy/compose.yaml.
-    ollama_base_url: str = "http://localhost:11434"
+    ollama_base_url: str = "http://ollama:11434"
     ollama_embed_model: str = "bge-m3"
     ollama_embed_dimensions: int = 1024
     ollama_timeout: int = 60  # used by embedding_service for /api/embeddings
@@ -46,6 +46,13 @@ class Settings(BaseSettings):
     groq_base_url: str = "https://api.groq.com/openai/v1"
     groq_model: str = "openai/gpt-oss-20b"
 
+
+    # --- MiniMax (LLM) ---
+    minimax_base_url: str = "https://api.minimaxi.chat/v1"
+    minimax_model: str = "MiniMax-Text-01"
+    minimax_api_key: str = ""
+    minimax_api_keys: str = ""
+    llm_provider_order: str = "minimax,groq"
     # --- Legacy / speaking-only ---
     # These fields are NOT used by the LLM-judge path (which is Groq-only).
     # They exist because out-of-scope speaking code still reads them:

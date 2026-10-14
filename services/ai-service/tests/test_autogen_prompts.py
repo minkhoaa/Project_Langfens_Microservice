@@ -23,7 +23,7 @@ def test_build_system_prompt_includes_required_sections(qtype, json_shape, const
     assert qtype in prompt
     assert json_shape in prompt
     assert "Strict JSON mode" in prompt
-    assert "Output ONLY a single JSON array" in prompt
+    assert 'Output ONLY a single JSON object of the form: {"questions": [...]}' in prompt
 
 
 def test_build_system_prompt_includes_constraints():
@@ -34,9 +34,10 @@ def test_build_system_prompt_includes_constraints():
 
 
 def test_build_user_prompt_includes_passage_count_difficulty():
-    prompt = build_user_prompt("MULTIPLE_CHOICE_SINGLE", "source text here", 3, 4)
+    prompt = build_user_prompt("MULTIPLE_CHOICE_SINGLE", "source text here", 3, 4, skill="READING")
     assert "source text here" in prompt
     assert "Generate 3 MULTIPLE_CHOICE_SINGLE question(s)" in prompt
+    assert "for skill READING" in prompt
     assert "at difficulty 4" in prompt
 
 

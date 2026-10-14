@@ -48,22 +48,39 @@ public static class GrpcSnapshotSanitizer
 {
     public static InternalDeliveryExam Sanitize(InternalDeliveryExam exam)
     {
-        var clone = exam.Clone(); // protobuf có IDeepCloneable
+        var clone = exam.Clone();
         foreach (var sec in clone.Sections)
-        foreach (var grp in sec.QuestionGroups)
-        foreach (var q in grp.Questions)
-        foreach (var o in q.Options)
-            if (o.HasIsCorrect)
-                o.ClearIsCorrect(); // unset optional bool
-        foreach (var sec in clone.Sections)
-        foreach (var grp in sec.QuestionGroups)
-        foreach (var q in grp.Questions)
         {
-            q.CompletionAccepts.Clear();
-            q.MatchPairs.Clear();
-            q.OrderCorrects.Clear();
-            q.ShortAnswerAcceptTexts.Clear();
-            q.ShortAnswerAcceptRegex.Clear();
+            foreach (var grp in sec.QuestionGroups)
+            {
+                foreach (var q in grp.Questions)
+                {
+                    q.ExplanationMd = string.Empty;
+                    foreach (var o in q.Options)
+                    {
+                        if (o.HasIsCorrect)
+                            o.ClearIsCorrect();
+                    }
+                    q.CompletionAccepts.Clear();
+                    q.MatchPairs.Clear();
+                    q.OrderCorrects.Clear();
+                    q.ShortAnswerAcceptTexts.Clear();
+                    q.ShortAnswerAcceptRegex.Clear();
+                    if (q.FlowChartNodes.Count > 0)
+                    {
+                        var count = q.FlowChartNodes.Count;
+                        q.FlowChartNodes.Clear();
+                        for (var i = 1; i <= count; i++)
+                        {
+                            q.FlowChartNodes.Add(new FlowChartNode
+                            {
+                                Key = $"step-{i}",
+                                Label = $"Step {i}"
+                            });
+                        }
+                    }
+                }
+            }
         }
         return clone;
     }

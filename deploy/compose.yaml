@@ -55,6 +55,9 @@ services:
 
   exam-service:
     image: ${DOCKERHUB_USER}/langfens-exam:${TAG}
+    environment:
+      AI_SERVICE_URL: http://ai-service:8080
+      GENERATION_SERVICE_URL: http://generation-service:8080
     env_file:
       - path: ./envs/exam.env
         required: false
@@ -66,6 +69,8 @@ services:
     depends_on:
       exam-database:
         condition: "service_healthy"
+      generation-service:
+        condition: "service_started"
     networks:
       - backend
 
@@ -448,12 +453,30 @@ services:
       - "8092:8080"
     networks:
       - backend
+    volumes:
+      # Mount the fine-tuned Qwen2.5-LoRA adapter so Speaking Grade works.
+      # The adapter is ~36MB (safetensors) and lives in models/qwen25-lora/
+      # relative to the repo root (one level above deploy/).
+      - ../models/qwen25-lora:/app/models/qwen25-lora:ro
     depends_on:
       redis:
         condition: service_healthy
       ollama-init:
         condition: service_completed_successfully
 
+  generation-service:
+    build:
+      context: ../
+      dockerfile: services/generation-service/Dockerfile
+    container_name: generation-service
+    ports:
+      - "8095:8080"
+    env_file:
+      - path: ./envs/ai.env
+        required: false
+    restart: unless-stopped
+    networks:
+      - backend
 
 networks:
   backend:

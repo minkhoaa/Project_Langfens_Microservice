@@ -1,0 +1,33 @@
+{
+  "evaluationId": "eval_pass_001",
+  "evaluatorId": "evaluator_deterministic_boundary",
+  "evaluatorVersion": "1.0.0",
+  "targetRef": {
+    "artifactId": "art_passage_001",
+    "artifactType": "Passage",
+    "version": 1,
+    "contentHash": "d177f3c0d050e6351cb99dc4810a904e80da37c3ae4d29c0499cdcb08b07e386"
+  },
+  "status": "PASS",
+  "issues": [],
+  "score": 1.0,
+  "inputDependencyRefs": [
+    {
+      "artifactId": "art_evidence_001",
+      "artifactType": "EvidenceGraph",
+      "version": 1,
+      "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "provider": "internal",
+  "model": "code-validator",
+  "promptVersion": null,
+  "elapsedMs": 14.5,
+  "usage": {
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "totalTokens": 0,
+    "costUsd": 0.0
+  },
+  "evaluatedAt": "2026-09-30T12:00:01Z"
+}

@@ -1,7 +1,6 @@
 # E2E Test Harness — Writing Module
 
-Layer 2 (backend) and Layer 3 (browser) entry points. Spec at
-`docs/superpowers/specs/2026-04-27-writing-e2e-simulation-design.md`.
+Layer 2 (backend) and Layer 3 (browser) entry points for writing module E2E verification.
 
 ## Pre-conditions
 1. Ollama running on host with `bge-m3` pulled (LLM goes to Groq cloud — no need for `deepseek-v2:16b`).
@@ -93,8 +92,7 @@ make -C scripts/e2e e2e-down    # tear down
 
 ## Flow A — standalone writing comparison
 
-`test_flow_a_compare.py` exercises the path added in
-`docs/superpowers/specs/2026-04-28-writing-flow-unified-design.md`:
+`test_flow_a_compare.py` exercises standalone writing comparison:
 
   1. Login as `e2e+writing@langfens.test`.
   2. Pick the first writing exam returned by `GET /writing/exams`

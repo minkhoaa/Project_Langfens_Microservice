@@ -2,6 +2,7 @@ using exam_service.Application.Common;
 using exam_service.Infrastructure.Persistence;
 using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
+using Shared.ExamDto.Contracts.Exam.Enums;
 using Shared.Grpc.ExamInternal;
 
 namespace exam_service.Features.Exams.InternalEndpoint;
@@ -26,18 +27,22 @@ public class ExamInternalGrpcService : ExamInternal.ExamInternalBase
             .Include(x => x.Sections).ThenInclude(x => x.QuestionGroups)
             .FirstOrDefaultAsync(context.CancellationToken);
         if (exams == null) throw new RpcException(new Status(StatusCode.NotFound, "Exam not found"));
+        if (!string.Equals(exams.Status, ExamStatus.Published, StringComparison.Ordinal))
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, "Exam is not published"));
+        }
         var res = ProtoHelper.MapToProto(exams, request.ShowAnswers);
         return res;
     }
-    
+
     public override async Task<GetExamListResponse> GetExamList(GetExamListRequest request,
         ServerCallContext context)
     {
         var query = _context.Exams.AsNoTracking()
+            .Where(e => e.Status == ExamStatus.Published)
             .Include(x => x.Sections)
             .ThenInclude(s => s.Questions)
             .AsQueryable();
-        
         // Apply filters
         if (!string.IsNullOrEmpty(request.Category))
         {

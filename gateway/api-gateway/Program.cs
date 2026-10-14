@@ -4,6 +4,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLangfensAuth(builder.Configuration);
 builder.Services.AddLangfensCors();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireRole(Shared.Security.Roles.Roles.Admin));
+});
 builder.Services.AddLangfensSwagger("API Gateway");
 
 builder.Services

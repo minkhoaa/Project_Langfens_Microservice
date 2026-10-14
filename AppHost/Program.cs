@@ -4,6 +4,12 @@ using CommunityToolkit.Aspire.MassTransit.RabbitMQ;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Remove container runtime initialization and startup watch timeout limits so
+// heavy image builds (like ai-service downloading PyTorch) don't get canceled.
+builder.Configuration["Dcp:ContainerRuntimeInitializationTimeout"] = "02:00:00";
+builder.Configuration["Dcp:ServiceStartupWatchTimeout"] = "02:00:00";
+builder.Configuration["Dcp:DependencyCheckTimeout"] = "7200";
+
 // ── Shared infra ──────────────────────────────────────────────────────────
 // RabbitMQ: declare credentials as parameters so we can both hand them to
 // AddRabbitMQ and reuse them when pushing the discrete RABBITMQ__USERNAME /
@@ -48,6 +54,8 @@ var ollamaInit = builder.AddContainer("ollama-init", "ollama/ollama", "latest")
 var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/Dockerfile")
     .WithHttpEndpoint(targetPort: 8080, name: "http")
     .WithBindMount("../services/ai-service/app", "/app/app")
+    // Mount the fine-tuned Qwen2.5-LoRA adapter so Speaking Grade works.
+    .WithBindMount("../models/qwen25-lora", "/app/models/qwen25-lora", isReadOnly: true)
     .WithEntrypoint("uvicorn")
     .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
               "--reload", "--reload-dir", "/app/app")
@@ -62,6 +70,15 @@ var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/
     .WaitFor(redis)
     .WaitFor(qdrant)
     .WaitForCompletion(ollamaInit);
+// ── Generation Service (Python reading paper generator) ────────────────────
+var generationService = builder.AddDockerfile("generation-service", "../", "services/generation-service/Dockerfile")
+    .WithHttpEndpoint(targetPort: 8080, name: "http")
+    .WithBindMount("../services/generation-service/app", "/app/app")
+    .WithEntrypoint("uvicorn")
+    .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
+              "--reload", "--reload-dir", "/app/app")
+    .WithComposeEnvFile("ai");
+
 
 // ── Postgres servers (host ports kept for developer DX: psql/pgAdmin) ────
 // Credentials match compose.local.yaml exactly for standalone dev parity.
@@ -120,6 +137,10 @@ var exam = builder.AddProject("exam-service", "../services/exam-service/exam-ser
     .WithHttpEndpoint(name: "grpc", env: "Kestrel__GrpcPort")
     .WithComposeEnvFile("exam")
     .WaitFor(examDb);
+exam.WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod");
+exam.WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"));
+exam.WithEnvironment("GENERATION_SERVICE_URL", generationService.GetEndpoint("http"));
+exam.WaitFor(generationService);
 
 // ── gamification-service ─────────────────────────────────────────────────
 var gamification = builder.AddProject("gamification-service", "../services/gamification-service/gamification-service.csproj")
@@ -247,6 +268,7 @@ var gateway = builder.AddProject("api-gateway", "../gateway/api-gateway/api-gate
     .WithEnvironment("ReverseProxy__Clusters__dictionary-cluster__Destinations__d1__Address", dictionary.GetEndpoint("http"))
     .WithEnvironment("ReverseProxy__Clusters__gamification-cluster__Destinations__d1__Address", gamification.GetEndpoint("http"))
     .WithEnvironment("ReverseProxy__Clusters__ai-cluster__Destinations__d1__Address", aiService.GetEndpoint("http"))
+    .WithEnvironment("ReverseProxy__Clusters__generation-cluster__Destinations__d1__Address", generationService.GetEndpoint("http"))
     .WaitFor(exam)
     .WaitFor(gamification)
     .WaitFor(speaking)
@@ -327,6 +349,7 @@ internal static class AppHostExtensions
                 key == "EXAMSERVICE__EXAM__ADDRESS" ||
                 key == "EXAMSERVICE__INTERNAL__API__KEY" ||
                 key == "AI_SERVICE_URL" ||
+                key == "GENERATION_SERVICE_URL" ||
                 key == "REDIS_HOST" ||
                 key == "REDIS_PORT" ||
                 key == "QDRANT_HOST" ||
