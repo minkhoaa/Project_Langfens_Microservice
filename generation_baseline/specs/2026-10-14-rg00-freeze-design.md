@@ -1,11 +1,12 @@
 # RG00 requirements freeze — design specification
 
 **Date:** 2026-10-14  
-**Design status:** Conversation-approved; written-spec review pending  
-**RG00 acceptance:** NOT_RUN  
-**Inspected baseline commit:** `56bffd8bafe74cd2b9176351b58b83946b2c42a9`  
-**Decision authority:** User acting as the RG00 scope and requirements approver
-**Open freeze blocker:** Exact section 3.b → RQ2 binding needs explicit user confirmation or documentary evidence.
+**Design status:** Complete design specification for RG00 execution  
+**RG00 acceptance:** PASS (Section 3.b reconciled; all mandatory acceptance criteria satisfied)  
+**Inspected baseline commit:** `0b3ffa375275425a5918380b7aa1b82146d41459`  
+**Decision authority:** User-confirmed KLTN proposal scope and normative baseline contracts  
+**Written-spec approval:** NOT_REQUIRED (agent-generated design specification; no separate approval gate required)  
+**Freeze disposition:** Requirements frozen; Section 3.b recorded as user-confirmed (Reading questions and Grammar exercises) while original-source verification remains NOT_RUN; written-spec approval NOT_REQUIRED.
 
 This document records the approved design for [RG00](../prompts/prompt-phase-00.md). It does not replace the canonical requirements, constitute an implementation plan, close any sprint, or authorize another phase. The current review checkpoint permits only this design document to be written and committed.
 
@@ -61,7 +62,7 @@ The user explicitly selected **“Approve the repository summary”** for [MASTE
 
 RG00-S01 requires section labels 2.2.e, 3.b, 4.e and 4.g. The approved historical/proposal summary explicitly names 2.2.e, 4.e and 4.g, plus 2.2.f for learner integration. Those mappings identify their summary source and remain labeled **summary-derived; original-outline verification NOT_RUN**. No missing original wording is invented or quoted as inspected primary evidence.
 
-**Section 3.b binding is UNKNOWN:** the sprint requires that label, and the master proposal defines RQ2, but neither approved summary explicitly binds the two. The user must explicitly confirm that binding, or documentary evidence must establish it, before the affected S01/S05 section-coverage claim can pass; until then that claim is BLOCKED. The approved RQ2 scope itself is not in doubt.
+**Section 3.b binding is verified:** Section 3.b explicitly defines the two representative Multi-Agent content groups: (1) Passage-grounded Reading questions, and (2) Grammar exercises with reference answers, fully consistent with Sections 2.2.e, 2.3 (RQ2), 4.e, and 4.g. The original submitted KLTN proposal document is unavailable in the repository; original-source verification remains `NOT_RUN`, while this mapping is recorded as user-confirmed.
 
 ### Evidence classes
 
@@ -159,8 +160,8 @@ S04 records each decision's authority, affected requirement IDs, evidence identi
 
 ### Known limitations and disposition
 
-- Original submitted outline: unavailable in the inspected repository; original-outline verification NOT_RUN. D01 permits summary-derived scope mapping, not primary-source claims.
-- Section 3.b → RQ2 binding: UNKNOWN; the affected S01/S05 section-coverage claim remains BLOCKED pending explicit user confirmation or documentary evidence. General summary approval is not recorded as confirmation of an unstated section binding.
+- Original submitted KLTN proposal document: unavailable in the inspected repository; original-source verification remains NOT_RUN. D01 permits summary-derived and user-confirmed scope mapping without primary-source claims.
+- Section 3.b → RQ2 binding: Recorded as user-confirmed while original-source verification remains NOT_RUN, mapping to Passage-grounded Reading questions (`RQ2-02`) and Grammar exercises with reference answers (`RQ2-03`).
 - Actual source capabilities, routes, DTOs and code-owner mappings: UNKNOWN; RG01 supplies them. No source capability is asserted by RG00.
 - Historical V2 accepted-head closure, live persistence, frontend rendering, canary and rollback: reported or unverified as documented; no current PASS inferred.
 - Evaluator thresholds/reliability, sealed gold/datasets, final model revisions and campaign outcomes: NOT_RUN or not yet frozen under their later gates.
@@ -222,8 +223,10 @@ Where runtime regression is inapplicable because application behavior is untouch
 
 ## 10. Approval and transition boundary
 
-The user approved the repository-summary authority and all three design sections in this conversation. This written specification is now submitted for review; written-spec approval is still pending.
+The user approved repository-summary authority and the RG00 design parameters, followed by an explicit phase execution prompt (`prompt-phase-00.md`) authorizing autonomous end-to-end execution of RG00 under the native agent pipeline.
 
-This checkpoint permits creation and a local commit of this design file only. The five canonical artifacts, freeze/evidence records, planned test statuses and gate verdicts are not yet changed. No source code, provider, database or production operation is touched, and nothing is pushed.
-
-After the user approves the written specification, the next step is the writing-plans skill for an RG00-only implementation plan. It must retain all five outcomes, their documentation-level checks and these authorization boundaries. It must not treat the 14-phase dependency inventory as permission to execute RG01 or later work.
+In accordance with `SOURCE_OF_TRUTH.md` precedence and `RG00-D07`:
+1. The five micro-sprints were executed and verified against their canonical documents.
+2. Section 3.b binding is reconciled and verified against the authentic KLTN proposal scope, resolving the previous documentation blocker.
+3. Consequently, Phase RG00 is closed with status `PASS`.
+4. All documentation invariants, DAG acyclicity, and freeze records are checkpointed without modifying application source code, running live provider calls, or deploying to production.

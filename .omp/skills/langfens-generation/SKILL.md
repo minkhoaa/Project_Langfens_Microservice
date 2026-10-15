@@ -1,56 +1,60 @@
 ---
 name: langfens-generation
-description: Workflows for the IELTS reading paper generation loop, runtime caps verification (R03/G06), and streaming NDJSON endpoints.
+description: Develop Langfens generation-service with pinned R03/G06 caps, durable run authority, independent review, and consumer-compatible JSON/NDJSON contracts.
 ---
 
-# Autonomous Generation Pipeline Workflow
+# Langfens generation workflow
 
-Use this skill when developing, testing, or diagnosing the IELTS reading paper generation service in `services/generation-service`.
+Use for `services/generation-service`, its exam-service consumer, and runtime
+budget changes. Reuse global `fastapi-patterns`, `python-testing`, and
+`cost-aware-llm-pipeline`. Use `generation-loop-expert` for substantial loop work.
 
-## Pipeline Phases
+## Trace the real execution path
 
-```text
-Source Text Ingestion (PMC, URL, HTML, Markdown)
-        ↓
-Phase 1: Passage Synthesis (720–915 words, authentic IELTS Academic style)
-        ↓
-Phase 2: Source Audit & Revision (strict fact-checking loop)
-        ↓
-Phase 3: Question Candidate Generation (6 canonical IELTS types)
-        ↓
-Phase 4: Adversarial Answer Review (independent solver validation)
-        ↓
-NDJSON Streaming Output to exam-service
-```
+Read `app/router.py`, `app/facade.py`, the affected generators/evaluators/repair,
+and `app/loop/`. Inspect `app/pipeline.py` when the affected route still uses it;
+do not assume all requests execute one fixed four-phase pipeline.
 
-## Runtime Caps (R03 / G06 Invariants)
+- Internal routes are under `/v1/autogen/reading-paper` (also mounted with `/api`).
+- Boundary models carry run IDs, lease owners, epochs, and artifact references.
+- Routes require `X-Internal-Service-Key`; keys come from environment/configuration.
+- Follow the relevant router's actual JSON or NDJSON contract and the
+  exam-service consumer. Never invent event names from illustrative examples.
+- Preserve independent answer review, authoritative artifact references/hashes,
+  terminal failure outcomes, cancellation, and bounded retries already in scope.
+- Ingestion must retain SSRF defenses and distinguish source/network failures
+  from valid generated content.
 
-Configuration lives in `deploy/envs/loop-caps.env`:
-- Never run production paper generation with unbounded loops or missing caps.
-- Caps must enforce:
-  - Token limits: max 60,000 tokens per section loop child execution.
-  - Timeout: max 300 seconds per generation phase.
-  - Word count: strictly 720 to 915 words for reading passages.
-- Run profiles are frozen with canonical UTF-8 JSON and verified via SHA-256 signatures.
+## R03 / G06 runtime profile
 
-## Running Tests
+`deploy/envs/loop-caps.env` governs approved deployment caps. Current loop and
+benchmark-child ceilings are **15 calls / 60,000 tokens / 300 seconds**. They are
+not universal limits for whole-paper runs or legacy/benchmark section stages;
+read each named budget from the profile. Preserve configured 720–915 passage
+word bounds and per-operation reservations.
 
-From `services/generation-service/`:
+Production configuration fails closed for missing or invalid required settings.
+Each run pins its canonical sorted-JSON profile plus SHA-256 digest at creation.
+A restart must keep that snapshot and accumulated counters, not rebind an
+in-flight run to a wider deployment environment. Missing authoritative snapshots
+must fail before model dispatch. Never loosen caps merely to make a test pass.
+
+`generation_baseline/` is a separate target/research package. Its `RGxx` gates
+are not the runtime G06 cap profile and do not prove shipped behavior. Read its
+source-of-truth and evidence policy when the user explicitly requests that work;
+preserve existing execution records and uncommitted evidence.
+
+## Deterministic verification
+
+Working directory: `services/generation-service`, with service dependencies and
+`requirements-dev.txt` available in a service-local environment:
+
 ```bash
-# Run unit tests (extractor, prompts, pipeline mocks)
-pytest tests/test_extractor.py tests/test_prompts.py tests/test_pipeline.py
-
-# Run caps and runtime invariant verification
-pytest tests/test_r03_config_caps.py tests/test_r03_runtime_caps.py tests/test_t06_loop_runtime.py
+python -m pytest tests/test_extractor.py tests/test_prompts.py tests/test_pipeline.py
+python -m pytest tests/test_r03_config_caps.py tests/test_r03_runtime_caps.py tests/test_t06_loop_runtime.py
 ```
 
-## Streaming NDJSON Protocol
-
-When invoking `POST /v1/autogen/reading-paper/section`:
-- Header: `Accept: application/x-ndjson`
-- Each newline-delimited JSON line contains generation events:
-  - `{"type": "passage_token", "delta": "..."}`
-  - `{"type": "phase_transition", "phase": "audit"}`
-  - `{"type": "question_candidate", "item": {...}}`
-  - `{"type": "complete", "result": {...}}`
-- Workers in `exam-service` process stream chunks and persist state checkpoints.
+Run the full service suite after focused checks for a code change. For cap
+changes, also run relevant `R03CapsProfileTests` in `services/exam-service.Tests`
+after inspecting fixture/database prerequisites. Do not invoke paid/live LLMs
+without explicit scope. See `/skill:langfens-verify` for broader checks.

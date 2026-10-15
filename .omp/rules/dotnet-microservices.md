@@ -6,7 +6,7 @@ globs:
   - "**/appsettings*.json"
 ---
 
-# .NET 10 Microservices & C# 13 Engineering Rules
+# .NET 10 Microservice Engineering Rules
 
 ## 1. Minimal API Architecture
 - Organize endpoints under `Features/{Feature}/{Action}Endpoint.cs`.
@@ -21,34 +21,40 @@ globs:
   ```
 - Use `init` property accessors rather than mutable `set`.
 - Enable and strictly enforce nullable reference types (`#nullable enable`). Avoid null-forgiving operator `!` unless guaranteed by a preceding framework invariant.
-- Leverage C# 13 features: primary constructors, collection expressions (`[...]`), and pattern matching.
+- Follow the installed .NET 10 SDK and existing project settings; do not pin C# 13 or upgrade dependencies based on generic ECC examples.
 
 ## 3. Asynchronous Programming & Cancellation
-- Async methods must accept a `CancellationToken cancellationToken = default` parameter.
-- Forward cancellation tokens down to EF Core, HTTP clients, and MassTransit publishers.
-- NEVER block on async code (`.Result`, `.Wait()`, `.GetAwaiter().GetResult()`).
-- Use `ConfigureAwait(false)` in non-UI class libraries where appropriate.
+- I/O paths accept and forward cancellation tokens to EF Core, HTTP/gRPC clients, and MassTransit.
+- Never block on async code (`.Result`, `.Wait()`, `.GetAwaiter().GetResult()`).
+- Reuse established bootstrap and client lifetime patterns; do not add retries or library-wide conventions unrelated to the requested change.
 
 ## 4. Entity Framework Core & PostgreSQL
 - Each microservice owns its `DbContext` mapping to its dedicated PostgreSQL database.
 - Use explicit migrations (`dotnet ef migrations add ... --output-dir Migrations`).
 - In queries, use `.AsNoTracking()` for read-only operations.
 - Avoid N+1 query problems by using explicit `.Include()` / `.ThenInclude()` or projection with `.Select()`.
-- Use execution strategies (`EnableRetryOnFailure`) for resilient database connections.
+- Preserve existing transaction/retry semantics; do not add blanket retries to non-idempotent operations.
 
 ## 5. Event-Driven Communication (RabbitMQ & MassTransit)
 - Read connection details from discrete environment variables:
   `RABBITMQ__HOST`, `RABBITMQ__PORT`, `RABBITMQ__USERNAME`, `RABBITMQ__PASSWORD`, `RABBITMQ__VHOST`, `RABBITMQ__USESSL`.
 - Consumers implement `IConsumer<TMessage>` and must be idempotent.
-- Configure queues explicitly: `cfg.ReceiveEndpoint("queue-name", e => e.ConfigureConsumer<MyConsumer>(ctx))`.
+- Follow the service's existing MassTransit endpoint/consumer registration; do not establish a second queue-naming convention.
 
 ## 6. gRPC Internal Communication
 - Proto contracts reside centrally in `services/_shared/Shared.Grpc/`.
 - `exam-service` serves `ExamInternalGrpcService`.
 - `attempt-service` consumes it via `ExamInternalClient`.
-- Protect internal gRPC endpoints with internal API key authentication or network isolation.
+- Preserve actual per-endpoint internal authentication and policies; never substitute network isolation for required authentication.
 
 ## 7. Aspire AppHost Integration
 - Never hardcode host ports or connection strings.
 - Inject database references using `builder.AddPostgres(...).AddDatabase(...)` + `.WithReference(db)`.
 - Re-use `deploy/envs/<name>.env` with `WithComposeEnvFile(name)` and discrete RabbitMQ envs with `WithRabbitMqEnv()`.
+
+## 8. Grading & Cross-Service Contracts
+- `IQuestionGrader.Grade(AttemptAnswer, QuestionKey)` returns `GradeResult`.
+- `IQuestionGraderRegistration` exposes `IEnumerable<string> SupportedTypes` and `Create()`; register both concrete graders and registrations as singletons in `Program.cs`.
+- Question types are shared string constants, not a new enum invented by a workflow.
+- Preserve all-or-nothing `AwardedPoints`: `0` or `QuestionPoints`; no partial credit.
+- Trace callers before changing shared DTOs/protos; update producers, consumers, and behavioral tests together. Generate EF migrations only for actual persisted schema changes.

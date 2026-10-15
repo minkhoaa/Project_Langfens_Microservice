@@ -11,5 +11,6 @@
    - Use async route handlers (`async def`) for all I/O.
    - Enforce Pydantic v2 models at system boundaries and maintain Groq/Ollama LLM facades.
    - Respect versioned runtime caps (`loop-caps.env`, R03/G06 invariants) in `generation-service`.
-6. **Testing & Verification**: Write tests first (TDD); verify changes with `dotnet test` or `pytest` before completing work. Never disable or bypass existing test suites.
+6. **Testing & Verification**: Use failing behavioral tests first for code changes and verify affected suites before completing work. Never disable existing suites. Exam integration fixtures can drop schemas: use an explicitly selected disposable test database, never real data. Configuration-only work requires OMP discovery smoke checks, not application startup.
 7. **Secrets & Security**: Never commit secrets, credentials, or API keys. Always use environment variables or `deploy/envs/*.env` files.
+8. **Configuration Safety**: Reuse global ECC resources; preserve custom project instructions, agents, and skills. Do not activate MCP servers, install packages/hooks, or change global plugin state without approval. Recommendations are not executable setup.

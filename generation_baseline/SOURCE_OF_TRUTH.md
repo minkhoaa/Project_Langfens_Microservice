@@ -11,6 +11,25 @@
 
 This baseline's artifact schemas are **target interfaces**, not proof of the existing code's wire format. A different concrete DTO name is acceptable if an explicit tested mapping preserves semantics and compatibility.
 
+## Authoritative evidence hierarchy and ownership map
+
+Claims and requirements in this baseline are classified by strict evidence tiers. Unverified claims in lower tiers cannot be upgraded to higher tiers without explicit, reproducible execution evidence.
+
+| Evidence class | What it can establish | Logical owner | Limitations and non-assumptions |
+|---|---|---|---|
+| **Approved requirement** | Intended behavior, scope, constraints, invariants, and acceptance criteria. | User / Research Owner | Defines normative targets, not proof of runtime implementation or existing code. |
+| **Verified current source/execution** | Concrete capability observed at a specific source SHA, runtime environment, and test execution. | Concrete component owner (established in RG01 source audit) | Proves only what was executed in that specific environment; does not certify uninspected paths. |
+| **Frozen experiment** | Versioned paired assignments, model/evaluator configurations, sealed datasets, and immutable execution outcomes. | Research Experiment Lead (RG07–RG11) | Valid only for the frozen configuration; cannot be edited or cherry-picked post-hoc. |
+| **Independent human gold** | Adjudicated item-level reference answers and expert evaluation labels. | Research Gold Custodian / Adjudicator | Restricted to research evaluation; never exposed to generator or blind solver views. |
+| **Reported V2 history** | Historical handoff documentation, reported 3-paper / 120-question semantic PASS, legacy benchmarks. | Historical Evidence Custodian | Background evidence only. **Unverified historical acceptance cannot be silently converted into current source PASS.** |
+| **Hypothesis** | Known hazards, proposed failure modes, or architectural assumptions awaiting audit. | Relevant logical requirement owner | Retains status `UNKNOWN` or `NOT_RUN` until validated by concrete tests. |
+
+### Evidence rules and limitations
+1. **No silent upgrade:** Reported historical metrics or documentation checklists never substitute for live/DB/evaluator test execution.
+2. **Original outline status:** Proposal-section mappings are summary-derived; original submitted outline verification is explicitly `NOT_RUN`.
+3. **Source reality vs target spec:** Target schemas define contract goals; concrete wire formats and service routes are established by RG01 audit.
+4. **Unknowns stay UNKNOWN:** Where data, unverified external assertions, or source entities are not directly verified, they must be marked `UNKNOWN` or `BLOCKED`. Reconciled specifications require authentic evidence binding.
+
 ## Pinned product/research truth
 
 - Reading V2: full-paper generator historically uses 3 sections, 6 question groups, exactly 40 continuously numbered questions. Section 1: TFNG 7 + Sentence Completion 6; Section 2: MCQ Single 6 + Summary Completion 7; Section 3: YNNG 7 + Short Answer 7. Target historical passage words 720–915 per passage and total 2,150–2,750. Enforce these for strict full-paper V2; **do not blindly impose 40 questions on the smaller research unit**.

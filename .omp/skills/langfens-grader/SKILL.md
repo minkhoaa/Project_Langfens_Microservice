@@ -1,86 +1,55 @@
 ---
 name: langfens-grader
-description: Implement, register, test, and troubleshoot IELTS question auto-graders in attempt-service and exam-service.
+description: Implement and test Langfens IELTS graders using actual IQuestionGrader registrations, string question types, and all-or-nothing scoring invariants.
 ---
 
-# IELTS Question Auto-Grader Workflow
+# Langfens question grading workflow
 
-Use this skill when implementing, extending, or fixing auto-graders for IELTS reading and listening questions.
+Use for reading/listening scoring and answer-key integration. Reuse global
+`dotnet-patterns`, `csharp-testing`, and `tdd-workflow`; delegate substantial
+scoring work to `grader-specialist` and review C# changes with `csharp-reviewer`.
 
-## Architecture
+## Actual contracts
 
-Graders reside in `services/attempt-service/Features/Helpers/` and implement the `IQuestionGrader` interface.
+- `services/attempt-service/Features/Helpers/Grader.cs` defines
+  `GradeResult(decimal AwardedPoints, bool? IsCorrect, bool NeedsManualReview, string? Feedback)`
+  and `IQuestionGrader.Grade(AttemptAnswer answer, QuestionKey key)`.
+- Existing implementations also live under the `Reading/` and `Listening/`
+  helper directories; follow the closest established strategy.
+- `QuestionGraderRegistration.cs` defines registrations with
+  `IEnumerable<string> SupportedTypes` and `IQuestionGrader Create()`.
+  There is no `Register(IServiceCollection)` method in that interface.
+- `QuestionGraderFactory.cs` resolves these registrations by question-type string.
+- `QuestionType.cs` under `services/_shared/Shared.PublicContracts/Contracts/Exam/Enums/`
+  contains shared string constants, not an enum to replace.
+- `services/attempt-service/Program.cs` registers both concrete grader types and
+  their `IQuestionGraderRegistration` implementations as singletons.
 
-```text
-Exam Attempt Submitted
-        ↓
-AttemptService
-        ↓
-QuestionGraderFactory
-        ↓ resolves by QuestionType enum
-IQuestionGrader (e.g. SingleChoiceGrader, CompletionGrader)
-        ↓ pure scoring logic
-Score & Diagnostic Output
-```
+## Change sequence
 
-## Step-by-Step Implementation Guide
+1. Trace the failing consumer behavior and write a deterministic regression test
+   under `services/attempt-service.Tests/Helpers/` before changing a grader.
+2. Reuse existing normalization, wire format, and answer-key retrieval behavior.
+   Scoring is pure and deterministic: awarded points are `0` or `QuestionPoints`.
+   Multi-blank responses do not gain partial credit.
+3. Change shared constants/DTOs only if the wire contract actually changes;
+   migrate all producers/consumers. Generate an exam EF migration only if the
+   persisted schema changes, not simply because a grader was added.
+4. Implement the existing `Grade` signature, add the matching registration, and
+   follow current singleton DI registrations. Do not invent parallel factories.
+5. Cover exact/incorrect answers, supported normalization, malformed/missing
+   input, multi-blank ordering, and repeated deterministic execution. Do not
+   expand accepted spelling variants or scoring policy without user scope.
 
-### Step 1: Declare QuestionType Enum
-File: `services/_shared/Shared.PublicContracts/Contracts/Exam/Enums/QuestionType.cs`
-Add the new question type:
-```csharp
-public enum QuestionType
-{
-    SingleChoice = 1,
-    MultipleChoice = 2,
-    // ...
-    NewQuestionType = X
-}
-```
+## Verification
 
-### Step 2: Implement the Grader
-File: `services/attempt-service/Features/Helpers/{Type}Grader.cs`
-```csharp
-namespace attempt_service.Features.Helpers;
+From repository root:
 
-public sealed class NewQuestionTypeGrader : IQuestionGrader
-{
-    public QuestionType SupportedType => QuestionType.NewQuestionType;
-
-    public GradeResult Grade(QuestionAnswerContext context)
-    {
-        // 1. Normalize user answer (trim, case-fold, canonical punctuation)
-        // 2. Compare against correct answer key from exam context
-        // 3. Compute score (full or partial credit)
-        // 4. Return GradeResult(isCorrect, score, explanation)
-    }
-}
-```
-
-### Step 3: Register the Grader
-File: `services/attempt-service/Features/Helpers/{Type}GraderRegistration.cs`
-```csharp
-public sealed class NewQuestionTypeGraderRegistration : IQuestionGraderRegistration
-{
-    public void Register(IServiceCollection services)
-    {
-        services.AddSingleton<IQuestionGrader, NewQuestionTypeGrader>();
-    }
-}
-```
-Wire in `services/attempt-service/Program.cs`:
-```csharp
-new NewQuestionTypeGraderRegistration().Register(builder.Services);
-```
-
-### Step 4: Write Unit Tests (TDD)
-File: `services/attempt-service.Tests/Helpers/NewQuestionTypeGraderTests.cs`
-- Test exact match (full score)
-- Test case/whitespace normalization
-- Test partial matches / alternate valid answers
-- Test empty, malformed, or boundary input (score 0, no exception)
-
-Run tests:
 ```bash
-dotnet test services/attempt-service.Tests/attempt-service.Tests.csproj --filter "FullyQualifiedName~NewQuestionTypeGrader"
+dotnet test services/attempt-service.Tests/attempt-service.Tests.csproj
 ```
+
+Use a fully qualified test filter for the initial red/green loop, then run the
+affected suite. These unit tests do not need Aspire or PostgreSQL. Cross-service
+changes additionally require relevant exam/contract verification; exam database
+fixtures can drop schemas and require a disposable test database explicitly.

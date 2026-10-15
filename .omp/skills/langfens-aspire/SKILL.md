@@ -1,68 +1,56 @@
 ---
 name: langfens-aspire
-description: Operate, diagnose, and expand the .NET Aspire orchestration environment, container graph, dynamic port mapping, and YARP gateway overrides for Langfens.
+description: Operate, diagnose, and extend Langfens Aspire 13.3 orchestration, dynamic endpoints, RabbitMQ environment wiring, and YARP routes.
 ---
 
-# Langfens Aspire Orchestration Workflow
+# Langfens Aspire workflow
 
-Use this skill when running, troubleshooting, or modifying the Aspire `AppHost` orchestration layer in Langfens.
+Use for `AppHost/`, gateway routing, and local infrastructure. Reuse global
+`dotnet-patterns` and `docker-patterns`; this skill adds only repository context.
+Delegate to `aspire-architect` when the topology change warrants a specialist.
 
-## 1. Running Aspire Locally
+## Inspect before acting
 
-Aspire is the primary local development workflow:
+- `AppHost/AppHost.csproj` targets .NET 10; primary Aspire packages are 13.3.2.
+- `AppHost/Program.cs` owns resource dependencies, `WithComposeEnvFile`,
+  `WithRabbitMqEnv`, and gateway destination overrides.
+- Gateway routes/clusters live in `gateway/api-gateway/appsettings.json`.
+- `deploy/compose.local.yaml` and `deploy/compose.yaml` are separate runtime
+  surfaces. Read current mappings rather than copying ports from old instructions.
+- Frontend code is in a sibling checkout; it is not a local npm application.
+
+## Local operation
+
+Requires .NET 10 SDK, Docker, and the appropriate local environment configuration:
+
 ```bash
-# Launch AppHost with all microservices and infra containers
 dotnet run --project AppHost/AppHost.csproj
 ```
-- **Aspire Dashboard**: `http://localhost:18888` (inspect live logs, environment variables, health metrics)
-- **API Gateway**: `http://localhost:5000` (YARP reverse proxy routing to all downstream services)
 
-## 2. Infrastructure Container Map
+Starting the full graph launches databases/services; do not do it for a
+configuration-only task. Read the actual Dashboard and gateway addresses from
+startup output. Never print environment values containing credentials.
 
-| Resource | Image / Mode | Host Port | Injected Env / Reference |
-|---|---|---|---|
-| `exam-db` | PostgreSQL 16 | 5433 | `WithReference(examDb)` |
-| `auth-db` | PostgreSQL 16 | 5434 | `WithReference(authDb)` |
-| `attempt-db` | PostgreSQL 16 | 5435 | `WithReference(attemptDb)` |
-| `writing-db` | PostgreSQL 16 | 5440 | `WithReference(writingDb)` |
-| `speaking-db` | PostgreSQL 16 | 5441 | `WithReference(speakingDb)` |
-| `dictionary-db` | PostgreSQL 16 | 5443 | `WithReference(dictionaryDb)` |
-| `gamification-db` | PostgreSQL 16 | 5444 | `WithReference(gamificationDb)` |
-| `course-db` | PostgreSQL 16 | 5446 | `WithReference(courseDb)` |
-| `vocabulary-db` | PostgreSQL 16 | 5987 | `WithReference(vocabularyDb)` |
-| `redis` | Redis Alpine | Dynamic | `WithReference(redis)` / `ConnectionStrings__auth-redis` |
-| `elasticsearch` | Elasticsearch 8.19.0 | Dynamic | `ELASTICSEARCH__URL` |
-| `qdrant` | Qdrant latest | Dynamic | `QDRANT_HOST`, `QDRANT_PORT` |
-| `rabbitmq` | RabbitMQ 3 Management | 15672 | `WithRabbitMqEnv(...)` (`RABBITMQ__*`) |
+## Resource and routing contract
 
-## 3. Adding a Microservice to AppHost
+- Stateful services own separate PostgreSQL databases and EF migrations.
+- Redis, RabbitMQ, Elasticsearch, Qdrant, and Ollama are infrastructure resources;
+  Python AI/generation services are containerized in the AppHost graph.
+- Inject database references with `WithReference`; respect existing `WaitFor`
+  dependencies and health checks.
+- Resolve service addresses using `GetEndpoint("http")` / `GetEndpoint("grpc")`.
+  Preserve existing Compose DNS configuration without inventing new fixed URLs.
+- Supply RabbitMQ through discrete `RABBITMQ__HOST`, `PORT`, `USERNAME`,
+  `PASSWORD`, `VHOST`, and `USESSL` settings, not a new connection-string parser.
+- When a route changes, align its YARP route/cluster configuration with the
+  AppHost `ReverseProxy__Clusters__...__Destinations__d1__Address` override and
+  Compose configuration. Do not treat a reachable downstream health endpoint
+  as proof that gateway transforms and authentication work.
 
-Edit `AppHost/Program.cs`:
-```csharp
-// 1. Add dedicated database (if applicable)
-var dbUser = builder.AddParameter("mysvc-db-user", "mysvc");
-var dbPass = builder.AddParameter("mysvc-db-pass", "mysvc", secret: true);
-var dbServer = builder.AddPostgres("mysvc-db-server", userName: dbUser, password: dbPass, port: 5450)
-    .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent);
-var db = dbServer.AddDatabase("mysvc-db");
+## Diagnose and verify
 
-// 2. Add service project
-var mySvc = builder.AddProject("mysvc-service", "../services/mysvc-service/mysvc-service.csproj")
-    .WithReference(db)
-    .WithReference(rabbitmq)
-    .WithComposeEnvFile("mysvc")
-    .WithRabbitMqEnv(rabbitmq, rabbitUser, rabbitPass)
-    .WaitFor(db)
-    .WaitFor(rabbitmq);
-
-// 3. Register gateway route override
-gateway.WithEnvironment(
-    "ReverseProxy__Clusters__mysvc-cluster__Destinations__d1__Address",
-    mySvc.GetEndpoint("http"));
-```
-
-## 4. Key Troubleshooting Rules
-- **Connection Refused in Tests**: Unit tests must not depend on Aspire containers. Integration tests require the target DB container running on its dedicated port.
-- **Port Conflicts**: Ensure each PostgreSQL database uses its unique assigned host port.
-- **RabbitMQ Credentials**: Never read `ConnectionStrings__rabbitmq`. Services use the discrete `RABBITMQ__*` env vars supplied by `WithRabbitMqEnv()`.
+Inspect the failed resource, its dependency health, endpoint bindings, and
+redacted logs before changing anything. Do not reset volumes or overwrite secrets
+to address connection failures. Build the affected projects, then exercise the
+actual gateway route and auth/health path when application behavior changes.
+Use `/skill:langfens-verify` for the applicable checks; do not infer fixed ports.

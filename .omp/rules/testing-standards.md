@@ -27,10 +27,10 @@ globs:
       // Assert ...
   }
   ```
-- Use `FluentAssertions` or `AwesomeAssertions` for expressive assertion messages.
-- Mock external services using `Moq` or `NSubstitute`; verify called contracts.
-- Isolate unit tests: unit tests (e.g., `attempt-service.Tests`) must run offline without requiring running databases or network services.
-- Integration tests requiring real infrastructure (e.g. `exam-service.Tests`) must clearly specify prerequisites (running PostgreSQL on port 5433).
+- Reuse installed xUnit, AwesomeAssertions, and Moq where the affected project references them; do not add an alternative test framework for style alone.
+- Unit tests must be deterministic and isolated from databases, live LLMs, and network services.
+- Some exam fixtures reset schemas or delete persisted data. Phase02/Phase03 include hardcoded targets and Phase02 can overwrite environment configuration: a DSN override does not isolate the suite. Inspect each selected fixture, isolate every full-suite target from real data, and preserve existing database-test serialization.
+- Cover consumer-visible scoring, boundaries, invariants, errors, and state transitions; do not test source strings, copied defaults, or mock echoes.
 
 ## 3. Python pytest Standards
 - Configure `asyncio_mode = auto` in `pytest.ini`.
@@ -40,5 +40,12 @@ globs:
   async def test_groq_service_fallback_on_rate_limit(mocker):
       ...
   ```
-- Separate live integration / E2E tests using custom markers (e.g., `@pytest.mark.live` skipped unless explicitly requested with `--run-live`).
-- Ensure mock fixtures cleanly restore application state in `finally` or teardown blocks.
+- AI `tests/e2e` live tests also run without `--run-live` when endpoints are reachable; the flag bypasses reachability skipping, not an opt-in gate. Use `-m "not live"` for explicit offline exclusion. Do not assume generation-service supports that flag.
+- Run each Python service from its own directory/environment; both expose a top-level `app` package.
+- Ensure fixtures restore application state and external resources reliably.
+- AI conftest stubs missing ML dependencies. Test doubles do not prove real inference, provider credentials, or container connectivity.
+
+## 4. Verification Scope
+- Use `/skill:langfens-verify` for repository commands and prerequisites.
+- CI currently deploys without automated test stages; report exact locally exercised checks.
+- Configuration-only changes require config parsing and native discovery smoke checks. Do not start Aspire, reset databases, invoke paid providers, or claim application tests passed for a configuration task.

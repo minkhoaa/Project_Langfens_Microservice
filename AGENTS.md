@@ -3,7 +3,7 @@
 ## System Overview
 
 **Langfens** is an enterprise-grade IELTS preparation mono-repo combining full-exam simulations, AI evaluation, spaced-repetition vocabulary, and gamification.
-The system is built on a distributed microservice architecture utilizing **.NET 10 (C# 13)** for transactional and domain services, and **Python 3.12 (FastAPI)** for AI inference, vector search, and autonomous paper generation.
+The system uses **.NET 10** (SDK-default C#; no explicit language-version pin) for transactional services and **Python 3.12** (FastAPI container images) for inference, vector retrieval, and autonomous paper generation. Aspire packages are primarily **13.3.2**; dependency manifests, not historical documentation, govern versions.
 
 ---
 
@@ -11,8 +11,8 @@ The system is built on a distributed microservice architecture utilizing **.NET 
 
 ```text
 Project_Langfens_Microservice/
-├── gateway/api-gateway/          # YARP reverse proxy + JWT auth (port 5000)
-├── AppHost/                      # .NET Aspire 9/10 orchestrator (local dev primary)
+├── gateway/api-gateway/          # YARP reverse proxy + JWT auth
+├── AppHost/                      # Aspire 13.3.2 local orchestration
 ├── deploy/                       # Production compose.yaml & env configs
 ├── services/
 │   ├── _shared/
@@ -32,10 +32,9 @@ Project_Langfens_Microservice/
 │   ├── course-service/           # Structured courses, study plans, learning paths
 │   ├── email-service/            # Transactional email delivery via MailKit/SMTP
 │   ├── ai-service/               # Python/FastAPI: Groq/Ollama LLM, Qdrant RAG, faster-whisper ASR
-│   └── generation-service/       # Python/FastAPI: Autonomous reading paper synthesis & review loop
-└── tests/
-    ├── services/exam-service.Tests/    # Exam integration & budget tests (xUnit)
-    └── services/attempt-service.Tests/ # Question auto-grader invariant unit tests (xUnit)
+│   ├── generation-service/       # Python/FastAPI: Autonomous reading paper synthesis & review loop
+│   ├── exam-service.Tests/       # xUnit; some integration fixtures reset PostgreSQL schemas
+│   └── attempt-service.Tests/    # Deterministic question-grader tests
 ```
 
 ---
@@ -44,12 +43,12 @@ Project_Langfens_Microservice/
 
 | Component | Technology | Role |
 |---|---|---|
-| **Platform Runtime** | .NET 10.0 (C# 13) | Core microservices & gateway |
-| **AI Runtime** | Python 3.12+ (FastAPI) | LLM evaluation, embeddings, ASR, RAG |
-| **Local Orchestration** | .NET Aspire 9/10 (`AppHost`) | Process & container orchestration + Dashboard |
+| **Platform Runtime** | .NET 10.0; SDK-default C# | Core microservices & gateway |
+| **AI Runtime** | Python 3.12 container images | LLM evaluation, embeddings, ASR, RAG |
+| **Local Orchestration** | .NET Aspire 13.3.2 (`AppHost`) | Process/container graph & Dashboard |
 | **API Gateway** | YARP Reverse Proxy (.NET 10) | Edge routing, JWT validation, path transforms |
-| **Database** | PostgreSQL (10 databases) | Isolated database per microservice schema |
-| **ORM & Migrations** | EF Core 10 + Npgsql | Code-first migrations (`MigrateAsync` on startup) |
+| **Database** | PostgreSQL | Dedicated database ownership per stateful service |
+| **ORM & Migrations** | EF Core 10.0.x + Npgsql 10 | Service-owned code-first migrations |
 | **Message Broker** | RabbitMQ + MassTransit | Asynchronous event-driven messaging |
 | **RPC / Internal** | gRPC (HTTP/2 protobuf) | High-speed answer-key lookups (attempt → exam) |
 | **Vector Database** | Qdrant | RAG embeddings for writing & grammar criteria |
@@ -105,9 +104,9 @@ Use these specialized agents for targeted engineering tasks:
 
 | Agent | Scope & Purpose |
 |---|---|
-| `csharp-reviewer` | Deep review of C# 13, .NET 10, EF Core queries, async patterns, and nullable correctness. |
+| `csharp-reviewer` | Global ECC: C#, .NET 10, EF Core, async patterns, and nullable correctness. |
 | `python-reviewer` | Deep review of Python 3.12 code, typing, async functions, and package best practices. |
-| `fastapi-reviewer` | Review of FastAPI route definitions, Pydantic schemas, dependency injection, and OpenAPI. |
+| `fastapi-reviewer` | Global ECC: route definitions, Pydantic schemas, dependency injection, and OpenAPI. |
 | `database-reviewer` | PostgreSQL schema design, EF Core migration safety, index efficiency, and query tuning. |
 | `aspire-architect` | Project-local agent for Aspire `AppHost`, YARP route clusters, container topology, and env wiring. |
 | `grader-specialist` | Project-local agent for IELTS question scoring algorithms, invariants, and `IQuestionGrader` additions. |
@@ -123,9 +122,11 @@ Use these specialized agents for targeted engineering tasks:
 
 ### 1. Local Development via Aspire
 ```bash
-# Start Aspire AppHost (Gateway on http://localhost:5000, Dashboard on http://localhost:18888)
+# Requires .NET 10 SDK, Docker, and appropriate local environment configuration
 dotnet run --project AppHost/AppHost.csproj
 ```
+Discover Dashboard, gateway, and infrastructure endpoints from the running AppHost.
+Existing Compose mappings are deployment configuration, not constants to copy into new code.
 
 ### 2. Building & Testing .NET Services
 ```bash
@@ -135,9 +136,30 @@ dotnet build Project_Langfens_Microservice.sln
 # Run unit tests (attempt-service tests run without external dependencies)
 dotnet test services/attempt-service.Tests/attempt-service.Tests.csproj
 
-# Run exam tests (requires PostgreSQL container on port 5433 via Aspire or Compose)
+# Full exam suite: only after isolating EVERY fixture target (see below)
 dotnet test services/exam-service.Tests/exam-service.Tests.csproj
 ```
+Some exam fixtures run `DROP SCHEMA ... CASCADE` or delete persisted test data.
+**Environment overrides do not isolate the whole suite.** `Phase02DurabilityTests`
+and `Phase03BudgetTests` contain hardcoded targets, and a Phase02 test overwrites
+`ConnectionStrings__exam-db` internally. Inspect each selected fixture's connection
+and cleanup path; prefer fixture-specific filters. Run the full suite only when
+every hardcoded/overridden target is disposable and isolated from real data.
+Never use a shared, populated development, or production database.
+
+Run Python suites separately with each service as the working directory:
+`python -m pytest -m "not live"` in `services/ai-service`, and
+`python -m pytest` in `services/generation-service`.
+Use service-local environments and `requirements-dev.txt`; AI fixtures stub missing
+ML libraries, so an offline pass is not proof that real model inference works.
+Live AI tests can run without `--run-live` whenever AI/Ollama endpoints are reachable.
+That flag bypasses reachability skipping, not an opt-in gate. Use `-m "not live"`
+to exclude them; run live inference only with explicit scope and configured services/models.
+See `/skill:langfens-verify` for focused commands and prerequisites.
+
+The current `.github/workflows/ci-cd.yaml` builds/pushes/deploys containers on
+`master`; it does **not** run `dotnet test` or `pytest`. Do not treat deployment
+success as a test gate.
 
 ### 3. Database Migrations
 ```bash
@@ -150,8 +172,28 @@ dotnet ef database update --project <service-name>.csproj
 ```
 
 ### 4. Adding a New IELTS Question Type
-1. Add enum to `Shared.PublicContracts/Contracts/Exam/Enums/QuestionType.cs`.
-2. Update `ExamDbContext.cs` in `services/exam-service/` and generate migration.
-3. Implement `IQuestionGrader` in `services/attempt-service/Features/Helpers/{Type}Grader.cs`.
-4. Register grader in `services/attempt-service/Program.cs` via `IQuestionGraderRegistration`.
-5. Add unit tests in `services/attempt-service.Tests/Helpers/`.
+1. Add shared string constants in `services/_shared/Shared.PublicContracts/Contracts/Exam/Enums/QuestionType.cs` only if the wire contract changes.
+2. Follow existing `Grader.cs`, `QuestionGraderRegistration.cs`, and the `Reading/` / `Listening/` helpers; do not invent a parallel grader API.
+3. Implement `Grade(AttemptAnswer, QuestionKey)` and preserve all-or-nothing awarded points (`0` or `QuestionPoints`).
+4. Register the concrete grader and its `IQuestionGraderRegistration` as singletons in `services/attempt-service/Program.cs`. Registrations expose `SupportedTypes` and `Create()`.
+5. Write behavioral tests under `services/attempt-service.Tests/Helpers/` first. Only change exam mappings/migrations if persistent schema actually changes.
+
+## Project-local ECC / OMP setup
+
+- Reuse the globally installed `ecc@ecc` plugin; never vendor or edit its cached resources.
+- `.omp/AGENTS.md` imports this file. `.omp/RULES.md` holds short sticky invariants;
+  `.omp/rules/*.md` holds project-specific domain guidance. Read the applicable
+  `rule://` entries before editing; rule globs are advisory, not an enforcement hook.
+- `.omp/config.yml` filters global skills, agents, and namespaced ECC commands.
+  Existing custom resources remain local; add future custom skill names to the
+  include list so filtering does not hide them.
+- Use `/skill:skill-library` for routing, `/skill:langfens-verify` for verification,
+  and `/ecc:plan`, `/ecc:code-review`, `/ecc:python-review`, or `/ecc:fastapi-review`
+  for the selected global command templates. These prompts do not themselves enforce checks.
+- The frontend is a separate sibling checkout, not this repository's toolchain.
+  Do not introduce npm/React/Next.js conventions here merely because a global ECC
+  example uses them.
+- MCP recommendations are inert in `.omp/mcp.recommended.json`; active
+  `.omp/mcp.json` stays empty until explicit approval of server, access, and credentials.
+- See [.omp/README.md](.omp/README.md) for the resource selection, evidence,
+  compatibility limits, and discovery verification.

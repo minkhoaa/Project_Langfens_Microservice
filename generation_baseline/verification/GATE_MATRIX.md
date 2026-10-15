@@ -4,7 +4,7 @@ Gate truth comes from real tests and evidence, never a planned checklist. Option
 
 | Phase | Required sprints | Decisive gate criterion | Actual status |
 |---|---:|---|---|
-| RG00 | 5 | Requirement conflicts are resolved explicitly or marked BLOCKED; RQ1 remains separate. | TARGET_SPEC / NOT_RUN |
+| RG00 | 5 | Requirement conflicts are resolved explicitly or marked BLOCKED; RQ1 remains separate. | PASS |
 | RG01 | 5 | No uninspected capability is asserted implemented and no historical cleanup is authorized. | TARGET_SPEC / NOT_RUN |
 | RG02 | 5 | Negative authorization/leakage, stale-hash and compatibility tests prove invariants. | TARGET_SPEC / NOT_RUN |
 | RG03 | 5 | Internal generation PASS or configuration labels cannot contaminate research verdict. | TARGET_SPEC / NOT_RUN |

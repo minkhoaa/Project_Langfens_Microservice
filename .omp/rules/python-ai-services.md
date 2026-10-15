@@ -16,29 +16,26 @@ globs:
 - Sync, CPU-intensive, or blocking calls (ASR `faster-whisper`, large text parsing) must run in thread pools via `asyncio.to_thread` or `ThreadPoolExecutor`.
 
 ## 2. Pydantic v2 Schemas & Data Contracts
-- Define all request and response models in `app/schemas.py`.
-- Enforce strict typing with field constraints:
-  ```python
-  class GenerateSectionRequest(BaseModel):
-      topic: str = Field(..., min_length=3, max_length=120)
-      word_count_target: int = Field(default=800, ge=650, le=950)
-  ```
+- Follow each service's existing schema/contract modules (`app/schemas.py`, router models, and `app/contracts/`); do not force all models into a new central file.
+- Validate request/response boundaries with Pydantic v2 and existing field constraints.
+- Keep runtime models distinct from `generation_baseline` target specifications; planned research gates are not proof of deployed behavior.
 - Keep request, update, and response schemas cleanly separated.
 - Never leak sensitive credentials, internal prompt rubrics, or API keys in response models.
 
 ## 3. Vector Search & RAG (Qdrant)
 - Qdrant client singleton managed through factory (`qdrant_factory.py`).
 - Embedding vector size must match configured dimensions (default 1024 for BGE-M3).
-- Implement Redis caching on vector queries using SHA256 hashes of truncated vectors + filter criteria to minimize redundant vector calculations.
-- Handle Qdrant downtime gracefully with circuit breakers or sensible fallback defaults.
+- Reuse existing Redis key construction and invalidation. Do not truncate vectors to invent cache keys or add speculative caching.
+- Preserve explicit failure semantics; do not turn Qdrant/LLM failures into fabricated successful results.
 
 ## 4. LLM Providers & Cost Guardrails
-- Route LLM calls through provider facades (`llm_service.py` / `groq_service.py` / `llm.py`).
-- Implement key rotation (`GROQ_API_KEYS` comma-separated) and handle HTTP 429 rate limits with backoff cooldowns.
+- Reuse `ai-service` provider services and `generation-service` adapters/facades; current providers include Groq, MiniMax, and OpenAI-compatible APIs. Ollama supplies local embedding/model capabilities.
+- Preserve configured routing, key rotation, and cooldown behavior; never log provider secrets or change provider priority as incidental cleanup.
 - Enforce token budgets, max completion tokens, and prompt truncation before dispatch.
 
 ## 5. Generation Service Runtime Caps (R03 / G06)
-- Resource caps must be loaded from `deploy/envs/loop-caps.env` or explicit environment settings.
-- Respect passage reservations (720–915 words) and question composition budget ceilings (60,000 tokens / 300s child limits).
-- Maintain immutable run profiles with sorted JSON keys and SHA-256 integrity verification.
+- `deploy/envs/loop-caps.env` is the authoritative versioned deployment profile; production must fail closed on missing/invalid required caps.
+- Current loop and benchmark-child ceilings are 15 calls / 60,000 tokens / 300 seconds. Whole-paper, legacy, and benchmark-section budgets are separate; never apply child ceilings indiscriminately.
+- Pin canonical sorted-JSON cap snapshots and SHA-256 integrity at run creation; resumes retain original caps and counters despite deployment changes.
+- Preserve configured passage word bounds rather than copying illustrative defaults from generic skills.
 - Passages and questions must undergo independent, adversarial review before acceptance.

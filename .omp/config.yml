@@ -1,7 +1,7 @@
 # Project-specific OMP & ECC configuration for Langfens IELTS Microservices
 
 task:
-  # Disable off-stack agents from global ECC to keep agent dispatch clean and relevant
+  # Keep native/custom agents and relevant ECC reviewers; suppress off-stack roles.
   disabledAgents:
     - a11y-architect
     - angular-developer
@@ -43,9 +43,64 @@ task:
     - swift-reviewer
     - typescript-reviewer
     - vue-reviewer
+    - build-error-resolver
+    - conversation-analyzer
+    - e2e-runner
+    - loop-operator
+    - network-architect
+    - network-config-reviewer
+    - network-troubleshooter
+    - spec-miner
 
 skills:
-  # Exclude off-stack ECC skills from prompt context
+  # Names are references to the global plugin, not locally copied skill bodies.
+  # Arrays replace lower-precedence arrays. Preserve custom names when updating.
+  includeSkills:
+    - "langfens-*"
+    - skill-library
+    - dotnet-patterns
+    - csharp-testing
+    - python-patterns
+    - python-testing
+    - fastapi-patterns
+    - postgres-patterns
+    - database-migrations
+    - redis-patterns
+    - docker-patterns
+    - deployment-patterns
+    - api-design
+    - contract-first
+    - error-handling
+    - security-review
+    - security-scan
+    - tdd-workflow
+    - verification-loop
+    - search-first
+    - terminal-ops
+    - coding-standards
+    - documentation-lookup
+    - git-workflow
+    - github-ops
+    - architecture-decision-records
+    - cost-aware-llm-pipeline
+    - latency-critical-systems
+    - eval-harness
+    - ai-regression-testing
+    - prompt-optimizer
+    - mle-workflow
+    - production-audit
+    - safety-guard
+    - orch-add-feature
+    - orch-change-feature
+    - orch-fix-defect
+    - orch-refine-code
+    - agent-self-evaluation
+    - configure-ecc
+    - agent-sort
+    - skill-scout
+    - workspace-surface-audit
+    - team-agent-orchestration
+  # Retain the existing off-stack exclusions as a second guard.
   ignoredSkills:
     - "angular-*"
     - "arkts-*"
@@ -81,3 +136,92 @@ skills:
     - "swift*"
     - "tinystruct-*"
     - "vue-*"
+
+# Retain ten relevant global /ecc:* templates; use /skill:* for new workflows.
+# Exact names are required by OMP; no wildcard command-disable semantics.
+# Other plugins and user/project custom commands are not disabled here.
+disabledExtensions:
+  - slash-command:ecc:aside
+  - slash-command:ecc:auto-update
+  - slash-command:ecc:build-fix
+  - slash-command:ecc:checkpoint
+  - slash-command:ecc:cost-report
+  - slash-command:ecc:cpp-build
+  - slash-command:ecc:cpp-review
+  - slash-command:ecc:cpp-test
+  - slash-command:ecc:epic-claim
+  - slash-command:ecc:epic-decompose
+  - slash-command:ecc:epic-publish
+  - slash-command:ecc:epic-review
+  - slash-command:ecc:epic-sync
+  - slash-command:ecc:epic-unblock
+  - slash-command:ecc:epic-validate
+  - slash-command:ecc:evolve
+  - slash-command:ecc:feature-dev
+  - slash-command:ecc:flutter-build
+  - slash-command:ecc:flutter-review
+  - slash-command:ecc:flutter-test
+  - slash-command:ecc:gan-build
+  - slash-command:ecc:gan-design
+  - slash-command:ecc:go-build
+  - slash-command:ecc:go-review
+  - slash-command:ecc:go-test
+  - slash-command:ecc:gradle-build
+  - slash-command:ecc:harness-audit
+  - slash-command:ecc:hookify
+  - slash-command:ecc:hookify-configure
+  - slash-command:ecc:hookify-help
+  - slash-command:ecc:hookify-list
+  - slash-command:ecc:instinct-export
+  - slash-command:ecc:instinct-import
+  - slash-command:ecc:instinct-status
+  - slash-command:ecc:jira
+  - slash-command:ecc:kotlin-build
+  - slash-command:ecc:kotlin-review
+  - slash-command:ecc:kotlin-test
+  - slash-command:ecc:learn
+  - slash-command:ecc:learn-eval
+  - slash-command:ecc:loop-start
+  - slash-command:ecc:loop-status
+  - slash-command:ecc:marketing-campaign
+  - slash-command:ecc:model-route
+  - slash-command:ecc:multi-backend
+  - slash-command:ecc:multi-execute
+  - slash-command:ecc:multi-frontend
+  - slash-command:ecc:multi-plan
+  - slash-command:ecc:multi-workflow
+  - slash-command:ecc:orch-add-feature
+  - slash-command:ecc:orch-build-mvp
+  - slash-command:ecc:orch-change-feature
+  - slash-command:ecc:orch-fix-defect
+  - slash-command:ecc:orch-refine-code
+  - slash-command:ecc:orch-review
+  - slash-command:ecc:plan-canvas
+  - slash-command:ecc:plan-prd
+  - slash-command:ecc:pm2
+  - slash-command:ecc:pr
+  - slash-command:ecc:project-init
+  - slash-command:ecc:projects
+  - slash-command:ecc:promote
+  - slash-command:ecc:prp-commit
+  - slash-command:ecc:prp-implement
+  - slash-command:ecc:prp-plan
+  - slash-command:ecc:prp-pr
+  - slash-command:ecc:prp-prd
+  - slash-command:ecc:prune
+  - slash-command:ecc:quality-gate
+  - slash-command:ecc:react-build
+  - slash-command:ecc:react-review
+  - slash-command:ecc:react-test
+  - slash-command:ecc:resume-session
+  - slash-command:ecc:rust-build
+  - slash-command:ecc:rust-review
+  - slash-command:ecc:rust-test
+  - slash-command:ecc:santa-loop
+  - slash-command:ecc:save-session
+  - slash-command:ecc:security-scan
+  - slash-command:ecc:sessions
+  - slash-command:ecc:setup-pm
+  - slash-command:ecc:skill-create
+  - slash-command:ecc:skill-health
+  - slash-command:ecc:vue-review
