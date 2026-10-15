@@ -1,0 +1,83 @@
+# Project-specific OMP & ECC configuration for Langfens IELTS Microservices
+
+task:
+  # Disable off-stack agents from global ECC to keep agent dispatch clean and relevant
+  disabledAgents:
+    - a11y-architect
+    - angular-developer
+    - bengali-reviewer
+    - chief-of-staff
+    - cpp-build-resolver
+    - cpp-reviewer
+    - dart-build-resolver
+    - django-build-resolver
+    - django-reviewer
+    - flutter-reviewer
+    - fsharp-reviewer
+    - gan-evaluator
+    - gan-generator
+    - gan-planner
+    - go-build-resolver
+    - go-reviewer
+    - harmonyos-app-resolver
+    - healthcare-reviewer
+    - homelab-architect
+    - java-build-resolver
+    - java-reviewer
+    - kotlin-build-resolver
+    - kotlin-reviewer
+    - marketing-agent
+    - openclaw-persona-forge
+    - opensource-forker
+    - opensource-packager
+    - opensource-sanitizer
+    - php-reviewer
+    - pytorch-build-resolver
+    - react-build-resolver
+    - react-reviewer
+    - ruby-reviewer
+    - rust-build-resolver
+    - rust-reviewer
+    - seo-specialist
+    - swift-build-resolver
+    - swift-reviewer
+    - typescript-reviewer
+    - vue-reviewer
+
+skills:
+  # Exclude off-stack ECC skills from prompt context
+  ignoredSkills:
+    - "angular-*"
+    - "arkts-*"
+    - "bengali-*"
+    - "cpp-*"
+    - "cisco-*"
+    - "dart-*"
+    - "django-*"
+    - "flutter-*"
+    - "fsharp-*"
+    - "golang-*"
+    - "go-*"
+    - "harmonyos-*"
+    - "healthcare-*"
+    - "homelab-*"
+    - "java-*"
+    - "jpa-*"
+    - "kotlin-*"
+    - "laravel-*"
+    - "mybatis-*"
+    - "netmiko-*"
+    - "network-*"
+    - "nuxt*"
+    - "openclaw-*"
+    - "perl-*"
+    - "php-*"
+    - "pytorch-*"
+    - "quarkus-*"
+    - "rails-*"
+    - "react-*"
+    - "ruby-*"
+    - "rust-*"
+    - "swift*"
+    - "tinystruct-*"
+    - "vue-*"

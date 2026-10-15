@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
+  "mcpServers": {
+    "postgres-exam": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://exam:exam@localhost:5433/exam-db"
+      ],
+      "enabled": false,
+      "description": "Inspect exam-db schemas, questions, and migrations locally without pgAdmin."
+    },
+    "postgres-attempt": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://attempt:attempt@localhost:5435/attempt-db"
+      ],
+      "enabled": false,
+      "description": "Inspect attempt-db submissions, scores, and diagnostics locally."
+    },
+    "qdrant": {
+      "type": "http",
+      "url": "http://localhost:6333",
+      "enabled": false,
+      "description": "Inspect Qdrant vector collections (writing_samples, grammar_knowledge) used by ai-service."
+    },
+    "context7-docs": {
+      "type": "http",
+      "url": "https://mcp.context7.ai/mcp",
+      "enabled": false,
+      "description": "Live framework documentation lookup for .NET 10, EF Core 10, Aspire, and FastAPI."
+    }
+  }
+}
