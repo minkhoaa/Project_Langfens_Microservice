@@ -383,8 +383,8 @@ class ProviderGateway:
                         result_json = response.model_dump_json(by_alias=True)
                         try:
                             from app.observability.accounting import get_token_accountant
-                            rep_tokens = usage.total_tokens if usage.accounting_type == UsageAccountingType.REPORTED_ACTUAL else 0
-                            est_tokens = usage.total_tokens if usage.accounting_type == UsageAccountingType.ESTIMATED_HEURISTIC else 0
+                            rep_tokens = usage.total_tokens if usage.accounting_type == UsageAccountingType.REPORTED else 0
+                            est_tokens = usage.total_tokens if usage.accounting_type == UsageAccountingType.ESTIMATED else 0
                             unk_tokens = usage.total_tokens if usage.accounting_type == UsageAccountingType.UNKNOWN else 0
                             get_token_accountant().record_usage(
                                 provider=provider_name,

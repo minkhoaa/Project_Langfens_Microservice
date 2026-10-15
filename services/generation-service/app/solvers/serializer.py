@@ -14,10 +14,16 @@ import re
 from typing import Any, Dict, List, Optional, Union
 
 from app.contracts.solver import (
+    AnswerVerificationView,
     BlindSolverInput,
+    BlindSolverResult,
+    CanonicalQuestion,
+    GoldReferenceView,
     SecurityLeakageError,
+    SolverView,
     StudentVisibleOption,
     StudentVisibleQuestion,
+    scan_text_for_security_leaks,
 )
 
 
@@ -172,3 +178,120 @@ def build_secure_envelope(
 </student_question>
 </untrusted_content>"""
     return envelope
+
+
+def project_to_canonical_question(question_data: Any) -> CanonicalQuestion:
+    """Projects question data to an allowlisted CanonicalQuestion."""
+    if hasattr(question_data, "model_dump"):
+        data = question_data.model_dump(by_alias=True)
+    elif hasattr(question_data, "get") and callable(question_data.get):
+        data = dict(question_data)
+    elif hasattr(question_data, "__dict__"):
+        data = dict(vars(question_data))
+    else:
+        raise ValueError(f"Unsupported question data type: {type(question_data)}")
+
+    q_id = str(data.get("question_id") or data.get("questionId") or f"q{data.get('question_number', 1)}")
+    q_type = str(data.get("question_type") or data.get("questionType") or "TFNG").strip()
+    text = str(data.get("text") or data.get("prompt") or data.get("statement") or "").strip()
+    if not text:
+        raise ValueError("Missing question text or prompt")
+
+    instructions = str(data.get("instructions") or "Answer using passage only.").strip()
+
+    raw_options = data.get("options") or []
+    options: List[str] = []
+    if isinstance(raw_options, (list, tuple, Sequence)):
+        for opt in raw_options:
+            if isinstance(opt, str):
+                options.append(opt.strip())
+            elif isinstance(opt, (dict, Mapping)):
+                t = opt.get("text") or opt.get("content") or opt.get("value")
+                if t:
+                    options.append(str(t).strip())
+
+    return CanonicalQuestion(
+        question_id=q_id,
+        question_type=q_type,
+        text=text,
+        options=options,
+        instructions=instructions,
+    )
+
+
+def project_to_solver_view(
+    context_text: str,
+    question_data: Any,
+    allowed_reference_text: Optional[str] = None,
+) -> SolverView:
+    """Projects context and question data to an isolated SolverView.
+
+    Strictly validates no answer, canary, or serialized alias leaks reach the solver.
+    """
+    if not context_text or len(context_text.strip()) < 1:
+        raise ValueError("context_text must not be empty")
+
+    ref_text = allowed_reference_text or context_text
+    canonical_q = project_to_canonical_question(question_data)
+
+    return SolverView(
+        context_text=context_text.strip(),
+        question=canonical_q,
+        allowed_reference_text=ref_text.strip(),
+    )
+
+
+def project_to_answer_verification_view(
+    blind_result: Union[BlindSolverResult, Dict[str, Any]],
+    generator_proposed_answer: str,
+    source_evidence_ref: str,
+    acceptable_variants: Optional[List[str]] = None,
+) -> AnswerVerificationView:
+    """Constructs the AnswerVerificationView only after blind solve completes."""
+    if not blind_result:
+        raise ValueError("blind_result must not be empty")
+    if not generator_proposed_answer:
+        raise ValueError("generator_proposed_answer must not be empty")
+    if not source_evidence_ref:
+        raise ValueError("source_evidence_ref must not be empty")
+
+    if isinstance(blind_result, dict):
+        b_res = BlindSolverResult(
+            question_id=str(blind_result.get("question_id") or blind_result.get("questionId") or "q1"),
+            proposed_solution=str(blind_result.get("proposed_solution") or blind_result.get("proposedSolution") or ""),
+            reasoning_evidence=str(blind_result.get("reasoning_evidence") or blind_result.get("reasoningEvidence") or ""),
+            confidence=float(blind_result.get("confidence", 1.0)),
+        )
+    else:
+        b_res = blind_result
+
+    return AnswerVerificationView(
+        blind_result=b_res,
+        generator_proposed_answer=generator_proposed_answer.strip(),
+        source_evidence_ref=source_evidence_ref.strip(),
+        acceptable_variants=acceptable_variants or [],
+    )
+
+
+def project_to_gold_reference_view(
+    item_id: str,
+    expert_label: str,
+    label_version: str,
+    adjudicator_id: str,
+) -> GoldReferenceView:
+    """Constructs the GoldReferenceView for external research evaluation."""
+    if not item_id:
+        raise ValueError("item_id must not be empty")
+    if not expert_label:
+        raise ValueError("expert_label must not be empty")
+    if not label_version:
+        raise ValueError("label_version must not be empty")
+    if not adjudicator_id:
+        raise ValueError("adjudicator_id must not be empty")
+
+    return GoldReferenceView(
+        item_id=item_id.strip(),
+        expert_label=expert_label.strip(),
+        label_version=label_version.strip(),
+        adjudicator_id=adjudicator_id.strip(),
+    )
