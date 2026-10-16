@@ -298,3 +298,21 @@ def test_visible_candidate_scrubs_proposed_answers_for_reviewer():
     for q in vis.get("questions", []):
         assert "proposed_answer" not in q
         assert "answer" not in q
+
+    # Assert on serialized dispatch payloads for REVIEWER and BLIND_SOLVER
+    from app.contracts.artifact import canonical_json_dump
+    rev_prompt = canonical_json_dump({
+        "configuration_id": run.arm, "prompt_version": run.prompt_version, "stage": "REVIEWER",
+        "task": run.request.task.model_dump(mode="json"), "candidate": vis, **run.source(),
+    })
+    solver_prompt = canonical_json_dump({
+        "configuration_id": run.arm, "prompt_version": run.prompt_version, "stage": "BLIND_SOLVER",
+        "task": run.request.task.model_dump(mode="json"), "candidate": vis, **run.source(),
+    })
+
+    assert "proposed_answer" not in rev_prompt
+    assert "proposed_answers" not in rev_prompt
+    assert "proposed_answer" not in solver_prompt
+    assert "proposed_answers" not in solver_prompt
+    assert '"TRUE"' not in rev_prompt
+    assert '"TRUE"' not in solver_prompt

@@ -89,18 +89,32 @@ def test_v2_5_extended_corpus_with_independent_controls():
     assert metrics.evaluable_count == 23
     assert metrics.coverage == 1.0
 
-    # Transparent measurements with threshold assertions (room for future improvement without regression breaks):
+    # Exact baseline counts (honest recording of current heuristic performance without post-hoc label tuning):
+    assert metrics.true_positive_count == 8
+    assert metrics.true_negative_count == 11
+    assert metrics.false_positive_count == 3
+    assert metrics.false_negative_count == 1
+    assert metrics.far == round(3 / 14, 4)
+    assert metrics.frr == round(1 / 9, 4)
+    assert metrics.accuracy_on_decided == round(19 / 23, 4)
+
+    # Threshold bounds (room for future improvement without regression breaks):
     assert metrics.far <= 0.25
     assert metrics.frr <= 0.15
     assert metrics.accuracy_on_decided >= 0.80
 
     # Specific audit of known boundary limitations exposed by independent controls:
     res18 = ev25.evaluate_item("v25-calib-pos-control-18", EVALUATOR_V2_5_CALIBRATION_CORPUS[17].passage_text, EVALUATOR_V2_5_CALIBRATION_CORPUS[17].question_data)
-    assert res18.verdict == EvaluationVerdict.FAIL  # Known heuristic boundary: extreme academic synonym paraphrase
+    assert res18.verdict == EvaluationVerdict.FAIL  # Known heuristic boundary: extreme academic synonym paraphrase (FN)
+
+    res19 = ev25.evaluate_item("v25-calib-neg-control-19", EVALUATOR_V2_5_CALIBRATION_CORPUS[18].passage_text, EVALUATOR_V2_5_CALIBRATION_CORPUS[18].question_data)
+    assert res19.verdict == EvaluationVerdict.PASS  # Known heuristic boundary: ratio-comparative direction inversion (FP)
+
+    res20 = ev25.evaluate_item("v25-calib-adv-control-20", EVALUATOR_V2_5_CALIBRATION_CORPUS[19].passage_text, EVALUATOR_V2_5_CALIBRATION_CORPUS[19].question_data)
+    assert res20.verdict == EvaluationVerdict.PASS  # Known heuristic boundary: cross-clause whereas chimera on TRUE path (FP)
 
     res21 = ev25.evaluate_item("v25-calib-ambig-control-21", EVALUATOR_V2_5_CALIBRATION_CORPUS[20].passage_text, EVALUATOR_V2_5_CALIBRATION_CORPUS[20].question_data, context_metadata=EVALUATOR_V2_5_CALIBRATION_CORPUS[20].context_metadata)
-    # Document that collective noun that/who cleft ambiguity is caught by UncertaintyEscalationProtocol
-
+    assert res21.verdict == EvaluationVerdict.PASS  # Known heuristic boundary: collective noun that/who cleft ambiguity (FP)
 def test_v2_3_historical_calibration_remains_strictly_frozen():
     """Verify that NeutralEvaluatorV2_3 remains strictly frozen with 3 false rejects (FRR=42.86%)."""
     ev23 = NeutralEvaluatorV2_3()

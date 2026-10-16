@@ -1105,5 +1105,6 @@
       "has_discrepancy": true
     }
   ],
-  "source_commit_sha": "7b33b827aec8e1de3525ce6d09dff0830beb37e0"
+  "replay_source_commit_sha": "7b33b827aec8e1de3525ce6d09dff0830beb37e0",
+  "artifact_published_at_commit": "9f1647dfdc0b0d5caf92eaabfd83e23802a7fed5"
 }

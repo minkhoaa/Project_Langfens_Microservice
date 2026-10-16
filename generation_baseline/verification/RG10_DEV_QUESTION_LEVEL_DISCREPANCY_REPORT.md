@@ -1,6 +1,7 @@
 # RG10 DEV Hardening — Full Question-Level Evidence Reconciliation & Discrepancy Report
 
-**Source Commit SHA:** `7b33b827aec8e1de3525ce6d09dff0830beb37e0`  
+**Replay Source Commit SHA:** `7b33b827aec8e1de3525ce6d09dff0830beb37e0`  
+**Artifact Published At Commit:** `9f1647dfdc0b0d5caf92eaabfd83e23802a7fed5`  
 **Date:** 2026-10-16T16:00:00Z  
 **Status:** PUBLISHED CORRECTED RECONCILIATION  
 **Machine-Readable Artifact:** `generation_baseline/verification/RG10_DEV_QUESTION_LEVEL_DISCREPANCY_REPORT.json`  

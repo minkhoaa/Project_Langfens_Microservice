@@ -634,6 +634,10 @@ def run_replay(
         "ambiguity_audit": client.ambiguous_dispatches,
         "unconsumed_records": [r["_filename"] for r in client._raw_records if r["_filename"] not in client._consumed_filenames],
     }
+    unconsumed_filenames = results["unconsumed_records"]
+    unconsumed_note = ""
+    if "research-REVIEWER-8_REVIEWER_1792133038741024377.json" in unconsumed_filenames:
+        unconsumed_note = " Note: research-REVIEWER-8 was unconsumed because research-REPAIR-7 omitted answer keys, triggering PROPOSED_ANSWERS_MISSING terminal failure before post-repair review dispatch."
 
     results_file = output_dir / "quality_dev_hardening_results.json"
     results_file.write_text(json.dumps(results, indent=2), encoding="utf-8")
@@ -664,7 +668,7 @@ def run_replay(
 **Execution Mode:** Pure Offline Replay (zero live provider network calls)  
 **Evaluator:** NeutralEvaluatorV2_3 (`neutral-eval-v2.3`, `rubric-qgeval-v2.3`)  
 **Raw Provider Dispatches Replayed:** {total_calls} authentic MiniMax calls  
-**Unconsumed Provider Records:** {len([r['_filename'] for r in client._raw_records if r['_filename'] not in client._consumed_filenames])} record(s)  
+**Unconsumed Provider Records:** {len(unconsumed_filenames)} record(s)  
 **Replay Output Artifact:** `{results_file}`  
 
 ---
@@ -675,8 +679,8 @@ def run_replay(
 - **Cumulative Tokens:** {total_tokens:,} tokens (EXACT confidence from provider response headers)
 - **Spend:** ${spent_usd:.4f} USD
 - **Completed Assignments:** {m1['completed_requests']}/{m1['assigned_requests']} ({round(m1['completion_rate'] * 100, 2)}% completion rate)
-- **Preserved Terminal Failures:** {m1['failed_validation_requests']}/{m1['assigned_requests']} ({round((1 - m1['completion_rate']) * 100, 2)}% failed validation; Arm B and Arm C terminated strictly without fake passes)
-- **Unconsumed Raw Records:** {len([r['_filename'] for r in client._raw_records if r['_filename'] not in client._consumed_filenames])} record(s) ({', '.join([r['_filename'] for r in client._raw_records if r['_filename'] not in client._consumed_filenames]) or 'None'}). Note: research-REVIEWER-8 was unconsumed because research-REPAIR-7 omitted answer keys, triggering PROPOSED_ANSWERS_MISSING terminal failure before post-repair review dispatch.
+- **Preserved Terminal Failures:** {m1['failed_validation_requests']}/{m1['assigned_requests']} ({round(m1['failed_validation_requests'] / m1['assigned_requests'] * 100, 2)}% failed validation; Arm B and Arm C terminated strictly without fake passes)
+- **Unconsumed Raw Records:** {len(unconsumed_filenames)} record(s) ({', '.join(unconsumed_filenames) or 'None'}).{unconsumed_note}
 - **Replay Ambiguity Audit:** {len(client.ambiguous_dispatches)} dispatch(es) with identical (stage, prompt_sha256) matches (REVIEWER-18 vs REVIEWER-20). Resolution: {client.ambiguous_dispatches[0]['resolution'] if client.ambiguous_dispatches else 'NONE'}
 ---
 

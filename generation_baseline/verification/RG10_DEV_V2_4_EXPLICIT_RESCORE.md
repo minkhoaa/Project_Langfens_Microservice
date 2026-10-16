@@ -1,6 +1,7 @@
 # RG10 DEV Hardening — Explicit NeutralEvaluatorV2_4 Rescore
 
-**Source Commit SHA:** `7b33b827aec8e1de3525ce6d09dff0830beb37e0`  
+**Replay Source Commit SHA:** `7b33b827aec8e1de3525ce6d09dff0830beb37e0`  
+**Artifact Published At Commit:** `9f1647dfdc0b0d5caf92eaabfd83e23802a7fed5`  
 **Date:** 2026-10-16T16:15:00Z  
 **Status:** PUBLISHED VERSIONED RESCORE (Preserves v2.3 Historical Baseline)  
 **Machine-Readable Artifact:** `generation_baseline/verification/RG10_DEV_V2_4_EXPLICIT_RESCORE.json`  
