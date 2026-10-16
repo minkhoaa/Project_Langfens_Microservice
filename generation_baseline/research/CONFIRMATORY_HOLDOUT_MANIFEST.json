@@ -5,7 +5,7 @@
   "governing_document": "generation_baseline/research/CONFIRMATORY_HOLDOUT_SPECIFICATION.md",
   "protocol": "RQ2_FROZEN_CONCURRENT_EVALUATION",
   "holdout_type": "JUDGE_HOLDOUT",
-  "specification_notes": "Defines holdout quotas and disjoint source families for post-freeze judge calibration and reliability assessment. Item-level curation, packaging, and cryptographic hashing must be performed independently by an external human panel prior to unsealing. Seals and attestations remain null/PENDING until real curated content is hashed to prevent fabricating holdout integrity.",
+  "specification_notes": "Defines holdout quotas and disjoint source families for post-freeze judge reliability assessment (measuring post-freeze FRR, FAR, and abstention rate; strictly forbidden for additional threshold tuning, parameter optimization, or heuristic calibration). Item-level curation, packaging, and cryptographic hashing must be performed independently by an external human panel prior to unsealing. Seals and attestations remain null/PENDING until real curated content is hashed to prevent fabricating holdout integrity.",
   "security_attestations": {
     "zero_developer_inspection_of_curated_content": null,
     "zero_prompt_tuning_leakage": null,
@@ -19,7 +19,7 @@
   "rq2_experimental_corpus_distinction": {
     "judge_holdout_scope": "30-item post-freeze evaluator reliability check (18 reading, 12 grammar questions)",
     "rq2_final_eval_scope": "25-40 paired benchmark tasks per domain (25-40 Reading tasks, 25-40 Grammar tasks across Arms A, B, C; 150-240 total assigned slots)",
-    "relationship": "DISJOINT: The 30-item judge holdout measures post-freeze evaluator calibration; it cannot substitute for, overlap with, or fulfill the 25-40 paired tasks per domain required for RQ2 hypothesis testing."
+    "relationship": "DISJOINT: The 30-item judge holdout measures post-freeze evaluator reliability (post-freeze reliability assessment, not additional threshold tuning); it cannot substitute for, overlap with, or fulfill the 25-40 paired tasks per domain required for RQ2 hypothesis testing."
   },
   "curation_prerequisites_for_sealing": {
     "curated_item_ids_present": false,

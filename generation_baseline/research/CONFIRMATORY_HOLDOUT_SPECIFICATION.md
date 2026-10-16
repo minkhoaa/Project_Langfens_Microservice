@@ -12,11 +12,11 @@ To eliminate evaluation leakage and circular prompt/evaluator tuning, confirmato
 
 ### Inviolable Governance Rules
 1. **Uninspected Labels:** Neither developers, prompts, generators, nor evaluators may open, inspect, or tune against holdout items during development.
-2. **Source-Family Disjointness:** Holdout passages and rule packs must originate from distinct source families with zero lexical, topical, or morphological overlap with any development split or calibration split.
+2. **Source-Family Isolation & Leakage Checks:** Holdout passages and rule packs must originate from quarantined, distinct source families completely isolated from any development or calibration source families. Passages and items must pass exact and near-duplicate leakage checks (e.g. 3-gram shingle Jaccard similarity < 0.3) against all development and calibration texts (replacing impossible zero-lexical-overlap rules with rigorous source-family isolation and empirical shingle leakage bounds).
 3. **Single-Flight Evaluation:** Confirmatory evaluation is executed exactly once upon research freeze unsealing. Multiple evaluation runs with retrospective prompt or heuristic adjustments are strictly forbidden.
 4. **Cryptographic Sealing Prerequisites:** The dataset item IDs, canonical content hashes, source provenance, and curator attestations must be provided by an external panel before cryptographic SHA-256 seals are generated. All seals remain `null` until real curated content is hashed.
 5. **Synthetic Data Prohibition:** Under no circumstances may developers or automated pipelines generate synthetic holdout items and label them as independently curated. All holdout items must originate exclusively from verified external human panel sources.
-6. **Corpus Separation:** The 30-item Judge Holdout corpus specified herein serves exclusively for post-freeze evaluator calibration and reliability assessment. It is strictly separate from, and cannot substitute for, the 25–40 paired benchmark tasks per domain (150–240 arm assignments) required for RQ2 hypothesis testing (`FINAL_EVAL`).
+6. **Corpus Separation & Role Clarification:** The 30-item Judge Holdout corpus specified herein serves exclusively for post-freeze evaluator reliability assessment (measuring post-freeze False Rejection Rate [FRR], False Acceptance Rate [FAR], and abstention rate). It is strictly forbidden to use the judge holdout for additional threshold tuning, parameter optimization, or heuristic calibration. Furthermore, the 30-item Judge Holdout is distinct from, and cannot substitute for or overlap with, the 25–40 paired benchmark tasks per domain (150–240 arm assignments) required for RQ2 hypothesis testing (`FINAL_EVAL`).
 
 ---
 
@@ -52,7 +52,7 @@ The Confirmatory Judge Holdout corpus shall consist of exactly $N = 30$ balanced
    - Requirement: Exactly 1 defensible option and 3 unambiguously ungrammatical distractors with documented syntactic error codes.
 
 ### Separation from RQ2 Experimental Corpus
-- **Judge Holdout ($N = 30$ questions):** Post-freeze measurement of evaluator reliability, False Rejection Rate (FRR), False Acceptance Rate (FAR), and abstention rate.
+- **Judge Holdout ($N = 30$ questions):** Post-freeze measurement of evaluator reliability, False Rejection Rate (FRR), False Acceptance Rate (FAR), and abstention rate. It is strictly designated for post-freeze reliability assessment, NOT for additional threshold tuning, parameter adjustment, prompt engineering, or heuristic fitting.
 - **RQ2 Benchmark Tasks ($N = 25\text{--}40$ tasks per domain):** 25–40 Reading passages (with 1–2 question groups) and 25–40 Grammar rule sets evaluated across Arm A, Arm B, and Arm C ($N_{\text{total}} = 150\text{--}240$ arm-slot assignments) for research question hypothesis testing.
 
 ---

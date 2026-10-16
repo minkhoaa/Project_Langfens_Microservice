@@ -1,0 +1,211 @@
+{
+  "report_id": "rg10-campaign-readiness-dryrun-v1.0",
+  "evaluated_at": "2026-10-16T19:00:00Z",
+  "software_commit_sha": "32cb85e514f881aef8a5366ea43eb67422012eaa",
+  "is_dry_run": true,
+  "dataset_readiness": {
+    "reading_task_count": 28,
+    "grammar_task_count": 28,
+    "total_task_count": 56,
+    "verified_sources_on_disk": 56,
+    "reading_source_hashes": [
+      "10ab86303d29ffa8aed7fc64cbc5c6c8db969229e83adc8a4202d6a9735441b1",
+      "132ba8acbce5f74d471ea65497c7ae4209ca6defe610aa452f2045481fb2d878",
+      "14f8b75c4799012461e5e3476d30aa0b70ebcdd2eff6829e8966721c48dac868",
+      "27cb270bb39ca735fa448ceb1fafd4ad61e36e13c5a6054714799800f1adda9c",
+      "2e9828f92ff12896038ecda2dd3561c269d0816b4c4d41537ec9e3b320053a6c",
+      "370537b554cd59abdee72d8b911580915bba7ef0d546e1f41fb394a7d1c0dc05",
+      "37c22d378a7c1902ff4d9ad3b1fd58e8d53b6ba9e0c5a09fe6729d601bdcf834",
+      "3c6069ab0525e2ba0f6b03c2401a82f5b34341b1f0ff1e8214c6f9f7e2ea8ce5",
+      "56d8f603d928def7bb359169f9c4ec7d6c0828376ed0bdb328137f505240285d",
+      "68ba1b7b9efd2e5372c57d639a7774cf9a5c5f4fcfb94c6ad517f4859bf4b1be",
+      "68d3e629166923b0a242e42da0c29aa8005684c81f2849099f39ce801273ac51",
+      "79f3c3885e41407fe05fa5620a90cb2ff876a0d7bfc3577e5d869ff6069222e5",
+      "7be04c3854e8734363028bb8e2fe0fe81e083f0aa86fa57c24e66563d2618192",
+      "99c30b25b655329031f4ed25ec981284ebd203c7818b883e0cbef8edeffee18a",
+      "9dd1cee6c8c9e4a7d512376245b414da02eb7fd59aa4ea045fc6f9390bdf9b98",
+      "a20900b3b36606758378940e81431f37d556cedd998ae5fbd8190b9efc85586c",
+      "a3603db1a22afa45161ce653951eb5814dead8a73ce106729cf3da0c25ed80a0",
+      "ad88f7ab8fdd5a97ab1b1aba6e5924ec31104271d55e69a109065730c4bcd895",
+      "c22ec61a4d3329858f7bf32e1d3bdf5b500dfa9410f2272ad47d145f29bf3738",
+      "c604e71c1b00a572e30dd213ec7c0f2b738327bf89a95aa3afe736598675a359",
+      "c6fabe3576dd27c0aab2d2e21f1dc82375c76a6f9736e0214767ba2d13395ecd",
+      "c8b5df060d6e63e18e5357b13b9645ae397075f976e01a65cfecd853e885c810",
+      "cd2726a54e17c0b12ad491a47dbd82578eb68da682a9966df2173e92fb9453ea",
+      "d5fc00cff220588ae0f7f985b17d1e8dd9563ffc5571ec9d31143859083f5dc2",
+      "d646ea80d61a5e69707682d3b4fab0f6ba2d469c397fb6d50d7c8d252bd41964",
+      "e945a2c5e35a94eb6a0a92b477d18cfbdd6efc6832c2b67efeb420e6d8c800d8",
+      "f158da9b73d14626dbeeb454119d1b8f3b5fa4dcda70614ddc5f22b3cef444bd",
+      "fe89b05280132a96595c1c0f145a9061eba5a3703227d40ab16f83f7a5972fdc"
+    ],
+    "grammar_source_hashes": [
+      "08c9d8af9bbbfdd7e4033abd30da92166fcb78dff1679ef65338fe25e7a817f8",
+      "0cc2071d2587188a7db1914557640139c37d343532515f0c1550ded549b98719",
+      "0e098fe0aa2708d726fa657912549a7df8c373ab3c509c78bde36566307e5896",
+      "189d38295a4632191e52476b3f5a92c88ab3ece31847b2ce4e90594cff276e6b",
+      "25957da8cb28d6e4f1f69fa719f8a19dacc56d671ce21e6490198832ae19b6ed",
+      "2847b21a68c46f3b7d95431c961742b229ec2a829054329541b190e270471fcd",
+      "30934033eece6c804a002305cc90398cc440e1a490725f2e5de4518ef4ef8765",
+      "3aefa97c8bdec01753801f2e351fff7e29ea1559d51d1957eccd185d25004d72",
+      "48116229f823c48e0dee6c627b54680821268b23dbd3483cd01f7ca0f2288d32",
+      "4c53d75ef4e7a82c87ff52826aecf663408b3eb1c5124f68679d6663390b8f65",
+      "5e8dbb93a29bc27dd3c537b1b060ebae26cfb9967c76784e5785c415e3280d13",
+      "65f3e0aeca61687364edb9314779138e1dae8992b6f07851b7a7e475544ccaf4",
+      "670769155b8a1e45da3bb08bff9b0b5bfe587f8205c4d9d295c596ca04bffa89",
+      "7183bcc6bc357f407aaa5528d31f080b4a1e55b1c7c5316c85329fe8fe43530f",
+      "7b22e1ec75e380753c1e12472e0b08ac0f77b8429064fc3c8c658dd35835e8fd",
+      "92fd3817ccff39263eb044585222783eab05b13e7e759d18642e10cf42541cae",
+      "99dbd14b9db48629c4a3ca80cece3333717cc5203635018ef96e0d8c2ea01b4c",
+      "9ce64b6324bddb0b78801a349905961631d7c24af51e822ae527d825ad98fa36",
+      "a7b9071e175d613b4a5e1fe84e497113c070c64cf6953e612fdd166ed7243b51",
+      "b170d46e58f35f3f11da6495ffea6a3576fd137dcaf20a8d8761f5169f55172b",
+      "b26890a45f386a47b439ecc5bd55349a2d435cd98cd892a5d0fe0f737e69fdff",
+      "c2cb81938e58d4048d984efcc14dc4a442ff39f9857a3c587aba5985d88439f4",
+      "cbd62dac90f84ddc69d51fa2356ef7367dbbac73af7b33814ef289911dade98c",
+      "cc6b4e82c789e290b6ddb14ac3d5f2072b14f49c94fd3c7043983374aeb8dc77",
+      "cf7c93c6a9286af67f8a8ad13f4df5e180f4779032b8ffa9340c1f307dd1e185",
+      "d33ee5a51aaf6db9b631f9a9598b893acedc6a0eb893d161f447ab2f7cecb097",
+      "d4a7eae0f1a5255fdef6eb42f5017892eed6f969f45d34326fcf7c1fd7d46f8f",
+      "f73814fd1b8642de20a76e9639e48658b702b03cfb7fb4b972196d534041fd85"
+    ],
+    "combined_source_sha256": "09db897c54fbdc05687b84779699706e330f5bff35a4167574560e4ec7133e4b",
+    "forbidden_family_collisions": [],
+    "is_source_isolated": true,
+    "holdout_manifest_status": "SPECIFICATION_PENDING_INDEPENDENT_CURATION",
+    "holdout_seals_are_null": true,
+    "holdout_corpus_present": false,
+    "synthetic_holdout_detected": null,
+    "evidence_notes": "Verified 56 tasks across 28 Reading and 28 Grammar slots. All 56/56 task content SHAs verified against source specifications. Zero forbidden family collisions. Holdout manifest status: SPECIFICATION_PENDING_INDEPENDENT_CURATION (seals null: True, holdout submitted: False).",
+    "status": "VERIFIED"
+  },
+  "version_readiness": {
+    "evaluator_version": "neutral-eval-v2.7",
+    "evaluator_candidate_class": "NeutralEvaluatorV2_7",
+    "rubric_version": "rubric-qgeval-v2.7",
+    "is_v2_7_plus": true,
+    "foundation_model_id": "minimax/MiniMax-Text-01",
+    "experimental_arms": [
+      "A",
+      "B",
+      "C"
+    ],
+    "prompt_versions": {
+      "A": "v2.1-baseline",
+      "B": "v2.2-grounded",
+      "C": "v3.0-adversarial"
+    },
+    "evidence_notes": "Instantiated NeutralEvaluatorV2_7 with version 'neutral-eval-v2.7' and rubric 'rubric-qgeval-v2.7'. Verified is_v2_7_plus=True. Foundation model pinned to 'minimax/MiniMax-Text-01' across Arms ['A', 'B', 'C'].",
+    "status": "VERIFIED"
+  },
+  "roster_and_denominators": {
+    "total_assignments": 168,
+    "reading_assignments": 84,
+    "grammar_assignments": 84,
+    "assignments_per_arm": {
+      "A": 56,
+      "B": 56,
+      "C": 56
+    },
+    "task_level_denominators": {
+      "reading_tasks": 28,
+      "grammar_tasks": 28,
+      "total_tasks": 56
+    },
+    "judge_holdout_denominator": 30,
+    "judge_holdout_reading_stratum": 18,
+    "judge_holdout_grammar_stratum": 12,
+    "ledger_comparison_count": 168,
+    "ledger_mismatches": 0,
+    "is_roster_deterministic": true,
+    "evidence_notes": "Evaluated 168 generated assignments against 168 frozen ledger entries. Exact symmetric difference: 0 mismatches. Explicit denominators: total=168, reading=84, grammar=84, per_arm=56. Separate Judge Holdout denominator: N=30.",
+    "status": "VERIFIED"
+  },
+  "provider_quota_status": {
+    "provider_id": "minimax",
+    "endpoint_offline_ref": "https://api.minimaxi.chat/v1/text/chatcompletion_v2",
+    "live_network_calls_made": 0,
+    "prior_verified_status": "BLOCKED_EXTERNAL_QUOTA",
+    "prior_verified_code": 429,
+    "prior_verified_message": "Token Plan usage limit reached (2056)",
+    "dry_run_assertion": "DRY RUN INVARIANT ENFORCED: Exactly 0 live network calls made. Provider quota cannot be asserted available without live dispatch; status truthfully retained as BLOCKED.",
+    "status": "BLOCKED"
+  },
+  "human_panel_readiness": {
+    "panel_status": "AWAITING_HUMAN_PANEL",
+    "blind_forms_available": true,
+    "curator_instructions_available": true,
+    "adjudication_workflow_available": true,
+    "synthetic_human_scores_present": false,
+    "human_adjudication_completed": false,
+    "evidence_notes": "Human panel status: AWAITING_HUMAN_PANEL. Handoff documents verified: forms=True, curator_instructions=True, adjudication_workflow=True. Zero synthetic human scores generated.",
+    "status": "HOLD"
+  },
+  "raw_response_preservation": {
+    "raw_response_directories_found": [
+      "generation_baseline/.execution/RG10/raw_responses",
+      "generation_baseline/.execution/RG10_DEV_FRESH_V3/raw_responses",
+      "generation_baseline/.execution/RG10_DEV_GRAMMAR_FIX_V5/raw_responses",
+      "generation_baseline/.execution/RG10_DEV_HARDENING/raw_responses",
+      "generation_baseline/.execution/RG10_DEV_HARDENING_V2/raw_responses",
+      "generation_baseline/.execution/RG10_DEV_UNSEEN_PILOT_V4/raw_responses",
+      "generation_baseline/.execution/RG10_REMEDIATION/raw_responses",
+      "generation_baseline/.execution/RG11_DEV_V22/raw_responses"
+    ],
+    "total_raw_responses_on_disk": 635,
+    "sample_file_verified": "generation_baseline/.execution/RG10/raw_responses/research-GENERATOR-6_GENERATOR_1792083397371579947.json",
+    "telemetry_fields_verified": [
+      "latency_ms",
+      "prompt_sha256",
+      "provider_request_id",
+      "raw_text_sha256",
+      "tokens",
+      "tokens_prompt_completion_total"
+    ],
+    "evidence_notes": "Found 635 raw response JSON records across 8 execution directories. Verified fields in sample 'generation_baseline/.execution/RG10/raw_responses/research-GENERATOR-6_GENERATOR_1792083397371579947.json': ['latency_ms', 'prompt_sha256', 'provider_request_id', 'raw_text_sha256', 'tokens', 'tokens_prompt_completion_total'].",
+    "status": "VERIFIED"
+  },
+  "failure_and_uncertainty_accounting": {
+    "evaluator_uncertain_verdict_supported": true,
+    "fail_closed_on_uncertain": true,
+    "missing_output_classified_as_fail": true,
+    "rate_limit_classified_as_blocked": true,
+    "zero_silent_drops": true,
+    "evidence_notes": "Evaluator NeutralEvaluatorV2_7 implements EvaluationVerdict.UNCERTAIN=True. Analysis plan enforces fail-closed: UNCERTAIN, timeout, rate-limit, and missing output are non-PASS. Zero silent drops.",
+    "status": "VERIFIED"
+  },
+  "statistical_analysis_plan": {
+    "plan_id": "prereg-rq2-2026-v1",
+    "plan_sha256": "2cf7bfa5763714ab6d50db373af41a2a36a3a4173f762973e25dd197acea6c42",
+    "plan_hash_verified": true,
+    "primary_endpoint": "independent_final_PASS / all_assigned",
+    "resampling_unit": "dataset_item_id",
+    "paired_contrasts": [
+      "C_minus_A",
+      "C_minus_B"
+    ],
+    "confidence_level": 0.95,
+    "analysis_plan_md_exists": true,
+    "corrections_verified": [
+      "primary_endpoint: independent_final_PASS / all_assigned",
+      "resampling_unit: dataset_item_id",
+      "paired_contrasts: C-A and C-B",
+      "bootstrap_95ci: paired bootstrap",
+      "fail_closed: UNCERTAIN/timeout as non-PASS"
+    ],
+    "evidence_notes": "Plan 'prereg-rq2-2026-v1' computed SHA256 matches: True (2cf7bfa5763714ab...). Primary endpoint: 'independent_final_PASS / all_assigned'. ANALYSIS_PLAN.md verified on disk with methods: ['primary_endpoint: independent_final_PASS / all_assigned', 'resampling_unit: dataset_item_id', 'paired_contrasts: C-A and C-B', 'bootstrap_95ci: paired bootstrap', 'fail_closed: UNCERTAIN/timeout as non-PASS'].",
+    "status": "VERIFIED"
+  },
+  "overall_software_readiness": "READY",
+  "overall_campaign_readiness": "HOLD",
+  "blockers": [
+    "Provider API quota returned HTTP 429 Token Plan usage limit reached (status: BLOCKED_EXTERNAL_QUOTA).",
+    "Confirmatory holdout corpus (N=30) remains SPECIFICATION_PENDING_INDEPENDENT_CURATION with null cryptographic seals.",
+    "Qualified human review panel is uncontracted/unpopulated (status: AWAITING_HUMAN_PANEL; zero synthetic scores)."
+  ],
+  "actionable_resume_criteria": [
+    "1. External provider quota replenished and confirmed operational.",
+    "2. Independent human panel delivers 30-item holdout passing check_corpus_disjointness.py.",
+    "3. Cryptographic SHA-256 seals generated and signed by panel lead into CONFIRMATORY_HOLDOUT_MANIFEST.json.",
+    "4. Human review panel onboarded to score blinded evaluation package."
+  ]
+}
