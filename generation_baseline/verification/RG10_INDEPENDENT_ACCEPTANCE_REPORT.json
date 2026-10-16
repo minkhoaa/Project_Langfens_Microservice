@@ -11,7 +11,7 @@
   },
   "gate_status": {
     "software_ready": "QUALIFIED_PASS_PREREQUISITE_LIMITED",
-    "quality_ready": "QUALIFIED_DEV_READY",
+    "quality_ready": "HOLD_EVALUATOR_DEFECTS_UNRESOLVED",
     "research_ready": "HOLD",
     "overall_gate_verdict": "HOLD"
   },

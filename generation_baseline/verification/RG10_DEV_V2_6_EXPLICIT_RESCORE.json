@@ -5,7 +5,8 @@
   "evaluator_version": "neutral-eval-v2.6",
   "rubric_version": "rubric-qgeval-v2.6",
   "code_reference": "NeutralEvaluatorV2_6 + validate_negative_inversion_grammaticality",
-  "source_commit_sha": "f578caaeb0686a780b0a005d1712094e447ae1b3",
+  "evidence_source_commit_sha": "f578caaeb0686a780b0a005d1712094e447ae1b3",
+  "evaluator_source_commit_sha": "9b76de1939e008bbeb3391115b3ff9e9bccbaa52",
   "evidence_reference": "generation_baseline/.execution/RG10_DEV_UNSEEN_PILOT_V4/unseen_live_dev_results.json",
   "methodology_note": "Original verdicts in UNSEEN_LIVE_DEV_REPORT.json are strictly preserved and unmutated. This report publishes independent forensic linguistic classifications and side-by-side comparison with NeutralEvaluatorV2_6. An evaluator's own output is explicitly not called independent human gold.",
   "summary_metrics": {

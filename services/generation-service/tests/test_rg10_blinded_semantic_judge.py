@@ -179,3 +179,14 @@ def test_blinded_judge_preserves_missing_answer_as_fail():
 
     assert verdict.verdict == EvaluationVerdict.FAIL
     assert "UNSCORABLE_MISSING_ANSWER" in verdict.rationale
+
+
+def test_blinded_judge_explicit_version_pinning():
+    """Verify that UncertaintyEscalationProtocol accepts explicit version-pinned base evaluators."""
+    from app.evaluators.independent import NeutralEvaluatorV2_5, NeutralEvaluatorV2_6
+
+    judge_v25 = BlindedSemanticJudgeProtocol(base_evaluator=NeutralEvaluatorV2_5())
+    assert judge_v25.base_evaluator.evaluator_version == "neutral-eval-v2.5"
+
+    judge_v26 = BlindedSemanticJudgeProtocol(base_evaluator=NeutralEvaluatorV2_6())
+    assert judge_v26.base_evaluator.evaluator_version == "neutral-eval-v2.6"

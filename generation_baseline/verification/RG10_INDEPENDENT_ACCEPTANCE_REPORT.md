@@ -18,9 +18,9 @@ This report provides the independent evaluation and software-quality assessment 
 | Pillar | Gate Verdict | Evidence & Rationale |
 |---|---|---|
 | **SOFTWARE_READY** | **QUALIFIED_PASS (PREREQUISITE_LIMITED)** | Deterministic unit and evaluator suites pass 100% (1,084 passed, 33 skipped in generation-service unit/functional tests; 26 passed in v2.6 acceptance test suite; 39 passed in isolation/grammar suite; 133 passed in loop runtime/caps suite; 73 passed in .NET attempt-service suite). Complete version isolation verified with zero regression in historical evaluators (v2.0–v2.5). **Prerequisite limits disclosed:** Full-suite run recorded 1 failure in `test_t14_harness_integration.py` due to absent live PostgreSQL instance on port 5433 (infrastructure dependency, not evaluator defect). Local runner executed under Python 3.10.12 (production containers are pinned to Python 3.12). |
-| **QUALITY_READY** | **QUALIFIED_DEV_READY** | Evaluator v2.6 eliminates historical regex blindspots (Not only missing trigger, shallow auxiliary distractor matching, and mandative noun-verb extraction errors). On a newly constructed internal DEV acceptance suite of 25 items across 5 grammar families, v2.6 achieves **84.0% accuracy** and **100.0% coverage** (FR rate = 13.3%, FA rate = 20.0% with explicit denominators). Reading failures reconciled into generator defects vs evaluator defects. |
-| **RESEARCH_READY** | **HOLD** | **Blocked on external prerequisites:** Live MiniMax API returned `HTTP 429: Token Plan usage limit reached (2056)` (truthfully recorded as `BLOCKED_EXTERNAL_QUOTA`). Confirmatory holdout specification ($N=30$) defines quotas across disjoint source families, but real item curation and cryptographic seals remain pending external panel execution. Certified human expert panel review is prepared with empty review packets (`AWAITING_HUMAN_PANEL`) without synthetic human score fabrication. |
-| **OVERALL GATE VERDICT** | **`HOLD`** | **Do NOT start RG11 or the final A/B/C campaign.** Evaluator v2.6 and generator prompt improvements are qualified for development; hold until external quota is restored, confirmatory holdout is independently curated, and human expert panel data is gathered. |
+| **QUALITY_READY** | **HOLD (EVALUATOR_DEFECTS_UNRESOLVED)** | Evaluator v2.6 eliminates historical regex blindspots (Not only missing trigger, shallow auxiliary distractor matching, and mandative noun-verb extraction errors). However, exploratory DEV testing on 25 items across 5 grammar families exposed **concrete unresolved evaluator defects** (FR rate = 13.3% [2/15], FA rate = 20.0% [2/10]: base verbs ending in `-s`/`-ss`, non-inverted *if* matching, and mandative adjective stems). Furthermore, because these 25 cases served to diagnose implementation limits, they do not constitute an independent post-freeze acceptance set. Quality acceptance remains incomplete. |
+| **RESEARCH_READY** | **HOLD** | **Blocked on external prerequisites:** Live MiniMax API returned `HTTP 429: Token Plan usage limit reached (2056)` (truthfully recorded as `BLOCKED_EXTERNAL_QUOTA`). Confirmatory holdout specification ($N=30$) defines quotas across disjoint source families, but real item curation and cryptographic seals remain pending external panel execution (`SPECIFICATION_PENDING_INDEPENDENT_CURATION`). Certified human expert panel review is prepared with empty review packets (`AWAITING_HUMAN_PANEL`) without synthetic human score fabrication. |
+| **OVERALL GATE VERDICT** | **`HOLD`** | **Do NOT start RG11 or the final A/B/C campaign.** Evaluator v2.6 exhibits known software-quality defects and lacks independent post-freeze holdout evaluation; hold until external quota is restored, evaluator defects are repaired, confirmatory holdout is independently curated, and human expert panel data is gathered. |
 
 ---
 
@@ -90,14 +90,13 @@ Actual │             │              │ (False Rej)  │
 
 ### 3.2 Metrics with Explicit Denominators
 
-| Metric | Formula | Observed Value | Percentage | Target / Invariant |
+| Metric | Formula | Observed Value | Percentage | Protocol Characterization |
 |---|---|---|---|---|
-| **Coverage** | $\frac{\text{Decisive (PASS + FAIL)}}{\text{Total}}$ | $\frac{25}{25}$ | **100.0%** | Zero unhandled crashes / stalls |
-| **Abstention Rate** | $\frac{\text{UNCERTAIN}}{\text{Total}}$ | $\frac{0}{25}$ | **0.0%** | $\le 10\%$ on standard forms |
-| **False Rejection Rate (FRR)** | $\frac{\text{FN}}{N_{\text{valid}}}$ | $\frac{2}{15}$ | **13.3%** | Documented defect boundary |
-| **False Acceptance Rate (FAR)** | $\frac{\text{FP}}{N_{\text{invalid}}}$ | $\frac{2}{10}$ | **20.0%** | Documented defect boundary |
-| **Overall Accuracy** | $\frac{\text{TP} + \text{TN}}{\text{Total}}$ | $\frac{21}{25}$ | **84.0%** | Exploratory DEV diagnostic level |
-
+| **Coverage** | $\frac{\text{Decisive (PASS + FAIL)}}{\text{Total}}$ | $\frac{25}{25}$ | **100.0%** | Full decisive coverage across diagnostic items |
+| **Abstention Rate** | $\frac{\text{UNCERTAIN}}{\text{Total}}$ | $\frac{0}{25}$ | **0.0%** | Reported per protocol; 0 unhandled stalls |
+| **False Rejection Rate (FRR)** | $\frac{\text{FN}}{N_{\text{valid}}}$ | $\frac{2}{15}$ | **13.3%** | Evaluator defect boundary (INV-DEV-02, CND-DEV-01) |
+| **False Acceptance Rate (FAR)** | $\frac{\text{FP}}{N_{\text{invalid}}}$ | $\frac{2}{10}$ | **20.0%** | Evaluator defect boundary (SUB-DEV-04, SUB-DEV-05) |
+| **Overall Diagnostic Concordance** | $\frac{\text{TP} + \text{TN}}{\text{Total}}$ | $\frac{21}{25}$ | **84.0%** | Descriptive exploratory baseline (not an RQ2 gate) |
 ### 3.3 Root Cause Analysis of Evaluator Discrepancies
 
 1. **False Rejection 1 (`INV-DEV-02`, Inversion):**
@@ -167,10 +166,9 @@ Forensic analysis of the three failing Reading slots in `RG10_DEV_GRAMMAR_FIX_V5
 ## 6. Final Gate Assessment & Recommendation
 
 - **SOFTWARE_READY: `QUALIFIED_PASS (PREREQUISITE_LIMITED)`**
-- **QUALITY_READY: `QUALIFIED_DEV_READY`**
+- **QUALITY_READY: `HOLD (EVALUATOR_DEFECTS_UNRESOLVED)`**
 - **RESEARCH_READY: `HOLD`**
 - **Overall Verdict: `HOLD`**
-
 **Prerequisites for Next Steps:**
 1. Replenish MiniMax provider API quotas and verify live connectivity.
 2. Complete external independent curation of the 30 holdout items with cryptographic SHA-256 digests.
