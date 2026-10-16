@@ -58,6 +58,11 @@ from app.solvers.serializer import (
 )
 from app.solvers.solver import normalize_solver_answer
 
+BASE_EED_VERBS = {
+    "need", "feed", "bleed", "proceed", "succeed", "exceed", "breed", "speed"
+}
+
+
 
 METADATA_STRIP_KEYS = {
     "configuration_id",
@@ -611,7 +616,7 @@ class NeutralEvaluator:
                                         return False
                                     if v.endswith("ing") and v != "bring":
                                         return False
-                                    if v.endswith("ed") and not v.endswith("eed") and v not in {"need", "feed", "bleed", "proceed", "succeed"}:
+                                    if v.endswith("ed") and v not in BASE_EED_VERBS:
                                         return False
                                     if v in IRREGULAR_PAST_VERBS:
                                         return False
@@ -781,7 +786,7 @@ class NeutralEvaluator:
                                     protasis_part = clean_l.split(",")[0] if "," in clean_l else clean_l
                                     p_words = protasis_part.split()
                                     if first == "had":
-                                        has_participle = any((w.endswith("ed") and not w.endswith("eed")) for w in p_words[2:]) or any(w in {"seen", "known", "been", "done", "gone", "found", "checked"} for w in p_words[2:])
+                                        has_participle = any((w.endswith("ed") and w not in BASE_EED_VERBS) for w in p_words[2:]) or any(w in {"seen", "known", "been", "done", "gone", "found", "checked"} for w in p_words[2:])
                                         has_main = bool(re.search(r"\b(?:would|could|might)\s+have\s+[a-z]+", clean_l))
                                         if has_participle and has_main:
                                             valid_cond_opts.append(idx + 1)
@@ -790,10 +795,10 @@ class NeutralEvaluator:
                                         has_main = bool(re.search(r"\b(?:would|could|might)\s+[a-z]+", clean_l))
                                         if m and has_main:
                                             v = m.group(1)
-                                            if not (v.endswith("s") and not v.endswith("ss")) and not (v.endswith("ed") and not v.endswith("eed")) and not (v.endswith("ing") and v != "bring"):
+                                            if not (v.endswith("s") and not v.endswith("ss")) and not (v.endswith("ed") and v not in BASE_EED_VERBS) and not (v.endswith("ing") and v != "bring"):
                                                 valid_cond_opts.append(idx + 1)
                                     elif first == "should":
-                                        has_past = any(w in {"arose", "did", "was", "were", "had"} or (w.endswith("ed") and not w.endswith("eed")) for w in p_words[1:])
+                                        has_past = any(w in {"arose", "did", "was", "were", "had"} or (w.endswith("ed") and w not in BASE_EED_VERBS) for w in p_words[1:])
                                         has_base = any(w in {"arise", "occur", "happen", "fail", "detect", "observe", "need", "find"} for w in p_words[1:])
                                         has_main = bool(re.search(r",\s*(?:notify|inform|contact|call|please|report|\w+\s+(?:will|would|can|should))", clean_l))
                                         if not has_past and (has_base or not any(w.endswith(("s", "ing")) for w in p_words[2:])) and has_main:

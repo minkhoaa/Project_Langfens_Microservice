@@ -291,6 +291,10 @@ class TestCounterexamplesPreventFalseAcceptance:
             ("Under no circumstances should we bypassed the interlock.", "-ed inflected form 'bypassed'"),
             ("Under no circumstances should we bypassing the interlock.", "present participle 'bypassing'"),
             ("Under no circumstances should we crossing the threshold.", "present participle 'crossing'"),
+            ("Under no circumstances should we freed the hostages.", "-ed inflected form 'freed'"),
+            ("Under no circumstances should we agreed to the terms.", "-ed inflected form 'agreed'"),
+            ("Under no circumstances should we decreed the changes.", "-ed inflected form 'decreed'"),
+            ("Under no circumstances should we guaranteed the loan.", "-ed inflected form 'guaranteed'"),
         ]
         for s, expected_reason in counterexamples:
             res = validate_negative_inversion_grammaticality(s, allow_ss_base_verbs=True)

@@ -437,6 +437,10 @@ COMMON_BASE_VERBS = {
     "demonstrate", "conclude", "suggest", "prove", "calibrate", "operate", "deliver"
 }
 
+BASE_EED_VERBS = {
+    "need", "feed", "bleed", "proceed", "succeed", "exceed", "breed", "speed"
+}
+
 
 def detect_negative_inversion_structural(sentence: str, allow_contracted: bool = False) -> tuple[bool, dict[str, Any]]:
     """Separates structural inversion detection from full grammaticality validation.
@@ -736,7 +740,7 @@ def validate_negative_inversion_grammaticality(sentence: str, allow_contracted: 
                 verb_phrase=predicate,
                 rejection_reason=f"Modal auxiliary '{auxiliary}' cannot be followed by past tense form '{pred_verb}' (requires bare infinitive)"
             )
-        is_past_ed = (pred_verb.endswith("ed") and not pred_verb.endswith("eed")) if allow_ss_base_verbs else (pred_verb.endswith("ed") and pred_verb not in {"need", "feed", "bleed", "proceed", "succeed"})
+        is_past_ed = (pred_verb.endswith("ed") and pred_verb not in BASE_EED_VERBS) if allow_ss_base_verbs else (pred_verb.endswith("ed") and pred_verb not in {"need", "feed", "bleed", "proceed", "succeed"})
         if is_past_ed:
             return NegativeInversionValidationResult(
                 is_structural_inversion=True,

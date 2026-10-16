@@ -12,7 +12,7 @@
   },
   "gate_status": {
     "software_ready": "PASS",
-    "quality_ready": "QUALIFIED_PASS_IN_SAMPLE_CALIBRATION_ONLY_HOLDOUT_PENDING",
+    "quality_ready": "HOLD_CALIBRATION_ONLY_HOLDOUT_PENDING",
     "research_ready": "HOLD",
     "overall_gate_verdict": "HOLD"
   },
