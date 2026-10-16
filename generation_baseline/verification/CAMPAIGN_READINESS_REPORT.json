@@ -1,7 +1,7 @@
 {
   "report_id": "rg10-campaign-readiness-dryrun-v1.0",
   "evaluated_at": "2026-10-16T19:00:00Z",
-  "software_commit_sha": "93ecf8a558f170fb1b63f3a08102cafeb910eecb",
+  "software_commit_sha": "798bf9ef614e393f2324fdd3344f535e9d74ee50",
   "is_dry_run": true,
   "dataset_readiness": {
     "reading_task_count": 28,
@@ -127,7 +127,7 @@
     "prior_verified_status": "BLOCKED_EXTERNAL_QUOTA",
     "prior_verified_code": 429,
     "prior_verified_message": "Token Plan usage limit reached (2056)",
-    "dry_run_assertion": "DRY RUN INVARIANT ENFORCED: Exactly 0 live network calls made. Provider quota cannot be asserted available without live dispatch; status truthfully retained as BLOCKED.",
+    "dry_run_assertion": "DRY RUN INVARIANT ENFORCED: Exactly 0 live network calls made. Real-time provider quota availability is UNVERIFIED in dry run; prior verified quota status was HTTP 429 Token Plan usage limit reached (status retained as BLOCKED).",
     "status": "BLOCKED"
   },
   "human_panel_readiness": {
@@ -135,9 +135,9 @@
     "blind_forms_available": true,
     "curator_instructions_available": true,
     "adjudication_workflow_available": true,
-    "synthetic_human_scores_present": false,
+    "synthetic_human_scores_present": null,
     "human_adjudication_completed": false,
-    "evidence_notes": "Human panel status: AWAITING_HUMAN_PANEL. Handoff documents verified: forms=True, curator_instructions=True, adjudication_workflow=True. Zero synthetic human scores generated.",
+    "evidence_notes": "Human panel status: AWAITING_HUMAN_PANEL. Handoff documents verified: forms=True, curator_instructions=True, adjudication_workflow=True. Human panel ratings not yet submitted (synthetic score presence: UNVERIFIED / PENDING_PANEL_SUBMISSION).",
     "status": "HOLD"
   },
   "raw_response_preservation": {

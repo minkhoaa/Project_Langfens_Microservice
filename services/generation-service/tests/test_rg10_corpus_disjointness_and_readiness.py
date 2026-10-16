@@ -235,7 +235,7 @@ def test_campaign_readiness_dry_run_covers_all_nine_areas():
 
     # 5. Human panel readiness
     assert report.human_panel_readiness.panel_status == "AWAITING_HUMAN_PANEL"
-    assert report.human_panel_readiness.synthetic_human_scores_present is False
+    assert report.human_panel_readiness.synthetic_human_scores_present is None
 
     # 6. Raw response preservation
     assert len(report.raw_response_preservation.raw_response_directories_found) > 0

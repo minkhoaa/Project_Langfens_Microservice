@@ -110,7 +110,7 @@ class HumanPanelReadinessCheck(CanonicalBaseModel):
     blind_forms_available: bool
     curator_instructions_available: bool
     adjudication_workflow_available: bool
-    synthetic_human_scores_present: bool
+    synthetic_human_scores_present: Optional[bool] = None
     human_adjudication_completed: bool
     evidence_notes: str
     status: VerificationStatus = "HOLD"
@@ -259,7 +259,7 @@ class CampaignReadinessAuditor:
             holdout_manifest_status=holdout_status,
             holdout_seals_are_null=seals_are_null,
             holdout_corpus_present=holdout_present,
-            synthetic_holdout_detected=None if not holdout_present else False,
+            synthetic_holdout_detected=None,
             evidence_notes=notes,
             status=status,
         )
@@ -479,9 +479,9 @@ class CampaignReadinessAuditor:
                 if res.returncode == 0 and len(res.stdout.strip()) == 40:
                     software_commit_sha = res.stdout.strip()
                 else:
-                    software_commit_sha = "867b94ea2d1f1f66bf0676249f5e812406a05691"
+                    software_commit_sha = "UNKNOWN"
             except Exception:
-                software_commit_sha = "867b94ea2d1f1f66bf0676249f5e812406a05691"
+                software_commit_sha = "UNKNOWN"
         sources_dir = (
             self.repo_root
             / "services"
@@ -518,7 +518,8 @@ class CampaignReadinessAuditor:
         # Dry run quota check (0 calls)
         quota_assertion = (
             "DRY RUN INVARIANT ENFORCED: Exactly 0 live network calls made. "
-            "Provider quota cannot be asserted available without live dispatch; status truthfully retained as BLOCKED."
+            "Real-time provider quota availability is UNVERIFIED in dry run; prior verified quota status was "
+            "HTTP 429 Token Plan usage limit reached (status retained as BLOCKED)."
         )
         quota_check = ProviderQuotaReadinessCheck(
             dry_run_assertion=quota_assertion,
@@ -541,7 +542,7 @@ class CampaignReadinessAuditor:
             f"Human panel status: {panel_status}. "
             f"Handoff documents verified: forms={blind_forms_path.exists()}, "
             f"curator_instructions={curator_inst_path.exists()}, adjudication_workflow={adj_wf_path.exists()}. "
-            "Zero synthetic human scores generated."
+            "Human panel ratings not yet submitted (synthetic score presence: UNVERIFIED / PENDING_PANEL_SUBMISSION)."
         )
 
         panel_check = HumanPanelReadinessCheck(
@@ -549,7 +550,7 @@ class CampaignReadinessAuditor:
             blind_forms_available=blind_forms_path.exists(),
             curator_instructions_available=curator_inst_path.exists(),
             adjudication_workflow_available=adj_wf_path.exists(),
-            synthetic_human_scores_present=False,
+            synthetic_human_scores_present=None,
             human_adjudication_completed=False,
             evidence_notes=panel_notes,
             status="HOLD",
