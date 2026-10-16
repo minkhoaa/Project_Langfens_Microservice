@@ -152,6 +152,51 @@ class UncertaintyEscalationProtocol:
                     verified_human_truth=False,
                     confidence_level="UNCERTAIN",
                 )
+        # Boundary C: Comparative direction inversion / inconclusive comparative claims
+        if "TFNG" in q_type and proposed.upper() in ("TRUE", "YES") and base_res.verdict == EvaluationVerdict.PASS:
+            comp_pattern = r"\b(?:faster|slower|higher|lower|more|less|greater|fewer)\s+than\b|\bat\s+(?:higher|lower|faster|slower)\s+rates?\s+than\b|\bexceeds?\b"
+            if re.search(comp_pattern, prompt, re.IGNORECASE):
+                if re.search(r"\b(?:rate\s+of|faster|slower|higher|lower|more|less|greater|fewer|twice|\w+\s+times|exceeds?)\b", passage_text, re.IGNORECASE):
+                    return BlindedJudgeVerdict(
+                        evaluation_id=f"judge_{output_sha[:12]}",
+                        dataset_item_id=dataset_item_id,
+                        output_sha256=output_sha,
+                        verdict=EvaluationVerdict.UNCERTAIN,
+                        evaluable=True,
+                        is_uncertain=True,
+                        uncertainty_code="COMPARATIVE_DIRECTION_INCONCLUSIVE",
+                        grounded_evidence_span=evidence_span,
+                        rationale="Statement asserts a comparative direction between entities. Deterministic heuristics cannot verify comparison polarity against the source passage assertions. Prefer explicit UNCERTAIN over unsupported PASS pending human panel adjudication.",
+                        verified_human_truth=False,
+                        confidence_level="UNCERTAIN",
+                    )
+
+        # Boundary D: Cross-clause factual chimera across contrastive conjunctions
+        if "TFNG" in q_type and proposed.upper() in ("TRUE", "YES") and base_res.verdict == EvaluationVerdict.PASS:
+            contrast_match = re.search(r"\b(?:whereas|while|in contrast to|on the other hand)\b", passage_text, re.IGNORECASE)
+            if contrast_match:
+                clause1 = passage_text[:contrast_match.start()]
+                clause2 = passage_text[contrast_match.end():]
+                from app.evaluators.semantic import stem_token
+                p_stems = {stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", prompt.lower())}
+                c1_stems = {stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", clause1.lower())}
+                c2_stems = {stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", clause2.lower())}
+                c1_overlap = p_stems & (c1_stems - c2_stems)
+                c2_overlap = p_stems & (c2_stems - c1_stems)
+                if len(c1_overlap) >= 1 and len(c2_overlap) >= 2:
+                    return BlindedJudgeVerdict(
+                        evaluation_id=f"judge_{output_sha[:12]}",
+                        dataset_item_id=dataset_item_id,
+                        output_sha256=output_sha,
+                        verdict=EvaluationVerdict.UNCERTAIN,
+                        evaluable=True,
+                        is_uncertain=True,
+                        uncertainty_code="CROSS_CLAUSE_CHIMERA_INCONCLUSIVE",
+                        grounded_evidence_span=evidence_span,
+                        rationale="Statement splices subject/entity from one clause with predicate from an opposing contrastive clause ('whereas'/'while'). Deterministic heuristics cannot rule out factual chimera contradiction; escalated to UNCERTAIN pending human panel adjudication.",
+                        verified_human_truth=False,
+                        confidence_level="UNCERTAIN",
+                    )
 
         # Return standard verdict with evidence span
         evidence_span = base_res.evidence_refs[0] if base_res.evidence_refs else None

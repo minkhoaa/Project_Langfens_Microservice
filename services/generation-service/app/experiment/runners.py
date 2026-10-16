@@ -81,7 +81,8 @@ class DefaultRecordingExperimentClient:
 
     def dispatch(self, prompt: str, model_id: str, system_prompt: str = "",
                  stage: str = "GENERATION", raw_output_override: str | None = None,
-                 simulate_failure: str | None = None) -> LLMDispatchResponse:
+                 simulate_failure: str | None = None, operation_id: str | None = None,
+                 **kwargs: Any) -> LLMDispatchResponse:
         self.recorded_dispatches.append({"stage": stage, "model_id": model_id,
                                          "prompt_length": len(prompt), "prompt_sha256": _hash(prompt),
                                          "response_origin": "OFFLINE"})
@@ -336,12 +337,16 @@ class _Run:
                 ans = proposed_map.get(qid)
                 ans_str = str(ans).strip() if ans is not None else ""
                 is_missing = not bool(ans_str)
+                q_text = getattr(q, "text", "")
+                q_content_hash = _hash(canonical_json_dump(q.model_dump(mode="json")))
                 authoritative_answers.append({
                     "campaign_id": getattr(self.request, "campaign_id", "RG10_DEV"),
                     "assignment_id": getattr(self.request, "assignment_id", self.request.run_id),
                     "attempt_id": getattr(self.request, "attempt_id", self.request.run_id),
                     "stage": candidate_stage,
                     "question_id": qid,
+                    "question_text": q_text,
+                    "question_content_hash": q_content_hash,
                     "output_response_sha256": response_hash,
                     "proposed_answer": ans_str if not is_missing else None,
                     "status": "AVAILABLE" if not is_missing else "UNSCORABLE_MISSING_ANSWER",

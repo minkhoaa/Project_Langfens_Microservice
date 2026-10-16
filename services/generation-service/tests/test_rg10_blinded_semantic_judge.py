@@ -74,6 +74,77 @@ def test_blinded_judge_flags_cleft_pronoun_ambiguity_as_uncertain():
     assert verdict.uncertainty_code == "RELATIVE_PRONOUN_DEFENSIBILITY_DISPUTED"
     assert "human panel adjudication" in verdict.rationale.lower()
 
+def test_blinded_judge_flags_comparative_direction_inversion_as_uncertain():
+    """Comparative statement with direction inversion / inconclusive polarity is flagged UNCERTAIN, not PASS."""
+    judge = BlindedSemanticJudgeProtocol()
+    item19 = [it for it in EVALUATOR_V2_5_CALIBRATION_CORPUS if it.item_id == "v25-calib-neg-control-19"][0]
+    verdict = judge.evaluate_blinded(
+        dataset_item_id=item19.item_id,
+        passage_text=item19.passage_text,
+        question_data=item19.question_data,
+        context_metadata=item19.context_metadata,
+    )
+    assert verdict.verdict == EvaluationVerdict.UNCERTAIN
+    assert verdict.is_uncertain is True
+    assert verdict.uncertainty_code == "COMPARATIVE_DIRECTION_INCONCLUSIVE"
+    assert "human panel adjudication" in verdict.rationale.lower()
+
+
+def test_blinded_judge_flags_cross_clause_chimera_as_uncertain():
+    """Statement combining subject from one clause with predicate from an opposing contrastive clause is flagged UNCERTAIN."""
+    judge = BlindedSemanticJudgeProtocol()
+    item20 = [it for it in EVALUATOR_V2_5_CALIBRATION_CORPUS if it.item_id == "v25-calib-adv-control-20"][0]
+    verdict = judge.evaluate_blinded(
+        dataset_item_id=item20.item_id,
+        passage_text=item20.passage_text,
+        question_data=item20.question_data,
+        context_metadata=item20.context_metadata,
+    )
+    assert verdict.verdict == EvaluationVerdict.UNCERTAIN
+    assert verdict.is_uncertain is True
+    assert verdict.uncertainty_code == "CROSS_CLAUSE_CHIMERA_INCONCLUSIVE"
+    assert "human panel adjudication" in verdict.rationale.lower()
+
+
+def test_blinded_judge_on_unseen_synthetic_controls_regression():
+    """AUTHOR_WRITTEN_NOT_INDEPENDENT: Unit regression for boundary detection on author-written synthetic controls.
+    Excluded from holdout/FAR/FRR measurement claims (sealed confirmatory holdout requires external panel adjudication)."""
+    judge = BlindedSemanticJudgeProtocol()
+
+    # Unseen Control 1: Comparative direction inversion
+    p_comp = "Lithium-ion batteries discharge at twice the rate of solid-state cells under freezing conditions."
+    q_comp = {
+        "question_id": "unseen-comp-01",
+        "prompt": "Solid-state cells discharge faster than lithium-ion batteries under freezing conditions.",
+        "question_type": "TFNG",
+        "proposed_answer": "TRUE",
+    }
+    v_comp = judge.evaluate_blinded("unseen-ctrl-01", p_comp, q_comp)
+    assert v_comp.verdict == EvaluationVerdict.UNCERTAIN
+    assert v_comp.uncertainty_code == "COMPARATIVE_DIRECTION_INCONCLUSIVE"
+
+    # Unseen Control 2: Cross-clause chimera
+    p_chim = "Arctic foxes grow thick white fur in winter, whereas desert foxes maintain thin sandy pelts throughout the year."
+    q_chim = {
+        "question_id": "unseen-chim-02",
+        "prompt": "Arctic foxes maintain thin sandy pelts throughout the year.",
+        "question_type": "TFNG",
+        "proposed_answer": "TRUE",
+    }
+    v_chim = judge.evaluate_blinded("unseen-ctrl-02", p_chim, q_chim)
+    assert v_chim.verdict == EvaluationVerdict.UNCERTAIN
+    assert v_chim.uncertainty_code == "CROSS_CLAUSE_CHIMERA_INCONCLUSIVE"
+
+    # Unseen Control 3: Valid grounded non-comparative statement
+    q_valid = {
+        "question_id": "unseen-valid-03",
+        "prompt": "Arctic foxes grow thick white fur during winter months.",
+        "question_type": "TFNG",
+        "proposed_answer": "TRUE",
+    }
+    v_valid = judge.evaluate_blinded("unseen-ctrl-03", p_chim, q_valid)
+    assert v_valid.verdict == EvaluationVerdict.PASS
+    assert v_valid.is_uncertain is False
 
 def test_blinded_judge_does_not_escalate_genuine_hallucinations_to_uncertain():
     """Pure hallucinations with fabricated quotes must remain FAIL and not be escalated to UNCERTAIN."""

@@ -316,3 +316,68 @@ def test_visible_candidate_scrubs_proposed_answers_for_reviewer():
     assert "proposed_answers" not in solver_prompt
     assert '"TRUE"' not in rev_prompt
     assert '"TRUE"' not in solver_prompt
+
+def test_stable_operation_id_matching_resolves_duplicate_prompts(tmp_path: Path):
+    """When duplicate prompt hashes exist, specifying operation_id binds to the exact matching candidate."""
+    prompt = "Review candidate question"
+    prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+
+    rec1 = {
+        "stage": "REVIEWER",
+        "operation_id": "research-REVIEWER-18",
+        "prompt_sha256": prompt_sha,
+        "raw_text": "{\"status\": \"REJECTED\"}",
+        "raw_text_sha256": hashlib.sha256(b"{\"status\": \"REJECTED\"}").hexdigest(),
+        "recorded_at_ns": 100,
+    }
+    rec2 = {
+        "stage": "REVIEWER",
+        "operation_id": "research-REVIEWER-20",
+        "prompt_sha256": prompt_sha,
+        "raw_text": "{\"status\": \"APPROVED\"}",
+        "raw_text_sha256": hashlib.sha256(b"{\"status\": \"APPROVED\"}").hexdigest(),
+        "recorded_at_ns": 200,
+    }
+    (tmp_path / "rec_18.json").write_text(json.dumps(rec1), encoding="utf-8")
+    (tmp_path / "rec_20.json").write_text(json.dumps(rec2), encoding="utf-8")
+
+    client = ReplayExperimentClient(tmp_path)
+    # Explicitly dispatch with operation_id matching rec2
+    res = client.dispatch(prompt=prompt, model_id="minimax/MiniMax-Text-01", stage="REVIEWER", operation_id="research-REVIEWER-20")
+    assert "APPROVED" in res.raw_text
+    assert len(client.ambiguous_dispatches) == 1
+    assert client.ambiguous_dispatches[0]["ambiguity_status"] == "RESOLVED_BY_STABLE_OPERATION_ID"
+    assert client.ambiguous_dispatches[0]["bound_operation"] == "research-REVIEWER-20"
+
+
+def test_historical_forensic_vs_behavioral_reexecution_workflow_separation(tmp_path: Path):
+    """Verify the separation of historical forensic replay (22/22) vs current behavioral re-execution (21/22)."""
+    from generation_baseline.tools.replay_quality_dev_hardening import (
+        run_historical_forensic_replay,
+        run_behavioral_reexecution,
+    )
+    raw_dir = repo_root / "generation_baseline" / ".execution" / "RG10_DEV_HARDENING_V2" / "raw_responses"
+    if not raw_dir.exists():
+        pytest.skip("Historical raw_responses directory not present on this machine.")
+
+    dir_forensic = tmp_path / "forensic"
+    dir_behavioral = tmp_path / "behavioral"
+
+    forensic_res = run_historical_forensic_replay(raw_responses_dir=raw_dir, output_dir=dir_forensic, publish_to_verification=False)
+    assert forensic_res["total_dispatches"] == 22
+    assert forensic_res["dispatches_consumed"] == 22
+    assert len(forensic_res["unconsumed_records"]) == 0
+    assert forensic_res["total_tokens"] == 23886
+    assert forensic_res["pass_count"] == 4
+    assert forensic_res["fail_count"] == 11
+
+    behavioral_res = run_behavioral_reexecution(raw_responses_dir=raw_dir, output_dir=dir_behavioral, publish_to_verification=False)
+    assert behavioral_res["telemetry"]["total_dispatches"] == 21
+    assert len(behavioral_res["unconsumed_records"]) == 1
+    assert "research-REVIEWER-8_REVIEWER_1792133038741024377.json" in behavioral_res["unconsumed_records"]
+    assert behavioral_res["telemetry"]["total_tokens"] == 23191
+    assert behavioral_res["measurements_12_dimensions"]["7_semantic_verdicts"]["PASS"] == 4
+    assert behavioral_res["measurements_12_dimensions"]["7_semantic_verdicts"]["FAIL"] == 11
+    # Assert verification directory was NOT mutated
+    assert not (dir_forensic / "generation_baseline").exists()
+    assert not (dir_behavioral / "generation_baseline").exists()
