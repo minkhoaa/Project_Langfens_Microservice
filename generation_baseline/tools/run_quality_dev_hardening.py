@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -62,7 +63,7 @@ def load_credentials() -> tuple[str, str]:
 
 def main():
     api_key, base_url = load_credentials()
-    output_dir = repo_root / "generation_baseline" / ".execution" / "RG10_DEV_HARDENING"
+    output_dir = repo_root / "generation_baseline" / ".execution" / "RG10_DEV_HARDENING_V2"
     output_dir.mkdir(parents=True, exist_ok=True)
     raw_responses_dir = output_dir / "raw_responses"
     raw_responses_dir.mkdir(parents=True, exist_ok=True)
@@ -90,11 +91,11 @@ def main():
             provenance_uri="https://botany.example.com/photosynthesis-arid-flora",
         ),
         foundation_model_id="minimax/MiniMax-Text-01",
-        prompt_versions=PromptVersionMap(A="v2.2", B="v2.3", C="v3.1"),
+        prompt_versions=PromptVersionMap(A="v2.3", B="v2.4", C="v3.2"),
         reading_task=ReadingTask(
             task_type="READING_SINGLE_PASSAGE",
             requested_groups=[StandaloneGroupType.TFNG],
-            requested_question_count=2,
+            requested_question_count=3,
             difficulty="MEDIUM",
         ),
         passage_text=(
@@ -120,7 +121,7 @@ def main():
             provenance_uri="https://linguistics.example.com/cleft-academic-register",
         ),
         foundation_model_id="minimax/MiniMax-Text-01",
-        prompt_versions=PromptVersionMap(A="v2.2", B="v2.3", C="v3.1"),
+        prompt_versions=PromptVersionMap(A="v2.3", B="v2.4", C="v3.2"),
         grammar_task=GrammarTask(
             task_type="GRAMMAR_EXERCISE",
             grammar_rule_pack_ref="pack-cleft-dev-03",
@@ -207,29 +208,20 @@ def main():
     print(f"  Live Arm C Result: {rep_res.execution_status.value}, failure: {rep_res.failure_code}")
     print(f"  Repair Count: {rep_usage.get('repair_count', 0)}, Stages: {[s['stage'] for s in rep_trace.get('steps', [])]}")
 
-    # Resolve real proposed answers from raw generation responses
-    attempt_to_raw = {
-        "dev-reading-photosynthesis-03__arm_A__att1": "research-DIRECT_GENERATION_A-1",
-        "dev-reading-photosynthesis-03__arm_B__att1": "research-BOUNDED_REVISION-4",
-        "dev-reading-photosynthesis-03__arm_C__att1": "research-GENERATOR-5",
-        "dev-grammar-cleft-03__arm_A__att1": "research-DIRECT_GENERATION_A-9",
-        "dev-grammar-cleft-03__arm_B__att1": "research-BOUNDED_REVISION-12",
-        "dev-grammar-cleft-03__arm_C__att1": "research-GENERATOR-13",
-    }
+    # Resolve real proposed answers dynamically from raw generation responses
     raw_q_answers = {}
-    for att_id, prefix in attempt_to_raw.items():
-        matches = list(raw_responses_dir.glob(prefix + "*.json"))
-        if matches:
-            d = json.loads(matches[0].read_text())
+    for f in sorted(raw_responses_dir.glob("*.json")):
+        try:
+            d = json.loads(f.read_text())
             txt = d.get("raw_text", "").replace("```json", "").replace("```", "").strip()
-            try:
-                p = json.loads(txt)
-                for q in p.get("questions", []):
-                    qid = str(q.get("question_id"))
-                    raw_q_answers[(att_id, qid)] = q.get("proposed_answer") or q.get("answer") or ""
-            except Exception:
-                pass
-
+            p = json.loads(txt)
+            for q in p.get("questions", []):
+                q_text = str(q.get("text", "")).strip()
+                ans = q.get("proposed_answer") or q.get("answer") or ""
+                if ans and q_text:
+                    raw_q_answers[q_text] = ans
+        except Exception:
+            pass
     # Inspect question-level evaluations from ledger under v2.2
     attempts = ledger.get_all_attempts()
     question_evals = []
@@ -273,7 +265,7 @@ def main():
             passage_txt = reading_dev.passage_text if domain == "READING" else out.generated_content.context_text
             for q in out.generated_content.questions:
                 q_dict = q.model_dump()
-                real_proposed = raw_q_answers.get((att.attempt_id, str(q.question_id))) or q_dict.get("proposed_answer") or q_dict.get("answer") or ""
+                real_proposed = raw_q_answers.get(str(q.text).strip()) or q_dict.get("proposed_answer") or q_dict.get("answer") or ""
                 q_dict["proposed_answer"] = real_proposed
                 ev_res = evaluator.evaluate_item(
                     dataset_item_id=out.dataset_item_id,
@@ -379,7 +371,7 @@ def main():
     }
 
     results = {
-        "campaign_id": "RG10_DEV_HARDENING",
+        "campaign_id": "RG10_DEV_HARDENING_V2",
         "experiment_type": "GENUINE_LIVE_DEV_HARDENING",
         "split": "DEV",
         "evaluator_version": evaluator.evaluator_version,

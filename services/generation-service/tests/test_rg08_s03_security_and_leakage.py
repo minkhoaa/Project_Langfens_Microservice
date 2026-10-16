@@ -172,3 +172,36 @@ def test_reg_rg08_s03_strict_v2_admin_publish_preserves_legitimate_flow() -> Non
         actor_role="ADMIN",
     )
     assert res is True
+
+
+def test_runner_provenance_clean_of_forbidden_serialized_aliases() -> None:
+    """Ensures runner provenance dicts never contain private answer aliases or canary tokens."""
+    import json
+    from app.contracts.solver import scan_text_for_security_leaks
+    from app.experiment.runners import ConfigurationARunner, ConfigurationCRunner
+    from app.contracts.research import StandaloneReadingRequest, ReadingTask, StandaloneGroupType
+
+    req = StandaloneReadingRequest(
+        run_id="run-prov-check-01",
+        dataset_item_id="item-prov-01",
+        configuration_id="C",
+        task=ReadingTask(
+            requested_groups=[StandaloneGroupType.TFNG],
+            requested_question_count=1,
+            difficulty="MEDIUM",
+        ),
+        source_pack_id="src-pack-01",
+    )
+    runner = ConfigurationCRunner()
+    # Mock client emits minimal output
+    result, trace, usage = runner.generate_reading(
+        request=req,
+        passage_text="This is a test passage with at least fifty characters for valid length.",
+        prompt_version="v3.2",
+        foundation_model_id="test-model",
+    )
+    prov_str = json.dumps(usage["provenance"])
+    # scan_text_for_security_leaks must not raise SecurityLeakageError
+    scan_text_for_security_leaks(prov_str)
+    trace_str = json.dumps(trace["provenance"])
+    scan_text_for_security_leaks(trace_str)

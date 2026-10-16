@@ -258,7 +258,8 @@ class NeutralEvaluator:
             task_validity["solver_view_leak_free"] = False
             task_issues.append(f"Security leakage in SolverView: {e}")
 
-        is_v2_2 = ("2.2" in self.evaluator_version or self.evaluator_version >= "neutral-eval-v2.2")
+        is_v2_2 = ("2.2" in self.evaluator_version or "2.3" in self.evaluator_version or self.evaluator_version >= "neutral-eval-v2.2")
+        is_v2_3 = ("2.3" in self.evaluator_version or self.evaluator_version >= "neutral-eval-v2.3")
         norm_proposed = normalize_solver_answer(proposed_ans, q_type)
         is_tfng = "TFNG" in q_type or "TRUEFALSE" in q_type or "YNNG" in q_type or "YESNO" in q_type
         contradiction_detected = False
@@ -499,8 +500,11 @@ class NeutralEvaluator:
                                     task_issues.append(f"Entailment contradiction: passage explicitly contains '{neg_verb}'")
                                     break
             elif norm_proposed in ("NOT_GIVEN", "NOT GIVEN"):
-                # NOT GIVEN contradiction: passage explicitly entails the proposition
-                if detect_entailment_in_text(prompt, passage_text):
+                # NOT GIVEN contradiction: passage explicitly contradicts or entails the proposition
+                if is_v2_2 and detect_contradiction_in_text(prompt, passage_text):
+                    contradiction_detected = True
+                    task_issues.append("NOT GIVEN contradiction: passage explicitly contradicts the proposition (should be FALSE)")
+                elif detect_entailment_in_text(prompt, passage_text):
                     contradiction_detected = True
                     task_issues.append("NOT GIVEN contradiction: passage explicitly entails the proposition (should be TRUE)")
                 else:
@@ -511,8 +515,11 @@ class NeutralEvaluator:
                             contradiction_detected = True
                             task_issues.append(f"NOT GIVEN contradiction: passage explicitly contains '{affirmative_phrase}'")
             elif norm_proposed in ("FALSE", "NO"):
-                # FALSE contradiction: passage entails proposition without contradiction
-                if detect_entailment_in_text(prompt, passage_text) and not detect_contradiction_in_text(prompt, passage_text):
+                # FALSE contradiction: cited evidence or passage affirms proposition without contradiction
+                if is_v2_2 and evidence_quote and detect_entailment_in_text(prompt, evidence_quote) and not detect_contradiction_in_text(prompt, evidence_quote):
+                    contradiction_detected = True
+                    task_issues.append("FALSE contradiction: cited evidence affirms statement (should be TRUE)")
+                elif detect_entailment_in_text(prompt, passage_text) and not detect_contradiction_in_text(prompt, passage_text):
                     contradiction_detected = True
                     task_issues.append("FALSE contradiction: passage affirms proposition without contradiction")
         task_validity["no_contradiction"] = not contradiction_detected
@@ -606,5 +613,19 @@ class NeutralEvaluatorV2_2(NeutralEvaluatorV2):
     ):
         super().__init__(
             rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.2"),
+            evaluator_version=evaluator_version,
+        )
+
+
+class NeutralEvaluatorV2_3(NeutralEvaluatorV2_2):
+    """Calibrated neutral evaluator with robust contradiction discrimination and distractor verification (v2.3)."""
+
+    def __init__(
+        self,
+        rubric: Optional[RubricProfile] = None,
+        evaluator_version: str = "neutral-eval-v2.3",
+    ):
+        super().__init__(
+            rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.3"),
             evaluator_version=evaluator_version,
         )

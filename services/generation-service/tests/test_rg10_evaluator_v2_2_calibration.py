@@ -30,6 +30,7 @@ from app.evaluators.independent import (
     NeutralEvaluator,
     NeutralEvaluatorV2,
     NeutralEvaluatorV2_2,
+    NeutralEvaluatorV2_3,
 )
 from app.evaluators.rubric import EvaluationVerdict, RubricDimension
 
@@ -241,6 +242,46 @@ def test_v2_2_reading_irrelevant_evidence_quote_detected_as_fail():
     assert "Irrelevant evidence citation" in (res.abstention_reason or "")
 
 
+def test_v2_2_reading_not_given_when_contradicted_by_passage_fails():
+    """Adversarial case: Statement directly contradicted by passage is incorrectly labeled NOT GIVEN."""
+    evaluator = NeutralEvaluatorV2_2()
+    passage = "Supervolcanoes produce catastrophic explosive events that generate enormous calderas rather than single volcanic cones."
+    q_data = {
+        "question_id": "adv_ng_contradicted",
+        "question_type": "TFNG",
+        "text": "Supervolcano eruptions produce single volcanic cones.",
+        "proposed_answer": "NOT GIVEN",
+    }
+    res = evaluator.evaluate_item(
+        dataset_item_id="dev-reading-volcano-01",
+        passage_text=passage,
+        question_data=q_data,
+    )
+    assert res.evaluable is True
+    assert res.verdict == EvaluationVerdict.FAIL
+    assert "NOT GIVEN contradiction: passage explicitly contradicts the proposition" in (res.abstention_reason or "")
+
+
+def test_v2_2_reading_false_when_cited_evidence_affirms_fails():
+    """Adversarial case: Statement affirmed by cited evidence is incorrectly labeled FALSE."""
+    evaluator = NeutralEvaluatorV2_2()
+    passage = "The Antarctic ice sheet contains roughly 61 percent of all fresh water on Earth."
+    q_data = {
+        "question_id": "adv_false_affirmed",
+        "question_type": "TFNG",
+        "text": "The Antarctic ice sheet contains over half of Earth's fresh water.",
+        "proposed_answer": "FALSE",
+        "evidence_quote": "The Antarctic ice sheet contains roughly 61 percent of all fresh water on Earth.",
+    }
+    res = evaluator.evaluate_item(
+        dataset_item_id="dev-reading-antarctica-01",
+        passage_text=passage,
+        question_data=q_data,
+    )
+    assert res.evaluable is True
+    assert res.verdict == EvaluationVerdict.FAIL
+    assert "FALSE contradiction: cited evidence affirms statement" in (res.abstention_reason or "")
+
 
 # ── 2. Grammar Semantic Calibration Tests ────────────────────────────────────
 
@@ -451,6 +492,7 @@ def test_evaluator_versioning_isolation():
     ev_base = NeutralEvaluator()
     ev_v2 = NeutralEvaluatorV2()
     ev_v2_2 = NeutralEvaluatorV2_2()
+    ev_v2_3 = NeutralEvaluatorV2_3()
 
     assert ev_base.evaluator_version == "neutral-eval-v2.0"
     assert ev_base.rubric.rubric_version == "R1-2026.1"
@@ -461,7 +503,8 @@ def test_evaluator_versioning_isolation():
     assert ev_v2_2.evaluator_version == "neutral-eval-v2.2"
     assert ev_v2_2.rubric.rubric_version == "rubric-qgeval-v2.2"
 
-
+    assert ev_v2_3.evaluator_version == "neutral-eval-v2.3"
+    assert ev_v2_3.rubric.rubric_version == "rubric-qgeval-v2.3"
 def test_fresh_judge_holdout_v2_provenance_disjointness():
     """Confirms that FRESH_JUDGE_HOLDOUT_CORPUS_V2 has zero overlap with calibration or DEV families."""
     from app.evaluators.calibration import (

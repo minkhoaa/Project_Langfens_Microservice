@@ -187,6 +187,14 @@ def parse_candidate(raw_text: str, request: ResearchRequest, passage_text: str |
     proposed = tuple((row["question_id"], row["proposed_answer"].strip()) for row in rows
                      if isinstance(row, dict) and row.get("question_id") in ids
                      and isinstance(row.get("proposed_answer"), str) and row["proposed_answer"].strip())
+    if not failure:
+        prop_map = dict(proposed)
+        for q in content.questions:
+            ans = prop_map.get(q.question_id, "")
+            if ans and len(ans) >= 3 and ans.lower() not in {"true", "false", "yes", "no", "not given", "not_given"}:
+                if re.search(rf"\b{re.escape(ans)}\b", q.text, re.IGNORECASE):
+                    failure = "PROMPT_LEAKS_ANSWER"
+                    break
     return ParsedCandidate(content, OutputAvailability.PARSEABLE if failure else OutputAvailability.NORMALIZED,
                            failure, proposed)
 

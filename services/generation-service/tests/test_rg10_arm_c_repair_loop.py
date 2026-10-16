@@ -26,6 +26,9 @@ from app.contracts.research import (
     StandaloneReadingRequest,
 )
 from app.experiment.runners import (
+    ARM_C_MAX_REPAIR_CEILING,
+    ARM_C_REPAIR_CONFIG_DEV_V2,
+    ARM_C_REPAIR_CONFIG_HISTORICAL_V1,
     ConfigurationARunner,
     ConfigurationBRunner,
     ConfigurationCRunner,
@@ -319,3 +322,97 @@ def test_arms_a_and_b_strictly_forbidden_from_arm_c_coordinated_repair():
     # Arm B forbids external certification of internal self-critique
     with pytest.raises(InternalScoreAsExternalVerdictForbiddenError):
         runner_b.certify_external_verdict(internal_verdict="APPROVED")
+
+
+def test_versioned_arm_c_repair_config_profiles():
+    """Explicit versioned profiles maintain historical freeze while enabling bounded repair for DEV."""
+    assert ARM_C_REPAIR_CONFIG_HISTORICAL_V1 == 0
+    assert ARM_C_REPAIR_CONFIG_DEV_V2 == 1
+    assert ARM_C_MAX_REPAIR_CEILING == 2
+
+    # Default construction preserves historical v1 (0 repairs)
+    runner_default = ConfigurationCRunner()
+    assert runner_default.default_max_repairs == 0
+    assert runner_default.repair_config_version == "v1.0"
+
+    # Version v2.0 profile sets bounded 1 repair
+    runner_v2 = ConfigurationCRunner(repair_config_version="v2.0")
+    assert runner_v2.default_max_repairs == 1
+    assert runner_v2.repair_config_version == "v2.0"
+
+
+def test_arm_c_prompt_leaks_answer_triggers_repair_and_recovers():
+    """When candidate leaks proposed answer in prompt, PROMPT_LEAKS_ANSWER triggers REPAIR."""
+    leaked_candidate = json.dumps({
+        "context_text": PASSAGE,
+        "question_groups": [{"group_id": "g1", "question_ids": ["q1"]}],
+        "questions": [{
+            "question_id": "q1", "question_type": "TFNG",
+            "text": "The answer is TRUE that facilities rely exclusively on artificial lighting.",
+            "instructions": "True, False, Not Given.", "options": [],
+            "proposed_answer": "TRUE"
+        }],
+    })
+    # Candidate with leaked substantive answer
+    leaked_substantive = json.dumps({
+        "context_text": PASSAGE,
+        "question_groups": [{"group_id": "g1", "question_ids": ["q1"]}],
+        "questions": [{
+            "question_id": "q1", "question_type": "MCQ_SINGLE",
+            "text": "In the sentence about artificial lighting, what is the light intensity?",
+            "instructions": "Choose option.",
+            "options": ["light intensity", "temperature", "humidity", "wavelength"],
+            "proposed_answer": "light intensity"
+        }],
+    })
+    repaired_candidate = json.dumps({
+        "context_text": PASSAGE,
+        "question_groups": [{"group_id": "g1", "question_ids": ["q1"]}],
+        "questions": [{
+            "question_id": "q1", "question_type": "MCQ_SINGLE",
+            "text": "What physical parameter governs the photosynthetic rate?",
+            "instructions": "Choose option.",
+            "options": ["light intensity", "temperature", "humidity", "wavelength"],
+            "proposed_answer": "light intensity"
+        }],
+    })
+    reviewer_approve = json.dumps({"status": "APPROVED", "issues": []})
+    solver_agree = json.dumps({"answers": [{"question_id": "q1", "answer": "light intensity", "ambiguous": False}]})
+    validator_accept = json.dumps({"accepted": True, "issues": []})
+
+    responses = [
+        leaked_substantive,  # 1. GENERATOR (leaks "light intensity" in prompt)
+        repaired_candidate,  # 2. REPAIR (prompt repaired without leaking answer)
+        reviewer_approve,    # 3. REVIEWER (approves repaired candidate)
+        solver_agree,        # 4. BLIND_SOLVER (solves without ambiguity)
+        validator_accept,    # 5. VALIDATOR (accepts)
+    ]
+
+    req = StandaloneReadingRequest(
+        run_id="run-c-repair-leak-01",
+        dataset_item_id="item-c-repair-leak-01",
+        configuration_id="C",
+        task=ReadingTask(
+            requested_groups=[StandaloneGroupType.MCQ_SINGLE],
+            requested_question_count=1,
+            difficulty="B2",
+        ),
+        source_pack_id="src-pack-01",
+    )
+
+    client = SequentialClient(responses)
+    runner = ConfigurationCRunner(client=client, default_max_repairs=1)
+
+    result, trace, usage = runner.generate_reading(
+        request=req,
+        passage_text=PASSAGE,
+        prompt_version="v3.1",
+        foundation_model_id="minimax/MiniMax-Text-01",
+    )
+
+    assert result.execution_status == ExecutionStatus.COMPLETED
+    assert result.failure_code is None
+    assert usage["repair_count"] == 1
+    stages = [step["stage"] for step in trace["steps"]]
+    assert "REPAIR" in stages
+    assert result.generated_content.questions[0].text == "What physical parameter governs the photosynthetic rate?"

@@ -101,12 +101,12 @@ ANTONYM_PAIRS = [
     ("improve", "limit"),
     ("improve", "limiting"),
     ("improves", "limits"),
-    ("open stomata", "stomata remain firmly closed"),
-    ("open stomata", "stomata remain closed"),
-    ("open their stomata", "stomata remain firmly closed"),
-    ("open their stomata", "stomata remain closed"),
     ("open their stomata during the day", "stomata remain firmly closed"),
+    ("open their stomata during daylight hours", "stomata remain firmly closed"),
     ("open stomata during daylight hours", "stomata remain firmly closed"),
+    ("open stomata during the day", "stomata remain firmly closed"),
+    ("open stomata during daylight hours", "stomata remain closed"),
+    ("open stomata during the day", "stomata remain closed"),
     ("accelerate", "slow down"),
     ("accelerates", "slows down"),
     ("active", "dormant"),
@@ -114,6 +114,24 @@ ANTONYM_PAIRS = [
     ("presence", "absence"),
     ("internal", "external"),
     ("internally", "externally"),
+    ("majority", "minority"),
+    ("synthetic", "natural"),
+    ("artificial", "natural"),
+    ("prohibit", "permit"),
+    ("prohibits", "permits"),
+    ("prohibited", "permitted"),
+    ("exclude", "include"),
+    ("excludes", "includes"),
+    ("excluded", "included"),
+    ("fail", "succeed"),
+    ("failed", "succeeded"),
+    ("failure", "success"),
+    ("ascend", "descend"),
+    ("mandatory", "optional"),
+    ("permanent", "temporary"),
+    ("harmful", "beneficial"),
+    ("absorb", "emit"),
+    ("absorbs", "emits"),
 ]
 
 def normalize_written_numbers(text: str) -> str:
@@ -187,6 +205,14 @@ def detect_contradiction_in_text(statement: str, reference_text: str) -> bool:
                         if len(s_words & r_words) >= 1:
                             return True
 
+        # 5. Contrastive exclusion markers (e.g. 'X rather than Y', 'instead of Y')
+        for marker in ["rather than", "instead of", "as opposed to", "unlike"]:
+            if marker in r_clean and marker not in s_clean:
+                _, excl = r_clean.split(marker, 1)
+                excl_words = {stem_token(w) for w in re.findall(r"\b\w+\b", excl) if len(w) > 3}
+                s_stems = {stem_token(w) for w in s_words if len(w) > 3}
+                if len(s_stems & excl_words) >= 2:
+                    return True
     return False
 
 
@@ -201,6 +227,21 @@ def detect_entailment_in_text(statement: str, reference_text: str) -> bool:
 
     for sent in sentences:
         r_clean = normalize_written_numbers(normalize_text_nfkc(sent)).lower()
+        # Sentence-level contradiction check: a sentence contradicting statement cannot entail it
+        if detect_contradiction_in_text(statement, sent):
+            continue
+        # Also ensure sentence does not contain an exclusion marker where statement words are in the excluded clause
+        has_exclusion = False
+        for marker in ["rather than", "instead of", "as opposed to", "unlike"]:
+            if marker in r_clean and marker not in s_clean:
+                _, excl = r_clean.split(marker, 1)
+                excl_words = {stem_token(w) for w in re.findall(r"\b\w+\b", excl) if len(w) > 3}
+                s_stems = {stem_token(w) for w in s_clean.split() if len(w) > 3}
+                if len(s_stems & excl_words) >= 2:
+                    has_exclusion = True
+                    break
+        if has_exclusion:
+            continue
         s_words = [w for w in re.findall(r"\b\w+\b", s_clean) if len(w) > 3 and w not in {"that", "with", "from", "this", "they", "have", "were"}]
         if not s_words:
             continue
@@ -213,7 +254,6 @@ def detect_entailment_in_text(statement: str, reference_text: str) -> bool:
             r_neg = any(re.search(rf"\b{re.escape(neg)}\b", r_clean) for neg in NEGATION_TERMS)
             if s_neg == r_neg:
                 return True
-
     return False
 
 

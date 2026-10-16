@@ -117,6 +117,8 @@ _GENERATION_SYSTEM = (
     "Generate novel carrier sentences derived from the GrammarRulePack rules; do NOT copy the rule pack's example sentences as final exercise items. "
     "For single-answer MCQs, verify that exactly ONE option is grammatically correct and defensible under standard academic grammar. "
     "Ensure distractors are unambiguously incorrect and do not introduce semantically equivalent, contracted-inversion, or duplicate valid answers. "
+    "Randomize and balance the position of the correct answer among options A, B, C, and D to prevent first-option position bias. "
+    "Never leak or quote the proposed answer in the question stem. For Grammar MCQs, every option must be a complete candidate sentence exemplifying the target structure, not bare noun phrases or fragments. "
     "Include proposed_answer privately on each question. Do not claim any proposed answer is verified gold. Do not emit scores or metadata."
 )
 _SYSTEMS = {
@@ -131,7 +133,8 @@ _SYSTEMS = {
     ),
     "REVIEWER": (
         'Independently review source grounding, clarity, distractor validity, and answer uniqueness without a proposed answer key. '
-        'For Grammar, verify that carrier sentences are novel (not copied from rule pack examples) and that exactly one option is grammatically defensible. '
+        'Reject any question where the prompt leaks the answer verbatim or where distractors contain multiple defensible choices. '
+        'For Grammar, verify that carrier sentences are novel (not copied from rule pack examples), that every option is a complete candidate sentence (not bare noun phrases), and that exactly one option is grammatically defensible. '
         'For Reading, verify that TRUE/FALSE/NOT GIVEN statements are strictly grounded without unsupported generalizations. '
         'Return raw JSON without markdown or code blocks: {"status":"APPROVED|REJECTED","issues":["blocking issue"]}. '
         'Use APPROVED only if no blocking issue remains.'
@@ -145,7 +148,7 @@ _SYSTEMS = {
     ),
     "VALIDATOR": (
         'Check the source, candidate, independent review and blinded solve. Proposed answers are '
-        'unverified generator proposals, not gold. Reject disagreement, ambiguity, duplicate defensible MCQ options, '
+        'unverified generator proposals, not gold. Reject disagreement, ambiguity, prompt answer leaks, bare non-sentence options for grammar MCQs, duplicate defensible MCQ options, '
         'ungrounded Reading generalizations, or unresolved review issues. Return raw JSON without markdown or code blocks: {"accepted":true,"issues":["blocking issue"]}.'
     ),
 }
@@ -319,6 +322,8 @@ class _Run:
             "normalized_output_sha256": _hash(canonical_json_dump(content.model_dump(mode="json"))) if content else None,
             "output_response_sha256": self.output_response_hash if content else None,
             "trace_ref": f"secure://traces/{self.request.run_id}",
+            "max_repairs": self.limits.get("max_repairs", 0),
+            "repair_config_version": self.limits.get("repair_config_version", "v1.0" if self.arm == "C" else None),
         }
         usage = {**_aggregate(self.responses, self.repairs), "model_id": self.model_id,
                  "prompt_version": self.prompt_version, "provenance": provenance}
@@ -426,7 +431,8 @@ def _coordinated(run: _Run, max_repairs: int, simulate_stage: str | None) -> tup
         can_repair = failure in {"REVIEW_REJECTED", "VALIDATOR_REJECTED", "BLIND_SOLVE_REJECTED",
                                  "BLIND_SOLVE_INCOMPLETE", "ANSWER_VERIFICATION_DISAGREEMENT", "PROPOSED_ANSWERS_MISSING",
                                  "QUESTION_COUNT_MISMATCH", "QUESTION_TYPE_MISMATCH", "QUESTION_GROUP_MISMATCH",
-                                 "QUESTION_OPTIONS_INVALID", "OUTPUT_SCHEMA_INVALID", "CONTEXT_MISMATCH"}
+                                 "QUESTION_OPTIONS_INVALID", "OUTPUT_SCHEMA_INVALID", "CONTEXT_MISMATCH",
+                                 "PROMPT_LEAKS_ANSWER"}
         if repair == max_repairs or not can_repair:
             return run.finish(failure, status)
         run.repairs += 1
@@ -485,12 +491,31 @@ class ConfigurationBRunner:
                                 max_revisions=max_revisions), max_revisions, simulate_failure_at_stage)
 
 
+# Versioned Arm C repair configuration profiles
+# v1.0: Historical frozen campaign configuration (0 repairs, immediate termination on rejection)
+ARM_C_REPAIR_CONFIG_HISTORICAL_V1: int = 0
+
+# v2.0: Bounded multi-agent repair configuration for DEV and future research (1 repair)
+ARM_C_REPAIR_CONFIG_DEV_V2: int = 1
+
+# Maximum ceiling permitted by scientific protocol to prevent unbounded loops
+ARM_C_MAX_REPAIR_CEILING: int = 2
+
+
 class ConfigurationCRunner:
     """Separated generation/review/solve/validation; each repair repeats fresh checks."""
-    def __init__(self, client: Any = None, default_max_repairs: int = 0) -> None:
+    def __init__(
+        self,
+        client: Any = None,
+        default_max_repairs: int = 0,
+        repair_config_version: str = "v1.0",
+    ) -> None:
         self.client = client if client is not None else DefaultRecordingExperimentClient()
-        self.default_max_repairs = default_max_repairs
-
+        if repair_config_version == "v2.0" and default_max_repairs == 0:
+            self.default_max_repairs = ARM_C_REPAIR_CONFIG_DEV_V2
+        else:
+            self.default_max_repairs = default_max_repairs
+        self.repair_config_version = repair_config_version
     def certify_external_verdict(self, internal_accepted: bool = False, source: str = "C_INTERNAL",
                                 use_internal_accepted_head: bool = False) -> None:
         if internal_accepted or use_internal_accepted_head or source == "C_INTERNAL":
@@ -502,7 +527,7 @@ class ConfigurationCRunner:
         repairs = self.default_max_repairs if max_repairs is None else max_repairs
         _bound(repairs, "max_repairs")
         return _coordinated(_Run(self.client, request, "C", prompt_version, foundation_model_id, passage_text,
-                                 max_repairs=repairs), repairs, simulate_failure_at_stage)
+                                 max_repairs=repairs, repair_config_version=self.repair_config_version), repairs, simulate_failure_at_stage)
 
     def generate_grammar(self, request: StandaloneGrammarRequest, prompt_version: str, foundation_model_id: str,
                          simulate_failure_at_stage: str | None = None,
@@ -510,4 +535,4 @@ class ConfigurationCRunner:
         repairs = self.default_max_repairs if max_repairs is None else max_repairs
         _bound(repairs, "max_repairs")
         return _coordinated(_Run(self.client, request, "C", prompt_version, foundation_model_id, None,
-                                 max_repairs=repairs), repairs, simulate_failure_at_stage)
+                                 max_repairs=repairs, repair_config_version=self.repair_config_version), repairs, simulate_failure_at_stage)
