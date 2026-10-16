@@ -34,10 +34,11 @@ This document concludes the software stabilization phase of RG10. All software, 
 - **Reported Base Commit from Prompt:** `6432c1621270b0958d1307a1b839aff03abdfd7f` (*fix(evaluator): remediate DEV grammar defects in v2.7 and enforce holdout governance*)
 - **Intermediate Remediation Commit:** `32cb85e514f881aef8a5366ea43eb67422012eaa` (*fix(evaluator): refine base -eed lexeme filter and enforce QUALITY_READY HOLD*)
 - **Handoff Package Commit:** `867b94ea2d1f1f66bf0676249f5e812406a05691` (*feat(rg10): finalize software freeze and external research handoff package*)
-- **Current Candidate Freeze HEAD:** `867b94ea2d1f1f66bf0676249f5e812406a05691` (verified clean working tree on branch `autonomous-generation`)
+- **Verified Candidate Freeze Commit:** `93ecf8a558f170fb1b63f3a08102cafeb910eecb` (*feat(rg10): lock candidate freeze manifest and document independent evidence requirements*)
 - **Commit Delta & Traceability:**
   - `6432c16` → `32cb85e`: Constrained `-eed` bare infinitive exemption to closed base class (`need`, `feed`, `bleed`, `proceed`, `succeed`, `exceed`, `breed`, `speed`), rejecting past participle forms `freed`, `agreed`, `decreed`, `guaranteed`. Added counterexample regressions in `test_rg10_v2_7_remediation.py`. Enforced `QUALITY_READY: HOLD` across acceptance reports.
   - `32cb85e` → `867b94e`: Built external research handoff package, including human curator instructions, licensing checklist, blind annotation forms, adjudication workflow, sealing conditions, hash verification tool, and corpus disjointness tool. Added dry-run campaign readiness auditor covering 9 research dimensions offline.
+  - `867b94e` → `93ecf8a`: Formally locked candidate freeze manifest, added dedicated Known Limitations and Independent Evidence Requirements sections, and enabled dynamic git HEAD discovery in campaign readiness check.
   - Candidate freeze pins Evaluator v2.7 (`neutral-eval-v2.7`), Rubric v2.7, MiniMax-Text-01, and frozen 168-assignment ledger.
 - **Git Branch:** `autonomous-generation` (tracking `origin/autonomous-generation`)
 ---

@@ -2,7 +2,7 @@
 
 **Report ID:** `rg10-campaign-readiness-dryrun-v1.0`  
 **Evaluated At:** `2026-10-16T19:00:00Z`  
-**Software Commit SHA:** `867b94ea2d1f1f66bf0676249f5e812406a05691`  
+**Software Commit SHA:** `93ecf8a558f170fb1b63f3a08102cafeb910eecb`  
 **Evaluation Mode:** `STRICTLY_DRY_RUN_NO_PROVIDER_CALLS`  
 **Overall Software Readiness:** **`READY`**  
 **Overall Campaign Gate:** **`HOLD`**  
