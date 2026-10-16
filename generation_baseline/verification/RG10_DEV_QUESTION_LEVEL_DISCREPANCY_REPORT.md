@@ -69,8 +69,8 @@ In the published artifact, modifying the text to include `"through their open st
 | **Total Questions** | 15 | 15 | 0 |
 | **Questions with Answer Keys** | 15 (6 borrowed) | 9 (6 missing) | -6 borrowed answers removed |
 | **UNSCORABLE_MISSING_ANSWER** | 0 | 6 (Reading B & C) | +6 correctly classified |
-| **Evaluator PASS** | 10 or 6 (inconsistent) | **4** (26.67%) | -2 or -6 (Reading A Q1, Q3, B, C fail) |
-| **Evaluator FAIL** | 5 or 9 | **11** (73.33%) | +2 or +6 |
+| **Evaluator PASS** | 11 (quality_dev_hardening_results.json) / 6 (DETERMINISTIC_REPLAY narrative) | **4** (26.67%) | -7 vs published JSON, -2 vs report narrative |
+| **Evaluator FAIL** | 4 (quality_dev_hardening_results.json) / 9 (DETERMINISTIC_REPLAY narrative) | **11** (73.33%) | +7 vs published JSON, +2 vs report narrative |
 | **Evaluator UNCERTAIN** | 0 | 0 | 0 |
 | **Grammar Distractor Ambiguities** | 3 flagged | 3 flagged | Confirmed: 3/6 MCQs have ambiguous/multiple keys |
 | **Provenance Integrity** | 0/15 (all None) | 15/15 (100% bound) | Full cryptographic provenance restored |
