@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 from app.evaluators.independent import (
     NeutralEvaluator,
     NeutralEvaluatorV2_5,
+    NeutralEvaluatorV2_6,
     strip_internal_arm_metadata,
 )
 from app.evaluators.rubric import (
@@ -53,7 +54,7 @@ class UncertaintyEscalationProtocol:
         judge_version: str = "blinded-judge-v1.0",
         uncertainty_threshold: float = 0.50,
     ) -> None:
-        self.base_evaluator = base_evaluator or NeutralEvaluatorV2_5()
+        self.base_evaluator = base_evaluator or NeutralEvaluatorV2_6()
         self.judge_version = judge_version
         self.uncertainty_threshold = uncertainty_threshold
 
@@ -197,6 +198,22 @@ class UncertaintyEscalationProtocol:
                         verified_human_truth=False,
                         confidence_level="UNCERTAIN",
                     )
+
+        # Boundary E: Inconclusive grammar linguistic judgment requiring human adjudication
+        if "Inconclusive MCQ" in (base_res.abstention_reason or ""):
+            return BlindedJudgeVerdict(
+                evaluation_id=f"judge_{output_sha[:12]}",
+                dataset_item_id=dataset_item_id,
+                output_sha256=output_sha,
+                verdict=EvaluationVerdict.UNCERTAIN,
+                evaluable=True,
+                is_uncertain=True,
+                uncertainty_code="GRAMMAR_LINGUISTIC_JUDGMENT_UNCERTAIN",
+                grounded_evidence_span=evidence_span,
+                rationale=base_res.abstention_reason or "Inconclusive grammar linguistic judgment under deterministic heuristics.",
+                verified_human_truth=False,
+                confidence_level="UNCERTAIN",
+            )
 
         # Return standard verdict with evidence span
         evidence_span = base_res.evidence_refs[0] if base_res.evidence_refs else None

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
 from uuid import uuid4
@@ -26,6 +27,11 @@ from app.contracts.solver import (
 )
 from app.evaluators.deterministic import matches_exact_token_bound, normalize_text_nfkc
 from app.evaluators.semantic import (
+    COMMON_BASE_VERBS,
+    IRREGULAR_PAST_PARTICIPLES,
+    IRREGULAR_PAST_VERBS,
+    NegativeInversionValidationResult,
+    check_content_aware_novelty,
     compute_substantive_grounding_ratio,
     detect_cleft_distractor_ambiguity,
     detect_comparison_inversion,
@@ -34,8 +40,10 @@ from app.evaluators.semantic import (
     detect_entailment_in_text,
     detect_it_cleft_syntax,
     detect_negation_polarity_conflict,
+    detect_negative_inversion_structural,
     detect_negative_inversion_syntax,
     detect_unsupported_generalization,
+    validate_negative_inversion_grammaticality,
 )
 from app.evaluators.rubric import (
     CanonicalEvaluationResult,
@@ -133,6 +141,10 @@ class NeutralEvaluator:
     @property
     def is_v2_5_plus(self) -> bool:
         return self.version_tuple >= (2, 5)
+
+    @property
+    def is_v2_6_plus(self) -> bool:
+        return self.version_tuple >= (2, 6)
 
 
 
@@ -396,6 +408,10 @@ class NeutralEvaluator:
                     topic_cues = ["is believed to", "are believed to", "is reported to", "are reported to", "is thought to", "are thought to", "is considered to"]
                 elif "modal" in topic:
                     topic_cues = ["must have", "could have", "should have", "might have", "would have", "cannot have"]
+                elif "subjunctive" in topic:
+                    topic_cues = ["mandate", "mandates", "insist", "insists", "demand", "demands", "require", "requires", "recommend", "recommends", "propose", "proposes", "suggest", "suggests", "subjunctive"]
+                elif "participle" in topic:
+                    topic_cues = ["having ", "being ", "ed by", "ing the", "participle"]
                 matches_topic_cue = any(
                     any(cue in txt for cue in topic_cues)
                     for txt in all_text_to_check
@@ -423,35 +439,98 @@ class NeutralEvaluator:
                         task_validity["unique_correct_answer"] = False
 
                     if "inversion" in topic:
-                        valid_inversion_opts = [
-                            idx + 1 for idx, opt_t in enumerate(opt_texts)
-                            if detect_negative_inversion_syntax(opt_t, allow_contracted=False)
-                        ]
-                        contracted_inversion_opts = [
-                            idx + 1 for idx, opt_t in enumerate(opt_texts)
-                            if detect_contracted_negative_inversion(opt_t)
-                        ]
-                        is_neg_polarity_q = any(term in prompt_norm for term in ["incorrect", "does not", "fails to", "wrong"])
-                        if not is_neg_polarity_q:
-                            if len(valid_inversion_opts) > 1:
-                                task_issues.append(
-                                    f"Ambiguous MCQ: multiple options {valid_inversion_opts} exhibit valid negative inversion (distractor validity failure)"
-                                )
-                                task_validity["unique_correct_answer"] = False
-                            elif len(valid_inversion_opts) == 1 and contracted_inversion_opts:
-                                extra_contracted = set(contracted_inversion_opts) - set(valid_inversion_opts)
-                                if extra_contracted:
+                        if self.is_v2_6_plus:
+                            validation_results = [
+                                validate_negative_inversion_grammaticality(opt_t, allow_contracted=False)
+                                for opt_t in opt_texts
+                            ]
+                            valid_inversion_opts = [
+                                idx + 1 for idx, r in enumerate(validation_results)
+                                if r.verdict == "VALID"
+                            ]
+                            uncertain_inversion_opts = [
+                                idx + 1 for idx, r in enumerate(validation_results)
+                                if r.verdict == "UNCERTAIN"
+                            ]
+                            contracted_inversion_opts = [
+                                idx + 1 for idx, opt_t in enumerate(opt_texts)
+                                if detect_contracted_negative_inversion(opt_t)
+                            ]
+                            is_neg_polarity_q = any(term in prompt_norm for term in ["incorrect", "does not", "fails to", "wrong"])
+                            if not is_neg_polarity_q:
+                                if uncertain_inversion_opts:
                                     task_issues.append(
-                                        f"Contested MCQ: option {list(extra_contracted)} exhibits contracted negative auxiliary inversion syntax, creating distractor ambiguity"
+                                        f"Inconclusive MCQ: option(s) {uncertain_inversion_opts} could not be conclusively validated: {validation_results[uncertain_inversion_opts[0]-1].rejection_reason or 'uncertain linguistic judgment'}"
                                     )
+                                    task_validity["unique_correct_answer"] = False
+                                elif len(valid_inversion_opts) > 1:
+                                    task_issues.append(
+                                        f"Ambiguous MCQ: multiple options {valid_inversion_opts} exhibit valid negative inversion (distractor validity failure)"
+                                    )
+                                    task_validity["unique_correct_answer"] = False
+                                elif len(valid_inversion_opts) == 1 and contracted_inversion_opts:
+                                    extra_contracted = set(contracted_inversion_opts) - set(valid_inversion_opts)
+                                    if extra_contracted:
+                                        task_issues.append(
+                                            f"Contested MCQ: option {list(extra_contracted)} exhibits contracted negative auxiliary inversion syntax, creating distractor ambiguity"
+                                        )
+                                        task_validity["unique_correct_answer"] = False
+                                    else:
+                                        task_validity["unique_correct_answer"] = True
+                                elif len(valid_inversion_opts) == 0:
+                                    task_issues.append("Defective MCQ: no options exhibit valid negative inversion")
+                                    task_validity["unique_correct_answer"] = False
+                                else:
+                                    valid_idx = valid_inversion_opts[0] - 1
+                                    valid_res = validation_results[valid_idx]
+                                    stem_conflict = False
+                                    if "uses 'do'" in prompt_norm or 'uses "do"' in prompt_norm or "using 'do'" in prompt_norm or 'using "do"' in prompt_norm:
+                                        if valid_res.auxiliary not in ("do", "does", "did"):
+                                            task_issues.append(
+                                                f"Stem-answer constraint conflict: question stem specifically requests 'do' inversion, but unique valid option uses auxiliary '{valid_res.auxiliary}'"
+                                            )
+                                            task_validity["unique_correct_answer"] = False
+                                            stem_conflict = True
+                                    if not stem_conflict:
+                                        norm_prop = normalize_solver_answer(proposed_ans, q_type)
+                                        prop_idx = ord(norm_prop) - ord("A") if norm_prop in ["A", "B", "C", "D"] else -1
+                                        if prop_idx >= 0 and prop_idx != valid_idx:
+                                            task_issues.append(
+                                                f"Proposed answer key discord: proposed answer points to option {norm_prop} (index {prop_idx+1}), but unique grammatically valid option is {chr(ord('A') + valid_idx)} (index {valid_idx+1})"
+                                            )
+                                            task_validity["unique_correct_answer"] = False
+                                        else:
+                                            task_validity["unique_correct_answer"] = True
+                        else:
+                            valid_inversion_opts = [
+                                idx + 1 for idx, opt_t in enumerate(opt_texts)
+                                if detect_negative_inversion_syntax(opt_t, allow_contracted=False)
+                            ]
+                            contracted_inversion_opts = [
+                                idx + 1 for idx, opt_t in enumerate(opt_texts)
+                                if detect_contracted_negative_inversion(opt_t)
+                            ]
+                            is_neg_polarity_q = any(term in prompt_norm for term in ["incorrect", "does not", "fails to", "wrong"])
+                            if not is_neg_polarity_q:
+                                if len(valid_inversion_opts) > 1:
+                                    task_issues.append(
+                                        f"Ambiguous MCQ: multiple options {valid_inversion_opts} exhibit valid negative inversion (distractor validity failure)"
+                                    )
+                                    task_validity["unique_correct_answer"] = False
+                                elif len(valid_inversion_opts) == 1 and contracted_inversion_opts:
+                                    extra_contracted = set(contracted_inversion_opts) - set(valid_inversion_opts)
+                                    if extra_contracted:
+                                        task_issues.append(
+                                            f"Contested MCQ: option {list(extra_contracted)} exhibits contracted negative auxiliary inversion syntax, creating distractor ambiguity"
+                                        )
+                                        task_validity["unique_correct_answer"] = False
+                                    else:
+                                        task_validity["unique_correct_answer"] = True
+                                elif len(valid_inversion_opts) == 0:
+                                    task_issues.append("Defective MCQ: no options exhibit valid negative inversion")
                                     task_validity["unique_correct_answer"] = False
                                 else:
                                     task_validity["unique_correct_answer"] = True
-                            elif len(valid_inversion_opts) == 0:
-                                task_issues.append("Defective MCQ: no options exhibit valid negative inversion")
-                                task_validity["unique_correct_answer"] = False
-                            else:
-                                task_validity["unique_correct_answer"] = True
                     elif "cleft" in topic:
                         is_ambig, ambig_reason = detect_cleft_distractor_ambiguity(opt_texts)
                         if is_ambig:
@@ -477,6 +556,170 @@ class NeutralEvaluator:
                                 task_validity["unique_correct_answer"] = False
                             else:
                                 task_validity["unique_correct_answer"] = True
+                    elif "subjunctive" in topic and self.is_v2_6_plus:
+                        mandative_triggers = [
+                            "mandate", "mandates", "insist", "insists", "demand", "demands",
+                            "require", "requires", "recommend", "recommends", "propose", "proposes",
+                            "stipulate", "stipulates", "vital", "crucial", "important", "essential"
+                        ]
+                        is_mandative = any(mt in prompt_norm for mt in mandative_triggers) or any(
+                            mt in getattr(rule_pack, "applicability", [""])[0].lower() for mt in mandative_triggers
+                        )
+                        if is_mandative:
+                            def _extract_subjunctive_verb(ot: str) -> str | None:
+                                clean = re.sub(r"^[A-Da-d][\).:]\s*", "", ot.strip())
+                                m_that = re.search(r"\bthat\s+([a-zA-Z\s]+)", clean, re.IGNORECASE)
+                                if not m_that:
+                                    return None
+                                words = m_that.group(1).split()
+                                if not words:
+                                    return None
+                                first = words[0].lower()
+                                if first in {"she", "he", "it", "they", "we", "you", "i", "one"}:
+                                    return words[1].lower().strip(",.") if len(words) > 1 else None
+                                start_idx = 1 if first in {"the", "a", "an", "each", "every", "this", "that", "these", "those", "all", "any", "both"} else 0
+                                subject_nouns = {
+                                    "supplier", "student", "technician", "researcher", "container", "employee",
+                                    "applicant", "candidate", "party", "doctor", "patient", "person", "individual",
+                                    "staff", "team", "committee", "board", "protocol", "member", "members",
+                                    "students", "suppliers", "researchers", "technicians", "device", "system",
+                                    "laboratory", "waste", "hazardous", "authorized", "new", "contractor"
+                                }
+                                idx = start_idx
+                                while idx < len(words):
+                                    w = words[idx].lower().strip(",.")
+                                    if w in subject_nouns:
+                                        idx += 1
+                                        continue
+                                    return w
+                                return None
+                            def _extract_all_subjunctive_verbs(opts: list[str]) -> list[str | None]:
+                                that_tails = []
+                                for ot in opts:
+                                    clean = re.sub(r"^[A-Da-d][\).:]\s*", "", ot.strip())
+                                    m_that = re.search(r"\bthat\s+([a-zA-Z\s]+)", clean, re.IGNORECASE)
+                                    that_tails.append(m_that.group(1).split() if m_that else [])
+
+                                if all(that_tails):
+                                    min_len = min(len(t) for t in that_tails)
+                                    common_len = 0
+                                    while common_len < min_len:
+                                        w0 = that_tails[0][common_len].lower()
+                                        if all(t[common_len].lower() == w0 for t in that_tails):
+                                            common_len += 1
+                                        else:
+                                            break
+                                    if common_len > 0 and all(len(t) > common_len for t in that_tails):
+                                        return [t[common_len].lower().strip(",.") for t in that_tails]
+
+                                return [_extract_subjunctive_verb(ot) for ot in opts]
+
+                            def _is_base_subjunctive_verb(verb: str | None) -> bool:
+                                if not verb:
+                                    return False
+                                v = verb.lower()
+                                if v in {"will", "has", "had", "must", "should", "would", "could", "can", "is", "was", "are", "were", "being", "been"}:
+                                    return False
+                                if v in ("be", "have"):
+                                    return True
+                                if v.endswith("s") and v not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+                                    return False
+                                if v.endswith("ing") and v != "bring":
+                                    return False
+                                if v.endswith("ed") and v not in {"need", "feed", "bleed", "proceed", "succeed"}:
+                                    return False
+                                if v in IRREGULAR_PAST_VERBS:
+                                    return False
+                                return True
+                            extracted_verbs = _extract_all_subjunctive_verbs(opt_texts)
+                            base_opts = [idx + 1 for idx, v in enumerate(extracted_verbs) if _is_base_subjunctive_verb(v)]
+                            is_neg_polarity_q = any(term in prompt_norm for term in ["incorrect", "does not", "fails to", "wrong"])
+                            if is_neg_polarity_q:
+                                norm_prop = normalize_solver_answer(proposed_ans, q_type)
+                                prop_idx = ord(norm_prop) - ord("A") + 1 if norm_prop in ["A", "B", "C", "D"] else -1
+                                if prop_idx > 0 and prop_idx in base_opts:
+                                    task_issues.append(f"Proposed answer {norm_prop} uses valid base subjunctive form in negative-polarity question")
+                                    task_validity["unique_correct_answer"] = False
+                                else:
+                                    task_validity["unique_correct_answer"] = True
+                            else:
+                                if len(base_opts) == 1:
+                                    valid_idx = base_opts[0] - 1
+                                    norm_prop = normalize_solver_answer(proposed_ans, q_type)
+                                    prop_idx = ord(norm_prop) - ord("A") if norm_prop in ["A", "B", "C", "D"] else -1
+                                    if prop_idx >= 0 and prop_idx != valid_idx:
+                                        task_issues.append(
+                                            f"Proposed answer key discord: proposed answer points to option {norm_prop} (index {prop_idx+1}), but unique grammatically valid subjunctive option is {chr(ord('A') + valid_idx)} (index {valid_idx+1})"
+                                        )
+                                        task_validity["unique_correct_answer"] = False
+                                    else:
+                                        task_validity["unique_correct_answer"] = True
+                                elif len(base_opts) > 1:
+                                    task_issues.append(f"Ambiguous subjunctive MCQ: multiple options {base_opts} use base subjunctive form")
+                                    task_validity["unique_correct_answer"] = False
+                                elif len(base_opts) == 0:
+                                    task_issues.append("Defective subjunctive MCQ: no options use base subjunctive form")
+                                    task_validity["unique_correct_answer"] = False
+                                else:
+                                    task_validity["unique_correct_answer"] = True
+                        else:
+                            task_validity["unique_correct_answer"] = True
+                    elif "conditional" in topic and self.is_v2_6_plus:
+                        valid_cond_opts = []
+                        for idx, ot in enumerate(opt_texts):
+                            ot_l = ot.lower()
+                            if re.search(r"^(?:[A-Da-d][\).:]\s*)?(?:had\s+\w+|were\s+\w+|should\s+\w+)", ot_l):
+                                if any(m in ot_l for m in ["would have", "could have", "might have", "would be", "could be"]):
+                                    valid_cond_opts.append(idx + 1)
+                            elif re.search(r"^(?:[A-Da-d][\).:]\s*)?if\s+", ot_l):
+                                valid_cond_opts.append(idx + 1)
+                        if len(valid_cond_opts) == 1:
+                            task_validity["unique_correct_answer"] = True
+                        elif len(valid_cond_opts) > 1:
+                            task_issues.append(f"Ambiguous conditional MCQ: multiple options {valid_cond_opts} are defensible conditional sentences")
+                            task_validity["unique_correct_answer"] = False
+                        elif len(valid_cond_opts) == 0:
+                            task_issues.append("Defective conditional MCQ: no options exhibit valid conditional structure")
+                            task_validity["unique_correct_answer"] = False
+                        else:
+                            task_validity["unique_correct_answer"] = True
+                    elif "modal" in topic and self.is_v2_6_plus:
+                        valid_modal_opts = []
+                        for idx, ot in enumerate(opt_texts):
+                            ot_l = ot.lower()
+                            m_mod = re.search(r"\b(must|could|cannot|might|should)\s+(?:not\s+)?have\s+([a-z]+)\b", ot_l)
+                            if m_mod:
+                                part = m_mod.group(2)
+                                if part.endswith("ed") or part in IRREGULAR_PAST_PARTICIPLES:
+                                    valid_modal_opts.append(idx + 1)
+                        if len(valid_modal_opts) == 1:
+                            task_validity["unique_correct_answer"] = True
+                        elif len(valid_modal_opts) > 1:
+                            task_issues.append(f"Ambiguous modal MCQ: multiple options {valid_modal_opts} exhibit valid modal deduction")
+                            task_validity["unique_correct_answer"] = False
+                        elif len(valid_modal_opts) == 0:
+                            task_issues.append("Defective modal MCQ: no options exhibit valid past modal deduction")
+                            task_validity["unique_correct_answer"] = False
+                        else:
+                            task_validity["unique_correct_answer"] = True
+                    elif ("passive" in topic or "reporting" in topic) and self.is_v2_6_plus:
+                        valid_pass_opts = []
+                        for idx, ot in enumerate(opt_texts):
+                            ot_l = ot.lower()
+                            if re.search(r"\b(is|are|was|were)\s+(believed|considered|thought|reported|said|estimated)\s+to\b", ot_l):
+                                valid_pass_opts.append(idx + 1)
+                        if len(valid_pass_opts) == 1:
+                            task_validity["unique_correct_answer"] = True
+                        elif len(valid_pass_opts) > 1:
+                            task_issues.append(f"Ambiguous passive MCQ: multiple options {valid_pass_opts} exhibit valid reporting passive")
+                            task_validity["unique_correct_answer"] = False
+                        elif len(valid_pass_opts) == 0:
+                            task_issues.append("Defective passive MCQ: no options exhibit valid reporting passive")
+                            task_validity["unique_correct_answer"] = False
+                        else:
+                            task_validity["unique_correct_answer"] = True
+                    else:
+                        task_validity["unique_correct_answer"] = True
         else:
             # For reading tasks without explicit evidence_quote, verify source grounding via passage spans
             clean_words = [w for w in re.sub(r"[^\w\s]", "", prompt).split() if len(w) > 2]
@@ -735,5 +978,19 @@ class NeutralEvaluatorV2_5(NeutralEvaluatorV2_4):
     ):
         super().__init__(
             rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.5"),
+            evaluator_version=evaluator_version,
+        )
+
+
+class NeutralEvaluatorV2_6(NeutralEvaluatorV2_5):
+    """Calibrated neutral evaluator with robust negative inversion validation, content-aware novelty, and multi-family distractor verification (v2.6)."""
+
+    def __init__(
+        self,
+        rubric: Optional[RubricProfile] = None,
+        evaluator_version: str = "neutral-eval-v2.6",
+    ):
+        super().__init__(
+            rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.6"),
             evaluator_version=evaluator_version,
         )

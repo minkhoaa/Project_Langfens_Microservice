@@ -7,7 +7,7 @@ Implements P07-04 & P07-05:
 - Advisory quality heuristics (separated from hard blockers, no IELTS band calibration claim)
 """
 
-from __future__ import annotations
+from dataclasses import dataclass
 
 from enum import Enum
 import re
@@ -371,11 +371,522 @@ def compute_substantive_grounding_ratio(statement: str, reference_text: str, is_
     return ratio, unsupported
 
 
-def detect_negative_inversion_syntax(sentence: str, allow_contracted: bool = False) -> bool:
-    """Detects whether a sentence exhibits negative/limiting auxiliary inversion.
-    If allow_contracted=False, standard uncontracted auxiliaries are matched.
-    If allow_contracted=True, contracted negative auxiliaries (e.g. 'shouldn't we') are also matched.
+@dataclass
+class NegativeInversionValidationResult:
+    is_structural_inversion: bool
+    is_grammatically_valid: bool
+    verdict: str  # "VALID", "INVALID", "UNCERTAIN"
+    rejection_reason: Optional[str] = None
+    trigger: Optional[str] = None
+    auxiliary: Optional[str] = None
+    subject: Optional[str] = None
+    verb_phrase: Optional[str] = None
+
+
+IRREGULAR_PAST_VERBS = {
+    "won", "broke", "knew", "saw", "went", "came", "did", "had",
+    "began", "spoke", "left", "found", "met", "took", "gave", "made",
+    "felt", "thought", "told", "became", "brought", "wrote", "chose",
+    "drove", "fell", "forgot", "hid", "ran", "sang", "stood", "threw",
+    "froze", "rose", "flew", "drew", "shook", "wore", "built", "spent", "understood"
+}
+
+IRREGULAR_PAST_PARTICIPLES = {
+    "witnessed", "observed", "begun", "opened", "closed", "discarded",
+    "stabilized", "seen", "known", "broken", "published", "ended",
+    "realized", "found", "conducted", "recorded", "detected", "confirmed",
+    "verified", "achieved", "documented", "isolated", "demonstrated",
+    "identified", "reported", "discovered", "analyzed", "tested", "been", "done",
+    "taken", "given", "written", "spoken", "left", "made", "become", "chosen",
+    "frozen", "risen", "flown", "drawn", "shaken", "worn", "built", "spent"
+}
+
+MODAL_AUXILIARY_WORDS = {
+    "should", "could", "would", "will", "can", "may", "might", "must", "shall"
+}
+CONTRACTED_MODAL_WORDS = {
+    "shouldn't", "couldn't", "wouldn't", "won't", "can't", "mightn't", "mustn't"
+}
+DO_AUXILIARY_WORDS = {"did", "do", "does"}
+CONTRACTED_DO_WORDS = {"didn't", "don't", "doesn't"}
+HAVE_AUXILIARY_WORDS = {"had", "have", "has"}
+CONTRACTED_HAVE_WORDS = {"hadn't", "haven't", "hasn't"}
+BE_AUXILIARY_WORDS = {"was", "were", "is", "are", "am"}
+CONTRACTED_BE_WORDS = {"wasn't", "weren't", "isn't", "aren't"}
+
+ALL_MODAL_WORDS = MODAL_AUXILIARY_WORDS | CONTRACTED_MODAL_WORDS
+ALL_DO_WORDS = DO_AUXILIARY_WORDS | CONTRACTED_DO_WORDS
+ALL_HAVE_WORDS = HAVE_AUXILIARY_WORDS | CONTRACTED_HAVE_WORDS
+ALL_BE_WORDS = BE_AUXILIARY_WORDS | CONTRACTED_BE_WORDS
+ALL_AUXILIARY_WORDS = ALL_MODAL_WORDS | ALL_DO_WORDS | ALL_HAVE_WORDS | ALL_BE_WORDS
+
+NON_THIRD_SINGULAR_SUBJECT_WORDS = {
+    "i", "you", "we", "they", "researchers", "scientists", "students", "people",
+    "samples", "specimens", "reviewers", "critics", "observers", "participants"
+}
+
+COMMON_BASE_VERBS = {
+    "open", "leave", "win", "see", "know", "be", "have", "enter", "go",
+    "come", "take", "give", "make", "find", "tell", "ask", "seem", "feel",
+    "try", "call", "walk", "speak", "witness", "observe", "realize", "expect",
+    "stabilize", "discard", "test", "analyze", "identify", "report", "discover",
+    "break", "begin", "start", "stop", "check", "verify", "admit", "deny",
+    "ignore", "compromise", "fail", "cause", "occur", "accept", "reject",
+    "permit", "allow", "require", "demand", "justify", "indicate", "suspect",
+    "raise", "encounter", "produce", "alter", "suppress", "record", "publish",
+    "demonstrate", "conclude", "suggest", "prove", "calibrate", "operate", "deliver"
+}
+
+
+def detect_negative_inversion_structural(sentence: str, allow_contracted: bool = False) -> tuple[bool, dict[str, Any]]:
+    """Separates structural inversion detection from full grammaticality validation.
+    Checks whether a sentence exhibits structural inversion word order following an initial
+    negative or limiting adverbial trigger (Trigger + Auxiliary + Subject).
     """
+    clean = re.sub(r"^[A-Da-d][\).:]\s*", "", sentence.strip())
+    triggers = [
+        r"under no circumstances",
+        r"not only",
+        r"seldom",
+        r"rarely",
+        r"never(?:\s+(?:before|again|in\s+my\s+life))?",
+        r"hardly",
+        r"scarcely",
+        r"barely",
+        r"no sooner",
+        r"at no point",
+        r"at no time",
+        r"on no account",
+        r"in no way",
+        r"little",
+        r"not until\s+.*?(?=\b(?:did|had|was|were|could|should|would|will|can|is|are|do|does)\b)",
+        r"only\s+(?:when|after|if|by)\s+.*?(?=\b(?:did|had|was|were|could|should|would|will|can|is|are|do|does)\b)",
+        r"only\s+then",
+    ]
+    matched_trigger = None
+    after_trigger = ""
+    for trig in triggers:
+        m = re.match(rf"^{trig}\b\s*(?:,\s*)?", clean, re.IGNORECASE)
+        if m:
+            matched_trigger = m.group(0).strip().rstrip(",").strip()
+            after_trigger = clean[m.end():].strip()
+            break
+
+    if not matched_trigger:
+        return False, {"rejection_reason": "No initial negative or limiting adverbial trigger found"}
+
+    tokens = after_trigger.split()
+    if not tokens:
+        return False, {"trigger": matched_trigger, "rejection_reason": "Empty clause following negative adverbial"}
+
+    first_token = tokens[0].lower().strip(",.")
+    if first_token not in ALL_AUXILIARY_WORDS:
+        if first_token in {"we", "they", "i", "he", "she", "it", "you", "the", "a", "an", "researchers", "scientists", "students", "people"}:
+            return False, {
+                "trigger": matched_trigger,
+                "rejection_reason": "Uninverted word order: subject precedes auxiliary after negative adverbial"
+            }
+        return False, {
+            "trigger": matched_trigger,
+            "rejection_reason": f"Illegal lexical verb '{first_token}' in inversion position: negative inversion requires auxiliary-subject inversion"
+        }
+
+    auxiliary = first_token
+    remainder = tokens[1:]
+    if not remainder:
+        return False, {
+            "trigger": matched_trigger,
+            "auxiliary": auxiliary,
+            "rejection_reason": "Missing subject and predicate following auxiliary"
+        }
+
+    rem0_clean = remainder[0].lower().strip(",.")
+    is_rem0_verb = (
+        rem0_clean in COMMON_BASE_VERBS
+        or rem0_clean in IRREGULAR_PAST_VERBS
+        or rem0_clean in IRREGULAR_PAST_PARTICIPLES
+        or rem0_clean == "to"
+        or (rem0_clean.endswith("ing") and rem0_clean not in {"building", "meeting", "morning", "training", "warning", "shipping", "ceiling"})
+        or (rem0_clean.endswith("ed") and rem0_clean not in {"pressurized", "untreated", "automated", "qualified", "preliminary", "unauthorized"})
+    )
+    if is_rem0_verb:
+        misplaced_subj = [w for w in remainder[1:] if w.lower().strip(",.") in {"we", "they", "i", "he", "she", "it", "you"}]
+        if misplaced_subj:
+            return False, {
+                "trigger": matched_trigger,
+                "auxiliary": auxiliary,
+                "rejection_reason": f"Misplaced subject '{misplaced_subj[0]}' following verb '{rem0_clean}' in inverted clause"
+            }
+        return False, {
+            "trigger": matched_trigger,
+            "auxiliary": auxiliary,
+            "rejection_reason": f"Missing subject in inverted clause: auxiliary '{auxiliary}' followed directly by verb '{rem0_clean}'"
+        }
+
+    subject_tokens = []
+    if rem0_clean in {"i", "you", "he", "she", "it", "we", "they", "one", "anyone", "anybody", "someone", "somebody", "everyone", "everybody"}:
+        subject_tokens = [remainder[0]]
+        predicate_tokens = remainder[1:]
+    elif rem0_clean in {"the", "a", "an", "this", "that", "these", "those", "each", "every", "all", "both", "many", "several", "some", "few", "no", "any", "neither", "either"}:
+        subject_tokens = [remainder[0]]
+        idx = 1
+        while idx < len(remainder):
+            w = remainder[idx].lower().strip(",.")
+            if w in ALL_AUXILIARY_WORDS or w == "to":
+                break
+            if w in {"ever", "never", "always", "really", "actually", "fully", "previously", "already", "even", "simply", "truly", "clearly", "directly", "also", "still"} or (w.endswith("ly") and w not in {"likely", "friendly", "lonely", "lovely", "daily", "early"}):
+                break
+            if idx >= 2 and (
+                w in COMMON_BASE_VERBS
+                or w in IRREGULAR_PAST_VERBS
+                or w in IRREGULAR_PAST_PARTICIPLES
+                or (w.endswith("ed") and w not in {"pressurized", "untreated", "automated", "qualified", "preliminary", "unauthorized"})
+            ):
+                break
+            subject_tokens.append(remainder[idx])
+            idx += 1
+            if len(subject_tokens) >= 5:
+                break
+        predicate_tokens = remainder[idx:]
+    else:
+        idx = 1
+        subject_tokens = [remainder[0]]
+        while idx < len(remainder):
+            w = remainder[idx].lower().strip(",.")
+            if w in ALL_AUXILIARY_WORDS or w == "to":
+                break
+            if w in {"ever", "never", "always", "really", "actually", "fully", "previously", "already", "even", "simply", "truly", "clearly", "directly", "also", "still"} or (w.endswith("ly") and w not in {"likely", "friendly", "lonely", "lovely", "daily", "early"}):
+                break
+            if w in COMMON_BASE_VERBS or w in IRREGULAR_PAST_VERBS or w in IRREGULAR_PAST_PARTICIPLES:
+                break
+            if w.endswith("ed") and w not in {"pressurized", "untreated", "automated", "qualified", "preliminary", "unauthorized"}:
+                break
+            subject_tokens.append(remainder[idx])
+            idx += 1
+            if len(subject_tokens) >= 4:
+                break
+        predicate_tokens = remainder[idx:]
+
+    subject = " ".join(subject_tokens).strip(",.")
+    predicate = " ".join(predicate_tokens)
+
+    return True, {
+        "trigger": matched_trigger,
+        "auxiliary": auxiliary,
+        "subject": subject,
+        "predicate": predicate,
+        "predicate_tokens": predicate_tokens
+    }
+
+
+def validate_negative_inversion_grammaticality(sentence: str, allow_contracted: bool = False) -> NegativeInversionValidationResult:
+    """Validates negative inversion syntax and full verb phrase grammaticality."""
+    is_struct, info = detect_negative_inversion_structural(sentence, allow_contracted=allow_contracted)
+    if not is_struct:
+        return NegativeInversionValidationResult(
+            is_structural_inversion=False,
+            is_grammatically_valid=False,
+            verdict="INVALID",
+            rejection_reason=info.get("rejection_reason"),
+            trigger=info.get("trigger"),
+            auxiliary=info.get("auxiliary")
+        )
+
+    trigger = info["trigger"]
+    auxiliary = info["auxiliary"]
+    subject = info["subject"]
+    predicate = info["predicate"]
+    predicate_tokens = info["predicate_tokens"]
+
+    if not allow_contracted and auxiliary in (CONTRACTED_MODAL_WORDS | CONTRACTED_DO_WORDS | CONTRACTED_HAVE_WORDS | CONTRACTED_BE_WORDS):
+        return NegativeInversionValidationResult(
+            is_structural_inversion=True,
+            is_grammatically_valid=False,
+            verdict="INVALID",
+            trigger=trigger,
+            auxiliary=auxiliary,
+            subject=subject,
+            verb_phrase=predicate,
+            rejection_reason=f"Contracted negative auxiliary '{auxiliary}' is not accepted in formal academic negative inversion"
+        )
+
+    if not predicate_tokens:
+        return NegativeInversionValidationResult(
+            is_structural_inversion=True,
+            is_grammatically_valid=False,
+            verdict="INVALID",
+            trigger=trigger,
+            auxiliary=auxiliary,
+            subject=subject,
+            rejection_reason="Missing predicate verb phrase following subject"
+        )
+
+    pred_first = predicate_tokens[0].lower().strip(",.")
+
+    # Illegal extra infinitive marker 'to'
+    if pred_first == "to":
+        return NegativeInversionValidationResult(
+            is_structural_inversion=True,
+            is_grammatically_valid=False,
+            verdict="INVALID",
+            trigger=trigger,
+            auxiliary=auxiliary,
+            subject=subject,
+            verb_phrase=predicate,
+            rejection_reason=f"Illegal extra infinitive marker 'to' following auxiliary '{auxiliary}'"
+        )
+
+    # Duplicate or misplaced auxiliary / modal
+    if pred_first in ALL_MODAL_WORDS or pred_first in ALL_DO_WORDS:
+        return NegativeInversionValidationResult(
+            is_structural_inversion=True,
+            is_grammatically_valid=False,
+            verdict="INVALID",
+            trigger=trigger,
+            auxiliary=auxiliary,
+            subject=subject,
+            verb_phrase=predicate,
+            rejection_reason=f"Illegal duplicate or misplaced auxiliary/modal '{pred_first}' following auxiliary '{auxiliary}'"
+        )
+    clean = re.sub(r"^[A-Da-d][\).:]\s*", "", sentence.strip())
+    clean_s = f" {clean.lower()} "
+    if trigger.lower() in {"scarcely", "hardly", "barely"} and " than " in clean_s:
+        return NegativeInversionValidationResult(
+            is_structural_inversion=True,
+            is_grammatically_valid=False,
+            verdict="INVALID",
+            trigger=trigger,
+            auxiliary=auxiliary,
+            subject=subject,
+            verb_phrase=predicate,
+            rejection_reason=f"Correlative conjunction discord: '{trigger}' cannot take 'than' (requires 'when' or 'before')"
+        )
+
+    if any(tok.lower().strip(",.") in {"not", "never"} for tok in predicate_tokens):
+        return NegativeInversionValidationResult(
+            is_structural_inversion=True,
+            is_grammatically_valid=False,
+            verdict="INVALID",
+            trigger=trigger,
+            auxiliary=auxiliary,
+            subject=subject,
+            verb_phrase=predicate,
+            rejection_reason=f"Illicit double negative: negative adverbial '{trigger}' cannot take duplicate negative marker in clause"
+        )
+
+    verb_idx = 0
+    adverb_words = {
+        "ever", "never", "always", "really", "actually", "fully", "previously",
+        "already", "even", "simply", "truly", "clearly", "directly", "also", "still"
+    }
+    while verb_idx < len(predicate_tokens):
+        w = predicate_tokens[verb_idx].lower().strip(",.")
+        if w in adverb_words or (w.endswith("ly") and w not in {"likely", "friendly", "lonely", "lovely", "daily", "early"}):
+            verb_idx += 1
+            continue
+        break
+
+    if verb_idx >= len(predicate_tokens):
+        return NegativeInversionValidationResult(
+            is_structural_inversion=True,
+            is_grammatically_valid=False,
+            verdict="INVALID",
+            trigger=trigger,
+            auxiliary=auxiliary,
+            subject=subject,
+            verb_phrase=predicate,
+            rejection_reason="Missing predicate verb phrase following adverb(s)"
+        )
+
+    pred_verb = predicate_tokens[verb_idx].lower().strip(",.")
+
+    # Modal auxiliary validation
+    if auxiliary in ALL_MODAL_WORDS:
+        if pred_verb.endswith("ing") and pred_verb != "bring":
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Modal auxiliary '{auxiliary}' cannot be followed directly by present participle '{pred_verb}' (-ing)"
+            )
+        if pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Modal auxiliary '{auxiliary}' cannot be followed by 3rd-person inflected verb '{pred_verb}' (requires bare infinitive)"
+            )
+        if pred_verb in IRREGULAR_PAST_VERBS:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Modal auxiliary '{auxiliary}' cannot be followed by past tense form '{pred_verb}' (requires bare infinitive)"
+            )
+        if pred_verb.endswith("ed") and pred_verb not in {"need", "feed", "bleed", "proceed", "succeed"}:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Modal auxiliary '{auxiliary}' cannot be followed directly by -ed inflected form '{pred_verb}' without auxiliary copula (requires bare infinitive)"
+            )
+
+    # Do-support validation
+    elif auxiliary in ALL_DO_WORDS:
+        if pred_verb.endswith("ing") and pred_verb != "bring":
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Do-support auxiliary '{auxiliary}' cannot be followed by present participle '{pred_verb}' (-ing)"
+            )
+        if pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Do-support auxiliary '{auxiliary}' requires base verb form, not 3rd-person singular inflected '{pred_verb}'"
+            )
+        if pred_verb in IRREGULAR_PAST_VERBS:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Do-support auxiliary '{auxiliary}' requires base verb form, not past tense '{pred_verb}'"
+            )
+        if pred_verb.endswith("ed") and pred_verb not in {"need", "feed", "bleed", "proceed", "succeed"}:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Do-support auxiliary '{auxiliary}' requires base verb form, not -ed inflected '{pred_verb}'"
+            )
+        subj_clean = subject.lower().split()[-1]
+        if auxiliary == "does" and subj_clean in NON_THIRD_SINGULAR_SUBJECT_WORDS:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Subject-verb agreement discord: 'does' cannot take subject '{subject}'"
+            )
+        if auxiliary == "do" and subj_clean in {"he", "she", "it"}:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Subject-verb agreement discord: 'do' cannot take 3rd-person singular subject '{subject}'"
+            )
+
+    # Have-aspect validation
+    elif auxiliary in ALL_HAVE_WORDS:
+        if pred_verb in COMMON_BASE_VERBS and pred_verb not in IRREGULAR_PAST_PARTICIPLES:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Have-aspect auxiliary '{auxiliary}' requires past participle form, not base form '{pred_verb}'"
+            )
+        if pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Have-aspect auxiliary '{auxiliary}' requires past participle form, not 3rd-person '{pred_verb}'"
+            )
+        subj_clean = subject.lower().split()[-1]
+        if auxiliary == "has" and subj_clean in NON_THIRD_SINGULAR_SUBJECT_WORDS:
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="INVALID",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Subject-verb agreement discord: 'has' cannot take subject '{subject}'"
+            )
+        if not (pred_verb.endswith("ed") or pred_verb in IRREGULAR_PAST_PARTICIPLES or pred_verb == "been"):
+            return NegativeInversionValidationResult(
+                is_structural_inversion=True,
+                is_grammatically_valid=False,
+                verdict="UNCERTAIN",
+                trigger=trigger,
+                auxiliary=auxiliary,
+                subject=subject,
+                verb_phrase=predicate,
+                rejection_reason=f"Inconclusive deterministic verification of participle form '{pred_verb}' following have-aspect auxiliary"
+            )
+
+    return NegativeInversionValidationResult(
+        is_structural_inversion=True,
+        is_grammatically_valid=True,
+        verdict="VALID",
+        trigger=trigger,
+        auxiliary=auxiliary,
+        subject=subject,
+        verb_phrase=predicate
+    )
+
+
+def detect_negative_inversion_syntax(sentence: str, allow_contracted: bool = False, version: str = "v2.5") -> bool:
+    """Detects whether a sentence exhibits negative/limiting auxiliary inversion.
+    If version is >= v2.6, uses full grammaticality validation.
+    If version is < v2.6, preserves historical v2.5 regex matching.
+    """
+    if version != "v2.5":
+        m_v = re.search(r"v?(\d+)\.(\d+)", version)
+        if m_v and (int(m_v.group(1)), int(m_v.group(2))) >= (2, 6):
+            res = validate_negative_inversion_grammaticality(sentence, allow_contracted=allow_contracted)
+            return res.is_grammatically_valid
+
     clean = re.sub(r"^[A-Da-d][\).:]\s*", "", sentence.strip())
     triggers = [
         r"under no circumstances",
@@ -407,7 +918,7 @@ def detect_negative_inversion_syntax(sentence: str, allow_contracted: bool = Fal
             if aux_word in {"could", "couldn't", "should", "shouldn't", "would", "wouldn't", "did", "didn't", "do", "don't", "does", "doesn't", "will", "won't", "can", "can't", "might", "must", "mustn't"}:
                 first_verb = after_subject.split()[0] if after_subject.split() else ""
                 if first_verb.endswith("ing"):
-                    return False  # Ungrammatical participle after modal auxiliary
+                    return False
             return True
     return False
 
@@ -436,6 +947,103 @@ def detect_contracted_negative_inversion(sentence: str) -> bool:
         if re.search(pattern, clean, re.IGNORECASE):
             return True
     return False
+
+
+ADVERBIAL_TRIGGERS = [
+    r"under no circumstances",
+    r"not only",
+    r"seldom",
+    r"rarely",
+    r"never(?:\s+before|\s+again)?",
+    r"hardly",
+    r"scarcely",
+    r"barely",
+    r"no sooner",
+    r"at no point",
+    r"at no time",
+    r"on no account",
+    r"in no way",
+    r"little(?:\s+did)?",
+    r"not until",
+    r"it (?:was|is)",
+    r"what",
+    r"the reason why",
+]
+
+FUNCTIONAL_STOP_WORDS = {
+    "the", "a", "an", "and", "or", "but", "if", "then", "else", "when",
+    "at", "by", "for", "from", "in", "into", "of", "off", "on", "onto",
+    "out", "over", "to", "up", "with", "as", "is", "was", "are", "were",
+    "be", "been", "being", "have", "has", "had", "do", "does", "did",
+    "will", "would", "shall", "should", "may", "might", "must", "can",
+    "could", "not", "no", "nor", "it", "its", "they", "them", "their",
+    "we", "us", "our", "you", "your", "he", "him", "his", "she", "her",
+    "this", "that", "these", "those", "which", "who", "whom", "whose",
+    "what", "where", "why", "how", "all", "any", "both", "each", "few",
+    "more", "most", "other", "some", "such", "than", "too", "very",
+    "before", "after", "during", "while"
+}
+
+
+def extract_substantive_tokens(text: str) -> set[str]:
+    """Strips compulsory grammatical triggers and functional stop words, returning substantive carrier content words."""
+    t = text.lower()
+    for trig in ADVERBIAL_TRIGGERS:
+        t = re.sub(rf"^{trig}\b\s*(?:,\s*)?", "", t)
+    words = re.findall(r"\b[a-z]{3,}\b", t)
+    return {w for w in words if w not in FUNCTIONAL_STOP_WORDS}
+
+
+def check_content_aware_novelty(
+    prompt: str,
+    options: list[Any],
+    rule_pack_examples: list[str] | None
+) -> tuple[float, str, dict[str, Any]]:
+    """Evaluates content-aware novelty separating compulsory rule patterns from carrier sentence content.
+    Returns (score, status, metadata):
+    - score: 1.0 (novel), 0.0 (copied), or float('nan') (unknown)
+    - status: 'NOVEL', 'EXACT_COPY', 'SUBSTANTIVE_NEAR_DUPLICATE', or 'UNKNOWN'
+    """
+    if not rule_pack_examples:
+        return float("nan"), "UNKNOWN", {"reason": "No rule pack examples provided"}
+
+    texts_to_check = [prompt]
+    for opt in options:
+        opt_text = opt.get("text", "") if isinstance(opt, dict) else str(opt)
+        clean_opt = re.sub(r"^[A-Da-d][\).:]\s*", "", opt_text).strip()
+        texts_to_check.append(clean_opt)
+
+    for ex in rule_pack_examples:
+        ex_clean = ex.strip().lower()
+        ex_substantive = extract_substantive_tokens(ex)
+
+        for t in texts_to_check:
+            t_clean = t.strip().lower()
+
+            # Exact verbatim match
+            if ex_clean == t_clean:
+                return 0.0, "EXACT_COPY", {"matched_example": ex, "item_text": t}
+
+            t_substantive = extract_substantive_tokens(t)
+            if not t_substantive:
+                continue
+
+            intersection = ex_substantive & t_substantive
+            if not intersection:
+                continue
+
+            overlap_ratio = len(intersection) / len(t_substantive)
+            ex_overlap = len(intersection) / len(ex_substantive) if ex_substantive else 0
+
+            # If 2 or more substantive carrier content words match and overlap >= 0.50
+            if len(intersection) >= 2 and (overlap_ratio >= 0.50 or ex_overlap >= 0.50):
+                return 0.0, "SUBSTANTIVE_NEAR_DUPLICATE", {
+                    "matched_example": ex,
+                    "shared_tokens": sorted(list(intersection)),
+                    "overlap_ratio": round(overlap_ratio, 4)
+                }
+
+    return 1.0, "NOVEL", {"details": "No substantive carrier content overlap with rule pack examples"}
 
 
 def detect_it_cleft_syntax(sentence: str) -> dict:

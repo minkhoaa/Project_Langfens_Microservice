@@ -1,0 +1,67 @@
+{
+  "manifest_id": "confirmatory_holdout_manifest_v1_0",
+  "status": "SPECIFICATION_PENDING_INDEPENDENT_CURATION",
+  "prepared_at": "2026-10-16T12:30:00Z",
+  "governing_document": "generation_baseline/research/CONFIRMATORY_HOLDOUT_SPECIFICATION.md",
+  "protocol": "RQ2_FROZEN_CONCURRENT_EVALUATION",
+  "specification_notes": "Defines holdout quotas and disjoint source families. Item-level curation, packaging, and cryptographic hashing must be performed independently by an external panel prior to unsealing. Seals and attestations remain null until real curated content is hashed to prevent fabricating holdout integrity.",
+  "security_invariants": {
+    "zero_developer_inspection_of_curated_content": true,
+    "zero_prompt_tuning_leakage": true,
+    "zero_evaluator_calibration_leakage": true,
+    "quarantined_disjoint_source_families": true,
+    "unsealing_condition": "MANDATORY_EXTERNAL_EVIDENCE_READY_AND_HUMAN_PANEL_ONBOARDED"
+  },
+  "source_families": [
+    {
+      "source_family_id": "fam-astrophysics-pulsar-08",
+      "domain": "READING",
+      "topic": "Millisecond Pulsar Magnetospheres & Relativistic Plasma",
+      "target_items_count": 9,
+      "quarantine_status": "RESERVED_QUARANTINED"
+    },
+    {
+      "source_family_id": "fam-paleontology-cambrian-09",
+      "domain": "READING",
+      "topic": "Burgess Shale Arthropod Radiation & Taphonomy",
+      "target_items_count": 9,
+      "quarantine_status": "RESERVED_QUARANTINED"
+    },
+    {
+      "source_family_id": "fam-mood-subjunctive-08",
+      "domain": "GRAMMAR",
+      "topic": "Mandative Subjunctive in Formal/Legal Registers",
+      "target_items_count": 6,
+      "quarantine_status": "RESERVED_QUARANTINED"
+    },
+    {
+      "source_family_id": "fam-aspect-participle-09",
+      "domain": "GRAMMAR",
+      "topic": "Reduced Participle Clauses and Adverbial Qualification",
+      "target_items_count": 6,
+      "quarantine_status": "RESERVED_QUARANTINED"
+    }
+  ],
+  "target_item_count": 30,
+  "reading_stratum": {
+    "target_questions": 18,
+    "planned_distribution": {
+      "TRUE": 6,
+      "FALSE": 6,
+      "NOT GIVEN": 6
+    }
+  },
+  "grammar_stratum": {
+    "target_questions": 12,
+    "planned_distribution": {
+      "mandative_subjunctive": 6,
+      "reduced_participle_clauses": 6
+    }
+  },
+  "cryptographic_seals": {
+    "reading_corpus_sha256": null,
+    "grammar_rule_packs_sha256": null,
+    "manifest_integrity_sha256": null,
+    "status": "PENDING_INDEPENDENT_EXTERNAL_CURATION"
+  }
+}

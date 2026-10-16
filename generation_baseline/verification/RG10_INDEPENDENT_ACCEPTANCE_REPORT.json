@@ -1,0 +1,180 @@
+{
+  "report_id": "rg10_independent_acceptance_report_v2_6",
+  "generated_at": "2026-10-16T12:55:00Z",
+  "evaluator_version": "neutral-eval-v2.6",
+  "rubric_version": "rubric-qgeval-v2.6",
+  "governing_protocol": "generation_baseline/research/RQ2_PROTOCOL.md",
+  "runtime_environment": {
+    "local_python_version": "Python 3.10.12",
+    "production_container_target": "Python 3.12",
+    "dotnet_sdk_version": ".NET 10.0"
+  },
+  "gate_status": {
+    "software_ready": "QUALIFIED_PASS_PREREQUISITE_LIMITED",
+    "quality_ready": "QUALIFIED_DEV_READY",
+    "research_ready": "HOLD",
+    "overall_gate_verdict": "HOLD"
+  },
+  "test_execution_disclosure": {
+    "passed_tests": 1084,
+    "skipped_tests": 33,
+    "deselected_tests": 1,
+    "failed_tests": 1,
+    "failure_details": "test_t14_harness_integration.py failed due to missing live PostgreSQL instance on port 5433 (infrastructure integration prerequisite); unit/evaluator test suites pass 100% deterministically",
+    "dotnet_attempt_service_tests_passed": 73,
+    "independent_acceptance_tests_passed": 26
+  },
+  "accounting_and_provider_status": {
+    "live_dispatches_executed": 28,
+    "tokens_consumed": 40279,
+    "estimated_spend_usd": 0.0604,
+    "subsequent_quota_status": "BLOCKED_EXTERNAL_QUOTA",
+    "provider_response_code": "HTTP 429: Token Plan usage limit reached (2056)",
+    "offline_verification_policy": "STRICT_OFFLINE_NO_UNAUTHORIZED_LIVE_CALLS"
+  },
+  "historical_grammar_audit": {
+    "source_campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+    "audit_type": "ANALYTICAL_LINGUISTIC_AUDIT_NON_HUMAN_GOLD",
+    "total_items": 6,
+    "unique_items": 5,
+    "v2_5_prediction_pass_count": 1,
+    "v2_5_prediction_pass_rate": 0.1667,
+    "analytical_linguistic_valid_count": 5,
+    "analytical_linguistic_valid_rate": 0.8333,
+    "v2_6_prediction_pass_count": 5,
+    "v2_6_prediction_pass_rate": 0.8333,
+    "evaluator_false_rejections_v2_5": 5,
+    "evaluator_false_acceptances_v2_5": 1,
+    "evaluator_false_rejections_v2_6": 0,
+    "evaluator_false_acceptances_v2_6": 0
+  },
+  "fresh_grammar_audit": {
+    "source_campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+    "audit_type": "ANALYTICAL_LINGUISTIC_AUDIT_NON_HUMAN_GOLD",
+    "total_slots": 12,
+    "unique_items": 9,
+    "families": [
+      "fam-syntax-inversion-dev-06",
+      "fam-syntax-subjunctive-dev-06"
+    ],
+    "analytical_linguistic_valid_count": 12,
+    "v2_6_prediction_pass_count": 12,
+    "v2_6_prediction_pass_rate": 1.0,
+    "carrier_novelty_rate": 1.0
+  },
+  "dev_acceptance_suite": {
+    "description": "25 internal exploratory DEV acceptance cases used for diagnostic boundary testing across 5 grammar families (not a confirmatory holdout)",
+    "total_items": 25,
+    "denominators": {
+      "analytical_valid_denominator": 15,
+      "analytical_invalid_denominator": 10,
+      "total_items_denominator": 25
+    },
+    "confusion_matrix": {
+      "true_positives": 13,
+      "false_rejections": 2,
+      "true_negatives": 8,
+      "false_acceptances": 2,
+      "abstentions": 0
+    },
+    "metrics": {
+      "false_rejection_rate": 0.1333,
+      "false_acceptance_rate": 0.2000,
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "accuracy": 0.8400
+    },
+    "epistemic_qualification": "Because these 25 items were used to diagnose boundary defects, this 84.0% result constitutes exploratory DEV evidence, NOT independent confirmatory gold",
+    "discrepancies": [
+      {
+        "id": "INV-DEV-02",
+        "family": "Inversion",
+        "analytical_label": "VALID",
+        "prediction": "FAIL",
+        "discrepancy_type": "FALSE_REJECTION",
+        "cause": "Naive '-s' inflection heuristic treated base verb 'bypass' (ending in '-ss') as 3rd-person inflected verb"
+      },
+      {
+        "id": "CND-DEV-01",
+        "family": "Conditionals",
+        "analytical_label": "VALID",
+        "prediction": "FAIL",
+        "discrepancy_type": "FALSE_REJECTION",
+        "cause": "Evaluator conditional regex accepted non-inverted 'If' distractor as valid, declaring distractor ambiguity"
+      },
+      {
+        "id": "SUB-DEV-04",
+        "family": "Subjunctive",
+        "analytical_label": "INVALID",
+        "prediction": "PASS",
+        "discrepancy_type": "FALSE_ACCEPTANCE",
+        "cause": "Evaluator failed to detect multi-option base form ambiguity when mandative triggers were omitted from the prompt"
+      },
+      {
+        "id": "SUB-DEV-05",
+        "family": "Subjunctive",
+        "analytical_label": "INVALID",
+        "prediction": "PASS",
+        "discrepancy_type": "FALSE_ACCEPTANCE",
+        "cause": "Prompt used adjective 'mandative' without base trigger 'mandate', bypassing mandative validator"
+      }
+    ]
+  },
+  "reading_reconciliation": {
+    "source_campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+    "total_reading_slots": 9,
+    "unique_items": 8,
+    "failures": [
+      {
+        "assignment_id": "dev-reading-volcanism-06__arm_A__att1",
+        "question_id": "3",
+        "prompt": "Pyroclastic fragmentation occurs in deep benthic environments due to high hydrostatic pressure.",
+        "proposed_answer": "FALSE",
+        "original_verdict": "FAIL",
+        "original_rationale": "FALSE contradiction: passage affirms proposition without contradiction",
+        "root_cause_classification": "EVALUATOR_DEFECT",
+        "analysis": "Passage states pressure prevents fragmentation; proposition is legitimately FALSE; evaluator missed negative polarity marker 'preventing'",
+        "corrected_derived_verdict": "PASS"
+      },
+      {
+        "assignment_id": "dev-reading-volcanism-06__arm_B__att1",
+        "question_id": "3",
+        "prompt": "Pyroclastic fragmentation is common in deep benthic environments.",
+        "proposed_answer": "FALSE",
+        "original_verdict": "FAIL",
+        "original_rationale": "FALSE contradiction: passage affirms proposition without contradiction",
+        "root_cause_classification": "EVALUATOR_DEFECT",
+        "analysis": "Passage states fragmentation is prevented; statement is legitimately FALSE; evaluator failed on contradiction detection",
+        "corrected_derived_verdict": "PASS"
+      },
+      {
+        "assignment_id": "dev-reading-volcanism-06__arm_C__att1",
+        "question_id": "2",
+        "prompt": "TRUE, FALSE or NOT GIVEN: Pillow lava forms when basaltic magma erupts into seawater at depths exceeding 200 atmospheres.",
+        "proposed_answer": "TRUE",
+        "original_verdict": "FAIL",
+        "original_rationale": "Entailment contradiction: passage contradicts TRUE statement",
+        "root_cause_classification": "GENERATOR_DEFECT_AND_INSUFFICIENT_PASSAGE_SUPPORT",
+        "analysis": "Generator conflated hydrostatic pressure unit (200 atmospheres) with ocean depth; passage does not support that pillow lava forms exclusively at that depth; statement is NOT GIVEN/ungrounded; evaluator FAIL verdict is upheld on grounds of insufficient passage support",
+        "corrected_derived_verdict": "FAIL"
+      }
+    ]
+  },
+  "confirmatory_holdout": {
+    "manifest_path": "generation_baseline/research/CONFIRMATORY_HOLDOUT_MANIFEST.json",
+    "status": "SPECIFICATION_PENDING_INDEPENDENT_CURATION",
+    "target_item_count": 30,
+    "quarantined_families": [
+      "fam-astrophysics-pulsar-08",
+      "fam-paleontology-cambrian-09",
+      "fam-mood-subjunctive-08",
+      "fam-aspect-participle-09"
+    ],
+    "seals_status": "NULL_PENDING_REAL_CURATED_DATA_HASHING"
+  },
+  "human_review_readiness": {
+    "packet_path": "generation_baseline/research/HUMAN_REVIEW_PACKET.json",
+    "status": "AWAITING_HUMAN_PANEL",
+    "synthetic_scores_fabricated": false
+  }
+}

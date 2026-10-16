@@ -18,6 +18,7 @@ from app.evaluators.independent import (
     NeutralEvaluatorV2_3,
     NeutralEvaluatorV2_4,
     NeutralEvaluatorV2_5,
+    NeutralEvaluatorV2_6,
     parse_evaluator_version_tuple,
 )
 from app.evaluators.rubric import EvaluationVerdict, RubricDimension
@@ -31,6 +32,7 @@ def test_numeric_version_parsing():
     assert parse_evaluator_version_tuple("neutral-eval-v2.3") == (2, 3)
     assert parse_evaluator_version_tuple("neutral-eval-v2.4") == (2, 4)
     assert parse_evaluator_version_tuple("neutral-eval-v2.5") == (2, 5)
+    assert parse_evaluator_version_tuple("neutral-eval-v2.6") == (2, 6)
     assert parse_evaluator_version_tuple("neutral-eval-v2.10") == (2, 10)
     assert parse_evaluator_version_tuple("v3.1") == (3, 1)
     assert parse_evaluator_version_tuple("invalid") == (2, 0)
@@ -70,7 +72,11 @@ def test_evaluator_feature_gates():
     ev_v2_5 = NeutralEvaluatorV2_5(evaluator_version="neutral-eval-v2.5")
     assert ev_v2_5.is_v2_4_plus
     assert ev_v2_5.is_v2_5_plus
+    assert not ev_v2_5.is_v2_6_plus
 
+    ev_v2_6 = NeutralEvaluatorV2_6(evaluator_version="neutral-eval-v2.6")
+    assert ev_v2_6.is_v2_5_plus
+    assert ev_v2_6.is_v2_6_plus
 
 def test_grammar_option_cues_isolation():
     """Option cues: v2.0 fails (no handler), v2.1 fails (stem cue blindspot), v2.2+ passes."""

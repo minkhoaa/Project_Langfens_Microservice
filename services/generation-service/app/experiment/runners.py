@@ -117,9 +117,11 @@ _GENERATION_SYSTEM = (
     "For grammar tasks: use the single question_type matching the requested exercise_type "
     "(GRAMMAR_MCQ for MCQ_SINGLE, GRAMMAR_GAP for GAP_FILL, GRAMMAR_CORRECTION for ERROR_CORRECTION) across all questions. "
     "Generate novel carrier sentences derived from the GrammarRulePack rules; do NOT copy the rule pack's example sentences as final exercise items. "
-    "For single-answer MCQs, verify that exactly ONE option is grammatically correct and defensible under standard academic grammar. "
-    "Every incorrect option (distractor) MUST contain an unambiguous grammatical defect (such as subject-verb agreement discord, missing auxiliary/copula, or illegal word order); "
-    "do NOT create distractors merely by changing tense, aspect, or valid pronouns (e.g. 'is' vs 'was', 'that' vs 'which') if both variants remain standard English sentences. "
+    "For single-answer MCQs, verify that precisely ONE option is grammatically correct and defensible under standard academic grammar. "
+    "The question stem must accurately describe the target structure without making contradictory claims (e.g. do not ask for a 'do' auxiliary if the answer uses a modal auxiliary). "
+    "Every incorrect option (distractor) MUST contain an unambiguous grammatical defect under the target rule (such as subject-auxiliary uninverted order, illicit do-support before a modal, missing auxiliary/copula, extra infinitive markers, or agreement discord). "
+    "Distractors must be plausible, educationally useful candidate sentences representing common learner pitfalls; avoid simplistic distractors, fragments, or artificially malformed gibberish. "
+    "Cover the target GrammarRulePack family accurately (including negative inversion, cleft sentences, conditionals, subjunctive, participles, modals, and reporting passives). "
     "Randomize and balance the position of the correct answer among options A, B, C, and D to prevent first-option position bias. "
     "Never leak or quote the proposed answer in the question stem. For Grammar MCQs, every option must be a complete candidate sentence exemplifying the target structure, not bare noun phrases, single words, or fragments. "
     "Include proposed_answer privately on each question. Do not claim any proposed answer is verified gold. Do not emit scores or metadata."
@@ -128,30 +130,30 @@ _SYSTEMS = {
     "DIRECT_GENERATION_A": _GENERATION_SYSTEM,
     "DRAFT_GENERATION": _GENERATION_SYSTEM,
     "GENERATOR": _GENERATION_SYSTEM,
-    "BOUNDED_REVISION": _GENERATION_SYSTEM + " Revise the actual supplied draft using the critique. Ensure rule pack novelty, distractor validity, and strict factual grounding. You MUST include proposed_answer on each revised question matching its revised text.",
-    "REPAIR": _GENERATION_SYSTEM + " Repair the actual supplied candidate using the listed issues. Ensure novel carrier sentences, exactly one valid MCQ option, and strict source grounding. You MUST include proposed_answer on each repaired question matching its repaired text.",
+    "BOUNDED_REVISION": _GENERATION_SYSTEM + " Revise the actual supplied draft using the critique. Ensure rule pack carrier novelty, distractor validity (precisely ONE defensible option), stem-option alignment, and strict factual grounding. You MUST include proposed_answer on each revised question matching its revised text.",
+    "REPAIR": _GENERATION_SYSTEM + " Repair the actual supplied candidate using the listed issues. Ensure novel carrier sentences, exactly one valid MCQ option, stem constraint alignment, and strict source grounding. You MUST include proposed_answer on each repaired question matching its repaired text.",
     "SELF_CRITIQUE": (
-        'Critique the actual draft. Check for rule pack example copying, distractor ambiguity (ensure only ONE option is a grammatically defensible sentence), tense discord, and Reading label balance (verify that TFNG includes TRUE, FALSE, and NOT GIVEN). Return raw JSON without markdown or code blocks: {"verdict":"APPROVED|REVISION_NEEDED|REJECTED",'
+        'Critique the actual draft. Check for rule pack example copying, distractor ambiguity (ensure precisely ONE option is a grammatically defensible sentence and all distractors contain unambiguous grammatical defects), stem-option constraint consistency, tense discord, and Reading label balance (verify that TFNG includes TRUE, FALSE, and NOT GIVEN). Return raw JSON without markdown or code blocks: {"verdict":"APPROVED|REVISION_NEEDED|REJECTED",'
         '"score":0.0,"issues":["blocking issue"]}. A self-score is not an external rubric verdict.'
     ),
     "REVIEWER": (
-        'Independently review source grounding, clarity, distractor validity, and answer uniqueness without a proposed answer key. '
-        'Reject any question where the prompt leaks the answer verbatim, where distractors contain multiple defensible choices (e.g. more than one grammatically standard sentence in an MCQ), or where options are fragments instead of full sentences. '
-        'For Grammar, verify that carrier sentences are novel (not copied from rule pack examples), that every option is a complete candidate sentence, and that exactly one option is grammatically defensible. '
+        'Independently review source grounding, clarity, distractor validity, stem constraint alignment, and answer uniqueness without a proposed answer key. '
+        'Reject any question where the prompt leaks the answer verbatim, where the stem specifies a constraint (e.g. specific auxiliary) that the correct option contradicts, where distractors contain multiple defensible choices (e.g. more than one grammatically standard sentence in an MCQ), or where options are fragments instead of full sentences. '
+        'For Grammar, verify that carrier sentences are novel (not copied from rule pack examples), that every option is a complete candidate sentence, and that precisely one option is grammatically defensible. '
         'For Reading, verify that TRUE/FALSE/NOT GIVEN statements are strictly grounded, and flag lack of NOT GIVEN diversity if all questions are binary TRUE/FALSE. '
         'Return raw JSON without markdown or code blocks: {"status":"APPROVED|REJECTED","issues":["blocking issue"]}. '
         'Use APPROVED only if no blocking issue remains.'
     ),
     "BLIND_SOLVER": (
         'Solve every supplied question independently using only its visible context. For MCQ provide option letter (or option text); for TFNG/YNNG use standard labels TRUE/FALSE/NOT GIVEN or YES/NO/NOT GIVEN; for fill-in-the-blank provide target words without full sentence repeats or discursive explanations. '
-        'If multiple options are grammatically defensible or if question is ambiguous/unsupported, flag ambiguous: true. '
+        'If multiple options are grammatically defensible or if question is ambiguous, stem contradicts options, or unsupported, flag ambiguous: true. '
         'Return raw JSON without markdown or code blocks: '
         '{"answers":[{"question_id":"id","answer":"answer","ambiguous":false}]}. '
         'No proposed answers or gold are provided.'
     ),
     "VALIDATOR": (
         'Check the source, candidate, independent review and blinded solve. Proposed answers are '
-        'unverified generator proposals, not gold. Reject disagreement, ambiguity, prompt answer leaks, bare non-sentence options for grammar MCQs, duplicate defensible MCQ options, '
+        'unverified generator proposals, not gold. Reject disagreement, ambiguity, stem-option constraint contradictions, prompt answer leaks, bare non-sentence options for grammar MCQs, duplicate defensible MCQ options, '
         'ungrounded Reading generalizations, or unresolved review issues. Return raw JSON without markdown or code blocks: {"accepted":true,"issues":["blocking issue"]}.'
     ),
 }
