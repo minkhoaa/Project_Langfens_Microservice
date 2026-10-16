@@ -198,3 +198,67 @@ class StandaloneGrammarRequest(CanonicalBaseModel):
                 f"Invalid task_type '{self.task.task_type}' for grammar unit. Expected 'GRAMMAR_EXERCISE'."
             )
         return self
+
+
+class ExperimentAssignment(CanonicalBaseModel):
+    """Experiment assignment mapping matching JSON_SCHEMAS.json#/$defs/ExperimentAssignment."""
+
+    assignment_id: str = Field(..., min_length=1)
+    dataset_item_id: str = Field(..., min_length=1)
+    configuration_id: Literal["A", "B", "C"]
+    attempt_number: int = Field(default=1, ge=1)
+    run_id: Optional[str] = Field(default=None)
+    result_ref: Optional[str] = Field(default=None)
+
+
+class PromptVersionMap(CanonicalBaseModel):
+    """Prompt versions for arms A, B, and C matching ExperimentManifest.prompt_versions."""
+
+    A: str = Field(..., min_length=1)
+    B: str = Field(..., min_length=1)
+    C: str = Field(..., min_length=1)
+
+
+class ExperimentManifest(CanonicalBaseModel):
+    """Frozen experiment manifest matching JSON_SCHEMAS.json#/$defs/ExperimentManifest."""
+
+    experiment_id: str = Field(..., min_length=1)
+    dataset_version: str = Field(..., min_length=1)
+    split: Literal["FINAL_EVAL"] = "FINAL_EVAL"
+    source_sha256: str = Field(..., pattern=r"^[0-9a-f]{64}$")
+    code_commit_sha: str = Field(..., min_length=1)
+    foundation_model_id: str = Field(..., min_length=1)
+    prompt_versions: PromptVersionMap
+    rubric_version: str = Field(..., min_length=1)
+    assignments: List[ExperimentAssignment] = Field(..., min_length=1)
+    primary_endpoint: str = Field(..., min_length=1)
+    analysis_plan_sha256: str = Field(..., pattern=r"^[0-9a-f]{64}$")
+
+
+class PairedTaskFixture(CanonicalBaseModel):
+    """Common task fixture paired across configurations A, B, and C."""
+
+    dataset_item_id: str = Field(..., min_length=1)
+    domain: Literal["READING", "GRAMMAR"]
+    source: SourceRef
+    foundation_model_id: str = Field(..., min_length=1)
+    prompt_versions: PromptVersionMap
+    rubric_version: str = Field(default="rubric-qgeval-v2.0", min_length=1)
+    reading_task: Optional[ReadingTask] = None
+    passage_text: Optional[str] = None
+    grammar_task: Optional[GrammarTask] = None
+    rule_pack: Optional[GrammarRulePack] = None
+
+    @model_validator(mode="after")
+    def validate_domain_payload(self) -> Self:
+        if self.domain == "READING":
+            if not self.reading_task:
+                raise ValueError("Reading domain requires reading_task")
+            if not self.passage_text or not self.passage_text.strip():
+                raise ValueError("Reading domain requires non-empty passage_text")
+        elif self.domain == "GRAMMAR":
+            if not self.grammar_task:
+                raise ValueError("Grammar domain requires grammar_task")
+            if not self.rule_pack:
+                raise ValueError("Grammar domain requires rule_pack")
+        return self

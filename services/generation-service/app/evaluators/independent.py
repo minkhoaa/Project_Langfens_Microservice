@@ -25,7 +25,18 @@ from app.contracts.solver import (
     scan_text_for_security_leaks,
 )
 from app.evaluators.deterministic import matches_exact_token_bound, normalize_text_nfkc
-from app.evaluators.semantic import detect_contradiction_in_text, detect_entailment_in_text
+from app.evaluators.semantic import (
+    compute_substantive_grounding_ratio,
+    detect_cleft_distractor_ambiguity,
+    detect_comparison_inversion,
+    detect_contradiction_in_text,
+    detect_contracted_negative_inversion,
+    detect_entailment_in_text,
+    detect_it_cleft_syntax,
+    detect_negation_polarity_conflict,
+    detect_negative_inversion_syntax,
+    detect_unsupported_generalization,
+)
 from app.evaluators.rubric import (
     CanonicalEvaluationResult,
     EvaluationVerdict,
@@ -95,6 +106,7 @@ class NeutralEvaluator:
         self.rubric = rubric or RubricProfile()
         self.evaluator_version = evaluator_version
 
+
     def evaluate_item(
         self,
         dataset_item_id: str,
@@ -150,6 +162,8 @@ class NeutralEvaluator:
             clean_q.get("evidence_quote")
             or clean_q.get("evidence")
             or clean_q.get("source_evidence_ref")
+            or (context_metadata.get("evidence_quote") if context_metadata else "")
+            or (context_metadata.get("evidence_span") if context_metadata else "")
             or ""
         ).strip()
         options = clean_q.get("options") or []
@@ -244,28 +258,227 @@ class NeutralEvaluator:
             task_validity["solver_view_leak_free"] = False
             task_issues.append(f"Security leakage in SolverView: {e}")
 
+        is_v2_2 = ("2.2" in self.evaluator_version or self.evaluator_version >= "neutral-eval-v2.2")
+        norm_proposed = normalize_solver_answer(proposed_ans, q_type)
+        is_tfng = "TFNG" in q_type or "TRUEFALSE" in q_type or "YNNG" in q_type or "YESNO" in q_type
+        contradiction_detected = False
+
         # Verify evidence grounding in passage
         passage_norm = normalize_text_nfkc(passage_text)
         evidence_in_passage = False
+        is_grammar = (
+            "GRAMMAR" in q_type
+            or (context_metadata and ("rule_pack" in context_metadata or context_metadata.get("is_grammar")))
+            or "grammar" in dataset_item_id.lower()
+        )
         if evidence_quote:
             evidence_clean = normalize_text_nfkc(evidence_quote)
             evidence_in_passage = evidence_clean.lower() in passage_norm.lower()
             task_validity["evidence_in_passage"] = evidence_in_passage
             if evidence_in_passage:
                 evidence_refs.append(evidence_quote[:100])
+                if is_v2_2:
+                    if not is_grammar:
+                        # Verify evidence quote relevance: prompt must share substantive content with cited quote
+                        prompt_words = {w.lower() for w in re.findall(r"\b[a-zA-Z]{4,}\b", prompt)} - {
+                            "statement", "according", "passage", "which", "following", "true", "false", "given"
+                        }
+                        quote_words = {w.lower() for w in re.findall(r"\b[a-zA-Z]{4,}\b", evidence_quote)}
+                        if prompt_words and not (prompt_words & quote_words):
+                            task_issues.append("Irrelevant evidence citation: cited evidence quote shares no substantive content with question prompt")
+                    if norm_proposed in ("TRUE", "YES"):
+                        has_neg_conflict, neg_msg = detect_negation_polarity_conflict(prompt, evidence_quote)
+                        has_comp_inversion = detect_comparison_inversion(prompt, evidence_quote)
+                        has_contra = detect_contradiction_in_text(prompt, evidence_quote)
+                        if has_neg_conflict or has_comp_inversion or has_contra:
+                            contradiction_detected = True
+                            task_issues.append(f"Entailment contradiction: cited evidence quote contradicts TRUE statement ({neg_msg or 'polarity/comparison conflict'})")
             else:
                 task_issues.append("Cited evidence quote not found in source passage")
+        elif is_grammar:
+            rule_pack = context_metadata.get("rule_pack") if context_metadata else None
+            if rule_pack is None:
+                # Fails grounding verification closed: cannot verify grammar grounding without authoritative rule pack
+                evidence_in_passage = False
+                task_validity["evidence_in_passage"] = False
+                task_issues.append("GrammarRulePack required for grammar grounding verification but not provided in context")
+            else:
+                # Real verification against the GrammarRulePack: check rule IDs, examples, or structural cues
+                rp_id = getattr(rule_pack, "rule_pack_id", "")
+                rule_ids = set(getattr(rule_pack, "rule_ids", []))
+                examples = [normalize_text_nfkc(ex).lower() for ex in getattr(rule_pack, "examples", [])]
+                topic = getattr(rule_pack, "topic", "").lower()
+                q_rule_ids = set(clean_q.get("rule_ids") or ([clean_q["rule_id"]] if "rule_id" in clean_q else []))
+                prompt_norm = normalize_text_nfkc(prompt).lower()
+                # In v2.2, also inspect options text for rule cues and examples
+                all_text_to_check = [prompt_norm]
+                if is_v2_2 and options:
+                    for opt in options:
+                        opt_str = opt.get("text") if isinstance(opt, dict) else str(opt)
+                        all_text_to_check.append(normalize_text_nfkc(opt_str).lower())
+
+                matches_rule_ids = bool(q_rule_ids and q_rule_ids.issubset(rule_ids))
+                matches_example = any(
+                    any(ex in txt or txt in ex for ex in examples)
+                    for txt in all_text_to_check
+                )
+                prompt_words = [w for w in re.sub(r"[^\w\s]", "", prompt_norm).split() if len(w) > 2]
+                matches_example_phrase = any(
+                    " ".join(prompt_words[i:i+3]) in ex
+                    for ex in examples
+                    for i in range(len(prompt_words) - 2)
+                ) if len(prompt_words) >= 3 else False
+                
+                # Inversion, cleft, and conditional cues from topic
+                topic_cues = []
+                if "inversion" in topic:
+                    topic_cues = [
+                        "seldom", "never", "under no circumstances", "rarely", "not only", "hardly", "scarcely",
+                        "at no point", "on no account", "were the", "had the", "should you", "not until",
+                        "at no time", "in no way", "little did", "only when", "only after", "should we", "were they", "had they"
+                    ]
+                elif "cleft" in topic:
+                    topic_cues = ["it was", "it is", "what ", "the reason why", "the thing that", "all that"]
+                elif "conditional" in topic:
+                    topic_cues = ["if ", "had the", "were the", "should the", "provided that", "unless"]
+                elif "passive" in topic or "reporting" in topic:
+                    topic_cues = ["is believed to", "are believed to", "is reported to", "are reported to", "is thought to", "are thought to", "is considered to"]
+                elif "modal" in topic:
+                    topic_cues = ["must have", "could have", "should have", "might have", "would have", "cannot have"]
+                matches_topic_cue = any(
+                    any(cue in txt for cue in topic_cues)
+                    for txt in all_text_to_check
+                ) if topic_cues else False
+                
+                if matches_rule_ids or matches_example or matches_example_phrase or matches_topic_cue:
+                    evidence_in_passage = True
+                    task_validity["evidence_in_passage"] = True
+                    evidence_refs.append(f"rule_pack:{rp_id}")
+                else:
+                    evidence_in_passage = False
+                    task_validity["evidence_in_passage"] = False
+                    task_issues.append(f"Question prompt does not exercise GrammarRulePack '{rp_id}'")
+
+                # In v2.2: Distractor validity and answer uniqueness check for Grammar MCQ
+                if is_v2_2 and options and "MCQ" in q_type:
+                    opt_texts = [
+                        o.get("text") if isinstance(o, dict) else str(o)
+                        for o in options
+                    ]
+                    # Duplicate option check
+                    norm_opts = [re.sub(r"^[A-Da-d][\).:]\s*", "", ot.strip()).lower() for ot in opt_texts]
+                    if len(set(norm_opts)) < len(norm_opts):
+                        task_issues.append("Defective MCQ: options contain duplicate choices")
+                        task_validity["unique_correct_answer"] = False
+
+                    if "inversion" in topic:
+                        valid_inversion_opts = [
+                            idx + 1 for idx, opt_t in enumerate(opt_texts)
+                            if detect_negative_inversion_syntax(opt_t, allow_contracted=False)
+                        ]
+                        contracted_inversion_opts = [
+                            idx + 1 for idx, opt_t in enumerate(opt_texts)
+                            if detect_contracted_negative_inversion(opt_t)
+                        ]
+                        is_neg_polarity_q = any(term in prompt_norm for term in ["incorrect", "does not", "fails to", "wrong"])
+                        if not is_neg_polarity_q:
+                            if len(valid_inversion_opts) > 1:
+                                task_issues.append(
+                                    f"Ambiguous MCQ: multiple options {valid_inversion_opts} exhibit valid negative inversion (distractor validity failure)"
+                                )
+                                task_validity["unique_correct_answer"] = False
+                            elif len(valid_inversion_opts) == 1 and contracted_inversion_opts:
+                                extra_contracted = set(contracted_inversion_opts) - set(valid_inversion_opts)
+                                if extra_contracted:
+                                    task_issues.append(
+                                        f"Contested MCQ: option {list(extra_contracted)} exhibits contracted negative auxiliary inversion syntax, creating distractor ambiguity"
+                                    )
+                                    task_validity["unique_correct_answer"] = False
+                                else:
+                                    task_validity["unique_correct_answer"] = True
+                            elif len(valid_inversion_opts) == 0:
+                                task_issues.append("Defective MCQ: no options exhibit valid negative inversion")
+                                task_validity["unique_correct_answer"] = False
+                            else:
+                                task_validity["unique_correct_answer"] = True
+                    elif "cleft" in topic:
+                        is_ambig, ambig_reason = detect_cleft_distractor_ambiguity(opt_texts)
+                        if is_ambig:
+                            task_issues.append(ambig_reason)
+                            task_validity["unique_correct_answer"] = False
+                        else:
+                            # Verify proposed answer validity and tense consistency
+                            proposed_text = ""
+                            norm_prop = normalize_solver_answer(proposed_ans, q_type)
+                            if norm_prop in ["A", "B", "C", "D"]:
+                                idx = ord(norm_prop) - ord("A")
+                                if 0 <= idx < len(opt_texts):
+                                    proposed_text = opt_texts[idx]
+                            else:
+                                proposed_text = proposed_ans
+
+                            cleft_info = detect_it_cleft_syntax(proposed_text)
+                            if cleft_info.get("has_tense_discord"):
+                                task_issues.append(f"Tense agreement discord: {cleft_info['tense_discord_reason']}")
+                                task_validity["unique_correct_answer"] = False
+                            elif not cleft_info.get("is_valid_cleft"):
+                                task_issues.append("Defective cleft MCQ: proposed answer is not a valid it-cleft construction")
+                                task_validity["unique_correct_answer"] = False
+                            else:
+                                task_validity["unique_correct_answer"] = True
         else:
-            task_validity["evidence_in_passage"] = False
-
+            # For reading tasks without explicit evidence_quote, verify source grounding via passage spans
+            clean_words = [w for w in re.sub(r"[^\w\s]", "", prompt).split() if len(w) > 2]
+            matched_span = None
+            for n in range(min(5, len(clean_words)), 1, -1):
+                for i in range(len(clean_words) - n + 1):
+                    phrase = " ".join(clean_words[i:i+n])
+                    if phrase.lower() in passage_norm.lower():
+                        matched_span = phrase
+                        break
+                if matched_span:
+                    break
+            if not matched_span and options:
+                for opt in options:
+                    opt_text = opt.get("text") if isinstance(opt, dict) else str(opt)
+                    opt_words = [w for w in re.sub(r"[^\w\s]", "", opt_text).split() if len(w) > 3]
+                    for ow in opt_words:
+                        if ow.lower() in passage_norm.lower():
+                            matched_span = ow
+                            break
+                    if matched_span:
+                        break
+            substantive_matches = [w for w in clean_words if len(w) > 3 and w.lower() in passage_norm.lower()]
+            if matched_span or len(substantive_matches) >= 2:
+                evidence_in_passage = True
+                task_validity["evidence_in_passage"] = True
+                evidence_refs.append((matched_span or " ".join(substantive_matches[:3]))[:100])
+            else:
+                evidence_in_passage = False
+                task_validity["evidence_in_passage"] = False
+                task_issues.append("Question content not grounded in source passage text")
         # Task validity: Check for obvious contradictions or ungrounded logic
-        norm_proposed = normalize_solver_answer(proposed_ans, q_type)
-        is_tfng = "TFNG" in q_type or "TRUEFALSE" in q_type or "YNNG" in q_type or "YESNO" in q_type
-
-        contradiction_detected = False
+        # norm_proposed and is_tfng initialized above
         if is_tfng and prompt:
             prompt_clean = normalize_text_nfkc(prompt).lower()
             passage_clean = passage_norm.lower()
+            if is_v2_2 and not is_grammar:
+                if detect_comparison_inversion(prompt, passage_text):
+                    contradiction_detected = True
+                    task_issues.append("Comparison inversion contradiction: passage asserts opposite comparison")
+                has_neg_conflict, neg_msg = detect_negation_polarity_conflict(prompt, passage_text)
+                if has_neg_conflict and norm_proposed in ("TRUE", "YES"):
+                    contradiction_detected = True
+                    task_issues.append(f"Entailment contradiction: {neg_msg}")
+                if norm_proposed in ("TRUE", "YES"):
+                    ratio, ungrounded_words = compute_substantive_grounding_ratio(prompt, passage_text, is_v2_2=is_v2_2)
+                    if ratio < 0.50 and len(ungrounded_words) >= 2:
+                        contradiction_detected = True
+                        task_issues.append(f"Ungrounded claim: statement asserts unsupported facts {ungrounded_words} not in source text")
+                    has_gen, gen_msg = detect_unsupported_generalization(prompt, passage_text)
+                    if has_gen:
+                        contradiction_detected = True
+                        task_issues.append(gen_msg)
             if norm_proposed in ("TRUE", "YES"):
                 if detect_contradiction_in_text(prompt, passage_text):
                     contradiction_detected = True
@@ -327,9 +540,9 @@ class NeutralEvaluator:
         if contradiction_detected or is_ungrounded:
             grounding = 1.0  # Entirely ungrounded or contradicted
             answerability = 1.0
-        elif not evidence_in_passage:
-            grounding = 2.0  # Major issue: cited evidence missing from text
-            answerability = 2.0
+        elif not evidence_in_passage or (is_v2_2 and task_validity.get("unique_correct_answer") is False):
+            grounding = 2.0  # Major issue: cited evidence missing from text or distractor failure
+            answerability = min(answerability, 2.0)
 
         semantic_scores = {
             RubricDimension.CLARITY.value: clarity,
@@ -366,4 +579,32 @@ class NeutralEvaluator:
             verdict=verdict,
             abstention_reason=abstention_reason,
             evidence_refs=evidence_refs,
+        )
+
+
+class NeutralEvaluatorV2(NeutralEvaluator):
+    """Remediated neutral evaluator with verified evidence contracts (RG10 remediation)."""
+
+    def __init__(
+        self,
+        rubric: Optional[RubricProfile] = None,
+        evaluator_version: str = "neutral-eval-v2.1",
+    ):
+        super().__init__(
+            rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.1"),
+            evaluator_version=evaluator_version,
+        )
+
+
+class NeutralEvaluatorV2_2(NeutralEvaluatorV2):
+    """Calibrated neutral evaluator with robust semantic grounding and distractor verification (v2.2)."""
+
+    def __init__(
+        self,
+        rubric: Optional[RubricProfile] = None,
+        evaluator_version: str = "neutral-eval-v2.2",
+    ):
+        super().__init__(
+            rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.2"),
+            evaluator_version=evaluator_version,
         )

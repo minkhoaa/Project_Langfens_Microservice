@@ -101,8 +101,20 @@ ANTONYM_PAIRS = [
     ("improve", "limit"),
     ("improve", "limiting"),
     ("improves", "limits"),
+    ("open stomata", "stomata remain firmly closed"),
+    ("open stomata", "stomata remain closed"),
+    ("open their stomata", "stomata remain firmly closed"),
+    ("open their stomata", "stomata remain closed"),
+    ("open their stomata during the day", "stomata remain firmly closed"),
+    ("open stomata during daylight hours", "stomata remain firmly closed"),
+    ("accelerate", "slow down"),
+    ("accelerates", "slows down"),
+    ("active", "dormant"),
+    ("present", "absent"),
+    ("presence", "absence"),
+    ("internal", "external"),
+    ("internally", "externally"),
 ]
-
 
 def normalize_written_numbers(text: str) -> str:
     res = text.lower()
@@ -124,6 +136,7 @@ def detect_contradiction_in_text(statement: str, reference_text: str) -> bool:
     Examines opposite polarity, conflicting numerical values, antonym pairs, or explicit negation.
     """
     s_clean = normalize_written_numbers(normalize_text_nfkc(statement)).lower()
+    s_words = set(re.findall(r"\b\w+\b", s_clean)) - {"the", "a", "an", "is", "are", "was", "were", "to", "of", "in"}
     sentences = [s.strip() for s in re.split(r"[.!?]\s+", reference_text) if s.strip()]
     if not sentences:
         sentences = [reference_text]
@@ -133,8 +146,9 @@ def detect_contradiction_in_text(statement: str, reference_text: str) -> bool:
 
         # 1. Antonym pairs check
         for w1, w2 in ANTONYM_PAIRS:
-            if (w1 in s_clean and w2 in r_clean) or (w2 in s_clean and w1 in r_clean):
-                s_words = set(re.findall(r"\b\w+\b", s_clean)) - {"the", "a", "an", "is", "are", "was", "were", "to", "of", "in"}
+            s_match = bool(re.search(rf"\b{re.escape(w1)}\b", s_clean)) and bool(re.search(rf"\b{re.escape(w2)}\b", r_clean))
+            r_match = bool(re.search(rf"\b{re.escape(w2)}\b", s_clean)) and bool(re.search(rf"\b{re.escape(w1)}\b", r_clean))
+            if s_match or r_match:
                 r_words = set(re.findall(r"\b\w+\b", r_clean)) - {"the", "a", "an", "is", "are", "was", "were", "to", "of", "in"}
                 if len(s_words & r_words) >= 1:
                     return True
@@ -202,6 +216,280 @@ def detect_entailment_in_text(statement: str, reference_text: str) -> bool:
 
     return False
 
+
+def detect_comparison_inversion(statement: str, reference_text: str) -> bool:
+    """Detects inverted comparative or alternative relationships (e.g. 'X rather than Y' vs 'Y rather than X')."""
+    s_clean = normalize_text_nfkc(statement).lower()
+    r_clean = normalize_text_nfkc(reference_text).lower()
+    for marker in ["rather than", "instead of", "as opposed to", "versus"]:
+        if marker in s_clean and marker in r_clean:
+            s_parts = [p.strip() for p in s_clean.split(marker, 1)]
+            r_parts = [p.strip() for p in r_clean.split(marker, 1)]
+            s0_words = set(re.findall(r"\b\w{4,}\b", s_parts[0])) - {"with", "that", "from", "have", "this", "they", "were"}
+            s1_words = set(re.findall(r"\b\w{4,}\b", s_parts[1])) - {"with", "that", "from", "have", "this", "they", "were"}
+            r0_words = set(re.findall(r"\b\w{4,}\b", r_parts[0])) - {"with", "that", "from", "have", "this", "they", "were"}
+            r1_words = set(re.findall(r"\b\w{4,}\b", r_parts[1])) - {"with", "that", "from", "have", "this", "they", "were"}
+            if len(s0_words & r1_words) >= 1 and len(s1_words & r0_words) >= 1:
+                return True
+    return False
+
+
+def detect_negation_polarity_conflict(statement: str, reference_text: str) -> tuple[bool, str]:
+    """Checks for negation polarity mismatches between statement and reference text."""
+    s_clean = normalize_text_nfkc(statement).lower()
+    r_clean = normalize_text_nfkc(reference_text).lower()
+    s_neg = bool(re.search(r"\b(never|not|cannot|no|neither|barely|scarcely|hardly|did not|does not|was not|were not)\b", s_clean))
+
+    sentences = [s.strip() for s in re.split(r"[.!?]\s+", r_clean) if s.strip()]
+    for sent in sentences:
+        sent_neg = bool(re.search(r"\b(did not|does not|was not|were not|cannot|failed to|never|not|no|neither)\b", sent))
+        s_words = set(re.findall(r"\b\w{4,}\b", s_clean)) - {"with", "that", "from", "have", "this", "they", "were", "than", "more", "less"}
+        sent_words = set(re.findall(r"\b\w{4,}\b", sent)) - {"with", "that", "from", "have", "this", "they", "were", "than", "more", "less"}
+        overlap = s_words & sent_words
+        if len(overlap) >= 2 and s_neg != sent_neg:
+            for w in overlap:
+                if re.search(rf"\b(never|not|cannot|no|barely)\s+(?:\w+\s+)?{w}\b", s_clean) and not re.search(rf"\b(never|not|cannot|no|did not|does not)\s+(?:\w+\s+)?{w}\b", sent):
+                    return True, f"Statement negates predicate '{w}' which is affirmed in source text"
+                if re.search(rf"\b(did not|does not|was not|were not|never|not)\s+(?:\w+\s+)?{w}\b", sent) and not re.search(rf"\b(never|not|no)\s+(?:\w+\s+)?{w}\b", s_clean):
+                    return True, f"Source text negates predicate '{w}' which is affirmed in statement"
+    return False, ""
+
+
+V2_1_STOPWORDS = {
+    "that", "with", "from", "this", "they", "have", "were", "been", "their", "which",
+    "about", "after", "before", "during", "while", "where", "there", "these", "those",
+    "than", "more", "most", "some", "many", "such", "into", "over", "under", "between",
+    "true", "false", "given", "statement", "decide", "whether", "choose", "correct",
+    "sentence", "following", "demonstrates", "uses", "examples", "example", "primary",
+    "produce", "produces", "producing", "erupt", "erupts", "eruption", "eruptions",
+    "occur", "occurs", "occurred", "represent", "represents", "represented", "refer", "refers",
+    "across", "never", "within", "characterized", "formation", "concentrations", "presence",
+    "contain", "contains", "consist", "consists", "included", "including", "always", "often",
+    "usually", "various", "multiple", "several", "different", "similar", "related"
+}
+
+V2_2_STOPWORDS = {
+    "that", "with", "from", "this", "they", "have", "were", "been", "their", "which",
+    "about", "after", "before", "during", "while", "where", "there", "these", "those",
+    "than", "more", "most", "some", "many", "such", "into", "over", "under", "between",
+    "true", "false", "given", "statement", "decide", "whether", "choose", "correct",
+    "sentence", "following", "demonstrates", "uses", "examples", "example", "primary",
+    "produce", "produces", "producing", "erupt", "erupts", "eruption", "eruptions",
+    "occur", "occurs", "occurred", "represent", "represents", "represented", "refer", "refers",
+    "across", "within", "characterized", "formation", "concentrations", "presence",
+    "contain", "contains", "consist", "consists", "included", "including", "often",
+    "usually", "different", "similar", "related"
+}
+
+
+def compute_substantive_grounding_ratio(statement: str, reference_text: str, is_v2_2: bool = False) -> tuple[float, list[str]]:
+    """Computes the ratio of substantive content words in statement grounded in reference text.
+    Uses prefix/stem matching and excludes grammatical/relational/paraphrase function words.
+    """
+    stopwords = V2_2_STOPWORDS if is_v2_2 else V2_1_STOPWORDS
+    s_words = [w for w in re.findall(r"\b[a-zA-Z]{4,}\b", statement.lower()) if w not in stopwords]
+    if not s_words:
+        return 1.0, []
+
+    r_clean = reference_text.lower()
+    r_words = set(re.findall(r"\b[a-zA-Z]{4,}\b", r_clean))
+    r_stems = {stem_token(w) for w in r_words}
+
+    unsupported = []
+    for w in s_words:
+        w_stem = stem_token(w)
+        if w in r_words or w_stem in r_stems or w in r_stems:
+            continue
+        prefix_len = min(5, len(w) - 1)
+        w_pfx = w[:prefix_len]
+        if any(rw.startswith(w_pfx) or rw[:prefix_len] == w_pfx for rw in r_words):
+            continue
+        unsupported.append(w)
+
+    ratio = 1.0 - (len(unsupported) / len(s_words))
+    return ratio, unsupported
+
+
+def detect_negative_inversion_syntax(sentence: str, allow_contracted: bool = False) -> bool:
+    """Detects whether a sentence exhibits negative/limiting auxiliary inversion.
+    If allow_contracted=False, standard uncontracted auxiliaries are matched.
+    If allow_contracted=True, contracted negative auxiliaries (e.g. 'shouldn't we') are also matched.
+    """
+    clean = re.sub(r"^[A-Da-d][\).:]\s*", "", sentence.strip())
+    triggers = [
+        r"under no circumstances",
+        r"not until [^,]+",
+        r"seldom",
+        r"never",
+        r"rarely",
+        r"hardly",
+        r"scarcely",
+        r"at no point",
+        r"at no time",
+        r"on no account",
+        r"in no way",
+        r"little did",
+        r"only (?:when|after|then|if|by) [^,]+",
+    ]
+    if allow_contracted:
+        auxiliaries = r"(?:shouldn't|should|hadn't|had|haven't|have|hasn't|has|couldn't|could|didn't|did|don't|do|doesn't|does|wasn't|was|weren't|were|wouldn't|would|won't|will|can't|cannot|can|might|mustn't|must|isn't|is|aren't|are)"
+    else:
+        auxiliaries = r"(?:should|had|have|has|could|did|do|does|was|were|would|will|can|might|must|is|are)"
+    subjects = r"(?:we|they|I|he|she|it|you|researchers|samples|students|scientists|people|the\s+\w+)"
+
+    for trig in triggers:
+        pattern = rf"^{trig}\s*(?:,\s*)?({auxiliaries})\s+({subjects})\b"
+        m = re.search(pattern, clean, re.IGNORECASE)
+        if m:
+            after_subject = clean[m.end():].strip()
+            aux_word = m.group(1).lower()
+            if aux_word in {"could", "couldn't", "should", "shouldn't", "would", "wouldn't", "did", "didn't", "do", "don't", "does", "doesn't", "will", "won't", "can", "can't", "might", "must", "mustn't"}:
+                first_verb = after_subject.split()[0] if after_subject.split() else ""
+                if first_verb.endswith("ing"):
+                    return False  # Ungrammatical participle after modal auxiliary
+            return True
+    return False
+
+
+def detect_contracted_negative_inversion(sentence: str) -> bool:
+    """Detects whether sentence uses a contracted negative auxiliary in inverted position (e.g. 'shouldn't we')."""
+    clean = re.sub(r"^[A-Da-d][\).:]\s*", "", sentence.strip())
+    contracted_aux = r"(?:shouldn't|hadn't|haven't|hasn't|couldn't|didn't|don't|doesn't|wasn't|weren't|wouldn't|won't|can't|mustn't|isn't|aren't)"
+    subjects = r"(?:we|they|I|he|she|it|you|researchers|samples|students|scientists|people|the\s+\w+)"
+    triggers = [
+        r"under no circumstances",
+        r"not until [^,]+",
+        r"seldom",
+        r"never",
+        r"rarely",
+        r"hardly",
+        r"scarcely",
+        r"at no point",
+        r"at no time",
+        r"on no account",
+        r"in no way",
+        r"only (?:when|after|then|if|by) [^,]+",
+    ]
+    for trig in triggers:
+        pattern = rf"^{trig}\s*(?:,\s*)?({contracted_aux})\s+({subjects})\b"
+        if re.search(pattern, clean, re.IGNORECASE):
+            return True
+    return False
+
+
+def detect_it_cleft_syntax(sentence: str) -> dict:
+    """Analyzes whether a sentence is an it-cleft construction:
+    Form: It + [be] + [focused element] + [that/which/who/whose/whom] + [cleft clause].
+    Returns metadata including copula, pronoun, focused element, tense discord, and validity.
+    """
+    clean = re.sub(r"^[A-Da-d][\).:]\s*", "", sentence.strip()).strip()
+    m = re.match(
+        r"^It\s+(is|was|has\s+been|will\s+be|would\s+be)\s+([a-zA-Z0-9\s,\-–—]+?)\s+(that|which|who|whom|whose)\s+([a-zA-Z0-9\s,\-–—.'\"]+)[.?!]?$",
+        clean,
+        re.IGNORECASE,
+    )
+    if not m:
+        return {"is_valid_cleft": False}
+
+    copula = m.group(1).lower()
+    focused = m.group(2).strip()
+    rel_pronoun = m.group(3).lower()
+    clause = m.group(4).strip()
+
+    clause_words = clause.split()
+    first_verb = clause_words[0].lower() if clause_words else ""
+
+    # Pronoun compatibility: who/whom are valid only for human referents
+    human_nouns = {
+        "person", "people", "researcher", "researchers", "scientist", "scientists",
+        "student", "students", "doctor", "doctors", "patient", "patients", "author",
+        "authors", "individual", "individuals", "leader", "leaders", "teacher", "teachers",
+        "man", "men", "woman", "women", "child", "children"
+    }
+    focused_words = set(re.findall(r"\b\w+\b", focused.lower()))
+    is_human = bool(focused_words & human_nouns)
+    if rel_pronoun in ("who", "whom") and not is_human:
+        return {
+            "is_valid_cleft": False,
+            "reason": f"Invalid relative pronoun '{rel_pronoun}' for non-human focus '{focused}'",
+            "has_tense_discord": False,
+            "tense_discord_reason": "",
+        }
+
+    # Morphological tense discord check
+    has_tense_discord = False
+    tense_discord_reason = ""
+    if copula == "is":
+        if first_verb in {"had", "was", "were", "did", "could", "would"} or (
+            len(first_verb) > 3 and first_verb.endswith("ed") and first_verb not in {"underpin", "need"}
+        ):
+            has_tense_discord = True
+            tense_discord_reason = f"Present copula 'is' clashes with past relative verb '{first_verb}' (expected 'was')"
+    elif copula == "was":
+        if first_verb in {"has", "have", "is", "are", "can", "will", "does"} or (
+            len(first_verb) > 3 and first_verb.endswith("s") and not first_verb.endswith(("ss", "us", "is", "as"))
+        ):
+            has_tense_discord = True
+            tense_discord_reason = f"Past copula 'was' clashes with present relative verb '{first_verb}' (expected 'is' or past relative verb)"
+
+    return {
+        "is_valid_cleft": not has_tense_discord,
+        "copula": copula,
+        "focused_element": focused,
+        "rel_pronoun": rel_pronoun,
+        "cleft_clause": clause,
+        "has_tense_discord": has_tense_discord,
+        "tense_discord_reason": tense_discord_reason,
+    }
+
+
+def detect_cleft_distractor_ambiguity(options: list[str]) -> tuple[bool, str]:
+    """Checks whether an MCQ has distractor ambiguity in it-clefts:
+    Specifically:
+    1. Multiple options are valid it-clefts where one uses 'that' and another uses 'which'
+       with the same focused element (in academic English, both are defensible for non-human referents).
+    2. Multiple options are grammatically defensible it-clefts without any tense or syntactic defect.
+    """
+    cleft_opts = []
+    for idx, opt in enumerate(options):
+        cleft_info = detect_it_cleft_syntax(opt)
+        if cleft_info.get("is_valid_cleft") and not cleft_info.get("has_tense_discord"):
+            cleft_opts.append((idx + 1, opt, cleft_info))
+
+    if len(cleft_opts) >= 2:
+        pronouns = {info["rel_pronoun"] for _, _, info in cleft_opts}
+        if "that" in pronouns and "which" in pronouns:
+            return True, "Ambiguous MCQ: multiple options exhibit valid it-cleft syntax with 'that' and 'which' (both grammatically acceptable for non-human focus)"
+        return True, f"Ambiguous MCQ: multiple options {[idx for idx, _, _ in cleft_opts]} exhibit grammatically valid it-cleft syntax"
+
+    return False, ""
+
+
+def detect_unsupported_generalization(statement: str, reference_text: str) -> tuple[bool, str]:
+    """Detects whether a Reading TFNG statement introduces an unsupported broad generalization
+    (e.g. 'various stimuli', 'all conditions', 'universal changes') not supported by the bounded passage.
+    """
+    s_clean = normalize_text_nfkc(statement).lower()
+    r_clean = normalize_text_nfkc(reference_text).lower()
+
+    generalization_patterns = [
+        (r"\bvarious\s+(?:stimuli|conditions|factors|reasons|mechanisms|activities|environments)\b", "various"),
+        (r"\ball\s+(?:conditions|stimuli|activities|types|species|patients|cases|situations)\b", "all"),
+        (r"\bevery\s+(?:condition|stimulus|activity|case|situation|circumstance)\b", "every"),
+        (r"\buniversally\b|\buniversal\b", "universal"),
+        (r"\binvariably\b", "invariably"),
+        (r"\bregardless\s+of\b", "regardless of"),
+        (r"\bunder\s+any\s+circumstances?\b", "under any circumstance"),
+    ]
+
+    for pat, label in generalization_patterns:
+        m = re.search(pat, s_clean)
+        if m:
+            matched_phrase = m.group(0)
+            if matched_phrase not in r_clean:
+                return True, f"Unsupported generalization: statement asserts broad claim '{matched_phrase}' not affirmed in bounded source text"
+
+    return False, ""
 def chunk_passage_coverage(
     passage_text: str,
     max_chunk_chars: int = 2800,

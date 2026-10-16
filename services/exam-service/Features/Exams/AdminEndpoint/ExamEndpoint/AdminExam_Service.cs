@@ -117,6 +117,16 @@ public sealed class AdminExamService(ExamDbContext db, IHttpContextAccessor? htt
                 {
                     return Results.BadRequest(new ApiResultDto(false, $"Invalid exam status: '{dto.Status}'. Allowed values: DRAFT, PUBLISHED, ARCHIVED", null!));
                 }
+                if (normalizedStatus == ExamStatus.Published)
+                {
+                    var isBenchmarkExam = await db.ReadingPaperRuns.AsNoTracking()
+                        .AnyAsync(r => db.ReadingPaperJobs.Any(j => j.ExamId == exam.Id && (j.Id == r.JobId || j.ActiveRunId == r.RunId))
+                                       && !string.IsNullOrWhiteSpace(r.BenchmarkCampaignId), ct);
+                    if (isBenchmarkExam)
+                    {
+                        return Results.Json(new ApiResultDto(false, "RESEARCH_PUBLICATION_FORBIDDEN: Research benchmark runs cannot be published to production.", null!), statusCode: 403);
+                    }
+                }
                 exam.Status = normalizedStatus;
             }
             exam.ImageUrl = dto.ImageUrl;

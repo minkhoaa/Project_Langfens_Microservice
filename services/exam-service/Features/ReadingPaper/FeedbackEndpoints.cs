@@ -635,6 +635,13 @@ public static class FeedbackEndpoints
         }
 
         var runId = job?.ActiveRunId ?? string.Empty;
+        var isBenchmarkRun = await db.ReadingPaperRuns.AsNoTracking()
+            .AnyAsync(r => ((job != null && r.JobId == job.Id) || (!string.IsNullOrWhiteSpace(runId) && r.RunId == runId))
+                           && !string.IsNullOrWhiteSpace(r.BenchmarkCampaignId), ct);
+        if (isBenchmarkRun)
+        {
+            return Results.Json(new { error = "RESEARCH_PUBLICATION_FORBIDDEN: Research benchmark runs cannot be published to production." }, statusCode: 403);
+        }
         var idempotencyKey = !string.IsNullOrWhiteSpace(headerKey)
             ? headerKey.Trim()
             : (!string.IsNullOrWhiteSpace(payload?.IdempotencyKey)

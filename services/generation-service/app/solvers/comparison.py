@@ -138,7 +138,7 @@ def compare_answers(
         is_match = norm_exp == norm_solv
         details["mode"] = "YNNG_CANONICAL"
 
-    elif "MULTIPLECHOICE" in q_type_norm or q_type_norm == "MCQ":
+    elif "MULTIPLECHOICE" in q_type_norm or "MCQ" in q_type_norm:
         norm_exp = normalize_mcq_answer(expected_answer, options)
         norm_solv = normalize_mcq_answer(solver_answer, options)
         is_match = norm_exp == norm_solv
