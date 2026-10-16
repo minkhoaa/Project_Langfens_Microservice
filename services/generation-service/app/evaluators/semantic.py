@@ -579,7 +579,7 @@ def detect_negative_inversion_structural(sentence: str, allow_contracted: bool =
     }
 
 
-def validate_negative_inversion_grammaticality(sentence: str, allow_contracted: bool = False) -> NegativeInversionValidationResult:
+def validate_negative_inversion_grammaticality(sentence: str, allow_contracted: bool = False, allow_ss_base_verbs: bool = False) -> NegativeInversionValidationResult:
     """Validates negative inversion syntax and full verb phrase grammaticality."""
     is_struct, info = detect_negative_inversion_structural(sentence, allow_contracted=allow_contracted)
     if not is_struct:
@@ -713,7 +713,8 @@ def validate_negative_inversion_grammaticality(sentence: str, allow_contracted: 
                 verb_phrase=predicate,
                 rejection_reason=f"Modal auxiliary '{auxiliary}' cannot be followed directly by present participle '{pred_verb}' (-ing)"
             )
-        if pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+        is_3rd_s = (pred_verb.endswith("s") and not pred_verb.endswith("ss")) if allow_ss_base_verbs else (pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"})
+        if is_3rd_s:
             return NegativeInversionValidationResult(
                 is_structural_inversion=True,
                 is_grammatically_valid=False,
@@ -735,7 +736,8 @@ def validate_negative_inversion_grammaticality(sentence: str, allow_contracted: 
                 verb_phrase=predicate,
                 rejection_reason=f"Modal auxiliary '{auxiliary}' cannot be followed by past tense form '{pred_verb}' (requires bare infinitive)"
             )
-        if pred_verb.endswith("ed") and pred_verb not in {"need", "feed", "bleed", "proceed", "succeed"}:
+        is_past_ed = (pred_verb.endswith("ed") and not pred_verb.endswith("eed")) if allow_ss_base_verbs else (pred_verb.endswith("ed") and pred_verb not in {"need", "feed", "bleed", "proceed", "succeed"})
+        if is_past_ed:
             return NegativeInversionValidationResult(
                 is_structural_inversion=True,
                 is_grammatically_valid=False,
@@ -760,7 +762,8 @@ def validate_negative_inversion_grammaticality(sentence: str, allow_contracted: 
                 verb_phrase=predicate,
                 rejection_reason=f"Do-support auxiliary '{auxiliary}' cannot be followed by present participle '{pred_verb}' (-ing)"
             )
-        if pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+        is_3rd_s = (pred_verb.endswith("s") and not pred_verb.endswith("ss")) if allow_ss_base_verbs else (pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"})
+        if is_3rd_s:
             return NegativeInversionValidationResult(
                 is_structural_inversion=True,
                 is_grammatically_valid=False,
@@ -830,7 +833,8 @@ def validate_negative_inversion_grammaticality(sentence: str, allow_contracted: 
                 verb_phrase=predicate,
                 rejection_reason=f"Have-aspect auxiliary '{auxiliary}' requires past participle form, not base form '{pred_verb}'"
             )
-        if pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+        is_3rd_s = (pred_verb.endswith("s") and not pred_verb.endswith("ss")) if allow_ss_base_verbs else (pred_verb.endswith("s") and pred_verb not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"})
+        if is_3rd_s:
             return NegativeInversionValidationResult(
                 is_structural_inversion=True,
                 is_grammatically_valid=False,
@@ -883,10 +887,12 @@ def detect_negative_inversion_syntax(sentence: str, allow_contracted: bool = Fal
     """
     if version != "v2.5":
         m_v = re.search(r"v?(\d+)\.(\d+)", version)
-        if m_v and (int(m_v.group(1)), int(m_v.group(2))) >= (2, 6):
-            res = validate_negative_inversion_grammaticality(sentence, allow_contracted=allow_contracted)
+        if m_v and (int(m_v.group(1)), int(m_v.group(2))) >= (2, 7):
+            res = validate_negative_inversion_grammaticality(sentence, allow_contracted=allow_contracted, allow_ss_base_verbs=True)
             return res.is_grammatically_valid
-
+        elif m_v and (int(m_v.group(1)), int(m_v.group(2))) >= (2, 6):
+            res = validate_negative_inversion_grammaticality(sentence, allow_contracted=allow_contracted, allow_ss_base_verbs=False)
+            return res.is_grammatically_valid
     clean = re.sub(r"^[A-Da-d][\).:]\s*", "", sentence.strip())
     triggers = [
         r"under no circumstances",

@@ -146,6 +146,9 @@ class NeutralEvaluator:
     def is_v2_6_plus(self) -> bool:
         return self.version_tuple >= (2, 6)
 
+    @property
+    def is_v2_7_plus(self) -> bool:
+        return self.version_tuple >= (2, 7)
 
 
     def evaluate_item(
@@ -441,7 +444,11 @@ class NeutralEvaluator:
                     if "inversion" in topic:
                         if self.is_v2_6_plus:
                             validation_results = [
-                                validate_negative_inversion_grammaticality(opt_t, allow_contracted=False)
+                                validate_negative_inversion_grammaticality(
+                                    opt_t,
+                                    allow_contracted=False,
+                                    allow_ss_base_verbs=self.is_v2_7_plus,
+                                )
                                 for opt_t in opt_texts
                             ]
                             valid_inversion_opts = [
@@ -557,132 +564,291 @@ class NeutralEvaluator:
                             else:
                                 task_validity["unique_correct_answer"] = True
                     elif "subjunctive" in topic and self.is_v2_6_plus:
-                        mandative_triggers = [
-                            "mandate", "mandates", "insist", "insists", "demand", "demands",
-                            "require", "requires", "recommend", "recommends", "propose", "proposes",
-                            "stipulate", "stipulates", "vital", "crucial", "important", "essential"
-                        ]
-                        is_mandative = any(mt in prompt_norm for mt in mandative_triggers) or any(
-                            mt in getattr(rule_pack, "applicability", [""])[0].lower() for mt in mandative_triggers
-                        )
-                        if is_mandative:
-                            def _extract_subjunctive_verb(ot: str) -> str | None:
-                                clean = re.sub(r"^[A-Da-d][\).:]\s*", "", ot.strip())
-                                m_that = re.search(r"\bthat\s+([a-zA-Z\s]+)", clean, re.IGNORECASE)
-                                if not m_that:
-                                    return None
-                                words = m_that.group(1).split()
-                                if not words:
-                                    return None
-                                first = words[0].lower()
-                                if first in {"she", "he", "it", "they", "we", "you", "i", "one"}:
-                                    return words[1].lower().strip(",.") if len(words) > 1 else None
-                                start_idx = 1 if first in {"the", "a", "an", "each", "every", "this", "that", "these", "those", "all", "any", "both"} else 0
-                                subject_nouns = {
-                                    "supplier", "student", "technician", "researcher", "container", "employee",
-                                    "applicant", "candidate", "party", "doctor", "patient", "person", "individual",
-                                    "staff", "team", "committee", "board", "protocol", "member", "members",
-                                    "students", "suppliers", "researchers", "technicians", "device", "system",
-                                    "laboratory", "waste", "hazardous", "authorized", "new", "contractor"
-                                }
-                                idx = start_idx
-                                while idx < len(words):
-                                    w = words[idx].lower().strip(",.")
-                                    if w in subject_nouns:
-                                        idx += 1
-                                        continue
-                                    return w
-                                return None
-                            def _extract_all_subjunctive_verbs(opts: list[str]) -> list[str | None]:
-                                that_tails = []
-                                for ot in opts:
+                        if self.is_v2_7_plus:
+                            mandative_triggers = [
+                                "mandate", "mandates", "insist", "insists", "demand", "demands",
+                                "require", "requires", "recommend", "recommends", "propose", "proposes",
+                                "stipulate", "stipulates", "vital", "crucial", "important", "essential",
+                                "mandative", "subjunctive", "formulaic", "decree", "statute", "order", "rule"
+                            ]
+                            is_mandative = any(mt in prompt_norm for mt in mandative_triggers) or any(
+                                mt in getattr(rule_pack, "applicability", [""])[0].lower() for mt in mandative_triggers
+                            ) or any(
+                                any(mt in opt_t.lower() for mt in mandative_triggers) for opt_t in opt_texts
+                            )
+                            if is_mandative:
+                                def _extract_subjunctive_verb_v27(ot: str) -> str | None:
                                     clean = re.sub(r"^[A-Da-d][\).:]\s*", "", ot.strip())
                                     m_that = re.search(r"\bthat\s+([a-zA-Z\s]+)", clean, re.IGNORECASE)
-                                    that_tails.append(m_that.group(1).split() if m_that else [])
+                                    if not m_that:
+                                        return None
+                                    words = m_that.group(1).split()
+                                    if not words:
+                                        return None
+                                    first = words[0].lower()
+                                    if first in {"she", "he", "it", "they", "we", "you", "i", "one"}:
+                                        return words[1].lower().strip(",.") if len(words) > 1 else None
+                                    start_idx = 1 if first in {"the", "a", "an", "each", "every", "this", "that", "these", "those", "all", "any", "both", "no"} else 0
+                                    if len(words) > start_idx + 2 and words[start_idx].lower() in {
+                                        "expert", "chief", "lead", "senior", "authorized", "commercial", "certified", "external", "special"
+                                    }:
+                                        return words[start_idx + 2].lower().strip(",.")
+                                    if len(words) > start_idx + 1:
+                                        return words[start_idx + 1].lower().strip(",.")
+                                    elif len(words) > start_idx:
+                                        return words[start_idx].lower().strip(",.")
+                                    return None
 
-                                if all(that_tails):
-                                    min_len = min(len(t) for t in that_tails)
-                                    common_len = 0
-                                    while common_len < min_len:
-                                        w0 = that_tails[0][common_len].lower()
-                                        if all(t[common_len].lower() == w0 for t in that_tails):
-                                            common_len += 1
-                                        else:
-                                            break
-                                    if common_len > 0 and all(len(t) > common_len for t in that_tails):
-                                        return [t[common_len].lower().strip(",.") for t in that_tails]
-
-                                return [_extract_subjunctive_verb(ot) for ot in opts]
-
-                            def _is_base_subjunctive_verb(verb: str | None) -> bool:
-                                if not verb:
-                                    return False
-                                v = verb.lower()
-                                if v in {"will", "has", "had", "must", "should", "would", "could", "can", "is", "was", "are", "were", "being", "been"}:
-                                    return False
-                                if v in ("be", "have"):
+                                def _is_base_subjunctive_verb_v27(verb: str | None) -> bool:
+                                    if not verb:
+                                        return False
+                                    v = verb.lower()
+                                    if v in {"will", "has", "had", "must", "should", "would", "could", "can", "is", "was", "are", "were", "being", "been"}:
+                                        return False
+                                    if v in ("be", "have"):
+                                        return True
+                                    if v.endswith("s") and not v.endswith("ss") and v not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+                                        return False
+                                    if v.endswith("ing") and v != "bring":
+                                        return False
+                                    if v.endswith("ed") and not v.endswith("eed") and v not in {"need", "feed", "bleed", "proceed", "succeed"}:
+                                        return False
+                                    if v in IRREGULAR_PAST_VERBS:
+                                        return False
                                     return True
-                                if v.endswith("s") and v not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
-                                    return False
-                                if v.endswith("ing") and v != "bring":
-                                    return False
-                                if v.endswith("ed") and v not in {"need", "feed", "bleed", "proceed", "succeed"}:
-                                    return False
-                                if v in IRREGULAR_PAST_VERBS:
-                                    return False
-                                return True
-                            extracted_verbs = _extract_all_subjunctive_verbs(opt_texts)
-                            base_opts = [idx + 1 for idx, v in enumerate(extracted_verbs) if _is_base_subjunctive_verb(v)]
-                            is_neg_polarity_q = any(term in prompt_norm for term in ["incorrect", "does not", "fails to", "wrong"])
-                            if is_neg_polarity_q:
-                                norm_prop = normalize_solver_answer(proposed_ans, q_type)
-                                prop_idx = ord(norm_prop) - ord("A") + 1 if norm_prop in ["A", "B", "C", "D"] else -1
-                                if prop_idx > 0 and prop_idx in base_opts:
-                                    task_issues.append(f"Proposed answer {norm_prop} uses valid base subjunctive form in negative-polarity question")
+
+                                extracted_verbs = [_extract_subjunctive_verb_v27(ot) for ot in opt_texts]
+                                if any(v is None for v in extracted_verbs):
+                                    unparsed_idx = [idx + 1 for idx, v in enumerate(extracted_verbs) if v is None]
+                                    task_issues.append(f"Inconclusive subjunctive MCQ: option(s) {unparsed_idx} could not be conclusively parsed into mandative subjunctive subordinate clause")
                                     task_validity["unique_correct_answer"] = False
                                 else:
-                                    task_validity["unique_correct_answer"] = True
+                                    base_opts = [idx + 1 for idx, v in enumerate(extracted_verbs) if _is_base_subjunctive_verb_v27(v)]
+                                    is_neg_polarity_q = any(term in prompt_norm for term in ["incorrect", "does not", "fails to", "wrong"])
+                                    if is_neg_polarity_q:
+                                        norm_prop = normalize_solver_answer(proposed_ans, q_type)
+                                        prop_idx = ord(norm_prop) - ord("A") + 1 if norm_prop in ["A", "B", "C", "D"] else -1
+                                        if prop_idx > 0 and prop_idx in base_opts:
+                                            task_issues.append(f"Proposed answer {norm_prop} uses valid base subjunctive form in negative-polarity question")
+                                            task_validity["unique_correct_answer"] = False
+                                        else:
+                                            task_validity["unique_correct_answer"] = True
+                                    else:
+                                        if len(base_opts) == 1:
+                                            valid_idx = base_opts[0] - 1
+                                            norm_prop = normalize_solver_answer(proposed_ans, q_type)
+                                            prop_idx = ord(norm_prop) - ord("A") if norm_prop in ["A", "B", "C", "D"] else -1
+                                            if prop_idx >= 0 and prop_idx != valid_idx:
+                                                task_issues.append(
+                                                    f"Proposed answer key discord: proposed answer points to option {norm_prop} (index {prop_idx+1}), but unique grammatically valid subjunctive option is {chr(ord('A') + valid_idx)} (index {valid_idx+1})"
+                                                )
+                                                task_validity["unique_correct_answer"] = False
+                                            else:
+                                                task_validity["unique_correct_answer"] = True
+                                        elif len(base_opts) > 1:
+                                            task_issues.append(f"Ambiguous subjunctive MCQ: multiple options {base_opts} use base subjunctive form")
+                                            task_validity["unique_correct_answer"] = False
+                                        elif len(base_opts) == 0:
+                                            task_issues.append("Defective subjunctive MCQ: no options use base subjunctive form")
+                                            task_validity["unique_correct_answer"] = False
+                                        else:
+                                            task_validity["unique_correct_answer"] = True
                             else:
-                                if len(base_opts) == 1:
-                                    valid_idx = base_opts[0] - 1
+                                task_validity["unique_correct_answer"] = True
+                        else:
+                            mandative_triggers = [
+                                "mandate", "mandates", "insist", "insists", "demand", "demands",
+                                "require", "requires", "recommend", "recommends", "propose", "proposes",
+                                "stipulate", "stipulates", "vital", "crucial", "important", "essential"
+                            ]
+                            is_mandative = any(mt in prompt_norm for mt in mandative_triggers) or any(
+                                mt in getattr(rule_pack, "applicability", [""])[0].lower() for mt in mandative_triggers
+                            )
+                            if is_mandative:
+                                def _extract_subjunctive_verb(ot: str) -> str | None:
+                                    clean = re.sub(r"^[A-Da-d][\).:]\s*", "", ot.strip())
+                                    m_that = re.search(r"\bthat\s+([a-zA-Z\s]+)", clean, re.IGNORECASE)
+                                    if not m_that:
+                                        return None
+                                    words = m_that.group(1).split()
+                                    if not words:
+                                        return None
+                                    first = words[0].lower()
+                                    if first in {"she", "he", "it", "they", "we", "you", "i", "one"}:
+                                        return words[1].lower().strip(",.") if len(words) > 1 else None
+                                    start_idx = 1 if first in {"the", "a", "an", "each", "every", "this", "that", "these", "those", "all", "any", "both"} else 0
+                                    subject_nouns = {
+                                        "supplier", "student", "technician", "researcher", "container", "employee",
+                                        "applicant", "candidate", "party", "doctor", "patient", "person", "individual",
+                                        "staff", "team", "committee", "board", "protocol", "member", "members",
+                                        "students", "suppliers", "researchers", "technicians", "device", "system",
+                                        "laboratory", "waste", "hazardous", "authorized", "new", "contractor"
+                                    }
+                                    idx = start_idx
+                                    while idx < len(words):
+                                        w = words[idx].lower().strip(",.")
+                                        if w in subject_nouns:
+                                            idx += 1
+                                            continue
+                                        return w
+                                    return None
+                                def _extract_all_subjunctive_verbs(opts: list[str]) -> list[str | None]:
+                                    that_tails = []
+                                    for ot in opts:
+                                        clean = re.sub(r"^[A-Da-d][\).:]\s*", "", ot.strip())
+                                        m_that = re.search(r"\bthat\s+([a-zA-Z\s]+)", clean, re.IGNORECASE)
+                                        that_tails.append(m_that.group(1).split() if m_that else [])
+
+                                    if all(that_tails):
+                                        min_len = min(len(t) for t in that_tails)
+                                        common_len = 0
+                                        while common_len < min_len:
+                                            w0 = that_tails[0][common_len].lower()
+                                            if all(t[common_len].lower() == w0 for t in that_tails):
+                                                common_len += 1
+                                            else:
+                                                break
+                                        if common_len > 0 and all(len(t) > common_len for t in that_tails):
+                                            return [t[common_len].lower().strip(",.") for t in that_tails]
+
+                                    return [_extract_subjunctive_verb(ot) for ot in opts]
+
+                                def _is_base_subjunctive_verb(verb: str | None) -> bool:
+                                    if not verb:
+                                        return False
+                                    v = verb.lower()
+                                    if v in {"will", "has", "had", "must", "should", "would", "could", "can", "is", "was", "are", "were", "being", "been"}:
+                                        return False
+                                    if v in ("be", "have"):
+                                        return True
+                                    if v.endswith("s") and v not in {"pass", "miss", "discuss", "process", "address", "express", "stress", "cross"}:
+                                        return False
+                                    if v.endswith("ing") and v != "bring":
+                                        return False
+                                    if v.endswith("ed") and v not in {"need", "feed", "bleed", "proceed", "succeed"}:
+                                        return False
+                                    if v in IRREGULAR_PAST_VERBS:
+                                        return False
+                                    return True
+                                extracted_verbs = _extract_all_subjunctive_verbs(opt_texts)
+                                base_opts = [idx + 1 for idx, v in enumerate(extracted_verbs) if _is_base_subjunctive_verb(v)]
+                                is_neg_polarity_q = any(term in prompt_norm for term in ["incorrect", "does not", "fails to", "wrong"])
+                                if is_neg_polarity_q:
                                     norm_prop = normalize_solver_answer(proposed_ans, q_type)
-                                    prop_idx = ord(norm_prop) - ord("A") if norm_prop in ["A", "B", "C", "D"] else -1
-                                    if prop_idx >= 0 and prop_idx != valid_idx:
-                                        task_issues.append(
-                                            f"Proposed answer key discord: proposed answer points to option {norm_prop} (index {prop_idx+1}), but unique grammatically valid subjunctive option is {chr(ord('A') + valid_idx)} (index {valid_idx+1})"
-                                        )
+                                    prop_idx = ord(norm_prop) - ord("A") + 1 if norm_prop in ["A", "B", "C", "D"] else -1
+                                    if prop_idx > 0 and prop_idx in base_opts:
+                                        task_issues.append(f"Proposed answer {norm_prop} uses valid base subjunctive form in negative-polarity question")
                                         task_validity["unique_correct_answer"] = False
                                     else:
                                         task_validity["unique_correct_answer"] = True
-                                elif len(base_opts) > 1:
-                                    task_issues.append(f"Ambiguous subjunctive MCQ: multiple options {base_opts} use base subjunctive form")
-                                    task_validity["unique_correct_answer"] = False
-                                elif len(base_opts) == 0:
-                                    task_issues.append("Defective subjunctive MCQ: no options use base subjunctive form")
+                                else:
+                                    if len(base_opts) == 1:
+                                        valid_idx = base_opts[0] - 1
+                                        norm_prop = normalize_solver_answer(proposed_ans, q_type)
+                                        prop_idx = ord(norm_prop) - ord("A") if norm_prop in ["A", "B", "C", "D"] else -1
+                                        if prop_idx >= 0 and prop_idx != valid_idx:
+                                            task_issues.append(
+                                                f"Proposed answer key discord: proposed answer points to option {norm_prop} (index {prop_idx+1}), but unique grammatically valid subjunctive option is {chr(ord('A') + valid_idx)} (index {valid_idx+1})"
+                                            )
+                                            task_validity["unique_correct_answer"] = False
+                                        else:
+                                            task_validity["unique_correct_answer"] = True
+                                    elif len(base_opts) > 1:
+                                        task_issues.append(f"Ambiguous subjunctive MCQ: multiple options {base_opts} use base subjunctive form")
+                                        task_validity["unique_correct_answer"] = False
+                                    elif len(base_opts) == 0:
+                                        task_issues.append("Defective subjunctive MCQ: no options use base subjunctive form")
+                                        task_validity["unique_correct_answer"] = False
+                                    else:
+                                        task_validity["unique_correct_answer"] = True
+                            else:
+                                task_validity["unique_correct_answer"] = True
+                    elif "conditional" in topic and self.is_v2_6_plus:
+                        if self.is_v2_7_plus:
+                            prompt_norm = normalize_text_nfkc(prompt).lower()
+                            is_inverted_req = bool(re.search(r"\binvert(?:ed|ion)?\b", prompt_norm))
+                            valid_cond_opts = []
+                            inconclusive_cond_opts = []
+                            for idx, ot in enumerate(opt_texts):
+                                clean = re.sub(r"^[A-Da-d][\).:]\s*", "", ot.strip())
+                                clean_l = clean.lower()
+                                words = clean_l.split()
+                                if not words:
+                                    inconclusive_cond_opts.append(idx + 1)
+                                    continue
+                                first = words[0]
+                                if first in ("had", "were", "should"):
+                                    protasis_part = clean_l.split(",")[0] if "," in clean_l else clean_l
+                                    p_words = protasis_part.split()
+                                    if first == "had":
+                                        has_participle = any((w.endswith("ed") and not w.endswith("eed")) for w in p_words[2:]) or any(w in {"seen", "known", "been", "done", "gone", "found", "checked"} for w in p_words[2:])
+                                        has_main = bool(re.search(r"\b(?:would|could|might)\s+have\s+[a-z]+", clean_l))
+                                        if has_participle and has_main:
+                                            valid_cond_opts.append(idx + 1)
+                                    elif first == "were":
+                                        m = re.search(r"\bwere\s+[a-z\s]+?\s+to\s+([a-z]+)", protasis_part)
+                                        has_main = bool(re.search(r"\b(?:would|could|might)\s+[a-z]+", clean_l))
+                                        if m and has_main:
+                                            v = m.group(1)
+                                            if not (v.endswith("s") and not v.endswith("ss")) and not (v.endswith("ed") and not v.endswith("eed")) and not (v.endswith("ing") and v != "bring"):
+                                                valid_cond_opts.append(idx + 1)
+                                    elif first == "should":
+                                        has_past = any(w in {"arose", "did", "was", "were", "had"} or (w.endswith("ed") and not w.endswith("eed")) for w in p_words[1:])
+                                        has_base = any(w in {"arise", "occur", "happen", "fail", "detect", "observe", "need", "find"} for w in p_words[1:])
+                                        has_main = bool(re.search(r",\s*(?:notify|inform|contact|call|please|report|\w+\s+(?:will|would|can|should))", clean_l))
+                                        if not has_past and (has_base or not any(w.endswith(("s", "ing")) for w in p_words[2:])) and has_main:
+                                            valid_cond_opts.append(idx + 1)
+                                elif first == "if":
+                                    if is_inverted_req:
+                                        # Distractor: non-inverted conditional where stem specifies inversion
+                                        pass
+                                    else:
+                                        has_third = bool(re.search(r"^if\s+[a-z\s]+?\s+had\s+[a-z]+.*?\b(?:would|could|might)\s+have\s+[a-z]+", clean_l))
+                                        has_second = bool(re.search(r"^if\s+[a-z\s]+?\s+(?:were|did|[a-z]+ed).*?\b(?:would|could|might)\s+[a-z]+", clean_l))
+                                        if has_third or has_second:
+                                            valid_cond_opts.append(idx + 1)
+
+                            if inconclusive_cond_opts:
+                                task_issues.append(f"Inconclusive conditional MCQ: option(s) {inconclusive_cond_opts} could not be conclusively validated")
+                                task_validity["unique_correct_answer"] = False
+                            elif len(valid_cond_opts) == 1:
+                                valid_idx = valid_cond_opts[0] - 1
+                                norm_prop = normalize_solver_answer(proposed_ans, q_type)
+                                prop_idx = ord(norm_prop) - ord("A") if norm_prop in ["A", "B", "C", "D"] else -1
+                                if prop_idx >= 0 and prop_idx != valid_idx:
+                                    task_issues.append(
+                                        f"Proposed answer key discord: proposed answer points to option {norm_prop} (index {prop_idx+1}), but unique grammatically valid conditional option is {chr(ord('A') + valid_idx)} (index {valid_idx+1})"
+                                    )
                                     task_validity["unique_correct_answer"] = False
                                 else:
                                     task_validity["unique_correct_answer"] = True
+                            elif len(valid_cond_opts) > 1:
+                                task_issues.append(f"Ambiguous conditional MCQ: multiple options {valid_cond_opts} are defensible conditional sentences")
+                                task_validity["unique_correct_answer"] = False
+                            elif len(valid_cond_opts) == 0:
+                                task_issues.append("Defective conditional MCQ: no options exhibit valid conditional structure")
+                                task_validity["unique_correct_answer"] = False
+                            else:
+                                task_validity["unique_correct_answer"] = True
                         else:
-                            task_validity["unique_correct_answer"] = True
-                    elif "conditional" in topic and self.is_v2_6_plus:
-                        valid_cond_opts = []
-                        for idx, ot in enumerate(opt_texts):
-                            ot_l = ot.lower()
-                            if re.search(r"^(?:[A-Da-d][\).:]\s*)?(?:had\s+\w+|were\s+\w+|should\s+\w+)", ot_l):
-                                if any(m in ot_l for m in ["would have", "could have", "might have", "would be", "could be"]):
+                            valid_cond_opts = []
+                            for idx, ot in enumerate(opt_texts):
+                                ot_l = ot.lower()
+                                if re.search(r"^(?:[A-Da-d][\).:]\s*)?(?:had\s+\w+|were\s+\w+|should\s+\w+)", ot_l):
+                                    if any(m in ot_l for m in ["would have", "could have", "might have", "would be", "could be"]):
+                                        valid_cond_opts.append(idx + 1)
+                                elif re.search(r"^(?:[A-Da-d][\).:]\s*)?if\s+", ot_l):
                                     valid_cond_opts.append(idx + 1)
-                            elif re.search(r"^(?:[A-Da-d][\).:]\s*)?if\s+", ot_l):
-                                valid_cond_opts.append(idx + 1)
-                        if len(valid_cond_opts) == 1:
-                            task_validity["unique_correct_answer"] = True
-                        elif len(valid_cond_opts) > 1:
-                            task_issues.append(f"Ambiguous conditional MCQ: multiple options {valid_cond_opts} are defensible conditional sentences")
-                            task_validity["unique_correct_answer"] = False
-                        elif len(valid_cond_opts) == 0:
-                            task_issues.append("Defective conditional MCQ: no options exhibit valid conditional structure")
-                            task_validity["unique_correct_answer"] = False
-                        else:
-                            task_validity["unique_correct_answer"] = True
+                            if len(valid_cond_opts) == 1:
+                                task_validity["unique_correct_answer"] = True
+                            elif len(valid_cond_opts) > 1:
+                                task_issues.append(f"Ambiguous conditional MCQ: multiple options {valid_cond_opts} are defensible conditional sentences")
+                                task_validity["unique_correct_answer"] = False
+                            elif len(valid_cond_opts) == 0:
+                                task_issues.append("Defective conditional MCQ: no options exhibit valid conditional structure")
+                                task_validity["unique_correct_answer"] = False
+                            else:
+                                task_validity["unique_correct_answer"] = True
                     elif "modal" in topic and self.is_v2_6_plus:
                         valid_modal_opts = []
                         for idx, ot in enumerate(opt_texts):
@@ -887,7 +1053,14 @@ class NeutralEvaluator:
         all_hard_pass = len(hard_issues) == 0 and all(hard_checks.values())
         all_task_pass = len(task_issues) == 0 and all(task_validity.values())
 
-        if not all_hard_pass or not all_task_pass or not is_rubric_pass:
+        inconclusive_issues = [
+            iss for iss in task_issues
+            if "Inconclusive" in iss or "could not be conclusively validated" in iss or "could not be conclusively parsed" in iss or "UNCERTAIN" in iss
+        ]
+        if self.is_v2_7_plus and inconclusive_issues:
+            verdict = EvaluationVerdict.UNCERTAIN
+            abstention_reason = f"INCONCLUSIVE_LINGUISTIC_JUDGMENT: {'; '.join(inconclusive_issues)}"
+        elif not all_hard_pass or not all_task_pass or not is_rubric_pass:
             verdict = EvaluationVerdict.FAIL
             if is_v2_3 and not proposed_ans:
                 abstention_reason = "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key"
@@ -992,5 +1165,21 @@ class NeutralEvaluatorV2_6(NeutralEvaluatorV2_5):
     ):
         super().__init__(
             rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.6"),
+            evaluator_version=evaluator_version,
+        )
+
+
+class NeutralEvaluatorV2_7(NeutralEvaluatorV2_6):
+    """Calibrated neutral evaluator with remediated verb-inflection filter (-ss base verbs),
+    inverted conditional distractor discrimination, robust mandative subjunctive parsing,
+    and explicit UNCERTAIN classification for inconclusive grammar structures (v2.7)."""
+
+    def __init__(
+        self,
+        rubric: Optional[RubricProfile] = None,
+        evaluator_version: str = "neutral-eval-v2.7",
+    ):
+        super().__init__(
+            rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.7"),
             evaluator_version=evaluator_version,
         )

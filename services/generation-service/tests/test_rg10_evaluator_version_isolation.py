@@ -19,6 +19,7 @@ from app.evaluators.independent import (
     NeutralEvaluatorV2_4,
     NeutralEvaluatorV2_5,
     NeutralEvaluatorV2_6,
+    NeutralEvaluatorV2_7,
     parse_evaluator_version_tuple,
 )
 from app.evaluators.rubric import EvaluationVerdict, RubricDimension
@@ -33,6 +34,7 @@ def test_numeric_version_parsing():
     assert parse_evaluator_version_tuple("neutral-eval-v2.4") == (2, 4)
     assert parse_evaluator_version_tuple("neutral-eval-v2.5") == (2, 5)
     assert parse_evaluator_version_tuple("neutral-eval-v2.6") == (2, 6)
+    assert parse_evaluator_version_tuple("neutral-eval-v2.7") == (2, 7)
     assert parse_evaluator_version_tuple("neutral-eval-v2.10") == (2, 10)
     assert parse_evaluator_version_tuple("v3.1") == (3, 1)
     assert parse_evaluator_version_tuple("invalid") == (2, 0)
@@ -77,7 +79,11 @@ def test_evaluator_feature_gates():
     ev_v2_6 = NeutralEvaluatorV2_6(evaluator_version="neutral-eval-v2.6")
     assert ev_v2_6.is_v2_5_plus
     assert ev_v2_6.is_v2_6_plus
+    assert not ev_v2_6.is_v2_7_plus
 
+    ev_v2_7 = NeutralEvaluatorV2_7(evaluator_version="neutral-eval-v2.7")
+    assert ev_v2_7.is_v2_6_plus
+    assert ev_v2_7.is_v2_7_plus
 def test_grammar_option_cues_isolation():
     """Option cues: v2.0 fails (no handler), v2.1 fails (stem cue blindspot), v2.2+ passes."""
     rule_pack = GrammarRulePack(
@@ -183,3 +189,48 @@ def test_missing_proposed_answer_fails_in_v2_3():
     assert res_v2_3.verdict == EvaluationVerdict.FAIL
     assert res_v2_3.semantic_scores[RubricDimension.GROUNDING.value] == 1.0
     assert "UNSCORABLE_MISSING_ANSWER" in (res_v2_3.abstention_reason or "")
+
+
+def test_v2_6_vs_v2_7_remediation_isolation():
+    """v2.6 maintains historical defect behavior while v2.7 resolves them."""
+    rule_pack_inv = GrammarRulePack(
+        rule_pack_id="pack-inv-iso-v27",
+        source=SourceRef(
+            source_id="src-inv", source_family="fam-inv", source_version="v1.0",
+            source_sha256="0" * 64, license="test", provenance_uri="https://test.internal",
+        ),
+        topic="Negative and Restrictive Adverbial Inversion",
+        level="C1",
+        rule_ids=["rule-inv-v27"],
+        applicability=["Academic"],
+        examples=["Under no circumstances should we bypass the interlock."],
+    )
+    q_bypass = {
+        "question_id": "q_iso_bypass",
+        "question_type": "GRAMMAR_MCQ",
+        "text": "Which sentence correctly demonstrates negative adverbial inversion?",
+        "options": [
+            "A) Under no circumstances we should bypass the interlock.",
+            "B) Under no circumstances should we bypass the interlock.",
+            "C) Under no circumstances we do bypass the interlock.",
+            "D) Under no circumstances should bypass we the interlock.",
+        ],
+        "proposed_answer": "B",
+    }
+    passage = "Under no circumstances should we bypass the interlock during operations."
+
+    # v2.6: Historical False Rejection (fails because 'bypass' ends in -s and was omitted from hardcoded list)
+    res_v2_6 = NeutralEvaluatorV2_6().evaluate_item(
+        dataset_item_id="item-iso-bypass-26", passage_text=passage, question_data=q_bypass,
+        context_metadata={"rule_pack": rule_pack_inv},
+    )
+    assert res_v2_6.verdict == EvaluationVerdict.FAIL
+    assert "Defective MCQ: no options exhibit valid negative inversion" in (res_v2_6.abstention_reason or "")
+
+    # v2.7: Remediation succeeds (recognizes 'bypass' as a valid base verb ending in -ss)
+    res_v2_7 = NeutralEvaluatorV2_7().evaluate_item(
+        dataset_item_id="item-iso-bypass-27", passage_text=passage, question_data=q_bypass,
+        context_metadata={"rule_pack": rule_pack_inv},
+    )
+    assert res_v2_7.verdict == EvaluationVerdict.PASS
+    assert res_v2_7.abstention_reason is None
