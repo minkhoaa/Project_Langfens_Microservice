@@ -3,7 +3,7 @@
 **Source Commit SHA:** `7b33b827aec8e1de3525ce6d09dff0830beb37e0`  
 **Date:** 2026-10-16T16:15:00Z  
 **Status:** PUBLISHED VERSIONED RESCORE (Preserves v2.3 Historical Baseline)  
-**Machine-Readable Artifact:** `generation_baseline/.execution/RG10_REMEDIATION/RG10_DEV_V2_4_EXPLICIT_RESCORE.json`  
+**Machine-Readable Artifact:** `generation_baseline/verification/RG10_DEV_V2_4_EXPLICIT_RESCORE.json`  
 **Evaluator Comparison:** `neutral-eval-v2.3` (baseline) vs `neutral-eval-v2.4` (rescore)  
 
 ---

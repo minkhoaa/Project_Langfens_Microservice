@@ -3,7 +3,7 @@
 **Source Commit SHA:** `7b33b827aec8e1de3525ce6d09dff0830beb37e0`  
 **Date:** 2026-10-16T16:00:00Z  
 **Status:** PUBLISHED CORRECTED RECONCILIATION  
-**Machine-Readable Artifact:** `generation_baseline/.execution/RG10_REMEDIATION/RG10_DEV_QUESTION_LEVEL_DISCREPANCY_REPORT.json`  
+**Machine-Readable Artifact:** `generation_baseline/verification/RG10_DEV_QUESTION_LEVEL_DISCREPANCY_REPORT.json`  
 **Authoritative Raw Records:** `generation_baseline/.execution/RG10_DEV_HARDENING_V2/raw_responses`  
 **Evaluator Used:** neutral-eval-v2.3 (`rubric-qgeval-v2.3`)  
 

@@ -125,8 +125,8 @@ _SYSTEMS = {
     "DIRECT_GENERATION_A": _GENERATION_SYSTEM,
     "DRAFT_GENERATION": _GENERATION_SYSTEM,
     "GENERATOR": _GENERATION_SYSTEM,
-    "BOUNDED_REVISION": _GENERATION_SYSTEM + " Revise the actual supplied draft using the critique. Ensure rule pack novelty, distractor validity, and strict factual grounding.",
-    "REPAIR": _GENERATION_SYSTEM + " Repair the actual supplied candidate using the listed issues. Ensure novel carrier sentences, exactly one valid MCQ option, and strict source grounding.",
+    "BOUNDED_REVISION": _GENERATION_SYSTEM + " Revise the actual supplied draft using the critique. Ensure rule pack novelty, distractor validity, and strict factual grounding. You MUST include proposed_answer on each revised question matching its revised text.",
+    "REPAIR": _GENERATION_SYSTEM + " Repair the actual supplied candidate using the listed issues. Ensure novel carrier sentences, exactly one valid MCQ option, and strict source grounding. You MUST include proposed_answer on each repaired question matching its repaired text.",
     "SELF_CRITIQUE": (
         'Critique the actual draft. Check for rule pack example copying, distractor ambiguity (e.g. that/which cleft variants), tense discord, and Reading polarity balance. Return raw JSON without markdown or code blocks: {"verdict":"APPROVED|REVISION_NEEDED|REJECTED",'
         '"score":0.0,"issues":["blocking issue"]}. A self-score is not an external rubric verdict.'
@@ -236,6 +236,12 @@ class _Run:
             return None
         dump = self.candidate.content.model_dump(mode="json")
         dump.pop("context_text", None)
+        # Defense-in-depth: Ensure proposed_answer or answer keys never leak to reviewer or solver
+        if "questions" in dump and isinstance(dump["questions"], list):
+            for q in dump["questions"]:
+                if isinstance(q, dict):
+                    q.pop("proposed_answer", None)
+                    q.pop("answer", None)
         return dump
 
     def identity_failure(self) -> str | None:

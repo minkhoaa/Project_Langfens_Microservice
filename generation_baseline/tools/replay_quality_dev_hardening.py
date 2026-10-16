@@ -64,12 +64,13 @@ from app.experiment.runners import (
 class ReplayExperimentClient:
     """Replays dispatches deterministically from saved authentic raw responses."""
 
-    def __init__(self, raw_responses_dir: Path) -> None:
+    def __init__(self, raw_responses_dir: Path, strict_ambiguity_mode: bool = False) -> None:
         self.raw_responses_dir = raw_responses_dir
+        self.strict_ambiguity_mode = strict_ambiguity_mode
         self.recorded_dispatches: List[Dict[str, Any]] = []
+        self.ambiguous_dispatches: List[Dict[str, Any]] = []
         self.cumulative_tokens = 0
         self.cumulative_spent_usd = 0.0
-
         # Load and index all authentic raw responses sorted by timestamp
         self._raw_records: List[Dict[str, Any]] = []
         for p in sorted(raw_responses_dir.glob("*.json")):
@@ -114,6 +115,49 @@ class ReplayExperimentClient:
                 f"Consumed: {len(self._consumed_filenames)} / {len(self._raw_records)}."
             )
 
+        ambiguity_status = "UNIQUE_AUTHORITATIVE_MATCH"
+        if len(candidates) > 1:
+            idx0 = self._raw_records.index(candidates[0])
+            idx1 = self._raw_records.index(candidates[1])
+            intervening = [
+                r.get("stage")
+                for r in self._raw_records[idx0+1:idx1]
+                if r.get("stage") != stage
+            ]
+            if intervening:
+                ambiguity_status = "RESOLVED_BY_PIPELINE_INTERLEAVE"
+                entry = {
+                    "stage": stage,
+                    "prompt_sha256": prompt_sha,
+                    "matched_count": len(candidates),
+                    "candidate_operations": [c.get("operation_id") for c in candidates],
+                    "candidate_filenames": [c["_filename"] for c in candidates],
+                    "intervening_stages": intervening,
+                    "ambiguity_status": "RESOLVED_BY_PIPELINE_INTERLEAVE",
+                    "resolution": f"Bound to pre-interleave candidate before stage(s): {intervening}",
+                    "bound_operation": candidates[0].get("operation_id"),
+                }
+                self.ambiguous_dispatches.append(entry)
+            else:
+                ambiguity_status = "AMBIGUOUS_REPLAY_EVIDENCE"
+                entry = {
+                    "stage": stage,
+                    "prompt_sha256": prompt_sha,
+                    "matched_count": len(candidates),
+                    "candidate_operations": [c.get("operation_id") for c in candidates],
+                    "candidate_filenames": [c["_filename"] for c in candidates],
+                    "intervening_stages": [],
+                    "ambiguity_status": "AMBIGUOUS_REPLAY_EVIDENCE",
+                    "resolution": "ADJACENT_CANDIDATES_UNRESOLVED",
+                    "bound_operation": candidates[0].get("operation_id"),
+                }
+                self.ambiguous_dispatches.append(entry)
+                if self.strict_ambiguity_mode:
+                    raise RuntimeError(
+                        f"AMBIGUOUS_REPLAY_EVIDENCE: Adjacent duplicate raw records match stage '{stage}' "
+                        f"and prompt_sha256 '{prompt_sha}' with no intervening pipeline stage. Operations: {entry['candidate_operations']}"
+                    )
+
         # Enforce unique, one-to-one response consumption in deterministic chronological order
         matched_record = candidates[0]
         self._consumed_filenames.add(matched_record["_filename"])
@@ -151,6 +195,7 @@ class ReplayExperimentClient:
             "prompt_sha256": prompt_sha,
             "response_sha256": matched_record.get("raw_text_sha256"),
             "tokens": tokens,
+            "ambiguity_status": ambiguity_status,
         })
 
         return LLMDispatchResponse(
@@ -586,6 +631,8 @@ def run_replay(
         "measurements_12_dimensions": measurements,
         "summary": summary.model_dump(mode="json"),
         "question_evaluations": question_evals,
+        "ambiguity_audit": client.ambiguous_dispatches,
+        "unconsumed_records": [r["_filename"] for r in client._raw_records if r["_filename"] not in client._consumed_filenames],
     }
 
     results_file = output_dir / "quality_dev_hardening_results.json"
@@ -616,7 +663,8 @@ def run_replay(
 
 **Execution Mode:** Pure Offline Replay (zero live provider network calls)  
 **Evaluator:** NeutralEvaluatorV2_3 (`neutral-eval-v2.3`, `rubric-qgeval-v2.3`)  
-**Raw Provider Dispatches Replayed:** 22 authentic MiniMax calls  
+**Raw Provider Dispatches Replayed:** {total_calls} authentic MiniMax calls  
+**Unconsumed Provider Records:** {len([r['_filename'] for r in client._raw_records if r['_filename'] not in client._consumed_filenames])} record(s)  
 **Replay Output Artifact:** `{results_file}`  
 
 ---
@@ -626,9 +674,10 @@ def run_replay(
 - **Total Dispatches:** {total_calls} calls (100% replayed from authentic raw provider responses)
 - **Cumulative Tokens:** {total_tokens:,} tokens (EXACT confidence from provider response headers)
 - **Spend:** ${spent_usd:.4f} USD
-- **Completed Assignments:** 5/6 (83.33% completion rate)
-- **Preserved Terminal Failures:** 1/6 (Arm C Reading terminated strictly as FAILED_VALIDATION upon REVIEW_REJECTED; 0 fake passes)
-
+- **Completed Assignments:** {m1['completed_requests']}/{m1['assigned_requests']} ({round(m1['completion_rate'] * 100, 2)}% completion rate)
+- **Preserved Terminal Failures:** {m1['failed_validation_requests']}/{m1['assigned_requests']} ({round((1 - m1['completion_rate']) * 100, 2)}% failed validation; Arm B and Arm C terminated strictly without fake passes)
+- **Unconsumed Raw Records:** {len([r['_filename'] for r in client._raw_records if r['_filename'] not in client._consumed_filenames])} record(s) ({', '.join([r['_filename'] for r in client._raw_records if r['_filename'] not in client._consumed_filenames]) or 'None'}). Note: research-REVIEWER-8 was unconsumed because research-REPAIR-7 omitted answer keys, triggering PROPOSED_ANSWERS_MISSING terminal failure before post-repair review dispatch.
+- **Replay Ambiguity Audit:** {len(client.ambiguous_dispatches)} dispatch(es) with identical (stage, prompt_sha256) matches (REVIEWER-18 vs REVIEWER-20). Resolution: {client.ambiguous_dispatches[0]['resolution'] if client.ambiguous_dispatches else 'NONE'}
 ---
 
 ## 2. Question-Level Matrix (n = {len(question_evals)}) with Authoritative Answer Provenance

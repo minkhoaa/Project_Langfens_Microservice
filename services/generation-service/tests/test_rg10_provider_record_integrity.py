@@ -156,3 +156,145 @@ def test_no_answer_borrowing_across_stages():
     assert auth_record["status"] == "UNSCORABLE_MISSING_ANSWER"
     # Verify earlier draft answer was not borrowed
     assert auth_record["proposed_answer"] != earlier_draft["proposed_answer"]
+
+
+def test_duplicate_records_resolved_by_pipeline_interleave(tmp_path: Path):
+    """Duplicate prompt hashes separated by an intervening pipeline stage are resolved by interleave."""
+    prompt = "Review candidate question"
+    prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+
+    rec1 = {
+        "stage": "REVIEWER",
+        "operation_id": "research-REVIEWER-1",
+        "prompt_sha256": prompt_sha,
+        "raw_text": "{\"status\": \"REJECTED\"}",
+        "raw_text_sha256": hashlib.sha256(b"{\"status\": \"REJECTED\"}").hexdigest(),
+        "recorded_at_ns": 100,
+    }
+    rec_intervening = {
+        "stage": "REPAIR",
+        "operation_id": "research-REPAIR-2",
+        "prompt_sha256": hashlib.sha256(b"Repair prompt").hexdigest(),
+        "raw_text": "{\"status\": \"REPAIRED\"}",
+        "raw_text_sha256": hashlib.sha256(b"{\"status\": \"REPAIRED\"}").hexdigest(),
+        "recorded_at_ns": 200,
+    }
+    rec2 = {
+        "stage": "REVIEWER",
+        "operation_id": "research-REVIEWER-3",
+        "prompt_sha256": prompt_sha,
+        "raw_text": "{\"status\": \"APPROVED\"}",
+        "raw_text_sha256": hashlib.sha256(b"{\"status\": \"APPROVED\"}").hexdigest(),
+        "recorded_at_ns": 300,
+    }
+    (tmp_path / "rec_01.json").write_text(json.dumps(rec1), encoding="utf-8")
+    (tmp_path / "rec_02.json").write_text(json.dumps(rec_intervening), encoding="utf-8")
+    (tmp_path / "rec_03.json").write_text(json.dumps(rec2), encoding="utf-8")
+
+    client = ReplayExperimentClient(tmp_path)
+    res1 = client.dispatch(prompt=prompt, model_id="minimax/MiniMax-Text-01", stage="REVIEWER")
+    assert "REJECTED" in res1.raw_text
+    assert len(client.ambiguous_dispatches) == 1
+    assert client.ambiguous_dispatches[0]["ambiguity_status"] == "RESOLVED_BY_PIPELINE_INTERLEAVE"
+    assert client.ambiguous_dispatches[0]["intervening_stages"] == ["REPAIR"]
+
+
+def test_adjacent_duplicate_records_fail_closed_under_strict_mode(tmp_path: Path):
+    """Adjacent duplicate records with no intervening stage fail closed when strict_ambiguity_mode=True."""
+    prompt = "Review candidate question"
+    prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+
+    rec1 = {
+        "stage": "REVIEWER",
+        "operation_id": "research-REVIEWER-1",
+        "prompt_sha256": prompt_sha,
+        "raw_text": "{\"status\": \"REJECTED\"}",
+        "raw_text_sha256": hashlib.sha256(b"{\"status\": \"REJECTED\"}").hexdigest(),
+        "recorded_at_ns": 100,
+    }
+    rec2 = {
+        "stage": "REVIEWER",
+        "operation_id": "research-REVIEWER-2",
+        "prompt_sha256": prompt_sha,
+        "raw_text": "{\"status\": \"APPROVED\"}",
+        "raw_text_sha256": hashlib.sha256(b"{\"status\": \"APPROVED\"}").hexdigest(),
+        "recorded_at_ns": 101,  # Adjacent with no intervening stage!
+    }
+    (tmp_path / "rec_01.json").write_text(json.dumps(rec1), encoding="utf-8")
+    (tmp_path / "rec_02.json").write_text(json.dumps(rec2), encoding="utf-8")
+
+    client_strict = ReplayExperimentClient(tmp_path, strict_ambiguity_mode=True)
+    with pytest.raises(RuntimeError, match="AMBIGUOUS_REPLAY_EVIDENCE"):
+        client_strict.dispatch(prompt=prompt, model_id="minimax/MiniMax-Text-01", stage="REVIEWER")
+
+
+def test_missing_proposed_answer_triggers_proposed_answers_missing():
+    """When candidate questions omit proposed_answer, parse_candidate flags PROPOSED_ANSWERS_MISSING."""
+    from app.contracts.research import StandaloneReadingRequest, ReadingTask, StandaloneGroupType
+    from app.experiment.parsing import parse_candidate
+
+    req = StandaloneReadingRequest(
+        run_id="test-run",
+        dataset_item_id="dev-reading-01",
+        configuration_id="B",
+        task=ReadingTask(
+            requested_groups=[StandaloneGroupType.TFNG],
+            requested_question_count=1,
+            difficulty="MEDIUM",
+        ),
+        source_pack_id="src-01",
+    )
+    raw_json = json.dumps({
+        "context_text": "Photosynthesis produces carbohydrates in green plants.",
+        "question_groups": [{"group_id": "g1", "question_ids": ["q1"]}],
+        "questions": [
+            {
+                "question_id": "q1",
+                "question_type": "TFNG",
+                "text": "Plants produce carbohydrates through photosynthesis.",
+                "instructions": "Determine if TRUE, FALSE, or NOT GIVEN.",
+                # Notice: proposed_answer is omitted!
+            }
+        ],
+    })
+
+    cand = parse_candidate(raw_json, req, "Photosynthesis produces carbohydrates in green plants.")
+    assert cand.failure_code == "PROPOSED_ANSWERS_MISSING"
+
+
+def test_visible_candidate_scrubs_proposed_answers_for_reviewer():
+    """Ensure answer-blind reviewer/solver never receives proposed_answer or answer keys."""
+    from app.contracts.research import StandaloneReadingRequest, ReadingTask, StandaloneGroupType
+    from app.experiment.runners import _Run
+
+    req = StandaloneReadingRequest(
+        run_id="test-run",
+        dataset_item_id="dev-reading-01",
+        configuration_id="C",
+        task=ReadingTask(
+            requested_groups=[StandaloneGroupType.TFNG],
+            requested_question_count=1,
+            difficulty="MEDIUM",
+        ),
+        source_pack_id="src-01",
+    )
+    run = _Run(None, req, "C", "v3.1", "minimax/MiniMax-Text-01", "Passage text.")
+
+    # Create mock parsed candidate with proposed answers
+    from app.contracts.research import NeutralOutput, NeutralQuestion, NeutralQuestionGroup
+    content = NeutralOutput(
+        context_text="Passage text.",
+        question_groups=[NeutralQuestionGroup(group_id="g1", question_ids=["q1"])],
+        questions=[NeutralQuestion(question_id="q1", question_type=StandaloneGroupType.TFNG,
+                                   text="Is this true?", instructions="True/False", options=[])],
+    )
+    from app.experiment.parsing import ParsedCandidate
+    from app.contracts.research import OutputAvailability
+    run.candidate = ParsedCandidate(content, OutputAvailability.NORMALIZED, None, (("q1", "TRUE"),))
+
+    vis = run.visible()
+    assert vis is not None
+    assert "context_text" not in vis
+    for q in vis.get("questions", []):
+        assert "proposed_answer" not in q
+        assert "answer" not in q

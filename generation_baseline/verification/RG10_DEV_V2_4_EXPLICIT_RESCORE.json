@@ -2,6 +2,13 @@
   "artifact_identity": "RG10_DEV_V2_4_EXPLICIT_RESCORE_V1",
   "timestamp": "2026-10-16T16:15:00Z",
   "purpose": "Explicit Versioned Rescore of Replayed DEV Items under NeutralEvaluatorV2_4",
+  "provenance": {
+    "source_commit_sha": "2b13a907313d3868f60919c96a76429307d921ab",
+    "method": "v2.4 re-scored the authentic v2.3-replayed question_evaluations (pipeline not re-run)",
+    "input_artifact_path": "generation_baseline/verification/RG10_DEV_QUESTION_LEVEL_DISCREPANCY_REPORT.json",
+    "grammar_rule_pack_id": "pack-cleft-dev-03",
+    "grammar_rule_ids": ["rule-cleft-02"]
+  },
   "evaluator_baseline": {
     "evaluator_version": "neutral-eval-v2.3",
     "rubric_version": "rubric-qgeval-v2.3",
