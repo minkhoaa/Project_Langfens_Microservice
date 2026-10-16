@@ -110,16 +110,18 @@ _GENERATION_SYSTEM = (
     "For reading tasks: set every question's question_type to exactly the single requested type in requested_groups "
     "(one of: TFNG, MCQ_SINGLE, SENTENCE_COMPLETION, SUMMARY_COMPLETION, YNNG, SHORT_ANSWER). "
     "For TFNG/YNNG tasks, generate genuinely grounded questions supporting TRUE, FALSE, and NOT GIVEN: "
+    "When 3 or more questions are requested, you MUST include at least one TRUE, at least one FALSE, and at least one NOT GIVEN question. Do NOT omit NOT GIVEN. "
     "TRUE must be strictly entailed by passage text; FALSE must directly contradict passage assertions; "
-    "NOT GIVEN must assert plausible claims neither confirmed nor contradicted. "
-    "Distribute labels across questions to avoid monolithic all-TRUE bias. Prevent repeated factual claims or trivial surface copies. "
+    "NOT GIVEN must assert a plausible claim about a topic mentioned in the text whose specific relation, quantity, or outcome is completely absent from the passage. "
+    "Distribute labels across questions to avoid monolithic all-TRUE or binary TRUE/FALSE bias. Prevent repeated factual claims or trivial surface copies. "
     "For grammar tasks: use the single question_type matching the requested exercise_type "
     "(GRAMMAR_MCQ for MCQ_SINGLE, GRAMMAR_GAP for GAP_FILL, GRAMMAR_CORRECTION for ERROR_CORRECTION) across all questions. "
     "Generate novel carrier sentences derived from the GrammarRulePack rules; do NOT copy the rule pack's example sentences as final exercise items. "
     "For single-answer MCQs, verify that exactly ONE option is grammatically correct and defensible under standard academic grammar. "
-    "Ensure distractors are unambiguously incorrect and do not introduce semantically equivalent, contracted-inversion, or duplicate valid answers. "
+    "Every incorrect option (distractor) MUST contain an unambiguous grammatical defect (such as subject-verb agreement discord, missing auxiliary/copula, or illegal word order); "
+    "do NOT create distractors merely by changing tense, aspect, or valid pronouns (e.g. 'is' vs 'was', 'that' vs 'which') if both variants remain standard English sentences. "
     "Randomize and balance the position of the correct answer among options A, B, C, and D to prevent first-option position bias. "
-    "Never leak or quote the proposed answer in the question stem. For Grammar MCQs, every option must be a complete candidate sentence exemplifying the target structure, not bare noun phrases or fragments. "
+    "Never leak or quote the proposed answer in the question stem. For Grammar MCQs, every option must be a complete candidate sentence exemplifying the target structure, not bare noun phrases, single words, or fragments. "
     "Include proposed_answer privately on each question. Do not claim any proposed answer is verified gold. Do not emit scores or metadata."
 )
 _SYSTEMS = {
@@ -129,14 +131,14 @@ _SYSTEMS = {
     "BOUNDED_REVISION": _GENERATION_SYSTEM + " Revise the actual supplied draft using the critique. Ensure rule pack novelty, distractor validity, and strict factual grounding. You MUST include proposed_answer on each revised question matching its revised text.",
     "REPAIR": _GENERATION_SYSTEM + " Repair the actual supplied candidate using the listed issues. Ensure novel carrier sentences, exactly one valid MCQ option, and strict source grounding. You MUST include proposed_answer on each repaired question matching its repaired text.",
     "SELF_CRITIQUE": (
-        'Critique the actual draft. Check for rule pack example copying, distractor ambiguity (e.g. that/which cleft variants), tense discord, and Reading polarity balance. Return raw JSON without markdown or code blocks: {"verdict":"APPROVED|REVISION_NEEDED|REJECTED",'
+        'Critique the actual draft. Check for rule pack example copying, distractor ambiguity (ensure only ONE option is a grammatically defensible sentence), tense discord, and Reading label balance (verify that TFNG includes TRUE, FALSE, and NOT GIVEN). Return raw JSON without markdown or code blocks: {"verdict":"APPROVED|REVISION_NEEDED|REJECTED",'
         '"score":0.0,"issues":["blocking issue"]}. A self-score is not an external rubric verdict.'
     ),
     "REVIEWER": (
         'Independently review source grounding, clarity, distractor validity, and answer uniqueness without a proposed answer key. '
-        'Reject any question where the prompt leaks the answer verbatim or where distractors contain multiple defensible choices. '
-        'For Grammar, verify that carrier sentences are novel (not copied from rule pack examples), that every option is a complete candidate sentence (not bare noun phrases), and that exactly one option is grammatically defensible. '
-        'For Reading, verify that TRUE/FALSE/NOT GIVEN statements are strictly grounded without unsupported generalizations. '
+        'Reject any question where the prompt leaks the answer verbatim, where distractors contain multiple defensible choices (e.g. more than one grammatically standard sentence in an MCQ), or where options are fragments instead of full sentences. '
+        'For Grammar, verify that carrier sentences are novel (not copied from rule pack examples), that every option is a complete candidate sentence, and that exactly one option is grammatically defensible. '
+        'For Reading, verify that TRUE/FALSE/NOT GIVEN statements are strictly grounded, and flag lack of NOT GIVEN diversity if all questions are binary TRUE/FALSE. '
         'Return raw JSON without markdown or code blocks: {"status":"APPROVED|REJECTED","issues":["blocking issue"]}. '
         'Use APPROVED only if no blocking issue remains.'
     ),
@@ -338,7 +340,12 @@ class _Run:
                 ans_str = str(ans).strip() if ans is not None else ""
                 is_missing = not bool(ans_str)
                 q_text = getattr(q, "text", "")
-                q_content_hash = _hash(canonical_json_dump(q.model_dump(mode="json")))
+                q_text_sha = _hash(q_text.strip())
+                q_content_hash = _hash(canonical_json_dump({
+                    "text": q_text.strip(),
+                    "options": list(getattr(q, "options", [])),
+                    "instructions": getattr(q, "instructions", ""),
+                }))
                 authoritative_answers.append({
                     "campaign_id": getattr(self.request, "campaign_id", "RG10_DEV"),
                     "assignment_id": getattr(self.request, "assignment_id", self.request.run_id),
@@ -346,6 +353,7 @@ class _Run:
                     "stage": candidate_stage,
                     "question_id": qid,
                     "question_text": q_text,
+                    "question_text_sha256": q_text_sha,
                     "question_content_hash": q_content_hash,
                     "output_response_sha256": response_hash,
                     "proposed_answer": ans_str if not is_missing else None,

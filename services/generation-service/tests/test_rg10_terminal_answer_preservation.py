@@ -133,8 +133,15 @@ def test_arm_b_revision_receives_newly_validated_answers_without_draft_borrowing
     assert q_prov["stage"] == "BOUNDED_REVISION"
     assert q_prov["proposed_answer"] == "TRUE"  # Matches revised answer, NOT draft "FALSE"
     assert q_prov["status"] == "AVAILABLE"
-    assert q_prov["question_text"] == "Obligate CAM species nocturnally assimilate atmospheric carbon dioxide."
-    assert q_prov["question_content_hash"] is not None
+    expected_text = "Obligate CAM species nocturnally assimilate atmospheric carbon dioxide."
+    assert q_prov["question_text"] == expected_text
+    assert q_prov["question_text_sha256"] == hashlib.sha256(expected_text.encode("utf-8")).hexdigest()
+    expected_content_hash = hashlib.sha256(canonical_json_dump({
+        "text": expected_text,
+        "options": [],
+        "instructions": "True/False/Not Given",
+    }).encode("utf-8")).hexdigest()
+    assert q_prov["question_content_hash"] == expected_content_hash
 
 
 def test_arm_b_missing_answers_in_revision_causes_explicit_failure_without_borrowing():
@@ -256,8 +263,15 @@ def test_arm_c_scoped_repair_recovers_missing_answers_with_answer_blind_review()
     assert len(prov) == 1
     assert prov[0]["proposed_answer"] == "TRUE"
     assert prov[0]["status"] == "AVAILABLE"
-    assert prov[0]["question_text"] == "Obligate CAM species nocturnally assimilate atmospheric carbon dioxide."
-    assert prov[0]["question_content_hash"] is not None
+    expected_c_text = "Obligate CAM species nocturnally assimilate atmospheric carbon dioxide."
+    assert prov[0]["question_text"] == expected_c_text
+    assert prov[0]["question_text_sha256"] == hashlib.sha256(expected_c_text.encode("utf-8")).hexdigest()
+    expected_c_content_hash = hashlib.sha256(canonical_json_dump({
+        "text": expected_c_text,
+        "options": [],
+        "instructions": "True/False/Not Given",
+    }).encode("utf-8")).hexdigest()
+    assert prov[0]["question_content_hash"] == expected_c_content_hash
 
 
 def test_arm_c_unsuccessful_repairs_are_preserved_without_fake_pass():
