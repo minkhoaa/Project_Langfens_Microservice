@@ -573,6 +573,122 @@ EVALUATOR_V2_3_CALIBRATION_CORPUS: List[CalibrationItem] = [
     ),
 ]
 
+# ── Enhanced Labeled Calibration Corpus for NeutralEvaluatorV2_5 (RG10-S03, RG10-S05) ─
+# Preserves all 17 v2.3 calibration items with historical reference labels untouched.
+# Adds independent positive, negative, adversarial, and ambiguous controls (total n = 23).
+EVALUATOR_V2_5_CALIBRATION_CORPUS: List[CalibrationItem] = list(EVALUATOR_V2_3_CALIBRATION_CORPUS) + [
+    # 18. Independent Positive Control: Valid paraphrase with true entailment (Reference: PASS)
+    CalibrationItem(
+        item_id="v25-calib-pos-control-18",
+        source_family_id="fam-calib-v25-mangrove-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="Mangrove ecosystems sequester carbon in anaerobic substrate at four times the rate of terrestrial forests.",
+        question_data={
+            "question_number": 18,
+            "question_type": "TFNG",
+            "prompt": "Mangroves trap carbon in waterlogged soils at higher rates than inland forests.",
+            "answer": "TRUE",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Legitimate substantive paraphrase: 'anaerobic substrate' -> 'waterlogged soils', 'terrestrial forests' -> 'inland forests', 'four times the rate' -> 'higher rates'.",
+    ),
+    # 19. Independent Negative Control: Inverted comparison polarity (Reference: FAIL)
+    CalibrationItem(
+        item_id="v25-calib-neg-control-19",
+        source_family_id="fam-calib-v25-mangrove-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Mangrove ecosystems sequester carbon in anaerobic substrate at four times the rate of terrestrial forests.",
+        question_data={
+            "question_number": 19,
+            "question_type": "TFNG",
+            "prompt": "Inland forests sequester carbon in soil faster than mangrove ecosystems.",
+            "answer": "TRUE",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Inverted comparison: statement directly contradicts text by claiming inland forests are faster.",
+    ),
+    # 20. Independent Adversarial Control: Cross-clause 'whereas' chimera statement (Reference: FAIL)
+    CalibrationItem(
+        item_id="v25-calib-adv-control-20",
+        source_family_id="fam-calib-v25-iguana-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Marine iguanas forage on submerged benthic algae, whereas terrestrial iguanas feed exclusively on xerophytic cacti.",
+        question_data={
+            "question_number": 20,
+            "question_type": "TFNG",
+            "prompt": "Marine iguanas feed exclusively on xerophytic cacti.",
+            "answer": "TRUE",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Chimera contradiction: statement splices subject from Clause 1 ('marine iguanas') with predicate from Clause 2 ('feed on cacti').",
+    ),
+    # 21. Independent Ambiguous Control: Grammar MCQ with multiple valid cleft relative pronouns (Reference: FAIL)
+    CalibrationItem(
+        item_id="v25-calib-ambig-control-21",
+        source_family_id="fam-calib-v25-cleft-02",
+        domain="grammar",
+        question_type="GRAMMAR_MCQ",
+        stratum=BenchmarkStratum.DISTRACTOR_DEFECT,
+        passage_text="When emphasizing a specific syntactic element, it-clefts use 'It is/was + [element] + that/who + [clause]'.",
+        question_data={
+            "question_number": 21,
+            "question_type": "GRAMMAR_MCQ",
+            "text": "Which sentence correctly uses an it-cleft structure to emphasize 'the research team'?",
+            "options": [
+                "A) It was the research team that developed the vaccine.",
+                "B) It was the research team who developed the vaccine.",
+                "C) The research team developed the vaccine efficiently.",
+                "D) Developing the vaccine was the research team.",
+            ],
+            "answer": "A",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Ambiguous distractor: both Option A ('that') and Option B ('who') are grammatically standard it-clefts emphasizing a human collective noun. Violates single unambiguous key constraint.",
+        context_metadata={"rule_pack": CALIB_CLEFT_RULE_PACK},
+    ),
+    # 22. Independent Positive NOT GIVEN Control: Topical anchor present, proposition absent (Reference: PASS)
+    CalibrationItem(
+        item_id="v25-calib-notgiven-anchor-22",
+        source_family_id="fam-calib-v25-biolum-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="Bioluminescent dinoflagellates emit blue-green flashes via luciferin oxidation when agitated by shear stress in coastal waters.",
+        question_data={
+            "question_number": 22,
+            "question_type": "TFNG",
+            "prompt": "Bioluminescent dinoflagellate blooms were observed during the seventeenth century in the Mediterranean.",
+            "answer": "NOT GIVEN",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Well-formed valid NOT GIVEN item: passage discusses bioluminescent dinoflagellates, but seventeenth-century Mediterranean observations are unmentioned.",
+    ),
+    # 23. Independent Negative Control: Unanchored fabricated question (Reference: FAIL)
+    CalibrationItem(
+        item_id="v25-calib-notgiven-unanchored-23",
+        source_family_id="fam-calib-v25-biolum-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Bioluminescent dinoflagellates emit blue-green flashes via luciferin oxidation when agitated by shear stress in coastal waters.",
+        question_data={
+            "question_number": 23,
+            "question_type": "TFNG",
+            "prompt": "Geothermal hydrothermal vents operate under immense hydrostatic pressure.",
+            "answer": "NOT GIVEN",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Completely ungrounded hallucination: prompt shares zero topical anchor with the source passage.",
+    ),
+]
+
+
 
 # ── Historical Judge Holdout Corpus (RETIRED 2026-10-16 PRETUNING) ───────────
 # Invariant disclosure: This split was read and evaluated pre-tuning on 2026-10-16

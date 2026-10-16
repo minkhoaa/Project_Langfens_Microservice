@@ -219,7 +219,7 @@ def detect_contradiction_in_text(statement: str, reference_text: str, enable_con
                     if len(s_stems & excl_words) >= 2:
                         return True
 
-def detect_entailment_in_text(statement: str, reference_text: str, enable_contrastive_exclusion: bool = False, enable_refined_contrastive_clause: bool = False) -> bool:
+def detect_entailment_in_text(statement: str, reference_text: str, enable_contrastive_exclusion: bool = False, enable_refined_contrastive_clause: bool = False, enable_contrastive_entailment: bool = False) -> bool:
     """Checks if statement is entailed by any sentence in reference_text with compatible polarity."""
     if detect_contradiction_in_text(statement, reference_text, enable_contrastive_exclusion=enable_contrastive_exclusion, enable_refined_contrastive_clause=enable_refined_contrastive_clause):
         return False
@@ -248,6 +248,19 @@ def detect_entailment_in_text(statement: str, reference_text: str, enable_contra
                     if len(s_stems & excl_words) >= 2:
                         has_exclusion = True
                         break
+            if enable_contrastive_entailment and not has_exclusion:
+                for marker in ["whereas"]:
+                    if f" {marker} " in f" {r_clean} " and marker not in s_clean:
+                        parts = r_clean.split(marker, 1)
+                        c1_stems = {stem_token(w) for w in re.findall(r"\b\w+\b", parts[0]) if len(w) > 3}
+                        c2_stems = {stem_token(w) for w in re.findall(r"\b\w+\b", parts[1]) if len(w) > 3}
+                        s_stems = {stem_token(w) for w in re.findall(r"\b\w+\b", s_clean) if len(w) > 3}
+                        if s_stems:
+                            overlap_1 = sum(1 for st in s_stems if st in c1_stems) / len(s_stems)
+                            overlap_2 = sum(1 for st in s_stems if st in c2_stems) / len(s_stems)
+                            if overlap_1 < 0.70 and overlap_2 < 0.70:
+                                has_exclusion = True
+                                break
             if has_exclusion:
                 continue
         s_words = [w for w in re.findall(r"\b\w+\b", s_clean) if len(w) > 3 and w not in {"that", "with", "from", "this", "they", "have", "were"}]

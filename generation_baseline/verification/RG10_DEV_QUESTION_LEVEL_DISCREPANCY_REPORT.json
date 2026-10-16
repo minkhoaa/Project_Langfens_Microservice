@@ -1,0 +1,1109 @@
+{
+  "report_id": "RG10_DEV_QUESTION_LEVEL_DISCREPANCY_REPORT_V1",
+  "generated_at": "2026-10-16T16:00:00Z",
+  "purpose": "Full Question-Level Evidence Reconciliation and Discrepancy Audit",
+  "sources": {
+    "raw_responses_directory": "generation_baseline/.execution/RG10_DEV_HARDENING_V2/raw_responses",
+    "published_results_artifact": "generation_baseline/.execution/RG10_DEV_HARDENING_V2/quality_dev_hardening_results.json",
+    "authoritative_replay_artifact": "generation_baseline/.execution/RG10_DEV_HARDENING_V2_REPLAY/quality_dev_hardening_results.json"
+  },
+  "investigation_reading_arm_a_q1": {
+    "disputed_phrase": "through their open stomata",
+    "authoritative_raw_dispatch": "research-DIRECT_GENERATION_A-1_DIRECT_GENERATION_A_1792132951678558827.json",
+    "authoritative_raw_text": "CAM plants assimilate atmospheric carbon dioxide during the night.",
+    "published_prompt_text": "CAM plants assimilate atmospheric carbon dioxide during the night through their open stomata.",
+    "findings": [
+      "The phrase 'through their open stomata' appears nowhere in any of the 22 authentic raw provider response records.",
+      "The raw provider response (SHA256: 32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593) contains solely: 'CAM plants assimilate atmospheric carbon dioxide during the night.'",
+      "The phrase was manually/externally injected into the derived quality_dev_hardening_results.json line 112 post-hoc.",
+      "Under NeutralEvaluatorV2_3, the authentic raw prompt evaluates to FAIL due to contrastive-clause false rejection ('unlike standard C3 plants').",
+      "Injecting 'through their open stomata' masked this evaluator defect and improperly caused Q1 to appear as PASS."
+    ],
+    "verdict_provenance_break": true
+  },
+  "summary_metrics": {
+    "total_questions_audited": 15,
+    "questions_with_discrepancies": 15,
+    "discrepancy_categories": {
+      "prompt_text_tampering_or_drift": 8,
+      "borrowed_answers_unscorable_missing": 6,
+      "verdict_reproducibility_failures": 7,
+      "missing_provenance_records": 15
+    },
+    "authoritative_v2_3_verdicts": {
+      "PASS": 4,
+      "FAIL": 11,
+      "UNCERTAIN": 0
+    },
+    "published_v2_verdicts": {
+      "PASS": 11,
+      "FAIL": 4,
+      "UNCERTAIN": 0
+    }
+  },
+  "items": [
+    {
+      "index": 1,
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/DIRECT_GENERATION_A_32e1ada8c0d5.json",
+        "terminal_stage": "DIRECT_GENERATION_A",
+        "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+        "prompt_text": "CAM plants assimilate atmospheric carbon dioxide during the night.",
+        "options": [],
+        "raw_proposed_answer": "TRUE",
+        "canonical_proposed_answer": "TRUE",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "CAM plants assimilate atmospheric carbon dioxide during the night through their open stomata.",
+        "options": [],
+        "published_proposed_answer": "TRUE",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 1.0,
+        "answerability_score": 1.0,
+        "abstention_reason": "Entailment contradiction: passage contradicts TRUE statement; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+        "evidence_refs": [
+          "assimilate atmospheric carbon dioxide"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": false
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "prompt",
+          "published_old": "CAM plants assimilate atmospheric carbon dioxide during the night through their open stomata.",
+          "authoritative_raw": "CAM plants assimilate atmospheric carbon dioxide during the night.",
+          "finding": "Prompt text modified post-generation in published artifact"
+        },
+        {
+          "field": "verdict",
+          "published_old": "PASS",
+          "authoritative_raw": "FAIL",
+          "finding": "Published verdict PASS does not reproduce under authentic v2.3 evaluation (got FAIL)"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_A__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_A__att1",
+            "stage": "DIRECT_GENERATION_A",
+            "question_id": "1",
+            "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 2,
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/DIRECT_GENERATION_A_32e1ada8c0d5.json",
+        "terminal_stage": "DIRECT_GENERATION_A",
+        "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+        "prompt_text": "CAM plants open their stomata during the day to absorb carbon dioxide.",
+        "options": [],
+        "raw_proposed_answer": "FALSE",
+        "canonical_proposed_answer": "FALSE",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "CAM plants open their stomata during the day to absorb carbon dioxide.",
+        "options": [],
+        "published_proposed_answer": "FALSE",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "PASS",
+        "grounding_score": 4.0,
+        "answerability_score": 4.0,
+        "abstention_reason": null,
+        "evidence_refs": [
+          "stomata during"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_A__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_A__att1",
+            "stage": "DIRECT_GENERATION_A",
+            "question_id": "2",
+            "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 3,
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/DIRECT_GENERATION_A_32e1ada8c0d5.json",
+        "terminal_stage": "DIRECT_GENERATION_A",
+        "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+        "prompt_text": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles until daybreak.",
+        "options": [],
+        "raw_proposed_answer": "TRUE",
+        "canonical_proposed_answer": "TRUE",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles.",
+        "options": [],
+        "published_proposed_answer": "TRUE",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 1.0,
+        "answerability_score": 1.0,
+        "abstention_reason": "Entailment contradiction: passage contradicts TRUE statement; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+        "evidence_refs": [
+          "central vacuoles until daybreak"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": false
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "prompt",
+          "published_old": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles.",
+          "authoritative_raw": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles until daybreak.",
+          "finding": "Prompt text modified post-generation in published artifact"
+        },
+        {
+          "field": "verdict",
+          "published_old": "PASS",
+          "authoritative_raw": "FAIL",
+          "finding": "Published verdict PASS does not reproduce under authentic v2.3 evaluation (got FAIL)"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_A__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_A__att1",
+            "stage": "DIRECT_GENERATION_A",
+            "question_id": "3",
+            "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 4,
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/BOUNDED_REVISION_e71012d6d93c.json",
+        "terminal_stage": "BOUNDED_REVISION",
+        "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+        "prompt_text": "CAM plants open their stomata during the day to take in carbon dioxide.",
+        "options": [],
+        "raw_proposed_answer": null,
+        "canonical_proposed_answer": null,
+        "provenance_status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "published_historical_record": {
+        "prompt_text": "CAM plants open their stomata during the day to take in carbon dioxide.",
+        "options": [],
+        "published_proposed_answer": "FALSE",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 1.0,
+        "answerability_score": 1.0,
+        "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+        "evidence_refs": [
+          "stomata during"
+        ],
+        "task_validity": {
+          "has_proposed_answer": false,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "proposed_answer",
+          "published_old": "FALSE",
+          "authoritative_raw": null,
+          "finding": "Answer borrowed from rejected draft/generator stage in published artifact; authoritative status is UNSCORABLE_MISSING_ANSWER"
+        },
+        {
+          "field": "verdict",
+          "published_old": "PASS",
+          "authoritative_raw": "FAIL",
+          "finding": "Published verdict PASS does not reproduce under authentic v2.3 evaluation (got FAIL)"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_B__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_B__att1",
+            "stage": "BOUNDED_REVISION",
+            "question_id": "1",
+            "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+            "status": "UNSCORABLE_MISSING_ANSWER"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 5,
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/BOUNDED_REVISION_e71012d6d93c.json",
+        "terminal_stage": "BOUNDED_REVISION",
+        "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+        "prompt_text": "Malate is the primary four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+        "options": [],
+        "raw_proposed_answer": null,
+        "canonical_proposed_answer": null,
+        "provenance_status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "published_historical_record": {
+        "prompt_text": "Malate is the primary four-carbon dicarboxylic acid produced in CAM plants.",
+        "options": [],
+        "published_proposed_answer": "TRUE",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 1.0,
+        "answerability_score": 1.0,
+        "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+        "evidence_refs": [
+          "dicarboxylic acid"
+        ],
+        "task_validity": {
+          "has_proposed_answer": false,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "prompt",
+          "published_old": "Malate is the primary four-carbon dicarboxylic acid produced in CAM plants.",
+          "authoritative_raw": "Malate is the primary four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+          "finding": "Prompt text modified post-generation in published artifact"
+        },
+        {
+          "field": "proposed_answer",
+          "published_old": "TRUE",
+          "authoritative_raw": null,
+          "finding": "Answer borrowed from rejected draft/generator stage in published artifact; authoritative status is UNSCORABLE_MISSING_ANSWER"
+        },
+        {
+          "field": "verdict",
+          "published_old": "PASS",
+          "authoritative_raw": "FAIL",
+          "finding": "Published verdict PASS does not reproduce under authentic v2.3 evaluation (got FAIL)"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_B__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_B__att1",
+            "stage": "BOUNDED_REVISION",
+            "question_id": "2",
+            "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+            "status": "UNSCORABLE_MISSING_ANSWER"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 6,
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/BOUNDED_REVISION_e71012d6d93c.json",
+        "terminal_stage": "BOUNDED_REVISION",
+        "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+        "prompt_text": "CAM plants use ribulose-1,5-bisphosphate carboxylase-oxygenase during the night.",
+        "options": [],
+        "raw_proposed_answer": null,
+        "canonical_proposed_answer": null,
+        "provenance_status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "published_historical_record": {
+        "prompt_text": "CAM plants use ribulose-1,5-bisphosphate carboxylase-oxygenase during the day while stomata are open.",
+        "options": [],
+        "published_proposed_answer": "FALSE",
+        "published_verdict": "FAIL",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 1.0,
+        "answerability_score": 1.0,
+        "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+        "evidence_refs": [
+          "plants during"
+        ],
+        "task_validity": {
+          "has_proposed_answer": false,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "prompt",
+          "published_old": "CAM plants use ribulose-1,5-bisphosphate carboxylase-oxygenase during the day while stomata are open.",
+          "authoritative_raw": "CAM plants use ribulose-1,5-bisphosphate carboxylase-oxygenase during the night.",
+          "finding": "Prompt text modified post-generation in published artifact"
+        },
+        {
+          "field": "proposed_answer",
+          "published_old": "FALSE",
+          "authoritative_raw": null,
+          "finding": "Answer borrowed from rejected draft/generator stage in published artifact; authoritative status is UNSCORABLE_MISSING_ANSWER"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_B__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_B__att1",
+            "stage": "BOUNDED_REVISION",
+            "question_id": "3",
+            "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+            "status": "UNSCORABLE_MISSING_ANSWER"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 7,
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/REPAIR_c69a93857219.json",
+        "terminal_stage": "REPAIR",
+        "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+        "prompt_text": "CAM plants open their stomata during the day to take in carbon dioxide.",
+        "options": [],
+        "raw_proposed_answer": null,
+        "canonical_proposed_answer": null,
+        "provenance_status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "published_historical_record": {
+        "prompt_text": "CAM plants open their stomata during the day to take in carbon dioxide.",
+        "options": [],
+        "published_proposed_answer": "FALSE",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 1.0,
+        "answerability_score": 1.0,
+        "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+        "evidence_refs": [
+          "stomata during"
+        ],
+        "task_validity": {
+          "has_proposed_answer": false,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "proposed_answer",
+          "published_old": "FALSE",
+          "authoritative_raw": null,
+          "finding": "Answer borrowed from rejected draft/generator stage in published artifact; authoritative status is UNSCORABLE_MISSING_ANSWER"
+        },
+        {
+          "field": "verdict",
+          "published_old": "PASS",
+          "authoritative_raw": "FAIL",
+          "finding": "Published verdict PASS does not reproduce under authentic v2.3 evaluation (got FAIL)"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_C__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_C__att1",
+            "stage": "REPAIR",
+            "question_id": "1",
+            "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+            "status": "UNSCORABLE_MISSING_ANSWER"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 8,
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/REPAIR_c69a93857219.json",
+        "terminal_stage": "REPAIR",
+        "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+        "prompt_text": "Malate is the only four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+        "options": [],
+        "raw_proposed_answer": null,
+        "canonical_proposed_answer": null,
+        "provenance_status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "published_historical_record": {
+        "prompt_text": "Malate is the only four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+        "options": [],
+        "published_proposed_answer": "FALSE",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 1.0,
+        "answerability_score": 1.0,
+        "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+        "evidence_refs": [
+          "dicarboxylic acid"
+        ],
+        "task_validity": {
+          "has_proposed_answer": false,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "proposed_answer",
+          "published_old": "FALSE",
+          "authoritative_raw": null,
+          "finding": "Answer borrowed from rejected draft/generator stage in published artifact; authoritative status is UNSCORABLE_MISSING_ANSWER"
+        },
+        {
+          "field": "verdict",
+          "published_old": "PASS",
+          "authoritative_raw": "FAIL",
+          "finding": "Published verdict PASS does not reproduce under authentic v2.3 evaluation (got FAIL)"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_C__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_C__att1",
+            "stage": "REPAIR",
+            "question_id": "2",
+            "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+            "status": "UNSCORABLE_MISSING_ANSWER"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 9,
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/REPAIR_c69a93857219.json",
+        "terminal_stage": "REPAIR",
+        "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+        "prompt_text": "Ribulose-1,5-bisphosphate carboxylase-oxygenase is active during the night in CAM plants.",
+        "options": [],
+        "raw_proposed_answer": null,
+        "canonical_proposed_answer": null,
+        "provenance_status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "published_historical_record": {
+        "prompt_text": "Ribulose-1,5-bisphosphate carboxylase-oxygenase is active during the night in CAM plants.",
+        "options": [],
+        "published_proposed_answer": "FALSE",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 1.0,
+        "answerability_score": 1.0,
+        "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+        "evidence_refs": [
+          "during plants"
+        ],
+        "task_validity": {
+          "has_proposed_answer": false,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "proposed_answer",
+          "published_old": "FALSE",
+          "authoritative_raw": null,
+          "finding": "Answer borrowed from rejected draft/generator stage in published artifact; authoritative status is UNSCORABLE_MISSING_ANSWER"
+        },
+        {
+          "field": "verdict",
+          "published_old": "PASS",
+          "authoritative_raw": "FAIL",
+          "finding": "Published verdict PASS does not reproduce under authentic v2.3 evaluation (got FAIL)"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-reading-photosynthesis-03__arm_C__att1",
+            "attempt_id": "att-dev-reading-photosynthesis-03__arm_C__att1",
+            "stage": "REPAIR",
+            "question_id": "3",
+            "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+            "status": "UNSCORABLE_MISSING_ANSWER"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 10,
+      "domain": "GRAMMAR",
+      "configuration_id": "A",
+      "question_id": "1",
+      "question_type": "GRAMMAR_MCQ",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/DIRECT_GENERATION_A_2bdff67ada45.json",
+        "terminal_stage": "DIRECT_GENERATION_A",
+        "output_response_sha256": "2bdff67ada459c79072a6114745420dd283bc07c6acbdc3f76bc1a93f8f60cbd",
+        "prompt_text": "Which of the following sentences correctly uses an it-cleft structure?",
+        "options": [
+          "A) It is the unusual weather patterns are causing the crop failures.",
+          "B) It was the unusual weather patterns that caused the crop failures.",
+          "C) The unusual weather patterns, it was them that caused the crop failures.",
+          "D) It is causing the crop failures, the unusual weather patterns."
+        ],
+        "raw_proposed_answer": "B",
+        "canonical_proposed_answer": "B",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the unusual weather patterns'?",
+        "options": [
+          "A) It is the unusual weather patterns are causing the crop failures.",
+          "B) It was the unusual weather patterns that caused the crop failures.",
+          "C) The unusual weather patterns, it was them that caused the crop failures.",
+          "D) It is causing the crop failures, the unusual weather patterns."
+        ],
+        "published_proposed_answer": "B",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "PASS",
+        "grounding_score": 4.0,
+        "answerability_score": 4.0,
+        "abstention_reason": null,
+        "evidence_refs": [
+          "rule_pack:pack-cleft-dev-03"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "unique_correct_answer": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "prompt",
+          "published_old": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the unusual weather patterns'?",
+          "authoritative_raw": "Which of the following sentences correctly uses an it-cleft structure?",
+          "finding": "Prompt text modified post-generation in published artifact"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-grammar-cleft-03__arm_A__att1",
+            "attempt_id": "att-dev-grammar-cleft-03__arm_A__att1",
+            "stage": "DIRECT_GENERATION_A",
+            "question_id": "1",
+            "output_response_sha256": "2bdff67ada459c79072a6114745420dd283bc07c6acbdc3f76bc1a93f8f60cbd",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 11,
+      "domain": "GRAMMAR",
+      "configuration_id": "A",
+      "question_id": "2",
+      "question_type": "GRAMMAR_MCQ",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/DIRECT_GENERATION_A_2bdff67ada45.json",
+        "terminal_stage": "DIRECT_GENERATION_A",
+        "output_response_sha256": "2bdff67ada459c79072a6114745420dd283bc07c6acbdc3f76bc1a93f8f60cbd",
+        "prompt_text": "What is the correct way to emphasize 'photosynthesis' using an it-cleft structure?",
+        "options": [
+          "A) It is photosynthesis that is the process of converting light energy into chemical energy.",
+          "B) It was photosynthesis is the process of converting light energy into chemical energy.",
+          "C) Photosynthesis, it is the process of converting light energy into chemical energy.",
+          "D) It is the process of converting light energy into chemical energy that photosynthesis."
+        ],
+        "raw_proposed_answer": "A",
+        "canonical_proposed_answer": "A",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "What is the correct way to emphasize 'photosynthesis' using an it-cleft structure in the sentence 'Photosynthesis is the process of converting light energy into chemical energy.'?",
+        "options": [
+          "A) It is photosynthesis that is the process of converting light energy into chemical energy.",
+          "B) It was photosynthesis is the process of converting light energy into chemical energy.",
+          "C) Photosynthesis, it is the process of converting light energy into chemical energy.",
+          "D) It is the process of converting light energy into chemical energy that photosynthesis."
+        ],
+        "published_proposed_answer": "A",
+        "published_verdict": "FAIL",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 2.0,
+        "answerability_score": 2.0,
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 4] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+        "evidence_refs": [
+          "rule_pack:pack-cleft-dev-03"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "unique_correct_answer": false,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "prompt",
+          "published_old": "What is the correct way to emphasize 'photosynthesis' using an it-cleft structure in the sentence 'Photosynthesis is the process of converting light energy into chemical energy.'?",
+          "authoritative_raw": "What is the correct way to emphasize 'photosynthesis' using an it-cleft structure?",
+          "finding": "Prompt text modified post-generation in published artifact"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-grammar-cleft-03__arm_A__att1",
+            "attempt_id": "att-dev-grammar-cleft-03__arm_A__att1",
+            "stage": "DIRECT_GENERATION_A",
+            "question_id": "2",
+            "output_response_sha256": "2bdff67ada459c79072a6114745420dd283bc07c6acbdc3f76bc1a93f8f60cbd",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 12,
+      "domain": "GRAMMAR",
+      "configuration_id": "B",
+      "question_id": "q1",
+      "question_type": "GRAMMAR_MCQ",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/BOUNDED_REVISION_abc9c30169b5.json",
+        "terminal_stage": "BOUNDED_REVISION",
+        "output_response_sha256": "abc9c30169b56f194b55b9f49a9fd1f8a5cd0096f1a5dc9e11651e9a8900beb7",
+        "prompt_text": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the new methodology'?",
+        "options": [
+          "A) It is the new methodology that has revolutionized our approach to data analysis.",
+          "B) It was the new methodology that has revolutionized our approach to data analysis.",
+          "C) The new methodology is what has revolutionized our approach to data analysis.",
+          "D) The new methodology, it has revolutionized our approach to data analysis."
+        ],
+        "raw_proposed_answer": "A",
+        "canonical_proposed_answer": "A",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the new methodology'?",
+        "options": [
+          "A) It is the new methodology that has revolutionized our approach to data analysis.",
+          "B) It was the new methodology that has revolutionized our approach to data analysis.",
+          "C) The new methodology is what has revolutionized our approach to data analysis.",
+          "D) The new methodology, it has revolutionized our approach to data analysis."
+        ],
+        "published_proposed_answer": "A",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "PASS",
+        "grounding_score": 4.0,
+        "answerability_score": 4.0,
+        "abstention_reason": null,
+        "evidence_refs": [
+          "rule_pack:pack-cleft-dev-03"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "unique_correct_answer": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-grammar-cleft-03__arm_B__att1",
+            "attempt_id": "att-dev-grammar-cleft-03__arm_B__att1",
+            "stage": "BOUNDED_REVISION",
+            "question_id": "q1",
+            "output_response_sha256": "abc9c30169b56f194b55b9f49a9fd1f8a5cd0096f1a5dc9e11651e9a8900beb7",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 13,
+      "domain": "GRAMMAR",
+      "configuration_id": "B",
+      "question_id": "q2",
+      "question_type": "GRAMMAR_MCQ",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/BOUNDED_REVISION_abc9c30169b5.json",
+        "terminal_stage": "BOUNDED_REVISION",
+        "output_response_sha256": "abc9c30169b56f194b55b9f49a9fd1f8a5cd0096f1a5dc9e11651e9a8900beb7",
+        "prompt_text": "Which sentence correctly uses an it-cleft structure with the emphasized element 'the research team'?",
+        "options": [
+          "A) It is the research team who developed the innovative solution.",
+          "B) It was the research team that developed the innovative solution.",
+          "C) The research team is who developed the innovative solution.",
+          "D) The research team, they developed the innovative solution."
+        ],
+        "raw_proposed_answer": "B",
+        "canonical_proposed_answer": "B",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "Which sentence correctly uses an it-cleft structure with the emphasis on 'the research team'?",
+        "options": [
+          "A) It is the research team who developed the innovative solution.",
+          "B) It was the research team that developed the innovative solution.",
+          "C) The research team is who developed the innovative solution.",
+          "D) The research team, they developed the innovative solution."
+        ],
+        "published_proposed_answer": "B",
+        "published_verdict": "PASS",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "PASS",
+        "grounding_score": 4.0,
+        "answerability_score": 4.0,
+        "abstention_reason": null,
+        "evidence_refs": [
+          "rule_pack:pack-cleft-dev-03"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "unique_correct_answer": true,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "prompt",
+          "published_old": "Which sentence correctly uses an it-cleft structure with the emphasis on 'the research team'?",
+          "authoritative_raw": "Which sentence correctly uses an it-cleft structure with the emphasized element 'the research team'?",
+          "finding": "Prompt text modified post-generation in published artifact"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-grammar-cleft-03__arm_B__att1",
+            "attempt_id": "att-dev-grammar-cleft-03__arm_B__att1",
+            "stage": "BOUNDED_REVISION",
+            "question_id": "q2",
+            "output_response_sha256": "abc9c30169b56f194b55b9f49a9fd1f8a5cd0096f1a5dc9e11651e9a8900beb7",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 14,
+      "domain": "GRAMMAR",
+      "configuration_id": "C",
+      "question_id": "GRAMMAR_MCQ_1",
+      "question_type": "GRAMMAR_MCQ",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/GENERATOR_d2b98aaedc5e.json",
+        "terminal_stage": "GENERATOR",
+        "output_response_sha256": "d2b98aaedc5e59c037ba11d694ce655a6319dde9f2c37426aeb3eb4f7ca12e41",
+        "prompt_text": "Choose the correct sentence that uses an it-cleft structure appropriately.",
+        "options": [
+          "It is the new findings that has surprised the scientific community.",
+          "It was the new findings that surprised the scientific community.",
+          "It is the new findings that surprise the scientific community.",
+          "It were the new findings that surprised the scientific community."
+        ],
+        "raw_proposed_answer": "It was the new findings that surprised the scientific community.",
+        "canonical_proposed_answer": "It was the new findings that surprised the scientific community.",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "Choose the correct sentence that uses an it-cleft structure appropriately to emphasize 'the new findings'.",
+        "options": [
+          "It is the new findings that has surprised the scientific community.",
+          "It was the new findings that surprised the scientific community.",
+          "It is the new findings that surprise the scientific community.",
+          "It were the new findings that surprised the scientific community."
+        ],
+        "published_proposed_answer": "It was the new findings that surprised the scientific community.",
+        "published_verdict": "FAIL",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 2.0,
+        "answerability_score": 2.0,
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 2, 3] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+        "evidence_refs": [
+          "rule_pack:pack-cleft-dev-03"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "unique_correct_answer": false,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "prompt",
+          "published_old": "Choose the correct sentence that uses an it-cleft structure appropriately to emphasize 'the new findings'.",
+          "authoritative_raw": "Choose the correct sentence that uses an it-cleft structure appropriately.",
+          "finding": "Prompt text modified post-generation in published artifact"
+        },
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-grammar-cleft-03__arm_C__att1",
+            "attempt_id": "att-dev-grammar-cleft-03__arm_C__att1",
+            "stage": "GENERATOR",
+            "question_id": "GRAMMAR_MCQ_1",
+            "output_response_sha256": "d2b98aaedc5e59c037ba11d694ce655a6319dde9f2c37426aeb3eb4f7ca12e41",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    },
+    {
+      "index": 15,
+      "domain": "GRAMMAR",
+      "configuration_id": "C",
+      "question_id": "GRAMMAR_MCQ_2",
+      "question_type": "GRAMMAR_MCQ",
+      "raw_provider_record": {
+        "dispatch_ref": "secure://raw_responses/GENERATOR_d2b98aaedc5e.json",
+        "terminal_stage": "GENERATOR",
+        "output_response_sha256": "d2b98aaedc5e59c037ba11d694ce655a6319dde9f2c37426aeb3eb4f7ca12e41",
+        "prompt_text": "Which sentence correctly uses an it-cleft to emphasize 'the research methodology'?",
+        "options": [
+          "It is the research methodology that the team has developed.",
+          "It was the research methodology that the team developed.",
+          "It is the research methodology that the team develops.",
+          "It was the research methodology that the team has developed."
+        ],
+        "raw_proposed_answer": "It was the research methodology that the team developed.",
+        "canonical_proposed_answer": "It was the research methodology that the team developed.",
+        "provenance_status": "AVAILABLE"
+      },
+      "published_historical_record": {
+        "prompt_text": "Which sentence correctly uses an it-cleft to emphasize 'the research methodology'?",
+        "options": [
+          "It is the research methodology that the team has developed.",
+          "It was the research methodology that the team developed.",
+          "It is the research methodology that the team develops.",
+          "It was the research methodology that the team has developed."
+        ],
+        "published_proposed_answer": "It was the research methodology that the team developed.",
+        "published_verdict": "FAIL",
+        "published_answer_provenance": null
+      },
+      "authoritative_evaluation_v2_3": {
+        "evaluator_version": "neutral-eval-v2.3",
+        "rubric_version": "rubric-qgeval-v2.3",
+        "verdict": "FAIL",
+        "grounding_score": 2.0,
+        "answerability_score": 2.0,
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 2, 3, 4] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+        "evidence_refs": [
+          "rule_pack:pack-cleft-dev-03"
+        ],
+        "task_validity": {
+          "has_proposed_answer": true,
+          "solver_view_leak_free": true,
+          "evidence_in_passage": true,
+          "unique_correct_answer": false,
+          "no_contradiction": true
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "answer_provenance",
+          "published_old": null,
+          "authoritative_raw": {
+            "campaign_id": "RG10_DEV_HARDENING_V2",
+            "assignment_id": "dev-grammar-cleft-03__arm_C__att1",
+            "attempt_id": "att-dev-grammar-cleft-03__arm_C__att1",
+            "stage": "GENERATOR",
+            "question_id": "GRAMMAR_MCQ_2",
+            "output_response_sha256": "d2b98aaedc5e59c037ba11d694ce655a6319dde9f2c37426aeb3eb4f7ca12e41",
+            "status": "AVAILABLE"
+          },
+          "finding": "Published artifact omitted provenance record entirely (None)"
+        }
+      ],
+      "has_discrepancy": true
+    }
+  ],
+  "source_commit_sha": "7b33b827aec8e1de3525ce6d09dff0830beb37e0"
+}

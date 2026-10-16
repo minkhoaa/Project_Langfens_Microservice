@@ -264,6 +264,10 @@ def main():
                 prov_rec = auth_answers.get(qid)
                 real_proposed = prov_rec.get("proposed_answer") if prov_rec else None
                 ans_status = prov_rec.get("status") if prov_rec else "UNSCORABLE_MISSING_ANSWER"
+                if real_proposed is None:
+                    ans_status = "UNSCORABLE_MISSING_ANSWER"
+
+                q_dict = q.model_dump() if hasattr(q, "model_dump") else (q.dict() if hasattr(q, "dict") else dict(q))
                 q_dict["proposed_answer"] = real_proposed
                 ev_res = evaluator.evaluate_item(
                     dataset_item_id=out.dataset_item_id,
@@ -272,11 +276,13 @@ def main():
                     context_metadata=ctx_meta,
                 )
                 if domain == "READING":
-                    reading_labels.append(real_proposed.strip().upper())
+                    if real_proposed:
+                        reading_labels.append(real_proposed.strip().upper())
                 else:
-                    opt_key = _resolve_option_key(real_proposed, q_dict.get("options", []))
-                    if opt_key != "UNKNOWN":
-                        mcq_keys.append(opt_key)
+                    if real_proposed:
+                        opt_key = _resolve_option_key(real_proposed, q_dict.get("options", []))
+                        if opt_key != "UNKNOWN":
+                            mcq_keys.append(opt_key)
                     if grammar_dev.rule_pack:
                         nov = _check_item_novelty(q.text, q_dict.get("options", []), grammar_dev.rule_pack.examples)
                         carrier_novelty_scores.append(nov)
@@ -299,6 +305,7 @@ def main():
                         "output_response_sha256": att_prov.get("terminal_candidate_response_sha256"),
                         "status": ans_status,
                     },
+                    "schema_valid": bool(q.text) and bool(q.question_type) and isinstance(q.options, list),
                     "verdict": ev_res.verdict.value,
                     "grounding_score": ev_res.semantic_scores.get("grounding"),
                     "answerability_score": ev_res.semantic_scores.get("answerability"),
@@ -343,8 +350,8 @@ def main():
         },
         "3_structural_validity": {
             "total_candidate_items": len(question_evals),
-            "schema_conforming_items": len(question_evals),
-            "schema_conformance_rate": 1.0,
+            "schema_conforming_items": sum(1 for q in question_evals if q.get("schema_valid", True)),
+            "schema_conformance_rate": round(sum(1 for q in question_evals if q.get("schema_valid", True)) / len(question_evals), 4) if question_evals else 0.0,
         },
         "4_answer_correctness": {
             "evaluated_questions": len(question_evals),
@@ -392,10 +399,10 @@ def main():
             "novelty_sample_disclosure": "Novelty rate 1.0 reflects the n=6 sample only, not generalized population novelty.",
         },
         "10_repair_effectiveness": {
-            "total_arm_c_repairs_invoked": 2,
-            "repairs_recovered": 1,
-            "repairs_failed_validation": 1,
-            "repair_recovery_rate": 0.50,
+            "total_arm_c_repairs_invoked": len([d for d in client.recorded_dispatches if d.get("stage") == "REPAIR"]),
+            "repairs_recovered": 1 if rep_res.execution_status == ExecutionStatus.COMPLETED else 0,
+            "repairs_failed_validation": sum(1 for a in attempts if a.configuration_id == "C" and a.execution_status == ExecutionStatus.FAILED_VALIDATION),
+            "repair_recovery_rate": round((1 if rep_res.execution_status == ExecutionStatus.COMPLETED else 0) / max(1, len([d for d in client.recorded_dispatches if d.get("stage") == "REPAIR"])), 4),
             "repair_failure_preservation": "Strict: research-REPAIR-7 failed review and terminated honestly without fake PASS.",
         },
         "11_false_acceptance_and_rejection": {

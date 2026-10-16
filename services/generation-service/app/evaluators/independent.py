@@ -130,6 +130,10 @@ class NeutralEvaluator:
     @property
     def is_v2_4_plus(self) -> bool:
         return self.version_tuple >= (2, 4)
+    @property
+    def is_v2_5_plus(self) -> bool:
+        return self.version_tuple >= (2, 5)
+
 
 
     def evaluate_item(
@@ -322,7 +326,16 @@ class NeutralEvaluator:
                             "statement", "according", "passage", "which", "following", "true", "false", "given"
                         }
                         quote_words = {w.lower() for w in re.findall(r"\b[a-zA-Z]{4,}\b", evidence_quote)}
-                        if prompt_words and not (prompt_words & quote_words):
+                        if self.is_v2_5_plus and options:
+                            opt_words = {
+                                w.lower()
+                                for opt in options
+                                for w in re.findall(r"\b[a-zA-Z]{4,}\b", opt.get("text", "") if isinstance(opt, dict) else str(opt))
+                            }
+                            target_words = prompt_words | opt_words
+                        else:
+                            target_words = prompt_words
+                        if target_words and not (target_words & quote_words):
                             task_issues.append("Irrelevant evidence citation: cited evidence quote shares no substantive content with question prompt")
                     if norm_proposed in ("TRUE", "YES"):
                         has_neg_conflict, neg_msg = detect_negation_polarity_conflict(prompt, evidence_quote)
@@ -491,6 +504,29 @@ class NeutralEvaluator:
                 evidence_in_passage = True
                 task_validity["evidence_in_passage"] = True
                 evidence_refs.append((matched_span or " ".join(substantive_matches[:3]))[:100])
+            elif self.is_v2_5_plus and norm_proposed in ("NOT_GIVEN", "NOT GIVEN"):
+                # In v2.5+, valid NOT GIVEN items by definition assert unentailed/absent propositions.
+                # They require only a topical anchor in the passage (at least 1 word of len >= 3 present in passage).
+                anchor_words = [w for w in clean_words if len(w) >= 3 and w.lower() in passage_norm.lower()]
+                acronym_match = False
+                upper_words = [w for w in clean_words if w.isupper() and 2 <= len(w) <= 5]
+                for acr in upper_words:
+                    acr_letters = list(acr.lower())
+                    p_words = [w.lower() for w in re.findall(r"\b[a-zA-Z]+\b", passage_norm)]
+                    for i in range(len(p_words) - len(acr_letters) + 1):
+                        if [w[0] for w in p_words[i:i+len(acr_letters)]] == acr_letters:
+                            acronym_match = True
+                            break
+                    if acronym_match:
+                        break
+                if anchor_words or acronym_match:
+                    evidence_in_passage = True
+                    task_validity["evidence_in_passage"] = True
+                    evidence_refs.append(f"Topical anchor: {anchor_words[0] if anchor_words else 'acronym_expansion'}")
+                else:
+                    evidence_in_passage = False
+                    task_validity["evidence_in_passage"] = False
+                    task_issues.append("Question content not grounded in source passage text")
             else:
                 evidence_in_passage = False
                 task_validity["evidence_in_passage"] = False
@@ -541,7 +577,7 @@ class NeutralEvaluator:
                 if is_v2_3 and detect_contradiction_in_text(prompt, passage_text, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus):
                     contradiction_detected = True
                     task_issues.append("NOT GIVEN contradiction: passage explicitly contradicts the proposition (should be FALSE)")
-                elif detect_entailment_in_text(prompt, passage_text, enable_contrastive_exclusion=is_v2_3, enable_refined_contrastive_clause=self.is_v2_4_plus):
+                elif detect_entailment_in_text(prompt, passage_text, enable_contrastive_exclusion=is_v2_3, enable_refined_contrastive_clause=self.is_v2_4_plus, enable_contrastive_entailment=self.is_v2_5_plus):
                     contradiction_detected = True
                     task_issues.append("NOT GIVEN contradiction: passage explicitly entails the proposition (should be TRUE)")
                 else:
@@ -554,10 +590,10 @@ class NeutralEvaluator:
             elif norm_proposed in ("FALSE", "NO"):
                 # FALSE contradiction
                 if is_v2_3:
-                    if evidence_quote and detect_entailment_in_text(prompt, evidence_quote, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus) and not detect_contradiction_in_text(prompt, evidence_quote, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus):
+                    if evidence_quote and detect_entailment_in_text(prompt, evidence_quote, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus, enable_contrastive_entailment=self.is_v2_5_plus) and not detect_contradiction_in_text(prompt, evidence_quote, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus):
                         contradiction_detected = True
                         task_issues.append("FALSE contradiction: cited evidence affirms statement (should be TRUE)")
-                    elif detect_entailment_in_text(prompt, passage_text, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus) and not detect_contradiction_in_text(prompt, passage_text, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus):
+                    elif detect_entailment_in_text(prompt, passage_text, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus, enable_contrastive_entailment=self.is_v2_5_plus) and not detect_contradiction_in_text(prompt, passage_text, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus):
                         contradiction_detected = True
                         task_issues.append("FALSE contradiction: passage affirms proposition without contradiction")
                 else:
@@ -685,5 +721,19 @@ class NeutralEvaluatorV2_4(NeutralEvaluatorV2_3):
     ):
         super().__init__(
             rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.4"),
+            evaluator_version=evaluator_version,
+        )
+
+
+class NeutralEvaluatorV2_5(NeutralEvaluatorV2_4):
+    """Calibrated neutral evaluator with refined clause entailment, distractor relevancy, and topical anchoring (v2.5)."""
+
+    def __init__(
+        self,
+        rubric: Optional[RubricProfile] = None,
+        evaluator_version: str = "neutral-eval-v2.5",
+    ):
+        super().__init__(
+            rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.5"),
             evaluator_version=evaluator_version,
         )

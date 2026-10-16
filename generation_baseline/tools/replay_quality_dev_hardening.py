@@ -93,31 +93,43 @@ class ReplayExperimentClient:
     ) -> LLMDispatchResponse:
         prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
 
-        # Match unconsumed authentic raw record strictly by prompt_sha256 and stage
-        matched_record = None
-        for rec in self._raw_records:
-            if rec["_filename"] in self._consumed_filenames:
-                continue
-            if rec.get("stage") == stage and rec.get("prompt_sha256") == prompt_sha:
-                matched_record = rec
-                break
+        # Strict matching by stage and prompt_sha256 (no stage-only fallback)
+        candidates = [
+            rec for rec in self._raw_records
+            if rec["_filename"] not in self._consumed_filenames
+            and rec.get("stage") == stage
+            and rec.get("prompt_sha256") == prompt_sha
+        ]
 
-        # Fallback to stage match tie-broken by recorded_at_ns if prompt hash differs slightly
-        if matched_record is None:
-            for rec in self._raw_records:
-                if rec["_filename"] in self._consumed_filenames:
-                    continue
-                if rec.get("stage") == stage:
-                    matched_record = rec
-                    break
-
-        if matched_record is None:
+        if not candidates:
+            stage_cands = [
+                rec for rec in self._raw_records
+                if rec["_filename"] not in self._consumed_filenames
+                and rec.get("stage") == stage
+            ]
             raise RuntimeError(
-                f"Replay dispatch missing for stage '{stage}', prompt_sha {prompt_sha[:12]}. "
-                f"Consumed: {len(self._consumed_filenames)} / {len(self._raw_records)}"
+                f"Strict replay failure: No unconsumed raw record matches stage '{stage}' "
+                f"and prompt_sha256 '{prompt_sha}'. Stage-only fallback is strictly prohibited. "
+                f"Found {len(stage_cands)} unconsumed records for stage '{stage}'. "
+                f"Consumed: {len(self._consumed_filenames)} / {len(self._raw_records)}."
             )
 
+        # Enforce unique, one-to-one response consumption in deterministic chronological order
+        matched_record = candidates[0]
         self._consumed_filenames.add(matched_record["_filename"])
+        raw_text = matched_record.get("raw_text", "")
+
+        # Verify response content SHA256 integrity
+        expected_raw_sha = matched_record.get("raw_text_sha256")
+        if expected_raw_sha:
+            computed_raw_sha = hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
+            if computed_raw_sha != expected_raw_sha:
+                raise ValueError(
+                    f"Integrity check failed for {matched_record['_filename']}: "
+                    f"expected raw_text_sha256 {expected_raw_sha}, got {computed_raw_sha}"
+                )
+
+
         raw_text = matched_record.get("raw_text", "")
         tokens = matched_record.get("tokens", {})
         prompt_tokens = tokens.get("prompt")
@@ -509,10 +521,10 @@ def run_replay(
             "novelty_sample_disclosure": "Novelty rate 1.0 reflects the n=6 sample only, not generalized population novelty.",
         },
         "10_repair_effectiveness": {
-            "total_arm_c_repairs_invoked": 2,
-            "repairs_recovered": 1,
-            "repairs_failed_validation": 1,
-            "repair_recovery_rate": 0.50,
+            "total_arm_c_repairs_invoked": len([d for d in client.recorded_dispatches if d["stage"] == "REPAIR"]),
+            "repairs_recovered": 1 if rep_res.execution_status == ExecutionStatus.COMPLETED else 0,
+            "repairs_failed_validation": sum(1 for a in attempts if a.configuration_id == "C" and a.execution_status == ExecutionStatus.FAILED_VALIDATION),
+            "repair_recovery_rate": round((1 if rep_res.execution_status == ExecutionStatus.COMPLETED else 0) / max(1, len([d for d in client.recorded_dispatches if d["stage"] == "REPAIR"])), 4),
             "repair_failure_preservation": "Strict: research-REPAIR-7 failed review and terminated honestly without fake PASS.",
         },
         "11_false_acceptance_and_rejection": {
@@ -537,7 +549,8 @@ def run_replay(
             "total_dispatches": total_calls,
             "total_tokens": total_tokens,
             "confidence": "EXACT",
-            "elapsed_seconds": 215.3,  # Historical authentic provider execution time
+            "cumulative_provider_latency_seconds": round(sum(r.get("latency_ms", 0) for r in client._raw_records if r.get("_filename") in client._consumed_filenames) / 1000.0, 1),
+            "replay_wall_time_seconds": total_time,
             "calculated_spend_usd": spent_usd,
         },
     }
@@ -577,6 +590,25 @@ def run_replay(
 
     results_file = output_dir / "quality_dev_hardening_results.json"
     results_file.write_text(json.dumps(results, indent=2), encoding="utf-8")
+
+    m1 = measurements["1_execution_completion"]
+    m2 = measurements["2_question_availability"]
+    m3 = measurements["3_structural_validity"]
+    m4 = measurements["4_answer_correctness"]
+    m5 = measurements["5_semantic_uniqueness"]
+    m6 = measurements["6_distractor_quality"]
+    m7 = measurements["7_semantic_verdicts"]
+    m8 = measurements["8_label_diversity"]
+    m9 = measurements["9_content_novelty"]
+    m10 = measurements["10_repair_effectiveness"]
+    m11 = measurements["11_false_acceptance_and_rejection"]
+    m12 = measurements["12_provider_usage_and_latency"]
+
+    assert m7["PASS"] == pass_count, f"Pass count mismatch: {m7['PASS']} vs {pass_count}"
+    assert m7["FAIL"] == fail_count, f"Fail count mismatch: {m7['FAIL']} vs {fail_count}"
+    assert m4["grounded_answers_pass_count"] == pass_count
+    assert m2["available_questions"] == available_q_count
+    assert m2["missing_answer_questions"] == missing_ans_count
 
     # Generate Replay Equivalence Report
     report_file = output_dir / "DETERMINISTIC_REPLAY_EQUIVALENCE_REPORT.md"
@@ -622,18 +654,18 @@ def run_replay(
 
 ## 3. The 12 Experimental Dimensions
 
-1. **Execution Completion:** 83.33% (5/6 requests completed, 1/6 FAILED_VALIDATION preserved).
-2. **Question Availability:** 60.0% (9/15 questions had answer keys; 6/15 terminal revisions omitted answer key).
-3. **Structural Validity:** 100.0% schema conformance (15/15 items valid NeutralQuestion instances).
-4. **Answer Correctness:** 40.0% pass rate (6/15 verified answers).
-5. **Answer Uniqueness:** 50.0% unique key pass rate (3/6 Grammar MCQs had single unambiguous keys; 3 flagged for distractor ambiguity).
-6. **Distractor Quality:** 3 Grammar MCQs caught with multiple valid cleft options.
-7. **Semantic Verdicts:** 6 PASS, 9 FAIL, 0 UNCERTAIN.
-8. **Label Diversity:** Reading: {{'TRUE': 2, 'FALSE': 1, 'NOT_GIVEN': 0, 'UNSCORABLE_MISSING': 6}}. Complete 3-way coverage NOT achieved. Grammar keys: {{'A': 2, 'B': 3, 'C': 0, 'D': 0}}. Small sample disclosure applied.
-9. **Content Novelty:** 100% novelty rate across n=6 Grammar MCQs (0 rule pack copies). Sample disclosure applied.
-10. **Repair Effectiveness:** 2 repairs invoked: 1 recovered (50%), 1 terminal review failure preserved (50%).
-11. **Evaluator v2.3 Calibration:** Calibrated on 17-item adversarial corpus (FAR=0.0, FRR=0.4286 with entity-swap and absent-topic false-rejection disclosures).
-12. **Provider Telemetry:** 22 calls, 23,886 tokens, $0.0358 spend, EXACT confidence, 215.3s wall time.
+1. **Execution Completion:** {round(m1['completion_rate'] * 100, 2)}% ({m1['completed_requests']}/{m1['assigned_requests']} requests completed, {m1['failed_validation_requests']}/{m1['assigned_requests']} FAILED_VALIDATION preserved).
+2. **Question Availability:** {round(m2['availability_rate'] * 100, 2)}% ({m2['available_questions']}/{m2['total_requested_questions']} questions had answer keys; {m2['missing_answer_questions']}/{m2['total_requested_questions']} terminal revisions omitted answer key).
+3. **Structural Validity:** {round(m3['schema_conformance_rate'] * 100, 2)}% schema conformance ({m3['schema_conforming_items']}/{m3['total_candidate_items']} items valid NeutralQuestion instances).
+4. **Answer Correctness:** {round(m4['grounded_answers_rate'] * 100, 2)}% pass rate ({m4['grounded_answers_pass_count']}/{m4['evaluated_questions']} verified answers).
+5. **Answer Uniqueness:** {round(m5['mcq_uniqueness_pass_rate'] * 100, 2)}% unique key pass rate ({m5['unique_key_pass_count']}/{m5['total_mcq_questions']} Grammar MCQs had single unambiguous keys; {m5['distractor_ambiguity_flagged']} flagged for distractor ambiguity).
+6. **Distractor Quality:** {len(m6['distractor_validity_issues'])} Grammar MCQs caught with distractor validity issues.
+7. **Semantic Verdicts:** {m7['PASS']} PASS, {m7['FAIL']} FAIL, {m7['UNCERTAIN']} UNCERTAIN.
+8. **Label Diversity:** Reading: {m8['reading_tfng_distribution']}. Complete 3-way coverage achieved: {m8['reading_complete_tfng_coverage_achieved']}. Grammar keys: {m8['grammar_mcq_key_distribution']}.
+9. **Content Novelty:** {round(m9['grammar_carrier_novelty_rate'] * 100, 2)}% novelty rate across n={m9['grammar_evaluated_items']} Grammar MCQs ({m9['rule_pack_example_copies_detected']} rule pack copies).
+10. **Repair Effectiveness:** {m10['total_arm_c_repairs_invoked']} repairs invoked: {m10['repairs_recovered']} recovered ({round(m10['repair_recovery_rate'] * 100, 1)}%), {m10['repairs_failed_validation']} terminal review failure preserved ({round((1 - m10['repair_recovery_rate']) * 100, 1)}%).
+11. **Evaluator v2.3 Calibration:** Calibrated on {m11['calibration_corpus_measurement']['total_items']}-item adversarial corpus (FAR={m11['calibration_corpus_measurement']['measured_far']}, FRR={m11['calibration_corpus_measurement']['measured_frr']}, accuracy on decided={round(m11['calibration_corpus_measurement']['accuracy_on_decided'] * 100, 2)}%).
+12. **Provider Telemetry:** {m12['total_dispatches']} calls, {m12['total_tokens']} tokens, ${m12['calculated_spend_usd']:.4f} spend, {m12['confidence']} confidence, {m12['cumulative_provider_latency_seconds']}s cumulative provider latency ({m12['replay_wall_time_seconds']}s replay wall time).
 """
     report_file.write_text(report_text, encoding="utf-8")
     print(f"[REPLAY] Completed! Output written to {output_dir}")

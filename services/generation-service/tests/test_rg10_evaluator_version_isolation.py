@@ -16,6 +16,8 @@ from app.evaluators.independent import (
     NeutralEvaluatorV2,
     NeutralEvaluatorV2_2,
     NeutralEvaluatorV2_3,
+    NeutralEvaluatorV2_4,
+    NeutralEvaluatorV2_5,
     parse_evaluator_version_tuple,
 )
 from app.evaluators.rubric import EvaluationVerdict, RubricDimension
@@ -27,6 +29,8 @@ def test_numeric_version_parsing():
     assert parse_evaluator_version_tuple("neutral-eval-v2.1") == (2, 1)
     assert parse_evaluator_version_tuple("neutral-eval-v2.2") == (2, 2)
     assert parse_evaluator_version_tuple("neutral-eval-v2.3") == (2, 3)
+    assert parse_evaluator_version_tuple("neutral-eval-v2.4") == (2, 4)
+    assert parse_evaluator_version_tuple("neutral-eval-v2.5") == (2, 5)
     assert parse_evaluator_version_tuple("neutral-eval-v2.10") == (2, 10)
     assert parse_evaluator_version_tuple("v3.1") == (3, 1)
     assert parse_evaluator_version_tuple("invalid") == (2, 0)
@@ -56,6 +60,16 @@ def test_evaluator_feature_gates():
     assert ev_v2_3.is_v2_1_plus
     assert ev_v2_3.is_v2_2_plus
     assert ev_v2_3.is_v2_3_plus
+    assert not ev_v2_3.is_v2_4_plus
+    assert not ev_v2_3.is_v2_5_plus
+
+    ev_v2_4 = NeutralEvaluatorV2_4(evaluator_version="neutral-eval-v2.4")
+    assert ev_v2_4.is_v2_4_plus
+    assert not ev_v2_4.is_v2_5_plus
+
+    ev_v2_5 = NeutralEvaluatorV2_5(evaluator_version="neutral-eval-v2.5")
+    assert ev_v2_5.is_v2_4_plus
+    assert ev_v2_5.is_v2_5_plus
 
 
 def test_grammar_option_cues_isolation():
