@@ -1,13 +1,12 @@
 """Evaluation, Human Review Export, Accounting Reconciliation, and Sealing Runner for RG10."""
 from __future__ import annotations
-
 import hashlib
 import json
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
-
 repo_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(repo_root / "services" / "generation-service"))
 
@@ -30,6 +29,22 @@ from app.experiment.final_dataset import FinalDatasetRegistry
 from app.experiment.ledger import ExperimentReplayLedger
 from app.experiment.paired import PairedAssignmentManager
 from app.experiment.preregistration import PreregisteredAnalysisPlan
+
+
+def get_git_commit_sha() -> str:
+    try:
+        res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
+        return res.stdout.strip()
+    except Exception:
+        return "UNKNOWN"
+
+
+def get_git_worktree_dirty() -> bool:
+    try:
+        res = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, check=True)
+        return bool(res.stdout.strip())
+    except Exception:
+        return True
 
 
 def run_evaluation_and_sealing():
@@ -217,8 +232,8 @@ def run_evaluation_and_sealing():
         ledger=ledger,
         evaluations_ledger_sha256=evaluations_ledger_sha256,
         human_review_ledger_sha256=human_review_ledger_sha256,
-        code_commit_sha="9e81cda156e950d7e705df9effe23e685cc89de5",
-        worktree_dirty=True,
+        code_commit_sha=get_git_commit_sha(),
+        worktree_dirty=get_git_worktree_dirty(),
         dirty_state=dirty_state_str,
         worktree_content_hashes=worktree_hashes,
         reproducibility_metadata=reproducibility_metadata,

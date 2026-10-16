@@ -20,6 +20,7 @@ import json
 from typing import Any, Dict, List, Optional, Set, Tuple
 from pydantic import BaseModel, Field
 
+from app.contracts.research import GrammarRulePack, SourceRef
 from app.curation.partitioning import jaccard_similarity, _extract_shingles
 from app.evaluators.independent import NeutralEvaluator
 from app.evaluators.rubric import (
@@ -51,7 +52,7 @@ class CalibrationItem(BaseModel):
     reference_verdict: EvaluationVerdict
     reference_rationale: str
     provenance: str = "synthetic_not_expert"  # Synthetic test items, not human expert adjudication
-
+    context_metadata: Optional[Dict[str, Any]] = None
 
 class ReliabilityMetrics(BaseModel):
     """Transparent reliability metrics with exact counts, coverage, and confusion matrix."""
@@ -195,6 +196,380 @@ CALIBRATION_CORPUS: List[CalibrationItem] = [
         },
         reference_verdict=EvaluationVerdict.PASS,
         reference_rationale="Correctly identifies that economic damage is neither entailed nor contradicted (NOT GIVEN).",
+    ),
+]
+
+CALIB_INVERSION_RULE_PACK = GrammarRulePack(
+    rule_pack_id="pack-calib-v23-inv",
+    source=SourceRef(source_id="src-calib-inv", source_family="fam-calib-v23-inversion-01", source_version="v1.0",
+                     source_sha256="0" * 64, license="test", provenance_uri="internal://calib/inv"),
+    topic="Negative and Limiting Inversion",
+    level="B2",
+    rule_ids=["rule-inv-01"],
+    applicability=["Academic IELTS Reading and Writing"],
+    examples=["Seldom had they observed such discrepancies in laboratory trials."],
+)
+
+CALIB_CLEFT_RULE_PACK = GrammarRulePack(
+    rule_pack_id="pack-calib-v23-cleft",
+    source=SourceRef(source_id="src-calib-cleft", source_family="fam-calib-v23-cleft-01", source_version="v1.0",
+                     source_sha256="0" * 64, license="test", provenance_uri="internal://calib/cleft"),
+    topic="Cleft Sentences and Information Packaging",
+    level="B2",
+    rule_ids=["rule-cleft-01"],
+    applicability=["Academic IELTS Reading and Writing"],
+    examples=["It was the protocol that accelerated motor recovery."],
+)
+
+# ── Curated Labeled Calibration Corpus for NeutralEvaluatorV2_3 (n=17) ────────
+# Covers all mandatory adversarial calibration categories:
+# 1. TRUE/FALSE/NOT GIVEN contradictions
+# 2. Missing and misleading evidence
+# 3. Multiple defensible Grammar MCQ answers
+# 4. False rejection of legitimate paraphrases
+# 5. Incorrect answer keys
+# 6. Missing proposed answers
+EVALUATOR_V2_3_CALIBRATION_CORPUS: List[CalibrationItem] = [
+    CalibrationItem(
+        item_id="v23-calib-contra-ng-01",
+        source_family_id="fam-calib-v23-volcano-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Supervolcanoes produce catastrophic explosive events that generate enormous calderas rather than single volcanic cones.",
+        question_data={
+            "question_number": 1,
+            "question_type": "TFNG",
+            "prompt": "Supervolcano eruptions produce single volcanic cones.",
+            "answer": "NOT GIVEN",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Passage explicitly contradicts the statement using contrastive exclusion ('rather than single volcanic cones'); should be FALSE, not NOT GIVEN.",
+    ),
+    # 2. Contradiction: FALSE when passage affirms proposition without contradiction (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-contra-false-02",
+        source_family_id="fam-calib-v23-antarctica-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="The Antarctic ice sheet contains roughly 61 percent of all fresh water on Earth.",
+        question_data={
+            "question_number": 2,
+            "question_type": "TFNG",
+            "prompt": "The Antarctic ice sheet contains over half of Earth's fresh water.",
+            "answer": "FALSE",
+            "evidence_quote": "The Antarctic ice sheet contains roughly 61 percent of all fresh water on Earth.",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Cited evidence explicitly affirms the statement (61% > half); labeling it FALSE is a contradiction.",
+    ),
+    # 3. Contradiction: TRUE when passage asserts the opposite (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-contra-true-03",
+        source_family_id="fam-calib-v23-hydrothermal-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Submarine rift chimneys harbor endemic bacterial mats that generate biochemical energy via chemolithotrophy rather than solar photons.",
+        question_data={
+            "question_number": 3,
+            "question_type": "TFNG",
+            "prompt": "Submarine rift bacterial mats rely on solar photons for primary biochemical energy.",
+            "answer": "TRUE",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Direct contradiction: text says 'generate biochemical energy via chemolithotrophy rather than solar photons'.",
+    ),
+    # 4. Evidence Defect: Cited evidence quote not found in source passage (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-evidence-missing-04",
+        source_family_id="fam-calib-v23-cea-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Controlled environment agriculture relies on artificial lighting to optimize plant growth.",
+        question_data={
+            "question_number": 4,
+            "question_type": "TFNG",
+            "prompt": "Urban vertical farms operate with solar panels.",
+            "answer": "TRUE",
+            "evidence_quote": "Urban vertical farms operate with solar panels across all major cities.",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Fabricated evidence quote missing from passage text.",
+    ),
+    # 5. Evidence Defect: Irrelevant evidence citation (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-evidence-irrelevant-05",
+        source_family_id="fam-calib-v23-cam-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Crassulacean acid metabolism enables xerophytes to achieve high water-use efficiency in hyper-arid environments. Photosynthetic efficiency determines agricultural productivity in temperate zones.",
+        question_data={
+            "question_number": 5,
+            "question_type": "TFNG",
+            "prompt": "Artificial LED arrays operate inside modern subterranean research facilities.",
+            "answer": "TRUE",
+            "evidence_quote": "Photosynthetic efficiency determines agricultural productivity in temperate zones.",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Evidence quote exists in passage but shares zero substantive content with question prompt.",
+    ),
+    # 6. Distractor Defect: Grammar MCQ with multiple defensible it-clefts (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-grammar-multicleft-06",
+        source_family_id="fam-calib-v23-inversion-01",
+        domain="grammar",
+        question_type="GRAMMAR_MCQ",
+        stratum=BenchmarkStratum.DISTRACTOR_DEFECT,
+        passage_text="Fronting restrictive negative adjuncts in formal prose triggers auxiliary inversion before the grammatical subject.",
+        question_data={
+            "question_number": 6,
+            "question_type": "GRAMMAR_MCQ",
+            "text": "Which sentence correctly demonstrates negative inversion with 'under no circumstances'?",
+            "options": [
+                "Under no circumstances we should compromise our principles.",
+                "Under no circumstances should we compromise our principles.",
+                "Under no circumstances we should be compromising our principles.",
+                "Under no circumstances should we be compromising our principles.",
+            ],
+            "answer": "Under no circumstances should we compromise our principles.",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Both Option 2 and Option 4 exhibit grammatically standard negative inversion (simple vs progressive aspect). Violates single-answer constraint.",
+        context_metadata={"rule_pack": CALIB_INVERSION_RULE_PACK},
+    ),
+    # 7. Distractor Defect: Grammar MCQ with contracted negative inversion contestation (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-grammar-contracted-07",
+        source_family_id="fam-calib-v23-inversion-01",
+        domain="grammar",
+        question_type="GRAMMAR_MCQ",
+        stratum=BenchmarkStratum.DISTRACTOR_DEFECT,
+        passage_text="Fronting restrictive negative adjuncts in formal prose triggers auxiliary inversion before the grammatical subject.",
+        question_data={
+            "question_number": 7,
+            "question_type": "GRAMMAR_MCQ",
+            "text": "Which of the following sentences correctly uses negative inversion?",
+            "options": [
+                "Under no circumstances we should ignore protocols.",
+                "Under no circumstances should we ignore protocols.",
+                "Under no circumstances we shouldn't ignore protocols.",
+                "Under no circumstances shouldn't we ignore protocols.",
+            ],
+            "answer": "B",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Option D exhibits contracted negative auxiliary inversion syntax ('shouldn't we'), creating distractor ambiguity against Option B.",
+        context_metadata={"rule_pack": CALIB_INVERSION_RULE_PACK},
+    ),
+    # 8. Legitimate Paraphrase: Mathematical and lexical paraphrase (Reference: PASS)
+    CalibrationItem(
+        item_id="v23-calib-paraphrase-math-08",
+        source_family_id="fam-calib-v23-antarctica-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="The Antarctic ice sheet contains roughly 61 percent of all fresh water on Earth. Observations show accelerated melting along the coast.",
+        question_data={
+            "question_number": 8,
+            "question_type": "TFNG",
+            "prompt": "More than half of the fresh water on Earth is located within the Antarctic ice sheet.",
+            "answer": "TRUE",
+            "evidence_quote": "The Antarctic ice sheet contains roughly 61 percent of all fresh water on Earth.",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Legitimate quantitative paraphrase (61 percent -> more than half). Must not be false-rejected.",
+    ),
+    # 9. Legitimate Paraphrase: Option-carried grammar cue with generic stem (Reference: PASS)
+    CalibrationItem(
+        item_id="v23-calib-paraphrase-options-09",
+        source_family_id="fam-calib-v23-inversion-01",
+        domain="grammar",
+        question_type="GRAMMAR_MCQ",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="Fronting restrictive negative adjuncts in formal prose triggers auxiliary inversion before the grammatical subject.",
+        question_data={
+            "question_number": 9,
+            "question_type": "GRAMMAR_MCQ",
+            "text": "Which of the following sentences correctly uses negative inversion?",
+            "options": [
+                "Not until the storm ended could they leave the shelter.",
+                "Not until the storm ended they could leave the shelter.",
+                "Not until the storm ended they leave the shelter.",
+                "Not until the storm ended could they leaving the shelter.",
+            ],
+            "answer": "Not until the storm ended could they leave the shelter.",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Single unambiguous valid negative inversion option with rule cue in options. Must not be false-rejected.",
+        context_metadata={"rule_pack": CALIB_INVERSION_RULE_PACK},
+    ),
+    # 10. Legitimate Paraphrase: Negative polarity stem (Reference: PASS)
+    CalibrationItem(
+        item_id="v23-calib-paraphrase-neg-stem-10",
+        source_family_id="fam-calib-v23-inversion-01",
+        domain="grammar",
+        question_type="GRAMMAR_MCQ",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="Fronting restrictive negative adjuncts in formal prose triggers auxiliary inversion before the grammatical subject.",
+        question_data={
+            "question_number": 10,
+            "question_type": "GRAMMAR_MCQ",
+            "text": "Which sentence demonstrates incorrect use of negative inversion?",
+            "options": [
+                "Never had I seen such a beautiful sunset.",
+                "Never I had seen such a beautiful sunset.",
+                "Never had such a beautiful sunset been seen by me.",
+                "I had never seen such a beautiful sunset.",
+            ],
+            "answer": "B",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Negative polarity stem asking for incorrect sentence; Option B correctly lacks inversion. Must not be false-rejected.",
+        context_metadata={"rule_pack": CALIB_INVERSION_RULE_PACK},
+    ),
+    # 11. Incorrect Key: Generator proposes TRUE for a factually contradicted statement (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-bad-key-reading-11",
+        source_family_id="fam-calib-v23-wetlands-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Arid mangrove wetlands occupy narrow intertidal zones, yet stabilize extensive shorelines against tidal wave erosion.",
+        question_data={
+            "question_number": 11,
+            "question_type": "TFNG",
+            "prompt": "Arid mangrove wetlands occupy the vast majority of continental inland territories.",
+            "answer": "TRUE",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Generator proposes TRUE for a statement contradicting the text ('narrow intertidal zones').",
+    ),
+    # 12. Incorrect Key: Generator proposes an ungrammatical option as the answer key (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-bad-key-grammar-12",
+        source_family_id="fam-calib-v23-cleft-01",
+        domain="grammar",
+        question_type="GRAMMAR_MCQ",
+        stratum=BenchmarkStratum.DISTRACTOR_DEFECT,
+        passage_text="When emphasizing a specific syntactic element, it-clefts use 'It is/was + [element] + that/who + [clause]'.",
+        question_data={
+            "question_number": 12,
+            "question_type": "GRAMMAR_MCQ",
+            "text": "Which sentence correctly uses an it-cleft structure?",
+            "options": [
+                "It were the unusual weather patterns that caused the damage.",
+                "It was the unusual weather patterns that caused the damage.",
+                "The unusual weather patterns, it was them that caused the damage.",
+                "It is causing the damage, the unusual weather patterns.",
+            ],
+            "answer": "A",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Proposed answer key points to Option A which contains plural copula discord ('It were').",
+        context_metadata={"rule_pack": CALIB_CLEFT_RULE_PACK},
+    ),
+    # 13. Missing Proposed Answer: proposed_answer is missing / empty (Reference: FAIL)
+    CalibrationItem(
+        item_id="v23-calib-missing-answer-13",
+        source_family_id="fam-calib-v23-cam-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.GROUNDING_DEFECT,
+        passage_text="Crassulacean acid metabolism represents a specialized photosynthetic adaptation enabling vascular xerophytes to achieve high water-use efficiency.",
+        question_data={
+            "question_number": 13,
+            "question_type": "TFNG",
+            "prompt": "CAM plants achieve high water-use efficiency in arid environments.",
+            "answer": "",
+        },
+        reference_verdict=EvaluationVerdict.FAIL,
+        reference_rationale="Question provides no proposed answer key (UNSCORABLE_MISSING_ANSWER).",
+    ),
+    # 14. Standard Valid TFNG FALSE (Reference: PASS)
+    CalibrationItem(
+        item_id="v23-calib-valid-tfng-false-14",
+        source_family_id="fam-calib-v23-cam-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="Standard C3 plants open stomata during daylight hours, whereas obligate CAM species nocturnally assimilate atmospheric carbon dioxide.",
+        question_data={
+            "question_number": 14,
+            "question_type": "TFNG",
+            "prompt": "CAM plants open their stomata during daylight hours to absorb carbon dioxide.",
+            "answer": "FALSE",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Statement is contradicted by passage; correctly answered FALSE.",
+    ),
+    # 15. Standard Valid TFNG NOT GIVEN (Reference: PASS)
+    CalibrationItem(
+        item_id="v23-calib-valid-tfng-notgiven-15",
+        source_family_id="fam-calib-v23-cam-01",
+        domain="reading",
+        question_type="TFNG",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="Crassulacean acid metabolism enables vascular xerophytes to achieve high water-use efficiency in hyper-arid environments.",
+        question_data={
+            "question_number": 15,
+            "question_type": "TFNG",
+            "prompt": "CAM photosynthesis was first discovered by nineteenth-century botanists in Madagascar.",
+            "answer": "NOT GIVEN",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Proposition is neither entailed nor contradicted; correctly answered NOT GIVEN.",
+    ),
+    # 16. Standard Valid Grammar it-cleft MCQ (Reference: PASS)
+    CalibrationItem(
+        item_id="v23-calib-valid-grammar-cleft-16",
+        source_family_id="fam-calib-v23-cleft-01",
+        domain="grammar",
+        question_type="GRAMMAR_MCQ",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="When emphasizing a specific syntactic element, it-clefts use 'It is/was + [element] + that/who + [clause]'.",
+        question_data={
+            "question_number": 16,
+            "question_type": "GRAMMAR_MCQ",
+            "text": "Which sentence correctly uses an it-cleft to emphasize 'synaptic plasticity'?",
+            "options": [
+                "A) Synaptic plasticity underpins long-term memory formation.",
+                "B) It is synaptic plasticity that underpins long-term memory formation.",
+                "C) Synaptic plasticity that underpins long-term memory formation is crucial.",
+                "D) Underpinning long-term memory formation is synaptic plasticity.",
+            ],
+            "answer": "B",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Well-formed it-cleft MCQ with single unambiguous valid answer (B) and non-cleft distractors.",
+        context_metadata={"rule_pack": CALIB_CLEFT_RULE_PACK},
+    ),
+    # 17. Valid Reading MCQ with single unambiguous correct answer (Reference: PASS)
+    CalibrationItem(
+        item_id="v23-calib-valid-mcq-17",
+        source_family_id="fam-calib-v23-woodlands-01",
+        domain="reading",
+        question_type="MCQ",
+        stratum=BenchmarkStratum.VALID,
+        passage_text="Temperate deciduous woodlands shed their foliage annually before freezing winter temperatures inhibit hydraulic fluid circulation.",
+        question_data={
+            "question_number": 17,
+            "question_type": "MCQ",
+            "prompt": "Why do temperate deciduous woodlands lose their leaves each autumn?",
+            "answer": "A",
+            "options": [
+                {"key": "A", "text": "Freezing winter temperatures inhibit hydraulic fluid circulation."},
+                {"key": "B", "text": "To absorb maximum sunlight during winter snowfalls."},
+                {"key": "C", "text": "Because high summer humidity demands rapid defoliation."},
+                {"key": "D", "text": "To prevent soil nutrients from evaporating into the air."},
+            ],
+            "evidence_quote": "before freezing winter temperatures inhibit hydraulic fluid circulation",
+        },
+        reference_verdict=EvaluationVerdict.PASS,
+        reference_rationale="Single unambiguous valid option supported by text.",
     ),
 ]
 
@@ -517,6 +892,7 @@ def measure_evaluator_reliability(
             dataset_item_id=item.item_id,
             passage_text=item.passage_text,
             question_data=item.question_data,
+            context_metadata=item.context_metadata,
         )
 
         if eval_res.evaluable:

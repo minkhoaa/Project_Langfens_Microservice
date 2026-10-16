@@ -242,9 +242,9 @@ def test_v2_2_reading_irrelevant_evidence_quote_detected_as_fail():
     assert "Irrelevant evidence citation" in (res.abstention_reason or "")
 
 
-def test_v2_2_reading_not_given_when_contradicted_by_passage_fails():
-    """Adversarial case: Statement directly contradicted by passage is incorrectly labeled NOT GIVEN."""
-    evaluator = NeutralEvaluatorV2_2()
+def test_v2_3_reading_not_given_when_contradicted_by_passage_fails():
+    """Adversarial case: Statement directly contradicted by passage is caught under v2.3 as NOT GIVEN contradiction."""
+    evaluator = NeutralEvaluatorV2_3()
     passage = "Supervolcanoes produce catastrophic explosive events that generate enormous calderas rather than single volcanic cones."
     q_data = {
         "question_id": "adv_ng_contradicted",
@@ -262,9 +262,9 @@ def test_v2_2_reading_not_given_when_contradicted_by_passage_fails():
     assert "NOT GIVEN contradiction: passage explicitly contradicts the proposition" in (res.abstention_reason or "")
 
 
-def test_v2_2_reading_false_when_cited_evidence_affirms_fails():
-    """Adversarial case: Statement affirmed by cited evidence is incorrectly labeled FALSE."""
-    evaluator = NeutralEvaluatorV2_2()
+def test_v2_3_reading_false_when_cited_evidence_affirms_fails():
+    """Adversarial case: Statement affirmed by cited evidence is caught under v2.3 as FALSE contradiction."""
+    evaluator = NeutralEvaluatorV2_3()
     passage = "The Antarctic ice sheet contains roughly 61 percent of all fresh water on Earth."
     q_data = {
         "question_id": "adv_false_affirmed",

@@ -95,6 +95,14 @@ def strip_internal_arm_metadata(payload: Any) -> Any:
     return payload
 
 
+def parse_evaluator_version_tuple(version_str: str) -> tuple[int, int]:
+    """Parses numeric (major, minor) version tuple from version string."""
+    m = re.search(r"v?(\d+)\.(\d+)", version_str)
+    if m:
+        return int(m.group(1)), int(m.group(2))
+    return (2, 0)
+
+
 class NeutralEvaluator:
     """Neutral, reproducible evaluator operating outside experimental arms."""
 
@@ -105,6 +113,23 @@ class NeutralEvaluator:
     ):
         self.rubric = rubric or RubricProfile()
         self.evaluator_version = evaluator_version
+        self.version_tuple = parse_evaluator_version_tuple(evaluator_version)
+
+    @property
+    def is_v2_1_plus(self) -> bool:
+        return self.version_tuple >= (2, 1)
+
+    @property
+    def is_v2_2_plus(self) -> bool:
+        return self.version_tuple >= (2, 2)
+
+    @property
+    def is_v2_3_plus(self) -> bool:
+        return self.version_tuple >= (2, 3)
+
+    @property
+    def is_v2_4_plus(self) -> bool:
+        return self.version_tuple >= (2, 4)
 
 
     def evaluate_item(
@@ -233,6 +258,14 @@ class NeutralEvaluator:
             if not hard_checks["word_limit_valid"]:
                 hard_issues.append(f"Answer exceeds word limit (max 3 words): {len(words)} words provided")
 
+        # Check proposed answer availability (v2.3+ fails closed if proposed answer is missing)
+        if not proposed_ans:
+            if self.is_v2_3_plus:
+                hard_checks["has_proposed_answer"] = False
+                hard_issues.append("UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key")
+        else:
+            hard_checks["has_proposed_answer"] = True
+
         # Check prompt answer leakage (verbatim answer in prompt)
         if proposed_ans and len(proposed_ans) >= 3 and proposed_ans.lower() not in {"true", "false", "yes", "no", "not given"}:
             leaked = matches_exact_token_bound(proposed_ans, prompt)
@@ -246,7 +279,11 @@ class NeutralEvaluator:
         task_validity: Dict[str, Any] = {}
         task_issues: List[str] = []
         evidence_refs: List[str] = []
-
+        if self.is_v2_3_plus and not proposed_ans:
+            task_validity["has_proposed_answer"] = False
+            task_issues.append("UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key")
+        elif self.is_v2_3_plus:
+            task_validity["has_proposed_answer"] = True
         # Attempt to project into SolverView to ensure no answer/canary leakage
         try:
             solver_view = project_to_solver_view(
@@ -258,8 +295,8 @@ class NeutralEvaluator:
             task_validity["solver_view_leak_free"] = False
             task_issues.append(f"Security leakage in SolverView: {e}")
 
-        is_v2_2 = ("2.2" in self.evaluator_version or "2.3" in self.evaluator_version or self.evaluator_version >= "neutral-eval-v2.2")
-        is_v2_3 = ("2.3" in self.evaluator_version or self.evaluator_version >= "neutral-eval-v2.3")
+        is_v2_2 = self.is_v2_2_plus
+        is_v2_3 = self.is_v2_3_plus
         norm_proposed = normalize_solver_answer(proposed_ans, q_type)
         is_tfng = "TFNG" in q_type or "TRUEFALSE" in q_type or "YNNG" in q_type or "YESNO" in q_type
         contradiction_detected = False
@@ -290,7 +327,7 @@ class NeutralEvaluator:
                     if norm_proposed in ("TRUE", "YES"):
                         has_neg_conflict, neg_msg = detect_negation_polarity_conflict(prompt, evidence_quote)
                         has_comp_inversion = detect_comparison_inversion(prompt, evidence_quote)
-                        has_contra = detect_contradiction_in_text(prompt, evidence_quote)
+                        has_contra = detect_contradiction_in_text(prompt, evidence_quote, enable_contrastive_exclusion=is_v2_3, enable_refined_contrastive_clause=self.is_v2_4_plus)
                         if has_neg_conflict or has_comp_inversion or has_contra:
                             contradiction_detected = True
                             task_issues.append(f"Entailment contradiction: cited evidence quote contradicts TRUE statement ({neg_msg or 'polarity/comparison conflict'})")
@@ -481,7 +518,7 @@ class NeutralEvaluator:
                         contradiction_detected = True
                         task_issues.append(gen_msg)
             if norm_proposed in ("TRUE", "YES"):
-                if detect_contradiction_in_text(prompt, passage_text):
+                if detect_contradiction_in_text(prompt, passage_text, enable_contrastive_exclusion=is_v2_3, enable_refined_contrastive_clause=self.is_v2_4_plus):
                     contradiction_detected = True
                     task_issues.append("Entailment contradiction: passage contradicts TRUE statement")
                 else:
@@ -500,11 +537,11 @@ class NeutralEvaluator:
                                     task_issues.append(f"Entailment contradiction: passage explicitly contains '{neg_verb}'")
                                     break
             elif norm_proposed in ("NOT_GIVEN", "NOT GIVEN"):
-                # NOT GIVEN contradiction: passage explicitly contradicts or entails the proposition
-                if is_v2_2 and detect_contradiction_in_text(prompt, passage_text):
+                # NOT GIVEN contradiction: in v2.3+, passage explicitly contradicts the proposition
+                if is_v2_3 and detect_contradiction_in_text(prompt, passage_text, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus):
                     contradiction_detected = True
                     task_issues.append("NOT GIVEN contradiction: passage explicitly contradicts the proposition (should be FALSE)")
-                elif detect_entailment_in_text(prompt, passage_text):
+                elif detect_entailment_in_text(prompt, passage_text, enable_contrastive_exclusion=is_v2_3, enable_refined_contrastive_clause=self.is_v2_4_plus):
                     contradiction_detected = True
                     task_issues.append("NOT GIVEN contradiction: passage explicitly entails the proposition (should be TRUE)")
                 else:
@@ -515,13 +552,18 @@ class NeutralEvaluator:
                             contradiction_detected = True
                             task_issues.append(f"NOT GIVEN contradiction: passage explicitly contains '{affirmative_phrase}'")
             elif norm_proposed in ("FALSE", "NO"):
-                # FALSE contradiction: cited evidence or passage affirms proposition without contradiction
-                if is_v2_2 and evidence_quote and detect_entailment_in_text(prompt, evidence_quote) and not detect_contradiction_in_text(prompt, evidence_quote):
-                    contradiction_detected = True
-                    task_issues.append("FALSE contradiction: cited evidence affirms statement (should be TRUE)")
-                elif detect_entailment_in_text(prompt, passage_text) and not detect_contradiction_in_text(prompt, passage_text):
-                    contradiction_detected = True
-                    task_issues.append("FALSE contradiction: passage affirms proposition without contradiction")
+                # FALSE contradiction
+                if is_v2_3:
+                    if evidence_quote and detect_entailment_in_text(prompt, evidence_quote, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus) and not detect_contradiction_in_text(prompt, evidence_quote, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus):
+                        contradiction_detected = True
+                        task_issues.append("FALSE contradiction: cited evidence affirms statement (should be TRUE)")
+                    elif detect_entailment_in_text(prompt, passage_text, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus) and not detect_contradiction_in_text(prompt, passage_text, enable_contrastive_exclusion=True, enable_refined_contrastive_clause=self.is_v2_4_plus):
+                        contradiction_detected = True
+                        task_issues.append("FALSE contradiction: passage affirms proposition without contradiction")
+                else:
+                    if detect_entailment_in_text(prompt, passage_text) and not detect_contradiction_in_text(prompt, passage_text):
+                        contradiction_detected = True
+                        task_issues.append("FALSE contradiction: passage affirms proposition without contradiction")
         task_validity["no_contradiction"] = not contradiction_detected
 
         # ── 4. Tier 2: QGEval Quality Dimensions (1-5 scale) ────────────────────
@@ -544,8 +586,8 @@ class NeutralEvaluator:
             not evidence_in_passage
             and not any(term in passage_norm.lower() for term in prompt.lower().split() if len(term) > 4)
         )
-        if contradiction_detected or is_ungrounded:
-            grounding = 1.0  # Entirely ungrounded or contradicted
+        if (is_v2_3 and not proposed_ans) or contradiction_detected or is_ungrounded:
+            grounding = 1.0  # Entirely ungrounded, contradicted, or missing answer key
             answerability = 1.0
         elif not evidence_in_passage or (is_v2_2 and task_validity.get("unique_correct_answer") is False):
             grounding = 2.0  # Major issue: cited evidence missing from text or distractor failure
@@ -568,11 +610,13 @@ class NeutralEvaluator:
 
         if not all_hard_pass or not all_task_pass or not is_rubric_pass:
             verdict = EvaluationVerdict.FAIL
-            abstention_reason = "; ".join(hard_issues + task_issues + ([rubric_reason] if rubric_reason else []))
+            if is_v2_3 and not proposed_ans:
+                abstention_reason = "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key"
+            else:
+                abstention_reason = "; ".join(hard_issues + task_issues + ([rubric_reason] if rubric_reason else []))
         else:
             verdict = EvaluationVerdict.PASS
             abstention_reason = None
-
         return CanonicalEvaluationResult(
             evaluation_id=eval_id,
             dataset_item_id=dataset_item_id,
@@ -627,5 +671,19 @@ class NeutralEvaluatorV2_3(NeutralEvaluatorV2_2):
     ):
         super().__init__(
             rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.3"),
+            evaluator_version=evaluator_version,
+        )
+
+
+class NeutralEvaluatorV2_4(NeutralEvaluatorV2_3):
+    """Calibrated neutral evaluator with refined contrastive clause boundary parsing (v2.4)."""
+
+    def __init__(
+        self,
+        rubric: Optional[RubricProfile] = None,
+        evaluator_version: str = "neutral-eval-v2.4",
+    ):
+        super().__init__(
+            rubric=rubric or RubricProfile(rubric_version="rubric-qgeval-v2.4"),
             evaluator_version=evaluator_version,
         )

@@ -184,9 +184,13 @@ def parse_candidate(raw_text: str, request: ResearchRequest, passage_text: str |
     content = NeutralOutput(context_text=context, questions=questions, question_groups=groups)
     failure = None if schema_valid and groups_valid else "OUTPUT_SCHEMA_INVALID"
     failure = failure or _task_failure(content, request, passage_text)
-    proposed = tuple((row["question_id"], row["proposed_answer"].strip()) for row in rows
-                     if isinstance(row, dict) and row.get("question_id") in ids
-                     and isinstance(row.get("proposed_answer"), str) and row["proposed_answer"].strip())
+    proposed_items = []
+    for row in rows:
+        if isinstance(row, dict) and row.get("question_id") in ids:
+            ans = row.get("proposed_answer") or row.get("answer")
+            if isinstance(ans, str) and ans.strip():
+                proposed_items.append((str(row["question_id"]), ans.strip()))
+    proposed = tuple(proposed_items)
     if not failure:
         prop_map = dict(proposed)
         for q in content.questions:

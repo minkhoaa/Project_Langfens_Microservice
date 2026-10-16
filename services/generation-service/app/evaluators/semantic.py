@@ -148,10 +148,10 @@ def stem_token(word: str) -> str:
     return word
 
 
-def detect_contradiction_in_text(statement: str, reference_text: str) -> bool:
+def detect_contradiction_in_text(statement: str, reference_text: str, enable_contrastive_exclusion: bool = False, enable_refined_contrastive_clause: bool = False) -> bool:
     """Checks if reference_text directly contradicts statement on a per-sentence basis.
-    
-    Examines opposite polarity, conflicting numerical values, antonym pairs, or explicit negation.
+    enable_contrastive_exclusion enables contrastive exclusion marker checks (v2.3+ feature).
+    enable_refined_contrastive_clause refines clause boundaries for 'unlike' (v2.4+ feature).
     """
     s_clean = normalize_written_numbers(normalize_text_nfkc(statement)).lower()
     s_words = set(re.findall(r"\b\w+\b", s_clean)) - {"the", "a", "an", "is", "are", "was", "were", "to", "of", "in"}
@@ -205,20 +205,23 @@ def detect_contradiction_in_text(statement: str, reference_text: str) -> bool:
                         if len(s_words & r_words) >= 1:
                             return True
 
-        # 5. Contrastive exclusion markers (e.g. 'X rather than Y', 'instead of Y')
-        for marker in ["rather than", "instead of", "as opposed to", "unlike"]:
-            if marker in r_clean and marker not in s_clean:
-                _, excl = r_clean.split(marker, 1)
-                excl_words = {stem_token(w) for w in re.findall(r"\b\w+\b", excl) if len(w) > 3}
-                s_stems = {stem_token(w) for w in s_words if len(w) > 3}
-                if len(s_stems & excl_words) >= 2:
-                    return True
-    return False
+        # 5. Contrastive exclusion markers (e.g. 'X rather than Y', 'instead of Y') - v2.3 feature gate
+        if enable_contrastive_exclusion:
+            for marker in ["rather than", "instead of", "as opposed to", "unlike"]:
+                if marker in r_clean and marker not in s_clean:
+                    if enable_refined_contrastive_clause and marker == "unlike":
+                        after_unlike = r_clean.split("unlike", 1)[1]
+                        excl = after_unlike.split(",", 1)[0] if "," in after_unlike else after_unlike
+                    else:
+                        _, excl = r_clean.split(marker, 1)
+                    excl_words = {stem_token(w) for w in re.findall(r"\b\w+\b", excl) if len(w) > 3}
+                    s_stems = {stem_token(w) for w in s_words if len(w) > 3}
+                    if len(s_stems & excl_words) >= 2:
+                        return True
 
-
-def detect_entailment_in_text(statement: str, reference_text: str) -> bool:
+def detect_entailment_in_text(statement: str, reference_text: str, enable_contrastive_exclusion: bool = False, enable_refined_contrastive_clause: bool = False) -> bool:
     """Checks if statement is entailed by any sentence in reference_text with compatible polarity."""
-    if detect_contradiction_in_text(statement, reference_text):
+    if detect_contradiction_in_text(statement, reference_text, enable_contrastive_exclusion=enable_contrastive_exclusion, enable_refined_contrastive_clause=enable_refined_contrastive_clause):
         return False
     s_clean = normalize_written_numbers(normalize_text_nfkc(statement)).lower()
     sentences = [s.strip() for s in re.split(r"[.!?]\s+", reference_text) if s.strip()]
@@ -228,20 +231,25 @@ def detect_entailment_in_text(statement: str, reference_text: str) -> bool:
     for sent in sentences:
         r_clean = normalize_written_numbers(normalize_text_nfkc(sent)).lower()
         # Sentence-level contradiction check: a sentence contradicting statement cannot entail it
-        if detect_contradiction_in_text(statement, sent):
+        if detect_contradiction_in_text(statement, sent, enable_contrastive_exclusion=enable_contrastive_exclusion, enable_refined_contrastive_clause=enable_refined_contrastive_clause):
             continue
         # Also ensure sentence does not contain an exclusion marker where statement words are in the excluded clause
-        has_exclusion = False
-        for marker in ["rather than", "instead of", "as opposed to", "unlike"]:
-            if marker in r_clean and marker not in s_clean:
-                _, excl = r_clean.split(marker, 1)
-                excl_words = {stem_token(w) for w in re.findall(r"\b\w+\b", excl) if len(w) > 3}
-                s_stems = {stem_token(w) for w in s_clean.split() if len(w) > 3}
-                if len(s_stems & excl_words) >= 2:
-                    has_exclusion = True
-                    break
-        if has_exclusion:
-            continue
+        if enable_contrastive_exclusion:
+            has_exclusion = False
+            for marker in ["rather than", "instead of", "as opposed to", "unlike"]:
+                if marker in r_clean and marker not in s_clean:
+                    if enable_refined_contrastive_clause and marker == "unlike":
+                        after_unlike = r_clean.split("unlike", 1)[1]
+                        excl = after_unlike.split(",", 1)[0] if "," in after_unlike else after_unlike
+                    else:
+                        _, excl = r_clean.split(marker, 1)
+                    excl_words = {stem_token(w) for w in re.findall(r"\b\w+\b", excl) if len(w) > 3}
+                    s_stems = {stem_token(w) for w in s_clean.split() if len(w) > 3}
+                    if len(s_stems & excl_words) >= 2:
+                        has_exclusion = True
+                        break
+            if has_exclusion:
+                continue
         s_words = [w for w in re.findall(r"\b\w+\b", s_clean) if len(w) > 3 and w not in {"that", "with", "from", "this", "they", "have", "were"}]
         if not s_words:
             continue

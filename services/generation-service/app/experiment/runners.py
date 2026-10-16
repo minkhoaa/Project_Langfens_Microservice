@@ -219,6 +219,8 @@ class _Run:
         self.responses: list[LLMDispatchResponse] = []
         self.steps: list[dict[str, Any]] = []
         self.candidate: ParsedCandidate | None = None
+        self.candidate_stage: str | None = None
+        self.candidate_response_hash: str | None = None
         self.output_response_hash: str | None = None
         self.last_parsed: ParsedCandidate | None = None
         self.repairs = 0
@@ -297,7 +299,9 @@ class _Run:
             self.last_parsed = parsed
             if parsed.content is not None or self.candidate is None:
                 self.candidate = parsed
-                self.output_response_hash = _hash(response.raw_text)
+                self.candidate_stage = stage
+                self.candidate_response_hash = _hash(response.raw_text)
+                self.output_response_hash = self.candidate_response_hash
         else:
             parsed = ParsedCandidate(None, OutputAvailability.NONE, "RAW_OUTPUT_UNPARSEABLE")
             self.last_parsed = parsed
@@ -316,9 +320,33 @@ class _Run:
         status = status or (ExecutionStatus.FAILED_VALIDATION if failure else ExecutionStatus.COMPLETED)
         availability = self.candidate.availability if self.candidate else (
             self.last_parsed.availability if self.last_parsed else OutputAvailability.NONE)
+        candidate_stage = self.candidate_stage or (self.steps[0]["stage"] if self.steps else "UNKNOWN")
+        response_hash = self.candidate_response_hash or (self.steps[0]["response_sha256"] if self.steps else None)
+        proposed_map = dict(self.candidate.proposed_answers) if self.candidate else {}
+        authoritative_answers = []
+        if content and content.questions:
+            for q in content.questions:
+                qid = str(q.question_id)
+                ans = proposed_map.get(qid)
+                ans_str = str(ans).strip() if ans is not None else ""
+                is_missing = not bool(ans_str)
+                authoritative_answers.append({
+                    "campaign_id": getattr(self.request, "campaign_id", "RG10_DEV"),
+                    "assignment_id": getattr(self.request, "assignment_id", self.request.run_id),
+                    "attempt_id": getattr(self.request, "attempt_id", self.request.run_id),
+                    "stage": candidate_stage,
+                    "question_id": qid,
+                    "output_response_sha256": response_hash,
+                    "proposed_answer": ans_str if not is_missing else None,
+                    "status": "AVAILABLE" if not is_missing else "UNSCORABLE_MISSING_ANSWER",
+                })
         provenance = {
             "configuration_id": self.arm, "prompt_version": self.prompt_version,
-            "requested_model_id": self.model_id, "dispatches": [dict(step) for step in self.steps],
+            "requested_model_id": self.model_id,
+            "terminal_candidate_stage": candidate_stage,
+            "terminal_candidate_response_sha256": response_hash,
+            "authoritative_answer_provenance": authoritative_answers,
+            "dispatches": [dict(step) for step in self.steps],
             "normalized_output_sha256": _hash(canonical_json_dump(content.model_dump(mode="json"))) if content else None,
             "output_response_sha256": self.output_response_hash if content else None,
             "trace_ref": f"secure://traces/{self.request.run_id}",
@@ -328,14 +356,16 @@ class _Run:
         usage = {**_aggregate(self.responses, self.repairs), "model_id": self.model_id,
                  "prompt_version": self.prompt_version, "provenance": provenance}
         trace = {"run_id": self.request.run_id, "configuration_id": self.arm,
-                 "steps": [dict(step) for step in self.steps], "provenance": provenance}
+                 "steps": [dict(step) for step in self.steps], "provenance": provenance,
+                 "authoritative_answer_provenance": authoritative_answers}
         if self.arm == "C":
             trace["internal_accepted_head"] = self.accepted and failure is None
         result = GenerationResult(run_id=self.request.run_id, dataset_item_id=self.request.dataset_item_id,
                                   configuration_id=self.arm, task_type=self.request.task.task_type,
                                   execution_status=status, output_availability=availability,
                                   generated_content=content, failure_code=failure,
-                                  private_answer_ref=None, trace_ref=f"secure://traces/{self.request.run_id}", usage_ref=None)
+                                  private_answer_ref=f"secure://answers/{self.request.run_id}",
+                                  trace_ref=f"secure://traces/{self.request.run_id}", usage_ref=None)
         return result, trace, usage
 
 
