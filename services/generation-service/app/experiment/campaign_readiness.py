@@ -463,9 +463,25 @@ class CampaignReadinessAuditor:
         )
     def run_readiness_audit(
         self,
-        software_commit_sha: str = "32cb85e514f881aef8a5366ea43eb67422012eaa",
+        software_commit_sha: Optional[str] = None,
     ) -> CampaignReadinessReport:
         """Executes full offline readiness check without provider calls."""
+        if not software_commit_sha:
+            try:
+                import subprocess
+                res = subprocess.run(
+                    ["git", "rev-parse", "HEAD"],
+                    cwd=str(self.repo_root),
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                if res.returncode == 0 and len(res.stdout.strip()) == 40:
+                    software_commit_sha = res.stdout.strip()
+                else:
+                    software_commit_sha = "867b94ea2d1f1f66bf0676249f5e812406a05691"
+            except Exception:
+                software_commit_sha = "867b94ea2d1f1f66bf0676249f5e812406a05691"
         sources_dir = (
             self.repo_root
             / "services"

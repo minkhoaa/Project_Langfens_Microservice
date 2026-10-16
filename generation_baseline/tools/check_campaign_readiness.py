@@ -89,11 +89,16 @@ def main() -> int:
         default=REPO_ROOT / "generation_baseline" / "verification" / "CAMPAIGN_READINESS_REPORT.md",
         help="Path for output Markdown report.",
     )
+    parser.add_argument(
+        "--commit-sha",
+        type=str,
+        default=None,
+        help="Optional software commit SHA override (defaults to current git HEAD).",
+    )
     args = parser.parse_args()
 
     auditor = CampaignReadinessAuditor(REPO_ROOT)
-    report = auditor.run_readiness_audit()
-
+    report = auditor.run_readiness_audit(software_commit_sha=args.commit_sha)
     # Ensure output directories exist
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.md_out.parent.mkdir(parents=True, exist_ok=True)

@@ -31,14 +31,15 @@ This document concludes the software stabilization phase of RG10. All software, 
 
 ## 2. Exact Git Provenance & Commit Traceability
 
-- **Reported Base Commit:** `6432c1621270b0958d1307a1b839aff03abdfd7f` (*fix(evaluator): remediate DEV grammar defects in v2.7 and enforce holdout governance*)
-- **Current HEAD Commit:** `32cb85e514f881aef8a5366ea43eb67422012eaa` (*fix(evaluator): refine base -eed lexeme filter and enforce QUALITY_READY HOLD*)
-- **Commit Delta:** Exactly 1 commit ahead of reported base:
-  - Constrained `-eed` bare infinitive exemption to closed base class (`need`, `feed`, `bleed`, `proceed`, `succeed`, `exceed`, `breed`, `speed`), rejecting past participle forms `freed`, `agreed`, `decreed`, `guaranteed`.
-  - Added counterexample regressions in `test_rg10_v2_7_remediation.py`.
-  - Enforced `QUALITY_READY: HOLD` across acceptance reports.
+- **Reported Base Commit from Prompt:** `6432c1621270b0958d1307a1b839aff03abdfd7f` (*fix(evaluator): remediate DEV grammar defects in v2.7 and enforce holdout governance*)
+- **Intermediate Remediation Commit:** `32cb85e514f881aef8a5366ea43eb67422012eaa` (*fix(evaluator): refine base -eed lexeme filter and enforce QUALITY_READY HOLD*)
+- **Handoff Package Commit:** `867b94ea2d1f1f66bf0676249f5e812406a05691` (*feat(rg10): finalize software freeze and external research handoff package*)
+- **Current Candidate Freeze HEAD:** `867b94ea2d1f1f66bf0676249f5e812406a05691` (verified clean working tree on branch `autonomous-generation`)
+- **Commit Delta & Traceability:**
+  - `6432c16` → `32cb85e`: Constrained `-eed` bare infinitive exemption to closed base class (`need`, `feed`, `bleed`, `proceed`, `succeed`, `exceed`, `breed`, `speed`), rejecting past participle forms `freed`, `agreed`, `decreed`, `guaranteed`. Added counterexample regressions in `test_rg10_v2_7_remediation.py`. Enforced `QUALITY_READY: HOLD` across acceptance reports.
+  - `32cb85e` → `867b94e`: Built external research handoff package, including human curator instructions, licensing checklist, blind annotation forms, adjudication workflow, sealing conditions, hash verification tool, and corpus disjointness tool. Added dry-run campaign readiness auditor covering 9 research dimensions offline.
+  - Candidate freeze pins Evaluator v2.7 (`neutral-eval-v2.7`), Rubric v2.7, MiniMax-Text-01, and frozen 168-assignment ledger.
 - **Git Branch:** `autonomous-generation` (tracking `origin/autonomous-generation`)
-
 ---
 
 ## 3. Comprehensive Verification & Regression Results
@@ -59,7 +60,28 @@ All tests executed offline in the verified runtime environment (Python 3.10.12 /
 
 ---
 
-## 4. Candidate Freeze Manifest
+## 4. Known Limitations
+
+1. **Evaluator v2.7 Development Candidate Status (Quality Ready on HOLD):**
+   - Evaluator v2.7 successfully remediates all 4 diagnostic DEV grammar defect classes (`INV-DEV-02`, `CND-DEV-01`, `SUB-DEV-04`, `SUB-DEV-05`) and passes all 330 unit/regression tests.
+   - However, in-sample calibration does NOT constitute independent confirmatory proof. Per empirical research protocol and repository governance, Evaluator v2.7 remains a *development candidate* and cannot be considered research-frozen or quality-passed until evaluated against the uninspected, independently curated 30-item Judge Holdout. Therefore, `QUALITY_READY` remains strictly on `HOLD`.
+2. **Offline Local Test DB Dependency for Phase 14 Lifecycle Test:**
+   - In `services/generation-service`, `test_full_phase14_lifecycle_e2e` in `tests/test_t14_harness_integration.py` targets a local PostgreSQL database instance on port 5433.
+   - In offline developer environments without running container infrastructure, this integration test fails with a connection refused error (`1125 passed, 33 skipped, 1 failed`). Per repository testing standards (`skill://langfens-verify`), this is an environmental fixture setup prerequisite, not a software defect.
+3. **Execution Record Validator Fixed Status Enumeration:**
+   - The verification utility `generation_baseline/tools/check_execution_records.py` validates sprint metadata against a fixed allowed set: `{'NOT_RUN','TARGET_SPEC','UNKNOWN','PARTIAL','BLOCKED','FAILED','PASS','VERIFIED'}`.
+   - Historical sprint artifact `generation_baseline/.execution/RG10/RG10-S03.json` recorded `"status": "PASS_WITH_EXTERNAL_BLOCKER"` because the software, scoring, and blind export passed while external human scoring was blocked. Per immutability and provenance preservation invariants, historical execution records are never altered.
+4. **Closed-Class Base `-eed` Lexeme Heuristic:**
+   - The bare infinitive exemption for `-eed` ending verbs is strictly constrained to the closed base class (`need`, `feed`, `bleed`, `proceed`, `succeed`, `exceed`, `breed`, `speed`), correctly treating past forms `freed`, `agreed`, `decreed`, `guaranteed` as inflected. Rare archaic or dialectal verbs not in this list are treated under general past participle heuristics.
+5. **Replacement of Impossible Lexical Isolation:**
+   - Theoretical "zero lexical/topical overlap" has been replaced with empirical source-family isolation and 3-gram shingle Jaccard threshold $< 0.30$.
+6. **External Environmental Blockers:**
+   - External MiniMax provider quota limit reached (`HTTP 429: Token Plan usage limit reached (2056)`).
+   - Confirmatory holdout corpus ($N=30$) not yet curated or sealed by external panel.
+   - Qualified human annotators not yet onboarded.
+---
+
+## 5. Candidate Freeze Manifest
 
 The following versions and artifacts are formally pinned as the candidate freeze:
 
@@ -80,7 +102,7 @@ The following versions and artifacts are formally pinned as the candidate freeze
 
 ---
 
-## 5. Research Governance Audit & Invariants
+## 6. Research Governance Audit & Invariants
 
 1. **Confirmatory Holdout Status Remains PENDING:**  
    `CONFIRMATORY_HOLDOUT_MANIFEST.json` status remains `SPECIFICATION_PENDING_INDEPENDENT_CURATION`.
@@ -95,7 +117,7 @@ The following versions and artifacts are formally pinned as the candidate freeze
 
 ---
 
-## 6. External Handoff Package
+## 7. External Handoff Package
 
 The following actionable documents and tools have been prepared for independent panel onboarding:
 
@@ -126,7 +148,35 @@ The following actionable documents and tools have been prepared for independent 
 
 ---
 
-## 7. External Blockers
+## 8. Independent Evidence Requirements
+
+To achieve full unsealing and research validation, the following independent empirical evidence must be provided by external reviewers:
+
+1. **Human Curator Attestation & Non-Synthetic Provenance:**
+   - Complete human curation of 18 Reading items and 12 Grammar items without any LLM assistance.
+   - Documented scholarly citations and verified Creative Commons / Public Domain / Fair Use licensing per `SOURCE_PROVENANCE_AND_LICENSING_CHECKLIST.md`.
+2. **Automated Disjointness & Eligibility Clearance:**
+   - Execution of `check_corpus_disjointness.py` returning `status: "AUDITED_ELIGIBLE"` with `eligible_for_sealing: true`.
+   - Zero source-family collisions against DEV/calibration sets (`fam-astrophysics-pulsar-08`, `fam-paleontology-cambrian-09`, `fam-mood-subjunctive-08`, `fam-aspect-participle-09` exclusively).
+   - Zero item-ID collisions against historical splits.
+   - Maximum 3-gram shingle Jaccard similarity $< 0.30$ against baseline passages.
+   - Reading items meet 720–915 word bounds and exact label balance (6 TRUE, 6 FALSE, 6 NOT GIVEN with verbatim citation spans).
+   - Grammar items contain exactly 1 defensible key and 3 syntactically flawed distractors with error codes.
+3. **Cryptographic Sealing & Manifest Signature:**
+   - Computation of canonical SHA-256 digests via `verify_corpus_hashes.py`.
+   - Independent panel lead digital signature / PGP attestation in `CONFIRMATORY_HOLDOUT_MANIFEST.json`.
+   - Transition of status from `SPECIFICATION_PENDING_INDEPENDENT_CURATION` to `SEALED_UNINSPECTED`.
+4. **Dual-Blind Human Evaluation & Adjudication:**
+   - Two qualified independent human annotators evaluate the blinded export package (`task_hrev_*`).
+   - Chief Adjudicator resolves discrepancies where key, verdict, or dimension scores diverge.
+   - Calculation of Cohen's $\kappa \ge 0.80$ and Gwet's $AC_1 \ge 0.85$.
+5. **Post-Freeze Reliability Metric Calculation:**
+   - 30-item Judge Holdout used exclusively to measure post-freeze evaluator False Rejection Rate (FRR), False Acceptance Rate (FAR), and abstention rate.
+   - Zero threshold tuning, parameter adjustment, or prompt modifications permitted.
+
+---
+
+## 9. External Blockers
 
 Execution of the final research campaign is blocked on three external factors outside the software workspace:
 
@@ -139,7 +189,7 @@ Execution of the final research campaign is blocked on three external factors ou
 
 ---
 
-## 8. Clear Actionable Criteria to Resume Final Research
+## 10. Clear Actionable Criteria to Resume Final Research
 
 To resume final confirmatory campaign execution:
 
@@ -163,7 +213,7 @@ To resume final confirmatory campaign execution:
 
 ---
 
-## 9. Gate Declaration
+## 11. Gate Declaration
 
 **SOFTWARE FREEZE:** **`CANDIDATE_FREEZE_LOCKED`**  
 **OVERALL RG10 STATUS:** **`HOLD`**  
