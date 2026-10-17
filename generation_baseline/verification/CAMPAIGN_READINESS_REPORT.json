@@ -1,10 +1,10 @@
 {
   "report_id": "rg10-campaign-readiness-dryrun-v1.0",
-  "evaluated_at": "2026-10-17T06:12:45Z",
-  "software_commit_sha": "7969076fa44640ebcf844e9e9ce0b94f202f7a29",
+  "evaluated_at": "2026-10-17T06:13:15Z",
+  "software_commit_sha": "ef98b70ec2e633601a32c2d20b12ce60b009e72c",
   "implementation_source_sha": "32cb85e514f881aef8a5366ea43eb67422012eaa",
-  "audit_tool_sha": "7969076fa44640ebcf844e9e9ce0b94f202f7a29",
-  "report_generated_from_sha": "7969076fa44640ebcf844e9e9ce0b94f202f7a29",
+  "audit_tool_sha": "ef98b70ec2e633601a32c2d20b12ce60b009e72c",
+  "report_generated_from_sha": "ef98b70ec2e633601a32c2d20b12ce60b009e72c",
   "is_dry_run": true,
   "dataset_readiness": {
     "reading_task_count": 28,
