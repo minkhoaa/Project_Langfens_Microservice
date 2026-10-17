@@ -1,7 +1,10 @@
 {
   "report_id": "rg10-campaign-readiness-dryrun-v1.0",
-  "evaluated_at": "2026-10-16T19:00:00Z",
-  "software_commit_sha": "798bf9ef614e393f2324fdd3344f535e9d74ee50",
+  "evaluated_at": "2026-10-17T06:12:45Z",
+  "software_commit_sha": "7969076fa44640ebcf844e9e9ce0b94f202f7a29",
+  "implementation_source_sha": "32cb85e514f881aef8a5366ea43eb67422012eaa",
+  "audit_tool_sha": "7969076fa44640ebcf844e9e9ce0b94f202f7a29",
+  "report_generated_from_sha": "7969076fa44640ebcf844e9e9ce0b94f202f7a29",
   "is_dry_run": true,
   "dataset_readiness": {
     "reading_task_count": 28,
@@ -70,12 +73,13 @@
     ],
     "combined_source_sha256": "09db897c54fbdc05687b84779699706e330f5bff35a4167574560e4ec7133e4b",
     "forbidden_family_collisions": [],
+    "holdout_family_collisions": [],
     "is_source_isolated": true,
     "holdout_manifest_status": "SPECIFICATION_PENDING_INDEPENDENT_CURATION",
     "holdout_seals_are_null": true,
     "holdout_corpus_present": false,
     "synthetic_holdout_detected": null,
-    "evidence_notes": "Verified 56 tasks across 28 Reading and 28 Grammar slots. All 56/56 task content SHAs verified against source specifications. Zero forbidden family collisions. Holdout manifest status: SPECIFICATION_PENDING_INDEPENDENT_CURATION (seals null: True, holdout submitted: False).",
+    "evidence_notes": "Verified 56 tasks across 28 Reading and 28 Grammar slots. All 56/56 task content SHAs verified against source specifications. Zero forbidden family collisions (dev=0, holdout=0). Holdout manifest status: SPECIFICATION_PENDING_INDEPENDENT_CURATION (seals null: True, holdout submitted: False).",
     "status": "VERIFIED"
   },
   "version_readiness": {
@@ -94,7 +98,14 @@
       "B": "v2.2-grounded",
       "C": "v3.0-adversarial"
     },
-    "evidence_notes": "Instantiated NeutralEvaluatorV2_7 with version 'neutral-eval-v2.7' and rubric 'rubric-qgeval-v2.7'. Verified is_v2_7_plus=True. Foundation model pinned to 'minimax/MiniMax-Text-01' across Arms ['A', 'B', 'C'].",
+    "prompt_template_hashes": {
+      "A": "ca8d0c878f78148cb6db5ac6efa0bb17b843c37fafd83834b51eeccf08a3751c",
+      "B": "0c2d0183148695703ee17f1eee1192b63999b6177a9b1a25bbf23a93135c8e25",
+      "C": "0861af20f3262f6ec20ac1ade9f5f818a94914f99ae0e61509dbd5f7ac73b0eb"
+    },
+    "source_of_truth": "ProviderFreezeManager + CampaignManifestBuilder",
+    "consistency_verified": true,
+    "evidence_notes": "Evaluator: NeutralEvaluatorV2_7 version 'neutral-eval-v2.7', rubric 'rubric-qgeval-v2.7' (is_v2_7_plus=True). Model 'minimax/MiniMax-Text-01' and Prompts {'A': 'v2.1-baseline', 'B': 'v2.2-grounded', 'C': 'v3.0-adversarial'} resolved from ProviderFreezeManager + CampaignManifestBuilder. Template SHA256 hashes verified: True. Consistency verified: True.",
     "status": "VERIFIED"
   },
   "roster_and_denominators": {
@@ -116,8 +127,10 @@
     "judge_holdout_grammar_stratum": 12,
     "ledger_comparison_count": 168,
     "ledger_mismatches": 0,
+    "fingerprint_mismatches": 0,
+    "holdout_collisions": 0,
     "is_roster_deterministic": true,
-    "evidence_notes": "Evaluated 168 generated assignments against 168 frozen ledger entries. Exact symmetric difference: 0 mismatches. Explicit denominators: total=168, reading=84, grammar=84, per_arm=56. Separate Judge Holdout denominator: N=30.",
+    "evidence_notes": "Evaluated 168 generated assignments against 168 frozen ledger entries. Assignment mismatches: 0, task fingerprint mismatches: 0, holdout collisions: 0. Explicit denominators: total=168, reading=84, grammar=84, per_arm=56. Separate Judge Holdout denominator: N=30 (18 Reading, 12 Grammar).",
     "status": "VERIFIED"
   },
   "provider_quota_status": {
@@ -143,6 +156,7 @@
   "raw_response_preservation": {
     "raw_response_directories_found": [
       "generation_baseline/.execution/RG10/raw_responses",
+      "generation_baseline/.execution/RG10/smoke_test/raw_responses",
       "generation_baseline/.execution/RG10_DEV_FRESH_V3/raw_responses",
       "generation_baseline/.execution/RG10_DEV_GRAMMAR_FIX_V5/raw_responses",
       "generation_baseline/.execution/RG10_DEV_HARDENING/raw_responses",
@@ -151,8 +165,8 @@
       "generation_baseline/.execution/RG10_REMEDIATION/raw_responses",
       "generation_baseline/.execution/RG11_DEV_V22/raw_responses"
     ],
-    "total_raw_responses_on_disk": 635,
-    "sample_file_verified": "generation_baseline/.execution/RG10/raw_responses/research-GENERATOR-6_GENERATOR_1792083397371579947.json",
+    "total_raw_responses_on_disk": 677,
+    "sample_file_verified": "generation_baseline/.execution/RG10/raw_responses/research-BLIND_SOLVER-10_BLIND_SOLVER_1792078938008483678.json",
     "telemetry_fields_verified": [
       "latency_ms",
       "prompt_sha256",
@@ -161,7 +175,13 @@
       "tokens",
       "tokens_prompt_completion_total"
     ],
-    "evidence_notes": "Found 635 raw response JSON records across 8 execution directories. Verified fields in sample 'generation_baseline/.execution/RG10/raw_responses/research-GENERATOR-6_GENERATOR_1792083397371579947.json': ['latency_ms', 'prompt_sha256', 'provider_request_id', 'raw_text_sha256', 'tokens', 'tokens_prompt_completion_total'].",
+    "valid_records_count": 677,
+    "invalid_records_count": 0,
+    "unverifiable_records_count": 0,
+    "missing_records_count": 0,
+    "corrupt_files": [],
+    "invalid_details": [],
+    "evidence_notes": "Audited 677 raw response JSON records across 9 directories. Valid: 677, Invalid: 0, Unverifiable: 0, Missing: 0. Every single file validated for parseability, required fields, SHA256 hashes, and telemetry. Verified fields in sample 'generation_baseline/.execution/RG10/raw_responses/research-BLIND_SOLVER-10_BLIND_SOLVER_1792078938008483678.json': ['latency_ms', 'prompt_sha256', 'provider_request_id', 'raw_text_sha256', 'tokens', 'tokens_prompt_completion_total'].",
     "status": "VERIFIED"
   },
   "failure_and_uncertainty_accounting": {
@@ -170,7 +190,32 @@
     "missing_output_classified_as_fail": true,
     "rate_limit_classified_as_blocked": true,
     "zero_silent_drops": true,
-    "evidence_notes": "Evaluator NeutralEvaluatorV2_7 implements EvaluationVerdict.UNCERTAIN=True. Analysis plan enforces fail-closed: UNCERTAIN, timeout, rate-limit, and missing output are non-PASS. Zero silent drops.",
+    "policy_declared": {
+      "abstention_rule": "UNCERTAIN, timeout, failed validation, and missing external evaluation counted as non-PASS",
+      "primary_endpoint": "independent_final_PASS / all_assigned",
+      "missing_data_policy": "UNCERTAIN, timeout, failed validation, and missing external evaluation counted as non-PASS",
+      "provider_fallback_policy": "FORBIDDEN (fails closed on provider fallback)",
+      "model_downgrade_policy": "FORBIDDEN (fails closed on model downgrade)"
+    },
+    "implementation_tested": {
+      "evaluator_uncertain_verdict_supported": true,
+      "uncertain_yields_non_pass": true,
+      "fail_yields_non_pass": true,
+      "timed_out_yields_non_pass": true,
+      "missing_output_yields_non_pass": true,
+      "provider_fallback_forbidden": true,
+      "post_hoc_endpoint_switching_forbidden": true
+    },
+    "runtime_observed": {
+      "ledger_assignments": 168,
+      "ledger_attempts": 262,
+      "ledger_outputs": 260,
+      "ledger_evaluations": 166,
+      "zero_silent_drops_verified": true,
+      "prior_quota_status": "BLOCKED_EXTERNAL_QUOTA",
+      "prior_http_code": 429
+    },
+    "evidence_notes": "Executable tests verified: UNCERTAIN=0.0 (True), missing_output=0.0 (True), timeout=0.0, fallback_forbidden=True, post_hoc_endpoint_switch_forbidden=True. Runtime observed: zero silent drops across 262 attempts. All tests passed: True.",
     "status": "VERIFIED"
   },
   "statistical_analysis_plan": {
