@@ -45,6 +45,13 @@ from app.experiment.preregistration import (
 VerificationStatus = Literal["VERIFIED", "HOLD", "BLOCKED", "FAIL", "UNKNOWN"]
 
 
+# Authoritative frozen SHA-256 template hashes for Candidate Prompt Map
+FROZEN_PROMPT_AUTHORITATIVE_HASHES: Dict[str, str] = {
+    "A": "ca8d0c878f78148cb6db5ac6efa0bb17b843c37fafd83834b51eeccf08a3751c",
+    "B": "0c2d0183148695703ee17f1eee1192b63999b6177a9b1a25bbf23a93135c8e25",
+    "C": "0861af20f3262f6ec20ac1ade9f5f818a94914f99ae0e61509dbd5f7ac73b0eb",
+}
+
 class DatasetReadinessCheck(CanonicalBaseModel):
     """Integrity check for final benchmark dataset and holdout specification."""
 
@@ -154,6 +161,7 @@ class FailureAndUncertaintyAccountingCheck(CanonicalBaseModel):
     policy_declared: Dict[str, str] = Field(default_factory=dict)
     implementation_tested: Dict[str, bool] = Field(default_factory=dict)
     runtime_observed: Dict[str, Any] = Field(default_factory=dict)
+    unresolved_attempts: List[str] = Field(default_factory=list)
     evidence_notes: str
     status: VerificationStatus
 
@@ -191,8 +199,8 @@ class CampaignReadinessReport(CanonicalBaseModel):
     raw_response_preservation: RawResponsePreservationCheck
     failure_and_uncertainty_accounting: FailureAndUncertaintyAccountingCheck
     statistical_analysis_plan: StatisticalPlanCheck
-    overall_software_readiness: Literal["READY", "HOLD", "BLOCKED", "UNKNOWN"]
-    overall_campaign_readiness: Literal["READY", "HOLD", "BLOCKED", "UNKNOWN"]
+    overall_software_readiness: Literal["READY", "HOLD", "BLOCKED", "FAIL", "UNKNOWN"]
+    overall_campaign_readiness: Literal["READY", "HOLD", "BLOCKED", "FAIL", "UNKNOWN"]
     blockers: List[str] = Field(default_factory=list)
     actionable_resume_criteria: List[str] = Field(default_factory=list)
 
@@ -370,8 +378,16 @@ class CampaignReadinessAuditor:
                 spec = freeze_manager.get_prompt_spec(arm)  # type: ignore[arg-type]
                 if not spec.version_tag or not spec.template_text:
                     fm_ok = False
+                # Reject missing or empty template SHA-256
+                template_sha = getattr(spec, "template_sha256", "") or ""
+                if not template_sha or not str(template_sha).strip():
+                    fm_ok = False
                 computed_hash = hashlib.sha256(spec.template_text.encode("utf-8")).hexdigest()
-                if spec.template_sha256 and computed_hash != spec.template_sha256:
+                if computed_hash != template_sha:
+                    fm_ok = False
+                # Validate computed digest against frozen authoritative evidence
+                expected_auth_hash = FROZEN_PROMPT_AUTHORITATIVE_HASHES.get(arm)
+                if not expected_auth_hash or computed_hash != expected_auth_hash:
                     fm_ok = False
                 prompt_versions[arm] = spec.version_tag
                 prompt_hashes[arm] = computed_hash
@@ -718,7 +734,10 @@ class CampaignReadinessAuditor:
             status=status,
         )
 
-    def audit_failure_and_uncertainty(self) -> FailureAndUncertaintyAccountingCheck:
+    def audit_failure_and_uncertainty(
+        self,
+        ledger_path_override: Optional[Path] = None,
+    ) -> FailureAndUncertaintyAccountingCheck:
         """Audits evaluator UNCERTAIN handling and fail-closed policies via executable tests and historical evidence."""
         # 1. Policy declared
         plan = PreregisteredAnalysisPlan()
@@ -792,35 +811,124 @@ class CampaignReadinessAuditor:
 
         # 3. Runtime observed
         # Inspect ledger accounting for zero silent drops and rate limit classification
-        ledger_path = self.repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json"
+        ledger_path = ledger_path_override or (
+            self.repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json"
+        )
         zero_silent_drops = False
         rate_limit_classified_as_blocked = False
         runtime_observed: Dict[str, Any] = {}
+        unresolved_attempts: List[str] = []
+        reconciled_attempts_count = 0
+        terminal_attempts_count = 0
+        non_terminal_attempts_count = 0
+
+        valid_statuses = {"COMPLETED", "FAILED_VALIDATION", "FAILED_RUNTIME", "TIMED_OUT", "CANCELLED"}
 
         if ledger_path.exists():
             try:
                 with open(ledger_path, "r", encoding="utf-8") as f:
                     ledger_data = json.load(f)
-                num_asgs = len(ledger_data.get("assignments", []))
-                num_attempts = len(ledger_data.get("attempts", []))
-                num_outputs = len(ledger_data.get("outputs", {}))
-                num_evals = len(ledger_data.get("evaluations", []))
-                zero_silent_drops = (num_asgs == 168 and num_attempts >= 168 and num_outputs >= 168)
+                assignments = ledger_data.get("assignments", [])
+                attempts = ledger_data.get("attempts", [])
+                outputs = ledger_data.get("outputs", {})
+                evals = ledger_data.get("evaluations", {})
+
+                asg_ids = {a.get("assignment_id") for a in assignments if a.get("assignment_id")}
+                terminal_per_asg: Dict[str, int] = {}
+
+                for a in attempts:
+                    att_id = a.get("attempt_id")
+                    asg_id = a.get("assignment_id")
+                    status_val = a.get("execution_status")
+                    is_terminal = a.get("is_terminal")
+                    fail_code = a.get("failure_code")
+                    out_avail = a.get("output_availability")
+
+                    issues: List[str] = []
+                    if not att_id:
+                        issues.append("missing attempt_id")
+                    if not asg_id or asg_id not in asg_ids:
+                        issues.append(f"unrecognized or missing assignment_id: '{asg_id}'")
+                    if status_val not in valid_statuses:
+                        issues.append(f"invalid or missing execution_status: '{status_val}'")
+                    if not isinstance(is_terminal, bool):
+                        issues.append(f"is_terminal is not a boolean: {is_terminal}")
+
+                    # Documented failure code required on failure status
+                    if status_val in {"FAILED_VALIDATION", "FAILED_RUNTIME", "TIMED_OUT", "CANCELLED"}:
+                        if not fail_code or not str(fail_code).strip():
+                            issues.append(f"failure status '{status_val}' lacks documented failure_code")
+
+                    # Validate output reference where applicable
+                    if out_avail in {"NORMALIZED", "PARSEABLE", "RAW_ONLY"}:
+                        if att_id not in outputs:
+                            issues.append(f"output_availability '{out_avail}' but attempt missing from outputs")
+                    elif out_avail == "NONE":
+                        if att_id in outputs:
+                            issues.append("output_availability is NONE but output exists in outputs")
+                    else:
+                        issues.append(f"invalid output_availability: '{out_avail}'")
+
+                    # Validate evaluation reference where applicable
+                    if is_terminal is True and out_avail in {"NORMALIZED", "PARSEABLE"}:
+                        if att_id not in evals:
+                            issues.append(f"terminal attempt with '{out_avail}' output missing evaluation reference")
+
+                    if is_terminal is True and asg_id:
+                        terminal_per_asg[asg_id] = terminal_per_asg.get(asg_id, 0) + 1
+
+                    if issues:
+                        unresolved_attempts.append(f"{att_id or 'unknown'}: {'; '.join(issues)}")
+                    else:
+                        reconciled_attempts_count += 1
+                        if is_terminal is True:
+                            terminal_attempts_count += 1
+                        else:
+                            non_terminal_attempts_count += 1
+
+                # Every frozen assignment must have exactly one terminal attempt
+                for asg_id in asg_ids:
+                    term_count = terminal_per_asg.get(asg_id, 0)
+                    if term_count != 1:
+                        unresolved_attempts.append(f"assignment '{asg_id}' has {term_count} terminal attempts (expected 1)")
+
+                num_asgs = len(asg_ids)
+                zero_silent_drops = (
+                    num_asgs == 168
+                    and len(attempts) >= 168
+                    and len(unresolved_attempts) == 0
+                    and terminal_attempts_count == 168
+                )
                 runtime_observed = {
                     "ledger_assignments": num_asgs,
-                    "ledger_attempts": num_attempts,
-                    "ledger_outputs": num_outputs,
-                    "ledger_evaluations": num_evals,
+                    "ledger_attempts": len(attempts),
+                    "reconciled_attempts": reconciled_attempts_count,
+                    "terminal_attempts": terminal_attempts_count,
+                    "non_terminal_attempts": non_terminal_attempts_count,
+                    "outputs_count": len(outputs),
+                    "evaluations_count": len(evals),
+                    "unresolved_attempts_count": len(unresolved_attempts),
+                    "unresolved_attempts": unresolved_attempts,
                     "zero_silent_drops_verified": zero_silent_drops,
                     "prior_quota_status": "BLOCKED_EXTERNAL_QUOTA",
                     "prior_http_code": 429,
                 }
                 rate_limit_classified_as_blocked = True
-            except Exception:
-                pass
+            except Exception as e:
+                unresolved_attempts.append(f"ledger reconciliation failed: {e}")
+                zero_silent_drops = False
 
-        all_tests_passed = all(implementation_tested.values()) and zero_silent_drops
-        status: VerificationStatus = "VERIFIED" if all_tests_passed else "HOLD"
+        all_tests_passed = (
+            all(implementation_tested.values())
+            and zero_silent_drops
+            and len(unresolved_attempts) == 0
+        )
+        if len(unresolved_attempts) > 0 or not zero_silent_drops:
+            status: VerificationStatus = "FAIL"
+        elif all_tests_passed:
+            status = "VERIFIED"
+        else:
+            status = "HOLD"
 
         notes = (
             f"Executable tests verified: UNCERTAIN=0.0 ({fail_closed_on_uncertain}), "
@@ -838,6 +946,7 @@ class CampaignReadinessAuditor:
             zero_silent_drops=zero_silent_drops,
             policy_declared=policy_declared,
             implementation_tested=implementation_tested,
+            unresolved_attempts=unresolved_attempts,
             runtime_observed=runtime_observed,
             evidence_notes=notes,
             status=status,
@@ -944,7 +1053,7 @@ class CampaignReadinessAuditor:
             execution_dir_override=execution_dir_override,
             ledger_path_override=ledger_path_override,
         )
-        fail_check = self.audit_failure_and_uncertainty()
+        fail_check = self.audit_failure_and_uncertainty(ledger_path_override=ledger_path_override)
         stat_check = self.audit_statistical_plan()
 
         # Dry run quota check (0 calls)
@@ -1000,15 +1109,26 @@ class CampaignReadinessAuditor:
             fail_check.status,
             stat_check.status,
         ]
-        overall_software: Literal["READY", "HOLD", "BLOCKED", "UNKNOWN"] = (
-            "READY" if all(s == "VERIFIED" for s in software_pillars) else ("FAIL" if any(s == "FAIL" for s in software_pillars) else "HOLD")
-        )
+        if any(s == "FAIL" for s in software_pillars):
+            overall_software: Literal["READY", "HOLD", "BLOCKED", "FAIL", "UNKNOWN"] = "FAIL"
+        elif any(s == "BLOCKED" for s in software_pillars):
+            overall_software = "BLOCKED"
+        elif any(s == "HOLD" for s in software_pillars):
+            overall_software = "HOLD"
+        elif all(s == "VERIFIED" for s in software_pillars):
+            overall_software = "READY"
+        else:
+            overall_software = "UNKNOWN"
 
         blockers = [
             "Provider API quota returned HTTP 429 Token Plan usage limit reached (status: BLOCKED_EXTERNAL_QUOTA).",
             "Confirmatory holdout corpus (N=30) remains SPECIFICATION_PENDING_INDEPENDENT_CURATION with null cryptographic seals.",
             "Qualified human review panel is uncontracted/unpopulated (status: AWAITING_HUMAN_PANEL; zero synthetic scores).",
         ]
+        if overall_software == "FAIL":
+            blockers.insert(0, "Software readiness verification FAILED on one or more software pillars.")
+        elif overall_software == "BLOCKED":
+            blockers.insert(0, "Software readiness verification BLOCKED on one or more software pillars.")
 
         resume_criteria = [
             "1. External provider quota replenished and confirmed operational.",

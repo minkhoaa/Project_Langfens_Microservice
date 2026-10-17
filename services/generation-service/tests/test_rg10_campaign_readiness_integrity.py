@@ -318,3 +318,169 @@ def test_git_unavailable_reports_unknown_without_fabricated_fallback(tmp_path: P
     auditor_no_git = CampaignReadinessAuditor(tmp_path)
     sha = auditor_no_git._resolve_git_sha("some/file.py")
     assert sha == "UNKNOWN"
+
+
+# =========================================================================
+# 7. Negative E2E Tests for Schema Mismatch & Pillar Failures (Bug 1)
+# =========================================================================
+
+def test_software_pillar_failure_produces_serializable_fail_report(auditor: CampaignReadinessAuditor, tmp_path: Path):
+    """When a software pillar fails (e.g. invalid raw responses), auditor produces a serializable FAIL report."""
+    corrupt_exec_dir = tmp_path / "corrupt_execution"
+    raw_dir = corrupt_exec_dir / "raw_responses"
+    raw_dir.mkdir(parents=True)
+    bad_rec = raw_dir / "bad.json"
+    bad_rec.write_text("{broken json syntax", encoding="utf-8")
+
+    report = auditor.run_readiness_audit(execution_dir_override=corrupt_exec_dir)
+
+    # Pillar failed
+    assert report.raw_response_preservation.status == "FAIL"
+    assert report.overall_software_readiness == "FAIL"
+    assert report.overall_campaign_readiness == "HOLD"
+    assert any("Software readiness verification FAILED" in b for b in report.blockers)
+
+    # Must be fully serializable to JSON and reconstructable without ValidationError
+    dumped = report.model_dump()
+    serialized_json = json.dumps(dumped)
+    assert '"overall_software_readiness": "FAIL"' in serialized_json
+
+    reconstructed = CampaignReadinessReport.model_validate(dumped)
+    assert reconstructed.overall_software_readiness == "FAIL"
+    assert reconstructed.overall_campaign_readiness == "HOLD"
+
+
+def test_software_pillar_blocked_produces_serializable_blocked_report(auditor: CampaignReadinessAuditor, monkeypatch):
+    """When a software pillar is BLOCKED and none FAIL, overall software status is BLOCKED and serializable."""
+    # Mock one software pillar check to return BLOCKED
+    real_stat_check = auditor.audit_statistical_plan()
+    blocked_stat = real_stat_check.model_copy(update={"status": "BLOCKED"})
+    monkeypatch.setattr(auditor, "audit_statistical_plan", lambda: blocked_stat)
+
+    report = auditor.run_readiness_audit()
+    assert report.overall_software_readiness == "BLOCKED"
+    assert any("Software readiness verification BLOCKED" in b for b in report.blockers)
+
+    # Verify serialization
+    dumped = report.model_dump()
+    serialized_json = json.dumps(dumped)
+    assert '"overall_software_readiness": "BLOCKED"' in serialized_json
+    reconstructed = CampaignReadinessReport.model_validate(dumped)
+    assert reconstructed.overall_software_readiness == "BLOCKED"
+
+
+# =========================================================================
+# 8. Negative Tests for Silent-Drop Attempt Reconciliation (Bug 2)
+# =========================================================================
+
+def test_attempt_lacking_documented_terminal_failure_code_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path):
+    """Attempt with failed status but missing failure_code is unresolved; check fails closed without VERIFIED."""
+    fake_ledger = tmp_path / "ledger_missing_fail_code.json"
+    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
+        ledger_data = json.load(f)
+
+    # Strip failure_code from a failed attempt
+    for a in ledger_data["attempts"]:
+        if a.get("execution_status") == "FAILED_VALIDATION":
+            a["failure_code"] = None
+            break
+
+    fake_ledger.write_text(json.dumps(ledger_data), encoding="utf-8")
+    check = auditor.audit_failure_and_uncertainty(ledger_path_override=fake_ledger)
+
+    assert check.zero_silent_drops is False
+    assert check.status == "FAIL"
+    assert len(check.unresolved_attempts) >= 1
+    assert any("lacks documented failure_code" in u for u in check.unresolved_attempts)
+
+
+def test_attempt_missing_expected_output_reference_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path):
+    """Attempt claiming output_availability=NORMALIZED but missing from outputs dictionary is unresolved."""
+    fake_ledger = tmp_path / "ledger_missing_output.json"
+    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
+        ledger_data = json.load(f)
+
+    # Delete output for the first attempt that has output
+    target_att_id = next(iter(ledger_data["outputs"].keys()))
+    del ledger_data["outputs"][target_att_id]
+
+    fake_ledger.write_text(json.dumps(ledger_data), encoding="utf-8")
+    check = auditor.audit_failure_and_uncertainty(ledger_path_override=fake_ledger)
+
+    assert check.zero_silent_drops is False
+    assert check.status == "FAIL"
+    assert len(check.unresolved_attempts) >= 1
+    assert any("attempt missing from outputs" in u for u in check.unresolved_attempts)
+
+
+def test_attempt_missing_expected_evaluation_reference_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path):
+    """Terminal attempt with normalized output missing evaluation reference in evaluations is unresolved."""
+    fake_ledger = tmp_path / "ledger_missing_eval.json"
+    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
+        ledger_data = json.load(f)
+
+    # Remove an evaluation entry for a terminal attempt
+    target_att_id = next(iter(ledger_data["evaluations"].keys()))
+    del ledger_data["evaluations"][target_att_id]
+
+    fake_ledger.write_text(json.dumps(ledger_data), encoding="utf-8")
+    check = auditor.audit_failure_and_uncertainty(ledger_path_override=fake_ledger)
+
+    assert check.zero_silent_drops is False
+    assert check.status == "FAIL"
+    assert len(check.unresolved_attempts) >= 1
+    assert any("missing evaluation reference" in u for u in check.unresolved_attempts)
+
+
+def test_assignment_missing_terminal_attempt_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path):
+    """Assignment whose attempts were all non-terminal (silent drop before resolution) reports unresolved."""
+    fake_ledger = tmp_path / "ledger_missing_terminal.json"
+    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
+        ledger_data = json.load(f)
+
+    # Mark terminal attempt of first assignment as non-terminal
+    first_asg = ledger_data["assignments"][0]["assignment_id"]
+    for a in ledger_data["attempts"]:
+        if a.get("assignment_id") == first_asg:
+            a["is_terminal"] = False
+
+    fake_ledger.write_text(json.dumps(ledger_data), encoding="utf-8")
+    check = auditor.audit_failure_and_uncertainty(ledger_path_override=fake_ledger)
+
+    assert check.zero_silent_drops is False
+    assert check.status == "FAIL"
+    assert any("terminal attempts (expected 1)" in u for u in check.unresolved_attempts)
+
+
+# =========================================================================
+# 9. Negative Tests for Prompt Freeze Hash (Bug 3)
+# =========================================================================
+
+def test_missing_or_empty_prompt_template_hash_fails_consistency(auditor: CampaignReadinessAuditor):
+    """Prompt template spec with empty or None template_sha256 fails consistency check."""
+    freeze_mgr = ProviderFreezeManager()
+    freeze_mgr._prompts["A"] = FrozenPromptSpec.model_construct(
+        version_tag="v2.1-baseline",
+        template_text="System: You are an IELTS generation assistant. Generate passage and questions.",
+        template_sha256="",  # Empty hash must be rejected
+    )
+
+    check = auditor.audit_version_readiness(freeze_manager=freeze_mgr)
+    assert check.consistency_verified is False
+    assert check.status == "HOLD"
+
+
+def test_prompt_template_hash_mismatch_against_authoritative_evidence_fails(auditor: CampaignReadinessAuditor):
+    """Prompt template whose self-computed hash matches template_sha256 but differs from frozen authoritative evidence fails."""
+    freeze_mgr = ProviderFreezeManager()
+    tampered_text = "System: Tampered prompt template text."
+    tampered_hash = hashlib.sha256(tampered_text.encode("utf-8")).hexdigest()
+    freeze_mgr._prompts["A"] = FrozenPromptSpec.model_construct(
+        version_tag="v2.1-baseline",
+        template_text=tampered_text,
+        template_sha256=tampered_hash,  # Matches text, but mismatches authoritative frozen evidence
+    )
+
+    check = auditor.audit_version_readiness(freeze_manager=freeze_mgr)
+    assert check.consistency_verified is False
+    assert check.status == "HOLD"
