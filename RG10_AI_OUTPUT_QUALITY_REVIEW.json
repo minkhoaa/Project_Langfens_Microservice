@@ -1,0 +1,2284 @@
+{
+  "metadata": {
+    "report_id": "rg10-ai-output-quality-review-v1.0",
+    "evaluated_at": "2026-10-18T08:15:00Z",
+    "governing_protocol": "generation_baseline/research/RQ2_PROTOCOL.md",
+    "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+    "notice": "This document records independent exploratory AI review judgments. It does NOT represent certified human gold labels.",
+    "evaluator_under_test": "neutral-eval-v2.7 (with historical references to v2.6)",
+    "foundation_model": "minimax/MiniMax-Text-01",
+    "selection_logic": "Exhaustive review of all 51 available terminal and live DEV generated questions across RG10_DEV_GRAMMAR_FIX_V5 (N=21), RG10_DEV_UNSEEN_PILOT_V4 (N=15), and RG10_DEV_HARDENING_V2 (N=15).",
+    "denominators": {
+      "total_items_evaluated": 51,
+      "reading_items_denominator": 27,
+      "grammar_items_denominator": 24,
+      "arm_a_denominator": 17,
+      "arm_b_denominator": 17,
+      "arm_c_denominator": 17,
+      "judge_holdout_inspected": 0,
+      "judge_holdout_disclosure": "CONFIRMATORY_HOLDOUT remains uninspected with null seals."
+    },
+    "summary_metrics": {
+      "review_status_distribution": {
+        "PASS": 44,
+        "FAIL": 5,
+        "UNCERTAIN": 2
+      },
+      "clean_items_count": 38,
+      "true_generation_defects_count": 7,
+      "evaluator_false_rejections_count": 3,
+      "evaluator_false_acceptances_count": 1,
+      "cross_arm_duplication_rate": 0.1176,
+      "pass_rate_exploratory": 0.8627
+    }
+  },
+  "items": [
+    {
+      "audit_idx": 1,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-volcanism-06__arm_A__att1",
+      "question_id": "1",
+      "question_text": "Submarine volcanism accounts for about seventy percent of Earth's total annual magma output.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "29db9274a421744b5c5d6616097d6b33245b4cf24f850a92e125e6253156bc6e",
+        "output_response_sha256": "41d90a9e97bddd5aaf2d715943d60bdc35cc0e1829e43cafb8e12b94e7e49d6a"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Submarine volcanism accounts for approximately seventy percent of Earth's total annual magma output",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage explicitly states that submarine volcanism accounts for approximately seventy percent of Earth's total annual magma output. 'About' is an exact synonym for 'approximately'."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 2,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-volcanism-06__arm_A__att1",
+      "question_id": "2",
+      "question_text": "Pillow lava is formed when basaltic magma erupts into seawater at abyssal depths.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "a40f2961a89cdf7bbeb47d573ac86bdd295287ac510e0bfb0b5efa14419760a4",
+        "output_response_sha256": "41d90a9e97bddd5aaf2d715943d60bdc35cc0e1829e43cafb8e12b94e7e49d6a"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "When basaltic magma erupts directly into seawater at abyssal depths, the extreme ambient hydrostatic pressure and rapid thermal quenching produce distinctive volcanic morphology known as pillow lava.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage directly confirms that when basaltic magma erupts directly into seawater at abyssal depths, it produces the distinctive volcanic morphology known as pillow lava."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 3,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-volcanism-06__arm_A__att1",
+      "question_id": "3",
+      "question_text": "Pyroclastic fragmentation occurs in deep benthic environments due to high hydrostatic pressure.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "0d953919b59a693916e8e66d608b28dfe9923a84861e3f9594dd38e67a5bddf4",
+        "output_response_sha256": "41d90a9e97bddd5aaf2d715943d60bdc35cc0e1829e43cafb8e12b94e7e49d6a"
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "FAIL",
+        "abstention_reason": "FALSE contradiction: passage affirms proposition without contradiction; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "In contrast to subaerial explosive eruptions, abyssal hydrostatic pressure exceeding two hundred atmospheres suppresses volatile exsolution, thereby preventing pyroclastic fragmentation in deep benthic environments.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage states that abyssal hydrostatic pressure prevents pyroclastic fragmentation in deep benthic environments, directly contradicting the statement's claim that it occurs due to high pressure."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "EVALUATOR_FALSE_REJECTION",
+        "defect_severity": "HIGH",
+        "evaluator_defect_classification": "FALSE_REJECTION: Generator answer was correct, evaluator failed on surface pattern.",
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 4,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-volcanism-06__arm_B__att1",
+      "question_id": "1",
+      "question_text": "Submarine volcanism accounts for seventy percent of Earth's total annual magma output.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "1f34c49da3fd73e9a5bb7cd4fffcdd2320882db5c5b5cd92d0d68d1f01c5787d",
+        "output_response_sha256": "23762e95ad134fdb1ecec16ef9cd174b333dc3effc1c8c7743c7c29891c73378"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Submarine volcanism accounts for approximately seventy percent of Earth's total annual magma output",
+        "linguistic_defects": [
+          "omitted_hedging_qualifier"
+        ],
+        "reviewer_rationale": "The passage states submarine volcanism accounts for 'approximately seventy percent' of Earth's total annual magma output. While the statement omits the hedging qualifier 'approximately', it accurately reflects the proportion stated in the text."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "MINOR_HEDGING_OMISSION",
+        "defect_severity": "LOW",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 5,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-volcanism-06__arm_B__att1",
+      "question_id": "2",
+      "question_text": "Pillow lava is formed when basaltic magma erupts into seawater at abyssal depths.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "50ceadb53b98b234b4d4637e1ac4d47f161fb2acbbba68fb59fa52237ea72a74",
+        "output_response_sha256": "23762e95ad134fdb1ecec16ef9cd174b333dc3effc1c8c7743c7c29891c73378"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "When basaltic magma erupts directly into seawater at abyssal depths, the extreme ambient hydrostatic pressure and rapid thermal quenching produce distinctive volcanic morphology known as pillow lava.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The text directly states that basaltic magma erupting directly into seawater at abyssal depths produces pillow lava."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 6,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-volcanism-06__arm_B__att1",
+      "question_id": "3",
+      "question_text": "Pyroclastic fragmentation is common in deep benthic environments.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "4c9377300e075a8a94758cdb8882d69294d422bce21bb8e5ed68de910b2cc716",
+        "output_response_sha256": "23762e95ad134fdb1ecec16ef9cd174b333dc3effc1c8c7743c7c29891c73378"
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "FAIL",
+        "abstention_reason": "FALSE contradiction: passage affirms proposition without contradiction; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "In contrast to subaerial explosive eruptions, abyssal hydrostatic pressure exceeding two hundred atmospheres suppresses volatile exsolution, thereby preventing pyroclastic fragmentation in deep benthic environments.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage explicitly notes that abyssal hydrostatic pressure prevents pyroclastic fragmentation in deep benthic environments, which contradicts the assertion that it is common."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "EVALUATOR_FALSE_REJECTION",
+        "defect_severity": "HIGH",
+        "evaluator_defect_classification": "FALSE_REJECTION: Generator answer was correct, evaluator failed on surface pattern.",
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 7,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-volcanism-06__arm_C__att1",
+      "question_id": "1",
+      "question_text": "TRUE, FALSE or NOT GIVEN: Submarine volcanism is responsible for the majority of Earth's magma output.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "621106388c436dbe9ab302839f7173ff0d8c366c4f44434269bd377272635371",
+        "output_response_sha256": "13758a94404afd854ce03e9752261907e907cfdcef497699b834e690d26b5845"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Submarine volcanism accounts for approximately seventy percent of Earth's total annual magma output",
+        "linguistic_defects": [
+          "prompt_leakage_prefix"
+        ],
+        "reviewer_rationale": "Accounting for approximately seventy percent of total annual magma output entails responsibility for the majority (>50%). The question text exhibits prompt leakage with the leading 'TRUE, FALSE or NOT GIVEN: ' prefix."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "PROMPT_LEAKAGE",
+        "defect_severity": "LOW",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 8,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-volcanism-06__arm_C__att1",
+      "question_id": "2",
+      "question_text": "TRUE, FALSE or NOT GIVEN: Pillow lava forms when basaltic magma erupts into seawater at depths exceeding 200 atmospheres.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "4f7b67e681c9694a1f327f2b065d57a48e7052f1d5a149f093d9eece534e778e",
+        "output_response_sha256": "13758a94404afd854ce03e9752261907e907cfdcef497699b834e690d26b5845"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "FAIL",
+        "abstention_reason": "Entailment contradiction: passage contradicts TRUE statement; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "UNCERTAIN",
+        "confidence": "HIGH",
+        "grounding_valid": false,
+        "evidence_quote_or_justification": "When basaltic magma erupts directly into seawater at abyssal depths, the extreme ambient hydrostatic pressure and rapid thermal quenching produce distinctive volcanic morphology known as pillow lava.",
+        "linguistic_defects": [
+          "unit_error_atmospheres_for_depth",
+          "premise_conflation",
+          "prompt_leakage_prefix"
+        ],
+        "reviewer_rationale": "The statement exhibits multiple critical defects: (1) Unit error: 'atmospheres' is a unit of pressure, not depth ('depths exceeding 200 atmospheres' is physically invalid). (2) Premise conflation: The passage mentions pillow lava formation at 'abyssal depths' in one sentence, and mentions hydrostatic pressure exceeding 200 atmospheres suppressing volatile exsolution in a separate sentence, never establishing 200 atmospheres as a formation threshold for pillow lava. Due to the invalid premise and conflated clauses, the statement cannot be evaluated as definitively TRUE or FALSE without guessing authorial intent. The question also contains prompt leakage."
+      },
+      "adjudication": {
+        "agreed_with_generator": false,
+        "review_status": "FAIL",
+        "defect_category": "FACTUAL_UNIT_ERROR",
+        "defect_severity": "CRITICAL",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 9,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-volcanism-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-volcanism-06__arm_C__att1",
+      "question_id": "3",
+      "question_text": "TRUE, FALSE or NOT GIVEN: Radiometric dating has been used to determine the duration of individual pillow lava eruption episodes.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "ccf6a255182569920b944fc72385e81eee70a9e84d16c14b17d74f43ce2f7fed",
+        "output_response_sha256": "13758a94404afd854ce03e9752261907e907cfdcef497699b834e690d26b5845"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Recent radiometric dating of pillow margins along the Juan de Fuca Ridge confirms that individual eruption episodes can span several weeks to months, producing contiguous volcanic flow fields covering hundreds of square kilometers.",
+        "linguistic_defects": [
+          "prompt_leakage_prefix"
+        ],
+        "reviewer_rationale": "The text confirms that radiometric dating of pillow margins established that individual eruption episodes span several weeks to months, directly verifying duration. Contains prompt leakage prefix 'TRUE, FALSE or NOT GIVEN: '."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "PROMPT_LEAKAGE",
+        "defect_severity": "LOW",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 10,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "A",
+      "assignment_id": "dev-grammar-inversion-06__arm_A__att1",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses negative inversion?",
+      "options": [
+        "A) Not only did the experiment fail, but it also caused significant damage.",
+        "B) Not only the experiment failed, but it also caused significant damage.",
+        "C) Not only failed the experiment, but it also caused significant damage.",
+        "D) Not only the experiment did fail, but it also caused significant damage."
+      ],
+      "original_hashes": {
+        "question_content_hash": "1587f9927080a001df192580cf0d5429a43e23b81d6bdb606ffcd50fade6f820",
+        "output_response_sha256": "f618959e80c33f287fe7fb2aebc6804a7819bad4af3257274b82fa009d90419b"
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "When 'Not only' introduces a clause, subject-auxiliary inversion is mandatory. Because the base declarative clause contains no auxiliary verb ('the experiment failed'), do-support ('did') must be inserted before the subject NP ('the experiment'), followed by the bare infinitive ('fail'). Option A correctly realizes this structure. Options B, C, and D exhibit lack of inversion, illicit full lexical verb inversion, and uninverted emphatic order respectively.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "When 'Not only' introduces a clause, subject-auxiliary inversion is mandatory. Because the base declarative clause contains no auxiliary verb ('the experiment failed'), do-support ('did') must be inserted before the subject NP ('the experiment'), followed by the bare infinitive ('fail'). Option A correctly realizes this structure. Options B, C, and D exhibit lack of inversion, illicit full lexical verb inversion, and uninverted emphatic order respectively."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 11,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "A",
+      "assignment_id": "dev-grammar-inversion-06__arm_A__att1",
+      "question_id": "2",
+      "question_text": "Which sentence correctly uses subject-auxiliary inversion with a restrictive adverbial?",
+      "options": [
+        "A) Under no circumstances we should ignore the safety protocols.",
+        "B) Under no circumstances should we ignore the safety protocols.",
+        "C) Under no circumstances should ignore we the safety protocols.",
+        "D) Under no circumstances we should be ignoring the safety protocols."
+      ],
+      "original_hashes": {
+        "question_content_hash": "b0f5b5c71f114f0dcb8f54a22966b0307d7b64f09d1d594f2106b132e63c2a66",
+        "output_response_sha256": "f618959e80c33f287fe7fb2aebc6804a7819bad4af3257274b82fa009d90419b"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The fronted restrictive prepositional phrase 'Under no circumstances' triggers mandatory subject-auxiliary inversion. The modal auxiliary 'should' must precede subject pronoun 'we' while lexical verb 'ignore' remains in the VP. Option B uniquely satisfies this rule.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The fronted restrictive prepositional phrase 'Under no circumstances' triggers mandatory subject-auxiliary inversion. The modal auxiliary 'should' must precede subject pronoun 'we' while lexical verb 'ignore' remains in the VP. Option B uniquely satisfies this rule."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 12,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "B",
+      "assignment_id": "dev-grammar-inversion-06__arm_B__att1",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "options": [
+        "A) Never have I seen such a beautiful sunset.",
+        "B) Never I have seen such a beautiful sunset.",
+        "C) Never did I saw such a beautiful sunset.",
+        "D) Never I saw such a beautiful sunset."
+      ],
+      "original_hashes": {
+        "question_content_hash": "ee84182c099845e7d82350ac269a5b2fb4f98454b0659ea2aaa43c6ae6b31d33",
+        "output_response_sha256": "4024e4b88b7c08fdf9e6c49d3cd9ccd45690550167006c09e65e663ec9f9ace2"
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Initial negative frequency adverb 'Never' mandates subject-auxiliary inversion. In present perfect, auxiliary 'have' precedes subject 'I' ('Never have I seen...'). Option A is uniquely correct. The register is colloquial/literary rather than strict academic C1, but fully complies with syntactic inversion rules.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Initial negative frequency adverb 'Never' mandates subject-auxiliary inversion. In present perfect, auxiliary 'have' precedes subject 'I' ('Never have I seen...'). Option A is uniquely correct. The register is colloquial/literary rather than strict academic C1, but fully complies with syntactic inversion rules."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 13,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "B",
+      "assignment_id": "dev-grammar-inversion-06__arm_B__att1",
+      "question_id": "2",
+      "question_text": "What is the correct way to form a sentence that begins with 'Under no circumstances'?",
+      "options": [
+        "A) Under no circumstances the equipment should be left unattended.",
+        "B) Under no circumstances should the equipment be left unattended.",
+        "C) Under no circumstances the equipment be left unattended.",
+        "D) Under no circumstances should left the equipment unattended."
+      ],
+      "original_hashes": {
+        "question_content_hash": "a297f72d0938256063ebd51e5b084e3c25e29b8874e3639379830822bf214a79",
+        "output_response_sha256": "4024e4b88b7c08fdf9e6c49d3cd9ccd45690550167006c09e65e663ec9f9ace2"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "A clause introduced by 'Under no circumstances' requires inversion of the modal auxiliary and subject NP. Option B correctly positions 'should' before 'the equipment'. Distractor C lacks an auxiliary and D garbles the predicate constituent structure.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "A clause introduced by 'Under no circumstances' requires inversion of the modal auxiliary and subject NP. Option B correctly positions 'should' before 'the equipment'. Distractor C lacks an auxiliary and D garbles the predicate constituent structure."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 14,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "C",
+      "assignment_id": "dev-grammar-inversion-06__arm_C__att1",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "options": [
+        "A) Under no circumstances we should compromise on safety standards.",
+        "B) Under no circumstances should we compromise on safety standards.",
+        "C) Under no circumstances we should not compromise on safety standards.",
+        "D) Under no circumstances will we not compromise on safety standards."
+      ],
+      "original_hashes": {
+        "question_content_hash": "7f9a63cd227f4eafd3b30965a4c6a0d1d27279d085d7e8aa4a4695fe00d8be33",
+        "output_response_sha256": "cd397ca4ae7aa94a9c546091adecee5091ebc85206f43d478ccb4bef74057141"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "'Under no circumstances' inherently provides negative polarity to the clause, requiring subject-auxiliary inversion without additional negative particles. Option B correctly inverts 'should' and 'we'. Options C and D introduce redundant/illicit negation ('not').",
+        "linguistic_defects": [],
+        "reviewer_rationale": "'Under no circumstances' inherently provides negative polarity to the clause, requiring subject-auxiliary inversion without additional negative particles. Option B correctly inverts 'should' and 'we'. Options C and D introduce redundant/illicit negation ('not')."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 15,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "C",
+      "assignment_id": "dev-grammar-inversion-06__arm_C__att1",
+      "question_id": "2",
+      "question_text": "What is the correct way to rewrite the sentence 'Scarcely had the meeting started when the fire alarm rang' using negative inversion?",
+      "options": [
+        "A) The meeting had scarcely started when the fire alarm rang.",
+        "B) Scarcely did the meeting start when the fire alarm rang.",
+        "C) Scarcely had the meeting started than the fire alarm rang.",
+        "D) Scarcely the meeting had started when the fire alarm rang."
+      ],
+      "original_hashes": {
+        "question_content_hash": "b635406c1984c7e74873b9db4363ab2f039486617ea4f216065dbbc1333b26a0",
+        "output_response_sha256": "cd397ca4ae7aa94a9c546091adecee5091ebc85206f43d478ccb4bef74057141"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "NONE",
+        "confidence": "HIGH",
+        "grounding_valid": false,
+        "evidence_quote_or_justification": "The question stem suffers from a fatal circular prompt defect: it asks the candidate to 'rewrite the sentence \"Scarcely had the meeting started when the fire alarm rang\" using negative inversion', yet the input sentence is ALREADY in the standard negative inversion form ('Scarcely' + past perfect auxiliary 'had' + subject 'the meeting' + participle 'started'). Consequently, none of the options represents a valid rewrite using negative inversion: Option A converts it into non-inverted order; Option B switches the necessary past perfect aspect into past simple do-support ('Scarcely did the meeting start...'), which is non-standard for 'scarcely...when'; Option C introduces an erroneous correlative ('than'); and Option D omits inversion. There is zero valid answer.",
+        "linguistic_defects": [
+          "defective_question_stem: prompt stem provides a sentence that already uses negative inversion ('Scarcely had the meeting started when the fire alarm rang') and asks to rewrite it using negative inversion",
+          "zero_correct_answers: no option provides a valid rewrite using negative inversion (Option A removes inversion; Option B degrades past perfect aspect to simple past; Option C introduces erroneous correlative 'than'; Option D lacks inversion)"
+        ],
+        "reviewer_rationale": "The question stem suffers from a fatal circular prompt defect: it asks the candidate to 'rewrite the sentence \"Scarcely had the meeting started when the fire alarm rang\" using negative inversion', yet the input sentence is ALREADY in the standard negative inversion form ('Scarcely' + past perfect auxiliary 'had' + subject 'the meeting' + participle 'started'). Consequently, none of the options represents a valid rewrite using negative inversion: Option A converts it into non-inverted order; Option B switches the necessary past perfect aspect into past simple do-support ('Scarcely did the meeting start...'), which is non-standard for 'scarcely...when'; Option C introduces an erroneous correlative ('than'); and Option D omits inversion. There is zero valid answer."
+      },
+      "adjudication": {
+        "agreed_with_generator": false,
+        "review_status": "FAIL",
+        "defect_category": "ZERO_CORRECT_ANSWERS",
+        "defect_severity": "CRITICAL",
+        "evaluator_defect_classification": "FALSE_ACCEPTANCE: Generator output had defect (ZERO_CORRECT_ANSWERS), but evaluator passed it.",
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 16,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-subjunctive-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "A",
+      "assignment_id": "dev-grammar-subjunctive-06__arm_A__att1",
+      "question_id": "GRAMMAR_MCQ_1",
+      "question_text": "Which of the following sentences correctly uses the mandative subjunctive?",
+      "options": [
+        "A) The contract stipulates that the supplier provides a detailed invoice.",
+        "B) The contract stipulates that the supplier provide a detailed invoice.",
+        "C) The contract stipulates that the supplier will provide a detailed invoice.",
+        "D) The contract stipulates that the supplier has to provide a detailed invoice."
+      ],
+      "original_hashes": {
+        "question_content_hash": "ec36925421aad0b4302af3e09b3aa52a3f5f0317f741c663911bf84aa3b97fbb",
+        "output_response_sha256": "dfcdb4ea0f6f4376d58851f215238134c4b1b5409a8e40a409d0ba8fa0698acd"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "In formal academic English, mandative verbs such as 'stipulate' require the base form (bare infinitive) in subordinate that-clauses regardless of the subject's person or number. Option B ('the supplier provide') correctly uses the base form.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "In formal academic English, mandative verbs such as 'stipulate' require the base form (bare infinitive) in subordinate that-clauses regardless of the subject's person or number. Option B ('the supplier provide') correctly uses the base form."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 17,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-subjunctive-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "A",
+      "assignment_id": "dev-grammar-subjunctive-06__arm_A__att1",
+      "question_id": "GRAMMAR_MCQ_2",
+      "question_text": "Which sentence correctly uses the mandative subjunctive with a mandative adjective?",
+      "options": [
+        "A) It is vital that she attends the conference.",
+        "B) It is vital that she attend the conference.",
+        "C) It is vital that she will attend the conference.",
+        "D) It is vital that she has to attend the conference."
+      ],
+      "original_hashes": {
+        "question_content_hash": "c1b756ae493dd7da13a3d8130453a243efb58ac4a0a346f9bf0a699271e6df39",
+        "output_response_sha256": "dfcdb4ea0f6f4376d58851f215238134c4b1b5409a8e40a409d0ba8fa0698acd"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Following mandative adjectives expressing necessity ('vital that'), the subordinate clause takes the subjunctive base form for all persons. Option B ('she attend') correctly applies this rule.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Following mandative adjectives expressing necessity ('vital that'), the subordinate clause takes the subjunctive base form for all persons. Option B ('she attend') correctly applies this rule."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 18,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-subjunctive-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "B",
+      "assignment_id": "dev-grammar-subjunctive-06__arm_B__att1",
+      "question_id": "Q1",
+      "question_text": "Which of the following sentences correctly uses the mandative subjunctive?",
+      "options": [
+        "A) The policy requires that each student has their own laptop.",
+        "B) The policy requires that each student have their own laptop.",
+        "C) The policy requires that each student will have their own laptop.",
+        "D) The policy requires that each student had their own laptop."
+      ],
+      "original_hashes": {
+        "question_content_hash": "ced6343a6fe7f303bb7e1d098276aef7a34761988ea0b05a2876c9052a84ca0b",
+        "output_response_sha256": "be0d333bd2bc8e9dc30871825e203c3ed2c58c7682505a9618b2f7dec7d3a509"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The mandative verb 'requires' governs a that-clause requiring the uninflected base form. For the verb 'have', the base form is 'have' (not indicative 'has' or past 'had'). Option B is uniquely correct.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The mandative verb 'requires' governs a that-clause requiring the uninflected base form. For the verb 'have', the base form is 'have' (not indicative 'has' or past 'had'). Option B is uniquely correct."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 19,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-subjunctive-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "B",
+      "assignment_id": "dev-grammar-subjunctive-06__arm_B__att1",
+      "question_id": "Q2",
+      "question_text": "Which sentence demonstrates incorrect use of the mandative subjunctive?",
+      "options": [
+        "A) It is crucial that she submit the report by Friday.",
+        "B) It is crucial that she submits the report by Friday.",
+        "C) It is crucial that she must submit the report by Friday.",
+        "D) It is crucial that she should submit the report by Friday."
+      ],
+      "original_hashes": {
+        "question_content_hash": "9f21621b8ff5c8e7973742752afe01dced6a2e5234ea5f71c14600c5df3b0d69",
+        "output_response_sha256": "be0d333bd2bc8e9dc30871825e203c3ed2c58c7682505a9618b2f7dec7d3a509"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The stem employs a negative polarity prompt ('demonstrates incorrect use of the mandative subjunctive'). Option B inflects the verb as 'submits' (3rd person singular indicative), violating the formal mandative subjunctive rule which requires base form 'submit' (as seen in A). Option D utilizes putative 'should', which is standard in British English. Option C uses 'must', which also fails to use the subjunctive, representing a distractor flaw, but Option B represents the quintessential diagnostic error (indicative -s vs subjunctive base form).",
+        "linguistic_defects": [
+          "distractor_weakness: Option C ('must submit') also fails to use the mandative subjunctive, potentially functioning as a competing defensible answer to 'Which sentence demonstrates incorrect use...'"
+        ],
+        "reviewer_rationale": "The stem employs a negative polarity prompt ('demonstrates incorrect use of the mandative subjunctive'). Option B inflects the verb as 'submits' (3rd person singular indicative), violating the formal mandative subjunctive rule which requires base form 'submit' (as seen in A). Option D utilizes putative 'should', which is standard in British English. Option C uses 'must', which also fails to use the subjunctive, representing a distractor flaw, but Option B represents the quintessential diagnostic error (indicative -s vs subjunctive base form)."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 20,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-subjunctive-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "C",
+      "assignment_id": "dev-grammar-subjunctive-06__arm_C__att1",
+      "question_id": "GRAMMAR_MCQ_1",
+      "question_text": "Which of the following sentences correctly uses the mandative subjunctive?",
+      "options": [
+        "A) The policy requires that each student attends the orientation session.",
+        "B) The policy requires that each student attend the orientation session.",
+        "C) The policy requires that each student is attending the orientation session.",
+        "D) The policy requires that each student will attend the orientation session."
+      ],
+      "original_hashes": {
+        "question_content_hash": "4b83f7a056dd80089650d35db30dc9d854f708daca65992cea126b6558417620",
+        "output_response_sha256": "ad4498e5a73429c670598a2688be9d5e4bee8d0f83a269d6eaa8def3575d8973"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "'Requires that' mandates the base form of the verb for all subjects. Option B ('each student attend') is the only option that correctly uses the uninflected base form.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "'Requires that' mandates the base form of the verb for all subjects. Option B ('each student attend') is the only option that correctly uses the uninflected base form."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 21,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-subjunctive-06",
+      "campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+      "domain": "GRAMMAR",
+      "arm": "C",
+      "assignment_id": "dev-grammar-subjunctive-06__arm_C__att1",
+      "question_id": "GRAMMAR_MCQ_2",
+      "question_text": "Which sentence correctly uses the mandative subjunctive with an adjective?",
+      "options": [
+        "A) It is important that she is on time for the presentation.",
+        "B) It is important that she be on time for the presentation.",
+        "C) It is important that she will be on time for the presentation.",
+        "D) It is important that she being on time for the presentation."
+      ],
+      "original_hashes": {
+        "question_content_hash": "4ac2ed0609991b8892e62728c166ca122ce62a0280a4a30fb139727258ac8cb2",
+        "output_response_sha256": "ad4498e5a73429c670598a2688be9d5e4bee8d0f83a269d6eaa8def3575d8973"
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The copular verb 'be' in a mandative subjunctive clause governed by 'important that' must appear in its base form 'be' for all persons ('she be on time'). Option B is uniquely correct.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The copular verb 'be' in a mandative subjunctive clause governed by 'important that' must appear in its base form 'be' for all persons ('she be on time'). Option B is uniquely correct."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 22,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_A__att1",
+      "question_id": "1",
+      "question_text": "Hydrothermal vent ecosystems depend on solar radiation for energy.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "013e696162ba3f5e74a51379042e07b8b75f2b23f081db525f6fe3e32fe81a7b",
+        "output_response_sha256": "62167eedde6d360b6c303da4e20b5cbacc7fad7f5e8a6afa30b08bbd3d240477"
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Unlike phototrophic surface ecosystems that depend on solar radiation, hydrothermal communities rely on lithoautotrophic bacteria that oxidize dissolved hydrogen sulfide emitted in superheated hydrothermal fluids.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage explicitly contrasts hydrothermal communities with phototrophic surface ecosystems that depend on solar radiation, stating they rely instead on lithoautotrophic bacteria."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 23,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_A__att1",
+      "question_id": "2",
+      "question_text": "Riftia pachyptila has endosymbiotic bacteria in its trophosome.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "5f280b462c0c630f3d373286f00d8159508385ecd924a5597cc69a57c3a91cdc",
+        "output_response_sha256": "62167eedde6d360b6c303da4e20b5cbacc7fad7f5e8a6afa30b08bbd3d240477"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The giant tubeworm Riftia pachyptila lacks a functional digestive tract, harboring endosymbiotic sulfur-oxidizing bacteria within a specialized vascularized organ termed the trophosome.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The text explicitly states that Riftia pachyptila harbors endosymbiotic sulfur-oxidizing bacteria within the trophosome."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 24,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_A__att1",
+      "question_id": "3",
+      "question_text": "The blood hemoglobin in Riftia pachyptila can bind oxygen but not hydrogen sulfide.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "0bb526e2bd36f92e5fdc9dd3ff3bfbee25f32a4c10ab7cb64d698e30813dec9c",
+        "output_response_sha256": "62167eedde6d360b6c303da4e20b5cbacc7fad7f5e8a6afa30b08bbd3d240477"
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Blood hemoglobin in Riftia exhibits high affinity for both oxygen and toxic hydrogen sulfide, binding them simultaneously at distinct molecular sites to prevent cellular poisoning while fueling bacterial chemosynthesis.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage confirms that hemoglobin in Riftia binds both oxygen and toxic hydrogen sulfide simultaneously at distinct sites, contradicting the statement that it cannot bind hydrogen sulfide."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 25,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_B__att1",
+      "question_id": "1",
+      "question_text": "Hydrothermal vent ecosystems are completely independent of sunlight.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "829eeccee69f2c8b5512221a60aae9ba8d67fa05412fe0e35cf34ecdd0ce7a68",
+        "output_response_sha256": "a5ebb997a91f34f6797bc6e3e826a139db53b298e6dd9237991761166b1df82f"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "UNCERTAIN",
+        "confidence": "MEDIUM",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Unlike phototrophic surface ecosystems that depend on solar radiation, hydrothermal communities rely on lithoautotrophic bacteria that oxidize dissolved hydrogen sulfide emitted in superheated hydrothermal fluids.",
+        "linguistic_defects": [
+          "unsupported_absolute_qualifier_completely",
+          "overgeneralization"
+        ],
+        "reviewer_rationale": "The passage states that unlike phototrophic surface ecosystems that depend on solar radiation, hydrothermal communities rely on lithoautotrophic bacteria for primary energy synthesis. However, claiming they are 'completely independent of sunlight' introduces an unsupported absolute qualifier ('completely'); the passage does not discuss other potential ecological dependencies (such as oxygen generated by surface photosynthesis), making total independence unverified by the text. Under audit guidelines, this ambiguity yields UNCERTAIN (though if read strictly as primary energy source contrast, generator intended TRUE)."
+      },
+      "adjudication": {
+        "agreed_with_generator": false,
+        "review_status": "UNCERTAIN",
+        "defect_category": "AMBIGUOUS_QUALIFIER",
+        "defect_severity": "MEDIUM",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 26,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_B__att1",
+      "question_id": "2",
+      "question_text": "Riftia pachyptila obtains nutrients through a conventional digestive system.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "157cfe41d1b4c9df19b52222a550f26b41bedb38aa09480cfdce12b888046472",
+        "output_response_sha256": "a5ebb997a91f34f6797bc6e3e826a139db53b298e6dd9237991761166b1df82f"
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The giant tubeworm Riftia pachyptila lacks a functional digestive tract, harboring endosymbiotic sulfur-oxidizing bacteria within a specialized vascularized organ termed the trophosome.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage explicitly notes that Riftia pachyptila 'lacks a functional digestive tract', directly refuting the claim that it obtains nutrients through a conventional digestive system."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 27,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_B__att1",
+      "question_id": "3",
+      "question_text": "The trophosome is responsible for binding oxygen and hydrogen sulfide in Riftia pachyptila.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "dc964b4fba8a8d7740347a7aad7ba55f26f8e90ce92ffa3aefe6332b4b1664cd",
+        "output_response_sha256": "a5ebb997a91f34f6797bc6e3e826a139db53b298e6dd9237991761166b1df82f"
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "FALSE contradiction: passage affirms proposition without contradiction; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Blood hemoglobin in Riftia exhibits high affinity for both oxygen and toxic hydrogen sulfide, binding them simultaneously at distinct molecular sites to prevent cellular poisoning while fueling bacterial chemosynthesis.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Blood hemoglobin is responsible for binding oxygen and hydrogen sulfide, while the trophosome is the organ harboring endosymbiotic bacteria, making the statement FALSE."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 28,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_C__att1",
+      "question_id": "1",
+      "question_text": "Hydrothermal vent ecosystems depend on solar radiation for energy.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "7198194ec7abcfca5c132a80ce2fd067207186bdea982f747f4db1f740ed3772",
+        "output_response_sha256": "ac3c0272a1811f5f56b0389792d05de1bb23add0856c365128111ce7c205e8fa"
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Unlike phototrophic surface ecosystems that depend on solar radiation, hydrothermal communities rely on lithoautotrophic bacteria that oxidize dissolved hydrogen sulfide emitted in superheated hydrothermal fluids.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Directly contradicted by the text, which states hydrothermal communities rely on lithoautotrophic bacteria unlike surface ecosystems that depend on solar radiation."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 29,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_C__att1",
+      "question_id": "2",
+      "question_text": "Riftia pachyptila has endosymbiotic bacteria in its trophosome.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "d6d234c33b12dfab74a594e0db2fa27d51ffae068ac7bb833af6ee8933d81d8d",
+        "output_response_sha256": "ac3c0272a1811f5f56b0389792d05de1bb23add0856c365128111ce7c205e8fa"
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The giant tubeworm Riftia pachyptila lacks a functional digestive tract, harboring endosymbiotic sulfur-oxidizing bacteria within a specialized vascularized organ termed the trophosome.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Directly verified by the passage: Riftia pachyptila harbors endosymbiotic bacteria in its trophosome."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 30,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-hydrothermal-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-hydrothermal-05__arm_C__att1",
+      "question_id": "3",
+      "question_text": "The blood hemoglobin in Riftia pachyptila can bind carbon dioxide.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": "71f9cc3f8d7d92753a25c0d67213f2759ffdb47030df9853745723cb78187ab9",
+        "output_response_sha256": "ac3c0272a1811f5f56b0389792d05de1bb23add0856c365128111ce7c205e8fa"
+      },
+      "generator_output": {
+        "proposed_answer": "NOT GIVEN",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "NOT GIVEN",
+        "confidence": "HIGH",
+        "grounding_valid": false,
+        "evidence_quote_or_justification": "Blood hemoglobin in Riftia exhibits high affinity for both oxygen and toxic hydrogen sulfide, binding them simultaneously at distinct molecular sites to prevent cellular poisoning while fueling bacterial chemosynthesis.",
+        "linguistic_defects": [
+          "unmentioned_entity_not_given"
+        ],
+        "reviewer_rationale": "Carbon dioxide binding by hemoglobin is not mentioned anywhere in the passage. The text only discusses hemoglobin binding oxygen and hydrogen sulfide. In IELTS reading, an unmentioned claim is NOT GIVEN."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 31,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "GRAMMAR",
+      "arm": "A",
+      "assignment_id": "dev-grammar-inversion-05__arm_A__att1",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "options": [
+        "A) Not only did she win the race, but she also broke the record.",
+        "B) Not only she won the race, but she also broke the record.",
+        "C) Not only she did win the race, but she also broke the record.",
+        "D) Not only she wins the race, but she also broke the record."
+      ],
+      "original_hashes": {
+        "question_content_hash": "49372d38a0ae13bb5e612ebdb2ceecbaec2d2377db04e866e0bf5589764304fa",
+        "output_response_sha256": "5fc9653b30ffb6dc0a969ac2640e038048e2944b12c77c41f6b27d4e03ad0eed"
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Defective MCQ: no options exhibit valid negative inversion (Not only cue missing from cue list)"
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Initial 'Not only' triggers mandatory subject-auxiliary inversion. In simple past declarative ('she won the race'), do-support requires auxiliary 'did' before subject 'she' and bare infinitive 'win'. Option A is uniquely correct.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Initial 'Not only' triggers mandatory subject-auxiliary inversion. In simple past declarative ('she won the race'), do-support requires auxiliary 'did' before subject 'she' and bare infinitive 'win'. Option A is uniquely correct."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 32,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "GRAMMAR",
+      "arm": "A",
+      "assignment_id": "dev-grammar-inversion-05__arm_A__att1",
+      "question_id": "2",
+      "question_text": "What is the correct way to rewrite the sentence 'Under no circumstances we should open the door' to follow the rule of subject-auxiliary inversion?",
+      "options": [
+        "A) Under no circumstances should we open the door.",
+        "B) Under no circumstances we should open the door.",
+        "C) Under no circumstances do we should open the door.",
+        "D) Under no circumstances we do should open the door."
+      ],
+      "original_hashes": {
+        "question_content_hash": "c25ea45c9e0442ee807aae1b427318f1863d206a67926597e2393cdc92f621c1",
+        "output_response_sha256": "5fc9653b30ffb6dc0a969ac2640e038048e2944b12c77c41f6b27d4e03ad0eed"
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)"
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The declarative input 'Under no circumstances we should open the door' incorrectly lacks inversion. To rewrite it under subject-auxiliary inversion, the modal auxiliary 'should' must precede subject 'we'. Option A correctly produces 'Under no circumstances should we open the door'.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The declarative input 'Under no circumstances we should open the door' incorrectly lacks inversion. To rewrite it under subject-auxiliary inversion, the modal auxiliary 'should' must precede subject 'we'. Option A correctly produces 'Under no circumstances should we open the door'."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 33,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "GRAMMAR",
+      "arm": "B",
+      "assignment_id": "dev-grammar-inversion-05__arm_B__att1",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses negative inversion?",
+      "options": [
+        "A) Not only did she win the award, but she also broke the record.",
+        "B) Not only she won the award, but she also broke the record.",
+        "C) Not only she did win the award, but she also broke the record.",
+        "D) Not only won she the award, but she also broke the record."
+      ],
+      "original_hashes": {
+        "question_content_hash": "c350f50002d7b00043e72333d1623437b9b86f944a7e73209cbfd4b0d58faa18",
+        "output_response_sha256": "ded623da0a14a56a6d79cb2ac99956788a4397f8eec5ea756e0e15255738bf57"
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)"
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Subject-auxiliary inversion after negative adverbial 'Not only' requires do-support when no other auxiliary is present. Option A correctly implements 'did she win'. Option D incorrectly inverts the lexical verb directly.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Subject-auxiliary inversion after negative adverbial 'Not only' requires do-support when no other auxiliary is present. Option A correctly implements 'did she win'. Option D incorrectly inverts the lexical verb directly."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 34,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "GRAMMAR",
+      "arm": "B",
+      "assignment_id": "dev-grammar-inversion-05__arm_B__att1",
+      "question_id": "2",
+      "question_text": "What is the correct way to rewrite the sentence 'Under no circumstances we should leave the building' using proper inversion?",
+      "options": [
+        "A) Under no circumstances should we leave the building.",
+        "B) Under no circumstances we should leave the building.",
+        "C) Under no circumstances did we should leave the building.",
+        "D) Under no circumstances we should not leave the building."
+      ],
+      "original_hashes": {
+        "question_content_hash": "ba15fc338ad3c48e347e200f7bb348202a25f9a637f453a5626d200677118e65",
+        "output_response_sha256": "ded623da0a14a56a6d79cb2ac99956788a4397f8eec5ea756e0e15255738bf57"
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)"
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Rewriting 'Under no circumstances we should leave the building' with inversion requires moving the modal auxiliary 'should' in front of subject 'we'. Option A is uniquely correct.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Rewriting 'Under no circumstances we should leave the building' with inversion requires moving the modal auxiliary 'should' in front of subject 'we'. Option A is uniquely correct."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 35,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "GRAMMAR",
+      "arm": "C",
+      "assignment_id": "dev-grammar-inversion-05__arm_C__att1",
+      "question_id": "Q1",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "options": [
+        "A) Not only did she win the race, but she also broke the record.",
+        "B) Not only she won the race, but she also broke the record.",
+        "C) Not only she did win the race, but she also broke the record.",
+        "D) Not only she wins the race, but she also broke the record."
+      ],
+      "original_hashes": {
+        "question_content_hash": "da5716fa34e5d6e60d4ed37dccaaac1cf3e1b7fd66d3734d8e7b19e3dc3333eb",
+        "output_response_sha256": "2bcc08cd97852c46987b1e6c15e459568e2f9cd29eecbe9a24993171b6e07ec1"
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Defective MCQ: no options exhibit valid negative inversion (Not only cue missing from cue list)"
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Initial 'Not only' triggers subject-auxiliary inversion with past auxiliary 'did' and base verb 'win'. Option A is uniquely correct. (Note: Question is verbatim identical to Item 13 due to cross-arm generator convergence).",
+        "linguistic_defects": [
+          "cross_arm_item_duplication: Question text and options are identical to Item 13 (dev-grammar-inversion-05__arm_A__att1 Q1)"
+        ],
+        "reviewer_rationale": "Initial 'Not only' triggers subject-auxiliary inversion with past auxiliary 'did' and base verb 'win'. Option A is uniquely correct. (Note: Question is verbatim identical to Item 13 due to cross-arm generator convergence)."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 36,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-inversion-05",
+      "campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+      "domain": "GRAMMAR",
+      "arm": "C",
+      "assignment_id": "dev-grammar-inversion-05__arm_C__att1",
+      "question_id": "Q2",
+      "question_text": "Which sentence correctly uses 'do' to form subject-auxiliary inversion when there is no auxiliary verb?",
+      "options": [
+        "A) Under no circumstances open the door before checking the credentials.",
+        "B) Under no circumstances you should open the door before checking the credentials.",
+        "C) Under no circumstances should you open the door before checking the credentials.",
+        "D) Under no circumstances should open the door before checking the credentials."
+      ],
+      "original_hashes": {
+        "question_content_hash": "975b852de5a07e4fc7efd77f71ba8c83f62f92d840b3bc3400557b08ac893616",
+        "output_response_sha256": "2bcc08cd97852c46987b1e6c15e459568e2f9cd29eecbe9a24993171b6e07ec1"
+      },
+      "generator_output": {
+        "proposed_answer": "C",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": null,
+        "abstention_reason": "Verified consistent with rubric."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "NONE",
+        "confidence": "HIGH",
+        "grounding_valid": false,
+        "evidence_quote_or_justification": "The question stem states: 'Which sentence correctly uses \"do\" to form subject-auxiliary inversion when there is no auxiliary verb?' However, not a single option (A, B, C, D) contains 'do', 'does', or 'did'. Instead, the generator provided options testing modal auxiliary 'should' inversion (Option C: 'Under no circumstances should you open...'). While Option C is a well-formed inverted sentence with a modal, it directly violates the explicit syntactic constraint defined in the question stem. Under the stem's explicit criteria, there are zero correct answers (NONE).",
+        "linguistic_defects": [
+          "incorrect_rule_targeting: question stem explicitly asks for subject-auxiliary inversion using 'do' when there is no auxiliary verb, but candidate options test modal auxiliary 'should' inversion",
+          "zero_correct_answers: no candidate option uses 'do/does/did' to form subject-auxiliary inversion"
+        ],
+        "reviewer_rationale": "The question stem states: 'Which sentence correctly uses \"do\" to form subject-auxiliary inversion when there is no auxiliary verb?' However, not a single option (A, B, C, D) contains 'do', 'does', or 'did'. Instead, the generator provided options testing modal auxiliary 'should' inversion (Option C: 'Under no circumstances should you open...'). While Option C is a well-formed inverted sentence with a modal, it directly violates the explicit syntactic constraint defined in the question stem. Under the stem's explicit criteria, there are zero correct answers (NONE)."
+      },
+      "adjudication": {
+        "agreed_with_generator": false,
+        "review_status": "FAIL",
+        "defect_category": "ZERO_CORRECT_ANSWERS",
+        "defect_severity": "CRITICAL",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 37,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_A",
+      "question_id": "1",
+      "question_text": "CAM plants assimilate atmospheric carbon dioxide during the night through their open stomata.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "Unlike standard C3 plants that open stomata during daylight hours, obligate CAM species nocturnally assimilate atmospheric carbon dioxide via phosphoenolpyruvate carboxylase.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The text states that unlike C3 plants opening stomata in daylight, CAM species assimilate CO2 nocturnally (at night), keeping stomata closed during the day to minimize transpiration."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 38,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_A",
+      "question_id": "2",
+      "question_text": "CAM plants open their stomata during the day to absorb carbon dioxide.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "while stomata remain firmly closed to minimize transpiration.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage confirms that stomata remain firmly closed during the day to minimize transpiration, directly contradicting the statement that they open during the day."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 39,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "A",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_A",
+      "question_id": "3",
+      "question_text": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The resulting four-carbon dicarboxylic acid, predominantly malate, is sequestered inside large central vacuoles until daybreak.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Directly confirmed: the four-carbon dicarboxylic acid is sequestered inside large central vacuoles until daybreak."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 40,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_B",
+      "question_id": "1",
+      "question_text": "CAM plants open their stomata during the day to take in carbon dioxide.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "while stomata remain firmly closed to minimize transpiration.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Directly contradicted by the passage, which explicitly states that stomata remain firmly closed during the day."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 41,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_B",
+      "question_id": "2",
+      "question_text": "Malate is the primary four-carbon dicarboxylic acid produced in CAM plants.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "TRUE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "TRUE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The resulting four-carbon dicarboxylic acid, predominantly malate, is sequestered inside large central vacuoles until daybreak.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage states that the acid is 'predominantly malate', directly supporting that it is the primary four-carbon dicarboxylic acid."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 42,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "B",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_B",
+      "question_id": "3",
+      "question_text": "CAM plants use ribulose-1,5-bisphosphate carboxylase-oxygenase during the day while stomata are open.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "FAIL",
+        "abstention_reason": "FALSE contradiction: passage affirms proposition without contradiction; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "releasing concentrated carbon dioxide internally around ribulose-1,5-bisphosphate carboxylase-oxygenase while stomata remain firmly closed to minimize transpiration.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage explicitly notes that carbon dioxide is released internally around ribulose-1,5-bisphosphate carboxylase-oxygenase 'while stomata remain firmly closed', contradicting the statement's claim that stomata are open."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "EVALUATOR_FALSE_REJECTION",
+        "defect_severity": "HIGH",
+        "evaluator_defect_classification": "FALSE_REJECTION: Generator answer was correct, evaluator failed on surface pattern.",
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 43,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_C",
+      "question_id": "1",
+      "question_text": "CAM plants open their stomata during the day to take in carbon dioxide.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "while stomata remain firmly closed to minimize transpiration.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "Contradicts the explicit statement that stomata remain firmly closed during the day."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 44,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_C",
+      "question_id": "2",
+      "question_text": "Malate is the only four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "FALSE",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The resulting four-carbon dicarboxylic acid, predominantly malate, is sequestered inside large central vacuoles until daybreak.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The passage describes the acid as 'predominantly malate', which means mostly or primarily, not exclusively. Asserting that it is the 'only' one contradicts 'predominantly'."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 45,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-reading-photosynthesis-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "READING",
+      "arm": "C",
+      "assignment_id": "dev-reading-photosynthesis-03__arm_C",
+      "question_id": "3",
+      "question_text": "Ribulose-1,5-bisphosphate carboxylase-oxygenase is active during the night in CAM plants.",
+      "options": [],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "FALSE",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "ReadingReviewerR",
+        "independent_answer": "UNCERTAIN",
+        "confidence": "MEDIUM",
+        "grounding_valid": false,
+        "evidence_quote_or_justification": "The resulting four-carbon dicarboxylic acid, predominantly malate, is sequestered inside large central vacuoles until daybreak. Solar radiation then drives nocturnal malate decarboxylation, releasing concentrated carbon dioxide internally around ribulose-1,5-bisphosphate carboxylase-oxygenase while stomata remain firmly closed to minimize transpiration.",
+        "linguistic_defects": [
+          "source_passage_contradiction_solar_radiation_vs_nocturnal",
+          "premise_ambiguity"
+        ],
+        "reviewer_rationale": "The passage contains an explicit internal drafting contradiction generated by the baseline model: 'Solar radiation then drives nocturnal malate decarboxylation, releasing concentrated carbon dioxide internally around ribulose-1,5-bisphosphate carboxylase-oxygenase'. Contextually ('until daybreak', 'solar radiation') this is a daytime process, which would make the claim that RuBisCO is active at night FALSE. However, because the passage text oxymoronically calls it 'nocturnal malate decarboxylation', the text contradicts itself on whether this phase is nocturnal or diurnal, leaving the truth value UNCERTAIN under strict text-based grounding."
+      },
+      "adjudication": {
+        "agreed_with_generator": false,
+        "review_status": "UNCERTAIN",
+        "defect_category": "SOURCE_PASSAGE_CONTRADICTION",
+        "defect_severity": "HIGH",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 46,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-cleft-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "GRAMMAR",
+      "arm": "A",
+      "assignment_id": "dev-grammar-cleft-03__arm_A",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the unusual weather patterns'?",
+      "options": [
+        "A) It is the unusual weather patterns are causing the crop failures.",
+        "B) It was the unusual weather patterns that caused the crop failures.",
+        "C) The unusual weather patterns, it was them that caused the crop failures.",
+        "D) It is causing the crop failures, the unusual weather patterns."
+      ],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "An it-cleft emphasizing 'the unusual weather patterns' follows the formula: 'It + be + [NP] + that + [clause]'. Per the rule pack exception, plural NP complements take singular copula ('It was'). Both copula 'was' and relative clause verb 'caused' maintain past tense consistency. Option B is uniquely correct.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "An it-cleft emphasizing 'the unusual weather patterns' follows the formula: 'It + be + [NP] + that + [clause]'. Per the rule pack exception, plural NP complements take singular copula ('It was'). Both copula 'was' and relative clause verb 'caused' maintain past tense consistency. Option B is uniquely correct."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 47,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-cleft-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "GRAMMAR",
+      "arm": "A",
+      "assignment_id": "dev-grammar-cleft-03__arm_A",
+      "question_id": "2",
+      "question_text": "What is the correct way to emphasize 'photosynthesis' using an it-cleft structure in the sentence 'Photosynthesis is the process of converting light energy into chemical energy.'?",
+      "options": [
+        "A) It is photosynthesis that is the process of converting light energy into chemical energy.",
+        "B) It was photosynthesis is the process of converting light energy into chemical energy.",
+        "C) Photosynthesis, it is the process of converting light energy into chemical energy.",
+        "D) It is the process of converting light energy into chemical energy that photosynthesis."
+      ],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "FAIL",
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 4] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "To emphasize the subject 'photosynthesis' using an it-cleft from the definition 'Photosynthesis is the process...', the structure is 'It is photosynthesis that is the process...'. Option A correctly implements this. (Pragmatically clefting equative 'is' clauses is somewhat redundant, but syntactically it is the uniquely correct cleft).",
+        "linguistic_defects": [],
+        "reviewer_rationale": "To emphasize the subject 'photosynthesis' using an it-cleft from the definition 'Photosynthesis is the process...', the structure is 'It is photosynthesis that is the process...'. Option A correctly implements this. (Pragmatically clefting equative 'is' clauses is somewhat redundant, but syntactically it is the uniquely correct cleft)."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 48,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-cleft-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "GRAMMAR",
+      "arm": "B",
+      "assignment_id": "dev-grammar-cleft-03__arm_B",
+      "question_id": "q1",
+      "question_text": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the new methodology'?",
+      "options": [
+        "A) It is the new methodology that has revolutionized our approach to data analysis.",
+        "B) It was the new methodology that has revolutionized our approach to data analysis.",
+        "C) The new methodology is what has revolutionized our approach to data analysis.",
+        "D) The new methodology, it has revolutionized our approach to data analysis."
+      ],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "A",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "A",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The prompt asks for an it-cleft emphasizing 'the new methodology'. Option A ('It is the new methodology that has revolutionized...') maintains tense harmony between present copula 'is' and present perfect 'has revolutionized'. Option B clashes past 'was' with present perfect 'has revolutionized', while C is a pseudo-cleft and D is topicalization.",
+        "linguistic_defects": [],
+        "reviewer_rationale": "The prompt asks for an it-cleft emphasizing 'the new methodology'. Option A ('It is the new methodology that has revolutionized...') maintains tense harmony between present copula 'is' and present perfect 'has revolutionized'. Option B clashes past 'was' with present perfect 'has revolutionized', while C is a pseudo-cleft and D is topicalization."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 49,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-cleft-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "GRAMMAR",
+      "arm": "B",
+      "assignment_id": "dev-grammar-cleft-03__arm_B",
+      "question_id": "q2",
+      "question_text": "Which sentence correctly uses an it-cleft structure with the emphasis on 'the research team'?",
+      "options": [
+        "A) It is the research team who developed the innovative solution.",
+        "B) It was the research team that developed the innovative solution.",
+        "C) The research team is who developed the innovative solution.",
+        "D) The research team, they developed the innovative solution."
+      ],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "B",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "PASS",
+        "abstention_reason": null
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "B",
+        "confidence": "HIGH",
+        "grounding_valid": true,
+        "evidence_quote_or_justification": "The rule pack mandates that 'Tense consistency between copula and cleft clause is mandatory' and that 'When the clefted constituent is personal, who or that can be used'. Option B provides consistent past tense ('It was ... that developed'). Option A contains a tense mismatch between present copula 'is' and past verb 'developed'. Options C and D are not it-clefts.",
+        "linguistic_defects": [
+          "distractor_ambiguity_risk: Option A ('It is the research team who developed...') may be perceived as defensible by test-takers focusing on personal relative pronoun 'who' despite the present-past tense mismatch"
+        ],
+        "reviewer_rationale": "The rule pack mandates that 'Tense consistency between copula and cleft clause is mandatory' and that 'When the clefted constituent is personal, who or that can be used'. Option B provides consistent past tense ('It was ... that developed'). Option A contains a tense mismatch between present copula 'is' and past verb 'developed'. Options C and D are not it-clefts."
+      },
+      "adjudication": {
+        "agreed_with_generator": true,
+        "review_status": "PASS",
+        "defect_category": "NONE",
+        "defect_severity": "NONE",
+        "evaluator_defect_classification": null,
+        "disputed_case": false
+      }
+    },
+    {
+      "audit_idx": 50,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-cleft-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "GRAMMAR",
+      "arm": "C",
+      "assignment_id": "dev-grammar-cleft-03__arm_C",
+      "question_id": "GRAMMAR_MCQ_1",
+      "question_text": "Choose the correct sentence that uses an it-cleft structure appropriately to emphasize 'the new findings'.",
+      "options": [
+        "It is the new findings that has surprised the scientific community.",
+        "It was the new findings that surprised the scientific community.",
+        "It is the new findings that surprise the scientific community.",
+        "It were the new findings that surprised the scientific community."
+      ],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "It was the new findings that surprised the scientific community.",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "FAIL",
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 2, 3] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "MULTIPLE",
+        "confidence": "HIGH",
+        "grounding_valid": false,
+        "evidence_quote_or_justification": "The question stem asks to 'Choose the correct sentence that uses an it-cleft structure appropriately to emphasize \"the new findings\"', but provides no source sentence or temporal context. Option B is in the past tense ('It was the new findings that surprised...'), which correctly retains singular copula 'was' with plural complement and past tense harmony. Option C is in the present tense ('It is the new findings that surprise...'), which also correctly retains singular copula 'is' with plural complement and present tense harmony (plural verb 'surprise' agreeing with plural 'findings'). Both sentences are fully grammatical it-cleft constructions. Consequently, this item lacks a unique correct answer and presents multiple defensible keys (B and C).",
+        "linguistic_defects": [
+          "multiple_defensible_answers: both Option B ('It was the new findings that surprised...') and Option C ('It is the new findings that surprise...') are fully grammatical, valid it-cleft sentences emphasizing 'the new findings', because the question stem provides no base sentence fixing grammatical tense",
+          "missing_option_label_formatting: options in raw item lack standard 'A)', 'B)', 'C)', 'D)' prefixes"
+        ],
+        "reviewer_rationale": "The question stem asks to 'Choose the correct sentence that uses an it-cleft structure appropriately to emphasize \"the new findings\"', but provides no source sentence or temporal context. Option B is in the past tense ('It was the new findings that surprised...'), which correctly retains singular copula 'was' with plural complement and past tense harmony. Option C is in the present tense ('It is the new findings that surprise...'), which also correctly retains singular copula 'is' with plural complement and present tense harmony (plural verb 'surprise' agreeing with plural 'findings'). Both sentences are fully grammatical it-cleft constructions. Consequently, this item lacks a unique correct answer and presents multiple defensible keys (B and C)."
+      },
+      "adjudication": {
+        "agreed_with_generator": false,
+        "review_status": "FAIL",
+        "defect_category": "MULTIPLE_DEFENSIBLE_ANSWERS",
+        "defect_severity": "CRITICAL",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    },
+    {
+      "audit_idx": 51,
+      "audit_label": "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD",
+      "dataset_item_id": "dev-grammar-cleft-03",
+      "campaign": "RG10_DEV_HARDENING_V2",
+      "domain": "GRAMMAR",
+      "arm": "C",
+      "assignment_id": "dev-grammar-cleft-03__arm_C",
+      "question_id": "GRAMMAR_MCQ_2",
+      "question_text": "Which sentence correctly uses an it-cleft to emphasize 'the research methodology'?",
+      "options": [
+        "It is the research methodology that the team has developed.",
+        "It was the research methodology that the team developed.",
+        "It is the research methodology that the team develops.",
+        "It was the research methodology that the team has developed."
+      ],
+      "original_hashes": {
+        "question_content_hash": null,
+        "output_response_sha256": null
+      },
+      "generator_output": {
+        "proposed_answer": "It was the research methodology that the team developed.",
+        "answer_status": "AVAILABLE"
+      },
+      "original_evaluator": {
+        "verdict": "FAIL",
+        "abstention_reason": "Ambiguous MCQ: multiple options [1, 2, 3, 4] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+      },
+      "independent_ai_review": {
+        "reviewer_agent": "GrammarReviewerG",
+        "independent_answer": "MULTIPLE",
+        "confidence": "HIGH",
+        "grounding_valid": false,
+        "evidence_quote_or_justification": "The question stem asks: 'Which sentence correctly uses an it-cleft to emphasize \"the research methodology\"?' without providing an input sentence. Both Option A ('It is the research methodology that the team has developed' - present + present perfect) and Option B ('It was the research methodology that the team developed' - past + past) are flawless, fully grammatical it-cleft sentences conforming to all syntactic rules. Option C is also grammatically possible. Only Option D has a clear tense clash ('was ... has developed'). Because there is no contextual anchor to distinguish between past and present perfect aspect, the item has multiple defensible answers (A and B).",
+        "linguistic_defects": [
+          "multiple_defensible_answers: Option A ('It is the research methodology that the team has developed') and Option B ('It was the research methodology that the team developed') are both completely valid and grammatical it-cleft sentences with consistent tense harmony, and Option C is also syntactically well-formed; without a baseline sentence, no single option can be uniquely selected",
+          "missing_option_label_formatting: options in raw item lack standard 'A)', 'B)', 'C)', 'D)' prefixes"
+        ],
+        "reviewer_rationale": "The question stem asks: 'Which sentence correctly uses an it-cleft to emphasize \"the research methodology\"?' without providing an input sentence. Both Option A ('It is the research methodology that the team has developed' - present + present perfect) and Option B ('It was the research methodology that the team developed' - past + past) are flawless, fully grammatical it-cleft sentences conforming to all syntactic rules. Option C is also grammatically possible. Only Option D has a clear tense clash ('was ... has developed'). Because there is no contextual anchor to distinguish between past and present perfect aspect, the item has multiple defensible answers (A and B)."
+      },
+      "adjudication": {
+        "agreed_with_generator": false,
+        "review_status": "FAIL",
+        "defect_category": "MULTIPLE_DEFENSIBLE_ANSWERS",
+        "defect_severity": "CRITICAL",
+        "evaluator_defect_classification": null,
+        "disputed_case": true
+      }
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 # RG10 Final Campaign Readiness Audit Report (Dry-Run Only)
 
 **Report ID:** `rg10-campaign-readiness-dryrun-v1.0`  
-**Evaluated At:** `2026-10-17T06:14:26Z`  
-**Report Generated From SHA:** `d491f2e42642bd5016807b5e863ce3e3bed88014`  
+**Evaluated At:** `2026-10-18T07:42:14Z`  
+**Report Generated From SHA:** `69007c8d0860eba40b0274837699f89970a46303`  
 **Implementation Source SHA:** `32cb85e514f881aef8a5366ea43eb67422012eaa`  
-**Audit Tool SHA:** `ef98b70ec2e633601a32c2d20b12ce60b009e72c`  
-**Software Commit SHA:** `d491f2e42642bd5016807b5e863ce3e3bed88014`  
+**Audit Tool SHA:** `69007c8d0860eba40b0274837699f89970a46303`  
+**Software Commit SHA:** `69007c8d0860eba40b0274837699f89970a46303`  
 **Evaluation Mode:** `STRICTLY_DRY_RUN_NO_PROVIDER_CALLS`  
 **Overall Software Readiness:** **`READY`**  
 **Overall Campaign Gate:** **`HOLD`**  

@@ -1,10 +1,10 @@
 {
   "report_id": "rg10-campaign-readiness-dryrun-v1.0",
-  "evaluated_at": "2026-10-17T06:14:26Z",
-  "software_commit_sha": "d491f2e42642bd5016807b5e863ce3e3bed88014",
+  "evaluated_at": "2026-10-18T07:42:14Z",
+  "software_commit_sha": "69007c8d0860eba40b0274837699f89970a46303",
   "implementation_source_sha": "32cb85e514f881aef8a5366ea43eb67422012eaa",
-  "audit_tool_sha": "ef98b70ec2e633601a32c2d20b12ce60b009e72c",
-  "report_generated_from_sha": "d491f2e42642bd5016807b5e863ce3e3bed88014",
+  "audit_tool_sha": "69007c8d0860eba40b0274837699f89970a46303",
+  "report_generated_from_sha": "69007c8d0860eba40b0274837699f89970a46303",
   "is_dry_run": true,
   "dataset_readiness": {
     "reading_task_count": 28,
@@ -209,12 +209,18 @@
     "runtime_observed": {
       "ledger_assignments": 168,
       "ledger_attempts": 262,
-      "ledger_outputs": 260,
-      "ledger_evaluations": 166,
+      "reconciled_attempts": 262,
+      "terminal_attempts": 168,
+      "non_terminal_attempts": 94,
+      "outputs_count": 260,
+      "evaluations_count": 166,
+      "unresolved_attempts_count": 0,
+      "unresolved_attempts": [],
       "zero_silent_drops_verified": true,
       "prior_quota_status": "BLOCKED_EXTERNAL_QUOTA",
       "prior_http_code": 429
     },
+    "unresolved_attempts": [],
     "evidence_notes": "Executable tests verified: UNCERTAIN=0.0 (True), missing_output=0.0 (True), timeout=0.0, fallback_forbidden=True, post_hoc_endpoint_switch_forbidden=True. Runtime observed: zero silent drops across 262 attempts. All tests passed: True.",
     "status": "VERIFIED"
   },
