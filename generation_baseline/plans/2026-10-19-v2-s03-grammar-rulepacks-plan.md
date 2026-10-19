@@ -59,8 +59,8 @@ Each RulePack is formalized as a validated `GrammarRulePack` instance with compl
 │                           GrammarRulePack Schema                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ • rule_pack_id: str (unique slug, e.g. "fam-v2-grammar-inversion")          │
-│ • source: SourceRef (academic reference, license="COPYRIGHTED_ACADEMIC_     │
-│                      REFERENCE_FAIR_USE", provenance_uri="urn:isbn:...")    │
+│ • source: SourceRef (source_id, source_family, source_version, source_sha256,│
+│                      license="ALL_RIGHTS_RESERVED", provenance_uri="urn:isbn:...") │
 │ • topic: str (descriptive syntactic topic)                                  │
 │ • level: str (provisional CEFR level: "B1", "B2", "C1", or "B2 / C1")      │
 │ • rule_ids: List[str] (fine-grained sub-rule identifiers)                   │
@@ -205,8 +205,9 @@ Sprint V2-S03 authors `services/generation-service/tests/test_v2_grammar_taxonom
 │                   V2-S03 Acceptance Test Architecture                       │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 1. Schema & Provenance Conformance Tests:                                   │
-│    • Asserts authentic citations with ISBNs & fair-use academic licensing.  │
-│    • Zero fabricated DOIs or false CC-BY-4.0 claims for commercial books.   │
+│    • Asserts authentic citations with ISBNs; license="ALL_RIGHTS_RESERVED"  │
+│      reflecting publisher rights status (zero fabricated CC-BY-4.0 claims). │
+│    • Fair-use / fair-dealing use basis documented separately for research.  │
 │    • Verifies exactly 8 examples per family (56 total) upon approval.       │
 │                                                                             │
 │ 2. CEFR Alignment & Context-Dependent Constraint Tests:                    │
@@ -261,16 +262,16 @@ Before implementation authorization and final dataset freeze, the following plan
 3. **Review Item 3 — Reporting Passive Lower Bound (`PASS-01`):**  
    - *Issue:* Impersonal reporting passives (*It is believed that...*) span B1/B2 in general ESL curricula, but academic IELTS tasks primarily target B2/C1.
    - *Action for Curator:* Confirm whether `PASS-01` items should be admitted at B1 or calibrated to B2 academic reporting.
-4. **Review Item 4 — Reference Book Licensing & Provenance Identifiers:**  
-   - *Issue:* Standard descriptive reference books (Quirk et al. 1985, Biber et al. 1999, Huddleston & Pullum 2002, Hewings 2013, Murphy 2019) are copyrighted commercial publications, not open-access CC-BY-4.0 articles with DOIs.
-   - *Resolution in Plan:* In `SourceRef`, licensing is formalized as `license="COPYRIGHTED_ACADEMIC_REFERENCE_FAIR_USE"` and `provenance_uri` as standard catalog ISBN URNs (`urn:isbn:...`). Zero unevidenced DOIs or false CC-BY-4.0 claims shall be introduced.
-
+4. **Review Item 4 — Publisher Rights Status & Institutional Fair-Use Determination:**  
+   - *Publisher Rights Status:* The commercial reference grammars (Quirk et al. 1985, Biber et al. 1999, Huddleston & Pullum 2002, Hewings 2013, Murphy 2019) are copyrighted publications with all rights reserved by their respective publishers (Longman/Pearson, Cambridge University Press). Therefore, `SourceRef.license` records the actual publisher rights status: `"ALL_RIGHTS_RESERVED"`.
+   - *Legal Use Basis (Pending Institutional Sign-Off):* Fair use (17 U.S.C. § 107) and fair dealing (UK CDPA 1988) are legal use doctrines, not publisher-granted licenses. The legal determination that citing structural grammatical taxonomy constitutes fair use for educational research is maintained as a separate institutional policy requirement. All 56 examples will be 100% original expressions authored in-repo to avoid copyright infringement.
+   - *Action for Curator:* Review and formally approve the institutional fair-use / fair-dealing compliance memorandum prior to Sprint V2-S06 dataset sealing.
 ---
 
 ## 9. Acceptance Gates & Exit Criteria
 
 Sprint V2-S03 shall achieve gate closure (`PASS`) if and only if all of the following criteria are satisfied:
-- [ ] **Gate 1 (Schema & RulePack Provenance):** Exactly 7 `GrammarRulePack` instances exist in `grammar_packs_v2.py`, strictly conforming to Pydantic v2 `GrammarRulePack` schema with authentic descriptive grammar citations and ISBN catalog identifiers under academic fair use (zero fabricated DOIs or false CC-BY-4.0 claims).
+- [ ] **Gate 1 (Schema & RulePack Provenance):** Exactly 7 `GrammarRulePack` instances exist in `grammar_packs_v2.py`, strictly conforming to Pydantic v2 `GrammarRulePack` schema with authentic descriptive grammar citations and ISBN catalog identifiers, recording publisher rights status as `license="ALL_RIGHTS_RESERVED"` (zero fabricated DOIs or false license grants).
 - [ ] **Gate 2 (Evidence-Based CEFR Alignment):** Documented structural criteria govern CEFR levels, with all provisional EGP attributions marked as PROPOSED pending primary database verification and flagged curator adjudication.
 - [ ] **Gate 3 (Original Academic Examples):** Exactly 56 original academic sentences (8 per family) are embedded upon implementation. Zero textbook copyright infringement.
 - [ ] **Gate 4 (Syntactic Exception Handling):** Every RulePack explicitly documents negative syntactic exceptions (subject-modifying *only*, dangling participles, illicit personal passives with *suggest*).
