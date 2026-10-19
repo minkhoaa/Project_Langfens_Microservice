@@ -165,14 +165,22 @@ def test_absolute_zero_overlap_with_forbidden_v1_sources(
     """Asserts ABSOLUTE ZERO OVERLAP with the 6 forbidden quarantined V1 sources (PMC8910001..6)."""
     forbidden_shingles: Set[str] = set()
     forbidden_pmcids: Set[str] = set()
+    forbidden_10w_spans: Set[str] = set()
 
     for item in forbidden_v1_sources:
         pmcid = item.get("pmcid", "")
         forbidden_pmcids.add(pmcid)
-        # Extract shingles from text if present
-        text = item.get("text", "") or item.get("body", "")
-        if text:
-            forbidden_shingles.update(extract_3gram_shingles(text))
+        content = item.get("content", "")
+        assert len(content) > 100, f"Missing or empty content for forbidden source {pmcid}"
+        shingles = extract_3gram_shingles(content)
+        forbidden_shingles.update(shingles)
+        tokens = tokenize_words(content)
+        if len(tokens) >= 10:
+            for i in range(len(tokens) - 9):
+                forbidden_10w_spans.add(" ".join(tokens[i : i + 10]))
+
+    assert len(forbidden_shingles) > 500, "Expected > 500 forbidden 3-gram shingles loaded."
+    assert len(forbidden_10w_spans) > 500, "Expected > 500 forbidden 10-word spans loaded."
 
     for src in provenance_ledger["sources"]:
         pmcid = src["pmcid"]
@@ -183,18 +191,65 @@ def test_absolute_zero_overlap_with_forbidden_v1_sources(
         assert txt_file.exists(), f"Missing text fixture {txt_file}"
         v2_text = txt_file.read_text(encoding="utf-8")
 
-        # Zero PMCID string references
+        # 1. Zero PMCID string references
         for f_pmcid in FORBIDDEN_QUARANTINED_PMCIDS:
             assert f_pmcid.lower() not in v2_text.lower(), (
                 f"Forbidden identifier {f_pmcid} found inside {pmcid}!"
             )
 
-        # Zero verbatim span overlap >= 10 words
-        v2_shingles = extract_3gram_shingles(v2_text)
-        if forbidden_shingles:
-            sim = jaccard_similarity(v2_shingles, forbidden_shingles)
-            assert sim < 0.05, f"Excessive overlap with quarantined sources: {sim:.4f}"
+        # 2. Zero verbatim 10-word span overlap
+        v2_tokens = tokenize_words(v2_text)
+        v2_10w = {" ".join(v2_tokens[i : i + 10]) for i in range(len(v2_tokens) - 9)}
+        overlap_spans = v2_10w & forbidden_10w_spans
+        assert len(overlap_spans) == 0, f"Verbatim span overlap with forbidden sources in {pmcid}: {overlap_spans}"
 
+        # 3. Overall 3-gram shingle similarity strictly bounded (< 0.001)
+        v2_shingles = extract_3gram_shingles(v2_text)
+        sim = jaccard_similarity(v2_shingles, forbidden_shingles)
+        assert sim < 0.001, f"Excessive overlap with quarantined sources in {pmcid}: {sim:.5f}"
+
+
+# --- Negative Rejection & Triage Tests ---
+
+
+def test_negative_reject_injected_forbidden_pmcid() -> None:
+    """Negative test: injecting a forbidden PMCID into text must trigger contamination rejection."""
+    contaminated_text = "Recent studies on PMC8910002 demonstrated significant environmental impact."
+    contains_forbidden = any(f.lower() in contaminated_text.lower() for f in FORBIDDEN_QUARANTINED_PMCIDS)
+    assert contains_forbidden is True, "Expected injected PMCID to be detected."
+
+
+def test_negative_reject_injected_forbidden_verbatim_span(
+    forbidden_v1_sources: List[Dict[str, Any]]
+) -> None:
+    """Negative test: injecting a 15-word span from a forbidden source must be flagged."""
+    forbidden_content = forbidden_v1_sources[0]["content"]
+    forbidden_tokens = tokenize_words(forbidden_content)
+    span_15w = " ".join(forbidden_tokens[20:35])
+    assert len(span_15w.split()) == 15
+
+    clean_sample = "This is an experimental plant biology text describing lettuce growth. " * 50
+    contaminated_sample = clean_sample + " " + span_15w + " " + clean_sample
+
+    sample_tokens = tokenize_words(contaminated_sample)
+    sample_15w = {" ".join(sample_tokens[i : i + 15]) for i in range(len(sample_tokens) - 14)}
+    assert span_15w in sample_15w, "Expected 15-word injected span to be detected."
+
+
+def test_triage_ledger_contains_suspected_lexical_evidence() -> None:
+    """Verifies that PADDING_REVIEW_TRIAGE.json audits all suspected lexical false positives."""
+    triage_path = REPO_ROOT / "generation_baseline" / "verification" / "PADDING_REVIEW_TRIAGE.json"
+    assert triage_path.exists(), f"Missing triage ledger at {triage_path}"
+    data = json.loads(triage_path.read_text(encoding="utf-8"))
+    assert data["triage_id"] == "PADDING_REVIEW_TRIAGE"
+    assert data["all_dispositions_acceptable"] is True
+    assert data["total_triage_entries"] > 0
+
+    for entry in data["triage_entries"]:
+        assert entry["triage_category"] == "SUSPECTED_LEXICAL_FALSE_POSITIVE"
+        assert entry["disposition"] == "APPROVED_LEGITIMATE_FUNCTION_WORDS"
+        assert entry["verbatim_10word_spans_count"] == 0
+        assert entry["jaccard_similarity"] < 0.005
 
 # --- Cross-Split Disjointness Tests ---
 

@@ -48,16 +48,20 @@
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
+        "max_forbidden_shingle_jaccard": 0.000183,
+        "verbatim_10word_spans_count": 0,
+        "suspected_lexical_false_positives_count": 1,
+        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
         "issues": []
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          522,
-          532,
-          500,
-          518
+          634,
+          628,
+          645,
+          642
         ],
         "error": null
       },
@@ -107,16 +111,20 @@
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
+        "max_forbidden_shingle_jaccard": 0.0,
+        "verbatim_10word_spans_count": 0,
+        "suspected_lexical_false_positives_count": 0,
+        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
         "issues": []
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          509,
-          510,
-          508,
-          504
+          644,
+          627,
+          631,
+          629
         ],
         "error": null
       },
@@ -166,16 +174,20 @@
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
+        "max_forbidden_shingle_jaccard": 0.000188,
+        "verbatim_10word_spans_count": 0,
+        "suspected_lexical_false_positives_count": 1,
+        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
         "issues": []
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          520,
-          510,
-          506,
-          508
+          634,
+          609,
+          616,
+          648
         ],
         "error": null
       },
@@ -225,16 +237,20 @@
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
+        "max_forbidden_shingle_jaccard": 0.0,
+        "verbatim_10word_spans_count": 0,
+        "suspected_lexical_false_positives_count": 0,
+        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
         "issues": []
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          502,
-          505,
-          519,
-          513
+          602,
+          608,
+          633,
+          646
         ],
         "error": null
       },
@@ -281,16 +297,20 @@
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
+        "max_forbidden_shingle_jaccard": 0.000148,
+        "verbatim_10word_spans_count": 0,
+        "suspected_lexical_false_positives_count": 1,
+        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
         "issues": []
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          510,
-          521,
-          505,
-          539
+          624,
+          632,
+          626,
+          641
         ],
         "error": null
       },
@@ -337,16 +357,20 @@
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
+        "max_forbidden_shingle_jaccard": 0.000142,
+        "verbatim_10word_spans_count": 0,
+        "suspected_lexical_false_positives_count": 1,
+        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
         "issues": []
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          526,
-          517,
-          501,
-          525
+          638,
+          621,
+          628,
+          640
         ],
         "error": null
       },
@@ -393,16 +417,20 @@
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
+        "max_forbidden_shingle_jaccard": 0.0,
+        "verbatim_10word_spans_count": 0,
+        "suspected_lexical_false_positives_count": 0,
+        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
         "issues": []
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          503,
-          515,
-          515,
-          512
+          649,
+          627,
+          641,
+          634
         ],
         "error": null
       },

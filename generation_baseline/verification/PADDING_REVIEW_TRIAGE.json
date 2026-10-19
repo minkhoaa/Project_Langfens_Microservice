@@ -1,0 +1,66 @@
+{
+  "triage_id": "PADDING_REVIEW_TRIAGE",
+  "version": "2.0.0",
+  "timestamp": "2026-10-19T00:00:00Z",
+  "governing_document": "generation_baseline/plans/2026-10-19-v2-s02-pmc-verification-segmentation-plan.md",
+  "description": "Evidence ledger of suspected lexical false positives and overlap triage against forbidden quarantined sources.",
+  "total_candidate_sources_checked": 7,
+  "total_forbidden_sources_checked": 6,
+  "total_triage_entries": 4,
+  "all_dispositions_acceptable": true,
+  "triage_entries": [
+    {
+      "candidate_pmcid": "PMC13621526",
+      "forbidden_pmcid": "PMC8910004",
+      "jaccard_similarity": 0.000183,
+      "shared_3gram_count": 1,
+      "shared_3grams_sample": [
+        "directly to the"
+      ],
+      "verbatim_10word_spans_count": 0,
+      "triage_category": "SUSPECTED_LEXICAL_FALSE_POSITIVE",
+      "disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+      "evidence_notes": "Overlap (0.00018) consists strictly of common grammatical function 3-grams (['directly to the']); zero verbatim content spans >= 10 words."
+    },
+    {
+      "candidate_pmcid": "PMC13517498",
+      "forbidden_pmcid": "PMC8910002",
+      "jaccard_similarity": 0.000188,
+      "shared_3gram_count": 2,
+      "shared_3grams_sample": [
+        "back to the",
+        "the reliability of"
+      ],
+      "verbatim_10word_spans_count": 0,
+      "triage_category": "SUSPECTED_LEXICAL_FALSE_POSITIVE",
+      "disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+      "evidence_notes": "Overlap (0.00019) consists strictly of common grammatical function 3-grams (['back to the', 'the reliability of']); zero verbatim content spans >= 10 words."
+    },
+    {
+      "candidate_pmcid": "PMC13665993",
+      "forbidden_pmcid": "PMC8910004",
+      "jaccard_similarity": 0.000148,
+      "shared_3gram_count": 1,
+      "shared_3grams_sample": [
+        "early in the"
+      ],
+      "verbatim_10word_spans_count": 0,
+      "triage_category": "SUSPECTED_LEXICAL_FALSE_POSITIVE",
+      "disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+      "evidence_notes": "Overlap (0.00015) consists strictly of common grammatical function 3-grams (['early in the']); zero verbatim content spans >= 10 words."
+    },
+    {
+      "candidate_pmcid": "PMC13667678",
+      "forbidden_pmcid": "PMC8910002",
+      "jaccard_similarity": 0.000142,
+      "shared_3gram_count": 1,
+      "shared_3grams_sample": [
+        "the reliability of"
+      ],
+      "verbatim_10word_spans_count": 0,
+      "triage_category": "SUSPECTED_LEXICAL_FALSE_POSITIVE",
+      "disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+      "evidence_notes": "Overlap (0.00014) consists strictly of common grammatical function 3-grams (['the reliability of']); zero verbatim content spans >= 10 words."
+    }
+  ]
+}

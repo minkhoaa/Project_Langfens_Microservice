@@ -495,7 +495,7 @@ This document constitutes the finalized, amended implementation plan candidate f
 - **Strict Invariants:** Zero MiniMax API calls, zero RG11 or live campaign dispatches, zero historical artifact mutations, zero holdout gold inspection, and all AI audits designated `EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD`.
 - **Sprint Progress Ledger:**
   - **Sprint V2-S01:** **`PASS`** (Completed and verified; `V1_QUARANTINE_MANIFEST.json` established; 594 historical assets verified with 0 mutations; 564 git-ignored execution files audited and backed up off-tree; post-implementation sign-off secured on 2026-10-19).
-  - **Sprint V2-S02:** **`PASS`** (Completed and verified; all 7 candidate sources verified against live NCBI XML; 28 Reading passages extracted under 350–650 word bounds; `V2_SOURCE_PROVENANCE_LEDGER.json` created; 20 acceptance tests pass).
+  - **Sprint V2-S02:** **`PASS`** (Completed and verified; all 7 candidate sources verified against live NCBI XML; 28 Reading passages extracted under 350–650 word bounds; `V2_SOURCE_PROVENANCE_LEDGER.json` created; blocker remediated with real content comparison and triage logging; 23 acceptance tests pass).
   - **Sprints V2-S03 to V2-S06:** **`NOT_RUN`** (Sequentially blocked).
 
 ### Sprint Execution Instructions (Next: V2-S03 Preflight)
