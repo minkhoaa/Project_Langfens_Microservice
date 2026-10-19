@@ -1,7 +1,7 @@
 # Micro-Sprint Plan: V2-S02 — Comprehensive 7-Source NCBI Verification, Provenance Tracing & Semantic Segmentation
 
 **Sprint ID**: `V2-S02`  
-**Parent Master Plan**: `generation_baseline/plans/2026-10-18-rq2-dataset-v2-recovery-plan.md` (Approved Master Plan)  
+**Parent Master Plan**: `generation_baseline/plans/2026-10-18-rq2-dataset-v2-recovery-plan.md`  
 **Document ID**: `PLAN-V2-S02-PMC-SEGMENTATION`  
 **Status**: `PROPOSED_SPRINT_PLAN_CANDIDATE_AWAITING_USER_APPROVAL`  
 **Approval Evidence**: `NONE_INVENTED` (Candidate sprint plan authored under V2-S02 preflight; awaiting explicit human review and sign-off; approval not invented per prompt mandate)  

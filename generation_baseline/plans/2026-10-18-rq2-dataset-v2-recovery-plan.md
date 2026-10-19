@@ -6,8 +6,8 @@
 **Complexity**: Large  
 **Document ID**: `PLAN-RQ2-V2-RECOVERY-FINAL`  
 **Revision Date**: 2026-10-19  
-**Status**: `APPROVED_MASTER_PLAN`  
-**Approval Evidence**: `USER_SIGN_OFF_20261019` (Formally approved by user on 2026-10-19 alongside V2-S01 implementation review and sprint plan sign-off)  
+**Status**: `AMENDED_PLAN_CANDIDATE_AWAITING_PREREGISTRATION_APPROVAL`  
+**Approval Evidence**: `V2_S01_APPROVED_MASTER_PREREGISTRATION_PENDING` (User post-implementation sign-off granted on 2026-10-19 specifically for completed Sprint V2-S01 implementation and `PLAN-V2-S01-QUARANTINE`; broader master plan preregistration amendment and Sprints V2-S02..06 remain pending sequential review and approval)  
 **Repository**: `minkhoaa/Project_Langfens_Microservice`  
 **Branch**: `autonomous-generation`  
 
@@ -490,7 +490,7 @@ This document constitutes the finalized, amended implementation plan candidate f
 
 **Plan Summary for Orchestrator:**
 - **Plan File Path:** `generation_baseline/plans/2026-10-18-rq2-dataset-v2-recovery-plan.md`
-- **Approval Status:** **`APPROVED_MASTER_PLAN`** (Approved by user on 2026-10-19)
+- **Approval Status:** **`AMENDED_PLAN_CANDIDATE_AWAITING_PREREGISTRATION_APPROVAL`** (Governing master plan candidate; Sprint V2-S01 closed with PASS via post-implementation sign-off; broader preregistration amendment and Sprints V2-S02..06 remain pending)
 - **Scope:** 6 Micro-Sprints (V2-S01 to V2-S06), covering V1 Quarantine, Comprehensive 7-Source PMC Verification, Semantic Sentence Segmentation, Calibrated Anti-Padding, Reference Grammar RulePacks, Dedicated V2 Tooling, Real Multi-Agent Audit, and Cryptographic Ledger Sealing.
 - **Strict Invariants:** Zero MiniMax API calls, zero RG11 or live campaign dispatches, zero historical artifact mutations, zero holdout gold inspection, and all AI audits designated `EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD`.
 - **Sprint Progress Ledger:**

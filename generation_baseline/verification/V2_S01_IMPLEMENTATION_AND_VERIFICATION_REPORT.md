@@ -23,9 +23,9 @@ The historical benchmark dataset `final-v1.0` has been formally quarantined with
 
 A re-run of the automated V1 quarantine integrity verification confirmed **ZERO MUTATIONS** (0 modified files, 0 missing files) across both git-tracked files and git-ignored historical execution directories. All 353 RG10 freeze regression tests and all 2,015 offline package integrity checks passed cleanly.
 
-Additionally, the 564 git-ignored historical execution files located in `generation_baseline/.execution/RG10/` were audited for preservation safety. Because `.execution/` is excluded by `generation_baseline/.gitignore`, these files carry an inherent preservation risk if workspace cleaning (`git clean -fdx`) or host teardown occurs. To mitigate this risk, a durable off-tree compressed backup archive was created at `/home/code/backups/generation_baseline_rg10/rg10_historical_execution_backup_20261019.tar.gz` (564 files, SHA-256: `0ad80d800855b0e955a0ac6c51849203079f6719ea9d5e6fb79dd907b05331a0`), and the preservation risk profile was explicitly documented.
+Additionally, the 564 git-ignored historical execution files located in `generation_baseline/.execution/RG10/` were audited for preservation safety. Because `.execution/` is excluded by `generation_baseline/.gitignore` and has never been committed to Git history, these files carry an inherent preservation risk if workspace cleaning (`git clean -fdx`) or host teardown occurs. To mitigate local accidental loss, a standalone off-tree compressed recovery copy was created at `/home/code/backups/generation_baseline_rg10/rg10_historical_execution_backup_20261019.tar.gz` (564 files, SHA-256: `0ad80d800855b0e955a0ac6c51849203079f6719ea9d5e6fb79dd907b05331a0`), and every member file was verified against its authentic SHA-256 digest with 100% hash equivalence. Crucially, because `/home/code/backups/` resides on the same filesystem (`/dev/root`) as the workspace, it is a local recovery copy rather than an off-site, multi-volume durable backup. The ongoing preservation risk is explicitly reported: no verified off-site or external durable backup exists for these untracked files.
 
-With all technical criteria verified, the 564 git-ignored files durably backed up, and post-implementation user sign-off secured, Sprint V2-S01 is formally promoted from **`HOLD`** to **`PASS`**.
+With all technical criteria verified, the 564 git-ignored files archived locally and their preservation risk explicitly documented, and post-implementation user sign-off secured, Sprint V2-S01 is formally promoted from **`HOLD`** to **`PASS`**.
 ---
 
 ## 2. Preflight & Remote Synchronization Audit
@@ -136,7 +136,7 @@ Executed offline package validator in repository root:
 - **Result:** **2015/2015 PASS** (0 failures, 0 issues).
 
 
-### 6.4 Preservation & Durable Backup Audit of 564 Git-Ignored Historical Files
+### 6.4 Preservation Audit & Same-Filesystem Recovery Copy of 564 Git-Ignored Historical Files
 An audit of the 564 git-ignored historical assets in `generation_baseline/.execution/RG10/` was conducted to evaluate durable preservation:
 1. **Inventory Breakdown**:
    - Top-level RG10 execution ledgers and metadata: 13 files
@@ -148,11 +148,14 @@ An audit of the 564 git-ignored historical assets in `generation_baseline/.execu
    - *Git Exclusion*: `generation_baseline/.gitignore` ignores `.execution/`. These 564 files were never committed to any branch in repository history.
    - *Destruction Vulnerability*: Commands such as `git clean -fdx` or container/workspace re-initialization would permanently delete these untracked files.
    - *Cryptographic Anchor*: While `V1_QUARANTINE_MANIFEST.json` records authentic SHA-256 digests and file sizes for all 564 files, the manifest stores only hashes, not file payloads.
-3. **Durable Mitigation Implemented**:
-   - Created standalone off-tree archive: `/home/code/backups/generation_baseline_rg10/rg10_historical_execution_backup_20261019.tar.gz` (904 KB, gzip compressed).
-   - Verified file count in archive: exactly 564 files.
-   - SHA-256 Checksum: `0ad80d800855b0e955a0ac6c51849203079f6719ea9d5e6fb79dd907b05331a0` (recorded in `/home/code/backups/generation_baseline_rg10/checksum.sha256`).
-   - *Residual Risk*: External persistence relies on workstation `/home/code` volume retention; if the entire VM disk is destroyed without volume preservation, host-level backup replication would be required.
+   - *Filesystem Colocation*: `/home/code/backups/` and the repository workspace share the same `/dev/root` mount.
+3. **Local Recovery Mitigation & Archive Verification**:
+   - Created off-tree compressed recovery copy: `/home/code/backups/generation_baseline_rg10/rg10_historical_execution_backup_20261019.tar.gz` (904 KB, gzip compressed).
+   - Archive Integrity Verified: Extracted and hashed every one of the 564 archive member files in-memory; 100% matched `V1_QUARANTINE_MANIFEST.json` and disk SHA-256 digests.
+   - Archive SHA-256 Checksum: `0ad80d800855b0e955a0ac6c51849203079f6719ea9d5e6fb79dd907b05331a0` (recorded in `/home/code/backups/generation_baseline_rg10/checksum.sha256`).
+4. **Explicit Preservation Risk Disclosure**:
+   - This archive is an off-tree **same-filesystem recovery copy**, providing protection against repository-level operations such as `git clean -fdx`.
+   - **No verified off-site or external durable backup exists.** If the workstation host, VM disk, or root volume (`/dev/root`) is terminated or corrupted, these 564 files cannot be recovered from any external repository. Establishing an external remote snapshot remains an explicit operational recommendation.
 ---
 
 ## 7. Deliverables Summary
@@ -182,7 +185,7 @@ $$\mathbf{SPRINT\ V2-S01\ GATE\ DECISION:\ PASS}$$
 ### 8.2 Governance & Approval Gate Criteria (All Satisfied)
 - [x] Dedicated sprint plan `PLAN-V2-S01-QUARANTINE` formally approved by user on 2026-10-19.
 - [x] Sign-off explicitly recorded as **post-implementation user sign-off** (not retroactive pre-implementation approval).
-- [x] 564 git-ignored historical files audited, durably backed up off-tree, and preservation risk documented.
+- [x] 564 git-ignored historical files audited, same-filesystem recovery copy verified, and preservation risk explicitly reported.
 - [x] Re-run verification confirms all 594 files remain byte-for-byte identical.
 
 **Gate Disposition**: **`PASS`**  
