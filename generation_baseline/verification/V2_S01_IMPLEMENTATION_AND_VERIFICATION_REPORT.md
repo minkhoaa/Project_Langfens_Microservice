@@ -98,11 +98,14 @@ In accordance with Sprint V2-S01 instructions, the directory `generation_baselin
    - `dataset_version`: `v2.0.0-candidate`
    - `status`: `INITIALIZED_V1_QUARANTINED`
    - `active_sprint`: `V2-S01`
+   - `sprint_gate_status`: `HOLD`
+   - `approval_evidence`: `NONE_INVENTED`
    - `campaign_ledger_status`: `NOT_GENERATED_PENDING_V2_S06`
    - `invariants`: `zero_historical_mutations=true`, `provider_calls_dispatched=0`, `live_campaign_dispatched=false`, `holdout_gold_inspected=false`.
 2. **`PHASE_STATUS.json`**:
    - `phase_id`: `RQ2_V2`
-   - `sprints`: `{"V2-S01": "PASS", "V2-S02": "NOT_RUN", "V2-S03": "NOT_RUN", "V2-S04": "NOT_RUN", "V2-S05": "NOT_RUN", "V2-S06": "NOT_RUN"}`
+   - `status`: `INITIALIZED_V1_QUARANTINED`
+   - `sprints`: `{"V2-S01": "HOLD", "V2-S02": "NOT_RUN", "V2-S03": "NOT_RUN", "V2-S04": "NOT_RUN", "V2-S05": "NOT_RUN", "V2-S06": "NOT_RUN"}`
    - `campaign_ledger`: `null`
 3. **`README.md`**:
    - Documentation of namespace isolation from historical RG10.
