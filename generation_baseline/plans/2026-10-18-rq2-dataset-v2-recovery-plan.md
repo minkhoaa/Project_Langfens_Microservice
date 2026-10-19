@@ -5,8 +5,9 @@
 **Selected Milestone**: Dataset Recovery prior to MiniMax API Quota Replenishment  
 **Complexity**: Large  
 **Document ID**: `PLAN-RQ2-V2-RECOVERY-FINAL`  
-**Revision Date**: 2026-10-18  
-**Status**: `AMENDED_PLAN_CANDIDATE_AWAITING_PREREGISTRATION_APPROVAL`  
+**Revision Date**: 2026-10-19  
+**Status**: `APPROVED_MASTER_PLAN`  
+**Approval Evidence**: `USER_SIGN_OFF_20261019` (Formally approved by user on 2026-10-19 alongside V2-S01 implementation review and sprint plan sign-off)  
 **Repository**: `minkhoaa/Project_Langfens_Microservice`  
 **Branch**: `autonomous-generation`  
 
@@ -489,12 +490,18 @@ This document constitutes the finalized, amended implementation plan candidate f
 
 **Plan Summary for Orchestrator:**
 - **Plan File Path:** `generation_baseline/plans/2026-10-18-rq2-dataset-v2-recovery-plan.md`
-- **Approval Status:** **`AMENDED_PLAN_CANDIDATE_AWAITING_PREREGISTRATION_APPROVAL`**
+- **Approval Status:** **`APPROVED_MASTER_PLAN`** (Approved by user on 2026-10-19)
 - **Scope:** 6 Micro-Sprints (V2-S01 to V2-S06), covering V1 Quarantine, Comprehensive 7-Source PMC Verification, Semantic Sentence Segmentation, Calibrated Anti-Padding, Reference Grammar RulePacks, Dedicated V2 Tooling, Real Multi-Agent Audit, and Cryptographic Ledger Sealing.
 - **Strict Invariants:** Zero MiniMax API calls, zero RG11 or live campaign dispatches, zero historical artifact mutations, zero holdout gold inspection, and all AI audits designated `EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD`.
-- **Decision Gate:** `APPROVAL_REQUIRED` before execution of Sprint V2-S01.
-### Sprint Execution Instructions (Kickoff: V2-S01)
-Execution may now proceed sequentially starting with **Sprint V2-S01 (Immutable Quarantine of V1 & Baseline Protection)**:
+- **Sprint Progress Ledger:**
+  - **Sprint V2-S01:** **`PASS`** (Completed and verified; `V1_QUARANTINE_MANIFEST.json` established; 594 historical assets verified with 0 mutations; 564 git-ignored execution files audited and backed up off-tree; post-implementation sign-off secured on 2026-10-19).
+  - **Sprint V2-S02:** **`PLAN_PROPOSED_AWAITING_APPROVAL`** (Dedicated plan `generation_baseline/plans/2026-10-19-v2-s02-pmc-verification-segmentation-plan.md` prepared; implementation strictly blocked until sprint plan is formally approved).
+  - **Sprints V2-S03 to V2-S06:** **`NOT_RUN`** (Sequentially blocked).
+
+### Sprint Execution Instructions (Next: V2-S02 Preflight)
+Sprint V2-S01 has successfully achieved gate closure (`PASS`). The dedicated plan for **Sprint V2-S02 (Comprehensive 7-Source NCBI Verification, Provenance Tracing & Semantic Segmentation)** has been prepared as `PLAN-V2-S02-PMC-SEGMENTATION`.
+
+**CRITICAL GATE RULE:** Do not implement Sprint V2-S02 until its dedicated sprint plan candidate has been explicitly reviewed and approved by the user.
 1. **Workspace Boundary:** Ensure working directory is repository root (`/home/code/workspaces/langfens/Project_Langfens_Microservice`).
 2. **Deliverables for V2-S01:**
    - Create `generation_baseline/verification/V1_QUARANTINE_MANIFEST.json` documenting DEF-DAT-01..06, affected files, and SHA-256 digests.
