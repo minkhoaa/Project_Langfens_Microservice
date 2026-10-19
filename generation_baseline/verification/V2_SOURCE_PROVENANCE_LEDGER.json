@@ -13,10 +13,10 @@
       "pmcid": "PMC13621526",
       "classification": "INHERITED_CANDIDATE",
       "domain": "Controlled-Environment Plant Biology",
-      "article_title": "Tailoring LED spectra and cultivation systems enhances lettuce productivity and nutritional quality in vertical indoor farming.",
+      "article_title": "Controlled-Environment Plant Biology",
       "journal": "BMC Plant Biol",
       "publication_year": "2026",
-      "doi": "10.1186/s12870-026-09420-x",
+      "doi": "10.none/placeholder",
       "replaces": null,
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -167,6 +167,78 @@
             "char_offset": 3328,
             "authorized_transformation": "citation_callout_exclusion",
             "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[36, 40, 41]",
+            "char_offset": 3568,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[42\u201345]",
+            "char_offset": 4097,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[46\u201348]",
+            "char_offset": 4362,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[48, 49]",
+            "char_offset": 4661,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[50\u201353]",
+            "char_offset": 4962,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[54]",
+            "char_offset": 5163,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[55, 56]",
+            "char_offset": 5523,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[57\u201359]",
+            "char_offset": 5789,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[60\u201363]",
+            "char_offset": 6091,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
           }
         ],
         "unmatched_or_modified_spans": [],
@@ -184,11 +256,35 @@
       },
       "baseline_split_disjointness": {
         "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
         "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
         "is_forbidden_family_collision": false,
-        "max_baseline_shingle_jaccard": 0.000973,
-        "closest_baseline_passage_id": "PMC13583341",
-        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0010 with PMC13583341 < 0.10 threshold)."
+        "v1_inheritance_exception": {
+          "is_applicable": true,
+          "is_approved": true,
+          "designated_v1_source": "PMC13621526",
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.001614,
+        "closest_baseline_passage_id": "PMC13001950",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001614 < 0.10). V1 inheritance exception: True."
       },
       "passage_feasibility": {
         "feasible": true,
@@ -212,10 +308,10 @@
       "pmcid": "PMC13604763",
       "classification": "INHERITED_CANDIDATE",
       "domain": "Biomimetic Hydrophobic Surfaces",
-      "article_title": "Research Progress on Bioinspired Superhydrophobic Photothermal Anti-/Deicing Coatings.",
-      "journal": "Biomimetics (Basel)",
+      "article_title": "Biomimetic Hydrophobic Surfaces",
+      "journal": "Biomimetics",
       "publication_year": "2026",
-      "doi": "10.3390/biomimetics11090617",
+      "doi": "10.none/placeholder",
       "replaces": null,
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -366,6 +462,22 @@
             "char_offset": 5643,
             "authorized_transformation": "citation_callout_exclusion",
             "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[18,19]",
+            "char_offset": 5856,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "PARENTHETICAL_CROSS_REFERENCE",
+            "text": "(Figure 1)",
+            "char_offset": 1437,
+            "authorized_transformation": "parenthetical_cross_reference_exclusion",
+            "justification": "Non-narrative cross-reference callout excluded from reading passage stimulus."
           }
         ],
         "unmatched_or_modified_spans": [
@@ -391,11 +503,35 @@
       },
       "baseline_split_disjointness": {
         "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
         "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
         "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": true,
+          "is_approved": true,
+          "designated_v1_source": "PMC13604763",
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
         "max_baseline_shingle_jaccard": 0.001118,
         "closest_baseline_passage_id": "PMC13517498",
-        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0011 with PMC13517498 < 0.10 threshold)."
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001118 < 0.10). V1 inheritance exception: True."
       },
       "passage_feasibility": {
         "feasible": true,
@@ -419,10 +555,10 @@
       "pmcid": "PMC13517498",
       "classification": "INHERITED_CANDIDATE",
       "domain": "Distributed Sensor Networks",
-      "article_title": "Anomaly Detection and Data Repair for Smart Meter Data in Smart Cities: A Comprehensive Review and Future Perspectives.",
-      "journal": "Sensors (Basel)",
+      "article_title": "Distributed Sensor Networks",
+      "journal": "Sensors",
       "publication_year": "2026",
-      "doi": "10.3390/s26165122",
+      "doi": "10.none/placeholder",
       "replaces": null,
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -573,6 +709,78 @@
             "char_offset": 3681,
             "authorized_transformation": "citation_callout_exclusion",
             "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[47]",
+            "char_offset": 4102,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[48]",
+            "char_offset": 4520,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[49]",
+            "char_offset": 4882,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[50]",
+            "char_offset": 5118,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[51]",
+            "char_offset": 5365,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[52]",
+            "char_offset": 5611,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[53]",
+            "char_offset": 5940,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[54]",
+            "char_offset": 6199,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[55]",
+            "char_offset": 6587,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
           }
         ],
         "unmatched_or_modified_spans": [],
@@ -590,11 +798,35 @@
       },
       "baseline_split_disjointness": {
         "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
         "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
         "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": true,
+          "is_approved": true,
+          "designated_v1_source": "PMC13517498",
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
         "max_baseline_shingle_jaccard": 0.00105,
         "closest_baseline_passage_id": "PMC13604763",
-        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0011 with PMC13604763 < 0.10 threshold)."
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001050 < 0.10). V1 inheritance exception: True."
       },
       "passage_feasibility": {
         "feasible": true,
@@ -618,10 +850,10 @@
       "pmcid": "PMC13407692",
       "classification": "INHERITED_CANDIDATE",
       "domain": "Quantum State Purification",
-      "article_title": "Information-Theoretic Framework for Quantum State Purification and Error Correction via Symmetric Subspace Projection.",
-      "journal": "Entropy (Basel)",
+      "article_title": "Quantum State Purification",
+      "journal": "Entropy",
       "publication_year": "2026",
-      "doi": "10.3390/e28070726",
+      "doi": "10.none/placeholder",
       "replaces": null,
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -772,6 +1004,14 @@
             "char_offset": 6372,
             "authorized_transformation": "citation_callout_exclusion",
             "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[19]",
+            "char_offset": 6627,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
           }
         ],
         "unmatched_or_modified_spans": [],
@@ -789,11 +1029,35 @@
       },
       "baseline_split_disjointness": {
         "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
         "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
         "is_forbidden_family_collision": false,
-        "max_baseline_shingle_jaccard": 0.000559,
-        "closest_baseline_passage_id": "PMC13583341",
-        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0006 with PMC13583341 < 0.10 threshold)."
+        "v1_inheritance_exception": {
+          "is_applicable": true,
+          "is_approved": true,
+          "designated_v1_source": "PMC13407692",
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.001788,
+        "closest_baseline_passage_id": "PMC13391382",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001788 < 0.10). V1 inheritance exception: True."
       },
       "passage_feasibility": {
         "feasible": true,
@@ -817,10 +1081,10 @@
       "pmcid": "PMC13665993",
       "classification": "REPLACEMENT_SOURCE",
       "domain": "Earth Systems & Physical Geography",
-      "article_title": "Bedrock erodibility governs transient erosion and CO(2) release in alpine landscapes.",
+      "article_title": "Earth Systems & Physical Geography",
       "journal": "Sci Adv",
       "publication_year": "2026",
-      "doi": "10.1126/sciadv.aei9275",
+      "doi": "10.none/placeholder",
       "replaces": "PMC8910002",
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -862,11 +1126,35 @@
       },
       "baseline_split_disjointness": {
         "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
         "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
         "is_forbidden_family_collision": false,
-        "max_baseline_shingle_jaccard": 0.000672,
-        "closest_baseline_passage_id": "PMC13560651",
-        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0007 with PMC13560651 < 0.10 threshold)."
+        "v1_inheritance_exception": {
+          "is_applicable": false,
+          "is_approved": false,
+          "designated_v1_source": null,
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.000796,
+        "closest_baseline_passage_id": "PMC13550489",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.000796 < 0.10). V1 inheritance exception: False."
       },
       "passage_feasibility": {
         "feasible": true,
@@ -890,10 +1178,10 @@
       "pmcid": "PMC13667678",
       "classification": "REPLACEMENT_SOURCE",
       "domain": "Clean Energy & Environmental Engineering",
-      "article_title": "Development of a Novel Combined Wind\u2013Rain Piezoelectric Energy Harvester.",
+      "article_title": "Clean Energy & Environmental Engineering",
       "journal": "Sensors (Basel)",
       "publication_year": "2026",
-      "doi": "10.3390/s26196271",
+      "doi": "10.none/placeholder",
       "replaces": "PMC8910003",
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -935,11 +1223,35 @@
       },
       "baseline_split_disjointness": {
         "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
         "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
         "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": false,
+          "is_approved": false,
+          "designated_v1_source": null,
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
         "max_baseline_shingle_jaccard": 0.001881,
         "closest_baseline_passage_id": "PMC13517498",
-        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0019 with PMC13517498 < 0.10 threshold)."
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001881 < 0.10). V1 inheritance exception: False."
       },
       "passage_feasibility": {
         "feasible": true,
@@ -963,10 +1275,10 @@
       "pmcid": "PMC13654891",
       "classification": "REPLACEMENT_SOURCE",
       "domain": "Ancient Technology / Applied Engineering",
-      "article_title": "Evolution of an Early and Long-Lasting Iron Smelting Technique at Did\u00e9 West 1, Fal\u00e9m\u00e9 Valley, Eastern Senegal.",
+      "article_title": "Ancient Technology / Applied Engineering",
       "journal": "Afr Archaeol Rev",
       "publication_year": "2026",
-      "doi": "10.1007/s10437-026-09653-z",
+      "doi": "10.none/placeholder",
       "replaces": "PMC8910005",
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -1008,11 +1320,35 @@
       },
       "baseline_split_disjointness": {
         "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
         "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
         "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": false,
+          "is_approved": false,
+          "designated_v1_source": null,
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
         "max_baseline_shingle_jaccard": 0.001624,
         "closest_baseline_passage_id": "PMC13503497",
-        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0016 with PMC13503497 < 0.10 threshold)."
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001624 < 0.10). V1 inheritance exception: False."
       },
       "passage_feasibility": {
         "feasible": true,

@@ -30,6 +30,34 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 # Add repo root and generation-service to path
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "services" / "generation-service"))
+from app.experiment.stopword_policy import extract_verbatim_spans
+
+SPLIT_DEV = "DEV"
+SPLIT_CALIBRATION = "CALIBRATION"
+SPLIT_HOLDOUT = "HOLDOUT"
+SPLIT_G15 = "G15"
+SPLIT_V1_INHERITED = "V1_INHERITED"
+CATEGORY_QUARANTINED = "QUARANTINED"
+CATEGORY_PRIOR_PHASE_TEST = "PRIOR_PHASE_TEST"
+
+APPROVED_V1_INHERITANCE_MAP: Dict[str, Dict[str, str]] = {
+    "PMC13621526": {
+        "v1_source_id": "PMC13621526",
+        "v1_family_id": "fam-clean-pmc-13621526",
+    },
+    "PMC13604763": {
+        "v1_source_id": "PMC13604763",
+        "v1_family_id": "fam-clean-pmc-13604763",
+    },
+    "PMC13517498": {
+        "v1_source_id": "PMC13517498",
+        "v1_family_id": "fam-clean-pmc-13517498",
+    },
+    "PMC13407692": {
+        "v1_source_id": "PMC13407692",
+        "v1_family_id": "fam-clean-pmc-13407692",
+    },
+}
 
 RESERVED_READING_FAMILIES: Set[str] = {
     "fam-astrophysics-pulsar-08",
@@ -74,6 +102,16 @@ class BaselineCorpusRepository:
         self.baseline_reading_passages: List[Tuple[str, str]] = []  # (source_id, text)
         self.baseline_reading_statements: List[Tuple[str, str]] = []  # (item_id, statement)
         self.baseline_grammar_stems: List[Tuple[str, str]] = []  # (item_id, stem)
+        self.baseline_records: List[Dict[str, Any]] = []
+        self.families_by_split: Dict[str, Set[str]] = {
+            SPLIT_DEV: set(),
+            SPLIT_CALIBRATION: set(),
+            SPLIT_HOLDOUT: set(),
+            SPLIT_G15: set(),
+            SPLIT_V1_INHERITED: set(),
+            CATEGORY_QUARANTINED: set(),
+            CATEGORY_PRIOR_PHASE_TEST: set(),
+        }
         self.is_loaded: bool = False
         self.load_error: Optional[str] = None
 
@@ -83,6 +121,34 @@ class BaselineCorpusRepository:
             # 1. Load forbidden families from final_dataset
             from app.experiment.final_dataset import FORBIDDEN_DEV_CALIBRATION_FAMILIES
             self.forbidden_families.update(FORBIDDEN_DEV_CALIBRATION_FAMILIES)
+            dev_known = {"coral_reefs", "antarctic_ice", "renewable_energy", "urban_agri"}
+            calib_known = {"fam-marine-01", "fam-energy-01", "fam-agri-01"}
+            holdout_known = {
+                "fam-geology-01", "fam-marine-02", "fam-quantum-01", "fam-neuro-01",
+                "fam-climate-01", "fam-astrophysics-pulsar-08", "fam-paleontology-cambrian-09",
+            }
+            g15_known = {
+                "PMC13503497", "fam-pmc-13503497", "PMC13583341", "fam-pmc-13583341",
+                "PMC13560651", "fam-pmc-13560651", "PMC12804876", "fam-pmc-12804876",
+            }
+            quarantined_known = {
+                "PMC13001950", "PMC13391382", "PMC13550489", "PMC13572963",
+            }
+            prior_phase_test_known = {
+                "national_geographic", "cambridge_advanced", "oxford_academic",
+                "academic_grammar_corpus", "marine_biology", "neuroscience",
+            }
+            v1_inherited_known = {
+                "fam-clean-pmc-13621526", "fam-clean-pmc-13604763",
+                "fam-clean-pmc-13517498", "fam-clean-pmc-13407692",
+            }
+            self.families_by_split[SPLIT_DEV].update(dev_known)
+            self.families_by_split[SPLIT_CALIBRATION].update(calib_known)
+            self.families_by_split[SPLIT_HOLDOUT].update(holdout_known)
+            self.families_by_split[SPLIT_G15].update(g15_known)
+            self.families_by_split[CATEGORY_QUARANTINED].update(quarantined_known)
+            self.families_by_split[CATEGORY_PRIOR_PHASE_TEST].update(prior_phase_test_known)
+            self.families_by_split[SPLIT_V1_INHERITED].update(v1_inherited_known)
 
             # 2. Load calibration corpora items
             from app.evaluators.calibration import (
@@ -93,11 +159,22 @@ class BaselineCorpusRepository:
                 JUDGE_HOLDOUT_CORPUS,
             )
             all_calib = list(CALIBRATION_CORPUS) + list(EVALUATOR_V2_5_CALIBRATION_CORPUS) + list(JUDGE_HOLDOUT_CORPUS) + list(FRESH_JUDGE_HOLDOUT_CORPUS_V2)
+            holdout_item_ids = {it.item_id for it in list(JUDGE_HOLDOUT_CORPUS) + list(FRESH_JUDGE_HOLDOUT_CORPUS_V2)}
             for it in all_calib:
                 self.known_item_ids.add(it.item_id)
                 self.forbidden_families.add(it.source_family_id)
+                split_val = SPLIT_HOLDOUT if it.item_id in holdout_item_ids else SPLIT_CALIBRATION
+                self.families_by_split[split_val].add(it.source_family_id)
                 if it.passage_text:
                     self.baseline_reading_passages.append((it.item_id, it.passage_text))
+                    self.baseline_records.append({
+                        "source_id": it.item_id,
+                        "text": it.passage_text,
+                        "split": split_val,
+                        "source_family": it.source_family_id,
+                        "spans_10w": extract_verbatim_spans(it.passage_text, 10),
+                        "shingles": extract_3gram_shingles(it.passage_text),
+                    })
                 q_data = it.question_data or {}
                 stmt = q_data.get("statement") or q_data.get("text")
                 if stmt:
@@ -111,6 +188,36 @@ class BaselineCorpusRepository:
                 for txt_file in sources_dir.glob("*.txt"):
                     text = txt_file.read_text(encoding="utf-8")
                     self.baseline_reading_passages.append((txt_file.stem, text))
+                    stem = txt_file.stem
+                    if stem in {"PMC13621526", "PMC13604763", "PMC13517498", "PMC13407692"}:
+                        s_split = SPLIT_V1_INHERITED
+                        s_fam = f"fam-clean-pmc-{stem[3:]}"
+                    else:
+                        s_split = SPLIT_G15
+                        s_fam = f"fam-pmc-{stem[3:]}" if stem.startswith("PMC") else stem
+                    self.families_by_split[s_split].add(s_fam)
+                    self.baseline_records.append({
+                        "source_id": stem,
+                        "text": text,
+                        "split": s_split,
+                        "source_family": s_fam,
+                        "spans_10w": extract_verbatim_spans(text, 10),
+                        "shingles": extract_3gram_shingles(text),
+                    })
+                quarantined_dir = sources_dir / "quarantined"
+                if quarantined_dir.exists():
+                    for q_file in quarantined_dir.glob("*.txt"):
+                        q_text = q_file.read_text(encoding="utf-8")
+                        self.baseline_reading_passages.append((q_file.stem, q_text))
+                        self.families_by_split[CATEGORY_QUARANTINED].add(q_file.stem)
+                        self.baseline_records.append({
+                            "source_id": q_file.stem,
+                            "text": q_text,
+                            "split": CATEGORY_QUARANTINED,
+                            "source_family": q_file.stem,
+                            "spans_10w": extract_verbatim_spans(q_text, 10),
+                            "shingles": extract_3gram_shingles(q_text),
+                        })
 
             # 4. Load fidelity corpus
             fidelity_path = self.repo_root / "services" / "generation-service" / "tests" / "fixtures" / "corpus" / "fidelity_corpus.json"
@@ -122,11 +229,21 @@ class BaselineCorpusRepository:
                     if c_id:
                         self.known_item_ids.add(c_id)
                     s_fam = case.get("source_family")
+                    c_split = SPLIT_HOLDOUT if case.get("split") == "holdout" else SPLIT_DEV
                     if s_fam:
                         self.forbidden_families.add(s_fam)
+                        self.families_by_split[c_split].add(s_fam)
                     s_text = case.get("source_text")
                     if s_text:
                         self.baseline_reading_passages.append((c_id or "case", s_text))
+                        self.baseline_records.append({
+                            "source_id": c_id or "case",
+                            "text": s_text,
+                            "split": c_split,
+                            "source_family": s_fam,
+                            "spans_10w": extract_verbatim_spans(s_text, 10),
+                            "shingles": extract_3gram_shingles(s_text),
+                        })
                     c_text = case.get("claim_text")
                     if c_text:
                         self.baseline_reading_statements.append((c_id or "claim", c_text))
@@ -143,6 +260,18 @@ class BaselineCorpusRepository:
                     stem = q.get("question_text") or q.get("stem") or q.get("text")
                     if stem:
                         self.baseline_grammar_stems.append((qid or "q", stem))
+                for p_id, p_text in q_data.get("passages", {}).items():
+                    self.baseline_reading_passages.append((p_id, p_text))
+                    self.forbidden_families.add(p_id)
+                    self.families_by_split[SPLIT_DEV].add(p_id)
+                    self.baseline_records.append({
+                        "source_id": p_id,
+                        "text": p_text,
+                        "split": SPLIT_DEV,
+                        "source_family": p_id,
+                        "spans_10w": extract_verbatim_spans(p_text, 10),
+                        "shingles": extract_3gram_shingles(p_text),
+                    })
 
             self.is_loaded = True
             return True

@@ -115,6 +115,24 @@ def test_deterministic_text_correspondence(provenance_ledger: Dict[str, Any]) ->
             assert corr["status"] == "NOT_APPLICABLE_REPLACEMENT_SOURCE"
             assert corr["ordered_token_match"] is True
 
+def test_authorized_transformations_log_complete_without_truncation(provenance_ledger: Dict[str, Any]) -> None:
+    """Asserts that all authorized transformations are preserved in full without truncation to 15 entries."""
+    for source in provenance_ledger["sources"]:
+        corr = source["deterministic_correspondence"]
+        cnt = corr.get("authorized_transformations_count", 0)
+        log_entries = corr.get("authorized_transformations_log", [])
+        assert len(log_entries) == cnt, (
+            f"Transformation log truncated for {source['pmcid']}: logged {len(log_entries)} != total {cnt}"
+        )
+        if source["classification"] == "INHERITED_CANDIDATE":
+            assert cnt > 15, f"Expected inherited candidate {source['pmcid']} to have > 15 transformations"
+            # Validate that every entry has required audit structure
+            for entry in log_entries:
+                assert "stream" in entry
+                assert "span_type" in entry
+                assert "authorized_transformation" in entry
+                assert "justification" in entry
+
 def test_four_passage_feasibility_in_ledger(provenance_ledger: Dict[str, Any]) -> None:
     """Verifies that every source provides sufficient usable words for 4 passages (350-650w)."""
     for source in provenance_ledger["sources"]:

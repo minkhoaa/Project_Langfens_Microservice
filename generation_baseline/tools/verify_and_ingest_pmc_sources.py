@@ -38,6 +38,7 @@ from app.experiment.stopword_policy import (
     tokenize_raw_words,
 )
 from generation_baseline.tools.check_corpus_disjointness import (
+    APPROVED_V1_INHERITANCE_MAP,
     BaselineCorpusRepository,
     RESERVED_READING_FAMILIES,
     jaccard_similarity,
@@ -406,7 +407,7 @@ def verify_deterministic_correspondence(
             "start_token_index": matched_idx,
             "matched_token_count": n_f,
             "authorized_transformations_count": len(authorized_transformations),
-            "authorized_transformations_log": authorized_transformations[:15],
+            "authorized_transformations_log": authorized_transformations,
             "unmatched_or_modified_spans": [],
             "diagnostics": f"Exact contiguous ordered sequence match: 100% of {n_f} narrative tokens align at index {matched_idx}. {len(authorized_transformations)} authorized transformations audited.",
         }
@@ -442,7 +443,7 @@ def verify_deterministic_correspondence(
                     "start_token_index": 0,
                     "matched_token_count": total_narrative,
                     "authorized_transformations_count": len(authorized_transformations),
-                    "authorized_transformations_log": authorized_transformations[:15],
+                    "authorized_transformations_log": authorized_transformations,
                     "unmatched_or_modified_spans": [
                         {
                             "span_type": "EMBEDDED_FIGURE_CAPTION",
@@ -470,7 +471,7 @@ def verify_deterministic_correspondence(
         "clean_fixture_token_count": n_f,
         "unmatched_or_modified_spans": [{"unauthorized_mismatch_count": len(mismatches), "first_3": mismatches[:3]}],
         "authorized_transformations_count": len(authorized_transformations),
-        "authorized_transformations_log": authorized_transformations[:15],
+        "authorized_transformations_log": authorized_transformations,
         "diagnostics": f"Ordered token correspondence failed closed with {len(mismatches)} unlisted mismatches.",
     }
 
@@ -597,41 +598,159 @@ def check_baseline_split_disjointness(
     candidate_family_id: str,
     clean_text: str,
     repo: BaselineCorpusRepository,
+    classification: str = "INHERITED_CANDIDATE",
 ) -> Dict[str, Any]:
-    """Validates source-family and lexical disjointness against DEV, CALIBRATION, HOLDOUT, and G15 baseline evidence."""
-    is_reserved_holdout = candidate_family_id in RESERVED_READING_FAMILIES
-    is_forbidden_family = candidate_family_id in repo.forbidden_families
+    """Validates source-family and lexical disjointness against DEV, CALIBRATION, HOLDOUT, and G15 baseline splits.
 
-    shingles = extract_raw_3grams(clean_text)
+    Enforces:
+    1. Source-family overlap audit by actual dataset split, rejecting genuine DEV, CALIBRATION, HOLDOUT, and G15 leakage.
+    2. Preservation of the approved V1 source-inheritance exception for inherited candidates while rejecting cross-source V1 collisions.
+    3. Cross-split zero shared 10-word span assertion against all DEV, CALIBRATION, HOLDOUT, and G15 passages.
+    4. Maximum 3-gram shingle Jaccard similarity < 0.10.
+    """
+    dev_fams = repo.families_by_split.get("DEV", set())
+    calib_fams = repo.families_by_split.get("CALIBRATION", set())
+    holdout_fams = repo.families_by_split.get("HOLDOUT", set()) | RESERVED_READING_FAMILIES
+    g15_fams = repo.families_by_split.get("G15", set())
+    quarantined_fams = repo.families_by_split.get("QUARANTINED", set())
+    prior_phase_fams = repo.families_by_split.get("PRIOR_PHASE_TEST", set())
+    v1_fams = repo.families_by_split.get("V1_INHERITED", set())
+
+    # 1. Family-level checks by split / category
+    is_dev_collision = candidate_family_id in dev_fams or any(f in candidate_family_id for f in dev_fams)
+    is_calib_collision = candidate_family_id in calib_fams or any(f in candidate_family_id for f in calib_fams)
+    is_holdout_collision = candidate_family_id in holdout_fams or any(f in candidate_family_id for f in holdout_fams)
+    is_g15_collision = candidate_family_id in g15_fams or any(f in candidate_family_id for f in g15_fams)
+    is_quarantined_collision = candidate_family_id in quarantined_fams or any(f in candidate_family_id for f in quarantined_fams)
+    is_prior_phase_collision = candidate_family_id in prior_phase_fams or any(f in candidate_family_id for f in prior_phase_fams)
+    v1_inheritance_applied = False
+    is_v1_cross_collision = False
+    designated_v1 = APPROVED_V1_INHERITANCE_MAP.get(candidate_pmcid)
+
+    if classification == "INHERITED_CANDIDATE":
+        if designated_v1:
+            v1_inheritance_applied = True
+            other_v1_fams = {f for f in v1_fams if f != designated_v1["v1_family_id"]}
+            if candidate_family_id in other_v1_fams or any(f in candidate_family_id for f in other_v1_fams):
+                is_v1_cross_collision = True
+    else:
+        if candidate_family_id in v1_fams or any(f in candidate_family_id for f in v1_fams):
+            is_v1_cross_collision = True
+
+    # 2. Cross-split zero shared 10-word span assertion & shingle similarity
+    candidate_spans_10w = extract_verbatim_spans(clean_text, span_length=10)
+    candidate_shingles = extract_raw_3grams(clean_text)
+
+    shared_10w_collisions: List[Dict[str, Any]] = []
+    jaccard_violations: List[Dict[str, Any]] = []
     max_sim = 0.0
     max_baseline_id = None
 
-    for b_id, b_text in repo.baseline_reading_passages:
-        if b_id in candidate_pmcid or candidate_pmcid in b_id:
-            continue
-        b_shingles = extract_raw_3grams(b_text)
-        sim = jaccard_similarity(shingles, b_shingles)
+    for record in repo.baseline_records:
+        r_split = record["split"]
+        r_id = record["source_id"]
+
+        # Approved V1 source-inheritance exception
+        if classification == "INHERITED_CANDIDATE" and designated_v1 and r_split == "V1_INHERITED":
+            if r_id == designated_v1["v1_source_id"]:
+                continue
+
+        # For all other passages across DEV, CALIBRATION, HOLDOUT, G15, or non-counterpart V1:
+        r_10w = record["spans_10w"]
+        shared_10w = candidate_spans_10w & r_10w
+        if shared_10w:
+            shared_10w_collisions.append({
+                "split": r_split,
+                "source_id": r_id,
+                "shared_spans_count": len(shared_10w),
+                "sample_spans": sorted(list(shared_10w))[:3],
+            })
+
+        sim = jaccard_similarity(candidate_shingles, record["shingles"])
         if sim > max_sim:
             max_sim = sim
-            max_baseline_id = b_id
+            max_baseline_id = r_id
+        if sim >= 0.10:
+            jaccard_violations.append({
+                "split": r_split,
+                "source_id": r_id,
+                "sim": round(sim, 6),
+            })
 
-    disjoint_ok = (
-        (not is_reserved_holdout)
-        and (not is_forbidden_family)
-        and (max_sim < 0.10)
+    has_leakage = (
+        is_dev_collision
+        or is_calib_collision
+        or is_holdout_collision
+        or is_g15_collision
+        or is_quarantined_collision
+        or is_prior_phase_collision
+        or is_v1_cross_collision
+        or len(shared_10w_collisions) > 0
+        or len(jaccard_violations) > 0
+        or max_sim >= 0.10
     )
+    status = "FAIL" if has_leakage else "PASS"
+
+    issues: List[str] = []
+    if is_dev_collision:
+        issues.append(f"Genuine DEV family collision detected: {candidate_family_id}")
+    if is_calib_collision:
+        issues.append(f"Genuine CALIBRATION family collision detected: {candidate_family_id}")
+    if is_holdout_collision:
+        issues.append(f"Genuine HOLDOUT family collision detected: {candidate_family_id}")
+    if is_g15_collision:
+        issues.append(f"Genuine G15 family collision detected: {candidate_family_id}")
+    if is_quarantined_collision:
+        issues.append(f"Forbidden quarantined family collision detected: {candidate_family_id}")
+    if is_prior_phase_collision:
+        issues.append(f"Forbidden prior phase test family collision detected: {candidate_family_id}")
+    if is_v1_cross_collision:
+        issues.append(f"Unapproved V1 cross-source collision detected: {candidate_family_id}")
+    if shared_10w_collisions:
+        issues.append(
+            f"Cross-split 10-word span collisions detected with {len(shared_10w_collisions)} baseline passages: {shared_10w_collisions[:2]}"
+        )
+    if jaccard_violations:
+        issues.append(f"Cross-split Jaccard similarity >= 0.10 threshold: {jaccard_violations[:2]}")
 
     return {
-        "status": "PASS" if disjoint_ok else "FAIL",
-        "is_reserved_holdout_collision": is_reserved_holdout,
-        "is_forbidden_family_collision": is_forbidden_family,
+        "status": status,
+        "is_dev_collision": is_dev_collision,
+        "is_calib_collision": is_calib_collision,
+        "is_reserved_holdout_collision": is_holdout_collision,
+        "is_g15_collision": is_g15_collision,
+        "is_quarantined_collision": is_quarantined_collision,
+        "is_prior_phase_collision": is_prior_phase_collision,
+        "is_forbidden_family_collision": (
+            is_dev_collision
+            or is_calib_collision
+            or is_holdout_collision
+            or is_g15_collision
+            or is_quarantined_collision
+            or is_prior_phase_collision
+        ),
+        "v1_inheritance_exception": {
+            "is_applicable": classification == "INHERITED_CANDIDATE",
+            "is_approved": v1_inheritance_applied,
+            "designated_v1_source": designated_v1["v1_source_id"] if designated_v1 else None,
+            "cross_source_v1_collision": is_v1_cross_collision,
+        },
+        "zero_shared_10word_spans": len(shared_10w_collisions) == 0,
+        "shared_10word_span_collisions_count": len(shared_10w_collisions),
+        "shared_10word_span_collisions": shared_10w_collisions,
         "max_baseline_shingle_jaccard": round(max_sim, 6),
         "closest_baseline_passage_id": max_baseline_id,
+        "split_counts": {
+            s: sum(1 for r in repo.baseline_records if r["split"] == s)
+            for s in ("DEV", "CALIBRATION", "HOLDOUT", "G15", "V1_INHERITED", "QUARANTINED", "PRIOR_PHASE_TEST")
+        },
+        "issues": issues,
         "diagnostics": (
-            f"Verified disjoint from all {len(repo.baseline_reading_passages)} baseline passages "
-            f"(max Jaccard={max_sim:.4f} with {max_baseline_id} < 0.10 threshold)."
-            if disjoint_ok
-            else f"Baseline disjointness failed (holdout_coll={is_reserved_holdout}, max_sim={max_sim:.4f})."
+            f"Verified disjoint from all {len(repo.baseline_records)} baseline passages across "
+            f"DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard={max_sim:.6f} < 0.10). "
+            f"V1 inheritance exception: {v1_inheritance_applied}."
+            if status == "PASS"
+            else f"Baseline disjointness failed: {'; '.join(issues)}"
         ),
     }
 
@@ -720,7 +839,7 @@ def process_source(
     baseline_disjointness = {"status": "SKIPPED_NO_REPO"}
     if baseline_repo:
         baseline_disjointness = check_baseline_split_disjointness(
-            pmcid, family_id, clean_text, baseline_repo
+            pmcid, family_id, clean_text, baseline_repo, classification=classification
         )
 
     # Passage extraction feasibility check
@@ -858,6 +977,8 @@ def main() -> int:
                 )
             if record.get("baseline_split_disjointness", {}).get("status") == "FAIL":
                 failures.append(f"{record['pmcid']}: Baseline split disjointness failed.")
+            if not record.get("baseline_split_disjointness", {}).get("zero_shared_10word_spans", True):
+                failures.append(f"{record['pmcid']}: Cross-split 10-word span collision detected.")
             if not record["passage_feasibility"]["feasible"]:
                 failures.append(
                     f"{record['pmcid']}: 4-passage feasibility failed ({record['passage_feasibility']['error']})."

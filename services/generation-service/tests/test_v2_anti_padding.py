@@ -294,25 +294,223 @@ def test_negative_reject_injected_forbidden_title_production_validator(
 def test_genuine_baseline_split_disjointness_all_seven_sources(
     provenance_ledger: Dict[str, Any], baseline_repo: BaselineCorpusRepository
 ) -> None:
-    """Validates disjointness against all available DEV, CALIBRATION, HOLDOUT, G15 baseline evidence."""
-    assert len(baseline_repo.baseline_reading_passages) >= 80, "Expected >= 80 baseline passages loaded."
+    """Validates split-based disjointness and zero shared 10-word spans against 93 excluded + 4 permitted V1 (97 total)."""
+    assert len(baseline_repo.baseline_reading_passages) == 97, f"Expected 97 passages, got {len(baseline_repo.baseline_reading_passages)}"
+    assert len(baseline_repo.baseline_records) == 97, f"Expected 97 records, got {len(baseline_repo.baseline_records)}"
     assert len(baseline_repo.forbidden_families) >= 70, "Expected >= 70 forbidden families loaded."
-
     for src in provenance_ledger["sources"]:
         pmcid = src["pmcid"]
         family_id = src["family_id"]
+        classification = src.get("classification", "INHERITED_CANDIDATE")
         txt_path = V2_SOURCES_DIR / f"{pmcid}.txt"
         assert txt_path.exists()
         clean_text = txt_path.read_text(encoding="utf-8")
 
-        result = check_baseline_split_disjointness(pmcid, family_id, clean_text, baseline_repo)
+        result = check_baseline_split_disjointness(
+            pmcid, family_id, clean_text, baseline_repo, classification=classification
+        )
         assert result["status"] == "PASS", f"Baseline disjointness failed for {pmcid}: {result['diagnostics']}"
+        assert result["is_dev_collision"] is False
+        assert result["is_calib_collision"] is False
         assert result["is_reserved_holdout_collision"] is False
+        assert result["is_g15_collision"] is False
+        assert result["is_quarantined_collision"] is False
+        assert result["is_prior_phase_collision"] is False
         assert result["is_forbidden_family_collision"] is False
+        assert result["zero_shared_10word_spans"] is True, f"Found shared 10-word spans in {pmcid}: {result['shared_10word_span_collisions']}"
+        assert result["shared_10word_span_collisions_count"] == 0
         assert result["max_baseline_shingle_jaccard"] < 0.10, (
             f"Jaccard {result['max_baseline_shingle_jaccard']} >= 0.10 for {pmcid}"
         )
 
+        v1_exc = result["v1_inheritance_exception"]
+        if classification == "INHERITED_CANDIDATE":
+            assert v1_exc["is_approved"] is True, f"Expected approved V1 inheritance for {pmcid}"
+            assert v1_exc["cross_source_v1_collision"] is False
+        else:
+            assert v1_exc["is_approved"] is False
+            assert v1_exc["cross_source_v1_collision"] is False
+
+        # Assert split representation
+        counts = result["split_counts"]
+        assert counts["DEV"] == 25
+        assert counts["CALIBRATION"] == 29
+        assert counts["HOLDOUT"] == 30
+        assert counts["G15"] == 5
+        assert counts["QUARANTINED"] == 4
+        assert counts["V1_INHERITED"] == 4
+        assert sum(counts[s] for s in ("DEV", "CALIBRATION", "HOLDOUT", "G15", "QUARANTINED")) == 93
+        assert counts["V1_INHERITED"] == 4
+
+
+def test_negative_reject_injected_cross_split_10word_span_production_validator(
+    baseline_repo: BaselineCorpusRepository
+) -> None:
+    """Asserts that production check_baseline_split_disjointness rejects injected 10-word span from DEV/G15 baseline."""
+    # Locate a DEV record with >= 10 words
+    dev_record = next(r for r in baseline_repo.baseline_records if r["split"] == "DEV" and len(r["text"].split()) >= 15)
+    dev_tokens = dev_record["text"].split()
+    dev_10w_span = " ".join(dev_tokens[2:12])
+
+    clean_sample = (
+        "A controlled environment agriculture system monitors ambient temperature, relative humidity, "
+        "and spectral irradiance continuously. Advanced sensor telemetry optimizes photosynthesis rates "
+        "without manual intervention. Nutrient concentrations remain strictly regulated throughout all stages."
+    )
+    tainted_sample = clean_sample + " " + dev_10w_span
+
+    result = check_baseline_split_disjointness(
+        candidate_pmcid="PMC_TEST_SPLIT_10W",
+        candidate_family_id="fam-v2-test-clean",
+        clean_text=tainted_sample,
+        repo=baseline_repo,
+        classification="REPLACEMENT_SOURCE",
+    )
+    assert result["status"] == "FAIL", "Validator must reject injected cross-split 10-word span!"
+    assert result["zero_shared_10word_spans"] is False
+    assert result["shared_10word_span_collisions_count"] > 0
+    assert any(c["split"] == "DEV" for c in result["shared_10word_span_collisions"])
+
+
+def test_negative_boundary_9word_vs_10word_cross_split_production_validator(
+    baseline_repo: BaselineCorpusRepository
+) -> None:
+    """Tests exact 10-word boundary condition: 9 words do not trigger 10-word cross-split rejection, 10 words fail."""
+    dev_record = next(r for r in baseline_repo.baseline_records if r["split"] == "DEV" and len(r["text"].split()) >= 15)
+    dev_tokens = dev_record["text"].split()
+    dev_9w_span = " ".join(dev_tokens[2:11])
+    dev_10w_span = " ".join(dev_tokens[2:12])
+
+    clean_sample = (
+        "Vertical farming facilities optimize resource utilization by recapturing ninety-five percent "
+        "of transpired moisture. Artificial lighting arrays supply photons across narrow spectral bands "
+        "to maximize chlorophyll absorption and minimize wasted energy."
+    )
+
+    # 1. 9-word span injection: zero_shared_10word_spans must remain True
+    sample_9w = clean_sample + " " + dev_9w_span
+    res_9w = check_baseline_split_disjointness(
+        candidate_pmcid="PMC_TEST_BOUNDARY_9W",
+        candidate_family_id="fam-v2-test-boundary",
+        clean_text=sample_9w,
+        repo=baseline_repo,
+        classification="REPLACEMENT_SOURCE",
+    )
+    assert res_9w["zero_shared_10word_spans"] is True, "9-word span must not trigger 10-word collision rejection!"
+
+    # 2. 10-word span injection: zero_shared_10word_spans must be False and fail closed
+    sample_10w = clean_sample + " " + dev_10w_span
+    res_10w = check_baseline_split_disjointness(
+        candidate_pmcid="PMC_TEST_BOUNDARY_10W",
+        candidate_family_id="fam-v2-test-boundary",
+        clean_text=sample_10w,
+        repo=baseline_repo,
+        classification="REPLACEMENT_SOURCE",
+    )
+    assert res_10w["status"] == "FAIL"
+    assert res_10w["zero_shared_10word_spans"] is False
+    assert res_10w["shared_10word_span_collisions_count"] > 0
+
+
+def test_negative_reject_genuine_dev_family_collision_production_validator(
+    baseline_repo: BaselineCorpusRepository
+) -> None:
+    """Asserts that production validator rejects genuine DEV family collision."""
+    clean_sample = (
+        "Autonomous robotic harvesters operate within greenhouse facilities using computer vision pipelines. "
+        "Fruit ripeness is classified via convolutional neural networks trained on multispectral imagery."
+    )
+    result = check_baseline_split_disjointness(
+        candidate_pmcid="PMC_TEST_DEV_FAM",
+        candidate_family_id="coral_reefs",  # Genuine DEV family
+        clean_text=clean_sample,
+        repo=baseline_repo,
+        classification="REPLACEMENT_SOURCE",
+    )
+    assert result["status"] == "FAIL"
+    assert result["is_dev_collision"] is True
+    assert result["is_forbidden_family_collision"] is True
+
+
+def test_negative_reject_genuine_g15_family_collision_production_validator(
+    baseline_repo: BaselineCorpusRepository
+) -> None:
+    """Asserts that production validator rejects genuine G15 campaign family collision."""
+    clean_sample = (
+        "Autonomous robotic harvesters operate within greenhouse facilities using computer vision pipelines. "
+        "Fruit ripeness is classified via convolutional neural networks trained on multispectral imagery."
+    )
+    result = check_baseline_split_disjointness(
+        candidate_pmcid="PMC_TEST_G15_FAM",
+        candidate_family_id="PMC13503497",  # Genuine G15 campaign family
+        clean_text=clean_sample,
+        repo=baseline_repo,
+        classification="REPLACEMENT_SOURCE",
+    )
+    assert result["status"] == "FAIL"
+    assert result["is_g15_collision"] is True
+    assert result["is_forbidden_family_collision"] is True
+
+
+def test_negative_reject_unapproved_v1_cross_source_collision(
+    baseline_repo: BaselineCorpusRepository
+) -> None:
+    """Asserts that replacement source colliding with V1 family is rejected without inheritance exception."""
+    clean_sample = (
+        "Autonomous robotic harvesters operate within greenhouse facilities using computer vision pipelines. "
+        "Fruit ripeness is classified via convolutional neural networks trained on multispectral imagery."
+    )
+    # Replacement source pretending to use a V1 family
+    result = check_baseline_split_disjointness(
+        candidate_pmcid="PMC13665993",  # A replacement source
+        candidate_family_id="fam-clean-pmc-13621526",  # A V1 family
+        clean_text=clean_sample,
+        repo=baseline_repo,
+        classification="REPLACEMENT_SOURCE",
+    )
+    assert result["status"] == "FAIL"
+    assert result["v1_inheritance_exception"]["is_approved"] is False
+    assert result["v1_inheritance_exception"]["cross_source_v1_collision"] is True
+
+
+def test_negative_reject_quarantined_family_collision_production_validator(
+    baseline_repo: BaselineCorpusRepository
+) -> None:
+    """Asserts that production validator rejects quarantined source family collision."""
+    clean_sample = (
+        "Autonomous robotic harvesters operate within greenhouse facilities using computer vision pipelines. "
+        "Fruit ripeness is classified via convolutional neural networks trained on multispectral imagery."
+    )
+    result = check_baseline_split_disjointness(
+        candidate_pmcid="PMC_TEST_QUAR_FAM",
+        candidate_family_id="PMC13001950",  # Quarantined source family from final_dataset.py
+        clean_text=clean_sample,
+        repo=baseline_repo,
+        classification="REPLACEMENT_SOURCE",
+    )
+    assert result["status"] == "FAIL"
+    assert result["is_quarantined_collision"] is True
+    assert result["is_forbidden_family_collision"] is True
+
+
+def test_negative_reject_prior_phase_test_family_collision_production_validator(
+    baseline_repo: BaselineCorpusRepository
+) -> None:
+    """Asserts that production validator rejects prior phase test source family collision."""
+    clean_sample = (
+        "Autonomous robotic harvesters operate within greenhouse facilities using computer vision pipelines. "
+        "Fruit ripeness is classified via convolutional neural networks trained on multispectral imagery."
+    )
+    result = check_baseline_split_disjointness(
+        candidate_pmcid="PMC_TEST_PRIOR_FAM",
+        candidate_family_id="national_geographic",  # Prior phase test source family from final_dataset.py
+        clean_text=clean_sample,
+        repo=baseline_repo,
+        classification="REPLACEMENT_SOURCE",
+    )
+    assert result["status"] == "FAIL"
+    assert result["is_prior_phase_collision"] is True
+    assert result["is_forbidden_family_collision"] is True
 
 # --- Triage Ledger & Documented Policy Verification ---
 

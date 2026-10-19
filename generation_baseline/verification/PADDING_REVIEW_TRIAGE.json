@@ -27,19 +27,6 @@
       "candidate_pmcid": "PMC13517498",
       "forbidden_pmcid": "PMC8910002",
       "raw_jaccard_similarity": 0.000187,
-      "raw_3gram": "the reliability of",
-      "content_word_count_in_shingle": 1,
-      "shared_content_3gram_count": 0,
-      "shared_6word_spans_count": 0,
-      "triage_category": "SUSPECTED_LEXICAL_FALSE_POSITIVE",
-      "disposition": "REVIEW_REQUIRED",
-      "review_status": "PENDING_HUMAN_CURATOR_REVIEW",
-      "evidence_notes": "Raw 3-gram 'the reliability of' matches forbidden source PMC8910002. Content-word 3-gram overlap is 0; verbatim 6-word span overlap is 0. Recorded for human review without automated approval."
-    },
-    {
-      "candidate_pmcid": "PMC13517498",
-      "forbidden_pmcid": "PMC8910002",
-      "raw_jaccard_similarity": 0.000187,
       "raw_3gram": "back to the",
       "content_word_count_in_shingle": 1,
       "shared_content_3gram_count": 0,
@@ -48,6 +35,19 @@
       "disposition": "REVIEW_REQUIRED",
       "review_status": "PENDING_HUMAN_CURATOR_REVIEW",
       "evidence_notes": "Raw 3-gram 'back to the' matches forbidden source PMC8910002. Content-word 3-gram overlap is 0; verbatim 6-word span overlap is 0. Recorded for human review without automated approval."
+    },
+    {
+      "candidate_pmcid": "PMC13517498",
+      "forbidden_pmcid": "PMC8910002",
+      "raw_jaccard_similarity": 0.000187,
+      "raw_3gram": "the reliability of",
+      "content_word_count_in_shingle": 1,
+      "shared_content_3gram_count": 0,
+      "shared_6word_spans_count": 0,
+      "triage_category": "SUSPECTED_LEXICAL_FALSE_POSITIVE",
+      "disposition": "REVIEW_REQUIRED",
+      "review_status": "PENDING_HUMAN_CURATOR_REVIEW",
+      "evidence_notes": "Raw 3-gram 'the reliability of' matches forbidden source PMC8910002. Content-word 3-gram overlap is 0; verbatim 6-word span overlap is 0. Recorded for human review without automated approval."
     },
     {
       "candidate_pmcid": "PMC13665993",
