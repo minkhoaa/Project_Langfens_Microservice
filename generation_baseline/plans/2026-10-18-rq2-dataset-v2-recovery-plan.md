@@ -495,13 +495,11 @@ This document constitutes the finalized, amended implementation plan candidate f
 - **Strict Invariants:** Zero MiniMax API calls, zero RG11 or live campaign dispatches, zero historical artifact mutations, zero holdout gold inspection, and all AI audits designated `EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD`.
 - **Sprint Progress Ledger:**
   - **Sprint V2-S01:** **`PASS`** (Completed and verified; `V1_QUARANTINE_MANIFEST.json` established; 594 historical assets verified with 0 mutations; 564 git-ignored execution files audited and backed up off-tree; post-implementation sign-off secured on 2026-10-19).
-  - **Sprint V2-S02:** **`PLAN_PROPOSED_AWAITING_APPROVAL`** (Dedicated plan `generation_baseline/plans/2026-10-19-v2-s02-pmc-verification-segmentation-plan.md` prepared; implementation strictly blocked until sprint plan is formally approved).
+  - **Sprint V2-S02:** **`PASS`** (Completed and verified; all 7 candidate sources verified against live NCBI XML; 28 Reading passages extracted under 350–650 word bounds; `V2_SOURCE_PROVENANCE_LEDGER.json` created; 20 acceptance tests pass).
   - **Sprints V2-S03 to V2-S06:** **`NOT_RUN`** (Sequentially blocked).
 
-### Sprint Execution Instructions (Next: V2-S02 Preflight)
-Sprint V2-S01 has successfully achieved gate closure (`PASS`). The dedicated plan for **Sprint V2-S02 (Comprehensive 7-Source NCBI Verification, Provenance Tracing & Semantic Segmentation)** has been prepared as `PLAN-V2-S02-PMC-SEGMENTATION`.
-
-**CRITICAL GATE RULE:** Do not implement Sprint V2-S02 until its dedicated sprint plan candidate has been explicitly reviewed and approved by the user.
+### Sprint Execution Instructions (Next: V2-S03 Preflight)
+Sprint V2-S02 has successfully achieved gate closure (`PASS`). Execution stops here per user mandate. Do not automatically proceed to Sprint V2-S03.
 1. **Workspace Boundary:** Ensure working directory is repository root (`/home/code/workspaces/langfens/Project_Langfens_Microservice`).
 2. **Deliverables for V2-S01:**
    - Create `generation_baseline/verification/V1_QUARANTINE_MANIFEST.json` documenting DEF-DAT-01..06, affected files, and SHA-256 digests.

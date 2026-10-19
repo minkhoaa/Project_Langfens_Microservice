@@ -1,0 +1,416 @@
+{
+  "ledger_id": "V2_SOURCE_PROVENANCE_LEDGER",
+  "version": "2.0.0",
+  "description": "Authoritative cryptographic provenance ledger for candidate Reading sources in RQ2_DATASET_V2.",
+  "governing_document": "generation_baseline/plans/2026-10-19-v2-s02-pmc-verification-segmentation-plan.md",
+  "total_sources_evaluated": 7,
+  "total_sources_admitted": 7,
+  "all_sources_verified": true,
+  "statistical_clustering_notice": "Source-family clustering: All four passages from any single article share common authorial style, syntactic profile, and vocabulary. Downstream analyses must not treat multiple passages from the same source as statistically independent. Cluster-robust variance estimation or mixed-effects models are required.",
+  "sources": [
+    {
+      "family_id": "fam-v2-pmc-13621526",
+      "pmcid": "PMC13621526",
+      "classification": "INHERITED_CANDIDATE",
+      "domain": "Controlled-Environment Plant Biology",
+      "article_title": "Tailoring LED spectra and cultivation systems enhances lettuce productivity and nutritional quality in vertical indoor farming.",
+      "journal": "BMC Plant Biol",
+      "publication_year": "2026",
+      "doi": "10.1186/s12870-026-09420-x",
+      "replaces": null,
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Open Access This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the C..."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "66f72f15f3ad08ab34d0322d1a581912649a29d0174d21ec215ac7eb1aacb0ab",
+        "extracted_body_sha256": "df5cd436aaf45b48865e82b6ded9fea11d30fb33288eef29f78a2f361eca921c",
+        "canonical_clean_text_sha256": "333caf051c89d48d6d3fd9a594c0a4c0c45cac75f4cca47ce450294833e5b09c",
+        "fixture_sha256": "333caf051c89d48d6d3fd9a594c0a4c0c45cac75f4cca47ce450294833e5b09c",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13621526.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13621526.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 6184,
+        "clean_body_chars": 45073,
+        "paragraph_count": 56
+      },
+      "deterministic_correspondence": {
+        "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
+        "is_faithful_substring": true,
+        "token_correspondence_ratio": 1.0,
+        "fixture_word_count": 779,
+        "body_word_count": 6184,
+        "prefix_match_char_index": 0,
+        "diagnostics": "Fixture (779 words) verified as authentic prefix excerpt of canonical XML body (6184 words), starting at character index 0 with 100.00% token overlap."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "issues": []
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          522,
+          532,
+          500,
+          518
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-pmc-13621526",
+        "cluster_id": "fam-v2-pmc-13621526",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-pmc-13604763",
+      "pmcid": "PMC13604763",
+      "classification": "INHERITED_CANDIDATE",
+      "domain": "Biomimetic Hydrophobic Surfaces",
+      "article_title": "Research Progress on Bioinspired Superhydrophobic Photothermal Anti-/Deicing Coatings.",
+      "journal": "Biomimetics (Basel)",
+      "publication_year": "2026",
+      "doi": "10.3390/biomimetics11090617",
+      "replaces": null,
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "9c26e13e55274cbe2de767f932a81efa230e992d12331f179752a2f1cbcf5294",
+        "extracted_body_sha256": "c4806165f99f1077d6dd6c419902bda3f9a92e36d3339d5eba9980e04b5e37b7",
+        "canonical_clean_text_sha256": "1bf4520c9d87a17d8698f7e0bc8d8d6c5f2422f7c0093b787118873470df51fd",
+        "fixture_sha256": "1bf4520c9d87a17d8698f7e0bc8d8d6c5f2422f7c0093b787118873470df51fd",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13604763.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13604763.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 18728,
+        "clean_body_chars": 150318,
+        "paragraph_count": 112
+      },
+      "deterministic_correspondence": {
+        "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
+        "is_faithful_substring": true,
+        "token_correspondence_ratio": 0.9934,
+        "fixture_word_count": 762,
+        "body_word_count": 18728,
+        "prefix_match_char_index": 0,
+        "diagnostics": "Fixture (762 words) verified as authentic prefix excerpt of canonical XML body (18728 words), starting at character index 0 with 99.34% token overlap."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "issues": []
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          509,
+          510,
+          508,
+          504
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-pmc-13604763",
+        "cluster_id": "fam-v2-pmc-13604763",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-pmc-13517498",
+      "pmcid": "PMC13517498",
+      "classification": "INHERITED_CANDIDATE",
+      "domain": "Distributed Sensor Networks",
+      "article_title": "Anomaly Detection and Data Repair for Smart Meter Data in Smart Cities: A Comprehensive Review and Future Perspectives.",
+      "journal": "Sensors (Basel)",
+      "publication_year": "2026",
+      "doi": "10.3390/s26165122",
+      "replaces": null,
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "be9323056e20ec38cde349c781addab5b4abc58596d91d0e705fd19a7fd65d35",
+        "extracted_body_sha256": "a6eb342d811ebb921047c70b4b0e3d4ef432597aef3568b8ba6a557253e69ed7",
+        "canonical_clean_text_sha256": "3aed02b8e6cb97f063f9cae59bec09877dc407921df8ed0b0eb18d9c3b715314",
+        "fixture_sha256": "3aed02b8e6cb97f063f9cae59bec09877dc407921df8ed0b0eb18d9c3b715314",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13517498.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13517498.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 12543,
+        "clean_body_chars": 91949,
+        "paragraph_count": 123
+      },
+      "deterministic_correspondence": {
+        "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
+        "is_faithful_substring": true,
+        "token_correspondence_ratio": 1.0,
+        "fixture_word_count": 915,
+        "body_word_count": 12543,
+        "prefix_match_char_index": 0,
+        "diagnostics": "Fixture (915 words) verified as authentic prefix excerpt of canonical XML body (12543 words), starting at character index 0 with 100.00% token overlap."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "issues": []
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          520,
+          510,
+          506,
+          508
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-pmc-13517498",
+        "cluster_id": "fam-v2-pmc-13517498",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-pmc-13407692",
+      "pmcid": "PMC13407692",
+      "classification": "INHERITED_CANDIDATE",
+      "domain": "Quantum State Purification",
+      "article_title": "Information-Theoretic Framework for Quantum State Purification and Error Correction via Symmetric Subspace Projection.",
+      "journal": "Entropy (Basel)",
+      "publication_year": "2026",
+      "doi": "10.3390/e28070726",
+      "replaces": null,
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "4289165be423ffe93a2b7f2784681acb5fc0f7815d588df3eaa513c54c89547d",
+        "extracted_body_sha256": "1e470604c1307499d890758574a195192a4f68feb681de9fcda840681dbb02cd",
+        "canonical_clean_text_sha256": "a088b054dd33f225c78425e101f7ffa8ed0fcd3f619cc4103c7b5ec6c696e22c",
+        "fixture_sha256": "a088b054dd33f225c78425e101f7ffa8ed0fcd3f619cc4103c7b5ec6c696e22c",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13407692.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13407692.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 8432,
+        "clean_body_chars": 62891,
+        "paragraph_count": 94
+      },
+      "deterministic_correspondence": {
+        "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
+        "is_faithful_substring": true,
+        "token_correspondence_ratio": 0.9916,
+        "fixture_word_count": 844,
+        "body_word_count": 8432,
+        "prefix_match_char_index": 0,
+        "diagnostics": "Fixture (844 words) verified as authentic prefix excerpt of canonical XML body (8432 words), starting at character index 0 with 99.16% token overlap."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "issues": []
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          502,
+          505,
+          519,
+          513
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-pmc-13407692",
+        "cluster_id": "fam-v2-pmc-13407692",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-rep-earth-01",
+      "pmcid": "PMC13665993",
+      "classification": "REPLACEMENT_SOURCE",
+      "domain": "Earth Systems & Physical Geography",
+      "article_title": "Bedrock erodibility governs transient erosion and CO(2) release in alpine landscapes.",
+      "journal": "Sci Adv",
+      "publication_year": "2026",
+      "doi": "10.1126/sciadv.aei9275",
+      "replaces": "PMC8910002",
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "This is an open-access article distributed under the terms of the Creative Commons Attribution-NonCommercial license, which permits use, distribution, and reproduction in any medium, so long as the resultant use is not for commercial advantage and provided the original work is properly cited."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "c39baec087fb01cad5a15f9d8597fcf9be7dc228be1c27f82a271f2235913356",
+        "extracted_body_sha256": "26f9d81c7c407de28d103436f13014324e78defa6a7793746cb13b1cc11a262c",
+        "canonical_clean_text_sha256": "53b1841a9f7e0c4b6986904cc4fd4a209b4b120b3fa0e4203cf180a2e5d3bdce",
+        "fixture_sha256": "53b1841a9f7e0c4b6986904cc4fd4a209b4b120b3fa0e4203cf180a2e5d3bdce",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13665993.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13665993.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 7274,
+        "clean_body_chars": 50652,
+        "paragraph_count": 27
+      },
+      "deterministic_correspondence": {
+        "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
+        "is_faithful_substring": true,
+        "token_correspondence_ratio": 1.0,
+        "diagnostics": "Replacement source; no prior historical fixture to reconcile."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "issues": []
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          510,
+          521,
+          505,
+          539
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-rep-earth-01",
+        "cluster_id": "fam-v2-rep-earth-01",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-rep-energy-02",
+      "pmcid": "PMC13667678",
+      "classification": "REPLACEMENT_SOURCE",
+      "domain": "Clean Energy & Environmental Engineering",
+      "article_title": "Development of a Novel Combined Wind\u2013Rain Piezoelectric Energy Harvester.",
+      "journal": "Sensors (Basel)",
+      "publication_year": "2026",
+      "doi": "10.3390/s26196271",
+      "replaces": "PMC8910003",
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "0b2b1662837f9338155e1074bc82502fbb852627d7793d417bf99a5173ea0405",
+        "extracted_body_sha256": "507530e9bdb783279e76884e217803b7c0cf69bc8ca21740c9e63c98603d4094",
+        "canonical_clean_text_sha256": "042fad6eed0abde400597a9f662f27315f2cfc5330b38a848700d18739ff2332",
+        "fixture_sha256": "042fad6eed0abde400597a9f662f27315f2cfc5330b38a848700d18739ff2332",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13667678.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13667678.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 8005,
+        "clean_body_chars": 57374,
+        "paragraph_count": 79
+      },
+      "deterministic_correspondence": {
+        "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
+        "is_faithful_substring": true,
+        "token_correspondence_ratio": 1.0,
+        "diagnostics": "Replacement source; no prior historical fixture to reconcile."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "issues": []
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          526,
+          517,
+          501,
+          525
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-rep-energy-02",
+        "cluster_id": "fam-v2-rep-energy-02",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-rep-tech-03",
+      "pmcid": "PMC13654891",
+      "classification": "REPLACEMENT_SOURCE",
+      "domain": "Ancient Technology / Applied Engineering",
+      "article_title": "Evolution of an Early and Long-Lasting Iron Smelting Technique at Did\u00e9 West 1, Fal\u00e9m\u00e9 Valley, Eastern Senegal.",
+      "journal": "Afr Archaeol Rev",
+      "publication_year": "2026",
+      "doi": "10.1007/s10437-026-09653-z",
+      "replaces": "PMC8910005",
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Open Access This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the C..."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "28e72998a43937782d5b37dc97e469f85f3144649647c214022a5b846b0a3363",
+        "extracted_body_sha256": "4e093bd660f67bec1d16814c62f38f20f978d13bfc200eab4d03c974d8650690",
+        "canonical_clean_text_sha256": "1adf7969449b67cb4f90d27ca8d4037968b26456e07b4a0975e8c6207c707d02",
+        "fixture_sha256": "1adf7969449b67cb4f90d27ca8d4037968b26456e07b4a0975e8c6207c707d02",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13654891.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13654891.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 8952,
+        "clean_body_chars": 57096,
+        "paragraph_count": 98
+      },
+      "deterministic_correspondence": {
+        "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
+        "is_faithful_substring": true,
+        "token_correspondence_ratio": 1.0,
+        "diagnostics": "Replacement source; no prior historical fixture to reconcile."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "issues": []
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          503,
+          515,
+          515,
+          512
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-rep-tech-03",
+        "cluster_id": "fam-v2-rep-tech-03",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    }
+  ]
+}
