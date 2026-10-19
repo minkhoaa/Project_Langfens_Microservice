@@ -83,48 +83,49 @@ Each RulePack is formalized as a validated `GrammarRulePack` instance with compl
 
 ---
 
-## 4. Evidence-Based CEFR Alignment & Structural Conditions
+## 4. Evidence-Based CEFR Alignment, Primary Sources & Epistemic Limitations
 
-### 4.1 Non-Universal Level Annotation Principles
-In strict adherence to the Cambridge English Grammar Profile (EGP) and descriptive reference grammars, CEFR levels are determined by **grammatical construction, syntactic complexity, and information-packaging register**, not by superficial lexical choices or topic:
+### 4.1 Epistemic Disclosure: Reference Grammar Citations vs CEFR Attributions
+In strict adherence to the project invariant **"Flag unsupported claims rather than inventing citations"**:
 
-1. **Context-Dependent Level Splitting:**
-   - Where a grammatical family encompasses both intermediate and advanced realizations, the RulePack explicitly defines sub-rule-level attributions and conditions:
-     - **Conditionals (`fam-v2-grammar-conditionals`):** Standard mixed counterfactuals (*If had + PP, would + bare*) map to **B2**; inverted operator-initial structures (*Had + S + PP*) map to **C1**.
-     - **Subjunctive (`fam-v2-grammar-subjunctive`):** Mandative complements with modal periphrasis (*should be*) map to **B2**; invariant base-form mandatives (*demand that he submit*) and negative mandatives (*not + base*) map to **B2 / C1** (EGP B2 in international/academic register; C1 in traditional British register); formulaic archaic set phrases (*suffice it to say*) map to **C1**.
-     - **Passives (`fam-v2-grammar-passives`):** Impersonal reporting passives with dummy *it* (*It is estimated that*) map to **B1**; nominative-raising reporting passives (*The complex is thought to have served*) map to **B2**.
-2. **Single-Level Form Families:**
-   - **Negative Inversion (`fam-v2-grammar-inversion`):** Standard C1 structure requiring fronted negative/restrictive adjuncts and subject-operator inversion.
-   - **Cleft Sentences (`fam-v2-grammar-clefts`):** Standard C1 information-packaging structure requiring contrastive focus allocation via it-clefts or wh-pseudo-clefts.
-   - **Participle Clauses (`fam-v2-grammar-participles`):** Standard B2 non-finite adverbial and reduced relative structures requiring coreferential matrix subjects.
-   - **Past Modals (`fam-v2-grammar-modals`):** Standard B2 epistemic perfect deduction and speculation (*must have*, *cannot have*, *might have*).
+1. **Verifiable Descriptive Grammar Citations:**  
+   All syntactic constructions, structural conditions, and exception rules in this plan are directly grounded in published, verifiable descriptive reference grammars:
+   - Quirk, Greenbaum, Leech, & Svartvik (1985), *A Comprehensive Grammar of the English Language* (Longman).
+   - Huddleston & Pullum (2002), *The Cambridge Grammar of the English Language* (Cambridge University Press).
+   - Biber, Johansson, Leech, Conrad, & Finegan (1999), *Longman Grammar of Spoken and Written English* (Longman).
+   - Hewings (2013), *Advanced Grammar in Use* (CUP); Murphy (2019), *English Grammar in Use* (CUP).
 
-### 4.2 Comprehensive Sub-Rule Citation & CEFR Attribution Matrix
+2. **CEFR Alignment Epistemic Status (`PROPOSED — PENDING CURATOR ADJUDICATION`):**  
+   - The descriptive grammars above document syntactic form and register, but do **not** assign CEFR levels (CEFR is an independent framework by the Council of Europe).
+   - The Cambridge English Grammar Profile (EGP) provides empirical CEFR alignments, but primary EGP database entry identifiers (unique can-do descriptor codes) cannot be independently fetched or verified in this offline workspace without access to Cambridge's proprietary database.
+   - Therefore, all CEFR level assignments below are formally designated as **`PROPOSED_CEFR_PENDING_CURATOR_ADJUDICATION`**.
+   - **FLAGGED UNSUPPORTED CLAIM:** Any assertion of a formal dialectal split in EGP (e.g. claiming EGP codifies "B2 American/international vs C1 British" for mandative subjunctives) is **UNSUPPORTED** by primary in-repo evidence and is explicitly flagged for curator review rather than asserted as fact.
 
-| Family ID | Sub-Rule ID | Syntactic Construction | Authoritative Reference | EGP Benchmark | Evidence-Based CEFR |
+### 4.2 Sub-Rule Reference & CEFR Status Matrix
+
+| Family ID | Sub-Rule ID | Target Construction | Verifiable Academic Reference | EGP Category Target | CEFR Status & Epistemic Notes |
 |---|---|---|---|---|---|
-| `fam-v2-grammar-inversion` | `INV-01` | Fronted negative adjuncts (*under no circumstances, rarely, seldom*) | Quirk et al. §18.24–28;<br>Huddleston & Pullum Ch. 11 §7.1 | EGP C1 Inversion: negative adverbials | **`C1`** |
-| | `INV-02` | Restrictive *only*-adjuncts (*only after, hardly/scarcely... when*) | Quirk et al. §18.29–33;<br>Huddleston & Pullum Ch. 11 §7.1 | EGP C1 Inversion: restrictive adverbials | **`C1`** |
-| | `INV-03` | Correlative *not only... but also* inversion | Quirk et al. §18.34–36 | EGP C1 Inversion: correlative conjunctions | **`C1`** |
-| `fam-v2-grammar-conditionals` | `COND-01` | Mixed past counterfactual condition $\to$ present state outcome | Quirk et al. §14.23;<br>Huddleston & Pullum Ch. 8 §2.2 | EGP B2 Conditionals: mixed, past/present | **`B2`** |
-| | `COND-02` | Mixed ongoing state condition $\to$ past counterfactual outcome | Quirk et al. §14.23;<br>Huddleston & Pullum Ch. 8 §2.2 | EGP B2 Conditionals: mixed, general/past | **`B2`** |
-| | `COND-03` | Inverted conditional clauses with operator fronting (*had, were, should*) | Quirk et al. §14.23 Note b, §15.35;<br>Huddleston & Pullum Ch. 8 §2.4 | EGP C1 Inversion: conditional without *if* | **`C1`** |
-| `fam-v2-grammar-clefts` | `CLEFT-01` | It-cleft focusing adjuncts, prepositional phrases, and subject NPs | Quirk et al. §18.25–30;<br>Biber et al. §11.4 | EGP C1 Cleft: it-clefts with that-clause | **`C1`** |
-| | `CLEFT-02` | Wh-pseudo-cleft with nominal relative clause (*What + S + V + be + focus*) | Quirk et al. §18.31–32;<br>Biber et al. §11.4 | EGP C1 Cleft: wh-pseudo-clefts | **`C1`** |
-| | `CLEFT-03` | Reversed wh-pseudo-cleft (*Focus + be + what-clause*) | Quirk et al. §18.32;<br>Biber et al. §11.4 | EGP C1 Cleft: reverse wh-clefts | **`C1`** |
-| `fam-v2-grammar-subjunctive` | `SUBJ-01` | Mandative subjunctive base form in that-clauses after suasion verbs | Quirk et al. §3.58–59;<br>Huddleston & Pullum Ch. 3 §1.4 | EGP B2/C1 Subjunctive: mandative base form | **`B2 / C1`** |
-| | `SUBJ-02` | Negative mandative subjunctive with *not + base* (no *do*-support) | Quirk et al. §3.59;<br>Huddleston & Pullum Ch. 3 §1.4 | EGP C1 Subjunctive: negative mandative | **`C1`** |
-| | `SUBJ-03` | Formulaic subjunctive archaic set expressions (*suffice it to say, be that as it may*) | Quirk et al. §3.61;<br>Huddleston & Pullum Ch. 3 §1.4 | EGP C1 Subjunctive: formulaic expressions | **`C1`** |
-| `fam-v2-grammar-participles` | `PART-01` | Present adverbial participle clauses denoting circumstance/cause (*V-ing*) | Quirk et al. §15.56–58;<br>Biber et al. §9.4 | EGP B2 Clauses: participle clauses with *-ing* | **`B2`** |
-| | `PART-02` | Perfect participle clauses denoting anterior completed action (*Having + PP*) | Quirk et al. §15.59–60;<br>Biber et al. §9.4 | EGP B2 Clauses: perfect participle clauses | **`B2`** |
-| | `PART-03` | Passive participle clauses & reduced relative clauses (*Treated with X*) | Quirk et al. §15.61–62;<br>Biber et al. §9.4 | EGP B2 Clauses: past participle & reduced relatives | **`B2`** |
-| `fam-v2-grammar-modals` | `MOD-01` | Epistemic high-certainty affirmative past deduction (*must have + PP*) | Quirk et al. §4.53–54;<br>Murphy Units 27–29 | EGP B2 Modals: deduction about the past | **`B2`** |
-| | `MOD-02` | Epistemic high-certainty negative past deduction (*cannot / could not have + PP*) | Quirk et al. §4.55;<br>Murphy Units 27–29 | EGP B2 Modals: negative deduction about the past | **`B2`** |
-| | `MOD-03` | Epistemic tentative possibility past speculation (*may / might / could have + PP*) | Quirk et al. §4.56–60;<br>Murphy Units 27–29 | EGP B2 Modals: possibility about the past | **`B2`** |
-| `fam-v2-grammar-passives` | `PASS-01` | Impersonal reporting passives with dummy *it* (*It is believed / reported that*) | Quirk et al. §16.64;<br>Hewings Unit 24;<br>Biber et al. §11.3 | EGP B1 Passive: reporting verbs with *it + that* | **`B1`** |
-| | `PASS-02` | Personal reporting passives with nominative subject + to-infinitive | Quirk et al. §16.65;<br>Hewings Unit 24;<br>Huddleston & Pullum Ch. 14 §3.2 | EGP B2 Passive: reporting verbs + to-infinitive | **`B2`** |
-| | `PASS-03` | Personal reporting passives with perfect infinitive (*to have + PP*) | Quirk et al. §16.65;<br>Hewings Unit 24;<br>Biber et al. §11.3 | EGP B2 Passive: reporting verbs + perfect infinitive | **`B2`** |
----
+| `fam-v2-grammar-inversion` | `INV-01` | Fronted negative adjuncts (*under no circumstances, rarely, seldom*) | Quirk et al. §18.24–28;<br>Huddleston & Pullum Ch. 11 §7.1 | EGP: INVERSION | **`C1`** (Consensus advanced register; primary EGP descriptor code pending online check). |
+| | `INV-02` | Restrictive *only*-adjuncts (*only after, hardly/scarcely... when*) | Quirk et al. §18.29–33;<br>Huddleston & Pullum Ch. 11 §7.1 | EGP: INVERSION | **`C1`** (Consensus advanced register). |
+| | `INV-03` | Correlative *not only... but also* inversion | Quirk et al. §18.34–36 | EGP: INVERSION / CONJUNCTIONS | **`C1`** (Consensus advanced register). |
+| `fam-v2-grammar-conditionals` | `COND-01` | Mixed past counterfactual condition $\to$ present state outcome | Quirk et al. §14.23;<br>Huddleston & Pullum Ch. 8 §2.2 | EGP: CONDITIONALS | **`B2`** (Standard mixed conditional; EGP B2 candidate). |
+| | `COND-02` | Mixed ongoing state condition $\to$ past counterfactual outcome | Quirk et al. §14.23;<br>Huddleston & Pullum Ch. 8 §2.2 | EGP: CONDITIONALS | **`B2`** (Standard mixed conditional; EGP B2 candidate). |
+| | `COND-03` | Inverted conditional clauses with operator fronting (*had, were, should*) | Quirk et al. §14.23 Note b, §15.35;<br>Huddleston & Pullum Ch. 8 §2.4 | EGP: INVERSION / CONDITIONALS | **`C1`** (Formal literary/academic register; inverted operator omission). |
+| `fam-v2-grammar-clefts` | `CLEFT-01` | It-cleft focusing adjuncts, PPs, and subject NPs | Quirk et al. §18.25–30;<br>Biber et al. §11.4 | EGP: CLEFT SENTENCES | **`C1`** (Information packaging; contrastive focus). |
+| | `CLEFT-02` | Wh-pseudo-cleft with nominal relative clause (*What + S + V + be + focus*) | Quirk et al. §18.31–32;<br>Biber et al. §11.4 | EGP: CLEFT SENTENCES | **`C1`** (Nominal relative clefting). |
+| | `CLEFT-03` | Reversed wh-pseudo-cleft (*Focus + be + what-clause*) | Quirk et al. §18.32;<br>Biber et al. §11.4 | EGP: CLEFT SENTENCES | **`C1`** (Reversed focus). |
+| `fam-v2-grammar-subjunctive` | `SUBJ-01` | Mandative subjunctive base form in that-clauses after suasion verbs | Quirk et al. §3.58–59;<br>Huddleston & Pullum Ch. 3 §1.4 | EGP: SUBJUNCTIVE / MODALITY | **`FLAGGED FOR CURATOR REVIEW (B2 vs C1)`**:<br>*Descriptive grammars confirm base form usage. Dialectal B2 vs C1 split claim is unsupported by primary in-repo evidence. Curator adjudication required to pin either C1 or B2/C1.* |
+| | `SUBJ-02` | Negative mandative subjunctive with *not + base* (no *do*-support) | Quirk et al. §3.59;<br>Huddleston & Pullum Ch. 3 §1.4 | EGP: SUBJUNCTIVE / NEGATION | **`C1`** (Advanced formal register; avoids auxiliary periphrasis). |
+| | `SUBJ-03` | Formulaic subjunctive archaic set expressions (*suffice it to say, be that as it may*) | Quirk et al. §3.61;<br>Huddleston & Pullum Ch. 3 §1.4 | EGP: FIXED PHRASES | **`C1`** (Archaic formulaic register). |
+| `fam-v2-grammar-participles` | `PART-01` | Present adverbial participle clauses denoting circumstance/cause (*V-ing*) | Quirk et al. §15.56–58;<br>Biber et al. §9.4 | EGP: CLAUSES (NON-FINITE) | **`B2`** (Non-finite adverbial participle). |
+| | `PART-02` | Perfect participle clauses denoting anterior completed action (*Having + PP*) | Quirk et al. §15.59–60;<br>Biber et al. §9.4 | EGP: CLAUSES (NON-FINITE) | **`B2`** (Aspectual anteriority). |
+| | `PART-03` | Passive participle clauses & reduced relative clauses (*Treated with X*) | Quirk et al. §15.61–62;<br>Biber et al. §9.4 | EGP: RELATIVE CLAUSES / PASSIVES | **`B2`** (Reduced postmodifying relative). |
+| `fam-v2-grammar-modals` | `MOD-01` | Epistemic high-certainty affirmative past deduction (*must have + PP*) | Quirk et al. §4.53–54;<br>Murphy Units 27–29 | EGP: MODALITY (PAST) | **`B2`** (Modal perfect deduction). |
+| | `MOD-02` | Epistemic high-certainty negative past deduction (*cannot / could not have + PP*) | Quirk et al. §4.55;<br>Murphy Units 27–29 | EGP: MODALITY (PAST) | **`B2`** (Negative modal perfect deduction). |
+| | `MOD-03` | Epistemic tentative possibility past speculation (*may / might / could have + PP*) | Quirk et al. §4.56–60;<br>Murphy Units 27–29 | EGP: MODALITY (PAST) | **`B2`** (Tentative epistemic possibility). |
+| `fam-v2-grammar-passives` | `PASS-01` | Impersonal reporting passives with dummy *it* (*It is believed / reported that*) | Quirk et al. §16.64;<br>Hewings Unit 24;<br>Biber et al. §11.3 | EGP: PASSIVES (REPORTING) | **`B1 / B2`** (Basic reporting frame; EGP treats simple forms as B1, complex as B2). |
+| | `PASS-02` | Personal reporting passives with nominative subject + to-infinitive | Quirk et al. §16.65;<br>Hewings Unit 24;<br>Huddleston & Pullum Ch. 14 §3.2 | EGP: PASSIVES (REPORTING) | **`B2`** (Nominative-raising passive). |
+| | `PASS-03` | Personal reporting passives with perfect infinitive (*to have + PP*) | Quirk et al. §16.65;<br>Hewings Unit 24;<br>Biber et al. §11.3 | EGP: PASSIVES (REPORTING) | **`B2`** (Anterior aspect in reported infinitive). |
 
 ## 5. Post-Approval Requirements for Original Academic Example Authoring (8 per RulePack)
 
@@ -246,13 +247,29 @@ When approved, Sprint V2-S03 will execute across five structured steps:
 
 ---
 
-## 8. Acceptance Gates & Exit Criteria
+## 8. Open Planning Review Items & Epistemic Limitations
+
+Before implementation authorization and final dataset freeze, the following planning review items must be resolved by authorized human curation:
+
+1. **Review Item 1 — Mandative Subjunctive CEFR Attribution (`SUBJ-01`):**  
+   - *Issue:* In-repo evidence supports syntactic base form requirements via Quirk et al. §3.58–59 and Huddleston & Pullum Ch. 3 §1.4, but any specific claim of an official EGP "B2 American vs C1 British" split is **UNSUPPORTED**.
+   - *Action for Curator:* Adjudicate whether `fam-v2-grammar-subjunctive` is standardized uniformly as **`C1`** (reflecting formal academic English register) or whether a **`B2`** track is explicitly bounded to modal periphrasis (*should + bare*).
+2. **Review Item 2 — Primary EGP Database Entry IDs:**  
+   - *Issue:* Proprietary Cambridge English Grammar Profile numeric descriptor IDs cannot be verified in this offline workspace.
+   - *Action for Curator:* Cross-reference target constructions against official Cambridge EGP database records prior to Sprint V2-S06 cryptographic dataset sealing.
+3. **Review Item 3 — Reporting Passive Lower Bound (`PASS-01`):**  
+   - *Issue:* Impersonal reporting passives (*It is believed that...*) span B1/B2 in general ESL curricula, but academic IELTS tasks primarily target B2/C1.
+   - *Action for Curator:* Confirm whether `PASS-01` items should be included at B1 or calibrated to B2 academic reporting.
+
+---
+
+## 9. Acceptance Gates & Exit Criteria
 
 Sprint V2-S03 shall achieve gate closure (`PASS`) if and only if all of the following criteria are satisfied:
-- [ ] **Gate 1 (Schema & RulePack Provenance):** Exactly 7 `GrammarRulePack` instances exist in `grammar_packs_v2.py`, strictly conforming to Pydantic v2 `GrammarRulePack` schema with authentic descriptive grammar citations (Quirk, Biber, Huddleston & Pullum, EGP). Zero fabricated provenance.
-- [ ] **Gate 2 (Evidence-Based CEFR Alignment):** Every family has documented structural criteria governing its CEFR level (B1, B2, C1, or B2/C1), with explicit justifications for context-dependent distinctions.
-- [ ] **Gate 3 (Original Academic Examples):** Exactly 56 original academic sentences (8 per family) are embedded. Zero verbatim duplication of commercial grammar textbook exercises.
-- [ ] **Gate 4 (Syntactic Exception Handling):** Every RulePack explicitly documents negative syntactic exceptions (e.g. subject-modifying *only*, dangling participles, illicit personal passives with *suggest*).
+- [ ] **Gate 1 (Schema & RulePack Provenance):** Exactly 7 `GrammarRulePack` instances exist in `grammar_packs_v2.py`, strictly conforming to Pydantic v2 `GrammarRulePack` schema with authentic descriptive grammar citations (Quirk, Biber, Huddleston & Pullum, Hewings, Murphy). Zero fabricated citations.
+- [ ] **Gate 2 (Evidence-Based CEFR Alignment):** Documented structural criteria govern CEFR levels, with unsupported EGP claims flagged and curator-adjudicated.
+- [ ] **Gate 3 (Original Academic Examples):** Exactly 56 original academic sentences (8 per family) are embedded upon implementation. Zero textbook copyright infringement.
+- [ ] **Gate 4 (Syntactic Exception Handling):** Every RulePack explicitly documents negative syntactic exceptions (subject-modifying *only*, dangling participles, illicit personal passives with *suggest*).
 - [ ] **Gate 5 (Comprehensive Negative Tests):** `test_v2_grammar_taxonomy.py` passes all syntactic invalidity, boundary violation, and CEFR misalignment tests.
 - [ ] **Gate 6 (Distractor Diagnostic Integrity):** Negative tests confirm that distractors represent defined grammatical error codes, with zero ambiguous or defensible keys.
 - [ ] **Gate 7 (Zero Historical Regression):** Full RG10 regression suite passes (353/353 tests), baseline package checks pass (2015/2015 checks), and V1 quarantine manifest confirms 0 mutations across 594 historical files.
@@ -260,7 +277,7 @@ Sprint V2-S03 shall achieve gate closure (`PASS`) if and only if all of the foll
 
 ---
 
-## 9. Gate Disposition & Handoff Boundary
+## 10. Gate Disposition & Handoff Boundary
 
 $$\mathbf{SPRINT\ V2-S03\ STATUS:\ PLAN\ CANDIDATE\ AWAITING\ USER\ APPROVAL}$$
 
