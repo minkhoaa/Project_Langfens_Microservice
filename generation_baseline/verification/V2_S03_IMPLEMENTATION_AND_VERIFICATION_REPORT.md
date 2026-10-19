@@ -8,13 +8,13 @@
 **Governing Authority**: `generation_baseline/SOURCE_OF_TRUTH.md`  
 **Repository**: `minkhoaa/Project_Langfens_Microservice`  
 **Branch**: `autonomous-generation`  
-**Gate Decision**: **`PASS`** (Sprint V2-S03 engineering deliverables closed following final engineering checks; dataset-level gate `DATASET_READY` remains on `HOLD`)  
+**Gate Decision**: **`PASS`** (Sprint V2-S03 engineering deliverables closed following final engineering checks; plan approval remains `NO_EXPLICIT_PLAN_SIGN_OFF_RECORDED`; dataset-level gate `DATASET_READY` remains on `HOLD`)  
 
 ---
 
 ## 1. Executive Summary
 
-Under sprint plan `PLAN-V2-S03-GRAMMAR-RULEPACKS` (reconciled post-implementation at commit `0fcc150` with final engineering checks, without fabricating retroactive pre-implementation approval), micro-sprint **V2-S03 (Reference-Grounded Grammar RulePacks & Evidence-Based CEFR Alignment)** has been fully implemented and verified offline.
+Under sprint plan candidate `PLAN-V2-S03-GRAMMAR-RULEPACKS` (for which no explicit pre- or post-implementation plan sign-off was granted; engineering closure was executed under dedicated user engineering check directive at commit `0fcc150`), micro-sprint **V2-S03 (Reference-Grounded Grammar RulePacks & Evidence-Based CEFR Alignment)** has been fully implemented, remediated, and verified offline. Engineering closure is strictly distinguished from formal plan approval, preserving governance integrity without fabricated sign-offs.
 Sprint V2-S03 resolves the root causes of Grammar task corruption identified during Day 2 research audits:
 1. **Unbacked Grammar RulePacks & Arbitrary Difficulty Cycling (DEF-DAT-03):** Replaced arbitrary CEFR rotations with 7 authoritative `GrammarRulePack` instances strictly conforming to the immutable Pydantic v2 `GrammarRulePack` schema (`services/generation-service/app/contracts/research.py:53`).
 2. **Academic Reference Grounding:** Grounded all 7 rule packs in standard descriptive reference grammars: Quirk, Greenbaum, Leech, & Svartvik (1985); Biber, Johansson, Leech, Conrad, & Finegan (1999); Huddleston & Pullum (2002); Hewings (2013); and Murphy (2019) with authentic ISBN catalog identifiers under publisher All Rights Reserved status.

@@ -3,8 +3,8 @@
 **Sprint ID**: `V2-S03`  
 **Parent Master Plan**: `generation_baseline/plans/2026-10-18-rq2-dataset-v2-recovery-plan.md`  
 **Document ID**: `PLAN-V2-S03-GRAMMAR-RULEPACKS`  
-**Status**: `IMPLEMENTED_AND_CLOSED_VIA_POST_IMPLEMENTATION_ENGINEERING_CHECKS`  
-**Approval Evidence**: `POST_IMPLEMENTATION_REVIEW_AND_ENGINEERING_CLOSEOUT_20261019` (V2-S03 implementation delivered at commit 0fcc150 and closed out via user directive; pre-implementation approval was not formally signed off prior to coding and is strictly not retroactively fabricated)  
+**Status**: `PLAN_UNAPPROVED__IMPLEMENTATION_CLOSED_BY_ENGINEERING_DIRECTIVE`  
+**Approval Evidence**: `NO_EXPLICIT_PLAN_SIGN_OFF_RECORDED` (No formal user sign-off was recorded for this sprint plan candidate. Implementation was reported at commit 0fcc150, and the user issued a closeout directive requiring final engineering checks and reconciliation; this engineering directive was fully satisfied and verified, but constitutes engineering task closeout rather than retroactive plan approval. Engineering closure is strictly maintained as separate from plan approval, and approval is not fabricated.)  
 **Governing Standard**: `generation_baseline/SOURCE_OF_TRUTH.md`  
 **Prerequisite Sprints**: `V2-S01` (`PASS`), `V2-S02` (`PASS`, with outstanding dataset-readiness prerequisites recorded)  
 **Repository**: `minkhoaa/Project_Langfens_Microservice`  
@@ -284,8 +284,14 @@ Sprint V2-S03 shall achieve gate closure (`PASS`) if and only if all of the foll
 
 ## 10. Gate Disposition & Handoff Boundary
 
-$$\mathbf{SPRINT\ V2-S03\ STATUS:\ IMPLEMENTED\ AND\ CLOSED\ (PASS)}$$
+$$\mathbf{SPRINT\ V2-S03\ STATUS:\ ENGINEERING\ CLOSEOUT\ COMPLETE\ (PASS)\ -\ NO\ EXPLICIT\ PLAN\ SIGN\text{-}OFF}$$
 
-Sprint V2-S03 implementation was completed at commit `0fcc150` and closed out following post-implementation engineering checks (audit of `validate_syntactic_construction` for fail-open behavior, explicit tri-state VALID / INVALID / INCONCLUSIVE semantics, positive target-construction screening, adversarial negative testing, and epistemic oracle separation). Pre-implementation approval was not formally signed off before coding; approval evidence is grounded in post-implementation delivery and verified engineering checks without retroactive fabrication.
+Sprint V2-S03 implementation was completed at commit `0fcc150` and closed out following post-implementation engineering checks (audit of `validate_syntactic_construction` for fail-open behavior, explicit tri-state VALID / INVALID / INCONCLUSIVE semantics, positive target-construction screening, adversarial negative testing, and epistemic oracle separation).
+
+**Epistemic Separation of Engineering Closeout vs. Plan Approval**:
+In strict adherence to the project invariant *"Never fabricate approval"*:
+1. No formal user plan approval sign-off was granted for `PLAN-V2-S03-GRAMMAR-RULEPACKS` either prior to implementation or post-implementation.
+2. The user directive acknowledging implementation at commit `0fcc150` mandated final engineering checks and closeout; this directive authorized engineering verification and remediation, not formal plan endorsement.
+3. Engineering deliverables are closed with PASS disposition, but the plan document remains formally recorded as `NO_EXPLICIT_PLAN_SIGN_OFF_RECORDED`.
 
 **Execution stops here.** Sprint V2-S03 engineering deliverables are closed. Implementation of Sprint V2-S04 (Dataset Task Assembly & Batching) shall NOT commence without dedicated user approval.
