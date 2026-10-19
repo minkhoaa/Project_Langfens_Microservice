@@ -1,0 +1,459 @@
+{
+  "ledger_id": "V2_GRAMMAR_PROVENANCE_LEDGER",
+  "version": "2.2.0",
+  "description": "Authoritative cryptographic provenance ledger for academic reference grammars grounding RQ2_DATASET_V2 Grammar RulePacks.",
+  "governing_document": "generation_baseline/plans/2026-10-19-v2-s03-grammar-rulepacks-plan.md",
+  "governing_sprint": "V2-S03",
+  "epistemic_disclosure": "Digests of reference works are computed strictly over canonical JSON bibliographic provenance records verified against primary publisher and library catalogs. They do NOT represent full book text digests, as commercial printed reference grammars are copyrighted publications cited under academic fair dealing. RulePack digests are computed deterministically over canonical JSON content payloads.",
+  "byte_basis_specification": {
+    "byte_basis": "CANONICAL_JSON_RECORD",
+    "encoding": "UTF-8",
+    "serialization": "json.dumps(data, sort_keys=True, separators=(',', ':'))",
+    "hash_algorithm": "SHA-256"
+  },
+  "total_reference_works": 5,
+  "reference_works": [
+    {
+      "source_id": "src-v2-grammar-ref-quirk-1985",
+      "title": "A Comprehensive Grammar of the English Language",
+      "authors": [
+        "Randolph Quirk",
+        "Sidney Greenbaum",
+        "Geoffrey Leech",
+        "Jan Svartvik"
+      ],
+      "publication_year": 1985,
+      "publisher": "Longman",
+      "isbn": "978-0582517349",
+      "provenance_uri": "urn:isbn:978-0582517349",
+      "catalog_source": "OpenLibrary:OL2864840M; British Library",
+      "license": "ALL_RIGHTS_RESERVED",
+      "byte_basis": "CANONICAL_JSON_BIBLIOGRAPHIC_METADATA_RECORD",
+      "epistemic_disclosure": "Digest computed over canonical bibliographic metadata record; does NOT represent full book text.",
+      "cited_sections": [
+        "§18.24–39",
+        "§3.58–62",
+        "§4.49–66",
+        "§14.23",
+        "§15.56–62",
+        "§16.64–68"
+      ],
+      "source_sha256": "595b3f9865ce58b7ecf040a9a72554048a680e9bd44f0b780d9e9257c80ffe4d"
+    },
+    {
+      "source_id": "src-v2-grammar-ref-huddleston-2002",
+      "title": "The Cambridge Grammar of the English Language",
+      "authors": [
+        "Rodney Huddleston",
+        "Geoffrey K. Pullum"
+      ],
+      "publication_year": 2002,
+      "publisher": "Cambridge University Press",
+      "isbn": "978-0521431460",
+      "provenance_uri": "urn:isbn:978-0521431460",
+      "catalog_source": "OpenLibrary:OL3943841M; Cambridge Core",
+      "license": "ALL_RIGHTS_RESERVED",
+      "byte_basis": "CANONICAL_JSON_BIBLIOGRAPHIC_METADATA_RECORD",
+      "epistemic_disclosure": "Digest computed over canonical bibliographic metadata record; does NOT represent full book text.",
+      "cited_sections": [
+        "Ch. 3 §1.4",
+        "Ch. 8 §2",
+        "Ch. 11 §7",
+        "Ch. 14 §3.2"
+      ],
+      "source_sha256": "e1a1ebd12d3c982be05adc7445450f58008e7b01b0da97983a7603080b680148"
+    },
+    {
+      "source_id": "src-v2-grammar-ref-biber-1999",
+      "title": "Longman Grammar of Spoken and Written English",
+      "authors": [
+        "Douglas Biber",
+        "Stig Johansson",
+        "Geoffrey Leech",
+        "Susan Conrad",
+        "Edward Finegan"
+      ],
+      "publication_year": 1999,
+      "publisher": "Longman",
+      "isbn": "978-0582045620",
+      "provenance_uri": "urn:isbn:978-0582045620",
+      "catalog_source": "OpenLibrary:OL3943840M; British Library; Cambridge Core Review",
+      "license": "ALL_RIGHTS_RESERVED",
+      "byte_basis": "CANONICAL_JSON_BIBLIOGRAPHIC_METADATA_RECORD",
+      "epistemic_disclosure": "Digest computed over canonical bibliographic metadata record; does NOT represent full book text.",
+      "cited_sections": [
+        "§9.4",
+        "§11.3",
+        "§11.4"
+      ],
+      "source_sha256": "239d5ea2afbc607f85e0e5f393c7cd72e79a9d2aa08578ded838ead3aeacc5e6"
+    },
+    {
+      "source_id": "src-v2-grammar-ref-murphy-2019",
+      "title": "English Grammar in Use",
+      "edition": "5th Edition",
+      "authors": [
+        "Raymond Murphy"
+      ],
+      "publication_year": 2019,
+      "publisher": "Cambridge University Press",
+      "isbn": "978-1108457651",
+      "provenance_uri": "urn:isbn:978-1108457651",
+      "catalog_source": "Cambridge University Press Catalog (assets.cambridge.org/97811084/57651)",
+      "license": "ALL_RIGHTS_RESERVED",
+      "byte_basis": "CANONICAL_JSON_BIBLIOGRAPHIC_METADATA_RECORD",
+      "epistemic_disclosure": "Digest computed over canonical bibliographic metadata record; does NOT represent full book text.",
+      "cited_sections": [
+        "Units 27–29"
+      ],
+      "source_sha256": "0dca77d384a63795dab78d4027ab785bd195ddc69aadaf8626ad8a5357f57f72"
+    },
+    {
+      "source_id": "src-v2-grammar-ref-hewings-2013",
+      "title": "Advanced Grammar in Use",
+      "edition": "3rd Edition",
+      "authors": [
+        "Martin Hewings"
+      ],
+      "publication_year": 2013,
+      "publisher": "Cambridge University Press",
+      "isbn": "978-1107690691",
+      "provenance_uri": "urn:isbn:978-1107690691",
+      "catalog_source": "Cambridge University Press Catalog (assets.cambridge.org/97811076/90691)",
+      "license": "ALL_RIGHTS_RESERVED",
+      "byte_basis": "CANONICAL_JSON_BIBLIOGRAPHIC_METADATA_RECORD",
+      "epistemic_disclosure": "Digest computed over canonical bibliographic metadata record; does NOT represent full book text.",
+      "cited_sections": [
+        "Unit 24"
+      ],
+      "source_sha256": "1730910af825cdf98d23fa94ebe5f719b22c07d14e8167541956f8a3c728f01a"
+    }
+  ],
+  "total_rule_packs": 7,
+  "rule_packs": [
+    {
+      "rule_pack_id": "fam-v2-grammar-inversion",
+      "topic": "Negative and Restrictive Adverbial Inversion",
+      "level": "C1",
+      "source_id": "src-v2-grammar-ref-quirk-1985",
+      "source_family": "fam-v2-grammar-inversion",
+      "source_version": "v2.0",
+      "source_sha256": "07916d26f79aa38795cac0251c278c53b9947032f9f510272a292363df2721d0",
+      "license": "ALL_RIGHTS_RESERVED",
+      "provenance_uri": "urn:isbn:978-0582517349",
+      "sub_rules_count": 3,
+      "rule_ids": [
+        "INV-01",
+        "INV-02",
+        "INV-03"
+      ],
+      "examples_count": 8,
+      "applicability_rules_count": 4,
+      "exceptions_count": 3
+    },
+    {
+      "rule_pack_id": "fam-v2-grammar-conditionals",
+      "topic": "Mixed Time-Reference and Inverted Conditionals",
+      "level": "B2 / C1",
+      "source_id": "src-v2-grammar-ref-huddleston-2002",
+      "source_family": "fam-v2-grammar-conditionals",
+      "source_version": "v2.0",
+      "source_sha256": "8a35948a1b5825b9aa95a70b73d44ac3569475944c321a49d059ae62bae637f4",
+      "license": "ALL_RIGHTS_RESERVED",
+      "provenance_uri": "urn:isbn:978-0521431460",
+      "sub_rules_count": 3,
+      "rule_ids": [
+        "COND-01",
+        "COND-02",
+        "COND-03"
+      ],
+      "examples_count": 8,
+      "applicability_rules_count": 3,
+      "exceptions_count": 3
+    },
+    {
+      "rule_pack_id": "fam-v2-grammar-clefts",
+      "topic": "It-Clefts and Wh-Pseudo-Clefts",
+      "level": "C1",
+      "source_id": "src-v2-grammar-ref-biber-1999",
+      "source_family": "fam-v2-grammar-clefts",
+      "source_version": "v2.0",
+      "source_sha256": "87488c7c3ce68f299eec0097854b63c45c6fdfe6b83d7146977156d2e37a0e53",
+      "license": "ALL_RIGHTS_RESERVED",
+      "provenance_uri": "urn:isbn:978-0582045620",
+      "sub_rules_count": 3,
+      "rule_ids": [
+        "CLEFT-01",
+        "CLEFT-02",
+        "CLEFT-03"
+      ],
+      "examples_count": 8,
+      "applicability_rules_count": 3,
+      "exceptions_count": 3
+    },
+    {
+      "rule_pack_id": "fam-v2-grammar-subjunctive",
+      "topic": "Mandative and Formulaic Subjunctive",
+      "level": "B2 / C1",
+      "source_id": "src-v2-grammar-ref-quirk-1985",
+      "source_family": "fam-v2-grammar-subjunctive",
+      "source_version": "v2.0",
+      "source_sha256": "799f23728f702e902793bf2ac0bf384ab3607e1adff0ac245bf2dcc0fcff7134",
+      "license": "ALL_RIGHTS_RESERVED",
+      "provenance_uri": "urn:isbn:978-0582517349",
+      "sub_rules_count": 3,
+      "rule_ids": [
+        "SUBJ-01",
+        "SUBJ-02",
+        "SUBJ-03"
+      ],
+      "examples_count": 8,
+      "applicability_rules_count": 4,
+      "exceptions_count": 3
+    },
+    {
+      "rule_pack_id": "fam-v2-grammar-participles",
+      "topic": "Participle Clauses and Reduced Relatives",
+      "level": "B2",
+      "source_id": "src-v2-grammar-ref-biber-1999",
+      "source_family": "fam-v2-grammar-participles",
+      "source_version": "v2.0",
+      "source_sha256": "0910cee247a1ada7749a9a67fe2660e64406dbafae336bf3e2588db7bf09722e",
+      "license": "ALL_RIGHTS_RESERVED",
+      "provenance_uri": "urn:isbn:978-0582045620",
+      "sub_rules_count": 3,
+      "rule_ids": [
+        "PART-01",
+        "PART-02",
+        "PART-03"
+      ],
+      "examples_count": 8,
+      "applicability_rules_count": 4,
+      "exceptions_count": 3
+    },
+    {
+      "rule_pack_id": "fam-v2-grammar-modals",
+      "topic": "Past Speculation and Logical Deduction",
+      "level": "B2",
+      "source_id": "src-v2-grammar-ref-murphy-2019",
+      "source_family": "fam-v2-grammar-modals",
+      "source_version": "v2.0",
+      "source_sha256": "771423dcf1f172d4347365aeaccd82fb738572793ed6d81cb6209ebfb9c6c62f",
+      "license": "ALL_RIGHTS_RESERVED",
+      "provenance_uri": "urn:isbn:978-1108457651",
+      "sub_rules_count": 3,
+      "rule_ids": [
+        "MOD-01",
+        "MOD-02",
+        "MOD-03"
+      ],
+      "examples_count": 8,
+      "applicability_rules_count": 4,
+      "exceptions_count": 3
+    },
+    {
+      "rule_pack_id": "fam-v2-grammar-passives",
+      "topic": "Impersonal and Reporting Passives",
+      "level": "B1 / B2",
+      "source_id": "src-v2-grammar-ref-hewings-2013",
+      "source_family": "fam-v2-grammar-passives",
+      "source_version": "v2.0",
+      "source_sha256": "43f67721634f3b08333f7f76861700355ea09bf55e059442ad49e63be359dfa4",
+      "license": "ALL_RIGHTS_RESERVED",
+      "provenance_uri": "urn:isbn:978-1107690691",
+      "sub_rules_count": 3,
+      "rule_ids": [
+        "PASS-01",
+        "PASS-02",
+        "PASS-03"
+      ],
+      "examples_count": 8,
+      "applicability_rules_count": 3,
+      "exceptions_count": 3
+    }
+  ],
+  "total_sub_rules": 21,
+  "sub_rules_registry": {
+    "INV-01": {
+      "family_id": "fam-v2-grammar-inversion",
+      "syntactic_target": "Fronted negative adjunct inversion",
+      "reference": "Quirk et al. §18.24–28; Huddleston Ch. 11 §7.1",
+      "egp_target": "INVERSION",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "INV-02": {
+      "family_id": "fam-v2-grammar-inversion",
+      "syntactic_target": "Restrictive only-adjunct inversion",
+      "reference": "Quirk et al. §18.29–33; Huddleston Ch. 11 §7.1",
+      "egp_target": "INVERSION",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "INV-03": {
+      "family_id": "fam-v2-grammar-inversion",
+      "syntactic_target": "Correlative not only... but also inversion",
+      "reference": "Quirk et al. §18.34–36",
+      "egp_target": "INVERSION / CONJUNCTIONS",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "COND-01": {
+      "family_id": "fam-v2-grammar-conditionals",
+      "syntactic_target": "Mixed past counterfactual to present state",
+      "reference": "Quirk et al. §14.23; Huddleston Ch. 8 §2.2",
+      "egp_target": "CONDITIONALS",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "COND-02": {
+      "family_id": "fam-v2-grammar-conditionals",
+      "syntactic_target": "Mixed ongoing state to past counterfactual outcome",
+      "reference": "Quirk et al. §14.23; Huddleston Ch. 8 §2.2",
+      "egp_target": "CONDITIONALS",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "COND-03": {
+      "family_id": "fam-v2-grammar-conditionals",
+      "syntactic_target": "Inverted conditional with operator fronting (had, were, should)",
+      "reference": "Quirk et al. §14.23 Note b, §15.35; Huddleston Ch. 8 §2.4",
+      "egp_target": "INVERSION / CONDITIONALS",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "CLEFT-01": {
+      "family_id": "fam-v2-grammar-clefts",
+      "syntactic_target": "It-cleft focused adjunct or noun phrase",
+      "reference": "Quirk et al. §18.25–30; Biber et al. §11.4",
+      "egp_target": "CLEFT SENTENCES",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "CLEFT-02": {
+      "family_id": "fam-v2-grammar-clefts",
+      "syntactic_target": "Wh-pseudo-cleft with nominal relative clause",
+      "reference": "Quirk et al. §18.31–32; Biber et al. §11.4",
+      "egp_target": "CLEFT SENTENCES",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "CLEFT-03": {
+      "family_id": "fam-v2-grammar-clefts",
+      "syntactic_target": "Reversed wh-pseudo-cleft",
+      "reference": "Quirk et al. §18.32; Biber et al. §11.4",
+      "egp_target": "CLEFT SENTENCES",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "SUBJ-01": {
+      "family_id": "fam-v2-grammar-subjunctive",
+      "syntactic_target": "Mandative subjunctive base form after suasion predicates",
+      "reference": "Quirk et al. §3.58–59; Huddleston Ch. 3 §1.4",
+      "egp_target": "SUBJUNCTIVE / MODALITY",
+      "provisional_cefr": "B2 / C1",
+      "cefr_evidence_status": "FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION"
+    },
+    "SUBJ-02": {
+      "family_id": "fam-v2-grammar-subjunctive",
+      "syntactic_target": "Negative mandative subjunctive (not + base)",
+      "reference": "Quirk et al. §3.59; Huddleston Ch. 3 §1.4",
+      "egp_target": "SUBJUNCTIVE / NEGATION",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "SUBJ-03": {
+      "family_id": "fam-v2-grammar-subjunctive",
+      "syntactic_target": "Formulaic subjunctive archaic set expressions",
+      "reference": "Quirk et al. §3.61; Huddleston Ch. 3 §1.4",
+      "egp_target": "FIXED PHRASES",
+      "provisional_cefr": "C1",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "PART-01": {
+      "family_id": "fam-v2-grammar-participles",
+      "syntactic_target": "Present adverbial participle clauses (V-ing)",
+      "reference": "Quirk et al. §15.56–58; Biber et al. §9.4",
+      "egp_target": "CLAUSES (NON-FINITE)",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "PART-02": {
+      "family_id": "fam-v2-grammar-participles",
+      "syntactic_target": "Perfect participle clauses (Having + past participle)",
+      "reference": "Quirk et al. §15.59–60; Biber et al. §9.4",
+      "egp_target": "CLAUSES (NON-FINITE)",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "PART-03": {
+      "family_id": "fam-v2-grammar-participles",
+      "syntactic_target": "Passive participle clauses and reduced relatives",
+      "reference": "Quirk et al. §15.61–62; Biber et al. §9.4",
+      "egp_target": "RELATIVE CLAUSES / PASSIVES",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "MOD-01": {
+      "family_id": "fam-v2-grammar-modals",
+      "syntactic_target": "Epistemic high-certainty affirmative past deduction (must have + PP)",
+      "reference": "Quirk et al. §4.53–54; Murphy Units 27–29",
+      "egp_target": "MODALITY (PAST)",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "MOD-02": {
+      "family_id": "fam-v2-grammar-modals",
+      "syntactic_target": "Epistemic high-certainty negative past deduction (cannot / could not have + PP)",
+      "reference": "Quirk et al. §4.55; Murphy Units 27–29",
+      "egp_target": "MODALITY (PAST)",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "MOD-03": {
+      "family_id": "fam-v2-grammar-modals",
+      "syntactic_target": "Epistemic tentative possibility past speculation (may / might / could have + PP)",
+      "reference": "Quirk et al. §4.56–60; Murphy Units 27–29",
+      "egp_target": "MODALITY (PAST)",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "PASS-01": {
+      "family_id": "fam-v2-grammar-passives",
+      "syntactic_target": "Impersonal reporting passives with dummy it (It is believed / reported that)",
+      "reference": "Quirk et al. §16.64; Hewings Unit 24; Biber §11.3",
+      "egp_target": "PASSIVES (REPORTING)",
+      "provisional_cefr": "B1 / B2",
+      "cefr_evidence_status": "FLAGGED_FOR_CURATOR_ADJUDICATION"
+    },
+    "PASS-02": {
+      "family_id": "fam-v2-grammar-passives",
+      "syntactic_target": "Personal reporting passives (Subject + be + passive + to-infinitive)",
+      "reference": "Quirk et al. §16.65; Hewings Unit 24; Huddleston Ch. 14 §3.2",
+      "egp_target": "PASSIVES (REPORTING)",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    },
+    "PASS-03": {
+      "family_id": "fam-v2-grammar-passives",
+      "syntactic_target": "Personal reporting passives with perfect infinitive (to have + PP)",
+      "reference": "Quirk et al. §16.65; Hewings Unit 24; Biber §11.3",
+      "egp_target": "PASSIVES (REPORTING)",
+      "provisional_cefr": "B2",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+    }
+  },
+  "total_examples": 56,
+  "governance_and_rights": {
+    "publisher_rights_status": "ALL_RIGHTS_RESERVED",
+    "institutional_legal_doctrine": "FAIR_USE_AND_FAIR_DEALING_EDUCATIONAL_RESEARCH",
+    "fair_use_memorandum_status": "PENDING_INSTITUTIONAL_SIGN_OFF",
+    "cefr_alignment_status": "PROPOSED_PENDING_CURATOR_ADJUDICATION",
+    "unsupported_claims_flagged": [
+      "SUBJ-01: Claim of EGP B2 American vs C1 British dialectal split is unsupported by in-repo evidence and flagged for curator adjudication.",
+      "PASS-01: Suitability of B1 impersonal passives for academic IELTS flagged for curator calibration."
+    ],
+    "reading_findings_status": "REVIEW_REQUIRED_PENDING_CURATOR_ADJUDICATION",
+    "dataset_ready_state": "HOLD"
+  }
+}
