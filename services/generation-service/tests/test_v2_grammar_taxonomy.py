@@ -26,6 +26,8 @@ import pytest
 from app.contracts.research import GrammarRulePack, SourceRef
 from app.experiment.grammar_packs_v2 import (
     PUBLISHER_RIGHTS_ALL_RESERVED,
+    REFERENCE_WORK_SOURCE_SHA256,
+    RULE_PACK_CONTENT_SHA256,
     V2_EXAMPLE_SUB_RULE_MAP,
     V2_GRAMMAR_ERROR_TAXONOMY,
     V2_GRAMMAR_RULE_PACKS,
@@ -86,7 +88,7 @@ def test_rule_pack_provenance_and_rights_integrity() -> None:
 
 
 def test_sha256_digest_integrity_and_determinism() -> None:
-    """Asserts that source_sha256 matches canonical compute_rulepack_content_sha256."""
+    """Asserts that source_sha256 matches cited source record and content_sha256 is deterministic."""
     citation_map = {
         "fam-v2-grammar-inversion": "Quirk, Greenbaum, Leech, & Svartvik (1985) §18.24–39; Huddleston & Pullum (2002) Ch. 11 §7",
         "fam-v2-grammar-conditionals": "Quirk et al. (1985) §14.23; Huddleston & Pullum (2002) Ch. 8 §2",
@@ -98,8 +100,15 @@ def test_sha256_digest_integrity_and_determinism() -> None:
     }
 
     for pack in list_v2_grammar_rule_packs():
+        # 1. SourceRef.source_sha256 must match the authentic reference work SHA-256
+        expected_source_hash = REFERENCE_WORK_SOURCE_SHA256[pack.source.source_id]
+        assert pack.source.source_sha256 == expected_source_hash, (
+            f"SourceRef hash mismatch for {pack.rule_pack_id}: {pack.source.source_sha256} != {expected_source_hash}"
+        )
+
+        # 2. RulePack content SHA-256 must match deterministic recomputation
         expected_citation = citation_map[pack.rule_pack_id]
-        recomputed = compute_rulepack_content_sha256(
+        recomputed_content_hash = compute_rulepack_content_sha256(
             pack.rule_pack_id,
             pack.topic,
             pack.level,
@@ -109,10 +118,9 @@ def test_sha256_digest_integrity_and_determinism() -> None:
             pack.examples,
             expected_citation,
         )
-        assert pack.source.source_sha256 == recomputed, (
-            f"Digest mismatch for {pack.rule_pack_id}: {pack.source.source_sha256} != {recomputed}"
+        assert RULE_PACK_CONTENT_SHA256[pack.rule_pack_id] == recomputed_content_hash, (
+            f"Content hash mismatch for {pack.rule_pack_id}"
         )
-
 
 # ===========================================================================
 # Tier 2: Sub-Rule Registry & Epistemic CEFR Tracking
@@ -136,20 +144,32 @@ def test_sub_rule_registry_and_cardinality() -> None:
 
 
 def test_epistemic_cefr_status_tracking() -> None:
-    """Asserts that provisional CEFR status and unverified claims are transparently flagged."""
+    """Asserts that all sub-rules are tracked as PROPOSED and review items are flagged."""
+    for r_id, entry in V2_SUB_RULE_REGISTRY.items():
+        # Every sub-rule must have explicit cefr_attribution == "PROPOSED"
+        assert entry["cefr_attribution"] == "PROPOSED", (
+            f"Expected cefr_attribution='PROPOSED' for {r_id}, got '{entry.get('cefr_attribution')}'"
+        )
+        assert entry["cefr_evidence_status"].startswith("PROPOSED_"), (
+            f"Evidence status must start with PROPOSED_ for {r_id}: '{entry['cefr_evidence_status']}'"
+        )
+        assert "adjudication_note" in entry and len(entry["adjudication_note"]) > 10
+
     # SUBJ-01 must be flagged for curator adjudication (regional dialect split unsupported)
     subj_01 = V2_SUB_RULE_REGISTRY["SUBJ-01"]
-    assert subj_01["cefr_evidence_status"] == "FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION"
+    assert subj_01["cefr_evidence_status"] == "PROPOSED_FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION"
+    assert subj_01["curator_adjudication_required"] is True
 
     # PASS-01 must be flagged for curator adjudication (B1 suitability for academic IELTS)
     pass_01 = V2_SUB_RULE_REGISTRY["PASS-01"]
-    assert pass_01["cefr_evidence_status"] == "FLAGGED_FOR_CURATOR_ADJUDICATION"
+    assert pass_01["cefr_evidence_status"] == "PROPOSED_FLAGGED_FOR_CURATOR_ADJUDICATION"
+    assert pass_01["curator_adjudication_required"] is True
 
-    # All other sub-rules must explicitly denote that primary Cambridge EGP descriptor codes are pending
+    # All other 19 sub-rules require primary Cambridge EGP descriptor ID verification
     for r_id, entry in V2_SUB_RULE_REGISTRY.items():
         if r_id not in {"SUBJ-01", "PASS-01"}:
             assert entry["cefr_evidence_status"] == "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
-
+            assert entry["curator_adjudication_required"] is False
 
 # ===========================================================================
 # Tier 3: Original Academic Examples & Invariant Checks
@@ -482,7 +502,10 @@ def test_grammar_provenance_ledger_file_integrity() -> None:
         live_pack = get_v2_grammar_rule_pack(family_id)
         ledger_pack = ledger_pack_map[family_id]
         assert live_pack.source.source_sha256 == ledger_pack["source_sha256"], (
-            f"SHA-256 mismatch between live pack and ledger for {family_id}"
+            f"Source SHA-256 mismatch between live pack and ledger for {family_id}"
+        )
+        assert RULE_PACK_CONTENT_SHA256[family_id] == ledger_pack["rule_pack_content_sha256"], (
+            f"Content SHA-256 mismatch between live pack and ledger for {family_id}"
         )
         assert len(live_pack.examples) == ledger_pack["examples_count"] == 8
         assert len(live_pack.rule_ids) == ledger_pack["sub_rules_count"] == 3

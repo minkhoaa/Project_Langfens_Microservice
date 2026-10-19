@@ -27,10 +27,20 @@ from app.experiment.grammar_validator_v2 import (
 QUIRK_1985_ISBN = "urn:isbn:978-0582517349"
 HUDDLESTON_2002_ISBN = "urn:isbn:978-0521431460"
 BIBER_1999_ISBN = "urn:isbn:978-0582045620"
-HEWINGS_2013_ISBN = "urn:isbn:978-1107690691"
+HEWINGS_2013_ISBN = "urn:isbn:978-1107699892"
 MURPHY_2019_ISBN = "urn:isbn:978-1108457651"
 
 PUBLISHER_RIGHTS_ALL_RESERVED = "ALL_RIGHTS_RESERVED"
+
+# Cryptographic SHA-256 fingerprints of cited academic reference works
+# (Computed over canonical JSON bibliographic records in V2_GRAMMAR_PROVENANCE_LEDGER.json)
+REFERENCE_WORK_SOURCE_SHA256: Dict[str, str] = {
+    "src-v2-grammar-ref-quirk-1985": "595b3f9865ce58b7ecf040a9a72554048a680e9bd44f0b780d9e9257c80ffe4d",
+    "src-v2-grammar-ref-huddleston-2002": "e1a1ebd12d3c982be05adc7445450f58008e7b01b0da97983a7603080b680148",
+    "src-v2-grammar-ref-biber-1999": "1fea2e332b6c097c555db808f2de5a3ae0126db8fd4b6c14dff20120acf9c67c",
+    "src-v2-grammar-ref-murphy-2019": "0dca77d384a63795dab78d4027ab785bd195ddc69aadaf8626ad8a5357f57f72",
+    "src-v2-grammar-ref-hewings-2013": "65a5e4d8c487c15815f492eb43c7f5ba32cdd81ad224a2055195e690c7c8ac2b",
+}
 
 
 def compute_rulepack_content_sha256(
@@ -86,7 +96,7 @@ INV_EXAMPLES = [
     "Not only did the high-throughput sequencing platform lower per-base sequencing costs, but it also substantially improved long-read assembly fidelity.",
     "Not only did the paleoclimate team recover intact ice core samples from the subglacial ridge, but they also identified unoxidized tephra layers spanning three distinct volcanic episodes.",
 ]
-INV_SHA256 = compute_rulepack_content_sha256(
+INV_CONTENT_SHA256 = compute_rulepack_content_sha256(
     "fam-v2-grammar-inversion",
     INV_TOPIC,
     INV_LEVEL,
@@ -103,7 +113,7 @@ RULE_PACK_INVERSION = GrammarRulePack(
         source_id="src-v2-grammar-ref-quirk-1985",
         source_family="fam-v2-grammar-inversion",
         source_version="v2.0",
-        source_sha256=INV_SHA256,
+        source_sha256=REFERENCE_WORK_SOURCE_SHA256["src-v2-grammar-ref-quirk-1985"],
         license=PUBLISHER_RIGHTS_ALL_RESERVED,
         provenance_uri=QUIRK_1985_ISBN,
     ),
@@ -143,7 +153,7 @@ COND_EXAMPLES = [
     "Had climate modellers incorporated deep-ocean thermal inertia twenty years ago, their projected atmospheric warming trajectories would now correspond more closely to observed satellite data.",
     "Were the cryogenic storage chambers to lose cooling capability during power outages, irreplaceable bacterial culture specimens would suffer irreversible cellular damage.",
 ]
-COND_SHA256 = compute_rulepack_content_sha256(
+COND_CONTENT_SHA256 = compute_rulepack_content_sha256(
     "fam-v2-grammar-conditionals",
     COND_TOPIC,
     COND_LEVEL,
@@ -160,7 +170,7 @@ RULE_PACK_CONDITIONALS = GrammarRulePack(
         source_id="src-v2-grammar-ref-huddleston-2002",
         source_family="fam-v2-grammar-conditionals",
         source_version="v2.0",
-        source_sha256=COND_SHA256,
+        source_sha256=REFERENCE_WORK_SOURCE_SHA256["src-v2-grammar-ref-huddleston-2002"],
         license=PUBLISHER_RIGHTS_ALL_RESERVED,
         provenance_uri=HUDDLESTON_2002_ISBN,
     ),
@@ -200,7 +210,7 @@ CLEFT_EXAMPLES = [
     "Substantial attenuation of viral replication in human bronchial epithelium was what the synthetic peptide clinical trial definitively demonstrated.",
     "A profound shift in prevailing oceanic circulation patterns was what ultimately precipitated the rapid onset of the Younger Dryas climatic reversal.",
 ]
-CLEFT_SHA256 = compute_rulepack_content_sha256(
+CLEFT_CONTENT_SHA256 = compute_rulepack_content_sha256(
     "fam-v2-grammar-clefts",
     CLEFT_TOPIC,
     CLEFT_LEVEL,
@@ -217,7 +227,7 @@ RULE_PACK_CLEFTS = GrammarRulePack(
         source_id="src-v2-grammar-ref-biber-1999",
         source_family="fam-v2-grammar-clefts",
         source_version="v2.0",
-        source_sha256=CLEFT_SHA256,
+        source_sha256=REFERENCE_WORK_SOURCE_SHA256["src-v2-grammar-ref-biber-1999"],
         license=PUBLISHER_RIGHTS_ALL_RESERVED,
         provenance_uri=BIBER_1999_ISBN,
     ),
@@ -258,7 +268,7 @@ SUBJ_EXAMPLES = [
     "Suffice it to say that early hypotheses regarding passive lunar mantle cooling proved fundamentally incompatible with contemporary seismological readings.",
     "Be that as it may, subsequent petrological analyses confirmed that volatile exsolution had already initiated prior to the major caldera collapse.",
 ]
-SUBJ_SHA256 = compute_rulepack_content_sha256(
+SUBJ_CONTENT_SHA256 = compute_rulepack_content_sha256(
     "fam-v2-grammar-subjunctive",
     SUBJ_TOPIC,
     SUBJ_LEVEL,
@@ -275,7 +285,7 @@ RULE_PACK_SUBJUNCTIVE = GrammarRulePack(
         source_id="src-v2-grammar-ref-quirk-1985",
         source_family="fam-v2-grammar-subjunctive",
         source_version="v2.0",
-        source_sha256=SUBJ_SHA256,
+        source_sha256=REFERENCE_WORK_SOURCE_SHA256["src-v2-grammar-ref-quirk-1985"],
         license=PUBLISHER_RIGHTS_ALL_RESERVED,
         provenance_uri=QUIRK_1985_ISBN,
     ),
@@ -316,7 +326,7 @@ PART_EXAMPLES = [
     "Treated with a specialized hydrophobic fluoropolymer spray, the micro-textured copper substrate exhibited sustained droplet roll-off under intense simulated rainfall.",
     "Artifacts discovered within the lower sedimentary layer provide compelling chronological evidence for metallurgical bronze casting in Southeast Asia by the second millennium BCE.",
 ]
-PART_SHA256 = compute_rulepack_content_sha256(
+PART_CONTENT_SHA256 = compute_rulepack_content_sha256(
     "fam-v2-grammar-participles",
     PART_TOPIC,
     PART_LEVEL,
@@ -333,7 +343,7 @@ RULE_PACK_PARTICIPLES = GrammarRulePack(
         source_id="src-v2-grammar-ref-biber-1999",
         source_family="fam-v2-grammar-participles",
         source_version="v2.0",
-        source_sha256=PART_SHA256,
+        source_sha256=REFERENCE_WORK_SOURCE_SHA256["src-v2-grammar-ref-biber-1999"],
         license=PUBLISHER_RIGHTS_ALL_RESERVED,
         provenance_uri=BIBER_1999_ISBN,
     ),
@@ -374,7 +384,7 @@ MOD_EXAMPLES = [
     "The unexplained attenuation of the seismic shear wave may have originated from a partially molten basaltic lens situated twenty kilometers beneath the caldera.",
     "Microbial communities inhabiting deep subglacial volcanic lakes might have adapted to extreme chemotrophic nutrient regimes over millions of years of complete photosynthetic isolation.",
 ]
-MOD_SHA256 = compute_rulepack_content_sha256(
+MOD_CONTENT_SHA256 = compute_rulepack_content_sha256(
     "fam-v2-grammar-modals",
     MOD_TOPIC,
     MOD_LEVEL,
@@ -391,7 +401,7 @@ RULE_PACK_MODALS = GrammarRulePack(
         source_id="src-v2-grammar-ref-murphy-2019",
         source_family="fam-v2-grammar-modals",
         source_version="v2.0",
-        source_sha256=MOD_SHA256,
+        source_sha256=REFERENCE_WORK_SOURCE_SHA256["src-v2-grammar-ref-murphy-2019"],
         license=PUBLISHER_RIGHTS_ALL_RESERVED,
         provenance_uri=MURPHY_2019_ISBN,
     ),
@@ -431,7 +441,7 @@ PASS_EXAMPLES = [
     "The asteroid impact at the Cretaceous-Paleogene boundary is understood to have triggered protracted atmospheric dust loading and global catastrophic wildfire surges.",
     "Early metallurgical smelting furnaces excavated in the eastern Mediterranean basin are believed to have attained operational temperatures exceeding twelve hundred degrees Celsius.",
 ]
-PASS_SHA256 = compute_rulepack_content_sha256(
+PASS_CONTENT_SHA256 = compute_rulepack_content_sha256(
     "fam-v2-grammar-passives",
     PASS_TOPIC,
     PASS_LEVEL,
@@ -448,7 +458,7 @@ RULE_PACK_PASSIVES = GrammarRulePack(
         source_id="src-v2-grammar-ref-hewings-2013",
         source_family="fam-v2-grammar-passives",
         source_version="v2.0",
-        source_sha256=PASS_SHA256,
+        source_sha256=REFERENCE_WORK_SOURCE_SHA256["src-v2-grammar-ref-hewings-2013"],
         license=PUBLISHER_RIGHTS_ALL_RESERVED,
         provenance_uri=HEWINGS_2013_ISBN,
     ),
@@ -474,6 +484,16 @@ V2_GRAMMAR_RULE_PACKS: Dict[str, GrammarRulePack] = {
     "fam-v2-grammar-passives": RULE_PACK_PASSIVES,
 }
 
+RULE_PACK_CONTENT_SHA256: Dict[str, str] = {
+    "fam-v2-grammar-inversion": INV_CONTENT_SHA256,
+    "fam-v2-grammar-conditionals": COND_CONTENT_SHA256,
+    "fam-v2-grammar-clefts": CLEFT_CONTENT_SHA256,
+    "fam-v2-grammar-subjunctive": SUBJ_CONTENT_SHA256,
+    "fam-v2-grammar-participles": PART_CONTENT_SHA256,
+    "fam-v2-grammar-modals": MOD_CONTENT_SHA256,
+    "fam-v2-grammar-passives": PASS_CONTENT_SHA256,
+}
+
 V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
     "INV-01": {
         "family_id": "fam-v2-grammar-inversion",
@@ -481,7 +501,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §18.24–28; Huddleston Ch. 11 §7.1",
         "egp_target": "INVERSION",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "INV-02": {
         "family_id": "fam-v2-grammar-inversion",
@@ -489,7 +512,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §18.29–33; Huddleston Ch. 11 §7.1",
         "egp_target": "INVERSION",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "INV-03": {
         "family_id": "fam-v2-grammar-inversion",
@@ -497,7 +523,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §18.34–36",
         "egp_target": "INVERSION / CONJUNCTIONS",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "COND-01": {
         "family_id": "fam-v2-grammar-conditionals",
@@ -505,7 +534,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §14.23; Huddleston Ch. 8 §2.2",
         "egp_target": "CONDITIONALS",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "COND-02": {
         "family_id": "fam-v2-grammar-conditionals",
@@ -513,7 +545,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §14.23; Huddleston Ch. 8 §2.2",
         "egp_target": "CONDITIONALS",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "COND-03": {
         "family_id": "fam-v2-grammar-conditionals",
@@ -521,7 +556,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §14.23 Note b, §15.35; Huddleston Ch. 8 §2.4",
         "egp_target": "INVERSION / CONDITIONALS",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "CLEFT-01": {
         "family_id": "fam-v2-grammar-clefts",
@@ -529,7 +567,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §18.25–30; Biber et al. §11.4",
         "egp_target": "CLEFT SENTENCES",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "CLEFT-02": {
         "family_id": "fam-v2-grammar-clefts",
@@ -537,7 +578,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §18.31–32; Biber et al. §11.4",
         "egp_target": "CLEFT SENTENCES",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "CLEFT-03": {
         "family_id": "fam-v2-grammar-clefts",
@@ -545,7 +589,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §18.32; Biber et al. §11.4",
         "egp_target": "CLEFT SENTENCES",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "SUBJ-01": {
         "family_id": "fam-v2-grammar-subjunctive",
@@ -553,7 +600,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §3.58–59; Huddleston Ch. 3 §1.4",
         "egp_target": "SUBJUNCTIVE / MODALITY",
         "provisional_cefr": "B2 / C1",
-        "cefr_evidence_status": "FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION",
+        "cefr_attribution": "PROPOSED",
+        "cefr_evidence_status": "PROPOSED_FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION",
+        "curator_adjudication_required": True,
+        "adjudication_note": "Descriptive grammars confirm base form usage. Regional B2 vs C1 split claim is unsupported by in-repo evidence. Curator adjudication required to pin either C1 or B2/C1.",
     },
     "SUBJ-02": {
         "family_id": "fam-v2-grammar-subjunctive",
@@ -561,7 +611,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §3.59; Huddleston Ch. 3 §1.4",
         "egp_target": "SUBJUNCTIVE / NEGATION",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "SUBJ-03": {
         "family_id": "fam-v2-grammar-subjunctive",
@@ -569,7 +622,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §3.61; Huddleston Ch. 3 §1.4",
         "egp_target": "FIXED PHRASES",
         "provisional_cefr": "C1",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "PART-01": {
         "family_id": "fam-v2-grammar-participles",
@@ -577,7 +633,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §15.56–58; Biber et al. §9.4",
         "egp_target": "CLAUSES (NON-FINITE)",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "PART-02": {
         "family_id": "fam-v2-grammar-participles",
@@ -585,7 +644,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §15.59–60; Biber et al. §9.4",
         "egp_target": "CLAUSES (NON-FINITE)",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "PART-03": {
         "family_id": "fam-v2-grammar-participles",
@@ -593,7 +655,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §15.61–62; Biber et al. §9.4",
         "egp_target": "RELATIVE CLAUSES / PASSIVES",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "MOD-01": {
         "family_id": "fam-v2-grammar-modals",
@@ -601,7 +666,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §4.53–54; Murphy Units 27–29",
         "egp_target": "MODALITY (PAST)",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "MOD-02": {
         "family_id": "fam-v2-grammar-modals",
@@ -609,7 +677,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §4.55; Murphy Units 27–29",
         "egp_target": "MODALITY (PAST)",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "MOD-03": {
         "family_id": "fam-v2-grammar-modals",
@@ -617,7 +688,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §4.56–60; Murphy Units 27–29",
         "egp_target": "MODALITY (PAST)",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "PASS-01": {
         "family_id": "fam-v2-grammar-passives",
@@ -625,7 +699,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §16.64; Hewings Unit 24; Biber §11.3",
         "egp_target": "PASSIVES (REPORTING)",
         "provisional_cefr": "B1 / B2",
-        "cefr_evidence_status": "FLAGGED_FOR_CURATOR_ADJUDICATION",
+        "cefr_attribution": "PROPOSED",
+        "cefr_evidence_status": "PROPOSED_FLAGGED_FOR_CURATOR_ADJUDICATION",
+        "curator_adjudication_required": True,
+        "adjudication_note": "Proposed B1 in ESL curricula; academic IELTS appropriateness under review.",
     },
     "PASS-02": {
         "family_id": "fam-v2-grammar-passives",
@@ -633,7 +710,10 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §16.65; Hewings Unit 24; Huddleston Ch. 14 §3.2",
         "egp_target": "PASSIVES (REPORTING)",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
     "PASS-03": {
         "family_id": "fam-v2-grammar-passives",
@@ -641,10 +721,12 @@ V2_SUB_RULE_REGISTRY: Dict[str, Dict[str, Any]] = {
         "reference": "Quirk et al. §16.65; Hewings Unit 24; Biber §11.3",
         "egp_target": "PASSIVES (REPORTING)",
         "provisional_cefr": "B2",
+        "cefr_attribution": "PROPOSED",
         "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+        "curator_adjudication_required": False,
+        "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace.",
     },
 }
-
 
 def get_v2_grammar_rule_pack(rule_pack_id: str) -> GrammarRulePack:
     """Retrieves an authoritative GrammarRulePack by its identifier."""

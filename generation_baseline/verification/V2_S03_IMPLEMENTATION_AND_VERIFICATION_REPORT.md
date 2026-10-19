@@ -31,45 +31,44 @@ Sprint V2-S03 resolves the root causes of Grammar task corruption identified dur
 
 Each RulePack is formalized as an immutable `GrammarRulePack` instance in `services/generation-service/app/experiment/grammar_packs_v2.py`:
 
-| Family ID | Target Syntactic Structure | Academic Citation | ISBN URN | Level | Content SHA-256 Digest |
-|---|---|---|---|---|---|
-| `fam-v2-grammar-inversion` | Negative & Restrictive Adverbial Inversion | Quirk et al. (1985) §18.24–39;<br>Huddleston & Pullum (2002) Ch. 11 §7 | `urn:isbn:978-0582517349` | `C1` | `07916d26f79aa38795cac0251c278c53b9947032f9f510272a292363df2721d0` |
-| `fam-v2-grammar-conditionals` | Mixed Time-Reference & Inverted Conditionals | Quirk et al. (1985) §14.23;<br>Huddleston & Pullum (2002) Ch. 8 §2 | `urn:isbn:978-0521431460` | `B2 / C1` | `8a35948a1b5825b9aa95a70b73d44ac3569475944c321a49d059ae62bae637f4` |
-| `fam-v2-grammar-clefts` | It-Clefts and Wh-Pseudo-Clefts | Biber et al. (1999) §11.4;<br>Quirk et al. (1985) §18.25–32 | `urn:isbn:978-0582045620` | `C1` | `87488c7c3ce68f299eec0097854b63c45c6fdfe6b83d7146977156d2e37a0e53` |
-| `fam-v2-grammar-subjunctive` | Mandative & Formulaic Subjunctive | Quirk et al. (1985) §3.58–62;<br>Huddleston & Pullum (2002) Ch. 3 §1.4 | `urn:isbn:978-0582517349` | `B2 / C1` | `799f23728f702e902793bf2ac0bf384ab3607e1adff0ac245bf2dcc0fcff7134` |
-| `fam-v2-grammar-participles` | Participle Clauses & Reduced Relatives | Quirk et al. (1985) §15.56–62;<br>Biber et al. (1999) §9.4 | `urn:isbn:978-0582045620` | `B2` | `0910cee247a1ada7749a9a67fe2660e64406dbafae336bf3e2588db7bf09722e` |
-| `fam-v2-grammar-modals` | Past Speculation & Logical Deduction | Quirk et al. (1985) §4.49–66;<br>Murphy (2019) Units 27–29 | `urn:isbn:978-1108457651` | `B2` | `771423dcf1f172d4347365aeaccd82fb738572793ed6d81cb6209ebfb9c6c62f` |
-| `fam-v2-grammar-passives` | Impersonal & Reporting Passives | Quirk et al. (1985) §16.64–68;<br>Hewings (2013) Unit 24;<br>Biber et al. (1999) §11.3 | `urn:isbn:978-1107690691` | `B1 / B2` | `43f67721634f3b08333f7f76861700355ea09bf55e059442ad49e63be359dfa4` |
-
+| Family ID | Target Syntactic Structure | Academic Citation | ISBN URN | Level | SourceRef SHA-256 (Source Record) | Content SHA-256 (RulePack Content) |
+|---|---|---|---|---|---|---|
+| `fam-v2-grammar-inversion` | Negative & Restrictive Adverbial Inversion | Quirk et al. (1985) §18.24–39;<br>Huddleston & Pullum (2002) Ch. 11 §7 | `urn:isbn:978-0582517349` | `C1` | `595b3f9865ce58b7ecf040a9a72554048a680e9bd44f0b780d9e9257c80ffe4d` | `07916d26f79aa38795cac0251c278c53b9947032f9f510272a292363df2721d0` |
+| `fam-v2-grammar-conditionals` | Mixed Time-Reference & Inverted Conditionals | Quirk et al. (1985) §14.23;<br>Huddleston & Pullum (2002) Ch. 8 §2 | `urn:isbn:978-0521431460` | `B2 / C1` | `e1a1ebd12d3c982be05adc7445450f58008e7b01b0da97983a7603080b680148` | `8a35948a1b5825b9aa95a70b73d44ac3569475944c321a49d059ae62bae637f4` |
+| `fam-v2-grammar-clefts` | It-Clefts and Wh-Pseudo-Clefts | Biber et al. (1999) §11.4;<br>Quirk et al. (1985) §18.25–32 | `urn:isbn:978-0582045620` | `C1` | `1fea2e332b6c097c555db808f2de5a3ae0126db8fd4b6c14dff20120acf9c67c` | `87488c7c3ce68f299eec0097854b63c45c6fdfe6b83d7146977156d2e37a0e53` |
+| `fam-v2-grammar-subjunctive` | Mandative & Formulaic Subjunctive | Quirk et al. (1985) §3.58–62;<br>Huddleston & Pullum (2002) Ch. 3 §1.4 | `urn:isbn:978-0582517349` | `B2 / C1` | `595b3f9865ce58b7ecf040a9a72554048a680e9bd44f0b780d9e9257c80ffe4d` | `799f23728f702e902793bf2ac0bf384ab3607e1adff0ac245bf2dcc0fcff7134` |
+| `fam-v2-grammar-participles` | Participle Clauses & Reduced Relatives | Quirk et al. (1985) §15.56–62;<br>Biber et al. (1999) §9.4 | `urn:isbn:978-0582045620` | `B2` | `1fea2e332b6c097c555db808f2de5a3ae0126db8fd4b6c14dff20120acf9c67c` | `0910cee247a1ada7749a9a67fe2660e64406dbafae336bf3e2588db7bf09722e` |
+| `fam-v2-grammar-modals` | Past Speculation & Logical Deduction | Quirk et al. (1985) §4.49–66;<br>Murphy (2019) Units 27–29 | `urn:isbn:978-1108457651` | `B2` | `0dca77d384a63795dab78d4027ab785bd195ddc69aadaf8626ad8a5357f57f72` | `771423dcf1f172d4347365aeaccd82fb738572793ed6d81cb6209ebfb9c6c62f` |
+| `fam-v2-grammar-passives` | Impersonal & Reporting Passives | Quirk et al. (1985) §16.64–68;<br>Hewings (2013) Unit 24;<br>Biber et al. (1999) §11.3 | `urn:isbn:978-1107699892` | `B1 / B2` | `65a5e4d8c487c15815f492eb43c7f5ba32cdd81ad224a2055195e690c7c8ac2b` | `43f67721634f3b08333f7f76861700355ea09bf55e059442ad49e63be359dfa4` |
 ---
 
 ## 3. Sub-Rule Registry & Epistemic CEFR Alignment
 
 All 21 sub-rules are registered in `V2_SUB_RULE_REGISTRY` with explicit epistemic disclosure:
 
-| Family ID | Sub-Rule ID | Target Syntactic Construction | Reference Section | EGP Category | Provisional CEFR | Evidence Status |
-|---|---|---|---|---|---|---|
-| `fam-v2-grammar-inversion` | `INV-01` | Fronted negative adjunct inversion | Quirk §18.24–28; H&P Ch. 11 §7.1 | INVERSION | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `INV-02` | Restrictive only-adjunct inversion | Quirk §18.29–33; H&P Ch. 11 §7.1 | INVERSION | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `INV-03` | Correlative not only... but also | Quirk §18.34–36 | INVERSION / CONJUNCTIONS | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| `fam-v2-grammar-conditionals` | `COND-01` | Mixed past condition $\to$ present outcome | Quirk §14.23; H&P Ch. 8 §2.2 | CONDITIONALS | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `COND-02` | Mixed ongoing state $\to$ past outcome | Quirk §14.23; H&P Ch. 8 §2.2 | CONDITIONALS | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `COND-03` | Inverted conditionals (*had*, *were*, *should*) | Quirk §14.23 Note b; H&P Ch. 8 §2.4 | INVERSION / CONDITIONALS | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| `fam-v2-grammar-clefts` | `CLEFT-01` | It-cleft focused adjunct or NP | Quirk §18.25–30; Biber §11.4 | CLEFT SENTENCES | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `CLEFT-02` | Wh-pseudo-cleft nominal relative | Quirk §18.31–32; Biber §11.4 | CLEFT SENTENCES | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `CLEFT-03` | Reversed wh-pseudo-cleft | Quirk §18.32; Biber §11.4 | CLEFT SENTENCES | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| `fam-v2-grammar-subjunctive` | `SUBJ-01` | Mandative subjunctive base form | Quirk §3.58–59; H&P Ch. 3 §1.4 | SUBJUNCTIVE / MODALITY | `B2 / C1` | **`FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION`** |
-| | `SUBJ-02` | Negative mandative (*not + base*) | Quirk §3.59; H&P Ch. 3 §1.4 | SUBJUNCTIVE / NEGATION | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `SUBJ-03` | Formulaic set expressions | Quirk §3.61; H&P Ch. 3 §1.4 | FIXED PHRASES | `C1` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| `fam-v2-grammar-participles` | `PART-01` | Present adverbial participle clauses | Quirk §15.56–58; Biber §9.4 | CLAUSES (NON-FINITE) | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `PART-02` | Perfect participle clauses (*having + PP*) | Quirk §15.59–60; Biber §9.4 | CLAUSES (NON-FINITE) | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `PART-03` | Passive participle & reduced relatives | Quirk §15.61–62; Biber §9.4 | RELATIVE CLAUSES / PASSIVES | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| `fam-v2-grammar-modals` | `MOD-01` | Epistemic certainty (*must have + PP*) | Quirk §4.53–54; Murphy U27–29 | MODALITY (PAST) | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `MOD-02` | Negative deduction (*cannot/could not have*) | Quirk §4.55; Murphy U27–29 | MODALITY (PAST) | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `MOD-03` | Tentative possibility (*may/might/could have*) | Quirk §4.56–60; Murphy U27–29 | MODALITY (PAST) | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| `fam-v2-grammar-passives` | `PASS-01` | Impersonal passives (*it is + V + that*) | Quirk §16.64; Hewings U24; Biber §11.3 | PASSIVES (REPORTING) | `B1 / B2` | **`FLAGGED_FOR_CURATOR_ADJUDICATION`** |
-| | `PASS-02` | Personal passives with to-infinitive | Quirk §16.65; Hewings U24; H&P Ch. 14 §3.2 | PASSIVES (REPORTING) | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
-| | `PASS-03` | Personal passives with perfect infinitive | Quirk §16.65; Hewings U24; Biber §11.3 | PASSIVES (REPORTING) | `B2` | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` |
+| Family ID | Sub-Rule ID | Target Syntactic Construction | Reference Section | EGP Category | CEFR Attribution | Evidence Status | Curator Review Required |
+|---|---|---|---|---|---|---|---|
+| `fam-v2-grammar-inversion` | `INV-01` | Fronted negative adjunct inversion | Quirk §18.24–28; H&P Ch. 11 §7.1 | INVERSION | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `INV-02` | Restrictive only-adjunct inversion | Quirk §18.29–33; H&P Ch. 11 §7.1 | INVERSION | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `INV-03` | Correlative not only... but also | Quirk §18.34–36 | INVERSION / CONJUNCTIONS | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| `fam-v2-grammar-conditionals` | `COND-01` | Mixed past condition $\to$ present outcome | Quirk §14.23; H&P Ch. 8 §2.2 | CONDITIONALS | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `COND-02` | Mixed ongoing state $\to$ past outcome | Quirk §14.23; H&P Ch. 8 §2.2 | CONDITIONALS | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `COND-03` | Inverted conditionals (*had*, *were*, *should*) | Quirk §14.23 Note b; H&P Ch. 8 §2.4 | INVERSION / CONDITIONALS | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| `fam-v2-grammar-clefts` | `CLEFT-01` | It-cleft focused adjunct or NP | Quirk §18.25–30; Biber §11.4 | CLEFT SENTENCES | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `CLEFT-02` | Wh-pseudo-cleft nominal relative | Quirk §18.31–32; Biber §11.4 | CLEFT SENTENCES | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `CLEFT-03` | Reversed wh-pseudo-cleft | Quirk §18.32; Biber §11.4 | CLEFT SENTENCES | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| `fam-v2-grammar-subjunctive` | `SUBJ-01` | Mandative subjunctive base form | Quirk §3.58–59; H&P Ch. 3 §1.4 | SUBJUNCTIVE / MODALITY | `PROPOSED` (B2/C1) | **`PROPOSED_FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION`** | **Yes (Curator)** |
+| | `SUBJ-02` | Negative mandative (*not + base*) | Quirk §3.59; H&P Ch. 3 §1.4 | SUBJUNCTIVE / NEGATION | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `SUBJ-03` | Formulaic set expressions | Quirk §3.61; H&P Ch. 3 §1.4 | FIXED PHRASES | `PROPOSED` (C1) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| `fam-v2-grammar-participles` | `PART-01` | Present adverbial participle clauses | Quirk §15.56–58; Biber §9.4 | CLAUSES (NON-FINITE) | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `PART-02` | Perfect participle clauses (*having + PP*) | Quirk §15.59–60; Biber §9.4 | CLAUSES (NON-FINITE) | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `PART-03` | Passive participle & reduced relatives | Quirk §15.61–62; Biber §9.4 | RELATIVE CLAUSES / PASSIVES | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| `fam-v2-grammar-modals` | `MOD-01` | Epistemic certainty (*must have + PP*) | Quirk §4.53–54; Murphy U27–29 | MODALITY (PAST) | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `MOD-02` | Negative deduction (*cannot/could not have*) | Quirk §4.55; Murphy U27–29 | MODALITY (PAST) | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `MOD-03` | Tentative possibility (*may/might/could have*) | Quirk §4.56–60; Murphy U27–29 | MODALITY (PAST) | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| `fam-v2-grammar-passives` | `PASS-01` | Impersonal passives (*it is + V + that*) | Quirk §16.64; Hewings U24; Biber §11.3 | PASSIVES (REPORTING) | `PROPOSED` (B1/B2) | **`PROPOSED_FLAGGED_FOR_CURATOR_ADJUDICATION`** | **Yes (Curator)** |
+| | `PASS-02` | Personal passives with to-infinitive | Quirk §16.65; Hewings U24; H&P Ch. 14 §3.2 | PASSIVES (REPORTING) | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
+| | `PASS-03` | Personal passives with perfect infinitive | Quirk §16.65; Hewings U24; Biber §11.3 | PASSIVES (REPORTING) | `PROPOSED` (B2) | `PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID` | No |
 
 ### 3.1 Epistemic Limitations & Disclosures
 - **Descriptive Grammars vs CEFR Framework:** Quirk et al., Huddleston & Pullum, Biber et al., Hewings, and Murphy document syntactic form, distribution, and register; they do not define Council of Europe CEFR levels.
@@ -103,7 +102,7 @@ All 56 examples are authored in `grammar_packs_v2.py` with 100% adherence to pre
 ## 5. Production Grammar Validation & Distractor Diagnostic Architecture
 
 ### 5.1 Production Syntactic Validator (`validate_syntactic_construction`)
-Implemented in `grammar_packs_v2.py:792-882`, this function evaluates whether a sentence satisfies target syntactic invariants and fails closed upon detecting documented negative grammatical defects:
+Implemented in `services/generation-service/app/experiment/grammar_validator_v2.py`, this function evaluates whether a sentence satisfies target syntactic invariants and fails closed upon detecting documented negative grammatical defects:
 - **`ERR-INV-01`**: Missing operator inversion following fronted negative adverbials (*under no circumstances*, *on no account*).
 - **`ERR-INV-02`**: Spurious operator inversion following subject-modifying *only*.
 - **`ERR-COND-01`**: Direct lexical verb inversion (*Knew the team...*) without auxiliary operator (*had*, *were*, *should*).

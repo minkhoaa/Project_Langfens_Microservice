@@ -1,10 +1,10 @@
 {
   "ledger_id": "V2_GRAMMAR_PROVENANCE_LEDGER",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Authoritative cryptographic provenance ledger for academic reference grammars grounding RQ2_DATASET_V2 Grammar RulePacks.",
   "governing_document": "generation_baseline/plans/2026-10-19-v2-s03-grammar-rulepacks-plan.md",
   "governing_sprint": "V2-S03",
-  "epistemic_disclosure": "Digests of reference works are computed strictly over canonical JSON bibliographic provenance records verified against primary publisher and library catalogs. They do NOT represent full book text digests, as commercial printed reference grammars are copyrighted publications cited under academic fair dealing. RulePack digests are computed deterministically over canonical JSON content payloads.",
+  "epistemic_disclosure": "Digests of reference works (source_sha256) are computed strictly over canonical JSON bibliographic provenance records verified against primary publisher and library catalogs. They do NOT represent full book text digests, as commercial printed reference grammars are copyrighted publications cited under academic fair dealing. RulePack content digests (rule_pack_content_sha256) are computed deterministically over canonical JSON content payloads.",
   "byte_basis_specification": {
     "byte_basis": "CANONICAL_JSON_RECORD",
     "encoding": "UTF-8",
@@ -76,6 +76,9 @@
       "publication_year": 1999,
       "publisher": "Longman",
       "isbn": "978-0582045620",
+      "alternate_isbns": [
+        "978-0582237254"
+      ],
       "provenance_uri": "urn:isbn:978-0582045620",
       "catalog_source": "OpenLibrary:OL3943840M; British Library; Cambridge Core Review",
       "license": "ALL_RIGHTS_RESERVED",
@@ -86,7 +89,7 @@
         "§11.3",
         "§11.4"
       ],
-      "source_sha256": "239d5ea2afbc607f85e0e5f393c7cd72e79a9d2aa08578ded838ead3aeacc5e6"
+      "source_sha256": "1fea2e332b6c097c555db808f2de5a3ae0126db8fd4b6c14dff20120acf9c67c"
     },
     {
       "source_id": "src-v2-grammar-ref-murphy-2019",
@@ -117,16 +120,19 @@
       ],
       "publication_year": 2013,
       "publisher": "Cambridge University Press",
-      "isbn": "978-1107690691",
-      "provenance_uri": "urn:isbn:978-1107690691",
-      "catalog_source": "Cambridge University Press Catalog (assets.cambridge.org/97811076/90691)",
+      "isbn": "978-1107699892",
+      "alternate_isbns": [
+        "978-1107690691"
+      ],
+      "provenance_uri": "urn:isbn:978-1107699892",
+      "catalog_source": "Cambridge University Press Catalog (assets.cambridge.org/97811076/99892)",
       "license": "ALL_RIGHTS_RESERVED",
       "byte_basis": "CANONICAL_JSON_BIBLIOGRAPHIC_METADATA_RECORD",
       "epistemic_disclosure": "Digest computed over canonical bibliographic metadata record; does NOT represent full book text.",
       "cited_sections": [
         "Unit 24"
       ],
-      "source_sha256": "1730910af825cdf98d23fa94ebe5f719b22c07d14e8167541956f8a3c728f01a"
+      "source_sha256": "65a5e4d8c487c15815f492eb43c7f5ba32cdd81ad224a2055195e690c7c8ac2b"
     }
   ],
   "total_rule_packs": 7,
@@ -138,7 +144,8 @@
       "source_id": "src-v2-grammar-ref-quirk-1985",
       "source_family": "fam-v2-grammar-inversion",
       "source_version": "v2.0",
-      "source_sha256": "07916d26f79aa38795cac0251c278c53b9947032f9f510272a292363df2721d0",
+      "source_sha256": "595b3f9865ce58b7ecf040a9a72554048a680e9bd44f0b780d9e9257c80ffe4d",
+      "rule_pack_content_sha256": "07916d26f79aa38795cac0251c278c53b9947032f9f510272a292363df2721d0",
       "license": "ALL_RIGHTS_RESERVED",
       "provenance_uri": "urn:isbn:978-0582517349",
       "sub_rules_count": 3,
@@ -158,7 +165,8 @@
       "source_id": "src-v2-grammar-ref-huddleston-2002",
       "source_family": "fam-v2-grammar-conditionals",
       "source_version": "v2.0",
-      "source_sha256": "8a35948a1b5825b9aa95a70b73d44ac3569475944c321a49d059ae62bae637f4",
+      "source_sha256": "e1a1ebd12d3c982be05adc7445450f58008e7b01b0da97983a7603080b680148",
+      "rule_pack_content_sha256": "8a35948a1b5825b9aa95a70b73d44ac3569475944c321a49d059ae62bae637f4",
       "license": "ALL_RIGHTS_RESERVED",
       "provenance_uri": "urn:isbn:978-0521431460",
       "sub_rules_count": 3,
@@ -178,7 +186,8 @@
       "source_id": "src-v2-grammar-ref-biber-1999",
       "source_family": "fam-v2-grammar-clefts",
       "source_version": "v2.0",
-      "source_sha256": "87488c7c3ce68f299eec0097854b63c45c6fdfe6b83d7146977156d2e37a0e53",
+      "source_sha256": "1fea2e332b6c097c555db808f2de5a3ae0126db8fd4b6c14dff20120acf9c67c",
+      "rule_pack_content_sha256": "87488c7c3ce68f299eec0097854b63c45c6fdfe6b83d7146977156d2e37a0e53",
       "license": "ALL_RIGHTS_RESERVED",
       "provenance_uri": "urn:isbn:978-0582045620",
       "sub_rules_count": 3,
@@ -198,7 +207,8 @@
       "source_id": "src-v2-grammar-ref-quirk-1985",
       "source_family": "fam-v2-grammar-subjunctive",
       "source_version": "v2.0",
-      "source_sha256": "799f23728f702e902793bf2ac0bf384ab3607e1adff0ac245bf2dcc0fcff7134",
+      "source_sha256": "595b3f9865ce58b7ecf040a9a72554048a680e9bd44f0b780d9e9257c80ffe4d",
+      "rule_pack_content_sha256": "799f23728f702e902793bf2ac0bf384ab3607e1adff0ac245bf2dcc0fcff7134",
       "license": "ALL_RIGHTS_RESERVED",
       "provenance_uri": "urn:isbn:978-0582517349",
       "sub_rules_count": 3,
@@ -218,7 +228,8 @@
       "source_id": "src-v2-grammar-ref-biber-1999",
       "source_family": "fam-v2-grammar-participles",
       "source_version": "v2.0",
-      "source_sha256": "0910cee247a1ada7749a9a67fe2660e64406dbafae336bf3e2588db7bf09722e",
+      "source_sha256": "1fea2e332b6c097c555db808f2de5a3ae0126db8fd4b6c14dff20120acf9c67c",
+      "rule_pack_content_sha256": "0910cee247a1ada7749a9a67fe2660e64406dbafae336bf3e2588db7bf09722e",
       "license": "ALL_RIGHTS_RESERVED",
       "provenance_uri": "urn:isbn:978-0582045620",
       "sub_rules_count": 3,
@@ -238,7 +249,8 @@
       "source_id": "src-v2-grammar-ref-murphy-2019",
       "source_family": "fam-v2-grammar-modals",
       "source_version": "v2.0",
-      "source_sha256": "771423dcf1f172d4347365aeaccd82fb738572793ed6d81cb6209ebfb9c6c62f",
+      "source_sha256": "0dca77d384a63795dab78d4027ab785bd195ddc69aadaf8626ad8a5357f57f72",
+      "rule_pack_content_sha256": "771423dcf1f172d4347365aeaccd82fb738572793ed6d81cb6209ebfb9c6c62f",
       "license": "ALL_RIGHTS_RESERVED",
       "provenance_uri": "urn:isbn:978-1108457651",
       "sub_rules_count": 3,
@@ -258,9 +270,10 @@
       "source_id": "src-v2-grammar-ref-hewings-2013",
       "source_family": "fam-v2-grammar-passives",
       "source_version": "v2.0",
-      "source_sha256": "43f67721634f3b08333f7f76861700355ea09bf55e059442ad49e63be359dfa4",
+      "source_sha256": "65a5e4d8c487c15815f492eb43c7f5ba32cdd81ad224a2055195e690c7c8ac2b",
+      "rule_pack_content_sha256": "43f67721634f3b08333f7f76861700355ea09bf55e059442ad49e63be359dfa4",
       "license": "ALL_RIGHTS_RESERVED",
-      "provenance_uri": "urn:isbn:978-1107690691",
+      "provenance_uri": "urn:isbn:978-1107699892",
       "sub_rules_count": 3,
       "rule_ids": [
         "PASS-01",
@@ -280,7 +293,10 @@
       "reference": "Quirk et al. §18.24–28; Huddleston Ch. 11 §7.1",
       "egp_target": "INVERSION",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "INV-02": {
       "family_id": "fam-v2-grammar-inversion",
@@ -288,7 +304,10 @@
       "reference": "Quirk et al. §18.29–33; Huddleston Ch. 11 §7.1",
       "egp_target": "INVERSION",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "INV-03": {
       "family_id": "fam-v2-grammar-inversion",
@@ -296,7 +315,10 @@
       "reference": "Quirk et al. §18.34–36",
       "egp_target": "INVERSION / CONJUNCTIONS",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "COND-01": {
       "family_id": "fam-v2-grammar-conditionals",
@@ -304,7 +326,10 @@
       "reference": "Quirk et al. §14.23; Huddleston Ch. 8 §2.2",
       "egp_target": "CONDITIONALS",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "COND-02": {
       "family_id": "fam-v2-grammar-conditionals",
@@ -312,7 +337,10 @@
       "reference": "Quirk et al. §14.23; Huddleston Ch. 8 §2.2",
       "egp_target": "CONDITIONALS",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "COND-03": {
       "family_id": "fam-v2-grammar-conditionals",
@@ -320,7 +348,10 @@
       "reference": "Quirk et al. §14.23 Note b, §15.35; Huddleston Ch. 8 §2.4",
       "egp_target": "INVERSION / CONDITIONALS",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "CLEFT-01": {
       "family_id": "fam-v2-grammar-clefts",
@@ -328,7 +359,10 @@
       "reference": "Quirk et al. §18.25–30; Biber et al. §11.4",
       "egp_target": "CLEFT SENTENCES",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "CLEFT-02": {
       "family_id": "fam-v2-grammar-clefts",
@@ -336,7 +370,10 @@
       "reference": "Quirk et al. §18.31–32; Biber et al. §11.4",
       "egp_target": "CLEFT SENTENCES",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "CLEFT-03": {
       "family_id": "fam-v2-grammar-clefts",
@@ -344,7 +381,10 @@
       "reference": "Quirk et al. §18.32; Biber et al. §11.4",
       "egp_target": "CLEFT SENTENCES",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "SUBJ-01": {
       "family_id": "fam-v2-grammar-subjunctive",
@@ -352,7 +392,10 @@
       "reference": "Quirk et al. §3.58–59; Huddleston Ch. 3 §1.4",
       "egp_target": "SUBJUNCTIVE / MODALITY",
       "provisional_cefr": "B2 / C1",
-      "cefr_evidence_status": "FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_FLAGGED_AS_UNSUPPORTED_CLAIM_PENDING_CURATOR_ADJUDICATION",
+      "curator_adjudication_required": true,
+      "adjudication_note": "Descriptive grammars confirm base form usage. Regional B2 vs C1 split claim is unsupported by in-repo evidence. Curator adjudication required to pin either C1 or B2/C1."
     },
     "SUBJ-02": {
       "family_id": "fam-v2-grammar-subjunctive",
@@ -360,7 +403,10 @@
       "reference": "Quirk et al. §3.59; Huddleston Ch. 3 §1.4",
       "egp_target": "SUBJUNCTIVE / NEGATION",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "SUBJ-03": {
       "family_id": "fam-v2-grammar-subjunctive",
@@ -368,7 +414,10 @@
       "reference": "Quirk et al. §3.61; Huddleston Ch. 3 §1.4",
       "egp_target": "FIXED PHRASES",
       "provisional_cefr": "C1",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "PART-01": {
       "family_id": "fam-v2-grammar-participles",
@@ -376,7 +425,10 @@
       "reference": "Quirk et al. §15.56–58; Biber et al. §9.4",
       "egp_target": "CLAUSES (NON-FINITE)",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "PART-02": {
       "family_id": "fam-v2-grammar-participles",
@@ -384,7 +436,10 @@
       "reference": "Quirk et al. §15.59–60; Biber et al. §9.4",
       "egp_target": "CLAUSES (NON-FINITE)",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "PART-03": {
       "family_id": "fam-v2-grammar-participles",
@@ -392,7 +447,10 @@
       "reference": "Quirk et al. §15.61–62; Biber et al. §9.4",
       "egp_target": "RELATIVE CLAUSES / PASSIVES",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "MOD-01": {
       "family_id": "fam-v2-grammar-modals",
@@ -400,7 +458,10 @@
       "reference": "Quirk et al. §4.53–54; Murphy Units 27–29",
       "egp_target": "MODALITY (PAST)",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "MOD-02": {
       "family_id": "fam-v2-grammar-modals",
@@ -408,7 +469,10 @@
       "reference": "Quirk et al. §4.55; Murphy Units 27–29",
       "egp_target": "MODALITY (PAST)",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "MOD-03": {
       "family_id": "fam-v2-grammar-modals",
@@ -416,7 +480,10 @@
       "reference": "Quirk et al. §4.56–60; Murphy Units 27–29",
       "egp_target": "MODALITY (PAST)",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "PASS-01": {
       "family_id": "fam-v2-grammar-passives",
@@ -424,7 +491,10 @@
       "reference": "Quirk et al. §16.64; Hewings Unit 24; Biber §11.3",
       "egp_target": "PASSIVES (REPORTING)",
       "provisional_cefr": "B1 / B2",
-      "cefr_evidence_status": "FLAGGED_FOR_CURATOR_ADJUDICATION"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_FLAGGED_FOR_CURATOR_ADJUDICATION",
+      "curator_adjudication_required": true,
+      "adjudication_note": "Proposed B1 in ESL curricula; academic IELTS appropriateness under review."
     },
     "PASS-02": {
       "family_id": "fam-v2-grammar-passives",
@@ -432,7 +502,10 @@
       "reference": "Quirk et al. §16.65; Hewings Unit 24; Huddleston Ch. 14 §3.2",
       "egp_target": "PASSIVES (REPORTING)",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     },
     "PASS-03": {
       "family_id": "fam-v2-grammar-passives",
@@ -440,7 +513,10 @@
       "reference": "Quirk et al. §16.65; Hewings Unit 24; Biber §11.3",
       "egp_target": "PASSIVES (REPORTING)",
       "provisional_cefr": "B2",
-      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID"
+      "cefr_attribution": "PROPOSED",
+      "cefr_evidence_status": "PROPOSED_PENDING_PRIMARY_EGP_ENTRY_ID",
+      "curator_adjudication_required": false,
+      "adjudication_note": "Primary Cambridge EGP descriptor ID unverified in offline workspace."
     }
   },
   "total_examples": 56,
