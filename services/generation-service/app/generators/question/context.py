@@ -60,10 +60,19 @@ class QuestionCandidate(CanonicalBaseModel):
 
     @model_validator(mode="after")
     def validate_type_specific_invariants(self) -> QuestionCandidate:
+        from app.validation.common import is_placeholder, validate_english_text
         family = QuestionPromptFamily.from_raw(self.question_type)
         ans = self.answer.strip()
 
-        # 1. TrueFalseNotGiven invariants
+        if is_placeholder(ans):
+            self.rejected = True
+            self.rejection_reasons.append(f"Answer '{ans}' cannot be a placeholder")
+
+        lang_issues = validate_english_text(self.prompt, "prompt") + validate_english_text(ans, "answer")
+        if lang_issues:
+            self.rejected = True
+            for li in lang_issues:
+                self.rejection_reasons.append(li.message)
         if family == QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN:
             norm = ans.upper().replace("_", " ")
             if norm not in ("TRUE", "FALSE", "NOT GIVEN"):

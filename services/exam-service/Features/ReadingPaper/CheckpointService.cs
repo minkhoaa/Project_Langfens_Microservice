@@ -2126,7 +2126,7 @@ public static class CheckpointService
             await db.ReadingPaperJobs.Where(j => j.Id == request.JobId)
                 .ExecuteUpdateAsync(s => s.SetProperty(j => j.ExamId, exam.Id)
                     .SetProperty(j => j.SectionsJson, JsonSerializer.Serialize(sections, ReadingPaperRules.Json))
-                    .SetProperty(j => j.CompletedSections, 3)
+                    .SetProperty(j => j.CompletedSections, sections.Count)
                     .SetProperty(j => j.LeaseOwner, (Guid?)null).SetProperty(j => j.LeaseUntil, (DateTime?)null), ct);
             await db.ReadingPaperRuns.Where(r => r.RunId == request.RunId)
                 .ExecuteUpdateAsync(s => s.SetProperty(r => r.LeaseOwner, (Guid?)null).SetProperty(r => r.LeaseUntil, (DateTime?)null), ct);

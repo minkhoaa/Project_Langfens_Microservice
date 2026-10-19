@@ -234,22 +234,40 @@ class BoundedLoopRuntime:
             raise ValueError("Durable work exists without a pinned loop cursor")
         # Reservations, including UNKNOWN_OUTCOME, are not refunded by restart.
         b = self.context.budget_tracker
+        this_artifact_op_ids = {
+            op.operationId for op in (state.operations or [])
+            if op.artifactId == self.context.target_artifact_id
+        }
         target_ops = [
             op for op in (state.operations or [])
             if op.artifactId == self.context.target_artifact_id
-            or (self.context.parent_operation_id and op.parentOperationId == self.context.parent_operation_id)
+            or (op.artifactId is None and op.parentOperationId in this_artifact_op_ids)
         ]
         if target_ops:
-            loop_calls = len([op for op in target_ops if op.operationType == "PROVIDER_CALL"])
-            loop_tokens = sum(
-                (getattr(op, "tokensUsed", 0) or 0)
-                if (getattr(op, "tokensUsed", 0) or 0) > 0
-                else max(0, getattr(op, "tokenReservation", 0) or 0)
-                for op in target_ops
-            )
+            provider_types = ("PROVIDER_CALL", "LLM", "LLM_CALL", "LLM_PASSAGE")
+            loop_calls = len([op for op in target_ops if op.operationType in provider_types])
+            has_provider_calls = any(op.operationType in provider_types for op in target_ops)
+            loop_tokens = 0
+            for op in target_ops:
+                is_provider = op.operationType in provider_types
+                status = getattr(op, "status", "").upper()
+                accounting = str(getattr(op, "accountingType", "") or "").upper()
+                used = getattr(op, "tokensUsed", 0) or 0
+                reservation = max(0, getattr(op, "tokenReservation", 0) or 0)
+                if has_provider_calls and not is_provider:
+                    child_ops = [c for c in target_ops if c.parentOperationId == op.operationId]
+                    if not child_ops and status in ("RESERVED", "UNKNOWN_OUTCOME"):
+                        loop_tokens += reservation
+                    continue
+                if status == "COMPLETED" and (accounting in ("REPORTED", "RECONCILED", "ESTIMATED") or used > 0):
+                    loop_tokens += used
+                elif status in ("RESERVED", "UNKNOWN_OUTCOME"):
+                    loop_tokens += reservation
+                else:
+                    loop_tokens += max(used, reservation)
             loop_wall = sum(
                 (getattr(op, "wallTimeUsedSeconds", 0.0) or 0.0)
-                if (getattr(op, "wallTimeUsedSeconds", 0.0) or 0.0) > 0.0
+                if (getattr(op, "status", "").upper() == "COMPLETED")
                 else max(0.0, float(getattr(op, "wallTimeReservationSeconds", 0.0) or 0.0))
                 for op in target_ops
             )
@@ -406,6 +424,13 @@ class BoundedLoopRuntime:
                     self._finish(LoopReason.CALL_CAP, "next operation exceeds shared call cap")
                     return False
             if not self.policy.is_unlimited and self.policy.max_total_tokens > 0 and b.tokens_used + intent.token_reservation > self.policy.max_total_tokens:
+                self.ledger_mgr.record_issue(
+                    code=IssueCode.BUDGET_EXHAUSTED,
+                    severity=IssueSeverity.CRITICAL,
+                    scope=self.context.scope,
+                    message=f"Budget exhausted: next reservation ({intent.token_reservation}) exceeds token cap (remaining: {max(0, self.policy.max_total_tokens - b.tokens_used)} of {self.policy.max_total_tokens})",
+                    reported_by="BoundedLoopRuntime",
+                )
                 self._finish(LoopReason.TOKEN_CAP, "next reservation exceeds token cap")
                 return False
             now_utc = datetime.now(timezone.utc)
@@ -717,7 +742,27 @@ class BoundedLoopRuntime:
                 self._finish(LoopReason.INVALID_OUTPUT, "capability returned wrong target/version/hash/parents")
                 return
             draft_wall_time = round(time.perf_counter() - t_draft_start, 4)
+            has_reported_usage = False
             draft_tokens = 0
+            if isinstance(art.payload, Mapping) and "tokensUsed" in art.payload and art.payload["tokensUsed"] is not None:
+                has_reported_usage = True
+                draft_tokens = int(art.payload["tokensUsed"])
+            elif self.persistence_client is not None:
+                try:
+                    state_res = self.persistence_client.resume_state(self.context.run_id)
+                    child_ops = [
+                        c_op for c_op in (state_res.operations or [])
+                        if c_op.parentOperationId == intent.operation_id and getattr(c_op, "status", "").upper() == "COMPLETED"
+                    ]
+                    if child_ops:
+                        has_reported_usage = True
+                        draft_tokens = sum(int(getattr(c_op, "tokensUsed", 0) or 0) for c_op in child_ops)
+                except Exception:
+                    pass
+            if has_reported_usage:
+                self.context.budget_tracker.tokens_used = max(
+                    0, self.context.budget_tracker.tokens_used - intent.token_reservation + draft_tokens
+                )
             try:
                 ack = self.persistence_client.save_draft_checkpoint(DraftCheckpointRequest(
                     runId=self.context.run_id, epoch=self.context.authority.epoch,
@@ -788,7 +833,17 @@ class BoundedLoopRuntime:
         self.context.open_issues = tuple(self.ledger_mgr.get_open_issues())
         self._latest_evaluations = []
         for evaluator in self.evaluators:
-            intent = self._intent("EVALUATE", art.version, self.policy.evaluate_token_reservation,
+            meta = getattr(evaluator, "metadata", None)
+            if meta is not None:
+                is_expensive = getattr(meta, "is_expensive", False) or getattr(evaluator, "is_expensive", False)
+                est_tokens = getattr(meta, "estimated_tokens", 0)
+                if not is_expensive or est_tokens == 0:
+                    eval_token_res = 0
+                else:
+                    eval_token_res = min(self.policy.evaluate_token_reservation, est_tokens) if est_tokens > 0 else self.policy.evaluate_token_reservation
+            else:
+                eval_token_res = self.policy.evaluate_token_reservation
+            intent = self._intent("EVALUATE", art.version, eval_token_res,
                                   f"{evaluator.evaluator_id}:{evaluator.evaluator_version}",
                                   {"ref": art.to_ref().model_dump(mode="json"),
                                    "parents": [r.model_dump(mode="json") for r in art.parent_refs]})

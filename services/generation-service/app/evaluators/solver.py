@@ -20,6 +20,7 @@ import logging
 import time
 from typing import Any, Dict, List, Optional, Tuple
 from uuid import uuid4
+from app.config import settings
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
 from app.contracts.evaluation import (
     EvaluationResult,
@@ -216,7 +217,10 @@ class BlindSolverEvaluator(BaseEvaluator):
                     "issues": updated_issues,
                     "status": EvaluationStatus.FAIL,
                     "score": 0.0,
+                    "input_dependency_refs": list(artifact.parent_refs),
                 })
+        if not eval_res.input_dependency_refs and artifact.parent_refs:
+            eval_res = eval_res.model_copy(update={"input_dependency_refs": list(artifact.parent_refs)})
         return eval_res
 
     async def evaluate_blind_input(
@@ -491,8 +495,8 @@ class BlindSolverEvaluator(BaseEvaluator):
             operation_id=op_id,
             run_id=run_id,
             preferred_provider=self.solver_provider,
-            timeout_seconds=120.0,
-            wall_time_reservation_seconds=120.0,
+            timeout_seconds=min(120.0, float(settings.loop_operation_wall_reservation_seconds)),
+            wall_time_reservation_seconds=min(120.0, float(settings.loop_operation_wall_reservation_seconds)),
             temperature=0.0,
         )
 
@@ -585,8 +589,8 @@ class BlindSolverEvaluator(BaseEvaluator):
             operation_id=op_id,
             run_id=run_id,
             preferred_provider=self.adversary_provider,
-            timeout_seconds=120.0,
-            wall_time_reservation_seconds=120.0,
+            timeout_seconds=min(120.0, float(settings.loop_operation_wall_reservation_seconds)),
+            wall_time_reservation_seconds=min(120.0, float(settings.loop_operation_wall_reservation_seconds)),
             temperature=0.3,
         )
 

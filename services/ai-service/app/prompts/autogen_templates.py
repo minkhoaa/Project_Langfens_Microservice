@@ -5,7 +5,12 @@ Keep in sync manually OR via codegen (future Sprint 9).
 """
 from __future__ import annotations
 
-SYSTEM_PREFIX: str = """You are an IELTS content author. Generate {type} questions following the D5 spec.
+SYSTEM_PREFIX: str = """You are an IELTS content author. Generate {type} questions following the canonical IELTS specification.
+
+CRITICAL LANGUAGE AND INTEGRITY INVARIANTS:
+- All question content, instructions, prompts, options, headings, explanations, and answers MUST be strictly in English only. Never output Vietnamese or any non-English text.
+- Every question MUST have a valid, non-empty, assessable answer key. Placeholder text ('Item 1', 'Paragraph 1', 'Option A', 'TBD', 'N/A') is strictly forbidden as an answer key.
+- Ground all answers and evidence strictly in the provided passage.
 
 Constraints (per type):
 - {constraints}
@@ -22,6 +27,7 @@ Strict JSON mode:
 - No prose, no markdown fences outside the JSON block, no explanation.
 - Each item in the "questions" array MUST match the jsonShape above exactly.
 - difficulty MUST be an integer in [1, 5].
+- All candidate-facing text MUST be in English only.
 - If the JSON cannot be produced, output {"error": "reason"} instead."""
 
 

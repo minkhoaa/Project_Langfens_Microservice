@@ -109,7 +109,7 @@ def build_passage_generation_prompt(
         style_profile,
         STYLE_PROFILE_DESCRIPTIONS[PassageStyleProfile.EXPOSITORY_SCIENTIFIC],
     )
-    sanitized_source = sanitize_source_for_envelope(source_text)
+    sanitized_source = sanitize_source_for_envelope(source_text[:30_000])
 
     feedback_prefix = f"{length_feedback}\n\n" if length_feedback else ""
     user_prompt = (

@@ -973,21 +973,27 @@ public class AttemptService(
                 if (blanks.Count > 0) return string.Join("; ", blanks);
             }
 
-            // Matching: render the display label (MatchPairs value[1]) rather than
-            // slash-joining the entire ["letter", "label"] array. Fall back to
-            // value[0] (the accepted letter) when no display label is stored.
+            // Matching: render both canonical key and display label (e.g. "[iv] — Heading text")
             if (key.MatchPairs is { Count: > 0 })
             {
                 var pairs = key.MatchPairs
-                    .Where(p => p.Value is { Length: > 0 })
-                    .Select(p => $"{p.Key}: " +
-                        (p.Value!.Length >= 2 && !string.IsNullOrWhiteSpace(p.Value[1])
-                            ? p.Value[1]
-                            : p.Value![0]))
+                    .Where(p => p.Value is { Length: > 0 } && !string.IsNullOrWhiteSpace(p.Value[0]))
+                    .Select(p =>
+                    {
+                        var k = p.Value![0]!.Trim();
+                        var label = (p.Value.Length >= 2 && !string.IsNullOrWhiteSpace(p.Value[1]))
+                            ? p.Value[1]!.Trim()
+                            : null;
+                        var formatted = !string.IsNullOrEmpty(label) && !string.Equals(k, label, StringComparison.OrdinalIgnoreCase)
+                            ? $"[{k}] — {label}"
+                            : $"[{k}]";
+                        return key.MatchPairs.Count > 1 ? $"{p.Key}: {formatted}" : formatted;
+                    })
                     .Where(IsNotBlank)
                     .ToList();
                 if (pairs.Count > 0) return string.Join("; ", pairs);
             }
+
 
             if (key.OrderCorrects is { Count: > 0 })
             {

@@ -211,9 +211,10 @@ class PassageGenerator:
     def _build_request(
         context: PassageGenerationContext,
         run_id: str,
-        parent_operation_id: Optional[str],
-        timeout_seconds: float,
-        length_feedback: Optional[str],
+        parent_operation_id: Optional[str] = None,
+        timeout_seconds: float = 60.0,
+        length_feedback: Optional[str] = None,
+        target_artifact_id: Optional[str] = None,
     ):
         """Build the (prompt payload, ProviderRequest) pair for one draft attempt."""
         prompt_data = build_passage_generation_prompt(
@@ -234,6 +235,8 @@ class PassageGenerator:
             messages=messages,
             operation_id=f"op_pass_gen_{uuid4().hex[:8]}",
             run_id=run_id,
+            section_id=f"section_{context.section_index}",
+            artifact_id=target_artifact_id or f"art_passage_s{context.section_index}",
             parent_operation_id=parent_operation_id,
             max_tokens=settings.passage_generate_max_tokens,
             timeout_seconds=timeout_seconds,
@@ -265,6 +268,8 @@ class PassageGenerator:
             resp = await self.gateway.call(req)
         else:
             raise AttributeError("Gateway does not have execute, request, or call method")
+        toks = int(resp.usage.total_tokens) if getattr(resp, "usage", None) and resp.usage.total_tokens else 0
+        self._last_tokens_used = getattr(self, "_last_tokens_used", 0) + toks
         return resp.raw_text.strip()
 
     async def generate(
@@ -281,6 +286,7 @@ class PassageGenerator:
         length_feedback: Optional[str] = None,
     ) -> ArtifactEnvelope:
         """Executes passage generation request and returns validated ArtifactEnvelope."""
+        self._last_tokens_used = 0
         effective_feedback = length_feedback or context.length_feedback
         if not effective_feedback and context.last_attempt_word_count is not None:
             prev_w = context.last_attempt_word_count
@@ -306,6 +312,7 @@ class PassageGenerator:
             parent_operation_id=parent_operation_id,
             timeout_seconds=timeout_seconds,
             length_feedback=effective_feedback,
+            target_artifact_id=target_artifact_id,
         )
         raw_text = await self._call_gateway(req, epoch=epoch, lease_owner=lease_owner)
 
@@ -341,6 +348,7 @@ class PassageGenerator:
                 parent_operation_id=parent_operation_id,
                 timeout_seconds=timeout_seconds,
                 length_feedback=combined_feedback,
+                target_artifact_id=target_artifact_id,
             )
             guard_raw_text = await self._call_gateway(
                 guard_req, epoch=epoch, lease_owner=lease_owner
@@ -423,6 +431,7 @@ class PassageGenerator:
                 parent_operation_id=parent_operation_id,
                 timeout_seconds=timeout_seconds,
                 length_feedback=combined_feedback,
+                target_artifact_id=target_artifact_id,
             )
             guard_raw_text = await self._call_gateway(
                 guard_req, epoch=epoch, lease_owner=lease_owner
@@ -490,6 +499,7 @@ class PassageGenerator:
             "wordCountGuardReasks": word_count_retries,
             "measuredWords": measured_words,
             "wordCountBand": [band_min, band_max],
+            "tokensUsed": int(getattr(self, "_last_tokens_used", 0)),
         }
 
         if input_dependencies is not None:

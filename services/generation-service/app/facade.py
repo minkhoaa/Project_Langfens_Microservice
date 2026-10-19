@@ -217,7 +217,7 @@ class GenerationFacade:
         client = persistence_client or self.get_persistence_client()
         benchmark_mode = (
             is_benchmark is True
-            or (is_benchmark is None and (run_id.lower().startswith("bench_") or "benchmark" in run_id.lower() or "test" in run_id.lower()))
+            or (is_benchmark is None and run_id.lower().startswith("bench_"))
         )
         if not benchmark_mode and client is not None:
             try:
@@ -294,7 +294,7 @@ class GenerationFacade:
         client = persistence_client or self.get_persistence_client()
         benchmark_mode = (
             is_benchmark is True
-            or (is_benchmark is None and (run_id.lower().startswith("bench_") or "benchmark" in run_id.lower() or "test" in run_id.lower()))
+            or (is_benchmark is None and run_id.lower().startswith("bench_"))
         )
         if not benchmark_mode and client is not None:
             try:
@@ -509,7 +509,25 @@ class GenerationFacade:
         # Strict fail-closed source validation
         source_text_content = source.get("content", "") if isinstance(source, dict) else str(source)
         if not source_text_content or len(source_text_content.strip()) < 50:
-            raise ValueError("Source content must contain at least 50 characters of verified text for section generation")
+            if isinstance(source, dict) and source.get("pmcid"):
+                from app.ingestion.fetcher import fetch_source as _fetch_source
+                try:
+                    fetched = await _fetch_source(source["pmcid"])
+                    source_text_content = fetched.get("content", "")
+                    if not source.get("title") and fetched.get("title"):
+                        source["title"] = fetched["title"]
+                    if not source.get("authors") and fetched.get("authors"):
+                        source["authors"] = fetched["authors"]
+                    if not source.get("doi") and fetched.get("doi"):
+                        source["doi"] = fetched["doi"]
+                    if not source.get("url") and fetched.get("url"):
+                        source["url"] = fetched["url"]
+                    if not source.get("license") and fetched.get("license"):
+                        source["license"] = fetched["license"]
+                except Exception as e:
+                    logger.warning("Failed to fetch source content for %s: %s", source.get("pmcid"), e)
+            if not source_text_content or len(source_text_content.strip()) < 50:
+                raise ValueError("Source content must contain at least 50 characters of verified text for section generation")
 
         source_id = source.get("pmcid") if isinstance(source, dict) and source.get("pmcid") else f"SRC_{uuid4().hex[:8]}"
         source_title = source.get("title", f"Source for {topic}") if isinstance(source, dict) else f"Source for {topic}"
@@ -682,13 +700,7 @@ class GenerationFacade:
             bp_env.artifact_id: bp_env.to_ref(),
         }
         # Determine benchmark/unlimited mode
-        is_bench = (
-            (provider and provider.strip().lower() == "minimax")
-            or run_id.lower().startswith("bench_")
-            or "benchmark" in run_id.lower()
-            or "test" in run_id.lower()
-            or (isinstance(source, dict) and str(source.get("metadata", {}).get("provider", "")).lower() == "minimax")
-        )
+        is_bench = run_id.lower().startswith("bench_")
         if not is_bench and client is not None:
             try:
                 state = client.resume_state(run_id)

@@ -25,15 +25,26 @@ from pydantic import BaseModel, Field
 
 QUESTION_PROMPT_VERSION = "2.0.0"
 
-
 class QuestionPromptFamily(str, Enum):
     TRUE_FALSE_NOT_GIVEN = "TrueFalseNotGiven"
     YES_NO_NOT_GIVEN = "YesNoNotGiven"
     SENTENCE_COMPLETION = "SentenceCompletion"
     SUMMARY_COMPLETION = "SummaryCompletion"
+    TABLE_COMPLETION = "TableCompletion"
+    NOTE_COMPLETION = "NoteCompletion"
+    FORM_COMPLETION = "FormCompletion"
+    DIAGRAM_LABEL = "DiagramLabel"
+    MAP_LABEL = "MapLabel"
     MULTIPLE_CHOICE_SINGLE = "MultipleChoiceSingle"
+    MULTIPLE_CHOICE_MULTIPLE = "MultipleChoiceMultiple"
+    MULTIPLE_CHOICE_SINGLE_IMAGE = "MultipleChoiceSingleImage"
     SHORT_ANSWER = "ShortAnswer"
-
+    MATCHING_HEADING = "MatchingHeading"
+    MATCHING_INFORMATION = "MatchingInformation"
+    MATCHING_FEATURES = "MatchingFeatures"
+    MATCHING_ENDINGS = "MatchingEndings"
+    CLASSIFICATION = "Classification"
+    FLOW_CHART = "FlowChart"
     @classmethod
     def from_raw(cls, val: Any) -> "QuestionPromptFamily":
         if isinstance(val, QuestionPromptFamily):
@@ -107,6 +118,99 @@ SYSTEM_PROMPTS: Dict[QuestionPromptFamily, str] = {
         "- Questions must begin with a clear interrogative (What, Which, Where, When, How, etc.).\n"
         "- The answer must be NO MORE THAN THREE WORDS and/or a NUMBER verbatim from the passage.\n"
         "- Do not produce conjoined answers ('X and Y') for singular questions.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.TABLE_COMPLETION: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Table Completion questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Answer must be strictly 1-3 words and/or a number verbatim from the passage.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.NOTE_COMPLETION: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Note Completion questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Answer must be strictly 1-3 words and/or a number verbatim from the passage.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.FORM_COMPLETION: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Form Completion questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Answer must be strictly 1-3 words and/or a number verbatim from the passage.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.DIAGRAM_LABEL: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Diagram Label completion questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Answer must be strictly 1-3 words verbatim from the passage.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.MAP_LABEL: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Map Label completion questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Answer must be strictly 1-3 words verbatim from the passage.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.MULTIPLE_CHOICE_MULTIPLE: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Multiple Choice questions with multiple correct options based on the provided passage.\n"
+        "RULES:\n"
+        "- Provide at least 5 options with at least 2 correct answers.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE_IMAGE: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Multiple Choice Single Image questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Exactly one option must be the correct answer grounded in the passage.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.MATCHING_HEADING: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Matching Heading questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Headings use Roman numerals (i, ii, iii...).\n"
+        "- Include at least one unused distractor heading.\n"
+        "- Each heading matches at most one paragraph.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.MATCHING_INFORMATION: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Matching Information questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Statements match paragraphs A, B, C...\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.MATCHING_FEATURES: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Matching Features questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Match statements to named features, researchers, or categories (A, B, C...).\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.MATCHING_ENDINGS: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Matching Sentence Endings questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Match sentence beginnings to lettered endings (A, B, C...).\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.CLASSIFICATION: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Classification questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Classify statements into categories (A, B, C...).\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.FLOW_CHART: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Flow Chart process ordering questions based on the provided passage.\n"
+        "RULES:\n"
+        "- Provide a sequence of distinct process step slugs.\n"
         "- Respond in valid JSON adhering to the specified schema."
     ),
 }
@@ -226,6 +330,201 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
         '      "answer": "verbatim answer (<= 3 words)",\n'
         '      "evidenceQuote": "verbatim sentence",\n'
         '      "wordCount": 1-3\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.TABLE_COMPLETION: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate {candidate_count} Table Completion candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Table row summary with blank \'______\'",\n'
+        '      "answer": "verbatim answer (1-3 words)",\n'
+        '      "evidenceQuote": "verbatim sentence"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.NOTE_COMPLETION: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate {candidate_count} Note Completion candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Note bullet with blank \'______\'",\n'
+        '      "answer": "verbatim answer (1-3 words)",\n'
+        '      "evidenceQuote": "verbatim sentence"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.FORM_COMPLETION: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate {candidate_count} Form Completion candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Form field with blank \'______\'",\n'
+        '      "answer": "verbatim answer (1-3 words)",\n'
+        '      "evidenceQuote": "verbatim sentence"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.DIAGRAM_LABEL: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate {candidate_count} Diagram Label candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Diagram label for part #{question_number} with blank \'______\'",\n'
+        '      "answer": "verbatim answer (1-3 words)",\n'
+        '      "evidenceQuote": "verbatim sentence"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.MAP_LABEL: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate {candidate_count} Map Label candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Map location label for #{question_number} with blank \'______\'",\n'
+        '      "answer": "verbatim answer (1-3 words)",\n'
+        '      "evidenceQuote": "verbatim sentence"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.MULTIPLE_CHOICE_MULTIPLE: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Multiple Choice questions (choose TWO or THREE options) for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Which TWO of the following are mentioned?",\n'
+        '      "options": [\n'
+        '        {{"key": "A", "text": "..."}},\n'
+        '        {{"key": "B", "text": "..."}},\n'
+        '        {{"key": "C", "text": "..."}},\n'
+        '        {{"key": "D", "text": "..."}},\n'
+        '        {{"key": "E", "text": "..."}}\n'
+        '      ],\n'
+        '      "answer": "A, B",\n'
+        '      "evidenceQuote": "verbatim passage quotes"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE_IMAGE: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Multiple Choice Single Image questions for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Which diagram correctly illustrates the process?",\n'
+        '      "options": [\n'
+        '        {{"key": "A", "text": "Diagram A description"}},\n'
+        '        {{"key": "B", "text": "Diagram B description"}},\n'
+        '        {{"key": "C", "text": "Diagram C description"}},\n'
+        '        {{"key": "D", "text": "Diagram D description"}}\n'
+        '      ],\n'
+        '      "answer": "A",\n'
+        '      "evidenceQuote": "verbatim passage quotes"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.MATCHING_HEADING: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Matching Heading candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Paragraph {question_number}",\n'
+        '      "answer": "i",\n'
+        '      "evidenceQuote": "verbatim topic sentence"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.MATCHING_INFORMATION: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Matching Information candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "a mention of...",\n'
+        '      "answer": "A",\n'
+        '      "evidenceQuote": "verbatim quote from Paragraph A"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.MATCHING_FEATURES: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Matching Features candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Finding or theory description",\n'
+        '      "answer": "A",\n'
+        '      "evidenceQuote": "verbatim researcher finding quote"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.MATCHING_ENDINGS: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Matching Sentence Endings candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Sentence beginning statement...",\n'
+        '      "answer": "A",\n'
+        '      "evidenceQuote": "verbatim sentence from passage"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.CLASSIFICATION: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Classification candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Characteristic or statement to classify",\n'
+        '      "answer": "A",\n'
+        '      "evidenceQuote": "verbatim sentence classifying the item"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.FLOW_CHART: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Flow Chart process ordering candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Step description in process",\n'
+        '      "answer": "step-slug-name",\n'
+        '      "evidenceQuote": "verbatim sentence"\n'
         "    }}\n"
         "  ]\n"
         "}}"

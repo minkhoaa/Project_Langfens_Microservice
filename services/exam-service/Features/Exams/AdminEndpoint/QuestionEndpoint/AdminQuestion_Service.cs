@@ -70,12 +70,15 @@ public class AdminQuestionService : IAdminQuestionService
         IEnumerable<string>? shortAnswerAcceptTexts,
         IConfiguration? config = null)
     {
+        var forbiddenPlaceholders = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "item 1", "item 2", "paragraph 1", "paragraph 2", "option a", "option b", "tbd", "n/a", "placeholder", "unknown"
+        };
         bool HasText(IEnumerable<string?>? seq) => seq?.Any(x => !string.IsNullOrWhiteSpace(x)) ?? false;
         bool DictNonEmpty(Dictionary<string, string[]?>? d) =>
             d != null && d.Count > 0 && d.Values.Any(v => v != null && v.Length > 0 && v.Any(s => !string.IsNullOrWhiteSpace(s)));
 
         IResult? Reject(string msg) => Results.BadRequest(new ApiResultDto(false, msg, null!));
-
         switch (type)
         {
             case QuestionType.MultipleChoiceSingle:
@@ -100,6 +103,23 @@ public class AdminQuestionService : IAdminQuestionService
                 if (DictNonEmpty(matchPairs))        return Reject($"{type}: MatchPairs must be empty.");
                 if (HasText(orderCorrects))          return Reject($"{type}: OrderCorrects must be empty.");
                 if (HasText(shortAnswerAcceptTexts)) return Reject($"{type}: ShortAnswerAcceptTexts must be empty.");
+                if (blankAcceptTexts != null)
+                {
+                    foreach (var (bKey, vals) in blankAcceptTexts)
+                    {
+                        if (vals != null)
+                        {
+                            foreach (var val in vals.Where(v => !string.IsNullOrWhiteSpace(v)))
+                            {
+                                if (forbiddenPlaceholders.Contains(val.Trim()))
+                                    return Reject($"{type}: Blank [{bKey}] answer '{val}' cannot be a placeholder.");
+                                var wordCount = val.Trim().Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                                if (wordCount > 3)
+                                    return Reject($"{type}: Blank [{bKey}] answer '{val}' exceeds IELTS 3-word limit ({wordCount} words).");
+                            }
+                        }
+                    }
+                }
                 if (blankAcceptTexts != null && !string.IsNullOrEmpty(promptMd) &&
                     !((type == QuestionType.DiagramLabel || type == QuestionType.MapLabel) &&
                       System.Text.RegularExpressions.Regex.IsMatch(promptMd, @"\[(Diagram|Map):\s*[^\]]+\]")))
@@ -123,6 +143,17 @@ public class AdminQuestionService : IAdminQuestionService
 
             case QuestionType.ShortAnswer:
                 if (!HasText(shortAnswerAcceptTexts)) return Reject($"{type}: ShortAnswerAcceptTexts is required (non-empty list).");
+                if (shortAnswerAcceptTexts != null)
+                {
+                    foreach (var val in shortAnswerAcceptTexts.Where(v => !string.IsNullOrWhiteSpace(v)))
+                    {
+                        if (forbiddenPlaceholders.Contains(val.Trim()))
+                            return Reject($"{type}: Short answer '{val}' cannot be a placeholder.");
+                        var wordCount = val.Trim().Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                        if (wordCount > 3)
+                            return Reject($"{type}: Short answer '{val}' exceeds IELTS 3-word limit ({wordCount} words).");
+                    }
+                }
                 if (DictNonEmpty(blankAcceptTexts))   return Reject($"{type}: BlankAcceptTexts must be empty.");
                 if (DictNonEmpty(matchPairs))         return Reject($"{type}: MatchPairs must be empty.");
                 if (HasText(orderCorrects))           return Reject($"{type}: OrderCorrects must be empty.");
@@ -143,6 +174,18 @@ public class AdminQuestionService : IAdminQuestionService
                         {
                             var expectedFormat = minLength == 1 ? "[acceptedKey]" : "[acceptedKey, displayLabel]";
                             return Reject($"{type}: MatchPairs[{kv.Key}] must have {expectedFormat}.");
+                        }
+                        if (forbiddenPlaceholders.Contains(kv.Value[0]!.Trim()))
+                        {
+                            return Reject($"{type}: MatchPairs[{kv.Key}][0] gradingKey '{kv.Value[0]}' cannot be a placeholder.");
+                        }
+                        if (kv.Value.Length >= 2 && !string.IsNullOrWhiteSpace(kv.Value[1]) && forbiddenPlaceholders.Contains(kv.Value[1]!.Trim()))
+                        {
+                            return Reject($"{type}: MatchPairs[{kv.Key}][1] displayLabel '{kv.Value[1]}' cannot be a placeholder.");
+                        }
+                        if (type == QuestionType.MatchingHeading && !System.Text.RegularExpressions.Regex.IsMatch(kv.Value[0]!.Trim(), @"^[ivxlcdm]+$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                        {
+                            return Reject($"{type}: MatchPairs[{kv.Key}][0] '{kv.Value[0]}' must be a valid Roman numeral (e.g. i, ii, iii).");
                         }
                     }
 

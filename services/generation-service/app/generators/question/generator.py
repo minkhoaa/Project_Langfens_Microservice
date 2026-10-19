@@ -260,8 +260,8 @@ class QuestionCandidateGenerator:
                 ChatMessage(role="user", content=user_prompt),
             ],
             max_tokens=max_toks,
-            timeout_seconds=120.0 if pool_limit > 3 else 60.0,
-            wall_time_reservation_seconds=120.0 if pool_limit > 3 else 60.0,
+            timeout_seconds=min(120.0 if pool_limit > 3 else 60.0, float(settings.loop_operation_wall_reservation_seconds)),
+            wall_time_reservation_seconds=min(120.0 if pool_limit > 3 else 60.0, float(settings.loop_operation_wall_reservation_seconds)),
         )
         resp = await self._gateway.execute(
             req,

@@ -69,6 +69,6 @@ class BaseProvider(ABC):
             "response_schema": request.response_schema,
         }
         prompt_bytes = len(json.dumps(prompt, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode("ascii"))
-        prompt_bound = prompt_bytes + 128 + 64 * len(request.messages)
+        prompt_bound = (prompt_bytes + 2) // 3 + 128 + 64 * len(request.messages)
         completion_bound = max(request.max_tokens, self.completion_token_limit(request))
         return prompt_bound + completion_bound

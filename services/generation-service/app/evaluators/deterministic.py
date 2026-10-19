@@ -330,9 +330,36 @@ class QuestionStructureEvaluator(BaseEvaluator):
                         evaluator_id=self.evaluator_id,
                     )
                 )
+            from app.validation.common import is_placeholder, validate_english_text
+            if ans is not None and is_placeholder(str(ans)):
+                issues.append(
+                    Issue.create(
+                        issue_id=f"iss_place_{uuid4().hex[:8]}",
+                        code=IssueCode.SCHEMA_VIOLATION,
+                        severity=IssueSeverity.CRITICAL,
+                        scope=IssueScope.QUESTION,
+                        message=f"Question {q_num} answer '{ans}' cannot be a placeholder",
+                        affected_refs=[artifact.to_ref()],
+                        evaluator_id=self.evaluator_id,
+                    )
+                )
+
+            prompt_text = payload.get("prompt", "") or payload.get("questionText", "")
+            lang_issues = validate_english_text(prompt_text, "prompt")
+            for li in lang_issues:
+                issues.append(
+                    Issue.create(
+                        issue_id=f"iss_lang_{uuid4().hex[:8]}",
+                        code=IssueCode.SCHEMA_VIOLATION,
+                        severity=IssueSeverity.CRITICAL,
+                        scope=IssueScope.QUESTION,
+                        message=li.message,
+                        affected_refs=[artifact.to_ref()],
+                        evaluator_id=self.evaluator_id,
+                    )
+                )
 
             # Check for summary group blank mismatch in prompt
-            prompt_text = payload.get("prompt", "") or payload.get("questionText", "")
             if q_type == "SummaryCompletion" and ("blanks for" in prompt_text.lower() or "blank count mismatch" in prompt_text.lower()):
                 issues.append(
                     Issue.create(

@@ -59,9 +59,12 @@ public sealed class SingleChoiceGrader : IQuestionGrader
 {
     public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
     {
-        var selection = (answer.SelectedOptionIds ?? new List<Guid>()).ToHashSet();
         var correct = key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>();
         var correctIds = correct.Select(t => t.id).ToHashSet();
+        if (correctIds.Count == 0)
+            return new GradeResult(0m, false, NeedsManualReview: true, Feedback: "No answer key");
+
+        var selection = (answer.SelectedOptionIds ?? new List<Guid>()).ToHashSet();
         // Accept match if EITHER:
         //   1. The user's SelectedOptionIds UUID is in the correct set
         //   2. TextAnswer holds a GUID that's in the correct set (older FE
@@ -83,11 +86,13 @@ public sealed class MultipleChoiceGrader : IQuestionGrader
 {
     public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
     {
-        var selection = (answer.SelectedOptionIds ?? new List<Guid>()).ToHashSet();
         var correctIds = (key.CorrectOptionIds ?? new HashSet<(Guid id, string content)>())
             .Select(t => t.id)
             .ToHashSet();
+        if (correctIds.Count == 0)
+            return new GradeResult(0m, false, NeedsManualReview: true, Feedback: "No answer key");
 
+        var selection = (answer.SelectedOptionIds ?? new List<Guid>()).ToHashSet();
         // Set equality - order doesn't matter, just need to match all correct options
         var isCorrect = selection.SetEquals(correctIds);
         return new GradeResult(isCorrect ? key.QuestionPoints : 0m, isCorrect);
@@ -107,6 +112,8 @@ public sealed class CompletionGrader : IQuestionGrader
 
         var texts = key.BlankAcceptTexts ?? new Dictionary<string, string[]?>();
         var regs = key.BlankAcceptRegex ?? new Dictionary<string, string[]?>();
+        if (texts.Count == 0 && regs.Count == 0)
+            return new GradeResult(0m, false, NeedsManualReview: true, Feedback: "No answer key");
         var raw = answer.TextAnswer.Trim();
 
         var looksLikeJson = raw.StartsWith("{") && raw.EndsWith("}");
@@ -275,65 +282,98 @@ public sealed class LabelGrader : IQuestionGrader
 
 public sealed class MatchingHeadingGrader : IQuestionGrader
 {
+    private static bool MatchesCanonicalKey(string[]? right, string? userVal)
+    {
+        if (right is not { Length: > 0 } || string.IsNullOrWhiteSpace(userVal))
+            return false;
+        // In canonical [gradingKey, displayLabel], right[0] is strictly the grading key.
+        var expectedKey = right[0]?.Trim();
+        if (string.IsNullOrEmpty(expectedKey)) return false;
+        return string.Equals(expectedKey, userVal.Trim(), StringComparison.OrdinalIgnoreCase);
+    }
+
     public GradeResult Grade(AttemptAnswer answer, QuestionKey key)
     {
         if (string.IsNullOrWhiteSpace(answer.TextAnswer))
-            return new GradeResult(0, false);
+            return new GradeResult(0m, false, Feedback: "No answer provided");
 
         var pairs = key.MatchPairs ??
                     new Dictionary<string, string[]?>(StringComparer.OrdinalIgnoreCase);
         if (pairs.Count == 0)
-            return new GradeResult(0, false, Feedback: "No answer key");
+            return new GradeResult(0m, false, NeedsManualReview: true, Feedback: "No answer key");
 
         var raw = answer.TextAnswer.Trim();
-
-
         Dictionary<string, string>? map = null;
         var looksLikeJson = raw.StartsWith("{") && raw.EndsWith("}");
         if (looksLikeJson)
         {
             try
             {
-                map = JsonSerializer.Deserialize<Dictionary<string, string>>(raw)
-                      ?? new Dictionary<string, string>();
+                map = JsonSerializer.Deserialize<Dictionary<string, string>>(raw);
             }
             catch
             {
-                // bỏ qua, fallback phía dưới
+                // map remains null
             }
         }
+
+        if (pairs.Count == 1)
+        {
+            var (left, accepted) = pairs.First();
+            string? candidateAnswer = null;
+            if (map is not null)
+            {
+                if (map.TryGetValue(left, out var directVal))
+                    candidateAnswer = directVal;
+                else if (map.TryGetValue("1", out var defaultVal))
+                    candidateAnswer = defaultVal;
+                else if (map.Count == 1)
+                    candidateAnswer = map.Values.First();
+            }
+            else
+            {
+                candidateAnswer = raw;
+            }
+
+            var matched = MatchesCanonicalKey(accepted, candidateAnswer);
+            var awarded = matched ? (key.QuestionPoints > 0m ? key.QuestionPoints : 1m) : 0m;
+            return new GradeResult(
+                awarded,
+                matched,
+                Feedback: matched ? null : "One or more pairs do not match");
+        }
+
+        // Multi-pair matching exercise:
         if (map is not null)
         {
-            decimal got = 0m, total = pairs.Count;
+            decimal got = 0m;
+            decimal total = pairs.Count;
             foreach (var (left, right) in pairs)
             {
                 map.TryGetValue(left, out var userRight);
-                if (right is { Length: > 0 } &&
-                    right.Any(r => string.Equals(r, userRight, StringComparison.OrdinalIgnoreCase)))
+                if (MatchesCanonicalKey(right, userRight))
                 {
                     got++;
                 }
             }
-            var isAllMatched = total > 0 && got == total;
-            return new GradeResult(
-                GraderScoring.ScoreFor(isAllMatched, key.QuestionPoints),
-                isAllMatched,
-                Feedback: isAllMatched ? null : "One or more pairs do not match");
-        }
-        if (pairs.Count == 1)
-        {
-            var (_, accepted) = pairs.First();
-            var matched = accepted is { Length: > 0 } &&
-                          accepted.Any(k => string.Equals(k, raw, StringComparison.OrdinalIgnoreCase));
-            return new GradeResult(
-                GraderScoring.ScoreFor(matched, key.QuestionPoints),
-                matched,
-                Feedback: matched ? null : "One or more pairs do not match");
-        }
-        return new GradeResult(0, false, Feedback: "One or more pairs do not match");
 
+            var isAllMatched = total > 0m && got == total;
+            // Per-target scoring: never collapse a 5-item exercise into an all-or-nothing single point.
+            var pointsPerTarget = (key.QuestionPoints > 0m && total > 0m)
+                ? (key.QuestionPoints / total)
+                : 1m;
+            var awardedPoints = Math.Round(got * pointsPerTarget, 2);
+
+            return new GradeResult(
+                awardedPoints,
+                isAllMatched,
+                Feedback: isAllMatched ? null : (got == 0m ? "One or more pairs do not match" : $"{got}/{total} pairs matched"));
+        }
+
+        return new GradeResult(0m, false, Feedback: "One or more pairs do not match");
     }
 }
+
 
 public sealed class FlowChartGrader : IQuestionGrader
 {

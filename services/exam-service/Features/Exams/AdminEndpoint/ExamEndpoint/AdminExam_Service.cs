@@ -126,6 +126,23 @@ public sealed class AdminExamService(ExamDbContext db, IHttpContextAccessor? htt
                     {
                         return Results.Json(new ApiResultDto(false, "RESEARCH_PUBLICATION_FORBIDDEN: Research benchmark runs cannot be published to production.", null!), statusCode: 403);
                     }
+
+                    var pubExam = await db.Exams.AsNoTracking()
+                        .Include(e => e.Sections)
+                            .ThenInclude(s => s.Questions)
+                                .ThenInclude(q => q.Options)
+                        .FirstOrDefaultAsync(e => e.Id == exam.Id, ct);
+                    if (pubExam != null)
+                    {
+                        var pubErrors = ExamPublicationValidator.ValidateForPublication(pubExam);
+                        if (pubErrors.Count > 0)
+                        {
+                            return Results.BadRequest(new ApiResultDto(
+                                false,
+                                "EXAM_PUBLICATION_VALIDATION_FAILED: Cannot publish exam with defective questions.",
+                                pubErrors));
+                        }
+                    }
                 }
                 exam.Status = normalizedStatus;
             }

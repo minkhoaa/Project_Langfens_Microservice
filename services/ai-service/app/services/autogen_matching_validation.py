@@ -31,6 +31,11 @@ HEADING_OPTION_PATTERN: re.Pattern[str] = re.compile(r"^([ivxlcdm]+)\.\s+(.+)$",
 LETTER_OPTION_PATTERN: re.Pattern[str] = re.compile(r"^([A-Z])\.\s+(.+)$")
 TARGET_LINE_PATTERN: re.Pattern[str] = re.compile(r"^\s*(\d+)[.)]\s+(.+)$")
 
+FORBIDDEN_PLACEHOLDERS: frozenset[str] = frozenset({
+    "item 1", "item 2", "paragraph 1", "paragraph 2", "tbd", "n/a", "none",
+    "null", "undefined", "option a", "option b", "placeholder", "unknown"
+})
+
 
 def _collapse_ws(s: str) -> str:
     """Normalize whitespace for text comparisons."""
@@ -208,6 +213,12 @@ def validate_matching_question(
         if not isinstance(d_label, str) or not d_label.strip():
             issues.append(f"matchPairs['{t_key}'][1] displayLabel must be a non-empty string")
             continue
+
+        if g_key.strip().lower() in FORBIDDEN_PLACEHOLDERS:
+            issues.append(f"matchPairs['{t_key}'][0] gradingKey '{g_key}' cannot be a placeholder")
+        if d_label.strip().lower() in FORBIDDEN_PLACEHOLDERS:
+            issues.append(f"matchPairs['{t_key}'][1] displayLabel '{d_label}' cannot be a placeholder")
+
 
         g_key_norm = g_key.strip().lower() if is_heading else g_key.strip()
         if g_key_norm not in option_keys:

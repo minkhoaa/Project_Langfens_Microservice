@@ -237,14 +237,12 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                 $"Acquiring durable operation grant for passage {sourceNum}/{sources.Count} ({source.Pmcid}: {source.Title})...", ct);
 
             var secId = $"section_{sourceNum}";
-            var isUnlimitedRun = (activeRun != null && (
+            var isUnlimitedRun = activeRun != null && (
                 activeRun.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap ||
                 activeRun.BudgetCapTokens == ReadingPaperCapsProfile.UnlimitedCap ||
                 activeRun.BudgetCapWallTimeSeconds == ReadingPaperCapsProfile.UnlimitedCap ||
                 (activeRun.BudgetProfileJson != null && activeRun.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase))
-            )) || sources.Any(s => string.Equals(s.Metadata?.GetValueOrDefault("provider"), "minimax", StringComparison.OrdinalIgnoreCase))
-               || job.Topic.Contains("Benchmark", StringComparison.OrdinalIgnoreCase)
-               || string.Equals(Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase);
+            );
 
             var sectionTokenCap = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap
                 : caps.Caps.TryGetValue("legacySectionTokenCap", out var legacySectionTokens) && legacySectionTokens > 0 ? legacySectionTokens
@@ -1183,14 +1181,10 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
         _ => "Answer the questions below according to the reading passage."
     };
 
-    private static bool IsMiniMaxOrBenchmark(ReadingPaperJob job)
-        => (!string.IsNullOrWhiteSpace(job.SourcesJson) &&
-            (job.SourcesJson.Contains("\"provider\":\"minimax\"", StringComparison.OrdinalIgnoreCase) ||
-             job.SourcesJson.Contains("\"provider\": \"minimax\"", StringComparison.OrdinalIgnoreCase))) ||
-           job.Topic.Contains("Benchmark", StringComparison.OrdinalIgnoreCase) ||
-           job.Topic.Contains("MiniMax", StringComparison.OrdinalIgnoreCase) ||
-           string.Equals(Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase) ||
-           string.Equals(Environment.GetEnvironmentVariable("LLM_PROVIDER"), "minimax", StringComparison.OrdinalIgnoreCase);
+    private bool IsMiniMaxOrBenchmark(ReadingPaperJob job)
+        => caps.IsBenchmarkUnlimited && (
+           job.Topic.StartsWith("Benchmark ", StringComparison.OrdinalIgnoreCase) ||
+           job.Topic.Contains("Benchmark", StringComparison.OrdinalIgnoreCase));
 
     public static Exam BuildExam(ReadingPaperJob job, IReadOnlyList<ReadingGeneratedSection> sections)
     {
