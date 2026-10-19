@@ -59,14 +59,12 @@ Candidate sources must be validated based on **usable clean body word count**, r
 1. **Usable Clean Word Count Standard:**
    - Raw character counts are inadequate due to varying markup density, formulas, and references.
    - Eligibility is evaluated on **clean, extracted, non-boilerplate body text** after removing front-matter, back-matter, tables, figures, formulas, and references.
-2. **Passage Extraction Feasibility:**
-   - A candidate source is eligible if and only if its clean body text naturally yields valid, coherent, non-overlapping 350–650-word semantic passages without artificial text padding, synthetic truncation, or sentence clipping.
-   - If an article cannot produce independent 350–650-word passages satisfying boundary cleanliness and antecedent preservation, it must be **rejected or replaced**.
-3. **No Forced Four-Passage Constraint:**
-   - Candidate sources are **not forced** to yield exactly four passages.
-   - Scientific articles vary naturally in length and narrative density. A source that cleanly yields 2 or 3 independent, high-quality passages meeting the 350–650 word bounds is admitted for those 2 or 3 passages.
-   - The total benchmark requirement across the admitted pool of candidate sources is 28 Reading tasks (each with an independent passage). If candidate sources yield fewer than 4 passages each, additional authentic replacement PMC sources shall be retrieved and ingested to achieve the required 28 passages, rather than artificially forcing 4 passages out of a short text.
-
+2. **Four-Passage Feasibility & Rejection Rule:**
+   - A candidate source is eligible for admission into the 7-source Reading pool if and only if its clean body text naturally yields **four independent, non-overlapping 350–650-word semantic passages** without artificial text padding, synthetic truncation, or sentence clipping.
+   - **If four independent 350–650-word passages cannot be extracted without padding or clipping, reject or replace the source.**
+3. **Do Not Force Every Candidate to Yield Four Passages:**
+   - The segmenter and ingestion pipeline must **never force** four passages out of an insufficient candidate text (avoiding the mechanical integer division `len // 4` of DEF-DAT-04 and synthetic paragraph multiplication loops of DEF-DAT-02).
+   - If a candidate source's natural linguistic structure or usable length cannot cleanly yield four independent 350–650-word passages, the pipeline **rejects and replaces the candidate source** rather than forcing four passages from it.
 ### 3.2 Explicit Source Boundary: Forbidden Quarantined Sources vs. Inherited Sources
 To eliminate ambiguity and resolve contradictions regarding V1 overlap:
 
@@ -83,19 +81,19 @@ To eliminate ambiguity and resolve contradictions regarding V1 overlap:
                      │                                                 │
                      ▼                                                 ▼
      ┌───────────────────────────────┐                 ┌───────────────────────────────┐
-     │ STRICT ZERO OVERLAP (FAIL)    │                 │ ELIGIBLE FOR V2 INHERITANCE   │
-     │ - Zero reuse or reference     │                 │ IF AND ONLY IF:               │
-     │ - Jaccard 3-gram < 0.10       │                 │ - Live NCBI metadata verified │
-     │ - Excluded from all V2 tasks  │                 │ - CC-BY-4.0 XML tag proven    │
-     └───────────────────────────────┘                 │ - Auditable text match passes │
-                                                       │ - Cross-split disjointness OK │
+     │ STRICT ABSOLUTE ZERO OVERLAP  │                 │ ELIGIBLE FOR V2 INHERITANCE   │
+     │ - Zero reuse, zero references │                 │ IF AND ONLY IF:               │
+     │ - verbatim_shared_spans = 0   │                 │ - Live NCBI metadata verified │
+     │ - content_ngram_overlap = 0.0 │                 │ - CC-BY-4.0 XML tag proven    │
+     │ - Excluded from all V2 tasks  │                 │ - Auditable text match passes │
+     └───────────────────────────────┘                 │ - Cross-split disjointness OK │
                                                        └───────────────────────────────┘
 ```
 
 1. **Permanently Quarantined & Forbidden Sources (`ZERO_TOLERANCE_FORBIDDEN`):**
    - Identifiers: `PMC8910001`, `PMC8910002`, `PMC8910003`, `PMC8910004`, `PMC8910005`, `PMC8910006`.
    - Rationale: These records are fundamentally compromised by bibliographic metadata fabrication (DEF-DAT-01) and synthetic paragraph duplication loops (DEF-DAT-02).
-   - Invariant: **Strict zero reuse and zero lexical overlap.** Any candidate V2 text displaying verbatim spans $\ge 15$ words or 3-gram shingle Jaccard overlap $\ge 0.10$ against these 6 sources immediately fails validation. This rule is never bypassed.
+   - Invariant: **Strict Absolute Zero Overlap.** Candidate V2 sources must have **zero verbatim phrase overlap** (0 shared sentences or multi-word sequences $\ge 6$ words), **zero content-word n-gram overlap** (`content_ngram_overlap = 0.0`), and **zero source-identifier or bibliographic reference overlap** with these 6 quarantined sources. Unlike separate authentic research splits (which allow bounded $< 0.10$ non-verbatim academic lexicon overlap), overlap with the 6 forbidden sources is strictly $0.0$. Any match immediately rejects the candidate. This rule is never bypassed.
 2. **Candidate Inherited Sources (`ELIGIBLE_SUBJECT_TO_VERIFICATION`):**
    - Identifiers: `PMC13621526`, `PMC13604763`, `PMC13517498`, `PMC13407692`.
    - Rationale: In-repo files present in `tests/fixtures/corpus/sources/` that did not exhibit synthetic paragraph duplication in V1, but have no certified metadata or XML license on record.
@@ -251,10 +249,14 @@ Universal zero-repetition assumptions fail on legitimate repetitive structures i
 1. **Domain Terminology & Technical Nouns:** Technical compounds (e.g. *LED photoperiod*, *superhydrophobic surface*, *sensor network topology*, *quantum state purification*) naturally recur throughout scientific papers and are permitted.
 2. **POS Content-Word Filtering:** The validator uses Zipfian frequency analysis and POS tagging to distinguish legitimate technical keyword recurrence from verbatim narrative padding.
 
-### 6.4 Cross-Split Disjointness
-1. **Forbidden Historical Sources:** Jaccard 3-gram overlap against `PMC8910001..PMC8910006` must be $< 0.10$ with 0 verbatim spans $\ge 15$ words.
-2. **Existing Research Splits:** Jaccard 3-gram overlap against DEV, CALIBRATION, HOLDOUT, and G15 splits must be $< 0.10$.
-
+### 6.4 Cross-Split Disjointness vs. Quarantined Source Exclusion
+1. **Forbidden Historical Sources (`PMC8910001..6`) — Strict Absolute Zero Overlap:**
+   - `verbatim_shared_spans = 0` (0 shared sentences, 0 verbatim spans $\ge 6$ words).
+   - `content_ngram_overlap = 0.0` (zero shared content-word shingles).
+   - `source_id_overlap = 0` (complete exclusion; no PMCID, DOI, or title reuse).
+2. **Existing Research Splits (DEV, CALIBRATION, HOLDOUT, G15) — Statistical Independence:**
+   - Natural academic vocabulary overlap is bounded: Jaccard 3-gram content shingle overlap must be strictly $< 0.10$.
+   - Verbatim passage or sentence sharing ($\ge 10$ words) is strictly $0$.
 ---
 
 ## 7. Implementation Steps & Work Breakdown
@@ -275,11 +277,11 @@ Universal zero-repetition assumptions fail on legitimate repetitive structures i
 Sprint V2-S02 shall achieve gate closure (`PASS`) if and only if all of the following criteria are satisfied:
 - [ ] **Gate 1 (Provenance Authenticity):** All candidate sources have verified records in `V2_SOURCE_PROVENANCE_LEDGER.json` with authentic PMCIDs, DOIs, journal citations, and verbatim `<license-p>` CC-BY-4.0 text derived from live NCBI XML. Zero missing evidence fabricated.
 - [ ] **Gate 2 (Deterministic Text Correspondence):** Clean disk text corresponds 100% to canonicalized official PMC XML body text with documented, deterministic transformation passes and zero unevidenced additions.
-- [ ] **Gate 3 (Usable Word Count & Feasibility):** Every admitted source provides sufficient usable body word count to produce independent 350–650-word passages without padding or clipping. No source is forced to yield 4 passages.
-- [ ] **Gate 4 (V1 Overlap Resolution):** 100% zero overlap against forbidden quarantined sources (`PMC8910001..6`). The 4 inherited sources pass full NCBI and disjointness verification.
+- [ ] **Gate 3 (Usable Word Count & Feasibility):** Every admitted source provides sufficient usable body word count to naturally yield four independent 350–650-word passages without padding or clipping. If four independent passages cannot be extracted without padding or clipping, the source is rejected or replaced. The segmenter never forces four passages out of an insufficient text.
+- [ ] **Gate 4 (V1 Overlap Resolution):** Absolute zero overlap (`verbatim_shared_spans = 0`, `content_ngram_overlap = 0.0`) against forbidden quarantined sources (`PMC8910001..6`). The 4 inherited sources pass full NCBI and disjointness verification.
 - [ ] **Gate 5 (Boundary Cleanliness):** `SemanticSentenceSegmenter` parses 100% of sentences at valid linguistic boundaries, with zero mid-word, mid-phrase, or mid-clause truncations across all candidate texts.
 - [ ] **Gate 6 (Passage Length Contracts):** All segmented passages strictly conform to the 350–650 word range with intact pronominal antecedents and zero synthetic padding.
 - [ ] **Gate 7 (Calibrated Anti-Padding):** `test_v2_anti_padding.py` confirms zero consecutive duplicate paragraphs, zero paragraph loops, and zero cross-source copying. Any uncertain non-consecutive repetitions are routed to `PADDING_REVIEW_TRIAGE.json` with recorded evidence.
-- [ ] **Gate 8 (Cross-Split Disjointness):** Jaccard 3-gram shingle overlap against DEV, CALIBRATION, HOLDOUT, G15, and forbidden V1 sources is strictly $< 0.10$.
+- [ ] **Gate 8 (Cross-Split Disjointness):** Absolute zero overlap against forbidden quarantined sources (`PMC8910001..6`), and bounded Jaccard 3-gram content shingle overlap ($< 0.10$) with zero verbatim sentence sharing against DEV, CALIBRATION, HOLDOUT, and G15 splits.
 - [ ] **Gate 9 (Zero Historical Regression):** Full RG10 regression suite passes (353/353 tests), baseline package checks pass (2015/2015 checks), and V1 quarantine manifest confirms 0 mutations across 594 historical files.
 - [ ] **Gate 10 (Safety & Provider Invariants):** 0 MiniMax API calls, 0 foundation model generation calls, 0 live research dispatches, and 0 holdout inspections.
