@@ -236,29 +236,12 @@ def test_sub_rule_example_allocation_and_quotas() -> None:
 
 
 def test_negative_inversion_missing_auxiliary_inversion_rejected() -> None:
-    """Asserts that failure to invert after fronted negative adjunct is detected as a syntactic defect."""
-    # Valid inversion: "Under no circumstances should researchers alter..."
-    valid_sentence = "Under no circumstances should researchers alter experimental parameters."
-    # Defective non-inversion: "Under no circumstances researchers should alter..."
+    """Asserts that failure to invert after fronted negative adjunct is detected as ERR-INV-01."""
     defective_sentence = "Under no circumstances researchers should alter experimental parameters."
-
-    # Validate trigger pattern: initial negative adverbial requires auxiliary immediately preceding subject
-    has_initial_neg = defective_sentence.lower().startswith("under no circumstances")
-    assert has_initial_neg is True
-
-    # Check inversion pattern: after "under no circumstances", auxiliary must precede noun phrase
-    remainder = defective_sentence[len("under no circumstances") :].strip()
-    first_word = remainder.split()[0].lower()
-    modal_auxiliaries = {"should", "must", "can", "could", "will", "would", "did", "does", "do", "have", "had", "has"}
-
-    is_inverted = first_word in modal_auxiliaries
-    assert is_inverted is False, "Defective sentence must fail auxiliary-initial inversion check!"
-
-    # Contrast with valid sentence
-    valid_remainder = valid_sentence[len("under no circumstances") :].strip()
-    valid_first_word = valid_remainder.split()[0].lower()
-    assert valid_first_word in modal_auxiliaries, "Valid sentence must exhibit auxiliary inversion!"
-
+    res = validate_syntactic_construction("fam-v2-grammar-inversion", defective_sentence)
+    assert res["status"] == VALIDATION_STATUS_INVALID
+    assert res["is_valid"] is False
+    assert any("ERR-INV-01" in err for err in res["errors"])
 
 def test_negative_inversion_spurious_subject_modifying_only_rejected() -> None:
     """Asserts that true spurious operator inversion fronting aux before subject NP is detected as ERR-INV-02."""
@@ -272,97 +255,60 @@ def test_negative_inversion_spurious_subject_modifying_only_rejected() -> None:
     assert any("ERR-INV-02" in err for err in res["errors"])
 
 def test_negative_conditionals_lexical_verb_direct_inversion_rejected() -> None:
-    """Asserts that direct inversion of lexical verbs without auxiliary operator is rejected."""
-    # Inverted conditionals strictly require auxiliary operators (had, were, should).
-    # Valid: "Had the geology team accurately calibrated..."
-    # Defective: "Knew the geology team the pressure data..." (illicit lexical verb fronting)
+    """Asserts that direct inversion of lexical verbs without auxiliary operator is rejected as ERR-COND-01."""
     defective_inverted = "Knew the geology team the pressure data, the anomaly would have been prevented."
-
-    first_word = defective_inverted.split()[0].lower()
-    valid_inversion_operators = {"had", "were", "should"}
-
-    is_valid_operator = first_word in valid_inversion_operators
-    assert is_valid_operator is False, f"Lexical verb '{first_word}' cannot serve as inverted conditional operator!"
-
+    res = validate_syntactic_construction("fam-v2-grammar-conditionals", defective_inverted)
+    assert res["status"] == VALIDATION_STATUS_INVALID
+    assert res["is_valid"] is False
+    assert any("ERR-COND-01" in err for err in res["errors"])
 
 def test_negative_subjunctive_inflected_verb_rejected() -> None:
-    """Asserts that inflected verbs in mandative that-clauses are detected as invalid."""
-    # Mandative subjunctive requires invariant base form (submit, remain, decontaminate).
-    # Valid: "...recommended that the investigator submit a revised framework."
-    # Defective indicative: "...recommended that the investigator submits a revised framework."
+    """Asserts that inflected verbs in mandative that-clauses are detected as ERR-SUBJ-01."""
     defective_subjunctive = (
         "The bioethics supervisory committee recommended that the principal investigator submits a revised framework."
     )
-
-    # Detect 3rd-person singular inflection on embedded verb after suasion predicate
-    match = re.search(r"recommended that the \w+ (\w+)", defective_subjunctive, re.IGNORECASE)
-    assert match is not None
-    # In the defective sentence, "principal investigator submits" contains inflected "submits"
-    assert "submits" in defective_subjunctive
-    is_base_form = "submits".endswith("s") is False
-    assert is_base_form is False, "Inflected verb 'submits' violates mandative base form requirement!"
-
+    res = validate_syntactic_construction("fam-v2-grammar-subjunctive", defective_subjunctive)
+    assert res["status"] == VALIDATION_STATUS_INVALID
+    assert res["is_valid"] is False
+    assert any("ERR-SUBJ-01" in err for err in res["errors"])
 
 def test_negative_subjunctive_do_periphrasis_negation_rejected() -> None:
-    """Asserts that do-support in negative mandative subjunctive is rejected."""
-    # Valid: "...insisted that the pharmaceutical sponsor not unblind patient outcome data."
-    # Defective: "...insisted that the pharmaceutical sponsor does not unblind patient outcome data."
+    """Asserts that do-support in negative mandative subjunctive is rejected as ERR-SUBJ-02."""
     defective_negative_subj = (
         "The panel insisted that the pharmaceutical sponsor does not unblind patient outcome data."
     )
-
-    has_do_negation = bool(re.search(r"insisted that .* (does not|did not|do not) \w+", defective_negative_subj))
-    assert has_do_negation is True, "Detected invalid do-periphrasis in negative mandative subjunctive!"
-
+    res = validate_syntactic_construction("fam-v2-grammar-subjunctive", defective_negative_subj)
+    assert res["status"] == VALIDATION_STATUS_INVALID
+    assert res["is_valid"] is False
+    assert any("ERR-SUBJ-02" in err for err in res["errors"])
 
 def test_negative_participles_dangling_participle_rejected() -> None:
-    """Asserts that dangling participles with non-coreferential matrix subjects are detected."""
-    # Valid coreferential: "Having synthesized the compound, the organic chemistry team conducted NMR..."
-    # (Agent of 'having synthesized' = organic chemistry team = matrix subject)
-    # Dangling defective: "Having synthesized the compound, NMR spectroscopy was conducted..."
-    # (Matrix subject is 'NMR spectroscopy', which cannot synthesize compounds)
+    """Asserts that dangling participles with non-coreferential matrix subjects are detected as ERR-PART-01."""
     dangling_sentence = (
         "Having synthesized the novel compound, nuclear magnetic resonance spectroscopy was conducted."
     )
-
-    # Fronted participle clause
-    assert dangling_sentence.startswith("Having synthesized")
-    comma_idx = dangling_sentence.find(",")
-    assert comma_idx != -1
-    matrix_clause = dangling_sentence[comma_idx + 1 :].strip()
-
-    # Matrix subject is inanimate technique/object
-    matrix_subject = matrix_clause.split()[0].lower()
-    inanimate_subjects = {"nuclear", "nmr", "spectroscopy", "data", "results", "analysis"}
-    is_dangling = matrix_subject in inanimate_subjects
-    assert is_dangling is True, "Detected dangling participle modifying inanimate technique rather than researcher agent!"
-
+    res = validate_syntactic_construction("fam-v2-grammar-participles", dangling_sentence)
+    assert res["status"] == VALIDATION_STATUS_INVALID
+    assert res["is_valid"] is False
+    assert any("ERR-PART-01" in err for err in res["errors"])
 
 def test_negative_passives_unpermitted_personal_passive_suggest_rejected() -> None:
-    """Asserts that personal reporting passives with unpermitted verbs (suggest) are detected."""
-    # Verbs like 'suggest' and 'explain' permit impersonal passives ("It is suggested that..."),
-    # but strictly disallow personal reporting passives with to-infinitive (*"He is suggested to be...").
+    """Asserts that personal reporting passives with unpermitted verbs (suggest) are detected as ERR-PASS-01."""
     defective_personal_passive = "The novel catalyst is suggested to increase reaction yield by thirty percent."
-
-    has_suggest_personal_passive = bool(re.search(r"is suggested to \w+", defective_personal_passive))
-    assert has_suggest_personal_passive is True, (
-        "Detected unpermitted personal reporting passive with verb 'suggest'!"
-    )
-
+    res = validate_syntactic_construction("fam-v2-grammar-passives", defective_personal_passive)
+    assert res["status"] == VALIDATION_STATUS_INVALID
+    assert res["is_valid"] is False
+    assert any("ERR-PASS-01" in err for err in res["errors"])
 
 def test_negative_modals_must_not_have_impossible_deduction_rejected() -> None:
-    """Asserts that 'must not have' for impossible past deduction is rejected in favor of 'cannot have'."""
-    # In standard academic English, impossible past deduction requires 'cannot have' or 'could not have'.
-    # Defective: "The aquifer depletion must not have resulted solely from seasonal drought..."
+    """Asserts that 'must not have' for impossible past deduction is rejected as ERR-MOD-01."""
     defective_modal_deduction = (
         "The aquifer depletion must not have resulted solely from seasonal precipitation deficits."
     )
-
-    has_must_not_have = "must not have" in defective_modal_deduction
-    assert has_must_not_have is True, (
-        "Detected 'must not have' in epistemic deduction context where 'cannot have' is required!"
-    )
-
+    res = validate_syntactic_construction("fam-v2-grammar-modals", defective_modal_deduction)
+    assert res["status"] == VALIDATION_STATUS_INVALID
+    assert res["is_valid"] is False
+    assert any("ERR-MOD-01" in err for err in res["errors"])
 
 
 
@@ -582,6 +528,12 @@ def test_validator_marks_dialect_sensitive_and_context_dependent_alternatives_as
     assert res_mod["status"] == VALIDATION_STATUS_INCONCLUSIVE
     assert res_mod["is_valid"] is False
 
+    # 5. Deontic rule on prior action with 'must not have + past participle' (e.g. 'must not have entered')
+    deontic_action = "Candidates must not have entered the examination hall without valid photographic identification."
+    res_action = validate_syntactic_construction("fam-v2-grammar-modals", deontic_action)
+    assert res_action["status"] == VALIDATION_STATUS_INCONCLUSIVE
+    assert res_action["is_valid"] is False
+    assert "deontic prohibition" in res_action["details"]
 
 def test_validator_unknown_and_malformed_inputs_handled_safely() -> None:
     """Asserts that empty, gibberish, and unknown family inputs fail closed safely."""

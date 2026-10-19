@@ -287,13 +287,24 @@ def validate_syntactic_construction(family_id: str, sentence: str) -> Dict[str, 
 
     elif family_id == "fam-v2-grammar-modals":
         if "must not have" in s_clean.lower():
-            if (
-                re.search(r"\bmust not have\s+(?:been|resulted|occurred|formed|originated|precipitated|caused|collapsed|exceeded|decayed)\b", s_clean, re.IGNORECASE)
-                or re.search(r"\bmust not have\s+[a-z]+ed\s+(?:solely\s+)?(?:from|by|in|due)\b", s_clean, re.IGNORECASE)
-            ):
+            has_epistemic_defect = bool(
+                re.search(
+                    r"\b(?:depletion|anomaly|readout|signal|specimen|core|furnace|trend|feature|event|loss|collapse)\s+must\s+not\s+have\s+(?:been|resulted|occurred|formed|originated|decayed|precipitated|caused)\b",
+                    s_clean,
+                    re.IGNORECASE,
+                )
+                or re.search(
+                    r"\bmust\s+not\s+have\s+(?:resulted|originated|occurred|decayed|formed|precipitated)\s+(?:solely\s+)?(?:from|by|in|due)\b",
+                    s_clean,
+                    re.IGNORECASE,
+                )
+            )
+            if has_epistemic_defect:
                 errors.append("ERR-MOD-01: Illicit 'must not have' used for impossible past deduction (requires 'cannot/could not have')")
             else:
-                inconclusive_notes.append("Ambiguous 'must not have': may denote present deontic prohibition on possession rather than past epistemic deduction")
+                inconclusive_notes.append(
+                    "Ambiguous 'must not have': morphology cannot distinguish impossible past deduction from deontic prohibition on prior action (e.g. 'must not have entered'); requires contextual pragmatic adjudication"
+                )
     elif family_id == "fam-v2-grammar-passives":
         if re.search(r"\b(is|was|are|were|has been)\s+(suggested|explained|announced)\s+to\s+\w+", s_clean, re.IGNORECASE):
             errors.append("ERR-PASS-01: Unpermitted personal reporting passive with restricted verb (e.g. 'is suggested to')")
