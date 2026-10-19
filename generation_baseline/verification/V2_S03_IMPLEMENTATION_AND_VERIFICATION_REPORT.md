@@ -8,20 +8,19 @@
 **Governing Authority**: `generation_baseline/SOURCE_OF_TRUTH.md`  
 **Repository**: `minkhoaa/Project_Langfens_Microservice`  
 **Branch**: `autonomous-generation`  
-**Gate Decision**: **`PASS`** (Sprint V2-S03 engineering deliverables closed; dataset-level gate `DATASET_READY` remains on `HOLD`)  
+**Gate Decision**: **`PASS`** (Sprint V2-S03 engineering deliverables closed following final engineering checks; dataset-level gate `DATASET_READY` remains on `HOLD`)  
 
 ---
 
 ## 1. Executive Summary
 
-Under the user-approved sprint plan `PLAN-V2-S03-GRAMMAR-RULEPACKS`, micro-sprint **V2-S03 (Reference-Grounded Grammar RulePacks & Evidence-Based CEFR Alignment)** has been fully implemented and verified offline.
-
+Under sprint plan `PLAN-V2-S03-GRAMMAR-RULEPACKS` (reconciled post-implementation at commit `0fcc150` with final engineering checks, without fabricating retroactive pre-implementation approval), micro-sprint **V2-S03 (Reference-Grounded Grammar RulePacks & Evidence-Based CEFR Alignment)** has been fully implemented and verified offline.
 Sprint V2-S03 resolves the root causes of Grammar task corruption identified during Day 2 research audits:
 1. **Unbacked Grammar RulePacks & Arbitrary Difficulty Cycling (DEF-DAT-03):** Replaced arbitrary CEFR rotations with 7 authoritative `GrammarRulePack` instances strictly conforming to the immutable Pydantic v2 `GrammarRulePack` schema (`services/generation-service/app/contracts/research.py:53`).
 2. **Academic Reference Grounding:** Grounded all 7 rule packs in standard descriptive reference grammars: Quirk, Greenbaum, Leech, & Svartvik (1985); Biber, Johansson, Leech, Conrad, & Finegan (1999); Huddleston & Pullum (2002); Hewings (2013); and Murphy (2019) with authentic ISBN catalog identifiers under publisher All Rights Reserved status.
 3. **Ambiguous Distractors & Undocumented Exceptions (DEF-DAT-05):** Formally codified 21 sub-rules and documented syntactic exception contexts across all families, supplemented with a 9-category distractor diagnostic error taxonomy (`V2_GRAMMAR_ERROR_TAXONOMY`).
 4. **Original Academic Example Sentences:** Authored a diverse corpus of **56 original academic example sentences** (exactly 8 per family), demonstrating target rules and exceptions in formal academic register across diverse scientific domains with zero textbook copyright infringement.
-5. **Production Grammar Validator & Comprehensive Negative Testing:** Implemented `validate_syntactic_construction` and authored 23 acceptance tests in `services/generation-service/tests/test_v2_grammar_taxonomy.py`, verifying schema conformance, SHA-256 fingerprint determinism, quota adherence, and fail-closed rejection of 9 distinct syntactic violation classes.
+5. **Production Grammar Validator & Comprehensive Negative Testing:** Implemented `validate_syntactic_construction` and authored 28 acceptance tests in `services/generation-service/tests/test_v2_grammar_taxonomy.py`, verifying schema conformance, SHA-256 fingerprint determinism, quota adherence, fail-closed rejection of 9 distinct syntactic violation classes, positive target-construction screening, explicit tri-state `VALID` / `INVALID` / `INCONCLUSIVE` semantics, and oracle separation from certified human judgment.
 6. **Cryptographic Provenance Ledger:** Generated `generation_baseline/verification/V2_GRAMMAR_PROVENANCE_LEDGER.json` recording canonical SHA-256 digests for all 5 reference works and all 7 RulePacks, sub-rule registry metadata, and transparent governance disclosures.
 7. **Preservation of Historical Assets:** Automated verification confirmed zero mutations across all 594 historical assets in `V1_QUARANTINE_MANIFEST.json`. All 353 RG10 regression tests and 2,015 baseline package checks passed cleanly.
 
@@ -102,16 +101,26 @@ All 56 examples are authored in `grammar_packs_v2.py` with 100% adherence to pre
 ## 5. Production Grammar Validation & Distractor Diagnostic Architecture
 
 ### 5.1 Production Syntactic Validator (`validate_syntactic_construction`)
-Implemented in `services/generation-service/app/experiment/grammar_validator_v2.py`, this function evaluates whether a sentence satisfies target syntactic invariants and fails closed upon detecting documented negative grammatical defects:
-- **`ERR-INV-01`**: Missing operator inversion following fronted negative adverbials (*under no circumstances*, *on no account*).
-- **`ERR-INV-02`**: Spurious operator inversion following subject-modifying *only*.
-- **`ERR-COND-01`**: Direct lexical verb inversion (*Knew the team...*) without auxiliary operator (*had*, *were*, *should*).
-- **`ERR-CLEFT-01`**: Demonstrative pronoun substitution (*This was X that Y*) destroying dummy *it* information structure.
-- **`ERR-SUBJ-01`**: 3rd-person singular inflection on verbs in mandative that-clauses (*submits*, *remains*).
-- **`ERR-SUBJ-02`**: Invalid *do*-periphrasis in negative mandative subjunctive (*does not unblind* vs *not unblind*).
-- **`ERR-PART-01`**: Dangling participles where the non-finite clause agent does not match the inanimate matrix subject.
-- **`ERR-MOD-01`**: Illicit *must not have* in epistemic deduction contexts where *cannot/could not have* is required.
-- **`ERR-PASS-01`**: Unpermitted personal reporting passive with restricted verbs (*is suggested to*).
+Implemented in `services/generation-service/app/experiment/grammar_validator_v2.py`, this function evaluates whether a sentence satisfies target syntactic invariants. Following a comprehensive engineering audit for fail-open defects:
+1. **Fail-Open Elimination:** The validator rejects the naive assumption that the absence of a recognized defect proves grammatical validity. Sentences lacking positive target construction indicators yield `INCONCLUSIVE` (with `is_valid: False`), preventing non-target or unrelated inputs from being mistakenly certified.
+2. **Explicit Tri-State Decision Semantics:**
+   - **`VALID` (`is_valid: True`):** Positive structural markers for the target syntactic construction are identified AND zero documented defects are detected.
+   - **`INVALID` (`is_valid: False`):** Documented negative syntactic defect explicitly detected, or input is empty/whitespace.
+   - **`INCONCLUSIVE` (`is_valid: False`):** Sentence lacks target construction markers, contains dialect-sensitive alternatives (e.g. British should-mandative), exhibits context-dependent structures (e.g. subject-modifying `only` with emphatic do-support, indicative factual complements), or references an unsupported family.
+3. **Refined Spurious Inversion Diagnostics (`ERR-INV-02`):**
+   - Fronted spurious operator inversion before the subject NP (e.g. `*Only did senior researchers attend...*`) is rejected as `INVALID` (`ERR-INV-02`).
+   - Canonical subject-auxiliary order with do-support (e.g. `Only senior researchers did attend the symposium`) is recognized as potential emphatic affirmative assertion rather than an inversion error, and is classified as `INCONCLUSIVE`.
+4. **Documented Syntactic Defect Classes:**
+   - **`ERR-INV-01`**: Missing operator inversion following fronted negative adverbials (*under no circumstances*, *on no account*).
+   - **`ERR-INV-02`**: Spurious operator inversion fronting auxiliary operator before subject NP following *only*.
+   - **`ERR-COND-01`**: Direct lexical verb inversion (*Knew the team...*) without auxiliary operator (*had*, *were*, *should*).
+   - **`ERR-CLEFT-01`**: Demonstrative pronoun substitution (*This was X that Y*) destroying dummy *it* information structure.
+   - **`ERR-SUBJ-01`**: 3rd-person singular inflection on verbs in mandative that-clauses (*submits*, *remains*).
+   - **`ERR-SUBJ-02`**: Invalid *do*-periphrasis in negative mandative subjunctive (*does not unblind* vs *not unblind*).
+   - **`ERR-PART-01`**: Dangling participles where the non-finite clause agent does not match the inanimate matrix subject.
+   - **`ERR-MOD-01`**: Illicit *must not have* in epistemic deduction contexts where *cannot/could not have* is required.
+   - **`ERR-PASS-01`**: Unpermitted personal reporting passive with restricted verbs (*is suggested to*).
+5. **Epistemic Separation from Certified Human Gold:** The validator functions strictly as an automated heuristic structural screening tool. Every validation response carries explicit disclosure (`EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD`) confirming that automated validation is not equivalent to certified human linguistic judgment.
 
 ### 5.2 Distractor Diagnostic Taxonomy (`V2_GRAMMAR_ERROR_TAXONOMY`)
 Codified all 9 defect classes into an authoritative registry with target sub-rules, formal defect types, structural descriptions, and pedagogical diagnostic messages.
@@ -121,11 +130,11 @@ Codified all 9 defect classes into an authoritative registry with target sub-rul
 ## 6. Verification Suite Execution Evidence
 
 ### 6.1 V2-S03 Dedicated Acceptance Suite
-Executed 23 acceptance tests in `services/generation-service/tests/test_v2_grammar_taxonomy.py`:
+Executed 28 acceptance tests in `services/generation-service/tests/test_v2_grammar_taxonomy.py`:
 ```bash
 cd services/generation-service && python3 -m pytest tests/test_v2_grammar_taxonomy.py -v
 ```
-- **Result:** **23 passed in 0.89s** (100% pass rate).
+- **Result:** **28 passed in 1.85s** (100% pass rate).
   - Schema & provenance conformance: 3 passed (`test_rule_pack_count_and_schema_conformance`, `test_rule_pack_provenance_and_rights_integrity`, `test_sha256_digest_integrity_and_determinism`).
   - Sub-rule registry & CEFR tracking: 2 passed (`test_sub_rule_registry_and_cardinality`, `test_epistemic_cefr_status_tracking`).
   - Original academic examples & quotas: 3 passed (`test_original_example_cardinality_and_uniqueness`, `test_structural_applicability_and_exceptions_presence`, `test_sub_rule_example_allocation_and_quotas`).
@@ -133,18 +142,18 @@ cd services/generation-service && python3 -m pytest tests/test_v2_grammar_taxono
   - Production validator execution: 2 passed (`test_production_syntactic_validator_all_56_examples_pass`, `test_production_syntactic_validator_detects_all_defect_classes`).
   - Registry & integrity helper: 3 passed (`test_grammar_error_taxonomy_registry`, `test_get_v2_grammar_rule_pack_lookup`, `test_validate_grammar_rule_pack_integrity_helper`).
   - Provenance ledger verification: 1 passed (`test_grammar_provenance_ledger_file_integrity`).
+  - Adversarial negative tests & oracle separation: 5 passed (`test_validator_fail_open_prevention_on_non_target_sentences`, `test_validator_marks_subject_only_declarative_do_as_inconclusive`, `test_validator_marks_dialect_sensitive_and_context_dependent_alternatives_as_inconclusive`, `test_validator_unknown_and_malformed_inputs_handled_safely`, `test_validator_epistemic_disclosure_and_human_oracle_separation`).
 
 ### 6.2 All RQ2_DATASET_V2 Acceptance Suites (Reading + Grammar)
-Executed combined V2 test suites (57 total tests across 4 test modules):
+Executed combined V2 test suites (62 total tests across 4 test modules):
 ```bash
 cd services/generation-service && python3 -m pytest tests/test_v2_*.py -v
 ```
-- **Result:** **57 passed in 1.73s** (100% pass rate).
+- **Result:** **62 passed in 3.35s** (100% pass rate).
   - `test_v2_source_authenticity.py`: 8 passed.
   - `test_v2_passage_segmentation.py`: 5 passed.
   - `test_v2_anti_padding.py`: 21 passed.
-  - `test_v2_grammar_taxonomy.py`: 23 passed.
-
+  - `test_v2_grammar_taxonomy.py`: 28 passed.
 ### 6.3 Historical RG10 Freeze Regression Suite
 Executed full RG10 regression test suite across 24 test modules:
 ```bash

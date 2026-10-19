@@ -35,10 +35,12 @@ from app.experiment.grammar_packs_v2 import (
     compute_rulepack_content_sha256,
     get_v2_grammar_rule_pack,
     list_v2_grammar_rule_packs,
+    VALIDATION_STATUS_INCONCLUSIVE,
+    VALIDATION_STATUS_INVALID,
+    VALIDATION_STATUS_VALID,
     validate_grammar_rule_pack_integrity,
     validate_syntactic_construction,
 )
-
 
 EXPECTED_FAMILY_IDS = [
     "fam-v2-grammar-inversion",
@@ -259,23 +261,15 @@ def test_negative_inversion_missing_auxiliary_inversion_rejected() -> None:
 
 
 def test_negative_inversion_spurious_subject_modifying_only_rejected() -> None:
-    """Asserts that spurious inversion when 'only' modifies subject NP is detected as invalid."""
-    # When 'only' modifies a subject NP, normal declarative word order applies:
-    # Valid: "Only senior researchers attended the symposium."
-    # Defective spurious inversion: "Only senior researchers did attend the symposium" (untriggered do-support inversion)
-    subject_only_sentence = "Only senior researchers did attend the symposium."
-
-    # Subject-modifying 'only' check: 'only' immediately followed by noun/adjective head modifying subject
-    tokens = subject_only_sentence.split()
-    assert tokens[0].lower() == "only"
-    # If the token after 'only' is not an adverbial (like 'after', 'when', 'if', 'then'), it restricts the subject NP
-    is_subject_modifier = tokens[1].lower() not in {"after", "when", "if", "then", "later", "recently", "rarely"}
-    assert is_subject_modifier is True
-
-    # Spurious auxiliary check
-    has_spurious_do = "did attend" in subject_only_sentence
-    assert has_spurious_do is True, "Detected spurious do-support following subject-modifying 'only'!"
-
+    """Asserts that true spurious operator inversion fronting aux before subject NP is detected as ERR-INV-02."""
+    # Valid subject-modifying declarative: "Only senior researchers attended the symposium."
+    # Canonical declarative order with emphatic do-support: "Only senior researchers did attend..." (not inversion)
+    # True spurious operator inversion (defective): "Only did senior researchers attend the symposium."
+    true_defective = "Only did senior researchers attend the symposium."
+    res = validate_syntactic_construction("fam-v2-grammar-inversion", true_defective)
+    assert res["status"] == VALIDATION_STATUS_INVALID
+    assert res["is_valid"] is False
+    assert any("ERR-INV-02" in err for err in res["errors"])
 
 def test_negative_conditionals_lexical_verb_direct_inversion_rejected() -> None:
     """Asserts that direct inversion of lexical verbs without auxiliary operator is rejected."""
@@ -394,7 +388,7 @@ def test_production_syntactic_validator_detects_all_defect_classes() -> None:
     """Asserts that validate_syntactic_construction detects all 9 documented defect classes."""
     defect_cases = [
         ("fam-v2-grammar-inversion", "Under no circumstances researchers should alter experimental parameters.", "ERR-INV-01"),
-        ("fam-v2-grammar-inversion", "Only senior researchers did attend the symposium.", "ERR-INV-02"),
+        ("fam-v2-grammar-inversion", "Only did senior researchers attend the symposium.", "ERR-INV-02"),
         ("fam-v2-grammar-conditionals", "Knew the geology team the pressure data, the anomaly would have been prevented.", "ERR-COND-01"),
         ("fam-v2-grammar-clefts", "This was the catalyst that accelerated the reaction.", "ERR-CLEFT-01"),
         ("fam-v2-grammar-subjunctive", "The committee recommended that the investigator submits a revised framework.", "ERR-SUBJ-01"),
@@ -403,7 +397,6 @@ def test_production_syntactic_validator_detects_all_defect_classes() -> None:
         ("fam-v2-grammar-modals", "The aquifer depletion must not have resulted solely from precipitation deficits.", "ERR-MOD-01"),
         ("fam-v2-grammar-passives", "The novel catalyst is suggested to increase reaction yield by thirty percent.", "ERR-PASS-01"),
     ]
-
     for family_id, sentence, expected_err in defect_cases:
         res = validate_syntactic_construction(family_id, sentence)
         assert res["is_valid"] is False, f"Expected defect detection for: '{sentence}'"
@@ -517,3 +510,111 @@ def test_grammar_provenance_ledger_file_integrity() -> None:
     assert gov["fair_use_memorandum_status"] == "PENDING_INSTITUTIONAL_SIGN_OFF"
     assert gov["reading_findings_status"] == "REVIEW_REQUIRED_PENDING_CURATOR_ADJUDICATION"
     assert len(gov["unsupported_claims_flagged"]) >= 2
+
+# ===========================================================================
+# Tier 6: Adversarial Negative Tests, Dialect Alternatives & Oracle Separation
+# ===========================================================================
+
+
+def test_validator_fail_open_prevention_on_non_target_sentences() -> None:
+    """Asserts that absence of error is NOT treated as valid: sentences lacking target construction are INCONCLUSIVE."""
+    non_target_cases = [
+        ("fam-v2-grammar-inversion", "The research team published their findings in a peer-reviewed journal."),
+        ("fam-v2-grammar-conditionals", "The laboratory purchased advanced mass spectrometers last autumn."),
+        ("fam-v2-grammar-clefts", "The sudden deceleration of the subpolar gyre caused the regional cooling anomaly."),
+        ("fam-v2-grammar-subjunctive", "The principal investigator submitted a revised protocol following peer feedback."),
+        ("fam-v2-grammar-participles", "The organic chemistry team synthesized the compound and conducted NMR spectroscopy."),
+        ("fam-v2-grammar-modals", "The adult sauropod specimen suffered from cardiovascular pathology."),
+        ("fam-v2-grammar-passives", "Paleoclimatologists believe that agrarian cultivation originated during the Holocene."),
+    ]
+
+    for family_id, sentence in non_target_cases:
+        res = validate_syntactic_construction(family_id, sentence)
+        assert res["status"] == VALIDATION_STATUS_INCONCLUSIVE, (
+            f"Expected INCONCLUSIVE for non-target sentence '{sentence}' in {family_id}, got {res['status']}"
+        )
+        assert res["is_valid"] is False, f"Non-target sentence must NOT be classified as valid: '{sentence}'"
+        assert res["positive_match"] is False, f"Non-target sentence must NOT match positive target criteria: '{sentence}'"
+        assert "absence of defect is not proof of validity" in res["details"]
+
+
+def test_validator_marks_subject_only_declarative_do_as_inconclusive() -> None:
+    """Asserts that 'Only NP did V' is classified as INCONCLUSIVE rather than confidently INVALID.
+
+    Subject-modifying 'only' maintains canonical subject-auxiliary order and may represent
+    valid emphatic affirmative do-support rather than an inversion defect.
+    """
+    subject_only_emphatic = "Only senior researchers did attend the symposium."
+    res = validate_syntactic_construction("fam-v2-grammar-inversion", subject_only_emphatic)
+    assert res["status"] == VALIDATION_STATUS_INCONCLUSIVE, (
+        f"Expected INCONCLUSIVE for subject-only declarative do-support, got {res['status']}"
+    )
+    assert res["is_valid"] is False
+    assert res["positive_match"] is False
+    assert "emphatic assertion" in res["details"] or "canonical subject-auxiliary order" in res["details"]
+
+
+def test_validator_marks_dialect_sensitive_and_context_dependent_alternatives_as_inconclusive() -> None:
+    """Asserts that dialect alternatives and context-dependent constructions yield INCONCLUSIVE."""
+    # 1. British should-mandative periphrasis (alternative to base subjunctive)
+    british_mandative = "The supervisory committee recommended that the principal investigator should submit a revised protocol."
+    res_subj = validate_syntactic_construction("fam-v2-grammar-subjunctive", british_mandative)
+    assert res_subj["status"] == VALIDATION_STATUS_INCONCLUSIVE
+    assert res_subj["is_valid"] is False
+    assert "should-mandative" in res_subj["details"]
+
+    # 2. Factual indicative assertion following epistemic predicate (not suasion mandative)
+    indicative_assertion = "The witness insisted that he was innocent throughout the cross-examination."
+    res_ind = validate_syntactic_construction("fam-v2-grammar-subjunctive", indicative_assertion)
+    assert res_ind["status"] == VALIDATION_STATUS_INCONCLUSIVE
+    assert res_ind["is_valid"] is False
+    assert "Indicative factual complement" in res_ind["details"]
+
+    # 3. Post-verbal non-fronted negative adjunct (valid declarative, but lacks target inversion construction)
+    non_fronted_neg = "The research team altered experimental parameters under no circumstances during the trial."
+    res_inv = validate_syntactic_construction("fam-v2-grammar-inversion", non_fronted_neg)
+    assert res_inv["status"] == VALIDATION_STATUS_INCONCLUSIVE
+    assert res_inv["is_valid"] is False
+
+    # 4. Deontic possession prohibition with 'must not have'
+    deontic_prohibition = "All laboratory technicians must not have unattended sample containers in the fume hood."
+    res_mod = validate_syntactic_construction("fam-v2-grammar-modals", deontic_prohibition)
+    assert res_mod["status"] == VALIDATION_STATUS_INCONCLUSIVE
+    assert res_mod["is_valid"] is False
+
+
+def test_validator_unknown_and_malformed_inputs_handled_safely() -> None:
+    """Asserts that empty, gibberish, and unknown family inputs fail closed safely."""
+    # Empty string
+    res_empty = validate_syntactic_construction("fam-v2-grammar-inversion", "")
+    assert res_empty["status"] == VALIDATION_STATUS_INVALID
+    assert res_empty["is_valid"] is False
+    assert any("ERR-EMPTY-INPUT" in err for err in res_empty["errors"])
+
+    # Whitespace only
+    res_ws = validate_syntactic_construction("fam-v2-grammar-inversion", "   \t\n  ")
+    assert res_ws["status"] == VALIDATION_STATUS_INVALID
+    assert res_ws["is_valid"] is False
+
+    # Unknown family ID
+    res_unk = validate_syntactic_construction("fam-v2-grammar-unknown", "Under no circumstances should researchers alter parameters.")
+    assert res_unk["status"] == VALIDATION_STATUS_INCONCLUSIVE
+    assert res_unk["is_valid"] is False
+    assert any("ERR-UNSUPPORTED-FAMILY" in err for err in res_unk["errors"])
+
+    # Gibberish input
+    res_gib = validate_syntactic_construction("fam-v2-grammar-conditionals", "!@#$%^&*() 1234567890 xyz abc")
+    assert res_gib["status"] == VALIDATION_STATUS_INCONCLUSIVE
+    assert res_gib["is_valid"] is False
+
+
+def test_validator_epistemic_disclosure_and_human_oracle_separation() -> None:
+    """Asserts that validator explicitly discloses its screening boundaries and does not claim human gold authority."""
+    test_sentence = "Under no circumstances should researchers alter experimental parameters after protocol preregistration has been finalized."
+    res = validate_syntactic_construction("fam-v2-grammar-inversion", test_sentence)
+    assert res["status"] == VALIDATION_STATUS_VALID
+    assert res["is_valid"] is True
+    assert "EXPLORATORY_AI_AUDIT_NOT_HUMAN_GOLD" in res["epistemic_disclosure"]
+    assert "not constitute certified human expert validation" in res["epistemic_disclosure"]
+    assert "positive_match" in res
+    assert "details" in res

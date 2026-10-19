@@ -20,6 +20,9 @@ from typing import Any, Dict, List, Optional
 from app.contracts.research import GrammarRulePack, SourceRef
 from app.experiment.grammar_validator_v2 import (
     V2_GRAMMAR_ERROR_TAXONOMY,
+    VALIDATION_STATUS_INCONCLUSIVE,
+    VALIDATION_STATUS_INVALID,
+    VALIDATION_STATUS_VALID,
     validate_syntactic_construction,
 )
 
