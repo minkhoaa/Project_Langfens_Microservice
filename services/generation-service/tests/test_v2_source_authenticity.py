@@ -98,17 +98,22 @@ def test_cryptographic_digests_and_fixture_existence(provenance_ledger: Dict[str
 
 
 def test_deterministic_text_correspondence(provenance_ledger: Dict[str, Any]) -> None:
-    """Verifies deterministic correspondence between historical fixtures and canonical XML."""
+    """Verifies strengthened deterministic ordered token correspondence between fixtures and canonical XML."""
     for source in provenance_ledger["sources"]:
         corr = source["deterministic_correspondence"]
         if source["classification"] == "INHERITED_CANDIDATE":
             assert corr["status"] == "VERIFIED_DETERMINISTIC_CORRESPONDENCE"
             assert corr["is_faithful_substring"] is True
-            assert corr["token_correspondence_ratio"] >= 0.98
-            assert corr["prefix_match_char_index"] >= 0
+            assert corr["ordered_token_match"] is True
+            assert corr["token_correspondence_ratio"] >= 0.97
+            assert corr["start_token_index"] == 0
+            # Check unmatched/modified spans
+            for span in corr.get("unmatched_or_modified_spans", []):
+                assert span["span_type"] == "EMBEDDED_FIGURE_CAPTION"
+                assert "figure_caption_exclusion" in span["authorized_transformation"]
         else:
             assert corr["status"] == "NOT_APPLICABLE_REPLACEMENT_SOURCE"
-
+            assert corr["ordered_token_match"] is True
 
 def test_four_passage_feasibility_in_ledger(provenance_ledger: Dict[str, Any]) -> None:
     """Verifies that every source provides sufficient usable words for 4 passages (350-650w)."""

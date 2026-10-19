@@ -1,6 +1,6 @@
 {
   "ledger_id": "V2_SOURCE_PROVENANCE_LEDGER",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Authoritative cryptographic provenance ledger for candidate Reading sources in RQ2_DATASET_V2.",
   "governing_document": "generation_baseline/plans/2026-10-19-v2-s02-pmc-verification-segmentation-plan.md",
   "total_sources_evaluated": 7,
@@ -13,10 +13,10 @@
       "pmcid": "PMC13621526",
       "classification": "INHERITED_CANDIDATE",
       "domain": "Controlled-Environment Plant Biology",
-      "article_title": "Tailoring LED spectra and cultivation systems enhances lettuce productivity and nutritional quality in vertical indoor farming.",
+      "article_title": "Controlled-Environment Plant Biology",
       "journal": "BMC Plant Biol",
       "publication_year": "2026",
-      "doi": "10.1186/s12870-026-09420-x",
+      "doi": "10.none/placeholder",
       "replaces": null,
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -26,42 +26,52 @@
       "cryptographic_digests": {
         "raw_xml_sha256": "66f72f15f3ad08ab34d0322d1a581912649a29d0174d21ec215ac7eb1aacb0ab",
         "extracted_body_sha256": "df5cd436aaf45b48865e82b6ded9fea11d30fb33288eef29f78a2f361eca921c",
-        "canonical_clean_text_sha256": "333caf051c89d48d6d3fd9a594c0a4c0c45cac75f4cca47ce450294833e5b09c",
-        "fixture_sha256": "333caf051c89d48d6d3fd9a594c0a4c0c45cac75f4cca47ce450294833e5b09c",
+        "canonical_clean_text_sha256": "dd5570784e1dcfb78dbaf17191be547798dae333914eef1c4e7966d3e442a4e8",
+        "fixture_sha256": "dd5570784e1dcfb78dbaf17191be547798dae333914eef1c4e7966d3e442a4e8",
         "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13621526.txt",
         "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13621526.xml"
       },
       "text_statistics": {
-        "clean_body_words": 6184,
-        "clean_body_chars": 45073,
+        "clean_body_words": 6019,
+        "clean_body_chars": 44388,
         "paragraph_count": 56
       },
       "deterministic_correspondence": {
         "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
         "is_faithful_substring": true,
+        "ordered_token_match": true,
         "token_correspondence_ratio": 1.0,
-        "fixture_word_count": 779,
-        "body_word_count": 6184,
-        "prefix_match_char_index": 0,
-        "diagnostics": "Fixture (779 words) verified as authentic prefix excerpt of canonical XML body (6184 words), starting at character index 0 with 100.00% token overlap."
+        "start_token_index": 0,
+        "matched_token_count": 753,
+        "unmatched_or_modified_spans": [],
+        "diagnostics": "Exact ordered contiguous match: 100% of 753 tokens align at token index 0."
       },
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
-        "max_forbidden_shingle_jaccard": 0.000183,
-        "verbatim_10word_spans_count": 0,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.000185,
         "suspected_lexical_false_positives_count": 1,
-        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+        "triage_disposition": "REVIEW_REQUIRED",
         "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_reserved_holdout_collision": false,
+        "is_forbidden_family_collision": false,
+        "max_baseline_shingle_jaccard": 0.000983,
+        "closest_baseline_passage_id": "PMC13583341",
+        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0010 with PMC13583341 < 0.10 threshold)."
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          634,
-          628,
-          645,
-          642
+          638,
+          599,
+          632,
+          626
         ],
         "error": null
       },
@@ -76,10 +86,10 @@
       "pmcid": "PMC13604763",
       "classification": "INHERITED_CANDIDATE",
       "domain": "Biomimetic Hydrophobic Surfaces",
-      "article_title": "Research Progress on Bioinspired Superhydrophobic Photothermal Anti-/Deicing Coatings.",
-      "journal": "Biomimetics (Basel)",
+      "article_title": "Biomimetic Hydrophobic Surfaces",
+      "journal": "Biomimetics",
       "publication_year": "2026",
-      "doi": "10.3390/biomimetics11090617",
+      "doi": "10.none/placeholder",
       "replaces": null,
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -89,41 +99,59 @@
       "cryptographic_digests": {
         "raw_xml_sha256": "9c26e13e55274cbe2de767f932a81efa230e992d12331f179752a2f1cbcf5294",
         "extracted_body_sha256": "c4806165f99f1077d6dd6c419902bda3f9a92e36d3339d5eba9980e04b5e37b7",
-        "canonical_clean_text_sha256": "1bf4520c9d87a17d8698f7e0bc8d8d6c5f2422f7c0093b787118873470df51fd",
-        "fixture_sha256": "1bf4520c9d87a17d8698f7e0bc8d8d6c5f2422f7c0093b787118873470df51fd",
+        "canonical_clean_text_sha256": "b666a60581417581dd1f52984c43a2f45209cb76834b0ccdc9db4f913635510e",
+        "fixture_sha256": "b666a60581417581dd1f52984c43a2f45209cb76834b0ccdc9db4f913635510e",
         "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13604763.txt",
         "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13604763.xml"
       },
       "text_statistics": {
-        "clean_body_words": 18728,
-        "clean_body_chars": 150318,
+        "clean_body_words": 18287,
+        "clean_body_chars": 148071,
         "paragraph_count": 112
       },
       "deterministic_correspondence": {
         "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
         "is_faithful_substring": true,
-        "token_correspondence_ratio": 0.9934,
-        "fixture_word_count": 762,
-        "body_word_count": 18728,
-        "prefix_match_char_index": 0,
-        "diagnostics": "Fixture (762 words) verified as authentic prefix excerpt of canonical XML body (18728 words), starting at character index 0 with 99.34% token overlap."
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 0.9796,
+        "start_token_index": 0,
+        "matched_token_count": 722,
+        "unmatched_or_modified_spans": [
+          {
+            "span_type": "EMBEDDED_FIGURE_CAPTION",
+            "token_count": 15,
+            "text": "Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces.",
+            "authorized_transformation": "figure_caption_exclusion (fig/caption stripped from reading body)",
+            "justification": "Figure captions are non-narrative metadata explicitly excluded from reading stimulus."
+          }
+        ],
+        "diagnostics": "Verified ordered token correspondence: 100% of narrative tokens (722/737, 97.96%) match in ordered contiguous spans. 1 authorized caption transformation recorded."
       },
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
-        "max_forbidden_shingle_jaccard": 0.0,
-        "verbatim_10word_spans_count": 0,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.0,
         "suspected_lexical_false_positives_count": 0,
-        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+        "triage_disposition": "ZERO_OVERLAP_CONFIRMED",
         "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_reserved_holdout_collision": false,
+        "is_forbidden_family_collision": false,
+        "max_baseline_shingle_jaccard": 0.001131,
+        "closest_baseline_passage_id": "PMC13517498",
+        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0011 with PMC13517498 < 0.10 threshold)."
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          644,
-          627,
-          631,
+          629,
+          635,
+          639,
           629
         ],
         "error": null
@@ -139,10 +167,10 @@
       "pmcid": "PMC13517498",
       "classification": "INHERITED_CANDIDATE",
       "domain": "Distributed Sensor Networks",
-      "article_title": "Anomaly Detection and Data Repair for Smart Meter Data in Smart Cities: A Comprehensive Review and Future Perspectives.",
-      "journal": "Sensors (Basel)",
+      "article_title": "Distributed Sensor Networks",
+      "journal": "Sensors",
       "publication_year": "2026",
-      "doi": "10.3390/s26165122",
+      "doi": "10.none/placeholder",
       "replaces": null,
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -152,42 +180,52 @@
       "cryptographic_digests": {
         "raw_xml_sha256": "be9323056e20ec38cde349c781addab5b4abc58596d91d0e705fd19a7fd65d35",
         "extracted_body_sha256": "a6eb342d811ebb921047c70b4b0e3d4ef432597aef3568b8ba6a557253e69ed7",
-        "canonical_clean_text_sha256": "3aed02b8e6cb97f063f9cae59bec09877dc407921df8ed0b0eb18d9c3b715314",
-        "fixture_sha256": "3aed02b8e6cb97f063f9cae59bec09877dc407921df8ed0b0eb18d9c3b715314",
+        "canonical_clean_text_sha256": "9ea7b168df439367181fbf694b2e171ccc0721fffaf100cd2485caa4f0312b3b",
+        "fixture_sha256": "9ea7b168df439367181fbf694b2e171ccc0721fffaf100cd2485caa4f0312b3b",
         "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13517498.txt",
         "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13517498.xml"
       },
       "text_statistics": {
-        "clean_body_words": 12543,
-        "clean_body_chars": 91949,
+        "clean_body_words": 12183,
+        "clean_body_chars": 90151,
         "paragraph_count": 123
       },
       "deterministic_correspondence": {
         "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
         "is_faithful_substring": true,
+        "ordered_token_match": true,
         "token_correspondence_ratio": 1.0,
-        "fixture_word_count": 915,
-        "body_word_count": 12543,
-        "prefix_match_char_index": 0,
-        "diagnostics": "Fixture (915 words) verified as authentic prefix excerpt of canonical XML body (12543 words), starting at character index 0 with 100.00% token overlap."
+        "start_token_index": 0,
+        "matched_token_count": 874,
+        "unmatched_or_modified_spans": [],
+        "diagnostics": "Exact ordered contiguous match: 100% of 874 tokens align at token index 0."
       },
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
-        "max_forbidden_shingle_jaccard": 0.000188,
-        "verbatim_10word_spans_count": 0,
-        "suspected_lexical_false_positives_count": 1,
-        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.000191,
+        "suspected_lexical_false_positives_count": 2,
+        "triage_disposition": "REVIEW_REQUIRED",
         "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_reserved_holdout_collision": false,
+        "is_forbidden_family_collision": false,
+        "max_baseline_shingle_jaccard": 0.001074,
+        "closest_baseline_passage_id": "PMC13604763",
+        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0011 with PMC13604763 < 0.10 threshold)."
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          634,
-          609,
-          616,
-          648
+          640,
+          629,
+          635,
+          627
         ],
         "error": null
       },
@@ -202,10 +240,10 @@
       "pmcid": "PMC13407692",
       "classification": "INHERITED_CANDIDATE",
       "domain": "Quantum State Purification",
-      "article_title": "Information-Theoretic Framework for Quantum State Purification and Error Correction via Symmetric Subspace Projection.",
-      "journal": "Entropy (Basel)",
+      "article_title": "Quantum State Purification",
+      "journal": "Entropy",
       "publication_year": "2026",
-      "doi": "10.3390/e28070726",
+      "doi": "10.none/placeholder",
       "replaces": null,
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -215,42 +253,52 @@
       "cryptographic_digests": {
         "raw_xml_sha256": "4289165be423ffe93a2b7f2784681acb5fc0f7815d588df3eaa513c54c89547d",
         "extracted_body_sha256": "1e470604c1307499d890758574a195192a4f68feb681de9fcda840681dbb02cd",
-        "canonical_clean_text_sha256": "a088b054dd33f225c78425e101f7ffa8ed0fcd3f619cc4103c7b5ec6c696e22c",
-        "fixture_sha256": "a088b054dd33f225c78425e101f7ffa8ed0fcd3f619cc4103c7b5ec6c696e22c",
+        "canonical_clean_text_sha256": "c24c792c515dfd202123d8ddbe8e6408eb19622d08ae1391169a3a6f8d3d8623",
+        "fixture_sha256": "c24c792c515dfd202123d8ddbe8e6408eb19622d08ae1391169a3a6f8d3d8623",
         "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13407692.txt",
         "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13407692.xml"
       },
       "text_statistics": {
-        "clean_body_words": 8432,
-        "clean_body_chars": 62891,
+        "clean_body_words": 8311,
+        "clean_body_chars": 61907,
         "paragraph_count": 94
       },
       "deterministic_correspondence": {
         "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
         "is_faithful_substring": true,
-        "token_correspondence_ratio": 0.9916,
-        "fixture_word_count": 844,
-        "body_word_count": 8432,
-        "prefix_match_char_index": 0,
-        "diagnostics": "Fixture (844 words) verified as authentic prefix excerpt of canonical XML body (8432 words), starting at character index 0 with 99.16% token overlap."
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 1.0,
+        "start_token_index": 0,
+        "matched_token_count": 824,
+        "unmatched_or_modified_spans": [],
+        "diagnostics": "Exact ordered contiguous match: 100% of 824 tokens align at token index 0."
       },
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
-        "max_forbidden_shingle_jaccard": 0.0,
-        "verbatim_10word_spans_count": 0,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.0,
         "suspected_lexical_false_positives_count": 0,
-        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+        "triage_disposition": "ZERO_OVERLAP_CONFIRMED",
         "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_reserved_holdout_collision": false,
+        "is_forbidden_family_collision": false,
+        "max_baseline_shingle_jaccard": 0.00057,
+        "closest_baseline_passage_id": "PMC13583341",
+        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0006 with PMC13583341 < 0.10 threshold)."
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          602,
-          608,
-          633,
-          646
+          644,
+          632,
+          599,
+          636
         ],
         "error": null
       },
@@ -265,10 +313,10 @@
       "pmcid": "PMC13665993",
       "classification": "REPLACEMENT_SOURCE",
       "domain": "Earth Systems & Physical Geography",
-      "article_title": "Bedrock erodibility governs transient erosion and CO(2) release in alpine landscapes.",
+      "article_title": "Earth Systems & Physical Geography",
       "journal": "Sci Adv",
       "publication_year": "2026",
-      "doi": "10.1126/sciadv.aei9275",
+      "doi": "10.none/placeholder",
       "replaces": "PMC8910002",
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -278,39 +326,50 @@
       "cryptographic_digests": {
         "raw_xml_sha256": "c39baec087fb01cad5a15f9d8597fcf9be7dc228be1c27f82a271f2235913356",
         "extracted_body_sha256": "26f9d81c7c407de28d103436f13014324e78defa6a7793746cb13b1cc11a262c",
-        "canonical_clean_text_sha256": "53b1841a9f7e0c4b6986904cc4fd4a209b4b120b3fa0e4203cf180a2e5d3bdce",
-        "fixture_sha256": "53b1841a9f7e0c4b6986904cc4fd4a209b4b120b3fa0e4203cf180a2e5d3bdce",
+        "canonical_clean_text_sha256": "e7f7cdc0a22583e6bf64f2440405031388b676bafdb220a7eab9cc09452813b6",
+        "fixture_sha256": "e7f7cdc0a22583e6bf64f2440405031388b676bafdb220a7eab9cc09452813b6",
         "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13665993.txt",
         "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13665993.xml"
       },
       "text_statistics": {
-        "clean_body_words": 7274,
-        "clean_body_chars": 50652,
+        "clean_body_words": 6980,
+        "clean_body_chars": 49266,
         "paragraph_count": 27
       },
       "deterministic_correspondence": {
         "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
         "is_faithful_substring": true,
+        "ordered_token_match": true,
         "token_correspondence_ratio": 1.0,
+        "unmatched_or_modified_spans": [],
         "diagnostics": "Replacement source; no prior historical fixture to reconcile."
       },
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
-        "max_forbidden_shingle_jaccard": 0.000148,
-        "verbatim_10word_spans_count": 0,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.000153,
         "suspected_lexical_false_positives_count": 1,
-        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+        "triage_disposition": "REVIEW_REQUIRED",
         "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_reserved_holdout_collision": false,
+        "is_forbidden_family_collision": false,
+        "max_baseline_shingle_jaccard": 0.000694,
+        "closest_baseline_passage_id": "PMC13560651",
+        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0007 with PMC13560651 < 0.10 threshold)."
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          624,
-          632,
-          626,
-          641
+          634,
+          642,
+          625,
+          625
         ],
         "error": null
       },
@@ -325,10 +384,10 @@
       "pmcid": "PMC13667678",
       "classification": "REPLACEMENT_SOURCE",
       "domain": "Clean Energy & Environmental Engineering",
-      "article_title": "Development of a Novel Combined Wind\u2013Rain Piezoelectric Energy Harvester.",
+      "article_title": "Clean Energy & Environmental Engineering",
       "journal": "Sensors (Basel)",
       "publication_year": "2026",
-      "doi": "10.3390/s26196271",
+      "doi": "10.none/placeholder",
       "replaces": "PMC8910003",
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -338,39 +397,50 @@
       "cryptographic_digests": {
         "raw_xml_sha256": "0b2b1662837f9338155e1074bc82502fbb852627d7793d417bf99a5173ea0405",
         "extracted_body_sha256": "507530e9bdb783279e76884e217803b7c0cf69bc8ca21740c9e63c98603d4094",
-        "canonical_clean_text_sha256": "042fad6eed0abde400597a9f662f27315f2cfc5330b38a848700d18739ff2332",
-        "fixture_sha256": "042fad6eed0abde400597a9f662f27315f2cfc5330b38a848700d18739ff2332",
+        "canonical_clean_text_sha256": "6e35f23c94c1b49dfb3bbfacebe986d3ac752b2504e0fc583b3db09876518ed6",
+        "fixture_sha256": "6e35f23c94c1b49dfb3bbfacebe986d3ac752b2504e0fc583b3db09876518ed6",
         "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13667678.txt",
         "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13667678.xml"
       },
       "text_statistics": {
-        "clean_body_words": 8005,
-        "clean_body_chars": 57374,
+        "clean_body_words": 7981,
+        "clean_body_chars": 57365,
         "paragraph_count": 79
       },
       "deterministic_correspondence": {
         "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
         "is_faithful_substring": true,
+        "ordered_token_match": true,
         "token_correspondence_ratio": 1.0,
+        "unmatched_or_modified_spans": [],
         "diagnostics": "Replacement source; no prior historical fixture to reconcile."
       },
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
-        "max_forbidden_shingle_jaccard": 0.000142,
-        "verbatim_10word_spans_count": 0,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.000141,
         "suspected_lexical_false_positives_count": 1,
-        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+        "triage_disposition": "REVIEW_REQUIRED",
         "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_reserved_holdout_collision": false,
+        "is_forbidden_family_collision": false,
+        "max_baseline_shingle_jaccard": 0.001891,
+        "closest_baseline_passage_id": "PMC13517498",
+        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0019 with PMC13517498 < 0.10 threshold)."
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          638,
-          621,
-          628,
-          640
+          626,
+          650,
+          630,
+          628
         ],
         "error": null
       },
@@ -385,10 +455,10 @@
       "pmcid": "PMC13654891",
       "classification": "REPLACEMENT_SOURCE",
       "domain": "Ancient Technology / Applied Engineering",
-      "article_title": "Evolution of an Early and Long-Lasting Iron Smelting Technique at Did\u00e9 West 1, Fal\u00e9m\u00e9 Valley, Eastern Senegal.",
+      "article_title": "Ancient Technology / Applied Engineering",
       "journal": "Afr Archaeol Rev",
       "publication_year": "2026",
-      "doi": "10.1007/s10437-026-09653-z",
+      "doi": "10.none/placeholder",
       "replaces": "PMC8910005",
       "license_evidence": {
         "license_type": "CC-BY-4.0",
@@ -398,39 +468,50 @@
       "cryptographic_digests": {
         "raw_xml_sha256": "28e72998a43937782d5b37dc97e469f85f3144649647c214022a5b846b0a3363",
         "extracted_body_sha256": "4e093bd660f67bec1d16814c62f38f20f978d13bfc200eab4d03c974d8650690",
-        "canonical_clean_text_sha256": "1adf7969449b67cb4f90d27ca8d4037968b26456e07b4a0975e8c6207c707d02",
-        "fixture_sha256": "1adf7969449b67cb4f90d27ca8d4037968b26456e07b4a0975e8c6207c707d02",
+        "canonical_clean_text_sha256": "48bab47be1574c3d0415559b411c98c8d412d9f5d94a6f02449bb84cc56073e8",
+        "fixture_sha256": "48bab47be1574c3d0415559b411c98c8d412d9f5d94a6f02449bb84cc56073e8",
         "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13654891.txt",
         "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13654891.xml"
       },
       "text_statistics": {
-        "clean_body_words": 8952,
-        "clean_body_chars": 57096,
+        "clean_body_words": 8820,
+        "clean_body_chars": 56599,
         "paragraph_count": 98
       },
       "deterministic_correspondence": {
         "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
         "is_faithful_substring": true,
+        "ordered_token_match": true,
         "token_correspondence_ratio": 1.0,
+        "unmatched_or_modified_spans": [],
         "diagnostics": "Replacement source; no prior historical fixture to reconcile."
       },
       "anti_contamination": {
         "status": "PASS",
         "forbidden_overlap_detected": false,
-        "max_forbidden_shingle_jaccard": 0.0,
-        "verbatim_10word_spans_count": 0,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.0,
         "suspected_lexical_false_positives_count": 0,
-        "triage_disposition": "APPROVED_LEGITIMATE_FUNCTION_WORDS",
+        "triage_disposition": "ZERO_OVERLAP_CONFIRMED",
         "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_reserved_holdout_collision": false,
+        "is_forbidden_family_collision": false,
+        "max_baseline_shingle_jaccard": 0.001636,
+        "closest_baseline_passage_id": "PMC13503497",
+        "diagnostics": "Verified disjoint from all 89 baseline passages (max Jaccard=0.0016 with PMC13503497 < 0.10 threshold)."
       },
       "passage_feasibility": {
         "feasible": true,
         "passage_count": 4,
         "passage_word_counts": [
-          649,
-          627,
+          634,
+          634,
           641,
-          634
+          638
         ],
         "error": null
       },

@@ -5,22 +5,53 @@ Verifies:
    sentence repetition >= 3, and cross-source verbatim copying >= 15 words.
 2. Tier 2 triage: Non-consecutive repeated clauses (>= 8 words) routed to review with recorded evidence.
 3. Tier 3 allowance: Permits natural repetition of legitimate technical compound nouns.
-4. Absolute zero overlap against the 6 forbidden quarantined V1 sources (PMC8910001..6).
-5. Cross-split disjointness: Jaccard 3-gram shingle overlap < 0.10 against DEV, CALIBRATION, HOLDOUT, G15.
-6. Source-family clustering: Validates that passages sharing source_family_id are marked as clustered observations.
+4. Exact preregistered forbidden-source policy:
+   - Distinguishes raw 3-grams from content-word shingles.
+   - Strict zero content-word 3-gram overlap under documented stopword policy.
+   - Strict zero verbatim 6-word span overlap.
+5. Production validator invocation: Negative tests call verify_anti_contamination directly.
+6. Genuine baseline disjointness: Checks candidate sources against all available DEV, CALIBRATION,
+   HOLDOUT, and G15 baseline evidence without exposing holdout gold to generator.
+7. Source-family clustering: Validates that passages sharing source_family_id are marked as clustered observations.
 """
 
 from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+sys.path.insert(0, str(REPO_ROOT / "services" / "generation-service"))
+sys.path.insert(0, str(REPO_ROOT))
+
+from app.experiment.stopword_policy import (
+    STANDARD_ENGLISH_STOPWORDS,
+    extract_content_word_3grams,
+    extract_raw_3grams,
+    extract_verbatim_spans,
+    is_pure_function_word_3gram,
+    tokenize_content_words,
+    tokenize_raw_words,
+)
+from generation_baseline.tools.check_corpus_disjointness import (
+    BaselineCorpusRepository,
+    RESERVED_READING_FAMILIES,
+    jaccard_similarity,
+)
+from generation_baseline.tools.verify_and_ingest_pmc_sources import (
+    FORBIDDEN_QUARANTINED_PMCIDS,
+    check_baseline_split_disjointness,
+    load_forbidden_v1_sources,
+    verify_anti_contamination,
+)
+
 LEDGER_PATH = REPO_ROOT / "generation_baseline" / "verification" / "V2_SOURCE_PROVENANCE_LEDGER.json"
+TRIAGE_PATH = REPO_ROOT / "generation_baseline" / "verification" / "PADDING_REVIEW_TRIAGE.json"
 V2_SOURCES_DIR = REPO_ROOT / "services" / "generation-service" / "tests" / "fixtures" / "corpus" / "sources_v2"
 SOURCES_ELIGIBLE_PATH = (
     REPO_ROOT
@@ -32,35 +63,6 @@ SOURCES_ELIGIBLE_PATH = (
     / "sources_eligible.json"
 )
 
-# 6 permanently quarantined and forbidden V1 sources
-FORBIDDEN_QUARANTINED_PMCIDS: Set[str] = {
-    "PMC8910001",
-    "PMC8910002",
-    "PMC8910003",
-    "PMC8910004",
-    "PMC8910005",
-    "PMC8910006",
-}
-
-
-def tokenize_words(text: str) -> List[str]:
-    return re.findall(r"\b[a-zA-Z0-9]+\b", text.lower())
-
-
-def extract_3gram_shingles(text: str) -> Set[str]:
-    tokens = tokenize_words(text)
-    if len(tokens) < 3:
-        return set(tokens)
-    return {" ".join(tokens[i : i + 3]) for i in range(len(tokens) - 2)}
-
-
-def jaccard_similarity(s1: Set[str], s2: Set[str]) -> float:
-    if not s1 and not s2:
-        return 0.0
-    inter = len(s1.intersection(s2))
-    union = len(s1.union(s2))
-    return float(inter) / float(union) if union > 0 else 0.0
-
 
 @pytest.fixture(scope="module")
 def provenance_ledger() -> Dict[str, Any]:
@@ -71,7 +73,17 @@ def provenance_ledger() -> Dict[str, Any]:
 @pytest.fixture(scope="module")
 def forbidden_v1_sources() -> List[Dict[str, Any]]:
     assert SOURCES_ELIGIBLE_PATH.exists(), f"Missing {SOURCES_ELIGIBLE_PATH}"
-    return json.loads(SOURCES_ELIGIBLE_PATH.read_text(encoding="utf-8"))
+    sources = load_forbidden_v1_sources()
+    assert len(sources) == 6, f"Expected 6 forbidden sources, got {len(sources)}"
+    return sources
+
+
+@pytest.fixture(scope="module")
+def baseline_repo() -> BaselineCorpusRepository:
+    repo = BaselineCorpusRepository()
+    loaded = repo.load_authoritative_baselines()
+    assert loaded is True, f"Failed to load baseline repository: {repo.load_error}"
+    return repo
 
 
 # --- Tier 1: Demonstrated Synthetic Padding Rejection Tests ---
@@ -100,7 +112,6 @@ def test_reject_def_dat_02_synthetic_paragraph_multiplication() -> None:
 
     max_repeat = max(counts.values())
     assert max_repeat >= 40, "Expected DEF-DAT-02 multiplication loop detection."
-    # Rule: any substantive paragraph repeated > 1 times fails validation
     assert max_repeat > 1
 
 
@@ -136,55 +147,37 @@ def test_reject_verbatim_cross_source_copying() -> None:
 
 def test_allow_legitimate_technical_domain_terminology() -> None:
     """Allows natural recurrence of domain compound nouns (Zipfian allowed)."""
-    legitimate_technical_terms = [
-        "LED photoperiod",
-        "superhydrophobic surface",
-        "sensor network topology",
-        "quantum state purification",
-        "piezoelectric energy harvester",
-        "iron smelting furnace",
-        "bedrock erodibility",
-    ]
     sample_text = (
         "In controlled environment vertical farming, the LED photoperiod governs photosynthetic "
         "efficiency. Optimizing the LED photoperiod reduces overall operational costs. Furthermore, "
         "proper adjustment of the LED photoperiod enhances secondary metabolite accumulation."
     )
-    # The term 'LED photoperiod' repeats 3 times naturally as a technical keyword
     matches = re.findall(r"\bLED photoperiod\b", sample_text)
     assert len(matches) == 3
-    # Allowed because it is technical terminology, not narrative paragraph duplication
 
 
-# --- Absolute Zero Overlap with Quarantined V1 Sources ---
+# --- Exact Preregistered Forbidden-Source Policy & Verification ---
 
 
-def test_absolute_zero_overlap_with_forbidden_v1_sources(
+def test_exact_preregistered_forbidden_source_policy(
     provenance_ledger: Dict[str, Any], forbidden_v1_sources: List[Dict[str, Any]]
 ) -> None:
-    """Asserts ABSOLUTE ZERO OVERLAP with the 6 forbidden quarantined V1 sources (PMC8910001..6)."""
-    forbidden_shingles: Set[str] = set()
+    """Enforces exact preregistered policy: zero content-word overlap, zero verbatim 6-word spans."""
+    all_forbidden_c3g: Set[str] = set()
+    all_forbidden_6w: Set[str] = set()
     forbidden_pmcids: Set[str] = set()
-    forbidden_10w_spans: Set[str] = set()
 
     for item in forbidden_v1_sources:
-        pmcid = item.get("pmcid", "")
-        forbidden_pmcids.add(pmcid)
-        content = item.get("content", "")
-        assert len(content) > 100, f"Missing or empty content for forbidden source {pmcid}"
-        shingles = extract_3gram_shingles(content)
-        forbidden_shingles.update(shingles)
-        tokens = tokenize_words(content)
-        if len(tokens) >= 10:
-            for i in range(len(tokens) - 9):
-                forbidden_10w_spans.add(" ".join(tokens[i : i + 10]))
+        forbidden_pmcids.add(item["pmcid"])
+        all_forbidden_c3g.update(item["content_3grams"])
+        all_forbidden_6w.update(item["spans_6w"])
 
-    assert len(forbidden_shingles) > 500, "Expected > 500 forbidden 3-gram shingles loaded."
-    assert len(forbidden_10w_spans) > 500, "Expected > 500 forbidden 10-word spans loaded."
+    assert len(all_forbidden_c3g) > 400, "Forbidden content 3-grams must be loaded."
+    assert len(all_forbidden_6w) > 400, "Forbidden 6-word spans must be loaded."
 
     for src in provenance_ledger["sources"]:
         pmcid = src["pmcid"]
-        assert pmcid not in forbidden_pmcids, f"Admitted forbidden PMCID: {pmcid}"
+        assert pmcid not in forbidden_pmcids
         assert pmcid not in FORBIDDEN_QUARANTINED_PMCIDS
 
         txt_file = V2_SOURCES_DIR / f"{pmcid}.txt"
@@ -193,88 +186,152 @@ def test_absolute_zero_overlap_with_forbidden_v1_sources(
 
         # 1. Zero PMCID string references
         for f_pmcid in FORBIDDEN_QUARANTINED_PMCIDS:
-            assert f_pmcid.lower() not in v2_text.lower(), (
-                f"Forbidden identifier {f_pmcid} found inside {pmcid}!"
-            )
+            assert f_pmcid.lower() not in v2_text.lower(), f"Forbidden identifier {f_pmcid} in {pmcid}"
 
-        # 2. Zero verbatim 10-word span overlap
-        v2_tokens = tokenize_words(v2_text)
-        v2_10w = {" ".join(v2_tokens[i : i + 10]) for i in range(len(v2_tokens) - 9)}
-        overlap_spans = v2_10w & forbidden_10w_spans
-        assert len(overlap_spans) == 0, f"Verbatim span overlap with forbidden sources in {pmcid}: {overlap_spans}"
+        # 2. Strict Zero Verbatim 6-Word Span Overlap
+        v2_6w = extract_verbatim_spans(v2_text, span_length=6)
+        shared_6w = v2_6w & all_forbidden_6w
+        assert len(shared_6w) == 0, f"Found shared 6-word verbatim spans in {pmcid}: {shared_6w}"
 
-        # 3. Overall 3-gram shingle similarity strictly bounded (< 0.001)
-        v2_shingles = extract_3gram_shingles(v2_text)
-        sim = jaccard_similarity(v2_shingles, forbidden_shingles)
-        assert sim < 0.001, f"Excessive overlap with quarantined sources in {pmcid}: {sim:.5f}"
+        # 3. Strict Zero Content-Word 3-Gram Overlap (Documented Stopword Policy)
+        v2_c3g = extract_content_word_3grams(v2_text)
+        shared_c3g = v2_c3g & all_forbidden_c3g
+        assert len(shared_c3g) == 0, f"Found shared content-word 3-grams in {pmcid}: {shared_c3g}"
 
 
-# --- Negative Rejection & Triage Tests ---
+# --- Negative Tests Invoking Production Contamination Validator ---
 
 
-def test_negative_reject_injected_forbidden_pmcid() -> None:
-    """Negative test: injecting a forbidden PMCID into text must trigger contamination rejection."""
-    contaminated_text = "Recent studies on PMC8910002 demonstrated significant environmental impact."
-    contains_forbidden = any(f.lower() in contaminated_text.lower() for f in FORBIDDEN_QUARANTINED_PMCIDS)
-    assert contains_forbidden is True, "Expected injected PMCID to be detected."
-
-
-def test_negative_reject_injected_forbidden_verbatim_span(
+def test_negative_reject_injected_forbidden_pmcid_production_validator(
     forbidden_v1_sources: List[Dict[str, Any]]
 ) -> None:
-    """Negative test: injecting a 15-word span from a forbidden source must be flagged."""
+    """Asserts that production verify_anti_contamination rejects text containing forbidden PMCID."""
+    contaminated_text = "Recent studies on PMC8910002 demonstrated significant environmental degradation."
+    clean_ok, issues, triage, max_sim = verify_anti_contamination(
+        contaminated_text, candidate_pmcid="PMC_TEST_NEG", forbidden_sources=forbidden_v1_sources
+    )
+    assert clean_ok is False, "Production validator must reject text containing forbidden PMCID!"
+    assert any("Forbidden source identifier PMC8910002" in iss for iss in issues)
+
+
+def test_negative_reject_injected_forbidden_6word_span_production_validator(
+    forbidden_v1_sources: List[Dict[str, Any]]
+) -> None:
+    """Asserts that production verify_anti_contamination rejects injected 6-word forbidden verbatim span."""
     forbidden_content = forbidden_v1_sources[0]["content"]
-    forbidden_tokens = tokenize_words(forbidden_content)
-    span_15w = " ".join(forbidden_tokens[20:35])
-    assert len(span_15w.split()) == 15
+    forbidden_tokens = tokenize_raw_words(forbidden_content)
+    span_6w = " ".join(forbidden_tokens[20:26])
+    assert len(span_6w.split()) == 6
 
-    clean_sample = "This is an experimental plant biology text describing lettuce growth. " * 50
-    contaminated_sample = clean_sample + " " + span_15w + " " + clean_sample
+    clean_sample = (
+        "Controlled environment agriculture provides significant advantages for commercial crop cultivation. "
+        "The experimental setup utilized advanced LED arrays with adjustable spectral output. "
+    ) * 10
+    contaminated_sample = clean_sample + " " + span_6w + " " + clean_sample
 
-    sample_tokens = tokenize_words(contaminated_sample)
-    sample_15w = {" ".join(sample_tokens[i : i + 15]) for i in range(len(sample_tokens) - 14)}
-    assert span_15w in sample_15w, "Expected 15-word injected span to be detected."
+    clean_ok, issues, triage, max_sim = verify_anti_contamination(
+        contaminated_sample, candidate_pmcid="PMC_TEST_NEG", forbidden_sources=forbidden_v1_sources
+    )
+    assert clean_ok is False, "Production validator must reject text containing 6-word verbatim overlap!"
+    assert any("Verbatim 6-word span overlap" in iss for iss in issues)
 
 
-def test_triage_ledger_contains_suspected_lexical_evidence() -> None:
-    """Verifies that PADDING_REVIEW_TRIAGE.json audits all suspected lexical false positives."""
-    triage_path = REPO_ROOT / "generation_baseline" / "verification" / "PADDING_REVIEW_TRIAGE.json"
-    assert triage_path.exists(), f"Missing triage ledger at {triage_path}"
-    data = json.loads(triage_path.read_text(encoding="utf-8"))
+def test_negative_boundary_5word_vs_6word_production_validator(
+    forbidden_v1_sources: List[Dict[str, Any]]
+) -> None:
+    """Tests exact 6-word boundary condition: 5 words do not trigger 6-word span rejection."""
+    forbidden_content = forbidden_v1_sources[0]["content"]
+    forbidden_tokens = tokenize_raw_words(forbidden_content)
+    span_5w = " ".join(forbidden_tokens[20:25])
+    assert len(span_5w.split()) == 5
+
+    clean_sample = "Plant biology requires rigorous calibration of light intensity and spectral distribution. " * 10
+    test_5w_sample = clean_sample + " " + span_5w + " " + clean_sample
+
+    clean_ok, issues, triage, max_sim = verify_anti_contamination(
+        test_5w_sample, candidate_pmcid="PMC_TEST_5W", forbidden_sources=forbidden_v1_sources
+    )
+    # The 5-word span does not trigger 6-word span rejection
+    assert not any("Verbatim 6-word span overlap" in iss for iss in issues)
+
+
+def test_negative_reject_injected_forbidden_content_3gram_production_validator(
+    forbidden_v1_sources: List[Dict[str, Any]]
+) -> None:
+    """Asserts that production verify_anti_contamination rejects injected forbidden content-word 3-gram."""
+    f_content_3g = list(forbidden_v1_sources[1]["content_3grams"])[0]
+    c_words = f_content_3g.split()
+    assert len(c_words) == 3
+
+    clean_sample = "Environmental hydrology studies groundwater movement through porous rock formations. " * 10
+    contaminated_sample = clean_sample + f" The study evaluated {c_words[0]} with {c_words[1]} and {c_words[2]}. " + clean_sample
+
+    clean_ok, issues, triage, max_sim = verify_anti_contamination(
+        contaminated_sample, candidate_pmcid="PMC_TEST_C3G", forbidden_sources=forbidden_v1_sources
+    )
+    assert clean_ok is False, "Production validator must reject substantive content-word 3-gram overlap!"
+    assert any("Content-word 3-gram overlap" in iss for iss in issues)
+
+
+def test_negative_reject_injected_forbidden_title_production_validator(
+    forbidden_v1_sources: List[Dict[str, Any]]
+) -> None:
+    """Asserts that production verify_anti_contamination rejects injected forbidden title."""
+    title_span = "Early Hydraulic Engineering in Mesopotamian"
+    clean_sample = "Ancient archaeological findings document canal development across the alluvial plain. " * 10
+    contaminated_sample = clean_sample + f" A paper entitled {title_span} was examined. " + clean_sample
+
+    clean_ok, issues, triage, max_sim = verify_anti_contamination(
+        contaminated_sample, candidate_pmcid="PMC_TEST_TITLE", forbidden_sources=forbidden_v1_sources
+    )
+    assert clean_ok is False, "Production validator must reject forbidden title substring!"
+    assert any("Forbidden title span" in iss for iss in issues)
+
+
+# --- Genuine Baseline Disjointness Verification ---
+
+
+def test_genuine_baseline_split_disjointness_all_seven_sources(
+    provenance_ledger: Dict[str, Any], baseline_repo: BaselineCorpusRepository
+) -> None:
+    """Validates disjointness against all available DEV, CALIBRATION, HOLDOUT, G15 baseline evidence."""
+    assert len(baseline_repo.baseline_reading_passages) >= 80, "Expected >= 80 baseline passages loaded."
+    assert len(baseline_repo.forbidden_families) >= 70, "Expected >= 70 forbidden families loaded."
+
+    for src in provenance_ledger["sources"]:
+        pmcid = src["pmcid"]
+        family_id = src["family_id"]
+        txt_path = V2_SOURCES_DIR / f"{pmcid}.txt"
+        assert txt_path.exists()
+        clean_text = txt_path.read_text(encoding="utf-8")
+
+        result = check_baseline_split_disjointness(pmcid, family_id, clean_text, baseline_repo)
+        assert result["status"] == "PASS", f"Baseline disjointness failed for {pmcid}: {result['diagnostics']}"
+        assert result["is_reserved_holdout_collision"] is False
+        assert result["is_forbidden_family_collision"] is False
+        assert result["max_baseline_shingle_jaccard"] < 0.10, (
+            f"Jaccard {result['max_baseline_shingle_jaccard']} >= 0.10 for {pmcid}"
+        )
+
+
+# --- Triage Ledger & Documented Policy Verification ---
+
+
+def test_triage_ledger_records_review_required_without_inventing_approval() -> None:
+    """Verifies that PADDING_REVIEW_TRIAGE.json audits raw 3-gram matches as REVIEW_REQUIRED."""
+    assert TRIAGE_PATH.exists(), f"Missing triage ledger at {TRIAGE_PATH}"
+    data = json.loads(TRIAGE_PATH.read_text(encoding="utf-8"))
     assert data["triage_id"] == "PADDING_REVIEW_TRIAGE"
-    assert data["all_dispositions_acceptable"] is True
     assert data["total_triage_entries"] > 0
+    assert data["review_required_count"] == data["total_triage_entries"]
 
     for entry in data["triage_entries"]:
         assert entry["triage_category"] == "SUSPECTED_LEXICAL_FALSE_POSITIVE"
-        assert entry["disposition"] == "APPROVED_LEGITIMATE_FUNCTION_WORDS"
-        assert entry["verbatim_10word_spans_count"] == 0
-        assert entry["jaccard_similarity"] < 0.005
-
-# --- Cross-Split Disjointness Tests ---
-
-
-def test_cross_split_disjointness_against_historical_holdout(
-    provenance_ledger: Dict[str, Any]
-) -> None:
-    """Asserts that candidate sources do not collide with known HOLDOUT or DEV corpora."""
-    holdout_topics = [
-        "fam-astrophysics-pulsar-08",
-        "fam-paleontology-cambrian-09",
-        "fam-marine-01",
-        "fam-energy-01",
-        "fam-agri-01",
-    ]
-    for src in provenance_ledger["sources"]:
-        fam_id = src["family_id"]
-        assert fam_id not in holdout_topics, f"Source family {fam_id} collides with holdout/calibration!"
-
-        txt_path = V2_SOURCES_DIR / f"{src['pmcid']}.txt"
-        v2_text = txt_path.read_text(encoding="utf-8")
-
-        # Assert no pulsar or cambrian text leakage
-        assert "millisecond pulsar" not in v2_text.lower()
-        assert "cambrian explosion" not in v2_text.lower()
+        assert entry["disposition"] == "REVIEW_REQUIRED", (
+            "Suspected lexical false positives must be recorded as REVIEW_REQUIRED; approval cannot be invented."
+        )
+        assert entry["shared_6word_spans_count"] == 0
+        assert entry["shared_content_3gram_count"] == 0
 
 
 # --- Statistical Clustering Notice Verification ---
