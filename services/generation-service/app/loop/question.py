@@ -254,8 +254,8 @@ class QuestionCandidateLoop:
             workflow_op_id = existing_reserved[0].operationId
         else:
             workflow_op_id = f"op_workflow_qcand_s{section_index}_{uuid4().hex[:8]}"
-            token_res = -1 if self.policy.is_unlimited else 60_000
-            wall_res = -1.0 if self.policy.is_unlimited else 300.0
+            token_res = -1 if self.policy.is_unlimited else min(self.policy.max_total_tokens if self.policy.max_total_tokens > 0 else 100_000, 100_000)
+            wall_res = -1.0 if self.policy.is_unlimited else min(float(self.policy.max_wall_time_seconds) if self.policy.max_wall_time_seconds > 0 else 900.0, 900.0)
             workflow_grant = self.persistence_client.grant_operation(OperationGrantRequest(
                 runId=run_id,
                 epoch=epoch,
@@ -323,7 +323,7 @@ class QuestionCandidateLoop:
 
         # 1. Candidate Generation for uncommitted slots via generic BoundedLoopRuntime
         class SlotCandidateGeneratorAdapter(GeneratorCapability):
-            def __init__(self, slot_generator, q_num, q_type, passage_text, p_ref, bp_ref, group_start_num=None, group_cache=None, blank_count=None, group_id=None):
+            def __init__(self, slot_generator, q_num, q_type, passage_text, p_ref, bp_ref, group_start_num=None, group_cache=None, blank_count=None, group_id=None, policy=None):
                 self._generator = slot_generator
                 self._q_num = q_num
                 self._q_type = q_type
@@ -334,6 +334,7 @@ class QuestionCandidateLoop:
                 self._group_cache = group_cache if group_cache is not None else {}
                 self._blank_count = blank_count
                 self._group_id = group_id
+                self._policy = policy
                 self.pool: Optional[QuestionCandidatePool] = None
 
             @property
@@ -364,6 +365,8 @@ class QuestionCandidateLoop:
             async def _call_generate_pool(self, **kwargs):
                 import inspect
                 fn = self._generator.generate_candidate_pool
+                if "max_wall_time_seconds" not in kwargs and self._policy is not None:
+                    kwargs["max_wall_time_seconds"] = self._policy.operation_wall_reservation_seconds
                 try:
                     sig = inspect.signature(fn)
                     accepts_var_kw = any(
@@ -625,6 +628,7 @@ class QuestionCandidateLoop:
                     group_cache=grp_cache,
                     blank_count=len(grp_slots),
                     group_id=str(gid),
+                    policy=self.policy,
                 )
 
                 slot_ctx = LoopContext(

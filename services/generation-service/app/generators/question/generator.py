@@ -203,6 +203,7 @@ class QuestionCandidateGenerator:
         parent_operation_id: Optional[str] = None,
         group_start_number: Optional[int] = None,
         blank_count: Optional[int] = None,
+        max_wall_time_seconds: Optional[float] = None,
     ) -> QuestionCandidatePool:
         pool_limit = custom_pool_limit or get_pool_limit_for_type(question_type)
         slot_id = f"slot_q{question_number}_{question_type}"
@@ -248,6 +249,7 @@ class QuestionCandidateGenerator:
             user_prompt = user_prompt + (
                 f"\n\nIMPORTANT: Generate {pool_limit} COMPLETELY DISTINCT question candidates covering different sentences and paragraphs across the entire passage. Every candidate must test a different fact with a distinct evidenceQuote copied verbatim from the passage, and for completion/short-answer types every answer MUST be 1, 2, or 3 words maximum (NEVER 4+ words) occurring verbatim in the passage."
             )
+        eff_wall = float(max_wall_time_seconds) if max_wall_time_seconds is not None else float(settings.loop_operation_wall_reservation_seconds)
         req = ProviderRequest(
             operation_id=op_id,
             run_id=run_id,
@@ -263,8 +265,8 @@ class QuestionCandidateGenerator:
                 ChatMessage(role="user", content=user_prompt),
             ],
             max_tokens=max_toks,
-            timeout_seconds=min(120.0 if pool_limit > 3 else 60.0, float(settings.loop_operation_wall_reservation_seconds)),
-            wall_time_reservation_seconds=min(120.0 if pool_limit > 3 else 60.0, float(settings.loop_operation_wall_reservation_seconds)),
+            timeout_seconds=min(120.0 if pool_limit > 3 else 60.0, eff_wall),
+            wall_time_reservation_seconds=min(120.0 if pool_limit > 3 else 60.0, eff_wall),
         )
         resp = await self._gateway.execute(
             req,

@@ -16,7 +16,7 @@ import json
 from uuid import uuid4
 import pytest
 
-from app.contracts.artifact import ArtifactType
+from app.contracts.artifact import ArtifactRef, ArtifactType
 from app.contracts.issue import IssueScope
 from app.contracts.loop import LoopState
 from app.loop.context import AuthorityGrant, BudgetTracker, LoopContext, ResumeCursor
@@ -119,6 +119,12 @@ class MockDurableStore(CheckpointClient):
             self.operations[operation_id]["wallTimeUsedSeconds"] = wall_time_used
             self.operations[operation_id]["tokensUsed"] = tokens_used
 
+    async def grant_operation_async(self, request: OperationGrantRequest) -> OperationGrantResult:
+        return self.grant_operation(request)
+
+    async def reconcile_operation_async(self, request) -> Any:
+        self.reconcile_operation(request.operationId, getattr(request, "wallTimeUsedSeconds", 0.0), getattr(request, "tokensUsed", 0))
+        return type("ReconcileResult", (), {"status": "COMPLETED", "reservationBreached": False, "budgetBreachDetected": False})()
 
 def _make_passage_runtime(policy: LoopPolicy | None = None, store: CheckpointClient | None = None) -> BoundedLoopRuntime:
     owner = uuid4()
@@ -444,3 +450,63 @@ def test_question_candidate_child_call_fits_inside_parent_reservation():
         ))
     assert exc_info.value.status_code == 422
     assert "Parent operation reservation exceeded" in exc_info.value.message
+
+
+@pytest.mark.asyncio
+async def test_question_candidate_generator_child_request_respects_passed_cap():
+    """QuestionCandidateGenerator child request aligns to the passed max_wall_time_seconds."""
+    from app.generators.question.generator import QuestionCandidateGenerator
+    from app.providers.gateway import ProviderGateway
+    from app.providers.registry import ProviderRegistry
+    from app.providers.base import BaseProvider
+    from app.providers.models import ProviderResponse, UsageReport
+
+    captured_requests = []
+
+    class RecordingProvider(BaseProvider):
+        def __init__(self):
+            super().__init__(name="minimax", base_url="http://fake.test", models={"large": "fake-model", "small": "fake-model"})
+        async def check_health(self): return True
+        async def call(self, request, api_key, deadline):
+            captured_requests.append(request)
+            payload = {"candidates": [{"prompt": "What is the primary factor in marine stoichiometry?", "answer": "Ans", "evidenceQuote": "Sample passage text for testing candidate generation.", "explanation": "Verified explanation for testing candidate generation."}]}
+            return ProviderResponse(
+                operation_id=request.operation_id, provider_name="minimax", model_name="fake-model",
+                raw_text=json.dumps(payload), parsed_payload=payload,
+                usage=UsageReport(prompt_tokens=100, completion_tokens=50, total_tokens=150),
+            )
+
+    reg = ProviderRegistry()
+    prov = RecordingProvider()
+    reg.register_provider(prov, keys=["fake_key"])
+    store = MockDurableStore("run_cap_align")
+    gateway = ProviderGateway(registry=reg, checkpoint_client=store)
+    q_gen = QuestionCandidateGenerator(gateway=gateway)
+
+    bp_ref = ArtifactRef(artifactId="bp_1", artifactType=ArtifactType.EXAM_BLUEPRINT, version=1, contentHash="0"*64)
+    p_ref = ArtifactRef(artifactId="art_passage_s2", artifactType=ArtifactType.PASSAGE, version=1, contentHash="1"*64)
+    owner = uuid4()
+    ctx = LoopContext(
+        runId="run_cap_align", targetArtifactId="art_q_slot_14", targetArtifactType=ArtifactType.QUESTION,
+        scope=IssueScope.QUESTION, authority=AuthorityGrant(leaseOwner=owner, epoch=1),
+    )
+
+    # 1. When max_wall_time_seconds = 60.0 (e.g. pinned 60s policy), child request must reserve 60.0s even with large pool
+    await q_gen.generate_candidate_pool(
+        passage_text="Sample passage text for testing candidate generation. " * 20,
+        question_type="MultipleChoice", question_number=14, passage_ref=p_ref, blueprint_ref=bp_ref,
+        run_id="run_cap_align", context=ctx, custom_pool_limit=5, max_wall_time_seconds=60.0,
+    )
+    assert len(captured_requests) == 1
+    assert captured_requests[-1].wall_time_reservation_seconds == 60.0
+    assert captured_requests[-1].timeout_seconds == 60.0
+
+    # 2. When max_wall_time_seconds = 180.0 (nominal production policy) and pool_limit > 3, child request reserves 120.0s
+    await q_gen.generate_candidate_pool(
+        passage_text="Sample passage text for testing candidate generation. " * 20,
+        question_type="MultipleChoice", question_number=14, passage_ref=p_ref, blueprint_ref=bp_ref,
+        run_id="run_cap_align", context=ctx, custom_pool_limit=5, max_wall_time_seconds=180.0,
+    )
+    assert len(captured_requests) == 2
+    assert captured_requests[-1].wall_time_reservation_seconds == 120.0
+    assert captured_requests[-1].timeout_seconds == 120.0
