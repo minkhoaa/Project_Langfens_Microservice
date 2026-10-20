@@ -1,57 +1,123 @@
 {
-  "task": "Task B \u2014 Section 3 Independent Generation Demo",
-  "target": {
-    "index": 3,
-    "source": {
-      "pmcid": "PMC8556156",
-      "title": "Ecological Restoration Strategies in Degraded Coral Reefs",
-      "url": "https://europepmc.org/articles/PMC8556156",
-      "license": "https://creativecommons.org/licenses/by/4.0",
-      "wordCount": 8200
-    },
-    "targetQuestions": "Questions 27\u201340 (7 YES_NO_NOT_GIVEN + 7 SHORT_ANSWER)",
-    "expectedQuestionCount": 14,
-    "provider": "minimax",
-    "endpoint": "POST /api/v1/autogen/reading-paper/section",
-    "acceptHeader": "application/x-ndjson"
+  "jobId": "9a839b83-2fc3-448d-a76e-42c530a881cc",
+  "runId": "run_9a839b832fc3448da76e42c530a881cc",
+  "status": "Failed",
+  "sectionIndex": 3,
+  "topic": "Marine Ecosystems and Global Climate Change",
+  "source": {
+    "pmcid": "PMC8556156",
+    "title": "Next-generation ensemble projections reveal higher climate risks for marine ecosystems",
+    "doi": "10.1038/s41558-021-01173-9",
+    "url": "https://europepmc.org/articles/PMC8556156",
+    "license": "https://creativecommons.org/licenses/by/4.0",
+    "wordCount": 5285,
+    "authors": "Tittensor Derek P., Novaglio Camilla, Harrison Cheryl S., Heneghan Ryan F., Barrier Nicolas, Bianchi Daniele, Bopp Laurent, Bryndum-Buch..."
   },
-  "execution": {
-    "status": "FAILED_AT_FENCING_GATE",
-    "httpStatus": 502,
-    "durationSeconds": 0.6323003768920898,
-    "runId": "run_sec3_7180c3ae",
-    "leaseOwner": "e2c30462-e2c2-4647-afb5-8accebf4449b",
-    "parentOperationId": "op_parent_sec3_5cc54b",
-    "streamEvents": [
+  "targetQuestionFormat": "Questions 27\u201340 (7 YES_NO_NOT_GIVEN + 7 SHORT_ANSWER)",
+  "questionCount": 0,
+  "passage": null,
+  "questions": [],
+  "error": "Passage generation failed in section 3: INVALID_OUTPUT: capability failed: BudgetExhaustedError: Budget cap exceeded: Parent operation reservation exceeded: parent 'loop:run_9a839b832fc3448da76e42c530a881cc:art_passage_s3:GENERATE:1:2.0.0' wall-time reservation (60s) would be exceeded by child reservation 59.99919247627258s (current child allocated: 46.4s)",
+  "durationSeconds": 50.514923334121704,
+  "tokenLedger": {
+    "totalTokensUsed": 8750,
+    "totalCalls": 1,
+    "wallTimeSeconds": 50.51,
+    "breakdown": [
       {
-        "type": "log",
-        "timestamp": "2026-10-20T09:07:41.317967+00:00",
-        "level": "Information",
-        "message": "Passage 3 generation stream opened."
-      },
-      {
-        "type": "error",
-        "httpStatus": 502,
-        "message": "HTTP 404: Run 'run_sec3_7180c3ae' not found",
-        "traceback": "Traceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 734, in _stream_section\n    {\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/facade.py\", line 658, in generate_section\n    epoch=epoch,\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/persistence/client.py\", line 110, in grant_operation\n    def set_budget_allocations(self, request: SetBudgetAllocationsRequest) -> SetBudgetAllocationsResult:\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/persistence/client.py\", line 323, in _handle_error\napp.persistence.client.CheckpointApiError: HTTP 404: Run 'run_sec3_7180c3ae' not found\n"
+        "operation": "Passage Generation (Initial Attempt)",
+        "operationId": "op_pass_gen_26c094bc",
+        "tokens": 8750,
+        "promptTokens": 7453,
+        "completionTokens": 1297,
+        "wallTimeSeconds": 46.396,
+        "status": "COMPLETED"
       }
     ],
-    "error": {
-      "type": "error",
-      "httpStatus": 502,
-      "message": "HTTP 404: Run 'run_sec3_7180c3ae' not found",
-      "traceback": "Traceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 734, in _stream_section\n    {\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/facade.py\", line 658, in generate_section\n    epoch=epoch,\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/persistence/client.py\", line 110, in grant_operation\n    def set_budget_allocations(self, request: SetBudgetAllocationsRequest) -> SetBudgetAllocationsResult:\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/persistence/client.py\", line 323, in _handle_error\napp.persistence.client.CheckpointApiError: HTTP 404: Run 'run_sec3_7180c3ae' not found\n"
-    }
+    "allLoggedOperations": [
+      {
+        "OperationId": "op_run_9a839b832fc3448da76e42c530a881cc_sec_3_4D3B4BDF91DC",
+        "OperationType": "GENERATE_SECTION",
+        "Status": "RESERVED",
+        "TokenReservation": 380000,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 800,
+        "WallTimeUsedSeconds": 0,
+        "CreatedAt": "2026-10-20T09:43:09.64842+00:00"
+      },
+      {
+        "OperationId": "init:run_9a839b832fc3448da76e42c530a881cc:sp_sec_3_6f8941f9:1",
+        "OperationType": "CHECKPOINT_COMMIT",
+        "Status": "COMPLETED",
+        "TokenReservation": 0,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 10,
+        "WallTimeUsedSeconds": 0.1,
+        "CreatedAt": "2026-10-20T09:43:34.133325+00:00"
+      },
+      {
+        "OperationId": "init:run_9a839b832fc3448da76e42c530a881cc:eg_sec_3_6f8941f9:1",
+        "OperationType": "CHECKPOINT_COMMIT",
+        "Status": "COMPLETED",
+        "TokenReservation": 0,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 10,
+        "WallTimeUsedSeconds": 0.1,
+        "CreatedAt": "2026-10-20T09:43:34.228546+00:00"
+      },
+      {
+        "OperationId": "init:run_9a839b832fc3448da76e42c530a881cc:bp_sec_3_6f8941f9:1",
+        "OperationType": "CHECKPOINT_COMMIT",
+        "Status": "COMPLETED",
+        "TokenReservation": 0,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 10,
+        "WallTimeUsedSeconds": 0.1,
+        "CreatedAt": "2026-10-20T09:43:34.349332+00:00"
+      },
+      {
+        "OperationId": "loop:run_9a839b832fc3448da76e42c530a881cc:art_passage_s3:GENERATE:1:2.0.0",
+        "OperationType": "GENERATE",
+        "Status": "RESERVED",
+        "TokenReservation": 40000,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 60,
+        "WallTimeUsedSeconds": 0,
+        "CreatedAt": "2026-10-20T09:43:34.741353+00:00"
+      },
+      {
+        "OperationId": "op_pass_gen_26c094bc",
+        "OperationType": "PROVIDER_CALL",
+        "Status": "COMPLETED",
+        "TokenReservation": 14184,
+        "TokensUsed": 8750,
+        "PromptTokensUsed": 7453,
+        "CompletionTokensUsed": 1297,
+        "WallTimeReservationSeconds": 59.99930715560913,
+        "WallTimeUsedSeconds": 46.3958,
+        "CreatedAt": "2026-10-20T09:43:36.077028+00:00"
+      }
+    ]
   },
-  "tokenLedger": {
-    "actualTokensUsed": 0,
-    "promptTokensUsed": 0,
-    "completionTokensUsed": 0,
-    "providerCalls": 0,
-    "wallTimeSeconds": 0.6323003768920898
-  },
-  "blockerDiagnostic": {
-    "summary": "No synthetic run was created in the database. The probe used client-side placeholder IDs that the CheckpointService fencing gate rejected (HTTP 404) before any provider call or token consumption.",
-    "rootCause": "POST /api/v1/autogen/reading-paper/section delegates to facade.generate_section, which requires upstream artifact bootstrapping (SourcePack, EvidenceGraph, ExamBlueprint) via client.grant_operation. CheckpointService.ValidateRunAuthorityAndFencingAsync strictly rejects any runId that is not an existing, leased row in reading_paper_runs (HTTP 404). In the current architecture, ReadingPaperWorker only creates runs as part of a full multi-source job starting at index 1, and benchmark provision requires an existing authorized campaign (0 exist). Therefore, independent Section 3 cannot be initialized without inventing synthetic runs or credentials."
+  "validationReport": {
+    "status": "HALTED_BEFORE_SECTION_COMPLETION",
+    "hasPassage": false,
+    "questionCount": 0,
+    "observations": [
+      "Demo run was initialized with authorized durable lease, checkpoints, and budget allocations in exam-service.",
+      "Initial MiniMax provider call (op_pass_gen_26c094bc) succeeded and consumed 8,750 tokens in 46.4s.",
+      "BoundedLoopRuntime halted when child reservation (60s) exceeded the parent operation's remaining wall-time reservation (60s total, 46.4s used).",
+      "In accordance with STRICT guidelines, no caps were increased and no automatic retries were executed."
+    ]
   }
 }

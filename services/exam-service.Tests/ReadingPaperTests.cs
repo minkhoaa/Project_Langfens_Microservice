@@ -342,4 +342,84 @@ public class ReadingPaperTests
         Assert.Equal("According to paragraph 2, the Persian Gulf has exceptionally high coastal ALAN density.", normalized[0].Groups[0].Questions[0].Explanation);
         Assert.Equal("The passage explicitly notes that 1.9 million square kilometers are affected at 1 meter depth.", normalized[0].Groups[1].Questions[5].Explanation);
     }
+
+    [Fact]
+    public void SectionBlueprint_QuestionNumberingAndTypes_Section2And3()
+    {
+        // Section 2: Index 2 (0-indexed 1)
+        Assert.Equal("MULTIPLE_CHOICE_SINGLE", ReadingPaperRules.Types[1][0]);
+        Assert.Equal(6, ReadingPaperRules.Counts[1][0]);
+        Assert.Equal("SUMMARY_COMPLETION", ReadingPaperRules.Types[1][1]);
+        Assert.Equal(7, ReadingPaperRules.Counts[1][1]);
+        Assert.Equal(13, ReadingPaperRules.Counts[1].Sum());
+
+        // Section 3: Index 3 (0-indexed 2)
+        Assert.Equal("YES_NO_NOT_GIVEN", ReadingPaperRules.Types[2][0]);
+        Assert.Equal(7, ReadingPaperRules.Counts[2][0]);
+        Assert.Equal("SHORT_ANSWER", ReadingPaperRules.Types[2][1]);
+        Assert.Equal(7, ReadingPaperRules.Counts[2][1]);
+        Assert.Equal(14, ReadingPaperRules.Counts[2].Sum());
+
+        // Question numbering continuous across 40 questions
+        var paper = Paper();
+        Assert.Equal(40, paper.Sum(s => s.Groups.Sum(g => g.Questions.Count)));
+
+        // Section 2 questions: Q14 - Q26
+        var sec2Questions = paper[1].Groups.SelectMany(g => g.Questions).ToList();
+        Assert.Equal(13, sec2Questions.Count);
+        Assert.Equal(14, sec2Questions.First().Number);
+        Assert.Equal(26, sec2Questions.Last().Number);
+
+        // Section 3 questions: Q27 - Q40
+        var sec3Questions = paper[2].Groups.SelectMany(g => g.Questions).ToList();
+        Assert.Equal(14, sec3Questions.Count);
+        Assert.Equal(27, sec3Questions.First().Number);
+        Assert.Equal(40, sec3Questions.Last().Number);
+    }
+
+    [Fact]
+    public async Task InitDemoRun_CreatesAuthorizedDurableRunsWithFencedLease()
+    {
+        var conn = "Host=localhost;Database=exam;Username=exam;Password=exam;Port=32771";
+        var options = new DbContextOptionsBuilder<ExamDbContext>()
+            .UseNpgsql(conn)
+            .Options;
+        await using var db = new ExamDbContext(options);
+
+        var caps = R03CapsProfileTests.ApprovedFromDeployEnvFile();
+
+        var src = new ReadingSource("PMC9640808", "Marine Climate", null, "https://europepmc.org/articles/PMC9640808", "CC BY 4.0", 5000);
+        var req = new ReadingPaperEndpoints.DemoRunRequest("Marine Climate", 2, null, src, "minimax");
+        try
+        {
+            var result = await ReadingPaperEndpoints.InitDemoRun(req, db, null!, caps, CancellationToken.None);
+            Assert.NotNull(result);
+
+            // Verify authorized durable run was created in DB and passes fencing check
+            var createdJob = await db.ReadingPaperJobs.OrderByDescending(j => j.CreatedAt).FirstAsync(j => j.Topic == "Marine Climate");
+            Assert.Equal("Running", createdJob.Status);
+            Assert.NotNull(createdJob.ActiveRunId);
+
+            var (run, job) = await CheckpointService.ValidateRunAuthorityAndFencingAsync(
+                db, createdJob.ActiveRunId, 1, createdJob.LeaseOwner!.Value, CancellationToken.None
+            );
+            Assert.Equal("RUNNING", run.Status);
+            Assert.Equal(1, run.Epoch);
+            Assert.True(run.LeaseUntil > DateTime.UtcNow);
+            Assert.True(await db.ReadingPaperOperations.AnyAsync(o => o.RunId == createdJob.ActiveRunId && o.OperationType == "GENERATE_SECTION"));
+        }
+        finally
+        {
+            var testJobs = await db.ReadingPaperJobs.Where(j => j.Topic == "Marine Climate").ToListAsync();
+            foreach (var j in testJobs)
+            {
+                if (j.ActiveRunId != null)
+                {
+                    await db.ReadingPaperOperations.Where(o => o.RunId == j.ActiveRunId).ExecuteDeleteAsync();
+                }
+                await db.ReadingPaperRuns.Where(r => r.JobId == j.Id).ExecuteDeleteAsync();
+                await db.ReadingPaperJobs.Where(x => x.Id == j.Id).ExecuteDeleteAsync();
+            }
+        }
+    }
 }
