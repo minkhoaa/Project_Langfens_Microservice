@@ -212,7 +212,7 @@ class PassageGenerator:
         context: PassageGenerationContext,
         run_id: str,
         parent_operation_id: Optional[str] = None,
-        timeout_seconds: float = 60.0,
+        timeout_seconds: float = 180.0,
         length_feedback: Optional[str] = None,
         target_artifact_id: Optional[str] = None,
     ):
@@ -281,7 +281,7 @@ class PassageGenerator:
         run_id: str,
         version: int = 1,
         target_artifact_id: Optional[str] = None,
-        timeout_seconds: float = 60.0,
+        timeout_seconds: float = 180.0,
         lease_owner: Optional[UUID] = None,
         epoch: int = 1,
         parent_operation_id: Optional[str] = None,

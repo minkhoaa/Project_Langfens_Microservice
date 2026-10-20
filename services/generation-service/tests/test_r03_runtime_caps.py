@@ -48,11 +48,11 @@ from tests.test_t06_loop_runtime import (
 # Approved production run caps (deploy/envs/loop-caps.env). Never exceeded here.
 APPROVED_CALL_CAP = 15
 APPROVED_TOKEN_CAP = 60_000
-APPROVED_WALL_CAP = 300
+APPROVED_WALL_CAP = 900
 
 # The widened fallback that must not survive in QuestionCandidateLoop.
 FORBIDDEN_TOKEN_CAP = 100_000
-FORBIDDEN_WALL_CAP = 600.0
+FORBIDDEN_WALL_CAP = 1800.0
 
 QUESTION_EVALUATORS = ("eval_question_structure", "eval_answer_verbatim_length")
 

@@ -386,13 +386,13 @@ class BoundedLoopRuntime:
             wall_time_reservation_seconds=(
                 (
                     # Account for at most 3 bounded passage calls (initial + quantity guard + word-count guard)
-                    # while respecting finite run cap if configured.
+                    # at up to 180s per call, while respecting finite run cap if configured.
                     min(
-                        3 * min(self.policy.operation_wall_reservation_seconds, 60.0),
+                        3 * min(self.policy.operation_wall_reservation_seconds, 180.0),
                         float(self.policy.max_wall_time_seconds),
                     )
                     if (not self.policy.is_unlimited and self.policy.max_wall_time_seconds > 0)
-                    else 3 * min(self.policy.operation_wall_reservation_seconds, 60.0)
+                    else 3 * min(self.policy.operation_wall_reservation_seconds, 180.0)
                 )
                 if (
                     kind == "GENERATE"

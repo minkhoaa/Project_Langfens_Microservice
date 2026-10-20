@@ -143,12 +143,11 @@ def _make_passage_runtime(policy: LoopPolicy | None = None, store: CheckpointCli
 
 
 def test_passage_generate_parent_reservation_sized_for_up_to_three_calls():
-    """Passage GENERATE parent reservation must account for at most 3 bounded calls (180s)."""
+    """Passage GENERATE parent reservation must account for at most 3 bounded calls (3 * 180s = 540s)."""
     runtime = _make_passage_runtime()
     intent = runtime._intent("GENERATE", version=1, tokens=40000, identity="2.0.0", extra={})
-    assert intent.wall_time_reservation_seconds == 180.0
+    assert intent.wall_time_reservation_seconds == 540.0
     assert intent.operation_type == "GENERATE"
-
 
 def test_evaluate_and_repair_reservations_remain_unchanged():
     """EVALUATE and REPAIR reservations must remain completely unchanged (min(wall_res, 60.0))."""
@@ -202,7 +201,7 @@ def test_passage_generate_reservation_respects_finite_caps():
     intent_very_tight = runtime_very_tight._intent("GENERATE", version=1, tokens=40000, identity="2.0.0", extra={})
     assert intent_very_tight.wall_time_reservation_seconds == 45.0
 
-    # 3. Unlimited run mode (max_wall_time_seconds = -1.0) -> nominal 180.0s
+    # 3. Unlimited run mode (max_wall_time_seconds = -1.0) -> nominal 540.0s
     policy_unlimited = LoopPolicy.from_settings().model_copy(update={
         "max_wall_time_seconds": -1.0,
         "max_total_calls": -1,
@@ -210,14 +209,14 @@ def test_passage_generate_reservation_respects_finite_caps():
     })
     runtime_unlimited = _make_passage_runtime(policy=policy_unlimited)
     intent_unlimited = runtime_unlimited._intent("GENERATE", version=1, tokens=40000, identity="2.0.0", extra={})
-    assert intent_unlimited.wall_time_reservation_seconds == 180.0
+    assert intent_unlimited.wall_time_reservation_seconds == 540.0
 
 def test_two_sequential_provider_calls_fit_inside_generate_when_permitted_by_caps():
-    """Two sequential provider calls inside one GENERATE must fit when parent reservation is sized for 3 calls."""
-    store = MockDurableStore("run_demo", artifact_wall_cap=200.0, section_wall_cap=800.0)
+    """Two sequential provider calls inside one GENERATE must fit when parent reservation is sized for 3 calls at 180s."""
+    store = MockDurableStore("run_demo", artifact_wall_cap=600.0, section_wall_cap=900.0)
     runtime = _make_passage_runtime(store=store)
 
-    # 1. Parent GENERATE is granted with 180s reservation
+    # 1. Parent GENERATE is granted with 540s reservation
     parent_intent = runtime._intent("GENERATE", version=1, tokens=40000, identity="2.0.0", extra={})
     parent_grant = store.grant_operation(OperationGrantRequest(
         runId="run_demo", epoch=1, leaseOwner=uuid4(),
@@ -226,39 +225,38 @@ def test_two_sequential_provider_calls_fit_inside_generate_when_permitted_by_cap
         wallTimeReservationSeconds=parent_intent.wall_time_reservation_seconds,
         artifactId="art_passage_s2",
     ))
-    assert parent_grant.wallTimeReservationSeconds == 180.0
+    assert parent_grant.wallTimeReservationSeconds == 540.0
 
-    # 2. Child 1 (initial generation): reserves 60s
+    # 2. Child 1 (initial generation): reserves 180s
     ch1 = store.grant_operation(OperationGrantRequest(
         runId="run_demo", epoch=1, leaseOwner=uuid4(),
         operationId="op_ch1", operationType="PROVIDER_CALL",
         requestHash="hash_ch1", tokenReservation=15000,
-        wallTimeReservationSeconds=60.0,
+        wallTimeReservationSeconds=180.0,
         artifactId="art_passage_s2",
         parentOperationId=parent_intent.operation_id,
     ))
-    assert ch1.wallTimeReservationSeconds == 60.0
+    assert ch1.wallTimeReservationSeconds == 180.0
 
-    # Child 1 completes and reconciles, using 32.6s (same as failed demo run Section 2)
-    store.reconcile_operation("op_ch1", wall_time_used=32.6, tokens_used=8285)
+    # Child 1 completes and reconciles, using 72.0s
+    store.reconcile_operation("op_ch1", wall_time_used=72.0, tokens_used=8285)
 
-    # 3. Child 2 (word-count guard re-ask): reserves 60s under the same parent GENERATE
-    # With parent reservation = 180s, child allocated is 32.6s + 60.0s = 92.6s <= 180.0s -> MUST FIT!
+    # 3. Child 2 (word-count guard re-ask): reserves 180s under the same parent GENERATE
+    # With parent reservation = 540s, child allocated is 72.0s + 180.0s = 252.0s <= 540.0s -> MUST FIT!
     ch2 = store.grant_operation(OperationGrantRequest(
         runId="run_demo", epoch=1, leaseOwner=uuid4(),
         operationId="op_ch2", operationType="PROVIDER_CALL",
         requestHash="hash_ch2", tokenReservation=15000,
-        wallTimeReservationSeconds=60.0,
+        wallTimeReservationSeconds=180.0,
         artifactId="art_passage_s2",
         parentOperationId=parent_intent.operation_id,
     ))
-    assert ch2.wallTimeReservationSeconds == 60.0
+    assert ch2.wallTimeReservationSeconds == 180.0
 
-    # Child 2 completes and reconciles using 35.0s
-    store.reconcile_operation("op_ch2", wall_time_used=35.0, tokens_used=8500)
+    # Child 2 completes and reconciles using 68.0s
+    store.reconcile_operation("op_ch2", wall_time_used=68.0, tokens_used=8500)
     # Two sequential calls completed successfully within parent GENERATE's wall time and token reservations.
     assert len(store.operations) == 3  # parent + ch1 + ch2
-
 def test_provider_call_exceeding_parent_cap_rejected():
     """A child reservation exceeding the parent reservation must be rejected with 422."""
     store = MockDurableStore("run_demo", artifact_wall_cap=200.0)

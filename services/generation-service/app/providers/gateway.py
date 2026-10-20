@@ -45,7 +45,8 @@ class ProviderGateway:
         checkpoint_client: Optional[CheckpointClient] = None,
     ):
         self.registry = registry or provider_registry
-        self.retry_policy = retry_policy or RetryPolicy(max_attempts=3)
+        default_max_attempts = int(os.environ.get("PROVIDER_MAX_ATTEMPTS", "1"))
+        self.retry_policy = retry_policy or RetryPolicy(max_attempts=default_max_attempts)
         self.checkpoint_client = checkpoint_client
         self.last_response: Optional[ProviderResponse] = None
 

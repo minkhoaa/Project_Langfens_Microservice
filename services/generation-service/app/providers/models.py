@@ -59,7 +59,7 @@ class ProviderRequest(CanonicalBaseModel):
     preferred_provider: Optional[str] = None
     temperature: float = 0.3
     max_tokens: int = 4096
-    timeout_seconds: float = 60.0
+    timeout_seconds: float = 180.0
     wall_time_reservation_seconds: float = settings.loop_operation_wall_reservation_seconds
     model_config_version: str = "2.0.0"
     prompt_hash: str = ""

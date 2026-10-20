@@ -93,7 +93,7 @@ class PassageGeneratorAdapter(GeneratorCapability):
             parent_operation_id=intent_id,
             input_dependencies=context.input_dependencies,
             length_feedback=feedback,
-            timeout_seconds=60.0,
+            timeout_seconds=180.0,
         )
         if envelope.version != version:
             envelope = envelope.model_copy(update={"version": version})
