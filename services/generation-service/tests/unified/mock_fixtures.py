@@ -15,6 +15,7 @@ import asyncio
 from collections.abc import Callable, Sequence
 from datetime import datetime, timezone
 import hashlib
+import re
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -190,7 +191,9 @@ class MockProvider(BaseProvider):
         self.outcomes: list[Any] = list(outcomes)
         self.scripted_responses: dict[str, Any] = {}
         self.fail_next_exc: Optional[Exception] = None
-
+        self._passages: dict[int, str] = {}
+        self._last_questions: dict[int, dict[str, Any]] = {}
+        self._cached_claims: dict[int, list[dict[str, Any]]] = {}
     def fail_next(self, exc: Exception) -> None:
         """Injects a failure to be raised on the next call."""
         self.fail_next_exc = exc
@@ -222,6 +225,18 @@ class MockProvider(BaseProvider):
         # Check explicit scripted responses
         if request.operation_id in self.scripted_responses:
             data = self.scripted_responses[request.operation_id]
+        elif (request.artifact_id or "") in self.scripted_responses:
+            data = self.scripted_responses[request.artifact_id]
+            if isinstance(data, dict):
+                cands = data.get("candidates") or []
+                if isinstance(cands, list) and cands and isinstance(cands[0], dict):
+                    q_num = cands[0].get("questionNumber") or cands[0].get("number")
+                    if q_num is not None:
+                        self._last_questions[int(q_num)] = cands[0]
+                elif data.get("statement") or data.get("prompt"):
+                    q_num = data.get("questionNumber") or data.get("number")
+                    if q_num is not None:
+                        self._last_questions[int(q_num)] = data
         elif request.capability.value in self.scripted_responses:
             data = self.scripted_responses[request.capability.value]
         else:
@@ -250,12 +265,135 @@ class MockProvider(BaseProvider):
             latency_seconds=0.01,
         )
 
+    def _get_claims_for_section(self, sec_idx: int) -> list[dict[str, Any]]:
+        if sec_idx in self._cached_claims:
+            return self._cached_claims[sec_idx]
+        src_map = {1: SECTION_1_SOURCE_TEXT, 2: SECTION_2_SOURCE_TEXT, 3: SECTION_3_SOURCE_TEXT}
+        text = src_map.get(sec_idx, SECTION_1_SOURCE_TEXT)
+        source_env = {
+            "sources": [
+                {
+                    "sourceId": f"src_sec_{sec_idx}",
+                    "document": {"text": text},
+                    "metadata": {"licenseCleared": True, "pmcid": "PMC12804876", "sourceUrl": "https://europepmc.org"},
+                }
+            ],
+            "licenseCleared": True,
+            "chunks": [{"sourceId": f"src_sec_{sec_idx}", "start_char": 0, "end_char": len(text), "text": text}],
+        }
+        policy = PinnedExecutionPolicy(provider="mock")
+        ev_graph = build_evidence(source_env, "run_mock_claims", sec_idx, policy)
+        claims = ev_graph.get("claims", [])
+        self._cached_claims[sec_idx] = claims
+        return claims
+
     def _generate_default_response(self, request: ProviderRequest) -> Any:
         cap = request.capability
+        art_id = request.artifact_id or ""
+        op_id = request.operation_id or ""
+
+        # 1. Passage generation request
+        if cap == Capability.GENERATE_JSON and ("passage:" in art_id or "passage:" in op_id):
+            try:
+                sec_idx = int(art_id.split(":")[-1])
+            except (ValueError, IndexError):
+                sec_idx = 1
+            claims = self._get_claims_for_section(sec_idx)
+            config = demo_sections()[sec_idx - 1]
+            src_map = {1: SECTION_1_SOURCE_TEXT, 2: SECTION_2_SOURCE_TEXT, 3: SECTION_3_SOURCE_TEXT}
+            text = src_map.get(sec_idx, SECTION_1_SOURCE_TEXT)
+            topic = (
+                "Wetland Agricultural Intensification in Prehistoric Settlements" if sec_idx == 1
+                else ("Marine Stoichiometry and the Classical Oceanic Redfield Ratio" if sec_idx == 2
+                      else "Atmospheric Transmission Spectroscopy of Transiting Exoplanets")
+            )
+            res = compose_passage(topic, sec_idx, text, claims, config)
+            self._passages[sec_idx] = res["passage"]
+            return res
+
+        # 2. Summary completion group generation request
+        if cap == Capability.GENERATE_JSON and ("summary_group" in op_id or "summary_group" in art_id):
+            sec_idx = 2
+            claims = self._get_claims_for_section(sec_idx)
+            config = demo_sections()[sec_idx - 1]
+            passage = self._passages.get(sec_idx)
+            if not passage:
+                res = compose_passage("Marine Stoichiometry", sec_idx, SECTION_2_SOURCE_TEXT, claims, config)
+                self._passages[sec_idx] = res["passage"]
+                passage = res["passage"]
+            slots = [{"groupIndex": 1, "questionNumber": n, "claimRefIds": [claims[0]["claimId"]]} for n in range(20, 27)]
+            all_q, groups = compose_questions(sec_idx, passage, claims, slots, config)
+            for q in all_q:
+                self._last_questions[q["questionNumber"]] = q
+            summary_group = next((g for g in groups if g.get("questionType") == "SUMMARY_COMPLETION"), groups[-1])
+            blanks = [{"number": q["questionNumber"], "answer": q["answer"], "evidenceQuote": q["evidenceQuote"]} for q in all_q if q["questionNumber"] >= 20]
+            return {
+                "summaryTitle": "Marine Stoichiometric Summary",
+                "summaryText": summary_group.get("sharedContext", ""),
+                "blanks": blanks,
+            }
+
+        # 3. Question candidate generation request
+        if cap == Capability.GENERATE_JSON and ("question:" in art_id or "question:" in op_id):
+            try:
+                q_num = int(art_id.split(":")[-1])
+            except (ValueError, IndexError):
+                q_num = 1
+            sec_idx = 1 if q_num <= 13 else (2 if q_num <= 26 else 3)
+            claims = self._get_claims_for_section(sec_idx)
+            config = demo_sections()[sec_idx - 1]
+            passage = self._passages.get(sec_idx)
+            if not passage:
+                src_map = {1: SECTION_1_SOURCE_TEXT, 2: SECTION_2_SOURCE_TEXT, 3: SECTION_3_SOURCE_TEXT}
+                text = src_map.get(sec_idx, SECTION_1_SOURCE_TEXT)
+                topic = "Scientific Study"
+                res = compose_passage(topic, sec_idx, text, claims, config)
+                self._passages[sec_idx] = res["passage"]
+                passage = res["passage"]
+            g_idx = 0 if (q_num <= 7 or (14 <= q_num <= 19) or (27 <= q_num <= 33)) else 1
+            slots = [{"groupIndex": g_idx, "questionNumber": q_num, "claimRefIds": [claims[0]["claimId"]]}]
+            all_q, _ = compose_questions(sec_idx, passage, claims, slots, config)
+            q_payload = all_q[0]
+            self._last_questions[q_num] = q_payload
+            return {"candidates": [q_payload]}
+
+        # 4. Blind solver request
         if cap == Capability.SOLVE_ITEM:
-            return {"solution": "A", "confidence": 1.0, "reasoning": "Determined from passage"}
+            user_msg = request.messages[-1].content if request.messages else ""
+            q_num_match = re.search(r'(?:question_number="|<question_number>)(\d+)', user_msg)
+            q_num = int(q_num_match.group(1)) if q_num_match else 1
+            q_payload = self._last_questions.get(q_num)
+            if q_payload:
+                norm_ans = q_payload.get("answer") or q_payload.get("correctOption") or "A"
+                quote = q_payload.get("evidenceQuote") or q_payload.get("passageEvidence", {}).get("text") or ""
+            else:
+                norm_ans = "A"
+                quote = ""
+            if not quote:
+                sec_idx = 1 if q_num <= 13 else (2 if q_num <= 26 else 3)
+                passage = self._passages.get(sec_idx, "")
+                if passage:
+                    quote = passage.split(". ")[0].strip() + "."
+            return {
+                "questionNumber": q_num,
+                "normalizedAnswer": norm_ans,
+                "justification": f"Verified by passage evidence: {quote[:100]}",
+                "citedSpans": [{"spanText": quote}] if quote else [],
+                "selfReportedConfidence": 0.95,
+            }
+
+        # 5. Adversarial evaluation request
         if cap == Capability.EVALUATE_ITEM:
-            return {"status": "PASS", "score": 1.0, "issues": []}
+            user_msg = request.messages[-1].content if request.messages else ""
+            q_num_match = re.search(r'(?:question_number="|<question_number>)(\d+)', user_msg)
+            q_num = int(q_num_match.group(1)) if q_num_match else 1
+            return {
+                "questionNumber": q_num,
+                "isAmbiguous": False,
+                "adversarySummary": "The item is clear and strictly grounded in the approved passage.",
+                "identifiedAlternatives": [],
+            }
+
         return {"status": "ok", "capability": cap.value, "operation": request.operation_id}
 
     async def check_health(self, api_key: Optional[str] = None) -> bool:

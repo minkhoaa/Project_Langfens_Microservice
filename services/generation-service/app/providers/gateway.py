@@ -191,7 +191,7 @@ class ProviderGateway:
                 )
             )
 
-        while attempt_number <= max_attempts:
+        while attempt_number <= max_attempts or (isinstance(last_error, RateLimitedError) and attempt_number <= 4):
             if time.time() >= deadline:
                 last_error = DeadlineExceededError(
                     f"Overall deadline of {timeout:.1f}s exceeded for operation '{request.operation_id}'",

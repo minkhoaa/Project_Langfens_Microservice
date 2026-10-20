@@ -273,7 +273,7 @@ class TestIngestRouterEndpoint:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/source/ingest",
-                json={"payload": text, "type": "text", "title": "Custom Title"},
+                json={"payload": text, "type": "text", "title": "Custom Title", "license": "CC-BY-4.0"},
             )
             assert resp.status_code == 200
             data = resp.json()
@@ -285,10 +285,10 @@ class TestIngestRouterEndpoint:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/source/ingest",
-                json={"payload": "Too short content", "type": "text"},
+                json={"payload": "Too short content", "type": "text", "license": "CC-BY-4.0"},
             )
             assert resp.status_code == 422
-            assert "too short" in resp.json()["detail"].lower()
+            assert "too short" in str(resp.json()["detail"]).lower()
 
     async def test_ingest_endpoint_ssrf_returns_422(self):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
@@ -304,7 +304,7 @@ class TestIngestRouterEndpoint:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=self.AUTH_HEADERS) as ac:
             resp = await ac.post(
                 "/api/v1/autogen/reading-paper/source/ingest",
-                json={"payload": text, "type": "text", "title": "Cognitive Linguistics"},
+                json={"payload": text, "type": "text", "title": "Cognitive Linguistics", "license": "CC-BY-4.0"},
             )
             assert resp.status_code == 200
             data = resp.json()
@@ -324,4 +324,4 @@ class TestIngestRouterEndpoint:
                 json={"payload": huge_payload, "type": "text"},
             )
             assert resp.status_code == 422
-            assert "5mb" in resp.json()["detail"].lower()
+            assert "5mb" in str(resp.json()["detail"]).lower() or "5242880" in str(resp.json()["detail"]).lower()

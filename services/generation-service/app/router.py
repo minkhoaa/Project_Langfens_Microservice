@@ -5,6 +5,11 @@ provider, legacy, demo, or worker-specific generation endpoints.
 """
 from __future__ import annotations
 
+import asyncio
+import json
+from datetime import datetime, timezone
+from uuid import UUID
+from fastapi.responses import StreamingResponse
 import logging
 import os
 import secrets
@@ -118,6 +123,84 @@ async def execute(
         raise HTTPException(502, detail="Provider operation failed; consult the durable run state before continuation") from exc
     except ValueError as exc:
         raise HTTPException(422, detail=redact_secrets(str(exc))[:500]) from exc
+
+
+class SectionEndpointRequest(BaseModel):
+    topic: str
+    index: int
+    source: dict[str, Any]
+    run_id: str = Field(alias="runId")
+    epoch: int = 1
+    lease_owner: UUID = Field(alias="leaseOwner")
+    parent_operation_id: str = Field(alias="parentOperationId")
+    provider: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+@router.post("/section")
+async def section_endpoint(request: SectionEndpointRequest, http_request: Request) -> Any:
+    is_ndjson = "application/x-ndjson" in http_request.headers.get("accept", "").lower()
+    from app.facade import get_generation_facade
+    facade = get_generation_facade()
+
+    if is_ndjson:
+        async def _stream():
+            events: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
+
+            async def report(level: str, message: str) -> None:
+                event = {
+                    "type": "log",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "level": level,
+                    "message": message,
+                }
+                await events.put(event)
+
+            async def run_gen():
+                return await facade.generate_section(
+                    request.topic,
+                    request.index,
+                    request.source,
+                    progress=report,
+                    provider=request.provider,
+                    run_id=request.run_id,
+                    epoch=request.epoch,
+                    lease_owner=request.lease_owner,
+                    parent_operation_id=request.parent_operation_id,
+                )
+
+            task = asyncio.create_task(run_gen())
+            try:
+                while not task.done():
+                    try:
+                        event = await asyncio.wait_for(events.get(), timeout=0.05)
+                        yield json.dumps(event, ensure_ascii=False) + "\n"
+                    except asyncio.TimeoutError:
+                        continue
+                while not events.empty():
+                    event = events.get_nowait()
+                    yield json.dumps(event, ensure_ascii=False) + "\n"
+                res = task.result()
+                yield json.dumps({"type": "result", "section": res}, ensure_ascii=False) + "\n"
+            except Exception as exc:
+                yield json.dumps({"type": "error", "message": str(exc)}, ensure_ascii=False) + "\n"
+            finally:
+                if not task.done():
+                    task.cancel()
+
+        return StreamingResponse(_stream(), media_type="application/x-ndjson")
+
+    return await facade.generate_section(
+        request.topic,
+        request.index,
+        request.source,
+        provider=request.provider,
+        run_id=request.run_id,
+        epoch=request.epoch,
+        lease_owner=request.lease_owner,
+        parent_operation_id=request.parent_operation_id,
+    )
 
 
 class FeedbackRegisterRequest(BaseModel):
