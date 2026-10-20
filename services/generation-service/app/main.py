@@ -11,7 +11,6 @@ from app.observability.dashboard import build_prometheus_payload
 
 from app.config import settings
 from app.router import router as reading_paper_router
-from app.routers.autogen import router as autogen_router
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s: %(message)s")
 logger = logging.getLogger("generation-service")
@@ -39,11 +38,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount router with and without /api prefix for maximum compatibility
+# Internal source/editorial operations and the single Reading execution route.
 app.include_router(reading_paper_router, prefix="/api")
 app.include_router(reading_paper_router)
-app.include_router(autogen_router, prefix="/api")
-app.include_router(autogen_router)
 
 
 @app.get("/healthz", tags=["health"])
