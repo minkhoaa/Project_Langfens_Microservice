@@ -384,7 +384,25 @@ class BoundedLoopRuntime:
             target_artifact_id=self.context.target_artifact_id, expected_version=version,
             token_reservation=tokens,
             wall_time_reservation_seconds=(
-                min(self.policy.operation_wall_reservation_seconds, 60.0)
+                (
+                    # Account for at most 3 bounded passage calls (initial + quantity guard + word-count guard)
+                    # while respecting finite run cap if configured.
+                    min(
+                        3 * min(self.policy.operation_wall_reservation_seconds, 60.0),
+                        float(self.policy.max_wall_time_seconds),
+                    )
+                    if (not self.policy.is_unlimited and self.policy.max_wall_time_seconds > 0)
+                    else 3 * min(self.policy.operation_wall_reservation_seconds, 60.0)
+                )
+                if (
+                    kind == "GENERATE"
+                    and (
+                        getattr(self.context, "target_artifact_type", None) in (ArtifactType.PASSAGE, "PASSAGE")
+                        or str(getattr(self.context, "target_artifact_id", "")).startswith("art_passage")
+                        or str(getattr(self.context, "scope", "")).upper() == "PASSAGE"
+                    )
+                )
+                else min(self.policy.operation_wall_reservation_seconds, 60.0)
                 if kind in ("GENERATE", "REPAIR", "EVALUATE")
                 else 0.0
             ),
