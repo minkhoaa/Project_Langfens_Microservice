@@ -533,7 +533,7 @@
     ]
   },
   "validationReport": {
-    "status": "PASS_WITH_OBSERVATIONS",
+    "status": "DEFECT_DETECTED_GENERIC_EXPLANATIONS",
     "section1QuestionCount": 13,
     "targetCount": 13,
     "hasPassage": true,
@@ -541,11 +541,14 @@
     "allQuestionsHaveEvidence": true,
     "allQuestionsHaveExplanations": true,
     "observations": [
-      "All 13 questions have non-null prompts, answers, evidence quotes, and explanations.",
-      "Group 1 (Q1-Q7): TRUE_FALSE_NOT_GIVEN format with standard 3 options.",
-      "Group 2 (Q8-Q13): SENTENCE_COMPLETION format with slot numbers [8]..[13].",
-      "Explanations were generated using standard pattern ('Explanation for question X based on passage text.'). Note: Commit 72dbc96 subsequently tightened normalization to flag generic explanation templates.",
-      "Section 2 halted before question generation due to token cap (next reservation exceeded cap)."
-    ]
+      "Structure & Content: Section 1 passage (724 words) and Q1-Q13 were extracted from accepted artifacts (art_section_1 and art_q_1..13).",
+      "Group 1 (Q1-Q7): TRUE_FALSE_NOT_GIVEN with standard 3 options and valid passage evidence quotes.",
+      "Group 2 (Q8-Q13): SENTENCE_COMPLETION with slot numbers [8]..[13] and extracted answers.",
+      "Explanation Quality Failure: All 13 questions contain identical templated filler ('Explanation for question {N} based on passage text.'). HEAD's IsGenericExplanation (ReadingPaperWorker.cs:1121-1130) failed to catch them because it checks for the literal 'Explanation for question based on passage text.' (without the digit); at ~48 characters, this bypasses the length >= 25 check. Thus, while structurally present, the explanations fail quality validation.",
+      "Token Accounting: Real consumption is exactly the 5 PROVIDER_CALL operations (Section 1: 13,197 tokens across 3 calls; Section 2: 16,699 tokens across 2 calls; Total: 29,896 tokens across 5 calls). Parent rollups are excluded to prevent duplicate counting.",
+      "Job Termination: Section 2 halted before question generation because the passage repair reservation exceeded the token cap."
+    ],
+    "genericExplanationsDetected": true,
+    "genericExplanationCount": 13
   }
 }
