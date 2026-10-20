@@ -232,4 +232,75 @@ public class ReadingPaperTests
         Assert.Equal("PMC1234567", request.Pmcids[0]);
         Assert.Null(request.Sources);
     }
+
+    [Fact]
+    public void NormalizeSections_ValidQuestions_RemainAccepted()
+    {
+        var sections = Paper();
+        var normalized = ReadingPaperWorker.NormalizeSectionsForValidation(sections);
+
+        Assert.Equal(3, normalized.Count);
+        Assert.Equal(40, normalized.Sum(s => s.Groups.Sum(g => g.Questions.Count)));
+        Assert.Equal("The passage states that scientists found species in the forest.", normalized[0].Groups[0].Questions[0].Explanation);
+        Assert.Equal("Scientists found species in the forest", normalized[0].Groups[0].Questions[0].EvidenceQuote);
+    }
+
+    [Fact]
+    public void NormalizeSections_EmptyOrShortExplanation_IsRejected()
+    {
+        var sections = Paper();
+        var q = sections[0].Groups[0].Questions[0];
+        sections[0].Groups[0].Questions[0] = q with { Explanation = "Too short" };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperWorker.NormalizeSectionsForValidation(sections));
+        Assert.Contains("explanation", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void NormalizeSections_GenericPlaceholderExplanation_IsRejected()
+    {
+        var sections = Paper();
+        var q = sections[0].Groups[0].Questions[0];
+        sections[0].Groups[0].Questions[0] = q with { Explanation = "Verified against the reading passage text." };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperWorker.NormalizeSectionsForValidation(sections));
+        Assert.Contains("explanation", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void NormalizeSections_InvalidEvidenceQuote_IsRejected()
+    {
+        var sections = Paper();
+        var q = sections[0].Groups[0].Questions[0];
+        sections[0].Groups[0].Questions[0] = q with { EvidenceQuote = "Invented evidence quote not in passage text" };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperWorker.NormalizeSectionsForValidation(sections));
+        Assert.Contains("evidence quote", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not found in passage text", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void NormalizeSections_FabricatedCompletionAnswer_IsRejected()
+    {
+        var sections = Paper();
+        var compGroup = sections[0].Groups[1];
+        var q = compGroup.Questions[0];
+        compGroup.Questions[0] = q with { Answer = "unmentioned_word" };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperWorker.NormalizeSectionsForValidation(sections));
+        Assert.Contains("completion answer", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not a verbatim 1–3 word match", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void NormalizeSections_CompletionAnswerExceedingWordLimit_IsRejected()
+    {
+        var sections = Paper();
+        var compGroup = sections[0].Groups[1];
+        var q = compGroup.Questions[0];
+        compGroup.Questions[0] = q with { Answer = "four words in answer" };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperWorker.NormalizeSectionsForValidation(sections));
+        Assert.Contains("completion answer", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
 }

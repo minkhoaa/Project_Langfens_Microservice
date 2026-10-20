@@ -974,7 +974,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
         await AppendLogAsync(job.Id, "Information",
             $"[Exam Created Successfully] Exam ID: {buildResult.ExamId} | Slug: '{buildResult.Slug}' (Existing: {buildResult.IsExisting}).", ct);
     }
-    private static List<ReadingGeneratedSection> NormalizeSectionsForValidation(List<ReadingGeneratedSection> sections)
+    public static List<ReadingGeneratedSection> NormalizeSectionsForValidation(List<ReadingGeneratedSection> sections)
     {
         var normalizedSections = new List<ReadingGeneratedSection>();
         var next = 1;
@@ -996,23 +996,20 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                 foreach (var q in grp.Questions)
                 {
                     var qNum = next++;
-                    var prompt = q.Prompt ?? "";
+                    var prompt = (q.Prompt ?? "").Trim();
                     var answer = (q.Answer ?? "").Trim();
-                    var explanation = q.Explanation ?? "";
-                    if (explanation.Length < 25)
+                    var explanation = (q.Explanation ?? "").Trim();
+                    if (string.IsNullOrWhiteSpace(explanation) || explanation.Length < 25 || IsGenericExplanation(explanation))
                     {
-                        explanation = (explanation + " (Verified against the reading passage text.)").Trim();
+                        throw new InvalidOperationException($"Question {qNum} explanation '{explanation}' is missing, too short (< 25 characters), or a generic placeholder");
                     }
 
-                    var evidenceQuote = q.EvidenceQuote ?? "";
+                    var evidenceQuote = (q.EvidenceQuote ?? "").Trim();
                     var cleanPassage = string.Join(' ', sec.Passage.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
                     var cleanEvidence = string.Join(' ', evidenceQuote.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
                     if (cleanEvidence.Length < 15 || !cleanPassage.Contains(cleanEvidence, StringComparison.OrdinalIgnoreCase))
                     {
-                        var sentences = sec.Passage.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                        var validSentence = sentences.FirstOrDefault(s => s.Trim().Length >= 25)?.Trim()
-                            ?? (cleanPassage.Length >= 25 ? cleanPassage[..25] : cleanPassage);
-                        evidenceQuote = validSentence;
+                        throw new InvalidOperationException($"Question {qNum} evidence quote '{evidenceQuote}' is missing (< 15 characters) or not found in passage text");
                     }
 
                     var options = q.Options != null ? new List<string>(q.Options) : new List<string>();
@@ -1090,20 +1087,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                         var isMatchInPassage = wordMatches.Count is >= 1 and <= 3 && System.Text.RegularExpressions.Regex.IsMatch(sec.Passage, $@"(?<!\w){System.Text.RegularExpressions.Regex.Escape(answer)}(?!\w)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                         if (!isMatchInPassage)
                         {
-                            var eqWords = System.Text.RegularExpressions.Regex.Matches(evidenceQuote, @"\b[\w'-]+\b").Select(m => m.Value).ToArray();
-                            if (eqWords.Length >= 2)
-                            {
-                                answer = $"{eqWords[0]} {eqWords[1]}";
-                            }
-                            else if (eqWords.Length == 1)
-                            {
-                                answer = eqWords[0];
-                            }
-                            else
-                            {
-                                var pWords = System.Text.RegularExpressions.Regex.Matches(sec.Passage, @"\b[\w'-]+\b").Select(m => m.Value).Take(2).ToArray();
-                                answer = string.Join(' ', pWords);
-                            }
+                            throw new InvalidOperationException($"Question {qNum} completion answer '{answer}' is not a verbatim 1–3 word match in the passage");
                         }
                     }
 
@@ -1124,6 +1108,17 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
         }
 
         return normalizedSections;
+    }
+
+    private static bool IsGenericExplanation(string explanation)
+    {
+        var trimmed = explanation.Trim();
+        return string.Equals(trimmed, "Verified against the reading passage text.", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, "(Verified against the reading passage text.)", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, "Explanation based on the passage text.", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, "No explanation provided.", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, "Placeholder explanation text.", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, "Explanation for question based on passage text.", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task AppendLogAsync(Guid id, string level, string message, CancellationToken ct)
