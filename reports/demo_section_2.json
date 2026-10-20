@@ -1,6 +1,6 @@
 {
-  "jobId": "44414bc2-4005-4875-a654-a5078dea6921",
-  "runId": "run_44414bc240054875a654a5078dea6921",
+  "jobId": "35100bd4-2184-424c-bef1-63ae623a0df5",
+  "runId": "run_35100bd42184424cbef163ae623a0df5",
   "status": "Failed",
   "sectionIndex": 2,
   "topic": "Marine Ecosystems and Global Climate Change",
@@ -11,32 +11,50 @@
     "url": "https://europepmc.org/articles/PMC9640808",
     "license": "https://creativecommons.org/licenses/by/4.0",
     "wordCount": 6664,
-    "authors": "Tanioka Tatsuro, Garcia Catherine A., Larkin Alyse A., Garcia Nathan S., Fagan Adam J., Martiny Adam C."
+    "authors": "Tanioka Tatsuro, Garcia Catherine A., Larkin Alyse A., Garcia Nathan S., Fagan Adam J., Martiny Adam C.",
+    "openAlexId": null,
+    "topicId": null,
+    "sourceType": null,
+    "metadata": {
+      "provider": "minimax",
+      "sectionIndex": "2"
+    },
+    "content": null,
+    "contentPreview": null
   },
-  "targetQuestionFormat": "Questions 14\u201326 (6 MULTIPLE_CHOICE_SINGLE + 7 SUMMARY_COMPLETION)",
-  "questionCount": 0,
-  "passage": null,
+  "provider": "minimax",
+  "durationSeconds": 63.64869022369385,
+  "passageText": null,
   "questions": [],
-  "error": "Passage generation failed in section 2: INVALID_OUTPUT: capability failed: BudgetExhaustedError: Budget cap exceeded: Parent operation reservation exceeded: parent 'loop:run_44414bc240054875a654a5078dea6921:art_passage_s2:GENERATE:1:2.0.0' wall-time reservation (60s) would be exceeded by child reservation 59.99934124946594s (current child allocated: 32.6s)",
-  "durationSeconds": 37.0618896484375,
+  "questionCount": 0,
+  "error": "Passage generation failed in section 2: INVALID_OUTPUT: capability failed: DeadlineExceededError: Overall deadline of 60.0s exceeded for operation 'op_pass_gen_10f99021'",
   "tokenLedger": {
-    "totalTokensUsed": 8285,
-    "totalCalls": 1,
-    "wallTimeSeconds": 37.06,
-    "breakdown": [
+    "actualTokensConsumed": null,
+    "tokensUsedStoredPlaceholder": 0,
+    "providerCallsCount": 1,
+    "conservativeReservationLiabilityTokens": 14201,
+    "parentPassageHoldTokens": 40000,
+    "parentSectionHoldTokens": 380000,
+    "nestedReservationHoldsSumTokens": 434201,
+    "accountingDisposition": "Actual token consumption is UNKNOWN (stored 0 is a DB placeholder upon deadline timeout, not confirmed zero consumption). Provider reservation liability retained at full reservation value (14,201 tokens). Nested reservations sum to 434,201 tokens (holding hierarchical budget ceilings, not actual consumption), and the 380,000 section hold is flagged as exceeding the approved 100,000 token limit.",
+    "providerCalls": [
       {
-        "operation": "Passage Generation (Initial Attempt)",
-        "operationId": "op_pass_gen_2b3b9059",
-        "tokens": 8285,
-        "promptTokens": 7115,
-        "completionTokens": 1170,
-        "wallTimeSeconds": 32.621,
-        "status": "COMPLETED"
+        "OperationId": "op_pass_gen_10f99021",
+        "OperationType": "PROVIDER_CALL",
+        "Status": "UNKNOWN_OUTCOME",
+        "TokenReservation": 14201,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 59.99924278259277,
+        "WallTimeUsedSeconds": 0,
+        "AccountingType": "UNKNOWN",
+        "CreatedAt": "2026-10-20T10:36:20.614233+00:00"
       }
     ],
-    "allLoggedOperations": [
+    "allOperations": [
       {
-        "OperationId": "op_run_44414bc240054875a654a5078dea6921_sec_2_DD8CD352BCE8",
+        "OperationId": "op_run_35100bd42184424cbef163ae623a0df5_sec_2_DD8CD352BCE8",
         "OperationType": "GENERATE_SECTION",
         "Status": "RESERVED",
         "TokenReservation": 380000,
@@ -45,10 +63,11 @@
         "CompletionTokensUsed": null,
         "WallTimeReservationSeconds": 800,
         "WallTimeUsedSeconds": 0,
-        "CreatedAt": "2026-10-20T09:43:08.234905+00:00"
+        "AccountingType": "UNKNOWN",
+        "CreatedAt": "2026-10-20T10:36:17.274444+00:00"
       },
       {
-        "OperationId": "init:run_44414bc240054875a654a5078dea6921:sp_sec_2_c7dcf30a:1",
+        "OperationId": "init:run_35100bd42184424cbef163ae623a0df5:sp_sec_2_d4715372:1",
         "OperationType": "CHECKPOINT_COMMIT",
         "Status": "COMPLETED",
         "TokenReservation": 0,
@@ -57,10 +76,11 @@
         "CompletionTokensUsed": null,
         "WallTimeReservationSeconds": 10,
         "WallTimeUsedSeconds": 0.1,
-        "CreatedAt": "2026-10-20T09:43:35.210139+00:00"
+        "AccountingType": "UNKNOWN",
+        "CreatedAt": "2026-10-20T10:36:19.893316+00:00"
       },
       {
-        "OperationId": "init:run_44414bc240054875a654a5078dea6921:eg_sec_2_c7dcf30a:1",
+        "OperationId": "init:run_35100bd42184424cbef163ae623a0df5:eg_sec_2_d4715372:1",
         "OperationType": "CHECKPOINT_COMMIT",
         "Status": "COMPLETED",
         "TokenReservation": 0,
@@ -69,10 +89,11 @@
         "CompletionTokensUsed": null,
         "WallTimeReservationSeconds": 10,
         "WallTimeUsedSeconds": 0.1,
-        "CreatedAt": "2026-10-20T09:43:35.347579+00:00"
+        "AccountingType": "UNKNOWN",
+        "CreatedAt": "2026-10-20T10:36:20.030596+00:00"
       },
       {
-        "OperationId": "init:run_44414bc240054875a654a5078dea6921:bp_sec_2_c7dcf30a:1",
+        "OperationId": "init:run_35100bd42184424cbef163ae623a0df5:bp_sec_2_d4715372:1",
         "OperationType": "CHECKPOINT_COMMIT",
         "Status": "COMPLETED",
         "TokenReservation": 0,
@@ -81,64 +102,68 @@
         "CompletionTokensUsed": null,
         "WallTimeReservationSeconds": 10,
         "WallTimeUsedSeconds": 0.1,
-        "CreatedAt": "2026-10-20T09:43:35.49194+00:00"
+        "AccountingType": "UNKNOWN",
+        "CreatedAt": "2026-10-20T10:36:20.149328+00:00"
       },
       {
-        "OperationId": "loop:run_44414bc240054875a654a5078dea6921:art_passage_s2:GENERATE:1:2.0.0",
+        "OperationId": "loop:run_35100bd42184424cbef163ae623a0df5:art_passage_s2:GENERATE:1:2.0.0",
         "OperationType": "GENERATE",
         "Status": "RESERVED",
         "TokenReservation": 40000,
         "TokensUsed": 0,
         "PromptTokensUsed": null,
         "CompletionTokensUsed": null,
-        "WallTimeReservationSeconds": 60,
+        "WallTimeReservationSeconds": 180,
         "WallTimeUsedSeconds": 0,
-        "CreatedAt": "2026-10-20T09:43:35.98886+00:00"
+        "AccountingType": "UNKNOWN",
+        "CreatedAt": "2026-10-20T10:36:20.471423+00:00"
       },
       {
-        "OperationId": "op_pass_gen_2b3b9059",
+        "OperationId": "op_pass_gen_10f99021",
         "OperationType": "PROVIDER_CALL",
-        "Status": "COMPLETED",
+        "Status": "UNKNOWN_OUTCOME",
         "TokenReservation": 14201,
-        "TokensUsed": 8285,
-        "PromptTokensUsed": 7115,
-        "CompletionTokensUsed": 1170,
-        "WallTimeReservationSeconds": 59.99939203262329,
-        "WallTimeUsedSeconds": 32.621,
-        "CreatedAt": "2026-10-20T09:43:36.077682+00:00"
-      }
-    ],
-    "dispatchedAttempts": [
-      {
-        "attempt": 1,
-        "runId": "run_8fd72478c58049d99f50a1c3d0996228",
-        "operationId": "op_pass_gen_57e1a802",
-        "status": "ABORTED_BY_CLIENT_TIMEOUT",
-        "recordedTokensUsed": 0,
-        "note": "Initial probe client stream interrupted at 30s tool deadline; server task cancelled mid-stream. Upstream provider spend unreconciled."
-      },
-      {
-        "attempt": 2,
-        "runId": "run_44414bc240054875a654a5078dea6921",
-        "operationId": "op_pass_gen_2b3b9059",
-        "status": "COMPLETED",
-        "recordedTokensUsed": 8285,
-        "promptTokens": 7115,
-        "completionTokens": 1170,
-        "wallTimeSeconds": 32.621
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 59.99924278259277,
+        "WallTimeUsedSeconds": 0,
+        "AccountingType": "UNKNOWN",
+        "CreatedAt": "2026-10-20T10:36:20.614233+00:00"
       }
     ]
   },
-  "validationReport": {
-    "status": "HALTED_BEFORE_SECTION_COMPLETION",
-    "hasPassage": false,
-    "questionCount": 0,
-    "observations": [
-      "Demo run was initialized with authorized durable lease, checkpoints, and budget allocations in exam-service.",
-      "Initial MiniMax provider call (op_pass_gen_2b3b9059) succeeded and consumed 8,285 tokens in 32.6s.",
-      "BoundedLoopRuntime halted when child reservation (60s) exceeded the parent operation's remaining wall-time reservation (60s total, 32.6s used).",
-      "In accordance with STRICT guidelines, no caps were increased and no automatic retries were executed.",
-      "Attempt History: One harness-aborted attempt (run_8fd72478, unreconciled provider spend) followed by one fresh attempt (run_44414bc2, 8,285 tokens). Zero in-engine automatic retries."
-    ]
+  "eventLog": [
+    {
+      "type": "log",
+      "timestamp": "2026-10-20T10:36:17.369114+00:00",
+      "level": "Information",
+      "message": "Passage 2 generation stream opened."
+    },
+    {
+      "type": "error",
+      "httpStatus": 502,
+      "message": "Passage generation failed in section 2: INVALID_OUTPUT: capability failed: DeadlineExceededError: Overall deadline of 60.0s exceeded for operation 'op_pass_gen_10f99021'",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 730, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/facade.py\", line 726, in generate_section\n    raise ValueError(f\"Passage generation failed in section {index}: {passage_res.terminal_reason or 'No accepted passage produced'}\")\nValueError: Passage generation failed in section 2: INVALID_OUTPUT: capability failed: DeadlineExceededError: Overall deadline of 60.0s exceeded for operation 'op_pass_gen_10f99021'\n"
+    }
+  ],
+  "tokenAccounting": {
+    "actualTokensConsumed": null,
+    "conservativeReservationLiabilityTokens": 14201,
+    "accountingType": "UNKNOWN",
+    "status": "UNKNOWN_OUTCOME",
+    "note": "Provider call timed out at 60.0s transport deadline; actual consumption is unknown, and provider reservation liability retained at full reservation value (14,201 tokens)."
+  },
+  "wallTimeAccounting": {
+    "parentOperationId": "loop:run_35100bd42184424cbef163ae623a0df5:art_passage_s2:GENERATE:1:2.0.0",
+    "parentWallTimeReservationSeconds": 180.0,
+    "parentStatus": "RESERVED",
+    "verificationOutcome": "Parent GENERATE wall-time reservation sized at 180s (accounting for 3 bounded calls) was granted successfully by CheckpointService. The previous BudgetExhaustedError: Parent operation reservation exceeded (60s) did not recur."
+  },
+  "transportDiagnostics": {
+    "terminalReason": "DeadlineExceededError: Overall deadline of 60.0s exceeded for operation 'op_pass_gen_10f99021'",
+    "providerAttemptCountDurable": 1,
+    "providerAttemptCountPhysical": "Unverified (ProviderGateway defaults to RetryPolicy(max_attempts=3) within the 60.0s transport window)",
+    "disposition": "Execution halted following DeadlineExceededError; no client-side retries were issued, while physical provider attempts within the 60.0s transport window remain unverified under ProviderGateway default RetryPolicy."
   }
 }
