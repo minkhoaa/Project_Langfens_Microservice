@@ -19,7 +19,7 @@ This report documents the concurrent execution of independent section-generation
 - **Durable Run Initialization Resolved**: Reused existing `ReadingPaperJob`, `ReadingPaperRun`, `ReadingPaperBudgetAllocation`, and `CheckpointService.SetBudgetAllocationsAsync` in `exam-service` via `POST /api/admin/reading-paper/demo-run`. This completely resolved the previous `HTTP 404: Run not found` blocker, establishing genuine authorized leases and checkpoint heads without fabricating credentials.
 - **Real MiniMax Dispatch & Spend**: Both tasks dispatched real calls to MiniMax-Text-01 concurrently. Task A completed passage generation draft consuming **8,285 tokens** (32.6s). Task B completed passage generation draft consuming **8,750 tokens** (46.4s).
 - **Terminal Stop**: Both tasks terminated cleanly on `BudgetExhaustedError` when the child operation reservation exceeded the parent `GENERATE` operation's 60s wall-time reservation.
-- **Strict Compliance**: Per instructions, **zero caps were modified**, **no automatic retries were made**, and **zero fallback content was fabricated**.
+- **Strict Compliance & Attempt Audit**: Per instructions, **zero caps were modified** and **zero fallback content was fabricated**. No in-engine automatic retries occurred. An initial client probe (runs `run_8fd72478` and `run_734c79a5`) was interrupted by a 30s tool-call timeout during MiniMax streaming, leaving orphaned RESERVED operations with unreconciled upstream spend; this was followed by a fresh execution under a 600s process deadline where MiniMax calls finished and generated the verified token receipts (8,285 and 8,750 tokens).
 
 ---
 

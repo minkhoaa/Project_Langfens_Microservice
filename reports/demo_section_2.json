@@ -107,6 +107,26 @@
         "WallTimeUsedSeconds": 32.621,
         "CreatedAt": "2026-10-20T09:43:36.077682+00:00"
       }
+    ],
+    "dispatchedAttempts": [
+      {
+        "attempt": 1,
+        "runId": "run_8fd72478c58049d99f50a1c3d0996228",
+        "operationId": "op_pass_gen_57e1a802",
+        "status": "ABORTED_BY_CLIENT_TIMEOUT",
+        "recordedTokensUsed": 0,
+        "note": "Initial probe client stream interrupted at 30s tool deadline; server task cancelled mid-stream. Upstream provider spend unreconciled."
+      },
+      {
+        "attempt": 2,
+        "runId": "run_44414bc240054875a654a5078dea6921",
+        "operationId": "op_pass_gen_2b3b9059",
+        "status": "COMPLETED",
+        "recordedTokensUsed": 8285,
+        "promptTokens": 7115,
+        "completionTokens": 1170,
+        "wallTimeSeconds": 32.621
+      }
     ]
   },
   "validationReport": {
@@ -117,7 +137,8 @@
       "Demo run was initialized with authorized durable lease, checkpoints, and budget allocations in exam-service.",
       "Initial MiniMax provider call (op_pass_gen_2b3b9059) succeeded and consumed 8,285 tokens in 32.6s.",
       "BoundedLoopRuntime halted when child reservation (60s) exceeded the parent operation's remaining wall-time reservation (60s total, 32.6s used).",
-      "In accordance with STRICT guidelines, no caps were increased and no automatic retries were executed."
+      "In accordance with STRICT guidelines, no caps were increased and no automatic retries were executed.",
+      "Attempt History: One harness-aborted attempt (run_8fd72478, unreconciled provider spend) followed by one fresh attempt (run_44414bc2, 8,285 tokens). Zero in-engine automatic retries."
     ]
   }
 }
