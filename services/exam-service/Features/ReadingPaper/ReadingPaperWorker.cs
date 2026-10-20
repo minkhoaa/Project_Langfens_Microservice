@@ -1118,7 +1118,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             || string.Equals(trimmed, "Explanation based on the passage text.", StringComparison.OrdinalIgnoreCase)
             || string.Equals(trimmed, "No explanation provided.", StringComparison.OrdinalIgnoreCase)
             || string.Equals(trimmed, "Placeholder explanation text.", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(trimmed, "Explanation for question based on passage text.", StringComparison.OrdinalIgnoreCase);
+            || System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"^Explanation for question\s+\d+\s+based on passage text\.$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
     }
 
     private async Task AppendLogAsync(Guid id, string level, string message, CancellationToken ct)

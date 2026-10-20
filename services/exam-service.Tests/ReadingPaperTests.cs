@@ -303,4 +303,43 @@ public class ReadingPaperTests
         var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperWorker.NormalizeSectionsForValidation(sections));
         Assert.Contains("completion answer", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public void NormalizeSections_GenericExplanationQ1FromRealDemoJson_IsRejected()
+    {
+        var sections = Paper();
+        var q = sections[0].Groups[0].Questions[0];
+        sections[0].Groups[0].Questions[0] = q with { Explanation = "Explanation for question 1 based on passage text." };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperWorker.NormalizeSectionsForValidation(sections));
+        Assert.Contains("explanation", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("generic placeholder", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void NormalizeSections_GenericExplanationQ13FromRealDemoJson_IsRejected()
+    {
+        var sections = Paper();
+        var q = sections[0].Groups[1].Questions[5];
+        sections[0].Groups[1].Questions[5] = q with { Explanation = "Explanation for question 13 based on passage text." };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => ReadingPaperWorker.NormalizeSectionsForValidation(sections));
+        Assert.Contains("explanation", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("generic placeholder", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void NormalizeSections_RealExplanatoryText_PassesValidation()
+    {
+        var sections = Paper();
+        var q1 = sections[0].Groups[0].Questions[0];
+        sections[0].Groups[0].Questions[0] = q1 with { Explanation = "According to paragraph 2, the Persian Gulf has exceptionally high coastal ALAN density." };
+        var q13 = sections[0].Groups[1].Questions[5];
+        sections[0].Groups[1].Questions[5] = q13 with { Explanation = "The passage explicitly notes that 1.9 million square kilometers are affected at 1 meter depth." };
+
+        var normalized = ReadingPaperWorker.NormalizeSectionsForValidation(sections);
+        Assert.NotNull(normalized);
+        Assert.Equal("According to paragraph 2, the Persian Gulf has exceptionally high coastal ALAN density.", normalized[0].Groups[0].Questions[0].Explanation);
+        Assert.Equal("The passage explicitly notes that 1.9 million square kilometers are affected at 1 meter depth.", normalized[0].Groups[1].Questions[5].Explanation);
+    }
 }
