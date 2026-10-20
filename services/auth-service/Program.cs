@@ -175,26 +175,31 @@ using (var scope = app.Services.CreateScope())
         await roleManager.CreateAsync(new Role { Name = Roles.Admin });
     }
 
-    var admin = await userManager.FindByEmailAsync("admin@gmail.com");
-    if (admin is null)
+    var adminEmail = Environment.GetEnvironmentVariable("ADMIN_SEED_EMAIL") ?? "admin@langfens.com";
+    var adminPassword = Environment.GetEnvironmentVariable("ADMIN_SEED_PASSWORD");
+    if (!string.IsNullOrWhiteSpace(adminPassword))
     {
-        admin = new User
+        var admin = await userManager.FindByEmailAsync(adminEmail);
+        if (admin is null)
         {
-            Id = Guid.NewGuid().ToString(),
-            Email = "admin@gmail.com",
-            NormalizedEmail = "ADMIN@GMAIL.COM",
-            UserName = "admin@gmail.com",
-            NormalizedUserName = "ADMIN@GMAIL.COM",
-            EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString()
-        };
-        admin.PasswordHash = hasher.HashPassword(admin, "admin");
-        await userManager.CreateAsync(admin);
-    }
+            admin = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = adminEmail,
+                NormalizedEmail = adminEmail.ToUpperInvariant(),
+                UserName = adminEmail,
+                NormalizedUserName = adminEmail.ToUpperInvariant(),
+                EmailConfirmed = true,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+            admin.PasswordHash = hasher.HashPassword(admin, adminPassword);
+            await userManager.CreateAsync(admin);
+        }
 
-    if (!await userManager.IsInRoleAsync(admin, Roles.Admin))
-    {
-        await userManager.AddToRoleAsync(admin, Roles.Admin);
+        if (!await userManager.IsInRoleAsync(admin, Roles.Admin))
+        {
+            await userManager.AddToRoleAsync(admin, Roles.Admin);
+        }
     }
 }
 
