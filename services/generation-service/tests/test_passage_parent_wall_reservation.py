@@ -183,10 +183,23 @@ def test_question_generate_parent_reservation_sized_for_candidate_loop():
         evaluators=[],
         persistence_client=MockDurableStore("run_test_q_wall"),
     )
+    # 1. Under nominal production settings (policy wall res = 180.0s), parent is capped to 120.0s
     q_intent = runtime._intent("GENERATE", version=1, tokens=5000, identity="1.0.0", extra={})
     assert q_intent.wall_time_reservation_seconds == 120.0
 
-    # Finite run cap clamped
+    # 2. When policy is configured for 60.0s, parent mirrors child at 60.0s
+    policy_60 = policy.model_copy(update={"operation_wall_reservation_seconds": 60.0})
+    rt_60 = BoundedLoopRuntime(
+        context=context,
+        policy=policy_60,
+        generator=dummy_gen,
+        evaluators=[],
+        persistence_client=MockDurableStore("run_test_q_wall"),
+    )
+    q_intent_60 = rt_60._intent("GENERATE", version=1, tokens=5000, identity="1.0.0", extra={})
+    assert q_intent_60.wall_time_reservation_seconds == 60.0
+
+    # 3. Finite run cap clamped: when max_wall_time_seconds = 45.0, clamped to 45.0s
     tight_policy = policy.model_copy(update={"max_wall_time_seconds": 45.0})
     tight_runtime = BoundedLoopRuntime(
         context=context,
@@ -197,7 +210,6 @@ def test_question_generate_parent_reservation_sized_for_candidate_loop():
     )
     tight_intent = tight_runtime._intent("GENERATE", version=1, tokens=5000, identity="1.0.0", extra={})
     assert tight_intent.wall_time_reservation_seconds == 45.0
-
 
 def test_non_passage_non_question_generate_reservation_remains_unchanged():
     """Non-passage, non-question GENERATE reservations (e.g. blueprint) must remain min(wall_res, 60.0)."""

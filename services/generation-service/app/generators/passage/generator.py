@@ -209,25 +209,17 @@ class PassageGenerator:
     def __init__(self, gateway: ProviderGateway):
         self.gateway = gateway
         self._last_attempt_word_count: Optional[int] = None
-        self._run_tokens: Dict[str, int] = {}
-        self._last_completed_tokens: int = 0
 
     @property
     def _last_tokens_used(self) -> int:
-        ctx_val = _tokens_used_ctx.get()
-        if ctx_val != 0:
-            return ctx_val
-        return self._last_completed_tokens
+        return _tokens_used_ctx.get()
 
     @_last_tokens_used.setter
     def _last_tokens_used(self, value: int) -> None:
         _tokens_used_ctx.set(value)
-        self._last_completed_tokens = value
 
     def get_tokens_used(self, run_id: Optional[str] = None) -> int:
-        """Returns isolated token usage for a given run_id or current context."""
-        if run_id and run_id in self._run_tokens:
-            return self._run_tokens[run_id]
+        """Returns task-local token usage for current context."""
         return self._last_tokens_used
     @staticmethod
     def _build_request(
@@ -283,8 +275,8 @@ class PassageGenerator:
         req: ProviderRequest,
         epoch: int = 1,
         lease_owner: Optional[UUID] = None,
-    ) -> str:
-        """Dispatch exactly one provider call and return the raw response text."""
+    ) -> tuple[str, int]:
+        """Dispatch exactly one provider call and return (raw response text, tokens used)."""
         if hasattr(self.gateway, "execute"):
             resp = await self.gateway.execute(req, epoch=epoch, lease_owner=lease_owner)
         elif hasattr(self.gateway, "request"):
@@ -294,13 +286,8 @@ class PassageGenerator:
         else:
             raise AttributeError("Gateway does not have execute, request, or call method")
         toks = int(resp.usage.total_tokens) if getattr(resp, "usage", None) and resp.usage.total_tokens else 0
-        new_ctx_toks = _tokens_used_ctx.get() + toks
-        _tokens_used_ctx.set(new_ctx_toks)
-        if getattr(req, "run_id", None):
-            self._run_tokens[req.run_id] = self._run_tokens.get(req.run_id, 0) + toks
-        self._last_completed_tokens = new_ctx_toks
-        return resp.raw_text.strip()
-
+        _tokens_used_ctx.set(_tokens_used_ctx.get() + toks)
+        return resp.raw_text.strip(), toks
     async def generate(
         self,
         context: PassageGenerationContext,
@@ -315,9 +302,8 @@ class PassageGenerator:
         length_feedback: Optional[str] = None,
     ) -> ArtifactEnvelope:
         """Executes passage generation request and returns validated ArtifactEnvelope."""
+        total_tokens_used: int = 0
         _tokens_used_ctx.set(0)
-        if run_id:
-            self._run_tokens[run_id] = 0
         effective_feedback = length_feedback or context.length_feedback
         if not effective_feedback and context.last_attempt_word_count is not None:
             prev_w = context.last_attempt_word_count
@@ -345,7 +331,8 @@ class PassageGenerator:
             length_feedback=effective_feedback,
             target_artifact_id=target_artifact_id,
         )
-        raw_text = await self._call_gateway(req, epoch=epoch, lease_owner=lease_owner)
+        raw_text, call_toks = await self._call_gateway(req, epoch=epoch, lease_owner=lease_owner)
+        total_tokens_used += call_toks
 
         # Parse output JSON or fallback to text segmentation
         parsed = self._parse_generation_output(raw_text, context)
@@ -381,9 +368,10 @@ class PassageGenerator:
                 length_feedback=combined_feedback,
                 target_artifact_id=target_artifact_id,
             )
-            guard_raw_text = await self._call_gateway(
+            guard_raw_text, guard_toks = await self._call_gateway(
                 guard_req, epoch=epoch, lease_owner=lease_owner
             )
+            total_tokens_used += guard_toks
             parsed = self._parse_generation_output(guard_raw_text, context)
             prompt_data = guard_prompt_data
             offending = _find_invented_quantities(context.source_text, parsed["passage"])
@@ -464,9 +452,10 @@ class PassageGenerator:
                 length_feedback=combined_feedback,
                 target_artifact_id=target_artifact_id,
             )
-            guard_raw_text = await self._call_gateway(
+            guard_raw_text, guard_toks = await self._call_gateway(
                 guard_req, epoch=epoch, lease_owner=lease_owner
             )
+            total_tokens_used += guard_toks
             parsed = self._parse_generation_output(guard_raw_text, context)
             prompt_data = guard_prompt_data
             measured_words = _measure_passage_words(parsed["passage"])
@@ -530,9 +519,8 @@ class PassageGenerator:
             "wordCountGuardReasks": word_count_retries,
             "measuredWords": measured_words,
             "wordCountBand": [band_min, band_max],
-            "tokensUsed": int(self._run_tokens.get(run_id, _tokens_used_ctx.get())),
+            "tokensUsed": total_tokens_used,
         }
-        self._last_completed_tokens = int(payload["tokensUsed"])
 
         if input_dependencies is not None:
             parent_refs = tuple(input_dependencies)

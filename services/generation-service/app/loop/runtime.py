@@ -403,20 +403,14 @@ class BoundedLoopRuntime:
                     )
                 )
                 else (
-                    # Account for Question Candidate generation child calls at up to 120s,
-                    # while respecting finite run cap if configured.
+                    # Mirror child ceiling: up to 120s for Question Candidate GENERATE
+                    # bounded by policy wall reservation and finite run cap.
                     min(
-                        min(max(self.policy.operation_wall_reservation_seconds, 120.0), 120.0)
-                        if self.policy.operation_wall_reservation_seconds >= 60.0
-                        else self.policy.operation_wall_reservation_seconds,
+                        min(self.policy.operation_wall_reservation_seconds, 120.0),
                         float(self.policy.max_wall_time_seconds),
                     )
                     if (not self.policy.is_unlimited and self.policy.max_wall_time_seconds > 0)
-                    else (
-                        min(max(self.policy.operation_wall_reservation_seconds, 120.0), 120.0)
-                        if self.policy.operation_wall_reservation_seconds >= 60.0
-                        else self.policy.operation_wall_reservation_seconds
-                    )
+                    else min(self.policy.operation_wall_reservation_seconds, 120.0)
                 )
                 if (
                     kind == "GENERATE"
