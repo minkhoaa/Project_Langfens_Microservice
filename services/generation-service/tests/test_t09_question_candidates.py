@@ -502,7 +502,7 @@ async def test_t09_07_persistence_crash_resumption_q17(tmp_path: Path):
     # overridden candidate pool).
     class _OfflineProvider(BaseProvider):
         def __init__(self):
-            super().__init__(name="offline_t09", base_url="http://offline.test",
+            super().__init__(name="minimax", base_url="http://offline.test",
                              models={"large": "offline-model", "small": "offline-model"})
 
         async def check_health(self, api_key: str | None = None) -> bool:
@@ -521,7 +521,7 @@ async def test_t09_07_persistence_crash_resumption_q17(tmp_path: Path):
             }
             return ProviderResponse(
                 operation_id=request.operation_id,
-                provider_name="offline_t09",
+                provider_name="minimax",
                 model_name="offline-model",
                 raw_text=json.dumps(payload),
                 parsed_payload=payload,
