@@ -279,20 +279,27 @@ class GroqService:
         max_tokens: int = 4096,
         expect_json: bool = False,
         stream_callback: Optional[Callable[[str, str], Any]] = None,
+        allow_fallback: bool = True,
+        allowed_providers: Optional[list[str]] = None,
     ) -> dict:
         prompt = PromptTemplate.from_template(prompt_template)
         formatted_prompt = prompt.format(**variables)
 
         status = key_manager.get_status()
-        configured = [p for p in self.provider_order if status.get(p, {}).get("total", 0) > 0]
-        active_order = configured or self.provider_order
-        if provider and provider in active_order:
-            providers_to_try = [(provider, True)] + [(p, True) for p in active_order if p != provider]
-        elif provider:
-            providers_to_try = [(provider, True)] + [(p, True) for p in active_order]
+        if allowed_providers:
+            active_order = [p.lower() for p in allowed_providers if p.lower() in PROVIDERS]
+            providers_to_try = [(p, False) for p in active_order]
+        elif provider and not allow_fallback:
+            providers_to_try = [(provider.lower(), False)]
         else:
-            providers_to_try = [(p, True) for p in active_order]
-        last_error = None
+            configured = [p for p in self.provider_order if status.get(p, {}).get("total", 0) > 0]
+            active_order = configured or self.provider_order
+            if provider and provider in active_order:
+                providers_to_try = [(provider, True)] + [(p, True) for p in active_order if p != provider]
+            elif provider:
+                providers_to_try = [(provider, True)] + [(p, True) for p in active_order]
+            else:
+                providers_to_try = [(p, True) for p in active_order]
         for provider_name, _ in providers_to_try:
             if provider_name not in PROVIDERS:
                 continue
@@ -494,6 +501,13 @@ groq_service = GroqService()
 
 async def groq_generate(prompt_template: str, variables: dict, **kwargs) -> dict:
     return await groq_service.generate(prompt_template, variables, **kwargs)
+async def minimax_generate(prompt_template: str, variables: dict, **kwargs) -> dict:
+    """Generate strictly via MiniMax with zero Groq fallback for IELTS generation."""
+    kwargs.setdefault("allow_fallback", False)
+    kwargs.setdefault("allowed_providers", ["minimax"])
+    kwargs.setdefault("provider", "minimax")
+    return await groq_service.generate(prompt_template, variables, **kwargs)
+
 
 def get_groq_key_status() -> dict:
     return groq_service.get_key_status()

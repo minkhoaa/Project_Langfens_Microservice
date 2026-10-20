@@ -232,6 +232,9 @@ class PassageGenerator:
         ]
         req = ProviderRequest(
             capability=Capability.GENERATE_JSON,
+            preferred_provider="minimax",
+            allowed_providers=["minimax"],
+            allow_fallback=False,
             messages=messages,
             operation_id=f"op_pass_gen_{uuid4().hex[:8]}",
             run_id=run_id,

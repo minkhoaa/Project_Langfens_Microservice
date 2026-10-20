@@ -153,6 +153,45 @@ class _BaseCompletionValidator(BaseQuestionValidator):
 
         return issues, scored_items
 
+    def validate_grounding(
+        self,
+        question: Dict[str, Any],
+        passage: Optional[str],
+        scored_items: List[ScoredItemValidation],
+        policy: ValidationPolicy,
+    ) -> List[ValidationIssue]:
+        issues: List[ValidationIssue] = []
+        if not passage:
+            return issues
+
+        p_norm = " ".join(passage.lower().split())
+        for item in scored_items:
+            if not item.accepted_answers:
+                continue
+            found = False
+            for ans in item.accepted_answers:
+                ans_norm = " ".join(ans.lower().split())
+                if ans_norm in p_norm:
+                    found = True
+                    break
+
+            if not found:
+                issues.append(
+                    ValidationIssue(
+                        code=IssueCode.ERR_UNGROUNDED_ANSWER,
+                        message=(
+                            f"None of the accepted answers {item.accepted_answers} for blank "
+                            f"[{item.item_key}] occur verbatim in the source passage"
+                        ),
+                        severity=ValidationSeverity.ERROR,
+                        is_blocking=True,
+                        field_path=f"blankAcceptTexts['{item.item_key}']",
+                        scored_item_index=item.item_index,
+                        repairability=Repairability.REPAIRABLE_MANUAL,
+                    )
+                )
+        return issues
+
 
 class SummaryCompletionValidator(_BaseCompletionValidator):
     @property

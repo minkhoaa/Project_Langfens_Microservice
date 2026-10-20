@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.prompts.autogen import build_system_prompt, build_user_prompt
 from app.prompts.autogen_data import get_constraints, get_json_shape
 from app.schemas.autogen import AutogenQuestionsRequest, AutogenQuestionsResponse
-from app.services.groq_service import groq_generate
+from app.services.groq_service import minimax_generate
 from app.services.autogen_validation import validate_question
 
 
@@ -78,7 +78,7 @@ async def autogen_questions(
         req.type, req.passage, req.count, req.difficulty, req.extra_context or ""
     )
 
-    result: dict[str, Any] = await groq_generate(
+    result: dict[str, Any] = await minimax_generate(
         prompt_template="{system}\n\n{user}",
         variables={"system": system_prompt, "user": user_prompt},
         expect_json=True,
@@ -106,6 +106,7 @@ async def autogen_questions(
             expected_type=req.type,
             expected_skill=req.skill,
             expected_difficulty=req.difficulty,
+            passage=req.passage,
         )
         if issues:
             validation_failures.append({

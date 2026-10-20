@@ -151,24 +151,87 @@ class BaseQuestionValidator(ABC):
                 reasons=["Payload is not a dictionary"],
             )
 
-        all_issues: List[ValidationIssue] = []
-        all_issues.extend(self.validate_structure(question, pol))
-        all_issues.extend(self.validate_language(question, pol))
+        structural_issues: List[ValidationIssue] = []
 
+        # A. Structural schema
+        structural_issues.extend(self.validate_structure(question, pol))
+
+        # E. Language policy
+        structural_issues.extend(self.validate_language(question, pol))
+
+        # B & F. Answer key & scored items
         key_issues, scored_items = self.validate_answer_key(question, pol)
-        all_issues.extend(key_issues)
-        all_issues.extend(self.validate_type_specific(question, pol))
+        structural_issues.extend(key_issues)
 
-        if pol.enforce_grounding and passage:
+        # C. Type-specific semantic rules
+        structural_issues.extend(self.validate_type_specific(question, pol))
+
+        # Ensure every scored item has a valid canonical answer key
+        if not scored_items:
+            structural_issues.append(
+                ValidationIssue(
+                    code=IssueCode.ERR_MISSING_ANSWER_KEY,
+                    message=f"{self.question_type}: Every question must yield at least one scored item",
+                    severity=ValidationSeverity.CRITICAL,
+                    is_blocking=True,
+                )
+            )
+        else:
+            for item in scored_items:
+                if not item.accepted_answers or all(not str(a).strip() for a in item.accepted_answers):
+                    item.is_valid = False
+                    structural_issues.append(
+                        ValidationIssue(
+                            code=IssueCode.ERR_MISSING_ANSWER_KEY,
+                            message=f"{self.question_type}: Scored item [{item.item_key}] must have a non-empty canonical answer key",
+                            severity=ValidationSeverity.ERROR,
+                            is_blocking=True,
+                            scored_item_index=item.item_index,
+                        )
+                    )
+
+        structural_blocking = any(i.is_blocking or i.severity == ValidationSeverity.CRITICAL for i in structural_issues)
+        structural_valid = not structural_blocking
+
+        all_issues = list(structural_issues)
+        grounding_verified = False
+        semantic_valid: Optional[bool] = None
+
+        # D. Grounding verification
+        has_passage = bool(passage and isinstance(passage, str) and passage.strip())
+        if has_passage:
             grounding_issues = self.validate_grounding(question, passage, scored_items, pol)
             all_issues.extend(grounding_issues)
+            has_grounding_blockers = any(i.is_blocking or i.severity == ValidationSeverity.CRITICAL for i in grounding_issues)
+            if has_grounding_blockers:
+                grounding_verified = False
+                semantic_valid = False
+            else:
+                grounding_verified = True
+                semantic_valid = True
+        else:
+            # Invariant 1: No source passage must NOT silently imply successful grounding verification
+            grounding_verified = False
+            semantic_valid = None
+            if pol.enforce_grounding:
+                all_issues.append(
+                    ValidationIssue(
+                        code=IssueCode.ERR_EVALUATION_INCONCLUSIVE,
+                        message="No source passage provided; grounding and semantic correctness remain unverified",
+                        severity=ValidationSeverity.WARNING,
+                        is_blocking=False,
+                    )
+                )
 
+        # Determine status
         has_blocking = any(issue.is_blocking for issue in all_issues)
         has_critical = any(issue.severity == ValidationSeverity.CRITICAL for issue in all_issues)
         has_review = any(issue.code == IssueCode.ERR_EVALUATION_INCONCLUSIVE for issue in all_issues)
 
         if has_critical or has_blocking:
             status = ValidationStatus.INVALID
+        elif pol.enforce_grounding and not has_passage:
+            status = ValidationStatus.NEEDS_REVIEW
         elif has_review:
             status = ValidationStatus.NEEDS_REVIEW
         else:
@@ -180,11 +243,16 @@ class BaseQuestionValidator(ABC):
         )
 
         reasons = [issue.message for issue in all_issues if issue.is_blocking]
+        if status == ValidationStatus.NEEDS_REVIEW and not reasons:
+            reasons = [issue.message for issue in all_issues if issue.code == IssueCode.ERR_EVALUATION_INCONCLUSIVE]
 
         return ValidationResult(
             status=status,
             question_type=self.question_type,
             schema_version=pol.schema_version,
+            structural_valid=structural_valid,
+            semantic_valid=semantic_valid,
+            grounding_verified=grounding_verified,
             issues=all_issues,
             scored_items=scored_items,
             is_repairable=is_repairable,

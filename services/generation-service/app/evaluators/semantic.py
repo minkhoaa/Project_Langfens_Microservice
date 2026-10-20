@@ -1798,6 +1798,9 @@ class AmbiguityAndDistractorEvaluator(BaseEvaluator):
                             section_id=sec_id,
                             artifact_id=art_id,
                             capability=Capability.GENERATE_JSON,
+                            preferred_provider="minimax",
+                            allowed_providers=["minimax"],
+                            allow_fallback=False,
                             messages=[
                                 ChatMessage(role="system", content=system_msg),
                                 ChatMessage(role="user", content=user_msg),
@@ -2076,6 +2079,9 @@ class NotGivenSemanticsEvaluator(BaseEvaluator):
                         section_id=sec_id,
                         artifact_id=art_id,
                         capability=Capability.GENERATE_JSON,
+                        preferred_provider="minimax",
+                        allowed_providers=["minimax"],
+                        allow_fallback=False,
                         messages=[
                             ChatMessage(role="system", content=system_msg),
                             ChatMessage(role="user", content=user_msg),

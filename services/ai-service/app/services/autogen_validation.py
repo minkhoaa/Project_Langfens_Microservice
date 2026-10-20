@@ -105,6 +105,7 @@ def validate_question(
     expected_type: str,
     expected_skill: str = "READING",
     expected_difficulty: int = 3,
+    passage: Optional[str] = None,
 ) -> list[str]:
     """Validate a single generated IELTS question against canonical schema and invariants.
 
@@ -353,4 +354,19 @@ def validate_question(
         if len(order) != len(set(order)):
             issues.append("FLOW_CHART: orderCorrects step slugs must be unique")
 
+    # Passage grounding check when passage is provided
+    if passage and isinstance(passage, str) and passage.strip():
+        p_lower = " ".join(passage.lower().split())
+        # For completion types: verify at least one accepted text appears in passage
+        if expected_type in (
+            "SUMMARY_COMPLETION", "TABLE_COMPLETION", "NOTE_COMPLETION",
+            "FORM_COMPLETION", "SENTENCE_COMPLETION", "SHORT_ANSWER"
+        ):
+            accept_dict = question.get("blankAcceptTexts") if expected_type != "SHORT_ANSWER" else {"1": question.get("shortAnswerAcceptTexts") or []}
+            if isinstance(accept_dict, dict):
+                for b_key, b_vals in accept_dict.items():
+                    if isinstance(b_vals, list) and b_vals:
+                        matched = any(" ".join(str(v).lower().split()) in p_lower for v in b_vals if str(v).strip())
+                        if not matched:
+                            issues.append(f"Grounding failure: accepted answer(s) {b_vals} for item [{b_key}] do not appear in the source passage")
     return issues

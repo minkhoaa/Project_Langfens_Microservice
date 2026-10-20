@@ -1045,21 +1045,46 @@ public class AttemptService(
                         }
                         else if (IsNotBlank(x.TextAnswer) && index.TryGetValue(x.QuestionId, out var questionMeta))
                         {
-                            // For MATCHING_HEADING: TextAnswer is value like "i", "ii"
-                            // Try to find matching option content (e.g., "i. The beginning...")
                             var textAnswer = x.TextAnswer!.Trim();
-                            var matchedOption = questionMeta.OptionIds
-                                .Select(opt => opt.content)
-                                .FirstOrDefault(content => 
-                                    !string.IsNullOrEmpty(content) &&
-                                    (content.StartsWith(textAnswer + ".", StringComparison.OrdinalIgnoreCase) ||
-                                     content.StartsWith(textAnswer + " ", StringComparison.OrdinalIgnoreCase) ||
-                                     content.Equals(textAnswer, StringComparison.OrdinalIgnoreCase)));
-                            selectedText = matchedOption ?? textAnswer;
+                            if (textAnswer.StartsWith("{") && textAnswer.EndsWith("}"))
+                            {
+                                try
+                                {
+                                    var parsedMap = JsonSerializer.Deserialize<Dictionary<string, string>>(textAnswer);
+                                    if (parsedMap != null && parsedMap.Count > 0)
+                                    {
+                                        selectedText = string.Join("; ", parsedMap.Select(kv => $"{kv.Key}: {kv.Value}"));
+                                    }
+                                    else
+                                    {
+                                        selectedText = textAnswer;
+                                    }
+                                }
+                                catch
+                                {
+                                    selectedText = textAnswer;
+                                }
+                            }
+                            else
+                            {
+                                var matchedOption = questionMeta.OptionIds
+                                    .Select(opt => opt.content)
+                                    .FirstOrDefault(content => 
+                                        !string.IsNullOrEmpty(content) &&
+                                        (content.StartsWith(textAnswer + ".", StringComparison.OrdinalIgnoreCase) ||
+                                         content.StartsWith(textAnswer + " ", StringComparison.OrdinalIgnoreCase) ||
+                                         content.Equals(textAnswer, StringComparison.OrdinalIgnoreCase)));
+                                selectedText = matchedOption ?? textAnswer;
+                            }
                         }
                         else
                         {
                             selectedText = IsNotBlank(x.TextAnswer) ? x.TextAnswer : null;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(selectedText))
+                        {
+                            selectedText = "(No answer provided)";
                         }
 
                         return new ResultAnswerItem(

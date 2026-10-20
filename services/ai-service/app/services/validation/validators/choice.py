@@ -1,4 +1,12 @@
-"""Validators for IELTS choice-family question types."""
+"""Validators for IELTS choice-family question types.
+
+Covers:
+- MULTIPLE_CHOICE_SINGLE
+- MULTIPLE_CHOICE_MULTIPLE
+- MULTIPLE_CHOICE_SINGLE_IMAGE
+- TRUE_FALSE_NOT_GIVEN
+- YES_NO_NOT_GIVEN
+"""
 from __future__ import annotations
 
 import re
@@ -17,6 +25,8 @@ from app.services.validation.registry import BaseQuestionValidator
 
 
 class _BaseChoiceValidator(BaseQuestionValidator):
+    """Base class for choice questions with options[] pools."""
+
     @property
     def allowed_answer_fields(self) -> Set[str]:
         return {"options"}
@@ -169,6 +179,41 @@ class MultipleChoiceSingleValidator(_BaseChoiceValidator):
                     field_path="options",
                 )
             )
+        return issues
+
+    def validate_grounding(
+        self,
+        question: Dict[str, Any],
+        passage: Optional[str],
+        scored_items: List[ScoredItemValidation],
+        policy: ValidationPolicy,
+    ) -> List[ValidationIssue]:
+        issues: List[ValidationIssue] = []
+        if not passage:
+            return issues
+
+        options = question.get("options") or []
+        correct_opts = [o for o in options if isinstance(o, dict) and o.get("isCorrect") is True]
+        if not correct_opts:
+            return issues
+
+        ans_text = correct_opts[0].get("contentMd", "")
+        clean_ans = re.sub(r"^[A-Za-z0-9]+[.)\-]\s*", "", ans_text).strip()
+        explanation = str(question.get("explanationMd", "")).strip()
+
+        p_lower = passage.lower()
+        if clean_ans.lower() not in p_lower and not any(w in p_lower for w in clean_ans.lower().split() if len(w) > 4):
+            if not explanation or not any(w in p_lower for w in explanation.lower().split() if len(w) > 4):
+                issues.append(
+                    ValidationIssue(
+                        code=IssueCode.ERR_UNGROUNDED_ANSWER,
+                        message=f"Correct answer '{clean_ans}' has no textual grounding or keywords in passage",
+                        severity=ValidationSeverity.WARNING,
+                        is_blocking=False,
+                        field_path="options",
+                        repairability=Repairability.REPAIRABLE_MANUAL,
+                    )
+                )
         return issues
 
 

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional
 from uuid import UUID
 
+from app.config import settings
 from app.persistence.client import CheckpointApiError, CheckpointClient
 from app.persistence.models import OperationGrantRequest, OperationReconcileRequest, UnknownOutcomeRequest
 from app.providers.base import redact_secrets
@@ -54,11 +55,30 @@ class ProviderGateway:
         epoch: int = 1,
         lease_owner: Optional[UUID] = None,
     ) -> ProviderResponse:
+        # Determine strict provider allowlist
+        allowed: Optional[List[str]] = None
+        if request.allowed_providers:
+            allowed = [p.strip().lower() for p in request.allowed_providers if p.strip()]
+        elif request.preferred_provider and request.preferred_provider.strip().lower() == "minimax" and not request.allow_fallback:
+            # IELTS generation rule: requests specifying minimax as preferred without explicit fallback are strictly MiniMax-only
+            allowed = ["minimax"]
+
         max_attempts = self.retry_policy.max_attempts
         is_unlimited_profile = (
             request.is_unlimited is True
             or float(request.wall_time_reservation_seconds) <= 0
         )
+
+        # Invariant: Selecting MiniMax must never enable unlimited budgets.
+        # MiniMax requests must have finite budgets, durable accounting, and bounded retries.
+        if (request.preferred_provider and request.preferred_provider.strip().lower() == "minimax") or (allowed and "minimax" in allowed):
+            if float(request.wall_time_reservation_seconds) <= 0:
+                request = request.model_copy(update={
+                    "wall_time_reservation_seconds": float(getattr(settings, "loop_operation_wall_reservation_seconds", 60.0))
+                })
+            if request.is_unlimited is not True:
+                is_unlimited_profile = False
+
         if not is_unlimited_profile and self.checkpoint_client and request.run_id:
             try:
                 if getattr(self, "_unlimited_runs", None) is None:
@@ -121,9 +141,15 @@ class ProviderGateway:
         ).encode("ascii")).hexdigest()
 
         provider_order = self.registry.get_provider_order(preferred=request.preferred_provider)
+        if allowed is not None:
+            provider_order = [p for p in provider_order if p.lower() in allowed]
+            if not provider_order:
+                raise ProviderUnavailableError(
+                    f"No registered LLM providers available matching allowlist: {allowed}",
+                    operation_id=request.operation_id,
+                )
         if not provider_order:
             raise ProviderUnavailableError("No registered LLM providers available", operation_id=request.operation_id)
-
         max_attempts = self.retry_policy.max_attempts
         attempt_number = 1
         provider_index = 0
@@ -153,6 +179,13 @@ class ProviderGateway:
                 provider_index = 0
 
             provider_name = provider_order[provider_index]
+            if allowed is not None and provider_name.lower() not in allowed:
+                raise ProviderError(
+                    f"Provider '{provider_name}' is not in allowlist {allowed}; Groq fallback is strictly prohibited for MiniMax generation requests",
+                    is_retryable=False,
+                    status_code=403,
+                    operation_id=request.operation_id,
+                )
             provider = self.registry.get_provider(provider_name)
             if provider is None:
                 provider_index += 1
@@ -169,7 +202,10 @@ class ProviderGateway:
                 logger.warning("All %s keys exhausted/in cooldown; rotating to fallback provider", provider_name.upper())
                 provider_index += 1
                 if provider_index >= len(provider_order):
-                    last_error = ProviderUnavailableError("All configured provider keys are unavailable", operation_id=request.operation_id)
+                    last_error = ProviderUnavailableError(
+                        f"All configured keys for allowed providers ({allowed or provider_order}) are exhausted/in cooldown",
+                        operation_id=request.operation_id,
+                    )
                     break
                 continue
 
@@ -418,6 +454,13 @@ class ProviderGateway:
                                 operation_id=attempt_operation_id,
                             ) from error
                         self.last_response = response
+                        if allowed is not None and response.provider_name.lower() not in allowed:
+                            raise ProviderError(
+                                f"Response received from unpermitted provider '{response.provider_name}'; expected one of {allowed}",
+                                is_retryable=False,
+                                status_code=502,
+                                operation_id=attempt_operation_id,
+                            )
                         if result.reservationBreached or result.budgetBreachDetected:
                             raise BudgetExhaustedError(
                                 "Provider usage exceeded its durable reservation; actual usage was recorded and further dispatch is blocked",

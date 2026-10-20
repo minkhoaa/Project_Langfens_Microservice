@@ -255,6 +255,9 @@ class QuestionCandidateGenerator:
             artifact_id=f"questions_section_{section_id}" if section_id and not str(section_id).startswith("section_") else (f"questions_{section_id}" if section_id else "questions_section_1"),
             parent_operation_id=parent_operation_id or (getattr(context, "parent_operation_id", None) if context else None),
             capability=Capability.GENERATE_JSON,
+            preferred_provider="minimax",
+            allowed_providers=["minimax"],
+            allow_fallback=False,
             messages=[
                 ChatMessage(role="system", content=prompt_data["system_instruction"]),
                 ChatMessage(role="user", content=user_prompt),
@@ -762,12 +765,16 @@ class QuestionCandidateGenerator:
             section_id=section_id,
             artifact_id=f"art_summary_grp_{start_number}",
             capability=Capability.GENERATE_JSON,
+            preferred_provider="minimax",
+            allowed_providers=["minimax"],
+            allow_fallback=False,
             messages=[
                 ChatMessage(role="system", content=prompt_data["system_instruction"]),
                 ChatMessage(role="user", content=prompt_data["user_prompt"]),
             ],
             max_tokens=2200,
             timeout_seconds=getattr(settings, "evaluator_stage_timeout_seconds", 45.0),
+            wall_time_reservation_seconds=float(getattr(settings, "loop_operation_wall_reservation_seconds", 60.0)),
         )
 
         resp = await self._gateway.execute(

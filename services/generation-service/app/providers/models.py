@@ -68,6 +68,8 @@ class ProviderRequest(CanonicalBaseModel):
     max_response_bytes: int = settings.loop_max_response_bytes
     allow_repair: bool = True
     is_unlimited: Optional[bool] = None
+    allowed_providers: Optional[List[str]] = Field(default=None, description="Strict provider allowlist. If set, gateway will only ever dispatch to these providers.")
+    allow_fallback: bool = Field(default=False, description="Whether fallback outside allowed providers is permitted.")
     stream_callback: Optional[Any] = Field(default=None, exclude=True)
 
 class ProviderResponse(CanonicalBaseModel):

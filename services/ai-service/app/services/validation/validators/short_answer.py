@@ -112,3 +112,42 @@ class ShortAnswerValidator(BaseQuestionValidator):
         self, question: Dict[str, Any], policy: ValidationPolicy
     ) -> List[ValidationIssue]:
         return []
+
+    def validate_grounding(
+        self,
+        question: Dict[str, Any],
+        passage: Optional[str],
+        scored_items: List[ScoredItemValidation],
+        policy: ValidationPolicy,
+    ) -> List[ValidationIssue]:
+        issues: List[ValidationIssue] = []
+        if not passage or not scored_items:
+            return issues
+
+        p_norm = " ".join(passage.lower().split())
+        for item in scored_items:
+            if not item.accepted_answers:
+                continue
+            found = False
+            for ans in item.accepted_answers:
+                ans_norm = " ".join(ans.lower().split())
+                if ans_norm in p_norm:
+                    found = True
+                    break
+
+            if not found:
+                issues.append(
+                    ValidationIssue(
+                        code=IssueCode.ERR_UNGROUNDED_ANSWER,
+                        message=(
+                            f"None of the shortAnswerAcceptTexts {item.accepted_answers} "
+                            f"occur verbatim in the source passage"
+                        ),
+                        severity=ValidationSeverity.ERROR,
+                        is_blocking=True,
+                        field_path="shortAnswerAcceptTexts",
+                        scored_item_index=item.item_index,
+                        repairability=Repairability.REPAIRABLE_MANUAL,
+                    )
+                )
+        return issues

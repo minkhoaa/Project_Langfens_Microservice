@@ -224,7 +224,7 @@ async def test_autogen_router_returns_422_when_validation_fails():
             {"idx": 2, "contentMd": "B. Egypt", "isCorrect": False},
         ],
     }
-    with patch("app.routers.autogen.groq_generate", new_callable=AsyncMock) as mock_gen:
+    with patch("app.routers.autogen.minimax_generate", new_callable=AsyncMock) as mock_gen:
         mock_gen.return_value = {"questions": [invalid_q]}
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
@@ -245,7 +245,7 @@ async def test_autogen_router_returns_422_when_validation_fails():
 @pytest.mark.asyncio
 async def test_autogen_router_returns_200_when_validation_passes(canonical_examples):
     valid_q = copy.deepcopy(canonical_examples["MULTIPLE_CHOICE_SINGLE"])
-    with patch("app.routers.autogen.groq_generate", new_callable=AsyncMock) as mock_gen:
+    with patch("app.routers.autogen.minimax_generate", new_callable=AsyncMock) as mock_gen:
         mock_gen.return_value = {"questions": [valid_q]}
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
@@ -262,3 +262,26 @@ async def test_autogen_router_returns_200_when_validation_passes(canonical_examp
         data = resp.json()
         assert len(data["questions"]) == 1
         assert data["questions"][0]["type"] == "MULTIPLE_CHOICE_SINGLE"
+
+@pytest.mark.asyncio
+async def test_autogen_router_uses_minimax_and_never_groq(canonical_examples):
+    """Verify that autogen router invokes minimax_generate and does NOT use groq_generate."""
+    valid_q = copy.deepcopy(canonical_examples["MULTIPLE_CHOICE_SINGLE"])
+    with patch("app.routers.autogen.minimax_generate", new_callable=AsyncMock) as mock_mm:
+        mock_mm.return_value = {"questions": [valid_q]}
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.post(
+                "/api/v1/autogen/questions",
+                json={
+                    "type": "MULTIPLE_CHOICE_SINGLE",
+                    "skill": "READING",
+                    "passage": "Paper was invented in China using plant fibres.",
+                    "count": 1,
+                    "difficulty": valid_q["difficulty"],
+                },
+            )
+        assert resp.status_code == 200
+        mock_mm.assert_called_once()
+        # Assert groq_generate is not imported or used in autogen router
+        import app.routers.autogen as autogen_mod
+        assert not hasattr(autogen_mod, "groq_generate"), "autogen router must not retain Groq transport!"

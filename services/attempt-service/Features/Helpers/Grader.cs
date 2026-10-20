@@ -93,9 +93,28 @@ public sealed class MultipleChoiceGrader : IQuestionGrader
             return new GradeResult(0m, false, NeedsManualReview: true, Feedback: "No answer key");
 
         var selection = (answer.SelectedOptionIds ?? new List<Guid>()).ToHashSet();
-        // Set equality - order doesn't matter, just need to match all correct options
-        var isCorrect = selection.SetEquals(correctIds);
-        return new GradeResult(isCorrect ? key.QuestionPoints : 0m, isCorrect);
+        if (selection.Count == 0)
+            return new GradeResult(0m, false, Feedback: "No answer provided");
+
+        var isAllMatched = selection.SetEquals(correctIds);
+        if (isAllMatched)
+            return new GradeResult(key.QuestionPoints > 0m ? key.QuestionPoints : 1m, true);
+
+        // Per-target partial-credit accounting when question represents multiple scored points
+        if (key.QuestionPoints > 1m && correctIds.Count > 1)
+        {
+            var correctSelected = selection.Intersect(correctIds).Count();
+            var incorrectSelected = selection.Except(correctIds).Count();
+            var netCorrect = Math.Max(0, correctSelected - incorrectSelected);
+            var pointsPerTarget = key.QuestionPoints / correctIds.Count;
+            var awardedPoints = Math.Round(netCorrect * pointsPerTarget, 2);
+            return new GradeResult(
+                awardedPoints,
+                false,
+                Feedback: netCorrect > 0 ? $"{correctSelected}/{correctIds.Count} correct ({incorrectSelected} incorrect)" : "Incorrect options selected");
+        }
+
+        return new GradeResult(0m, false, Feedback: "Incorrect option selection");
     }
 }
 

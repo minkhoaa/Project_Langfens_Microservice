@@ -108,6 +108,9 @@ class ValidationResult(BaseModel):
     status: ValidationStatus
     question_type: str
     schema_version: int = 2
+    structural_valid: bool = False
+    semantic_valid: Optional[bool] = None
+    grounding_verified: bool = False
     issues: List[ValidationIssue] = Field(default_factory=list)
     scored_items: List[ScoredItemValidation] = Field(default_factory=list)
     is_repairable: bool = False
