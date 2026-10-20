@@ -43,7 +43,8 @@
               "NOT GIVEN"
             ],
             "evidenceQuote": "There is no globally recognized standard for monitoring biologically active light, and the tools commonly used, such as lux meters, often fail to account for the full spectrum of light wavelengths that are biologically relevant.",
-            "explanation": "The passage indicates that lux meters are not a globally recognized standard."
+            "explanation": "The passage indicates that lux meters are not a globally recognized standard.",
+            "explanationSource": "PROVIDER_MODEL_OUTPUT"
           },
           {
             "number": 2,
@@ -55,7 +56,8 @@
               "NOT GIVEN"
             ],
             "evidenceQuote": "In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters,",
-            "explanation": "The passage states that ALAN affects up to 50 meters in the Mediterranean, not 100 meters."
+            "explanation": "The passage states that ALAN affects up to 50 meters in the Mediterranean, not 100 meters.",
+            "explanationSource": "PROVIDER_MODEL_OUTPUT"
           },
           {
             "number": 3,
@@ -67,7 +69,8 @@
               "NOT GIVEN"
             ],
             "evidenceQuote": "In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters, while in the Black Sea, Red Sea, and Persian Gulf, it reaches around 30 meters.",
-            "explanation": "The passage does not provide a direct comparison of the impact of ALAN between the Black Sea and the Mediterranean Sea."
+            "explanation": "The passage does not provide a direct comparison of the impact of ALAN between the Black Sea and the Mediterranean Sea.",
+            "explanationSource": "PROVIDER_MODEL_OUTPUT"
           },
           {
             "number": 4,
@@ -79,7 +82,8 @@
               "NOT GIVEN"
             ],
             "evidenceQuote": "The Mediterranean, Red Sea, Persian Gulf, and seas of Southeast Asia are among the most exposed regions.",
-            "explanation": "The passage explicitly states that the Mediterranean Sea is one of the most exposed regions to ALAN."
+            "explanation": "The passage explicitly states that the Mediterranean Sea is one of the most exposed regions to ALAN.",
+            "explanationSource": "PROVIDER_MODEL_OUTPUT"
           },
           {
             "number": 5,
@@ -91,7 +95,8 @@
               "NOT GIVEN"
             ],
             "evidenceQuote": "Globally, approximately 1.9 million km\u00b2 of coastal seas are affected by ALAN at a depth of 1 meter,",
-            "explanation": "The statement is directly supported by the data provided in the passage."
+            "explanation": "The statement is directly supported by the data provided in the passage.",
+            "explanationSource": "PROVIDER_MODEL_OUTPUT"
           },
           {
             "number": 6,
@@ -103,7 +108,8 @@
               "NOT GIVEN"
             ],
             "evidenceQuote": "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters.",
-            "explanation": "The passage confirms that ALAN penetrates to 20 meters in the Gulf of Thailand."
+            "explanation": "The passage confirms that ALAN penetrates to 20 meters in the Gulf of Thailand.",
+            "explanationSource": "PROVIDER_MODEL_OUTPUT"
           },
           {
             "number": 7,
@@ -115,7 +121,8 @@
               "NOT GIVEN"
             ],
             "evidenceQuote": "ALAN has the potential to disrupt a wide array of biological processes and habitats that rely on natural light cycles. These include diel vertical migrations, which constitute the largest migration of biomass on the planet, as well as coral spawning and symbiotic relationships crucial for coral reef health.",
-            "explanation": "The passage explicitly states that ALAN impacts coral spawning."
+            "explanation": "The passage explicitly states that ALAN impacts coral spawning.",
+            "explanationSource": "PROVIDER_MODEL_OUTPUT"
           }
         ]
       },
@@ -129,7 +136,8 @@
             "answer": "20",
             "options": [],
             "evidenceQuote": "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters.",
-            "explanation": "Verified from passage: In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meter"
+            "explanation": "Verified from passage: In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meter",
+            "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
           },
           {
             "number": 9,
@@ -137,7 +145,8 @@
             "answer": "macroalgae",
             "options": [],
             "evidenceQuote": "In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a variety of sessile and mobile animals.",
-            "explanation": "Verified from passage: In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a vari"
+            "explanation": "Verified from passage: In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a vari",
+            "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
           },
           {
             "number": 10,
@@ -145,7 +154,8 @@
             "answer": "amphipods",
             "options": [],
             "evidenceQuote": "Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods, with some species showing immediate recovery once the light is removed.",
-            "explanation": "Verified from passage: Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods,"
+            "explanation": "Verified from passage: Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods,",
+            "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
           },
           {
             "number": 11,
@@ -153,7 +163,8 @@
             "answer": "bivalves",
             "options": [],
             "evidenceQuote": "Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustaceans, polychaetes, and bivalves.",
-            "explanation": "Verified from passage: Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustacean"
+            "explanation": "Verified from passage: Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustacean",
+            "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
           },
           {
             "number": 12,
@@ -161,7 +172,8 @@
             "answer": "compare",
             "options": [],
             "evidenceQuote": "The challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, making it difficult to compare study results.",
-            "explanation": "Verified from passage: The challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, maki"
+            "explanation": "Verified from passage: The challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, maki",
+            "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
           },
           {
             "number": 13,
@@ -169,7 +181,8 @@
             "answer": "white",
             "options": [],
             "evidenceQuote": "The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migration in marine organisms, such as female Calanus copepods.",
-            "explanation": "Verified from passage: The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migra"
+            "explanation": "Verified from passage: The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migra",
+            "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
           }
         ]
       }
@@ -187,7 +200,8 @@
       ],
       "correctAnswer": "FALSE",
       "evidence": "There is no globally recognized standard for monitoring biologically active light, and the tools commonly used, such as lux meters, often fail to account for the full spectrum of light wavelengths that are biologically relevant.",
-      "explanation": "The passage indicates that lux meters are not a globally recognized standard."
+      "explanation": "The passage indicates that lux meters are not a globally recognized standard.",
+      "explanationSource": "PROVIDER_MODEL_OUTPUT"
     },
     {
       "questionNumber": 2,
@@ -200,7 +214,8 @@
       ],
       "correctAnswer": "FALSE",
       "evidence": "In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters,",
-      "explanation": "The passage states that ALAN affects up to 50 meters in the Mediterranean, not 100 meters."
+      "explanation": "The passage states that ALAN affects up to 50 meters in the Mediterranean, not 100 meters.",
+      "explanationSource": "PROVIDER_MODEL_OUTPUT"
     },
     {
       "questionNumber": 3,
@@ -213,7 +228,8 @@
       ],
       "correctAnswer": "NOT GIVEN",
       "evidence": "In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters, while in the Black Sea, Red Sea, and Persian Gulf, it reaches around 30 meters.",
-      "explanation": "The passage does not provide a direct comparison of the impact of ALAN between the Black Sea and the Mediterranean Sea."
+      "explanation": "The passage does not provide a direct comparison of the impact of ALAN between the Black Sea and the Mediterranean Sea.",
+      "explanationSource": "PROVIDER_MODEL_OUTPUT"
     },
     {
       "questionNumber": 4,
@@ -226,7 +242,8 @@
       ],
       "correctAnswer": "TRUE",
       "evidence": "The Mediterranean, Red Sea, Persian Gulf, and seas of Southeast Asia are among the most exposed regions.",
-      "explanation": "The passage explicitly states that the Mediterranean Sea is one of the most exposed regions to ALAN."
+      "explanation": "The passage explicitly states that the Mediterranean Sea is one of the most exposed regions to ALAN.",
+      "explanationSource": "PROVIDER_MODEL_OUTPUT"
     },
     {
       "questionNumber": 5,
@@ -239,7 +256,8 @@
       ],
       "correctAnswer": "TRUE",
       "evidence": "Globally, approximately 1.9 million km\u00b2 of coastal seas are affected by ALAN at a depth of 1 meter,",
-      "explanation": "The statement is directly supported by the data provided in the passage."
+      "explanation": "The statement is directly supported by the data provided in the passage.",
+      "explanationSource": "PROVIDER_MODEL_OUTPUT"
     },
     {
       "questionNumber": 6,
@@ -252,7 +270,8 @@
       ],
       "correctAnswer": "TRUE",
       "evidence": "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters.",
-      "explanation": "The passage confirms that ALAN penetrates to 20 meters in the Gulf of Thailand."
+      "explanation": "The passage confirms that ALAN penetrates to 20 meters in the Gulf of Thailand.",
+      "explanationSource": "PROVIDER_MODEL_OUTPUT"
     },
     {
       "questionNumber": 7,
@@ -265,7 +284,8 @@
       ],
       "correctAnswer": "FALSE",
       "evidence": "ALAN has the potential to disrupt a wide array of biological processes and habitats that rely on natural light cycles. These include diel vertical migrations, which constitute the largest migration of biomass on the planet, as well as coral spawning and symbiotic relationships crucial for coral reef health.",
-      "explanation": "The passage explicitly states that ALAN impacts coral spawning."
+      "explanation": "The passage explicitly states that ALAN impacts coral spawning.",
+      "explanationSource": "PROVIDER_MODEL_OUTPUT"
     },
     {
       "questionNumber": 8,
@@ -274,7 +294,8 @@
       "options": [],
       "correctAnswer": "20",
       "evidence": "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters.",
-      "explanation": "Verified from passage: In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meter"
+      "explanation": "Verified from passage: In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meter",
+      "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
     },
     {
       "questionNumber": 9,
@@ -283,7 +304,8 @@
       "options": [],
       "correctAnswer": "macroalgae",
       "evidence": "In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a variety of sessile and mobile animals.",
-      "explanation": "Verified from passage: In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a vari"
+      "explanation": "Verified from passage: In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a vari",
+      "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
     },
     {
       "questionNumber": 10,
@@ -292,7 +314,8 @@
       "options": [],
       "correctAnswer": "amphipods",
       "evidence": "Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods, with some species showing immediate recovery once the light is removed.",
-      "explanation": "Verified from passage: Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods,"
+      "explanation": "Verified from passage: Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods,",
+      "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
     },
     {
       "questionNumber": 11,
@@ -301,7 +324,8 @@
       "options": [],
       "correctAnswer": "bivalves",
       "evidence": "Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustaceans, polychaetes, and bivalves.",
-      "explanation": "Verified from passage: Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustacean"
+      "explanation": "Verified from passage: Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustacean",
+      "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
     },
     {
       "questionNumber": 12,
@@ -310,7 +334,8 @@
       "options": [],
       "correctAnswer": "compare",
       "evidence": "The challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, making it difficult to compare study results.",
-      "explanation": "Verified from passage: The challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, maki"
+      "explanation": "Verified from passage: The challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, maki",
+      "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
     },
     {
       "questionNumber": 13,
@@ -319,7 +344,8 @@
       "options": [],
       "correctAnswer": "white",
       "evidence": "The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migration in marine organisms, such as female Calanus copepods.",
-      "explanation": "Verified from passage: The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migra"
+      "explanation": "Verified from passage: The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migra",
+      "explanationSource": "GENERATOR_FALLBACK_EVIDENCE_PREFIX"
     }
   ],
   "tokenLedger": {
@@ -458,7 +484,7 @@
     ]
   },
   "validationReport": {
-    "status": "PASSED",
+    "status": "PASSED_WITH_OBSERVATIONS",
     "section1QuestionCount": 13,
     "targetCount": 13,
     "hasPassage": true,
@@ -469,11 +495,10 @@
     "genericExplanationCount": 0,
     "defectiveQuestionIds": [],
     "observations": [
-      "All 13 questions have authentic, question-specific explanations propagated from generator candidates.",
-      "Group 1 (Q1-Q7): TRUE_FALSE_NOT_GIVEN with standard 3 options and valid passage evidence quotes.",
-      "Group 2 (Q8-Q13): SENTENCE_COMPLETION with slot numbers [8]..[13] and verbatim answers from passage text.",
-      "Zero generic placeholder explanations detected; regex '^Explanation for question\\s+\\d+\\s+based on passage text\\.$' matched 0/13 questions.",
-      "Exam created and validated according to IELTS standards."
+      "Q1-Q7 (TRUE_FALSE_NOT_GIVEN): Carry authentic, question-specific provider explanations emitted by MiniMax ('The passage indicates that lux meters are not a globally recognized standard.', etc.) that successfully survived Candidate -> Question -> Section propagation without corruption.",
+      "Q8-Q13 (SENTENCE_COMPLETION): Carry fallback-derived explanations ('Verified from passage: ...') injected by generators/question/generator.py:696 because the cloze candidate generation returned explanation < 30 chars. They passed .NET normalization because 'Verified from passage:' satisfies length >= 25 and is not in the IsGenericExplanation blocklist.",
+      "Generic Placeholder Detection: The previous generic placeholder string ('Explanation for question N based on passage text.') was eliminated and matched 0/13 questions.",
+      "Lineage & Verification: Section 1 validated cleanly through ReadingPaperRules.Validate and NormalizeSectionsForValidation."
     ]
   }
 }
