@@ -1,0 +1,167 @@
+[
+  {
+    "title": "Marine Ecosystems and Global Climate Change",
+    "passage": "Artificial Light at Night (ALAN) has emerged as a pervasive and escalating form of environmental pollution, recognized as a significant global change issue in the 21st century. While the consequences of ALAN have been extensively studied in terrestrial ecosystems, research into its impacts on marine environments has only recently gained momentum. It is now understood that ALAN has been reshaping natural processes for over a century, with its effects cascading across the biological hierarchy\u2014from individual organism physiology to broader ecological community compositions. Recent studies indicate that at least 22% of coastal regions are exposed to ALAN, with the light from urban areas being sufficiently intense to elicit biological responses in seafloor-dwelling animals in adjacent habitats. Approximately 1.9 million km\u00b2 of the world's coastal seas are affected by ALAN at a depth of 1 meter, with 840,000 km\u00b2 experiencing these effects at 20 meters depth. Notably, regions such as the Mediterranean, the Red Sea, the Persian Gulf, and the seas of Southeast Asia are among the most exposed. Furthermore, ALAN pervades critical marine areas, with 20% of the world's contiguous Marine Protected Areas exposed across their entire range.\n\nThe biological importance of ALAN penetration into marine environments has been mapped extensively. Data derived from the relationship between the New World Atlas of Artificial Night Sky Brightness and sea surface irradiances, coupled with monthly climatologies of globally inherent optical water properties, reveal the depth to which biologically significant ALAN penetrates. This data is validated against in situ measurements from the Persian Gulf. 'Biologically important ALAN' is defined by the minimum irradiances of white light that trigger diel vertical migration in female Calanus copepods. The Mediterranean and Northeast Atlantic, the Black Sea, the Red Sea, the Persian Gulf, and the seas of Southeast Asia exhibit varying degrees of ALAN penetration, highlighting the widespread nature of this phenomenon.\n\nThe potential for ALAN to disrupt marine ecosystems is profound, yet it has remained relatively understudied until recently. ALAN affects a wide array of marine organisms and processes that rely on natural light cycles. These include diel vertical migrations, which constitute the largest migration of biomass on the planet, as well as coral spawning and symbiosis, which are crucial for the health of coral reefs. Additionally, ALAN impacts consumer-resource interactions that drive the top-down structuring of marine ecosystems, the migrations and orientation of marine organisms critical for their survival, and the recruitment of sessile invertebrate larvae into marine habitats. Despite the gaps in research, such as the lack of multistressor experiments and difficulties in defining ecologically relevant light intensities, ALAN is increasingly acknowledged as a major sensory pollutant due to its clear and widespread effects on natural circadian regulatory pathways in marine biota.\n\nMeasuring light for ecological studies presents significant challenges. Biologists employ a variety of techniques and instruments to measure light at scales ranging from centimeters to tens of kilometers, often using different measurement systems and units. This inconsistency means that study results cannot be reliably compared. Currently, there is no globally recognized standard method or agreed-upon unit of measurement for monitoring biologically active light. Commercial lux meters, for example, only quantify light within the CIE curve and exclude wavelengths outside this range. Furthermore, these meters are designed for indoor use and have poor sensitivity to low light levels, making them unsuitable for field settings where sky glow or dim light is prevalent. They also fail to provide spectral information, which is crucial for understanding how different wavelengths of light affect biological organisms.\n\nThe impact of ALAN on sandy beach ecosystems exemplifies the broader implications for marine biodiversity. Sandy beaches, which constitute over 80% of the ice-free coastline, support a diverse array of fauna, including crustaceans, polychaetes, and bivalves. Many of these species exhibit dynamic day/night activity rhythms governed by natural light cycles and moonlight. The encroachment of ALAN into these environments is expected to significantly affect their biodiversity. Studies have shown that ALAN can disrupt the locomotor activity of amphipods and isopods, reduce feeding rates, absorption efficiency, and growth rates, and negatively impact the abundance and distribution of sandy beach organisms. For instance, the amphipod Talitrus saltator has been observed to recover its natural activity pattern shortly after the removal of ALAN, underscoring the potential for some species to adapt to temporary disturbances. However, the long-term effects of chronic ALAN exposure remain a critical area for further investigation.",
+    "source": {
+      "pmcid": "PMC9540822",
+      "title": "Impacts of artificial light at night in marine ecosystems\u2014A review",
+      "doi": "10.1111/gcb.16264",
+      "url": "https://europepmc.org/articles/PMC9540822",
+      "license": "https://creativecommons.org/licenses/by/4.0",
+      "wordCount": 10301,
+      "authors": "Marangoni Laura F. B., Davies Thomas, Smyth Tim, Rodr\u00edguez Airam, Hamann Mark, Duarte Cristian, Pendoley Kellie, Berge J\u00f8rgen, Maggi Elena, Levy Oren",
+      "openAlexId": null,
+      "topicId": null,
+      "sourceType": null,
+      "metadata": null,
+      "content": null,
+      "contentPreview": null
+    },
+    "groups": [
+      {
+        "type": "TRUE_FALSE_NOT_GIVEN",
+        "instruction": "Do the following statements agree with the information given in Reading Passage? In boxes on your answer sheet, write TRUE, FALSE, or NOT GIVEN.",
+        "questions": [
+          {
+            "number": 1,
+            "prompt": "The Persian Gulf is among the most exposed regions to ALAN.",
+            "answer": "TRUE",
+            "options": [
+              "TRUE",
+              "FALSE",
+              "NOT GIVEN"
+            ],
+            "evidenceQuote": "Regions such as the Mediterranean, the Red Sea, the Persian Gulf, and the seas of Southeast Asia are among the most exposed.",
+            "explanation": "Explanation for question 1 based on passage text."
+          },
+          {
+            "number": 2,
+            "prompt": "The Mediterranean and Northeast Atlantic exhibit the highest degree of ALAN penetration.",
+            "answer": "NOT GIVEN",
+            "options": [
+              "TRUE",
+              "FALSE",
+              "NOT GIVEN"
+            ],
+            "evidenceQuote": "Artificial Light at Night (ALAN) has emerged as a pervasive and escalating form of environmental pollution, recognized as a significant global change issue in the 21st century",
+            "explanation": "Explanation for question 2 based on passage text."
+          },
+          {
+            "number": 3,
+            "prompt": "There is a globally recognized standard method for monitoring biologically active light.",
+            "answer": "FALSE",
+            "options": [
+              "TRUE",
+              "FALSE",
+              "NOT GIVEN"
+            ],
+            "evidenceQuote": "Currently, there is no globally recognized standard method or agreed-upon unit of measurement for monitoring biologically active light.",
+            "explanation": "Explanation for question 3 based on passage text."
+          },
+          {
+            "number": 4,
+            "prompt": "At least 22% of coastal regions are exposed to ALAN.",
+            "answer": "TRUE",
+            "options": [
+              "TRUE",
+              "FALSE",
+              "NOT GIVEN"
+            ],
+            "evidenceQuote": "Recent studies indicate that at least 22% of coastal regions are exposed to ALAN, with the light from urban areas being sufficiently intense to elicit biological responses in seafloor-dwelling animals in adjacent habitats.",
+            "explanation": "Explanation for question 4 based on passage text."
+          },
+          {
+            "number": 5,
+            "prompt": "ALAN affects coral spawning and symbiosis.",
+            "answer": "TRUE",
+            "options": [
+              "TRUE",
+              "FALSE",
+              "NOT GIVEN"
+            ],
+            "evidenceQuote": "These include diel vertical migrations, which constitute the largest migration of biomass on the planet, as well as coral spawning and symbiosis, which are crucial for the health of coral reefs.",
+            "explanation": "Explanation for question 5 based on passage text."
+          },
+          {
+            "number": 6,
+            "prompt": "Commercial lux meters are designed for indoor use and have poor sensitivity to low light levels.",
+            "answer": "TRUE",
+            "options": [
+              "TRUE",
+              "FALSE",
+              "NOT GIVEN"
+            ],
+            "evidenceQuote": "Furthermore, these meters are designed for indoor use and have poor sensitivity to low light levels, making them unsuitable for field settings where sky glow or dim light is prevalent.",
+            "explanation": "Explanation for question 6 based on passage text."
+          },
+          {
+            "number": 7,
+            "prompt": "ALAN has no impact on the locomotor activity of amphipods and isopods.",
+            "answer": "FALSE",
+            "options": [
+              "TRUE",
+              "FALSE",
+              "NOT GIVEN"
+            ],
+            "evidenceQuote": "Studies have shown that ALAN can disrupt the locomotor activity of amphipods and isopods, reduce feeding rates, absorption efficiency, and growth rates, and negatively impact the abundance and distribution of sandy beach organisms.",
+            "explanation": "Explanation for question 7 based on passage text."
+          }
+        ]
+      },
+      {
+        "type": "SENTENCE_COMPLETION",
+        "instruction": "Complete the sentences below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+        "questions": [
+          {
+            "number": 8,
+            "prompt": "Regions such as the Mediterranean, the Red Sea, and the Persian Gulf are among the most [8] to ALAN.",
+            "answer": "exposed",
+            "options": [],
+            "evidenceQuote": "Regions such as the Mediterranean, the Red Sea, the Persian Gulf, and the seas of Southeast Asia are among the most exposed.",
+            "explanation": "Explanation for question 8 based on passage text."
+          },
+          {
+            "number": 9,
+            "prompt": "ALAN affects a wide array of marine organisms and processes that rely on [9].",
+            "answer": "natural light cycles",
+            "options": [],
+            "evidenceQuote": "ALAN affects a wide array of marine organisms and processes that rely on natural light cycles.",
+            "explanation": "Explanation for question 9 based on passage text."
+          },
+          {
+            "number": 10,
+            "prompt": "Biologists employ a variety of techniques and instruments to measure light at scales ranging from centimeters to [10].",
+            "answer": "tens of kilometers",
+            "options": [],
+            "evidenceQuote": "Biologists employ a variety of techniques and instruments to measure light at scales ranging from centimeters to tens of kilometers, often using different measurement systems and units.",
+            "explanation": "Explanation for question 10 based on passage text."
+          },
+          {
+            "number": 11,
+            "prompt": "ALAN is increasingly acknowledged as a major [11] due to its clear and widespread effects on natural circadian regulatory pathways in marine biota.",
+            "answer": "sensory pollutant",
+            "options": [],
+            "evidenceQuote": "Despite the gaps in research, such as the lack of multistressor experiments and difficulties in defining ecologically relevant light intensities, ALAN is increasingly acknowledged as a major sensory pollutant due to its clear and widespread effects on natural circadian regulatory pathways in marine biota.",
+            "explanation": "Explanation for question 11 based on passage text."
+          },
+          {
+            "number": 12,
+            "prompt": "20% of the world's contiguous Marine Protected Areas are exposed to ALAN across their [12].",
+            "answer": "entire range",
+            "options": [],
+            "evidenceQuote": "Furthermore, ALAN pervades critical marine areas, with 20% of the world's contiguous Marine Protected Areas exposed across their entire range.",
+            "explanation": "Explanation for question 12 based on passage text."
+          },
+          {
+            "number": 13,
+            "prompt": "Approximately [13] km\u00b2 of the world's coastal seas are affected by ALAN at a depth of 1 meter.",
+            "answer": "1.9 million",
+            "options": [],
+            "evidenceQuote": "Approximately 1.9 million km\u00b2 of the world's coastal seas are affected by ALAN at a depth of 1 meter, with 840,000 km\u00b2 experiencing these effects at 20 meters depth.",
+            "explanation": "Explanation for question 13 based on passage text."
+          }
+        ]
+      }
+    ]
+  }
+]
