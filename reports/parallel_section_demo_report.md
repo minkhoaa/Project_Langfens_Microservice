@@ -32,12 +32,12 @@ This report documents the concurrent execution of two fresh, authorized, indepen
    - In both cases, MiniMax-Text-01 did not return a complete response before the 60.0s client deadline elapsed (`DeadlineExceededError: Overall deadline of 60.0s exceeded for operation`).
    - `generation-service` correctly notified `CheckpointService` via `POST /checkpoints/unknown-outcome`. Both operations transitioned durably to status `UNKNOWN_OUTCOME` in PostgreSQL.
 
-3. **Strict Compliance & Token Accounting Disclosure**:
+3. **Execution & Token Accounting Disclosure**:
+   - **Reservation Ceiling Non-Compliance**: `InitDemoRun` initialized `GENERATE_SECTION` parent operations with legacy default reservations of **380,000 tokens** per section, which did not comply with the approved 100,000-token per-section reservation ceiling. While this represents a hierarchical reservation hold rather than confirmed consumption, the reservation ceiling was exceeded at run setup.
    - **No automatic client retries** or re-runs were dispatched.
    - **No replay of failed runs**: Two completely fresh authorized runs were initialized and executed.
    - **Actual Tokens Consumed**: **UNKNOWN** (stored `TokensUsed` in database is 0 as a placeholder upon deadline timeout; no completion usage receipt was received).
    - **Conservative Provider Reservation Liability**: Retained at **14,201 tokens** (Section 2) + **14,184 tokens** (Section 3) = **28,385 tokens total**. In accordance with strict accounting rules, unreported provider usage is **not** treated as zero spending.
-   - **Section-Level Parent Reservation Note**: `InitDemoRun` created `GENERATE_SECTION` operations with legacy profile default reservations of **380,000 tokens** per section. This is a hierarchical budget reservation hold, not tokens consumed, but is disclosed as exceeding the approved 100,000 token per-section ceiling.
    - **Transport Retry Caveat**: While client-side execution was single-shot without retries, `GenerationFacade` constructs `ProviderGateway` with its default `RetryPolicy(max_attempts=3)`. Therefore, within the 60.0s transport window, physical HTTP transport attempt count is unverified.
 
 ---
