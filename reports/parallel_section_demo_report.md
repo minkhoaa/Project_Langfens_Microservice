@@ -112,7 +112,16 @@ Therefore, execution halted honestly at the initialization gate as instructed.
 
 ---
 
-## 4. Deliverables & Artifact Links
+
+---
+
+## 4. Repository Concurrency & Working Tree Note
+
+- **External Reflog Events**: During this session, reflog inspection revealed an external commit `869614b` (*fix(services): remove autotrigger seeders on startup*) followed by `HEAD@{1}: reset: moving to origin/autonomous-generation`. This hard-reset cleaned 19 previously uncommitted working tree files from an earlier session state.
+- **Stash Audit**: Local stashes (`stash@{0}` through `stash@{4}`) were confirmed via read-only inspection to hold RG03–RG05 research sprint checkpoints. In strict adherence to isolation principles, no stashes were modified, popped, or applied.
+- **Probe ID Clarification**: The IDs listed in probe diagnostics (`run_sec2_54f372ed`, `run_sec3_7180c3ae`) were ephemeral client-side request placeholders sent to probe the endpoint. **No synthetic run records, leases, or campaigns were inserted into the database**, and the fencing gate rejected them prior to any LLM dispatch.
+
+## 5. Deliverables & Artifact Links
 
 | Artifact | File Path | Status | Tokens Used |
 | :--- | :--- | :--- | :--- |

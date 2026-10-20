@@ -51,7 +51,7 @@
     "wallTimeSeconds": 0.9169981479644775
   },
   "blockerDiagnostic": {
-    "summary": "Isolated durable run cannot be initialized safely for standalone Section 2 generation without inventing credentials.",
+    "summary": "No synthetic run was created in the database. The probe used client-side placeholder IDs that the CheckpointService fencing gate rejected (HTTP 404) before any provider call or token consumption.",
     "rootCause": "POST /api/v1/autogen/reading-paper/section delegates to facade.generate_section, which requires upstream artifact bootstrapping (SourcePack, EvidenceGraph, ExamBlueprint) via client.grant_operation. CheckpointService.ValidateRunAuthorityAndFencingAsync strictly rejects any runId that is not an existing, leased row in reading_paper_runs (HTTP 404). In the current architecture, ReadingPaperWorker only creates runs as part of a full multi-source job starting at index 1, and benchmark provision requires an existing authorized campaign (0 exist). Therefore, independent Section 2 cannot be initialized without inventing synthetic runs or credentials."
   }
 }
