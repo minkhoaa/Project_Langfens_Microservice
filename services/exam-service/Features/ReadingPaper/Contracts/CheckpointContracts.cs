@@ -299,3 +299,11 @@ public sealed record OutboxEventDto(
     [property: JsonPropertyName("createdAt")] DateTime CreatedAt,
     [property: JsonPropertyName("sequence")] long Sequence = 0
 );
+
+public sealed record CheckpointImportRequest(
+    [property: JsonPropertyName("runId")] string RunId,
+    [property: JsonPropertyName("epoch")] int Epoch,
+    [property: JsonPropertyName("leaseOwner")] Guid LeaseOwner,
+    [property: JsonPropertyName("artifact")] ArtifactEnvelope Artifact,
+    [property: JsonPropertyName("sourceRunId")] string? SourceRunId = null
+);

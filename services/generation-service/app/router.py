@@ -85,6 +85,7 @@ class QuestionsRequest(BaseModel):
     passage_ref: dict[str, Any] = Field(alias="passageRef")
     blueprint_ref: dict[str, Any] = Field(alias="blueprintRef")
     slots: list[dict[str, Any]] = Field(default_factory=list)
+    passage_envelope: dict[str, Any] | None = Field(default=None, alias="passageEnvelope")
     run_id: str = Field(alias="runId")
     lease_owner: UUID = Field(alias="leaseOwner")
     epoch: int = 1
@@ -98,12 +99,12 @@ class SectionV2Request(BaseModel):
     passage_ref: dict[str, Any] = Field(alias="passageRef")
     blueprint_ref: dict[str, Any] = Field(alias="blueprintRef")
     question_refs: list[dict[str, Any]] = Field(default_factory=list, alias="questionRefs")
+    passage_envelope: dict[str, Any] | None = Field(default=None, alias="passageEnvelope")
     run_id: str = Field(alias="runId")
     lease_owner: UUID = Field(alias="leaseOwner")
     epoch: int = 1
     source: dict[str, Any] | None = None
     engine: str = "v2"
-
 
 class PaperV2Request(BaseModel):
     blueprint_ref: dict[str, Any] = Field(alias="blueprintRef")
@@ -223,6 +224,30 @@ async def questions(request: QuestionsRequest, http_request: Request) -> Any:
     except Exception as exc:
         logger.warning("Error fetching durable state: %s", exc)
 
+    if not passage_art and request.passage_envelope:
+        try:
+            cand_env = ArtifactEnvelope.model_validate(request.passage_envelope)
+            if (
+                cand_env.artifact_id == p_ref.artifact_id
+                and cand_env.version == p_ref.version
+                and cand_env.content_hash.lower() == p_ref.content_hash.lower()
+                and cand_env.verify_integrity()
+            ):
+                if client is not None and hasattr(client, "import_checkpoint"):
+                    from app.persistence.models import CheckpointImportRequest
+                    try:
+                        client.import_checkpoint(CheckpointImportRequest(
+                            run_id=request.run_id,
+                            epoch=request.epoch,
+                            lease_owner=request.lease_owner,
+                            artifact=cand_env,
+                        ))
+                    except Exception as imp_err:
+                        logger.warning("Checkpoint import during continuation: %s", imp_err)
+                passage_art = cand_env
+        except Exception as env_err:
+            logger.warning("Failed validating passage_envelope for continuation: %s", env_err)
+
     if not passage_art:
         raise HTTPException(
             status_code=422,
@@ -313,6 +338,19 @@ async def section_v2(request: SectionV2Request, http_request: Request) -> Any:
                             )
     except Exception as exc:
         logger.warning("Error fetching durable state in section-v2: %s", exc)
+
+    if not passage_art and request.passage_envelope:
+        try:
+            cand_env = ArtifactEnvelope.model_validate(request.passage_envelope)
+            if (
+                cand_env.artifact_id == p_ref.artifact_id
+                and cand_env.version == p_ref.version
+                and cand_env.content_hash.lower() == p_ref.content_hash.lower()
+                and cand_env.verify_integrity()
+            ):
+                passage_art = cand_env
+        except Exception as env_err:
+            logger.warning("Failed validating passage_envelope in section-v2 continuation: %s", env_err)
 
     if not passage_art:
         raise HTTPException(

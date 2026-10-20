@@ -54,6 +54,9 @@ from app.persistence.models import (
 from app.selection.selector import CandidateSelector, SelectionInfeasibleError
 
 logger = logging.getLogger(__name__)
+SECTION_MAX_TOKENS = 100_000
+SECTION_MAX_WALL_TIME_SECONDS = 900.0
+
 
 class QuestionCandidateLoop:
     """Bounded loop orchestrator for question candidate generation, evaluation, and selection."""
@@ -129,6 +132,25 @@ class QuestionCandidateLoop:
             budget_tracker.calls_used = int(stored_state.callsUsed)
         if hasattr(stored_state, "tokensUsed") and stored_state.tokensUsed:
             budget_tracker.tokens_used = int(stored_state.tokensUsed)
+        if hasattr(stored_state, "wallTimeUsedSeconds") and stored_state.wallTimeUsedSeconds:
+            budget_tracker.wall_time_used_seconds = float(stored_state.wallTimeUsedSeconds)
+
+        SECTION_MAX_TOKENS = 100_000
+        SECTION_MAX_WALL_TIME_SECONDS = 900.0
+
+        if not self.policy.is_unlimited:
+            if budget_tracker.tokens_used >= SECTION_MAX_TOKENS:
+                raise SelectionInfeasibleError(
+                    f"Cumulative section token budget exhausted before question loop: {budget_tracker.tokens_used} >= {SECTION_MAX_TOKENS}",
+                    step_count=1,
+                    reason="TOKEN_CAP",
+                )
+            if budget_tracker.get_elapsed_seconds() >= SECTION_MAX_WALL_TIME_SECONDS:
+                raise SelectionInfeasibleError(
+                    f"Cumulative section wall time budget exhausted before question loop: {budget_tracker.get_elapsed_seconds():.1f}s >= {SECTION_MAX_WALL_TIME_SECONDS}s",
+                    step_count=1,
+                    reason="WALL_TIME_CAP",
+                )
         # 3. Transactional Step Journal projection
         step_journal = StepJournal(
             run_id=run_id,
@@ -254,8 +276,10 @@ class QuestionCandidateLoop:
             workflow_op_id = existing_reserved[0].operationId
         else:
             workflow_op_id = f"op_workflow_qcand_s{section_index}_{uuid4().hex[:8]}"
-            token_res = -1 if self.policy.is_unlimited else min(self.policy.max_total_tokens if self.policy.max_total_tokens > 0 else 100_000, 100_000)
-            wall_res = -1.0 if self.policy.is_unlimited else min(float(self.policy.max_wall_time_seconds) if self.policy.max_wall_time_seconds > 0 else 900.0, 900.0)
+            remaining_tokens = max(0, SECTION_MAX_TOKENS - budget_tracker.tokens_used)
+            remaining_wall = max(0.0, SECTION_MAX_WALL_TIME_SECONDS - budget_tracker.get_elapsed_seconds())
+            token_res = -1 if self.policy.is_unlimited else min(self.policy.max_total_tokens if self.policy.max_total_tokens > 0 else remaining_tokens, remaining_tokens)
+            wall_res = -1.0 if self.policy.is_unlimited else min(float(self.policy.max_wall_time_seconds) if self.policy.max_wall_time_seconds > 0 else remaining_wall, remaining_wall)
             workflow_grant = self.persistence_client.grant_operation(OperationGrantRequest(
                 runId=run_id,
                 epoch=epoch,
@@ -616,6 +640,20 @@ class QuestionCandidateLoop:
                 q_num = slot.get("questionNumber") or slot.get("slotNumber") or slot.get("number") or 1
                 q_type = slot.get("questionType") or slot.get("type") or "TrueFalseNotGiven"
 
+                if not self.policy.is_unlimited:
+                    if budget_tracker.tokens_used >= SECTION_MAX_TOKENS:
+                        raise SelectionInfeasibleError(
+                            f"Cumulative section token budget exceeded: {budget_tracker.tokens_used} >= {SECTION_MAX_TOKENS}",
+                            step_count=1,
+                            reason="TOKEN_CAP",
+                        )
+                    if budget_tracker.get_elapsed_seconds() >= SECTION_MAX_WALL_TIME_SECONDS:
+                        raise SelectionInfeasibleError(
+                            f"Cumulative section wall time budget exceeded: {budget_tracker.get_elapsed_seconds():.1f}s >= {SECTION_MAX_WALL_TIME_SECONDS}s",
+                            step_count=1,
+                            reason="WALL_TIME_CAP",
+                        )
+
                 grp_start_num = grp_slots[0].get("questionNumber") or grp_slots[0].get("slotNumber") or grp_slots[0].get("number") or 1
                 adapter = SlotCandidateGeneratorAdapter(
                     slot_generator=self.generator,
@@ -639,7 +677,11 @@ class QuestionCandidateLoop:
                     sectionId=section_index,
                     authority=AuthorityGrant(leaseOwner=lease_owner, epoch=epoch),
                     inputDependencies=(passage_artifact.to_ref(), blueprint_ref),
-                    budgetTracker=BudgetTracker(),
+                    budgetTracker=BudgetTracker(
+                        tokensUsed=budget_tracker.tokens_used,
+                        wallTimeUsedSeconds=budget_tracker.get_elapsed_seconds(),
+                        callsUsed=budget_tracker.calls_used,
+                    ),
                     parent_operation_id=workflow_op_id,
                 )
 
@@ -669,6 +711,9 @@ class QuestionCandidateLoop:
                         step_count=1,
                         reason="SLOT_RUNTIME_FAILED",
                     )
+                new_slot_tokens = max(0, slot_runtime.context.budget_tracker.tokens_used - budget_tracker.tokens_used)
+                new_slot_calls = max(0, slot_runtime.context.budget_tracker.calls_used - budget_tracker.calls_used)
+                budget_tracker.record_usage(tokens=new_slot_tokens, calls=new_slot_calls)
 
                 slot_art = slot_res.accepted_artifact or slot_runtime.context.current_artifact
                 if slot_art and slot_art.payload and "candidates" in slot_art.payload:

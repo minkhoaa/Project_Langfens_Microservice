@@ -8,6 +8,7 @@ from app.persistence.models import (
     OperationGrantRequest,
     OperationGrantResult,
     CheckpointCommitRequest,
+    CheckpointImportRequest,
     DraftCheckpointRequest,
     CheckpointAck,
     ResumeStateResult,
@@ -156,6 +157,28 @@ class CheckpointClient:
 
     async def commit_checkpoint_async(self, request: CheckpointCommitRequest) -> CheckpointAck:
         url = f"{self.base_url}/api/internal/reading-paper/checkpoints/commit"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(url, headers=self._get_headers(), json=request.model_dump(mode="json", by_alias=True))
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            ack = CheckpointAck.model_validate(resp.json())
+            self._verify_ack(request, ack)
+            return ack
+
+    def import_checkpoint(self, request: CheckpointImportRequest) -> CheckpointAck:
+        """Imports and binds a verified historical/continuation checkpoint."""
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/import"
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(url, headers=self._get_headers(), json=request.model_dump(mode="json", by_alias=True))
+            if resp.status_code != 200:
+                self._handle_error(resp)
+            ack = CheckpointAck.model_validate(resp.json())
+            self._verify_ack(request, ack)
+            return ack
+
+    async def import_checkpoint_async(self, request: CheckpointImportRequest) -> CheckpointAck:
+        """Async imports and binds a verified historical/continuation checkpoint."""
+        url = f"{self.base_url}/api/internal/reading-paper/checkpoints/import"
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             resp = await client.post(url, headers=self._get_headers(), json=request.model_dump(mode="json", by_alias=True))
             if resp.status_code != 200:

@@ -219,6 +219,13 @@ class ResumeStateResult(CanonicalBaseModel):
     budgetProfileSource: Optional[str] = None
     budgetProfileJson: Optional[str] = None
     budgetBreachDetected: bool = False
+class CheckpointImportRequest(CanonicalBaseModel):
+    run_id: str = Field(alias="runId")
+    epoch: int
+    lease_owner: UUID = Field(alias="leaseOwner")
+    artifact: ArtifactEnvelope
+    source_run_id: Optional[str] = Field(default=None, alias="sourceRunId")
+
 class InvalidateDependencyRequest(CanonicalBaseModel):
     runId: str
     epoch: int

@@ -100,6 +100,22 @@ public static class CheckpointEndpoints
             }
         });
 
+        group.MapPost("/import", async (
+            [FromBody] CheckpointImportRequest request,
+            ExamDbContext db,
+            CancellationToken ct) =>
+        {
+            try
+            {
+                var result = await CheckpointService.ImportCheckpointAsync(db, request, ct);
+                return Results.Ok(result);
+            }
+            catch (CheckpointValidationException ex)
+            {
+                return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode);
+            }
+        });
+
         group.MapPost("/draft", async (
             [FromBody] DraftCheckpointRequest request,
             ExamDbContext db,
