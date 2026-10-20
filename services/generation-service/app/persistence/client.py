@@ -314,16 +314,22 @@ class CheckpointClient:
                 self._handle_error(resp)
             return resp.json()
     def _verify_ack(self, request: Any, ack: CheckpointAck) -> None:
-        if ack.runId != request.runId:
-            raise ValueError(f"CheckpointAck runId mismatch: ack={ack.runId}, req={request.runId}")
-        if ack.epoch != request.epoch:
-            raise ValueError(f"CheckpointAck epoch mismatch: ack={ack.epoch}, req={request.epoch}")
-        if ack.artifactId != request.artifact.artifact_id:
-            raise ValueError(f"CheckpointAck artifactId mismatch: ack={ack.artifactId}, req={request.artifact.artifact_id}")
-        if ack.version != request.artifact.version:
-            raise ValueError(f"CheckpointAck version mismatch: ack={ack.version}, req={request.artifact.version}")
-        if ack.contentHash.lower() != request.artifact.content_hash.lower():
-            raise ValueError(f"CheckpointAck contentHash mismatch: ack={ack.contentHash}, req={request.artifact.content_hash}")
+        req_run_id = getattr(request, "runId", getattr(request, "run_id", None))
+        req_epoch = getattr(request, "epoch", None)
+        if req_run_id is not None and ack.runId != req_run_id:
+            raise ValueError(f"CheckpointAck runId mismatch: ack={ack.runId}, req={req_run_id}")
+        if req_epoch is not None and ack.epoch != req_epoch:
+            raise ValueError(f"CheckpointAck epoch mismatch: ack={ack.epoch}, req={req_epoch}")
+        if hasattr(request, "artifact") and request.artifact:
+            art_id = getattr(request.artifact, "artifact_id", getattr(request.artifact, "artifactId", None))
+            art_ver = getattr(request.artifact, "version", None)
+            art_hash = getattr(request.artifact, "content_hash", getattr(request.artifact, "contentHash", None))
+            if art_id and ack.artifactId != art_id:
+                raise ValueError(f"CheckpointAck artifactId mismatch: ack={ack.artifactId}, req={art_id}")
+            if art_ver is not None and ack.version != art_ver:
+                raise ValueError(f"CheckpointAck version mismatch: ack={ack.version}, req={art_ver}")
+            if art_hash and ack.contentHash.lower() != art_hash.lower():
+                raise ValueError(f"CheckpointAck contentHash mismatch: ack={ack.contentHash}, req={art_hash}")
 
     def _handle_error(self, resp: httpx.Response) -> None:
         try:

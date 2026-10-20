@@ -95,6 +95,8 @@ class CheckpointCommitRequest(CanonicalBaseModel):
     evaluations: Optional[List[EvaluationResult]] = None
     decision: Optional[LoopDecision] = None
     expectedHeadVersion: Optional[int] = None
+    expectedHeadHash: Optional[str] = None
+    expectedCursorRevision: Optional[int] = None
     events: Optional[List[DomainEvent]] = None
     requiredEvaluatorIds: Optional[List[str]] = None
     tokensUsed: int = 0
@@ -108,6 +110,7 @@ class DraftCheckpointRequest(CanonicalBaseModel):
     operationId: str
     requestHash: str
     artifact: ArtifactEnvelope
+    expectedCursorRevision: Optional[int] = None
     tokensUsed: int = 0
     costUsedUsd: float = 0.0
     wallTimeUsedSeconds: float = 0.0
@@ -198,6 +201,7 @@ class ResumeStateResult(CanonicalBaseModel):
     engineVersion: str
     schemaVersion: str
     policyVersion: str
+    policyHash: Optional[str] = None
     artifacts: List[ArtifactResumeInfo] = Field(default_factory=list)
     isCompatible: bool = True
     incompatibilityReason: Optional[str] = None
@@ -220,11 +224,23 @@ class ResumeStateResult(CanonicalBaseModel):
     budgetProfileJson: Optional[str] = None
     budgetBreachDetected: bool = False
 class CheckpointImportRequest(CanonicalBaseModel):
-    run_id: str = Field(alias="runId")
+    runId: str
     epoch: int
-    lease_owner: UUID = Field(alias="leaseOwner")
+    leaseOwner: UUID
     artifact: ArtifactEnvelope
-    source_run_id: Optional[str] = Field(default=None, alias="sourceRunId")
+    sourceRunId: Optional[str] = None
+
+    @property
+    def run_id(self) -> str:
+        return self.runId
+
+    @property
+    def lease_owner(self) -> UUID:
+        return self.leaseOwner
+
+    @property
+    def source_run_id(self) -> Optional[str]:
+        return self.sourceRunId
 
 class InvalidateDependencyRequest(CanonicalBaseModel):
     runId: str
