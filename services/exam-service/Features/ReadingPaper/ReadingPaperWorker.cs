@@ -218,751 +218,82 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             $"Generation started for {sources.Count} selected source(s); {sections.Count} section checkpoint(s) already complete.", ct);
         var runId = job.ActiveRunId ?? $"run_{job.Id:N}";
         var activeRun = await db.ReadingPaperRuns.FirstOrDefaultAsync(r => r.RunId == runId, ct);
-        var isV2Engine = (activeRun != null && string.Equals(activeRun.EngineVersion, "2.0.0", StringComparison.OrdinalIgnoreCase))
-            || sources.Any(s => string.Equals(s.Metadata?.GetValueOrDefault("engine"), "v2", StringComparison.OrdinalIgnoreCase))
-            || string.Equals(Environment.GetEnvironmentVariable("READING_PAPER_ENGINE"), "v2", StringComparison.OrdinalIgnoreCase);
+        var provider = sources.FirstOrDefault()?.Metadata?.GetValueOrDefault("provider")
+            ?? Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER")
+            ?? Environment.GetEnvironmentVariable("LLM_PROVIDER")
+            ?? "minimax";
 
-        for (var i = sections.Count; i < sources.Count; i++)
+        var isUnlimitedRun = activeRun != null && (
+            activeRun.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap ||
+            activeRun.BudgetCapTokens == ReadingPaperCapsProfile.UnlimitedCap ||
+            activeRun.BudgetCapWallTimeSeconds == ReadingPaperCapsProfile.UnlimitedCap ||
+            (activeRun.BudgetProfileJson != null && activeRun.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase))
+        );
+
+        var policy = PinnedExecutionPolicy.CreateDefault(provider);
+        if (isUnlimitedRun)
         {
-            var sourceNum = i + 1;
-            var source = sources[i];
-            var sourceHash = ReadingPaperEndpoints.ComputeSourceHash(source);
-
-            // 1. Deterministic request hash & grant acquisition before provider call
-            var rawReq = $"{runId}:{sourceNum}:{source.Pmcid}:{sourceHash}";
-            var reqHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawReq)));
-            var opId = $"op_{runId}_sec_{sourceNum}_{sourceHash[..12]}";
-
-            await AppendLogAsync(job.Id, "Information",
-                $"Acquiring durable operation grant for passage {sourceNum}/{sources.Count} ({source.Pmcid}: {source.Title})...", ct);
-
-            var secId = $"section_{sourceNum}";
-            var isUnlimitedRun = activeRun != null && (
-                activeRun.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap ||
-                activeRun.BudgetCapTokens == ReadingPaperCapsProfile.UnlimitedCap ||
-                activeRun.BudgetCapWallTimeSeconds == ReadingPaperCapsProfile.UnlimitedCap ||
-                (activeRun.BudgetProfileJson != null && activeRun.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase))
-            );
-
-            var sectionTokenCap = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap
-                : caps.Caps.TryGetValue("legacySectionTokenCap", out var legacySectionTokens) && legacySectionTokens > 0 ? legacySectionTokens
-                : caps.Caps.TryGetValue("benchmarkSectionTokenCap", out var benchmarkSectionTokens) && benchmarkSectionTokens > 0 ? benchmarkSectionTokens
-                : caps.Caps.TryGetValue("sectionTokenCap", out var sectionTokensFallback) && sectionTokensFallback > 0 ? sectionTokensFallback
-                : 0;
-            var sectionWallTimeCap = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap
-                : caps.Caps.TryGetValue("legacySectionWallTimeCapSeconds", out var legacySectionWall) && legacySectionWall > 0 ? legacySectionWall
-                : caps.Caps.TryGetValue("benchmarkSectionWallTimeCapSeconds", out var benchmarkSectionWall) && benchmarkSectionWall > 0 ? benchmarkSectionWall
-                : caps.Caps.TryGetValue("sectionWallTimeCapSeconds", out var sectionWallFallback) && sectionWallFallback > 0 ? sectionWallFallback
-                : 0;
-            var grant = await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(
-                runId, job.Epoch, owner, opId, "GENERATE_SECTION", reqHash,
-                TokenReservation: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : (sectionTokenCap > 0 ? sectionTokenCap : 60000),
-                CostReservationUsd: 0m,
-                WallTimeReservationSeconds: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : (sectionWallTimeCap > 0 ? (double)sectionWallTimeCap : 300.0),
-                SectionId: secId,
-                ArtifactId: null
-            ), ct);
-
-            await AppendLogAsync(job.Id, "Information",
-                $"Durable operation grant acquired: {grant.OperationId} (Reservation: {grant.TokenReservation} tokens, Replay: {grant.IsReplay}).", ct);
-
-            // 2. Invoke provider I/O with fault recording
-            ReadingGeneratedSection section;
-            try
+            policy = policy with
             {
-                var provider = source.Metadata?.GetValueOrDefault("provider");
-                section = await ai.GenerateSectionAsync(job.Topic, sourceNum, source,
-                    (level, message) => AppendLogAsync(job.Id, level, $"AI service: {message}", ct), ct, provider,
-                    runId, job.Epoch, owner, opId);
-            }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or TimeoutException)
-            {
-                await CheckpointService.RecordUnknownOutcomeAsync(db, new UnknownOutcomeRequest(
-                    runId, job.Epoch, owner, opId, ex.Message
-                ), ct);
-                throw;
-            }
-
-            // 3. Verify source identity and license
-            if (!section.Source.Pmcid.Equals(source.Pmcid, StringComparison.OrdinalIgnoreCase)
-                || section.Source.License != source.License
-                || (source.Doi is not null && section.Source.Doi != source.Doi))
-            {
-                throw new ReadingSourceUnavailableException("Source identity or license changed");
-            }
-
-            // 3b. V2 QuestionCandidateLoop Integration: If V2 is active and questions are decoupled
-
-            var requiredSectionQuestions = sourceNum switch { 1 => 13, 2 => 13, 3 => 14, _ => 13 };
-            var currentQuestionsCount = section.Groups?.Sum(g => g.Questions.Count) ?? 0;
-
-            if (isV2Engine && currentQuestionsCount < requiredSectionQuestions)
-            {
-                await AppendLogAsync(job.Id, "Information",
-                    $"Executing V2 QuestionCandidateLoop via AI service for section {sourceNum} (current: {currentQuestionsCount}/{requiredSectionQuestions} questions)...", ct);
-                var passageHead = await db.ReadingPaperArtifactHeads
-                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == $"art_passage_s{sourceNum}" || h.ArtifactId == $"art_passage_{sourceNum}"), ct);
-                var bpPrefix = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
-                var blueprintHead = await db.ReadingPaperArtifactHeads
-                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == bpPrefix || h.ArtifactId.StartsWith("art_blueprint_") || h.ArtifactId.StartsWith("bp_sec_")), ct);
-
-                if (blueprintHead == null)
-                {
-                    var bpId = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
-                    var bpDoc = JsonDocument.Parse(JsonSerializer.Serialize(new { totalQuestions = 40, targetWordCountMin = 2150, targetWordCountMax = 2750 }, ReadingPaperRules.Json));
-                    var bpHash = ArtifactEnvelope.ComputeContentHash(bpDoc.RootElement, new List<ArtifactRef>());
-                    var bpEnv = new ArtifactEnvelope(bpId, ArtifactType.ExamBlueprint, 1, runId, null, "2.0.0", bpHash, DateTime.UtcNow, "2.0.0", bpDoc.RootElement.Clone(), new List<ArtifactRef>());
-                    await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(runId, job.Epoch, owner, $"op_bp_{runId[..Math.Min(8, runId.Length)]}", "GENERATE_BLUEPRINT", reqHash, 0, 0m, 5.0, null, bpId), ct);
-                    await CheckpointService.CommitCheckpointAsync(db, new CheckpointCommitRequest(runId, job.Epoch, owner, $"op_bp_{runId[..Math.Min(8, runId.Length)]}", reqHash, bpEnv, TokensUsed: 0, WallTimeUsedSeconds: 0.0), ct);
-                    blueprintHead = await db.ReadingPaperArtifactHeads.FirstOrDefaultAsync(h => h.RunId == runId && h.ArtifactId == bpId, ct);
-                }
-
-                if (passageHead == null)
-                {
-                    var passDoc = JsonDocument.Parse(JsonSerializer.Serialize(new { text = section.Passage, passage = section.Passage, wordCount = ReadingPaperRules.WordCount(section.Passage), source }, ReadingPaperRules.Json));
-                    var pParents = blueprintHead != null ? new List<ArtifactRef> { new ArtifactRef(blueprintHead.ArtifactId, ArtifactType.ExamBlueprint, blueprintHead.AcceptedVersion, blueprintHead.AcceptedHash) } : new List<ArtifactRef>();
-                    var pHash = ArtifactEnvelope.ComputeContentHash(passDoc.RootElement, pParents);
-                    var passEnv = new ArtifactEnvelope($"art_passage_s{sourceNum}", ArtifactType.Passage, 1, runId, sourceNum, "2.0.0", pHash, DateTime.UtcNow, "2.0.0", passDoc.RootElement.Clone(), pParents);
-                    var passOpId = $"op_passage_{sourceNum}_{pHash[..Math.Min(12, pHash.Length)]}";
-                    await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(runId, job.Epoch, owner, passOpId, "GENERATE_PASSAGE", reqHash, 0, 0m, 30.0, secId, $"art_passage_s{sourceNum}"), ct);
-                    await CheckpointService.CommitCheckpointAsync(db, new CheckpointCommitRequest(runId, job.Epoch, owner, passOpId, reqHash, passEnv, TokensUsed: 0, WallTimeUsedSeconds: 0.0), ct);
-                    passageHead = await db.ReadingPaperArtifactHeads.FirstOrDefaultAsync(h => h.RunId == runId && h.ArtifactId == $"art_passage_s{sourceNum}", ct);
-                }
-
-                if (passageHead == null || blueprintHead == null)
-                {
-                    throw new InvalidOperationException($"Cannot proceed with V2 section generation: missing accepted passage head ({passageHead != null}) or blueprint head ({blueprintHead != null})");
-                }
-
-                var passageRef = new ArtifactRef(passageHead.ArtifactId, ArtifactType.Passage, passageHead.AcceptedVersion, passageHead.AcceptedHash);
-                var blueprintRef = new ArtifactRef(blueprintHead.ArtifactId, ArtifactType.ExamBlueprint, blueprintHead.AcceptedVersion, blueprintHead.AcceptedHash);
-                // Determine missing question slot indices
-                var existingNums = section.Groups?.SelectMany(g => g.Questions).Select(q => q.Number).ToHashSet() ?? new HashSet<int>();
-                var baseStart = sourceNum switch { 1 => 1, 2 => 14, 3 => 27, _ => 1 };
-                var missingSlots = new List<object>();
-                for (var qNum = baseStart; qNum < baseStart + requiredSectionQuestions; qNum++)
-                {
-                    if (!existingNums.Contains(qNum))
-                    {
-                        var slotType = (sourceNum, qNum - baseStart) switch
-                        {
-                            (1, < 7) => "TrueFalseNotGiven",
-                            (1, _) => "SentenceCompletion",
-                            (2, < 6) => "MultipleChoiceSingle",
-                            (2, _) => "SummaryCompletion",
-                            (3, < 7) => "YesNoNotGiven",
-                            (3, _) => "ShortAnswer",
-                            _ => "SentenceCompletion"
-                        };
-                        missingSlots.Add(new { number = qNum, type = slotType });
-                    }
-                }
-
-                var qResult = await ai.GenerateQuestionsAsync(
-                    passageRef, blueprintRef, missingSlots.Count > 0 ? missingSlots : null, runId, owner, job.Epoch, sourceNum, ct);
-
-                if (qResult.Questions != null && qResult.Questions.Count > 0)
-                {
-                    var extractedQuestions = new List<(int Number, string CanonicalType, ReadingGeneratedQuestion Question)>();
-                    foreach (var kv in qResult.Questions)
-                    {
-                        if (kv.Value is JsonElement qEl)
-                        {
-                            if (qEl.TryGetProperty("payload", out var pNode) && pNode.TryGetProperty("questions", out var qArray) && qArray.ValueKind == JsonValueKind.Array)
-                            {
-                                foreach (var item in qArray.EnumerateArray())
-                                {
-                                    var num = item.TryGetProperty("questionNumber", out var nP) ? nP.GetInt32() : 1;
-                                    var rawType = item.TryGetProperty("questionType", out var tP) ? tP.GetString() ?? "TrueFalseNotGiven" : "TrueFalseNotGiven";
-                                    var cType = GetCanonicalGroupType(rawType);
-                                    var prompt = item.TryGetProperty("prompt", out var pP) ? pP.GetString() ?? "" : "";
-                                    var answer = item.TryGetProperty("answer", out var aP) ? aP.GetString() ?? "" : "";
-                                    var quote = item.TryGetProperty("evidenceQuote", out var eqP) ? eqP.GetString() ?? "" : "";
-                                    var expl = item.TryGetProperty("explanation", out var expP) ? expP.GetString() ?? "" : "";
-                                    var opts = new List<string>();
-                                    if (item.TryGetProperty("options", out var optNode) && optNode.ValueKind == JsonValueKind.Array)
-                                    {
-                                        foreach (var o in optNode.EnumerateArray())
-                                        {
-                                            if (o.ValueKind == JsonValueKind.String) opts.Add(o.GetString() ?? "");
-                                            else if (o.TryGetProperty("text", out var tText)) opts.Add(tText.GetString() ?? "");
-                                            else opts.Add(o.ToString());
-                                        }
-                                    }
-                                    extractedQuestions.Add((num, cType, new ReadingGeneratedQuestion(num, prompt, answer, opts, quote, expl)));
-                                }
-                            }
-                            else
-                            {
-                                var num = int.TryParse(kv.Key, out var parsedNum) ? parsedNum : 1;
-                                var rawType = qEl.TryGetProperty("questionType", out var tProp) ? tProp.GetString() ?? "TrueFalseNotGiven" : "TrueFalseNotGiven";
-                                var cType = GetCanonicalGroupType(rawType);
-                                var prompt = qEl.TryGetProperty("prompt", out var pProp) ? pProp.GetString() ?? "" : "";
-                                var answer = qEl.TryGetProperty("answer", out var aProp) ? aProp.GetString() ?? "" : "";
-                                var quote = qEl.TryGetProperty("evidenceQuote", out var eqP) ? eqP.GetString() ?? "" : "";
-                                var expl = qEl.TryGetProperty("explanation", out var expP) ? expP.GetString() ?? "" : "";
-                                var opts = new List<string>();
-                                if (qEl.TryGetProperty("options", out var optNode) && optNode.ValueKind == JsonValueKind.Array)
-                                {
-                                    foreach (var o in optNode.EnumerateArray())
-                                    {
-                                        if (o.ValueKind == JsonValueKind.String) opts.Add(o.GetString() ?? "");
-                                        else if (o.TryGetProperty("text", out var tText)) opts.Add(tText.GetString() ?? "");
-                                        else opts.Add(o.ToString());
-                                    }
-                                }
-                                extractedQuestions.Add((num, cType, new ReadingGeneratedQuestion(num, prompt, answer, opts, quote, expl)));
-                            }
-                        }
-                    }
-                    // Deduplicate newly extracted questions by Number
-                    var distinctQuestions = extractedQuestions
-                        .GroupBy(x => x.Number)
-                        .Select(g => g.First())
-                        .ToList();
-
-                    // Merge with any pre-existing questions
-                    if (section.Groups != null && section.Groups.Count > 0)
-                    {
-                        foreach (var existingGrp in section.Groups)
-                        {
-                            foreach (var eq in existingGrp.Questions)
-                            {
-                                if (!distinctQuestions.Any(x => x.Number == eq.Number))
-                                {
-                                    distinctQuestions.Add((eq.Number, GetCanonicalGroupType(existingGrp.Type), eq));
-                                }
-                            }
-                        }
-                    }
-
-                    distinctQuestions = distinctQuestions.OrderBy(x => x.Number).ToList();
-
-                    if (distinctQuestions.Count > 0)
-                    {
-                        var newGroups = new List<ReadingGeneratedGroup>();
-                        var currentType = "";
-                        var currentGroupQuestions = new List<ReadingGeneratedQuestion>();
-
-                        foreach (var item in distinctQuestions)
-                        {
-                            if (!string.Equals(currentType, item.CanonicalType, StringComparison.OrdinalIgnoreCase) && currentGroupQuestions.Count > 0)
-                            {
-                                newGroups.Add(new ReadingGeneratedGroup(currentType, GetGroupInstruction(currentType), currentGroupQuestions));
-                                currentGroupQuestions = new List<ReadingGeneratedQuestion>();
-                            }
-                            currentType = item.CanonicalType;
-                            currentGroupQuestions.Add(item.Question);
-                        }
-                        if (currentGroupQuestions.Count > 0)
-                        {
-                            newGroups.Add(new ReadingGeneratedGroup(currentType, GetGroupInstruction(currentType), currentGroupQuestions));
-                        }
-                        section = section with { Groups = newGroups };
-                    }
-                }
-            }
-
-            if (isV2Engine && (section.Groups == null || section.Groups.Sum(g => g.Questions.Count) < requiredSectionQuestions))
-            {
-                throw new InvalidOperationException(
-                    $"Section {sourceNum} question generation incomplete: expected {requiredSectionQuestions} questions, got {section.Groups?.Sum(g => g.Questions.Count) ?? 0}");
-            }
-
-            if (isV2Engine)
-            {
-                var passageHead = await db.ReadingPaperArtifactHeads
-                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == $"art_passage_s{sourceNum}" || h.ArtifactId == $"art_passage_{sourceNum}"), ct);
-                var bpPrefix = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
-                var blueprintHead = await db.ReadingPaperArtifactHeads
-                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == bpPrefix || h.ArtifactId.StartsWith("art_blueprint_") || h.ArtifactId.StartsWith("bp_sec_")), ct);
-
-                if (passageHead != null && blueprintHead != null)
-                {
-                    await AppendLogAsync(job.Id, "Information",
-                        $"Executing V2 SectionLoop via AI service for section {sourceNum}...", ct);
-
-                    var passageRef = new ArtifactRef(passageHead.ArtifactId, ArtifactType.Passage, passageHead.AcceptedVersion, passageHead.AcceptedHash);
-                    var blueprintRef = new ArtifactRef(blueprintHead.ArtifactId, ArtifactType.ExamBlueprint, blueprintHead.AcceptedVersion, blueprintHead.AcceptedHash);
-                    var qHeads = await db.ReadingPaperArtifactHeads
-                        .Where(h => h.RunId == runId && (
-                            h.ArtifactId.StartsWith($"art_grp_s{sourceNum}_") ||
-                            h.ArtifactId.StartsWith($"art_q_s{sourceNum}_") ||
-                            h.ArtifactId.StartsWith("art_q_slot_") ||
-                            h.ArtifactId.StartsWith("art_q_")
-                        ))
-                        .ToListAsync(ct);
-
-                    var groupHeads = qHeads.Where(h => h.ArtifactId.StartsWith($"art_grp_s{sourceNum}_")).ToList();
-                    int baseStart = sourceNum switch { 1 => 1, 2 => 14, 3 => 27, _ => 1 };
-                    var effectiveQHeads = groupHeads.Count > 0
-                        ? groupHeads
-                        : qHeads.Where(h =>
-                        {
-                            if (h.ArtifactId.StartsWith($"art_q_s{sourceNum}_"))
-                            {
-                                return true;
-                            }
-                            if (h.ArtifactId.StartsWith("art_q_slot_") && int.TryParse(h.ArtifactId.Replace("art_q_slot_", ""), out var slotNum))
-                            {
-                                return slotNum >= baseStart && slotNum < baseStart + requiredSectionQuestions;
-                            }
-                            if (h.ArtifactId.StartsWith("art_q_") && int.TryParse(h.ArtifactId.Replace("art_q_", ""), out var qNum))
-                            {
-                                return qNum >= baseStart && qNum < baseStart + requiredSectionQuestions;
-                            }
-                            return false;
-                        }).ToList();
-
-                    var questionRefs = effectiveQHeads
-                        .Select(qh => new ArtifactRef(qh.ArtifactId, qh.ArtifactId.Contains("_grp_") ? ArtifactType.QuestionGroup : ArtifactType.Question, qh.AcceptedVersion, qh.AcceptedHash))
-                        .ToList();
-
-                    section = await ai.GenerateSectionV2Async(
-                        sourceNum,
-                        section.Title,
-                        passageRef,
-                        blueprintRef,
-                        questionRefs,
-                        runId,
-                        owner,
-                        job.Epoch,
-                        ct
-                    );
-                    if (section == null || string.IsNullOrWhiteSpace(section.Passage) || section.Groups == null || section.Groups.Count == 0)
-                    {
-                        throw new InvalidOperationException($"Section {sourceNum} V2 SectionLoop did not produce an accepted section");
-                    }
-                }
-            }
-
-            section = NormalizeSectionsForValidation(sections.Concat(new[] { section }).ToList())[^1];
-            await AppendLogAsync(job.Id, "Information",
-                $"Passage {sourceNum} generated and verified ({ReadingPaperRules.WordCount(section.Passage)} words, {section.Groups.Sum(g => g.Questions.Count)} questions). Committing durable checkpoint...", ct);
-
-            // 4. Ensure prerequisite artifact heads (blueprint, passage, per-question) exist before constructing section envelope.
-            //    When the AI returns the full section in one call (currentQuestionsCount == requiredSectionQuestions), the
-            //    V2 QuestionCandidateLoop branch above is skipped, so blueprint/passage/question heads would otherwise be
-            //    missing from the persistence store. Without these heads, the section envelope's parentRefs is empty and
-            //    Python's assemble_immutable_paper fails with "Section envelope 'art_section_N' missing passageRef in payload
-            //    and parent_refs". Commit any missing heads idempotently here.
-
-            // 4a. Blueprint head (committed once per run; reused across all 3 sections)
-            var bpPrefixForSection = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
-            var blueprintHeadForSection = await db.ReadingPaperArtifactHeads
-                .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == bpPrefixForSection || h.ArtifactId.StartsWith("art_blueprint_") || h.ArtifactId.StartsWith("bp_sec_")), ct);
-
-            if (blueprintHeadForSection == null)
-            {
-                var bpId = bpPrefixForSection;
-                var bpDoc = JsonDocument.Parse(JsonSerializer.Serialize(new { totalQuestions = 40, targetWordCountMin = 2150, targetWordCountMax = 2750 }, ReadingPaperRules.Json));
-                var bpHash = ArtifactEnvelope.ComputeContentHash(bpDoc.RootElement, new List<ArtifactRef>());
-                var bpCreatedAt = DateTime.UtcNow;
-                var bpEnv = new ArtifactEnvelope(bpId, ArtifactType.ExamBlueprint, 1, runId, null, "2.0.0", bpHash, bpCreatedAt, "2.0.0", bpDoc.RootElement.Clone(), new List<ArtifactRef>());
-                var bpOpId = $"op_bp_{runId[..Math.Min(8, runId.Length)]}_sec_{sourceNum}";
-                var bpReqHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{runId}:blueprint:{sourceNum}")));
-                await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(runId, job.Epoch, owner, bpOpId, "GENERATE_BLUEPRINT", bpReqHash, 0, 0m, 5.0, null, bpId), ct);
-                await CheckpointService.CommitCheckpointAsync(db, new CheckpointCommitRequest(runId, job.Epoch, owner, bpOpId, bpReqHash, bpEnv, TokensUsed: 0, WallTimeUsedSeconds: 0.0), ct);
-                blueprintHeadForSection = await db.ReadingPaperArtifactHeads
-                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == bpPrefixForSection || h.ArtifactId.StartsWith("art_blueprint_") || h.ArtifactId.StartsWith("bp_sec_")), ct);
-            }
-
-            if (blueprintHeadForSection == null)
-            {
-                throw new InvalidOperationException($"Cannot commit section {sourceNum}: blueprint head '{bpPrefixForSection}' could not be established");
-            }
-
-            var blueprintRefForSection = new ArtifactRef(blueprintHeadForSection.ArtifactId, ArtifactType.ExamBlueprint, blueprintHeadForSection.AcceptedVersion, blueprintHeadForSection.AcceptedHash);
-
-            // 4b. Passage head (committed once per section)
-            var passageIdForSection = $"art_passage_s{sourceNum}";
-            var passageHeadForSection = await db.ReadingPaperArtifactHeads
-                .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == passageIdForSection || h.ArtifactId == $"art_passage_{sourceNum}"), ct);
-
-            if (passageHeadForSection == null)
-            {
-                var passDoc = JsonDocument.Parse(JsonSerializer.Serialize(new { text = section.Passage, passage = section.Passage, wordCount = ReadingPaperRules.WordCount(section.Passage), source = section.Source }, ReadingPaperRules.Json));
-                var passParents = new List<ArtifactRef> { blueprintRefForSection };
-                var passHash = ArtifactEnvelope.ComputeContentHash(passDoc.RootElement, passParents);
-                var passCreatedAt = DateTime.UtcNow;
-                var passEnv = new ArtifactEnvelope(passageIdForSection, ArtifactType.Passage, 1, runId, sourceNum, "2.0.0", passHash, passCreatedAt, "2.0.0", passDoc.RootElement.Clone(), passParents);
-                var passOpId = $"op_passage_{sourceNum}_{passHash[..Math.Min(12, passHash.Length)]}";
-                var passReqHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{runId}:passage:{sourceNum}")));
-                await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(runId, job.Epoch, owner, passOpId, "GENERATE_PASSAGE", passReqHash, 0, 0m, 30.0, secId, passageIdForSection), ct);
-                await CheckpointService.CommitCheckpointAsync(db, new CheckpointCommitRequest(runId, job.Epoch, owner, passOpId, passReqHash, passEnv, TokensUsed: 0, WallTimeUsedSeconds: 0.0), ct);
-                passageHeadForSection = await db.ReadingPaperArtifactHeads
-                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == passageIdForSection || h.ArtifactId == $"art_passage_{sourceNum}"), ct);
-            }
-
-            if (passageHeadForSection == null)
-            {
-                throw new InvalidOperationException($"Cannot commit section {sourceNum}: passage head '{passageIdForSection}' could not be established");
-            }
-
-            var passageRefForSection = new ArtifactRef(passageHeadForSection.ArtifactId, ArtifactType.Passage, passageHeadForSection.AcceptedVersion, passageHeadForSection.AcceptedHash);
-
-            // 4c. Question heads (one per question in section.Groups). Commit any missing; reuse existing refs from store.
-            //     Use canonical key 'art_q_{questionNumber}' so the G12 final snapshot can locate all 40 question refs by
-            //     matching artifactId. ParentRefs for each question head = [passageRef, blueprintRef] (order preserved as
-            //     in the canonical seed).
-            var questionRefsForSection = new List<ArtifactRef>();
-            var existingQHeads = await db.ReadingPaperArtifactHeads
-                .Where(h => h.RunId == runId && h.ArtifactId.StartsWith("art_q_"))
-                .ToDictionaryAsync(h => h.ArtifactId, ct);
-
-            if (section.Groups != null)
-            {
-                foreach (var grp in section.Groups)
-                {
-                    foreach (var q in grp.Questions)
-                    {
-                        var qId = $"art_q_{q.Number}";
-                        var qPayload = new
-                        {
-                            number = q.Number,
-                            questionNumber = q.Number,
-                            prompt = q.Prompt,
-                            answer = q.Answer,
-                            options = q.Options,
-                            evidenceQuote = q.EvidenceQuote,
-                            explanation = q.Explanation
-                        };
-                        var qDoc = JsonDocument.Parse(JsonSerializer.Serialize(qPayload, ReadingPaperRules.Json));
-                        var qParents = new List<ArtifactRef> { passageRefForSection, blueprintRefForSection };
-                        var qHash = ArtifactEnvelope.ComputeContentHash(qDoc.RootElement, qParents);
-                        if (!existingQHeads.TryGetValue(qId, out var qHead) || qHead.AcceptedHash != qHash)
-                        {
-                            var qVersion = (qHead?.AcceptedVersion ?? 0) + 1;
-                            var qCreatedAt = DateTime.UtcNow;
-                            var qEnv = new ArtifactEnvelope(qId, ArtifactType.Question, qVersion, runId, sourceNum, "2.0.0", qHash, qCreatedAt, "2.0.0", qDoc.RootElement.Clone(), qParents);
-                            var qOpId = $"op_q_{sourceNum}_{q.Number}_{qHash[..Math.Min(12, qHash.Length)]}";
-                            var qReqHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{runId}:question:{sourceNum}:{q.Number}:{qVersion}")));
-                            await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(runId, job.Epoch, owner, qOpId, "GENERATE_QUESTION", qReqHash, 0, 0m, 5.0, secId, qId), ct);
-                            await CheckpointService.CommitCheckpointAsync(db, new CheckpointCommitRequest(runId, job.Epoch, owner, qOpId, qReqHash, qEnv, TokensUsed: 0, WallTimeUsedSeconds: 0.0), ct);
-                            qHead = await db.ReadingPaperArtifactHeads
-                                .FirstOrDefaultAsync(h => h.RunId == runId && h.ArtifactId == qId, ct);
-                            if (qHead == null)
-                            {
-                                throw new InvalidOperationException($"Cannot commit question head '{qId}' for section {sourceNum}");
-                            }
-                            existingQHeads[qId] = qHead;
-                        }
-
-                        var qRef = new ArtifactRef(qHead.ArtifactId, ArtifactType.Question, qHead.AcceptedVersion, qHead.AcceptedHash);
-                        questionRefsForSection.Add(qRef);
-                    }
-                }
-            }
-
-            // 4d. Build parent refs in canonical order: [passage, blueprint, ...questionRefs]
-            var parentRefsForSection = new List<ArtifactRef> { passageRefForSection, blueprintRefForSection };
-            parentRefsForSection.AddRange(questionRefsForSection);
-
-            // 4e. Construct ArtifactEnvelope & commit checkpoint atomically
-            var artifactId = $"art_section_{sourceNum}";
-
-            var sectionPayloadObj = new
-            {
-                sectionId = sourceNum,
-                title = section.Title,
-                passage = section.Passage,
-                source = section.Source,
-                passageRef = passageRefForSection,
-                blueprintRef = blueprintRefForSection,
-                questionRefs = questionRefsForSection,
-                groups = section.Groups
+                ProviderCallSeconds = 180.0,
+                SectionWallSeconds = 900.0,
+                SectionTokenCap = 100000,
+                RunTokenCap = 300000,
+                RunWallSeconds = 2700.0
             };
-            var payloadJson = JsonSerializer.Serialize(sectionPayloadObj, ReadingPaperRules.Json);
-            using var doc = JsonDocument.Parse(payloadJson);
-            var contentHash = ArtifactEnvelope.ComputeContentHash(doc.RootElement, parentRefsForSection);
-            var sectionEnvelope = new ArtifactEnvelope(
-                artifactId,
-                ArtifactType.Section,
-                1,
-                runId,
-                sourceNum,
-                "2.0.0",
-                contentHash,
-                DateTime.UtcNow,
-                "2.0.0",
-                doc.RootElement.Clone(),
-                parentRefsForSection
-            );
-
-            // 4a. Aggregate actual tokens and wall time spent across all child operations for this section
-            var sectionOps = await db.ReadingPaperOperations
-                .Where(o => o.RunId == runId && (o.SectionId == secId || o.ParentOperationId == opId))
-                .ToListAsync(ct);
-
-            var providerOpsForRunCount = await db.ReadingPaperOperations
-                .CountAsync(o => o.RunId == runId &&
-                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE"), ct);
-
-            var actualSectionTokens = sectionOps
-                .Where(o => CheckpointService.IsProviderCallType(o.OperationType))
-                .Sum(o => o.TokensUsed);
-
-            var actualSectionWallTime = sectionOps
-                .Where(o => CheckpointService.IsProviderCallType(o.OperationType))
-                .Sum(o => o.WallTimeUsedSeconds);
-
-            // Retain full reservation if child operations were not separately reconciled (e.g. unknown outcome / test mock);
-            // never substitute an arbitrary fabricated constant like 2200, and never clamp reservations that retain the bound.
-            var tokensToCommit = actualSectionTokens > 0
-                ? actualSectionTokens
-                : (providerOpsForRunCount == 0 && grant.TokenReservation > 0 && !isUnlimitedRun ? grant.TokenReservation : 0);
-            var wallTimeToCommit = actualSectionWallTime > 0
-                ? actualSectionWallTime
-                : (providerOpsForRunCount == 0 && grant.WallTimeReservationSeconds > 0 && !isUnlimitedRun ? grant.WallTimeReservationSeconds : 0.0);
-
-            var ack = await CheckpointService.CommitCheckpointAsync(db, new CheckpointCommitRequest(
-                runId, job.Epoch, owner, opId, reqHash, sectionEnvelope,
-                TokensUsed: tokensToCommit,
-                WallTimeUsedSeconds: wallTimeToCommit
-            ), ct);
-
-            // Advance local in-memory progress ONLY after durable ACK is received
-            sections.Add(section);
-            var completed = sections.Count;
-            await AppendLogAsync(job.Id, "Information",
-                $"Passage {sourceNum} durable checkpoint acknowledged ({ack.ArtifactId} v{ack.Version}, Hash: {ack.ContentHash[..8]}...). Progress: {completed}/{sources.Count}.", ct);
         }
-        List<EvaluationResult>? finalEvaluations = null;
-        if (isV2Engine && sections.Count == 3)
+
+        var sourceInputs = sources.Select((s, idx) => new SourceInput(
+            SectionIndex: idx + 1,
+            Pmcid: s.Pmcid,
+            Title: s.Title,
+            Url: s.Url,
+            License: s.License,
+            Content: s.Content,
+            Doi: s.Doi,
+            Authors: s.Authors
+        )).ToList();
+
+        var pipelineRequest = new PipelineRequest(
+            RunId: runId,
+            JobId: job.Id,
+            Epoch: job.Epoch,
+            LeaseOwner: owner,
+            Topic: job.Topic,
+            Sources: sourceInputs,
+            SectionIndices: sourceInputs.Select(s => s.SectionIndex).ToList(),
+            Parallel: false,
+            Policy: policy,
+            Finalize: true
+        );
+
+        await AppendLogAsync(job.Id, "Information",
+            $"Executing unified ReadingGenerationPipeline via AI client for topic '{job.Topic}' ({sources.Count} sources)...", ct);
+
+        var pipelineResult = await ai.ExecutePipelineAsync(pipelineRequest, ct);
+
+        await AppendLogAsync(job.Id, "Information",
+            $"Unified pipeline executed successfully. Status: {pipelineResult.Status}, Sections: {pipelineResult.Sections?.Count ?? 0}.", ct);
+
+        if (pipelineResult.Sections != null && pipelineResult.Sections.Count > 0)
         {
-            await AppendLogAsync(job.Id, "Information",
-                $"[Section Loop Acceptance Complete] All {sections.Count} section(s) accepted and durable in persistence store. Proceeding to PaperLoop exam finalization.", ct);
-
-            var bpPrefix = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
-            var blueprintHead = await db.ReadingPaperArtifactHeads
-                .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == bpPrefix || h.ArtifactId.StartsWith("art_blueprint_") || h.ArtifactId.StartsWith("bp_sec_")), ct);
-            if (blueprintHead == null)
-            {
-                var bpId = $"art_blueprint_{runId[..Math.Min(8, runId.Length)]}";
-                var bpDoc = JsonDocument.Parse(JsonSerializer.Serialize(new { totalQuestions = 40, targetWordCountMin = 2150, targetWordCountMax = 2750 }, ReadingPaperRules.Json));
-                var bpHash = ArtifactEnvelope.ComputeContentHash(bpDoc.RootElement, new List<ArtifactRef>());
-                var bpEnv = new ArtifactEnvelope(bpId, ArtifactType.ExamBlueprint, 1, runId, null, "2.0.0", bpHash, DateTime.UtcNow, "2.0.0", bpDoc.RootElement.Clone(), new List<ArtifactRef>());
-                var bpOpId = $"op_bp_{runId[..Math.Min(8, runId.Length)]}";
-                var bpReqHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{runId}:blueprint")));
-                await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(runId, job.Epoch, owner, bpOpId, "GENERATE_BLUEPRINT", bpReqHash, 0, 0m, 5.0, null, bpId), ct);
-                await CheckpointService.CommitCheckpointAsync(db, new CheckpointCommitRequest(runId, job.Epoch, owner, bpOpId, bpReqHash, bpEnv, TokensUsed: 0, WallTimeUsedSeconds: 0.0), ct);
-                blueprintHead = await db.ReadingPaperArtifactHeads
-                    .FirstOrDefaultAsync(h => h.RunId == runId && (h.ArtifactId == bpPrefix || h.ArtifactId.StartsWith("art_blueprint_") || h.ArtifactId.StartsWith("bp_sec_")), ct);
-            }
-            var allHeads = await db.ReadingPaperArtifactHeads
-                .Where(h => h.RunId == runId)
-                .ToDictionaryAsync(h => h.ArtifactId, ct);
-
-            if (blueprintHead == null || !allHeads.ContainsKey(blueprintHead.ArtifactId))
-            {
-                throw new InvalidOperationException("Cannot proceed with PaperLoop: missing authoritative blueprint head");
-            }
-
-            for (var sIdx = 0; sIdx < sections.Count; sIdx++)
-            {
-                var secNum = sIdx + 1;
-                var secArtId = $"art_section_{secNum}";
-                if (!allHeads.ContainsKey(secArtId))
-                {
-                    throw new InvalidOperationException($"Cannot proceed with PaperLoop: missing section head '{secArtId}'");
-                }
-
-                var passArtId = $"art_passage_s{secNum}";
-                if (!allHeads.ContainsKey(passArtId) && !allHeads.ContainsKey($"art_passage_{secNum}"))
-                {
-                    throw new InvalidOperationException($"Cannot proceed with PaperLoop: missing passage head for section {secNum} ('{passArtId}')");
-                }
-
-                if (sections[sIdx].Groups != null)
-                {
-                    foreach (var grp in sections[sIdx].Groups)
-                    {
-                        foreach (var q in grp.Questions)
-                        {
-                            var qArtId = $"art_q_{q.Number}";
-                            if (!allHeads.ContainsKey(qArtId))
-                            {
-                                throw new InvalidOperationException($"Cannot proceed with PaperLoop: missing question head '{qArtId}' for section {secNum}");
-                            }
-                        }
-                    }
-                }
-            }
-
-            var sectionHeads = sections.Select((_, idx) =>
-                allHeads.TryGetValue($"art_section_{idx + 1}", out var sh)
-                    ? sh
-                    : allHeads[$"art_section_s{idx + 1}"]
-            ).ToList();
-
-            var bpRef = new ArtifactRef(blueprintHead.ArtifactId, ArtifactType.ExamBlueprint, blueprintHead.AcceptedVersion, blueprintHead.AcceptedHash);
-            var sRefs = sectionHeads.Select(sh => new ArtifactRef(sh.ArtifactId, ArtifactType.Section, sh.AcceptedVersion, sh.AcceptedHash)).ToList();
-
-            var paperOpId = $"op_paper_{runId[..Math.Min(8, runId.Length)]}";
-            var rawReq = $"{runId}:paper:{job.Topic}";
-            var reqHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawReq)));
-            activeRun = await db.ReadingPaperRuns.AsNoTracking().FirstOrDefaultAsync(r => r.RunId == runId, ct) ?? activeRun;
-            var isUnlimitedPaper = caps.IsBenchmarkUnlimited || (activeRun != null && (activeRun.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap || (activeRun.BudgetProfileJson != null && activeRun.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase))));
-            var paperTokenReservation = isUnlimitedPaper ? ReadingPaperCapsProfile.UnlimitedCap
-                : (caps.RunBudgetCapTokens > 0 && activeRun != null && activeRun.BudgetUsedTokens < caps.RunBudgetCapTokens
-                    ? Math.Min(300000, caps.RunBudgetCapTokens - activeRun.BudgetUsedTokens)
-                    : 300000);
-            var paperWallReservation = isUnlimitedPaper ? ReadingPaperCapsProfile.UnlimitedCap
-                : (caps.RunBudgetCapWallTimeSeconds > 0 && activeRun != null && activeRun.BudgetUsedWallTimeSeconds < caps.RunBudgetCapWallTimeSeconds
-                    ? Math.Min(600.0, caps.RunBudgetCapWallTimeSeconds - activeRun.BudgetUsedWallTimeSeconds)
-                    : 600.0);
-
-            var paperGrant = await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(
-                runId, job.Epoch, owner, paperOpId, "GENERATE_PAPER", reqHash, paperTokenReservation, 0m, paperWallReservation, null, null), ct);
-            await AppendLogAsync(job.Id, "Information", "[Paper Loop] Generating and evaluating immutable ReadingPaper snapshot via AI service...", ct);
-            var paperJson = await ai.GeneratePaperV2Async(bpRef, sRefs, runId, owner, job.Epoch, job.Topic, null, paperOpId, ct);
-
-            if (paperJson.ValueKind != JsonValueKind.Object || !paperJson.TryGetProperty("artifactId", out var paperArtIdNode))
-            {
-                throw new InvalidOperationException("Paper generation failed: invalid paper envelope response from AI service");
-            }
-
-            var paperArtId = paperArtIdNode.GetString() ?? $"art_paper_{runId[..Math.Min(8, runId.Length)]}";
-            var paperEnv = JsonSerializer.Deserialize<ArtifactEnvelope>(paperJson.GetRawText(), LoopEngineJson.Options)
-                ?? throw new InvalidOperationException($"Failed to deserialize ReadingPaper artifact envelope '{paperArtId}'");
-
-            // Ensure complete and exact parent references to Blueprint, 3 Section artifacts, 3 Passage artifacts, and 40 Question artifacts
-            var blueprintRef = ReadingPaperFinalSnapshot.Ref(paperEnv.Payload, "blueprintRef");
-            var sectionRefsList = ReadingPaperFinalSnapshot.Refs(paperEnv.Payload, "sectionRefs");
-            var passageRefsList = ReadingPaperFinalSnapshot.Refs(paperEnv.Payload, "passageRefs");
-            var questionRefsList = ReadingPaperFinalSnapshot.Refs(paperEnv.Payload, "questionRefs");
-            var fullParentRefs = new[] { blueprintRef }.Concat(sectionRefsList).Concat(passageRefsList).Concat(questionRefsList).ToList();
-
-            if (paperEnv.ParentRefs == null || paperEnv.ParentRefs.Count != fullParentRefs.Count || !paperEnv.ParentRefs.SequenceEqual(fullParentRefs))
-            {
-                var recomputedHash = ArtifactEnvelope.ComputeContentHash(paperEnv.Payload, fullParentRefs);
-                paperEnv = paperEnv with
-                {
-                    ParentRefs = fullParentRefs,
-                    ContentHash = recomputedHash
-                };
-            }
-
-            var evalResult = await ai.EvaluatePaperAsync(paperEnv, runId, owner, job.Epoch, ct);
-            await AppendLogAsync(job.Id, "Information", $"[Paper Evaluated] Evaluation completed for {paperArtId}.", ct);
-
-            // Deserialize and verify all required evaluators
-            List<EvaluationResult> evaluations = new();
-            if (evalResult.ValueKind == JsonValueKind.Array)
-            {
-                evaluations = JsonSerializer.Deserialize<List<EvaluationResult>>(evalResult.GetRawText(), LoopEngineJson.Options) ?? new();
-            }
-            else if (evalResult.ValueKind == JsonValueKind.Object)
-            {
-                if (evalResult.TryGetProperty("evaluations", out var evalsArray) && evalsArray.ValueKind == JsonValueKind.Array)
-                {
-                    evaluations = JsonSerializer.Deserialize<List<EvaluationResult>>(evalsArray.GetRawText(), LoopEngineJson.Options) ?? new();
-                }
-                else if (evalResult.TryGetProperty("results", out var resultsArray) && resultsArray.ValueKind == JsonValueKind.Array)
-                {
-                    evaluations = JsonSerializer.Deserialize<List<EvaluationResult>>(resultsArray.GetRawText(), LoopEngineJson.Options) ?? new();
-                }
-                else
-                {
-                    var single = JsonSerializer.Deserialize<EvaluationResult>(evalResult.GetRawText(), LoopEngineJson.Options);
-                    if (single != null) evaluations.Add(single);
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("Paper evaluation failed: AI service returned non-object non-array JSON");
-            }
-
-            // STRICT FAIL-CLOSED EVALUATION CHECK:
-            var evalIssues = new List<string>();
-            var hasBlockingFailure = false;
-            var evaluationsByEvaluatorId = evaluations
-                .GroupBy(e => e.EvaluatorId, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
-
-            foreach (var (requiredId, expectedVersion) in ReadingPaperFinalSnapshot.RequiredEvaluators)
-            {
-                if (!evaluationsByEvaluatorId.TryGetValue(requiredId, out var eval))
-                {
-                    hasBlockingFailure = true;
-                    evalIssues.Add($"Mandatory evaluator '{requiredId}' is missing from whole-paper evaluation results");
-                    continue;
-                }
-
-                if (eval.EvaluatorVersion != expectedVersion)
-                {
-                    hasBlockingFailure = true;
-                    evalIssues.Add($"Evaluator '{requiredId}' version mismatch: expected '{expectedVersion}', got '{eval.EvaluatorVersion}'");
-                }
-
-                if (eval.Status != EvaluationStatus.PASS)
-                {
-                    hasBlockingFailure = true;
-                    evalIssues.Add($"Evaluator '{requiredId}' reported non-pass status '{eval.Status}'");
-                }
-
-                var openBlockingIssues = (eval.Issues ?? Array.Empty<Issue>())
-                    .Where(i => i.Status == IssueStatus.OPEN && (i.Severity is IssueSeverity.CRITICAL or IssueSeverity.MAJOR))
-                    .ToList();
-
-                foreach (var issue in openBlockingIssues)
-                {
-                    hasBlockingFailure = true;
-                    evalIssues.Add($"[{issue.Severity}] {issue.Code}: {issue.Message}");
-                }
-            }
-
-            if (hasBlockingFailure || evalIssues.Count > 0)
-            {
-                var failureSummary = string.Join("; ", evalIssues);
-                await AppendLogAsync(job.Id, "Error", $"Whole-paper evaluation failed with blocking issues: {failureSummary}", ct);
-
-                await db.ReadingPaperJobs.Where(x => x.Id == job.Id && x.LeaseOwner == owner && x.Epoch == job.Epoch)
-                    .ExecuteUpdateAsync(x => x.SetProperty(j => j.Status, "Failed")
-                        .SetProperty(j => j.Error, $"Whole-paper evaluation failed: {failureSummary}".Length > 1000
-                            ? $"Whole-paper evaluation failed: {failureSummary}"[..1000]
-                            : $"Whole-paper evaluation failed: {failureSummary}")
-                        .SetProperty(j => j.LeaseUntil, (DateTime?)null)
-                        .SetProperty(j => j.LeaseOwner, (Guid?)null)
-                        .SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
-
-                throw new InvalidOperationException($"Whole-paper evaluation failed: {failureSummary}");
-            }
-
-            finalEvaluations = evaluations;
-
-            var actualPaperTokens = await db.ReadingPaperOperations
-                .Where(o => o.RunId == runId && (o.OperationId == paperOpId || o.ParentOperationId == paperOpId))
-                .SumAsync(o => o.TokensUsed, ct);
-
-            var actualPaperWallTime = await db.ReadingPaperOperations
-                .Where(o => o.RunId == runId && (o.OperationId == paperOpId || o.ParentOperationId == paperOpId))
-                .SumAsync(o => o.WallTimeUsedSeconds, ct);
-
-            var paperAccountingType = actualPaperTokens > 0 ? "REPORTED" : "ESTIMATED";
-
-            // Authoritative artifact commit is owned by BoundedLoopRuntime.PaperLoop inside the
-            // generation-service (via CommitCheckpointAsync against paperEnv). The worker must
-            // ONLY reconcile the operation ledger here; re-committing paperEnv here would race
-            // with the runtime's CAS-guarded initial-head check.
-            var paperReconcile = await CheckpointService.ReconcileOperationAsync(db, new OperationReconcileRequest(
-                runId, job.Epoch, owner, paperOpId,
-                TokensUsed: actualPaperTokens,
-                WallTimeUsedSeconds: actualPaperWallTime,
-                CostUsedUsd: 0m,
-                AccountingType: paperAccountingType,
-                ResultRefJson: paperEnv.ContentHash
-            ), ct);
-
-            await AppendLogAsync(job.Id, "Information",
-                $"[Paper Loop Acceptance Complete] ReadingPaper snapshot {paperArtId} committed to persistence store (status={paperReconcile.Status}, tokens={paperReconcile.TokensUsed}).", ct);
+            sections = pipelineResult.Sections
+                .Select(secEnv => CheckpointService.ParseCanonicalV2Section(secEnv.Payload))
+                .Where(s => s != null)
+                .Select(s => s!)
+                .ToList();
         }
+
+        List<EvaluationResult>? finalEvaluations = null;
 
         var normalizedSections = NormalizeSectionsForValidation(sections);
         sections = normalizedSections;
         job.SectionsJson = JsonSerializer.Serialize(sections, ReadingPaperRules.Json);
+        job.CompletedSections = sections.Count;
         await db.ReadingPaperJobs.Where(x => x.Id == job.Id && x.LeaseOwner == owner && x.Epoch == job.Epoch)
-            .ExecuteUpdateAsync(x => x.SetProperty(j => j.SectionsJson, job.SectionsJson).SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
+            .ExecuteUpdateAsync(x => x.SetProperty(j => j.SectionsJson, job.SectionsJson)
+                .SetProperty(j => j.CompletedSections, job.CompletedSections)
+                .SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
         await AppendLogAsync(job.Id, "Information", $"[Exam Finalization] Validating all {sections.Count} section(s) against IELTS Academic Paper Rules...", ct);
         ReadingPaperRules.Validate(sections);
         await AppendLogAsync(job.Id, "Information", $"[Exam Validation Passed] All {sections.Sum(s => s.Groups.Sum(g => g.Questions.Count))} questions and {sections.Sum(s => ReadingPaperRules.WordCount(s.Passage))} words meet IELTS standards. Saving Exam in database via idempotent finalizer...", ct);

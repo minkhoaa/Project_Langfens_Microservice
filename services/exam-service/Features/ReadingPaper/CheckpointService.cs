@@ -1116,6 +1116,30 @@ public static class CheckpointService
                     $"Operation '{request.OperationId}' was already completed with a different artifact payload");
             }
             // 5a. Persist Artifact
+            if (!string.IsNullOrWhiteSpace(request.ExpectedHeadHash))
+            {
+                var currentHead = await db.ReadingPaperArtifactHeads.AsNoTracking().FirstOrDefaultAsync(
+                    h => h.RunId == request.RunId && h.ArtifactId == request.Artifact.ArtifactId, ct);
+                if (currentHead == null || !string.Equals(currentHead.AcceptedHash, request.ExpectedHeadHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    var actualHash = currentHead?.AcceptedHash ?? "none";
+                    throw new CheckpointValidationException(409,
+                        $"CAS rejection: expected head hash '{request.ExpectedHeadHash}' for artifact '{request.Artifact.ArtifactId}', but current head hash is '{actualHash}'");
+                }
+            }
+
+            if (request.ExpectedCursorRevision is not null)
+            {
+                var currentCursor = await db.ReadingPaperLoopCursors.AsNoTracking().FirstOrDefaultAsync(
+                    c => c.RunId == request.RunId && c.ArtifactId == request.Artifact.ArtifactId, ct);
+                var actualRev = currentCursor?.Revision ?? 0;
+                if (actualRev != request.ExpectedCursorRevision.Value)
+                {
+                    throw new CheckpointValidationException(409,
+                        $"CAS rejection: expected cursor revision {request.ExpectedCursorRevision} for artifact '{request.Artifact.ArtifactId}', but current revision is {actualRev}");
+                }
+            }
+
             if (existingArt == null)
             {
                 var newArt = new ReadingPaperArtifact
@@ -1545,9 +1569,10 @@ public static class CheckpointService
         }
 
         // 2. Provenance verification if source run is provided
+        ReadingPaperRun? sourceRun = null;
         if (!string.IsNullOrWhiteSpace(request.SourceRunId))
         {
-            var sourceRun = await db.ReadingPaperRuns.FirstOrDefaultAsync(r => r.RunId == request.SourceRunId, ct);
+            sourceRun = await db.ReadingPaperRuns.FirstOrDefaultAsync(r => r.RunId == request.SourceRunId, ct);
             if (sourceRun == null)
             {
                 throw new CheckpointValidationException(404,
@@ -1563,12 +1588,33 @@ public static class CheckpointService
                     $"Artifact '{request.Artifact.ArtifactId}' not found in source run '{request.SourceRunId}'");
             }
 
-            // For v1, hash must match source artifact
-            if (request.Artifact.Version == 1 &&
-                !string.Equals(sourceArtifact.ContentHash, request.Artifact.ContentHash, StringComparison.OrdinalIgnoreCase))
+            // Generic provenance validation:
+            // If the artifact matches an existing version in the source run, its content hash must match.
+            // If importing a derived version (Version > sourceArtifact.Version), verify that the source
+            // artifact has a valid predecessor with non-empty content hash.
+            var exactSourceArt = await db.ReadingPaperArtifacts.FirstOrDefaultAsync(
+                a => a.RunId == request.SourceRunId && a.ArtifactId == request.Artifact.ArtifactId && a.Version == request.Artifact.Version, ct);
+
+            if (exactSourceArt != null)
             {
-                throw new CheckpointValidationException(409,
-                    $"Provenance mismatch: artifact '{request.Artifact.ArtifactId}' hash '{request.Artifact.ContentHash}' does not match source run hash '{sourceArtifact.ContentHash}'");
+                if (!string.Equals(exactSourceArt.ContentHash, request.Artifact.ContentHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new CheckpointValidationException(409,
+                        $"Provenance mismatch: artifact '{request.Artifact.ArtifactId}' v{request.Artifact.Version} hash '{request.Artifact.ContentHash}' does not match source run hash '{exactSourceArt.ContentHash}'");
+                }
+            }
+            else
+            {
+                var predecessor = await db.ReadingPaperArtifacts
+                    .Where(a => a.RunId == request.SourceRunId && a.ArtifactId == request.Artifact.ArtifactId && a.Version < request.Artifact.Version)
+                    .OrderByDescending(a => a.Version)
+                    .FirstOrDefaultAsync(ct);
+
+                if (predecessor == null || string.IsNullOrWhiteSpace(predecessor.ContentHash))
+                {
+                    throw new CheckpointValidationException(409,
+                        $"Provenance mismatch: derived artifact '{request.Artifact.ArtifactId}' v{request.Artifact.Version} lacks a valid predecessor in source run '{request.SourceRunId}'");
+                }
             }
         }
 
@@ -1595,7 +1641,7 @@ public static class CheckpointService
             );
         }
 
-        // 4. Atomic transaction to insert artifact and head
+        // 4. Atomic transaction to insert artifact, parent closure heads, and ledger
         var strategy = db.Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
         {
@@ -1603,6 +1649,72 @@ public static class CheckpointService
             await using var tx = await db.Database.BeginTransactionAsync(ct);
 
             var (txRun, txJob) = await ValidateRunAuthorityAndFencingAsync(db, request.RunId, request.Epoch, request.LeaseOwner, ct);
+
+            // 4a. Validate and bind parent artifact heads in destination run closure
+            foreach (var parent in request.Artifact.ParentRefs)
+            {
+                var existingParentHead = await db.ReadingPaperArtifactHeads.FirstOrDefaultAsync(
+                    h => h.RunId == request.RunId && h.ArtifactId == parent.ArtifactId, ct);
+
+                if (existingParentHead == null)
+                {
+                    if (!string.IsNullOrWhiteSpace(request.SourceRunId))
+                    {
+                        var sourceParentArt = await db.ReadingPaperArtifacts.FirstOrDefaultAsync(
+                            a => a.RunId == request.SourceRunId && a.ArtifactId == parent.ArtifactId && a.Version == parent.Version, ct);
+
+                        if (sourceParentArt != null)
+                        {
+                            var parentArtInDest = await db.ReadingPaperArtifacts.FirstOrDefaultAsync(
+                                a => a.RunId == request.RunId && a.ArtifactId == parent.ArtifactId && a.Version == parent.Version, ct);
+
+                            if (parentArtInDest == null)
+                            {
+                                db.ReadingPaperArtifacts.Add(new ReadingPaperArtifact
+                                {
+                                    Id = Guid.NewGuid(),
+                                    RunId = request.RunId,
+                                    ArtifactId = sourceParentArt.ArtifactId,
+                                    ArtifactType = sourceParentArt.ArtifactType,
+                                    Version = sourceParentArt.Version,
+                                    ContentHash = sourceParentArt.ContentHash,
+                                    PayloadJson = sourceParentArt.PayloadJson,
+                                    ParentRefsJson = sourceParentArt.ParentRefsJson,
+                                    ProducerVersion = sourceParentArt.ProducerVersion,
+                                    EnvelopeJson = sourceParentArt.EnvelopeJson,
+                                    CreatedAt = DateTime.UtcNow
+                                });
+                            }
+
+                            db.ReadingPaperArtifactHeads.Add(new ReadingPaperArtifactHead
+                            {
+                                Id = Guid.NewGuid(),
+                                RunId = request.RunId,
+                                ArtifactId = parent.ArtifactId,
+                                AcceptedVersion = parent.Version,
+                                AcceptedHash = parent.ContentHash,
+                                UpdatedAt = DateTime.UtcNow
+                            });
+                        }
+                        else
+                        {
+                            throw new CheckpointValidationException(422,
+                                $"Dependency closure incomplete: parent '{parent.ArtifactId}' v{parent.Version} not found in source run '{request.SourceRunId}'");
+                        }
+                    }
+                    else
+                    {
+                        throw new CheckpointValidationException(422,
+                            $"Dependency closure incomplete: destination run lacks parent head '{parent.ArtifactId}' v{parent.Version}");
+                    }
+                }
+                else if (existingParentHead.AcceptedVersion != parent.Version ||
+                         !string.Equals(existingParentHead.AcceptedHash, parent.ContentHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new CheckpointValidationException(409,
+                        $"Dependency conflict: destination run head for '{parent.ArtifactId}' (v{existingParentHead.AcceptedVersion}: {existingParentHead.AcceptedHash}) does not match parent ref (v{parent.Version}: {parent.ContentHash})");
+                }
+            }
 
             var newArt = new ReadingPaperArtifact
             {
@@ -1656,7 +1768,40 @@ public static class CheckpointService
                 existingHead.UpdatedAt = DateTime.UtcNow;
             }
 
-            // Also record an import operation with 0 tokens and 0 wall time
+            // 4b. Prior budget usage accounting from source run
+            int sourceTokens = 0;
+            double sourceWallTime = 0.0;
+            int sourceCalls = 0;
+
+            if (!string.IsNullOrWhiteSpace(request.SourceRunId) && sourceRun != null)
+            {
+                var sourceOps = await db.ReadingPaperOperations
+                    .Where(o => o.RunId == request.SourceRunId && (o.Status == "COMPLETED" || o.Status == "RESERVED" || o.Status == "UNKNOWN_OUTCOME"))
+                    .ToListAsync(ct);
+                var sourceProviderOps = sourceOps.Where(o => IsProviderCallType(o.OperationType)).ToList();
+                if (sourceProviderOps.Count > 0)
+                {
+                    sourceTokens = sourceProviderOps.Sum(o => o.Status == "COMPLETED"
+                        ? ((string.Equals(o.AccountingType, "REPORTED", StringComparison.OrdinalIgnoreCase) || string.Equals(o.AccountingType, "RECONCILED", StringComparison.OrdinalIgnoreCase))
+                            ? o.TokensUsed
+                            : Math.Max(o.TokensUsed, Math.Max(0, o.TokenReservation)))
+                        : Math.Max(0, o.TokenReservation));
+                    sourceWallTime = sourceProviderOps.Sum(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : Math.Max(0.0, o.WallTimeReservationSeconds));
+                    sourceCalls = sourceProviderOps.Count;
+                }
+                else
+                {
+                    sourceTokens = sourceRun.BudgetUsedTokens;
+                    sourceWallTime = sourceRun.BudgetUsedWallTimeSeconds;
+                    sourceCalls = sourceRun.BudgetUsedCalls;
+                }
+
+                txRun.BudgetUsedTokens = Math.Max(txRun.BudgetUsedTokens, sourceTokens);
+                txRun.BudgetUsedWallTimeSeconds = Math.Max(txRun.BudgetUsedWallTimeSeconds, sourceWallTime);
+                txRun.BudgetUsedCalls = Math.Max(txRun.BudgetUsedCalls, sourceCalls);
+            }
+
+            // Also record an import operation with prior usage
             var importOpId = $"op_import_{request.Artifact.ArtifactId}_v{request.Artifact.Version}";
             var existingOp = await db.ReadingPaperOperations.FirstOrDefaultAsync(
                 o => o.RunId == request.RunId && o.OperationId == importOpId, ct);
@@ -1671,9 +1816,9 @@ public static class CheckpointService
                     RequestHash = $"import:{request.Artifact.ArtifactId}:{request.Artifact.ContentHash}",
                     Status = "COMPLETED",
                     TokenReservation = 0,
-                    TokensUsed = 0,
+                    TokensUsed = sourceTokens,
                     WallTimeReservationSeconds = 0,
-                    WallTimeUsedSeconds = 0,
+                    WallTimeUsedSeconds = sourceWallTime,
                     ArtifactId = request.Artifact.ArtifactId,
                     SectionId = request.Artifact.SectionId?.ToString(),
                     AccountingType = "REPORTED",
@@ -1681,7 +1826,6 @@ public static class CheckpointService
                     UpdatedAt = DateTime.UtcNow
                 });
             }
-
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
 
@@ -1788,6 +1932,30 @@ public static class CheckpointService
             if (txJob.LeaseUntil is null || txJob.LeaseUntil < DateTime.UtcNow)
             {
                 throw new CheckpointValidationException(409, "Lease has expired; worker must renew before writing");
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.ExpectedHeadHash))
+            {
+                var currentHead = await db.ReadingPaperArtifactHeads.AsNoTracking().FirstOrDefaultAsync(
+                    h => h.RunId == request.RunId && h.ArtifactId == request.Artifact.ArtifactId, ct);
+                if (currentHead == null || !string.Equals(currentHead.AcceptedHash, request.ExpectedHeadHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    var actualHash = currentHead?.AcceptedHash ?? "none";
+                    throw new CheckpointValidationException(409,
+                        $"CAS rejection: expected head hash '{request.ExpectedHeadHash}' for artifact '{request.Artifact.ArtifactId}', but current head hash is '{actualHash}'");
+                }
+            }
+
+            if (request.ExpectedCursorRevision is not null)
+            {
+                var currentCursor = await db.ReadingPaperLoopCursors.AsNoTracking().FirstOrDefaultAsync(
+                    c => c.RunId == request.RunId && c.ArtifactId == request.Artifact.ArtifactId, ct);
+                var actualRev = currentCursor?.Revision ?? 0;
+                if (actualRev != request.ExpectedCursorRevision.Value)
+                {
+                    throw new CheckpointValidationException(409,
+                        $"CAS rejection: expected cursor revision {request.ExpectedCursorRevision} for artifact '{request.Artifact.ArtifactId}', but current revision is {actualRev}");
+                }
             }
 
             // Persist draft artifact WITHOUT touching ReadingPaperArtifactHeads!
@@ -2138,6 +2306,77 @@ public static class CheckpointService
             }
         }
 
+        var loopCursorsList = await db.ReadingPaperLoopCursors.Where(c => c.RunId == runId)
+            .Select(c => new LoopCursorCheckpoint(c.ArtifactId, c.Revision, c.StateJson, c.LastOperationId)).ToListAsync(ct);
+
+        string? policyHash = null;
+        foreach (var cursor in loopCursorsList)
+        {
+            if (!string.IsNullOrWhiteSpace(cursor.StateJson))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(cursor.StateJson);
+                    if (doc.RootElement.TryGetProperty("policyHash", out var phProp) && phProp.ValueKind == JsonValueKind.String)
+                    {
+                        var candidate = phProp.GetString();
+                        if (!string.IsNullOrWhiteSpace(candidate))
+                        {
+                            policyHash = candidate;
+                            break;
+                        }
+                    }
+                }
+                catch { }
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(policyHash))
+        {
+            foreach (var op in ops)
+            {
+                if (!string.IsNullOrWhiteSpace(op.ResultRefJson) && op.ResultRefJson.Contains("policyHash", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(op.ResultRefJson);
+                        if (doc.RootElement.TryGetProperty("policyHash", out var phProp) && phProp.ValueKind == JsonValueKind.String)
+                        {
+                            var candidate = phProp.GetString();
+                            if (!string.IsNullOrWhiteSpace(candidate))
+                            {
+                                policyHash = candidate;
+                                break;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(policyHash))
+        {
+            var provider = "minimax";
+            if (!string.IsNullOrWhiteSpace(run.SourceRevisionsJson))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(run.SourceRevisionsJson);
+                    if (doc.RootElement.ValueKind == JsonValueKind.Array && doc.RootElement.GetArrayLength() > 0)
+                    {
+                        var first = doc.RootElement[0];
+                        if (first.TryGetProperty("metadata", out var meta) && meta.TryGetProperty("provider", out var provProp))
+                        {
+                            provider = provProp.GetString() ?? provider;
+                        }
+                    }
+                }
+                catch { }
+            }
+            policyHash = PinnedExecutionPolicy.CreateDefault(provider).ComputeHash();
+        }
+
         return new ResumeStateResult(
             run.RunId,
             run.JobId,
@@ -2160,8 +2399,8 @@ public static class CheckpointService
             DraftArtifacts: draftArtifacts,
             Issues: issues,
             Evaluations: evalResults,
-            LoopCursors: await db.ReadingPaperLoopCursors.Where(c => c.RunId == runId)
-                .Select(c => new LoopCursorCheckpoint(c.ArtifactId, c.Revision, c.StateJson, c.LastOperationId)).ToListAsync(ct),
+            LoopCursors: loopCursorsList,
+            PolicyHash: policyHash,
             Operations: ops.Select(o => new OperationResumeInfo(o.OperationId, o.OperationType, o.Status,
                 o.ArtifactId, o.RequestHash, o.TokenReservation, o.TokensUsed,
                 o.WallTimeReservationSeconds, o.WallTimeUsedSeconds, o.ResultRefJson,
@@ -2387,7 +2626,7 @@ public static class CheckpointService
         }
     }
 
-    private static ReadingGeneratedSection? ParseCanonicalV2Section(JsonElement payload)
+    public static ReadingGeneratedSection? ParseCanonicalV2Section(JsonElement payload)
     {
         try
         {

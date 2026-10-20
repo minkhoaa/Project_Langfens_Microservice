@@ -33,17 +33,46 @@ public static class ReadingPaperRules
     private static readonly Regex Words = new(@"\b[\w'-]+\b", RegexOptions.Compiled);
     public static int WordCount(string text) => Words.Matches(text).Count;
 
-    public static void Validate(IReadOnlyList<ReadingGeneratedSection> sections)
+    public static void Validate(ReadingGeneratedSection section, int? sectionNumber = null, int? startingQuestionNumber = null)
+        => Validate([section], sectionNumber, startingQuestionNumber);
+
+    public static void Validate(
+        IReadOnlyList<ReadingGeneratedSection> sections,
+        int? startingSectionNumber = null,
+        int? startingQuestionNumber = null)
     {
-        if (sections.Count is < 1 or > 3) throw new InvalidOperationException("Expected one to three passages");
+        int startSec;
+        if (startingSectionNumber.HasValue)
+        {
+            startSec = startingSectionNumber.Value;
+        }
+        else if (sections.Count == 1 && sections[0].Groups.Count > 0 && sections[0].Groups[0].Questions.Count > 0)
+        {
+            var firstQ = sections[0].Groups[0].Questions[0].Number;
+            startSec = firstQ switch
+            {
+                >= 27 => 3,
+                >= 14 => 2,
+                _ => 1
+            };
+        }
+        else
+        {
+            startSec = 1;
+        }
+
+        if (startSec < 1 || startSec > 3 || sections.Count < 1 || startSec - 1 + sections.Count > 3)
+            throw new InvalidOperationException("Expected one to three passages within valid range");
         var seenSources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenDois = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenPrompts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var passageShingles = new List<HashSet<string>>();
-        var next = 1;
+        var next = startingQuestionNumber ?? (1 + Counts.Take(startSec - 1).Sum(c => c.Sum()));
+        var startQuestion = next;
         var totalWords = 0;
         for (var i = 0; i < sections.Count; i++)
         {
+            var secIndex = startSec - 1 + i;
             var section = sections[i];
             if (!seenSources.Add(section.Source.Pmcid) || string.IsNullOrWhiteSpace(section.Title))
                 throw new InvalidOperationException("Duplicate source or missing title");
@@ -60,7 +89,7 @@ public static class ReadingPaperRules
             for (var g = 0; g < 2; g++)
             {
                 var group = section.Groups[g];
-                if (group.Type != Types[i][g] || group.Questions.Count != Counts[i][g]
+                if (group.Type != Types[secIndex][g] || group.Questions.Count != Counts[secIndex][g]
                     || string.IsNullOrWhiteSpace(group.Instruction))
                     throw new InvalidOperationException("Invalid group type, count or instruction");
                 foreach (var q in group.Questions)
@@ -107,10 +136,10 @@ public static class ReadingPaperRules
                 }
             }
         }
-        var expectedQuestions = Counts.Take(sections.Count).Sum(counts => counts.Sum());
-        if (next != expectedQuestions + 1)
+        var expectedQuestions = Counts.Skip(startSec - 1).Take(sections.Count).Sum(counts => counts.Sum());
+        if (next != startQuestion + expectedQuestions)
             throw new InvalidOperationException($"Paper must have {expectedQuestions} scored items");
-        if (sections.Count == 3 && (totalWords is < 2150 or > 2750))
+        if (startSec == 1 && sections.Count == 3 && (totalWords is < 2150 or > 2750))
             throw new InvalidOperationException("A three-passage paper must have 2150–2750 passage words");
     }
 

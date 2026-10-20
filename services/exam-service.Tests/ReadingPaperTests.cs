@@ -1,13 +1,14 @@
+using System.Net;
 using System.Text.Json;
 using exam_service.Domains.Entities;
 using attempt_service.Domain.Entities;
 using attempt_service.Features.Helpers;
 using exam_service.Features.ReadingPaper;
+using exam_service.Features.ReadingPaper.Contracts;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shared.ExamDto.Contracts.Exam.Enums;
 using Xunit;
-
 namespace exam_service.Tests;
 
 public class ReadingPaperTests
@@ -420,6 +421,305 @@ public class ReadingPaperTests
                 await db.ReadingPaperRuns.Where(r => r.JobId == j.Id).ExecuteDeleteAsync();
                 await db.ReadingPaperJobs.Where(x => x.Id == j.Id).ExecuteDeleteAsync();
             }
+        }
+    }
+
+    [Fact]
+    public void Validate_StandaloneSection2_SucceedsWithoutContinuousOneBasedErrors()
+    {
+        var section2 = Paper()[1];
+        ReadingPaperRules.Validate(section2);
+    }
+
+    [Fact]
+    public void Validate_StandaloneSection3_SucceedsWithoutContinuousOneBasedErrors()
+    {
+        var section3 = Paper()[2];
+        ReadingPaperRules.Validate(section3);
+    }
+
+    [Fact]
+    public void Validate_StandaloneSection2_ExplicitStartingSection_Succeeds()
+    {
+        var section2 = Paper()[1];
+        ReadingPaperRules.Validate([section2], startingSectionNumber: 2);
+    }
+
+    [Fact]
+    public void Validate_StandaloneSection2_WrongStartingNumber_Throws()
+    {
+        var section2 = Paper()[1];
+        Assert.Throws<InvalidOperationException>(() =>
+            ReadingPaperRules.Validate([section2], startingSectionNumber: 2, startingQuestionNumber: 1));
+    }
+
+    [Fact]
+    public void PinnedExecutionPolicy_CreateDefault_GeneratesStable64HexHash()
+    {
+        var policy = PinnedExecutionPolicy.CreateDefault("minimax");
+        var hash = policy.ComputeHash();
+        Assert.NotNull(hash);
+        Assert.Equal(64, hash.Length);
+        Assert.Matches("^[0-9a-f]{64}$", hash);
+        Assert.Equal(hash, policy.ComputeHash());
+    }
+
+    [Fact]
+    public void PipelineRequest_Serialization_ContainsRequiredWireFields()
+    {
+        var sources = new List<SourceInput>
+        {
+            new(1, "PMC123", "Title 1", "https://pmc/123", "CC BY 4.0", "content 1"),
+            new(2, "PMC456", "Title 2", "https://pmc/456", "CC BY 4.0", "content 2"),
+            new(3, "PMC789", "Title 3", "https://pmc/789", "CC BY 4.0", "content 3")
+        };
+        var policy = PinnedExecutionPolicy.CreateDefault("minimax");
+        var request = new PipelineRequest(
+            RunId: "run_test_01",
+            JobId: Guid.NewGuid(),
+            Epoch: 1,
+            LeaseOwner: Guid.NewGuid(),
+            Topic: "Climate Change",
+            Sources: sources,
+            SectionIndices: [1, 2, 3],
+            Parallel: false,
+            Policy: policy,
+            Finalize: true
+        );
+
+        var json = JsonSerializer.Serialize(request, ReadingPaperRules.Json);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        Assert.True(root.TryGetProperty("runId", out var runIdProp));
+        Assert.Equal("run_test_01", runIdProp.GetString());
+        Assert.True(root.TryGetProperty("jobId", out _));
+        Assert.True(root.TryGetProperty("epoch", out var epochProp));
+        Assert.Equal(1, epochProp.GetInt32());
+        Assert.True(root.TryGetProperty("leaseOwner", out _));
+        Assert.True(root.TryGetProperty("topic", out var topicProp));
+        Assert.Equal("Climate Change", topicProp.GetString());
+        Assert.True(root.TryGetProperty("sources", out var sourcesProp));
+        Assert.Equal(3, sourcesProp.GetArrayLength());
+        Assert.True(root.TryGetProperty("sectionIndices", out var secProp));
+        Assert.Equal(3, secProp.GetArrayLength());
+        Assert.True(root.TryGetProperty("policy", out var polProp));
+        Assert.True(polProp.TryGetProperty("provider", out var provProp));
+        Assert.Equal("minimax", provProp.GetString());
+        Assert.True(root.TryGetProperty("finalize", out var finProp));
+        Assert.True(finProp.GetBoolean());
+    }
+
+    [Fact]
+    public async Task ExecutePipelineAsync_PostsToExecuteEndpoint_ReturnsAcceptedResult()
+    {
+        string? capturedPath = null;
+        string? capturedBody = null;
+
+        var handler = new TestMockHttpMessageHandler((req, body) =>
+        {
+            capturedPath = req.RequestUri?.PathAndQuery;
+            capturedBody = body;
+            var responseResult = new PipelineResult(
+                RunId: "run_mock_01",
+                Status: "ACCEPTED",
+                Sections: new List<ArtifactEnvelope>()
+            );
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(responseResult, ReadingPaperRules.Json), System.Text.Encoding.UTF8, "application/json")
+            };
+        });
+
+        using var http = new HttpClient(handler) { BaseAddress = new Uri("http://localhost:8000") };
+        var client = new ReadingPaperAiClient(http);
+
+        var request = new PipelineRequest(
+            RunId: "run_mock_01",
+            JobId: Guid.NewGuid(),
+            Epoch: 1,
+            LeaseOwner: Guid.NewGuid(),
+            Topic: "Ocean Biology",
+            Sources: [new(1, "PMC1", "Title", "https://url", "CC BY 4.0")],
+            SectionIndices: [1],
+            Parallel: false,
+            Policy: PinnedExecutionPolicy.CreateDefault("minimax")
+        );
+
+        var result = await client.ExecutePipelineAsync(request, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal("run_mock_01", result.RunId);
+        Assert.Equal("ACCEPTED", result.Status);
+        Assert.Equal("/api/v1/autogen/reading-paper/execute", capturedPath);
+        Assert.NotNull(capturedBody);
+        Assert.Contains("run_mock_01", capturedBody);
+        Assert.Contains("Ocean Biology", capturedBody);
+    }
+
+    [Fact]
+    public void ResumeStateResult_IncludesPolicyHash_RoundTripsJson()
+    {
+        var result = new ResumeStateResult(
+            RunId: "run_01",
+            JobId: Guid.NewGuid(),
+            Epoch: 1,
+            Status: "RUNNING",
+            EngineVersion: "2.0.0",
+            SchemaVersion: "2.0.0",
+            PolicyVersion: "2.0.0",
+            Artifacts: [],
+            PolicyHash: "a47f3b969f6e2e7608004bd70950ece0e357b2805575411ea766e5da3227ce25"
+        );
+
+        var json = JsonSerializer.Serialize(result, ReadingPaperRules.Json);
+        Assert.Contains("policyHash", json);
+        Assert.Contains("a47f3b969f6e2e7608004bd70950ece0e357b2805575411ea766e5da3227ce25", json);
+
+        var deserialized = JsonSerializer.Deserialize<ResumeStateResult>(json, ReadingPaperRules.Json);
+        Assert.NotNull(deserialized);
+        Assert.Equal("a47f3b969f6e2e7608004bd70950ece0e357b2805575411ea766e5da3227ce25", deserialized.PolicyHash);
+    }
+
+    [Fact]
+    public void CheckpointCommitRequest_IncludesExpectedGuards_RoundTripsJson()
+    {
+        var dummyPayload = JsonDocument.Parse("{}").RootElement;
+        var env = new ArtifactEnvelope(
+            "art_section_1",
+            ArtifactType.Section,
+            1,
+            "run_01",
+            1,
+            "2.0.0",
+            "hash123",
+            DateTime.UtcNow,
+            "2.0.0",
+            dummyPayload,
+            []
+        );
+
+        var req = new CheckpointCommitRequest(
+            RunId: "run_01",
+            Epoch: 1,
+            LeaseOwner: Guid.NewGuid(),
+            OperationId: "op_01",
+            RequestHash: "req_hash_01",
+            Artifact: env,
+            ExpectedHeadVersion: 1,
+            ExpectedHeadHash: "head_hash_abc",
+            ExpectedCursorRevision: 3
+        );
+
+        var json = JsonSerializer.Serialize(req, ReadingPaperRules.Json);
+        Assert.Contains("expectedHeadHash", json);
+        Assert.Contains("expectedCursorRevision", json);
+
+        var deserialized = JsonSerializer.Deserialize<CheckpointCommitRequest>(json, ReadingPaperRules.Json);
+        Assert.NotNull(deserialized);
+        Assert.Equal("head_hash_abc", deserialized.ExpectedHeadHash);
+        Assert.Equal(3, deserialized.ExpectedCursorRevision);
+    }
+
+    [Fact]
+    public void DraftCheckpointRequest_IncludesExpectedGuards_RoundTripsJson()
+    {
+        var dummyPayload = JsonDocument.Parse("{}").RootElement;
+        var env = new ArtifactEnvelope(
+            "art_section_1",
+            ArtifactType.Section,
+            1,
+            "run_01",
+            1,
+            "2.0.0",
+            "hash123",
+            DateTime.UtcNow,
+            "2.0.0",
+            dummyPayload,
+            []
+        );
+
+        var req = new DraftCheckpointRequest(
+            RunId: "run_01",
+            Epoch: 1,
+            LeaseOwner: Guid.NewGuid(),
+            OperationId: "op_01",
+            RequestHash: "req_hash_01",
+            Artifact: env,
+            ExpectedHeadHash: "draft_head_hash_123",
+            ExpectedCursorRevision: 2
+        );
+
+        var json = JsonSerializer.Serialize(req, ReadingPaperRules.Json);
+        Assert.Contains("expectedHeadHash", json);
+        Assert.Contains("expectedCursorRevision", json);
+
+        var deserialized = JsonSerializer.Deserialize<DraftCheckpointRequest>(json, ReadingPaperRules.Json);
+        Assert.NotNull(deserialized);
+        Assert.Equal("draft_head_hash_123", deserialized.ExpectedHeadHash);
+        Assert.Equal(2, deserialized.ExpectedCursorRevision);
+    }
+
+    [Fact]
+    public void ParseCanonicalV2Section_ExtractsReadingGeneratedSectionFromPayload()
+    {
+        var sectionObj = new
+        {
+            sectionId = 2,
+            title = "Section 2 Title",
+            passage = "This is the passage text for section 2.",
+            source = new
+            {
+                pmcid = "PMC999999",
+                title = "Study on Ecology",
+                doi = "10.1000/182",
+                url = "https://europepmc.org/articles/PMC999999",
+                license = "CC BY 4.0",
+                wordCount = 750,
+                authors = "Author A, Author B"
+            },
+            groups = new[]
+            {
+                new
+                {
+                    type = "MULTIPLE_CHOICE_SINGLE",
+                    instruction = "Choose the correct letter",
+                    questions = new[]
+                    {
+                        new
+                        {
+                            number = 14,
+                            prompt = "What is studied?",
+                            answer = "A. ecology",
+                            options = new[] { "A. ecology", "B. physics", "C. chemistry", "D. biology" },
+                            evidenceQuote = "This is the passage text",
+                            explanation = "The passage explicitly describes the ecology study in detail."
+                        }
+                    }
+                }
+            }
+        };
+
+        var doc = JsonDocument.Parse(JsonSerializer.Serialize(sectionObj, ReadingPaperRules.Json));
+        var parsed = CheckpointService.ParseCanonicalV2Section(doc.RootElement);
+
+        Assert.NotNull(parsed);
+        Assert.Equal("Section 2 Title", parsed.Title);
+        Assert.Equal("This is the passage text for section 2.", parsed.Passage);
+        Assert.Equal("PMC999999", parsed.Source.Pmcid);
+        Assert.Single(parsed.Groups);
+        Assert.Equal("MULTIPLE_CHOICE_SINGLE", parsed.Groups[0].Type);
+        Assert.Single(parsed.Groups[0].Questions);
+        Assert.Equal(14, parsed.Groups[0].Questions[0].Number);
+        Assert.Equal("What is studied?", parsed.Groups[0].Questions[0].Prompt);
+    }
+
+    private sealed class TestMockHttpMessageHandler(Func<HttpRequestMessage, string, HttpResponseMessage> handler) : HttpMessageHandler
+    {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var body = request.Content != null ? await request.Content.ReadAsStringAsync(cancellationToken) : "";
+            return handler(request, body);
         }
     }
 }
