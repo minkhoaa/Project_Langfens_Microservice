@@ -1,6 +1,6 @@
 {
-  "jobId": "35100bd4-2184-424c-bef1-63ae623a0df5",
-  "runId": "run_35100bd42184424cbef163ae623a0df5",
+  "jobId": "70d6a3b9-2ecf-4f5a-b61a-c42cef20dd4c",
+  "runId": "run_70d6a3b92ecf4f5ab61ac42cef20dd4c",
   "status": "Failed",
   "sectionIndex": 2,
   "topic": "Marine Ecosystems and Global Climate Change",
@@ -23,51 +23,46 @@
     "contentPreview": null
   },
   "provider": "minimax",
-  "durationSeconds": 63.64869022369385,
-  "passageText": null,
+  "durationSeconds": 55.57044196128845,
+  "passageText": "The study of Carbon-Nitrogen-Phosphorus (CNP) stoichiometry has emerged as a pivotal tool in oceanographic research, providing essential insights into the intricate relationships between nutrient availability, primary productivity, and carbon sequestration within marine ecosystems. This approach examines the ratios of these elements in suspended particulate organic matter (POM) and has revealed significant regional variations in the surface ocean. Notably, the C:P, N:P, and C:N ratios often deviate from the classical Redfield ratio of 106:16:6.7, with lower values observed in nutrient-rich high-latitude regions and higher values in the warm, nutrient-depleted subtropical gyres. These ratios also exhibit temporal variability across daily, seasonal, and inter-annual timescales, underscoring the dynamic nature of marine ecosystems and their response to environmental changes.\n\nThe mechanisms controlling the C:N:P ratios of suspended POM in marine environments are complex and multifaceted. Several hypotheses have been proposed, though they are not mutually exclusive. Temperature and nutrient availability are known to modulate the cellular C:N:P ratios of phytoplankton over timescales ranging from days to weeks. Additionally, shifts in plankton biodiversity, driven by temperature and nutrient variations, can alter the bulk ecosystem C:N:P, as different plankton taxa may have unique optimal C:N:P ratios. However, the relative importance of temperature versus nutrient influences remains poorly quantified. This uncertainty arises from limited spatial coverage and a lack of direct measurements of nutrient stress in plankton communities, particularly in mid-to-low latitude oligotrophic regions. Traditional global synthesis studies have relied on dissolved nitrate and phosphorus concentrations to infer nutrient stress, but these nutrients are often below analytical detection limits in many low-latitude ecosystems, complicating accurate diagnosis of nitrogen versus phosphorus limitation. Given that phytoplankton C:P and N:P ratios can vary up to threefold between P-limited and N-limited conditions, understanding the type of nutrient limitation is crucial for interpreting C:N:P variability.\n\nIn this study, we aimed to quantify the global variation and identify key environmental predictors of surface ocean ecosystem C:N:P. We analyzed POM samples collected across all major ocean basins as part of the Bio-GO-SHIP initiative, significantly expanding the spatial coverage of previous studies. Our dataset included samples from regions such as the South Subtropical Pacific, South Atlantic, and the Indian Ocean, which were underrepresented in prior research. By analyzing the relationships between C:N:P and diverse environmental predictors, including phytoplankton nutrient stress from paired metagenomics observations, we developed data-derived statistical models. These models were then applied to projections from the Community Earth System Model Large Ensemble Simulation (CESM2-LENS) to forecast surface ecosystem C:N:P for the historical period (2010\u20132014) and the end of the 21st century (2095\u20132100) under the SSP3-7.0 scenario, a high-emission trajectory where CO2 doubles by 2100.\n\nOur findings reveal a robust latitudinal pattern in ecosystem C:N:P ratios, with the highest values in the subtropical gyres, intermediate values in equatorial regions, and lower values towards higher latitudes. The highest C:P and N:P ratios were observed in the western North Atlantic, while the lowest were found poleward of the Southern subtropical convergence. Interestingly, C:N ratios were close to the Redfield ratio of 6.6 in most regions but were elevated in the eastern parts of the southern subtropical gyres in the Atlantic, Indian, and Pacific Oceans. In contrast, the Southern Ocean exhibited slightly lower C:N ratios. These patterns suggest that C:N:P ratios are not only influenced by latitude but also exhibit clear hemispheric and longitudinal deviations.\n\nTo identify the environmental predictors of C:N:P, we employed a combination of correlation analysis and generalized additive models (GAMs). While correlation analysis captured first-order, monotonic relationships, GAMs detected nonlinear, non-monotonic relationships between C:N:P and in situ measurements of sea surface temperature (SST), nutrient availability, and nutrient limitation type. In (sub)polar regions, SST was strongly positively correlated with C:P and N:P, explaining a significant portion of the variance. In contrast, in (sub)tropical ecosystems, nutricline depth and element-specific nutrient stress were the strongest predictors. These findings indicate a transition from temperature and macronutrient dependency in high latitudes to a multi-dimensional nutrient stress control in mid-to-low latitudes.\n\nProjections of future C:N:P ratios under the SSP3-7.0 scenario suggest an increase in C:P and N:P in high-latitude ecosystems, consistent with Earth system model predictions. However, projections for low-latitude ecosystems remain highly uncertain, with significant geographical differences and low model agreement. This uncertainty highlights critical knowledge gaps in our understanding of C:N:P regulation and underscores the need for expanded monitoring and research.\n\nIn summary, our global analysis supports a link between temperature, surface nutrient depletion, and nutrient stress with C:N:P stoichiometry. The observed patterns suggest that while temperature is a dominant factor in high-latitude ecosystems, nutrient supply and stress play a crucial role in shaping C:N:P ratios in low-latitude regions. These findings have important implications for understanding the impacts of climate change on marine ecosystems and the global carbon cycle, emphasizing the need for continued research and monitoring to better predict future changes in ocean elemental stoichiometry.",
   "questions": [],
   "questionCount": 0,
-  "error": "Passage generation failed in section 2: INVALID_OUTPUT: capability failed: DeadlineExceededError: Overall deadline of 60.0s exceeded for operation 'op_pass_gen_10f99021'",
+  "error": "Candidate generation/evaluation failed for slot Q14: INVALID_OUTPUT: capability failed: BudgetExhaustedError: Budget cap exceeded: Parent operation reservation exceeded: parent 'loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_q_slot_14:GENERATE:1:2.0.0' wall-time reservation (60s) would be exceeded by child reservation 119.99951314926147s (current child allocated: 0.0s) | issues: []",
   "tokenLedger": {
-    "actualTokensConsumed": null,
-    "tokensUsedStoredPlaceholder": 0,
+    "reportedTokensConsumed": 8220,
+    "conservativeReservationLiabilityTokens": 8220,
     "providerCallsCount": 1,
-    "conservativeReservationLiabilityTokens": 14201,
-    "parentPassageHoldTokens": 40000,
-    "parentSectionHoldTokens": 380000,
-    "nestedReservationHoldsSumTokens": 434201,
-    "accountingDisposition": "Actual token consumption is UNKNOWN (stored 0 is a DB placeholder upon deadline timeout, not confirmed zero consumption). Provider reservation liability retained at full reservation value (14,201 tokens). Nested reservations sum to 434,201 tokens (holding hierarchical budget ceilings, not actual consumption), and the 380,000 section hold is flagged as exceeding the approved 100,000 token limit.",
     "providerCalls": [
       {
-        "OperationId": "op_pass_gen_10f99021",
+        "OperationId": "op_pass_gen_de42b749",
         "OperationType": "PROVIDER_CALL",
-        "Status": "UNKNOWN_OUTCOME",
+        "Status": "COMPLETED",
         "TokenReservation": 14201,
-        "TokensUsed": 0,
-        "PromptTokensUsed": null,
-        "CompletionTokensUsed": null,
-        "WallTimeReservationSeconds": 59.99924278259277,
-        "WallTimeUsedSeconds": 0,
-        "AccountingType": "UNKNOWN",
-        "CreatedAt": "2026-10-20T10:36:20.614233+00:00"
+        "TokensUsed": 8220,
+        "PromptTokensUsed": 7115,
+        "CompletionTokensUsed": 1105,
+        "WallTimeReservationSeconds": 179.99925804138184,
+        "WallTimeUsedSeconds": 48.6664,
+        "AccountingType": "REPORTED",
+        "CreatedAt": "2026-10-20T11:07:55.879678+00:00"
       }
     ],
     "allOperations": [
       {
-        "OperationId": "op_run_35100bd42184424cbef163ae623a0df5_sec_2_DD8CD352BCE8",
+        "OperationId": "op_run_70d6a3b92ecf4f5ab61ac42cef20dd4c_sec_2_DD8CD352BCE8",
         "OperationType": "GENERATE_SECTION",
         "Status": "RESERVED",
-        "TokenReservation": 380000,
+        "TokenReservation": 100000,
         "TokensUsed": 0,
         "PromptTokensUsed": null,
         "CompletionTokensUsed": null,
-        "WallTimeReservationSeconds": 800,
+        "WallTimeReservationSeconds": 900,
         "WallTimeUsedSeconds": 0,
         "AccountingType": "UNKNOWN",
-        "CreatedAt": "2026-10-20T10:36:17.274444+00:00"
+        "CreatedAt": "2026-10-20T11:07:51.166503+00:00"
       },
       {
-        "OperationId": "init:run_35100bd42184424cbef163ae623a0df5:sp_sec_2_d4715372:1",
+        "OperationId": "init:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:sp_sec_2_a39ea79c:1",
         "OperationType": "CHECKPOINT_COMMIT",
         "Status": "COMPLETED",
         "TokenReservation": 0,
@@ -77,10 +72,10 @@
         "WallTimeReservationSeconds": 10,
         "WallTimeUsedSeconds": 0.1,
         "AccountingType": "UNKNOWN",
-        "CreatedAt": "2026-10-20T10:36:19.893316+00:00"
+        "CreatedAt": "2026-10-20T11:07:53.528035+00:00"
       },
       {
-        "OperationId": "init:run_35100bd42184424cbef163ae623a0df5:eg_sec_2_d4715372:1",
+        "OperationId": "init:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:eg_sec_2_a39ea79c:1",
         "OperationType": "CHECKPOINT_COMMIT",
         "Status": "COMPLETED",
         "TokenReservation": 0,
@@ -90,10 +85,10 @@
         "WallTimeReservationSeconds": 10,
         "WallTimeUsedSeconds": 0.1,
         "AccountingType": "UNKNOWN",
-        "CreatedAt": "2026-10-20T10:36:20.030596+00:00"
+        "CreatedAt": "2026-10-20T11:07:53.856643+00:00"
       },
       {
-        "OperationId": "init:run_35100bd42184424cbef163ae623a0df5:bp_sec_2_d4715372:1",
+        "OperationId": "init:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:bp_sec_2_a39ea79c:1",
         "OperationType": "CHECKPOINT_COMMIT",
         "Status": "COMPLETED",
         "TokenReservation": 0,
@@ -103,67 +98,129 @@
         "WallTimeReservationSeconds": 10,
         "WallTimeUsedSeconds": 0.1,
         "AccountingType": "UNKNOWN",
-        "CreatedAt": "2026-10-20T10:36:20.149328+00:00"
+        "CreatedAt": "2026-10-20T11:07:54.059072+00:00"
       },
       {
-        "OperationId": "loop:run_35100bd42184424cbef163ae623a0df5:art_passage_s2:GENERATE:1:2.0.0",
+        "OperationId": "loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_passage_s2:GENERATE:1:2.0.0",
+        "OperationType": "GENERATE",
+        "Status": "COMPLETED",
+        "TokenReservation": 40000,
+        "TokensUsed": 16627,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 540,
+        "WallTimeUsedSeconds": 50.0399,
+        "AccountingType": "REPORTED",
+        "CreatedAt": "2026-10-20T11:07:54.592785+00:00"
+      },
+      {
+        "OperationId": "op_pass_gen_de42b749",
+        "OperationType": "PROVIDER_CALL",
+        "Status": "COMPLETED",
+        "TokenReservation": 14201,
+        "TokensUsed": 8220,
+        "PromptTokensUsed": 7115,
+        "CompletionTokensUsed": 1105,
+        "WallTimeReservationSeconds": 179.99925804138184,
+        "WallTimeUsedSeconds": 48.6664,
+        "AccountingType": "REPORTED",
+        "CreatedAt": "2026-10-20T11:07:55.879678+00:00"
+      },
+      {
+        "OperationId": "loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_passage_s2:EVALUATE:1:eval_passage_word_count:1.0.0",
+        "OperationType": "EVALUATE",
+        "Status": "COMPLETED",
+        "TokenReservation": 0,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 60,
+        "WallTimeUsedSeconds": 0.0006,
+        "AccountingType": "REPORTED",
+        "CreatedAt": "2026-10-20T11:08:44.80563+00:00"
+      },
+      {
+        "OperationId": "loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_passage_s2:EVALUATE:1:eval_passage_style:1.0.0",
+        "OperationType": "EVALUATE",
+        "Status": "COMPLETED",
+        "TokenReservation": 0,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 60,
+        "WallTimeUsedSeconds": 0.0009,
+        "AccountingType": "REPORTED",
+        "CreatedAt": "2026-10-20T11:08:44.953034+00:00"
+      },
+      {
+        "OperationId": "loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_passage_s2:EVALUATE:1:eval_grounding_fidelity:2.0.0",
+        "OperationType": "EVALUATE",
+        "Status": "COMPLETED",
+        "TokenReservation": 4000,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 60,
+        "WallTimeUsedSeconds": 0.4355,
+        "AccountingType": "REPORTED",
+        "CreatedAt": "2026-10-20T11:08:45.108728+00:00"
+      },
+      {
+        "OperationId": "loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_passage_s2:CHECKPOINT_COMMIT:1:a76d249ce00f73ef430b23e947ea685bd922685c8b3803f4a7c8eaddfb0e2bb6",
+        "OperationType": "CHECKPOINT_COMMIT",
+        "Status": "COMPLETED",
+        "TokenReservation": 0,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 60,
+        "WallTimeUsedSeconds": 0,
+        "AccountingType": "UNKNOWN",
+        "CreatedAt": "2026-10-20T11:08:45.910231+00:00"
+      },
+      {
+        "OperationId": "op_workflow_qcand_s2_e705000d",
+        "OperationType": "WORKFLOW",
+        "Status": "COMPLETED",
+        "TokenReservation": 60000,
+        "TokensUsed": 0,
+        "PromptTokensUsed": null,
+        "CompletionTokensUsed": null,
+        "WallTimeReservationSeconds": 300,
+        "WallTimeUsedSeconds": 0.536902,
+        "AccountingType": "REPORTED",
+        "CreatedAt": "2026-10-20T11:08:46.306668+00:00"
+      },
+      {
+        "OperationId": "loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_q_slot_14:GENERATE:1:2.0.0",
         "OperationType": "GENERATE",
         "Status": "RESERVED",
-        "TokenReservation": 40000,
+        "TokenReservation": 15000,
         "TokensUsed": 0,
         "PromptTokensUsed": null,
         "CompletionTokensUsed": null,
-        "WallTimeReservationSeconds": 180,
+        "WallTimeReservationSeconds": 60,
         "WallTimeUsedSeconds": 0,
         "AccountingType": "UNKNOWN",
-        "CreatedAt": "2026-10-20T10:36:20.471423+00:00"
-      },
-      {
-        "OperationId": "op_pass_gen_10f99021",
-        "OperationType": "PROVIDER_CALL",
-        "Status": "UNKNOWN_OUTCOME",
-        "TokenReservation": 14201,
-        "TokensUsed": 0,
-        "PromptTokensUsed": null,
-        "CompletionTokensUsed": null,
-        "WallTimeReservationSeconds": 59.99924278259277,
-        "WallTimeUsedSeconds": 0,
-        "AccountingType": "UNKNOWN",
-        "CreatedAt": "2026-10-20T10:36:20.614233+00:00"
+        "CreatedAt": "2026-10-20T11:08:46.515916+00:00"
       }
-    ]
+    ],
+    "actualTokensConsumed": 8220
   },
   "eventLog": [
     {
       "type": "log",
-      "timestamp": "2026-10-20T10:36:17.369114+00:00",
+      "timestamp": "2026-10-20T11:07:51.400349+00:00",
       "level": "Information",
       "message": "Passage 2 generation stream opened."
     },
     {
       "type": "error",
       "httpStatus": 502,
-      "message": "Passage generation failed in section 2: INVALID_OUTPUT: capability failed: DeadlineExceededError: Overall deadline of 60.0s exceeded for operation 'op_pass_gen_10f99021'",
-      "traceback": "Traceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 730, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/facade.py\", line 726, in generate_section\n    raise ValueError(f\"Passage generation failed in section {index}: {passage_res.terminal_reason or 'No accepted passage produced'}\")\nValueError: Passage generation failed in section 2: INVALID_OUTPUT: capability failed: DeadlineExceededError: Overall deadline of 60.0s exceeded for operation 'op_pass_gen_10f99021'\n"
+      "message": "Candidate generation/evaluation failed for slot Q14: INVALID_OUTPUT: capability failed: BudgetExhaustedError: Budget cap exceeded: Parent operation reservation exceeded: parent 'loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_q_slot_14:GENERATE:1:2.0.0' wall-time reservation (60s) would be exceeded by child reservation 119.99951314926147s (current child allocated: 0.0s) | issues: []",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/router.py\", line 730, in _stream_section\n    result = await task\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/facade.py\", line 728, in generate_section\n    q_res = await self.generate_questions_v2(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/facade.py\", line 331, in generate_questions_v2\n    res = await q_loop.run(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/loop/question.py\", line 275, in run\n    return await self._generate_and_commit_slots(\n  File \"/home/code/workspaces/langfens/Project_Langfens_Microservice/services/generation-service/app/loop/question.py\", line 663, in _generate_and_commit_slots\n    raise SelectionInfeasibleError(\napp.selection.selector.SelectionInfeasibleError: Candidate generation/evaluation failed for slot Q14: INVALID_OUTPUT: capability failed: BudgetExhaustedError: Budget cap exceeded: Parent operation reservation exceeded: parent 'loop:run_70d6a3b92ecf4f5ab61ac42cef20dd4c:art_q_slot_14:GENERATE:1:2.0.0' wall-time reservation (60s) would be exceeded by child reservation 119.99951314926147s (current child allocated: 0.0s) | issues: []\n"
     }
   ],
-  "tokenAccounting": {
-    "actualTokensConsumed": null,
-    "conservativeReservationLiabilityTokens": 14201,
-    "accountingType": "UNKNOWN",
-    "status": "UNKNOWN_OUTCOME",
-    "note": "Provider call timed out at 60.0s transport deadline; actual consumption is unknown, and provider reservation liability retained at full reservation value (14,201 tokens)."
-  },
-  "wallTimeAccounting": {
-    "parentOperationId": "loop:run_35100bd42184424cbef163ae623a0df5:art_passage_s2:GENERATE:1:2.0.0",
-    "parentWallTimeReservationSeconds": 180.0,
-    "parentStatus": "RESERVED",
-    "verificationOutcome": "Parent GENERATE wall-time reservation sized at 180s (accounting for 3 bounded calls) was granted successfully by CheckpointService. The previous BudgetExhaustedError: Parent operation reservation exceeded (60s) did not recur."
-  },
-  "transportDiagnostics": {
-    "terminalReason": "DeadlineExceededError: Overall deadline of 60.0s exceeded for operation 'op_pass_gen_10f99021'",
-    "providerAttemptCountDurable": 1,
-    "providerAttemptCountPhysical": "Unverified (ProviderGateway defaults to RetryPolicy(max_attempts=3) within the 60.0s transport window)",
-    "disposition": "Execution halted following DeadlineExceededError; no client-side retries were issued, while physical provider attempts within the 60.0s transport window remain unverified under ProviderGateway default RetryPolicy."
-  }
+  "passageTitle": "Marine Ecosystems and Global Climate Change: Insights from Carbon-Nitrogen-Phosphorus Stoichiometry",
+  "passageWordCount": 799
 }
