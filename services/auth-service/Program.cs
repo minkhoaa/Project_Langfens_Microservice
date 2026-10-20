@@ -191,11 +191,6 @@ using (var scope = app.Services.CreateScope())
         admin.PasswordHash = hasher.HashPassword(admin, "admin");
         await userManager.CreateAsync(admin);
     }
-    else
-    {
-        admin.PasswordHash = hasher.HashPassword(admin, "admin");
-        await userManager.UpdateAsync(admin);
-    }
 
     if (!await userManager.IsInRoleAsync(admin, Roles.Admin))
     {
