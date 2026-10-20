@@ -5,13 +5,16 @@ untrusted data encapsulation, and schema validation.
 """
 
 from __future__ import annotations
-
+import contextvars
 import json
 import logging
 import re
 from typing import Any, Dict, List, Optional, Sequence, Set
 from uuid import UUID, uuid4
 
+_tokens_used_ctx: contextvars.ContextVar[int] = contextvars.ContextVar(
+    "_passage_generator_tokens_used", default=0
+)
 from app.config import settings
 from app.contracts.artifact import ArtifactEnvelope, ArtifactType, compute_content_hash
 from app.contracts.policies import (
@@ -206,7 +209,26 @@ class PassageGenerator:
     def __init__(self, gateway: ProviderGateway):
         self.gateway = gateway
         self._last_attempt_word_count: Optional[int] = None
+        self._run_tokens: Dict[str, int] = {}
+        self._last_completed_tokens: int = 0
 
+    @property
+    def _last_tokens_used(self) -> int:
+        ctx_val = _tokens_used_ctx.get()
+        if ctx_val != 0:
+            return ctx_val
+        return self._last_completed_tokens
+
+    @_last_tokens_used.setter
+    def _last_tokens_used(self, value: int) -> None:
+        _tokens_used_ctx.set(value)
+        self._last_completed_tokens = value
+
+    def get_tokens_used(self, run_id: Optional[str] = None) -> int:
+        """Returns isolated token usage for a given run_id or current context."""
+        if run_id and run_id in self._run_tokens:
+            return self._run_tokens[run_id]
+        return self._last_tokens_used
     @staticmethod
     def _build_request(
         context: PassageGenerationContext,
@@ -272,7 +294,11 @@ class PassageGenerator:
         else:
             raise AttributeError("Gateway does not have execute, request, or call method")
         toks = int(resp.usage.total_tokens) if getattr(resp, "usage", None) and resp.usage.total_tokens else 0
-        self._last_tokens_used = getattr(self, "_last_tokens_used", 0) + toks
+        new_ctx_toks = _tokens_used_ctx.get() + toks
+        _tokens_used_ctx.set(new_ctx_toks)
+        if getattr(req, "run_id", None):
+            self._run_tokens[req.run_id] = self._run_tokens.get(req.run_id, 0) + toks
+        self._last_completed_tokens = new_ctx_toks
         return resp.raw_text.strip()
 
     async def generate(
@@ -289,7 +315,9 @@ class PassageGenerator:
         length_feedback: Optional[str] = None,
     ) -> ArtifactEnvelope:
         """Executes passage generation request and returns validated ArtifactEnvelope."""
-        self._last_tokens_used = 0
+        _tokens_used_ctx.set(0)
+        if run_id:
+            self._run_tokens[run_id] = 0
         effective_feedback = length_feedback or context.length_feedback
         if not effective_feedback and context.last_attempt_word_count is not None:
             prev_w = context.last_attempt_word_count
@@ -502,8 +530,9 @@ class PassageGenerator:
             "wordCountGuardReasks": word_count_retries,
             "measuredWords": measured_words,
             "wordCountBand": [band_min, band_max],
-            "tokensUsed": int(getattr(self, "_last_tokens_used", 0)),
+            "tokensUsed": int(self._run_tokens.get(run_id, _tokens_used_ctx.get())),
         }
+        self._last_completed_tokens = int(payload["tokensUsed"])
 
         if input_dependencies is not None:
             parent_refs = tuple(input_dependencies)

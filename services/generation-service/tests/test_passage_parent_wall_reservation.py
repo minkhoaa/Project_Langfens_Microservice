@@ -163,12 +163,12 @@ def test_evaluate_and_repair_reservations_remain_unchanged():
     assert repair_intent.wall_time_reservation_seconds == expected_repair
 
 
-def test_non_passage_generate_reservation_remains_unchanged():
-    """Non-passage GENERATE reservations (e.g. question) must remain min(wall_res, 60.0)."""
+def test_question_generate_parent_reservation_sized_for_candidate_loop():
+    """Question GENERATE reservations (e.g. question candidate loop) must be sized to 120.0s to match child."""
     owner = uuid4()
     context = LoopContext(
         runId="run_test_q_wall",
-        targetArtifactId="art_question_01",
+        targetArtifactId="art_q_slot_14",
         targetArtifactType=ArtifactType.QUESTION,
         scope=IssueScope.QUESTION,
         authority=AuthorityGrant(leaseOwner=owner, epoch=1),
@@ -184,8 +184,43 @@ def test_non_passage_generate_reservation_remains_unchanged():
         persistence_client=MockDurableStore("run_test_q_wall"),
     )
     q_intent = runtime._intent("GENERATE", version=1, tokens=5000, identity="1.0.0", extra={})
-    assert q_intent.wall_time_reservation_seconds == min(policy.operation_wall_reservation_seconds, 60.0)
+    assert q_intent.wall_time_reservation_seconds == 120.0
 
+    # Finite run cap clamped
+    tight_policy = policy.model_copy(update={"max_wall_time_seconds": 45.0})
+    tight_runtime = BoundedLoopRuntime(
+        context=context,
+        policy=tight_policy,
+        generator=dummy_gen,
+        evaluators=[],
+        persistence_client=MockDurableStore("run_test_q_wall"),
+    )
+    tight_intent = tight_runtime._intent("GENERATE", version=1, tokens=5000, identity="1.0.0", extra={})
+    assert tight_intent.wall_time_reservation_seconds == 45.0
+
+
+def test_non_passage_non_question_generate_reservation_remains_unchanged():
+    """Non-passage, non-question GENERATE reservations (e.g. blueprint) must remain min(wall_res, 60.0)."""
+    owner = uuid4()
+    context = LoopContext(
+        runId="run_test_bp_wall",
+        targetArtifactId="art_blueprint_01",
+        targetArtifactType=ArtifactType.EXAM_BLUEPRINT,
+        scope=IssueScope.SECTION,
+        authority=AuthorityGrant(leaseOwner=owner, epoch=1),
+        budgetTracker=BudgetTracker(),
+    )
+    policy = LoopPolicy.from_settings()
+    dummy_gen = type("DummyGen", (), {"name": "BPGen", "version": "2.0.0"})()
+    runtime = BoundedLoopRuntime(
+        context=context,
+        policy=policy,
+        generator=dummy_gen,
+        evaluators=[],
+        persistence_client=MockDurableStore("run_test_bp_wall"),
+    )
+    bp_intent = runtime._intent("GENERATE", version=1, tokens=5000, identity="1.0.0", extra={})
+    assert bp_intent.wall_time_reservation_seconds == min(policy.operation_wall_reservation_seconds, 60.0)
 
 def test_passage_generate_reservation_respects_finite_caps():
     """Passage GENERATE reservation must respect finite loop deadline / run cap if configured."""
@@ -332,3 +367,68 @@ def test_provider_call_exceeding_artifact_cap_rejected():
         ))
     assert exc_info.value.status_code == 422
     assert "Artifact budget exhausted" in exc_info.value.message
+
+def test_question_candidate_child_call_fits_inside_parent_reservation():
+    """Question candidate child call (120s) must fit inside the 120s parent GENERATE reservation without budget error."""
+    store = MockDurableStore("run_q_demo", artifact_wall_cap=300.0, section_wall_cap=900.0)
+    owner = uuid4()
+    context = LoopContext(
+        runId="run_q_demo",
+        targetArtifactId="art_q_slot_14",
+        targetArtifactType=ArtifactType.QUESTION,
+        scope=IssueScope.QUESTION,
+        authority=AuthorityGrant(leaseOwner=owner, epoch=1),
+        budgetTracker=BudgetTracker(),
+    )
+    policy = LoopPolicy.from_settings()
+    runtime = BoundedLoopRuntime(
+        context=context,
+        policy=policy,
+        generator=type("DummyGen", (), {"name": "QGen", "version": "2.0.0"})(),
+        evaluators=[],
+        persistence_client=store,
+    )
+
+    # 1. Parent GENERATE is granted with 120s reservation
+    parent_intent = runtime._intent("GENERATE", version=1, tokens=15000, identity="2.0.0", extra={})
+    assert parent_intent.wall_time_reservation_seconds == 120.0
+    parent_grant = store.grant_operation(OperationGrantRequest(
+        runId="run_q_demo", epoch=1, leaseOwner=owner,
+        operationId=parent_intent.operation_id, operationType="GENERATE",
+        requestHash="hash_q_parent", tokenReservation=parent_intent.token_reservation,
+        wallTimeReservationSeconds=parent_intent.wall_time_reservation_seconds,
+        artifactId="art_q_slot_14",
+    ))
+    assert parent_grant.wallTimeReservationSeconds == 120.0
+
+    # 2. Child candidate pool provider call requests 120.0s (e.g. pool_limit > 3)
+    ch_grant = store.grant_operation(OperationGrantRequest(
+        runId="run_q_demo", epoch=1, leaseOwner=owner,
+        operationId="op_q_cand_pool", operationType="PROVIDER_CALL",
+        requestHash="hash_q_cand_pool", tokenReservation=8000,
+        wallTimeReservationSeconds=120.0,
+        artifactId="art_q_slot_14",
+        parentOperationId=parent_intent.operation_id,
+    ))
+    assert ch_grant.wallTimeReservationSeconds == 120.0
+
+    # 3. Verify that under the OLD 60s parent reservation, the 120s child was rejected
+    old_parent_id = "op_old_q_parent_60s"
+    store.grant_operation(OperationGrantRequest(
+        runId="run_q_demo", epoch=1, leaseOwner=owner,
+        operationId=old_parent_id, operationType="GENERATE",
+        requestHash="hash_old_q", tokenReservation=15000,
+        wallTimeReservationSeconds=60.0,  # Old under-sized 60s reservation
+        artifactId="art_q_slot_15",
+    ))
+    with pytest.raises(CheckpointApiError) as exc_info:
+        store.grant_operation(OperationGrantRequest(
+            runId="run_q_demo", epoch=1, leaseOwner=owner,
+            operationId="op_old_child_120s", operationType="PROVIDER_CALL",
+            requestHash="hash_old_child", tokenReservation=8000,
+            wallTimeReservationSeconds=120.0,
+            artifactId="art_q_slot_15",
+            parentOperationId=old_parent_id,
+        ))
+    assert exc_info.value.status_code == 422
+    assert "Parent operation reservation exceeded" in exc_info.value.message

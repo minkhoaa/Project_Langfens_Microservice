@@ -290,8 +290,8 @@ SQLiteCheckpointSimulation = DurableStoreFake
 class FakePassageProvider(BaseProvider):
     """Predictable provider returning structured IELTS passage responses."""
 
-    def __init__(self, passage_text: str, title: str = "Marine Biology"):
-        super().__init__(name="fake_passage_provider", base_url="http://fake.test", models={"large": "fake-model", "small": "fake-model"})
+    def __init__(self, passage_text: str, title: str = "Marine Biology", name: str = "minimax"):
+        super().__init__(name=name, base_url="http://fake.test", models={"large": "fake-model", "small": "fake-model"})
         self.passage_text = passage_text
         self.title = title
         self.call_count = 0
@@ -313,7 +313,7 @@ class FakePassageProvider(BaseProvider):
         })
         return ProviderResponse(
             operation_id=request.operation_id,
-            provider_name="fake_passage_provider",
+            provider_name=self.name,
             model_name="fake-model",
             raw_text=response_json,
             usage=UsageReport(prompt_tokens=300, completion_tokens=850, total_tokens=1150),

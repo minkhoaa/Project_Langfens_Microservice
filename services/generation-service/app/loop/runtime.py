@@ -402,6 +402,30 @@ class BoundedLoopRuntime:
                         or str(getattr(self.context, "scope", "")).upper() == "PASSAGE"
                     )
                 )
+                else (
+                    # Account for Question Candidate generation child calls at up to 120s,
+                    # while respecting finite run cap if configured.
+                    min(
+                        min(max(self.policy.operation_wall_reservation_seconds, 120.0), 120.0)
+                        if self.policy.operation_wall_reservation_seconds >= 60.0
+                        else self.policy.operation_wall_reservation_seconds,
+                        float(self.policy.max_wall_time_seconds),
+                    )
+                    if (not self.policy.is_unlimited and self.policy.max_wall_time_seconds > 0)
+                    else (
+                        min(max(self.policy.operation_wall_reservation_seconds, 120.0), 120.0)
+                        if self.policy.operation_wall_reservation_seconds >= 60.0
+                        else self.policy.operation_wall_reservation_seconds
+                    )
+                )
+                if (
+                    kind == "GENERATE"
+                    and (
+                        getattr(self.context, "target_artifact_type", None) in (ArtifactType.QUESTION, "QUESTION")
+                        or str(getattr(self.context, "target_artifact_id", "")).startswith("art_q")
+                        or str(getattr(self.context, "scope", "")).upper() == "QUESTION"
+                    )
+                )
                 else min(self.policy.operation_wall_reservation_seconds, 60.0)
                 if kind in ("GENERATE", "REPAIR", "EVALUATE")
                 else 0.0
