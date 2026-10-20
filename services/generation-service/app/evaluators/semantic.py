@@ -282,6 +282,8 @@ def detect_comparison_inversion(statement: str, reference_text: str) -> bool:
     """Detects inverted comparative or alternative relationships (e.g. 'X rather than Y' vs 'Y rather than X')."""
     s_clean = normalize_text_nfkc(statement).lower()
     r_clean = normalize_text_nfkc(reference_text).lower()
+    if s_clean == r_clean:
+        return False
     for marker in ["rather than", "instead of", "as opposed to", "versus"]:
         if marker in s_clean and marker in r_clean:
             s_parts = [p.strip() for p in s_clean.split(marker, 1)]
