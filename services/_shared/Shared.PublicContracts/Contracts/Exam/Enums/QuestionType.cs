@@ -15,6 +15,7 @@ public static class QuestionType
 	public const string FormCompletion = "FORM_COMPLETION";
 	public const string SentenceCompletion = "SENTENCE_COMPLETION";
 	public const string ShortAnswer = "SHORT_ANSWER";
+	public const string SummaryCompletionBox = "SUMMARY_COMPLETION_BOX";
 
 	public const string DiagramLabel = "DIAGRAM_LABEL";
 	public const string MapLabel = "MAP_LABEL";
@@ -27,4 +28,7 @@ public static class QuestionType
 	public const string Classification = "CLASSIFICATION";
 
 	public const string FlowChart = "FLOW_CHART";
+
+	// Academic reading global / title
+	public const string ChoosingTitle = "CHOOSING_TITLE";
 }
