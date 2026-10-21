@@ -193,6 +193,7 @@ class BlindSolverEvaluator(BaseEvaluator):
             expected_answer=str(payload.get("answer") or payload.get("correctOption") or ""),
             target_ref=target_ref,
             context=context,
+            input_dependency_refs=artifact.parent_refs,
         )
 
         # 4. Objective check for completion answer length (IELTS constraint: max 3 words)
@@ -241,6 +242,7 @@ class BlindSolverEvaluator(BaseEvaluator):
         expected_answer: str,
         target_ref: ArtifactRef,
         context: Optional[LoopContext] = None,
+        input_dependency_refs: Sequence[ArtifactRef] = (),
     ) -> Tuple[EvaluationResult, AdjudicationResult]:
         """Core execution pipeline for blind solver and adversary.
 
@@ -295,6 +297,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                     evaluatorId=self.evaluator_id,
                     evaluatorVersion=self.evaluator_version,
                     targetRef=target_ref,
+                    inputDependencyRefs=list(input_dependency_refs),
                     status=EvaluationStatus.FAIL,
                     issues=[Issue.create(
                         issue_id=f"iss_{eval_id}",
@@ -411,6 +414,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                 evaluatorId=self.evaluator_id,
                 evaluatorVersion=self.evaluator_version,
                 targetRef=target_ref,
+                inputDependencyRefs=list(input_dependency_refs),
                 status=EvaluationStatus.PASS,
                 issues=[],
                 score=1.0,
@@ -457,6 +461,7 @@ class BlindSolverEvaluator(BaseEvaluator):
             evaluatorId=self.evaluator_id,
             evaluatorVersion=self.evaluator_version,
             targetRef=target_ref,
+            inputDependencyRefs=list(input_dependency_refs),
             status=EvaluationStatus.FAIL,
             issues=[issue],
             score=0.0,

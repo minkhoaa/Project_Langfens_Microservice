@@ -1,7 +1,7 @@
 # Autonomous IELTS Reading Generation Harness Implementation Report
 
 **Document ID:** `REPORT-2026-10-21-AUTONOMOUS-READING-HARNESS`  
-**Location:** `generation_baseline/verification/AUTONOMOUS_READING_HARNESS_IMPLEMENTATION.md`  
+**Location:** `docs/reports/AUTONOMOUS_READING_HARNESS_IMPLEMENTATION.md`  
 **Repository:** `minkhoaa/Project_Langfens_Microservice`  
 **Branch:** `autonomous-generation`  
 **Date:** 2026-10-21  
@@ -270,7 +270,7 @@ In `services/exam-service`:
 
 ```text
 IMPLEMENTATION: COMPLETE
-FINAL_SHA: 81a6647
+BASE_VERIFIED_COMMIT: d2530ad
 ACTIVE_EXECUTION_ENGINE: BoundedLoopRuntime
 CANONICAL_PIPELINE: ReadingGenerationPipeline
 QUESTION_TYPES_REGISTERED: 19
@@ -285,5 +285,5 @@ PROVIDER_RETRY: ENABLED
 AUTONOMOUS_QUALITY_LOOP: ENABLED
 UNRESOLVED_BLOCKERS: NONE
 READY_FOR_LIVE_MINIMAX: YES
-REPORT_PATH: generation_baseline/verification/AUTONOMOUS_READING_HARNESS_IMPLEMENTATION.md
+REPORT_PATH: docs/reports/AUTONOMOUS_READING_HARNESS_IMPLEMENTATION.md
 ```

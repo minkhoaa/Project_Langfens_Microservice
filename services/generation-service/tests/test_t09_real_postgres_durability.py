@@ -50,11 +50,11 @@ REAL_API_KEY = "test-only-ephemeral-secret-key-phase09"
 # for its exam-db resource. Containers for this database are therefore identified by
 # running a PostgreSQL image and publishing that port, which holds for both the compose
 # container and an AppHost-provisioned one regardless of what either names itself.
-EXAM_DB_HOST_PORT = 5433
+EXAM_DB_HOST_PORT = int(os.environ.get("EXAM_DB_HOST_PORT", "5433"))
 EXAM_DB_IMAGE_PREFIX = "postgres"
-EXAM_DB_USER = "exam"
-EXAM_DB_PASSWORD = "exam"
-EXAM_DB_NAME = "exam-db"
+EXAM_DB_USER = os.environ.get("EXAM_DB_USER", "exam")
+EXAM_DB_PASSWORD = os.environ.get("EXAM_DB_PASSWORD", "exam")
+EXAM_DB_NAME = os.environ.get("EXAM_DB_NAME", "exam-db")
 # Dedicated throwaway database for these durability tests; created idempotently.
 # These tests seed rows and then drive them through the live exam-service, so
 # exam-service must be provisioned against this same database. Override with

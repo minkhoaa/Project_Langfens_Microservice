@@ -294,6 +294,10 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             .ExecuteUpdateAsync(x => x.SetProperty(j => j.SectionsJson, job.SectionsJson)
                 .SetProperty(j => j.CompletedSections, job.CompletedSections)
                 .SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
+        if (pipelineResult.Status != "COMPLETED" || sections.Count < pipelineRequest.SectionIndices.Count)
+        {
+            throw new InvalidOperationException($"Unified pipeline did not complete all sections (status={pipelineResult.Status}, completed={sections.Count}/{pipelineRequest.SectionIndices.Count})");
+        }
         await AppendLogAsync(job.Id, "Information", $"[Exam Finalization] Validating all {sections.Count} section(s) against IELTS Academic Paper Rules...", ct);
         ReadingPaperRules.Validate(sections);
         await AppendLogAsync(job.Id, "Information", $"[Exam Validation Passed] All {sections.Sum(s => s.Groups.Sum(g => g.Questions.Count))} questions and {sections.Sum(s => ReadingPaperRules.WordCount(s.Passage))} words meet IELTS standards. Saving Exam in database via idempotent finalizer...", ct);

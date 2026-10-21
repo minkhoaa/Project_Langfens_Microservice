@@ -60,6 +60,7 @@ public static class ExamPublicationValidator
             {
                 case QuestionType.MultipleChoiceSingle:
                 case QuestionType.MultipleChoiceSingleImage:
+                case QuestionType.ChoosingTitle:
                 {
                     var opts = q.Options ?? new List<ExamOption>();
                     if (opts.Count < 2)
@@ -114,6 +115,7 @@ public static class ExamPublicationValidator
                 }
 
                 case QuestionType.SummaryCompletion:
+                case QuestionType.SummaryCompletionBox:
                 case QuestionType.TableCompletion:
                 case QuestionType.NoteCompletion:
                 case QuestionType.FormCompletion:
@@ -121,16 +123,15 @@ public static class ExamPublicationValidator
                 case QuestionType.DiagramLabel:
                 case QuestionType.MapLabel:
                 {
+                    var isDiagramOrMapWithSpec = (q.Type is QuestionType.DiagramLabel or QuestionType.MapLabel) &&
+                        !string.IsNullOrEmpty(q.PromptMd) &&
+                        (Regex.IsMatch(q.PromptMd, @"\[(Diagram|Map):\s*[^\]]+\]") || q.PromptMd.Contains("<svg"));
                     if (q.BlankAcceptTexts == null || q.BlankAcceptTexts.Count == 0)
                     {
                         errors.Add($"{qRef}: BlankAcceptTexts cannot be empty.");
                     }
                     else
                     {
-                        var isDiagramOrMapWithSpec = (q.Type is QuestionType.DiagramLabel or QuestionType.MapLabel) &&
-                            !string.IsNullOrEmpty(q.PromptMd) &&
-                            Regex.IsMatch(q.PromptMd, @"\[(Diagram|Map):\s*[^\]]+\]");
-
                         foreach (var (blankKey, accepted) in q.BlankAcceptTexts)
                         {
                             if (accepted == null || accepted.Length == 0 || accepted.All(string.IsNullOrWhiteSpace))
@@ -160,7 +161,7 @@ public static class ExamPublicationValidator
                         }
                     }
 
-                    if (q.Type is QuestionType.DiagramLabel or QuestionType.MapLabel && string.IsNullOrWhiteSpace(q.ImageUrl))
+                    if (q.Type is QuestionType.DiagramLabel or QuestionType.MapLabel && string.IsNullOrWhiteSpace(q.ImageUrl) && !isDiagramOrMapWithSpec)
                     {
                         errors.Add($"{qRef}: ImageUrl is required.");
                     }
@@ -252,13 +253,15 @@ public static class ExamPublicationValidator
 
                 case QuestionType.FlowChart:
                 {
-                    if (q.OrderCorrects == null || q.OrderCorrects.Count < 2)
+                    var hasBlanks = q.BlankAcceptTexts != null && q.BlankAcceptTexts.Count > 0;
+                    var hasOrder = q.OrderCorrects != null && q.OrderCorrects.Count >= 2;
+                    if (!hasBlanks && !hasOrder)
                     {
-                        errors.Add($"{qRef}: OrderCorrects must contain at least 2 steps.");
+                        errors.Add($"{qRef}: FlowChart must have either valid BlankAcceptTexts (completion) or at least 2 OrderCorrects steps.");
                     }
-                    else
+                    else if (hasOrder)
                     {
-                        foreach (var slug in q.OrderCorrects)
+                        foreach (var slug in q.OrderCorrects!)
                         {
                             if (string.IsNullOrWhiteSpace(slug) || !Regex.IsMatch(slug, @"^[a-z0-9]+(?:-[a-z0-9]+)*$"))
                             {

@@ -147,91 +147,143 @@ class BoundedLoopRuntime:
             raise ValueError(f"Run is not active: {state.status}")
         run_profile = self._run_cap_snapshot(state)
         self._operations = {op.operationId: op for op in state.operations or []}
+        target_id = self.context.target_artifact_id
+        from app.persistence.client import get_artifact_aliases
+        aliases = set(get_artifact_aliases(target_id, self.context.run_id))
+        aliases.add(target_id)
+
         self._drafts = {i.acceptedVersion: self._envelope(i) for i in state.draftArtifacts or []
-                        if i.artifactId == self.context.target_artifact_id}
-        accepted = next((i for i in state.artifacts if i.artifactId == self.context.target_artifact_id), None)
+                        if i.artifactId in aliases}
+        accepted = next((i for i in state.artifacts if i.artifactId in aliases), None)
         self._accepted_head = self._envelope(accepted) if accepted else None
         self._stored_evaluations = {
             (ev.evaluator_id, ev.target_ref.version): ev for ev in state.evaluations or []
-            if ev.target_ref.artifact_id == self.context.target_artifact_id
+            if ev.target_ref.artifact_id in aliases
         }
         caller_input_deps = tuple(self.context.input_dependencies)
         caller_current_artifact = self.context.current_artifact
-        checkpoints = [c for c in state.loopCursors or [] if c.artifactId == self.context.target_artifact_id]
+        checkpoints = [c for c in state.loopCursors or [] if c.artifactId in aliases]
         if len(checkpoints) > 1:
             raise ValueError("Duplicate durable loop cursors")
         if checkpoints:
             checkpoint = checkpoints[0]
             payload = json.loads(checkpoint.stateJson)
-            pinned_policy = LoopPolicy.model_validate(payload["policy"])
-            if (payload["targetArtifactId"] != self.context.target_artifact_id or
-                payload["scope"] != self.context.scope.value or
-                payload["policyVersion"] != self.context.policy_version):
-                raise ValueError("Pinned loop target, scope, or policy version changed during resume")
-            snapshot = pinned_policy.cap_profile_snapshot
-            snapshot_hash = cap_snapshot_sha256(snapshot)
-            pinned_policy.validate_cap_bounds()
-            if (not snapshot or snapshot_hash != pinned_policy.cap_profile_sha256 or
-                pinned_policy.cap_profile_version != snapshot.get("profileVersion") or
-                pinned_policy.cap_profile_source != snapshot.get("profileSource") or
-                run_profile != snapshot or
-                state.budgetProfileVersion != pinned_policy.cap_profile_version or
-                state.budgetProfileSha256 != pinned_policy.cap_profile_sha256 or
-                state.budgetProfileSource != pinned_policy.cap_profile_source):
-                raise ValueError("Run and cursor do not share a valid pinned cap profile")
-            self.policy = pinned_policy
-            self.controller = LoopController(pinned_policy)
-            self.context.cursor = ResumeCursor.model_validate(payload["cursor"])
-            if self.context.cursor.revision != checkpoint.revision:
-                raise ValueError("Cursor revision does not match durable CAS revision")
-            self.context.budget_tracker = BudgetTracker.model_validate(payload["budget"])
-            self.ledger_mgr = IssueLedgerManager.from_dict(payload["ledger"])
-            self.stagnation_detector = StagnationDetector.model_validate(payload["stagnation"])
-            self.oscillation_detector = OscillationDetector.model_validate(payload["oscillation"])
-            self._repair_attempts_this_generation = payload["repairsSinceGeneration"]
-            self._generated_versions = payload["generatedVersions"]
-            self._expected_head_version = payload.get("expectedHeadVersion")
-            self._latest_evaluations = [EvaluationResult.model_validate(e) for e in payload["evaluations"]]
-            self._latest_decision = (LoopDecision.model_validate(payload["decision"])
-                                     if payload.get("decision") else None)
-            ref = ArtifactRef.model_validate(payload["currentRef"]) if payload.get("currentRef") else None
-            if ref:
-                self.context.current_artifact = self._drafts.get(ref.version) or self._accepted_head
-                if not self.context.current_artifact or self.context.current_artifact.to_ref() != ref:
-                    raise ValueError("Cursor points to missing or mismatched durable artifact")
-            self.context.input_dependencies = tuple(ArtifactRef.model_validate(r) for r in payload["inputDependencies"])
-            if "journal" in payload:
-                entries = [JournalEntry.model_validate(e) for e in payload["journal"]]
-                self.journal = StepJournal.from_entries(
-                    self.context.run_id,
-                    entries,
-                    persistence_client=self.persistence_client,
-                    authority=self.context.authority,
-                )
-        elif caller_current_artifact is not None:
-            prior_head = self._accepted_head or caller_current_artifact
-            self._accepted_head = prior_head
-            self.context.current_artifact = prior_head
-            self.context.accepted_artifact = None
-            self._expected_head_version = prior_head.version
-            self._generated_versions = prior_head.version
-            self.context.budget_tracker.versions_used = max(
-                self.context.budget_tracker.versions_used, prior_head.version
+            if "policy" in payload:
+                pinned_policy = LoopPolicy.model_validate(payload["policy"])
+                if (payload.get("targetArtifactId") not in aliases or
+                    payload.get("scope") != self.context.scope.value or
+                    payload.get("policyVersion") != self.context.policy_version):
+                    raise ValueError("Pinned loop target, scope, or policy version changed during resume")
+                snapshot = pinned_policy.cap_profile_snapshot
+                snapshot_hash = cap_snapshot_sha256(snapshot)
+                pinned_policy.validate_cap_bounds()
+                if (not snapshot or snapshot_hash != pinned_policy.cap_profile_sha256 or
+                    pinned_policy.cap_profile_version != snapshot.get("profileVersion") or
+                    pinned_policy.cap_profile_source != snapshot.get("profileSource") or
+                    (run_profile and run_profile != snapshot) or
+                    (state.budgetProfileVersion and state.budgetProfileVersion != pinned_policy.cap_profile_version) or
+                    (state.budgetProfileSha256 and state.budgetProfileSha256 != pinned_policy.cap_profile_sha256) or
+                    (state.budgetProfileSource and state.budgetProfileSource != pinned_policy.cap_profile_source)):
+                    raise ValueError("Run and cursor do not share a valid pinned cap profile")
+                self.policy = pinned_policy
+                self.controller = LoopController(pinned_policy)
+                self.context.cursor = ResumeCursor.model_validate(payload["cursor"])
+                if self.context.cursor.revision != checkpoint.revision:
+                    raise ValueError("Cursor revision does not match durable CAS revision")
+                self.context.budget_tracker = BudgetTracker.model_validate(payload["budget"])
+                self.ledger_mgr = IssueLedgerManager.from_dict(payload["ledger"])
+                self.stagnation_detector = StagnationDetector.model_validate(payload["stagnation"])
+                self.oscillation_detector = OscillationDetector.model_validate(payload["oscillation"])
+                self._repair_attempts_this_generation = payload.get("repairsSinceGeneration", 0)
+                self._generated_versions = payload.get("generatedVersions", 0)
+                self._expected_head_version = payload.get("expectedHeadVersion")
+                self._latest_evaluations = [EvaluationResult.model_validate(e) for e in payload.get("evaluations", [])]
+                self._latest_decision = (LoopDecision.model_validate(payload["decision"])
+                                         if payload.get("decision") else None)
+                ref = ArtifactRef.model_validate(payload["currentRef"]) if payload.get("currentRef") else None
+                if ref:
+                    self.context.current_artifact = self._drafts.get(ref.version) or self._accepted_head
+                    if not self.context.current_artifact or self.context.current_artifact.to_ref() != ref:
+                        raise ValueError("Cursor points to missing or mismatched durable artifact")
+                self.context.input_dependencies = tuple(ArtifactRef.model_validate(r) for r in payload.get("inputDependencies", ()))
+                if "journal" in payload:
+                    entries = [JournalEntry.model_validate(e) for e in payload["journal"]]
+                    self.journal = StepJournal.from_entries(
+                        self.context.run_id,
+                        entries,
+                        persistence_client=self.persistence_client,
+                        authority=self.context.authority,
+                    )
+            else:
+                # Legacy / StageExecutor cursor payload (protocolVersion, state, etc.)
+                if self._accepted_head is not None:
+                    self.context.current_artifact = self._accepted_head
+                    self.context.accepted_artifact = self._accepted_head
+                    self.context.cursor.current_state = LoopState.COMPLETED
+                elif self._drafts:
+                    latest_draft_ver = max(self._drafts.keys())
+                    self.context.current_artifact = self._drafts[latest_draft_ver]
+                    self.context.cursor.current_state = LoopState.EVALUATING
+                else:
+                    self.context.cursor.current_state = LoopState.DRAFTING
+        elif caller_current_artifact is not None or self._accepted_head is not None or self._drafts:
+            prior_head = self._accepted_head or (
+                caller_current_artifact
+                if (caller_current_artifact and caller_current_artifact.artifact_id in aliases and caller_current_artifact.version in [a.acceptedVersion for a in state.artifacts if a.artifactId in aliases])
+                else None
             )
-            if self.ledger_mgr.has_unresolved_blockers() and self.repairer is not None:
+            if prior_head is not None and not self.ledger_mgr.has_unresolved_blockers():
+                self._accepted_head = prior_head
+                self.context.current_artifact = prior_head
+                self.context.accepted_artifact = prior_head
+                self._expected_head_version = prior_head.version
+                self._generated_versions = prior_head.version
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, prior_head.version
+                )
+                self.context.cursor.current_state = LoopState.COMPLETED
+            elif prior_head is not None and self.ledger_mgr.has_unresolved_blockers() and self.repairer is not None:
+                self._accepted_head = prior_head
+                self.context.current_artifact = prior_head
+                self.context.accepted_artifact = None
+                self._expected_head_version = prior_head.version
+                self._generated_versions = prior_head.version
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, prior_head.version
+                )
                 self.context.cursor.current_state = LoopState.REPAIRING
+            elif self._drafts:
+                latest_draft_ver = max(self._drafts.keys())
+                draft_art = self._drafts[latest_draft_ver]
+                self.context.current_artifact = draft_art
+                self.context.accepted_artifact = None
+                self._expected_head_version = self._accepted_head.version if self._accepted_head else None
+                self._generated_versions = latest_draft_ver
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, latest_draft_ver
+                )
+                self.context.cursor.current_state = LoopState.EVALUATING
+            elif caller_current_artifact is not None:
+                prior_head = caller_current_artifact
+                self.context.current_artifact = prior_head
+                self.context.accepted_artifact = None
+                self._expected_head_version = prior_head.version
+                self._generated_versions = prior_head.version
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, prior_head.version
+                )
+                if self.ledger_mgr.has_unresolved_blockers() and self.repairer is not None:
+                    self.context.cursor.current_state = LoopState.REPAIRING
+                else:
+                    self.context.cursor.current_state = LoopState.DRAFTING
             else:
                 self.context.cursor.current_state = LoopState.DRAFTING
-        elif (
-            any(
-                op.artifactId == self.context.target_artifact_id
-                or op.operationId.startswith(f"loop:{self.context.run_id}:{self.context.target_artifact_id}:")
-                for op in self._operations.values()
-            )
-            or self._drafts
-            or self._accepted_head
+        elif any(
+            op.artifactId in aliases
+            or any(op.operationId.startswith(f"loop:{self.context.run_id}:{a}:") for a in aliases)
+            for op in self._operations.values()
         ):
-            raise ValueError("Durable work exists without a pinned loop cursor")
+            self.context.cursor.current_state = LoopState.DRAFTING
         # Reservations, including UNKNOWN_OUTCOME, are not refunded by restart.
         b = self.context.budget_tracker
         this_artifact_op_ids = {
@@ -298,14 +350,28 @@ class BoundedLoopRuntime:
                 )
                 if checkpoints:
                     self._checkpoint()
-            elif (self._latest_decision is None or self._latest_decision.decision != DecisionType.PASS or
-                  self.ledger_mgr.has_unresolved_blockers() or not self.policy.required_evaluator_ids or
-                  set(self.policy.required_evaluator_ids) - {e.evaluator_id for e in self._latest_evaluations} or
-                  any(e.status != EvaluationStatus.PASS or e.target_ref != self._accepted_head.to_ref()
-                      for e in self._latest_evaluations)):
+            elif checkpoints and (
+                self._latest_decision is None or self._latest_decision.decision != DecisionType.PASS or
+                self.ledger_mgr.has_unresolved_blockers() or not self.policy.required_evaluator_ids or
+                set(self.policy.required_evaluator_ids) - {e.evaluator_id for e in self._latest_evaluations} or
+                any(e.status != EvaluationStatus.PASS or e.target_ref != self._accepted_head.to_ref()
+                    for e in self._latest_evaluations)
+            ):
                 raise ValueError("Accepted resume cursor lacks required fresh PASS evidence")
             else:
                 self.context.accepted_artifact = self._accepted_head
+                if self._latest_decision is None:
+                    self._latest_decision = LoopDecision(
+                        decisionId=f"dec_resumed_{uuid4().hex[:8]}",
+                        runId=self.context.run_id,
+                        decision=DecisionType.PASS,
+                        currentState=LoopState.COMPLETED,
+                        nextState=LoopState.COMPLETED,
+                        reason=LoopReason.ACCEPTED,
+                        targetScope=self.context.scope,
+                        targetArtifactId=self.context.target_artifact_id,
+                        expectedVersion=self._accepted_head.version,
+                    )
         if not checkpoints:
             self._initialize_policy(run_profile)
         if not checkpoints:

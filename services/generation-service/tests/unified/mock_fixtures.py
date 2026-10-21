@@ -27,6 +27,7 @@ from app.contracts.artifact import (
 )
 from app.contracts.evaluation import EvaluationResult, EvaluationStatus
 from app.contracts.issue import Issue, IssueCode, IssueScope, IssueSeverity
+from app.contracts.question_type import QuestionPromptFamily
 from app.persistence.client import (
     CheckpointApiError,
     CheckpointClient,
@@ -356,8 +357,47 @@ class MockProvider(BaseProvider):
                 res = compose_passage(topic, sec_idx, text, claims, config)
                 self._passages[sec_idx] = res["passage"]
                 passage = res["passage"]
+            q_type = None
+            if request.messages:
+                full_content = " ".join(m.content for m in request.messages).lower()
+                if "true/false" in full_content or "true, false" in full_content or "true false" in full_content:
+                    q_type = "TRUE_FALSE_NOT_GIVEN"
+                elif "yes/no" in full_content or "yes, no" in full_content or "yes no" in full_content:
+                    q_type = "YES_NO_NOT_GIVEN"
+                elif "multiple choice" in full_content and ("multiple correct" in full_content or "multiple answers" in full_content):
+                    q_type = "MULTIPLE_CHOICE_MULTIPLE"
+                elif "multiple choice" in full_content:
+                    q_type = "MULTIPLE_CHOICE_SINGLE"
+                elif "matching heading" in full_content or "matching headings" in full_content:
+                    q_type = "MATCHING_HEADING"
+                elif "matching information" in full_content:
+                    q_type = "MATCHING_INFORMATION"
+                elif "matching features" in full_content:
+                    q_type = "MATCHING_FEATURES"
+                elif "sentence endings" in full_content or "matching endings" in full_content:
+                    q_type = "MATCHING_ENDINGS"
+                elif "summary completion" in full_content or "summary" in full_content:
+                    q_type = "SUMMARY_COMPLETION"
+                elif "sentence completion" in full_content:
+                    q_type = "SENTENCE_COMPLETION"
+                elif "table completion" in full_content:
+                    q_type = "TABLE_COMPLETION"
+                elif "flow chart" in full_content or "flowchart" in full_content:
+                    q_type = "FLOW_CHART"
+                elif "diagram" in full_content:
+                    q_type = "DIAGRAM_LABEL"
+                elif "note completion" in full_content or "notes" in full_content:
+                    q_type = "NOTE_COMPLETION"
+                elif "short answer" in full_content:
+                    q_type = "SHORT_ANSWER"
+                else:
+                    for f in QuestionPromptFamily:
+                        display_name = f.value.replace("_", " ").lower()
+                        if f.value.lower() in full_content or display_name in full_content:
+                            q_type = f.value
+                            break
             g_idx = 0 if (q_num <= 7 or (14 <= q_num <= 19) or (27 <= q_num <= 33)) else 1
-            slots = [{"groupIndex": g_idx, "questionNumber": q_num, "claimRefIds": [claims[(q_num - 1) % len(claims)]["claimId"]]}]
+            slots = [{"groupIndex": g_idx, "questionNumber": q_num, "questionType": q_type, "claimRefIds": [claims[(q_num - 1) % len(claims)]["claimId"]]}]
             all_q, _ = compose_questions(sec_idx, passage, claims, slots, config)
             q_payload = all_q[0]
             self._last_questions[q_num] = q_payload

@@ -245,10 +245,14 @@ class EvaluatorRegistry:
             recorded_failures: List[EvaluationResult] = []
             for m_id in missing_or_omitted:
                 eval_id = f"eval_cfg_err_{uuid4().hex[:10]}"
+                ev_ver = self._evaluators[m_id].evaluator_version if m_id in self._evaluators else "1.0.0"
+                if ev_ver == "1.0.0":
+                    from app.reading_evaluation import EVALUATION_CATALOG
+                    ev_ver = EVALUATION_CATALOG.get(m_id, "1.0.0")
                 err_res = EvaluationResult.create_error(
                     evaluation_id=eval_id,
                     evaluator_id=m_id,
-                    evaluator_version="1.0.0",
+                    evaluator_version=ev_ver,
                     target_ref=artifact.to_ref(),
                     error_message=f"Required evaluator '{m_id}' is missing or omitted from execution pipeline for {artifact.artifact_type.value}",
                     code=IssueCode.EVALUATOR_UNAVAILABLE,

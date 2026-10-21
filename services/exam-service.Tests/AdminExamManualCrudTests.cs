@@ -105,6 +105,37 @@ public class AdminExamManualCrudTests
             Assert.Equal("C1", exam.Level);
             Assert.Equal(ExamStatus.Draft, exam.Status);
         }
+        // Add section and question so exam can be published according to ExamPublicationValidator rules
+        using (var scope = provider.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
+            var sec = new ExamSection
+            {
+                Id = Guid.NewGuid(),
+                ExamId = examId,
+                Idx = 1,
+                Title = "Section 1",
+                PassageMd = "Valid passage text with sufficient content for manual test.",
+            };
+            var q = new ExamQuestion
+            {
+                Id = Guid.NewGuid(),
+                SectionId = sec.Id,
+                Idx = 1,
+                Type = Shared.ExamDto.Contracts.Exam.Enums.QuestionType.MultipleChoiceSingle,
+                Skill = "Reading",
+                PromptMd = "What is the primary topic of the passage?",
+                ExplanationMd = "The passage discusses the primary topic directly.",
+                Options = new List<ExamOption>
+                {
+                    new ExamOption { Id = Guid.NewGuid(), Idx = 1, ContentMd = "Option A", IsCorrect = true },
+                    new ExamOption { Id = Guid.NewGuid(), Idx = 2, ContentMd = "Option B", IsCorrect = false }
+                }
+            };
+            sec.Questions.Add(q);
+            db.ExamSections.Add(sec);
+            await db.SaveChangesAsync();
+        }
 
         // 4. Admin publishes the exam
         using (var scope = provider.CreateScope())

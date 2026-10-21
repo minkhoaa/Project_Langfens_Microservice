@@ -1,0 +1,259 @@
+{
+  "id": "f615c58d-4195-448d-81d9-f87edb4cd74f",
+  "topic": "Marine Ecosystems and Global Climate Change",
+  "status": "Completed",
+  "completedSections": 1,
+  "error": null,
+  "examId": "2212d86a-bc28-4e05-bce2-4c015ba7425e",
+  "createdAt": "2026-10-20T08:48:38.729564Z",
+  "updatedAt": "2026-10-20T08:51:16.833465Z",
+  "sources": [
+    {
+      "pmcid": "PMC9540822",
+      "title": "Impacts of artificial light at night in marine ecosystems\u2014A review",
+      "doi": "10.1111/gcb.16264",
+      "url": "https://europepmc.org/articles/PMC9540822",
+      "license": "https://creativecommons.org/licenses/by/4.0",
+      "wordCount": 10301,
+      "authors": "Marangoni Laura F. B., Davies Thomas, Smyth Tim, Rodr\u00edguez Airam, Hamann Mark, Duarte Cristian, Pendoley Kellie, Berge J\u00f8rgen, Maggi Elena, Levy Oren",
+      "openAlexId": null,
+      "topicId": null,
+      "sourceType": null,
+      "metadata": {
+        "provider": "minimax",
+        "engine": "v2"
+      },
+      "content": null,
+      "contentPreview": null
+    }
+  ],
+  "sections": [
+    {
+      "title": "Marine Ecosystems and Global Climate Change",
+      "passage": "Artificial Light at Night (ALAN) has emerged as a pervasive and escalating form of pollution, recognized as a significant global change issue in the 21st century. While terrestrial ecosystems have been the primary focus of ALAN research, recent years have witnessed a substantial expansion in our understanding of its impacts on marine environments. Studies indicate that at least 22% of coastal regions are exposed to ALAN, with light from urban areas eliciting biological responses in seafloor-dwelling organisms in adjacent habitats. Globally, approximately 1.9 million km\u00b2 of coastal seas are affected by ALAN at a depth of 1 meter, with 840,000 km\u00b2 experiencing such impacts at 20 meters. The Mediterranean, Red Sea, Persian Gulf, and seas of Southeast Asia are among the most exposed regions. Notably, 20% of the world's Marine Protected Areas are exposed to ALAN across their entire range, underscoring the widespread nature of this phenomenon.\n\nThe depth to which biologically important ALAN penetrates marine environments varies significantly around the world. In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters, while in the Black Sea, Red Sea, and Persian Gulf, it reaches around 30 meters. In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters. These findings are derived from a combination of data on artificial night sky brightness, sea surface irradiances, and inherent optical water properties, validated against in situ measurements from the Persian Gulf. The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migration in marine organisms, such as female Calanus copepods. This data provides a critical foundation for understanding the extent to which marine ecosystems are exposed to artificial light.\n\nThe implications of ALAN for marine organisms and ecosystems are profound and multifaceted. ALAN has the potential to disrupt a wide array of biological processes and habitats that rely on natural light cycles. These include diel vertical migrations, which constitute the largest migration of biomass on the planet, as well as coral spawning and symbiotic relationships crucial for coral reef health. Consumer-resource interactions, which are fundamental to the structure of marine food webs, are also affected. Furthermore, the migrations and orientation of marine organisms, essential for their survival, are compromised by ALAN. The recruitment of sessile invertebrate larvae into marine habitats is another process impacted by artificial light, with significant consequences for biodiversity and ecosystem resilience.\n\nResearch has shown that ALAN affects various marine environments differently. Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustaceans, polychaetes, and bivalves. Many of these species exhibit dynamic day/night activity rhythms governed by natural light cycles and moonlight. The encroachment of ALAN into these ecosystems is expected to have a substantial negative impact on their biodiversity. Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods, with some species showing immediate recovery once the light is removed. However, the long-term effects of such disruptions on feeding rates, absorption efficiency, and growth rates remain less clear and warrant further investigation.\n\nIn rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a variety of sessile and mobile animals. In the Mediterranean, lit areas at night have been found to increase the biomass and photosynthetic efficiency of cyanobacteria-dominated MPB. The effects of ALAN on sessile species are complex, with some taxa showing positive or negative responses depending on the light intensity and species-specific light optima. For mobile organisms, such as the ecologically important abalone Concholepas concholepas, ALAN has been shown to increase metabolic rates and alter foraging behaviors, highlighting the potential for broader ecological impacts.\n\nThe challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, making it difficult to compare study results. There is no globally recognized standard for monitoring biologically active light, and the tools commonly used, such as lux meters, often fail to account for the full spectrum of light wavelengths that are biologically relevant. This limitation underscores the need for more sophisticated and standardized approaches to measuring light in ecological studies.\n\nIn conclusion, while ALAN is a well-documented threat to marine turtles, its effects on other marine organisms and ecosystems are only beginning to be understood. The ongoing expansion of ALAN presents a critical challenge for conservation practitioners and researchers alike. Addressing this challenge requires a concerted effort to fill existing knowledge gaps, develop effective management strategies, and implement site-specific interventions to mitigate the impacts of artificial light on marine biodiversity and ecosystem health.",
+      "source": {
+        "pmcid": "PMC9540822",
+        "title": "Impacts of artificial light at night in marine ecosystems\u2014A review",
+        "doi": "10.1111/gcb.16264",
+        "url": "https://europepmc.org/articles/PMC9540822",
+        "license": "https://creativecommons.org/licenses/by/4.0",
+        "wordCount": 10301,
+        "authors": "Marangoni Laura F. B., Davies Thomas, Smyth Tim, Rodr\u00edguez Airam, Hamann Mark, Duarte Cristian, Pendoley Kellie, Berge J\u00f8rgen, Maggi Elena, Levy Oren",
+        "openAlexId": null,
+        "topicId": null,
+        "sourceType": null,
+        "metadata": null,
+        "content": null,
+        "contentPreview": null
+      },
+      "groups": [
+        {
+          "type": "TRUE_FALSE_NOT_GIVEN",
+          "instruction": "Do the following statements agree with the information given in Reading Passage? In boxes on your answer sheet, write TRUE, FALSE, or NOT GIVEN.",
+          "questions": [
+            {
+              "number": 1,
+              "prompt": "Lux meters are considered a globally recognized standard for monitoring biologically active light.",
+              "answer": "FALSE",
+              "options": [
+                "TRUE",
+                "FALSE",
+                "NOT GIVEN"
+              ],
+              "evidenceQuote": "There is no globally recognized standard for monitoring biologically active light, and the tools commonly used, such as lux meters, often fail to account for the full spectrum of light wavelengths that are biologically relevant.",
+              "explanation": "The passage indicates that lux meters are not a globally recognized standard."
+            },
+            {
+              "number": 2,
+              "prompt": "ALAN affects marine environments up to 100 meters deep in the Mediterranean.",
+              "answer": "FALSE",
+              "options": [
+                "TRUE",
+                "FALSE",
+                "NOT GIVEN"
+              ],
+              "evidenceQuote": "In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters,",
+              "explanation": "The passage states that ALAN affects up to 50 meters in the Mediterranean, not 100 meters."
+            },
+            {
+              "number": 3,
+              "prompt": "The Black Sea is less affected by ALAN compared to the Mediterranean Sea.",
+              "answer": "NOT GIVEN",
+              "options": [
+                "TRUE",
+                "FALSE",
+                "NOT GIVEN"
+              ],
+              "evidenceQuote": "In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters, while in the Black Sea, Red Sea, and Persian Gulf, it reaches around 30 meters.",
+              "explanation": "The passage does not provide a direct comparison of the impact of ALAN between the Black Sea and the Mediterranean Sea."
+            },
+            {
+              "number": 4,
+              "prompt": "The Mediterranean Sea is among the most exposed regions to ALAN.",
+              "answer": "TRUE",
+              "options": [
+                "TRUE",
+                "FALSE",
+                "NOT GIVEN"
+              ],
+              "evidenceQuote": "The Mediterranean, Red Sea, Persian Gulf, and seas of Southeast Asia are among the most exposed regions.",
+              "explanation": "The passage explicitly states that the Mediterranean Sea is one of the most exposed regions to ALAN."
+            },
+            {
+              "number": 5,
+              "prompt": "Globally, 1.9 million km\u00b2 of coastal seas are affected by ALAN at a depth of 1 meter.",
+              "answer": "TRUE",
+              "options": [
+                "TRUE",
+                "FALSE",
+                "NOT GIVEN"
+              ],
+              "evidenceQuote": "Globally, approximately 1.9 million km\u00b2 of coastal seas are affected by ALAN at a depth of 1 meter,",
+              "explanation": "The statement is directly supported by the data provided in the passage."
+            },
+            {
+              "number": 6,
+              "prompt": "ALAN can penetrate to 20 meters in the Gulf of Thailand.",
+              "answer": "TRUE",
+              "options": [
+                "TRUE",
+                "FALSE",
+                "NOT GIVEN"
+              ],
+              "evidenceQuote": "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters.",
+              "explanation": "The passage confirms that ALAN penetrates to 20 meters in the Gulf of Thailand."
+            },
+            {
+              "number": 7,
+              "prompt": "ALAN has no impact on coral spawning.",
+              "answer": "FALSE",
+              "options": [
+                "TRUE",
+                "FALSE",
+                "NOT GIVEN"
+              ],
+              "evidenceQuote": "ALAN has the potential to disrupt a wide array of biological processes and habitats that rely on natural light cycles. These include diel vertical migrations, which constitute the largest migration of biomass on the planet, as well as coral spawning and symbiotic relationships crucial for coral reef health.",
+              "explanation": "The passage explicitly states that ALAN impacts coral spawning."
+            }
+          ]
+        },
+        {
+          "type": "SENTENCE_COMPLETION",
+          "instruction": "Complete the sentences below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+          "questions": [
+            {
+              "number": 8,
+              "prompt": "In Southeast Asian seas, ALAN penetrates to approximately [8] meters.",
+              "answer": "20",
+              "options": [],
+              "evidenceQuote": "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters.",
+              "explanation": "Verified from passage: In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meter"
+            },
+            {
+              "number": 9,
+              "prompt": "In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and [9].",
+              "answer": "macroalgae",
+              "options": [],
+              "evidenceQuote": "In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a variety of sessile and mobile animals.",
+              "explanation": "Verified from passage: In rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a vari"
+            },
+            {
+              "number": 10,
+              "prompt": "Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of [10] and isopods.",
+              "answer": "amphipods",
+              "options": [],
+              "evidenceQuote": "Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods, with some species showing immediate recovery once the light is removed.",
+              "explanation": "Verified from passage: Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods,"
+            },
+            {
+              "number": 11,
+              "prompt": "Sandy beaches support a rich diversity of fauna, including crustaceans, polychaetes, and [11].",
+              "answer": "bivalves",
+              "options": [],
+              "evidenceQuote": "Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustaceans, polychaetes, and bivalves.",
+              "explanation": "Verified from passage: Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustacean"
+            },
+            {
+              "number": 12,
+              "prompt": "The challenges of measuring ecological light are significant because current methodologies and instruments vary widely, making it difficult to [12] study results.",
+              "answer": "compare",
+              "options": [],
+              "evidenceQuote": "The challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, making it difficult to compare study results.",
+              "explanation": "Verified from passage: The challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, maki"
+            },
+            {
+              "number": 13,
+              "prompt": "The term 'biologically important ALAN' refers to the minimum irradiances of [13] light that trigger diel vertical migration in marine organisms.",
+              "answer": "white",
+              "options": [],
+              "evidenceQuote": "The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migration in marine organisms, such as female Calanus copepods.",
+              "explanation": "Verified from passage: The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migra"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "logs": [
+    {
+      "timestamp": "2026-10-20T08:48:38.7313267Z",
+      "level": "Information",
+      "message": "Job created with 1 verified source(s); waiting for the generation worker."
+    },
+    {
+      "timestamp": "2026-10-20T08:48:45.8014113Z",
+      "level": "Information",
+      "message": "Worker claimed job for topic 'Marine Ecosystems and Global Climate Change' with 1 source(s) [Epoch 2]."
+    },
+    {
+      "timestamp": "2026-10-20T08:48:45.8745295Z",
+      "level": "Information",
+      "message": "Generation started for 1 selected source(s); 0 section checkpoint(s) already complete."
+    },
+    {
+      "timestamp": "2026-10-20T08:48:45.9001905Z",
+      "level": "Information",
+      "message": "Acquiring durable operation grant for passage 1/1 (PMC9540822: Impacts of artificial light at night in marine ecosystems\u2014A review)..."
+    },
+    {
+      "timestamp": "2026-10-20T08:48:46.2094041Z",
+      "level": "Information",
+      "message": "Durable operation grant acquired: op_run_f615c58d4195448d81d9f87edb4cd74f_sec_1_7EDDDAE45B37 (Reservation: 380000 tokens, Replay: False)."
+    },
+    {
+      "timestamp": "2026-10-20T08:48:46.2664439Z",
+      "level": "Information",
+      "message": "AI service: Passage 1 generation stream opened."
+    },
+    {
+      "timestamp": "2026-10-20T08:51:15.5901541Z",
+      "level": "Information",
+      "message": "Executing V2 SectionLoop via AI service for section 1..."
+    },
+    {
+      "timestamp": "2026-10-20T08:51:15.9487515Z",
+      "level": "Information",
+      "message": "Passage 1 generated and verified (766 words, 13 questions). Committing durable checkpoint..."
+    },
+    {
+      "timestamp": "2026-10-20T08:51:16.5053775Z",
+      "level": "Information",
+      "message": "Passage 1 durable checkpoint acknowledged (art_section_1 v1, Hash: 8a1e9111...). Progress: 1/1."
+    },
+    {
+      "timestamp": "2026-10-20T08:51:16.5199738Z",
+      "level": "Information",
+      "message": "[Exam Finalization] Validating all 1 section(s) against IELTS Academic Paper Rules..."
+    },
+    {
+      "timestamp": "2026-10-20T08:51:16.533067Z",
+      "level": "Information",
+      "message": "[Exam Validation Passed] All 13 questions and 766 words meet IELTS standards. Saving Exam in database via idempotent finalizer..."
+    },
+    {
+      "timestamp": "2026-10-20T08:51:16.8333497Z",
+      "level": "Information",
+      "message": "[Exam Created Successfully] Exam ID: 2212d86a-bc28-4e05-bce2-4c015ba7425e | Slug: 'reading-f615c58d4195448d81d9f87edb4cd74f' (Existing: False)."
+    }
+  ]
+}

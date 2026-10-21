@@ -12,11 +12,26 @@ from .base import CanonicalBaseModel
 
 class QuestionType(str, Enum):
     TRUE_FALSE_NOT_GIVEN = "TRUE_FALSE_NOT_GIVEN"
-    SENTENCE_COMPLETION = "SENTENCE_COMPLETION"
-    MULTIPLE_CHOICE_SINGLE = "MULTIPLE_CHOICE_SINGLE"
-    SUMMARY_COMPLETION = "SUMMARY_COMPLETION"
     YES_NO_NOT_GIVEN = "YES_NO_NOT_GIVEN"
+    SENTENCE_COMPLETION = "SENTENCE_COMPLETION"
+    SUMMARY_COMPLETION = "SUMMARY_COMPLETION"
+    SUMMARY_COMPLETION_BOX = "SUMMARY_COMPLETION_BOX"
+    MULTIPLE_CHOICE_SINGLE = "MULTIPLE_CHOICE_SINGLE"
+    MULTIPLE_CHOICE_MULTIPLE = "MULTIPLE_CHOICE_MULTIPLE"
+    MATCHING_HEADING = "MATCHING_HEADING"
+    MATCHING_INFORMATION = "MATCHING_INFORMATION"
+    MATCHING_FEATURES = "MATCHING_FEATURES"
+    MATCHING_ENDINGS = "MATCHING_ENDINGS"
+    TABLE_COMPLETION = "TABLE_COMPLETION"
+    FLOW_CHART = "FLOW_CHART"
+    DIAGRAM_LABEL = "DIAGRAM_LABEL"
     SHORT_ANSWER = "SHORT_ANSWER"
+    NOTE_COMPLETION = "NOTE_COMPLETION"
+    FORM_COMPLETION = "FORM_COMPLETION"
+    CLASSIFICATION = "CLASSIFICATION"
+    CHOOSING_TITLE = "CHOOSING_TITLE"
+    MULTIPLE_CHOICE_SINGLE_IMAGE = "MULTIPLE_CHOICE_SINGLE_IMAGE"
+    MAP_LABEL = "MAP_LABEL"
 class DifficultyLevel(str, Enum):
     FOUNDATION = "FOUNDATION"
     MODERATE = "MODERATE"
@@ -48,7 +63,7 @@ class QuestionSlot(CanonicalBaseModel):
     question_number: int = Field(..., ge=1, le=40, alias="questionNumber")
     section_id: int = Field(..., ge=1, le=3, alias="sectionId")
     group_index: int = Field(..., ge=0, le=10, alias="groupIndex")
-    question_type: Any = Field(..., alias="questionType")
+    question_type: QuestionType = Field(..., alias="questionType")
     target_skill: str = Field(..., alias="targetSkill")
     target_difficulty: TargetDifficulty = Field(..., alias="targetDifficulty")
     claim_ref_ids: List[str] = Field(default_factory=list, alias="claimRefIds")
@@ -78,7 +93,7 @@ class BudgetAllocation(CanonicalBaseModel):
 class QuestionTypeAllocation(CanonicalBaseModel):
     """Allocation of question types within a section."""
 
-    question_type: Any = Field(..., alias="questionType")
+    question_type: QuestionType = Field(..., alias="questionType")
     count: int = Field(..., ge=1)
     start_question_number: int = Field(..., ge=1, le=40, alias="startQuestionNumber")
     end_question_number: int = Field(..., ge=1, le=40, alias="endQuestionNumber")

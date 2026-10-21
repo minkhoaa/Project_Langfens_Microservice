@@ -1,0 +1,43 @@
+{
+  "execution_metadata": {
+    "executed_at": "2026-10-20T02:54:24.633156+00:00",
+    "backup_location": "backups/db_backup_20261020_024500/",
+    "operator_authorization": "cleanup_auth APPROVED",
+    "target_database": "exam-db (PostgreSQL 17.6)",
+    "attempt_database": "attempt-db (PostgreSQL 17.6)"
+  },
+  "cleanup_results": {
+    "archived_exams_count": 46,
+    "physically_deleted_exams_count": 3,
+    "historical_attempts_preserved_count": 91,
+    "historical_attempts_modified_count": 0,
+    "active_published_exams_remaining": 0,
+    "active_draft_exams_remaining": 0,
+    "public_api_returned_exams_count": 0,
+    "verification_status": "PASS"
+  },
+  "archived_exam_ids": [
+    "059b3933-008b-5971-a3d5-2ce082254d7e",
+    "0ff384b4-e5cb-4f7e-8c7d-79c5eba87807",
+    "13452153-b72f-4cfe-9641-58cf1f53b992",
+    "178e85ec-d0f5-46aa-be3a-fad86f7e3f0a",
+    "1c15943a-1d9c-4ddf-b7e1-daed3b2cae46",
+    "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+    "2eb01490-db38-45f5-b347-ad52434b1dfc",
+    "4158c2c7-c68e-489f-b78d-f57e1b182411",
+    "4b405ce8-0f24-5181-a4a8-6f7e8bcfe805",
+    "6aa44aef-e816-43da-9f05-12d8e3c4d458",
+    "8d33960e-cb05-4e6a-a37b-7dee0521efce",
+    "92362e08-1731-4f1f-8934-9fd5dcfe1f37",
+    "a0bb39ed-19c6-455b-9d7a-7dac5c64e373",
+    "c4d0d5fd-201d-4d35-a5d7-3c45e45c649d",
+    "e291c0c8-0761-467d-b083-5883ca8f2b9e",
+    "e6e3021b-7264-4cd2-a548-361e08fffaee",
+    "ea9cc216-5182-5b04-8631-a3ad34646e5c"
+  ],
+  "deleted_unreferenced_exam_ids": [
+    "e7b53117-9aec-5dc2-9eef-b147dde32879",
+    "5890a237-5d25-52ea-9525-41cbd939e7b0",
+    "685a93af-13d3-447a-ab20-85dae9556bfe"
+  ]
+}

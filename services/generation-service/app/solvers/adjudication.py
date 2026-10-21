@@ -71,7 +71,7 @@ def adjudicate_item(
                     is_compelling = (
                         alt.plausibility_score is None
                         or (exp_score is not None and alt.plausibility_score >= exp_score)
-                        or (exp_score is None and alt.plausibility_score >= 0.95)
+                        or (exp_score is None and alt.plausibility_score >= 0.8)
                     )
                     if is_compelling:
                         grounded_distinct_alts.append(alt.model_dump())

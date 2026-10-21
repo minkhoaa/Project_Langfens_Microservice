@@ -320,7 +320,7 @@ async def test_gate_4_incorrect_mcq_keys_and_unsupported_tfng_rejected() -> None
 async def test_gate_4b_mcq_duplicate_options_rejected() -> None:
     """Gate 4b: Proves MCQ question with duplicate options or bad distractors is rejected."""
     run_id = f"gate4b-mcq-dup-{uuid4().hex[:8]}"
-    policy = PinnedExecutionPolicy(provider="mock")
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="legacy_preset")
     pipeline, client, provider, gateway = create_mock_environment(policy=policy, run_id=run_id)
 
     context = RunContext(

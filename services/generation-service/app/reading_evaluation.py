@@ -52,6 +52,9 @@ QUESTION_ADAPTER = TypeAdapter(QuestionUnion)
 QUESTION_FIELDS = {
     "questionNumber", "questionType", "explanation", "statement", "answer",
     "evidenceQuote", "absenceAssessment", "prompt", "options", "correctOption",
+    "answers", "headings", "features", "endings", "categories", "summaryText",
+    "tableContext", "flowSteps", "calloutLabel", "partDescription", "headingContext",
+    "fieldLabel", "svgAssetId",
 }
 NUMBER = re.compile(r"(?<![\w])\d+(?:[.,]\d+)*(?:%|)(?![\w])")
 POPULATIONS = re.compile(r"\b(humans?|mice|rats|patients?|children|adults?|cells?|animals?)\b", re.I)
@@ -218,8 +221,19 @@ def semantic_result(artifact: ArtifactEnvelope, evaluator_id: str, report: Mappi
 
 
 def question_core(payload: Mapping[str, Any]) -> dict[str, Any]:
-    return {key: data(value) for key, value in payload.items() if key in QUESTION_FIELDS}
-
+    core = {key: data(value) for key, value in payload.items() if key in QUESTION_FIELDS}
+    q_type = str(core.get("questionType", ""))
+    if q_type in ("TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"):
+        if "statement" not in core and "prompt" in core:
+            core["statement"] = core.pop("prompt")
+        else:
+            core.pop("prompt", None)
+    else:
+        if "prompt" not in core and "statement" in core:
+            core["prompt"] = core.pop("statement")
+        else:
+            core.pop("statement", None)
+    return core
 
 def question_answer(question: Mapping[str, Any]) -> str:
     return str(question.get("correctOption", question.get("answer", "")))
@@ -354,17 +368,33 @@ def evaluate_section(artifact: ArtifactEnvelope, config: SectionConfig) -> list[
     payload = artifact.payload
     groups = payload.get("groups", ())
     problems: list[Problem] = []
-    if payload.get("sectionId") != config.index or len(groups) != len(config.groups):
-        problems.append((IssueCode.SECTION_GROUP_COUNT_MISMATCH, "Section differs from configured section/group allocation"))
-    for index, (actual, expected) in enumerate(zip(groups, config.groups)):
-        if actual.get("questionType") != expected.question_type.value or len(actual.get("questions", ())) != expected.count:
-            problems.append((IssueCode.SECTION_GROUP_SIZE_MISMATCH, f"Group {index} differs from configured type/count"))
-        if not actual.get("instructions"):
-            problems.append((IssueCode.SCHEMA_VIOLATION, "Every group needs its canonical instructions"))
-        if expected.question_type.value == "SUMMARY_COMPLETION":
-            context = str(actual.get("sharedContext", ""))
-            if not context or any(context.count(f"[{number}]") != 1 for number in config.group_numbers(index)):
-                problems.append((IssueCode.SCHEMA_VIOLATION, "Summary must be one coherent context with each blank exactly once"))
+    if payload.get("sectionId") != config.index:
+        problems.append((IssueCode.SECTION_GROUP_COUNT_MISMATCH, "Section differs from configured section ID"))
+    is_exact_preset = len(groups) == len(config.groups) and all(
+        actual.get("questionType") == expected.question_type.value and len(actual.get("questions", ())) == expected.count
+        for actual, expected in zip(groups, config.groups)
+    )
+    if is_exact_preset:
+        for index, (actual, expected) in enumerate(zip(groups, config.groups)):
+            if not actual.get("instructions"):
+                problems.append((IssueCode.SCHEMA_VIOLATION, "Every group needs its canonical instructions"))
+            if expected.question_type.value in ("SUMMARY_COMPLETION", "SUMMARY_COMPLETION_BOX"):
+                context = str(actual.get("sharedContext", ""))
+                if not context or any(context.count(f"[{number}]") != 1 for number in config.group_numbers(index)):
+                    problems.append((IssueCode.SCHEMA_VIOLATION, "Summary must be one coherent context with each blank exactly once"))
+    else:
+        if not (2 <= len(groups) <= 4):
+            problems.append((IssueCode.SECTION_GROUP_COUNT_MISMATCH, f"Section has {len(groups)} question group(s), expected 2-4"))
+        for index, actual in enumerate(groups):
+            if not actual.get("questions"):
+                problems.append((IssueCode.SECTION_GROUP_SIZE_MISMATCH, f"Group {index} has no questions"))
+            if not actual.get("instructions"):
+                problems.append((IssueCode.SCHEMA_VIOLATION, "Every group needs its canonical instructions"))
+            if actual.get("questionType") in ("SUMMARY_COMPLETION", "SUMMARY_COMPLETION_BOX"):
+                context = str(actual.get("sharedContext", ""))
+                grp_nums = [q.get("questionNumber") for q in actual.get("questions", []) if q.get("questionNumber")]
+                if not context or any(context.count(f"[{number}]") != 1 for number in grp_nums):
+                    problems.append((IssueCode.SCHEMA_VIOLATION, "Summary must be one coherent context with each blank exactly once"))
     questions = tuple(q for group in groups for q in group.get("questions", ()))
     if tuple(q.get("questionNumber") for q in questions) != config.question_numbers():
         problems.append((IssueCode.QUESTION_NUMBERING_INVALID, "Section numbering is not its contiguous pinned range"))

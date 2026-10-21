@@ -93,6 +93,7 @@ public sealed record PinnedExecutionPolicy(
     [property: JsonPropertyName("paperMinWords")] int PaperMinWords,
     [property: JsonPropertyName("paperMaxWords")] int PaperMaxWords,
     [property: JsonPropertyName("requireBlindSolver")] bool RequireBlindSolver,
+    [property: JsonPropertyName("blueprintMode")] string BlueprintMode,
     [property: JsonPropertyName("sections")] IReadOnlyList<SectionPolicyConfig> Sections
 )
 {
@@ -113,6 +114,7 @@ public sealed record PinnedExecutionPolicy(
         PaperMinWords: 2150,
         PaperMaxWords: 2750,
         RequireBlindSolver: true,
+        BlueprintMode: "dynamic",
         Sections: [
             new SectionPolicyConfig(
                 Index: 1,

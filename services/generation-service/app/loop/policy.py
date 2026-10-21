@@ -320,7 +320,7 @@ class LoopPolicy(CanonicalBaseModel):
             max_total_repairs=getattr(policy, "max_repairs", 2),
             cap_profile_version="pinned-execution-v2",
             cap_profile_source=f"PinnedExecutionPolicy ({getattr(policy, 'provider', 'pinned')})",
-            cap_profile_sha256=expected_sha,
+            cap_profile_sha256=policy_hash or expected_sha,
             cap_profile_snapshot=snapshot,
             policy_hash=policy_hash,
             **overrides,

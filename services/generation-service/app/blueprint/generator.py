@@ -41,24 +41,25 @@ SECTION_1_FAMILIES = [
     QuestionPromptFamily.FLOW_CHART,
     QuestionPromptFamily.SENTENCE_COMPLETION,
     QuestionPromptFamily.SHORT_ANSWER,
+    QuestionPromptFamily.FORM_COMPLETION,
 ]
 
-# Section 2: Technical, analytical, discursive texts (Matching Info, Matching Features, Summary Completion, Diagram Label)
 SECTION_2_FAMILIES = [
     QuestionPromptFamily.MATCHING_INFORMATION,
     QuestionPromptFamily.MATCHING_FEATURES,
     QuestionPromptFamily.SUMMARY_COMPLETION,
     QuestionPromptFamily.DIAGRAM_LABEL,
     QuestionPromptFamily.SUMMARY_COMPLETION_BOX,
+    QuestionPromptFamily.CLASSIFICATION,
 ]
 
-# Section 3: Argumentative, complex academic debate, viewpoints (Matching Headings, YNNG, MCQ Multiple, Sentence Endings, MCQ Single)
 SECTION_3_FAMILIES = [
     QuestionPromptFamily.MATCHING_HEADING,
     QuestionPromptFamily.YES_NO_NOT_GIVEN,
     QuestionPromptFamily.MULTIPLE_CHOICE_MULTIPLE,
     QuestionPromptFamily.MATCHING_ENDINGS,
     QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE,
+    QuestionPromptFamily.CHOOSING_TITLE,
 ]
 
 
@@ -216,7 +217,7 @@ def generate_dynamic_blueprint(
 
             allocations.append(
                 QuestionTypeAllocation(
-                    question_type=fam.value,
+                    question_type=QuestionType(fam.value),
                     count=g_count,
                     start_question_number=g_start,
                     end_question_number=g_end,
@@ -234,7 +235,7 @@ def generate_dynamic_blueprint(
                         question_number=q_num,
                         section_id=sec_id,
                         group_index=grp_idx,
-                        question_type=fam,
+                        question_type=QuestionType(fam.value),
                         target_skill=f"Evaluates comprehension of {fam.value} in Section {sec_id}",
                         target_difficulty=TargetDifficulty(
                             level=diff_level,

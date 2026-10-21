@@ -626,15 +626,17 @@ class StageExecutor:
                 eval_cache[cache_key] = list(raw) if isinstance(raw, (list, tuple)) else [raw]
             return eval_cache[cache_key]
 
+        from app.reading_evaluation import EVALUATION_CATALOG
         class StageEvalSingleAdapter(EvaluatorCapability):
             def __init__(inner_self, ev_id: str):
                 inner_self._ev_id = ev_id
+                inner_self._ev_version = EVALUATION_CATALOG.get(ev_id, "1.0.0")
             @property
             def evaluator_id(inner_self) -> str:
                 return inner_self._ev_id
             @property
             def evaluator_version(inner_self) -> str:
-                return "1.0.0"
+                return inner_self._ev_version
             async def evaluate(inner_self, ctx: LoopContext, art: ArtifactEnvelope, intent_id: str) -> EvaluationResult:
                 results = await run_all_evaluations(art)
                 matched = next((e for e in results if e.evaluator_id == inner_self._ev_id), None)
@@ -647,13 +649,18 @@ class StageExecutor:
                     )
                     last_eval_rejected_error.append(err)
                     raise err
-                res = matched.model_copy(update={
-                    "evaluator_id": inner_self._ev_id,
-                    "evaluator_version": inner_self.evaluator_version,
-                    "target_ref": art.to_ref(),
-                    "input_dependency_refs": list(art.parent_refs),
-                })
-
+                updates: dict[str, Any] = {}
+                if matched.evaluator_id != inner_self._ev_id:
+                    updates["evaluator_id"] = inner_self._ev_id
+                if matched.evaluator_version and matched.evaluator_version != inner_self._ev_version:
+                    inner_self._ev_version = matched.evaluator_version
+                if not matched.evaluator_version:
+                    updates["evaluator_version"] = inner_self._ev_version
+                if matched.target_ref != art.to_ref():
+                    updates["target_ref"] = art.to_ref()
+                if not matched.input_dependency_refs:
+                    updates["input_dependency_refs"] = list(art.parent_refs)
+                res = matched.model_copy(update=updates) if updates else matched
                 if res.status == EvaluationStatus.PASS and getattr(ctx, "open_issues", None):
                     resolved_fps = list(res.resolved_issue_fingerprints or [])
                     for oi in ctx.open_issues:

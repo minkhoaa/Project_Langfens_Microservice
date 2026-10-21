@@ -241,6 +241,95 @@ public class Phase13E2EWorkflowTests
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             var path = request.RequestUri?.AbsolutePath ?? "";
+            if (path.Contains("execute", StringComparison.OrdinalIgnoreCase))
+            {
+                using var doc = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
+                var secIndices = new List<int>();
+                if (doc.RootElement.TryGetProperty("sectionIndices", out var arr))
+                {
+                    foreach (var elem in arr.EnumerateArray())
+                    {
+                        secIndices.Add(elem.GetInt32());
+                    }
+                }
+                if (secIndices.Count == 0) secIndices.Add(1);
+                var completedIndices = new List<int>();
+                foreach (var sIdx in secIndices)
+                {
+                    Calls[sIdx] = Calls.GetValueOrDefault(sIdx, 0) + 1;
+                    if (sIdx == failOnSection)
+                    {
+                        if (completedIndices.Count > 0)
+                        {
+                            var runIdPartial = doc.RootElement.TryGetProperty("runId", out var rp) ? rp.GetString() : "run-test";
+                            var secEnvelopesPartial = completedIndices.Where(i => i <= sections.Count).Select(i =>
+                            {
+                                var s = sections[i - 1];
+                                return new
+                                {
+                                    artifactId = $"section:{runIdPartial}:{i}",
+                                    artifactType = "Section",
+                                    version = 1,
+                                    runId = runIdPartial ?? "run-test",
+                                    sectionId = i,
+                                    schemaVersion = "2.0.0",
+                                    contentHash = "hash-section",
+                                    createdAt = DateTime.UtcNow,
+                                    producerVersion = "2.0.0",
+                                    payload = s,
+                                    parentRefs = Array.Empty<object>()
+                                };
+                            }).ToList();
+
+                            var partialResult = new
+                            {
+                                runId = runIdPartial ?? "run-test",
+                                status = "FAILED",
+                                sections = secEnvelopesPartial
+                            };
+
+                            return new HttpResponseMessage(HttpStatusCode.OK)
+                            {
+                                Content = new StringContent(JsonSerializer.Serialize(partialResult, ReadingPaperRules.Json), Encoding.UTF8, "application/json")
+                            };
+                        }
+                        return new HttpResponseMessage(HttpStatusCode.BadRequest)
+                        {
+                            Content = new StringContent("{\"error\":\"Simulated provider failure\"}", Encoding.UTF8, "application/json")
+                        };
+                    }
+                    completedIndices.Add(sIdx);
+                }
+                var runId = doc.RootElement.TryGetProperty("runId", out var r) ? r.GetString() : "run-test";
+                var payload = new
+                {
+                    runId = runId ?? "run-test",
+                    status = "COMPLETED",
+                    sections = secIndices.Where(i => i <= sections.Count).Select(i =>
+                    {
+                        var s = sections[i - 1];
+                        return new
+                        {
+                            artifactId = $"section:{runId}:{i}",
+                            artifactType = "Section",
+                            version = 1,
+                            runId = runId ?? "run-test",
+                            sectionId = i,
+                            schemaVersion = "2.0.0",
+                            contentHash = "hash-section",
+                            createdAt = DateTime.UtcNow,
+                            producerVersion = "2.0.0",
+                            payload = s,
+                            parentRefs = Array.Empty<object>()
+                        };
+                    }).ToList()
+                };
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(payload, ReadingPaperRules.Json), Encoding.UTF8, "application/json")
+                };
+            }
             if (path.Contains("section", StringComparison.OrdinalIgnoreCase))
             {
                 using var doc = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
@@ -249,7 +338,7 @@ public class Phase13E2EWorkflowTests
 
                 if (index == failOnSection)
                 {
-                    return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)
+                    return new HttpResponseMessage(HttpStatusCode.BadRequest)
                     {
                         Content = new StringContent("{\"error\":\"Simulated provider failure\"}", Encoding.UTF8, "application/json")
                     };
@@ -562,8 +651,33 @@ public class Phase13E2EWorkflowTests
             Assert.Equal(ExamStatus.Draft, exam.Status);
             examId = exam.Id;
             slug = exam.Slug;
+            var sec = new ExamSection
+            {
+                Id = Guid.NewGuid(),
+                ExamId = examId,
+                Idx = 1,
+                Title = "Section 1",
+                PassageMd = "Valid passage text with sufficient content for manual test.",
+            };
+            var q = new ExamQuestion
+            {
+                Id = Guid.NewGuid(),
+                SectionId = sec.Id,
+                Idx = 1,
+                Type = Shared.ExamDto.Contracts.Exam.Enums.QuestionType.MultipleChoiceSingle,
+                Skill = "Reading",
+                PromptMd = "What is the primary topic of the passage?",
+                ExplanationMd = "The passage discusses the primary topic directly.",
+                Options = new List<ExamOption>
+                {
+                    new ExamOption { Id = Guid.NewGuid(), Idx = 1, ContentMd = "Option A", IsCorrect = true },
+                    new ExamOption { Id = Guid.NewGuid(), Idx = 2, ContentMd = "Option B", IsCorrect = false }
+                }
+            };
+            sec.Questions.Add(q);
+            db.ExamSections.Add(sec);
+            await db.SaveChangesAsync();
         }
-
         // 2. Verify public endpoint GET /api/public/exam/getby/{slug} returns 404 NotFound when Draft
         var publicDraftRes = await client.GetAsync($"/api/public/exam/getby/{slug}");
         Assert.Equal(HttpStatusCode.NotFound, publicDraftRes.StatusCode);

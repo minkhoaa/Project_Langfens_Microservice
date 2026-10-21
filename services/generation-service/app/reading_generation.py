@@ -7,6 +7,7 @@ without dispatching live LLM providers.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import unicodedata
 from collections.abc import Mapping, Sequence
@@ -279,6 +280,81 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
         raise ValueError(
             f"Run token budget ({policy.run_token_cap}) is insufficient for selected sections"
         )
+    if getattr(policy, "blueprint_mode", "legacy_preset") == "dynamic":
+        from app.blueprint.generator import generate_dynamic_blueprint
+        evidence_summary = {
+            "topics": [f"{topic} - Section {i}" for i in (1, 2, 3)],
+            "section_indices": list(sorted(section_indices)),
+        }
+        dyn_bp = generate_dynamic_blueprint(policy, evidence_summary)
+        updated_sections = []
+        for sb in dyn_bp.sections:
+            sec_idx = sb.section_id
+            if sec_idx not in section_indices:
+                continue
+            ev_item = evidence_map.get(sec_idx)
+            ev_payload = _payload(ev_item) if ev_item else {}
+            claims = ev_payload.get("claims", [])
+            graph_id = ev_payload.get("graphId", f"graph:{run_id}:{sec_idx}")
+            source_pack_id = ev_payload.get("sourcePackId", f"src:{run_id}:{sec_idx}")
+            eg_ref = EvidenceGraphRef(
+                graphId=graph_id,
+                sourcePackId=source_pack_id,
+                contentHash=ev_payload.get("contentHash") or hashlib.sha256(graph_id.encode()).hexdigest(),
+                claimCount=len(claims),
+            )
+            updated_slots = []
+            for q_slot in sb.question_slots:
+                c_id = claims[(q_slot.question_number - 1) % len(claims)]["claimId"] if claims else f"claim:{run_id}:{sec_idx}:1"
+                updated_slots.append(q_slot.model_copy(update={"claim_ref_ids": [c_id]}))
+
+            config = policy.section(sec_idx) if hasattr(policy, "section") else None
+            editorial_obj = config.editorial_objective if config else f"Editorial objective for Section {sec_idx}"
+            objectives = [
+                PassageObjective(
+                    objectiveId=f"obj:{run_id}:{sec_idx}:{i+1}",
+                    description=f"Objective based on claim {c.get('claimId', i+1)}",
+                    mappedClaimIds=[c.get("claimId", f"claim:{run_id}:{sec_idx}:{i+1}")],
+                    role="factual_foundation",
+                )
+                for i, c in enumerate(claims[:3])
+            ] or [
+                PassageObjective(
+                    objectiveId=f"obj:{run_id}:{sec_idx}:1",
+                    description=editorial_obj,
+                    mappedClaimIds=[],
+                    role="factual_foundation",
+                )
+            ]
+
+            budget = BudgetAllocation(
+                maxTokensAllocated=policy.section_token_cap,
+                repairHeadroomCalls=policy.max_repairs,
+            )
+            updated_sb = sb.model_copy(update={
+                "topic": f"{topic} - Section {sec_idx}",
+                "evidence_graph_ref": eg_ref,
+                "passage_objectives": objectives,
+                "budget_allocation": budget,
+                "question_slots": updated_slots,
+            })
+            updated_sections.append(updated_sb)
+
+        dyn_bp = dyn_bp.model_copy(update={
+            "blueprint_id": f"blueprint:{run_id}",
+            "run_id": run_id,
+            "sections": updated_sections,
+            "total_questions": sum(s.total_questions for s in updated_sections),
+            "parent_budget_cap_tokens": policy.run_token_cap,
+            "target_word_count_min": policy.paper_min_words,
+            "target_word_count_max": policy.paper_max_words,
+            "metadata": {"blueprint_mode": "dynamic"},
+        })
+        canonical_dict = dyn_bp.model_dump(mode="json", by_alias=True)
+        canonical_json = json.dumps(canonical_dict, sort_keys=True, separators=(",", ":"))
+        content_hash = hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+        dyn_bp = dyn_bp.model_copy(update={"content_hash": content_hash})
+        return dyn_bp.model_dump(mode="json", by_alias=True)
 
     section_blueprints: list[SectionBlueprint] = []
 
@@ -558,6 +634,9 @@ def compose_questions(
         )
 
         for slot in grp_slots:
+            slot_q_type = slot.get("questionType") or q_type
+            if hasattr(slot_q_type, "value"):
+                slot_q_type = slot_q_type.value
             q_num = slot["questionNumber"]
             c_refs = slot.get("claimRefIds") or ()
             claim = claim_by_id.get(c_refs[0]) if c_refs else list(claims)[(q_num - 1) % len(claims)]
@@ -575,12 +654,11 @@ def compose_questions(
                 f"The passage explicitly states that '{quote[:40]}...', "
                 f"which provides direct verifiable evidence for question {q_num}."
             )
-
-            if q_type in ("TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"):
-                # Rotate keys to avoid monotony: T, F, T, NG, T, F, T...
+            effective_type = slot_q_type
+            if effective_type in ("TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"):
                 keys_tf = ["TRUE", "FALSE", "TRUE", "NOT_GIVEN", "TRUE", "FALSE", "NOT_GIVEN", "FALSE"]
                 keys_yn = ["YES", "NO", "YES", "NOT_GIVEN", "YES", "NO", "NOT_GIVEN", "NO"]
-                ans = keys_tf[(q_num - 1) % len(keys_tf)] if q_type == "TRUE_FALSE_NOT_GIVEN" else keys_yn[(q_num - 1) % len(keys_yn)]
+                ans = keys_tf[(q_num - 1) % len(keys_tf)] if effective_type == "TRUE_FALSE_NOT_GIVEN" else keys_yn[(q_num - 1) % len(keys_yn)]
                 clean_snippet = re.sub(r"[.!?]+$", "", quote[:60]).strip()
                 templates_tf = [
                     f"Item {q_num} confirms that {clean_snippet}.",
@@ -592,7 +670,7 @@ def compose_questions(
                 if ans == "NOT_GIVEN":
                     q_payload = {
                         "questionNumber": q_num,
-                        "questionType": q_type,
+                        "questionType": effective_type,
                         "statement": statement,
                         "answer": ans,
                         "explanation": explanation,
@@ -609,7 +687,7 @@ def compose_questions(
                 else:
                     q_payload = {
                         "questionNumber": q_num,
-                        "questionType": q_type,
+                        "questionType": effective_type,
                         "statement": statement,
                         "answer": ans,
                         "evidenceQuote": quote,
@@ -619,7 +697,7 @@ def compose_questions(
                         "evidenceClaimRef": claim["claimId"],
                     }
 
-            elif q_type == "MULTIPLE_CHOICE_SINGLE":
+            elif effective_type in ("MULTIPLE_CHOICE_SINGLE", "CHOOSING_TITLE", "MULTIPLE_CHOICE_SINGLE_IMAGE"):
                 correct_letter = ["A", "B", "C", "D"][(q_num - 1) % 4]
                 clean_snippet = re.sub(r"[.!?]+$", "", quote[:50]).strip()
                 mcq_prompts = [
@@ -637,10 +715,11 @@ def compose_questions(
                 ]
                 q_payload = {
                     "questionNumber": q_num,
-                    "questionType": q_type,
+                    "questionType": effective_type,
                     "prompt": prompt,
                     "options": options,
                     "correctOption": correct_letter,
+                    "answer": correct_letter,
                     "evidenceQuote": quote,
                     "explanation": explanation,
                     "difficulty": config.difficulty.value,
@@ -648,8 +727,7 @@ def compose_questions(
                     "evidenceClaimRef": claim["claimId"],
                 }
 
-            elif q_type in ("SENTENCE_COMPLETION", "SUMMARY_COMPLETION"):
-                # Pick a safe 1-2 word noun phrase that appears verbatim in passage and not in prompt
+            elif effective_type in ("SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SUMMARY_COMPLETION_BOX"):
                 candidate_templates = [
                     f"Detailed investigations for item {q_num} evaluated the [{q_num}] in regional ecosystems.",
                     f"Regarding question {q_num}, empirical observations measured the [{q_num}] under controlled conditions.",
@@ -663,7 +741,7 @@ def compose_questions(
                 ans = valid_words[0].lower() if valid_words else (words_in_quote[0].lower() if words_in_quote else "habitat")
                 q_payload = {
                     "questionNumber": q_num,
-                    "questionType": q_type,
+                    "questionType": effective_type,
                     "prompt": prompt,
                     "answer": ans,
                     "evidenceQuote": quote,
@@ -672,8 +750,10 @@ def compose_questions(
                     "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
                     "evidenceClaimRef": claim["claimId"],
                 }
+                if effective_type == "SUMMARY_COMPLETION_BOX":
+                    q_payload["options"] = ["A. habitat", "B. species", "C. climate", "D. cycles"]
 
-            else:  # SHORT_ANSWER
+            else:  # MATCHING_HEADING, MATCHING_INFORMATION, MATCHING_FEATURES, MATCHING_ENDINGS, TABLE_COMPLETION, FLOW_CHART, DIAGRAM_LABEL, NOTE_COMPLETION, FORM_COMPLETION, CLASSIFICATION, SHORT_ANSWER
                 sa_templates = [
                     f"What key environmental factor was documented in question {q_num} regarding the study?",
                     f"Which specific operational indicator was evaluated in item {q_num} under experimental conditions?",
@@ -687,7 +767,7 @@ def compose_questions(
                 ans = valid_words[0].lower() if valid_words else (words_in_quote[0].lower() if words_in_quote else "observations")
                 q_payload = {
                     "questionNumber": q_num,
-                    "questionType": q_type,
+                    "questionType": effective_type,
                     "prompt": prompt,
                     "answer": ans,
                     "evidenceQuote": quote,
@@ -696,6 +776,21 @@ def compose_questions(
                     "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
                     "evidenceClaimRef": claim["claimId"],
                 }
+                if effective_type == "MATCHING_HEADING":
+                    q_payload["headings"] = ["i. Overview", "ii. Methodology", "iii. Results", "iv. Discussion"]
+                    q_payload["answer"] = "i"
+                elif effective_type in ("MATCHING_FEATURES", "CLASSIFICATION"):
+                    q_payload["features"] = ["A. Category 1", "B. Category 2", "C. Category 3"]
+                    q_payload["answer"] = "A"
+                elif effective_type == "MATCHING_ENDINGS":
+                    q_payload["endings"] = ["A. ending 1", "B. ending 2", "C. ending 3"]
+                    q_payload["answer"] = "A"
+                elif effective_type == "MATCHING_INFORMATION":
+                    q_payload["answer"] = "A"
+                elif effective_type == "MULTIPLE_CHOICE_MULTIPLE":
+                    q_payload["options"] = ["A. Option 1", "B. Option 2", "C. Option 3", "D. Option 4", "E. Option 5"]
+                    q_payload["answers"] = ["A", "C"]
+                    q_payload["answer"] = "A, C"
 
             grp_questions.append(q_payload)
             all_questions.append(q_payload)

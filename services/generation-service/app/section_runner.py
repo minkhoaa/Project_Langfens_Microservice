@@ -48,14 +48,21 @@ def _get_instructions_for_type(q_type: str) -> str:
         )
     if q_type == "YES_NO_NOT_GIVEN":
         return "Write YES, NO, or NOT GIVEN."
-    if q_type == "MULTIPLE_CHOICE_SINGLE":
+    if q_type in ("MULTIPLE_CHOICE_SINGLE", "CHOOSING_TITLE", "MULTIPLE_CHOICE_SINGLE_IMAGE"):
         return "Choose the correct letter, A, B, C or D."
+    if q_type == "MULTIPLE_CHOICE_MULTIPLE":
+        return "Choose the correct letters."
     if q_type == "SENTENCE_COMPLETION":
         return "Complete the sentences below. Choose NO MORE THAN THREE WORDS from the passage."
-    if q_type == "SUMMARY_COMPLETION":
+    if q_type in ("SUMMARY_COMPLETION", "SUMMARY_COMPLETION_BOX"):
         return "Complete the summary below. Choose NO MORE THAN THREE WORDS from the passage for each answer."
+    if q_type in ("NOTE_COMPLETION", "TABLE_COMPLETION", "FORM_COMPLETION", "FLOW_CHART", "DIAGRAM_LABEL", "MAP_LABEL"):
+        return "Complete the notes/diagram below. Choose NO MORE THAN THREE WORDS from the passage for each answer."
+    if q_type == "MATCHING_HEADING":
+        return "Choose the correct heading for each paragraph from the list of headings below."
+    if q_type in ("MATCHING_INFORMATION", "MATCHING_FEATURES", "MATCHING_ENDINGS", "CLASSIFICATION"):
+        return "Match each item with the correct statement from the list below."
     return "Answer the questions below. Choose NO MORE THAN THREE WORDS from the passage for each answer."
-
 
 def _parse_candidate_payload(
     raw_payload: Any,
@@ -217,7 +224,7 @@ def _parse_candidate_payload(
         }
 
     elif q_type in ("SENTENCE_COMPLETION", "SUMMARY_COMPLETION"):
-        prompt = str(cand.get("prompt") or "").strip()
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
         if not prompt and q_type == "SUMMARY_COMPLETION":
             summary_text = str(raw_payload.get("summaryText") or raw_payload.get("summary") or "").strip()
             if summary_text and f"[{q_num}]" in summary_text:
@@ -266,7 +273,7 @@ def _parse_candidate_payload(
         }
 
     else:  # SHORT_ANSWER
-        prompt = str(cand.get("prompt") or "").strip()
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
         quote = str(cand.get("evidenceQuote") or "").strip()
         p_start = passage_text.find(quote) if quote else -1
         if p_start < 0 and quote:
@@ -286,9 +293,9 @@ def _parse_candidate_payload(
             quote = target_focus
             p_start = passage_text.find(quote)
         p_end = p_start + len(quote) if p_start >= 0 else -1
-        answer = str(cand.get("answer") or "").strip()
+        answer = str(cand.get("answer") or cand.get("correctOption") or "").strip()
 
-        return {
+        res_payload = {
             "questionNumber": q_num,
             "questionType": q_type,
             "prompt": prompt,
@@ -299,6 +306,10 @@ def _parse_candidate_payload(
             "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
             "evidenceClaimRef": claim_id,
         }
+        for extra_key in ("options", "headings", "features", "endings", "categories", "answers", "correctOption", "summaryText", "tableContext", "flowSteps", "svgAssetId"):
+            if extra_key in cand:
+                res_payload[extra_key] = cand[extra_key]
+        return res_payload
 
 class SectionRunner:
     """Configurable runner executing generation stages for a single reading section.
@@ -475,8 +486,13 @@ class SectionRunner:
         for slot in sorted_slots:
             q_num = slot["questionNumber"]
             g_idx = slot.get("groupIndex", 0)
-            grp_config = config.groups[g_idx]
-            q_type = grp_config.question_type.value
+            if "questionType" in slot:
+                raw_qt = slot["questionType"]
+                q_type = raw_qt.value if hasattr(raw_qt, "value") else str(raw_qt)
+            elif g_idx < len(config.groups):
+                q_type = config.groups[g_idx].question_type.value
+            else:
+                q_type = "SHORT_ANSWER"
             q_art_id = f"question:{context.run_id}:{q_num}"
             claim_ref_ids = slot.get("claimRefIds") or ()
             claim_id = claim_ref_ids[0] if claim_ref_ids else (claims[0]["claimId"] if claims else "claim_1")
@@ -677,23 +693,48 @@ class SectionRunner:
         q_refs = [q.to_ref() for q in q_envelopes]
         sec_parents = (passage_envelope.to_ref(), actual_blueprint, *q_refs)
 
+        allocations = sec_blueprint.get("questionAllocations", []) if sec_blueprint else []
         groups_data: list[dict[str, Any]] = []
-        for g_idx, grp_config in enumerate(config.groups):
-            grp_q_nums = set(config.group_numbers(g_idx))
-            grp_questions = [q.payload for q in q_envelopes if q.payload.get("questionNumber") in grp_q_nums]
-            grp_dict: dict[str, Any] = {
-                "groupId": f"group_{config.index}_{g_idx + 1}",
-                "questionType": grp_config.question_type.value,
-                "instructions": _get_instructions_for_type(grp_config.question_type.value),
-                "questions": grp_questions,
-            }
-            if grp_config.question_type.value == "SUMMARY_COMPLETION":
-                cached_summary = summary_group_cache.get(g_idx, {})
-                shared_ctx = cached_summary.get("summaryText")
-                if not shared_ctx:
-                    shared_ctx = " ".join(q.get("prompt", "") for q in grp_questions)
-                grp_dict["sharedContext"] = shared_ctx
-            groups_data.append(grp_dict)
+        if allocations:
+            for g_idx, alloc in enumerate(allocations):
+                raw_type = alloc.get("questionType", "")
+                q_type_str = raw_type.value if hasattr(raw_type, "value") else str(raw_type)
+                start_q = alloc.get("startQuestionNumber", 1)
+                end_q = alloc.get("endQuestionNumber", 40)
+                grp_questions = [
+                    q.payload for q in q_envelopes
+                    if start_q <= q.payload.get("questionNumber", 0) <= end_q
+                ]
+                grp_dict: dict[str, Any] = {
+                    "groupId": f"group_{config.index}_{g_idx + 1}",
+                    "questionType": q_type_str,
+                    "instructions": _get_instructions_for_type(q_type_str),
+                    "questions": grp_questions,
+                }
+                if q_type_str in ("SUMMARY_COMPLETION", "SUMMARY_COMPLETION_BOX"):
+                    cached_summary = summary_group_cache.get(g_idx, {})
+                    shared_ctx = cached_summary.get("summaryText")
+                    if not shared_ctx:
+                        shared_ctx = " ".join(q.get("prompt", "") for q in grp_questions)
+                    grp_dict["sharedContext"] = shared_ctx
+                groups_data.append(grp_dict)
+        else:
+            for g_idx, grp_config in enumerate(config.groups):
+                grp_q_nums = set(config.group_numbers(g_idx))
+                grp_questions = [q.payload for q in q_envelopes if q.payload.get("questionNumber") in grp_q_nums]
+                grp_dict: dict[str, Any] = {
+                    "groupId": f"group_{config.index}_{g_idx + 1}",
+                    "questionType": grp_config.question_type.value,
+                    "instructions": _get_instructions_for_type(grp_config.question_type.value),
+                    "questions": grp_questions,
+                }
+                if grp_config.question_type.value == "SUMMARY_COMPLETION":
+                    cached_summary = summary_group_cache.get(g_idx, {})
+                    shared_ctx = cached_summary.get("summaryText")
+                    if not shared_ctx:
+                        shared_ctx = " ".join(q.get("prompt", "") for q in grp_questions)
+                    grp_dict["sharedContext"] = shared_ctx
+                groups_data.append(grp_dict)
 
         async def generate_section_artifact(version: int) -> dict[str, Any]:
             title = str(passage_envelope.payload.get("title", topic))

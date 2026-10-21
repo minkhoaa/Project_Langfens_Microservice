@@ -21,6 +21,7 @@ namespace attempt_service.Features.Helpers
         QuestionType.MultipleChoiceSingleImage,
         QuestionType.TrueFalseNotGiven,
         QuestionType.YesNoNotGiven,
+        QuestionType.ChoosingTitle,
     };
 
         public IQuestionGrader Create() => _instance;
@@ -35,6 +36,7 @@ namespace attempt_service.Features.Helpers
         public IEnumerable<string> SupportedTypes =>
         [
             QuestionType.SummaryCompletion,
+            QuestionType.SummaryCompletionBox,
             QuestionType.TableCompletion,
             QuestionType.NoteCompletion,
             QuestionType.FormCompletion,

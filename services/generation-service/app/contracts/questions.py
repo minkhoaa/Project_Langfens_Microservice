@@ -320,7 +320,8 @@ class BaseQuestion(CanonicalBaseModel):
 
     question_number: int = Field(..., ge=1, le=40, alias="questionNumber")
     explanation: str = Field(..., min_length=10)
-
+    options: Optional[List[Any]] = Field(default_factory=list)
+    correct_option: Optional[str] = Field(default=None, alias="correctOption")
 
 class TrueFalseNotGivenQuestion(BaseQuestion):
     """Question type 1: TRUE / FALSE / NOT GIVEN."""
@@ -437,6 +438,166 @@ class ShortAnswerQuestion(BaseQuestion):
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
 
 
+class SummaryCompletionBoxQuestion(BaseQuestion):
+    """Question type: Summary Completion with box options."""
+    question_type: Literal[QuestionType.SUMMARY_COMPLETION_BOX] = Field(
+        default=QuestionType.SUMMARY_COMPLETION_BOX, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+    options: Optional[List[Any]] = Field(default_factory=list)
+
+
+class MultipleChoiceMultipleQuestion(BaseQuestion):
+    """Question type: Multiple Choice with multiple answers."""
+    question_type: Literal[QuestionType.MULTIPLE_CHOICE_MULTIPLE] = Field(
+        default=QuestionType.MULTIPLE_CHOICE_MULTIPLE, alias="questionType",
+    )
+    prompt: str
+    options: List[Any] = Field(default_factory=list)
+    answers: Optional[List[str]] = None
+    answer: Optional[str] = None
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class MatchingHeadingQuestion(BaseQuestion):
+    """Question type: Matching Headings."""
+    question_type: Literal[QuestionType.MATCHING_HEADING] = Field(
+        default=QuestionType.MATCHING_HEADING, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    headings: Optional[List[Any]] = Field(default_factory=list)
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class MatchingInformationQuestion(BaseQuestion):
+    """Question type: Matching Information."""
+    question_type: Literal[QuestionType.MATCHING_INFORMATION] = Field(
+        default=QuestionType.MATCHING_INFORMATION, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class MatchingFeaturesQuestion(BaseQuestion):
+    """Question type: Matching Features."""
+    question_type: Literal[QuestionType.MATCHING_FEATURES] = Field(
+        default=QuestionType.MATCHING_FEATURES, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    features: Optional[List[Any]] = Field(default_factory=list)
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class MatchingEndingsQuestion(BaseQuestion):
+    """Question type: Matching Sentence Endings."""
+    question_type: Literal[QuestionType.MATCHING_ENDINGS] = Field(
+        default=QuestionType.MATCHING_ENDINGS, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    endings: Optional[List[Any]] = Field(default_factory=list)
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class TableCompletionQuestion(BaseQuestion):
+    """Question type: Table Completion."""
+    question_type: Literal[QuestionType.TABLE_COMPLETION] = Field(
+        default=QuestionType.TABLE_COMPLETION, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class FlowChartQuestion(BaseQuestion):
+    """Question type: Flow Chart Completion."""
+    question_type: Literal[QuestionType.FLOW_CHART] = Field(
+        default=QuestionType.FLOW_CHART, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class DiagramLabelQuestion(BaseQuestion):
+    """Question type: Diagram Label Completion."""
+    question_type: Literal[QuestionType.DIAGRAM_LABEL] = Field(
+        default=QuestionType.DIAGRAM_LABEL, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class NoteCompletionQuestion(BaseQuestion):
+    """Question type: Note Completion."""
+    question_type: Literal[QuestionType.NOTE_COMPLETION] = Field(
+        default=QuestionType.NOTE_COMPLETION, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class FormCompletionQuestion(BaseQuestion):
+    """Question type: Form Completion."""
+    question_type: Literal[QuestionType.FORM_COMPLETION] = Field(
+        default=QuestionType.FORM_COMPLETION, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class ClassificationQuestion(BaseQuestion):
+    """Question type: Classification."""
+    question_type: Literal[QuestionType.CLASSIFICATION] = Field(
+        default=QuestionType.CLASSIFICATION, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    categories: Optional[List[Any]] = Field(default_factory=list)
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class ChoosingTitleQuestion(BaseQuestion):
+    """Question type: Choosing a Title."""
+    question_type: Literal[QuestionType.CHOOSING_TITLE] = Field(
+        default=QuestionType.CHOOSING_TITLE, alias="questionType",
+    )
+    prompt: str
+    answer: Optional[str] = None
+    correct_option: Optional[str] = Field(default=None, alias="correctOption")
+    options: Optional[List[Any]] = Field(default_factory=list)
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class MultipleChoiceSingleImageQuestion(BaseQuestion):
+    """Question type: Multiple Choice Single Image."""
+    question_type: Literal[QuestionType.MULTIPLE_CHOICE_SINGLE_IMAGE] = Field(
+        default=QuestionType.MULTIPLE_CHOICE_SINGLE_IMAGE, alias="questionType",
+    )
+    prompt: str
+    options: Optional[List[Any]] = Field(default_factory=list)
+    correct_option: Optional[str] = Field(default=None, alias="correctOption")
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
+class MapLabelQuestion(BaseQuestion):
+    """Question type: Map Label Completion."""
+    question_type: Literal[QuestionType.MAP_LABEL] = Field(
+        default=QuestionType.MAP_LABEL, alias="questionType",
+    )
+    prompt: str
+    answer: str
+    evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
+
+
 QuestionUnion = Annotated[
     Union[
         TrueFalseNotGivenQuestion,
@@ -445,6 +606,21 @@ QuestionUnion = Annotated[
         SummaryCompletionQuestion,
         YesNoNotGivenQuestion,
         ShortAnswerQuestion,
+        SummaryCompletionBoxQuestion,
+        MultipleChoiceMultipleQuestion,
+        MatchingHeadingQuestion,
+        MatchingInformationQuestion,
+        MatchingFeaturesQuestion,
+        MatchingEndingsQuestion,
+        TableCompletionQuestion,
+        FlowChartQuestion,
+        DiagramLabelQuestion,
+        NoteCompletionQuestion,
+        FormCompletionQuestion,
+        ClassificationQuestion,
+        ChoosingTitleQuestion,
+        MultipleChoiceSingleImageQuestion,
+        MapLabelQuestion,
     ],
     Field(discriminator="question_type"),
 ]
