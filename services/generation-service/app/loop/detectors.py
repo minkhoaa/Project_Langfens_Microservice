@@ -88,6 +88,26 @@ def semantic_issue_identities(issues: Sequence[object]) -> List[str]:
         identities.append(f"{code_v}|{scope_v}|{' '.join(message.lower().split())}")
     return identities
 
+def compute_issues_digest(issues: Sequence[object]) -> str:
+    """Computes a deterministic SHA-256 digest across normalized issue identities.
+
+    Combines code, scope, target ref/location, and message.
+    """
+    import hashlib
+    identities: List[str] = []
+    for issue in issues:
+        code = getattr(issue, "code", "")
+        scope = getattr(issue, "scope", "")
+        message = str(getattr(issue, "message", "") or "")
+        art_ref = str(getattr(issue, "artifact_ref", "") or getattr(issue, "location", "") or "")
+        code_v = getattr(code, "value", code)
+        scope_v = getattr(scope, "value", scope)
+        norm_msg = " ".join(message.lower().split())
+        identities.append(f"{code_v}|{scope_v}|{art_ref}|{norm_msg}")
+    identities.sort()
+    raw = "|".join(identities)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
 
 class StagnationDetector(CanonicalBaseModel):
     """Detects consecutive non-progressing repairs where output hash remains identical."""
@@ -106,6 +126,9 @@ class StagnationDetector(CanonicalBaseModel):
         default=0, alias="consecutiveIdenticalOutcomes"
     )
     total_identical_outcomes: int = Field(default=0, alias="totalIdenticalOutcomes")
+    last_issues_digest: Optional[str] = Field(default=None, alias="lastIssuesDigest")
+    consecutive_identical_issues: int = Field(default=0, alias="consecutiveIdenticalIssues")
+    total_identical_issues: int = Field(default=0, alias="totalIdenticalIssues")
 
     def record_repair(self, current_hash: str) -> int:
         """Records a repaired artifact content hash, returning current consecutive identical count."""
@@ -137,6 +160,19 @@ class StagnationDetector(CanonicalBaseModel):
             self.consecutive_identical_outcomes = 0
             self.last_outcome_fingerprint = outcome_fingerprint
         return self.consecutive_identical_outcomes
+    def record_issues_digest(self, digest: str) -> bool:
+        """Records an issues digest. Returns True if stagnation threshold (>= 1 consecutive repeat) is reached."""
+        if self.last_issues_digest is not None and self.last_issues_digest == digest:
+            self.consecutive_identical_issues += 1
+            self.total_identical_issues += 1
+        else:
+            self.consecutive_identical_issues = 0
+            self.last_issues_digest = digest
+        return self.consecutive_identical_issues >= 1
+
+    def should_escalate_stagnation(self, threshold: int = 1) -> bool:
+        """Returns True if consecutive identical issues meet or exceed threshold."""
+        return self.consecutive_identical_issues >= threshold
 
     def is_stagnated(self, cap: int) -> bool:
         """Returns True if consecutive identical repairs OR outcomes meet or exceed the cap."""

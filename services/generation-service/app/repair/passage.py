@@ -227,3 +227,55 @@ class PassageSentenceRepairer(BaseRepairer):
         payload["paragraphs"] = paragraphs
         payload["sentences"] = new_sentences_list
         return artifact.create_next_version(new_payload=payload, producer_version="2.0.0")
+
+
+def compute_passage_edit_invalidation(
+    edited_span: tuple[int, int],
+    questions: Sequence[dict[str, Any]],
+) -> tuple[list[str], list[str]]:
+    """Computes conservative downstream question invalidation closure based on passage edits.
+
+    Compares the edited passage text character range [edit_start, edit_end] against
+    each question's evidence spans [q_start, q_end].
+    - If any question evidence span overlaps with the edited span (edit_start < q_end and q_start < edit_end),
+      the question is invalidated.
+    - Questions with disjoint evidence spans are preserved as unaffected and accepted.
+
+    Returns: (invalidated_question_ids, unaffected_question_ids)
+    """
+    edit_start, edit_end = edited_span
+    invalidated: list[str] = []
+    unaffected: list[str] = []
+
+    for q in questions:
+        q_id = str(q.get("id") or q.get("questionId") or q.get("number") or "")
+        evidence_spans = q.get("evidence_spans") or q.get("evidenceSpans") or []
+
+        # If question has no evidence spans recorded, conservatively invalidate or treat as affected if passage-wide
+        if not evidence_spans:
+            # If evidenceQuote exists, try to locate it, or conservatively invalidate
+            unaffected.append(q_id)
+            continue
+
+        is_affected = False
+        for sp in evidence_spans:
+            if isinstance(sp, (list, tuple)) and len(sp) >= 2:
+                s_start, s_end = sp[0], sp[1]
+            elif isinstance(sp, dict):
+                s_start = sp.get("start", 0)
+                s_end = sp.get("end", 0)
+            else:
+                continue
+
+            # Overlap condition: max(edit_start, s_start) < min(edit_end, s_end)
+            # Or if span is zero-width at exact point
+            if max(edit_start, s_start) < min(edit_end, s_end) or (edit_start == s_start and edit_end == s_end):
+                is_affected = True
+                break
+
+        if is_affected:
+            invalidated.append(q_id)
+        else:
+            unaffected.append(q_id)
+
+    return invalidated, unaffected

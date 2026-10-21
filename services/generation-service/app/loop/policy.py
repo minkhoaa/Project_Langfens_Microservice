@@ -176,6 +176,19 @@ class LoopPolicy(CanonicalBaseModel):
             "policy_hash": overrides.pop("policy_hash", snapshot.get("policyHash", "")),
             **overrides,
         })
+    @classmethod
+    def reading_section(cls, **overrides) -> LoopPolicy:
+        """Standard policy for autonomous IELTS Reading section loop."""
+        return cls(
+            max_versions=3,
+            max_generated_versions=3,
+            max_repair_attempts_per_version=2,
+            max_total_repairs=5,
+            max_consecutive_no_progress=2,
+            max_oscillation_cycles=2,
+            **overrides,
+        )
+
 
     @classmethod
     def from_settings(cls, s: Optional[Any] = None, is_benchmark: bool = False, **overrides) -> LoopPolicy:

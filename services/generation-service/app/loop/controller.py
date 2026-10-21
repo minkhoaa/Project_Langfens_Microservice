@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from enum import Enum
+from typing import Optional
 from uuid import uuid4
 
 from app.contracts.evaluation import EvaluationResult, EvaluationStatus
+from app.contracts.issue import Issue, IssueCode, IssueScope, IssueSeverity
 from app.contracts.loop import DecisionType, LoopDecision, LoopReason, LoopState
 from app.loop.context import LoopContext
 from app.loop.detectors import OscillationDetector, StagnationDetector
@@ -12,18 +15,58 @@ from app.loop.ledger import IssueLedgerManager
 from app.loop.policy import LoopPolicy
 
 
+class EscalationLadder(str, Enum):
+    """Escalation steps for autonomous defect recovery."""
+    ITEM_REPAIR = "ITEM_REPAIR"
+    ITEM_RESELECT = "ITEM_RESELECT"
+    GROUP_REPAIR = "GROUP_REPAIR"
+    PASSAGE_REPAIR = "PASSAGE_REPAIR"
+    REGENERATE = "REGENERATE"
+
 class LoopController:
-    def __init__(self, policy: LoopPolicy):
-        self.policy = policy
+    def __init__(self, policy: Optional[LoopPolicy] = None):
+        self.policy = policy or LoopPolicy.reading_section()
 
     def decide(
-        self, context: LoopContext, ledger_mgr: IssueLedgerManager,
-        latest_evaluations: Sequence[EvaluationResult],
-        stagnation_detector: StagnationDetector, oscillation_detector: OscillationDetector,
-        dependencies_fresh: bool = True, dependency_stale_reasons: list[str] | None = None,
-        repair_attempts_this_version: int = 0, generated_versions: int = 0,
+        self,
+        context: Optional[LoopContext] = None,
+        ledger_mgr: Optional[IssueLedgerManager] = None,
+        latest_evaluations: Sequence[EvaluationResult] = (),
+        stagnation_detector: Optional[StagnationDetector] = None,
+        oscillation_detector: Optional[OscillationDetector] = None,
+        dependencies_fresh: bool = True,
+        dependency_stale_reasons: list[str] | None = None,
+        repair_attempts_this_version: int = 0,
+        generated_versions: int = 0,
         has_repairer: bool = True,
+        issues: Optional[Sequence[object]] = None,
+        **kwargs,
     ) -> LoopDecision:
+        if issues is not None:
+            from app.loop.context import AuthorityGrant
+            auth = kwargs.get("authority") or AuthorityGrant(leaseOwner=uuid4(), epoch=1)
+            ctx = context or LoopContext(
+                run_id=kwargs.get("run_id", "run_recovery"),
+                target_artifact_id=kwargs.get("target_artifact_id", "question:target"),
+                target_artifact_type=kwargs.get("target_artifact_type", "Section"),
+                scope=kwargs.get("scope", IssueScope.QUESTION),
+                authority=auth,
+            )
+            return self.decide_recovery(
+                issues=issues,
+                context=ctx,
+                stagnation_detector=stagnation_detector,
+                oscillation_detector=oscillation_detector,
+                repair_attempts=repair_attempts_this_version,
+            )
+        if context is None:
+            raise ValueError("LoopController.decide requires either 'context' or 'issues'")
+        if stagnation_detector is None:
+            stagnation_detector = StagnationDetector()
+        if oscillation_detector is None:
+            oscillation_detector = OscillationDetector()
+        if ledger_mgr is None:
+            ledger_mgr = IssueLedgerManager(run_id=context.run_id)
         artifact = context.current_artifact
         version = artifact.version if artifact else 0
 
@@ -156,3 +199,175 @@ class LoopController:
         return decision(DecisionType.PASS, LoopReason.ACCEPTED,
                         "all required evaluations PASS on fresh dependencies; no open blockers",
                         LoopState.COMPLETED, evaluation_ref=by_id[self.policy.required_evaluator_ids[0]].evaluation_id)
+
+    def decide_recovery(
+        self,
+        issues: Sequence[object],
+        context: LoopContext,
+        stagnation_detector: Optional[StagnationDetector] = None,
+        oscillation_detector: Optional[OscillationDetector] = None,
+        repair_attempts: int = 0,
+        reserve_candidates_available: bool = True,
+    ) -> LoopDecision:
+        """Diagnoses issues and routes to the appropriate level of the escalation ladder.
+
+        Escalation Ladder:
+        1. ITEM_REPAIR: Isolated single-question defects (e.g. ambiguity, bad distractor, ungrounded key).
+        2. ITEM_RESELECT: When item repair repeats or stagnates, pull a candidate from reserve pool.
+        3. GROUP_REPAIR: Shared group issues (summary flow, headings list, diagram labels).
+        4. PASSAGE_REPAIR: Defect requires clarifying passage text (contradiction, overstatement, passage gap).
+        5. REGENERATE: Repeated failures after repairs or unrepairable defects.
+        """
+        artifact = context.current_artifact
+        version = artifact.version if artifact else 0
+        cur_state = context.cursor.current_state if context.cursor else LoopState.DRAFTING
+
+        # Filter or check issues
+        if not issues:
+            return LoopDecision(
+                decisionId=f"dec_{uuid4().hex}",
+                runId=context.run_id,
+                decision=DecisionType.PASS,
+                currentState=cur_state,
+                nextState=LoopState.COMPLETED,
+                reason="No issues reported",
+                reasonCode=LoopReason.ACCEPTED,
+                targetScope=context.scope,
+                targetArtifactId=context.target_artifact_id,
+                expectedVersion=version,
+            )
+
+        # Max repair attempts check
+        max_repairs = getattr(self.policy, "max_total_repairs", 3)
+        if repair_attempts >= max_repairs:
+            return LoopDecision(
+                decisionId=f"dec_{uuid4().hex}",
+                runId=context.run_id,
+                decision=DecisionType.REGENERATE,
+                currentState=cur_state,
+                nextState=LoopState.DRAFTING,
+                reason=f"Exceeded max repair attempts ({repair_attempts} >= {max_repairs}); regenerating",
+                reasonCode=LoopReason.MAX_REPAIRS,
+                targetScope=context.scope,
+                targetArtifactId=context.target_artifact_id,
+                expectedVersion=version + 1,
+            )
+
+        # Classify scopes and targets of issues
+        has_passage_defect = False
+        has_group_defect = False
+        question_issues: list[object] = []
+
+        for iss in issues:
+            scope = getattr(iss, "scope", None)
+            scope_v = getattr(scope, "value", str(scope) if scope else "")
+            code = getattr(iss, "code", None)
+            code_v = getattr(code, "value", str(code) if code else "")
+
+            if scope_v in (IssueScope.PASSAGE.value, "PASSAGE", "SECTION"):
+                has_passage_defect = True
+            elif scope_v in (IssueScope.QUESTION_GROUP.value, "QUESTION_GROUP", "GROUP"):
+                has_group_defect = True
+            elif scope_v in (IssueScope.QUESTION.value, "QUESTION", "ITEM"):
+                question_issues.append(iss)
+            else:
+                # Check code heuristics
+                if code_v in (
+                    IssueCode.OVERSTATED_CERTAINTY.value,
+                    IssueCode.CAUSAL_OVERSTATEMENT.value,
+                    IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM.value,
+                    IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS.value,
+                ):
+                    has_passage_defect = True
+                elif code_v in (
+                    IssueCode.DUPLICATE_ITEMS.value,
+                    "DUPLICATE_ITEMS",
+                    "SUMMARY_COHERENCE",
+                    "HEADING_REDUNDANCY",
+                ):
+                    has_group_defect = True
+                else:
+                    question_issues.append(iss)
+
+        # Ladder Level 4: PASSAGE_REPAIR
+        if has_passage_defect:
+            art_ref = getattr(issues[0], "artifact_ref", None) or getattr(issues[0], "location", None) or context.target_artifact_id
+            return LoopDecision(
+                decisionId=f"dec_{uuid4().hex}",
+                runId=context.run_id,
+                decision=DecisionType.REPAIR,
+                currentState=cur_state,
+                nextState=LoopState.REPAIRING,
+                reason="Passage defect detected; routing to PASSAGE_REPAIR",
+                reasonCode=LoopReason.REPAIRABLE_DEFECTS,
+                targetScope=EscalationLadder.PASSAGE_REPAIR.value,
+                targetArtifactId=str(art_ref),
+                expectedVersion=version + 1,
+            )
+
+        # Ladder Level 3: GROUP_REPAIR
+        if has_group_defect or len({getattr(q, 'artifact_ref', None) for q in question_issues if getattr(q, 'artifact_ref', None)}) > 2:
+            art_ref = getattr(issues[0], "artifact_ref", None) or getattr(issues[0], "location", None) or context.target_artifact_id
+            return LoopDecision(
+                decisionId=f"dec_{uuid4().hex}",
+                runId=context.run_id,
+                decision=DecisionType.REPAIR,
+                currentState=cur_state,
+                nextState=LoopState.REPAIRING,
+                reason="Group-level defect detected; routing to GROUP_REPAIR",
+                reasonCode=LoopReason.REPAIRABLE_DEFECTS,
+                targetScope=EscalationLadder.GROUP_REPAIR.value,
+                targetArtifactId=str(art_ref),
+                expectedVersion=version + 1,
+            )
+
+        # Check stagnation detector for item repair
+        is_stagnated = False
+        if stagnation_detector:
+            is_stagnated = stagnation_detector.should_escalate_stagnation(threshold=1)
+
+        first_q = question_issues[0] if question_issues else issues[0]
+        target_id = getattr(first_q, "artifact_ref", None) or getattr(first_q, "location", None) or context.target_artifact_id
+
+        # Ladder Level 2: ITEM_RESELECT
+        if is_stagnated:
+            if reserve_candidates_available:
+                return LoopDecision(
+                    decisionId=f"dec_{uuid4().hex}",
+                    runId=context.run_id,
+                    decision=DecisionType.REPAIR,
+                    currentState=cur_state,
+                    nextState=LoopState.REPAIRING,
+                    reason="Stagnation detected after repeated identical defects; escalating to ITEM_RESELECT",
+                    reasonCode=LoopReason.REPAIRABLE_DEFECTS,
+                    targetScope=EscalationLadder.ITEM_RESELECT.value,
+                    targetArtifactId=str(target_id),
+                    expectedVersion=version + 1,
+                )
+            else:
+                return LoopDecision(
+                    decisionId=f"dec_{uuid4().hex}",
+                    runId=context.run_id,
+                    decision=DecisionType.REGENERATE,
+                    currentState=cur_state,
+                    nextState=LoopState.DRAFTING,
+                    reason="Stagnation detected and no reserve candidates available; escalating to REGENERATE",
+                    reasonCode=LoopReason.UNREPAIRABLE_DEFECTS,
+                    targetScope=EscalationLadder.REGENERATE.value,
+                    targetArtifactId=str(target_id),
+                    expectedVersion=version + 1,
+                )
+
+        # Ladder Level 1: ITEM_REPAIR
+        return LoopDecision(
+            decisionId=f"dec_{uuid4().hex}",
+            runId=context.run_id,
+            decision=DecisionType.REPAIR,
+            currentState=cur_state,
+            nextState=LoopState.REPAIRING,
+            reason="Isolated single-question defect; routing to ITEM_REPAIR",
+            reasonCode=LoopReason.REPAIRABLE_DEFECTS,
+            targetScope=EscalationLadder.ITEM_REPAIR.value,
+            targetArtifactId=str(target_id),
+            expectedVersion=version + 1,
+        )

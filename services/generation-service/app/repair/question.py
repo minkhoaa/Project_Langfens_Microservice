@@ -638,3 +638,48 @@ class SummaryGroupRepairer(BaseRepairer):
             )
 
         return artifact.create_next_version(new_payload=payload, producer_version="2.0.0")
+
+
+def format_diagnostic_feedback(
+    issue: object,
+    adversary_claim: Optional[str] = None,
+    conflicting_span: Optional[str] = None,
+    question_text: Optional[str] = None,
+    suggested_fix: Optional[str] = None,
+) -> str:
+    """Formats structured diagnostic feedback for surgical LLM question item repair.
+
+    Supplies the repair prompt with adversary counter-claims, conflicting spans,
+    and exact ambiguity context so the model can resolve the defect with high precision.
+    """
+    lines: list[str] = []
+    code = getattr(issue, "code", "")
+    code_val = getattr(code, "value", str(code))
+    msg = getattr(issue, "message", "")
+    target = getattr(issue, "artifact_ref", None) or getattr(issue, "location", None) or "question"
+
+    lines.append(f"## Diagnostic Defect Report: {code_val}")
+    lines.append(f"- **Target Artifact**: {target}")
+    lines.append(f"- **Issue Code**: {code_val}")
+    lines.append(f"- **Diagnostic Message**: {msg}")
+
+    if question_text:
+        lines.append(f"\n### Defective Question Under Repair\n{question_text.strip()}")
+
+    if adversary_claim:
+        lines.append(f"\n### Adversary Counter-Claim\n{adversary_claim.strip()}")
+
+    if conflicting_span:
+        lines.append(f"\n### Conflicting Text Span in Passage\n\"{conflicting_span.strip()}\"")
+
+    if suggested_fix:
+        lines.append(f"\n### Recommended Surgical Correction\n{suggested_fix.strip()}")
+
+    lines.append(
+        "\n### Repair Instructions\n"
+        "1. Surgically modify ONLY the defective question prompt, options, or answer key.\n"
+        "2. Ensure the correct answer is strictly and unambiguously grounded in the passage text.\n"
+        "3. Eliminate any second defensible interpretation or misleading distractor."
+    )
+
+    return "\n".join(lines)
