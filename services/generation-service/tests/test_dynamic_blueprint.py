@@ -100,22 +100,30 @@ def test_validate_blueprint_dynamic_allows_three_groups():
     policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="dynamic")
     blueprint = generate_dynamic_blueprint(policy)
 
+    # Section 2 explicitly has 3 groups (5, 4, 4)
+    sec2_groups = {slot.group_index for slot in blueprint.sections[1].question_slots}
+    assert len(sec2_groups) == 3, f"Expected 3 groups in Section 2, got {sec2_groups}"
+
     # Validate under dynamic mode succeeds
     dynamic_issues = [i for i in validate_blueprint(blueprint, mode="dynamic") if i.severity.value.upper() == "CRITICAL"]
     assert not dynamic_issues
 
-    # If any section has != 2 groups or non-legacy types, legacy_preset mode must reject it
-    has_custom = False
-    for s in blueprint.sections:
-        groups = {slot.group_index for slot in s.question_slots}
-        if len(groups) != 2:
-            has_custom = True
-            break
-        g0_type = next(slot.question_type for slot in s.question_slots if slot.group_index == 0)
-        if s.section_id == 1 and g0_type not in (QuestionType.TRUE_FALSE_NOT_GIVEN, QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN):
-            has_custom = True
-            break
+    # Legacy mode must reject this blueprint because Section 2 has 3 groups
+    legacy_issues = [i for i in validate_blueprint(blueprint, mode="legacy_preset") if i.severity.value.upper() == "CRITICAL"]
+    assert len(legacy_issues) > 0
 
-    if has_custom:
-        legacy_issues = [i for i in validate_blueprint(blueprint, mode="legacy_preset") if i.severity.value.upper() == "CRITICAL"]
-        assert len(legacy_issues) > 0
+
+def test_validate_blueprint_rejects_invalid_question_type():
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="dynamic")
+    blueprint = generate_dynamic_blueprint(policy)
+
+    # Tamper one slot with an invalid type string
+    tampered_slots = list(blueprint.sections[0].question_slots)
+    tampered_slots[0] = tampered_slots[0].model_copy(update={"question_type": "INVALID_RANDOM_TYPE"})
+    tampered_sec = blueprint.sections[0].model_copy(update={"question_slots": tampered_slots})
+    tampered_bp = blueprint.model_copy(update={"sections": [tampered_sec, blueprint.sections[1], blueprint.sections[2]]})
+
+    issues = validate_blueprint(tampered_bp, mode="dynamic")
+    type_issues = [i for i in issues if i.code == "BLUEPRINT_INVALID_QUESTION_TYPE"]
+    assert len(type_issues) >= 1
+    assert type_issues[0].severity.value.upper() == "CRITICAL"

@@ -199,10 +199,10 @@ def generate_dynamic_blueprint(
         if sec_id == 1:
             group_counts = [7, 6]
         elif sec_id == 2:
-            group_counts = [6, 7]
+            # Variable groups: 3 groups in Section 2 (5, 4, 4 summing to 13)
+            group_counts = [5, 4, 4]
         else:
             group_counts = [7, 7]
-
         # Select families from candidate pool for groups
         selected_families = [pool[i % len(pool)] for i in range(len(group_counts))]
 

@@ -256,21 +256,18 @@ def validate_blueprint(blueprint: ExamBlueprint, mode: Optional[str] = None) -> 
             # Validate that question types in slots are valid IELTS families
             for slot in sec_slots:
                 raw_type = slot.question_type
-                # Check if it's in QuestionPromptFamily or QuestionType
+                # Check if it's strictly a member of QuestionPromptFamily or QuestionType
                 is_valid_type = False
-                try:
-                    resolved_family = QuestionPromptFamily.from_raw(raw_type)
-                    is_valid_type = bool(resolved_family)
-                except Exception:
-                    is_valid_type = False
-
-                if not is_valid_type:
-                    try:
-                        is_valid_type = any(
-                            raw_type == qt or raw_type == qt.value for qt in QuestionType
-                        )
-                    except Exception:
-                        is_valid_type = False
+                if isinstance(raw_type, (QuestionPromptFamily, QuestionType)):
+                    is_valid_type = True
+                elif isinstance(raw_type, str):
+                    # Check if string matches any QuestionPromptFamily name/value or QuestionType name/value
+                    norm = raw_type.strip()
+                    is_valid_type = any(
+                        norm == member.value or norm == member.name for member in QuestionPromptFamily
+                    ) or any(
+                        norm == member.value or norm == member.name for member in QuestionType
+                    )
 
                 if not is_valid_type:
                     issues.append(
