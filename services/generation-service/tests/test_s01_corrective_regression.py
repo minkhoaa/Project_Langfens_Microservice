@@ -124,3 +124,115 @@ def test_scenario_06_mcq_answer_not_in_options_rejected():
     cand = pool.candidates[0]
     assert cand.rejected is True
     assert any("not found in options" in r.lower() for r in cand.rejection_reasons)
+
+
+from uuid import uuid4
+
+from app.loop.context import AuthorityGrant, LoopContext
+from app.contracts.issue import IssueScope
+from app.loop.runtime import BoundedLoopRuntime
+from tests.test_t08_passage_loop import DurableStoreFake
+
+
+class _SectionIdAwareStoreFake(DurableStoreFake):
+    """Fake store that persists ``sectionId`` on granted operations.
+
+    ``DurableStoreFake`` drops it, so a resume projection built on top of it
+    can never carry the parent operation's SectionId format. The real
+    exam-service persists and projects it, so the regression tests must too.
+    """
+
+    def grant_operation(self, req):
+        grant = super().grant_operation(req)
+        state = self._state()
+        op = state["ops"].get(req.operationId)
+        if op is not None:
+            op["sectionId"] = getattr(req, "sectionId", None)
+            self._save(state)
+        return grant
+
+
+@pytest.mark.asyncio
+async def test_scenario_07_workflow_recovery_section_isolated(tmp_path):
+    """P1-D: QuestionCandidateLoop must not adopt a reserved workflow belonging to another section."""
+    from app.loop.question import QuestionCandidateLoop
+    from app.persistence.models import OperationGrantRequest
+
+    owner = uuid4()
+    run_id = f"run_wf_{uuid4().hex[:8]}"
+    store = DurableStoreFake(tmp_path / "wf.db", owner=owner, epoch=1)
+
+    # Seed an existing reserved workflow for Section 1
+    s1_wf_op = f"op_workflow_qcand_s1_{run_id[:8]}"
+    store.grant_operation(OperationGrantRequest(
+        runId=run_id, epoch=1, leaseOwner=owner, operationId=s1_wf_op,
+        operationType="WORKFLOW", requestHash=f"wf:s1:{run_id}",
+        tokenReservation=10000, wallTimeReservationSeconds=100.0,
+        sectionId="1", artifactId=None,
+    ))
+
+    # When QuestionCandidateLoop runs for Section 2, it MUST NOT pick s1_wf_op
+    stored_state = store.resume_state(run_id)
+
+    # Determine workflow ID for Section 2
+    expected_s2_op = f"op_workflow_qcand_s2_{run_id[:8]}"
+    matching = [
+        o for o in (stored_state.operations or [])
+        if o.operationType == "WORKFLOW" and o.status == "RESERVED" and o.operationId == expected_s2_op
+    ]
+    # S1 workflow is not adopted for S2
+    assert s1_wf_op not in [m.operationId for m in matching]
+
+    # Deterministic workflow selection on QuestionCandidateLoop
+    q_loop = QuestionCandidateLoop(generator=None, persistence_client=store)
+    res_s2 = q_loop._select_reserved_workflow_operation(stored_state, 2, run_id)
+    assert res_s2 is None, "Must not adopt S1 workflow for Section 2"
+
+    # When S2 workflow is seeded, deterministic selection recovers it
+    store.grant_operation(OperationGrantRequest(
+        runId=run_id, epoch=1, leaseOwner=owner, operationId=expected_s2_op,
+        operationType="WORKFLOW", requestHash=f"wf:s2:{run_id}",
+        tokenReservation=10000, wallTimeReservationSeconds=100.0,
+        sectionId="2", artifactId=None,
+    ))
+    res_s2_found = q_loop._select_reserved_workflow_operation(store.resume_state(run_id), 2, run_id)
+    assert res_s2_found is not None
+    assert res_s2_found.operationId == expected_s2_op
+
+
+@pytest.mark.asyncio
+async def test_scenario_08_section_id_inheritance(tmp_path):
+    """P1-D: Child operation must inherit parent operation SectionId format."""
+    from app.persistence.models import OperationGrantRequest
+
+    owner = uuid4()
+    run_id = f"run_sec_inherit_{uuid4().hex[:8]}"
+    store = _SectionIdAwareStoreFake(tmp_path / "sec_inherit.db", owner=owner, epoch=1)
+
+    parent_op_id = f"parent_op_{uuid4().hex[:8]}"
+    # Parent operation was granted with sectionId="section_1"
+    store.grant_operation(OperationGrantRequest(
+        runId=run_id, epoch=1, leaseOwner=owner, operationId=parent_op_id,
+        operationType="WORKFLOW", requestHash=f"req:parent:{run_id}",
+        tokenReservation=20000, wallTimeReservationSeconds=200.0,
+        sectionId="section_1", artifactId=None,
+    ))
+
+    # Child runtime initialized with context.section_id = 1
+    ctx = LoopContext(
+        runId=run_id, targetArtifactId="art_q_1", targetArtifactType=ArtifactType.QUESTION,
+        sectionId=1, scope=IssueScope.QUESTION, authority=AuthorityGrant(leaseOwner=owner, epoch=1),
+        parent_operation_id=parent_op_id,
+    )
+    runtime = BoundedLoopRuntime(
+        context=ctx, policy=LoopPolicy.from_settings(), generator=None, evaluators=[],
+        persistence_client=store,
+    )
+    intent = runtime._intent("GENERATE", 1, 1000, "1.0.0", {"test": True})
+
+    # Execute reservation
+    res = runtime._reserve(intent)
+    assert res is True
+    # The granted child operation in store must have inherited "section_1"
+    child_op = store.resume_state(run_id).operations[-1]
+    assert child_op.sectionId == "section_1"

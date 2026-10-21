@@ -181,6 +181,7 @@ class OperationResumeInfo(CanonicalBaseModel):
     operationType: str
     status: str
     artifactId: Optional[str] = None
+    sectionId: Optional[str] = None
     requestHash: str
     tokenReservation: int
     tokensUsed: int

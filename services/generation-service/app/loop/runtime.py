@@ -481,7 +481,21 @@ class BoundedLoopRuntime:
                 self._finish(LoopReason.WALL_TIME_CAP, "next reservation exceeds deadline")
                 return False
         self.journal.record_intent(intent, self.context.cursor.current_state)
-        sec_id = (
+        parent_sec_id = None
+        if parent_op:
+            p_record = self._operations.get(parent_op) if hasattr(self, "_operations") and isinstance(self._operations, dict) else None
+            if p_record is None and hasattr(self.context, "operations"):
+                p_record = next((o for o in (getattr(self.context, "operations", []) or []) if getattr(o, "operationId", None) == parent_op), None)
+            if p_record is None and hasattr(self.persistence_client, "resume_state"):
+                try:
+                    r_state = self.persistence_client.resume_state(self.context.run_id)
+                    p_record = next((o for o in (getattr(r_state, "operations", []) or []) if getattr(o, "operationId", None) == parent_op), None)
+                except Exception as ex:
+                    logger.warning("Could not resolve parent operation %s from persistence: %s", parent_op, ex)
+            if p_record and getattr(p_record, "sectionId", None):
+                parent_sec_id = p_record.sectionId
+
+        sec_id = parent_sec_id or (
             str(self.context.section_id)
             if getattr(self.context, "section_id", None) is not None
             else None

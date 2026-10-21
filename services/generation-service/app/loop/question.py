@@ -87,6 +87,17 @@ class QuestionCandidateLoop:
             policy = policy.model_copy(update={"required_evaluator_ids": ("eval_question_structure", "eval_answer_verbatim_length")})
         self.policy = policy
 
+    @staticmethod
+    def _select_reserved_workflow_operation(stored_state: Any, section_index: int, run_id: str) -> Optional[Any]:
+        expected_workflow_op_id = f"op_workflow_qcand_s{section_index}_{run_id[:8]}"
+        matching = [
+            o for o in (getattr(stored_state, "operations", []) or [])
+            if getattr(o, "operationType", None) == "WORKFLOW"
+            and getattr(o, "status", None) == "RESERVED"
+            and getattr(o, "operationId", None) == expected_workflow_op_id
+        ]
+        return matching[0] if matching else None
+
     async def run(
         self,
         passage_artifact: ArtifactEnvelope,
@@ -255,14 +266,15 @@ class QuestionCandidateLoop:
                 "resumedCount": len(question_slots),
                 "generatedCount": 0,
             }
+        expected_workflow_op_id = f"op_workflow_qcand_s{section_index}_{run_id[:8]}"
         existing_reserved = [
             o for o in (stored_state.operations or [])
-            if o.operationType == "WORKFLOW" and o.status == "RESERVED"
+            if o.operationType == "WORKFLOW" and o.status == "RESERVED" and o.operationId == expected_workflow_op_id
         ]
         if existing_reserved:
             workflow_op_id = existing_reserved[0].operationId
         else:
-            workflow_op_id = f"op_workflow_qcand_s{section_index}_{uuid4().hex[:8]}"
+            workflow_op_id = expected_workflow_op_id
             remaining_tokens = max(0, SECTION_MAX_TOKENS - budget_tracker.tokens_used)
             remaining_wall = max(0.0, SECTION_MAX_WALL_TIME_SECONDS - budget_tracker.get_elapsed_seconds())
             token_res = -1 if self.policy.is_unlimited else min(self.policy.max_total_tokens if self.policy.max_total_tokens > 0 else remaining_tokens, remaining_tokens)
@@ -273,10 +285,10 @@ class QuestionCandidateLoop:
                 leaseOwner=lease_owner,
                 operationId=workflow_op_id,
                 operationType="WORKFLOW",
-                requestHash=f"workflow:questions:s{section_index}:{run_id}:{workflow_op_id}",
+                requestHash=f"workflow:questions:s{section_index}:{run_id}:v1",
                 tokenReservation=token_res,
                 wallTimeReservationSeconds=wall_res,
-                sectionId=None,
+                sectionId=str(section_index),
                 artifactId=None,
                 parentOperationId=parent_operation_id,
             ))
