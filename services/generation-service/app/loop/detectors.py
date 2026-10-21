@@ -187,6 +187,8 @@ class StagnationDetector(CanonicalBaseModel):
         self.last_content_hash = None
         self.consecutive_identical_outcomes = 0
         self.last_outcome_fingerprint = None
+        self.consecutive_identical_issues = 0
+        self.last_issues_digest = None
 
 
 class OscillationDetector(CanonicalBaseModel):

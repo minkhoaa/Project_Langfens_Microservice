@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Sequence, Union
 from uuid import uuid4
 from pydantic import Field, model_validator
 
@@ -74,11 +74,23 @@ class IssueCode(str, Enum):
 def compute_issue_fingerprint(
     code: IssueCode,
     scope: IssueScope,
-    affected_refs: List[ArtifactRef],
+    affected_refs: Sequence[Union[ArtifactRef, dict[str, Any], Any]],
     message: str,
 ) -> str:
     """Computes a deterministic hash fingerprint to prevent duplicate error thrashing."""
-    ref_keys = sorted(f"{r.artifact_type}:{r.artifact_id}:{r.version}" for r in affected_refs)
+    ref_keys = []
+    for r in affected_refs:
+        if isinstance(r, dict):
+            a_type = r.get("artifact_type") or r.get("artifactType") or ""
+            a_id = r.get("artifact_id") or r.get("artifactId") or ""
+            ver = r.get("version", "")
+        else:
+            a_type = getattr(r, "artifact_type", None) or getattr(r, "artifactType", "")
+            a_id = getattr(r, "artifact_id", None) or getattr(r, "artifactId", "")
+            ver = getattr(r, "version", "")
+        a_type_str = getattr(a_type, "value", str(a_type))
+        ref_keys.append(f"{a_type_str}:{a_id}:{ver}")
+    ref_keys.sort()
     normalized_msg = " ".join(message.strip().lower().split())
     code_val = getattr(code, "value", str(code))
     scope_val = getattr(scope, "value", str(scope))
@@ -115,6 +127,19 @@ class Issue(CanonicalBaseModel):
                 msg = data.get("message") or ""
                 if code and scope:
                     data["fingerprint"] = compute_issue_fingerprint(code, scope, refs, msg)
+        elif hasattr(data, "__dict__") or hasattr(data, "code"):
+            fp = getattr(data, "fingerprint", None)
+            if not fp:
+                code = getattr(data, "code", None)
+                scope = getattr(data, "scope", None)
+                refs = getattr(data, "affected_refs", None) or getattr(data, "affectedRefs", None) or []
+                msg = getattr(data, "message", None) or ""
+                if code and scope:
+                    computed_fp = compute_issue_fingerprint(code, scope, refs, msg)
+                    try:
+                        setattr(data, "fingerprint", computed_fp)
+                    except Exception:
+                        pass
         return data
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),

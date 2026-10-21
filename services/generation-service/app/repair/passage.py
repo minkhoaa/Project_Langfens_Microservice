@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Union
 from datetime import datetime, timezone
 
 from app.config import settings
@@ -231,15 +231,18 @@ class PassageSentenceRepairer(BaseRepairer):
 
 def compute_passage_edit_invalidation(
     edited_span: tuple[int, int],
-    questions: Sequence[dict[str, Any]],
+    questions: Sequence[Union[dict[str, Any], Any]],
 ) -> tuple[list[str], list[str]]:
     """Computes conservative downstream question invalidation closure based on passage edits.
 
     Compares the edited passage text character range [edit_start, edit_end] against
-    each question's evidence spans [q_start, q_end].
-    - If any question evidence span overlaps with the edited span (edit_start < q_end and q_start < edit_end),
-      the question is invalidated.
-    - Questions with disjoint evidence spans are preserved as unaffected and accepted.
+    each question's evidence spans.
+    - Supports both plural (`evidence_spans`, `evidenceSpans`) and singular (`evidence_span`, `evidenceSpan`).
+    - Handles single span tuple/list [start, end] and multi-span list [[start, end], ...].
+    - Handles both dict and object question formats.
+    - Zero-width point insertions inside/at span boundaries (start <= edit_point <= end) are affected.
+    - If evidence spans are absent, empty, or cannot be determined, fail-closed conservatism
+      requires the question to be treated as invalidated.
 
     Returns: (invalidated_question_ids, unaffected_question_ids)
     """
@@ -248,30 +251,76 @@ def compute_passage_edit_invalidation(
     unaffected: list[str] = []
 
     for q in questions:
-        q_id = str(q.get("id") or q.get("questionId") or q.get("number") or "")
-        evidence_spans = q.get("evidence_spans") or q.get("evidenceSpans") or []
+        if isinstance(q, dict):
+            q_id = str(q.get("id") or q.get("questionId") or q.get("number") or "")
+            raw_spans = (
+                q.get("evidence_spans")
+                or q.get("evidenceSpans")
+                or q.get("evidence_span")
+                or q.get("evidenceSpan")
+            )
+        else:
+            q_id = str(
+                getattr(q, "id", None)
+                or getattr(q, "questionId", None)
+                or getattr(q, "number", "")
+                or ""
+            )
+            raw_spans = (
+                getattr(q, "evidence_spans", None)
+                or getattr(q, "evidenceSpans", None)
+                or getattr(q, "evidence_span", None)
+                or getattr(q, "evidenceSpan", None)
+            )
 
-        # If question has no evidence spans recorded, conservatively invalidate or treat as affected if passage-wide
-        if not evidence_spans:
-            # If evidenceQuote exists, try to locate it, or conservatively invalidate
-            unaffected.append(q_id)
+        if not raw_spans:
+            invalidated.append(q_id)
+            continue
+
+        # Normalize raw_spans into list of parsed (start, end) tuples
+        parsed_spans: list[tuple[int, int]] = []
+        if isinstance(raw_spans, (list, tuple)):
+            if len(raw_spans) >= 2 and all(isinstance(x, (int, float)) for x in raw_spans[:2]):
+                # Single span tuple/list e.g. (10, 50)
+                parsed_spans.append((int(raw_spans[0]), int(raw_spans[1])))
+            else:
+                for item in raw_spans:
+                    if isinstance(item, (list, tuple)) and len(item) >= 2:
+                        parsed_spans.append((int(item[0]), int(item[1])))
+                    elif isinstance(item, dict):
+                        s = item.get("start")
+                        e = item.get("end")
+                        if s is not None and e is not None:
+                            parsed_spans.append((int(s), int(e)))
+                    elif hasattr(item, "start") and hasattr(item, "end"):
+                        parsed_spans.append((int(getattr(item, "start")), int(getattr(item, "end"))))
+        elif isinstance(raw_spans, dict):
+            s = raw_spans.get("start")
+            e = raw_spans.get("end")
+            if s is not None and e is not None:
+                parsed_spans.append((int(s), int(e)))
+        elif hasattr(raw_spans, "start") and hasattr(raw_spans, "end"):
+            parsed_spans.append((int(getattr(raw_spans, "start")), int(getattr(raw_spans, "end"))))
+
+        if not parsed_spans:
+            # Spans could not be determined; fail-closed conservative invalidation
+            invalidated.append(q_id)
             continue
 
         is_affected = False
-        for sp in evidence_spans:
-            if isinstance(sp, (list, tuple)) and len(sp) >= 2:
-                s_start, s_end = sp[0], sp[1]
-            elif isinstance(sp, dict):
-                s_start = sp.get("start", 0)
-                s_end = sp.get("end", 0)
+        for s_start, s_end in parsed_spans:
+            # Overlap condition:
+            # 1. Standard interval overlap: max(edit_start, s_start) < min(edit_end, s_end)
+            # 2. Point edit (edit_start == edit_end): point falls inside/at boundary: s_start <= edit_start <= s_end
+            # 3. Exact matching boundaries
+            if edit_start == edit_end:
+                if s_start <= edit_start <= s_end:
+                    is_affected = True
+                    break
             else:
-                continue
-
-            # Overlap condition: max(edit_start, s_start) < min(edit_end, s_end)
-            # Or if span is zero-width at exact point
-            if max(edit_start, s_start) < min(edit_end, s_end) or (edit_start == s_start and edit_end == s_end):
-                is_affected = True
-                break
+                if max(edit_start, s_start) < min(edit_end, s_end) or (edit_start == s_start and edit_end == s_end):
+                    is_affected = True
+                    break
 
         if is_affected:
             invalidated.append(q_id)
