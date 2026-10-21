@@ -236,3 +236,69 @@ async def test_scenario_08_section_id_inheritance(tmp_path):
     # The granted child operation in store must have inherited "section_1"
     child_op = store.resume_state(run_id).operations[-1]
     assert child_op.sectionId == "section_1"
+
+
+from app.contracts.artifact import ArtifactEnvelope, ArtifactType, ArtifactRef
+from app.contracts.evaluation import EvaluationResult, EvaluationStatus
+from app.contracts.loop import DecisionType, LoopState
+from app.generators.passage.context import PassageGenerationContext
+from app.generators.passage.generator import PassageGenerator
+from app.loop.passage import PassageLoop
+from tests.test_t08_passage_loop import DurableStoreFake
+
+
+@pytest.mark.asyncio
+async def test_scenario_02_zero_call_resume_requires_evaluations(tmp_path):
+    """P0-B: Zero-call resume must reject PASS if accepted artifact lacks required evaluations."""
+    owner = uuid4()
+    run_id = f"run_no_eval_{uuid4().hex[:8]}"
+    store = DurableStoreFake(tmp_path / "no_eval.db", owner=owner, epoch=1)
+
+    bp_art = ArtifactEnvelope.create("art_bp", ArtifactType.EXAM_BLUEPRINT, run_id, {"title": "BP"}, "2.0.0", version=1)
+    eg_art = ArtifactEnvelope.create("art_eg", ArtifactType.EVIDENCE_GRAPH, run_id, {"title": "EG"}, "2.0.0", version=1)
+    p_env = ArtifactEnvelope.create(
+        "art_passage_s1", ArtifactType.PASSAGE, run_id,
+        {"text": "Sample passage content. " * 50, "wordCount": 800}, "2.0.0", version=1,
+        parent_refs=[bp_art.to_ref(), eg_art.to_ref()],
+    )
+    store.commit_checkpoint(type("Req", (), {"epoch": 1, "leaseOwner": owner, "artifact": bp_art, "evaluations": [], "operationId": "op_bp"})())
+    store.commit_checkpoint(type("Req", (), {"epoch": 1, "leaseOwner": owner, "artifact": eg_art, "evaluations": [], "operationId": "op_eg"})())
+    # Commit passage with evaluations=[] (missing required evaluations)
+    store.commit_checkpoint(type("Req", (), {"epoch": 1, "leaseOwner": owner, "artifact": p_env, "evaluations": [], "operationId": "op_p"})())
+
+    passage_loop = PassageLoop(generator=PassageGenerator(gateway=None), persistence_client=store)
+    p_ctx = PassageGenerationContext(
+        topic="Topic", section_index=1, source_text="Source " * 20,
+        blueprint_ref=bp_art.to_ref(), evidence_graph_ref=eg_art.to_ref(),
+    )
+
+    # Because evaluations are missing, zero-call resume must NOT award PASS early
+    res = await passage_loop.run(passage_context=p_ctx, run_id=run_id, lease_owner=owner, epoch=1)
+    # It must not be a zero-call completed resume without evaluations
+    assert not (res.decision == DecisionType.PASS and res.calls_count == 0)
+
+
+@pytest.mark.asyncio
+async def test_scenario_03_missing_parent_ref_rejected(tmp_path):
+    """P0-B: Missing parent ref in store_accepted_heads must fail closed (loophole closed)."""
+    owner = uuid4()
+    run_id = f"run_missing_p_{uuid4().hex[:8]}"
+    store = DurableStoreFake(tmp_path / "missing_p.db", owner=owner, epoch=1)
+
+    bp_ref = ArtifactRef(artifactId="art_bp_missing", artifactType=ArtifactType.EXAM_BLUEPRINT, version=1, contentHash="a"*64)
+    p_env = ArtifactEnvelope.create(
+        "art_passage_s1", ArtifactType.PASSAGE, run_id,
+        {"text": "Sample passage content. " * 50, "wordCount": 800}, "2.0.0", version=1,
+        parent_refs=[bp_ref],
+    )
+    # art_bp_missing is NOT in store
+    store.commit_checkpoint(type("Req", (), {"epoch": 1, "leaseOwner": owner, "artifact": p_env, "evaluations": [], "operationId": "op_p"})())
+
+    passage_loop = PassageLoop(generator=PassageGenerator(gateway=None), persistence_client=store)
+    p_ctx = PassageGenerationContext(
+        topic="Topic", section_index=1, source_text="Source " * 20,
+        blueprint_ref=bp_ref, evidence_graph_ref=ArtifactRef(artifactId="art_eg", artifactType=ArtifactType.EVIDENCE_GRAPH, version=1, contentHash="b"*64),
+    )
+    # Must not resume with zero calls
+    res = await passage_loop.run(passage_context=p_ctx, run_id=run_id, lease_owner=owner, epoch=1)
+    assert res.calls_count != 0 or res.decision != DecisionType.PASS

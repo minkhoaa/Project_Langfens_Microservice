@@ -211,15 +211,30 @@ class PassageLoop:
                 raise ValueError(f"Corrupt checkpoint for {target_art_id}: integrity verification failed")
 
             parents_match_input = tuple(accepted_envelope.parent_refs) == tuple(expected_input_deps)
-            parents_not_stale = all(
-                store_accepted_heads[p.artifact_id] == p
-                for p in accepted_envelope.parent_refs
-                if p.artifact_id in store_accepted_heads
+            parents_not_stale = (
+                len(accepted_envelope.parent_refs) == len(expected_input_deps)
+                and all(
+                    p.artifact_id in store_accepted_heads and store_accepted_heads[p.artifact_id] == p
+                    for p in accepted_envelope.parent_refs
+                )
             )
 
-            if parents_match_input and parents_not_stale:
+            from app.contracts.evaluation import EvaluationStatus
+            stored_evals = [
+                e for e in (getattr(resume_state, "evaluations", None) or [])
+                if getattr(e, "target_ref", None) == accepted_envelope.to_ref()
+            ]
+            eval_ids = {
+                getattr(e, "evaluator_id", "")
+                for e in stored_evals
+                if getattr(e, "status", None) == EvaluationStatus.PASS
+                and bool(str(getattr(e, "evaluator_version", "") or "").strip())
+            }
+            has_required_evals = bool(self.policy.required_evaluator_ids) and set(self.policy.required_evaluator_ids).issubset(eval_ids)
+
+            if parents_match_input and parents_not_stale and has_required_evals:
                 logger.info(
-                    "Resuming run %s: reusing previously accepted passage artifact %s (version %d) with verified fresh dependencies",
+                    "Resuming run %s: reusing previously accepted passage artifact %s (version %d) with verified fresh dependencies and evaluations",
                     run_id,
                     accepted_envelope.artifact_id,
                     accepted_envelope.version,
@@ -245,11 +260,13 @@ class PassageLoop:
                 )
             else:
                 logger.info(
-                    "Run %s: previously accepted passage artifact %s has stale/unmatched parent dependencies; refusing to reuse",
+                    "Run %s: accepted passage artifact %s lacks fresh parents or required evaluation evidence; invoking revalidation",
                     run_id,
-                    accepted_envelope.artifact_id,
+                    target_art_id,
                 )
-
+                prior_passage_envelope = accepted_envelope
+        else:
+            prior_passage_envelope = None
         # 2. Build LoopContext bound to authority and dependencies
         input_deps = list(expected_input_deps)
         context = LoopContext(
@@ -262,8 +279,8 @@ class PassageLoop:
             inputDependencies=tuple(input_deps),
             policyVersion=passage_context.policy_version,
             parent_operation_id=parent_operation_id,
+            current_artifact=prior_passage_envelope,
         )
-
         if accepted_dependencies is None:
             effective_accepted_dependencies: Dict[str, ArtifactRef] = {}
             try:

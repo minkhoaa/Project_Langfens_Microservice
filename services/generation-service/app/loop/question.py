@@ -79,12 +79,19 @@ class QuestionCandidateLoop:
         self.evaluator_registry = evaluator_registry
         self.selector = selector or CandidateSelector()
 
+        base_required = ["eval_question_structure", "eval_answer_verbatim_length"]
+        if evaluator_registry.get("eval_blind_solver_adversary") is not None:
+            base_required.append("eval_blind_solver_adversary")
+        if evaluator_registry.get("eval_grounding_fidelity") is not None:
+            base_required.append("eval_grounding_fidelity")
+        default_required_ids = tuple(base_required)
+
         if policy is None:
             policy = LoopPolicy.from_settings(
-                required_evaluator_ids=("eval_question_structure", "eval_answer_verbatim_length"),
+                required_evaluator_ids=default_required_ids,
             )
         elif not policy.required_evaluator_ids:
-            policy = policy.model_copy(update={"required_evaluator_ids": ("eval_question_structure", "eval_answer_verbatim_length")})
+            policy = policy.model_copy(update={"required_evaluator_ids": default_required_ids})
         self.policy = policy
 
     @staticmethod

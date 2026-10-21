@@ -504,13 +504,28 @@ class SectionLoop:
                         and prior_section_envelope is None
                         and template_section_payload is None
                     )
-                    parents_not_stale = all(
-                        store_accepted_heads[p.artifact_id] == p
-                        for p in stored_parent_refs
-                        if p.artifact_id in store_accepted_heads
+                    parents_not_stale = (
+                        len(stored_parent_refs) == len(all_input_deps)
+                        and all(
+                            p.artifact_id in store_accepted_heads and store_accepted_heads[p.artifact_id] == p
+                            for p in stored_parent_refs
+                        )
                     )
 
-                    if parents_match_current and parents_not_stale:
+                    from app.contracts.evaluation import EvaluationStatus
+                    stored_evals = [
+                        e for e in (getattr(stored_state, "evaluations", None) or [])
+                        if getattr(e, "target_ref", None) == stored_env.to_ref()
+                    ]
+                    eval_ids = {
+                        getattr(e, "evaluator_id", "")
+                        for e in stored_evals
+                        if getattr(e, "status", None) == EvaluationStatus.PASS
+                        and bool(str(getattr(e, "evaluator_version", "") or "").strip())
+                    }
+                    has_required_evals = bool(self.policy.required_evaluator_ids) and set(self.policy.required_evaluator_ids).issubset(eval_ids)
+
+                    if parents_match_current and parents_not_stale and has_required_evals:
                         logger.info("Resuming already accepted section %s v%d with 0 provider calls", effective_target_id, acc_ver)
                         student_payload = to_student_visible_section(stored_env)
                         return LoopResult(
@@ -539,8 +554,14 @@ class SectionLoop:
                                 reasonCode=LoopReason.ACCEPTED,
                             ),
                         )
-                    elif prior_section_envelope is None:
-                        prior_section_envelope = stored_env
+                    else:
+                        logger.info(
+                            "Run %s: accepted section artifact %s lacks fresh parents or required evaluation evidence; invoking revalidation",
+                            run_id,
+                            effective_target_id,
+                        )
+                        if prior_section_envelope is None:
+                            prior_section_envelope = stored_env
         authority = AuthorityGrant(leaseOwner=lease_owner, epoch=epoch)
         context = LoopContext(
             runId=run_id,
