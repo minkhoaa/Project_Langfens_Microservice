@@ -18,6 +18,7 @@ from app.contracts.artifact import ArtifactRef
 from app.contracts.base import CanonicalBaseModel
 from app.contracts.policies import count_words
 from app.generators.question.prompts import QuestionPromptFamily
+from app.context import validate_candidate_slot, ContextValidationIssue
 
 
 class OptionItem(CanonicalBaseModel):
@@ -137,6 +138,48 @@ class QuestionCandidate(CanonicalBaseModel):
                         self.rejected = True
                         self.rejection_reasons.append(f"Duplicate option text '{o.text}'")
                     seen_texts.add(t_norm)
+
+        # 5. Table, Note, Form Completion invariants: <= 3 words
+        elif family in (
+            QuestionPromptFamily.TABLE_COMPLETION,
+            QuestionPromptFamily.NOTE_COMPLETION,
+            QuestionPromptFamily.FORM_COMPLETION,
+        ):
+            w_count = count_words(ans)
+            if w_count > 3:
+                self.rejected = True
+                self.rejection_reasons.append(
+                    f"Answer exceeds maximum of 3 words: '{ans}' ({w_count} words)"
+                )
+
+        # 6. Flow Chart and Diagram Label completion invariants: <= 3 words
+        elif family in (
+            QuestionPromptFamily.FLOW_CHART,
+            QuestionPromptFamily.DIAGRAM_LABEL,
+        ):
+            w_count = count_words(ans)
+            if w_count > 3:
+                self.rejected = True
+                self.rejection_reasons.append(
+                    f"Answer exceeds maximum of 3 words: '{ans}' ({w_count} words)"
+                )
+
+        # 7. Choosing Title invariants: 4 options A-D, answer in options
+        elif family == QuestionPromptFamily.CHOOSING_TITLE:
+            if not self.options or len(self.options) != 4:
+                self.rejected = True
+                self.rejection_reasons.append(
+                    f"Choosing Title must have exactly 4 options, found {len(self.options) if self.options else 0}"
+                )
+            else:
+                keys = [o.key.upper() for o in self.options]
+                if keys != ["A", "B", "C", "D"]:
+                    self.rejected = True
+                    self.rejection_reasons.append(f"Option keys must be ['A', 'B', 'C', 'D'], found {keys}")
+                ans_key = ans.upper()
+                if ans_key not in ("A", "B", "C", "D"):
+                    self.rejected = True
+                    self.rejection_reasons.append(f"Answer key must be A, B, C, or D; found '{ans}'")
 
         return self
 

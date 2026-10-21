@@ -20,7 +20,7 @@ from __future__ import annotations
 from enum import Enum
 import hashlib
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
 QUESTION_PROMPT_VERSION = "2.0.0"
@@ -30,6 +30,7 @@ class QuestionPromptFamily(str, Enum):
     YES_NO_NOT_GIVEN = "YesNoNotGiven"
     SENTENCE_COMPLETION = "SentenceCompletion"
     SUMMARY_COMPLETION = "SummaryCompletion"
+    SUMMARY_COMPLETION_BOX = "SummaryCompletionBox"
     TABLE_COMPLETION = "TableCompletion"
     NOTE_COMPLETION = "NoteCompletion"
     FORM_COMPLETION = "FormCompletion"
@@ -45,14 +46,33 @@ class QuestionPromptFamily(str, Enum):
     MATCHING_ENDINGS = "MatchingEndings"
     CLASSIFICATION = "Classification"
     FLOW_CHART = "FlowChart"
+    CHOOSING_TITLE = "ChoosingTitle"
+
     @classmethod
     def from_raw(cls, val: Any) -> "QuestionPromptFamily":
         if isinstance(val, QuestionPromptFamily):
             return val
-        s = str(getattr(val, "value", val)).strip().replace("_", "").lower()
+        raw = str(getattr(val, "value", val)).strip()
+        s = raw.replace("_", "").replace("-", "").replace(" ", "").lower()
         for member in cls:
             if member.value.lower() == s or member.name.replace("_", "").lower() == s:
                 return member
+        alias_map = {
+            "summarybox": cls.SUMMARY_COMPLETION_BOX,
+            "summarycompletionbox": cls.SUMMARY_COMPLETION_BOX,
+            "choosingatitle": cls.CHOOSING_TITLE,
+            "choosingtitle": cls.CHOOSING_TITLE,
+            "matchingheadings": cls.MATCHING_HEADING,
+            "matchingheading": cls.MATCHING_HEADING,
+            "matchingsentenceendings": cls.MATCHING_ENDINGS,
+            "matchingendings": cls.MATCHING_ENDINGS,
+            "flowchartcompletion": cls.FLOW_CHART,
+            "flowchart": cls.FLOW_CHART,
+            "diagramlabelcompletion": cls.DIAGRAM_LABEL,
+            "diagramlabel": cls.DIAGRAM_LABEL,
+        }
+        if s in alias_map:
+            return alias_map[s]
         return cls.TRUE_FALSE_NOT_GIVEN
 
 # ── System Instructions per Family ──────────────────────────────────────────
@@ -106,8 +126,10 @@ SYSTEM_PROMPTS: Dict[QuestionPromptFamily, str] = {
         "Generate Multiple Choice questions (single correct answer) based on the provided passage.\n"
         "RULES:\n"
         "- Provide exactly four options with keys 'A', 'B', 'C', 'D'.\n"
-        "- Exactly one option must be the correct answer grounded in the passage.\n"
-        "- Distractors must be plausible based on passage themes but clearly incorrect or unsupported.\n"
+        "- Exactly ONE option must be the indisputably correct answer directly supported by the passage.\n"
+        "- The 3 distractors MUST be unequivocally incorrect, clearly contradicted by the passage or completely unsupported.\n"
+        "- NEVER create distractors that are partially true, true in a different context/region, or synonymous with the correct option.\n"
+        "- The question stem MUST be specific and precise (including relevant geographic, temporal, or taxonomic conditions from the passage) so that ONLY ONE option is true.\n"
         "- Distractors must not be identical or duplicate each other.\n"
         "- Output strictly valid JSON without trailing commas before closing brackets or braces."
     ),
@@ -211,6 +233,23 @@ SYSTEM_PROMPTS: Dict[QuestionPromptFamily, str] = {
         "Generate Flow Chart process ordering questions based on the provided passage.\n"
         "RULES:\n"
         "- Provide a sequence of distinct process step slugs.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.SUMMARY_COMPLETION_BOX: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Summary Completion (with a box of options) based on the provided passage.\n"
+        "RULES:\n"
+        "- The summary must be a coherent paragraph with blanks.\n"
+        "- Provide a pool/box of options (words or phrases) from which answers are chosen.\n"
+        "- Distractors in the box must be grammatically plausible but incorrect.\n"
+        "- Respond in valid JSON adhering to the specified schema."
+    ),
+    QuestionPromptFamily.CHOOSING_TITLE: (
+        "You are an expert Cambridge IELTS Academic Reading test writer.\n"
+        "Generate Choosing a Title questions testing the main global idea or purpose of the passage.\n"
+        "RULES:\n"
+        "- Provide 4 title options (A, B, C, D).\n"
+        "- Exactly one option captures the overall thesis; others are too narrow, too broad, or contradicted.\n"
         "- Respond in valid JSON adhering to the specified schema."
     ),
 }
@@ -378,13 +417,18 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
     ),
     QuestionPromptFamily.DIAGRAM_LABEL: (
         "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
-        "Generate {candidate_count} Diagram Label candidates for question #{question_number}.\n"
+        "Generate {candidate_count} Diagram Label completion candidates for question #{question_number}.\n"
+        "RULES FOR DIAGRAM LABELS:\n"
+        "- Each question candidate must provide a technical diagram callout layout description, part description, and blank callout number.\n"
+        "- Answer must be strictly 1-3 words taken verbatim from the passage.\n"
         "Output JSON format:\n"
         "{{\n"
         '  "candidates": [\n'
         "    {{\n"
-        '      "prompt": "Diagram label for part #{question_number} with blank \'______\'",\n'
+        '      "prompt": "Diagram label for part/callout #{question_number} with blank \'______\'",\n'
         '      "answer": "verbatim answer (1-3 words)",\n'
+        '      "calloutLabel": "Part {question_number}",\n'
+        '      "partDescription": "Layout description of the component or diagram part",\n'
         '      "evidenceQuote": "verbatim sentence"\n'
         "    }}\n"
         "  ]\n"
@@ -518,12 +562,61 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
     QuestionPromptFamily.FLOW_CHART: (
         "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
         "Generate Flow Chart process ordering candidates for question #{question_number}.\n"
+        "RULES FOR FLOW CHART:\n"
+        "- Flow chart prompts must represent sequential processes with step layout descriptions and blank callout numbers.\n"
+        "- Each step must describe a clear stage in the process.\n"
         "Output JSON format:\n"
         "{{\n"
         '  "candidates": [\n'
         "    {{\n"
-        '      "prompt": "Step description in process",\n'
+        '      "prompt": "Complete the flow chart below. Step {question_number}: ______",\n'
         '      "answer": "step-slug-name",\n'
+        '      "flowSteps": [\n'
+        '        "Stage 1: initial process step",\n'
+        '        "Stage 2: subsequent process step",\n'
+        '        "Stage 3: final process step with blank ______"\n'
+        '      ],\n'
+        '      "stepIndex": {question_number},\n'
+        '      "evidenceQuote": "verbatim sentence"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.SUMMARY_COMPLETION_BOX: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Summary Completion with an options box for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Summary paragraph with blank [1] ...",\n'
+        '      "answer": "A",\n'
+        '      "options": [\n'
+        '        {{"key": "A", "text": "correct option phrase"}},\n'
+        '        {{"key": "B", "text": "distractor phrase 1"}},\n'
+        '        {{"key": "C", "text": "distractor phrase 2"}},\n'
+        '        {{"key": "D", "text": "distractor phrase 3"}}\n'
+        '      ],\n'
+        '      "evidenceQuote": "verbatim sentence"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}"
+    ),
+    QuestionPromptFamily.CHOOSING_TITLE: (
+        "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
+        "Generate Choosing a Title candidates for question #{question_number}.\n"
+        "Output JSON format:\n"
+        "{{\n"
+        '  "candidates": [\n'
+        "    {{\n"
+        '      "prompt": "Choose the most appropriate title for the passage.",\n'
+        '      "answer": "A",\n'
+        '      "options": [\n'
+        '        {{"key": "A", "text": "Best overarching title"}},\n'
+        '        {{"key": "B", "text": "Too specific title"}},\n'
+        '        {{"key": "C", "text": "Too broad title"}},\n'
+        '        {{"key": "D", "text": "Inaccurate or contradicted title"}}\n'
+        '      ],\n'
         '      "evidenceQuote": "verbatim sentence"\n'
         "    }}\n"
         "  ]\n"
@@ -564,3 +657,37 @@ def build_question_prompt(
         "system_instruction": SYSTEM_PROMPTS[family],
         "user_prompt": user_prompt,
     }
+
+
+def render_question_prompt(
+    family: Union[QuestionPromptFamily, str],
+    slot_number: int,
+    passage_text: str,
+    candidate_count: int = 3,
+    blank_count: int = 4,
+    total_questions: Optional[int] = None,
+    target_focus: Optional[str] = None,
+) -> str:
+    """Renders a complete prompt string for question generation for any IELTS question family.
+
+    Returns a combined, high-quality prompt with system instructions, passage envelope,
+    slot constraints, and output JSON schema specifications.
+    """
+    resolved_family = QuestionPromptFamily.from_raw(family)
+    prompt_payload = build_question_prompt(
+        family=resolved_family,
+        passage_text=passage_text,
+        question_number=slot_number,
+        candidate_count=candidate_count,
+        blank_count=blank_count,
+        target_focus=target_focus,
+    )
+    system_inst = prompt_payload.get("system_instruction", "")
+    user_prompt = prompt_payload.get("user_prompt", "")
+    meta_note = (
+        f"\n[Generation Task: Question Family={resolved_family.name} ({resolved_family.value}), "
+        f"Target Slot={slot_number}"
+        + (f" of {total_questions}" if total_questions else "")
+        + "]\n"
+    )
+    return f"{system_inst}\n\n{meta_note}\n{user_prompt}".strip()
