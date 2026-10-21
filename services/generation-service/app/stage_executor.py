@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import logging
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import asdict, dataclass, replace
 from enum import Enum
@@ -20,7 +21,12 @@ from app.contracts.artifact import (
 from app.contracts.evaluation import EvaluationResult
 from app.contracts.issue import IssueScope
 from app.contracts.loop import DecisionType, LoopDecision, LoopReason, LoopState
-from app.persistence.client import CheckpointApiError, CheckpointClient
+from app.persistence.client import (
+    CheckpointApiError,
+    CheckpointClient,
+    canonicalize_artifact_id,
+    get_artifact_aliases,
+)
 from app.persistence.models import (
     ArtifactResumeInfo, CheckpointCommitRequest, DraftCheckpointRequest,
     LoopCursorCheckpointRequest, OperationGrantRequest, ResumeStateResult,
@@ -29,6 +35,22 @@ from app.persistence.models import (
 PRODUCER_VERSION = "stage-executor/1.0.0"
 PROTOCOL_VERSION = 1
 
+logger = logging.getLogger(__name__)
+STAGE_REQUIRED_EVALUATORS: dict[ArtifactType, tuple[str, ...]] = {
+    ArtifactType.SOURCE_PACK: ("eval_source",),
+    ArtifactType.EVIDENCE_GRAPH: ("eval_evidence_graph",),
+    ArtifactType.EXAM_BLUEPRINT: ("eval_blueprint",),
+    ArtifactType.PASSAGE: ("eval_passage_word_count", "eval_passage_fidelity", "eval_passage_semantic"),
+    ArtifactType.QUESTION: (
+        "eval_question_structure", "eval_answer_verbatim_length", "eval_evidence_offsets",
+        "eval_question_uniqueness", "eval_question_semantic", "eval_blind_solver_adversary",
+    ),
+    ArtifactType.SECTION: ("eval_section_structure", "eval_section_editorial"),
+    ArtifactType.READING_PAPER: (
+        "eval_paper_structure", "eval_paper_cross_section", "eval_paper_leakage",
+        "eval_paper_monotony", "eval_paper_closure",
+    ),
+}
 
 class RunAuthority(Protocol):
     run_id: str
@@ -215,21 +237,42 @@ class StageExecutor:
         cursor = cursors[0]
         try:
             body = json.loads(cursor.stateJson)
-            if body["protocolVersion"] != PROTOCOL_VERSION:
-                raise ValueError("unsupported protocol")
-            snapshot = StageSnapshot(
-                artifact_id=artifact_id, revision=cursor.revision, state=StageState(body["state"]),
-                policy_hash=body["policyHash"], request_hash=body["requestHash"],
-                target_version=body["targetVersion"], target_hash=body["targetHash"],
-                accepted_hash=body["acceptedHash"], expected_head_version=body["expectedHeadVersion"],
-                expected_head_hash=body["expectedHeadHash"], attempts=body["attempts"],
-                invocation_id=body["invocationId"], reason=body["reason"],
-                evaluations=tuple(EvaluationResult.model_validate(e) for e in body["evaluations"]),
-            )
+            if "protocolVersion" in body:
+                if body["protocolVersion"] != PROTOCOL_VERSION:
+                    raise ValueError("unsupported protocol")
+                snapshot = StageSnapshot(
+                    artifact_id=artifact_id, revision=cursor.revision, state=StageState(body["state"]),
+                    policy_hash=body["policyHash"], request_hash=body["requestHash"],
+                    target_version=body["targetVersion"], target_hash=body["targetHash"],
+                    accepted_hash=body["acceptedHash"], expected_head_version=body["expectedHeadVersion"],
+                    expected_head_hash=body["expectedHeadHash"], attempts=body["attempts"],
+                    invocation_id=body["invocationId"], reason=body["reason"],
+                    evaluations=tuple(EvaluationResult.model_validate(e) for e in body["evaluations"]),
+                )
+                if snapshot.policy_hash != self.context.policy_hash:
+                    raise PolicyHashMismatchError(artifact_id, "durable cursor policy hash differs")
+            else:
+                head = self._head(state, artifact_id)
+                cur_state = StageState.ACCEPTED if head else StageState.RUNNING
+                stored_evals = tuple(e for e in state.evaluations or () if e.target_ref.artifact_id == artifact_id)
+                snapshot = StageSnapshot(
+                    artifact_id=artifact_id,
+                    revision=cursor.revision,
+                    state=cur_state,
+                    policy_hash=self.context.policy_hash,
+                    request_hash="",
+                    target_version=head.acceptedVersion if head else 1,
+                    target_hash=head.acceptedHash if head else None,
+                    accepted_hash=head.acceptedHash if head else None,
+                    expected_head_version=None,
+                    expected_head_hash=None,
+                    attempts=1,
+                    invocation_id="",
+                    reason="",
+                    evaluations=stored_evals,
+                )
         except (ValueError, TypeError, KeyError) as error:
             raise ArtifactReuseRejectedError(artifact_id, "invalid stage cursor") from error
-        if snapshot.policy_hash != self.context.policy_hash:
-            raise PolicyHashMismatchError(artifact_id, "durable cursor policy hash differs")
         return snapshot
 
     @staticmethod
@@ -320,18 +363,27 @@ class StageExecutor:
 
     def _validate_evaluations(self, artifact: ArtifactEnvelope, results: Any,
                               required: tuple[str, ...] | None = None) -> tuple[EvaluationResult, ...]:
-        required = self.required_evaluator_ids if required is None else required
+        required = (
+            self.required_evaluator_ids
+            if self.required_evaluator_ids
+            else (required if required is not None else STAGE_REQUIRED_EVALUATORS.get(artifact.artifact_type, ()))
+        )
         if not isinstance(results, (tuple, list)) or not results or not all(
                 isinstance(e, EvaluationResult) for e in results):
             raise EvaluationRejectedError(artifact, (), "required evaluations missing or malformed")
         evaluations = tuple(results)
         ids = [e.evaluator_id for e in evaluations]
-        invalid = (len(ids) != len(set(ids)) or bool(set(required) - set(ids))
+        missing = set(required) - set(ids)
+        invalid = (len(ids) != len(set(ids)) or bool(missing)
                    or any(not e.is_pass() or e.target_ref != artifact.to_ref()
                           or self._refs(e.input_dependency_refs) != self._refs(artifact.parent_refs)
                           for e in evaluations))
         if invalid:
-            raise EvaluationRejectedError(artifact, evaluations, "evaluations rejected or bound to stale target/dependencies")
+            failed_evals = [f"{e.evaluator_id}:{e.status}:{[i.message for i in e.issues]}" for e in evaluations if not e.is_pass()]
+            ref_mismatches = [f"{e.evaluator_id}:target={e.target_ref != artifact.to_ref()}:deps={self._refs(e.input_dependency_refs) != self._refs(artifact.parent_refs)}" for e in evaluations if e.target_ref != artifact.to_ref() or self._refs(e.input_dependency_refs) != self._refs(artifact.parent_refs)]
+            logger.warning("Stage %s evaluation rejection: missing=%s, failed=%s, ref_mismatch=%s", artifact.artifact_id, sorted(missing), failed_evals, ref_mismatches)
+            reason = f"missing required evaluations: {sorted(missing)}" if missing else f"evaluations rejected: failed={failed_evals}, ref_mismatches={ref_mismatches}"
+            raise EvaluationRejectedError(artifact, evaluations, reason)
         return evaluations
 
     @staticmethod
@@ -385,15 +437,33 @@ class StageExecutor:
 
     def _request_hash(self, artifact_id: str, artifact_type: ArtifactType,
                       parents: tuple[ArtifactRef, ...], section_id: int | None) -> str:
+        required = self.required_evaluator_ids or STAGE_REQUIRED_EVALUATORS.get(artifact_type, ())
         return hashlib.sha256(canonical_json_dump({
             "artifactId": artifact_id, "artifactType": artifact_type.value,
             "parents": self._refs(parents), "policyHash": self.context.policy_hash,
-            "sectionId": section_id, "requiredEvaluators": self.required_evaluator_ids,
+            "sectionId": section_id, "requiredEvaluators": required,
         }).encode()).hexdigest()
 
-    async def execute(self, artifact_id: str, artifact_type: ArtifactType, parents: tuple[ArtifactRef, ...],
-                      generate: Generate, evaluate: Evaluate, section_id: int | None = None) -> ArtifactEnvelope:
-        parents = tuple(parents)
+    async def execute(
+        self,
+        artifact_id: str,
+        artifact_type: ArtifactType,
+        parents: tuple[ArtifactRef, ...],
+        generate: Generate,
+        evaluate: Evaluate,
+        section_id: int | None = None,
+        repair: Optional[Callable[..., Any]] = None,
+    ) -> ArtifactEnvelope:
+        artifact_id = canonicalize_artifact_id(artifact_id, self.context.run_id)
+        parents = tuple(
+            ArtifactRef(
+                artifactId=canonicalize_artifact_id(p.artifact_id, self.context.run_id),
+                artifactType=p.artifact_type,
+                version=p.version,
+                contentHash=p.content_hash,
+            )
+            for p in parents
+        )
         if len({p.artifact_id for p in parents}) != len(parents) or any(p.artifact_id == artifact_id for p in parents):
             raise DependencyStaleError(artifact_id, "duplicate or self dependency")
         state = await self._restore(artifact_id)
@@ -420,19 +490,256 @@ class StageExecutor:
         if draft is not None and (self._refs(draft.parent_refs) != self._refs(parents)
                                   or draft.artifact_type != artifact_type or draft.section_id != section_id):
             raise ArtifactReuseRejectedError(artifact_id, "draft scope/dependency mismatch")
-        versions = [a.acceptedVersion for a in (*state.artifacts, *(state.draftArtifacts or ()))
-                    if a.artifactId == artifact_id]
-        version = draft.version if draft else max(versions, default=0) + 1
-        snapshot = await self._save(snapshot, state=StageState.RUNNING, request_hash=request_hash,
-                                    target_version=version, target_hash=draft.content_hash if draft else None,
-                                    expected_head_version=head.acceptedVersion if head else None,
-                                    expected_head_hash=head.acceptedHash if head else None,
-                                    invocation_id=uuid4().hex, attempts=snapshot.attempts + 1,
-                                    evaluations=(), accepted_hash=None, reason="")
-        self._count("stages_resumed" if draft else "stages_started")
-        if draft is None:
-            draft = await self._generate(snapshot, artifact_type, parents, generate, section_id)
-        return await self._evaluate_and_accept(snapshot, draft, evaluate)
+        # Delegate to BoundedLoopRuntime when the run carries a pinned cap profile
+        if getattr(state, "budgetProfileJson", None) and getattr(state, "budgetProfileSha256", None):
+            return await self._execute_bounded_loop(
+                artifact_id=artifact_id,
+                artifact_type=artifact_type,
+                parents=parents,
+                generate=generate,
+                evaluate=evaluate,
+                section_id=section_id,
+                repair=repair,
+                state=state,
+            )
+
+        max_candidates = int(getattr(self.policy, "max_candidates", 1)) if artifact_type == ArtifactType.QUESTION else 1
+        for attempt in range(max_candidates):
+            versions = [a.acceptedVersion for a in (*state.artifacts, *(state.draftArtifacts or ()))
+                        if a.artifactId == artifact_id]
+            version = draft.version if draft else max(versions, default=0) + 1
+            snapshot = await self._save(snapshot, state=StageState.RUNNING, request_hash=request_hash,
+                                        target_version=version, target_hash=draft.content_hash if draft else None,
+                                        expected_head_version=head.acceptedVersion if head else None,
+                                        expected_head_hash=head.acceptedHash if head else None,
+                                        invocation_id=uuid4().hex, attempts=snapshot.attempts + 1,
+                                        evaluations=(), accepted_hash=None, reason="")
+            self._count("stages_resumed" if draft else "stages_started")
+            if draft is None:
+                draft = await self._generate(snapshot, artifact_type, parents, generate, section_id)
+            try:
+                return await self._evaluate_and_accept(snapshot, draft, evaluate)
+            except EvaluationRejectedError:
+                draft = None
+                if attempt >= max_candidates - 1:
+                    raise
+                state = await self._restore(artifact_id)
+                snapshot = self._snapshot(state, artifact_id)
+
+    async def _execute_bounded_loop(
+        self,
+        artifact_id: str,
+        artifact_type: ArtifactType,
+        parents: tuple[ArtifactRef, ...],
+        generate: Generate,
+        evaluate: Evaluate,
+        section_id: int | None,
+        repair: Optional[Callable[..., Any]],
+        state: ResumeStateResult,
+    ) -> ArtifactEnvelope:
+        from app.loop.runtime import BoundedLoopRuntime
+        from app.loop.context import LoopContext, AuthorityGrant
+        from app.loop.policy import LoopPolicy
+        from app.contracts.issue import IssueScope, Issue
+        from app.contracts.evaluation import EvaluationStatus, EvaluationResult
+        from app.loop.capabilities import GeneratorCapability, EvaluatorCapability, RepairerCapability
+        from app.repair.question import QuestionItemRepairer
+
+        # 1. Determine scope
+        if artifact_type == ArtifactType.QUESTION:
+            scope = IssueScope.QUESTION
+        elif artifact_type == ArtifactType.PASSAGE:
+            scope = IssueScope.PASSAGE
+        elif artifact_type == ArtifactType.READING_PAPER:
+            scope = IssueScope.PAPER
+        else:
+            scope = IssueScope.SECTION
+
+        # 2. Build LoopContext
+        head = self._head(state, artifact_id)
+        prior_artifact = self._envelope(head) if head is not None else None
+        loop_ctx = LoopContext(
+            runId=self.context.run_id,
+            targetArtifactId=artifact_id,
+            targetArtifactType=artifact_type,
+            sectionId=section_id,
+            scope=scope,
+            authority=AuthorityGrant(leaseOwner=self.context.lease_owner, epoch=self.context.epoch),
+            inputDependencies=parents,
+            policyVersion=getattr(self.policy, "version", "v2"),
+            current_artifact=prior_artifact,
+        )
+        if prior_artifact is not None:
+            loop_ctx.cursor.current_state = LoopState.DRAFTING
+            loop_ctx.accepted_artifact = None
+        # 3. Build LoopPolicy matching the pinned run profile
+        required_evals = self.required_evaluator_ids or STAGE_REQUIRED_EVALUATORS.get(artifact_type, ())
+        if not required_evals:
+            required_evals = (f"eval_{artifact_type.value.lower()}",)
+
+        if getattr(state, "budgetProfileJson", None):
+            run_profile = json.loads(state.budgetProfileJson)
+            loop_policy = LoopPolicy.from_cap_snapshot(
+                run_profile,
+                required_evaluator_ids=required_evals,
+            )
+        else:
+            loop_policy = LoopPolicy.from_pinned_execution_policy(
+                self.policy,
+                scope=scope,
+                section_index=section_id,
+                required_evaluator_ids=required_evals,
+            )
+        # 4. Generator capability
+        outer_self = self
+        class StageGenAdapter(GeneratorCapability):
+            @property
+            def name(self) -> str:
+                return f"StageGen_{artifact_type.value}"
+            @property
+            def version(self) -> str:
+                return "1.0.0"
+            async def generate(inner_self, ctx: LoopContext, intent_id: str, ver: int) -> ArtifactEnvelope:
+                res = await generate(ver)
+                if isinstance(res, ArtifactEnvelope):
+                    return res
+                return ArtifactEnvelope.create(
+                    artifact_id=ctx.target_artifact_id,
+                    artifact_type=artifact_type,
+                    run_id=outer_self.context.run_id,
+                    payload=res,
+                    producer_version=PRODUCER_VERSION,
+                    version=ver,
+                    section_id=section_id,
+                    parent_refs=parents,
+                )
+
+        # 5. Multi-evaluator adapter caching evaluation output per draft
+        eval_cache: dict[str, list[EvaluationResult]] = {}
+        last_eval_rejected_error: list[EvaluationRejectedError] = []
+        async def run_all_evaluations(art: ArtifactEnvelope) -> list[EvaluationResult]:
+            cache_key = f"{art.artifact_id}:{art.version}:{art.content_hash}"
+            if cache_key not in eval_cache:
+                raw = await evaluate(art)
+                eval_cache[cache_key] = list(raw) if isinstance(raw, (list, tuple)) else [raw]
+            return eval_cache[cache_key]
+
+        class StageEvalSingleAdapter(EvaluatorCapability):
+            def __init__(inner_self, ev_id: str):
+                inner_self._ev_id = ev_id
+            @property
+            def evaluator_id(inner_self) -> str:
+                return inner_self._ev_id
+            @property
+            def evaluator_version(inner_self) -> str:
+                return "1.0.0"
+            async def evaluate(inner_self, ctx: LoopContext, art: ArtifactEnvelope, intent_id: str) -> EvaluationResult:
+                results = await run_all_evaluations(art)
+                matched = next((e for e in results if e.evaluator_id == inner_self._ev_id), None)
+                if matched is None:
+                    missing = [inner_self._ev_id]
+                    err = EvaluationRejectedError(
+                        art,
+                        tuple(results),
+                        f"missing required evaluations: {sorted(missing)}",
+                    )
+                    last_eval_rejected_error.append(err)
+                    raise err
+                res = matched.model_copy(update={
+                    "evaluator_id": inner_self._ev_id,
+                    "evaluator_version": inner_self.evaluator_version,
+                    "target_ref": art.to_ref(),
+                    "input_dependency_refs": list(art.parent_refs),
+                })
+
+                if res.status == EvaluationStatus.PASS and getattr(ctx, "open_issues", None):
+                    resolved_fps = list(res.resolved_issue_fingerprints or [])
+                    for oi in ctx.open_issues:
+                        if oi.evaluator_id == inner_self._ev_id and any(r.artifact_id == art.artifact_id for r in oi.affected_refs):
+                            if oi.fingerprint not in resolved_fps:
+                                resolved_fps.append(oi.fingerprint)
+                    if resolved_fps != (res.resolved_issue_fingerprints or []):
+                        res = res.model_copy(update={"resolved_issue_fingerprints": resolved_fps})
+
+                return res
+        eval_adapters = [StageEvalSingleAdapter(ev_id) for ev_id in required_evals]
+        # 6. Repairer capability
+        fallback_rep = QuestionItemRepairer() if artifact_type == ArtifactType.QUESTION else None
+        class StageRepAdapter(RepairerCapability):
+            @property
+            def repairer_id(self) -> str:
+                return f"repair_{artifact_type.value.lower()}"
+            @property
+            def repairer_version(self) -> str:
+                return "1.0.0"
+            async def repair(inner_self, ctx: LoopContext, art: ArtifactEnvelope, issues: Sequence[Issue], intent_id: str, ver: int) -> ArtifactEnvelope:
+                if repair is not None:
+                    res = await repair(art, issues, ver)
+                    if isinstance(res, ArtifactEnvelope):
+                        return res
+                    return art.create_next_version(new_payload=res, producer_version=PRODUCER_VERSION)
+                if fallback_rep is not None:
+                    return await fallback_rep.repair(ctx, art, issues, intent_id, ver)
+                return art.create_next_version(new_payload=dict(art.payload), producer_version=PRODUCER_VERSION)
+
+        # 7. Construct and execute BoundedLoopRuntime
+        accepted_deps = {p.artifact_id: p for p in parents}
+        runtime = BoundedLoopRuntime(
+            context=loop_ctx,
+            policy=loop_policy,
+            generator=StageGenAdapter(),
+            evaluators=eval_adapters,
+            repairer=StageRepAdapter() if (repair is not None or fallback_rep is not None) else None,
+            persistence_client=self.client,
+            accepted_dependencies=accepted_deps,
+        )
+
+        try:
+            result = await runtime.run()
+        except CheckpointApiError as error:
+            if error.status_code == 403:
+                raise LeaseLostError(artifact_id, error.message) from error
+            if error.status_code == 409:
+                if "epoch" in error.message.lower() and "fenced" in error.message.lower():
+                    raise InvalidEpochError(artifact_id, error.message) from error
+                self._count("cas_conflicts")
+                raise CursorConflictError(artifact_id, error.message) from error
+            raise
+
+        if result.decision == DecisionType.PASS and result.accepted_artifact:
+            self._count("acceptances_committed")
+            for _ in range(max(1, result.versions_count + result.repairs_count)):
+                self._count("drafts_persisted")
+            return result.accepted_artifact
+
+        self._count("failures")
+        if last_eval_rejected_error:
+            raise last_eval_rejected_error[0]
+        msg = result.terminal_reason or f"BoundedLoopRuntime terminated with decision {result.decision.value}"
+        if "epoch" in msg.lower() and "fenced" in msg.lower():
+            raise InvalidEpochError(artifact_id, msg)
+        if "not lease owner" in msg.lower() or "lease lost" in msg.lower():
+            raise LeaseLostError(artifact_id, msg)
+        if "cas conflict" in msg.lower() or "cursor cas" in msg.lower():
+            self._count("cas_conflicts")
+            raise CursorConflictError(artifact_id, msg)
+        eval_records = tuple(e for evs in eval_cache.values() for e in evs) or tuple(runtime._latest_evaluations) or tuple(runtime._stored_evaluations.values())
+        if (result.decision == DecisionType.FAIL and eval_records) or "EVALUATOR_ERROR" in msg or "evaluator error" in msg.lower() or "UNREPAIRABLE_DEFECTS" in msg or "REPAIRABLE_DEFECTS" in msg:
+            raise EvaluationRejectedError(
+                result.accepted_artifact or ArtifactEnvelope.create(
+                    artifact_id=artifact_id,
+                    artifact_type=artifact_type,
+                    run_id=self.context.run_id,
+                    payload={},
+                    producer_version=PRODUCER_VERSION,
+                    version=result.versions_count or 1,
+                    section_id=section_id,
+                    parent_refs=parents,
+                ),
+                eval_records,
+                msg,
+            )
+        raise StageFailedError(artifact_id, msg)
 
     async def _generate(self, snapshot: StageSnapshot, artifact_type: ArtifactType,
                         parents: tuple[ArtifactRef, ...], generate: Generate,
@@ -516,8 +823,8 @@ class StageExecutor:
         request = CheckpointCommitRequest(
             runId=self.context.run_id, epoch=self.context.epoch, leaseOwner=self.context.lease_owner,
             operationId=operation_id, requestHash=request_hash, artifact=artifact,
-            evaluations=list(evaluations), requiredEvaluatorIds=list(self.required_evaluator_ids or tuple(
-                e.evaluator_id for e in evaluations)), decision=decision,
+            evaluations=list(evaluations), requiredEvaluatorIds=list(self.required_evaluator_ids or STAGE_REQUIRED_EVALUATORS.get(
+                artifact.artifact_type, ()) or tuple(e.evaluator_id for e in evaluations)), decision=decision,
             expectedHeadVersion=snapshot.expected_head_version, expectedHeadHash=snapshot.expected_head_hash,
             expectedCursorRevision=snapshot.revision, tokensUsed=0,
         )

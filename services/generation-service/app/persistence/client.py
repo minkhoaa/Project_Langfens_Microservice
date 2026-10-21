@@ -1,3 +1,5 @@
+import hashlib
+import re
 import json
 import os
 from typing import Any, Dict, Optional
@@ -32,6 +34,139 @@ from app.persistence.models import (
     OutboxEventRecord,
 )
 
+# ── Canonical & Legacy Artifact ID Mapping ──────────────────────────────────
+
+SECTION_QUESTION_OFFSETS = {
+    1: (1, 13, 0),
+    2: (14, 26, 13),
+    3: (27, 40, 26),
+}
+
+
+def _q_num_to_sec_slot(q_num: int) -> tuple[int, int]:
+    if 1 <= q_num <= 13:
+        return 1, q_num
+    if 14 <= q_num <= 26:
+        return 2, q_num - 13
+    if 27 <= q_num <= 40:
+        return 3, q_num - 26
+    return 1, q_num
+
+
+def canonicalize_artifact_id(artifact_id: str, run_id: Optional[str] = None) -> str:
+    """Converts a legacy or partial artifact ID to the canonical pipeline format."""
+    if not artifact_id:
+        return artifact_id
+
+    parts = artifact_id.split(":")
+    if len(parts) >= 2 and parts[0] in ("source", "evidence", "blueprint", "passage", "question", "section", "paper"):
+        if len(parts) == 2 and parts[0] in ("blueprint", "paper"):
+            return artifact_id
+        if len(parts) == 3:
+            return artifact_id
+
+    effective_run_id = run_id or "run"
+
+    # Match legacy passage: art_passage_s1
+    m = re.match(r"^art_passage_s(\d+)$", artifact_id)
+    if m:
+        return f"passage:{effective_run_id}:{m.group(1)}"
+
+    # Match legacy question candidate: art_qcand_s{sec}_{slot} or art_q_s{sec}_{slot}
+    m = re.match(r"^art_q(?:cand)?_s([1-3])_(\d+)$", artifact_id)
+    if m:
+        sec = int(m.group(1))
+        slot = int(m.group(2))
+        offset = SECTION_QUESTION_OFFSETS[sec][2]
+        q_num = offset + slot
+        return f"question:{effective_run_id}:{q_num}"
+
+    # Match legacy question with direct number: art_q_{num} or art_qcand_{num} or question_{num}
+    m = re.match(r"^(?:art_q(?:cand)?|question)_(\d+)$", artifact_id)
+    if m:
+        return f"question:{effective_run_id}:{m.group(1)}"
+
+    # Match legacy source: art_source_s(\d+)
+    m = re.match(r"^art_source_s(\d+)$", artifact_id)
+    if m:
+        return f"source:{effective_run_id}:{m.group(1)}"
+
+    # Match legacy evidence: art_evidence_s(\d+)
+    m = re.match(r"^art_evidence_s(\d+)$", artifact_id)
+    if m:
+        return f"evidence:{effective_run_id}:{m.group(1)}"
+
+    # Match legacy blueprint: art_blueprint.*
+    if artifact_id == "art_blueprint" or artifact_id.startswith("art_blueprint_"):
+        return f"blueprint:{effective_run_id}"
+
+    # Match legacy section: art_section_s(\d+)
+    m = re.match(r"^art_section_s(\d+)$", artifact_id)
+    if m:
+        return f"section:{effective_run_id}:{m.group(1)}"
+
+    # Match legacy paper: art_paper.*
+    if artifact_id == "art_paper" or artifact_id.startswith("art_paper_"):
+        return f"paper:{effective_run_id}"
+
+    return artifact_id
+
+
+def legacy_artifact_id(artifact_id: str, run_id: Optional[str] = None) -> str:
+    """Converts a canonical artifact ID to the legacy loop format."""
+    if not artifact_id:
+        return artifact_id
+
+    if artifact_id.startswith("art_"):
+        return artifact_id
+
+    parts = artifact_id.split(":")
+    if len(parts) >= 2:
+        kind = parts[0]
+        if kind == "passage" and len(parts) == 3:
+            return f"art_passage_s{parts[2]}"
+        if kind == "question" and len(parts) == 3:
+            try:
+                q_num = int(parts[2])
+                sec, slot = _q_num_to_sec_slot(q_num)
+                return f"art_qcand_s{sec}_{slot}"
+            except ValueError:
+                return f"art_q_{parts[2]}"
+        if kind == "section" and len(parts) == 3:
+            return f"art_section_s{parts[2]}"
+        if kind == "source" and len(parts) == 3:
+            return f"art_source_s{parts[2]}"
+        if kind == "evidence" and len(parts) == 3:
+            return f"art_evidence_s{parts[2]}"
+        if kind == "blueprint":
+            return "art_blueprint"
+        if kind == "paper":
+            return "art_paper"
+
+    return artifact_id
+
+
+def get_artifact_aliases(artifact_id: str, run_id: Optional[str] = None) -> set[str]:
+    """Returns all known identity representations (canonical, legacy variants) for an artifact."""
+    aliases: set[str] = {artifact_id}
+    canonical = canonicalize_artifact_id(artifact_id, run_id)
+    legacy = legacy_artifact_id(artifact_id, run_id)
+    aliases.add(canonical)
+    aliases.add(legacy)
+
+    parts = canonical.split(":")
+    if len(parts) == 3 and parts[0] == "question":
+        try:
+            q_num = int(parts[2])
+            sec, slot = _q_num_to_sec_slot(q_num)
+            aliases.add(f"art_qcand_s{sec}_{slot}")
+            aliases.add(f"art_q_s{sec}_{slot}")
+            aliases.add(f"art_q_{q_num}")
+            aliases.add(f"question_{q_num}")
+        except ValueError:
+            pass
+
+    return aliases
 
 class CheckpointApiError(Exception):
     def __init__(self, status_code: int, message: str, payload: Optional[Dict[str, Any]] = None):
@@ -313,6 +448,120 @@ class CheckpointClient:
             if resp.status_code != 200:
                 self._handle_error(resp)
             return resp.json()
+    def get_artifact_head(self, run_id: str, artifact_id: str) -> Optional[Any]:
+        """Retrieves authoritative head for an artifact, resolving canonical and legacy aliases."""
+        from app.contracts.artifact import ArtifactEnvelope
+        aliases = get_artifact_aliases(artifact_id, run_id)
+        state = self.resume_state(run_id)
+        for art_info in (state.artifacts or []):
+            if art_info.artifactId in aliases:
+                if art_info.envelopeJson:
+                    return ArtifactEnvelope.model_validate_json(art_info.envelopeJson)
+                payload = json.loads(art_info.payloadJson) if isinstance(art_info.payloadJson, str) else (art_info.payloadJson or {})
+                return ArtifactEnvelope.create(
+                    artifact_id=art_info.artifactId,
+                    artifact_type=art_info.artifactType,
+                    run_id=run_id,
+                    payload=payload,
+                    producer_version="1.0.0",
+                    version=art_info.acceptedVersion,
+                )
+        return None
+
+    async def get_artifact_head_async(self, run_id: str, artifact_id: str) -> Optional[Any]:
+        from app.contracts.artifact import ArtifactEnvelope
+        aliases = get_artifact_aliases(artifact_id, run_id)
+        state = await self.resume_state_async(run_id)
+        for art_info in (state.artifacts or []):
+            if art_info.artifactId in aliases:
+                if art_info.envelopeJson:
+                    return ArtifactEnvelope.model_validate_json(art_info.envelopeJson)
+                payload = json.loads(art_info.payloadJson) if isinstance(art_info.payloadJson, str) else (art_info.payloadJson or {})
+                return ArtifactEnvelope.create(
+                    artifact_id=art_info.artifactId,
+                    artifact_type=art_info.artifactType,
+                    run_id=run_id,
+                    payload=payload,
+                    producer_version="1.0.0",
+                    version=art_info.acceptedVersion,
+                )
+        return None
+
+    def get_artifact(self, run_id: str, artifact_id: str, version: Optional[int] = None) -> Optional[Any]:
+        """Retrieves an accepted head or draft artifact by ID and optional version with alias resolution."""
+        from app.contracts.artifact import ArtifactEnvelope
+        aliases = get_artifact_aliases(artifact_id, run_id)
+        state = self.resume_state(run_id)
+        for art_info in (state.artifacts or []):
+            if art_info.artifactId in aliases:
+                if version is None or art_info.acceptedVersion == version:
+                    if art_info.envelopeJson:
+                        return ArtifactEnvelope.model_validate_json(art_info.envelopeJson)
+                    payload = json.loads(art_info.payloadJson) if isinstance(art_info.payloadJson, str) else (art_info.payloadJson or {})
+                    return ArtifactEnvelope.create(
+                        artifact_id=art_info.artifactId,
+                        artifact_type=art_info.artifactType,
+                        run_id=run_id,
+                        payload=payload,
+                        producer_version="1.0.0",
+                        version=art_info.acceptedVersion,
+                    )
+        for draft_info in (state.draftArtifacts or []):
+            if draft_info.artifactId in aliases:
+                if version is None or draft_info.acceptedVersion == version:
+                    if draft_info.envelopeJson:
+                        return ArtifactEnvelope.model_validate_json(draft_info.envelopeJson)
+                    payload = json.loads(draft_info.payloadJson) if isinstance(draft_info.payloadJson, str) else (draft_info.payloadJson or {})
+                    return ArtifactEnvelope.create(
+                        artifact_id=draft_info.artifactId,
+                        artifact_type=draft_info.artifactType,
+                        run_id=run_id,
+                        payload=payload,
+                        producer_version="1.0.0",
+                        version=draft_info.acceptedVersion,
+                    )
+        return None
+
+    async def get_artifact_async(self, run_id: str, artifact_id: str, version: Optional[int] = None) -> Optional[Any]:
+        from app.contracts.artifact import ArtifactEnvelope
+        aliases = get_artifact_aliases(artifact_id, run_id)
+        state = await self.resume_state_async(run_id)
+        for art_info in (state.artifacts or []):
+            if art_info.artifactId in aliases:
+                if version is None or art_info.acceptedVersion == version:
+                    if art_info.envelopeJson:
+                        return ArtifactEnvelope.model_validate_json(art_info.envelopeJson)
+                    payload = json.loads(art_info.payloadJson) if isinstance(art_info.payloadJson, str) else (art_info.payloadJson or {})
+                    return ArtifactEnvelope.create(
+                        artifact_id=art_info.artifactId,
+                        artifact_type=art_info.artifactType,
+                        run_id=run_id,
+                        payload=payload,
+                        producer_version="1.0.0",
+                        version=art_info.acceptedVersion,
+                    )
+        for draft_info in (state.draftArtifacts or []):
+            if draft_info.artifactId in aliases:
+                if version is None or draft_info.acceptedVersion == version:
+                    if draft_info.envelopeJson:
+                        return ArtifactEnvelope.model_validate_json(draft_info.envelopeJson)
+                    payload = json.loads(draft_info.payloadJson) if isinstance(draft_info.payloadJson, str) else (draft_info.payloadJson or {})
+                    return ArtifactEnvelope.create(
+                        artifact_id=draft_info.artifactId,
+                        artifact_type=draft_info.artifactType,
+                        run_id=run_id,
+                        payload=payload,
+                        producer_version="1.0.0",
+                        version=draft_info.acceptedVersion,
+                    )
+        return None
+
+    def commit_artifact(self, request: CheckpointCommitRequest) -> CheckpointAck:
+        """Alias for commit_checkpoint for seamless artifact persistence."""
+        return self.commit_checkpoint(request)
+
+    async def commit_artifact_async(self, request: CheckpointCommitRequest) -> CheckpointAck:
+        return await self.commit_checkpoint_async(request)
     def _verify_ack(self, request: Any, ack: CheckpointAck) -> None:
         req_run_id = getattr(request, "runId", getattr(request, "run_id", None))
         req_epoch = getattr(request, "epoch", None)

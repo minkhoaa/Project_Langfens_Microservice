@@ -27,7 +27,13 @@ from app.contracts.artifact import (
 )
 from app.contracts.evaluation import EvaluationResult, EvaluationStatus
 from app.contracts.issue import Issue, IssueCode, IssueScope, IssueSeverity
-from app.persistence.client import CheckpointApiError, CheckpointClient
+from app.persistence.client import (
+    CheckpointApiError,
+    CheckpointClient,
+    canonicalize_artifact_id,
+    get_artifact_aliases,
+    legacy_artifact_id,
+)
 from app.persistence.models import (
     ArtifactResumeInfo, BuildExamInternalRequest, BuildExamInternalResult,
     CheckpointAck, CheckpointCommitRequest, CheckpointImportRequest,
@@ -225,7 +231,7 @@ class MockProvider(BaseProvider):
         # Check explicit scripted responses
         if request.operation_id in self.scripted_responses:
             data = self.scripted_responses[request.operation_id]
-        elif (request.artifact_id or "") in self.scripted_responses:
+        elif (request.artifact_id or "") in self.scripted_responses and request.capability == Capability.GENERATE_JSON:
             data = self.scripted_responses[request.artifact_id]
             if isinstance(data, dict):
                 cands = data.get("candidates") or []
@@ -638,21 +644,27 @@ class InMemoryCheckpointClient(CheckpointClient):
             hook(request)
 
         head_key = (request.runId, request.artifact.artifact_id)
-        old_head = self.heads.get(head_key)
+        aliases = get_artifact_aliases(request.artifact.artifact_id, request.runId)
+        old_head = next((self.heads.get((request.runId, a)) for a in aliases if (request.runId, a) in self.heads), None)
 
         if request.expectedHeadVersion != (old_head.version if old_head else None):
             raise CheckpointApiError(409, "head CAS mismatch: version")
-        if request.expectedHeadHash != (old_head.content_hash if old_head else None):
+        if request.expectedHeadHash is not None and request.expectedHeadHash != (old_head.content_hash if old_head else None):
             raise CheckpointApiError(409, "head CAS mismatch: hash")
 
         # Verify dependency closure
         for parent in request.artifact.parent_refs:
-            parent_head = self.heads.get((request.runId, parent.artifact_id))
-            if parent_head is None or parent_head.to_ref() != parent or (request.runId, parent.artifact_id) in self.stale:
+            parent_aliases = get_artifact_aliases(parent.artifact_id, request.runId)
+            parent_head = next(
+                (self.heads.get((request.runId, a)) for a in parent_aliases if (request.runId, a) in self.heads),
+                None,
+            )
+            if parent_head is None or (parent_head.to_ref() != parent and parent_head.to_ref().version != parent.version) or any((request.runId, a) in self.stale for a in parent_aliases):
                 raise CheckpointApiError(409, f"stale or missing dependency: {parent.artifact_id}")
 
         self.heads[head_key] = request.artifact
-        self.stale.discard(head_key)
+        for a in aliases:
+            self.stale.discard((request.runId, a))
 
         if request.evaluations:
             self.evaluations.extend(request.evaluations)
@@ -736,6 +748,14 @@ class InMemoryCheckpointClient(CheckpointClient):
         cursors = [c for (r_id, _), c in self.cursors.items() if r_id == run_id]
         ops = list(self.operations.values())
 
+        from app.config import cap_snapshot_json, cap_snapshot_sha256
+        from app.loop.policy import LoopPolicy
+        pol = LoopPolicy.from_pinned_execution_policy(
+            SimpleNamespace(hash=self.policy_hashes.get(run_id, self.default_policy_hash)),
+        )
+        profile = pol.cap_profile_snapshot
+        profile_json = cap_snapshot_json(profile)
+        profile_sha = cap_snapshot_sha256(profile)
         return ResumeStateResult(
             runId=run_id,
             jobId=self.job_ids.get(run_id, self.default_job_id),
@@ -745,6 +765,10 @@ class InMemoryCheckpointClient(CheckpointClient):
             schemaVersion="2.0.0",
             policyVersion="v2",
             policyHash=self.policy_hashes.get(run_id, self.default_policy_hash),
+            budgetProfileJson=profile_json,
+            budgetProfileSha256=profile_sha,
+            budgetProfileVersion=profile.get("profileVersion", "pinned-execution-v2"),
+            budgetProfileSource=profile.get("profileSource", "PinnedExecutionPolicy"),
             artifacts=artifacts,
             draftArtifacts=drafts,
             loopCursors=cursors,

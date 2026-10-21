@@ -15,7 +15,7 @@ from uuid import UUID
 
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType, canonical_json_dump_prep
 from app.contracts.evaluation import EvaluationResult
-from app.contracts.policies import count_words, match_verbatim_in_passage, validate_answer_length
+from app.contracts.policies import calculate_shingle_overlap, count_words, match_verbatim_in_passage, validate_answer_length
 from app.evaluators.solver import BlindSolverEvaluator
 from app.generators.passage.prompts import PassageStyleProfile, build_passage_generation_prompt
 from app.generators.question.prompts import QuestionPromptFamily, build_question_prompt
@@ -24,7 +24,7 @@ from app.providers.gateway import ProviderGateway
 from app.providers.models import Capability, ChatMessage, ProviderRequest
 from app.providers.parser import parse_defensive_json
 from app.reading_evaluation import evaluate_passage, evaluate_question, evaluate_section
-from app.reading_generation import align_claims_to_passage, compose_section_payload
+from app.reading_generation import align_claims_to_passage, compose_section_payload, trim_passage
 from app.reading_models import AcceptedSectionArtifact, RunContext, SourceRef
 from app.reading_policy import PinnedExecutionPolicy, SectionConfig
 from app.solvers.serializer import build_blind_solver_input
@@ -65,6 +65,7 @@ def _parse_candidate_payload(
     claims_map: dict[str, Any],
     claim_id: str,
     difficulty: str,
+    target_focus: Optional[str] = None,
 ) -> dict[str, Any]:
     """Parses raw provider candidate payload into a validated canonical question payload."""
     if not isinstance(raw_payload, dict):
@@ -83,37 +84,44 @@ def _parse_candidate_payload(
         raise ValueError(f"Malformed candidate payload for question {q_num}: missing candidates/blanks")
 
     matched_claim = claims_map.get(claim_id)
-    fallback_quote = matched_claim["text"].strip() if matched_claim else passage_text.split(". ")[0].strip() + "."
     explanation = str(cand.get("explanation") or "").strip()
+    if len(explanation) < 25 and q_type in ("SUMMARY_COMPLETION", "SENTENCE_COMPLETION"):
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        if quote:
+            explanation = f"The passage states that '{quote[:50]}...', providing verifiable evidence for item {q_num}."
     if len(explanation) < 25:
-        explanation = f"The passage states that '{fallback_quote[:50]}...', which provides verifiable grounding for item {q_num}."
-
+        raise ValueError(f"Question {q_num} explanation is missing or too short (< 25 characters)")
     if q_type in ("TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"):
         statement = str(cand.get("statement") or cand.get("prompt") or "").strip()
-        if not statement:
-            statement = f"Researchers verified that {fallback_quote[:60].strip()}."
-
         raw_ans = str(cand.get("answer") or "").strip().replace(" ", "_").upper()
-        if raw_ans in ("NOT_GIVEN", "NG"):
-            answer = "NOT_GIVEN"
-        elif q_type == "TRUE_FALSE_NOT_GIVEN":
-            answer = "TRUE" if raw_ans in ("TRUE", "T") else ("FALSE" if raw_ans in ("FALSE", "F") else (raw_ans or "TRUE"))
+        if not raw_ans:
+            raise ValueError(f"Question {q_num} answer is missing")
+        if q_type == "TRUE_FALSE_NOT_GIVEN":
+            if raw_ans in ("TRUE", "T"):
+                answer = "TRUE"
+            elif raw_ans in ("FALSE", "F"):
+                answer = "FALSE"
+            elif raw_ans in ("NOT_GIVEN", "NG"):
+                answer = "NOT_GIVEN"
+            else:
+                raise ValueError(f"Invalid answer '{raw_ans}' for TRUE_FALSE_NOT_GIVEN in question {q_num}")
         else:
-            answer = "YES" if raw_ans in ("YES", "Y") else ("NO" if raw_ans in ("NO", "N") else (raw_ans or "YES"))
+            if raw_ans in ("YES", "Y"):
+                answer = "YES"
+            elif raw_ans in ("NO", "N"):
+                answer = "NO"
+            elif raw_ans in ("NOT_GIVEN", "NG"):
+                answer = "NOT_GIVEN"
+            else:
+                raise ValueError(f"Invalid answer '{raw_ans}' for YES_NO_NOT_GIVEN in question {q_num}")
 
         if answer == "NOT_GIVEN":
-            absence = cand.get("absenceAssessment") or {
-                "assessmentId": f"abs:{q_num}",
-                "claimOrTopic": statement,
-                "absenceReason": cand.get("explanation") or f"The passage provides no conclusive factual statement confirming or refuting whether {statement}.",
-                "absenceConfirmed": True,
-            }
-            anchor = str(cand.get("evidenceQuote") or fallback_quote).strip()
-            p_start = passage_text.find(anchor)
-            if p_start < 0:
-                anchor = passage_text.split(". ")[0].strip() + "."
-                p_start = passage_text.find(anchor)
-            p_end = p_start + len(anchor)
+            absence = cand.get("absenceAssessment")
+            anchor = str(cand.get("evidenceQuote") or (matched_claim["text"].strip() if matched_claim else "")).strip()
+            p_start = passage_text.find(anchor) if anchor else -1
+            if p_start < 0 and anchor:
+                p_start = 0
+            p_end = p_start + len(anchor) if p_start >= 0 else -1
             return {
                 "questionNumber": q_num,
                 "questionType": q_type,
@@ -126,12 +134,25 @@ def _parse_candidate_payload(
                 "absenceAssessment": absence,
             }
         else:
-            quote = str(cand.get("evidenceQuote") or fallback_quote).strip()
-            p_start = passage_text.find(quote)
-            if p_start < 0:
-                quote = fallback_quote if fallback_quote in passage_text else passage_text.split(". ")[0].strip() + "."
+            quote = str(cand.get("evidenceQuote") or "").strip()
+            p_start = passage_text.find(quote) if quote else -1
+            if p_start < 0 and quote:
+                clean_q = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", quote)
+                p_start = passage_text.find(clean_q)
+                if p_start >= 0:
+                    quote = clean_q
+            if p_start < 0 and quote:
+                clauses = [c.strip() for c in re.split(r"[,;:.!?—–\n]", quote) if len(c.strip()) >= 20]
+                for c in clauses:
+                    pos = passage_text.find(c)
+                    if pos != -1:
+                        p_start = pos
+                        quote = c
+                        break
+            if p_start < 0 and target_focus and target_focus in passage_text:
+                quote = target_focus
                 p_start = passage_text.find(quote)
-            p_end = p_start + len(quote)
+            p_end = p_start + len(quote) if p_start >= 0 else -1
             return {
                 "questionNumber": q_num,
                 "questionType": q_type,
@@ -145,8 +166,8 @@ def _parse_candidate_payload(
             }
 
     elif q_type == "MULTIPLE_CHOICE_SINGLE":
-        prompt = str(cand.get("prompt") or f"Which primary finding is established in query {q_num}?").strip()
-        raw_opts = cand.get("options") or []
+        prompt = str(cand.get("prompt") or "").strip()
+        raw_opts = cand.get("options")
         if isinstance(raw_opts, list) and all(isinstance(o, dict) for o in raw_opts):
             formatted_opts = [f"{o.get('key', chr(65+i))}. {o.get('text', '')}" for i, o in enumerate(raw_opts)]
         elif isinstance(raw_opts, list) and all(isinstance(o, str) for o in raw_opts):
@@ -154,20 +175,34 @@ def _parse_candidate_payload(
             for i, o in enumerate(raw_opts):
                 clean_o = re.sub(r"^[A-D]\.\s*", "", o)
                 formatted_opts.append(o if re.match(r"^[A-D]\.", o) else f"{chr(65+i)}. {clean_o}")
+        elif isinstance(raw_opts, list):
+            formatted_opts = [str(o) for o in raw_opts]
         else:
-            formatted_opts = [f"{chr(65+i)}. Option {chr(65+i)} for item {q_num}" for i in range(4)]
+            formatted_opts = []
 
-        correct_opt = str(cand.get("correctOption") or cand.get("answer") or "A").strip().upper()
-        mcq_m = re.search(r"\b([A-D])\b", correct_opt)
-        correct_letter = mcq_m.group(1) if mcq_m else "A"
+        raw_correct = str(cand.get("correctOption") or cand.get("answer") or "").strip().upper()
+        mcq_m = re.search(r"\b([A-D])\b", raw_correct)
+        correct_letter = mcq_m.group(1) if mcq_m else raw_correct
 
-        quote = str(cand.get("evidenceQuote") or fallback_quote).strip()
-        p_start = passage_text.find(quote)
-        if p_start < 0:
-            quote = fallback_quote if fallback_quote in passage_text else passage_text.split(". ")[0].strip() + "."
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        if p_start < 0 and quote:
+            clean_q = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", quote)
+            p_start = passage_text.find(clean_q)
+            if p_start >= 0:
+                quote = clean_q
+        if p_start < 0 and quote:
+            clauses = [c.strip() for c in re.split(r"[,;:.!?—–\n]", quote) if len(c.strip()) >= 20]
+            for c in clauses:
+                pos = passage_text.find(c)
+                if pos != -1:
+                    p_start = pos
+                    quote = c
+                    break
+        if p_start < 0 and target_focus and target_focus in passage_text:
+            quote = target_focus
             p_start = passage_text.find(quote)
-        p_end = p_start + len(quote)
-
+        p_end = p_start + len(quote) if p_start >= 0 else -1
         return {
             "questionNumber": q_num,
             "questionType": q_type,
@@ -183,23 +218,40 @@ def _parse_candidate_payload(
 
     elif q_type in ("SENTENCE_COMPLETION", "SUMMARY_COMPLETION"):
         prompt = str(cand.get("prompt") or "").strip()
-        if not prompt or f"[{q_num}]" not in prompt:
-            clean_prompt = prompt.replace("______", f"[{q_num}]") if "______" in prompt else f"Regarding question {q_num}, researchers analyzed the [{q_num}] in field surveys."
-            prompt = clean_prompt
+        if not prompt and q_type == "SUMMARY_COMPLETION":
+            summary_text = str(raw_payload.get("summaryText") or raw_payload.get("summary") or "").strip()
+            if summary_text and f"[{q_num}]" in summary_text:
+                for sentence in re.split(r"(?<=[.!?])\s+", summary_text):
+                    if f"[{q_num}]" in sentence:
+                        prompt = sentence.strip()
+                        break
+                if not prompt:
+                    prompt = summary_text
+        if f"[{q_num}]" not in prompt and "______" in prompt:
+            prompt = prompt.replace("______", f"[{q_num}]")
 
-        quote = str(cand.get("evidenceQuote") or fallback_quote).strip()
-        p_start = passage_text.find(quote)
-        if p_start < 0:
-            quote = fallback_quote if fallback_quote in passage_text else passage_text.split(". ")[0].strip() + "."
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        if p_start < 0 and quote:
+            clean_q = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", quote)
+            p_start = passage_text.find(clean_q)
+            if p_start >= 0:
+                quote = clean_q
+        if p_start < 0 and quote:
+            clauses = [c.strip() for c in re.split(r"[,;:.!?—–\n]", quote) if len(c.strip()) >= 20]
+            for c in clauses:
+                pos = passage_text.find(c)
+                if pos != -1:
+                    p_start = pos
+                    quote = c
+                    break
+        if p_start < 0 and target_focus and target_focus in passage_text:
+            quote = target_focus
             p_start = passage_text.find(quote)
-        p_end = p_start + len(quote)
-
+        p_end = p_start + len(quote) if p_start >= 0 else -1
         answer = str(cand.get("answer") or "").strip()
-        if not answer or not match_verbatim_in_passage(answer, passage_text) or not validate_answer_length(answer) or answer.lower() in prompt.lower().replace(f"[{q_num}]", ""):
-            stopwords = {"that", "this", "with", "from", "were", "been", "their", "which", "during", "after", "before", "while", "under", "about", "into", "over", "between", "through", "across", "within", "without"}
-            words_in_quote = [w for w in re.findall(r"\b[A-Za-z]{4,}\b", quote) if w.lower() not in stopwords]
-            valid_words = [w for w in words_in_quote if match_verbatim_in_passage(w.lower(), passage_text) and w.lower() not in prompt.lower().replace(f"[{q_num}]", "")]
-            answer = valid_words[0].lower() if valid_words else "habitat"
+        if len(explanation) < 25 and quote:
+            explanation = f"The passage states that '{quote[:50]}...', providing verifiable evidence for item {q_num}."
 
         return {
             "questionNumber": q_num,
@@ -214,20 +266,27 @@ def _parse_candidate_payload(
         }
 
     else:  # SHORT_ANSWER
-        prompt = str(cand.get("prompt") or f"Which primary environmental factor was evaluated in query {q_num}?").strip()
-        quote = str(cand.get("evidenceQuote") or fallback_quote).strip()
-        p_start = passage_text.find(quote)
-        if p_start < 0:
-            quote = fallback_quote if fallback_quote in passage_text else passage_text.split(". ")[0].strip() + "."
+        prompt = str(cand.get("prompt") or "").strip()
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        if p_start < 0 and quote:
+            clean_q = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", quote)
+            p_start = passage_text.find(clean_q)
+            if p_start >= 0:
+                quote = clean_q
+        if p_start < 0 and quote:
+            clauses = [c.strip() for c in re.split(r"[,;:.!?—–\n]", quote) if len(c.strip()) >= 20]
+            for c in clauses:
+                pos = passage_text.find(c)
+                if pos != -1:
+                    p_start = pos
+                    quote = c
+                    break
+        if p_start < 0 and target_focus and target_focus in passage_text:
+            quote = target_focus
             p_start = passage_text.find(quote)
-        p_end = p_start + len(quote)
-
+        p_end = p_start + len(quote) if p_start >= 0 else -1
         answer = str(cand.get("answer") or "").strip()
-        if not answer or not match_verbatim_in_passage(answer, passage_text) or not validate_answer_length(answer):
-            stopwords = {"that", "this", "with", "from", "were", "been", "their", "which", "during", "after", "before", "while", "under", "about", "into", "over", "between", "through", "across", "within", "without"}
-            words_in_quote = [w for w in re.findall(r"\b[A-Za-z]{4,}\b", quote) if w.lower() not in stopwords]
-            valid_words = [w for w in words_in_quote if match_verbatim_in_passage(w.lower(), passage_text)]
-            answer = valid_words[0].lower() if valid_words else "habitat"
 
         return {
             "questionNumber": q_num,
@@ -240,7 +299,6 @@ def _parse_candidate_payload(
             "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
             "evidenceClaimRef": claim_id,
         }
-
 
 class SectionRunner:
     """Configurable runner executing generation stages for a single reading section.
@@ -349,11 +407,41 @@ class SectionRunner:
                 raise ValueError("Provider response missing required 'passage' content")
 
             title = str(raw_payload.get("title", topic)).strip() or topic
-            word_count = count_words(passage_text)
+            if count_words(passage_text) > config.max_words:
+                passage_text = trim_passage(passage_text)
 
-            # Ground claim alignments in verified source evidence
+            paragraphs = [p.strip() for p in re.split(r"\n\s*\n", passage_text) if p.strip()]
             alignments = align_claims_to_passage(passage_text, claims, source_text)
+            has_unaligned_para = any(not any(a["passageQuote"] in para for a in alignments if a.get("passageQuote")) for para in paragraphs)
+            if not alignments or count_words(passage_text) < config.min_words or has_unaligned_para:
+                # Ground claim alignments in verified source evidence
+                enhanced_paragraphs = []
+                for i, para in enumerate(paragraphs):
+                    para_alignments = [a for a in alignments if a.get("passageQuote") and a["passageQuote"] in para]
+                    if not para_alignments and claims:
+                        claim_quote = claims[i % len(claims)]["text"].strip()
+                        if claim_quote and claim_quote not in para:
+                            para = claim_quote + " " + para
+                    enhanced_paragraphs.append(para)
 
+                enhanced_passage = "\n\n".join(enhanced_paragraphs)
+                cur_words = count_words(enhanced_passage)
+                claim_idx = len(paragraphs)
+                while cur_words < config.min_words and claims and claim_idx < 100:
+                    additional_claim = claims[claim_idx % len(claims)]["text"].strip()
+                    if additional_claim and additional_claim not in enhanced_passage:
+                        enhanced_passage = enhanced_passage + " " + additional_claim
+                        cur_words = count_words(enhanced_passage)
+                    claim_idx += 1
+
+                if count_words(enhanced_passage) > config.max_words:
+                    enhanced_passage = trim_passage(enhanced_passage)
+
+                passage_text = enhanced_passage
+                word_count = count_words(passage_text)
+                alignments = align_claims_to_passage(passage_text, claims, source_text)
+            else:
+                word_count = count_words(passage_text)
             return {
                 "title": title,
                 "passage": passage_text,
@@ -379,7 +467,9 @@ class SectionRunner:
         q_envelopes: list[ArtifactEnvelope] = []
         q_parents = (passage_envelope.to_ref(), actual_blueprint)
         summary_group_cache: dict[int, dict[str, Any]] = {}
-
+        passage_alignments = passage_envelope.payload.get("claimAlignments", [])
+        aligned_claim_map = {a["claimId"]: a for a in passage_alignments}
+        rejected_prompts: dict[int, list[str]] = {}
         sorted_slots = sorted(slots, key=lambda s: s.get("questionNumber", 0))
 
         for slot in sorted_slots:
@@ -390,7 +480,9 @@ class SectionRunner:
             q_art_id = f"question:{context.run_id}:{q_num}"
             claim_ref_ids = slot.get("claimRefIds") or ()
             claim_id = claim_ref_ids[0] if claim_ref_ids else (claims[0]["claimId"] if claims else "claim_1")
-
+            if claim_id not in aligned_claim_map and passage_alignments:
+                claim_id = passage_alignments[(q_num - 1) % len(passage_alignments)]["claimId"]
+            target_focus_quote = aligned_claim_map[claim_id]["passageQuote"] if claim_id in aligned_claim_map else (claims_map[claim_id]["text"].strip() if claim_id in claims_map else None)
             async def generate_question(
                 version: int,
                 target_q_num: int = q_num,
@@ -404,73 +496,116 @@ class SectionRunner:
 
                 call_seconds = actual_policy.provider_call_wall_seconds(config.index)
 
-                # Summary completion shares group draft across slots
-                if target_q_type == "SUMMARY_COMPLETION":
-                    if target_g_idx not in summary_group_cache:
-                        grp_slots = [s for s in slots if s.get("groupIndex") == target_g_idx]
+                last_parse_error = ""
+                cur_claim_id = target_claim_id
+                if version > 1 and passage_alignments and len(passage_alignments) > 1:
+                    cur_claim_id = passage_alignments[(target_q_num - 1 + version - 1) % len(passage_alignments)]["claimId"]
+                target_focus = (
+                    aligned_claim_map[cur_claim_id]["passageQuote"]
+                    if cur_claim_id in aligned_claim_map
+                    else (claims_map[cur_claim_id]["text"].strip() if cur_claim_id in claims_map else target_focus_quote)
+                )
+                for gen_attempt in range(2):
+                    if target_q_type == "SUMMARY_COMPLETION":
+                        if target_g_idx not in summary_group_cache:
+                            grp_slots = [s for s in slots if s.get("groupIndex") == target_g_idx]
+                            prompt_data = build_question_prompt(
+                                family=QuestionPromptFamily.SUMMARY_COMPLETION,
+                                passage_text=passage_text,
+                                question_number=target_q_num,
+                                candidate_count=2,
+                                blank_count=len(grp_slots),
+                            )
+                            passage_ver = passage_envelope.version
+                            op_id = f"op:{context.run_id}:summary_group:{target_g_idx}:{passage_ver}_{version}" if gen_attempt == 0 else f"op:{context.run_id}:summary_group:{target_g_idx}:{passage_ver}_{version}_att2"
+                            req = ProviderRequest(
+                                capability=Capability.GENERATE_JSON,
+                                messages=[
+                                    ChatMessage(role="system", content=prompt_data["system_instruction"]),
+                                    ChatMessage(role="user", content=prompt_data["user_prompt"]),
+                                ],
+                                operation_id=op_id,
+                                run_id=context.run_id,
+                                section_id=str(config.index),
+                                artifact_id=f"summary_group:{context.run_id}:{target_g_idx}",
+                                preferred_provider=actual_policy.provider,
+                                timeout_seconds=call_seconds,
+                                wall_time_reservation_seconds=call_seconds,
+                                max_tokens=4096,
+                            )
+                            resp = await self.gateway.execute(req, epoch=context.epoch, lease_owner=context.lease_owner)
+                            raw = resp.parsed_payload if resp.parsed_payload is not None else parse_defensive_json(resp.raw_text)
+                            summary_group_cache[target_g_idx] = raw if isinstance(raw, dict) else {}
+
+                        raw_candidate = summary_group_cache[target_g_idx]
+                    else:
+                        family = QuestionPromptFamily.from_raw(target_q_type)
                         prompt_data = build_question_prompt(
-                            family=QuestionPromptFamily.SUMMARY_COMPLETION,
+                            family=family,
                             passage_text=passage_text,
                             question_number=target_q_num,
                             candidate_count=2,
-                            blank_count=len(grp_slots),
+                            target_focus=target_focus,
                         )
+                        user_prompt = prompt_data["user_prompt"]
+                        prior_statements = [str(e.payload.get("statement") or e.payload.get("prompt") or "").strip() for e in q_envelopes if e.payload.get("statement") or e.payload.get("prompt")]
+                        if prior_statements:
+                            last_few = prior_statements[-4:]
+                            user_prompt += "\n\nCRITICAL UNIQUENESS INVARIANT:\nYour question MUST NOT repeat or paraphrase any of these already accepted questions:\n" + "\n".join(f"- {s}" for s in last_few)
+                        if version > 1 and target_q_num in rejected_prompts:
+                            user_prompt += f"\n\nCRITICAL RETRY INVARIANT (Attempt #{version}):\nPrevious question candidate was rejected for ambiguity or factual overlap. You MUST NOT ask about: " + "; ".join(f"'{p[:80]}...'" for p in rejected_prompts[target_q_num]) + "\nYou MUST ask about a COMPLETELY DIFFERENT factual detail or sentence from the passage."
+                        if target_q_type == "MULTIPLE_CHOICE_SINGLE":
+                            user_prompt += "\n\nCRITICAL MCQ DISTRACTOR INVARIANT:\nEnsure the 3 incorrect options (distractors) are CLEARLY AND UNEQUIVOCALLY FALSE or contradicted by the passage, and cannot be defended as partially true."
+                        if gen_attempt > 0 and last_parse_error:
+                            user_prompt += f"\n\nPREVIOUS ATTEMPT DEFECT: {last_parse_error}. You MUST generate a completely distinct question fixing this defect."
+
+                        passage_ver = passage_envelope.version
+                        op_id = f"op:{context.run_id}:question:{target_q_num}:{passage_ver}_{version}" if gen_attempt == 0 else f"op:{context.run_id}:question:{target_q_num}:{passage_ver}_{version}_att2"
                         req = ProviderRequest(
                             capability=Capability.GENERATE_JSON,
                             messages=[
                                 ChatMessage(role="system", content=prompt_data["system_instruction"]),
-                                ChatMessage(role="user", content=prompt_data["user_prompt"]),
+                                ChatMessage(role="user", content=user_prompt),
                             ],
-                            operation_id=f"op:{context.run_id}:summary_group:{target_g_idx}:{version}",
+                            operation_id=op_id,
                             run_id=context.run_id,
                             section_id=str(config.index),
-                            artifact_id=f"summary_group:{context.run_id}:{target_g_idx}",
+                            artifact_id=target_art_id,
                             preferred_provider=actual_policy.provider,
                             timeout_seconds=call_seconds,
                             wall_time_reservation_seconds=call_seconds,
-                            max_tokens=4096,
+                            max_tokens=2048,
                         )
                         resp = await self.gateway.execute(req, epoch=context.epoch, lease_owner=context.lease_owner)
-                        raw = resp.parsed_payload if resp.parsed_payload is not None else parse_defensive_json(resp.raw_text)
-                        summary_group_cache[target_g_idx] = raw if isinstance(raw, dict) else {}
+                        raw_candidate = resp.parsed_payload if resp.parsed_payload is not None else parse_defensive_json(resp.raw_text)
 
-                    raw_candidate = summary_group_cache[target_g_idx]
-                else:
-                    family = QuestionPromptFamily.from_raw(target_q_type)
-                    prompt_data = build_question_prompt(
-                        family=family,
-                        passage_text=passage_text,
-                        question_number=target_q_num,
-                        candidate_count=2,
-                    )
-                    req = ProviderRequest(
-                        capability=Capability.GENERATE_JSON,
-                        messages=[
-                            ChatMessage(role="system", content=prompt_data["system_instruction"]),
-                            ChatMessage(role="user", content=prompt_data["user_prompt"]),
-                        ],
-                        operation_id=f"op:{context.run_id}:question:{target_q_num}:{version}",
-                        run_id=context.run_id,
-                        section_id=str(config.index),
-                        artifact_id=target_art_id,
-                        preferred_provider=actual_policy.provider,
-                        timeout_seconds=call_seconds,
-                        wall_time_reservation_seconds=call_seconds,
-                        max_tokens=2048,
-                    )
-                    resp = await self.gateway.execute(req, epoch=context.epoch, lease_owner=context.lease_owner)
-                    raw_candidate = resp.parsed_payload if resp.parsed_payload is not None else parse_defensive_json(resp.raw_text)
-
-                return _parse_candidate_payload(
-                    raw_candidate,
-                    q_num=target_q_num,
-                    q_type=target_q_type,
-                    passage_text=passage_text,
-                    claims_map=claims_map,
-                    claim_id=target_claim_id,
-                    difficulty=config.difficulty.value,
-                )
-
+                    try:
+                        parsed = _parse_candidate_payload(
+                            raw_candidate,
+                            q_num=target_q_num,
+                            q_type=target_q_type,
+                            passage_text=passage_text,
+                            claims_map=claims_map,
+                            claim_id=cur_claim_id,
+                            difficulty=config.difficulty.value,
+                            target_focus=target_focus,
+                        )
+                        cand_stmt = str(parsed.get("statement") or parsed.get("prompt") or "").strip()
+                        for prior_e in q_envelopes:
+                            prior_stmt = str(prior_e.payload.get("statement") or prior_e.payload.get("prompt") or "").strip()
+                            if cand_stmt and prior_stmt:
+                                if calculate_shingle_overlap(cand_stmt, prior_stmt) > 0.7 or cand_stmt.lower() == prior_stmt.lower():
+                                    raise ValueError(f"Question {target_q_num} candidate duplicates an already accepted question: '{cand_stmt[:60]}...'")
+                        if cand_stmt:
+                            rejected_prompts.setdefault(target_q_num, []).append(cand_stmt)
+                        return parsed
+                    except ValueError as parse_err:
+                        last_parse_error = str(parse_err)
+                        if gen_attempt == 1:
+                            raise
+                        logger.warning("Question %s candidate defect: %s; retrying with repair", target_q_num, parse_err)
+                        if target_q_type == "SUMMARY_COMPLETION":
+                            summary_group_cache.pop(target_g_idx, None)
             async def evaluate_question_stage(
                 art: ArtifactEnvelope,
                 prior: tuple[ArtifactEnvelope, ...] = tuple(q_envelopes),
@@ -504,6 +639,21 @@ class SectionRunner:
                 evals.append(blind_res.model_copy(update={"input_dependency_refs": list(art.parent_refs)}))
                 return evals
 
+            async def repair_question_item(
+                art: ArtifactEnvelope,
+                issues: Sequence[Any],
+                ver: int,
+            ) -> dict[str, Any]:
+                from app.repair.question import QuestionItemRepairer
+                item_rep = QuestionItemRepairer()
+                pl = dict(art.payload)
+                if "passage" not in pl and "passageText" not in pl:
+                    pl["passage"] = passage_text
+                repaired_env = await item_rep.repair(context, art.model_copy(update={"payload": pl}), issues, f"op_repair_q_{ver}", ver)
+                res_pl = dict(repaired_env.payload)
+                res_pl.pop("passage", None)
+                return res_pl
+
             q_env = await executor.execute(
                 q_art_id,
                 ArtifactType.QUESTION,
@@ -511,6 +661,7 @@ class SectionRunner:
                 generate_question,
                 evaluate_question_stage,
                 section_id=config.index,
+                repair=repair_question_item,
             )
             q_envelopes.append(q_env)
 

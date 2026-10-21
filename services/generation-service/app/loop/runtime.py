@@ -292,7 +292,8 @@ class BoundedLoopRuntime:
                 self._expected_head_version = self._accepted_head.version
                 self.context.cursor.current_state = (
                     LoopState.DRAFTING
-                    if self.context.input_dependencies != tuple(self._accepted_head.parent_refs)
+                    if (self.context.input_dependencies != tuple(self._accepted_head.parent_refs)
+                        or any(i.isStale for i in state.artifacts if i.artifactId == self.context.target_artifact_id))
                     else LoopState.EVALUATING
                 )
                 if checkpoints:
