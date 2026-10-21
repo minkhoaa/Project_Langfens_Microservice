@@ -100,7 +100,13 @@ def project_to_student_visible(question_data: Any) -> StudentVisibleQuestion:
     if shared_context is not None:
         shared_context = str(shared_context).strip()
 
-    raw_options = data.get("options") or data.get("headings")
+    raw_options = (
+        data.get("options")
+        or data.get("headings")
+        or data.get("features")
+        or data.get("endings")
+        or data.get("categories")
+    )
     student_options: Optional[List[StudentVisibleOption]] = None
     if raw_options and isinstance(raw_options, (list, tuple, Sequence)):
         student_options = []

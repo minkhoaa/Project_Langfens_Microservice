@@ -170,6 +170,28 @@ def test_zero_leakage_serialization_all_19_types(family: QuestionPromptFamily):
         assert secret not in envelope.lower(), f"Leak of '{secret}' detected in secure envelope for family {family}!"
 
 
+def test_project_to_student_visible_alternative_options_keys():
+    for field_name, fam in [
+        ("headings", QuestionPromptFamily.MATCHING_HEADING),
+        ("features", QuestionPromptFamily.MATCHING_FEATURES),
+        ("endings", QuestionPromptFamily.MATCHING_ENDINGS),
+        ("categories", QuestionPromptFamily.CLASSIFICATION),
+    ]:
+        cand = {
+            "questionNumber": 1,
+            "questionType": fam.value,
+            "prompt": "Test matching prompt",
+            "instructions": "Match the items.",
+            field_name: [
+                {"key": "A", "text": "Option 1"},
+                {"key": "B", "text": "Option 2"},
+            ],
+        }
+        sv = project_to_student_visible(cand)
+        assert sv.options is not None
+        assert len(sv.options) == 2
+        assert sv.options[0].key == "A"
+        assert sv.options[0].text == "Option 1"
 # =====================================================================
 # 2. Answer Comparison Normalizers Across All 19 Types
 # =====================================================================
