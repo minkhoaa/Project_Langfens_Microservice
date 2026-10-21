@@ -619,10 +619,15 @@ class SectionRunner:
                 ))
 
                 # 2. Independent Blind Solver & Adversarial evaluations
+                # When evaluating a repaired question (version > 1), provide a fresh cache
+                # to guarantee blind solving re-runs fresh without hitting stale V1 entries.
+                from app.solvers.cache import BlindSolverCache
+                q_cache = BlindSolverCache() if art.version > 1 else None
                 blind_evaluator = BlindSolverEvaluator(
                     gateway=self.gateway,
                     solver_provider=actual_policy.provider,
                     adversary_provider=actual_policy.provider,
+                    cache=q_cache,
                 )
                 blind_input = build_blind_solver_input(
                     passage_text=passage_text,
