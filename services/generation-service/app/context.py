@@ -29,7 +29,7 @@ def _extract_field(candidate: Any, *field_names: str, default: Any = None) -> An
     """Helper to extract field value from candidate dict or Pydantic model by multiple name variations."""
     for name in field_names:
         if isinstance(candidate, dict):
-            if name in candidate:
+            if name in candidate and candidate[name] is not None:
                 return candidate[name]
         elif hasattr(candidate, name):
             val = getattr(candidate, name)
@@ -93,7 +93,12 @@ def validate_candidate_slot(
                 )
             )
         elif norm_ans == "NOT GIVEN":
-            if not absence_raw or not isinstance(absence_raw, (dict, object)) or (isinstance(absence_raw, dict) and not absence_raw.get("is_absent", False)):
+            is_absent = (
+                absence_raw.get("is_absent", False)
+                if isinstance(absence_raw, dict)
+                else getattr(absence_raw, "is_absent", getattr(absence_raw, "absence_confirmed", False))
+            )
+            if not is_absent:
                 issues.append(
                     ContextValidationIssue(
                         "ERR_NOT_GIVEN_ABSENCE_MISSING",
@@ -101,7 +106,6 @@ def validate_candidate_slot(
                         "absence_assessment",
                     )
                 )
-
     elif resolved_family == QuestionPromptFamily.YES_NO_NOT_GIVEN:
         if norm_ans not in ("YES", "NO", "NOT GIVEN"):
             issues.append(
@@ -112,7 +116,12 @@ def validate_candidate_slot(
                 )
             )
         elif norm_ans == "NOT GIVEN":
-            if not absence_raw or not isinstance(absence_raw, (dict, object)) or (isinstance(absence_raw, dict) and not absence_raw.get("is_absent", False)):
+            is_absent = (
+                absence_raw.get("is_absent", False)
+                if isinstance(absence_raw, dict)
+                else getattr(absence_raw, "is_absent", getattr(absence_raw, "absence_confirmed", False))
+            )
+            if not is_absent:
                 issues.append(
                     ContextValidationIssue(
                         "ERR_NOT_GIVEN_ABSENCE_MISSING",
@@ -120,7 +129,6 @@ def validate_candidate_slot(
                         "absence_assessment",
                     )
                 )
-
     # Completion types requiring <= 3 words and blank marker
     elif resolved_family in (
         QuestionPromptFamily.SENTENCE_COMPLETION,
@@ -138,16 +146,23 @@ def validate_candidate_slot(
                     "answer",
                 )
             )
-        if resolved_family == QuestionPromptFamily.SENTENCE_COMPLETION:
-            if "______" not in prompt and "[blank]" not in prompt.lower() and "[1]" not in prompt:
+        if resolved_family in (
+            QuestionPromptFamily.SENTENCE_COMPLETION,
+            QuestionPromptFamily.TABLE_COMPLETION,
+            QuestionPromptFamily.NOTE_COMPLETION,
+            QuestionPromptFamily.FORM_COMPLETION,
+        ):
+            has_blank_marker = bool(
+                re.search(r"(_{3,}|\[blank\]|\[\d+\]|\(\d+\)|<blank>)", prompt, re.IGNORECASE)
+            )
+            if not has_blank_marker:
                 issues.append(
                     ContextValidationIssue(
                         "ERR_BLANK_MARKER_MISSING",
-                        "Sentence completion prompt missing blank marker '______'",
+                        f"{resolved_family.value} prompt missing blank marker ('______', '[blank]', or '[1]')",
                         "prompt",
                     )
                 )
-
     elif resolved_family == QuestionPromptFamily.SHORT_ANSWER:
         w_count = count_words(answer)
         if w_count > 3:
@@ -230,7 +245,8 @@ def validate_candidate_slot(
 
     # Matching Headings
     elif resolved_family == QuestionPromptFamily.MATCHING_HEADING:
-        opts = options_raw or []
+        headings_raw = _extract_field(candidate, "headings", "options", default=None)
+        opts = headings_raw or []
         if len(opts) < 3:
             issues.append(
                 ContextValidationIssue(
@@ -239,14 +255,14 @@ def validate_candidate_slot(
                     "headings",
                 )
             )
-
     # Matching Features, Endings, Classification
     elif resolved_family in (
         QuestionPromptFamily.MATCHING_FEATURES,
         QuestionPromptFamily.MATCHING_ENDINGS,
         QuestionPromptFamily.CLASSIFICATION,
     ):
-        opts = options_raw or []
+        opts_raw = _extract_field(candidate, "options", "features", "endings", "categories", default=None)
+        opts = opts_raw or []
         if len(opts) < 2:
             issues.append(
                 ContextValidationIssue(
@@ -255,7 +271,6 @@ def validate_candidate_slot(
                     "options",
                 )
             )
-
     # Flow Chart
     elif resolved_family == QuestionPromptFamily.FLOW_CHART:
         flow_steps = _extract_field(candidate, "flow_steps", "flowSteps", default=None)
@@ -276,7 +291,19 @@ def validate_candidate_slot(
                     "answer",
                 )
             )
-
+        # Blank marker validation for FLOW_CHART
+        prompt_and_steps = prompt + " " + " ".join(str(s) for s in (flow_steps or []))
+        has_blank_marker = bool(
+            re.search(r"(_{3,}|\[blank\]|\[\d+\]|\(\d+\)|<blank>)", prompt_and_steps, re.IGNORECASE)
+        )
+        if not has_blank_marker:
+            issues.append(
+                ContextValidationIssue(
+                    "ERR_BLANK_MARKER_MISSING",
+                    "FLOW_CHART prompt or flow_steps missing blank marker ('______', '[blank]', or '[1]')",
+                    "prompt",
+                )
+            )
     # Diagram Label
     elif resolved_family == QuestionPromptFamily.DIAGRAM_LABEL:
         callout = _extract_field(candidate, "callout_label", "calloutLabel", default=None)

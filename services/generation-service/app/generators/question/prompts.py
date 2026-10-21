@@ -492,12 +492,18 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
     QuestionPromptFamily.MATCHING_HEADING: (
         "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
         "Generate Matching Heading candidates for question #{question_number}.\n"
+        "Include a list of plausible headings (at least 3).\n"
         "Output JSON format:\n"
         "{{\n"
         '  "candidates": [\n'
         "    {{\n"
         '      "prompt": "Paragraph {question_number}",\n'
         '      "answer": "i",\n'
+        '      "headings": [\n'
+        '        "Heading i: First potential topic",\n'
+        '        "Heading ii: Second potential topic",\n'
+        '        "Heading iii: Third potential topic"\n'
+        '      ],\n'
         '      "evidenceQuote": "verbatim topic sentence"\n'
         "    }}\n"
         "  ]\n"
@@ -520,12 +526,17 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
     QuestionPromptFamily.MATCHING_FEATURES: (
         "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
         "Generate Matching Features candidates for question #{question_number}.\n"
+        "Include options list representing researchers, features, or theories (at least 2).\n"
         "Output JSON format:\n"
         "{{\n"
         '  "candidates": [\n'
         "    {{\n"
         '      "prompt": "Finding or theory description",\n'
         '      "answer": "A",\n'
+        '      "options": [\n'
+        '        {{"key": "A", "text": "Feature or Person A"}},\n'
+        '        {{"key": "B", "text": "Feature or Person B"}}\n'
+        '      ],\n'
         '      "evidenceQuote": "verbatim researcher finding quote"\n'
         "    }}\n"
         "  ]\n"
@@ -534,12 +545,17 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
     QuestionPromptFamily.MATCHING_ENDINGS: (
         "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
         "Generate Matching Sentence Endings candidates for question #{question_number}.\n"
+        "Include options list representing sentence endings (at least 2).\n"
         "Output JSON format:\n"
         "{{\n"
         '  "candidates": [\n'
         "    {{\n"
         '      "prompt": "Sentence beginning statement...",\n'
         '      "answer": "A",\n'
+        '      "options": [\n'
+        '        {{"key": "A", "text": "Ending completion A"}},\n'
+        '        {{"key": "B", "text": "Ending completion B"}}\n'
+        '      ],\n'
         '      "evidenceQuote": "verbatim sentence from passage"\n'
         "    }}\n"
         "  ]\n"
@@ -548,12 +564,18 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
     QuestionPromptFamily.CLASSIFICATION: (
         "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
         "Generate Classification candidates for question #{question_number}.\n"
+        "Include options list representing classification categories (at least 2).\n"
         "Output JSON format:\n"
         "{{\n"
         '  "candidates": [\n'
         "    {{\n"
         '      "prompt": "Characteristic or statement to classify",\n'
         '      "answer": "A",\n'
+        '      "options": [\n'
+        '        {{"key": "A", "text": "Category A"}},\n'
+        '        {{"key": "B", "text": "Category B"}},\n'
+        '        {{"key": "C", "text": "Category C"}}\n'
+        '      ],\n'
         '      "evidenceQuote": "verbatim sentence classifying the item"\n'
         "    }}\n"
         "  ]\n"

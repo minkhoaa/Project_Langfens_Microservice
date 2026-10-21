@@ -54,10 +54,29 @@ def test_render_question_prompt_all_19_types():
             assert "label" in prompt_data.lower() or "callout" in prompt_data.lower()
             assert "part" in prompt_data.lower() or "diagram" in prompt_data.lower()
 
+def test_matching_and_classification_prompt_schemas_include_options_and_headings():
+    """Verify prompt templates for matching and classification include options or headings in JSON schema."""
+    # 1. Matching Headings
+    prompt_heading = render_question_prompt(QuestionPromptFamily.MATCHING_HEADING, 1, SAMPLE_PASSAGE)
+    assert '"headings":' in prompt_heading
+    assert "Heading i:" in prompt_heading
 
+    # 2. Matching Features
+    prompt_features = render_question_prompt(QuestionPromptFamily.MATCHING_FEATURES, 2, SAMPLE_PASSAGE)
+    assert '"options":' in prompt_features
+    assert "Feature or Person" in prompt_features
+
+    # 3. Matching Endings
+    prompt_endings = render_question_prompt(QuestionPromptFamily.MATCHING_ENDINGS, 3, SAMPLE_PASSAGE)
+    assert '"options":' in prompt_endings
+    assert "Ending completion" in prompt_endings
+
+    # 4. Classification
+    prompt_class = render_question_prompt(QuestionPromptFamily.CLASSIFICATION, 4, SAMPLE_PASSAGE)
+    assert '"options":' in prompt_class
+    assert "Category A" in prompt_class
 def test_validate_candidate_slot_true_false_and_yes_no():
     """Verify TFNG and YNNG validation, including NOT GIVEN absence assessment."""
-    # Valid TRUE
     tf_valid = {
         "prompt": "The Metropolitan Railway began operations in the 19th century.",
         "answer": "TRUE",
@@ -95,11 +114,40 @@ def test_validate_candidate_slot_true_false_and_yes_no():
     }
     issues = validate_candidate_slot(tf_ng_no_absence, QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN)
     assert any("absence" in str(i).lower() for i in issues)
+    # NOT GIVEN with Pydantic AbsenceAssessment where is_absent=False must be rejected
+    from pydantic import BaseModel
 
+    class MockAbsenceAssessment(BaseModel):
+        is_absent: bool = False
+        absence_reason: str = "Present in text"
 
+    tf_ng_falsy_obj = {
+        "prompt": "Charles Pearson was knighted for his engineering achievements.",
+        "answer": "NOT GIVEN",
+        "absence_assessment": MockAbsenceAssessment(is_absent=False),
+    }
+    issues_falsy = validate_candidate_slot(tf_ng_falsy_obj, QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN)
+    assert any("absence assessment" in str(i).lower() for i in issues_falsy)
+
+    # NOT GIVEN with Pydantic AbsenceAssessment where is_absent=True must pass
+    tf_ng_truthy_obj = {
+        "prompt": "Charles Pearson was knighted for his engineering achievements.",
+        "answer": "NOT GIVEN",
+        "absence_assessment": MockAbsenceAssessment(is_absent=True, absence_reason="Not found"),
+    }
+    issues_truthy = validate_candidate_slot(tf_ng_truthy_obj, QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN)
+    assert len(issues_truthy) == 0
+
+    # Also test YNNG with Pydantic AbsenceAssessment
+    yn_ng_falsy_obj = {
+        "prompt": "Charles Pearson was knighted for his engineering achievements.",
+        "answer": "NOT GIVEN",
+        "absence_assessment": MockAbsenceAssessment(is_absent=False),
+    }
+    issues_yn = validate_candidate_slot(yn_ng_falsy_obj, QuestionPromptFamily.YES_NO_NOT_GIVEN)
+    assert any("absence assessment" in str(i).lower() for i in issues_yn)
 def test_validate_candidate_slot_completions():
     """Verify sentence, summary, note, and form completion validation (<=3 words, blank marker)."""
-    # Valid Sentence Completion
     sc_valid = {
         "prompt": "The first underground railway operated using ______ locomotives.",
         "answer": "steam",
@@ -122,11 +170,61 @@ def test_validate_candidate_slot_completions():
     }
     issues = validate_candidate_slot(sc_too_long, QuestionPromptFamily.SENTENCE_COMPLETION)
     assert any("3 words" in str(i) for i in issues)
+    # Verify blank marker requirements across ALL completion families
+    completion_families = [
+        QuestionPromptFamily.SENTENCE_COMPLETION,
+        QuestionPromptFamily.TABLE_COMPLETION,
+        QuestionPromptFamily.NOTE_COMPLETION,
+        QuestionPromptFamily.FORM_COMPLETION,
+    ]
+    for comp_fam in completion_families:
+        # Missing blank marker
+        cand_no_blank = {
+            "prompt": f"Summary sentence for {comp_fam.value} without marker.",
+            "answer": "valid word",
+        }
+        iss = validate_candidate_slot(cand_no_blank, comp_fam)
+        assert any("blank marker" in str(i).lower() for i in iss), f"Failed for {comp_fam}"
 
+        # Valid with ______
+        cand_with_underscores = {
+            "prompt": f"Summary sentence for {comp_fam.value} with ______ marker.",
+            "answer": "valid word",
+        }
+        assert len(validate_candidate_slot(cand_with_underscores, comp_fam)) == 0
 
+        # Valid with [blank]
+        cand_with_bracket = {
+            "prompt": f"Summary sentence for {comp_fam.value} with [blank] marker.",
+            "answer": "valid word",
+        }
+        assert len(validate_candidate_slot(cand_with_bracket, comp_fam)) == 0
+
+        # Valid with [1]
+        cand_with_num = {
+            "prompt": f"Summary sentence for {comp_fam.value} with [1] marker.",
+            "answer": "valid word",
+        }
+        assert len(validate_candidate_slot(cand_with_num, comp_fam)) == 0
+
+    # FLOW_CHART missing blank marker
+    flow_no_blank = {
+        "prompt": "Complete the flow chart below.",
+        "answer": "steam engines",
+        "flow_steps": ["Step 1 initial stage", "Step 2 final stage"],
+    }
+    flow_issues = validate_candidate_slot(flow_no_blank, QuestionPromptFamily.FLOW_CHART)
+    assert any("blank marker" in str(i).lower() for i in flow_issues)
+
+    # FLOW_CHART with blank marker in flow_steps
+    flow_with_blank = {
+        "prompt": "Complete the flow chart below.",
+        "answer": "steam engines",
+        "flow_steps": ["Step 1 initial stage", "Step 2 final stage with ______"],
+    }
+    assert len(validate_candidate_slot(flow_with_blank, QuestionPromptFamily.FLOW_CHART)) == 0
 def test_validate_candidate_slot_mcq_single_and_multiple():
     """Verify Multiple Choice options count, distinctness, and key validation."""
-    # Valid MCQ Single
     mcq_valid = {
         "prompt": "Who proposed the construction of London's subterranean railway?",
         "answer": "B",
