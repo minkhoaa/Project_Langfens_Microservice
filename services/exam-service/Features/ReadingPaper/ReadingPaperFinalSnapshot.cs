@@ -79,7 +79,7 @@ public static class ReadingPaperFinalSnapshot
             var passage = Ref(section.Payload, "passageRef");
             var questions = Refs(section.Payload, "questionRefs");
             if (passage != passageRefs[i] || Ref(section.Payload, "blueprintRef") != blueprint
-                || questions.Count != ReadingPaperRules.Counts[i].Sum())
+                || questions.Count < 1)
                 throw Invalid("Section-local question/passage/blueprint references are inconsistent");
             ExactRefs(section.ParentRefs, new[] { passage, blueprint }.Concat(questions));
             expectedQuestionRefs.AddRange(questions);
@@ -181,11 +181,30 @@ public static class ReadingPaperFinalSnapshot
             if (e.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String) return value.GetString()!;
         return "";
     }
-    private static string CanonicalType(string type) => type.Replace("_", "").ToUpperInvariant() switch
+    private static string CanonicalType(string type) => type.Replace("_", "").Replace("-", "").ToUpperInvariant() switch
     {
-        "TRUEFALSENOTGIVEN" => "TRUE_FALSE_NOT_GIVEN", "YESNONOTGIVEN" => "YES_NO_NOT_GIVEN",
-        "MULTIPLECHOICESINGLE" => "MULTIPLE_CHOICE_SINGLE", "SENTENCECOMPLETION" => "SENTENCE_COMPLETION",
-        "SUMMARYCOMPLETION" => "SUMMARY_COMPLETION", "SHORTANSWER" => "SHORT_ANSWER", _ => type
+        "TRUEFALSENOTGIVEN" => "TRUE_FALSE_NOT_GIVEN",
+        "YESNONOTGIVEN" => "YES_NO_NOT_GIVEN",
+        "MULTIPLECHOICESINGLE" => "MULTIPLE_CHOICE_SINGLE",
+        "MULTIPLECHOICEMULTIPLE" => "MULTIPLE_CHOICE_MULTIPLE",
+        "MULTIPLECHOICESINGLEIMAGE" => "MULTIPLE_CHOICE_SINGLE_IMAGE",
+        "SENTENCECOMPLETION" => "SENTENCE_COMPLETION",
+        "SUMMARYCOMPLETION" => "SUMMARY_COMPLETION",
+        "SUMMARYCOMPLETIONBOX" or "SUMMARYBOX" => "SUMMARY_COMPLETION_BOX",
+        "SHORTANSWER" => "SHORT_ANSWER",
+        "MATCHINGHEADING" or "MATCHINGHEADINGS" => "MATCHING_HEADING",
+        "MATCHINGINFORMATION" => "MATCHING_INFORMATION",
+        "MATCHINGFEATURES" => "MATCHING_FEATURES",
+        "MATCHINGENDINGS" or "MATCHINGSENTENCEENDINGS" => "MATCHING_ENDINGS",
+        "TABLECOMPLETION" => "TABLE_COMPLETION",
+        "FLOWCHART" or "FLOWCHARTCOMPLETION" => "FLOW_CHART",
+        "DIAGRAMLABEL" or "DIAGRAMLABELING" => "DIAGRAM_LABEL",
+        "MAPLABEL" => "MAP_LABEL",
+        "NOTECOMPLETION" => "NOTE_COMPLETION",
+        "FORMCOMPLETION" => "FORM_COMPLETION",
+        "CLASSIFICATION" => "CLASSIFICATION",
+        "CHOOSINGTITLE" or "CHOOSINGATITLE" => "CHOOSING_TITLE",
+        _ => type
     };
     private static CheckpointValidationException Invalid(string message) => new(409, message);
 }

@@ -313,14 +313,16 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
         for (var i = 0; i < sections.Count; i++)
         {
             var sec = sections[i];
+            // Check if this matches legacy 2-group preset
+            var isLegacyPreset = sections.Count <= ReadingPaperRules.Types.Length
+                && sections.All(s => s.Groups.Count == 2);
+            var expectedGroups = isLegacyPreset && ReadingPaperRules.Types.Length > i ? ReadingPaperRules.Types[i] : Array.Empty<string>();
             var normGroups = new List<ReadingGeneratedGroup>();
-            var expectedGroups = ReadingPaperRules.Types.Length > i ? ReadingPaperRules.Types[i] : Array.Empty<string>();
 
             for (var g = 0; g < sec.Groups.Count; g++)
             {
                 var grp = sec.Groups[g];
-                var expectedType = expectedGroups.Length > g ? expectedGroups[g] : GetCanonicalGroupType(grp.Type);
-                var normType = expectedType;
+                var normType = (isLegacyPreset && expectedGroups.Length > g) ? expectedGroups[g] : GetCanonicalGroupType(grp.Type);
                 var instruction = !string.IsNullOrWhiteSpace(grp.Instruction) ? grp.Instruction : GetGroupInstruction(normType);
 
                 var normQuestions = new List<ReadingGeneratedQuestion>();
@@ -483,15 +485,30 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
 
     private static string GetCanonicalGroupType(string rawType)
     {
-        var norm = rawType.Replace("_", "").Replace(" ", "").ToUpperInvariant();
+        var norm = rawType.Replace("_", "").Replace(" ", "").Replace("-", "").ToUpperInvariant();
         return norm switch
         {
             "TRUEFALSENOTGIVEN" or "TFNG" => "TRUE_FALSE_NOT_GIVEN",
             "YESNONOTGIVEN" or "YNNG" => "YES_NO_NOT_GIVEN",
             "MULTIPLECHOICESINGLE" or "MCQ" or "MULTIPLECHOICE" => "MULTIPLE_CHOICE_SINGLE",
+            "MULTIPLECHOICEMULTIPLE" => "MULTIPLE_CHOICE_MULTIPLE",
+            "MULTIPLECHOICESINGLEIMAGE" => "MULTIPLE_CHOICE_SINGLE_IMAGE",
             "SENTENCECOMPLETION" => "SENTENCE_COMPLETION",
             "SUMMARYCOMPLETION" => "SUMMARY_COMPLETION",
+            "SUMMARYCOMPLETIONBOX" or "SUMMARYBOX" => "SUMMARY_COMPLETION_BOX",
             "SHORTANSWER" => "SHORT_ANSWER",
+            "MATCHINGHEADING" or "MATCHINGHEADINGS" => "MATCHING_HEADING",
+            "MATCHINGINFORMATION" => "MATCHING_INFORMATION",
+            "MATCHINGFEATURES" => "MATCHING_FEATURES",
+            "MATCHINGENDINGS" or "MATCHINGSENTENCEENDINGS" => "MATCHING_ENDINGS",
+            "TABLECOMPLETION" => "TABLE_COMPLETION",
+            "FLOWCHART" or "FLOWCHARTCOMPLETION" => "FLOW_CHART",
+            "DIAGRAMLABEL" or "DIAGRAMLABELING" => "DIAGRAM_LABEL",
+            "MAPLABEL" => "MAP_LABEL",
+            "NOTECOMPLETION" => "NOTE_COMPLETION",
+            "FORMCOMPLETION" => "FORM_COMPLETION",
+            "CLASSIFICATION" => "CLASSIFICATION",
+            "CHOOSINGTITLE" or "CHOOSINGATITLE" => "CHOOSING_TITLE",
             _ => rawType.ToUpperInvariant()
         };
     }
@@ -535,7 +552,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                 Title = generated.Title,
                 PassageMd = generated.Passage + $"\n\nSource adapted from: {generated.Source.Authors ?? "Article authors"}, "
                     + $"{generated.Source.Title}. {generated.Source.Url}. License: {generated.Source.License}.",
-                InstructionsMd = $"Read the passage and answer questions {1 + ReadingPaperRules.Counts.Take(i).Sum(c => c.Sum())}–{ReadingPaperRules.Counts.Take(i + 1).Sum(c => c.Sum())}.",
+                InstructionsMd = $"Read the passage and answer questions {generated.Groups.SelectMany(g => g.Questions).Min(q => q.Number)}–{generated.Groups.SelectMany(g => g.Questions).Max(q => q.Number)}.",
                 SourcePmcid = generated.Source.Pmcid, SourceTitle = generated.Source.Title,
                 SourceAuthors = generated.Source.Authors,
                 SourceDoi = generated.Source.Doi, SourceUrl = generated.Source.Url,
@@ -557,16 +574,70 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                         Type = groupData.Type, Skill = "READING", Difficulty = i + 1,
                         PromptMd = item.Prompt, ExplanationMd = item.Explanation + "\n\nEvidence: “" + item.EvidenceQuote + "”"
                     };
-                    if (groupData.Type is "SENTENCE_COMPLETION" or "SUMMARY_COMPLETION")
+                    var type = groupData.Type;
+                    if (type is "SENTENCE_COMPLETION" or "SUMMARY_COMPLETION" or "TABLE_COMPLETION"
+                        or "NOTE_COMPLETION" or "FORM_COMPLETION" or "SUMMARY_COMPLETION_BOX"
+                        or "DIAGRAM_LABEL" or "FLOW_CHART" or "MAP_LABEL")
+                    {
                         question.BlankAcceptTexts = new Dictionary<string, string[]?> { [item.Number.ToString()] = [item.Answer] };
-                    else if (groupData.Type == "SHORT_ANSWER")
+                        if (item.Options.Count > 0)
+                        {
+                            question.Options = item.Options.Select((option, idx) => new ExamOption
+                            {
+                                Id = Guid.NewGuid(), Question = question, Idx = idx + 1,
+                                ContentMd = option, IsCorrect = option == item.Answer || option.StartsWith(item.Answer + ".", StringComparison.OrdinalIgnoreCase)
+                            }).ToList();
+                        }
+                    }
+                    else if (type == "SHORT_ANSWER")
+                    {
                         question.ShortAnswerAcceptTexts = [item.Answer];
+                        question.BlankAcceptTexts = new Dictionary<string, string[]?> { [item.Number.ToString()] = [item.Answer] };
+                    }
+                    else if (type is "MATCHING_HEADING" or "MATCHING_INFORMATION" or "MATCHING_FEATURES"
+                        or "MATCHING_ENDINGS" or "CLASSIFICATION")
+                    {
+                        var matchLabel = item.Options.FirstOrDefault(o => o.StartsWith(item.Answer + ".", StringComparison.OrdinalIgnoreCase) || o == item.Answer) ?? item.Answer;
+                        question.MatchPairs = new Dictionary<string, string[]?>
+                        {
+                            [item.Number.ToString()] = [item.Answer, matchLabel]
+                        };
+                        if (item.Options.Count > 0)
+                        {
+                            question.Options = item.Options.Select((option, idx) => new ExamOption
+                            {
+                                Id = Guid.NewGuid(), Question = question, Idx = idx + 1,
+                                ContentMd = option, IsCorrect = option == item.Answer || option.StartsWith(item.Answer + ".", StringComparison.OrdinalIgnoreCase)
+                            }).ToList();
+                        }
+                    }
+                    else if (type is "MULTIPLE_CHOICE_SINGLE" or "CHOOSING_TITLE" or "MULTIPLE_CHOICE_SINGLE_IMAGE")
+                    {
+                        question.Options = item.Options.Select((option, idx) => new ExamOption
+                        {
+                            Id = Guid.NewGuid(), Question = question, Idx = idx + 1,
+                            ContentMd = option, IsCorrect = option == item.Answer || (item.Answer.Length == 1 && option.StartsWith($"{item.Answer}.", StringComparison.OrdinalIgnoreCase))
+                        }).ToList();
+                    }
+                    else if (type == "MULTIPLE_CHOICE_MULTIPLE")
+                    {
+                        var correctTokens = item.Answer.Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        question.Options = item.Options.Select((option, idx) => new ExamOption
+                        {
+                            Id = Guid.NewGuid(), Question = question, Idx = idx + 1,
+                            ContentMd = option,
+                            IsCorrect = correctTokens.Any(token => option == token || (token.Length == 1 && option.StartsWith($"{token}.", StringComparison.OrdinalIgnoreCase)))
+                        }).ToList();
+                    }
                     else
+                    {
+                        // Default choice / boolean options (TRUE_FALSE_NOT_GIVEN, YES_NO_NOT_GIVEN, etc.)
                         question.Options = item.Options.Select((option, idx) => new ExamOption
                         {
                             Id = Guid.NewGuid(), Question = question, Idx = idx + 1,
                             ContentMd = option, IsCorrect = option == item.Answer
                         }).ToList();
+                    }
                     group.Questions.Add(question);
                     section.Questions.Add(question);
                 }
