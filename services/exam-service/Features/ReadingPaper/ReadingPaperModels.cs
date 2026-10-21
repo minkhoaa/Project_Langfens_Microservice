@@ -35,7 +35,7 @@ public static class ReadingPaperRules
 
     public static void Validate(ReadingGeneratedSection section, int? sectionNumber = null, int? startingQuestionNumber = null)
         => Validate([section], sectionNumber, startingQuestionNumber);
-    private static readonly HashSet<string> KnownQuestionFamilies = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly HashSet<string> KnownQuestionFamilies = new(StringComparer.OrdinalIgnoreCase)
     {
         "TRUE_FALSE_NOT_GIVEN",
         "YES_NO_NOT_GIVEN",

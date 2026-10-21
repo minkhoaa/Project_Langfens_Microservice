@@ -292,4 +292,143 @@ public class ReadingPaperDynamicRulesTests
         Assert.Single(q15.Options, o => o.IsCorrect);
         Assert.Equal("A. hyperspectral cameras", q15.Options.First(o => o.IsCorrect).ContentMd);
     }
+
+    [Fact]
+    public void BuildExam_DoesNotOverwriteDynamicTypes_WhenSectionHasTwoGroups()
+    {
+        // Arrange: 3 sections, each with exactly 2 groups (which triggered legacy preset detection),
+        // but with non-legacy dynamic question families: MATCHING_HEADING and FLOW_CHART in Section 1.
+        var sec1Q = new List<ReadingGeneratedQuestion>();
+        for (var i = 1; i <= 7; i++)
+        {
+            sec1Q.Add(new ReadingGeneratedQuestion(
+                i,
+                $"Paragraph {i}",
+                $"Heading {i}",
+                new List<string> { "Heading 1", "Heading 2", "Heading 3", "Heading 4", "Heading 5", "Heading 6", "Heading 7" },
+                "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities.",
+                $"Detailed explanation for heading match item {i} exceeding 25 chars."
+            ));
+        }
+        for (var i = 8; i <= 14; i++)
+        {
+            sec1Q.Add(new ReadingGeneratedQuestion(
+                i,
+                $"Flow chart step completion item {i} describing vent flow",
+                "hydrogen sulfide",
+                new List<string>(),
+                "Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy.",
+                $"Detailed explanation for flow chart step {i} exceeding 25 chars."
+            ));
+        }
+
+        var sec2Q = new List<ReadingGeneratedQuestion>();
+        for (var i = 15; i <= 20; i++)
+        {
+            sec2Q.Add(new ReadingGeneratedQuestion(
+                i,
+                $"Diagram label item {i} pointing to sensor pod",
+                "sensor",
+                new List<string>(),
+                "Autonomous submersibles equipped with hyperspectral cameras and suction samplers analyze deep benthic zones.",
+                $"Detailed explanation for diagram label item {i} exceeding 25 chars."
+            ));
+        }
+        for (var i = 21; i <= 27; i++)
+        {
+            sec2Q.Add(new ReadingGeneratedQuestion(
+                i,
+                $"Summary box item {i} describing heat shock proteins",
+                "A",
+                new List<string> { "A. protein", "B. lipid", "C. lipid layer", "D. sugar" },
+                "Novel heat-shock proteins assist extreme thermophilic archaea in maintaining molecular cellular integrity.",
+                $"Detailed explanation for summary box item {i} exceeding 25 chars."
+            ));
+        }
+
+        var sec3Q = new List<ReadingGeneratedQuestion>();
+        for (var i = 28; i <= 33; i++)
+        {
+            sec3Q.Add(new ReadingGeneratedQuestion(
+                i,
+                $"Sentence completion item {i} regarding deep ocean fissures",
+                "microbial biosphere",
+                new List<string>(),
+                "Geological fissures reveal subterranean microbial biosphere extending kilometers below the oceanic seafloor crust.",
+                $"Detailed explanation for sentence completion item {i} exceeding 25 chars."
+            ));
+        }
+        for (var i = 34; i <= 40; i++)
+        {
+            sec3Q.Add(new ReadingGeneratedQuestion(
+                i,
+                $"Short answer item {i} regarding deep trenches research",
+                "origins of life",
+                new List<string>(),
+                "Deep trenches provide natural laboratories for investigating evolutionary biology and origins of life on Earth.",
+                $"Detailed explanation for short answer item {i} exceeding 25 chars."
+            ));
+        }
+
+        var source1 = new ReadingSource("PMC1001", "Hydrothermal Vents Ecosystem", "10.1001/vent.1", "https://example.org/1", "https://creativecommons.org/licenses/by/4.0", 800);
+        var source2 = new ReadingSource("PMC1002", "Benthic Exploration Methods", "10.1002/benthic.2", "https://example.org/2", "https://creativecommons.org/licenses/by/4.0", 800);
+        var source3 = new ReadingSource("PMC1003", "Deep Oceanic Crust Fissures", "10.1003/crust.3", "https://example.org/3", "https://creativecommons.org/licenses/by/4.0", 800);
+        var sections = new List<ReadingGeneratedSection>
+        {
+            new ReadingGeneratedSection(
+                "Section 1",
+                GeneratePassage(0, "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy."),
+                source1,
+                new List<ReadingGeneratedGroup>
+                {
+                    new ReadingGeneratedGroup("MATCHING_HEADING", "Choose the correct heading for each paragraph from the list of headings below.", sec1Q.Take(7).ToList()),
+                    new ReadingGeneratedGroup("FLOW_CHART", "<svg width='100' height='100'><rect/></svg>", sec1Q.Skip(7).Take(7).ToList())
+                }
+            ),
+            new ReadingGeneratedSection(
+                "Section 2",
+                GeneratePassage(1, "Autonomous submersibles equipped with hyperspectral cameras and suction samplers analyze deep benthic zones. Novel heat-shock proteins assist extreme thermophilic archaea in maintaining molecular cellular integrity."),
+                source2,
+                new List<ReadingGeneratedGroup>
+                {
+                    new ReadingGeneratedGroup("DIAGRAM_LABEL", "Label the diagram below.", sec2Q.Take(6).ToList()),
+                    new ReadingGeneratedGroup("SUMMARY_COMPLETION_BOX", "Complete the summary using the list of words, A-D, below.", sec2Q.Skip(6).Take(7).ToList())
+                }
+            ),
+            new ReadingGeneratedSection(
+                "Section 3",
+                GeneratePassage(2, "Geological fissures reveal subterranean microbial biosphere extending kilometers below the oceanic seafloor crust. Deep trenches provide natural laboratories for investigating evolutionary biology and origins of life on Earth."),
+                source3,
+                new List<ReadingGeneratedGroup>
+                {
+                    new ReadingGeneratedGroup("SENTENCE_COMPLETION", "Complete the sentences below.", sec3Q.Take(6).ToList()),
+                    new ReadingGeneratedGroup("SHORT_ANSWER", "Answer the questions below.", sec3Q.Skip(6).Take(7).ToList())
+                }
+            )
+        };
+        var job = new ReadingPaperJob { Id = Guid.NewGuid(), Topic = "Two-group dynamic blueprint test" };
+
+        // Act
+        var exam = ReadingPaperWorker.BuildExam(job, sections);
+
+        // Assert
+        Assert.Equal(3, exam.Sections.Count);
+        // Section 0 Group 0 should retain MATCHING_HEADING (not overwritten to legacy TRUE_FALSE_NOT_GIVEN)
+        var sec0Grp0 = exam.Sections[0].QuestionGroups[0];
+        Assert.Contains("heading", sec0Grp0.InstructionMd, StringComparison.OrdinalIgnoreCase);
+        // Section 0 Group 1 should retain FLOW_CHART with SVG
+        var sec0Grp1 = exam.Sections[0].QuestionGroups[1];
+        Assert.Contains("<svg", sec0Grp1.InstructionMd);
+
+        // Check question 1: MATCHING_HEADING maps MatchPairs
+        var q1 = exam.Sections[0].Questions.First(q => q.Idx == 1);
+        Assert.NotNull(q1.MatchPairs);
+        Assert.True(q1.MatchPairs.ContainsKey("1"));
+
+        // Check question 8: FLOW_CHART maps BlankAcceptTexts
+        var q8 = exam.Sections[0].Questions.First(q => q.Idx == 8);
+        Assert.NotNull(q8.BlankAcceptTexts);
+        Assert.True(q8.BlankAcceptTexts.ContainsKey("8"));
+        Assert.Equal("hydrogen sulfide", q8.BlankAcceptTexts["8"]![0]);
+    }
 }

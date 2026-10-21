@@ -322,7 +322,11 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             for (var g = 0; g < sec.Groups.Count; g++)
             {
                 var grp = sec.Groups[g];
-                var normType = (isLegacyPreset && expectedGroups.Length > g) ? expectedGroups[g] : GetCanonicalGroupType(grp.Type);
+                var canonicalType = GetCanonicalGroupType(grp.Type);
+                var expectedType = (isLegacyPreset && expectedGroups.Length > g) ? expectedGroups[g] : null;
+                var normType = ReadingPaperRules.KnownQuestionFamilies.Contains(canonicalType)
+                    ? canonicalType
+                    : (!string.IsNullOrWhiteSpace(expectedType) ? expectedType : canonicalType);
                 var instruction = !string.IsNullOrWhiteSpace(grp.Instruction) ? grp.Instruction : GetGroupInstruction(normType);
 
                 var normQuestions = new List<ReadingGeneratedQuestion>();
