@@ -118,18 +118,36 @@ class QuestionCandidateGenerator:
 
     def build_pool_from_raw_candidates(
         self,
-        raw_candidates: List[Dict[str, Any]],
-        passage_text: str,
-        question_type: str,
-        question_number: int,
-        passage_ref: ArtifactRef,
-        blueprint_ref: ArtifactRef,
-        pool_limit: int,
-        slot_id: str,
+        raw_candidates: Any,
+        passage_text: Any = "",
+        question_type: Any = "",
+        question_number: Any = 1,
+        passage_ref: Any = None,
+        blueprint_ref: Any = None,
+        pool_limit: Any = 2,
+        slot_id: str = "slot_1",
         group_id: Optional[str] = None,
         provider_name: str = "minimax",
         model_name: str = "MiniMax-Text-01",
     ) -> QuestionCandidatePool:
+        if isinstance(raw_candidates, str):
+            _pos_slot_id = raw_candidates
+            _pos_q_num = int(passage_text) if isinstance(passage_text, int) else 1
+            _pos_q_type = str(question_type)
+            _pos_raw = question_number if isinstance(question_number, list) else []
+            _pos_passage_text = str(passage_ref) if isinstance(passage_ref, str) else ""
+            _pos_p_ref = blueprint_ref
+            _pos_bp_ref = pool_limit if isinstance(pool_limit, ArtifactRef) else None
+            _pos_limit = len(_pos_raw) if _pos_raw else 2
+
+            slot_id = _pos_slot_id
+            question_number = _pos_q_num
+            question_type = _pos_q_type
+            raw_candidates = _pos_raw
+            passage_text = _pos_passage_text
+            passage_ref = _pos_p_ref
+            blueprint_ref = _pos_bp_ref
+            pool_limit = _pos_limit
         pool = QuestionCandidatePool(
             slotId=slot_id,
             questionNumber=question_number,
@@ -184,7 +202,11 @@ class QuestionCandidateGenerator:
                                 if opt.text.strip().lower() == raw_ans_str.lower():
                                     matched_key = opt.key
                                     break
-                    raw_ans = matched_key if matched_key else ans_upper
+                    if matched_key:
+                        raw_ans = matched_key
+                    else:
+                        rejection_reasons.append(f"MCQ answer key '{raw_ans_str}' not found in options")
+                        raw_ans = "[UNMAPPED]"
                 else:
                     raw_ans = "[MISSING]"
             else:
@@ -199,8 +221,13 @@ class QuestionCandidateGenerator:
 
                 if not ev_quote and not is_not_given:
                     rejection_reasons.append("Missing evidence quote")
-                elif ev_quote and len(ev_quote) >= 15 and ev_quote.casefold() not in passage_text.casefold():
+                elif ev_quote and ev_quote.casefold() not in passage_text.casefold():
                     rejection_reasons.append(f"Evidence quote is unsupported by passage: '{ev_quote[:60]}'")
+
+            raw_prompt = str(raw.get("prompt") or "").strip()
+            if not raw_prompt:
+                rejection_reasons.append("Missing prompt")
+                raw_prompt = "[MISSING]"
 
             cand = QuestionCandidate(
                 candidateId=cand_id,
@@ -210,7 +237,7 @@ class QuestionCandidateGenerator:
                 groupId=group_id,
                 questionNumber=question_number,
                 questionType=question_type,
-                prompt=raw.get("prompt", "") or f"Question {question_number} prompt.",
+                prompt=raw_prompt,
                 answer=raw_ans,
                 options=options,
                 evidenceQuote=ev_quote,
@@ -224,6 +251,8 @@ class QuestionCandidateGenerator:
             if rejection_reasons:
                 cand.rejected = True
                 cand.rejection_reasons.extend(rejection_reasons)
+            if cand.rejection_reasons:
+                cand.rejected = True
             pool.add_candidate(cand)
         return pool
 
