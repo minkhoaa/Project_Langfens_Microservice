@@ -327,7 +327,7 @@ class MockProvider(BaseProvider):
                 res = compose_passage("Marine Stoichiometry", sec_idx, SECTION_2_SOURCE_TEXT, claims, config)
                 self._passages[sec_idx] = res["passage"]
                 passage = res["passage"]
-            slots = [{"groupIndex": 1, "questionNumber": n, "claimRefIds": [claims[0]["claimId"]]} for n in range(20, 27)]
+            slots = [{"groupIndex": 1, "questionNumber": n, "claimRefIds": [claims[(n - 20 + 1) % len(claims)]["claimId"]]} for n in range(20, 27)]
             all_q, groups = compose_questions(sec_idx, passage, claims, slots, config)
             for q in all_q:
                 self._last_questions[q["questionNumber"]] = q
@@ -357,7 +357,7 @@ class MockProvider(BaseProvider):
                 self._passages[sec_idx] = res["passage"]
                 passage = res["passage"]
             g_idx = 0 if (q_num <= 7 or (14 <= q_num <= 19) or (27 <= q_num <= 33)) else 1
-            slots = [{"groupIndex": g_idx, "questionNumber": q_num, "claimRefIds": [claims[0]["claimId"]]}]
+            slots = [{"groupIndex": g_idx, "questionNumber": q_num, "claimRefIds": [claims[(q_num - 1) % len(claims)]["claimId"]]}]
             all_q, _ = compose_questions(sec_idx, passage, claims, slots, config)
             q_payload = all_q[0]
             self._last_questions[q_num] = q_payload

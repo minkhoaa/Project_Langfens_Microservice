@@ -229,7 +229,6 @@ class ReadingGenerationPipeline:
 
             async def evaluate_paper_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
                 return evaluate_paper(art, request.policy)
-
             paper_envelope = await executor.execute(
                 paper_art_id,
                 ArtifactType.READING_PAPER,

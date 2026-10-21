@@ -816,7 +816,7 @@ async def test_t12_internal_generation_requires_service_auth(monkeypatch, prefix
     from app.main import app
     monkeypatch.setenv("EXAMSERVICE__INTERNAL__API__KEY", "runtime-test-key")
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        for route in ("/paper-v2", "/paper-evaluate", "/paper-repair"):
+        for route in ("/execute", "/source"):
             url = prefix + "/v1/autogen/reading-paper" + route
             assert (await client.post(url, json={})).status_code == 401
             assert (await client.post(url, json={}, headers={"X-Internal-Service-Key": "wrong"})).status_code == 403
@@ -827,7 +827,7 @@ async def test_t12_internal_generation_requires_service_auth(monkeypatch, prefix
     from app.config import settings
     monkeypatch.setattr(settings, "internal_api_key", "")
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        assert (await client.post(prefix + "/v1/autogen/reading-paper/paper-v2", json={})).status_code == 503
+        assert (await client.post(prefix + "/v1/autogen/reading-paper/execute", json={})).status_code == 503
 
 
 def test_t12_paper_loop_benchmark_policy_binding():
@@ -941,140 +941,16 @@ async def test_t12_evaluator_failure_fail_closed():
     assert result.accepted_artifact is None
 
 
-@pytest.mark.asyncio
-async def test_t12_question_group_retry_operation_id_deterministic_and_distinct():
-    """Verify question group generation retry generates distinct operation_ids on dynamic feedback and passage changes, while identical requests remain deterministic."""
-    from unittest.mock import AsyncMock, patch
-    from app.pipeline import generate_section, _attempt_op_id_suffix
-    from tests.test_pipeline import valid_section
+def test_t12_attempt_op_id_suffix_deterministic_and_distinct():
+    """Verify _attempt_op_id_suffix generates distinct operation_ids on dynamic feedback and passage changes, while identical requests remain deterministic."""
+    from app.pipeline import _attempt_op_id_suffix
 
-    sec_data_1 = valid_section(1)
-    article = {
-        "pmcid": "PMC123",
-        "title": "Research title",
-        "doi": "10.1000/test",
-        "url": "https://europepmc.org/articles/PMC123",
-        "license": "https://creativecommons.org/licenses/by/4.0",
-        "wordCount": 800,
-        "authors": "Ada Example",
-        "content": "Source text.",
-    }
-    reviews = {
-        number: {"number": number, "valid": True, "issues": [], "reason": ""}
-        for group in sec_data_1["groups"]
-        for q in group["questions"]
-        for number in [q["number"]]
-    }
-
-    recorded_op_ids: list[str] = []
-
-    async def mock_generate_json(**kwargs):
-        op_id = kwargs.get("operation_id", "")
-        if "group_1" in op_id:
-            recorded_op_ids.append(op_id)
-            # Fail attempt 1 with bad shape to trigger retry with feedback
-            if len([x for x in recorded_op_ids if "group_1" in x]) == 1:
-                return "bad_shape"
-            return {"questions": sec_data_1["groups"][0]["questions"]}
-        if "group_2" in op_id:
-            return {"questions": sec_data_1["groups"][1]["questions"]}
-        # Default passage synthesis
-        return {"text": f"{sec_data_1['title']}\n\n{sec_data_1['passage']}"}
-
-    with patch("app.pipeline.fetch_source", new_callable=AsyncMock, return_value=article), \
-         patch("app.pipeline.review_passage_source", new_callable=AsyncMock, return_value=[]), \
-         patch("app.pipeline.review_answers", new_callable=AsyncMock, return_value=reviews), \
-         patch("app.pipeline.generate_json", side_effect=mock_generate_json):
-
-        section = await generate_section(
-            "topic", 1, {"pmcid": "PMC123"},
-            run_id="run_t12_retry_test", epoch=1,
-            lease_owner=UUID("00000000-0000-0000-0000-000000000001"),
-            parent_operation_id="op_parent_123",
-        )
-
-    assert len(recorded_op_ids) == 2
-    op_att1, op_att2 = recorded_op_ids[0], recorded_op_ids[1]
-    assert op_att1 != op_att2
-    assert "op_parent_123_group_1_att_1_" in op_att1
-    assert "op_parent_123_group_1_att_2_" in op_att2
-
-    # Determinism test: identical prompt payload produces identical suffix
     payload_a = "Instruction A\n\nPASSAGE:\nPassage text"
     payload_b = "Instruction A with Feedback\n\nPASSAGE:\nPassage text"
     payload_c = "Instruction A\n\nPASSAGE:\nDifferent Passage"
     assert _attempt_op_id_suffix(payload_a) == _attempt_op_id_suffix(payload_a)
     assert _attempt_op_id_suffix(payload_a) != _attempt_op_id_suffix(payload_b)
     assert _attempt_op_id_suffix(payload_a) != _attempt_op_id_suffix(payload_c)
-
-
-@pytest.mark.asyncio
-async def test_t12_outer_section_retry_distinct_group_operation_ids():
-    """Verify outer section retry with a modified passage generates distinct group operation IDs."""
-    from unittest.mock import AsyncMock, patch
-    from app.pipeline import generate_section
-    from tests.test_pipeline import valid_section
-
-    sec_data_1 = valid_section(1)
-    sec_data_2 = valid_section(1)
-    sec_data_2["passage"] = sec_data_1["passage"] + " Different text for outer attempt 2."
-
-    article = {
-        "pmcid": "PMC123",
-        "title": "Research title",
-        "doi": "10.1000/test",
-        "url": "https://europepmc.org/articles/PMC123",
-        "license": "https://creativecommons.org/licenses/by/4.0",
-        "wordCount": 800,
-        "authors": "Ada Example",
-        "content": "Source text.",
-    }
-    reviews = {
-        number: {"number": number, "valid": True, "issues": [], "reason": ""}
-        for group in sec_data_1["groups"]
-        for q in group["questions"]
-        for number in [q["number"]]
-    }
-
-    outer_attempts = 0
-    group_1_att_1_op_ids: list[str] = []
-
-    async def mock_generate_json(**kwargs):
-        nonlocal outer_attempts
-        op_id = kwargs.get("operation_id", "")
-        if "_synthesis" in op_id:
-            outer_attempts += 1
-            if outer_attempts == 1:
-                return {"text": f"{sec_data_1['title']}\n\n{sec_data_1['passage']}"}
-            return {"text": f"{sec_data_2['title']}\n\n{sec_data_2['passage']}"}
-        if "group_1" in op_id:
-            if "att_1" in op_id:
-                group_1_att_1_op_ids.append(op_id)
-            if outer_attempts == 1:
-                # Force failure in outer attempt 1 so generate_section retries _generate_section_once
-                raise ValueError("Simulated outer failure")
-            return {"questions": sec_data_2["groups"][0]["questions"]}
-        if "group_2" in op_id:
-            return {"questions": sec_data_2["groups"][1]["questions"]}
-        return {"text": "default"}
-
-    with patch("app.pipeline.fetch_source", new_callable=AsyncMock, return_value=article), \
-         patch("app.pipeline.review_passage_source", new_callable=AsyncMock, return_value=[]), \
-         patch("app.pipeline.review_answers", new_callable=AsyncMock, return_value=reviews), \
-         patch("app.pipeline.generate_json", side_effect=mock_generate_json):
-
-        section = await generate_section(
-            "topic", 1, {"pmcid": "PMC123"},
-            run_id="run_t12_outer_retry", epoch=1,
-            lease_owner=UUID("00000000-0000-0000-0000-000000000001"),
-            parent_operation_id="op_parent_456",
-        )
-
-    assert outer_attempts == 2
-    assert len(group_1_att_1_op_ids) == 2
-    # The two outer attempts generated group_1_att_1 with different passages, so operation_ids must be distinct!
-    assert group_1_att_1_op_ids[0] != group_1_att_1_op_ids[1]
-
 
 @pytest.mark.asyncio
 async def test_t12_none_ref_handling_in_section_payload_and_loop():

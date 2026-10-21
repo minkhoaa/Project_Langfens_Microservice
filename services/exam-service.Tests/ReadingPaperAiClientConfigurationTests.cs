@@ -33,4 +33,11 @@ public sealed class ReadingPaperAiClientConfigurationTests
 
         Assert.Equal(expected, ReadingPaperAiClientConfiguration.ResolveInternalApiKey(configuration));
     }
+
+    [Fact]
+    public void ComputeHash_MatchesExpected()
+    {
+        var pol = PinnedExecutionPolicy.CreateDefault("minimax");
+        Assert.Equal("4aa260c80a70b067d29a0075e5675f4a19a0e4894cd76f32f5ddc6ac3fe97697", pol.ComputeHash());
+    }
 }

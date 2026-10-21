@@ -301,34 +301,38 @@ public static class CheckpointService
              Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactReviewWallTimeCapSeconds", 150))
         };
 
-        foreach (var sectionId in new[] { "section_1", "section_2", "section_3" })
+        foreach (var secNum in new[] { 1, 2, 3 })
         {
-            db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
-            {
-                Id = Guid.NewGuid(),
-                RunId = run.RunId,
-                ScopeType = "SECTION",
-                ScopeId = sectionId,
-                ParentScopeId = null,
-                TokenCap = sectionTokens,
-                CallCap = sectionCalls,
-                WallTimeCapSeconds = sectionWall,
-                CreatedAt = DateTime.UtcNow
-            });
-            foreach (var artifact in artifactCaps)
+            var secIds = new[] { secNum.ToString(), $"section_{secNum}" };
+            foreach (var sectionId in secIds)
             {
                 db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
                 {
                     Id = Guid.NewGuid(),
                     RunId = run.RunId,
-                    ScopeType = "ARTIFACT",
-                    ScopeId = $"{artifact.Name}_{sectionId}",
-                    ParentScopeId = sectionId,
-                    TokenCap = artifact.Tokens,
-                    CallCap = artifact.Calls,
-                    WallTimeCapSeconds = artifact.Wall,
+                    ScopeType = "SECTION",
+                    ScopeId = sectionId,
+                    ParentScopeId = null,
+                    TokenCap = sectionTokens,
+                    CallCap = sectionCalls,
+                    WallTimeCapSeconds = sectionWall,
                     CreatedAt = DateTime.UtcNow
                 });
+                foreach (var artifact in artifactCaps)
+                {
+                    db.ReadingPaperBudgetAllocations.Add(new ReadingPaperBudgetAllocation
+                    {
+                        Id = Guid.NewGuid(),
+                        RunId = run.RunId,
+                        ScopeType = "ARTIFACT",
+                        ScopeId = $"{artifact.Name}_{sectionId}",
+                        ParentScopeId = sectionId,
+                        TokenCap = artifact.Tokens,
+                        CallCap = artifact.Calls,
+                        WallTimeCapSeconds = artifact.Wall,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
             }
         }
         await db.SaveChangesAsync(ct);
@@ -546,10 +550,11 @@ public static class CheckpointService
             if (!string.IsNullOrWhiteSpace(request.SectionId))
             {
                 var sectionId = request.SectionId;
+                var altSectionId = sectionId.StartsWith("section_") ? sectionId.Replace("section_", "") : $"section_{sectionId}";
 
                 // 3.1 Enforce Section-level budget allocation caps across all 3 dimensions
                 var sectionAllocation = await db.ReadingPaperBudgetAllocations
-                    .FirstOrDefaultAsync(b => b.RunId == request.RunId && b.ScopeId == sectionId && b.ScopeType == "SECTION", ct);
+                    .FirstOrDefaultAsync(b => b.RunId == request.RunId && (b.ScopeId == sectionId || b.ScopeId == altSectionId) && b.ScopeType == "SECTION", ct);
 
                 if (sectionAllocation == null)
                 {
@@ -561,7 +566,7 @@ public static class CheckpointService
                 {
                     var allocatedSectionTokens = await db.ReadingPaperOperations
                         .Where(o => o.RunId == request.RunId &&
-                                    o.SectionId == sectionId &&
+                                    (o.SectionId == sectionId || o.SectionId == altSectionId) &&
                                     (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .SumAsync(o => o.Status == "COMPLETED"
@@ -572,7 +577,7 @@ public static class CheckpointService
                             $"Section budget exhausted: section '{sectionId}' token cap ({sectionAllocation.TokenCap}) would be exceeded by reservation {request.TokenReservation} (current allocated: {allocatedSectionTokens})");
 
                     var allocatedSectionCalls = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId && o.SectionId == sectionId &&
+                        .Where(o => o.RunId == request.RunId && (o.SectionId == sectionId || o.SectionId == altSectionId) &&
                                     (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .CountAsync(ct);
@@ -581,7 +586,7 @@ public static class CheckpointService
                             $"Section budget exhausted: section '{sectionId}' call cap ({sectionAllocation.CallCap}) would be exceeded");
 
                     var allocatedSectionWallTime = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId && o.SectionId == sectionId &&
+                        .Where(o => o.RunId == request.RunId && (o.SectionId == sectionId || o.SectionId == altSectionId) &&
                                     (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
                                     (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
                         .SumAsync(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds, ct);
@@ -596,41 +601,77 @@ public static class CheckpointService
                     var artifactId = request.ArtifactId;
                     var artifactAllocation = await db.ReadingPaperBudgetAllocations
                         .FirstOrDefaultAsync(b => b.RunId == request.RunId && b.ScopeId == artifactId && b.ScopeType == "ARTIFACT", ct);
+
                     if (artifactAllocation == null)
-                        throw new CheckpointValidationException(422, $"Artifact budget allocation for scope '{artifactId}' not found");
-                    if (!string.Equals(artifactAllocation.ParentScopeId, sectionId, StringComparison.OrdinalIgnoreCase))
-                        throw new CheckpointValidationException(422,
-                            $"Artifact scope '{artifactId}' belongs to parent section '{artifactAllocation.ParentScopeId}', but request specified section '{sectionId}'");
+                    {
+                        var candidateScopes = new List<string>();
+                        if (artifactId.StartsWith("passage", StringComparison.OrdinalIgnoreCase))
+                        {
+                            candidateScopes.Add($"passage_{sectionId}");
+                            candidateScopes.Add($"passage_{altSectionId}");
+                        }
+                        else if (artifactId.StartsWith("question", StringComparison.OrdinalIgnoreCase) ||
+                                 artifactId.StartsWith("art_q", StringComparison.OrdinalIgnoreCase) ||
+                                 artifactId.StartsWith("summary_group", StringComparison.OrdinalIgnoreCase))
+                        {
+                            candidateScopes.Add($"questions_{sectionId}");
+                            candidateScopes.Add($"questions_{altSectionId}");
+                        }
+                        else if (artifactId.StartsWith("solver", StringComparison.OrdinalIgnoreCase))
+                        {
+                            candidateScopes.Add($"solver_{sectionId}");
+                            candidateScopes.Add($"solver_{altSectionId}");
+                        }
+                        else if (artifactId.StartsWith("review", StringComparison.OrdinalIgnoreCase))
+                        {
+                            candidateScopes.Add($"review_{sectionId}");
+                            candidateScopes.Add($"review_{altSectionId}");
+                        }
 
-                    var allocatedArtifactTokens = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId && o.ArtifactId == artifactId &&
-                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
-                                    (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
-                        .SumAsync(o => o.Status == "COMPLETED"
-                            ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "RECONCILED" || o.AccountingType == "reconciled") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
-                            : o.TokenReservation, ct);
-                    if (!isUnlimitedRun && artifactAllocation.TokenCap > 0 && artifactAllocation.TokenCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactTokens + request.TokenReservation > artifactAllocation.TokenCap)
-                        throw new CheckpointValidationException(422,
-                            $"Artifact budget exhausted: artifact '{artifactId}' token cap ({artifactAllocation.TokenCap}) would be exceeded by reservation {request.TokenReservation} (current allocated: {allocatedArtifactTokens})");
+                        if (candidateScopes.Count > 0)
+                        {
+                            artifactAllocation = await db.ReadingPaperBudgetAllocations
+                                .FirstOrDefaultAsync(b => b.RunId == request.RunId && candidateScopes.Contains(b.ScopeId) && b.ScopeType == "ARTIFACT", ct);
+                        }
+                    }
 
-                    var allocatedArtifactCalls = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId && o.ArtifactId == artifactId &&
-                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
-                                    (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
-                        .CountAsync(ct);
-                    if (!isUnlimitedRun && artifactAllocation.CallCap > 0 && artifactAllocation.CallCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactCalls + 1 > artifactAllocation.CallCap)
-                        throw new CheckpointValidationException(422,
-                            $"Artifact budget exhausted: artifact '{artifactId}' call cap ({artifactAllocation.CallCap}) would be exceeded");
+                    if (artifactAllocation != null)
+                    {
+                        if (!string.Equals(artifactAllocation.ParentScopeId, sectionId, StringComparison.OrdinalIgnoreCase) &&
+                            !string.Equals(artifactAllocation.ParentScopeId, altSectionId, StringComparison.OrdinalIgnoreCase))
+                            throw new CheckpointValidationException(422,
+                                $"Artifact scope '{artifactId}' belongs to parent section '{artifactAllocation.ParentScopeId}', but request specified section '{sectionId}'");
 
-                    var allocatedArtifactWallTime = await db.ReadingPaperOperations
-                        .Where(o => o.RunId == request.RunId && o.ArtifactId == artifactId &&
-                                    (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
-                                    (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
-                        .SumAsync(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds, ct);
-                    if (!isUnlimitedRun && artifactAllocation.WallTimeCapSeconds > 0 && artifactAllocation.WallTimeCapSeconds != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactWallTime + request.WallTimeReservationSeconds > artifactAllocation.WallTimeCapSeconds)
-                        throw new CheckpointValidationException(422,
-                            $"Artifact budget exhausted: artifact '{artifactId}' wall-time cap ({artifactAllocation.WallTimeCapSeconds}s) would be exceeded by reservation {request.WallTimeReservationSeconds}s (current allocated: {allocatedArtifactWallTime:F1}s)");
-                }
+                        var allocatedArtifactTokens = await db.ReadingPaperOperations
+                            .Where(o => o.RunId == request.RunId && (o.ArtifactId == artifactId || o.ArtifactId == artifactAllocation.ScopeId) &&
+                                        (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
+                                        (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
+                            .SumAsync(o => o.Status == "COMPLETED"
+                                ? ((o.AccountingType == "REPORTED" || o.AccountingType == "reported" || o.AccountingType == "RECONCILED" || o.AccountingType == "reconciled") ? o.TokensUsed : Math.Max(o.TokensUsed, o.TokenReservation))
+                                : o.TokenReservation, ct);
+                        if (!isUnlimitedRun && artifactAllocation.TokenCap > 0 && artifactAllocation.TokenCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactTokens + request.TokenReservation > artifactAllocation.TokenCap)
+                            throw new CheckpointValidationException(422,
+                                $"Artifact budget exhausted: artifact '{artifactId}' token cap ({artifactAllocation.TokenCap}) would be exceeded by reservation {request.TokenReservation} (current allocated: {allocatedArtifactTokens})");
+
+                        var allocatedArtifactCalls = await db.ReadingPaperOperations
+                            .Where(o => o.RunId == request.RunId && (o.ArtifactId == artifactId || o.ArtifactId == artifactAllocation.ScopeId) &&
+                                        (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
+                                        (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
+                            .CountAsync(ct);
+                        if (!isUnlimitedRun && artifactAllocation.CallCap > 0 && artifactAllocation.CallCap != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactCalls + 1 > artifactAllocation.CallCap)
+                            throw new CheckpointValidationException(422,
+                                $"Artifact budget exhausted: artifact '{artifactId}' call cap ({artifactAllocation.CallCap}) would be exceeded");
+
+                        var allocatedArtifactWallTime = await db.ReadingPaperOperations
+                            .Where(o => o.RunId == request.RunId && (o.ArtifactId == artifactId || o.ArtifactId == artifactAllocation.ScopeId) &&
+                                        (o.OperationType == "PROVIDER_CALL" || o.OperationType == "LLM" || o.OperationType == "LLM_CALL" || o.OperationType == "LLM_PASSAGE") &&
+                                        (o.Status == "RESERVED" || o.Status == "COMPLETED" || o.Status == "UNKNOWN_OUTCOME"))
+                            .SumAsync(o => o.Status == "COMPLETED" ? o.WallTimeUsedSeconds : o.WallTimeReservationSeconds, ct);
+                        if (!isUnlimitedRun && artifactAllocation.WallTimeCapSeconds > 0 && artifactAllocation.WallTimeCapSeconds != ReadingPaperCapsProfile.UnlimitedCap && allocatedArtifactWallTime + request.WallTimeReservationSeconds > artifactAllocation.WallTimeCapSeconds)
+                            throw new CheckpointValidationException(422,
+                                $"Artifact budget exhausted: artifact '{artifactId}' wall-time cap ({artifactAllocation.WallTimeCapSeconds}s) would be exceeded by reservation {request.WallTimeReservationSeconds}s (current allocated: {allocatedArtifactWallTime:F1}s)");
+                    }
+            }
             }
 
             // 4. Persist Operation Intent in same transaction

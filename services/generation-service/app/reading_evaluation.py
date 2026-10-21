@@ -171,37 +171,42 @@ def evaluate_passage(artifact: ArtifactEnvelope, source_text: str, claims: Mappi
     words = count_words(passage)
     lengths = [] if config.min_words <= words <= config.max_words else [
         (IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS, f"Passage has {words} canonical words; expected {config.min_words}–{config.max_words}")]
-    problems: list[Problem] = []
+    fidelity_problems: list[Problem] = []
+    semantic_problems: list[Problem] = []
     if not str(payload.get("title", "")).strip() or re.search(r"(?im)^\s*(section|reading passage)\s+[123]\s*:", passage):
-        problems.append((IssueCode.EDITORIAL_STYLE_DEFECT, "Passage has missing title or internal exam labels"))
+        fidelity_problems.append((IssueCode.EDITORIAL_STYLE_DEFECT, "Passage has missing title or internal exam labels"))
     invented = set(NUMBER.findall(passage)) - set(NUMBER.findall(source_text))
     if invented:
-        problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, f"Invented or altered source quantities: {sorted(invented)}"))
+        semantic_problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, f"Invented or altered source quantities: {sorted(invented)}"))
     if set(w.lower() for w in POPULATIONS.findall(passage)) - set(w.lower() for w in POPULATIONS.findall(source_text)):
-        problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Scientific population drift from source"))
+        semantic_problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Scientific population drift from source"))
     alignments = payload.get("claimAlignments", ())
     if not alignments:
-        problems.append((IssueCode.EVIDENCE_MISSING, "Passage has no verified claim alignments"))
+        fidelity_problems.append((IssueCode.EVIDENCE_MISSING, "Passage has no verified claim alignments"))
     for alignment in alignments:
         claim = claims.get(alignment["claimId"])
         start, end = alignment["sourceStart"], alignment["sourceEnd"]
         quote, source_quote = alignment["passageQuote"], alignment["sourceQuote"]
         if (claim is None or not quote or quote not in passage or start >= end
                 or source_text[start:end] != source_quote or source_quote != claim["text"]):
-            problems.append((IssueCode.EVIDENCE_MISSING, "Passage alignment fails exact source/passage quote verification"))
+            fidelity_problems.append((IssueCode.EVIDENCE_MISSING, "Passage alignment fails exact source/passage quote verification"))
             continue
         if set(NUMBER.findall(quote)) - set(NUMBER.findall(source_quote)):
-            problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Aligned claim changes a quantity"))
+            semantic_problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Aligned claim changes a quantity"))
         if quote.strip().lower() != source_quote.strip().lower():
             conflict, reason = detect_negation_polarity_conflict(quote, source_quote)
             if conflict or detect_comparison_inversion(quote, source_quote):
-                problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, reason or "Scientific comparison inverted"))
+                semantic_problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, reason or "Scientific comparison inverted"))
         if re.search(r"\b(proves?|always|certainly|causes?)\b", quote, re.I) and re.search(r"\b(may|might|associated|suggests?|correlat\w*)\b", source_quote, re.I):
-            problems.append((IssueCode.CAUSAL_OVERSTATEMENT, "Passage inflates source certainty or causation"))
+            semantic_problems.append((IssueCode.CAUSAL_OVERSTATEMENT, "Passage inflates source certainty or causation"))
     for paragraph in re.split(r"\n\s*\n", passage):
         if paragraph.strip() and not any(a["passageQuote"] in paragraph for a in alignments if a.get("passageQuote")):
-            problems.append((IssueCode.EVIDENCE_MISSING, "Every substantive paragraph needs a verified claim alignment"))
-    return [result(artifact, "eval_passage_word_count", lengths), result(artifact, "eval_passage_fidelity", problems)]
+            fidelity_problems.append((IssueCode.EVIDENCE_MISSING, "Every substantive paragraph needs a verified claim alignment"))
+    return [
+        result(artifact, "eval_passage_word_count", lengths),
+        result(artifact, "eval_passage_fidelity", fidelity_problems),
+        result(artifact, "eval_passage_semantic", semantic_problems),
+    ]
 
 
 def semantic_result(artifact: ArtifactEnvelope, evaluator_id: str, report: Mapping[str, Any], required: Sequence[str]) -> EvaluationResult:
@@ -258,7 +263,8 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
             evidence.append((IssueCode.EVIDENCE_MISSING, "Evidence quote must be the exact identified passage span"))
     if question_type in {"SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SHORT_ANSWER"}:
         if not validate_answer_length(answer) or not match_verbatim_in_passage(answer, passage):
-            answer_problems.append((IssueCode.WORD_LIMIT_EXCEEDED, "Answer is not a full-token source phrase within IELTS word/number limits"))
+            q_num_label = payload.get("questionNumber") or payload.get("number") or ""
+            answer_problems.append((IssueCode.WORD_LIMIT_EXCEEDED, f"Question {q_num_label}: Answer '{answer}' is not a full-token source phrase within IELTS word/number limits"))
         if question_type != "SHORT_ANSWER" and f"[{payload.get('questionNumber')}]" not in prompt:
             structure.append((IssueCode.SCHEMA_VIOLATION, "Completion item lacks its numbered blank"))
         if check_prompt_answer_leakage(prompt, answer):
@@ -274,10 +280,58 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
         if (normalize_prompt(prompt) == normalize_prompt(question_prompt(other))
                 or calculate_shingle_overlap(prompt, question_prompt(other)) > 0.7):
             unique.append((IssueCode.DUPLICATE_CONTENT, "Candidate duplicates an already accepted question"))
+    semantic: list[Problem] = []
+    if answer == "NOT_GIVEN":
+        assessment = payload.get("absenceAssessment") or {}
+        if payload.get("evidenceQuote") is not None:
+            semantic.append((IssueCode.EVIDENCE_MISSING, "NOT GIVEN must not provide positive evidenceQuote"))
+        if assessment.get("absenceConfirmed") is not True:
+            semantic.append((IssueCode.EVIDENCE_MISSING, "NOT GIVEN requires verified absenceConfirmed=True"))
+        if not assessment.get("absenceReason"):
+            semantic.append((IssueCode.EVIDENCE_MISSING, "NOT GIVEN requires an explicit absenceReason"))
+        if len(prompt.strip()) >= 10 and prompt.lower().strip(". ") in passage.lower():
+            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "NOT GIVEN statement is directly present in passage text"))
+    elif question_type in {"TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"}:
+        quote = str(payload.get("evidenceQuote", ""))
+        if answer in ("TRUE", "YES"):
+            conflict, reason = detect_negation_polarity_conflict(prompt, quote)
+            if conflict or detect_comparison_inversion(prompt, quote):
+                semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, reason or "Statement contradicts evidence quote"))
+        elif answer in ("FALSE", "NO"):
+            conflict, _ = detect_negation_polarity_conflict(prompt, quote)
+            inverted = detect_comparison_inversion(prompt, quote)
+            if not conflict and not inverted and prompt.strip().lower() == quote.strip().lower():
+                semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "FALSE/NO statement verbatim matches evidence quote without contradiction"))
+    elif question_type == "MULTIPLE_CHOICE_SINGLE":
+        correct_opt = str(payload.get("correctOption", "")).strip().upper()
+        if correct_opt not in ("A", "B", "C", "D"):
+            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, f"MCQ key '{correct_opt}' is unsupported; must be A, B, C, or D"))
+        options = tuple(payload.get("options", ()))
+        bodies = tuple(re.sub(r"^[A-D]\.\s*", "", option).strip().casefold() for option in options)
+        if len(set(bodies)) != len(options):
+            semantic.append((IssueCode.BAD_DISTRACTOR, "MCQ options contain duplicate distractors"))
+        opt_idx = ord(correct_opt) - ord('A') if correct_opt in ("A", "B", "C", "D") else -1
+        if 0 <= opt_idx < len(bodies):
+            correct_body = bodies[opt_idx]
+            quote = str(payload.get("evidenceQuote", "")).casefold()
+            for d_idx, d_body in enumerate(bodies):
+                if d_idx != opt_idx:
+                    if len(d_body) > 10 and len(correct_body) > 10 and calculate_shingle_overlap(d_body, correct_body) > 0.8:
+                        semantic.append((IssueCode.BAD_DISTRACTOR, f"MCQ distractor {chr(65 + d_idx)} is ambiguously similar to correct option {correct_opt}"))
+                    if len(d_body) > 15 and quote and d_body in quote:
+                        semantic.append((IssueCode.BAD_DISTRACTOR, f"MCQ distractor {chr(65 + d_idx)} is directly supported by evidence quote"))
+    if question_type in {"SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SHORT_ANSWER"}:
+        clean_prompt = prompt.replace(f"[{payload.get('questionNumber')}]", "")
+        if check_prompt_answer_leakage(clean_prompt, answer):
+            semantic.append((IssueCode.ANSWER_LEAKAGE, "Question prompt exposes its own answer"))
+        quote = str(payload.get("evidenceQuote", ""))
+        if quote and answer.lower() not in quote.lower():
+            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Completion answer is not contained in the evidence quote"))
     return [result(artifact, "eval_question_structure", structure),
             result(artifact, "eval_answer_verbatim_length", answer_problems),
             result(artifact, "eval_evidence_offsets", evidence),
-            result(artifact, "eval_question_uniqueness", unique)]
+            result(artifact, "eval_question_uniqueness", unique),
+            result(artifact, "eval_question_semantic", semantic)]
 
 
 def blind_result(artifact: ArtifactEnvelope, report: Mapping[str, Any], solver: Mapping[str, Any], adversary: Mapping[str, Any], passage: str) -> EvaluationResult:

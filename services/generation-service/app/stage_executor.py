@@ -558,6 +558,7 @@ class StageExecutor:
         # 2. Build LoopContext
         head = self._head(state, artifact_id)
         prior_artifact = self._envelope(head) if head is not None else None
+        parent_workflow_op = f"op_stage_{self.context.run_id}_{artifact_type.value.lower()}_{section_id or 'global'}"
         loop_ctx = LoopContext(
             runId=self.context.run_id,
             targetArtifactId=artifact_id,
@@ -568,6 +569,7 @@ class StageExecutor:
             inputDependencies=parents,
             policyVersion=getattr(self.policy, "version", "v2"),
             current_artifact=prior_artifact,
+            parent_operation_id=parent_workflow_op,
         )
         if prior_artifact is not None:
             loop_ctx.cursor.current_state = LoopState.DRAFTING

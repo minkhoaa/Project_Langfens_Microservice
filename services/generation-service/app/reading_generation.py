@@ -41,6 +41,16 @@ def _payload(obj: Union[ArtifactEnvelope, dict[str, Any]]) -> dict[str, Any]:
     if isinstance(obj, ArtifactEnvelope):
         return dict(canonical_json_dump_prep(obj.payload))
     return dict(canonical_json_dump_prep(obj))
+def trim_passage(passage: str, max_words: int = 900, min_words: int = 720) -> str:
+    """Trims an overlong passage at sentence boundaries to fall within word bounds."""
+    if count_words(passage) <= max_words:
+        return passage
+    for boundary in reversed([m.end() for m in re.finditer(r"[.!?](?=\s|$)", passage)]):
+        trimmed = passage[:boundary].strip()
+        if min_words <= count_words(trimmed) <= max_words:
+            return trimmed
+    return passage
+
 
 
 def _validate_source_license(license_str: str) -> None:
@@ -385,8 +395,9 @@ def align_claims_to_passage(
         if not quote:
             continue
         if quote in passage_text and cid not in seen_claims:
-            start = claim["offsets"]["startChar"]
-            end = claim["offsets"]["endChar"]
+            offsets = claim.get("offsets") or {}
+            start = offsets.get("startChar") if "startChar" in offsets else offsets.get("start", 0)
+            end = offsets.get("endChar") if "endChar" in offsets else offsets.get("end", 0)
             if 0 <= start < end <= len(source_text):
                 source_quote = source_text[start:end]
                 if source_quote == quote:

@@ -644,6 +644,8 @@ class SectionRunner:
                 issues: Sequence[Any],
                 ver: int,
             ) -> dict[str, Any]:
+                from app.solvers.cache import solver_cache
+                solver_cache.invalidate()
                 from app.repair.question import QuestionItemRepairer
                 item_rep = QuestionItemRepairer()
                 pl = dict(art.payload)

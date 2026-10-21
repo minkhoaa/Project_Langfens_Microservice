@@ -496,46 +496,41 @@ public class Phase13E2EWorkflowTests
     }
 
     [Fact]
-    public async Task Scenario6_StreamNDJSON_ReceivesLogsAndResult_AndParsesCanonicalSection()
+    public async Task Scenario6_ExecutePipeline_ReceivesResult_AndParsesCanonicalSection()
     {
         var sampleSource = CreateSampleSource(1, "PMC1000001", "Memory Systems");
-        var expectedSection = new ReadingGeneratedSection(
-            "Section 1: Memory Systems",
-            "This is a verified academic passage about human memory systems...",
-            sampleSource,
-            new List<ReadingGeneratedGroup>()
+        var expectedPipelineResult = new PipelineResult(
+            RunId: "run_sample",
+            Status: "ACCEPTED",
+            Sections: Array.Empty<ArtifactEnvelope>(),
+            ExamId: Guid.NewGuid()
         );
-        var serializedSection = JsonSerializer.Serialize(expectedSection, ReadingPaperRules.Json);
+        var serializedResult = JsonSerializer.Serialize(expectedPipelineResult, ReadingPaperRules.Json);
 
-        var ndjsonLines = new StringBuilder();
-        ndjsonLines.AppendLine("{\"type\": \"log\", \"level\": \"Information\", \"message\": \"Synthesizing passage...\"}");
-        ndjsonLines.AppendLine("{\"type\": \"log\", \"level\": \"Information\", \"message\": \"Auditing against evidence graph...\"}");
-        ndjsonLines.AppendLine($"{{\"type\": \"result\", \"section\": {serializedSection}}}");
-
-        var httpClient = new HttpClient(new MockStreamHandler(ndjsonLines.ToString()))
+        var httpClient = new HttpClient(new MockStreamHandler(serializedResult))
         {
             BaseAddress = new Uri("http://localhost:8080/")
         };
         var aiClient = new ReadingPaperAiClient(httpClient);
 
-        var logs = new List<string>();
-        var result = await aiClient.GenerateSectionAsync(
-            topic: "Memory Systems",
-            index: 1,
-            source: sampleSource,
-            onProgress: (level, msg) =>
-            {
-                logs.Add($"[{level}] {msg}");
-                return Task.CompletedTask;
-            },
-            ct: CancellationToken.None
+        var request = new PipelineRequest(
+            RunId: "run_sample",
+            JobId: Guid.NewGuid(),
+            Epoch: 1,
+            LeaseOwner: Guid.NewGuid(),
+            Topic: "Memory Systems",
+            Sources: new List<SourceInput> { new(1, sampleSource.Pmcid, sampleSource.Title, sampleSource.Url, sampleSource.License, sampleSource.Content) },
+            SectionIndices: new List<int> { 1 },
+            Parallel: false,
+            Policy: PinnedExecutionPolicy.CreateDefault("minimax")
         );
 
+        var result = await aiClient.ExecutePipelineAsync(request, CancellationToken.None);
+
         Assert.NotNull(result);
-        Assert.Equal("Section 1: Memory Systems", result.Title);
-        Assert.Equal(2, logs.Count);
-        Assert.Contains(logs, l => l.Contains("Synthesizing passage"));
-        Assert.Contains(logs, l => l.Contains("Auditing against evidence"));
+        Assert.Equal("ACCEPTED", result.Status);
+        Assert.Equal("run_sample", result.RunId);
+        Assert.NotNull(result.ExamId);
     }
 
     [Fact]

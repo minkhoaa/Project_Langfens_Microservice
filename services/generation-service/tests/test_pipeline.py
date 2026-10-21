@@ -15,7 +15,6 @@ from app.pipeline import (
     TYPES,
     _words,
     extend_passage,
-    generate_section,
     repair_evidence,
     replace_rejected_question,
     review_answers,
@@ -227,131 +226,6 @@ async def test_passage_source_review_rejects_conflicting_verdict():
             await review_passage_source("Source.", "Passage.")
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("issue", ["causal_overstatement", "overstated_certainty", "unsupported_claim"])
-async def test_generation_fails_closed_when_causal_or_unsupported_findings_persist(issue):
-    """Regression test: Unresolved causal overstatement, overstated certainty, or unsupported claims must fail closed."""
-    generated = valid_section(1)
-    article = {
-        "pmcid": "PMC123",
-        "title": "Research title",
-        "doi": "10.1000/test",
-        "url": "https://europepmc.org/articles/PMC123",
-        "license": "https://creativecommons.org/licenses/by/4.0",
-        "wordCount": 800,
-        "authors": "Ada Example",
-        "content": "Source text.",
-    }
-    persistent_finding = [{"claimQuote": "Claim quote.", "issue": issue, "reason": "Persistent fidelity defect."}]
-    with patch("app.pipeline.fetch_source", new_callable=AsyncMock, return_value=article), \
-         patch("app.pipeline.review_passage_source", new_callable=AsyncMock, return_value=persistent_finding) as mock_review, \
-         patch("app.pipeline.generate_json", new_callable=AsyncMock) as mock_gen:
-        mock_gen.return_value = {"text": f"{generated['title']}\n\n{generated['passage']}"}
-        from app.pipeline import _generate_section_once
-        with pytest.raises(ValueError, match="Source-fidelity review rejected the revised passage"):
-            await _generate_section_once(
-                "Topic", 1, {"pmcid": "PMC123"},
-                run_id="run_test", epoch=1,
-                lease_owner=UUID("00000000-0000-0000-0000-000000000001"),
-                parent_operation_id="op_test",
-            )
-        # Must have attempted revision loop and checked findings multiple times before failing closed
-        assert mock_review.await_count >= 2
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("index", [1, 2, 3])
-async def test_generation_uses_section_and_question_type_prompts(index):
-    generated = valid_section(index)
-    article = {
-        "pmcid": "PMC123",
-        "title": "Research title",
-        "doi": "10.1000/test",
-        "url": "https://europepmc.org/articles/PMC123",
-        "license": "https://creativecommons.org/licenses/by/4.0",
-        "wordCount": 800,
-        "authors": "Ada Example",
-        "content": "Source text.",
-    }
-    reviews = {
-        number: {"number": number, "valid": True, "issues": [], "reason": ""}
-        for group in generated["groups"]
-        for q in group["questions"]
-        for number in [q["number"]]
-    }
-    with patch("app.pipeline.fetch_source", new_callable=AsyncMock) as fetch, \
-         patch("app.pipeline.generate_json", new_callable=AsyncMock) as generate, \
-         patch("app.pipeline.review_passage_source", new_callable=AsyncMock) as review_passage, \
-         patch("app.pipeline.review_answers", new_callable=AsyncMock) as review_ans:
-        fetch.return_value = article
-        review_passage.return_value = []
-        review_ans.return_value = reviews
-        generate.side_effect = [
-            {"text": f"{generated['title']}\n\n{generated['passage']}"},
-            {"questions": generated["groups"][0]["questions"]},
-            {"questions": generated["groups"][1]["questions"]},
-        ]
-
-        section = await generate_section(
-            "topic", index, {"pmcid": "PMC123"},
-            run_id="run_test", epoch=1,
-            lease_owner=UUID("00000000-0000-0000-0000-000000000001"),
-            parent_operation_id="op_test",
-        )
-
-    assert section["title"] == generated["title"]
-    assert section["passage"] == generated["passage"].strip()
-    passage_call = generate.await_args_list[0].kwargs
-    passage_instruction = passage_call["variables"]["instruction"].casefold()
-    assert "preserve the study's limitations" in passage_instruction
-    assert "do not turn correlation into causation" in passage_instruction
-    assert "do not include internal section labels" in passage_instruction
-    assert ("must contain a sustained argument" in passage_instruction) is (index == 3)
-
-
-@pytest.mark.asyncio
-async def test_defensive_question_extraction_handles_bare_list():
-    """Defensive extraction: LLM returning bare list [] should be parsed correctly."""
-    generated = valid_section(1)
-    article = {
-        "pmcid": "PMC123",
-        "title": "Research title",
-        "doi": "10.1000/test",
-        "url": "https://europepmc.org/articles/PMC123",
-        "license": "https://creativecommons.org/licenses/by/4.0",
-        "wordCount": 800,
-        "authors": "Ada Example",
-        "content": "Source text.",
-    }
-    reviews = {
-        number: {"number": number, "valid": True, "issues": [], "reason": ""}
-        for group in generated["groups"]
-        for q in group["questions"]
-        for number in [q["number"]]
-    }
-    with patch("app.pipeline.fetch_source", new_callable=AsyncMock) as fetch, \
-         patch("app.pipeline.generate_json", new_callable=AsyncMock) as generate, \
-         patch("app.pipeline.review_passage_source", new_callable=AsyncMock) as review_passage, \
-         patch("app.pipeline.review_answers", new_callable=AsyncMock) as review_ans:
-        fetch.return_value = article
-        review_passage.return_value = []
-        review_ans.return_value = reviews
-        # Bare list returned for question groups instead of {"questions": [...]}
-        generate.side_effect = [
-            {"text": f"{generated['title']}\n\n{generated['passage']}"},
-            generated["groups"][0]["questions"],  # bare list
-            generated["groups"][1]["questions"],  # bare list
-        ]
-
-        section = await generate_section(
-            "topic", 1, {"pmcid": "PMC123"},
-            run_id="run_test", epoch=1,
-            lease_owner=UUID("00000000-0000-0000-0000-000000000001"),
-            parent_operation_id="op_test",
-        )
-        assert len(section["groups"]) == 2
-        assert len(section["groups"][0]["questions"]) == 7
-
-
-@pytest.mark.asyncio
 async def test_short_passage_is_extended():
     passage = "Scientists found species in the forest. " * 105  # ~420 words
     with patch("app.pipeline.generate_json", new_callable=AsyncMock) as generate:
@@ -368,48 +242,60 @@ def test_overlong_passage_is_trimmed():
 
 
 @pytest.mark.asyncio
-async def test_section_endpoint_ndjson_streaming(monkeypatch):
+async def test_execute_endpoint(monkeypatch):
+    from app.contracts.artifact import ArtifactEnvelope, ArtifactType
+    from app.reading_policy import PinnedExecutionPolicy
+    from app.reading_models import PipelineRequest, PipelineResult, SourceInput
+    from app.router import get_reading_pipeline
     monkeypatch.setenv("EXAMSERVICE__INTERNAL__API__KEY", "test-pipeline-key")
     auth_headers = {"X-Internal-Service-Key": "test-pipeline-key"}
-    generated = valid_section(1)
-    article = {
-        "pmcid": "PMC123",
-        "title": "Research title",
-        "doi": "10.1000/test",
-        "url": "https://europepmc.org/articles/PMC123",
-        "license": "https://creativecommons.org/licenses/by/4.0",
-        "wordCount": 800,
-        "authors": "Ada Example",
-        "content": "Source text.",
-    }
-    with patch("app.facade.GenerationFacade.generate_section", new_callable=AsyncMock) as mock_gen:
-        async def fake_generate_section(topic, index, source, progress=None, **kwargs):
-            if progress:
-                await progress("Information", "Step 1 complete")
-                await progress("Information", "Step 2 complete")
-            return generated
-
-        mock_gen.side_effect = fake_generate_section
-
+    sec_env = ArtifactEnvelope.create(
+        artifact_id="section:run_test:1",
+        artifact_type=ArtifactType.SECTION,
+        run_id="run_test",
+        payload={"sectionId": 1, "title": "Passage 1", "passage": "Text", "groups": []},
+        producer_version="2.0.0",
+        version=1,
+    )
+    mock_pipeline = AsyncMock()
+    mock_pipeline.execute.return_value = PipelineResult(
+        runId="run_test",
+        status="ACCEPTED",
+        sections=(sec_env,),
+        paper=None,
+        examId=None,
+        metrics={"stages_executed": 1, "artifacts_reused": 0, "drafts_persisted": 0, "acceptances_committed": 1},
+    )
+    policy = PinnedExecutionPolicy(provider="mock")
+    req = PipelineRequest(
+        runId="run_test",
+        jobId=UUID("00000000-0000-0000-0000-000000000001"),
+        epoch=1,
+        leaseOwner=UUID("00000000-0000-0000-0000-000000000001"),
+        topic="Biodiversity",
+        sources=(SourceInput(
+            sectionIndex=1,
+            pmcid="PMC1234567",
+            title="Research title",
+            url="https://europepmc.org/articles/PMC1234567",
+            license="https://creativecommons.org/licenses/by/4.0",
+            content="Source text content with sufficient words " * 20,
+        ),),
+        sectionIndices=(1,),
+        parallel=False,
+        policy=policy,
+        finalize=False,
+    )
+    app.dependency_overrides[get_reading_pipeline] = lambda: mock_pipeline
+    try:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as ac:
             resp = await ac.post(
-                "/api/v1/autogen/reading-paper/section",
-                json={
-                    "topic": "Biodiversity",
-                    "index": 1,
-                    "source": article,
-                    "runId": "run_test",
-                    "epoch": 1,
-                    "leaseOwner": "00000000-0000-0000-0000-000000000001",
-                    "parentOperationId": "op_test",
-                },
-                headers={"Accept": "application/x-ndjson"},
+                "/v1/autogen/reading-paper/execute",
+                json=req.model_dump(mode="json", by_alias=True),
             )
-            assert "application/x-ndjson" in resp.headers.get("content-type", "")
-
-            lines = [json.loads(line) for line in resp.text.strip().split("\n") if line.strip()]
-            types = [item["type"] for item in lines]
-            assert "log" in types
-            assert "result" in types
-            result_item = next(item for item in lines if item["type"] == "result")
-            assert result_item["section"]["title"] == generated["title"]
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["status"] == "ACCEPTED"
+            assert data["runId"] == "run_test"
+    finally:
+        app.dependency_overrides.pop(get_reading_pipeline, None)

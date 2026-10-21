@@ -108,3 +108,20 @@ class PipelineResult(CanonicalBaseModel):
     paper: ArtifactEnvelope | None = None
     exam_id: UUID | None = Field(default=None, alias="examId")
     metrics: dict[str, Any] = Field(default_factory=dict)
+
+    @property
+    def accepted_questions_count(self) -> int:
+        if self.paper and isinstance(self.paper.payload, dict):
+            total = self.paper.payload.get("totalQuestions")
+            if total is not None:
+                return int(total)
+            return sum(
+                len(grp.get("questions", []))
+                for sec in self.paper.payload.get("sections", [])
+                for grp in sec.get("groups", [])
+            )
+        return sum(
+            len(grp.get("questions", []))
+            for sec in self.sections
+            for grp in (sec.payload.get("groups", []) if isinstance(sec.payload, dict) else [])
+        )

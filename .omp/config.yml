@@ -100,6 +100,22 @@ skills:
     - skill-scout
     - workspace-surface-audit
     - team-agent-orchestration
+    # Superpowers skills
+    - using-superpowers
+    - brainstorming
+    - systematic-debugging
+    - writing-plans
+    - executing-plans
+    - subagent-driven-development
+    - test-driven-development
+    - verification-before-completion
+    - finishing-a-development-branch
+    - requesting-code-review
+    - receiving-code-review
+    - using-git-worktrees
+    - writing-skills
+    - dispatching-parallel-agents
+    - diagnosing-superpowers
   # Retain the existing off-stack exclusions as a second guard.
   ignoredSkills:
     - "angular-*"

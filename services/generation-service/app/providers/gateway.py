@@ -83,6 +83,7 @@ class ProviderGateway:
         request: ProviderRequest,
         epoch: int = 1,
         lease_owner: Optional[UUID] = None,
+        retry_policy: Optional[RetryPolicy] = None,
     ) -> ProviderResponse:
         # 1. Input validation & strict finiteness
         if not request.operation_id:
@@ -175,7 +176,8 @@ class ProviderGateway:
             default=str,
         ).encode("ascii")).hexdigest()
 
-        max_attempts = self.retry_policy.max_attempts
+        effective_retry_policy = retry_policy or self.retry_policy
+        max_attempts = effective_retry_policy.max_attempts
         attempt_number = 1
         provider_index = 0
         last_error: Optional[Exception] = None
@@ -335,11 +337,19 @@ class ProviderGateway:
                             status_code=409,
                             operation_id=attempt_operation_id,
                         )
-                    response = ProviderResponse.model_validate_json(result_json)
-                    response.operation_id = request.operation_id
-                    response.attempts_count = attempt_number
-                    self.last_response = response
-                    return response
+                    try:
+                        data = json.loads(result_json)
+                        if isinstance(data, dict) and "error" in data:
+                            raise InvalidJsonError(f"Persisted provider format error: {data['error']}", operation_id=attempt_operation_id)
+                        response = ProviderResponse.model_validate(data)
+                        response.operation_id = request.operation_id
+                        response.attempts_count = attempt_number
+                        self.last_response = response
+                        return response
+                    except InvalidJsonError:
+                        raise
+                    except Exception as val_err:
+                        raise ProviderError(f"Could not validate replayed provider response: {val_err}", operation_id=attempt_operation_id) from val_err
                 if status in ("RESERVED", "UNKNOWN_OUTCOME"):
                     raise ProviderError(
                         f"Persisted attempt '{attempt_operation_id}' has status '{status}' without committed result; halts and requires reconciliation",
@@ -558,7 +568,7 @@ class ProviderGateway:
             if attempt_number >= max_attempts:
                 break
 
-            delay = self.retry_policy.compute_delay(attempt_number - 1, retry_after=retry_after)
+            delay = effective_retry_policy.compute_delay(attempt_number - 1, retry_after=retry_after)
             if time.time() + delay > deadline:
                 last_error = DeadlineExceededError(
                     f"Backoff delay ({delay:.1f}s) would exceed remaining deadline for operation '{request.operation_id}'",
