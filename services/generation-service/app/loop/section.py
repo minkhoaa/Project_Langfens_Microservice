@@ -447,60 +447,77 @@ class SectionLoop:
 
         # 4. Check for existing durable checkpoint to resume idempotently
         stored_state = self.persistence_client.resume_state(run_id)
+        if not stored_state.isCompatible:
+            raise ValueError(f"Run {run_id} is not compatible: {stored_state.incompatibilityReason}")
+        if stored_state.status.upper() not in ("RUNNING", "COMPLETED"):
+            raise ValueError(f"Run {run_id} is not active: {stored_state.status}")
+
+        store_accepted_heads: Dict[str, ArtifactRef] = {}
+        for a in (stored_state.artifacts or []):
+            if not getattr(a, "isStale", False):
+                try:
+                    store_accepted_heads[a.artifactId] = ArtifactRef(
+                        artifactId=a.artifactId,
+                        artifactType=ArtifactType(a.artifactType),
+                        version=a.acceptedVersion,
+                        contentHash=a.acceptedHash,
+                    )
+                except Exception:
+                    pass
+
         if hasattr(stored_state, "artifacts") and stored_state.artifacts:
             for art_info in stored_state.artifacts:
                 art_id = getattr(art_info, "artifactId", None) or getattr(art_info, "artifact_id", None)
-                if art_id == effective_target_id:
+                if art_id == effective_target_id and not getattr(art_info, "isStale", False):
                     acc_ver = getattr(art_info, "acceptedVersion", 1) or getattr(art_info, "accepted_version", 1)
                     acc_hash = getattr(art_info, "acceptedHash", "") or getattr(art_info, "accepted_hash", "")
 
-                    raw_payload = getattr(art_info, "payloadJson", "{}") or getattr(art_info, "payload_json", "{}")
-                    import json
-                    p_dict = json.loads(raw_payload) if isinstance(raw_payload, str) else raw_payload
+                    unresolved = [
+                        op.operationId for op in (stored_state.operations or [])
+                        if op.artifactId == effective_target_id and op.status.upper() not in ("COMPLETED", "FAILED", "CANCELLED")
+                    ]
+                    if unresolved:
+                        raise ValueError(f"Unresolved provider operations for {effective_target_id}: {unresolved}")
 
-                    stored_parent_refs: tuple[ArtifactRef, ...] = ()
-                    if getattr(art_info, "envelopeJson", None):
-                        try:
-                            stored_env = ArtifactEnvelope.model_validate_json(art_info.envelopeJson)
-                            stored_parent_refs = tuple(stored_env.parent_refs)
-                        except Exception:
-                            pass
-                    if not stored_parent_refs and isinstance(p_dict, dict) and p_dict.get("passageRef") and p_dict.get("blueprintRef") and p_dict.get("questionRefs"):
-                        try:
-                            stored_parent_refs = tuple(
-                                [
-                                    ArtifactRef.model_validate(p_dict["passageRef"]),
-                                    ArtifactRef.model_validate(p_dict["blueprintRef"]),
-                                ]
-                                + [ArtifactRef.model_validate(qr) for qr in p_dict["questionRefs"]]
-                            )
-                        except Exception:
-                            pass
+                    env_json = getattr(art_info, "envelopeJson", None)
+                    if not env_json:
+                        raise ValueError(f"Corrupt checkpoint for section {effective_target_id}: missing envelopeJson")
+                    try:
+                        stored_env = ArtifactEnvelope.model_validate_json(env_json)
+                    except Exception as e:
+                        raise ValueError(f"Corrupt checkpoint for section {effective_target_id}: invalid envelopeJson ({e})") from e
 
+                    if stored_env.run_id != run_id:
+                        raise ValueError(f"Corrupt checkpoint for section {effective_target_id}: runId mismatch")
+                    if stored_env.artifact_id != effective_target_id:
+                        raise ValueError(f"Corrupt checkpoint for section {effective_target_id}: artifactId mismatch")
+                    if stored_env.version != acc_ver:
+                        raise ValueError(f"Corrupt checkpoint for section {effective_target_id}: version mismatch ({stored_env.version} != {acc_ver})")
+                    if stored_env.content_hash != acc_hash:
+                        raise ValueError(f"Corrupt checkpoint for section {effective_target_id}: contentHash mismatch ({stored_env.content_hash} != {acc_hash})")
+                    if not stored_env.verify_integrity():
+                        raise ValueError(f"Corrupt checkpoint for section {effective_target_id}: integrity verification failed")
+
+                    stored_parent_refs = tuple(stored_env.parent_refs)
                     parents_match_current = (
-                        not stored_parent_refs or stored_parent_refs == tuple(all_input_deps)
-                    ) and prior_section_envelope is None and template_section_payload is None
+                        stored_parent_refs == tuple(all_input_deps)
+                        and prior_section_envelope is None
+                        and template_section_payload is None
+                    )
+                    parents_not_stale = all(
+                        store_accepted_heads[p.artifact_id] == p
+                        for p in stored_parent_refs
+                        if p.artifact_id in store_accepted_heads
+                    )
 
-                    if parents_match_current:
-                        cached_env = ArtifactEnvelope.create(
-                            artifact_id=effective_target_id,
-                            artifact_type=ArtifactType.SECTION,
-                            run_id=run_id,
-                            payload=p_dict,
-                            producer_version="2.0.0",
-                            version=acc_ver,
-                            section_id=section_index,
-                            parent_refs=all_input_deps,
-                            schema_version="2.0.0",
-                        )
-                        logger.info(f"Resuming already accepted section {effective_target_id} v{acc_ver} ({acc_hash[:8]})")
-
-                        student_payload = to_student_visible_section(cached_env)
+                    if parents_match_current and parents_not_stale:
+                        logger.info("Resuming already accepted section %s v%d with 0 provider calls", effective_target_id, acc_ver)
+                        student_payload = to_student_visible_section(stored_env)
                         return LoopResult(
                             runId=run_id,
                             decision=DecisionType.PASS,
                             terminalState=LoopState.COMPLETED,
-                            acceptedArtifact=cached_env,
+                            acceptedArtifact=stored_env,
                             terminalReason=f"Resumed already accepted section {effective_target_id}",
                             terminalReasonCode=LoopReason.ACCEPTED,
                             totalIterations=0,
@@ -523,24 +540,7 @@ class SectionLoop:
                             ),
                         )
                     elif prior_section_envelope is None:
-                        if getattr(art_info, "envelopeJson", None):
-                            try:
-                                prior_section_envelope = ArtifactEnvelope.model_validate_json(art_info.envelopeJson)
-                            except Exception:
-                                pass
-                        if prior_section_envelope is None:
-                            prior_section_envelope = ArtifactEnvelope.create(
-                                artifact_id=effective_target_id,
-                                artifact_type=ArtifactType.SECTION,
-                                run_id=run_id,
-                                payload=p_dict,
-                                producer_version="2.0.0",
-                                version=acc_ver,
-                                section_id=section_index,
-                                parent_refs=list(stored_parent_refs) if stored_parent_refs else all_input_deps,
-                                schema_version="2.0.0",
-                            )
-        # 5. Build LoopContext & BoundedLoopRuntime
+                        prior_section_envelope = stored_env
         authority = AuthorityGrant(leaseOwner=lease_owner, epoch=epoch)
         context = LoopContext(
             runId=run_id,

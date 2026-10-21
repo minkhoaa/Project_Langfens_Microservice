@@ -188,6 +188,107 @@ class LoopPolicy(CanonicalBaseModel):
             **overrides,
         })
 
+    @classmethod
+    def from_pinned_execution_policy(
+        cls,
+        policy: Any,
+        scope: Any = "SECTION",
+        section_index: Optional[int] = None,
+        **overrides: Any,
+    ) -> LoopPolicy:
+        """Adapts canonical PinnedExecutionPolicy into a bounded LoopPolicy.
+
+        Strictly enforces the unified contract hard ceilings:
+        - provider call <= 180s
+        - section wall time <= 900s
+        - paper wall time <= 2700s (900s * 3)
+        - section token cap <= 100,000
+        - paper token cap <= 300,000 (100,000 * 3)
+        No unlimited fallback, silent budget reset, or artificial USD cap.
+        Pins the canonical policy hash as cap_profile_sha256.
+        """
+        from app.contracts.issue import IssueScope
+        from app.reading_policy import (
+            MAX_PROVIDER_CALL_SECONDS,
+            MAX_SECTION_WALL_SECONDS,
+            MAX_SECTION_TOKEN_CAP,
+        )
+
+        scope_val = scope.value if isinstance(scope, IssueScope) else str(scope).upper()
+        is_paper = scope_val == "PAPER"
+
+        max_provider_seconds = min(
+            float(getattr(policy, "provider_call_seconds", MAX_PROVIDER_CALL_SECONDS)),
+            float(MAX_PROVIDER_CALL_SECONDS),
+        )
+        if is_paper:
+            max_wall = min(
+                float(getattr(policy, "run_wall_seconds", MAX_SECTION_WALL_SECONDS * 3)),
+                float(MAX_SECTION_WALL_SECONDS * 3),
+            )
+            max_tokens = min(
+                int(getattr(policy, "run_token_cap", MAX_SECTION_TOKEN_CAP * 3)),
+                MAX_SECTION_TOKEN_CAP * 3,
+            )
+            max_calls = getattr(policy, "run_call_cap", 30)
+        else:
+            max_wall = min(
+                float(getattr(policy, "section_wall_seconds", MAX_SECTION_WALL_SECONDS)),
+                float(MAX_SECTION_WALL_SECONDS),
+            )
+            max_tokens = min(
+                int(getattr(policy, "section_token_cap", MAX_SECTION_TOKEN_CAP)),
+                MAX_SECTION_TOKEN_CAP,
+            )
+            max_calls = getattr(policy, "section_call_cap", 15)
+
+        policy_hash = getattr(policy, "hash", "")
+
+        snapshot = {
+            "profileVersion": "pinned-execution-v2",
+            "profileSource": f"PinnedExecutionPolicy ({getattr(policy, 'provider', 'pinned')})",
+            "policyHash": policy_hash,
+            "caps": {
+                "loopMaxVersions": 3,
+                "loopMaxGeneratedVersions": 3,
+                "loopMaxRepairAttemptsPerVersion": 2,
+                "loopMaxTotalRepairs": getattr(policy, "max_repairs", 2),
+                "loopMaxConsecutiveNoProgress": 2,
+                "loopMaxOscillationCycles": 2,
+                "loopMaxTotalCalls": max_calls,
+                "loopMaxTotalTokens": max_tokens,
+                "loopMaxWallTimeSeconds": int(max_wall),
+                "generateTokenReservation": min(15_000, max_tokens),
+                "passageGenerateTokenReservation": min(15_000, max_tokens),
+                "evaluateTokenReservation": min(10_000, max_tokens),
+                "repairTokenReservation": min(15_000, max_tokens),
+                "loopOperationWallReservationSeconds": max_provider_seconds,
+                "loopMaxResponseBytes": 500_000,
+                "evaluatorSemanticTimeoutSeconds": 30.0,
+                "evaluatorStageTimeoutSeconds": 60.0,
+                "evaluatorDeterministicTimeoutSeconds": 5.0,
+                "repairTimeoutSeconds": 30.0,
+                "repairMaxTokensPerAttempt": 3000,
+                "evaluatorMaxTokensPerEvaluation": 4000,
+            },
+        }
+
+        return cls(
+            max_total_calls=max_calls,
+            max_total_tokens=max_tokens,
+            max_wall_time_seconds=max_wall,
+            operation_wall_reservation_seconds=max_provider_seconds,
+            generate_token_reservation=min(15_000, max_tokens),
+            evaluate_token_reservation=min(10_000, max_tokens),
+            repair_token_reservation=min(15_000, max_tokens),
+            max_repair_attempts_per_version=getattr(policy, "max_repairs", 2),
+            max_total_repairs=getattr(policy, "max_repairs", 2),
+            cap_profile_version="pinned-execution-v2",
+            cap_profile_source=f"PinnedExecutionPolicy ({getattr(policy, 'provider', 'pinned')})",
+            cap_profile_sha256=policy_hash,
+            cap_profile_snapshot=snapshot,
+            **overrides,
+        )
     @property
     def is_unlimited(self) -> bool:
         return self.max_total_calls <= 0 and self.max_total_tokens <= 0 and self.max_wall_time_seconds <= 0

@@ -170,80 +170,67 @@ class QuestionCandidateLoop:
         else:
             sec_start = 1 if section_index == 1 else (14 if section_index == 2 else 27)
             sec_end = 13 if section_index == 1 else (26 if section_index == 2 else 40)
-        for art in stored_state.artifacts:
-            art_type = getattr(art, "artifact_type", None) or getattr(art, "artifactType", None)
-            # Rehydrate ArtifactResumeInfo (and other non-envelope) objects into a real ArtifactEnvelope
-            # so downstream code (e.g. assemble_immutable_section) that reads .payload does not crash.
-            if not isinstance(art, ArtifactEnvelope):
-                if getattr(art, "envelopeJson", None):
-                    try:
-                        env_obj: ArtifactEnvelope = ArtifactEnvelope.model_validate_json(art.envelopeJson)
-                    except Exception:
-                        env_obj = None  # fall through to envelope-less reconstruction below
-                    if env_obj is not None:
-                        art = env_obj
-                else:
-                    payload_fallback = getattr(art, "payload", None)
-                    if not payload_fallback and hasattr(art, "payloadJson"):
-                        import json
-                        try:
-                            payload_fallback = json.loads(art.payloadJson)
-                        except Exception:
-                            payload_fallback = {}
-                    elif not payload_fallback and hasattr(art, "contentJson"):
-                        import json
-                        try:
-                            payload_fallback = json.loads(art.contentJson)
-                        except Exception:
-                            payload_fallback = {}
-                    type_for_create = ArtifactType(art_type) if isinstance(art_type, str) else art_type
-                    art = ArtifactEnvelope.create(
-                        artifact_id=getattr(art, "artifactId", None) or getattr(art, "artifact_id", ""),
-                        artifact_type=type_for_create or ArtifactType.QUESTION,
-                        run_id=run_id,
-                        payload=payload_fallback or {},
-                        producer_version="2.0.0",
-                        version=getattr(art, "acceptedVersion", 1) or 1,
-                        section_id=section_index,
+        store_accepted_heads: Dict[str, ArtifactRef] = {}
+        for art_info in stored_state.artifacts:
+            if not getattr(art_info, "isStale", False):
+                try:
+                    store_accepted_heads[art_info.artifactId] = ArtifactRef(
+                        artifactId=art_info.artifactId,
+                        artifactType=ArtifactType(art_info.artifactType),
+                        version=art_info.acceptedVersion,
+                        contentHash=art_info.acceptedHash,
                     )
-            if art_type in (ArtifactType.QUESTION, "Question"):
-                payload = getattr(art, "payload", None)
-                if not payload and hasattr(art, "payloadJson"):
-                    import json
-                    try:
-                        payload = json.loads(art.payloadJson)
-                    except Exception:
-                        payload = {}
-                elif not payload and hasattr(art, "contentJson"):
-                    import json
-                    try:
-                        payload = json.loads(art.contentJson)
-                    except Exception:
-                        payload = {}
-                if isinstance(payload, (Mapping, dict)):
-                    q_num = payload.get("questionNumber")
-                    if q_num is not None and sec_start <= int(q_num) <= sec_end:
-                        committed_questions[int(q_num)] = art
-            elif art_type in (ArtifactType.QUESTION_GROUP, "QuestionGroup"):
-                payload = getattr(art, "payload", None)
-                if not payload and hasattr(art, "payloadJson"):
-                    import json
-                    try:
-                        payload = json.loads(art.payloadJson)
-                    except Exception:
-                        payload = {}
-                elif not payload and hasattr(art, "contentJson"):
-                    import json
-                    try:
-                        payload = json.loads(art.contentJson)
-                    except Exception:
-                        payload = {}
-                if isinstance(payload, (Mapping, dict)):
-                    for q in (payload.get("questions") or []):
-                        if isinstance(q, (Mapping, dict)):
-                            q_num = q.get("questionNumber")
-                            if q_num is not None and sec_start <= int(q_num) <= sec_end:
-                                committed_questions[int(q_num)] = art
+                except Exception:
+                    pass
+
+        for art in stored_state.artifacts:
+            if getattr(art, "isStale", False):
+                continue
+            art_type = getattr(art, "artifact_type", None) or getattr(art, "artifactType", None)
+            if art_type in (ArtifactType.QUESTION, "Question", ArtifactType.QUESTION_GROUP, "QuestionGroup"):
+                env_json = getattr(art, "envelopeJson", None)
+                if not env_json:
+                    raise ValueError(f"Corrupt question artifact checkpoint {getattr(art, 'artifactId', '')}: missing envelopeJson")
+                try:
+                    env_obj = ArtifactEnvelope.model_validate_json(env_json)
+                except Exception as e:
+                    raise ValueError(f"Corrupt question artifact envelope for {getattr(art, 'artifactId', '')}: {e}") from e
+
+                if env_obj.run_id != run_id:
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: runId mismatch")
+                if env_obj.artifact_id != getattr(art, "artifactId", None):
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: artifactId mismatch")
+                acc_v = getattr(art, "acceptedVersion", None)
+                if acc_v is not None and env_obj.version != acc_v:
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: version mismatch")
+                acc_h = getattr(art, "acceptedHash", None)
+                if acc_h and env_obj.content_hash != acc_h:
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: contentHash mismatch")
+                if not env_obj.verify_integrity():
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: integrity verification failed")
+
+                parents_accepted = bool(env_obj.parent_refs) and all(
+                    p.artifact_id in store_accepted_heads
+                    and store_accepted_heads[p.artifact_id] == p
+                    for p in env_obj.parent_refs
+                )
+                if not parents_accepted:
+                    continue
+
+                if art_type in (ArtifactType.QUESTION, "Question"):
+                    payload = env_obj.payload
+                    if isinstance(payload, (Mapping, dict)):
+                        q_num = payload.get("questionNumber")
+                        if q_num is not None and sec_start <= int(q_num) <= sec_end:
+                            committed_questions[int(q_num)] = env_obj
+                elif art_type in (ArtifactType.QUESTION_GROUP, "QuestionGroup"):
+                    payload = env_obj.payload
+                    if isinstance(payload, (Mapping, dict)):
+                        for q in (payload.get("questions") or []):
+                            if isinstance(q, (Mapping, dict)):
+                                q_num = q.get("questionNumber")
+                                if q_num is not None and sec_start <= int(q_num) <= sec_end:
+                                    committed_questions[int(q_num)] = env_obj
         pools: List[QuestionCandidatePool] = []
         newly_selected_candidates: List[QuestionCandidate] = []
         candidate_artifacts: Dict[str, ArtifactEnvelope] = {}

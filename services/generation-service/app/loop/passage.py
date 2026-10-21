@@ -162,73 +162,93 @@ class PassageLoop:
         if passage_context.source_pack_ref:
             expected_input_deps.append(passage_context.source_pack_ref)
 
-        try:
-            resume_state = self.persistence_client.resume_state(run_id)
-            # Query authoritative accepted upstream heads from store
-            store_accepted_heads: Dict[str, ArtifactRef] = {}
-            for art_info in resume_state.artifacts:
-                if not art_info.isStale:
-                    try:
-                        store_accepted_heads[art_info.artifactId] = ArtifactRef(
-                            artifactId=art_info.artifactId,
-                            artifactType=ArtifactType(art_info.artifactType),
-                            version=art_info.acceptedVersion,
-                            contentHash=art_info.acceptedHash,
-                        )
-                    except Exception:
-                        pass
+        resume_state = self.persistence_client.resume_state(run_id)
+        if not resume_state.isCompatible:
+            raise ValueError(f"Run {run_id} is not compatible: {resume_state.incompatibilityReason}")
+        if resume_state.status.upper() not in ("RUNNING", "COMPLETED"):
+            raise ValueError(f"Run {run_id} is not active: {resume_state.status}")
 
-            for art_info in resume_state.artifacts:
-                if (
-                    art_info.artifactType == ArtifactType.PASSAGE.value
-                    and not art_info.isStale
-                    and art_info.envelopeJson
-                ):
-                    accepted_envelope = ArtifactEnvelope.model_validate_json(art_info.envelopeJson)
-                    # Invariant: Resumed artifact MUST have exact parent_refs matching current input dependencies
-                    # AND those parent_refs must be currently accepted and fresh in the durable store!
-                    parents_match_input = tuple(accepted_envelope.parent_refs) == tuple(expected_input_deps)
-                    parents_accepted_in_store = bool(accepted_envelope.parent_refs) and all(
-                        p.artifact_id in store_accepted_heads
-                        and store_accepted_heads[p.artifact_id] == p
-                        for p in accepted_envelope.parent_refs
+        # Query authoritative accepted upstream heads from store
+        store_accepted_heads: Dict[str, ArtifactRef] = {}
+        for art_info in resume_state.artifacts:
+            if not art_info.isStale:
+                try:
+                    store_accepted_heads[art_info.artifactId] = ArtifactRef(
+                        artifactId=art_info.artifactId,
+                        artifactType=ArtifactType(art_info.artifactType),
+                        version=art_info.acceptedVersion,
+                        contentHash=art_info.acceptedHash,
                     )
+                except Exception:
+                    pass
 
-                    if parents_match_input and parents_accepted_in_store:
-                        logger.info(
-                            "Resuming run %s: reusing previously accepted passage artifact %s (version %d) with verified fresh dependencies",
-                            run_id,
-                            accepted_envelope.artifact_id,
-                            accepted_envelope.version,
-                        )
-                        from app.contracts.loop import DecisionType, LoopState, LoopReason
-                        from app.loop.journal import StepJournal
-                        from app.loop.ledger import IssueLedgerManager
-                        ledger_mgr = IssueLedgerManager(run_id)
-                        return LoopResult(
-                            runId=run_id,
-                            decision=DecisionType.PASS,
-                            terminalState=LoopState.COMPLETED,
-                            acceptedArtifact=accepted_envelope,
-                            terminalReason=f"Resumed previously accepted passage artifact at version {accepted_envelope.version}",
-                            terminalReasonCode=LoopReason.ACCEPTED,
-                            totalIterations=0,
-                            versionsCount=accepted_envelope.version,
-                            repairsCount=0,
-                            callsCount=0,
-                            tokensConsumed=0,
-                            wallTimeSeconds=0.0,
-                            ledger=ledger_mgr.to_ledger(),
-                            latestDecision=None,
-                        )
-                    else:
-                        logger.info(
-                            "Run %s: previously accepted passage artifact %s has stale/unmatched parent dependencies; refusing to reuse",
-                            run_id,
-                            accepted_envelope.artifact_id,
-                        )
-        except Exception as exc:
-            logger.debug("Crash resumption check encountered notice: %s", exc)
+        target_art_info = next((a for a in resume_state.artifacts if a.artifactId == target_art_id), None)
+        if target_art_info and not target_art_info.isStale:
+            unresolved = [
+                op.operationId for op in (resume_state.operations or [])
+                if op.artifactId == target_art_id and op.status.upper() not in ("COMPLETED", "FAILED", "CANCELLED")
+            ]
+            if unresolved:
+                raise ValueError(f"Unresolved provider operations for {target_art_id}: {unresolved}")
+
+            if not target_art_info.envelopeJson:
+                raise ValueError(f"Corrupt checkpoint for {target_art_id}: missing envelopeJson")
+
+            try:
+                accepted_envelope = ArtifactEnvelope.model_validate_json(target_art_info.envelopeJson)
+            except Exception as e:
+                raise ValueError(f"Corrupt checkpoint for {target_art_id}: invalid envelopeJson ({e})") from e
+
+            if accepted_envelope.run_id != run_id:
+                raise ValueError(f"Corrupt checkpoint for {target_art_id}: runId mismatch")
+            if accepted_envelope.artifact_id != target_art_id:
+                raise ValueError(f"Corrupt checkpoint for {target_art_id}: artifactId mismatch")
+            if accepted_envelope.version != target_art_info.acceptedVersion:
+                raise ValueError(f"Corrupt checkpoint for {target_art_id}: version mismatch ({accepted_envelope.version} != {target_art_info.acceptedVersion})")
+            if accepted_envelope.content_hash != target_art_info.acceptedHash:
+                raise ValueError(f"Corrupt checkpoint for {target_art_id}: contentHash mismatch ({accepted_envelope.content_hash} != {target_art_info.acceptedHash})")
+            if not accepted_envelope.verify_integrity():
+                raise ValueError(f"Corrupt checkpoint for {target_art_id}: integrity verification failed")
+
+            parents_match_input = tuple(accepted_envelope.parent_refs) == tuple(expected_input_deps)
+            parents_not_stale = all(
+                store_accepted_heads[p.artifact_id] == p
+                for p in accepted_envelope.parent_refs
+                if p.artifact_id in store_accepted_heads
+            )
+
+            if parents_match_input and parents_not_stale:
+                logger.info(
+                    "Resuming run %s: reusing previously accepted passage artifact %s (version %d) with verified fresh dependencies",
+                    run_id,
+                    accepted_envelope.artifact_id,
+                    accepted_envelope.version,
+                )
+                from app.contracts.loop import DecisionType, LoopState, LoopReason
+                from app.loop.ledger import IssueLedgerManager
+                ledger_mgr = IssueLedgerManager(run_id)
+                return LoopResult(
+                    runId=run_id,
+                    decision=DecisionType.PASS,
+                    terminalState=LoopState.COMPLETED,
+                    acceptedArtifact=accepted_envelope,
+                    terminalReason=f"Resumed previously accepted passage artifact at version {accepted_envelope.version}",
+                    terminalReasonCode=LoopReason.ACCEPTED,
+                    totalIterations=0,
+                    versionsCount=accepted_envelope.version,
+                    repairsCount=0,
+                    callsCount=0,
+                    tokensConsumed=0,
+                    wallTimeSeconds=0.0,
+                    ledger=ledger_mgr.to_ledger(),
+                    latestDecision=None,
+                )
+            else:
+                logger.info(
+                    "Run %s: previously accepted passage artifact %s has stale/unmatched parent dependencies; refusing to reuse",
+                    run_id,
+                    accepted_envelope.artifact_id,
+                )
 
         # 2. Build LoopContext bound to authority and dependencies
         input_deps = list(expected_input_deps)
@@ -236,6 +256,7 @@ class PassageLoop:
             runId=run_id,
             targetArtifactId=target_art_id,
             targetArtifactType=ArtifactType.PASSAGE,
+            sectionId=passage_context.section_index,
             scope="PASSAGE",
             authority=AuthorityGrant(leaseOwner=lease_owner, epoch=epoch),
             inputDependencies=tuple(input_deps),

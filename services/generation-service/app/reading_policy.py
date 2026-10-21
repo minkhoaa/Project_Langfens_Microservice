@@ -361,3 +361,15 @@ class PinnedExecutionPolicy(CanonicalBaseModel):
             max_candidates_remaining=max(0, self.max_candidates - max(0, candidates_used)),
             max_repairs_remaining=max(0, self.max_repairs - max(0, repairs_used)),
         )
+
+    def to_loop_policy(
+        self,
+        scope: Any = "SECTION",
+        section_index: Optional[int] = None,
+        **overrides: Any,
+    ) -> Any:
+        """Converts this canonical finite policy into a compatible LoopPolicy."""
+        from app.loop.policy import LoopPolicy
+        return LoopPolicy.from_pinned_execution_policy(
+            self, scope=scope, section_index=section_index, **overrides
+        )

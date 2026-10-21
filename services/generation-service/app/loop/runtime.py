@@ -346,6 +346,12 @@ class BoundedLoopRuntime:
             ack = self.persistence_client.save_loop_cursor(request)
             if ack.revision != cursor.revision or ack.stateJson != request.stateJson:
                 raise ValueError("Cursor acknowledgement mismatch")
+        except CheckpointApiError as error:
+            cursor.revision = revision
+            if error.status_code in (409, 403):
+                self._finish(LoopReason.LEASE_LOST, f"CAS_CONFLICT: {error.message}", aborted=True)
+                return
+            raise
         except BaseException:
             cursor.revision = revision
             raise
@@ -475,7 +481,11 @@ class BoundedLoopRuntime:
                 self._finish(LoopReason.WALL_TIME_CAP, "next reservation exceeds deadline")
                 return False
         self.journal.record_intent(intent, self.context.cursor.current_state)
-        sec_id = None
+        sec_id = (
+            str(self.context.section_id)
+            if getattr(self.context, "section_id", None) is not None
+            else None
+        )
         art_id = self.context.target_artifact_id
         try:
             grant = self.persistence_client.grant_operation(OperationGrantRequest(
@@ -493,30 +503,8 @@ class BoundedLoopRuntime:
                 self._finish(LoopReason.LEASE_LOST, error.message, aborted=True)
                 return False
             if error.status_code == 422:
-                if self.policy.is_unlimited and intent.token_reservation > 0:
-                    try:
-                        logger.warning(
-                            "Child reservation returned 422 under unlimited profile (%s); retrying with unreserved token allocation",
-                            error.message,
-                        )
-                        zero_grant = self.persistence_client.grant_operation(OperationGrantRequest(
-                            runId=self.context.run_id, epoch=self.context.authority.epoch,
-                            leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
-                            operationType=intent.operation_type, requestHash=intent.request_hash,
-                            tokenReservation=0,
-                            wallTimeReservationSeconds=intent.wall_time_reservation_seconds,
-                            sectionId=sec_id,
-                            artifactId=art_id,
-                            parentOperationId=parent_op,
-                        ))
-                        grant = zero_grant
-                        intent = intent.model_copy(update={"token_reservation": 0})
-                    except Exception as retry_err:
-                        self._finish(LoopReason.TOKEN_CAP, f"Reservation rejected under unlimited profile: {retry_err}")
-                        return False
-                else:
-                    self._finish(LoopReason.TOKEN_CAP, error.message)
-                    return False
+                self._finish(LoopReason.TOKEN_CAP, error.message)
+                return False
             else:
                 raise
         if grant.operationId != intent.operation_id or grant.tokenReservation != intent.token_reservation:
@@ -946,7 +934,6 @@ class BoundedLoopRuntime:
                     logger.error("Evaluator %s failed: %s: %s", evaluator.evaluator_id, type(error).__name__, error, exc_info=True)
                     result = self._error_evaluation(evaluator, art, intent,
                                                     f"Evaluator {evaluator.evaluator_id} error: {type(error).__name__}: {error}")
-                    result = self._error_evaluation(evaluator, art, intent, "Evaluator returned ERROR without evidence")
                 try:
                     self.persistence_client.reconcile_operation(OperationReconcileRequest(
                         runId=self.context.run_id, epoch=self.context.authority.epoch,
@@ -1034,6 +1021,9 @@ class BoundedLoopRuntime:
                 return
             if ev.target_ref != art.to_ref() or set(ev.input_dependency_refs) != set(art.parent_refs):
                 self._finish(LoopReason.STALE_DEPENDENCY, f"Cannot accept: evaluation {ev.evaluator_id} target/parent refs do not match artifact")
+                return
+            if not getattr(ev, "evaluator_version", None) or not str(ev.evaluator_version).strip():
+                self._finish(LoopReason.EVALUATOR_ERROR, f"Cannot accept: evaluation {ev.evaluator_id} missing evaluator_version")
                 return
         intent = self._intent("CHECKPOINT_COMMIT", art.version, 0, art.content_hash,
                               {"evaluations": [e.evaluation_id for e in self._latest_evaluations],

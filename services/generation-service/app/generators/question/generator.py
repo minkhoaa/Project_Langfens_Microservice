@@ -137,35 +137,71 @@ class QuestionCandidateGenerator:
             poolLimit=pool_limit,
         )
         family = QuestionPromptFamily.from_raw(question_type)
+        import re
         for idx, raw in enumerate(raw_candidates[:pool_limit]):
             cand_id = f"cand_{slot_id}_{idx+1}_{uuid4().hex[:6]}"
             options = None
-            raw_ans = raw.get("answer") or "A"
-            if not str(raw_ans).strip():
-                raw_ans = "A"
-            if family == QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE and "options" in raw:
+            rejection_reasons: List[str] = []
+
+            extracted_ans = raw.get("answer")
+            if extracted_ans is None and "correctOption" in raw:
+                extracted_ans = raw.get("correctOption")
+            raw_ans_str = str(extracted_ans).strip() if extracted_ans is not None else ""
+
+            if not raw_ans_str:
+                rejection_reasons.append("Missing answer key")
+
+            if family == QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE:
                 opts_raw = raw.get("options", [])
-                parsed_opts = [
-                    OptionItem(key=o.get("key", "").upper(), text=o.get("text", ""))
-                    for o in opts_raw
-                    if isinstance(o, dict) and o.get("text")
-                ]
-                if len(parsed_opts) >= 4:
-                    keys = ["A", "B", "C", "D"]
-                    target_key = keys[(question_number + idx) % 4]
-                    curr_correct = next((o for o in parsed_opts if o.key == str(raw_ans).upper()), parsed_opts[0])
-                    distractors = [o for o in parsed_opts if o != curr_correct][:3]
-                    options = []
-                    d_idx = 0
-                    for k in keys:
-                        if k == target_key:
-                            options.append(OptionItem(key=k, text=curr_correct.text))
-                        else:
-                            options.append(OptionItem(key=k, text=distractors[d_idx].text if d_idx < len(distractors) else f"Option {k}"))
-                            d_idx += 1
-                    raw_ans = target_key
+                parsed_opts: List[OptionItem] = []
+                if isinstance(opts_raw, list):
+                    for i, o in enumerate(opts_raw):
+                        if isinstance(o, dict) and o.get("text"):
+                            k = str(o.get("key") or chr(65 + i)).strip().upper()
+                            parsed_opts.append(OptionItem(key=k, text=str(o.get("text", "")).strip()))
+                        elif isinstance(o, str) and o.strip():
+                            clean_str = o.strip()
+                            m = re.match(r"^([A-D])\.\s*(.+)$", clean_str)
+                            if m:
+                                parsed_opts.append(OptionItem(key=m.group(1).upper(), text=m.group(2).strip()))
+                            else:
+                                parsed_opts.append(OptionItem(key=chr(65 + i), text=clean_str))
+
+                # Preserve valid MCQ option mappings; NEVER manufacture missing distractors!
+                options = parsed_opts if parsed_opts else None
+
+                # Validate answer key mapping against options without artificial fallback
+                if raw_ans_str:
+                    ans_upper = raw_ans_str.upper()
+                    matched_key = None
+                    if parsed_opts:
+                        for opt in parsed_opts:
+                            if opt.key == ans_upper:
+                                matched_key = opt.key
+                                break
+                        if not matched_key:
+                            for opt in parsed_opts:
+                                if opt.text.strip().lower() == raw_ans_str.lower():
+                                    matched_key = opt.key
+                                    break
+                    raw_ans = matched_key if matched_key else ans_upper
                 else:
-                    options = parsed_opts
+                    raw_ans = "[MISSING]"
+            else:
+                raw_ans = raw_ans_str if raw_ans_str else "[MISSING]"
+
+            ev_quote = str(raw.get("evidenceQuote") or "").strip()
+            if passage_text:
+                is_not_given = family in (
+                    QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN,
+                    QuestionPromptFamily.YES_NO_NOT_GIVEN,
+                ) and raw_ans in ("NOT GIVEN", "NOT_GIVEN", "NG")
+
+                if not ev_quote and not is_not_given:
+                    rejection_reasons.append("Missing evidence quote")
+                elif ev_quote and len(ev_quote) >= 15 and ev_quote.casefold() not in passage_text.casefold():
+                    rejection_reasons.append(f"Evidence quote is unsupported by passage: '{ev_quote[:60]}'")
+
             cand = QuestionCandidate(
                 candidateId=cand_id,
                 slotId=slot_id,
@@ -174,10 +210,10 @@ class QuestionCandidateGenerator:
                 groupId=group_id,
                 questionNumber=question_number,
                 questionType=question_type,
-                prompt=raw.get("prompt", ""),
-                answer=str(raw_ans),
+                prompt=raw.get("prompt", "") or f"Question {question_number} prompt.",
+                answer=raw_ans,
                 options=options,
-                evidenceQuote=raw.get("evidenceQuote", ""),
+                evidenceQuote=ev_quote,
                 explanation=raw.get("explanation"),
                 metadata={
                     "promptVersion": QUESTION_PROMPT_VERSION,
@@ -185,6 +221,9 @@ class QuestionCandidateGenerator:
                     "model": model_name,
                 },
             )
+            if rejection_reasons:
+                cand.rejected = True
+                cand.rejection_reasons.extend(rejection_reasons)
             pool.add_candidate(cand)
         return pool
 
