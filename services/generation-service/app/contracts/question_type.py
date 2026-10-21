@@ -66,8 +66,10 @@ class QuestionPromptFamily(str, Enum):
             "flowchart": cls.FLOW_CHART,
             "diagramlabelcompletion": cls.DIAGRAM_LABEL,
             "diagramlabel": cls.DIAGRAM_LABEL,
+            "multiplechoice": cls.MULTIPLE_CHOICE_SINGLE,
+            "mcq": cls.MULTIPLE_CHOICE_SINGLE,
         }
         if norm in alias_map:
             return alias_map[norm]
 
-        return cls.TRUE_FALSE_NOT_GIVEN
+        raise ValueError(f"Unknown or unsupported question family: {raw}")

@@ -270,7 +270,7 @@ In `services/exam-service`:
 
 ```text
 IMPLEMENTATION: COMPLETE
-FINAL_SHA: 83eabd9
+FINAL_SHA: 89d92c8
 ACTIVE_EXECUTION_ENGINE: BoundedLoopRuntime
 CANONICAL_PIPELINE: ReadingGenerationPipeline
 QUESTION_TYPES_REGISTERED: 19

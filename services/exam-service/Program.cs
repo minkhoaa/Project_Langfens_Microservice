@@ -65,6 +65,12 @@ builder.Services.AddHttpClient<ReadingPaperAiClient>(client =>
     {
         client.DefaultRequestHeaders.Add(CheckpointService.InternalApiKeyHeader, internalKey);
     }
+})
+.AddStandardResilienceHandler(options =>
+{
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(45);
+    options.AttemptTimeout.Timeout = TimeSpan.FromMinutes(45);
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(90);
 });
 builder.Services.AddHostedService<ReadingPaperWorker>();
 

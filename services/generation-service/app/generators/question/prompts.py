@@ -23,58 +23,9 @@ import json
 from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
+from app.contracts.question_type import QuestionPromptFamily
+
 QUESTION_PROMPT_VERSION = "2.0.0"
-
-class QuestionPromptFamily(str, Enum):
-    TRUE_FALSE_NOT_GIVEN = "TrueFalseNotGiven"
-    YES_NO_NOT_GIVEN = "YesNoNotGiven"
-    SENTENCE_COMPLETION = "SentenceCompletion"
-    SUMMARY_COMPLETION = "SummaryCompletion"
-    SUMMARY_COMPLETION_BOX = "SummaryCompletionBox"
-    TABLE_COMPLETION = "TableCompletion"
-    NOTE_COMPLETION = "NoteCompletion"
-    FORM_COMPLETION = "FormCompletion"
-    DIAGRAM_LABEL = "DiagramLabel"
-    MAP_LABEL = "MapLabel"
-    MULTIPLE_CHOICE_SINGLE = "MultipleChoiceSingle"
-    MULTIPLE_CHOICE_MULTIPLE = "MultipleChoiceMultiple"
-    MULTIPLE_CHOICE_SINGLE_IMAGE = "MultipleChoiceSingleImage"
-    SHORT_ANSWER = "ShortAnswer"
-    MATCHING_HEADING = "MatchingHeading"
-    MATCHING_INFORMATION = "MatchingInformation"
-    MATCHING_FEATURES = "MatchingFeatures"
-    MATCHING_ENDINGS = "MatchingEndings"
-    CLASSIFICATION = "Classification"
-    FLOW_CHART = "FlowChart"
-    CHOOSING_TITLE = "ChoosingTitle"
-
-    @classmethod
-    def from_raw(cls, val: Any) -> "QuestionPromptFamily":
-        if isinstance(val, QuestionPromptFamily):
-            return val
-        raw = str(getattr(val, "value", val)).strip()
-        s = raw.replace("_", "").replace("-", "").replace(" ", "").lower()
-        for member in cls:
-            if member.value.lower() == s or member.name.replace("_", "").lower() == s:
-                return member
-        alias_map = {
-            "summarybox": cls.SUMMARY_COMPLETION_BOX,
-            "summarycompletionbox": cls.SUMMARY_COMPLETION_BOX,
-            "choosingatitle": cls.CHOOSING_TITLE,
-            "choosingtitle": cls.CHOOSING_TITLE,
-            "matchingheadings": cls.MATCHING_HEADING,
-            "matchingheading": cls.MATCHING_HEADING,
-            "matchingsentenceendings": cls.MATCHING_ENDINGS,
-            "matchingendings": cls.MATCHING_ENDINGS,
-            "flowchartcompletion": cls.FLOW_CHART,
-            "flowchart": cls.FLOW_CHART,
-            "diagramlabelcompletion": cls.DIAGRAM_LABEL,
-            "diagramlabel": cls.DIAGRAM_LABEL,
-        }
-        if s in alias_map:
-            return alias_map[s]
-        return cls.TRUE_FALSE_NOT_GIVEN
-
 # ── System Instructions per Family ──────────────────────────────────────────
 
 SYSTEM_PROMPTS: Dict[QuestionPromptFamily, str] = {

@@ -93,3 +93,9 @@ def test_question_prompt_family_from_raw():
     assert QuestionPromptFamily.from_raw("matching_headings") == QuestionPromptFamily.MATCHING_HEADING
     assert QuestionPromptFamily.from_raw("CHOOSING_A_TITLE") == QuestionPromptFamily.CHOOSING_TITLE
     assert QuestionPromptFamily.from_raw("summary_box") == QuestionPromptFamily.SUMMARY_COMPLETION_BOX
+
+    with pytest.raises(ValueError, match="Unknown or unsupported question family: INVALID_FAMILY"):
+        QuestionPromptFamily.from_raw("INVALID_FAMILY")
+
+    with pytest.raises(ValueError, match="Unknown or unsupported question family"):
+        QuestionPromptFamily.from_raw("unsupported_custom_type")
