@@ -18,6 +18,9 @@ from app.blueprint.suitability import (
 from app.blueprint.validators import (
     validate_blueprint,
 )
+from app.blueprint.generator import (
+    generate_dynamic_blueprint,
+)
 from app.blueprint.planner import (
     BlueprintPlanner,
     SectionPlanInput,
@@ -37,6 +40,7 @@ __all__ = [
     "SourceSuitabilityResult",
     "evaluate_source_suitability",
     "validate_blueprint",
+    "generate_dynamic_blueprint",
     "BlueprintPlanner",
     "SectionPlanInput",
     "BlueprintPlanResult",

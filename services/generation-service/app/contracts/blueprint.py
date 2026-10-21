@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional
 from pydantic import Field
 
 from .base import CanonicalBaseModel
@@ -47,8 +47,8 @@ class QuestionSlot(CanonicalBaseModel):
 
     question_number: int = Field(..., ge=1, le=40, alias="questionNumber")
     section_id: int = Field(..., ge=1, le=3, alias="sectionId")
-    group_index: int = Field(..., ge=0, le=1, alias="groupIndex")
-    question_type: QuestionType = Field(..., alias="questionType")
+    group_index: int = Field(..., ge=0, le=10, alias="groupIndex")
+    question_type: Any = Field(..., alias="questionType")
     target_skill: str = Field(..., alias="targetSkill")
     target_difficulty: TargetDifficulty = Field(..., alias="targetDifficulty")
     claim_ref_ids: List[str] = Field(default_factory=list, alias="claimRefIds")
@@ -78,7 +78,7 @@ class BudgetAllocation(CanonicalBaseModel):
 class QuestionTypeAllocation(CanonicalBaseModel):
     """Allocation of question types within a section."""
 
-    question_type: QuestionType = Field(..., alias="questionType")
+    question_type: Any = Field(..., alias="questionType")
     count: int = Field(..., ge=1)
     start_question_number: int = Field(..., ge=1, le=40, alias="startQuestionNumber")
     end_question_number: int = Field(..., ge=1, le=40, alias="endQuestionNumber")
@@ -131,3 +131,4 @@ class ExamBlueprint(CanonicalBaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         alias="createdAt",
     )
+    metadata: Optional[dict] = Field(default_factory=dict)

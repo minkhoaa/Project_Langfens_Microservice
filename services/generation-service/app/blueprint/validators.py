@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Any, List, Optional
 from pydantic import Field
 from app.contracts.base import CanonicalBaseModel
 from app.contracts.blueprint import (
@@ -12,6 +12,7 @@ from app.contracts.blueprint import (
     QuestionType,
     DifficultyLevel,
 )
+from app.contracts.question_type import QuestionPromptFamily
 from app.contracts.issue import IssueSeverity
 from app.blueprint.policies import (
     BLUEPRINT_POLICY_VERSION,
@@ -33,11 +34,15 @@ class BlueprintIssue(CanonicalBaseModel):
     field: str
 
 
-def validate_blueprint(blueprint: ExamBlueprint) -> List[BlueprintIssue]:
-    """Validates structural and policy integrity of an ExamBlueprint."""
+def validate_blueprint(blueprint: ExamBlueprint, mode: Optional[str] = None) -> List[BlueprintIssue]:
+    """Validates structural and policy integrity of an ExamBlueprint.
+
+    Supports 'dynamic' mode (default unless blueprint metadata or parameter specifies legacy_preset)
+    and strict 'legacy_preset' mode.
+    """
     issues: List[BlueprintIssue] = []
 
-    # 1. Total questions count
+    effective_mode = mode or (blueprint.metadata or {}).get("blueprint_mode", "dynamic")
     if blueprint.total_questions != TOTAL_PAPER_QUESTIONS:
         issues.append(
             BlueprintIssue(
@@ -164,45 +169,115 @@ def validate_blueprint(blueprint: ExamBlueprint) -> List[BlueprintIssue]:
 
         # Slots in this section
         sec_slots = section.question_slots or []
-        if len(sec_slots) != sec_config["total_questions"]:
-            issues.append(
-                BlueprintIssue(
-                    code="BLUEPRINT_SECTION_SLOT_COUNT_MISMATCH",
-                    severity=IssueSeverity.CRITICAL,
-                    message=f"Section {sec_id} has {len(sec_slots)} slots; expected {sec_config['total_questions']}.",
-                    field=f"sections[{sec_id}].questionSlots",
-                )
-            )
-
-        # Validate Groups and Question Types
-        for grp in sec_config["groups"]:
-            grp_slots = [
-                s for s in sec_slots
-                if s.group_index == grp["group_index"]
-            ]
-            if len(grp_slots) != grp["count"]:
+        if effective_mode == "legacy_preset":
+            if len(sec_slots) != sec_config["total_questions"]:
                 issues.append(
                     BlueprintIssue(
-                        code="BLUEPRINT_GROUP_COUNT_MISMATCH",
+                        code="BLUEPRINT_SECTION_SLOT_COUNT_MISMATCH",
                         severity=IssueSeverity.CRITICAL,
-                        message=(
-                            f"Section {sec_id} Group {grp['group_index']} has {len(grp_slots)} slots; "
-                            f"expected {grp['count']} ({grp['question_type'].value})."
-                        ),
+                        message=f"Section {sec_id} has {len(sec_slots)} slots; expected {sec_config['total_questions']}.",
                         field=f"sections[{sec_id}].questionSlots",
                     )
                 )
 
-            for slot in grp_slots:
-                if slot.question_type != grp["question_type"]:
+            # Validate Groups and Question Types strictly for legacy preset
+            for grp in sec_config["groups"]:
+                grp_slots = [
+                    s for s in sec_slots
+                    if s.group_index == grp["group_index"]
+                ]
+                if len(grp_slots) != grp["count"]:
                     issues.append(
                         BlueprintIssue(
-                            code="BLUEPRINT_SLOT_TYPE_MISMATCH",
+                            code="BLUEPRINT_GROUP_COUNT_MISMATCH",
                             severity=IssueSeverity.CRITICAL,
                             message=(
-                                f"Question {slot.question_number} in Section {sec_id} Group {grp['group_index']} "
-                                f"has type {slot.question_type.value}; expected {grp['question_type'].value}."
+                                f"Section {sec_id} Group {grp['group_index']} has {len(grp_slots)} slots; "
+                                f"expected {grp['count']} ({grp['question_type'].value})."
                             ),
+                            field=f"sections[{sec_id}].questionSlots",
+                        )
+                    )
+
+                for slot in grp_slots:
+                    raw_slot_type = slot.question_type
+                    slot_type_val = getattr(raw_slot_type, "value", str(raw_slot_type))
+                    expected_val = getattr(grp["question_type"], "value", str(grp["question_type"]))
+                    if slot_type_val != expected_val:
+                        issues.append(
+                            BlueprintIssue(
+                                code="BLUEPRINT_SLOT_TYPE_MISMATCH",
+                                severity=IssueSeverity.CRITICAL,
+                                message=(
+                                    f"Question {slot.question_number} in Section {sec_id} Group {grp['group_index']} "
+                                    f"has type {slot_type_val}; expected {expected_val}."
+                                ),
+                                field=f"sections[{sec_id}].questionSlots[{slot.question_number}].questionType",
+                            )
+                        )
+
+                    # Difficulty checks
+                    diff = slot.target_difficulty
+                    if diff.is_calibrated:
+                        issues.append(
+                            BlueprintIssue(
+                                code="BLUEPRINT_CALIBRATED_DIFFICULTY_PROHIBITED",
+                                severity=IssueSeverity.CRITICAL,
+                                message=(
+                                    f"Question {slot.question_number} claims calibrated IELTS band difficulty. "
+                                    f"Pre-pilot calibrated difficulty is prohibited by policy."
+                                ),
+                                field=f"sections[{sec_id}].questionSlots[{slot.question_number}].targetDifficulty.isCalibrated",
+                            )
+                        )
+                    if not diff.rationale or len(diff.rationale.strip()) < 5:
+                        issues.append(
+                            BlueprintIssue(
+                                code="BLUEPRINT_DIFFICULTY_RATIONALE_MISSING",
+                                severity=IssueSeverity.CRITICAL,
+                                message=f"Question {slot.question_number} lacks targetDifficulty rationale.",
+                                field=f"sections[{sec_id}].questionSlots[{slot.question_number}].targetDifficulty.rationale",
+                            )
+                        )
+        else:
+            # Dynamic mode:
+            # - Allow >= 1 groups per section
+            # - Validate slot count >= 1 and that all slots sum to section total
+            if len(sec_slots) < 1:
+                issues.append(
+                    BlueprintIssue(
+                        code="BLUEPRINT_SECTION_EMPTY_SLOTS",
+                        severity=IssueSeverity.CRITICAL,
+                        message=f"Section {sec_id} has no question slots.",
+                        field=f"sections[{sec_id}].questionSlots",
+                    )
+                )
+
+            # Validate that question types in slots are valid IELTS families
+            for slot in sec_slots:
+                raw_type = slot.question_type
+                # Check if it's in QuestionPromptFamily or QuestionType
+                is_valid_type = False
+                try:
+                    resolved_family = QuestionPromptFamily.from_raw(raw_type)
+                    is_valid_type = bool(resolved_family)
+                except Exception:
+                    is_valid_type = False
+
+                if not is_valid_type:
+                    try:
+                        is_valid_type = any(
+                            raw_type == qt or raw_type == qt.value for qt in QuestionType
+                        )
+                    except Exception:
+                        is_valid_type = False
+
+                if not is_valid_type:
+                    issues.append(
+                        BlueprintIssue(
+                            code="BLUEPRINT_INVALID_QUESTION_TYPE",
+                            severity=IssueSeverity.CRITICAL,
+                            message=f"Question {slot.question_number} has unrecognized question type: {raw_type}.",
                             field=f"sections[{sec_id}].questionSlots[{slot.question_number}].questionType",
                         )
                     )
@@ -230,7 +305,6 @@ def validate_blueprint(blueprint: ExamBlueprint) -> List[BlueprintIssue]:
                             field=f"sections[{sec_id}].questionSlots[{slot.question_number}].targetDifficulty.rationale",
                         )
                     )
-
         # Budget Allocation Check
         if section.budget_allocation:
             total_planned_tokens += section.budget_allocation.max_tokens_allocated
@@ -246,7 +320,6 @@ def validate_blueprint(blueprint: ExamBlueprint) -> List[BlueprintIssue]:
                         field=f"sections[{sec_id}].budgetAllocation.maxCandidatesPerSlot",
                     )
                 )
-
     # 6. Overall Budget Cap
     if blueprint.parent_budget_cap_tokens is not None:
         if total_planned_tokens > blueprint.parent_budget_cap_tokens:

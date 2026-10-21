@@ -19,15 +19,13 @@ Two rules define this module:
 from __future__ import annotations
 
 import hashlib
-from typing import Literal, Tuple
-
+from typing import Any, Literal, Tuple
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from app.contracts.artifact import canonical_json_dump
 from app.contracts.base import CanonicalBaseModel
 from app.contracts.blueprint import DifficultyLevel, QuestionType
-
-# Hard ceilings from the pinned execution contract. A policy may ask for less;
+from app.contracts.question_type import QuestionPromptFamily
 # it may never ask for more.
 MAX_PROVIDER_CALL_SECONDS = 180
 MAX_SECTION_WALL_SECONDS = 900
@@ -52,14 +50,24 @@ MAX_DEPENDENCY_DEPTH_CEILING = 8
 class GroupConfig(CanonicalBaseModel):
     """One question-type group inside a section, sized by count only."""
 
-    question_type: QuestionType = Field(..., alias="questionType")
+    question_type: QuestionType | QuestionPromptFamily = Field(..., alias="questionType")
     count: int = Field(..., ge=1, le=MAX_QUESTION_NUMBER)
+
+    @field_validator("question_type", mode="before")
+    @classmethod
+    def _normalize_question_type(cls, v: Any) -> QuestionType | QuestionPromptFamily:
+        if isinstance(v, (QuestionType, QuestionPromptFamily)):
+            return v
+        # Try QuestionType first, fallback to QuestionPromptFamily
+        raw_str = str(getattr(v, "value", v)).strip()
+        for qt in QuestionType:
+            if qt.value == raw_str or qt.name == raw_str:
+                return qt
+        return QuestionPromptFamily.from_raw(v)
 
     @property
     def question_count(self) -> int:
         return self.count
-
-
 class SectionConfig(CanonicalBaseModel):
     """Configurable allocation for one reading section.
 
@@ -250,9 +258,9 @@ class PinnedExecutionPolicy(CanonicalBaseModel):
     paper_min_words: int = Field(default=2150, gt=0, alias="paperMinWords")
     paper_max_words: int = Field(default=2750, gt=0, alias="paperMaxWords")
     require_blind_solver: Literal[True] = Field(default=True, alias="requireBlindSolver")
+    blueprint_mode: str = Field(default="dynamic", alias="blueprintMode")
 
     sections: Tuple[SectionConfig, ...] = Field(default_factory=demo_sections, min_length=1)
-
     @field_validator("provider")
     @classmethod
     def _provider_name(cls, value: str) -> str:
