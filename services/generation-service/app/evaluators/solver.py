@@ -198,11 +198,23 @@ class BlindSolverEvaluator(BaseEvaluator):
         # 4. Objective check for completion answer length (IELTS constraint: max 3 words)
         q_type_str = str(payload.get("questionType") or payload.get("question_type") or "")
         expected_ans_str = str(payload.get("answer") or payload.get("correctOption") or "").strip()
-        is_completion_type = q_type_str in ("SentenceCompletion", "SummaryCompletion", "ShortAnswer")
+        norm_family_str = q_type_str.upper().replace("_", "")
+        is_completion_type = any(
+            t in norm_family_str
+            for t in (
+                "SENTENCECOMPLETION",
+                "SUMMARYCOMPLETION",
+                "TABLECOMPLETION",
+                "FLOWCHART",
+                "DIAGRAMLABEL",
+                "SHORTANSWER",
+                "NOTECOMPLETION",
+                "FORMCOMPLETION",
+            )
+        ) and "BOX" not in norm_family_str
         if is_completion_type and expected_ans_str:
             ans_words = expected_ans_str.split()
             if len(ans_words) > 3:
-                eval_id = f"eval_bsa_len_{uuid4().hex[:12]}"
                 len_issue = Issue.create(
                     issue_id=f"iss_{eval_id}",
                     code=IssueCode.WORD_LIMIT_EXCEEDED,
@@ -480,7 +492,6 @@ class BlindSolverEvaluator(BaseEvaluator):
             return simulated, None
         # Build ProviderRequest with SDK retry=0
         chat_msgs = [ChatMessage(role=m["role"], content=m["content"]) for m in messages]
-        op_id = f"op_solve_{uuid4().hex[:12]}"
         run_id = getattr(context, "run_id", None) or f"run_eval_{uuid4().hex[:8]}"
         if context and getattr(context, "authority", None):
             lease_owner = context.authority.lease_owner
@@ -489,11 +500,20 @@ class BlindSolverEvaluator(BaseEvaluator):
             lease_owner = getattr(context, "lease_owner", None) or uuid4()
             epoch = getattr(context, "epoch", 1)
 
+        parent_op = getattr(context, "parent_operation_id", None) or getattr(context, "operation_id", None)
+        sec_id = str(blind_input.section_id or getattr(target_ref, "section_id", None) or "")
+        art_id = target_ref.artifact_id
+        version = target_ref.version
+        op_id = f"{parent_op}:solve" if parent_op else f"op_solve_{run_id}_{art_id}_{version}"
+
         req = ProviderRequest(
             capability=Capability.SOLVE_ITEM,
             messages=chat_msgs,
             operation_id=op_id,
             run_id=run_id,
+            section_id=sec_id,
+            artifact_id=art_id,
+            parent_operation_id=parent_op,
             preferred_provider=self.solver_provider or "minimax",
             allowed_providers=[self.solver_provider] if self.solver_provider else ["minimax"],
             allow_fallback=False,
@@ -503,21 +523,16 @@ class BlindSolverEvaluator(BaseEvaluator):
         )
 
         try:
-            # Force SDK retry=0 via one-shot retry policy
-            saved_policy = self.gateway.retry_policy
-            self.gateway.retry_policy = RetryPolicy(max_attempts=1)
-            try:
-                resp: ProviderResponse = await self.gateway.execute(
-                    req,
-                    epoch=epoch,
-                    lease_owner=lease_owner,
-                )
-                self.solver_provider = resp.provider_name
-                self.solver_model = resp.model_name
-                payload = resp.parsed_payload if resp.parsed_payload is not None else resp.raw_text
-                return payload, None
-            finally:
-                self.gateway.retry_policy = saved_policy
+            resp: ProviderResponse = await self.gateway.execute(
+                req,
+                epoch=epoch,
+                lease_owner=lease_owner,
+                retry_policy=RetryPolicy(max_attempts=1),
+            )
+            self.solver_provider = resp.provider_name
+            self.solver_model = resp.model_name
+            payload = resp.parsed_payload if resp.parsed_payload is not None else resp.raw_text
+            return payload, None
         except (ProviderTimeoutError, asyncio.TimeoutError, DeadlineExceededError) as tex:
             eval_id = f"eval_err_{uuid4().hex[:12]}"
             return None, EvaluationResult.create_error(
@@ -576,7 +591,6 @@ class BlindSolverEvaluator(BaseEvaluator):
             simulated = self._simulate_adversary_response(blind_input)
             return simulated, None
         chat_msgs = [ChatMessage(role=m["role"], content=m["content"]) for m in messages]
-        op_id = f"op_adv_{uuid4().hex[:12]}"
         run_id = getattr(context, "run_id", None) or f"run_eval_{uuid4().hex[:8]}"
         if context and getattr(context, "authority", None):
             lease_owner = context.authority.lease_owner
@@ -585,11 +599,20 @@ class BlindSolverEvaluator(BaseEvaluator):
             lease_owner = getattr(context, "lease_owner", None) or uuid4()
             epoch = getattr(context, "epoch", 1)
 
+        parent_op = getattr(context, "parent_operation_id", None) or getattr(context, "operation_id", None)
+        sec_id = str(blind_input.section_id or getattr(target_ref, "section_id", None) or "")
+        art_id = target_ref.artifact_id
+        version = target_ref.version
+        adv_op_id = f"{parent_op}:adv" if parent_op else f"op_adv_{run_id}_{art_id}_{version}"
+
         req = ProviderRequest(
             capability=Capability.EVALUATE_ITEM,
             messages=chat_msgs,
-            operation_id=op_id,
+            operation_id=adv_op_id,
             run_id=run_id,
+            section_id=sec_id,
+            artifact_id=art_id,
+            parent_operation_id=parent_op,
             preferred_provider=self.adversary_provider or "minimax",
             allowed_providers=[self.adversary_provider] if self.adversary_provider else ["minimax"],
             allow_fallback=False,
@@ -599,20 +622,16 @@ class BlindSolverEvaluator(BaseEvaluator):
         )
 
         try:
-            saved_policy = self.gateway.retry_policy
-            self.gateway.retry_policy = RetryPolicy(max_attempts=1)
-            try:
-                resp: ProviderResponse = await self.gateway.execute(
-                    req,
-                    epoch=epoch,
-                    lease_owner=lease_owner,
-                )
-                self.adversary_provider = resp.provider_name
-                self.adversary_model = resp.model_name
-                payload = resp.parsed_payload if resp.parsed_payload is not None else resp.raw_text
-                return payload, None
-            finally:
-                self.gateway.retry_policy = saved_policy
+            resp: ProviderResponse = await self.gateway.execute(
+                req,
+                epoch=epoch,
+                lease_owner=lease_owner,
+                retry_policy=RetryPolicy(max_attempts=1),
+            )
+            self.adversary_provider = resp.provider_name
+            self.adversary_model = resp.model_name
+            payload = resp.parsed_payload if resp.parsed_payload is not None else resp.raw_text
+            return payload, None
         except (ProviderTimeoutError, asyncio.TimeoutError, DeadlineExceededError) as tex:
             eval_id = f"eval_err_{uuid4().hex[:12]}"
             return None, EvaluationResult.create_error(
@@ -656,16 +675,17 @@ class BlindSolverEvaluator(BaseEvaluator):
         # Pick first sentence from passage as evidence span
         sentences = [s.strip() for s in passage.split(".") if len(s.strip()) > 15]
         first_span = sentences[0] if sentences else passage[:50]
-
-        if "TRUE_FALSE" in q.question_type or q.question_type == "TFNG":
+        q_type_upper = q.question_type.upper().replace("_", "")
+        if "TRUEFALSE" in q_type_upper or q_type_upper == "TFNG":
             norm_ans = "TRUE"
-        elif "YES_NO" in q.question_type or q.question_type == "YNNG":
+        elif "YESNO" in q_type_upper or q_type_upper == "YNNG":
             norm_ans = "YES"
+        elif "HEADING" in q_type_upper and q.options:
+            norm_ans = q.options[0].key.upper()
         elif q.options:
-            norm_ans = q.options[0].key
+            norm_ans = q.options[0].key.upper()
         else:
             norm_ans = first_span.split()[0] if first_span.split() else "answer"
-
         return {
             "questionNumber": q.question_number,
             "normalizedAnswer": norm_ans,

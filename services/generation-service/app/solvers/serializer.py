@@ -75,20 +75,32 @@ def project_to_student_visible(question_data: Any) -> StudentVisibleQuestion:
         raise ValueError("Missing questionType in input data")
     q_type = re.sub(r'[^a-zA-Z0-9_\-]', '', str(q_type).strip())
 
-    prompt = data.get("prompt") or data.get("statement")
+    prompt = data.get("prompt") or data.get("statement") or data.get("text") or data.get("stem")
     if not prompt:
-        raise ValueError("Missing prompt or statement in input data")
+        # For MATCHING_HEADING, prompt may be in paragraphRef
+        paragraph_ref = data.get("paragraphRef") or data.get("paragraph_ref")
+        if paragraph_ref:
+            prompt = f"Choose the correct heading for {paragraph_ref}"
+        else:
+            raise ValueError("Missing prompt or statement in input data")
     prompt = str(prompt).strip()
 
     instructions = data.get("instructions")
     if instructions is not None:
         instructions = str(instructions).strip()
 
-    shared_context = data.get("sharedContext") or data.get("shared_context")
+    shared_context = (
+        data.get("sharedContext")
+        or data.get("shared_context")
+        or data.get("summaryText")
+        or data.get("summary_text")
+        or data.get("diagramDescription")
+        or data.get("diagram_description")
+    )
     if shared_context is not None:
         shared_context = str(shared_context).strip()
 
-    raw_options = data.get("options")
+    raw_options = data.get("options") or data.get("headings")
     student_options: Optional[List[StudentVisibleOption]] = None
     if raw_options and isinstance(raw_options, (list, tuple, Sequence)):
         student_options = []
@@ -107,8 +119,9 @@ def project_to_student_visible(question_data: Any) -> StudentVisibleQuestion:
 
             if k and t:
                 # Sanitize option text: ensure it contains no canary or leak
-                student_options.append(StudentVisibleOption(key=str(k).upper(), text=str(t).strip()))
-
+                clean_t = str(t).strip()
+                clean_k = str(k).strip()
+                student_options.append(StudentVisibleOption(key=clean_k, text=clean_t))
     return StudentVisibleQuestion(
         question_number=q_num,
         question_type=q_type,

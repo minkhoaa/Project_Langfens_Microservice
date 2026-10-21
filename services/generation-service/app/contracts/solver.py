@@ -59,7 +59,7 @@ class StudentVisibleOption(CanonicalBaseModel):
     Contains ONLY the letter key and the visible text. Strictly forbids correctOption,
     explanation, or distractor annotations.
     """
-    key: str = Field(..., pattern=r"^[A-D]$", description="Option letter: A, B, C, or D")
+    key: str = Field(..., pattern=r"^[A-Za-z0-9ivxlcdmIVXLCDM\-_]+$", description="Option key: e.g. A-H, Roman numeral i-x, or identifier")
     text: str = Field(..., min_length=1, description="Option text as visible to the student")
 
 

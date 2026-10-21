@@ -21,7 +21,7 @@ from app.contracts.solver import (
     DisagreementSeverity,
     SolverOutput,
 )
-
+from app.solvers.comparison import compare_answers
 logger = logging.getLogger(__name__)
 
 
@@ -41,9 +41,42 @@ def adjudicate_item(
     q_num = comparison.question_number
     solver_match = comparison.is_match
     adv_ambiguous = bool(adversary_output and adversary_output.is_ambiguous)
+    norm_exp = comparison.normalized_expected.replace("_", " ").strip().casefold()
 
-    # 1. Clean Agreement: Solver matches expected key and adversary finds no grounded ambiguity
-    if solver_match and not adv_ambiguous:
+    grounded_distinct_alts = []
+    if adversary_output:
+        # Evaluate expected score if adversary reviewed expected key as an alternative
+        exp_score = None
+        for alt in adversary_output.identified_alternatives:
+            cmp_alt = compare_answers(
+                expected_answer=comparison.expected_answer,
+                solver_answer=alt.alternative_answer,
+                question_type=comparison.question_type,
+                question_number=q_num,
+            )
+            if cmp_alt.is_match and alt.plausibility_score is not None:
+                exp_score = alt.plausibility_score
+                break
+
+        for alt in adversary_output.identified_alternatives:
+            if alt.is_grounded_in_passage:
+                cmp_alt = compare_answers(
+                    expected_answer=comparison.expected_answer,
+                    solver_answer=alt.alternative_answer,
+                    question_type=comparison.question_type,
+                    question_number=q_num,
+                )
+                # Distinct alternative if it does NOT match the expected answer
+                if not cmp_alt.is_match:
+                    is_compelling = (
+                        alt.plausibility_score is None
+                        or (exp_score is not None and alt.plausibility_score >= exp_score)
+                        or (exp_score is None and alt.plausibility_score >= 0.95)
+                    )
+                    if is_compelling:
+                        grounded_distinct_alts.append(alt.model_dump())
+    # 1. Clean Agreement: Solver matches expected key and adversary finds no grounded distinct alternative
+    if solver_match and not (adv_ambiguous and grounded_distinct_alts):
         return AdjudicationResult(
             question_number=q_num,
             verdict=AdjudicationVerdict.KEY_CONFIRMED,
@@ -57,13 +90,8 @@ def adjudicate_item(
             },
         )
 
-    # 2. Adversarial Ambiguity Detected (even if solver matched one of the keys)
-    if adv_ambiguous and adversary_output:
-        grounded_alts = [
-            alt.model_dump()
-            for alt in adversary_output.identified_alternatives
-            if alt.is_grounded_in_passage
-        ]
+    # 2. Adversarial Ambiguity Detected (genuine alternative that differs from expected key)
+    if adv_ambiguous and grounded_distinct_alts:
         return AdjudicationResult(
             question_number=q_num,
             verdict=AdjudicationVerdict.AMBIGUOUS_DEFECTIVE,
@@ -73,14 +101,13 @@ def adjudicate_item(
             adversary_ambiguity_found=True,
             details={
                 "message": (
-                    f"Adversary identified {len(grounded_alts)} grounded alternative(s) "
+                    f"Adversary identified {len(grounded_distinct_alts)} grounded alternative(s) "
                     "or ambiguous interpretation in the question."
                 ),
                 "summary": adversary_output.adversary_summary,
-                "alternatives": grounded_alts,
+                "alternatives": grounded_distinct_alts,
             },
         )
-
     # 3. Solver Disagreement with Expected Key
     # Bounded evidence-backed inspection:
     solver_has_valid_spans = bool(solver_output and solver_output.cited_spans)
