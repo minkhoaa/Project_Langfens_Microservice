@@ -107,6 +107,12 @@ def evaluate_source(artifact: ArtifactEnvelope, policy: PinnedExecutionPolicy) -
         metadata, document = item["metadata"], item["document"]
         if not metadata.get("licenseCleared") or not metadata.get("pmcid") or not metadata.get("sourceUrl"):
             problems.append((IssueCode.SOURCE_INSUFFICIENT, "Source metadata lacks exact provenance and license"))
+        lic = (metadata.get("license") or metadata.get("licenseType") or "").strip().lower()
+        if not lic or lic in ("all rights reserved", "copyrighted", "proprietary", "unknown", "none"):
+            problems.append((IssueCode.SOURCE_INSUFFICIENT, f"Source has unapproved or missing license: {lic}"))
+        elif "by-nc" in lic or "noncommercial" in lic or "non-commercial" in lic:
+            if not getattr(policy, "allow_noncommercial", False) and not metadata.get("authorizedNoncommercial"):
+                problems.append((IssueCode.SOURCE_INSUFFICIENT, "Non-commercial license requires explicit policy authorization"))
         if count_words(document["text"]) < policy.source_min_words:
             problems.append((IssueCode.SOURCE_INSUFFICIENT, "Normalized source is below pinned minimum length"))
     for chunk in payload.get("chunks", ()):

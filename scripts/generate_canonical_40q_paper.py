@@ -1035,18 +1035,18 @@ def build_canonical_40q_paper() -> dict:
 
     sec3_obj = {
         "sectionId": 3,
-        "title": "Bedrock erodibility governs transient erosion and CO2 drawdown in active orogens",
+        "title": "Bedrock erodibility governs transient erosion and CO2 release in alpine landscapes",
         "passage": S3_PASSAGE,
         "wordCount": s3_wc,
         "source": {
             "pmcid": "PMC13665993",
-            "title": "Bedrock erodibility governs transient erosion and CO2 drawdown in active orogens",
+            "title": "Bedrock erodibility governs transient erosion and CO2 release in alpine landscapes",
             "doi": "10.1126/sciadv.aei9275",
-            "authors": "Eyal Marder; John R. Slosson; Isaac J. Larsen",
+            "authors": "Eyal Marder; John R. Slosson; Isaac J. Larsen; Xianmei Huang; Darryl E. Granger; Matthew J. Winnick; Kenneth H. Williams; Alan J. Hidy",
             "url": "https://europepmc.org/article/PMC/PMC13665993",
             "sourceUrl": "https://europepmc.org/article/PMC/PMC13665993",
             "sourceId": "PMC13665993",
-            "license": "CC BY 4.0",
+            "license": "CC BY-NC 4.0",
             "licenseCleared": True,
             "sectionIndex": 3,
             "wordCount": s3_wc,

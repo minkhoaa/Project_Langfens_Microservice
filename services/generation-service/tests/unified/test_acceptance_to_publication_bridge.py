@@ -17,7 +17,11 @@ import json
 from pathlib import Path
 import pytest
 
-from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
+from app.acceptance_bridge import (
+    build_canonical_acceptance_bundle,
+    generate_and_save_acceptance_bundle,
+)
+from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType, compute_content_hash
 from app.contracts.evaluation import EvaluationResult, EvaluationStatus
 from app.contracts.issue import IssueSeverity
 from app.reading_evaluation import evaluate_paper, evaluate_passage, evaluate_question, evaluate_section
@@ -178,3 +182,35 @@ def test_d6_corrupt_dependency_hash_rejected():
     h1 = compute_content_hash(body, [parent_ref])
     h2 = compute_content_hash(body, [mutated_parent_ref])
     assert h1 != h2, "Content hash must change when dependency hash changes"
+
+
+def test_d7_real_evaluator_acceptance_bundle_generated_and_verified():
+    """D7: Generates deterministic acceptance bundle with genuine evaluation results and validates completeness."""
+    bundle_path = generate_and_save_acceptance_bundle()
+    assert bundle_path.exists(), f"Bundle file missing at {bundle_path}"
+
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    assert bundle["bundleVersion"] == "2.0.0"
+    assert bundle["paperId"] == "paper:canonical-40q-shared"
+    assert len(bundle["envelopes"]) == 48, "Must contain exactly 48 canonical envelopes (1 BP, 3 P, 40 Q, 3 S, 1 Paper)"
+
+    # Verify real evaluations
+    evals = bundle["evaluations"]
+    assert len(evals) == 5
+    eval_ids = {e["evaluatorId"]: e for e in evals}
+    expected_evaluators = {
+        "eval_paper_structure": "2.0.0",
+        "eval_paper_cross_section": "2.0.0",
+        "eval_paper_leakage": "2.1.0",
+        "eval_paper_monotony": "2.0.0",
+        "eval_paper_closure": "1.0.0",
+    }
+    for req_id, req_ver in expected_evaluators.items():
+        assert req_id in eval_ids, f"Missing required evaluator {req_id}"
+        ev = eval_ids[req_id]
+        assert ev["evaluatorVersion"] == req_ver, f"Evaluator {req_id} version mismatch"
+        assert ev["status"] == "PASS", f"Evaluator {req_id} did not pass: {ev.get('issues')}"
+        assert ev["score"] == 1.0
+        assert len(ev["issues"]) == 0
+        assert len(ev["inputDependencyRefs"]) == 47, "Paper evaluations must cover all 47 parent references"
+

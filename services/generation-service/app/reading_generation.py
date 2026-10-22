@@ -117,6 +117,11 @@ async def prepare_source(
 
     raw_hash = hashlib.sha256(source.content.encode("utf-8")).hexdigest()
 
+    lic_norm = source.license.strip().lower()
+    is_nc = "by-nc" in lic_norm or "noncommercial" in lic_norm or "non-commercial" in lic_norm
+    nc_authorized = bool(getattr(policy, "allow_noncommercial", False) or getattr(source, "authorized_noncommercial", False))
+    license_cleared = (not is_nc) or nc_authorized
+
     return {
         "sources": [
             {
@@ -127,7 +132,8 @@ async def prepare_source(
                     "title": source.title,
                     "sourceUrl": source.url,
                     "license": source.license,
-                    "licenseCleared": True,
+                    "licenseCleared": license_cleared,
+                    "authorizedNoncommercial": nc_authorized if is_nc else None,
                     "authors": source.authors or "",
                     "doi": source.doi,
                     "sectionIndex": source.section_index,
@@ -139,7 +145,7 @@ async def prepare_source(
                 },
             }
         ],
-        "licenseCleared": True,
+        "licenseCleared": license_cleared,
         "rawContentHash": raw_hash,
         "chunks": [
             {
