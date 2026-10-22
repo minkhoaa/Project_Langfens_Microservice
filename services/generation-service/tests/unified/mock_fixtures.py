@@ -328,15 +328,30 @@ class MockProvider(BaseProvider):
                 res = compose_passage("Marine Stoichiometry", sec_idx, SECTION_2_SOURCE_TEXT, claims, config)
                 self._passages[sec_idx] = res["passage"]
                 passage = res["passage"]
-            slots = [{"groupIndex": 1, "questionNumber": n, "claimRefIds": [claims[(n - 20 + 1) % len(claims)]["claimId"]]} for n in range(20, 27)]
+
+            user_content = " ".join(m.content for m in request.messages)
+            m_start = re.search(r'starting at question #(\d+)', user_content)
+            start_q = int(m_start.group(1)) if m_start else 20
+            m_count = re.search(r'with (\d+) blanks', user_content)
+            b_count = int(m_count.group(1)) if m_count else 7
+
+            slots = [{"groupIndex": 1, "questionNumber": n, "claimRefIds": [claims[(n - start_q) % len(claims)]["claimId"]]} for n in range(start_q, start_q + b_count)]
             all_q, groups = compose_questions(sec_idx, passage, claims, slots, config)
             for q in all_q:
                 self._last_questions[q["questionNumber"]] = q
-            summary_group = next((g for g in groups if g.get("questionType") == "SUMMARY_COMPLETION"), groups[-1])
-            blanks = [{"number": q["questionNumber"], "answer": q["answer"], "evidenceQuote": q["evidenceQuote"]} for q in all_q if q["questionNumber"] >= 20]
+            summary_text = " ".join(f"In the analysis of the ecosystem, scientists examined [{n}] carefully." for n in range(start_q, start_q + b_count))
+            blanks = [
+                {
+                    "number": q["questionNumber"],
+                    "answer": q["answer"],
+                    "evidenceQuote": q["evidenceQuote"],
+                    "explanation": q.get("explanation", f"The passage states that '{q['evidenceQuote'][:40]}...', providing verifiable evidence for item {q['questionNumber']}."),
+                }
+                for q in all_q if q["questionNumber"] >= start_q
+            ]
             return {
                 "summaryTitle": "Marine Stoichiometric Summary",
-                "summaryText": summary_group.get("sharedContext", ""),
+                "summaryText": summary_text,
                 "blanks": blanks,
             }
 

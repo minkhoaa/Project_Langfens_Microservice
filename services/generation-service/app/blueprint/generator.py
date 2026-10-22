@@ -187,6 +187,10 @@ def _score_family_suitability(
         if fam in (QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN, QuestionPromptFamily.SENTENCE_COMPLETION, QuestionPromptFamily.NOTE_COMPLETION, QuestionPromptFamily.SHORT_ANSWER):
             score += 4.0
 
+    # Section 1 authentic anchor: IELTS Academic Passage 1 prioritizes TRUE_FALSE_NOT_GIVEN
+    if sec_id == 1 and fam == QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN:
+        score += 2.0
+
     # Deterministic pseudo-random tie-break for reproducible variety
     tie_break_seed = f"{seed_int}:{sec_id}:{fam.value}"
     tie_break_hash = int(hashlib.sha256(tie_break_seed.encode()).hexdigest()[:6], 16)
@@ -206,8 +210,8 @@ def _determine_section_group_counts(
         opts = [[7, 6], [6, 7], [5, 4, 4]]
         return opts[(seed_int + 1) % len(opts)]
     elif sec_id == 2:
-        # Sum to 13
-        opts = [[5, 4, 4], [4, 5, 4], [7, 6]]
+        # Section 2 dynamic: 3 groups summing to 13
+        opts = [[5, 4, 4], [4, 5, 4], [4, 4, 5]]
         return opts[(seed_int + 2) % len(opts)]
     else:
         # Sum to 14
@@ -246,7 +250,7 @@ def generate_dynamic_blueprint(
         "Cognitive philosophy and social debate",
     ])
 
-    seed_str = f"{policy.provider}_{'_'.join(topics)}_{run_id}"
+    seed_str = f"{policy.provider}_{'_'.join(topics)}"
     seed_val = int(hashlib.sha256(seed_str.encode("utf-8")).hexdigest()[:8], 16)
 
     sections: List[SectionBlueprint] = []

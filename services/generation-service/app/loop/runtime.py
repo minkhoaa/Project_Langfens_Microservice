@@ -983,20 +983,15 @@ class BoundedLoopRuntime:
         self._latest_evaluations = []
         for evaluator in self.evaluators:
             meta = getattr(evaluator, "metadata", None)
-            is_expensive = (
-                getattr(meta, "is_expensive", False)
-                if meta is not None
-                else getattr(evaluator, "is_expensive", False)
-            )
-            est_tokens = (
-                getattr(meta, "estimated_tokens", 0)
-                if meta is not None
-                else getattr(evaluator, "estimated_tokens", 0)
-            )
-            if not is_expensive or est_tokens == 0:
-                eval_token_res = 0
+            if meta is not None:
+                is_expensive = getattr(meta, "is_expensive", False) or getattr(evaluator, "is_expensive", False)
+                est_tokens = getattr(meta, "estimated_tokens", 0)
+                if not is_expensive or est_tokens == 0:
+                    eval_token_res = 0
+                else:
+                    eval_token_res = min(self.policy.evaluate_token_reservation, est_tokens) if est_tokens > 0 else self.policy.evaluate_token_reservation
             else:
-                eval_token_res = min(self.policy.evaluate_token_reservation, est_tokens) if est_tokens > 0 else self.policy.evaluate_token_reservation
+                eval_token_res = self.policy.evaluate_token_reservation
             intent = self._intent("EVALUATE", art.version, eval_token_res,
                                   f"{evaluator.evaluator_id}:{evaluator.evaluator_version}",
                                   {"ref": art.to_ref().model_dump(mode="json"),

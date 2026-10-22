@@ -262,6 +262,8 @@ def _parse_candidate_payload(
                         break
                 if not prompt:
                     prompt = summary_text
+            if not prompt:
+                prompt = summary_text or f"Summary statement for question [{q_num}]."
         if f"[{q_num}]" not in prompt and "______" in prompt:
             prompt = prompt.replace("______", f"[{q_num}]")
 
