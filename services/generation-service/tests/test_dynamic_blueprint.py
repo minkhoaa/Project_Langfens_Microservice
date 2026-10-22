@@ -127,3 +127,35 @@ def test_validate_blueprint_rejects_invalid_question_type():
     type_issues = [i for i in issues if i.code == "BLUEPRINT_INVALID_QUESTION_TYPE"]
     assert len(type_issues) >= 1
     assert type_issues[0].severity.value.upper() == "CRITICAL"
+
+
+def test_dynamic_blueprint_selects_families_based_on_evidence():
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="dynamic")
+    evidence_with_processes = {
+        "topics": ["Section 1 Biology", "Section 2 Industrial Process", "Section 3 Scientific Debate"],
+        "section_evidence": {
+            1: {"has_chronology": True, "claim_count": 12},
+            2: {"has_mechanisms": True, "process_steps": 5, "claim_count": 14},
+            3: {"has_arguments": True, "opinions_count": 8, "claim_count": 15},
+        }
+    }
+    bp = generate_dynamic_blueprint(policy, evidence_with_processes)
+    assert bp.total_questions == 40
+    assert len(bp.sections) == 3
+    s2_types = {q.question_type.value for q in bp.sections[1].question_slots}
+    assert any(t in ("FLOW_CHART", "DIAGRAM_LABEL", "SUMMARY_COMPLETION", "TABLE_COMPLETION", "SUMMARY_COMPLETION_BOX") for t in s2_types)
+
+
+def test_dynamic_blueprint_deterministic_reproducibility():
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="dynamic")
+    evidence = {
+        "topics": ["Marine Ecosystems", "Atmospheric Physics", "Linguistic Evolution"],
+        "run_id": "run_stable_12345",
+    }
+    bp1 = generate_dynamic_blueprint(policy, evidence)
+    bp2 = generate_dynamic_blueprint(policy, evidence)
+
+    types1 = [q.question_type.value for s in bp1.sections for q in s.question_slots]
+    types2 = [q.question_type.value for s in bp2.sections for q in s.question_slots]
+    assert types1 == types2, "Dynamic blueprint must be 100% deterministic given identical evidence"
+
