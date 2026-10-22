@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 import pytest
+from app.contracts.artifact import ArtifactEnvelope, ArtifactType
 from app.contracts.question_type import QuestionPromptFamily
+from app.reading_evaluation import evaluate_question
 from app.section_runner import _parse_candidate_payload
 from app.visual.evaluator import SvgVisualEvaluator
 
@@ -52,6 +54,21 @@ def test_golden_fixtures_cover_all_19_families():
             assert svg_xml, f"{q_type} fixture must supply an inline svgXml"
             res = svg_evaluator.evaluate(svg_xml, expected_callouts=[item["questionNumber"]])
             assert res.is_valid, f"SVG validation failed for {q_type}: {res.errors}"
+
+        # 4. Mandatory fail-closed production evaluator verification
+        envelope = ArtifactEnvelope.create(
+            f"art_q_{item['questionNumber']}",
+            ArtifactType.QUESTION,
+            "run_golden_fixture",
+            parsed,
+            "1.0.0",
+        )
+        eval_results = evaluate_question(envelope, item["passageText"], item.get("difficulty", "FOUNDATION"), siblings=[])
+        failed_evals = [e for e in eval_results if not e.is_pass()]
+        assert not failed_evals, (
+            f"Question {item['questionNumber']} ({q_type}) failed production evaluators: "
+            f"{[(e.evaluator_id, [i.message for i in e.issues]) for e in failed_evals]}"
+        )
 
     # Verify all 19 Academic Reading families are covered
     expected_19 = {

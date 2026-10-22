@@ -281,18 +281,28 @@ public static class ReadingPaperEndpoints
     }
     private static async Task<IResult> Retry(Guid id, ExamDbContext db, CancellationToken ct)
     {
-        var job = await db.ReadingPaperJobs.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (job is null) return Results.NotFound();
-        if (job.Status != "Failed" || job.ExamId is not null)
+        var now = DateTime.UtcNow;
+        var retryLog = SerializeLog("Information", "Retry requested; the worker will resume from the last saved passage.");
+        var rows = await db.ReadingPaperJobs
+            .Where(x => x.Id == id && x.Status == "Failed" && x.ExamId == null)
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(j => j.Status, "Pending")
+                .SetProperty(j => j.Error, (string?)null)
+                .SetProperty(j => j.LeaseUntil, (DateTime?)null)
+                .SetProperty(j => j.LeaseOwner, (Guid?)null)
+                .SetProperty(j => j.UpdatedAt, now)
+                .SetProperty(j => j.Logs, j => j.Logs + "\n" + retryLog),
+                ct);
+
+        if (rows == 0)
+        {
+            var existing = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+            if (existing is null) return Results.NotFound();
             return Results.Conflict(new { error = "Only a failed, unsaved job can be retried" });
-        job.Status = "Pending";
-        job.Error = null;
-        job.LeaseUntil = null;
-        job.LeaseOwner = null;
-        job.UpdatedAt = DateTime.UtcNow;
-        job.Logs += SerializeLog("Information", "Retry requested; the worker will resume from the last saved passage.");
-        await db.SaveChangesAsync(ct);
-        return Results.Ok(View(job));
+        }
+
+        var updatedJob = await db.ReadingPaperJobs.AsNoTracking().FirstAsync(x => x.Id == id, ct);
+        return Results.Ok(View(updatedJob));
     }
 
     private static async Task<IResult> Cancel(Guid id, ExamDbContext db, CancellationToken ct)

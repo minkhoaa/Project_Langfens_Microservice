@@ -1,5 +1,6 @@
 """Comprehensive tests for 19 IELTS Question Families Prompt Generation & Candidate Validation."""
 
+import asyncio
 import pytest
 from app.contracts.question_type import QuestionPromptFamily
 from app.contracts.questions import (
@@ -27,7 +28,91 @@ SAMPLE_PASSAGE = (
 )
 
 
-def test_render_question_prompt_all_19_types():
+def test_completion_evaluators_verbatim_and_offsets():
+    from app.evaluators.deterministic import AnswerVerbatimAndLengthEvaluator, EvidenceOffsetEvaluator
+    from app.contracts.artifact import ArtifactEnvelope, ArtifactType
+    from app.reading_evaluation import evaluate_question
+
+    passage_text = "The subterranean Metropolitan Railway opened in 1863 using steam locomotives to ease street congestion."
+    completion_types = ["NOTE_COMPLETION", "TABLE_COMPLETION", "FORM_COMPLETION"]
+    
+    verbatim_evaluator = AnswerVerbatimAndLengthEvaluator()
+    offset_evaluator = EvidenceOffsetEvaluator()
+
+    for ctype in completion_types:
+        # Subcase 1: Non-verbatim answer rejected
+        bad_ans_art = ArtifactEnvelope.create(
+            f"art_{ctype}_bad_ans",
+            ArtifactType.QUESTION,
+            "run_test",
+            {
+                "questionNumber": 2,
+                "questionType": ctype,
+                "prompt": f"Locomotives were powered by [2] in 1863.",
+                "answer": "diesel engines",  # Not in passage!
+                "explanation": "Valid explanation exceeding twenty-five characters in length.",
+                "difficulty": "FOUNDATION",
+                "evidenceQuote": "using steam locomotives",
+                "passageText": passage_text,
+                "passageEvidence": {"startChar": 53, "endChar": 76, "text": "using steam locomotives"},
+                "evidenceClaimRef": "claim_1",
+            },
+            "1.0.0",
+        )
+        res_v = asyncio.run(verbatim_evaluator.evaluate(None, bad_ans_art, "intent_test"))
+        assert not res_v.is_pass(), f"{ctype} must reject non-verbatim answer in AnswerVerbatimAndLengthEvaluator"
+
+        evals = evaluate_question(bad_ans_art, passage_text, "FOUNDATION", ())
+        v_eval = next(e for e in evals if e.evaluator_id == "eval_answer_verbatim_length")
+        assert not v_eval.is_pass(), f"{ctype} must reject non-verbatim answer in evaluate_question"
+
+        # Subcase 2: Valid verbatim answer with passageEvidence accepted
+        good_art = ArtifactEnvelope.create(
+            f"art_{ctype}_good",
+            ArtifactType.QUESTION,
+            "run_test",
+            {
+                "questionNumber": 2,
+                "questionType": ctype,
+                "prompt": f"Locomotives were powered by [2] in 1863.",
+                "answer": "steam",
+                "explanation": "Valid explanation exceeding twenty-five characters in length.",
+                "difficulty": "FOUNDATION",
+                "evidenceQuote": "using steam locomotives",
+                "passageEvidence": {"startChar": 53, "endChar": 76, "text": "using steam locomotives"},
+                "evidenceClaimRef": "claim_1",
+            },
+            "1.0.0",
+        )
+        # Test EvidenceOffsetEvaluator reading passageEvidence object
+        good_art_with_pass = ArtifactEnvelope.create(
+            f"art_{ctype}_good_pass",
+            ArtifactType.QUESTION,
+            "run_test",
+            {
+                **good_art.payload,
+                "passageText": passage_text,
+            },
+            "1.0.0",
+        )
+        res_o = asyncio.run(offset_evaluator.evaluate(None, good_art_with_pass, "intent_test"))
+        assert res_o.is_pass(), f"{ctype} must pass EvidenceOffsetEvaluator with canonical passageEvidence"
+
+        # Subcase 3: Invalid offsets [-1:-1] rejected by EvidenceOffsetEvaluator
+        bad_offset_art = ArtifactEnvelope.create(
+            f"art_{ctype}_bad_offsets",
+            ArtifactType.QUESTION,
+            "run_test",
+            {
+                **good_art.payload,
+                "passageText": passage_text,
+                "passageEvidence": {"startChar": -1, "endChar": -1, "text": "using steam locomotives"},
+            },
+            "1.0.0",
+        )
+        res_bad_o = asyncio.run(offset_evaluator.evaluate(None, bad_offset_art, "intent_test"))
+        assert not res_bad_o.is_pass(), f"{ctype} must reject negative offsets [-1:-1] in EvidenceOffsetEvaluator"
+
     """Verify render_question_prompt generates robust prompts for all 19 IELTS question families."""
     for family in QuestionPromptFamily:
         # MAP_LABEL and MULTIPLE_CHOICE_SINGLE_IMAGE are optional compatibility aliases

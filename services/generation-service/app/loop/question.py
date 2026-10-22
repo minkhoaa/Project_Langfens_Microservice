@@ -26,6 +26,7 @@ from app.contracts.issue import IssueScope, IssueSeverity
 from app.contracts.loop import DecisionType, LoopDecision, LoopReason, LoopState
 from app.evaluators.deterministic import (
     AnswerVerbatimAndLengthEvaluator,
+    EvidenceOffsetEvaluator,
     QuestionStructureEvaluator,
 )
 from app.evaluators.solver import BlindSolverEvaluator
@@ -75,11 +76,12 @@ class QuestionCandidateLoop:
             reg = EvaluatorRegistry()
             reg.register(QuestionStructureEvaluator())
             reg.register(AnswerVerbatimAndLengthEvaluator())
+            reg.register(EvidenceOffsetEvaluator())
             evaluator_registry = reg
         self.evaluator_registry = evaluator_registry
         self.selector = selector or CandidateSelector()
 
-        base_required = ["eval_question_structure", "eval_answer_verbatim_length"]
+        base_required = ["eval_question_structure", "eval_answer_verbatim_length", "eval_evidence_offsets"]
         if evaluator_registry.get("eval_blind_solver_adversary") is not None:
             base_required.append("eval_blind_solver_adversary")
         if evaluator_registry.get("eval_grounding_fidelity") is not None:

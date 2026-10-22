@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
+import hashlib
+import json
 from typing import Any, List, Optional
 from pydantic import Field
 
@@ -147,3 +149,17 @@ class ExamBlueprint(CanonicalBaseModel):
         alias="createdAt",
     )
     metadata: Optional[dict] = Field(default_factory=dict)
+
+    def compute_canonical_hash(self) -> str:
+        return compute_canonical_blueprint_hash(self)
+
+
+def compute_canonical_blueprint_hash(bp: ExamBlueprint) -> str:
+    """Computes a stable, canonical content hash for an ExamBlueprint, stripping volatile fields."""
+    canonical_dict = bp.model_dump(mode="json", by_alias=True)
+    canonical_dict.pop("createdAt", None)
+    canonical_dict.pop("contentHash", None)
+    canonical_dict.pop("invalidatedDescendants", None)
+    canonical_json = json.dumps(canonical_dict, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+

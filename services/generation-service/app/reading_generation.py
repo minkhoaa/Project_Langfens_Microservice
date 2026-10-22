@@ -283,8 +283,10 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
     if getattr(policy, "blueprint_mode", "legacy_preset") == "dynamic":
         from app.blueprint.generator import generate_dynamic_blueprint
         evidence_summary = {
+            "run_id": run_id,
             "topics": [f"{topic} - Section {i}" for i in (1, 2, 3)],
             "section_indices": list(sorted(section_indices)),
+            "section_evidence": {sec_idx: _payload(evidence_map.get(sec_idx)) for sec_idx in section_indices if evidence_map.get(sec_idx)},
         }
         dyn_bp = generate_dynamic_blueprint(policy, evidence_summary)
         updated_sections = []
@@ -294,7 +296,7 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                 continue
             ev_item = evidence_map.get(sec_idx)
             ev_payload = _payload(ev_item) if ev_item else {}
-            claims = ev_payload.get("claims", [])
+            claims = ev_payload.get("claims", []) if ev_item else []
             graph_id = ev_payload.get("graphId", f"graph:{run_id}:{sec_idx}")
             source_pack_id = ev_payload.get("sourcePackId", f"src:{run_id}:{sec_idx}")
             eg_ref = EvidenceGraphRef(
@@ -305,8 +307,14 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
             )
             updated_slots = []
             for q_slot in sb.question_slots:
-                c_id = claims[(q_slot.question_number - 1) % len(claims)]["claimId"] if claims else f"claim:{run_id}:{sec_idx}:1"
-                updated_slots.append(q_slot.model_copy(update={"claim_ref_ids": [c_id]}))
+                if claims:
+                    c_id = claims[(q_slot.question_number - 1) % len(claims)]["claimId"]
+                    c_ids = [c_id]
+                elif ev_item is None:
+                    c_ids = [f"claim:{run_id}:{sec_idx}:1"]
+                else:
+                    c_ids = []
+                updated_slots.append(q_slot.model_copy(update={"claim_ref_ids": c_ids}))
 
             config = policy.section(sec_idx) if hasattr(policy, "section") else None
             editorial_obj = config.editorial_objective if config else f"Editorial objective for Section {sec_idx}"
@@ -350,9 +358,8 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
             "target_word_count_max": policy.paper_max_words,
             "metadata": {"blueprint_mode": "dynamic"},
         })
-        canonical_dict = dyn_bp.model_dump(mode="json", by_alias=True)
-        canonical_json = json.dumps(canonical_dict, sort_keys=True, separators=(",", ":"))
-        content_hash = hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+        from app.contracts.blueprint import compute_canonical_blueprint_hash
+        content_hash = compute_canonical_blueprint_hash(dyn_bp)
         dyn_bp = dyn_bp.model_copy(update={"content_hash": content_hash})
         return dyn_bp.model_dump(mode="json", by_alias=True)
 

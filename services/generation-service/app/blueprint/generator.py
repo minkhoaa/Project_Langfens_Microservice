@@ -27,6 +27,7 @@ from app.contracts.blueprint import (
     QuestionTypeAllocation,
     SectionBlueprint,
     TargetDifficulty,
+    compute_canonical_blueprint_hash,
 )
 from app.contracts.question_type import QuestionPromptFamily
 from app.reading_policy import PinnedExecutionPolicy
@@ -205,18 +206,28 @@ def _determine_section_group_counts(
     seed_int: int,
 ) -> List[int]:
     """Determines authentic variable question group counts per IELTS Academic section summing to 13, 13, 14."""
+    claims = sec_evidence.get("claims", [])
+    claim_count = sec_evidence.get("claim_count") or len(claims)
+    has_processes = sec_evidence.get("has_mechanisms") or sec_evidence.get("process_steps")
+
     if sec_id == 1:
         # Sum to 13
         opts = [[7, 6], [6, 7], [5, 4, 4]]
-        return opts[(seed_int + 1) % len(opts)]
+        if claim_count >= 14:
+            return opts[2]  # 3 groups for rich evidence
+        return opts[(seed_int + 1 + claim_count) % len(opts)]
     elif sec_id == 2:
         # Section 2 dynamic: 3 groups summing to 13
         opts = [[5, 4, 4], [4, 5, 4], [4, 4, 5]]
-        return opts[(seed_int + 2) % len(opts)]
+        if has_processes:
+            return opts[0]
+        return opts[(seed_int + 2 + claim_count) % len(opts)]
     else:
         # Sum to 14
         opts = [[7, 7], [5, 5, 4], [6, 4, 4]]
-        return opts[(seed_int + 3) % len(opts)]
+        if claim_count >= 14:
+            return opts[1]
+        return opts[(seed_int + 3 + claim_count) % len(opts)]
 
 
 def generate_dynamic_blueprint(
@@ -231,7 +242,7 @@ def generate_dynamic_blueprint(
     """
     evidence_summary = evidence_summary or {}
     run_id = evidence_summary.get("run_id") or f"run_{uuid.uuid4().hex[:8]}"
-    blueprint_id = f"bp_{uuid.uuid4().hex[:12]}"
+    blueprint_id = f"blueprint:{run_id}" if "run_id" in evidence_summary else f"bp_{uuid.uuid4().hex[:12]}"
 
     if policy.blueprint_mode == "legacy_preset":
         return _build_legacy_preset_blueprint(policy, run_id, blueprint_id)
@@ -382,11 +393,5 @@ def generate_dynamic_blueprint(
         metadata={"blueprint_mode": "dynamic"},
     )
 
-    canonical_dict = draft_bp.model_dump(by_alias=True)
-    canonical_dict.pop("createdAt", None)
-    canonical_dict.pop("contentHash", None)
-    canonical_dict.pop("invalidatedDescendants", None)
-    canonical_json = json.dumps(canonical_dict, sort_keys=True)
-    content_hash = hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
-
+    content_hash = compute_canonical_blueprint_hash(draft_bp)
     return draft_bp.model_copy(update={"content_hash": content_hash})

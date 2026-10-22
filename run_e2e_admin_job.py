@@ -10,13 +10,24 @@ import urllib.error
 import urllib.request
 import uuid
 
-secret = os.getenv("JWT_SIGNING_KEY") or os.getenv("JwtSettings__SignKey") or "bTNGPmniBGyINHPdsmONct16TIqqb1bZ"
+def get_secret() -> str:
+    raw_secret = os.getenv("JWT_SIGNING_KEY") or os.getenv("JwtSettings__SignKey")
+    if not raw_secret:
+        print(
+            "ERROR: [KEY_HYGIENE] Required JWT signing key is not set. "
+            "Please configure JWT_SIGNING_KEY or JwtSettings__SignKey environment variable.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return raw_secret
+
 os.makedirs("reports", exist_ok=True)
 
 def b64url(b: bytes) -> str:
     return base64.urlsafe_b64encode(b).rstrip(b"=").decode("ascii")
 
 def get_headers():
+    secret = get_secret()
     header = {"alg": "HS256", "typ": "JWT"}
     payload = {
         "sub": "00000000-0000-0000-0000-000000000001",
@@ -66,7 +77,7 @@ def main():
     parser.add_argument(
         "--mode",
         choices=["new", "resume", "monitor"],
-        default="new",
+        required=True,
         help="Execution mode: new (submit new job), resume (safely resume existing job), monitor (poll existing job)",
     )
     parser.add_argument(
@@ -97,7 +108,7 @@ def main():
     args = parser.parse_args()
     base_url = args.base_url
 
-    # Offline safety guard check
+    # Offline safety guard check for mutating actions
     if args.offline and args.mode == "new":
         print(
             "ERROR: [OFFLINE_GUARD] Submitting a new live generation job is prohibited while in OFFLINE mode "
@@ -148,16 +159,32 @@ def main():
                 data = json.loads(r.read().decode())
                 current_status = data.get("status")
                 print(f"Existing job found: ID = {job_id}, Status = {current_status}, Completed = {data.get('completedSections')}", flush=True)
-                if current_status in ("Failed", "NeedsSources"):
-                    print(f"Re-triggering failed job via retry endpoint...", flush=True)
-                    retry_req = urllib.request.Request(
-                        f"{base_url}/api/admin/reading-paper/jobs/{job_id}/retry",
-                        data=b"{}",
-                        headers=get_headers(),
-                        method="POST",
+
+                if current_status == "NeedsSources":
+                    print(
+                        f"Job {job_id} requires updated sources (status 'NeedsSources'). "
+                        "The server retry endpoint does not accept NeedsSources jobs; use PUT /sources to supply verified sources.",
+                        flush=True,
                     )
-                    with urllib.request.urlopen(retry_req, timeout=30) as retry_resp:
-                        print(f"Retry acknowledged: HTTP {retry_resp.status}", flush=True)
+                elif current_status == "Failed":
+                    if args.offline:
+                        print(
+                            "NOTE: [OFFLINE_GUARD] Skipping POST /retry because OFFLINE mode is active. "
+                            "Monitoring existing job without triggering new provider operations.",
+                            flush=True,
+                        )
+                    else:
+                        print(f"Re-triggering failed job via retry endpoint...", flush=True)
+                        retry_req = urllib.request.Request(
+                            f"{base_url}/api/admin/reading-paper/jobs/{job_id}/retry",
+                            data=b"{}",
+                            headers=get_headers(),
+                            method="POST",
+                        )
+                        with urllib.request.urlopen(retry_req, timeout=30) as retry_resp:
+                            print(f"Retry acknowledged: HTTP {retry_resp.status}", flush=True)
+                elif current_status == "Completed":
+                    print(f"Job {job_id} is already Completed. No retry or publication mutation needed.", flush=True)
         except urllib.error.HTTPError as e:
             print(f"Error inspecting or retrying job: HTTP {e.code}: {e.read().decode()}", file=sys.stderr)
             sys.exit(1)

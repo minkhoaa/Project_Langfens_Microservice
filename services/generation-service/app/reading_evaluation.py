@@ -275,7 +275,10 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
         quote = str(payload.get("evidenceQuote", ""))
         if len(quote) < 15 or quote not in passage or span.get("text") != quote:
             evidence.append((IssueCode.EVIDENCE_MISSING, "Evidence quote must be the exact identified passage span"))
-    if question_type in {"SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SHORT_ANSWER"}:
+    if question_type in {
+        "SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SHORT_ANSWER",
+        "NOTE_COMPLETION", "TABLE_COMPLETION", "FORM_COMPLETION"
+    }:
         if not validate_answer_length(answer) or not match_verbatim_in_passage(answer, passage):
             q_num_label = payload.get("questionNumber") or payload.get("number") or ""
             answer_problems.append((IssueCode.WORD_LIMIT_EXCEEDED, f"Question {q_num_label}: Answer '{answer}' is not a full-token source phrase within IELTS word/number limits"))
@@ -334,7 +337,10 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
                         semantic.append((IssueCode.BAD_DISTRACTOR, f"MCQ distractor {chr(65 + d_idx)} is ambiguously similar to correct option {correct_opt}"))
                     if len(d_body) > 15 and quote and d_body in quote:
                         semantic.append((IssueCode.BAD_DISTRACTOR, f"MCQ distractor {chr(65 + d_idx)} is directly supported by evidence quote"))
-    if question_type in {"SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SHORT_ANSWER"}:
+    if question_type in {
+        "SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SHORT_ANSWER",
+        "NOTE_COMPLETION", "TABLE_COMPLETION", "FORM_COMPLETION"
+    }:
         clean_prompt = prompt.replace(f"[{payload.get('questionNumber')}]", "")
         if check_prompt_answer_leakage(clean_prompt, answer):
             semantic.append((IssueCode.ANSWER_LEAKAGE, "Question prompt exposes its own answer"))

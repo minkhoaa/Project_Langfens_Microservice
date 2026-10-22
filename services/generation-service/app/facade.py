@@ -316,6 +316,7 @@ class GenerationFacade:
         reg = EvaluatorRegistry()
         reg.register(QuestionStructureEvaluator(timeout_seconds=resolved_policy.evaluator_deterministic_timeout_seconds))
         reg.register(AnswerVerbatimAndLengthEvaluator(timeout_seconds=resolved_policy.evaluator_deterministic_timeout_seconds))
+        reg.register(EvidenceOffsetEvaluator(timeout_seconds=resolved_policy.evaluator_deterministic_timeout_seconds))
         reg.register(AmbiguityAndDistractorEvaluator(timeout_seconds=resolved_policy.evaluator_semantic_timeout_seconds, estimated_tokens=resolved_policy.evaluator_max_tokens_per_evaluation))
         reg.register(NotGivenSemanticsEvaluator(timeout_seconds=resolved_policy.evaluator_semantic_timeout_seconds, estimated_tokens=resolved_policy.evaluator_max_tokens_per_evaluation))
 

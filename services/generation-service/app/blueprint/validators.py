@@ -302,6 +302,18 @@ def validate_blueprint(blueprint: ExamBlueprint, mode: Optional[str] = None) -> 
                             field=f"sections[{sec_id}].questionSlots[{slot.question_number}].targetDifficulty.rationale",
                         )
                     )
+
+                # Claim reference checks: fabricated synthetic claims prohibited
+                for cid in slot.claim_ref_ids:
+                    if cid.startswith("claim:run_") or cid.startswith("claim:None:"):
+                        issues.append(
+                            BlueprintIssue(
+                                code="BLUEPRINT_FABRICATED_CLAIM_PROHIBITED",
+                                severity=IssueSeverity.CRITICAL,
+                                message=f"Question {slot.question_number} has fabricated synthetic claim ID '{cid}'.",
+                                field=f"sections[{sec_id}].questionSlots[{slot.question_number}].claimRefIds",
+                            )
+                        )
         # Budget Allocation Check
         if section.budget_allocation:
             total_planned_tokens += section.budget_allocation.max_tokens_allocated

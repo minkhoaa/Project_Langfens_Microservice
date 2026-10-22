@@ -592,3 +592,80 @@ async def test_negative_three_sections_through_one_runner() -> None:
     assert [r.section.section_id for r in results] == [1, 2, 3]
     total_q = sum(len(r.questions) for r in results)
     assert total_q == 40
+
+
+# ── 10. Fixture Grounding & Evidence Offsets Negative Tests ─────────────────
+
+def test_negative_invalid_offsets_and_truncated_evidence():
+    """Verifies that invalid offsets and truncated evidence quotes fail production evaluators."""
+    passage_text = "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters."
+
+    # Subcase A: Invalid negative offsets [-1:-1]
+    invalid_offsets_art = ArtifactEnvelope.create(
+        "art_q_neg_offsets",
+        ArtifactType.QUESTION,
+        "run_neg",
+        {
+            "questionNumber": 1,
+            "questionType": "TRUE_FALSE_NOT_GIVEN",
+            "statement": "ALAN penetrates deep into water.",
+            "answer": "TRUE",
+            "evidenceQuote": "ALAN penetrates to approximately 20 meters",
+            "explanation": "Valid explanation exceeding twenty-five characters in length.",
+            "difficulty": "FOUNDATION",
+            "passageEvidence": {"startChar": -1, "endChar": -1, "text": "ALAN penetrates to approximately 20 meters"},
+            "evidenceClaimRef": "claim_1",
+        },
+        "1.0.0",
+    )
+    evals = evaluate_question(invalid_offsets_art, passage_text, "FOUNDATION", ())
+    offset_eval = next(e for e in evals if e.evaluator_id == "eval_evidence_offsets")
+    assert not offset_eval.is_pass()
+    assert any(i.code == IssueCode.EVIDENCE_MISSING for i in offset_eval.issues)
+
+    # Subcase B: Truncated evidence quote omitting the answer
+    truncated_quote_art = ArtifactEnvelope.create(
+        "art_q_truncated_quote",
+        ArtifactType.QUESTION,
+        "run_neg",
+        {
+            "questionNumber": 8,
+            "questionType": "SENTENCE_COMPLETION",
+            "prompt": "In Southeast Asian seas, ALAN penetrates to approximately [8] meters.",
+            "answer": "20",
+            "evidenceQuote": "In Southeast Asian seas",  # Omits '20'
+            "explanation": "Valid explanation exceeding twenty-five characters in length.",
+            "difficulty": "FOUNDATION",
+            "passageEvidence": {"startChar": 0, "endChar": 23, "text": "In Southeast Asian seas"},
+            "evidenceClaimRef": "claim_1",
+        },
+        "1.0.0",
+    )
+    evals = evaluate_question(truncated_quote_art, passage_text, "FOUNDATION", ())
+    semantic_eval = next(e for e in evals if e.evaluator_id == "eval_question_semantic")
+    assert not semantic_eval.is_pass()
+    assert any(i.code == IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM for i in semantic_eval.issues)
+
+    # Subcase C: Missing verified claim identity
+    missing_claim_art = ArtifactEnvelope.create(
+        "art_q_missing_claim",
+        ArtifactType.QUESTION,
+        "run_neg",
+        {
+            "questionNumber": 1,
+            "questionType": "TRUE_FALSE_NOT_GIVEN",
+            "statement": "ALAN penetrates deep into water.",
+            "answer": "TRUE",
+            "evidenceQuote": "ALAN penetrates to approximately 20 meters",
+            "explanation": "Valid explanation exceeding twenty-five characters in length.",
+            "difficulty": "FOUNDATION",
+            "passageEvidence": {"startChar": 80, "endChar": 122, "text": "ALAN penetrates to approximately 20 meters"},
+            "evidenceClaimRef": "",  # Missing claim reference!
+        },
+        "1.0.0",
+    )
+    evals = evaluate_question(missing_claim_art, passage_text, "FOUNDATION", ())
+    offset_eval = next(e for e in evals if e.evaluator_id == "eval_evidence_offsets")
+    assert not offset_eval.is_pass()
+    assert any(i.code == IssueCode.EVIDENCE_MISSING for i in offset_eval.issues)
+

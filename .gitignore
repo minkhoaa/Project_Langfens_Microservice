@@ -205,5 +205,8 @@ scripts/crawler/_cache_writing_images/
 reports/job_*.json
 reports/*_result.json
 reports/demo_*.json
+reports/reading_generation_*.json
+services/generation-service/reports/
+.superpowers/
 current_fresh_job_id.txt
 

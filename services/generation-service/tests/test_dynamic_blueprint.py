@@ -158,4 +158,121 @@ def test_dynamic_blueprint_deterministic_reproducibility():
     types1 = [q.question_type.value for s in bp1.sections for q in s.question_slots]
     types2 = [q.question_type.value for s in bp2.sections for q in s.question_slots]
     assert types1 == types2, "Dynamic blueprint must be 100% deterministic given identical evidence"
+    assert bp1.content_hash == bp2.content_hash, f"content_hash must match: {bp1.content_hash} != {bp2.content_hash}"
+
+
+def test_build_blueprint_production_reproducibility_and_evidence_awareness():
+    from app.reading_generation import build_blueprint
+    from app.contracts.artifact import ArtifactEnvelope, ArtifactType
+
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="dynamic")
+    sec_configs = policy.sections
+    verified_claims = [
+        {"claimId": f"claim_sec1_{i}", "text": f"Verified factual claim {i} regarding marine organisms"}
+        for i in range(1, 15)
+    ]
+    evidence_env = ArtifactEnvelope.create(
+        "art_eg_1",
+        ArtifactType.EVIDENCE_GRAPH,
+        "run_repro_1",
+        {
+            "graphId": "graph_sec1_v1",
+            "sourcePackId": "src_sec1_v1",
+            "contentHash": "abc123hash",
+            "claims": verified_claims,
+        },
+        "2.0.0",
+    )
+
+    # 1. Two calls with identical inputs must produce IDENTICAL contentHash
+    bp1 = build_blueprint(
+        evidence_env,
+        "run_repro_1",
+        sec_configs,
+        policy=policy,
+        topic="Marine Ecosystems",
+    )
+    bp2 = build_blueprint(
+        evidence_env,
+        "run_repro_1",
+        sec_configs,
+        policy=policy,
+        topic="Marine Ecosystems",
+    )
+
+    assert bp1["contentHash"] == bp2["contentHash"], (
+        f"Production blueprint contentHash drifted across identical runs: {bp1['contentHash']} != {bp2['contentHash']}"
+    )
+
+    # 2. Mutating evidence changes contentHash
+    altered_claims = [
+        {"claimId": f"claim_sec1_{i}", "text": f"Altered claim {i}"}
+        for i in range(1, 15)
+    ]
+    altered_evidence = ArtifactEnvelope.create(
+        "art_eg_2",
+        ArtifactType.EVIDENCE_GRAPH,
+        "run_repro_1",
+        {
+            "graphId": "graph_sec1_v2",
+            "sourcePackId": "src_sec1_v2",
+            "contentHash": "def456altered",
+            "claims": altered_claims,
+        },
+        "2.0.0",
+    )
+    bp_mutated = build_blueprint(
+        altered_evidence,
+        "run_repro_1",
+        sec_configs,
+        policy=policy,
+        topic="Marine Ecosystems",
+    )
+    assert bp_mutated["contentHash"] != bp1["contentHash"], "Mutating evidence must alter contentHash"
+
+    # 3. All slots have claim references resolving to verified evidence (no synthetic fallback)
+    for sec in bp1["sections"]:
+        for slot in sec["questionSlots"]:
+            assert len(slot["claimRefIds"]) > 0
+            for cid in slot["claimRefIds"]:
+                assert not cid.startswith("claim:run_repro_1:"), f"Found synthetic fabricated claim {cid}"
+                assert any(c["claimId"] == cid for c in verified_claims), f"Claim {cid} not in verified evidence"
+
+    # 4. Missing claims cannot produce accepted claim refs (never fabricate synthetic claims)
+    empty_evidence = ArtifactEnvelope.create(
+        "art_eg_empty",
+        ArtifactType.EVIDENCE_GRAPH,
+        "run_repro_1",
+        {
+            "graphId": "graph_sec1_empty",
+            "sourcePackId": "src_sec1_empty",
+            "contentHash": "emptyhash",
+            "claims": [],
+        },
+        "2.0.0",
+    )
+    bp_empty = build_blueprint(
+        empty_evidence,
+        "run_repro_1",
+        sec_configs,
+        policy=policy,
+        topic="Marine Ecosystems",
+    )
+    for sec in bp_empty["sections"]:
+        for slot in sec["questionSlots"]:
+            assert slot["claimRefIds"] == [], (
+                f"Missing claims must NOT produce accepted claim refs; got {slot['claimRefIds']}"
+            )
+
+    # 5. Blueprint validation rejects fabricated synthetic claim IDs
+    from app.blueprint.validators import validate_blueprint
+    from app.contracts.blueprint import ExamBlueprint
+    tampered_bp_dict = dict(bp1)
+    tampered_bp_dict["sections"][0]["questionSlots"][0]["claimRefIds"] = ["claim:run_repro_1:1:1"]
+    tampered_bp = ExamBlueprint.model_validate(tampered_bp_dict)
+    issues = validate_blueprint(tampered_bp, mode="dynamic")
+    assert any(i.code == "BLUEPRINT_FABRICATED_CLAIM_PROHIBITED" for i in issues), (
+        "Blueprint validation must reject fabricated synthetic claim IDs"
+    )
+
 
