@@ -327,10 +327,11 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             {
                 var grp = sec.Groups[g];
                 var canonicalType = GetCanonicalGroupType(grp.Type);
-                var expectedType = (isLegacyPreset && expectedGroups.Length > g) ? expectedGroups[g] : null;
-                var normType = ReadingPaperRules.KnownQuestionFamilies.Contains(canonicalType)
-                    ? canonicalType
-                    : (!string.IsNullOrWhiteSpace(expectedType) ? expectedType : canonicalType);
+                if (!ReadingPaperRules.KnownQuestionFamilies.Contains(canonicalType))
+                {
+                    throw new InvalidOperationException($"Unknown or unsupported question family '{grp.Type}' (canonical: '{canonicalType}') in section {i + 1} group {g + 1}");
+                }
+                var normType = canonicalType;
                 var instruction = !string.IsNullOrWhiteSpace(grp.Instruction) ? grp.Instruction : GetGroupInstruction(normType);
 
                 var normQuestions = new List<ReadingGeneratedQuestion>();

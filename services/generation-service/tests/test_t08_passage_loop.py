@@ -175,7 +175,7 @@ class DurableStoreFake:
         # so a commit that carries no evaluations is valid. Treat an absent list as
         # empty rather than iterating None.
         for ev in (req.evaluations or []):
-            state["evaluations"][f"{ev.evaluator_id}_{req.artifact.version}"] = ev.model_dump_json(by_alias=True)
+            state["evaluations"][f"{req.artifact.artifact_id}_{ev.evaluator_id}_{req.artifact.version}"] = ev.model_dump_json(by_alias=True)
         self._save(state)
         return CheckpointAck(
             runId=req.artifact.run_id,
@@ -675,12 +675,25 @@ async def test_t08_06_crash_resumption_and_fencing_invariants(tmp_path: Path):
         producer_version="2.0.0",
         parent_refs=(bp_ref, eg_ref),
     )
+    evals = [
+        EvaluationResult(
+            evaluationId=f"eval_{ev_id}_{run_id[:6]}",
+            evaluatorId=ev_id,
+            evaluatorVersion="2.0.0" if ev_id == "eval_grounding_fidelity" else "1.0.0",
+            targetRef=accepted_art.to_ref(),
+            inputDependencyRefs=[bp_ref, eg_ref],
+            status=EvaluationStatus.PASS,
+            issues=[],
+            score=1.0,
+        )
+        for ev_id in ("eval_passage_word_count", "eval_passage_style", "eval_grounding_fidelity")
+    ]
     commit_ack = store.commit_checkpoint(
         type("CommitReq", (), {
             "epoch": 1,
             "leaseOwner": owner_id,
             "artifact": accepted_art,
-            "evaluations": [],
+            "evaluations": evals,
         })()
     )
     assert commit_ack.artifactId == "art_passage_s1"

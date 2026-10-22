@@ -621,7 +621,13 @@ class BoundedLoopRuntime:
                 self._finish(LoopReason.LEASE_LOST, error.message, aborted=True)
                 return False
             if error.status_code == 422:
-                self._finish(LoopReason.TOKEN_CAP, error.message)
+                msg = (error.message or "").lower()
+                if "call" in msg:
+                    self._finish(LoopReason.CALL_CAP, error.message)
+                elif "wall" in msg:
+                    self._finish(LoopReason.WALL_TIME_CAP, error.message)
+                else:
+                    self._finish(LoopReason.TOKEN_CAP, error.message)
                 return False
             else:
                 raise

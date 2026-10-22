@@ -93,12 +93,6 @@ def _parse_candidate_payload(
     matched_claim = claims_map.get(claim_id)
     explanation = str(cand.get("explanation") or "").strip()
     if len(explanation) < 25:
-        quote = str(cand.get("evidenceQuote") or "").strip()
-        if not quote and matched_claim and matched_claim.get("text"):
-            quote = str(matched_claim["text"]).strip()
-        if quote:
-            explanation = f"The passage states that '{quote[:50]}...', providing verifiable evidence for item {q_num}."
-    if len(explanation) < 25:
         raise ValueError(f"Question {q_num} explanation is missing or too short (< 25 characters)")
     if q_type in ("TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"):
         statement = str(cand.get("statement") or cand.get("prompt") or "").strip()
@@ -716,7 +710,7 @@ class SectionRunner:
             elif g_idx < len(config.groups):
                 q_type = config.groups[g_idx].question_type.value
             else:
-                q_type = "SHORT_ANSWER"
+                raise ValueError(f"Question slot {q_num} has no valid questionType or matching group configuration")
             q_art_id = f"question:{context.run_id}:{q_num}"
             claim_ref_ids = slot.get("claimRefIds") or ()
             claim_id = claim_ref_ids[0] if claim_ref_ids else (claims[0]["claimId"] if claims else "claim_1")

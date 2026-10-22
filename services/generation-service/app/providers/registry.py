@@ -61,6 +61,7 @@ class ProviderRegistry:
         self._current_indices: Dict[str, int] = {}
         self._semaphores: Dict[str, asyncio.Semaphore] = {}
         self._rate_limiters: Dict[str, TokenBucket] = {}
+        self._min_key_intervals: Dict[str, float] = {}
         self._lock = asyncio.Lock()
         self._initialized = False
 
@@ -70,11 +71,19 @@ class ProviderRegistry:
         keys: Optional[List[str]] = None,
         max_concurrency: int = 5,
         rate_per_second: float = 10.0,
+        min_key_interval: Optional[float] = None,
     ) -> None:
         name = provider.name.lower()
         self._providers[name] = provider
         self._semaphores[name] = asyncio.Semaphore(max_concurrency)
         self._rate_limiters[name] = TokenBucket(rate_per_second=rate_per_second, capacity=max_concurrency * 2)
+
+        if min_key_interval is not None:
+            self._min_key_intervals[name] = float(min_key_interval)
+        elif name == "groq" and "fake" not in type(provider).__name__.lower() and not getattr(provider, "is_fake", False):
+            self._min_key_intervals[name] = 60.0
+        else:
+            self._min_key_intervals[name] = 0.0
 
         key_list = keys or []
         self._keys[name] = [KeyInfo(key=k.strip(), index=i) for i, k in enumerate(key_list) if k.strip()]
@@ -119,7 +128,7 @@ class ProviderRegistry:
                         k.exhausted_at = None
                         logger.info("Provider %s key #%d cooldown elapsed; re-enabled", name.upper(), k.index + 1)
 
-            min_key_interval = 60.0 if name == "groq" else 0.0
+            min_key_interval = self._min_key_intervals.get(name, 60.0 if (name == "groq" and "fake" not in type(self._providers.get(name)).__name__.lower() and not getattr(self._providers.get(name), "is_fake", False)) else 0.0)
             start_idx = self._current_indices.get(name, 0)
             attempts = 0
             while attempts < len(keys):

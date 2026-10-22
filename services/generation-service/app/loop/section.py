@@ -507,8 +507,9 @@ class SectionLoop:
                     parents_not_stale = (
                         len(stored_parent_refs) == len(all_input_deps)
                         and all(
-                            p.artifact_id in store_accepted_heads and store_accepted_heads[p.artifact_id] == p
+                            store_accepted_heads[p.artifact_id] == p
                             for p in stored_parent_refs
+                            if p.artifact_id in store_accepted_heads
                         )
                     )
 

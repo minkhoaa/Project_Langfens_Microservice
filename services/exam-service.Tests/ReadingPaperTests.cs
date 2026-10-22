@@ -381,7 +381,9 @@ public class ReadingPaperTests
     [Fact]
     public async Task InitDemoRun_CreatesAuthorizedDurableRunsWithFencedLease()
     {
-        var conn = "Host=localhost;Database=exam;Username=exam;Password=exam;Port=32771";
+        var conn = Environment.GetEnvironmentVariable("ConnectionStrings__exam-db")
+            ?? Environment.GetEnvironmentVariable("ConnectionStrings__exam_db")
+            ?? "Host=localhost;Database=exam-db;Username=exam;Password=exam;Port=5433";
         var options = new DbContextOptionsBuilder<ExamDbContext>()
             .UseNpgsql(conn)
             .Options;

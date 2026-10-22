@@ -31,7 +31,7 @@ from app.loop.capabilities import EvaluatorCapability, GeneratorCapability
 from app.loop.context import AuthorityGrant, BudgetTracker, LoopContext, ResumeCursor
 from app.loop.detectors import OscillationDetector, StagnationDetector
 from app.loop.passage import PassageLoop
-from app.loop.policy import LoopPolicy
+from app.loop.policy import LoopPolicy, cap_snapshot_sha256
 from app.loop.runtime import BoundedLoopRuntime
 from app.persistence.client import CheckpointApiError
 from app.persistence.models import LoopCursorCheckpointRequest
@@ -61,7 +61,7 @@ async def test_regression_01_correct_accepted_artifact_resumes_zero_provider_cal
     store.commit_checkpoint(type("Req", (), {"epoch": 1, "leaseOwner": owner, "artifact": bp_art, "evaluations": [], "operationId": "op_bp"})())
     store.commit_checkpoint(type("Req", (), {"epoch": 1, "leaseOwner": owner, "artifact": eg_art, "evaluations": [], "operationId": "op_eg"})())
 
-    # Create and commit an accepted passage artifact
+    # Create and commit an accepted passage artifact with verified passing evaluations
     p_env = ArtifactEnvelope.create(
         "art_passage_s1",
         ArtifactType.PASSAGE,
@@ -71,7 +71,20 @@ async def test_regression_01_correct_accepted_artifact_resumes_zero_provider_cal
         version=1,
         parent_refs=[bp_ref, eg_ref],
     )
-    store.commit_checkpoint(type("Req", (), {"epoch": 1, "leaseOwner": owner, "artifact": p_env, "evaluations": [], "operationId": "op_p"})())
+    p_evals = [
+        EvaluationResult(
+            evaluationId=f"eval_{ev_id}_{run_id[:6]}",
+            evaluatorId=ev_id,
+            evaluatorVersion="2.0.0" if ev_id == "eval_grounding_fidelity" else "1.0.0",
+            targetRef=p_env.to_ref(),
+            inputDependencyRefs=[bp_ref, eg_ref],
+            status=EvaluationStatus.PASS,
+            issues=[],
+            score=1.0,
+        )
+        for ev_id in ("eval_passage_word_count", "eval_passage_style", "eval_grounding_fidelity")
+    ]
+    store.commit_checkpoint(type("Req", (), {"epoch": 1, "leaseOwner": owner, "artifact": p_env, "evaluations": p_evals, "operationId": "op_p"})())
 
     generator = PassageGenerator(gateway=None)
     passage_loop = PassageLoop(generator=generator, persistence_client=store)
@@ -510,7 +523,8 @@ def test_regression_08_legacy_and_unified_contracts_remain_compatible():
     assert sec_loop_policy.max_wall_time_seconds <= MAX_SECTION_WALL_SECONDS
     assert sec_loop_policy.max_total_tokens <= MAX_SECTION_TOKEN_CAP
     assert sec_loop_policy.operation_wall_reservation_seconds <= MAX_PROVIDER_CALL_SECONDS
-    assert sec_loop_policy.cap_profile_sha256 == unified_policy.hash
+    assert sec_loop_policy.cap_profile_sha256 == cap_snapshot_sha256(sec_loop_policy.cap_profile_snapshot)
+    assert sec_loop_policy.policy_hash == unified_policy.hash
     assert sec_loop_policy.cap_profile_version == "pinned-execution-v2"
     # Cap bounds validation passes
     sec_loop_policy.validate_cap_bounds()
@@ -520,5 +534,6 @@ def test_regression_08_legacy_and_unified_contracts_remain_compatible():
     assert not paper_loop_policy.is_unlimited
     assert paper_loop_policy.max_wall_time_seconds <= MAX_SECTION_WALL_SECONDS * 3
     assert paper_loop_policy.max_total_tokens <= MAX_SECTION_TOKEN_CAP * 3
-    assert paper_loop_policy.cap_profile_sha256 == unified_policy.hash
+    assert paper_loop_policy.cap_profile_sha256 == cap_snapshot_sha256(paper_loop_policy.cap_profile_snapshot)
+    assert paper_loop_policy.policy_hash == unified_policy.hash
     paper_loop_policy.validate_cap_bounds()

@@ -234,10 +234,12 @@ class DurableStore:
             return type("Grant", (), {"operationId": req.operationId,
                                       "tokenReservation": req.tokenReservation, "isReplay": True})()
         work = [x for x in state["ops"].values() if x["operationType"] != "CHECKPOINT_COMMIT"]
-        if req.operationType != "CHECKPOINT_COMMIT" and (len(work) + 1 > self.cap_calls or
+        if req.operationType != "CHECKPOINT_COMMIT" and len(work) + 1 > self.cap_calls:
+            raise CheckpointApiError(422, "Budget exhausted: maximum calls exceeded")
+        if req.operationType != "CHECKPOINT_COMMIT" and (
             sum(x["tokensUsed"] if x["status"] == "COMPLETED" else x["tokenReservation"] for x in work)
             + req.tokenReservation > self.cap_tokens):
-            raise CheckpointApiError(422, "budget reservation cap")
+            raise CheckpointApiError(422, "Budget exhausted: token cap exceeded")
         state["ops"][req.operationId] = dict(
             operationId=req.operationId, operationType=req.operationType, status="RESERVED",
             artifactId=req.artifactId, requestHash=req.requestHash,
