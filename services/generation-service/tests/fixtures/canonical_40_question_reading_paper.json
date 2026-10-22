@@ -1,0 +1,1433 @@
+{
+  "blueprintRef": {
+    "artifactId": "blueprint:canonical-40q-shared",
+    "artifactType": "ExamBlueprint",
+    "contentHash": "0cf4126870ad25593af291e032cd8419c184e6e9ff735ef35e2c960c62c9ed06",
+    "version": 1
+  },
+  "paperId": "paper:canonical-40q-shared",
+  "passageRefs": [
+    {
+      "artifactId": "passage:canonical-40q-shared:1",
+      "artifactType": "Passage",
+      "contentHash": "c4a7c27a83ebc95728a740eeed5aa2c8182a35f8a700911a7eba22d780da32bf",
+      "version": 1
+    },
+    {
+      "artifactId": "passage:canonical-40q-shared:2",
+      "artifactType": "Passage",
+      "contentHash": "fdf76da07077c84b7d9017af3c9fb946a6a45ee64ba4609c3bbf067c150b2f49",
+      "version": 1
+    },
+    {
+      "artifactId": "passage:canonical-40q-shared:3",
+      "artifactType": "Passage",
+      "contentHash": "6e51af6f0c2689907254164ef65feba13b6f921de3c513ff14ec7dab3acfddf9",
+      "version": 1
+    }
+  ],
+  "questionRefs": [
+    {
+      "artifactId": "question:canonical-40q-shared:1",
+      "artifactType": "Question",
+      "contentHash": "42109f0486fbbcc8c549f53ec982b4dbc5b7d20800308960de2db317a9494d6c",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:2",
+      "artifactType": "Question",
+      "contentHash": "3c1db23f77c79031fcf3094d5c5c0b29c3242627073f5504787da1ee49e3f026",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:3",
+      "artifactType": "Question",
+      "contentHash": "ece5f1ff518249e1501d76f05c6e29d214436689dc1b25c370cae57fd6dd5a70",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:4",
+      "artifactType": "Question",
+      "contentHash": "280a2fb3840d9bf23566b2ebbed7f881e18700f7d899bc793351130b24c64493",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:5",
+      "artifactType": "Question",
+      "contentHash": "81551d0954258766a4ac993b3c8d40ea555ef9479c26af25836f4589d33cf246",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:6",
+      "artifactType": "Question",
+      "contentHash": "4ad8fdada3feb3e93f4a093f9d3f273a29cbbe303d16be604170102f9b403d1d",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:7",
+      "artifactType": "Question",
+      "contentHash": "4bb3f45344cfe1dfe4d0afebb64d13aa5d4daf2ca0c0bd69d3256ad87540f786",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:8",
+      "artifactType": "Question",
+      "contentHash": "3e324dade330a0d86cf0609b8ad6c0f18babbebeca8c8774fdc32120220b3955",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:9",
+      "artifactType": "Question",
+      "contentHash": "46da8af831d44702c1c12dc2f47a983993ed2d53f3504ace8ecbf687312cb31b",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:10",
+      "artifactType": "Question",
+      "contentHash": "841e23ba7d5deb71406176a34f584a4ec7e87457d527d92c1e7b3694042dfa6e",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:11",
+      "artifactType": "Question",
+      "contentHash": "b5dc506e16918c6df368e7be3d37c047778ade5c94dd0138c5f28e13a9a88531",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:12",
+      "artifactType": "Question",
+      "contentHash": "714008d9aedd51121765066bf0c0c05b24d942028c9bf148a9d4ac5e80ea1b5b",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:13",
+      "artifactType": "Question",
+      "contentHash": "9e1d991a8b5b07e26d9a2f72078648a90dbce998f0a91e732f5d35e69e62a866",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:14",
+      "artifactType": "Question",
+      "contentHash": "0a4001ce8903d56afeb53306980dcd49b437d4a250bc487666f9a9b6fb3b545c",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:15",
+      "artifactType": "Question",
+      "contentHash": "6a11fea85cf9f391ab22b0303780dea1d68cab898e001dfbd8c3e226761893c4",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:16",
+      "artifactType": "Question",
+      "contentHash": "2ed9ae1e81ea350272bec57f5302cd8b04a9cc0b795753156c2e5929135de405",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:17",
+      "artifactType": "Question",
+      "contentHash": "581dc25547781caa901b548b4e89ab1dde9e57ae84430af83f68ed0b3d5af089",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:18",
+      "artifactType": "Question",
+      "contentHash": "c338ca783c3f9d19d482b12c0f30e2db9a1be8b86b06b8fefba30373b4da1739",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:19",
+      "artifactType": "Question",
+      "contentHash": "83faf8d341f63880019fbaa3d0bfdbb21f0e8b63e1f6ccf374d3972f487ea91f",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:20",
+      "artifactType": "Question",
+      "contentHash": "eff25c6e9243d523dc42ebc2e4ae191082c8dbb1aae45595726e073e2314b4e4",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:21",
+      "artifactType": "Question",
+      "contentHash": "4e0e4fe8bb53cbb9429e32c5a333e7708d44952c1817cc3099d13d95dc9317c9",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:22",
+      "artifactType": "Question",
+      "contentHash": "4b3c8b405017449c2cf5d413087a7fe50c027563828fa6e45caa75a4ea1a2766",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:23",
+      "artifactType": "Question",
+      "contentHash": "301f38194a71e93e9990b8758fd8b2e4752ad4cc3f0c5f63f62bf4e45ce1552e",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:24",
+      "artifactType": "Question",
+      "contentHash": "152bcbadefa01b21f3313ab0ba11c808ba5eb5fca6aa13f31019026cafa80f6e",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:25",
+      "artifactType": "Question",
+      "contentHash": "46df0bb6fb0e70ff5e618d9c3c97248577ce0b902b5825af8826b3871c1728ff",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:26",
+      "artifactType": "Question",
+      "contentHash": "d4d86b3c69d73fc873c6a107dfcf2b51fa5746af70242cd52c7d2fad56bd2d33",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:27",
+      "artifactType": "Question",
+      "contentHash": "676bbfdaa0d99649993294d73b5b77bce70e8c15fcfbe171e31d656fe5711ac8",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:28",
+      "artifactType": "Question",
+      "contentHash": "6efc75d888d3bfd9c2145e0e49a0ff4ed0f2511cbc1d9e1336211a4020667742",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:29",
+      "artifactType": "Question",
+      "contentHash": "51a6fe992aae16337fdff352fef5e19a64826410c46aebf5f7f21e889db6fd1b",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:30",
+      "artifactType": "Question",
+      "contentHash": "120fba2d6dc0bf41a818b7b246233633bbefa83549f3f76ad3ef3ee7119e093e",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:31",
+      "artifactType": "Question",
+      "contentHash": "dc8c777ec4e21ae6910f6e30d2c030794cc64eb1e8ff2e26813ff4934def8441",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:32",
+      "artifactType": "Question",
+      "contentHash": "58bc0491ef72e487eb49cc0b0b66ecb50659cb8d8402a5812bfbd1058aae8149",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:33",
+      "artifactType": "Question",
+      "contentHash": "789f1001411fb370ad9423131e59bb91306903b80049e1b544287b9c221d14ad",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:34",
+      "artifactType": "Question",
+      "contentHash": "465a557e8bbc162fe90ca9308fb32cefeed9e52a016835126d641798bf12c461",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:35",
+      "artifactType": "Question",
+      "contentHash": "b3d8b201f4cb948cef0f4b22b8cb554b41d50cb93502a197c60dc0ccfc5be1e7",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:36",
+      "artifactType": "Question",
+      "contentHash": "869a1fe51a1150d24e9eb012b4e3c9a7188fc407eed5e9a6db932d1d0cef52b7",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:37",
+      "artifactType": "Question",
+      "contentHash": "9985d218aa64c74c04eb8ff95cb8f6b2026086b4f6208d098e14bfa9758846e6",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:38",
+      "artifactType": "Question",
+      "contentHash": "05a2155420673e0468f051fe936f8c6e4609e506283381121f5d82d6f519eae2",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:39",
+      "artifactType": "Question",
+      "contentHash": "0059b9e310a4b6b42b42a8a35afe37b46ae9e9da013f72badc4e112052b53bfe",
+      "version": 1
+    },
+    {
+      "artifactId": "question:canonical-40q-shared:40",
+      "artifactType": "Question",
+      "contentHash": "fd9630451e3ee5479f2f1d0436e2126e48d017c3603e5ebab3f99967254cdfc7",
+      "version": 1
+    }
+  ],
+  "runId": "canonical-40q-shared",
+  "sectionRefs": [
+    {
+      "artifactId": "section:canonical-40q-shared:1",
+      "artifactType": "Section",
+      "contentHash": "3b8d3b282230a99aba9a5be2c6e2b354b03884f10e03522fbbc557aedeee321d",
+      "version": 1
+    },
+    {
+      "artifactId": "section:canonical-40q-shared:2",
+      "artifactType": "Section",
+      "contentHash": "b581b8b3a619a2657c91a951b698fa44eebb0a8d532e73cc3f7472db666014b3",
+      "version": 1
+    },
+    {
+      "artifactId": "section:canonical-40q-shared:3",
+      "artifactType": "Section",
+      "contentHash": "6bc4be8a375ecdad5826bec263afb541e718e853525f988064c54d34f7196b01",
+      "version": 1
+    }
+  ],
+  "sections": [
+    {
+      "groups": [
+        {
+          "groupId": "group_1_1",
+          "instructions": "Do the following statements agree with the information given in the Reading Passage? Write TRUE, FALSE, or NOT GIVEN.",
+          "questionType": "TRUE_FALSE_NOT_GIVEN",
+          "questions": [
+            {
+              "answer": "TRUE",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:10",
+              "evidenceQuote": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE.",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 1.",
+              "passageEvidence": {
+                "endChar": 4315,
+                "startChar": 4144,
+                "text": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE."
+              },
+              "questionNumber": 1,
+              "questionType": "TRUE_FALSE_NOT_GIVEN",
+              "statement": "Item 1 confirms that Dendrochronological dating of oak piles supporting trackways."
+            },
+            {
+              "answer": "FALSE",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:10",
+              "evidenceQuote": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE.",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 2.",
+              "passageEvidence": {
+                "endChar": 4315,
+                "startChar": 4144,
+                "text": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE."
+              },
+              "questionNumber": 2,
+              "questionType": "TRUE_FALSE_NOT_GIVEN",
+              "statement": "Regarding question 2, researchers observed that Dendrochronological dating of oak piles supporting trackways."
+            },
+            {
+              "answer": "TRUE",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:7",
+              "evidenceQuote": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE.",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 3.",
+              "passageEvidence": {
+                "endChar": 4315,
+                "startChar": 4144,
+                "text": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE."
+              },
+              "questionNumber": 3,
+              "questionType": "TRUE_FALSE_NOT_GIVEN",
+              "statement": "The analysis in item 3 established that Dendrochronological dating of oak piles supporting trackways."
+            },
+            {
+              "absenceAssessment": {
+                "absenceConfirmed": true,
+                "absenceReason": "The passage provides no conclusive factual statement regarding this specific factor.",
+                "assessmentId": "abs:1:4",
+                "claimOrTopic": "Field measurements for query 4 indicated that Dendrochronological dating of oak piles supporting trackways."
+              },
+              "answer": "NOT_GIVEN",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:12",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 4.",
+              "passageEvidence": {
+                "endChar": 4949,
+                "startChar": 4730,
+                "text": "Heavy oxygen isotope ratios preserved in subfossil wood cellulose corroborate regional climatic reconstructions indicating elevated summer precipitation and reduced thermal variability during this developmental horizon."
+              },
+              "questionNumber": 4,
+              "questionType": "TRUE_FALSE_NOT_GIVEN",
+              "statement": "Field measurements for query 4 indicated that Dendrochronological dating of oak piles supporting trackways."
+            },
+            {
+              "answer": "TRUE",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:9",
+              "evidenceQuote": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE.",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 5.",
+              "passageEvidence": {
+                "endChar": 4315,
+                "startChar": 4144,
+                "text": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE."
+              },
+              "questionNumber": 5,
+              "questionType": "TRUE_FALSE_NOT_GIVEN",
+              "statement": "Item 5 confirms that Dendrochronological dating of oak piles supporting trackways."
+            }
+          ]
+        },
+        {
+          "groupId": "group_1_2",
+          "instructions": "Complete the notes/diagram below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+          "questionType": "TABLE_COMPLETION",
+          "questions": [
+            {
+              "answer": "dendrochronological",
+              "colHeader": null,
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:10",
+              "evidenceQuote": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE.",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 6.",
+              "passageEvidence": {
+                "endChar": 4315,
+                "startChar": 4144,
+                "text": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE."
+              },
+              "prompt": "Regarding question 6, empirical observations measured the [6] under controlled conditions.",
+              "questionNumber": 6,
+              "questionType": "TABLE_COMPLETION",
+              "rowHeader": null,
+              "tableContext": ""
+            },
+            {
+              "answer": "dendrochronological",
+              "colHeader": null,
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:9",
+              "evidenceQuote": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE.",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 7.",
+              "passageEvidence": {
+                "endChar": 4315,
+                "startChar": 4144,
+                "text": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE."
+              },
+              "prompt": "In survey item 7, researchers documented the [7] across seasonal horizons.",
+              "questionNumber": 7,
+              "questionType": "TABLE_COMPLETION",
+              "rowHeader": null,
+              "tableContext": ""
+            },
+            {
+              "answer": "dendrochronological",
+              "colHeader": null,
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:10",
+              "evidenceQuote": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE.",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 8.",
+              "passageEvidence": {
+                "endChar": 4315,
+                "startChar": 4144,
+                "text": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE."
+              },
+              "prompt": "The analysis for query 8 emphasized the role of [8] in environmental dynamics.",
+              "questionNumber": 8,
+              "questionType": "TABLE_COMPLETION",
+              "rowHeader": null,
+              "tableContext": ""
+            },
+            {
+              "answer": "dendrochronological",
+              "colHeader": null,
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:12",
+              "evidenceQuote": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE.",
+              "explanation": "The passage explicitly states that 'Dendrochronological dating of oak piles ...', which provides direct verifiable evidence for question 9.",
+              "passageEvidence": {
+                "endChar": 4315,
+                "startChar": 4144,
+                "text": "Dendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE."
+              },
+              "prompt": "Detailed investigations for item 9 evaluated the [9] in regional ecosystems.",
+              "questionNumber": 9,
+              "questionType": "TABLE_COMPLETION",
+              "rowHeader": null,
+              "tableContext": ""
+            }
+          ]
+        },
+        {
+          "groupId": "group_1_3",
+          "instructions": "Complete the notes/diagram below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+          "questionType": "FLOW_CHART",
+          "questions": [
+            {
+              "answer": "spatial",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:7",
+              "evidenceQuote": "Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles.",
+              "explanation": "The passage explicitly states that 'Spatial analysis of ditch alignments sug...', which provides direct verifiable evidence for question 10.",
+              "flowSteps": [],
+              "passageEvidence": {
+                "endChar": 1909,
+                "startChar": 1674,
+                "text": "Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles."
+              },
+              "prompt": "Which specific operational indicator was evaluated in item 10 under experimental conditions?",
+              "questionNumber": 10,
+              "questionType": "FLOW_CHART",
+              "stepIndex": null,
+              "svgAssetId": null
+            },
+            {
+              "answer": "spatial",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:5",
+              "evidenceQuote": "Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles.",
+              "explanation": "The passage explicitly states that 'Spatial analysis of ditch alignments sug...', which provides direct verifiable evidence for question 11.",
+              "flowSteps": [],
+              "passageEvidence": {
+                "endChar": 1909,
+                "startChar": 1674,
+                "text": "Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles."
+              },
+              "prompt": "What primary parameter was systematically recorded in query 11 during observations?",
+              "questionNumber": 11,
+              "questionType": "FLOW_CHART",
+              "stepIndex": null,
+              "svgAssetId": null
+            },
+            {
+              "answer": "spatial",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:14",
+              "evidenceQuote": "Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles.",
+              "explanation": "The passage explicitly states that 'Spatial analysis of ditch alignments sug...', which provides direct verifiable evidence for question 12.",
+              "flowSteps": [],
+              "passageEvidence": {
+                "endChar": 1909,
+                "startChar": 1674,
+                "text": "Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles."
+              },
+              "prompt": "Which primary variable was measured in problem 12 in relation to the investigation?",
+              "questionNumber": 12,
+              "questionType": "FLOW_CHART",
+              "stepIndex": null,
+              "svgAssetId": null
+            },
+            {
+              "answer": "spatial",
+              "difficulty": "FOUNDATION",
+              "evidenceClaimRef": "claim:canonical-40q-shared:1:14",
+              "evidenceQuote": "Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles.",
+              "explanation": "The passage explicitly states that 'Spatial analysis of ditch alignments sug...', which provides direct verifiable evidence for question 13.",
+              "flowSteps": [],
+              "passageEvidence": {
+                "endChar": 1909,
+                "startChar": 1674,
+                "text": "Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles."
+              },
+              "prompt": "What key environmental factor was documented in question 13 regarding the study?",
+              "questionNumber": 13,
+              "questionType": "FLOW_CHART",
+              "stepIndex": null,
+              "svgAssetId": null
+            }
+          ]
+        }
+      ],
+      "passage": "Archaeological and paleoecological investigations across temperate river basins demonstrate that early agrarian communities actively modified local hydrology to cultivate wetland cereals. Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape. Radiocarbon determinations from waterlogged sediment strata indicate continuous occupation spanning the middle to late Bronze Age. Detailed sedimentary measurements confirmed the structural and environmental characteristics of the regional habitat. Excavations at lakeside settlements revealed complex networks of timber-revetted drainage canals, raised agricultural terraces, and subterranean storage pits lined with charred birch bark. Systematic comparative sampling provided consistent supporting evidence across the designated excavation zones. Careful comparative analysis of these physical samples indicated consistent structural adaptation across consecutive chronological intervals. These combined findings illustrate the sophisticated technical competence and organizational capacity governing local environmental management. Subsequent laboratory examinations corroborated the primary interpretive conclusions across all diagnostic indicators.\n\nSystematic archaeobotanical macro-remain flotation recovered abundant carbonized caryopses of hulled barley (Hordeum vulgare) and emmer wheat (Triticum dicoccum), accompanied by characteristic arable weed assemblages including Chenopodium album, Fallopia convolvulus, and Polygonum lapathifolium. Careful contextual recording and stratigraphic calibration remained central to the interdisciplinary analytical approach. Spatial analysis of ditch alignments suggests coordinated communal labor rather than piecemeal household adaptation, reflecting emergent socio-political hierarchies capable of mobilizing substantial labor forces across seasonal cycles. Comprehensive environmental assessments further highlighted several consistent parameters throughout the developmental horizon. Micromorphological analysis of thin sections prepared from ditch infill sediments demonstrates cyclical depositional episodes marked by alternating laminations of fine organic silt and coarser mineral grains. Rigorous verification procedures ensured that recorded measurements reflected genuine depositional rhythms. The integration of microstratigraphic profiling with geochemical screening provided essential corroboration for the initial empirical model. Methodological uniformity across the recovered materials ensured that interpretive classifications remained reliable and reproducible. Comprehensive macroscopic examination reaffirmed that local technological traditions remained stable and resilient.\n\nThese sedimentary rhythms correspond to seasonal inundation cycles and controlled water-sluicing operations designed to prevent soil salinization in low-lying alluvial basins. Additional stratigraphic observations aligned directly with these previously documented environmental parameters. Palynological spectra extracted from adjacent peat cores register pronounced declines in arboreal pollen taxa, notably Quercus, Tilia, and Fraxinus, concurrent with abrupt expansions of anthropogenic indicators such as Plantago lanceolata and microscopic charcoal particulates. Methodological consistency across independent samples substantiated the coherence of the primary investigation. Lipid biomarker analysis of ceramic residues recovered from cooking vessels revealed degraded animal fats with delta-C-13 values indicative of ruminant dairy products, suggesting mixed agro-pastoral economies wherein livestock grazing on harvested stubble contributed vital nutrient replenishment to depleted infield plots. Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape. Such interdisciplinary observations emphasize the complex operational relationships between resource availability and communal infrastructure. Extended macro-botanical analysis substantiated the presence of coordinated agricultural management throughout the regional river basin.\n\nDendrochronological dating of oak piles supporting trackways traversing saturated mire environments yielded felling dates clustered around the late fourteenth century BCE. Detailed sedimentary measurements confirmed the structural and environmental characteristics of the regional habitat. The construction of these causeways required substantial timber extraction from mature upland deciduous woodlands, implying careful forest management and rotational coppicing systems. Systematic comparative sampling provided consistent supporting evidence across the designated excavation zones. Heavy oxygen isotope ratios preserved in subfossil wood cellulose corroborate regional climatic reconstructions indicating elevated summer precipitation and reduced thermal variability during this developmental horizon. Careful contextual recording and stratigraphic calibration remained central to the interdisciplinary analytical approach. Systematic evaluation across multiple independent sampling horizons confirmed that these primary features were deliberately engineered rather than incidental. Detailed geochemical profiling of preserved sediments verified the absence of modern intrusive contamination within the core strata.\n\nFurthermore, trace element geochemical signatures obtained through portable X-ray fluorescence analysis of hearth clays demonstrated localized copper working, pointing to specialized metallurgy occurring in close physical proximity to grain processing precincts. Comprehensive environmental assessments further highlighted several consistent parameters throughout the developmental horizon. Spatial point-pattern analysis of quern-stone fragments and pestle stones confirms centralized cereal dehusking within fortified compounds, underscoring the defensive vulnerability of agricultural surplus during phases of regional territorial consolidation. Rigorous verification procedures ensured that recorded measurements reflected genuine depositional rhythms. Collectively, these stratigraphic, botanical, and artifactual lines of evidence demonstrate that prehistoric wetland cultivation was not an expedient subsistence fallback, but a sophisticated, institutionally managed technological system characterized by intentional environmental engineering, sustained nutrient management, and resilient communal resource infrastructure. Additional stratigraphic observations aligned directly with these previously documented environmental parameters. Further contextual assessment established that regional depositional processes maintained continuous stability throughout the recorded horizon. The spatial coherence of these structural alignments demonstrates an established architectural tradition spanning multiple generations.",
+      "questionRefs": [
+        {
+          "artifactId": "question:canonical-40q-shared:1",
+          "artifactType": "Question",
+          "contentHash": "42109f0486fbbcc8c549f53ec982b4dbc5b7d20800308960de2db317a9494d6c",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:2",
+          "artifactType": "Question",
+          "contentHash": "3c1db23f77c79031fcf3094d5c5c0b29c3242627073f5504787da1ee49e3f026",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:3",
+          "artifactType": "Question",
+          "contentHash": "ece5f1ff518249e1501d76f05c6e29d214436689dc1b25c370cae57fd6dd5a70",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:4",
+          "artifactType": "Question",
+          "contentHash": "280a2fb3840d9bf23566b2ebbed7f881e18700f7d899bc793351130b24c64493",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:5",
+          "artifactType": "Question",
+          "contentHash": "81551d0954258766a4ac993b3c8d40ea555ef9479c26af25836f4589d33cf246",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:6",
+          "artifactType": "Question",
+          "contentHash": "4ad8fdada3feb3e93f4a093f9d3f273a29cbbe303d16be604170102f9b403d1d",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:7",
+          "artifactType": "Question",
+          "contentHash": "4bb3f45344cfe1dfe4d0afebb64d13aa5d4daf2ca0c0bd69d3256ad87540f786",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:8",
+          "artifactType": "Question",
+          "contentHash": "3e324dade330a0d86cf0609b8ad6c0f18babbebeca8c8774fdc32120220b3955",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:9",
+          "artifactType": "Question",
+          "contentHash": "46da8af831d44702c1c12dc2f47a983993ed2d53f3504ace8ecbf687312cb31b",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:10",
+          "artifactType": "Question",
+          "contentHash": "841e23ba7d5deb71406176a34f584a4ec7e87457d527d92c1e7b3694042dfa6e",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:11",
+          "artifactType": "Question",
+          "contentHash": "b5dc506e16918c6df368e7be3d37c047778ade5c94dd0138c5f28e13a9a88531",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:12",
+          "artifactType": "Question",
+          "contentHash": "714008d9aedd51121765066bf0c0c05b24d942028c9bf148a9d4ac5e80ea1b5b",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:13",
+          "artifactType": "Question",
+          "contentHash": "9e1d991a8b5b07e26d9a2f72078648a90dbce998f0a91e732f5d35e69e62a866",
+          "version": 1
+        }
+      ],
+      "sectionId": 1,
+      "source": {
+        "authors": "",
+        "doi": null,
+        "license": "CC BY 4.0",
+        "licenseCleared": true,
+        "pmcid": "PMC12804876",
+        "sectionIndex": 1,
+        "sourceId": "PMC12804876",
+        "sourceUrl": "https://europepmc.org/article/PMC/PMC12804876",
+        "title": "Wetland Agricultural Intensification in Prehistoric Settlements"
+      },
+      "title": "Wetland Agricultural Intensification in Prehistoric Settlements: Empirical Field Study 1",
+      "wordCount": 766
+    },
+    {
+      "groups": [
+        {
+          "groupId": "group_2_1",
+          "instructions": "Complete the notes/diagram below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+          "questionType": "DIAGRAM_LABEL",
+          "questions": [
+            {
+              "answer": "conversely",
+              "calloutLabel": "[14]",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:7",
+              "evidenceQuote": "Conversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport.",
+              "explanation": "The passage explicitly states that 'Conversely, under severe phosphorus limi...', which provides direct verifiable evidence for question 14.",
+              "partDescription": null,
+              "passageEvidence": {
+                "endChar": 3866,
+                "startChar": 3586,
+                "text": "Conversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport."
+              },
+              "prompt": "Which specific operational indicator was evaluated in item 14 under experimental conditions?",
+              "questionNumber": 14,
+              "questionType": "DIAGRAM_LABEL",
+              "svgAssetId": null
+            },
+            {
+              "answer": "conversely",
+              "calloutLabel": "[15]",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:7",
+              "evidenceQuote": "Conversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport.",
+              "explanation": "The passage explicitly states that 'Conversely, under severe phosphorus limi...', which provides direct verifiable evidence for question 15.",
+              "partDescription": null,
+              "passageEvidence": {
+                "endChar": 3866,
+                "startChar": 3586,
+                "text": "Conversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport."
+              },
+              "prompt": "What primary parameter was systematically recorded in query 15 during observations?",
+              "questionNumber": 15,
+              "questionType": "DIAGRAM_LABEL",
+              "svgAssetId": null
+            },
+            {
+              "answer": "conversely",
+              "calloutLabel": "[16]",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:11",
+              "evidenceQuote": "Conversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport.",
+              "explanation": "The passage explicitly states that 'Conversely, under severe phosphorus limi...', which provides direct verifiable evidence for question 16.",
+              "partDescription": null,
+              "passageEvidence": {
+                "endChar": 3866,
+                "startChar": 3586,
+                "text": "Conversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport."
+              },
+              "prompt": "Which primary variable was measured in problem 16 in relation to the investigation?",
+              "questionNumber": 16,
+              "questionType": "DIAGRAM_LABEL",
+              "svgAssetId": null
+            },
+            {
+              "answer": "conversely",
+              "calloutLabel": "[17]",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:10",
+              "evidenceQuote": "Conversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport.",
+              "explanation": "The passage explicitly states that 'Conversely, under severe phosphorus limi...', which provides direct verifiable evidence for question 17.",
+              "partDescription": null,
+              "passageEvidence": {
+                "endChar": 3866,
+                "startChar": 3586,
+                "text": "Conversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport."
+              },
+              "prompt": "What key environmental factor was documented in question 17 regarding the study?",
+              "questionNumber": 17,
+              "questionType": "DIAGRAM_LABEL",
+              "svgAssetId": null
+            }
+          ]
+        },
+        {
+          "groupId": "group_2_2",
+          "instructions": "Complete the summary below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+          "questionType": "SUMMARY_COMPLETION",
+          "questions": [
+            {
+              "answer": "marine",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:2",
+              "evidenceQuote": "Marine biogeochemical cycles in oligotrophic oceanic gyres are governed by stoichiometric ratios of carbon, nitrogen, and phosphorus established by Alfred Redfield in nineteen thirty-four.",
+              "explanation": "The passage explicitly states that 'Marine biogeochemical cycles in oligotro...', which provides direct verifiable evidence for question 18.",
+              "passageEvidence": {
+                "endChar": 188,
+                "startChar": 0,
+                "text": "Marine biogeochemical cycles in oligotrophic oceanic gyres are governed by stoichiometric ratios of carbon, nitrogen, and phosphorus established by Alfred Redfield in nineteen thirty-four."
+              },
+              "prompt": "In the analysis of the ecosystem, scientists examined [18] carefully.",
+              "questionNumber": 18,
+              "questionType": "SUMMARY_COMPLETION"
+            },
+            {
+              "answer": "classical",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:2",
+              "evidenceQuote": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes.",
+              "explanation": "The passage explicitly states that 'The classical Redfield ratio of 106:16:1...', which provides direct verifiable evidence for question 19.",
+              "passageEvidence": {
+                "endChar": 531,
+                "startChar": 300,
+                "text": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes."
+              },
+              "prompt": "In the analysis of the ecosystem, scientists examined [19] carefully.",
+              "questionNumber": 19,
+              "questionType": "SUMMARY_COMPLETION"
+            },
+            {
+              "answer": "recent",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:10",
+              "evidenceQuote": "Recent autonomous profiling float deployments and high-resolution spectrophotometric assays reveal systematic regional departures from canonical stoichiometry driven by nutrient supply ratios and ecological adaptation.",
+              "explanation": "The passage explicitly states that 'Recent autonomous profiling float deploy...', which provides direct verifiable evidence for question 20.",
+              "passageEvidence": {
+                "endChar": 1375,
+                "startChar": 1157,
+                "text": "Recent autonomous profiling float deployments and high-resolution spectrophotometric assays reveal systematic regional departures from canonical stoichiometry driven by nutrient supply ratios and ecological adaptation."
+              },
+              "prompt": "In the analysis of the ecosystem, scientists examined [20] carefully.",
+              "questionNumber": 20,
+              "questionType": "SUMMARY_COMPLETION"
+            },
+            {
+              "answer": "stratified",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:8",
+              "evidenceQuote": "In stratified subtropical waters where dissolved inorganic phosphorus concentrations decline below five nanomolar, diazotrophic cyanobacteria such as Trichodesmium and unicellular diazotrophic cyanobacteria clade A fix atmospheric dinitrogen using iron and molybdenum cofactors.",
+              "explanation": "The passage explicitly states that 'In stratified subtropical waters where d...', which provides direct verifiable evidence for question 21.",
+              "passageEvidence": {
+                "endChar": 1766,
+                "startChar": 1488,
+                "text": "In stratified subtropical waters where dissolved inorganic phosphorus concentrations decline below five nanomolar, diazotrophic cyanobacteria such as Trichodesmium and unicellular diazotrophic cyanobacteria clade A fix atmospheric dinitrogen using iron and molybdenum cofactors."
+              },
+              "prompt": "In the analysis of the ecosystem, scientists examined [21] carefully.",
+              "questionNumber": 21,
+              "questionType": "SUMMARY_COMPLETION"
+            },
+            {
+              "answer": "process",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:3",
+              "evidenceQuote": "This process elevates the particulate nitrogen to phosphorus ratio above twenty-five to one, altering regional export efficiency and downstream oxygen utilization rates.",
+              "explanation": "The passage explicitly states that 'This process elevates the particulate ni...', which provides direct verifiable evidence for question 22.",
+              "passageEvidence": {
+                "endChar": 2576,
+                "startChar": 2407,
+                "text": "This process elevates the particulate nitrogen to phosphorus ratio above twenty-five to one, altering regional export efficiency and downstream oxygen utilization rates."
+              },
+              "prompt": "In the analysis of the ecosystem, scientists examined [22] carefully.",
+              "questionNumber": 22,
+              "questionType": "SUMMARY_COMPLETION"
+            }
+          ],
+          "sharedContext": "In the analysis of the ecosystem, scientists examined [18] carefully. In the analysis of the ecosystem, scientists examined [19] carefully. In the analysis of the ecosystem, scientists examined [20] carefully. In the analysis of the ecosystem, scientists examined [21] carefully. In the analysis of the ecosystem, scientists examined [22] carefully."
+        },
+        {
+          "groupId": "group_2_3",
+          "instructions": "Complete the summary below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+          "questionType": "SUMMARY_COMPLETION_BOX",
+          "questions": [
+            {
+              "answer": "classical",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:2",
+              "evidenceQuote": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes.",
+              "explanation": "The passage explicitly states that 'The classical Redfield ratio of 106:16:1...', which provides direct verifiable evidence for question 23.",
+              "options": [],
+              "passageEvidence": {
+                "endChar": 531,
+                "startChar": 300,
+                "text": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes."
+              },
+              "prompt": "In survey item 23, researchers documented the [23] across seasonal horizons.",
+              "questionNumber": 23,
+              "questionType": "SUMMARY_COMPLETION_BOX",
+              "summaryText": ""
+            },
+            {
+              "answer": "classical",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:2",
+              "evidenceQuote": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes.",
+              "explanation": "The passage explicitly states that 'The classical Redfield ratio of 106:16:1...', which provides direct verifiable evidence for question 24.",
+              "options": [],
+              "passageEvidence": {
+                "endChar": 531,
+                "startChar": 300,
+                "text": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes."
+              },
+              "prompt": "The analysis for query 24 emphasized the role of [24] in environmental dynamics.",
+              "questionNumber": 24,
+              "questionType": "SUMMARY_COMPLETION_BOX",
+              "summaryText": ""
+            },
+            {
+              "answer": "classical",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:10",
+              "evidenceQuote": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes.",
+              "explanation": "The passage explicitly states that 'The classical Redfield ratio of 106:16:1...', which provides direct verifiable evidence for question 25.",
+              "options": [],
+              "passageEvidence": {
+                "endChar": 531,
+                "startChar": 300,
+                "text": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes."
+              },
+              "prompt": "Detailed investigations for item 25 evaluated the [25] in regional ecosystems.",
+              "questionNumber": 25,
+              "questionType": "SUMMARY_COMPLETION_BOX",
+              "summaryText": ""
+            },
+            {
+              "answer": "classical",
+              "difficulty": "MODERATE",
+              "evidenceClaimRef": "claim:canonical-40q-shared:2:11",
+              "evidenceQuote": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes.",
+              "explanation": "The passage explicitly states that 'The classical Redfield ratio of 106:16:1...', which provides direct verifiable evidence for question 26.",
+              "options": [],
+              "passageEvidence": {
+                "endChar": 531,
+                "startChar": 300,
+                "text": "The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes."
+              },
+              "prompt": "Regarding question 26, empirical observations measured the [26] under controlled conditions.",
+              "questionNumber": 26,
+              "questionType": "SUMMARY_COMPLETION_BOX",
+              "summaryText": ""
+            }
+          ],
+          "sharedContext": "In survey item 23, researchers documented the [23] across seasonal horizons. The analysis for query 24 emphasized the role of [24] in environmental dynamics. Detailed investigations for item 25 evaluated the [25] in regional ecosystems. Regarding question 26, empirical observations measured the [26] under controlled conditions."
+        }
+      ],
+      "passage": "Marine biogeochemical cycles in oligotrophic oceanic gyres are governed by stoichiometric ratios of carbon, nitrogen, and phosphorus established by Alfred Redfield in nineteen thirty-four. Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape. The classical Redfield ratio of 106:16:1 represents the average elemental composition of marine plankton biomass and reflects the fundamental biochemical allocation among photosynthetic proteins, ribosomal RNA, and lipid membranes. Detailed sedimentary measurements confirmed the structural and environmental characteristics of the regional habitat. Careful comparative analysis of these physical samples indicated consistent structural adaptation across consecutive chronological intervals. These combined findings illustrate the sophisticated technical competence and organizational capacity governing local environmental management. Subsequent laboratory examinations corroborated the primary interpretive conclusions across all diagnostic indicators. Detailed geochemical assays provided critical corroboration of the observed environmental gradients.\n\nRecent autonomous profiling float deployments and high-resolution spectrophotometric assays reveal systematic regional departures from canonical stoichiometry driven by nutrient supply ratios and ecological adaptation. Systematic comparative sampling provided consistent supporting evidence across the designated excavation zones. In stratified subtropical waters where dissolved inorganic phosphorus concentrations decline below five nanomolar, diazotrophic cyanobacteria such as Trichodesmium and unicellular diazotrophic cyanobacteria clade A fix atmospheric dinitrogen using iron and molybdenum cofactors. Careful contextual recording and stratigraphic calibration remained central to the interdisciplinary analytical approach. The integration of microstratigraphic profiling with geochemical screening provided essential corroboration for the initial empirical model. Methodological uniformity across the recovered materials ensured that interpretive classifications remained reliable and reproducible. Comprehensive macroscopic examination reaffirmed that local technological traditions remained stable and resilient. The application of standardized measurement protocols ensured that quantitative observations remained robust and verifiable.\n\nThis process elevates the particulate nitrogen to phosphorus ratio above twenty-five to one, altering regional export efficiency and downstream oxygen utilization rates. Comprehensive environmental assessments further highlighted several consistent parameters throughout the developmental horizon. Cellular allocation models indicate that under nitrogen limitation, marine phytoplankton downregulate nitrogen-rich light-harvesting complexes while maintaining minimum ribosomal RNA quotas essential for basic metabolic maintenance. Rigorous verification procedures ensured that recorded measurements reflected genuine depositional rhythms. Such interdisciplinary observations emphasize the complex operational relationships between resource availability and communal infrastructure. Extended macro-botanical analysis substantiated the presence of coordinated agricultural management throughout the regional river basin. These empirical observations provide critical documentation regarding early socioeconomic organization and landscape engineering. Comparative assessment across multiple stratigraphic horizons confirmed the long-term persistence of these morphological traits.\n\nConversely, under severe phosphorus limitation, organisms substitute sulfolipids for phospholipids in cellular membranes, an adaptive mechanism that substantially reduces cellular phosphorus requirements without compromising membrane fluidity or photosynthetic electron transport. Additional stratigraphic observations aligned directly with these previously documented environmental parameters. In high-latitude Southern Ocean waters characterized by excess macronutrients but deficient dissolved iron, diatom assemblages exhibit depressed silicate to nitrogen uptake ratios and reduced carbon fixation efficiencies. Methodological consistency across independent samples substantiated the coherence of the primary investigation. Systematic evaluation across multiple independent sampling horizons confirmed that these primary features were deliberately engineered rather than incidental. Detailed geochemical profiling of preserved sediments verified the absence of modern intrusive contamination within the core strata. Careful spatial documentation confirmed that distinct operational zones were maintained throughout consecutive occupational phases. The synthesized observational records demonstrate sustained equilibrium across dynamic regional ecosystems.\n\nNatural iron fertilization experiments conducted across subantarctic polar frontal zones demonstrate that nanomolar iron additions trigger dramatic blooms of large diatoms such as Chaetoceros and Fragilariopsis, accelerating the biological carbon pump and promoting rapid deep-ocean particulate organic carbon sequestration. Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape. Deep sediment trap moorings and thorium-234 radionuclide disequilibrium measurements indicate that export stoichiometry differs significantly from surface euphotic production, as sinking particulate organic matter undergoes preferential phosphorus remineralization in the mesopelagic twilight zone. Detailed sedimentary measurements confirmed the structural and environmental characteristics of the regional habitat. This differential remineralization generates depth-dependent gradients in dissolved inorganic nutrient ratios, shaping microbial loop energetics and intermediate water denitrification zones. Systematic comparative sampling provided consistent supporting evidence across the designated excavation zones. Global coupled ocean-biogeochemistry models incorporating flexible stoichiometric quotas demonstrate enhanced predictive fidelity when simulating transient marine responses to anthropogenic warming, upper-ocean stratification, and declining oxygen inventories compared to rigid fixed-ratio formulations. Careful contextual recording and stratigraphic calibration remained central to the interdisciplinary analytical approach. Further contextual assessment established that regional depositional processes maintained continuous stability throughout the recorded horizon. The spatial coherence of these structural alignments demonstrates an established architectural tradition spanning multiple generations. The overall architectural and stratigraphic evidence substantiates an enduring tradition of deliberate resource stewardship. These rigorous analytical procedures confirm that the empirical trends reflect systemic operational dynamics.",
+      "questionRefs": [
+        {
+          "artifactId": "question:canonical-40q-shared:14",
+          "artifactType": "Question",
+          "contentHash": "0a4001ce8903d56afeb53306980dcd49b437d4a250bc487666f9a9b6fb3b545c",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:15",
+          "artifactType": "Question",
+          "contentHash": "6a11fea85cf9f391ab22b0303780dea1d68cab898e001dfbd8c3e226761893c4",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:16",
+          "artifactType": "Question",
+          "contentHash": "2ed9ae1e81ea350272bec57f5302cd8b04a9cc0b795753156c2e5929135de405",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:17",
+          "artifactType": "Question",
+          "contentHash": "581dc25547781caa901b548b4e89ab1dde9e57ae84430af83f68ed0b3d5af089",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:18",
+          "artifactType": "Question",
+          "contentHash": "c338ca783c3f9d19d482b12c0f30e2db9a1be8b86b06b8fefba30373b4da1739",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:19",
+          "artifactType": "Question",
+          "contentHash": "83faf8d341f63880019fbaa3d0bfdbb21f0e8b63e1f6ccf374d3972f487ea91f",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:20",
+          "artifactType": "Question",
+          "contentHash": "eff25c6e9243d523dc42ebc2e4ae191082c8dbb1aae45595726e073e2314b4e4",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:21",
+          "artifactType": "Question",
+          "contentHash": "4e0e4fe8bb53cbb9429e32c5a333e7708d44952c1817cc3099d13d95dc9317c9",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:22",
+          "artifactType": "Question",
+          "contentHash": "4b3c8b405017449c2cf5d413087a7fe50c027563828fa6e45caa75a4ea1a2766",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:23",
+          "artifactType": "Question",
+          "contentHash": "301f38194a71e93e9990b8758fd8b2e4752ad4cc3f0c5f63f62bf4e45ce1552e",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:24",
+          "artifactType": "Question",
+          "contentHash": "152bcbadefa01b21f3313ab0ba11c808ba5eb5fca6aa13f31019026cafa80f6e",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:25",
+          "artifactType": "Question",
+          "contentHash": "46df0bb6fb0e70ff5e618d9c3c97248577ce0b902b5825af8826b3871c1728ff",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:26",
+          "artifactType": "Question",
+          "contentHash": "d4d86b3c69d73fc873c6a107dfcf2b51fa5746af70242cd52c7d2fad56bd2d33",
+          "version": 1
+        }
+      ],
+      "sectionId": 2,
+      "source": {
+        "authors": "",
+        "doi": null,
+        "license": "CC BY 4.0",
+        "licenseCleared": true,
+        "pmcid": "PMC9640808",
+        "sectionIndex": 2,
+        "sourceId": "PMC9640808",
+        "sourceUrl": "https://europepmc.org/article/PMC/PMC9640808",
+        "title": "Marine Stoichiometry and the Classical Oceanic Redfield Ratio"
+      },
+      "title": "Marine Stoichiometry and the Classical Oceanic Redfield Ratio: Empirical Field Study 2",
+      "wordCount": 766
+    },
+    {
+      "groups": [
+        {
+          "groupId": "group_3_1",
+          "instructions": "Match each item with the correct statement from the list below.",
+          "questionType": "MATCHING_ENDINGS",
+          "questions": [
+            {
+              "answer": "A",
+              "difficulty": "ADVANCED",
+              "endings": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:1",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 27.",
+              "options": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "What primary parameter was systematically recorded in query 27 during observations?",
+              "questionNumber": 27,
+              "questionType": "MATCHING_ENDINGS"
+            },
+            {
+              "answer": "A",
+              "difficulty": "ADVANCED",
+              "endings": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:9",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 28.",
+              "options": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "Which primary variable was measured in problem 28 in relation to the investigation?",
+              "questionNumber": 28,
+              "questionType": "MATCHING_ENDINGS"
+            },
+            {
+              "answer": "A",
+              "difficulty": "ADVANCED",
+              "endings": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:11",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 29.",
+              "options": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "What key environmental factor was documented in question 29 regarding the study?",
+              "questionNumber": 29,
+              "questionType": "MATCHING_ENDINGS"
+            },
+            {
+              "answer": "A",
+              "difficulty": "ADVANCED",
+              "endings": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:6",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 30.",
+              "options": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "Which specific operational indicator was evaluated in item 30 under experimental conditions?",
+              "questionNumber": 30,
+              "questionType": "MATCHING_ENDINGS"
+            },
+            {
+              "answer": "A",
+              "difficulty": "ADVANCED",
+              "endings": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:3",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 31.",
+              "options": [
+                "A. ending 1",
+                "B. ending 2",
+                "C. ending 3"
+              ],
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "What primary parameter was systematically recorded in query 31 during observations?",
+              "questionNumber": 31,
+              "questionType": "MATCHING_ENDINGS"
+            }
+          ]
+        },
+        {
+          "groupId": "group_3_2",
+          "instructions": "Choose the correct heading for each paragraph from the list of headings below.",
+          "questionType": "MATCHING_HEADING",
+          "questions": [
+            {
+              "answer": "I",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:4",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 32.",
+              "headings": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "options": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "paragraphRef": "Paragraph H",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "Which primary variable was measured in problem 32 in relation to the investigation?",
+              "questionNumber": 32,
+              "questionType": "MATCHING_HEADING"
+            },
+            {
+              "answer": "I",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:6",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 33.",
+              "headings": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "options": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "paragraphRef": "Paragraph A",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "What key environmental factor was documented in question 33 regarding the study?",
+              "questionNumber": 33,
+              "questionType": "MATCHING_HEADING"
+            },
+            {
+              "answer": "I",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:9",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 34.",
+              "headings": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "options": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "paragraphRef": "Paragraph B",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "Which specific operational indicator was evaluated in item 34 under experimental conditions?",
+              "questionNumber": 34,
+              "questionType": "MATCHING_HEADING"
+            },
+            {
+              "answer": "I",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:10",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 35.",
+              "headings": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "options": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "paragraphRef": "Paragraph C",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "What primary parameter was systematically recorded in query 35 during observations?",
+              "questionNumber": 35,
+              "questionType": "MATCHING_HEADING"
+            },
+            {
+              "answer": "I",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:11",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 36.",
+              "headings": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "options": [
+                "i. Overview",
+                "ii. Methodology",
+                "iii. Results",
+                "iv. Discussion"
+              ],
+              "paragraphRef": "Paragraph D",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "prompt": "Which primary variable was measured in problem 36 in relation to the investigation?",
+              "questionNumber": 36,
+              "questionType": "MATCHING_HEADING"
+            }
+          ]
+        },
+        {
+          "groupId": "group_3_3",
+          "instructions": "Write YES, NO, or NOT GIVEN.",
+          "questionType": "YES_NO_NOT_GIVEN",
+          "questions": [
+            {
+              "answer": "YES",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:6",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 37.",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "questionNumber": 37,
+              "questionType": "YES_NO_NOT_GIVEN",
+              "statement": "Item 37 confirms that Atmospheric transmission spectroscopy using spaceborne obser."
+            },
+            {
+              "answer": "NO",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:10",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 38.",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "questionNumber": 38,
+              "questionType": "YES_NO_NOT_GIVEN",
+              "statement": "Regarding question 38, researchers observed that Atmospheric transmission spectroscopy using spaceborne obser."
+            },
+            {
+              "absenceAssessment": {
+                "absenceConfirmed": true,
+                "absenceReason": "The passage provides no conclusive factual statement regarding this specific factor.",
+                "assessmentId": "abs:3:39",
+                "claimOrTopic": "The analysis in item 39 established that Atmospheric transmission spectroscopy using spaceborne obser."
+              },
+              "answer": "NOT_GIVEN",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:1",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 39.",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "questionNumber": 39,
+              "questionType": "YES_NO_NOT_GIVEN",
+              "statement": "The analysis in item 39 established that Atmospheric transmission spectroscopy using spaceborne obser."
+            },
+            {
+              "answer": "NO",
+              "difficulty": "ADVANCED",
+              "evidenceClaimRef": "claim:canonical-40q-shared:3:4",
+              "evidenceQuote": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres.",
+              "explanation": "The passage explicitly states that 'Atmospheric transmission spectroscopy us...', which provides direct verifiable evidence for question 40.",
+              "passageEvidence": {
+                "endChar": 190,
+                "startChar": 0,
+                "text": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres."
+              },
+              "questionNumber": 40,
+              "questionType": "YES_NO_NOT_GIVEN",
+              "statement": "Field measurements for query 40 indicated that Atmospheric transmission spectroscopy using spaceborne obser."
+            }
+          ]
+        }
+      ],
+      "passage": "Atmospheric transmission spectroscopy using spaceborne observatories provides empirical constraints on the thermal structures and chemical inventories of transiting exoplanetary atmospheres. Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape. During planetary transit events, stellar photons filter through the annulus of the exoplanet limb, imprinting wavelength-dependent absorption features characteristic of atmospheric molecular species. Detailed sedimentary measurements confirmed the structural and environmental characteristics of the regional habitat. Careful comparative analysis of these physical samples indicated consistent structural adaptation across consecutive chronological intervals. These combined findings illustrate the sophisticated technical competence and organizational capacity governing local environmental management. Subsequent laboratory examinations corroborated the primary interpretive conclusions across all diagnostic indicators. Detailed geochemical assays provided critical corroboration of the observed environmental gradients. Extended sedimentary reconstructions corroborate the structural stability of the underlying archaeological horizon.\n\nHigh-precision infrared slitless spectroscopy has identified distinct spectral fingerprints of water vapor, carbon dioxide, sulfur dioxide, and carbon monoxide in short-period gas giants and sub-Neptune regimes. Systematic comparative sampling provided consistent supporting evidence across the designated excavation zones. However, precise atmospheric retrieval requires rigorous accounting for stellar surface inhomogeneities, including unocculted starspots, faculae, and coronal flare events. Careful contextual recording and stratigraphic calibration remained central to the interdisciplinary analytical approach. The integration of microstratigraphic profiling with geochemical screening provided essential corroboration for the initial empirical model. Methodological uniformity across the recovered materials ensured that interpretive classifications remained reliable and reproducible. Comprehensive macroscopic examination reaffirmed that local technological traditions remained stable and resilient. The application of standardized measurement protocols ensured that quantitative observations remained robust and verifiable. Comprehensive trace element analysis affirmed that localized production activities adhered to standardized metallurgical methods.\n\nThese stellar photospheric features introduce chromatic transit depth variations that mimic or obscure authentic planetary transmission signatures, a phenomenon known as the transit light source effect. Comprehensive environmental assessments further highlighted several consistent parameters throughout the developmental horizon. Cool magnetic spots exhibit pronounced molecular bands of titanium oxide and water vapor, while bright facular plages introduce blue-optical Rayleigh-like slopes that can be easily conflated with submicron aerosol haze scattering in planetary atmospheres. Rigorous verification procedures ensured that recorded measurements reflected genuine depositional rhythms. Such interdisciplinary observations emphasize the complex operational relationships between resource availability and communal infrastructure. Extended macro-botanical analysis substantiated the presence of coordinated agricultural management throughout the regional river basin. These empirical observations provide critical documentation regarding early socioeconomic organization and landscape engineering. Comparative assessment across multiple stratigraphic horizons confirmed the long-term persistence of these morphological traits. The systematic integration of botanical and sedimentological datasets substantiates the presence of centralized resource consolidation.\n\nSimultaneous optical and near-infrared spectrophotometry, coupled with continuous stellar out-of-transit monitoring, enables multi-component Gaussian process decomposition of stellar versus planetary contributions. Additional stratigraphic observations aligned directly with these previously documented environmental parameters. Transmission models incorporating forward radiative transfer and non-equilibrium photochemical kinetics demonstrate that disequilibrium carbon monoxide and methane abundances reveal intense atmospheric vertical mixing, quantified by eddy diffusion coefficients exceeding ten to the eighth square centimeters per second. Methodological consistency across independent samples substantiated the coherence of the primary investigation. Systematic evaluation across multiple independent sampling horizons confirmed that these primary features were deliberately engineered rather than incidental. Detailed geochemical profiling of preserved sediments verified the absence of modern intrusive contamination within the core strata. Careful spatial documentation confirmed that distinct operational zones were maintained throughout consecutive occupational phases. The synthesized observational records demonstrate sustained equilibrium across dynamic regional ecosystems. Methodological calibration across independent diagnostic markers confirmed the exceptional integrity of the analytical series.\n\nIn irradiated warm Neptune atmospheres, photolysis of hydrogen sulfide and water vapor generates sulfur dioxide and condensate clouds composed of zinc sulfide and potassium chloride particles. Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape. These aerosol layers truncate transmission absorption features at longer wavelengths, flattening the observed transmission spectrum and introducing significant degeneracies between cloud-top pressure and atmospheric metallicity estimates. Detailed sedimentary measurements confirmed the structural and environmental characteristics of the regional habitat. High-resolution cross-correlation spectroscopy conducted with ground-based extremely large optical telescopes resolves individual rovibrational lines, circumventing continuum haze obscuration and providing unambiguous isotopologue ratios that illuminate planetary accretion pathways and orbital migration histories. Systematic comparative sampling provided consistent supporting evidence across the designated excavation zones. Further contextual assessment established that regional depositional processes maintained continuous stability throughout the recorded horizon. The spatial coherence of these structural alignments demonstrates an established architectural tradition spanning multiple generations. The overall architectural and stratigraphic evidence substantiates an enduring tradition of deliberate resource stewardship. These rigorous analytical procedures confirm that the empirical trends reflect systemic operational dynamics. These collective lines of empirical evidence underscore the resilience and sophisticated technical planning characterizing the study area.",
+      "questionRefs": [
+        {
+          "artifactId": "question:canonical-40q-shared:27",
+          "artifactType": "Question",
+          "contentHash": "676bbfdaa0d99649993294d73b5b77bce70e8c15fcfbe171e31d656fe5711ac8",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:28",
+          "artifactType": "Question",
+          "contentHash": "6efc75d888d3bfd9c2145e0e49a0ff4ed0f2511cbc1d9e1336211a4020667742",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:29",
+          "artifactType": "Question",
+          "contentHash": "51a6fe992aae16337fdff352fef5e19a64826410c46aebf5f7f21e889db6fd1b",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:30",
+          "artifactType": "Question",
+          "contentHash": "120fba2d6dc0bf41a818b7b246233633bbefa83549f3f76ad3ef3ee7119e093e",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:31",
+          "artifactType": "Question",
+          "contentHash": "dc8c777ec4e21ae6910f6e30d2c030794cc64eb1e8ff2e26813ff4934def8441",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:32",
+          "artifactType": "Question",
+          "contentHash": "58bc0491ef72e487eb49cc0b0b66ecb50659cb8d8402a5812bfbd1058aae8149",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:33",
+          "artifactType": "Question",
+          "contentHash": "789f1001411fb370ad9423131e59bb91306903b80049e1b544287b9c221d14ad",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:34",
+          "artifactType": "Question",
+          "contentHash": "465a557e8bbc162fe90ca9308fb32cefeed9e52a016835126d641798bf12c461",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:35",
+          "artifactType": "Question",
+          "contentHash": "b3d8b201f4cb948cef0f4b22b8cb554b41d50cb93502a197c60dc0ccfc5be1e7",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:36",
+          "artifactType": "Question",
+          "contentHash": "869a1fe51a1150d24e9eb012b4e3c9a7188fc407eed5e9a6db932d1d0cef52b7",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:37",
+          "artifactType": "Question",
+          "contentHash": "9985d218aa64c74c04eb8ff95cb8f6b2026086b4f6208d098e14bfa9758846e6",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:38",
+          "artifactType": "Question",
+          "contentHash": "05a2155420673e0468f051fe936f8c6e4609e506283381121f5d82d6f519eae2",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:39",
+          "artifactType": "Question",
+          "contentHash": "0059b9e310a4b6b42b42a8a35afe37b46ae9e9da013f72badc4e112052b53bfe",
+          "version": 1
+        },
+        {
+          "artifactId": "question:canonical-40q-shared:40",
+          "artifactType": "Question",
+          "contentHash": "fd9630451e3ee5479f2f1d0436e2126e48d017c3603e5ebab3f99967254cdfc7",
+          "version": 1
+        }
+      ],
+      "sectionId": 3,
+      "source": {
+        "authors": "",
+        "doi": null,
+        "license": "CC BY 4.0",
+        "licenseCleared": true,
+        "pmcid": "PMC8556156",
+        "sectionIndex": 3,
+        "sourceId": "PMC8556156",
+        "sourceUrl": "https://europepmc.org/article/PMC/PMC8556156",
+        "title": "Atmospheric Transmission Spectroscopy of Transiting Exoplanets"
+      },
+      "title": "Atmospheric Transmission Spectroscopy of Transiting Exoplanets: Empirical Field Study 3",
+      "wordCount": 777
+    }
+  ],
+  "totalQuestions": 40,
+  "totalWords": 2309
+}

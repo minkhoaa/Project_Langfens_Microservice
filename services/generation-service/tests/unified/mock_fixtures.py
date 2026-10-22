@@ -412,7 +412,9 @@ class MockProvider(BaseProvider):
                             q_type = f.value
                             break
             g_idx = 0 if (q_num <= 7 or (14 <= q_num <= 19) or (27 <= q_num <= 33)) else 1
-            slots = [{"groupIndex": g_idx, "questionNumber": q_num, "questionType": q_type, "claimRefIds": [claims[(q_num - 1) % len(claims)]["claimId"]]}]
+            from app.blueprint.claim_binding import score_claim_suitability_for_family
+            best_c = sorted(claims, key=lambda c: score_claim_suitability_for_family(c, q_type, sec_idx), reverse=True)[0]
+            slots = [{"groupIndex": g_idx, "questionNumber": q_num, "questionType": q_type, "claimRefIds": [best_c["claimId"]]}]
             all_q, _ = compose_questions(sec_idx, passage, claims, slots, config)
             q_payload = all_q[0]
             self._last_questions[q_num] = q_payload

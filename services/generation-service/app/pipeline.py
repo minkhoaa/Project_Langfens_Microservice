@@ -161,7 +161,7 @@ class ReadingGenerationPipeline:
 
         # ── Stage 3: Exam Blueprint ──────────────────────────────────────────
         bp_art_id = f"blueprint:{request.run_id}"
-        bp_indices = request.policy.section_indices
+        bp_indices = request.section_indices
 
         async def generate_blueprint(version: int) -> dict[str, Any]:
             return build_blueprint(

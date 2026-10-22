@@ -345,6 +345,11 @@ def generate_dynamic_blueprint(
 
             q_cursor += g_count
 
+        claims_in_ev = sec_ev.get("claims", [])
+        if claims_in_ev:
+            from app.blueprint.claim_binding import bind_claims_to_slots
+            slots = bind_claims_to_slots(slots, claims_in_ev, sec_id, f"eg_sec{sec_id}_{run_id[:8]}", run_id)
+
         eg_ref = EvidenceGraphRef(
             graph_id=f"eg_sec{sec_id}_{run_id[:8]}",
             source_pack_id=f"pack_sec{sec_id}",

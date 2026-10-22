@@ -279,7 +279,7 @@ public static class ReadingPaperEndpoints
         var raw = $"{s.Pmcid}|{s.Title}|{s.Doi}|{s.License}|{s.Authors}|{s.WordCount}|{s.Url}|{s.OpenAlexId}|{s.TopicId}|{s.SourceType}|{metaStr}|{s.Content}|{s.ContentPreview}";
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw)));
     }
-    private static async Task<IResult> Retry(Guid id, ExamDbContext db, CancellationToken ct)
+    internal static async Task<IResult> Retry(Guid id, ExamDbContext db, CancellationToken ct)
     {
         var now = DateTime.UtcNow;
         var retryLog = SerializeLog("Information", "Retry requested; the worker will resume from the last saved passage.");

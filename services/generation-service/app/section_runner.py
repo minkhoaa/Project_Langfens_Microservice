@@ -542,6 +542,8 @@ class SectionRunner:
     def __init__(self, client: CheckpointClient, gateway: ProviderGateway) -> None:
         self.client = client
         self.gateway = gateway
+        from app.solvers.cache import BlindSolverCache
+        self._solver_cache = BlindSolverCache()
 
     async def run(
         self,
@@ -583,7 +585,6 @@ class SectionRunner:
         )
         topic = sec_blueprint.get("topic", f"Section {config.index}") if sec_blueprint else f"Section {config.index}"
         slots = sec_blueprint.get("questionSlots", []) if sec_blueprint else []
-
         # 2. Extract source and verified claims
         source_payload = _payload(actual_source.source)
         source_metadata = source_payload["sources"][0]["metadata"]
@@ -591,6 +592,18 @@ class SectionRunner:
         evidence_payload = _payload(actual_source.evidence)
         claims = evidence_payload.get("claims", [])
         claims_map = {c["claimId"]: c for c in claims}
+
+        if not slots:
+            slots = [
+                {
+                    "questionNumber": q_num,
+                    "groupIndex": g_idx,
+                    "questionType": grp.question_type.value,
+                    "claimRefIds": [claims[(q_num - 1) % len(claims)]["claimId"]] if claims else [],
+                }
+                for g_idx, grp in enumerate(config.groups)
+                for q_num in config.group_numbers(g_idx)
+            ]
 
         # 3. Passage stage
         passage_art_id = f"passage:{context.run_id}:{config.index}"
@@ -858,7 +871,7 @@ class SectionRunner:
                 # When evaluating a repaired question (version > 1), provide a fresh cache
                 # to guarantee blind solving re-runs fresh without hitting stale V1 entries.
                 from app.solvers.cache import BlindSolverCache
-                q_cache = BlindSolverCache() if art.version > 1 else None
+                q_cache = BlindSolverCache() if art.version > 1 else self._solver_cache
                 blind_evaluator = BlindSolverEvaluator(
                     gateway=self.gateway,
                     solver_provider=actual_policy.provider,

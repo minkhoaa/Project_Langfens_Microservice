@@ -305,16 +305,11 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                 contentHash=ev_payload.get("contentHash") or hashlib.sha256(graph_id.encode()).hexdigest(),
                 claimCount=len(claims),
             )
-            updated_slots = []
-            for q_slot in sb.question_slots:
-                if claims:
-                    c_id = claims[(q_slot.question_number - 1) % len(claims)]["claimId"]
-                    c_ids = [c_id]
-                elif ev_item is None:
-                    c_ids = [f"claim:{run_id}:{sec_idx}:1"]
-                else:
-                    c_ids = []
-                updated_slots.append(q_slot.model_copy(update={"claim_ref_ids": c_ids}))
+            if claims:
+                from app.blueprint.claim_binding import bind_claims_to_slots
+                updated_slots = bind_claims_to_slots(sb.question_slots, claims, sec_idx, graph_id, run_id)
+            else:
+                updated_slots = [q.model_copy(update={"claim_ref_ids": []}) for q in sb.question_slots]
 
             config = policy.section(sec_idx) if hasattr(policy, "section") else None
             editorial_obj = config.editorial_objective if config else f"Editorial objective for Section {sec_idx}"
@@ -387,8 +382,6 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                 )
             )
             for q_num in numbers:
-                # Assign rotating claim ref ids
-                claim_ref = claims[(q_num - 1) % len(claims)]["claimId"] if claims else f"claim:{run_id}:{sec_idx}:1"
                 is_ng = (grp.question_type in (QuestionType.TRUE_FALSE_NOT_GIVEN, QuestionType.YES_NO_NOT_GIVEN)
                          and (q_num % 3 == 0))
                 question_slots.append(
@@ -403,11 +396,16 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                             rationale=f"Editorial difficulty for section {sec_idx}",
                             isCalibrated=False,
                         ),
-                        claimRefIds=[claim_ref],
+                        claimRefIds=[],
                         isNotGivenTarget=is_ng,
                         maxConcentrationPerParagraph=2,
                     )
                 )
+
+        if claims:
+            from app.blueprint.claim_binding import bind_claims_to_slots
+            graph_id = _payload(ev_item).get("graphId", f"graph:{run_id}:{sec_idx}")
+            question_slots = bind_claims_to_slots(question_slots, claims, sec_idx, graph_id, run_id)
 
         objectives = [
             PassageObjective(
@@ -646,7 +644,13 @@ def compose_questions(
                 slot_q_type = slot_q_type.value
             q_num = slot["questionNumber"]
             c_refs = slot.get("claimRefIds") or ()
-            claim = claim_by_id.get(c_refs[0]) if c_refs else list(claims)[(q_num - 1) % len(claims)]
+            claim = claim_by_id.get(c_refs[0]) if c_refs and c_refs[0] in claim_by_id else None
+            if claim is None and claims:
+                from app.blueprint.claim_binding import score_claim_suitability_for_family
+                scored = sorted(claims, key=lambda c: score_claim_suitability_for_family(c, slot_q_type, section_id), reverse=True)
+                claim = scored[0]
+            if claim is None:
+                raise ValueError(f"Question {q_num} has no valid supporting claim from evidence graph")
             quote = claim["text"].strip()
 
             # Locate exact offset in passage

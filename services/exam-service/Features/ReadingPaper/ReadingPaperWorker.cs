@@ -622,6 +622,10 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                         or "DIAGRAM_LABEL" or "FLOW_CHART" or "MAP_LABEL")
                     {
                         question.BlankAcceptTexts = new Dictionary<string, string[]?> { [item.Number.ToString()] = [item.Answer] };
+                        if (type is "FLOW_CHART")
+                        {
+                            question.OrderCorrects = [$"step-{item.Number}"];
+                        }
                         if (item.Options.Count > 0)
                         {
                             question.Options = item.Options.Select((option, idx) => new ExamOption

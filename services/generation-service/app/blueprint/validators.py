@@ -34,7 +34,12 @@ class BlueprintIssue(CanonicalBaseModel):
     field: str
 
 
-def validate_blueprint(blueprint: ExamBlueprint, mode: Optional[str] = None) -> List[BlueprintIssue]:
+def validate_blueprint(
+    blueprint: ExamBlueprint,
+    mode: Optional[str] = None,
+    evidence_map: Optional[Dict[int, Any]] = None,
+    require_claims: Optional[bool] = None,
+) -> List[BlueprintIssue]:
     """Validates structural and policy integrity of an ExamBlueprint.
 
     Supports 'dynamic' mode (default unless blueprint metadata or parameter specifies legacy_preset)
@@ -303,9 +308,19 @@ def validate_blueprint(blueprint: ExamBlueprint, mode: Optional[str] = None) -> 
                         )
                     )
 
-                # Claim reference checks: fabricated synthetic claims prohibited
+                # Claim reference checks: non-empty when claims are required and non-fabricated
+                must_have_claims = require_claims if require_claims is not None else (evidence_map is not None)
+                if must_have_claims and not slot.claim_ref_ids:
+                    issues.append(
+                        BlueprintIssue(
+                            code="BLUEPRINT_EMPTY_CLAIM_REFS",
+                            severity=IssueSeverity.CRITICAL,
+                            message=f"Question {slot.question_number} has empty claimRefIds; accepted blueprint question slots must reference verified evidence.",
+                            field=f"sections[{sec_id}].questionSlots[{slot.question_number}].claimRefIds",
+                        )
+                    )
                 for cid in slot.claim_ref_ids:
-                    if cid.startswith("claim:run_") or cid.startswith("claim:None:"):
+                    if cid.startswith("claim:run_") or cid.startswith("claim:None:") or cid.startswith("claim:synthetic:"):
                         issues.append(
                             BlueprintIssue(
                                 code="BLUEPRINT_FABRICATED_CLAIM_PROHIBITED",
@@ -314,6 +329,29 @@ def validate_blueprint(blueprint: ExamBlueprint, mode: Optional[str] = None) -> 
                                 field=f"sections[{sec_id}].questionSlots[{slot.question_number}].claimRefIds",
                             )
                         )
+                if evidence_map and sec_id in evidence_map:
+                    ev_data = evidence_map[sec_id]
+                    ev_payload = getattr(ev_data, "payload", ev_data) if hasattr(ev_data, "payload") else ev_data
+                    if isinstance(ev_payload, dict):
+                        ev_claims = ev_payload.get("claims", [])
+                    elif hasattr(ev_payload, "claims"):
+                        ev_claims = ev_payload.claims or []
+                    else:
+                        ev_claims = []
+                    valid_cids = {
+                        c.claim_id if hasattr(c, "claim_id") else c.get("claimId")
+                        for c in ev_claims
+                    }
+                    for cid in slot.claim_ref_ids:
+                        if cid not in valid_cids:
+                            issues.append(
+                                BlueprintIssue(
+                                    code="BLUEPRINT_CLAIM_NOT_FOUND",
+                                    severity=IssueSeverity.CRITICAL,
+                                    message=f"Question {slot.question_number} references claim '{cid}' which is not in Section {sec_id}'s verified EvidenceGraph.",
+                                    field=f"sections[{sec_id}].questionSlots[{slot.question_number}].claimRefIds",
+                                )
+                            )
         # Budget Allocation Check
         if section.budget_allocation:
             total_planned_tokens += section.budget_allocation.max_tokens_allocated
