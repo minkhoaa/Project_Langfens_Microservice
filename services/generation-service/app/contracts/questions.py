@@ -391,6 +391,7 @@ class MultipleChoiceSingleQuestion(BaseQuestion):
     prompt: str
     options: List[str] = Field(..., min_length=4, max_length=4)
     correct_option: str = Field(..., alias="correctOption", pattern=r"^[A-D]$")
+    answer: Optional[str] = None
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
 
     @field_validator("options")
@@ -445,9 +446,9 @@ class SummaryCompletionBoxQuestion(BaseQuestion):
     )
     prompt: str
     answer: str
+    summary_text: Optional[str] = Field(default=None, alias="summaryText")
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
     options: Optional[List[Any]] = Field(default_factory=list)
-
 
 class MultipleChoiceMultipleQuestion(BaseQuestion):
     """Question type: Multiple Choice with multiple answers."""
@@ -468,9 +469,9 @@ class MatchingHeadingQuestion(BaseQuestion):
     )
     prompt: str
     answer: str
+    paragraph_ref: Optional[str] = Field(default=None, alias="paragraphRef")
     headings: Optional[List[Any]] = Field(default_factory=list)
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
-
 
 class MatchingInformationQuestion(BaseQuestion):
     """Question type: Matching Information."""
@@ -479,8 +480,8 @@ class MatchingInformationQuestion(BaseQuestion):
     )
     prompt: str
     answer: str
+    target_paragraph: Optional[str] = Field(default=None, alias="targetParagraph")
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
-
 
 class MatchingFeaturesQuestion(BaseQuestion):
     """Question type: Matching Features."""
@@ -511,6 +512,9 @@ class TableCompletionQuestion(BaseQuestion):
     )
     prompt: str
     answer: str
+    table_context: Optional[str] = Field(default=None, alias="tableContext")
+    row_header: Optional[str] = Field(default=None, alias="rowHeader")
+    col_header: Optional[str] = Field(default=None, alias="colHeader")
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
 
 
@@ -521,6 +525,9 @@ class FlowChartQuestion(BaseQuestion):
     )
     prompt: str
     answer: str
+    flow_steps: Optional[List[str]] = Field(default=None, alias="flowSteps")
+    step_index: Optional[int] = Field(default=None, alias="stepIndex")
+    svg_asset_id: Optional[str] = Field(default=None, alias="svgAssetId")
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
 
 
@@ -531,6 +538,9 @@ class DiagramLabelQuestion(BaseQuestion):
     )
     prompt: str
     answer: str
+    callout_label: Optional[str] = Field(default=None, alias="calloutLabel")
+    part_description: Optional[str] = Field(default=None, alias="partDescription")
+    svg_asset_id: Optional[str] = Field(default=None, alias="svgAssetId")
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
 
 
@@ -541,6 +551,8 @@ class NoteCompletionQuestion(BaseQuestion):
     )
     prompt: str
     answer: str
+    heading_context: Optional[str] = Field(default=None, alias="headingContext")
+    bullet_prefix: Optional[str] = Field(default=None, alias="bulletPrefix")
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
 
 
@@ -551,8 +563,8 @@ class FormCompletionQuestion(BaseQuestion):
     )
     prompt: str
     answer: str
+    field_label: Optional[str] = Field(default=None, alias="fieldLabel")
     evidence_quote: str = Field(..., min_length=10, alias="evidenceQuote")
-
 
 class ClassificationQuestion(BaseQuestion):
     """Question type: Classification."""

@@ -217,9 +217,23 @@ class BoundedLoopRuntime:
             else:
                 # Legacy / StageExecutor cursor payload (protocolVersion, state, etc.)
                 if self._accepted_head is not None:
+                    stored_evals_for_head = [
+                        ev for ev in self._stored_evaluations.values()
+                        if ev.target_ref == self._accepted_head.to_ref() and ev.status == EvaluationStatus.PASS
+                        and bool(str(getattr(ev, "evaluator_version", "") or "").strip())
+                    ]
+                    eval_ids = {ev.evaluator_id for ev in stored_evals_for_head}
+                    has_required_evals = (
+                        not self.policy.required_evaluator_ids
+                        or set(self.policy.required_evaluator_ids).issubset(eval_ids)
+                    )
                     self.context.current_artifact = self._accepted_head
-                    self.context.accepted_artifact = self._accepted_head
-                    self.context.cursor.current_state = LoopState.COMPLETED
+                    if has_required_evals and not self.ledger_mgr.has_unresolved_blockers():
+                        self.context.accepted_artifact = self._accepted_head
+                        self.context.cursor.current_state = LoopState.COMPLETED
+                    else:
+                        self.context.accepted_artifact = None
+                        self.context.cursor.current_state = LoopState.EVALUATING
                 elif self._drafts:
                     latest_draft_ver = max(self._drafts.keys())
                     self.context.current_artifact = self._drafts[latest_draft_ver]
@@ -232,7 +246,17 @@ class BoundedLoopRuntime:
                 if (caller_current_artifact and caller_current_artifact.artifact_id in aliases and caller_current_artifact.version in [a.acceptedVersion for a in state.artifacts if a.artifactId in aliases])
                 else None
             )
-            if prior_head is not None and not self.ledger_mgr.has_unresolved_blockers():
+            stored_evals_for_head = [
+                ev for ev in self._stored_evaluations.values()
+                if prior_head and ev.target_ref == prior_head.to_ref() and ev.status == EvaluationStatus.PASS
+                and bool(str(getattr(ev, "evaluator_version", "") or "").strip())
+            ]
+            eval_ids = {ev.evaluator_id for ev in stored_evals_for_head}
+            has_required_evals = (
+                not self.policy.required_evaluator_ids
+                or set(self.policy.required_evaluator_ids).issubset(eval_ids)
+            )
+            if prior_head is not None and not self.ledger_mgr.has_unresolved_blockers() and has_required_evals:
                 self._accepted_head = prior_head
                 self.context.current_artifact = prior_head
                 self.context.accepted_artifact = prior_head
@@ -242,7 +266,19 @@ class BoundedLoopRuntime:
                     self.context.budget_tracker.versions_used, prior_head.version
                 )
                 self.context.cursor.current_state = LoopState.COMPLETED
-            elif prior_head is not None and self.ledger_mgr.has_unresolved_blockers() and self.repairer is not None:
+            elif prior_head is not None and (not has_required_evals or self.ledger_mgr.has_unresolved_blockers()):
+                self._accepted_head = prior_head
+                self.context.current_artifact = prior_head
+                self.context.accepted_artifact = None
+                self._expected_head_version = prior_head.version
+                self._generated_versions = prior_head.version
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, prior_head.version
+                )
+                if self.ledger_mgr.has_unresolved_blockers() and self.repairer is not None:
+                    self.context.cursor.current_state = LoopState.REPAIRING
+                else:
+                    self.context.cursor.current_state = LoopState.EVALUATING
                 self._accepted_head = prior_head
                 self.context.current_artifact = prior_head
                 self.context.accepted_artifact = None
@@ -326,7 +362,7 @@ class BoundedLoopRuntime:
             b.calls_used = max(b.calls_used, loop_calls)
             b.tokens_used = max(b.tokens_used, loop_tokens)
             b.wall_time_used_seconds = max(b.wall_time_used_seconds, loop_wall)
-        elif not self.context.parent_operation_id:
+        elif not self.context.parent_operation_id and not state.artifacts:
             b.calls_used = max(b.calls_used, state.callsUsed)
             b.tokens_used = max(b.tokens_used, state.tokensUsed)
             b.wall_time_used_seconds = max(b.wall_time_used_seconds, state.wallTimeUsedSeconds)
@@ -528,7 +564,8 @@ class BoundedLoopRuntime:
         b = self.context.budget_tracker
         parent_op = getattr(self.context, "parent_operation_id", None)
         if intent.operation_type != "CHECKPOINT_COMMIT":
-            if not parent_op:
+            is_llm_call = intent.operation_type in ("GENERATE", "REPAIR") or (intent.operation_type == "EVALUATE" and intent.token_reservation > 0)
+            if not parent_op and is_llm_call:
                 if not self.policy.is_unlimited and self.policy.max_total_calls > 0 and b.calls_used + 1 > self.policy.max_total_calls:
                     self._finish(LoopReason.CALL_CAP, "next operation exceeds shared call cap")
                     return False
@@ -595,7 +632,8 @@ class BoundedLoopRuntime:
             self._finish(LoopReason.UNKNOWN_OUTCOME, "grant replay without committed outcome")
             return False
         if intent.operation_type != "CHECKPOINT_COMMIT":
-            if not parent_op:
+            is_llm_call = intent.operation_type in ("GENERATE", "REPAIR") or (intent.operation_type == "EVALUATE" and intent.token_reservation > 0)
+            if not parent_op and is_llm_call:
                 b.calls_used += 1
             b.tokens_used += intent.token_reservation
             now_utc = datetime.now(timezone.utc)
@@ -939,15 +977,20 @@ class BoundedLoopRuntime:
         self._latest_evaluations = []
         for evaluator in self.evaluators:
             meta = getattr(evaluator, "metadata", None)
-            if meta is not None:
-                is_expensive = getattr(meta, "is_expensive", False) or getattr(evaluator, "is_expensive", False)
-                est_tokens = getattr(meta, "estimated_tokens", 0)
-                if not is_expensive or est_tokens == 0:
-                    eval_token_res = 0
-                else:
-                    eval_token_res = min(self.policy.evaluate_token_reservation, est_tokens) if est_tokens > 0 else self.policy.evaluate_token_reservation
+            is_expensive = (
+                getattr(meta, "is_expensive", False)
+                if meta is not None
+                else getattr(evaluator, "is_expensive", False)
+            )
+            est_tokens = (
+                getattr(meta, "estimated_tokens", 0)
+                if meta is not None
+                else getattr(evaluator, "estimated_tokens", 0)
+            )
+            if not is_expensive or est_tokens == 0:
+                eval_token_res = 0
             else:
-                eval_token_res = self.policy.evaluate_token_reservation
+                eval_token_res = min(self.policy.evaluate_token_reservation, est_tokens) if est_tokens > 0 else self.policy.evaluate_token_reservation
             intent = self._intent("EVALUATE", art.version, eval_token_res,
                                   f"{evaluator.evaluator_id}:{evaluator.evaluator_version}",
                                   {"ref": art.to_ref().model_dump(mode="json"),

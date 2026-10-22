@@ -92,8 +92,10 @@ def _parse_candidate_payload(
 
     matched_claim = claims_map.get(claim_id)
     explanation = str(cand.get("explanation") or "").strip()
-    if len(explanation) < 25 and q_type in ("SUMMARY_COMPLETION", "SENTENCE_COMPLETION"):
+    if len(explanation) < 25:
         quote = str(cand.get("evidenceQuote") or "").strip()
+        if not quote and matched_claim and matched_claim.get("text"):
+            quote = str(matched_claim["text"]).strip()
         if quote:
             explanation = f"The passage states that '{quote[:50]}...', providing verifiable evidence for item {q_num}."
     if len(explanation) < 25:
@@ -172,7 +174,7 @@ def _parse_candidate_payload(
                 "evidenceClaimRef": claim_id,
             }
 
-    elif q_type == "MULTIPLE_CHOICE_SINGLE":
+    elif q_type in ("MULTIPLE_CHOICE_SINGLE", "CHOOSING_TITLE", "MULTIPLE_CHOICE_SINGLE_IMAGE"):
         prompt = str(cand.get("prompt") or "").strip()
         raw_opts = cand.get("options")
         if isinstance(raw_opts, list) and all(isinstance(o, dict) for o in raw_opts):
@@ -215,7 +217,39 @@ def _parse_candidate_payload(
             "questionType": q_type,
             "prompt": prompt,
             "options": formatted_opts,
+            "answer": correct_letter,
             "correctOption": correct_letter,
+            "evidenceQuote": quote,
+            "explanation": explanation,
+            "difficulty": difficulty,
+            "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
+            "evidenceClaimRef": claim_id,
+        }
+
+    elif q_type == "MULTIPLE_CHOICE_MULTIPLE":
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
+        raw_opts = cand.get("options") or []
+        formatted_opts = [str(o) if isinstance(o, str) else f"{o.get('key', chr(65+i))}. {o.get('text', '')}" for i, o in enumerate(raw_opts)]
+        raw_answers = cand.get("answers") or cand.get("answer") or []
+        if isinstance(raw_answers, str):
+            ans_tokens = [tok.strip().upper() for tok in re.split(r"[,;&/\s]+|\band\b", raw_answers, flags=re.IGNORECASE) if tok.strip()]
+        elif isinstance(raw_answers, list):
+            ans_tokens = [str(a).strip().upper() for a in raw_answers if str(a).strip()]
+        else:
+            ans_tokens = []
+        cleaned_answers = sorted(list(set(re.sub(r"[^A-Z]", "", t) for t in ans_tokens if re.sub(r"[^A-Z]", "", t))))
+        joined_ans = ", ".join(cleaned_answers)
+
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        p_end = p_start + len(quote) if p_start >= 0 else -1
+        return {
+            "questionNumber": q_num,
+            "questionType": q_type,
+            "prompt": prompt,
+            "options": formatted_opts,
+            "answers": cleaned_answers,
+            "answer": joined_ans,
             "evidenceQuote": quote,
             "explanation": explanation,
             "difficulty": difficulty,
@@ -272,7 +306,196 @@ def _parse_candidate_payload(
             "evidenceClaimRef": claim_id,
         }
 
-    else:  # SHORT_ANSWER
+    elif q_type == "SUMMARY_COMPLETION_BOX":
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
+        summary_text = str(cand.get("summaryText") or raw_payload.get("summaryText") or "").strip()
+        if not prompt and summary_text:
+            prompt = summary_text
+        if f"[{q_num}]" not in prompt and "______" in prompt:
+            prompt = prompt.replace("______", f"[{q_num}]")
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        p_end = p_start + len(quote) if p_start >= 0 else -1
+        answer = str(cand.get("answer") or cand.get("correctOption") or "").strip()
+        options = cand.get("options") or raw_payload.get("options") or []
+        return {
+            "questionNumber": q_num,
+            "questionType": q_type,
+            "prompt": prompt,
+            "summaryText": summary_text,
+            "options": options,
+            "answer": answer,
+            "evidenceQuote": quote,
+            "explanation": explanation,
+            "difficulty": difficulty,
+            "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
+            "evidenceClaimRef": claim_id,
+        }
+
+    elif q_type == "MATCHING_HEADING":
+        paragraph_ref = str(cand.get("paragraphRef") or cand.get("targetParagraph") or f"Paragraph {chr(65 + (q_num - 1) % 8)}").strip()
+        prompt = str(cand.get("prompt") or f"Choose the correct heading for {paragraph_ref}").strip()
+        headings = cand.get("headings") or cand.get("options") or raw_payload.get("headings") or []
+        answer = str(cand.get("answer") or cand.get("correctOption") or "").strip().upper()
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        p_end = p_start + len(quote) if p_start >= 0 else -1
+        return {
+            "questionNumber": q_num,
+            "questionType": q_type,
+            "prompt": prompt,
+            "paragraphRef": paragraph_ref,
+            "headings": headings,
+            "options": headings,
+            "answer": answer,
+            "evidenceQuote": quote,
+            "explanation": explanation,
+            "difficulty": difficulty,
+            "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
+            "evidenceClaimRef": claim_id,
+        }
+
+    elif q_type in ("MATCHING_INFORMATION", "MATCHING_FEATURES", "MATCHING_ENDINGS", "CLASSIFICATION"):
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
+        raw_opts = (
+            cand.get("options")
+            or cand.get("features")
+            or cand.get("endings")
+            or cand.get("categories")
+            or raw_payload.get("options")
+            or raw_payload.get("features")
+            or raw_payload.get("endings")
+            or raw_payload.get("categories")
+            or []
+        )
+        answer = str(cand.get("answer") or cand.get("correctOption") or cand.get("targetParagraph") or "").strip().upper()
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        p_end = p_start + len(quote) if p_start >= 0 else -1
+        res_payload = {
+            "questionNumber": q_num,
+            "questionType": q_type,
+            "prompt": prompt,
+            "options": raw_opts,
+            "answer": answer,
+            "evidenceQuote": quote,
+            "explanation": explanation,
+            "difficulty": difficulty,
+            "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
+            "evidenceClaimRef": claim_id,
+        }
+        if q_type == "MATCHING_INFORMATION":
+            res_payload["targetParagraph"] = answer
+        elif q_type == "MATCHING_FEATURES":
+            res_payload["features"] = raw_opts
+        elif q_type == "MATCHING_ENDINGS":
+            res_payload["endings"] = raw_opts
+        elif q_type == "CLASSIFICATION":
+            res_payload["categories"] = raw_opts
+        return res_payload
+
+    elif q_type == "TABLE_COMPLETION":
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
+        if f"[{q_num}]" not in prompt and "______" in prompt:
+            prompt = prompt.replace("______", f"[{q_num}]")
+        table_context = str(cand.get("tableContext") or raw_payload.get("tableContext") or "").strip()
+        answer = str(cand.get("answer") or "").strip()
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        p_end = p_start + len(quote) if p_start >= 0 else -1
+        return {
+            "questionNumber": q_num,
+            "questionType": q_type,
+            "prompt": prompt,
+            "tableContext": table_context,
+            "rowHeader": str(cand.get("rowHeader") or "").strip() or None,
+            "colHeader": str(cand.get("colHeader") or "").strip() or None,
+            "answer": answer,
+            "evidenceQuote": quote,
+            "explanation": explanation,
+            "difficulty": difficulty,
+            "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
+            "evidenceClaimRef": claim_id,
+        }
+
+    elif q_type == "FLOW_CHART":
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
+        if f"[{q_num}]" not in prompt and "______" in prompt:
+            prompt = prompt.replace("______", f"[{q_num}]")
+        flow_steps = cand.get("flowSteps") or raw_payload.get("flowSteps") or []
+        svg_asset = cand.get("svgAssetId") or raw_payload.get("svgAssetId")
+        answer = str(cand.get("answer") or "").strip()
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        p_end = p_start + len(quote) if p_start >= 0 else -1
+        return {
+            "questionNumber": q_num,
+            "questionType": q_type,
+            "prompt": prompt,
+            "flowSteps": flow_steps,
+            "stepIndex": cand.get("stepIndex"),
+            "svgAssetId": svg_asset,
+            "answer": answer,
+            "evidenceQuote": quote,
+            "explanation": explanation,
+            "difficulty": difficulty,
+            "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
+            "evidenceClaimRef": claim_id,
+        }
+
+    elif q_type == "DIAGRAM_LABEL":
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
+        if f"[{q_num}]" not in prompt and "______" in prompt:
+            prompt = prompt.replace("______", f"[{q_num}]")
+        callout = str(cand.get("calloutLabel") or f"[{q_num}]").strip()
+        part_desc = str(cand.get("partDescription") or "").strip() or None
+        svg_asset = cand.get("svgAssetId") or raw_payload.get("svgAssetId")
+        answer = str(cand.get("answer") or "").strip()
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        p_end = p_start + len(quote) if p_start >= 0 else -1
+        return {
+            "questionNumber": q_num,
+            "questionType": q_type,
+            "prompt": prompt,
+            "calloutLabel": callout,
+            "partDescription": part_desc,
+            "svgAssetId": svg_asset,
+            "answer": answer,
+            "evidenceQuote": quote,
+            "explanation": explanation,
+            "difficulty": difficulty,
+            "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
+            "evidenceClaimRef": claim_id,
+        }
+
+    elif q_type in ("NOTE_COMPLETION", "FORM_COMPLETION"):
+        prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
+        if f"[{q_num}]" not in prompt and "______" in prompt:
+            prompt = prompt.replace("______", f"[{q_num}]")
+        answer = str(cand.get("answer") or "").strip()
+        quote = str(cand.get("evidenceQuote") or "").strip()
+        p_start = passage_text.find(quote) if quote else -1
+        p_end = p_start + len(quote) if p_start >= 0 else -1
+        res_payload = {
+            "questionNumber": q_num,
+            "questionType": q_type,
+            "prompt": prompt,
+            "answer": answer,
+            "evidenceQuote": quote,
+            "explanation": explanation,
+            "difficulty": difficulty,
+            "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
+            "evidenceClaimRef": claim_id,
+        }
+        if q_type == "NOTE_COMPLETION":
+            res_payload["headingContext"] = str(cand.get("headingContext") or "").strip() or None
+            res_payload["bulletPrefix"] = str(cand.get("bulletPrefix") or "").strip() or None
+        elif q_type == "FORM_COMPLETION":
+            res_payload["fieldLabel"] = str(cand.get("fieldLabel") or "").strip() or None
+        return res_payload
+
+    elif q_type == "SHORT_ANSWER":
         prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
         quote = str(cand.get("evidenceQuote") or "").strip()
         p_start = passage_text.find(quote) if quote else -1
@@ -295,7 +518,7 @@ def _parse_candidate_payload(
         p_end = p_start + len(quote) if p_start >= 0 else -1
         answer = str(cand.get("answer") or cand.get("correctOption") or "").strip()
 
-        res_payload = {
+        return {
             "questionNumber": q_num,
             "questionType": q_type,
             "prompt": prompt,
@@ -306,10 +529,11 @@ def _parse_candidate_payload(
             "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
             "evidenceClaimRef": claim_id,
         }
-        for extra_key in ("options", "headings", "features", "endings", "categories", "answers", "correctOption", "summaryText", "tableContext", "flowSteps", "svgAssetId"):
-            if extra_key in cand:
-                res_payload[extra_key] = cand[extra_key]
-        return res_payload
+
+    else:
+        raise ValueError(
+            f"Unsupported question type '{q_type}' for question {q_num}. Silent fallback to SHORT_ANSWER is prohibited."
+        )
 
 class SectionRunner:
     """Configurable runner executing generation stages for a single reading section.
@@ -656,8 +880,9 @@ class SectionRunner:
                     expected_answer=expected_ans,
                     target_ref=art.to_ref(),
                     context=context,
+                    input_dependency_refs=list(art.parent_refs),
                 )
-                evals.append(blind_res.model_copy(update={"input_dependency_refs": list(art.parent_refs)}))
+                evals.append(blind_res)
                 return evals
 
             async def repair_question_item(

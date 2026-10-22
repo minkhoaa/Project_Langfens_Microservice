@@ -1,72 +1,86 @@
-import jwt, time, requests, json, sys, os
+import base64
+import hashlib
+import hmac
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
 
 secret = "bTNGPmniBGyINHPdsmONct16TIqqb1bZ"
 os.makedirs("reports", exist_ok=True)
 
+def b64url(b: bytes) -> str:
+    return base64.urlsafe_b64encode(b).rstrip(b"=").decode("ascii")
+
 def get_headers():
-    token = jwt.encode({
+    header = {"alg": "HS256", "typ": "JWT"}
+    payload = {
         "sub": "00000000-0000-0000-0000-000000000001",
         "roles": "ADMIN",
         "iss": "IssuerName",
         "aud": "AudienceName",
-        "exp": int(time.time()) + 7200
-    }, secret, algorithm="HS256")
+        "exp": int(time.time()) + 14400,
+    }
+    p1 = b64url(json.dumps(header, separators=(",", ":")).encode("utf-8"))
+    p2 = b64url(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
+    sig = hmac.new(secret.encode("utf-8"), f"{p1}.{p2}".encode("utf-8"), hashlib.sha256).digest()
+    p3 = b64url(sig)
+    token = f"{p1}.{p2}.{p3}"
     return {
-        "Authorization": "Bearer " + token,
-        "Content-Type": "application/json"
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
     }
 
 base_url = "http://127.0.0.1:42933"
 
-# 1. GET /api/admin/reading-paper/sources?topic=Environmental Science
-print("[Step 1] Querying sources via Admin API...", flush=True)
-t0 = time.time()
-try:
-    src_res = requests.get(f"{base_url}/api/admin/reading-paper/sources?topic=Environmental%20Science", headers=get_headers(), timeout=180)
-    print(f"GET sources HTTP Status: {src_res.status_code} in {time.time() - t0:.1f}s", flush=True)
-except Exception as e:
-    print(f"GET sources exception (proceeding to job submission): {e}", flush=True)
-
-# 2. POST /api/admin/reading-paper/jobs
 pmcids = ["PMC9540822", "PMC9640808", "PMC8556156"]
 body = {
-    "topic": "Environmental Science",
+    "topic": "Marine Ecosystems and Global Climate Change",
     "pmcids": pmcids,
-    "provider": "minimax"
+    "provider": "minimax",
 }
 
-print(f"\n[Step 2] Submitting generation job for topic '{body['topic']}' with {len(pmcids)} PMC sources using provider '{body['provider']}'...", flush=True)
-res = requests.post(f"{base_url}/api/admin/reading-paper/jobs", headers=get_headers(), json=body, timeout=120)
-print(f"POST jobs HTTP Status: {res.status_code}", flush=True)
-if res.status_code not in (200, 201):
-    print("Error submitting job:", res.text, flush=True)
-    sys.exit(1)
+print(f"\n[Step 1] Submitting full 3-passage IELTS Academic generation job with provider '{body['provider']}'...", flush=True)
+req = urllib.request.Request(
+    f"{base_url}/api/admin/reading-paper/jobs",
+    data=json.dumps(body).encode("utf-8"),
+    headers=get_headers(),
+    method="POST",
+)
 
-job_data = res.json()
-job_id = job_data["id"]
-status = job_data.get("status")
-print(f"Job created successfully: ID = {job_id}", flush=True)
-print(f"Initial status = {status}", flush=True)
+try:
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        job_data = json.loads(resp.read().decode())
+        job_id = job_data["id"]
+        status = job_data.get("status")
+        print(f"Job created successfully: ID = {job_id}, status = {status}", flush=True)
+except urllib.error.HTTPError as e:
+    print(f"Error submitting job: HTTP {e.code}: {e.read().decode()}", flush=True)
+    sys.exit(1)
 
 with open("current_fresh_job_id.txt", "w") as f:
     f.write(job_id)
 
-# 3. GET /api/admin/reading-paper/jobs/{jobId}
+print(f"\n[Step 2] Monitoring job {job_id} until terminal status...", flush=True)
 seen_logs = 0
 terminal_statuses = {"Completed", "Failed", "Aborted", "Cancelled", "NeedsSources"}
 start_time = time.time()
-print(f"\n[Step 3] Monitoring job {job_id} until terminal status...", flush=True)
 
 while True:
     try:
-        r = requests.get(f"{base_url}/api/admin/reading-paper/jobs/{job_id}", headers=get_headers(), timeout=30)
-        if r.status_code == 200:
-            data = r.json()
+        get_req = urllib.request.Request(
+            f"{base_url}/api/admin/reading-paper/jobs/{job_id}",
+            headers=get_headers(),
+        )
+        with urllib.request.urlopen(get_req, timeout=30) as r:
+            data = json.loads(r.read().decode())
             status = data.get("status")
             completed = data.get("completedSections")
             logs = data.get("logs") or []
 
-            # Print new logs
             if len(logs) > seen_logs:
                 for entry in logs[seen_logs:]:
                     ts = entry.get("timestamp", "")
@@ -85,20 +99,17 @@ while True:
                     print(f"Error: {data.get('error')}", flush=True)
                 print("==========================================", flush=True)
 
-                # Save final job json
                 with open("reports/fresh_monitored_job_result.json", "w") as f:
                     json.dump(data, f, indent=2)
                 with open(f"reports/job_{job_id}.json", "w") as f:
                     json.dump(data, f, indent=2)
 
                 if status == "Completed":
-                    print("SUCCESS: Real MiniMax generation job completed successfully!", flush=True)
+                    print("SUCCESS: Full-paper 40-question MiniMax LIVE acceptance run completed!", flush=True)
                     sys.exit(0)
                 else:
                     print(f"FAILURE: Job ended in status {status}", flush=True)
                     sys.exit(1)
-        else:
-            print(f"Warning: HTTP {r.status_code}: {r.text}", flush=True)
     except Exception as e:
         print(f"Polling exception: {e}", flush=True)
 

@@ -228,17 +228,24 @@ public static class ReadingPaperRules
                 {
                     if (q.Number != next) throw new InvalidOperationException("Question numbers must be continuous");
                     if (string.IsNullOrWhiteSpace(q.Prompt) || string.IsNullOrWhiteSpace(q.Answer)
-                        || q.Explanation.Length < 25 || q.EvidenceQuote.Length < 15)
-                        throw new InvalidOperationException($"Question {next} lacks an answer, explanation or evidence");
-                    var passageText = string.Join(' ', section.Passage.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-                    var evidenceText = string.Join(' ', q.EvidenceQuote.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-                    if (!passageText.Contains(evidenceText, StringComparison.OrdinalIgnoreCase))
-                        throw new InvalidOperationException($"Question {next} evidence is absent from passage");
+                        || q.Explanation.Length < 25)
+                        throw new InvalidOperationException($"Question {next} lacks an answer or explanation");
+                    var isNotGiven = (group.Type is "TRUE_FALSE_NOT_GIVEN" or "YES_NO_NOT_GIVEN")
+                        && q.Answer.ToUpperInvariant().Replace("_", " ").Contains("NOT");
+                    if (!isNotGiven)
+                    {
+                        if (q.EvidenceQuote.Length < 15)
+                            throw new InvalidOperationException($"Question {next} lacks evidence (< 15 characters)");
+                        var passageText = string.Join(' ', section.Passage.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+                        var evidenceText = string.Join(' ', q.EvidenceQuote.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+                        if (!passageText.Contains(evidenceText, StringComparison.OrdinalIgnoreCase))
+                            throw new InvalidOperationException($"Question {next} evidence is absent from passage");
+                    }
                     if (!seenPrompts.Add(Regex.Replace(q.Prompt, @"\W+", "").ToLowerInvariant()))
                         throw new InvalidOperationException("Duplicate question prompt");
-                    if (group.Type is "TRUE_FALSE_NOT_GIVEN" or "YES_NO_NOT_GIVEN" or "MULTIPLE_CHOICE_SINGLE")
+                    if (group.Type is "TRUE_FALSE_NOT_GIVEN" or "YES_NO_NOT_GIVEN" or "MULTIPLE_CHOICE_SINGLE" or "CHOOSING_TITLE" or "MULTIPLE_CHOICE_SINGLE_IMAGE")
                     {
-                        var expected = group.Type == "MULTIPLE_CHOICE_SINGLE" ? 4 : 3;
+                        var expected = group.Type is "MULTIPLE_CHOICE_SINGLE" or "CHOOSING_TITLE" or "MULTIPLE_CHOICE_SINGLE_IMAGE" ? 4 : 3;
                         if (q.Options.Count != expected || q.Options.Distinct(StringComparer.OrdinalIgnoreCase).Count() != expected
                             || q.Options.Count(o => o == q.Answer) != 1)
                             throw new InvalidOperationException($"Question {next} has invalid options or answer");
@@ -246,10 +253,17 @@ public static class ReadingPaperRules
                             : group.Type == "YES_NO_NOT_GIVEN" ? ["YES", "NO", "NOT GIVEN"] : null;
                         if (fixedOptions is not null && !q.Options.SequenceEqual(fixedOptions))
                             throw new InvalidOperationException($"Question {next} has invalid judgement options");
-                        if (group.Type == "MULTIPLE_CHOICE_SINGLE"
+                        if (group.Type is "MULTIPLE_CHOICE_SINGLE" or "CHOOSING_TITLE" or "MULTIPLE_CHOICE_SINGLE_IMAGE"
                             && !q.Options.Select((option, idx) => option.StartsWith($"{(char)('A' + idx)}.", StringComparison.Ordinal))
                                 .All(valid => valid))
                             throw new InvalidOperationException($"Question {next} needs A–D options");
+                    }
+                    else if (group.Type == "MULTIPLE_CHOICE_MULTIPLE")
+                    {
+                        if (q.Options.Count < 4)
+                            throw new InvalidOperationException($"Question {next} multi-select needs at least 4 options");
+                        if (string.IsNullOrWhiteSpace(q.Answer))
+                            throw new InvalidOperationException($"Question {next} multi-select answer cannot be empty");
                     }
                     else if (group.Type == "SHORT_ANSWER")
                     {
@@ -263,6 +277,23 @@ public static class ReadingPaperRules
                             || Words.Matches(q.Answer).Count is < 1 or > 3
                             || !Regex.IsMatch(section.Passage, $@"(?<!\w){Regex.Escape(q.Answer)}(?!\w)", RegexOptions.IgnoreCase))
                             throw new InvalidOperationException($"Question {next} has an invalid completion answer");
+                    }
+                    else if (group.Type is "TABLE_COMPLETION" or "NOTE_COMPLETION" or "FORM_COMPLETION" or "FLOW_CHART" or "DIAGRAM_LABEL")
+                    {
+                        if (string.IsNullOrWhiteSpace(q.Answer))
+                            throw new InvalidOperationException($"Question {next} completion answer cannot be empty");
+                    }
+                    else if (group.Type == "SUMMARY_COMPLETION_BOX")
+                    {
+                        if (!q.Prompt.Contains($"[{next}]", StringComparison.Ordinal))
+                            throw new InvalidOperationException($"Question {next} summary box needs [{next}] in prompt");
+                        if (string.IsNullOrWhiteSpace(q.Answer))
+                            throw new InvalidOperationException($"Question {next} summary box answer cannot be empty");
+                    }
+                    else if (group.Type is "MATCHING_HEADING" or "MATCHING_INFORMATION" or "MATCHING_FEATURES" or "MATCHING_ENDINGS" or "CLASSIFICATION")
+                    {
+                        if (string.IsNullOrWhiteSpace(q.Answer))
+                            throw new InvalidOperationException($"Question {next} matching answer cannot be empty");
                     }
                     next++;
                 }

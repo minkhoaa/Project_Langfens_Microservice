@@ -490,42 +490,17 @@ class StageExecutor:
         if draft is not None and (self._refs(draft.parent_refs) != self._refs(parents)
                                   or draft.artifact_type != artifact_type or draft.section_id != section_id):
             raise ArtifactReuseRejectedError(artifact_id, "draft scope/dependency mismatch")
-        # Delegate to BoundedLoopRuntime when the run carries a pinned cap profile
-        if getattr(state, "budgetProfileJson", None) and getattr(state, "budgetProfileSha256", None):
-            return await self._execute_bounded_loop(
-                artifact_id=artifact_id,
-                artifact_type=artifact_type,
-                parents=parents,
-                generate=generate,
-                evaluate=evaluate,
-                section_id=section_id,
-                repair=repair,
-                state=state,
-            )
-
-        max_candidates = int(getattr(self.policy, "max_candidates", 1)) if artifact_type == ArtifactType.QUESTION else 1
-        for attempt in range(max_candidates):
-            versions = [a.acceptedVersion for a in (*state.artifacts, *(state.draftArtifacts or ()))
-                        if a.artifactId == artifact_id]
-            version = draft.version if draft else max(versions, default=0) + 1
-            snapshot = await self._save(snapshot, state=StageState.RUNNING, request_hash=request_hash,
-                                        target_version=version, target_hash=draft.content_hash if draft else None,
-                                        expected_head_version=head.acceptedVersion if head else None,
-                                        expected_head_hash=head.acceptedHash if head else None,
-                                        invocation_id=uuid4().hex, attempts=snapshot.attempts + 1,
-                                        evaluations=(), accepted_hash=None, reason="")
-            self._count("stages_resumed" if draft else "stages_started")
-            if draft is None:
-                draft = await self._generate(snapshot, artifact_type, parents, generate, section_id)
-            try:
-                return await self._evaluate_and_accept(snapshot, draft, evaluate)
-            except EvaluationRejectedError:
-                draft = None
-                if attempt >= max_candidates - 1:
-                    raise
-                state = await self._restore(artifact_id)
-                snapshot = self._snapshot(state, artifact_id)
-
+        # BoundedLoopRuntime is the single execution authority for all stages
+        return await self._execute_bounded_loop(
+            artifact_id=artifact_id,
+            artifact_type=artifact_type,
+            parents=parents,
+            generate=generate,
+            evaluate=evaluate,
+            section_id=section_id,
+            repair=repair,
+            state=state,
+        )
     async def _execute_bounded_loop(
         self,
         artifact_id: str,
@@ -558,7 +533,9 @@ class StageExecutor:
         # 2. Build LoopContext
         head = self._head(state, artifact_id)
         prior_artifact = self._envelope(head) if head is not None else None
-        parent_workflow_op = f"op_stage_{self.context.run_id}_{artifact_type.value.lower()}_{section_id or 'global'}"
+        parent_workflow_op = getattr(self.context, "parent_operation_id", None)
+        if parent_workflow_op and (not state.operations or not any(o.operationId == parent_workflow_op for o in state.operations)):
+            parent_workflow_op = None
         loop_ctx = LoopContext(
             runId=self.context.run_id,
             targetArtifactId=artifact_id,
@@ -627,10 +604,13 @@ class StageExecutor:
             return eval_cache[cache_key]
 
         from app.reading_evaluation import EVALUATION_CATALOG
+        EXPENSIVE_EVALUATORS = {"eval_blind_solver_adversary", "eval_passage_semantic", "eval_section_editorial", "eval_paper_monotony"}
         class StageEvalSingleAdapter(EvaluatorCapability):
             def __init__(inner_self, ev_id: str):
                 inner_self._ev_id = ev_id
                 inner_self._ev_version = EVALUATION_CATALOG.get(ev_id, "1.0.0")
+                inner_self.is_expensive = ev_id in EXPENSIVE_EVALUATORS
+                inner_self.estimated_tokens = 4000 if inner_self.is_expensive else 0
             @property
             def evaluator_id(inner_self) -> str:
                 return inner_self._ev_id
@@ -651,16 +631,16 @@ class StageExecutor:
                     raise err
                 updates: dict[str, Any] = {}
                 if matched.evaluator_id != inner_self._ev_id:
-                    updates["evaluator_id"] = inner_self._ev_id
-                if matched.evaluator_version and matched.evaluator_version != inner_self._ev_version:
-                    inner_self._ev_version = matched.evaluator_version
+                    raise ValueError(f"Evaluator ID mismatch: expected {inner_self._ev_id}, got {matched.evaluator_id}")
+                if matched.evaluator_version and inner_self._ev_version and matched.evaluator_version != inner_self._ev_version:
+                    raise ValueError(f"Evaluator version mismatch for {inner_self._ev_id}: expected {inner_self._ev_version}, got {matched.evaluator_version}")
                 if not matched.evaluator_version:
-                    updates["evaluator_version"] = inner_self._ev_version
+                    raise ValueError(f"Evaluator {inner_self._ev_id} returned empty evaluatorVersion")
                 if matched.target_ref != art.to_ref():
-                    updates["target_ref"] = art.to_ref()
-                if not matched.input_dependency_refs:
-                    updates["input_dependency_refs"] = list(art.parent_refs)
-                res = matched.model_copy(update=updates) if updates else matched
+                    raise ValueError(f"Evaluator {inner_self._ev_id} target_ref mismatch: expected {art.to_ref()}, got {matched.target_ref}")
+                if set(matched.input_dependency_refs) != set(art.parent_refs):
+                    raise ValueError(f"Evaluator {inner_self._ev_id} input_dependency_refs mismatch: expected {art.parent_refs}, got {matched.input_dependency_refs}")
+                res = matched
                 if res.status == EvaluationStatus.PASS and getattr(ctx, "open_issues", None):
                     resolved_fps = list(res.resolved_issue_fingerprints or [])
                     for oi in ctx.open_issues:

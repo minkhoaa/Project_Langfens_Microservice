@@ -84,7 +84,9 @@ public sealed record Issue(
     [property: JsonPropertyName("fingerprint")] string Fingerprint,
     [property: JsonPropertyName("createdAt")] DateTime CreatedAt,
     [property: JsonPropertyName("resolvedAt")] DateTime? ResolvedAt,
-    [property: JsonPropertyName("evaluatorId")] string? EvaluatorId = null
+    [property: JsonPropertyName("evaluatorId")] string? EvaluatorId = null,
+    [property: JsonPropertyName("artifactRef")] string? ArtifactRef = null,
+    [property: JsonPropertyName("location")] string? Location = null
 )
 {
     public static string ComputeFingerprint(

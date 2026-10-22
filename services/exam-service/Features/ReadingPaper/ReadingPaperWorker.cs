@@ -294,14 +294,14 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             .ExecuteUpdateAsync(x => x.SetProperty(j => j.SectionsJson, job.SectionsJson)
                 .SetProperty(j => j.CompletedSections, job.CompletedSections)
                 .SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
-        if (pipelineResult.Status != "COMPLETED" || sections.Count < pipelineRequest.SectionIndices.Count)
+        if ((pipelineResult.Status != "COMPLETED" && pipelineResult.Status != "ACCEPTED") || sections.Count < pipelineRequest.SectionIndices.Count)
         {
             throw new InvalidOperationException($"Unified pipeline did not complete all sections (status={pipelineResult.Status}, completed={sections.Count}/{pipelineRequest.SectionIndices.Count})");
         }
         await AppendLogAsync(job.Id, "Information", $"[Exam Finalization] Validating all {sections.Count} section(s) against IELTS Academic Paper Rules...", ct);
         ReadingPaperRules.Validate(sections);
         await AppendLogAsync(job.Id, "Information", $"[Exam Validation Passed] All {sections.Sum(s => s.Groups.Sum(g => g.Questions.Count))} questions and {sections.Sum(s => ReadingPaperRules.WordCount(s.Passage))} words meet IELTS standards. Saving Exam in database via idempotent finalizer...", ct);
-
+        db.ChangeTracker.Clear();
         var buildResult = await CheckpointService.BuildExamIdempotentAsync(db, new BuildExamInternalRequest(
             runId, job.Epoch, owner, job.Id, FinalEvaluations: finalEvaluations
         ), ct);
@@ -346,16 +346,21 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                     }
 
                     var evidenceQuote = (q.EvidenceQuote ?? "").Trim();
-                    var cleanPassage = string.Join(' ', sec.Passage.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-                    var cleanEvidence = string.Join(' ', evidenceQuote.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-                    if (cleanEvidence.Length < 15 || !cleanPassage.Contains(cleanEvidence, StringComparison.OrdinalIgnoreCase))
+                    var isNotGiven = (normType is "TRUE_FALSE_NOT_GIVEN" or "YES_NO_NOT_GIVEN")
+                        && answer.ToUpperInvariant().Replace("_", " ").Contains("NOT");
+                    if (!isNotGiven)
                     {
-                        throw new InvalidOperationException($"Question {qNum} evidence quote '{evidenceQuote}' is missing (< 15 characters) or not found in passage text");
+                        var cleanPassage = string.Join(' ', sec.Passage.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+                        var cleanEvidence = string.Join(' ', evidenceQuote.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+                        if (cleanEvidence.Length < 15 || !cleanPassage.Contains(cleanEvidence, StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new InvalidOperationException($"Question {qNum} evidence quote '{evidenceQuote}' is missing (< 15 characters) or not found in passage text");
+                        }
                     }
 
                     var options = q.Options != null ? new List<string>(q.Options) : new List<string>();
 
-                    if (normType is "TRUE_FALSE_NOT_GIVEN" or "YES_NO_NOT_GIVEN" or "MULTIPLE_CHOICE_SINGLE")
+                    if (normType is "TRUE_FALSE_NOT_GIVEN" or "YES_NO_NOT_GIVEN" or "MULTIPLE_CHOICE_SINGLE" or "CHOOSING_TITLE" or "MULTIPLE_CHOICE_SINGLE_IMAGE")
                     {
                         if (normType == "TRUE_FALSE_NOT_GIVEN")
                         {
@@ -373,7 +378,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                             else if (ansUpper.Contains("NO")) answer = "NO";
                             else if (ansUpper.Contains("YES")) answer = "YES";
                         }
-                        else if (normType == "MULTIPLE_CHOICE_SINGLE")
+                        else if (normType is "MULTIPLE_CHOICE_SINGLE" or "CHOOSING_TITLE" or "MULTIPLE_CHOICE_SINGLE_IMAGE")
                         {
                             if (options.Count == 4)
                             {
@@ -394,7 +399,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                             if (answer.Length == 1 && answer[0] >= 'A' && answer[0] <= 'D' && options.Count == 4)
                             {
                                 var optIdx = answer[0] - 'A';
-                                answer = options[optIdx];
+                                 answer = options[optIdx];
                             }
                             else if (options.Count == 4 && !options.Contains(answer))
                             {
@@ -403,16 +408,16 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                             }
                         }
                     }
+                    else if (normType == "MULTIPLE_CHOICE_MULTIPLE")
+                    {
+                        if (options.Count == 0 && q.Options != null)
+                        {
+                            options = new List<string>(q.Options);
+                        }
+                    }
                     else if (normType is "SENTENCE_COMPLETION" or "SUMMARY_COMPLETION" or "SHORT_ANSWER")
                     {
-                        if (normType == "SUMMARY_COMPLETION")
-                        {
-                            if (!prompt.Contains($"[{qNum}]", StringComparison.Ordinal))
-                            {
-                                prompt = $"Question [{qNum}]: {prompt} [{qNum}]";
-                            }
-                        }
-                        else if (normType == "SENTENCE_COMPLETION")
+                        if (normType != "SHORT_ANSWER")
                         {
                             if (!prompt.Contains($"[{qNum}]", StringComparison.Ordinal))
                             {
@@ -431,7 +436,35 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                             throw new InvalidOperationException($"Question {qNum} completion answer '{answer}' is not a verbatim 1–3 word match in the passage");
                         }
                     }
-
+                    else if (normType is "TABLE_COMPLETION" or "NOTE_COMPLETION" or "FORM_COMPLETION" or "FLOW_CHART" or "DIAGRAM_LABEL")
+                    {
+                        if (!prompt.Contains($"[{qNum}]", StringComparison.Ordinal))
+                        {
+                            prompt = System.Text.RegularExpressions.Regex.Replace(prompt, @"_{2,}", $"[{qNum}]");
+                            if (!prompt.Contains($"[{qNum}]", StringComparison.Ordinal))
+                            {
+                                prompt = $"{prompt} [{qNum}]";
+                            }
+                        }
+                    }
+                    else if (normType == "SUMMARY_COMPLETION_BOX")
+                    {
+                        if (!prompt.Contains($"[{qNum}]", StringComparison.Ordinal))
+                        {
+                            prompt = System.Text.RegularExpressions.Regex.Replace(prompt, @"_{2,}", $"[{qNum}]");
+                            if (!prompt.Contains($"[{qNum}]", StringComparison.Ordinal))
+                            {
+                                prompt = $"{prompt} [{qNum}]";
+                            }
+                        }
+                    }
+                    else if (normType is "MATCHING_HEADING" or "MATCHING_INFORMATION" or "MATCHING_FEATURES" or "MATCHING_ENDINGS" or "CLASSIFICATION")
+                    {
+                        if (options.Count == 0 && q.Options != null)
+                        {
+                            options = new List<string>(q.Options);
+                        }
+                    }
                     var normKey = System.Text.RegularExpressions.Regex.Replace(prompt, @"\W+", "").ToLowerInvariant();
                     if (!seenPrompts.Add(normKey))
                     {

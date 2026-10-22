@@ -132,7 +132,7 @@ async def test_section_standalone_generation(
 ) -> None:
     """Verifies each section generates cleanly via the same authoritative SectionRunner."""
     run_id = f"standalone-s{section_index}-{uuid4().hex[:8]}"
-    policy = PinnedExecutionPolicy(provider="mock")
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="legacy_preset")
     _, client, _, gateway = create_mock_environment(policy=policy, run_id=run_id)
 
     context = RunContext(
@@ -203,7 +203,7 @@ async def test_section_standalone_generation(
 @pytest.mark.asyncio
 async def test_section_runner_is_strictly_identical_class_across_sections() -> None:
     """Verifies Section 1, 2, and 3 use the exact same SectionRunner instance and method."""
-    policy = PinnedExecutionPolicy(provider="mock")
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="legacy_preset")
     run_id = f"identical-runner-{uuid4().hex[:8]}"
     _, client, _, gateway = create_mock_environment(policy=policy, run_id=run_id)
 

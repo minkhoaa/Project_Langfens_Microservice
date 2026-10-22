@@ -24,6 +24,21 @@ from app.providers.errors import ProviderError
 from app.providers.gateway import ProviderGateway
 from app.providers.registry import ProviderRegistry
 from app.reading_models import PipelineRequest, PipelineResult
+from app.stage_executor import (
+    ArtifactReuseRejectedError,
+    CursorConflictError,
+    DependencyMissingError,
+    DependencyStaleError,
+    EvaluationRejectedError,
+    InvalidEpochError,
+    InvalidTransitionError,
+    LeaseLostError,
+    PolicyHashMismatchError,
+    RunNotActiveError,
+    StageExecutorError,
+    StageFailedError,
+    UnresolvedProviderOutcomeError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -115,9 +130,26 @@ async def execute(
     except ProviderError as exc:
         logger.warning("Provider operation failed for Reading run %s (%s)", request.run_id, type(exc).__name__)
         raise HTTPException(502, detail="Provider operation failed; consult the durable run state before continuation") from exc
+    except (InvalidEpochError, RunNotActiveError, CursorConflictError, InvalidTransitionError) as exc:
+        logger.warning("Fencing / concurrency conflict for Reading run %s: %s", request.run_id, exc)
+        raise HTTPException(409, detail=redact_secrets(str(exc))[:500]) from exc
+    except LeaseLostError as exc:
+        logger.warning("Lease lost for Reading run %s: %s", request.run_id, exc)
+        raise HTTPException(403, detail=redact_secrets(str(exc))[:500]) from exc
+    except UnresolvedProviderOutcomeError as exc:
+        logger.warning("Unresolved provider outcome for Reading run %s: %s", request.run_id, exc)
+        raise HTTPException(502, detail=redact_secrets(str(exc))[:500]) from exc
+    except (EvaluationRejectedError, StageFailedError, PolicyHashMismatchError, DependencyMissingError, DependencyStaleError, ArtifactReuseRejectedError) as exc:
+        logger.warning("Stage rejected for Reading run %s: %s", request.run_id, exc)
+        raise HTTPException(422, detail=redact_secrets(str(exc))[:500]) from exc
+    except StageExecutorError as exc:
+        logger.error("Stage executor error in Reading run %s: %s", request.run_id, exc, exc_info=True)
+        raise HTTPException(422, detail=redact_secrets(str(exc))[:500]) from exc
     except ValueError as exc:
         raise HTTPException(422, detail=redact_secrets(str(exc))[:500]) from exc
-
+    except Exception as exc:
+        logger.error("Unexpected error in Reading run %s: %s", request.run_id, exc, exc_info=True)
+        raise HTTPException(500, detail=redact_secrets(str(exc))[:500]) from exc
 
 
 class FeedbackRegisterRequest(BaseModel):

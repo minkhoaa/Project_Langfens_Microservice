@@ -43,13 +43,14 @@ public static class CheckpointService
         CancellationToken ct)
     {
         var run = await db.ReadingPaperRuns
+            .AsNoTracking()
             .Include(r => r.Job)
             .FirstOrDefaultAsync(r => r.RunId == runId, ct);
 
         if (run == null)
             throw new CheckpointValidationException(404, $"Run '{runId}' not found");
 
-        var job = run.Job ?? await db.ReadingPaperJobs.FirstOrDefaultAsync(j => j.Id == run.JobId, ct);
+        var job = run.Job ?? await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == run.JobId, ct);
         if (job == null)
             throw new CheckpointValidationException(404, $"Job '{run.JobId}' not found");
 
@@ -280,13 +281,13 @@ public static class CheckpointService
                               run.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase));
         var sectionTokens = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionTokenCap", 60000), 60000);
         var sectionCalls = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionCallCap", 12), 12);
-        var sectionWall = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionWallTimeCapSeconds", 360), 360);
+        var sectionWall = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionWallTimeCapSeconds", 900), 900);
         var artifactCaps = new[]
         {
             (Name: "passage",
              Tokens: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageTokenCap", 80000),
              Calls: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageCallCap", 10),
-             Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageWallTimeCapSeconds", 200)),
+             Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("ArtifactPassageWallTimeCapSeconds", 400), 400)),
             (Name: "questions",
              Tokens: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactQuestionsTokenCap", 200000),
              Calls: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactQuestionsCallCap", 50),

@@ -30,6 +30,9 @@ WATCHDOG.yml
 *.key
 *.cert
 !/docs/standards/
+*.dump
+*.dmp
+backups/
 # ------------------------------
 # Node / JS / TS
 # ------------------------------

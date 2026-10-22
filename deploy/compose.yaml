@@ -61,6 +61,8 @@ services:
     env_file:
       - path: ./envs/exam.env
         required: false
+      - path: ./envs/loop-caps.env
+        required: false
     expose:
       - "8081"
     ports:
@@ -201,7 +203,9 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=appuser
       - RABBITMQ_DEFAULT_PASS=apppassword
-
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
@@ -473,6 +477,8 @@ services:
       - "8095:8080"
     env_file:
       - path: ./envs/ai.env
+        required: false
+      - path: ./envs/loop-caps.env
         required: false
     restart: unless-stopped
     networks:

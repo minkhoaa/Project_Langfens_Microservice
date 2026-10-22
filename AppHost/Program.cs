@@ -77,7 +77,8 @@ var generationService = builder.AddDockerfile("generation-service", "../", "serv
     .WithEntrypoint("uvicorn")
     .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
               "--reload", "--reload-dir", "/app/app")
-    .WithComposeEnvFile("ai");
+    .WithComposeEnvFile("ai")
+    .WithComposeEnvFile("loop-caps");
 
 
 // ── Postgres servers (host ports kept for developer DX: psql/pgAdmin) ────
@@ -136,6 +137,7 @@ var exam = builder.AddProject("exam-service", "../services/exam-service/exam-ser
     .WithHttpEndpoint(name: "http", env: "Kestrel__HttpPort")
     .WithHttpEndpoint(name: "grpc", env: "Kestrel__GrpcPort")
     .WithComposeEnvFile("exam")
+    .WithComposeEnvFile("loop-caps")
     .WaitFor(examDb);
 exam.WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod");
 exam.WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"));
@@ -298,8 +300,20 @@ finally
 // ── Helpers ──────────────────────────────────────────────────────────────
 internal static class AppHostExtensions
 {
-    private static readonly string EnvDir = Path.Combine(
-        AppContext.BaseDirectory, "..", "..", "..", "..", "deploy", "envs");
+    private static readonly string EnvDir = ResolveEnvDir();
+
+    private static string ResolveEnvDir()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, "deploy", "envs");
+            if (Directory.Exists(candidate))
+                return candidate;
+            dir = dir.Parent;
+        }
+        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "deploy", "envs"));
+    }
 
     /// <summary>
     /// Loads deploy/envs/&lt;name&gt;.env and applies every key/value pair to the
