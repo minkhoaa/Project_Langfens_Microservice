@@ -18,6 +18,13 @@ public sealed class ReadingPaperRealistic40QuestionE2ETests
 {
     private const string IsolatedConnection = "Host=localhost;Port=5433;Database=exam-db;Username=exam;Password=exam";
 
+    private static void EnsureDatabaseIsolationSafety(ExamDbContext db)
+    {
+        var connStr = db.Database.GetConnectionString() ?? "";
+        Assert.True(connStr.Contains("5433") || connStr.Contains("exam-db"),
+            "Database safety violation: Test must run against isolated test PostgreSQL instance on port 5433.");
+    }
+
     private static string FindCanonicalFixturePath()
     {
         var candidates = new[]
@@ -332,6 +339,68 @@ public sealed class ReadingPaperRealistic40QuestionE2ETests
     }
 
     [Fact]
+    public void D1_Through_D6_VerifyScholarlyProvenanceAndNegativeGates()
+    {
+        using var doc = LoadCanonicalFixtureDocument();
+        var root = doc.RootElement;
+        var sections = root.GetProperty("sections").EnumerateArray().ToList();
+        Assert.Equal(3, sections.Count);
+
+        // D1: Verify Section 1 Scholarly Source (PMC13654891, Iron Smelting at Didé West 1)
+        var s1Source = sections[0].GetProperty("source");
+        Assert.Equal("PMC13654891", s1Source.GetProperty("pmcid").GetString());
+        Assert.Contains("Didé West 1", s1Source.GetProperty("title").GetString()!);
+        Assert.Equal("10.1007/s10437-026-09653-z", s1Source.GetProperty("doi").GetString());
+        Assert.Contains("Morel", s1Source.GetProperty("authors").GetString()!);
+        Assert.Equal("CC BY 4.0", s1Source.GetProperty("license").GetString());
+
+        // D1: Verify Section 2 Scholarly Source (PMC13667678, Combined Wind-Rain Harvester)
+        var s2Source = sections[1].GetProperty("source");
+        Assert.Equal("PMC13667678", s2Source.GetProperty("pmcid").GetString());
+        Assert.Contains("Piezoelectric Energy Harvester", s2Source.GetProperty("title").GetString()!);
+        Assert.Equal("10.3390/s26196271", s2Source.GetProperty("doi").GetString());
+        Assert.Contains("Chen", s2Source.GetProperty("authors").GetString()!);
+        Assert.Equal("CC BY 4.0", s2Source.GetProperty("license").GetString());
+
+        // D1: Verify Section 3 Scholarly Source (PMC13665993, Bedrock Erodibility and CO2)
+        var s3Source = sections[2].GetProperty("source");
+        Assert.Equal("PMC13665993", s3Source.GetProperty("pmcid").GetString());
+        Assert.Contains("Bedrock erodibility", s3Source.GetProperty("title").GetString()!);
+        Assert.Equal("10.1126/sciadv.aei9275", s3Source.GetProperty("doi").GetString());
+        Assert.Contains("Marder", s3Source.GetProperty("authors").GetString()!);
+        Assert.Equal("CC BY 4.0", s3Source.GetProperty("license").GetString());
+
+        // D5: Verify Visual SVG Assets for FLOW_CHART and DIAGRAM_LABEL
+        var s1Groups = sections[0].GetProperty("groups").EnumerateArray().ToList();
+        var flowChartGroup = s1Groups.Single(g => g.GetProperty("questionType").GetString() == "FLOW_CHART");
+        var flowSvg = flowChartGroup.TryGetProperty("svgXml", out var fsvg) ? fsvg.GetString() : null;
+        Assert.False(string.IsNullOrWhiteSpace(flowSvg), "FLOW_CHART group must provide svgXml");
+        Assert.Contains("<svg", flowSvg);
+        Assert.Contains("viewBox", flowSvg);
+        Assert.Contains("data-callout-id=\"10\"", flowSvg);
+        Assert.Contains("data-callout-id=\"13\"", flowSvg);
+
+        var s2Groups = sections[1].GetProperty("groups").EnumerateArray().ToList();
+        var diagramGroup = s2Groups.Single(g => g.GetProperty("questionType").GetString() == "DIAGRAM_LABEL");
+        var diagramSvg = diagramGroup.TryGetProperty("svgXml", out var dsvg) ? dsvg.GetString() : null;
+        Assert.False(string.IsNullOrWhiteSpace(diagramSvg), "DIAGRAM_LABEL group must provide svgXml");
+        Assert.Contains("<svg", diagramSvg);
+        Assert.Contains("viewBox", diagramSvg);
+        Assert.Contains("data-callout-id=\"14\"", diagramSvg);
+        Assert.Contains("data-callout-id=\"17\"", diagramSvg);
+
+        // Verify DIAGRAM_LABEL answers are physical component labels, not adverbs
+        var diagramQuestions = diagramGroup.GetProperty("questions").EnumerateArray().ToList();
+        foreach (var dq in diagramQuestions)
+        {
+            var ans = dq.GetProperty("answer").GetString()!;
+            Assert.False(string.Equals(ans, "conversely", StringComparison.OrdinalIgnoreCase),
+                "DIAGRAM_LABEL answer must not be the placeholder 'conversely'");
+            Assert.True(ans.Length >= 5, "DIAGRAM_LABEL answer must be a valid component label");
+        }
+    }
+
+    [Fact]
     public async Task C5_Through_C15_FullPaperCrossServiceE2E_PersistenceAndGrading()
     {
         // C5 & C6: Canonical Python serialization -> .NET contract deserialization
@@ -340,6 +409,7 @@ public sealed class ReadingPaperRealistic40QuestionE2ETests
 
         var options = CreateOptions();
         await using var db = new ExamDbContext(options);
+        EnsureDatabaseIsolationSafety(db);
 
         // Setup durable job and run in isolated PostgreSQL
         var jobId = Guid.NewGuid();
@@ -351,7 +421,7 @@ public sealed class ReadingPaperRealistic40QuestionE2ETests
         var job = new ReadingPaperJob
         {
             Id = jobId,
-            Topic = "Wetland Agriculture, Marine Stoichiometry, and Exoplanet Spectroscopy",
+            Topic = "Ancient Metallurgy, Wind-Rain Energy Harvesting, and Bedrock Erodibility",
             Status = "Running",
             ActiveRunId = runId,
             Epoch = epoch,

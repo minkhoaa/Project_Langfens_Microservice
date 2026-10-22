@@ -728,10 +728,22 @@ class SectionRunner:
                 raise ValueError(f"Question slot {q_num} has no valid questionType or matching group configuration")
             q_art_id = f"question:{context.run_id}:{q_num}"
             claim_ref_ids = slot.get("claimRefIds") or ()
-            claim_id = claim_ref_ids[0] if claim_ref_ids else (claims[0]["claimId"] if claims else "claim_1")
-            if claim_id not in aligned_claim_map and passage_alignments:
-                claim_id = passage_alignments[(q_num - 1) % len(passage_alignments)]["claimId"]
-            target_focus_quote = aligned_claim_map[claim_id]["passageQuote"] if claim_id in aligned_claim_map else (claims_map[claim_id]["text"].strip() if claim_id in claims_map else None)
+            if not claim_ref_ids:
+                raise ValueError(
+                    f"Question slot {q_num} has no bound verified claim reference. "
+                    "Fail-closed: ungrounded slots are prohibited."
+                )
+            claim_id = claim_ref_ids[0]
+            if claim_id not in claims_map:
+                raise ValueError(
+                    f"Question slot {q_num} references claim '{claim_id}' not found in verified claims map. "
+                    "Fail-closed: ungrounded claims are prohibited."
+                )
+            target_focus_quote = (
+                aligned_claim_map[claim_id]["passageQuote"]
+                if claim_id in aligned_claim_map
+                else claims_map[claim_id]["text"].strip()
+            )
             async def generate_question(
                 version: int,
                 target_q_num: int = q_num,

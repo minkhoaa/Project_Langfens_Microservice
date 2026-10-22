@@ -150,14 +150,20 @@ def evaluate_evidence(artifact: ArtifactEnvelope, texts: Mapping[str, str], mini
     return [result(artifact, "eval_evidence_graph", evidence_problems(graph, texts, minimum))]
 
 
-def evaluate_blueprint(artifact: ArtifactEnvelope, policy: PinnedExecutionPolicy, indices: tuple[int, ...]) -> list[EvaluationResult]:
+def evaluate_blueprint(
+    artifact: ArtifactEnvelope,
+    policy: PinnedExecutionPolicy,
+    indices: tuple[int, ...],
+    evidence_map: Optional[Mapping[int, Any]] = None,
+) -> list[EvaluationResult]:
     payload = artifact.payload
     sections = payload.get("sections", ())
     problems = []
     if tuple(item["sectionId"] for item in sections) != tuple(sorted(indices)):
         problems.append((IssueCode.SCHEMA_VIOLATION, "Blueprint does not cover exactly the requested sections"))
     for item in sections:
-        config = policy.section(item["sectionId"])
+        sec_id = item["sectionId"]
+        config = policy.section(sec_id)
         slots = item.get("questionSlots", ())
         if tuple(slot["questionNumber"] for slot in slots) != config.question_numbers():
             problems.append((IssueCode.QUESTION_NUMBERING_INVALID, "Blueprint question numbers diverge from pinned allocation"))
@@ -165,6 +171,46 @@ def evaluate_blueprint(artifact: ArtifactEnvelope, policy: PinnedExecutionPolicy
             problems.append((IssueCode.EVIDENCE_MISSING, "Every blueprint slot must bind verified evidence"))
         if not item.get("passageObjectives") or not item.get("evidenceGraphRef"):
             problems.append((IssueCode.EVIDENCE_MISSING, "Blueprint lacks evidence graph or coherent editorial objectives"))
+
+        # Evidence graph membership and semantic eligibility checks
+        claims_by_id: dict[str, Any] = {}
+        if evidence_map and sec_id in evidence_map:
+            ev_data = evidence_map[sec_id]
+            ev_payload = getattr(ev_data, "payload", ev_data) if hasattr(ev_data, "payload") else ev_data
+            if hasattr(ev_payload, "get"):
+                ev_claims = ev_payload.get("claims", [])
+            elif hasattr(ev_payload, "claims"):
+                ev_claims = ev_payload.claims or []
+            else:
+                ev_claims = []
+            claims_by_id = {
+                (c.claim_id if hasattr(c, "claim_id") else (c.get("claimId") or c.get("claim_id"))): c
+                for c in ev_claims
+            }
+
+        for slot in slots:
+            q_num = slot.get("questionNumber")
+            q_type = slot.get("questionType", "")
+            for cid in slot.get("claimRefIds", ()):
+                if cid.startswith("claim:synthetic:") or cid.startswith("claim:run_") or cid.startswith("claim:placeholder:") or cid.startswith("claim:None:"):
+                    problems.append((IssueCode.EVIDENCE_MISSING, f"Question {q_num} has fabricated synthetic claim ID '{cid}'"))
+                elif evidence_map and sec_id in evidence_map:
+                    if cid not in claims_by_id:
+                        problems.append((IssueCode.EVIDENCE_MISSING, f"Question {q_num} references claim '{cid}' which is not in Section {sec_id}'s verified EvidenceGraph"))
+                    else:
+                        claim_obj = claims_by_id[cid]
+                        claim_dict = (
+                            claim_obj.model_dump(by_alias=True)
+                            if hasattr(claim_obj, "model_dump")
+                            else (claim_obj if hasattr(claim_obj, "get") else {"claimId": cid, "text": getattr(claim_obj, "text", "")})
+                        )
+                        from app.blueprint.claim_binding import check_claim_eligibility_for_family
+                        if not check_claim_eligibility_for_family(claim_dict, str(q_type), sec_id):
+                            problems.append((
+                                IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM,
+                                f"Question {q_num} references claim '{cid}' which is semantically ineligible for question family '{q_type}'"
+                            ))
+
     return [result(artifact, "eval_blueprint", problems)]
 
 

@@ -645,20 +645,20 @@ def compose_questions(
             q_num = slot["questionNumber"]
             c_refs = slot.get("claimRefIds") or ()
             claim = claim_by_id.get(c_refs[0]) if c_refs and c_refs[0] in claim_by_id else None
-            if claim is None and claims:
-                from app.blueprint.claim_binding import score_claim_suitability_for_family
-                scored = sorted(claims, key=lambda c: score_claim_suitability_for_family(c, slot_q_type, section_id), reverse=True)
-                claim = scored[0]
             if claim is None:
-                raise ValueError(f"Question {q_num} has no valid supporting claim from evidence graph")
+                raise ValueError(
+                    f"Question {q_num} has no valid supporting claim from evidence graph (ref: {c_refs}). "
+                    "Fail-closed: synthetic claim fallback is prohibited."
+                )
             quote = claim["text"].strip()
 
             # Locate exact offset in passage
             p_start = passage_text.find(quote)
             if p_start < 0:
-                # If exact quote not found, insert or use the first paragraph
-                quote = passage_text.split(". ")[0].strip() + "."
-                p_start = passage_text.find(quote)
+                raise ValueError(
+                    f"Question {q_num}: Bound claim quote '{quote[:50]}...' cannot be located in the passage text. "
+                    "Fail-closed: unrelated passage-span substitution is prohibited."
+                )
             p_end = p_start + len(quote)
 
             explanation = (

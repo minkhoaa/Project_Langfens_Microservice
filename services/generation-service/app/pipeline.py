@@ -174,7 +174,7 @@ class ReadingGenerationPipeline:
             )
 
         async def evaluate_blueprint_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
-            return evaluate_blueprint(art, request.policy, bp_indices)
+            return evaluate_blueprint(art, request.policy, bp_indices, evidence_map=evidence_envelopes)
 
         blueprint_envelope = await executor.execute(
             bp_art_id,

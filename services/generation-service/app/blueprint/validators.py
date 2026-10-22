@@ -320,7 +320,7 @@ def validate_blueprint(
                         )
                     )
                 for cid in slot.claim_ref_ids:
-                    if cid.startswith("claim:run_") or cid.startswith("claim:None:") or cid.startswith("claim:synthetic:"):
+                    if cid.startswith("claim:run_") or cid.startswith("claim:None:") or cid.startswith("claim:synthetic:") or cid.startswith("claim:placeholder:"):
                         issues.append(
                             BlueprintIssue(
                                 code="BLUEPRINT_FABRICATED_CLAIM_PROHIBITED",
@@ -332,14 +332,14 @@ def validate_blueprint(
                 if evidence_map and sec_id in evidence_map:
                     ev_data = evidence_map[sec_id]
                     ev_payload = getattr(ev_data, "payload", ev_data) if hasattr(ev_data, "payload") else ev_data
-                    if isinstance(ev_payload, dict):
+                    if hasattr(ev_payload, "get"):
                         ev_claims = ev_payload.get("claims", [])
                     elif hasattr(ev_payload, "claims"):
                         ev_claims = ev_payload.claims or []
                     else:
                         ev_claims = []
                     valid_cids = {
-                        c.claim_id if hasattr(c, "claim_id") else c.get("claimId")
+                        c.claim_id if hasattr(c, "claim_id") else (c.get("claimId") or c.get("claim_id"))
                         for c in ev_claims
                     }
                     for cid in slot.claim_ref_ids:

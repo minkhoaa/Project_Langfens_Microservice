@@ -26,7 +26,7 @@ PROCESS_KEYWORDS = {
     "transform", "transforms", "transformed", "transforming", "transformation",
     "stage", "stages", "phase", "phases", "reaction", "reactions", "trigger", "triggers",
     "triggered", "triggering", "flow", "flows", "flowed", "flowing", "sequence",
-    "cause", "causes", "caused", "causing", "lead", "leads", "led", "leading",
+    "cause", "causes", "caused", "causing", "leads", "led", "leading",
     "result", "results", "resulted", "resulting", "generate", "generates", "generated",
     "inhibit", "inhibits", "inhibited", "regulate", "regulates", "regulated",
     "input", "output", "absorb", "release", "synthesize", "transfer", "transport",
@@ -89,7 +89,8 @@ def score_claim_suitability_for_family(
 ) -> float:
     """Scores how well a verified claim semantically satisfies a question family.
 
-    Returns a suitability score. Higher score indicates higher academic suitability.
+    Returns a suitability score. Positive scores indicate valid suitability;
+    scores <= 0.0 indicate semantic unsuitability.
     """
     text = claim_dict.get("text", "").lower()
     keywords = set(k.lower() for k in claim_dict.get("keywords", []))
@@ -109,20 +110,19 @@ def score_claim_suitability_for_family(
     # Categorization / Matching features / Classification families
     elif any(p in fam_norm for p in ("MATCHING_FEATURES", "CLASSIFICATION", "MATCHING_INFORMATION")):
         entity_overlap = len(words & ENTITY_DISTINCTION_KEYWORDS)
-        # Check for capitalized proper nouns in original text
         orig_text = claim_dict.get("text", "")
         cap_entities = len(re.findall(r"\b[A-Z][a-z]{2,}\b", orig_text))
         if entity_overlap > 0 or cap_entities > 0:
             base_score += min(10.0, 2.0 * entity_overlap + 1.5 * cap_entities)
         else:
-            base_score -= 1.0
+            base_score -= 2.0
 
     # Author viewpoint / stance / debate families
     elif any(p in fam_norm for p in ("YES_NO", "MATCHING_ENDINGS", "MATCHING_HEADING", "TITLE")):
         stance_overlap = len(words & STANCE_OPINION_KEYWORDS)
         if stance_overlap > 0:
             base_score += min(10.0, 3.0 * stance_overlap)
-        elif section_id == 3:
+        elif section_id == 3 and len(words) >= 8:
             # Section 3 naturally tests arguments; claims with analytical reasoning still get credit
             base_score += 1.0
         else:
@@ -134,14 +134,19 @@ def score_claim_suitability_for_family(
         quant_overlap = len(words & FACTUAL_QUANTITATIVE_KEYWORDS)
         if has_digits or quant_overlap > 0:
             base_score += min(8.0, 2.0 * quant_overlap + (3.0 if has_digits else 0.0))
-        else:
+        elif len(words) >= 3:
             base_score += 1.5
+        else:
+            base_score -= 1.0
 
     # True / False / Not Given
     elif "TRUE_FALSE" in fam_norm or "TFNG" in fam_norm:
-        # Factual descriptive sentences are foundational
+        has_digits = bool(re.search(r"\b\d+\b", text))
         quant_overlap = len(words & FACTUAL_QUANTITATIVE_KEYWORDS)
-        base_score += min(6.0, 1.0 + 1.5 * quant_overlap)
+        if quant_overlap > 0 or has_digits or len(words) >= 3:
+            base_score += min(6.0, 1.0 + 1.5 * quant_overlap + (1.0 if has_digits else 0.0))
+        else:
+            base_score -= 1.0
 
     # General MCQ
     elif "MULTIPLE_CHOICE" in fam_norm or "MCQ" in fam_norm:
@@ -151,7 +156,27 @@ def score_claim_suitability_for_family(
         else:
             base_score += 2.0
 
-    return max(0.1, base_score)
+    return base_score
+
+
+def check_claim_eligibility_for_family(
+    claim_dict: Dict[str, Any],
+    question_family: str,
+    section_id: int,
+) -> bool:
+    """Explicitly checks whether a claim satisfies semantic eligibility criteria for a question family."""
+    cid = claim_dict.get("claimId") or ""
+    # Reject synthetic or fabricated claim IDs
+    if cid.startswith("claim:synthetic:") or cid.startswith("claim:run_") or cid.startswith("claim:placeholder:") or cid.startswith("claim:None:"):
+        return False
+
+    # Reject cross-section mismatch if section ID is explicitly recorded
+    claim_sec = claim_dict.get("sectionId") or claim_dict.get("section_id")
+    if claim_sec is not None and claim_sec != section_id:
+        return False
+
+    score = score_claim_suitability_for_family(claim_dict, question_family, section_id)
+    return score > 0.0
 
 
 def bind_claims_to_slots(
@@ -165,10 +190,9 @@ def bind_claims_to_slots(
 
     Guarantees:
     1. Every dynamic slot references an existing claim in the verified graph.
-    2. Replaces positional claim rotation with suitability scoring and deterministic tie-breaking.
-    3. Never invents synthetic claim IDs (e.g. claim:run_... or claim:None:...).
-    4. Fails closed with ValueError if claims is empty.
-    5. Fully reproducible for identical claims and slot inputs.
+    2. Enforces explicit eligibility check before ranking: fails closed if no claim is eligible.
+    3. Rejects cross-section and synthetic claims.
+    4. Deterministic tie-breaking for identical scores.
     """
     if not claims:
         raise ValueError(
@@ -181,8 +205,21 @@ def bind_claims_to_slots(
     if not claim_id_set:
         raise ValueError(f"Section {section_id} EvidenceGraph '{graph_id}' has no valid claim IDs.")
 
+    # Strict check: reject cross-section claims
+    valid_section_claims = []
+    for c in norm_claims:
+        c_sec = c.get("sectionId") or c.get("section_id")
+        if c_sec is not None and c_sec != section_id:
+            continue
+        valid_section_claims.append(c)
+
+    if not valid_section_claims:
+        raise ValueError(
+            f"Section {section_id} EvidenceGraph '{graph_id}' contains only cross-section claims from other sections. "
+            "Fail-closed: cross-section claim binding is prohibited."
+        )
+
     updated_slots: List[QuestionSlot] = []
-    # Track usage frequency within each group to ensure coverage across claims
     group_claim_usage: Dict[int, Dict[str, int]] = {}
 
     for slot in slots:
@@ -193,8 +230,21 @@ def bind_claims_to_slots(
         raw_type = slot.question_type
         type_str = raw_type.value if hasattr(raw_type, "value") else str(raw_type)
 
+        # 1. Filter by explicit eligibility
+        eligible_candidates: List[Dict[str, Any]] = [
+            c for c in valid_section_claims
+            if check_claim_eligibility_for_family(c, type_str, section_id)
+        ]
+
+        if not eligible_candidates:
+            raise ValueError(
+                f"Section {section_id} EvidenceGraph '{graph_id}' has no eligible verified claims for family '{type_str}' "
+                f"(slot {slot.question_number}). Fail-closed: cannot force unsuitable evidence binding."
+            )
+
+        # 2. Score eligible candidates
         scored_candidates: List[Tuple[float, str, Dict[str, Any]]] = []
-        for c in norm_claims:
+        for c in eligible_candidates:
             cid = c["claimId"]
             semantic_score = score_claim_suitability_for_family(c, type_str, section_id)
             usage_penalty = 1.5 * group_claim_usage[grp_idx].get(cid, 0)
