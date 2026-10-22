@@ -1,0 +1,162 @@
+{
+  "sectionId": 3,
+  "title": "Cognitive Linguistics and Multilingual Memory Representation",
+  "passage": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+  "questions": [
+    {
+      "questionType": "MATCHING_HEADING",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 27,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_27",
+      "claimsMap": {
+        "claim_p3_27": {
+          "claimId": "claim_p3_27",
+          "text": "Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 27,
+        "prompt": "Paragraph A",
+        "answer": "ii",
+        "options": [
+          "i. Socioeconomic biases in testing",
+          "ii. Long-term neuroimaging cohort findings",
+          "iii. Curricula reforms in schools",
+          "iv. Early acoustic reflexes"
+        ],
+        "evidenceQuote": "Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects.",
+        "explanation": "Paragraph A summarizes the seven-year longitudinal cohort investigation and neuroimaging findings."
+      }
+    },
+    {
+      "questionType": "YES_NO_NOT_GIVEN",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 28,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_28",
+      "claimsMap": {
+        "claim_p3_28": {
+          "claimId": "claim_p3_28",
+          "text": "early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 28,
+        "statement": "Acquiring a second language in early childhood strengthens neural prefrontal connectivity.",
+        "answer": "YES",
+        "evidenceQuote": "early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity.",
+        "explanation": "The author reports that early second language acquisition reinforces prefrontal cortical connectivity."
+      }
+    },
+    {
+      "questionType": "MULTIPLE_CHOICE_SINGLE",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 29,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_29",
+      "claimsMap": {
+        "claim_p3_29": {
+          "claimId": "claim_p3_29",
+          "text": "cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 29,
+        "prompt": "What magnitude of cognitive flexibility advantage was observed in proficient bilinguals?",
+        "answer": "B",
+        "correctOption": "B",
+        "options": [
+          "A. Ten percent",
+          "B. Twenty-four percent",
+          "C. Fifty percent",
+          "D. Seventy-five percent"
+        ],
+        "evidenceQuote": "cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals.",
+        "explanation": "The text explicitly records an advantage of approximately twenty-four percent."
+      }
+    },
+    {
+      "questionType": "MULTIPLE_CHOICE_MULTIPLE",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 30,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_30",
+      "claimsMap": {
+        "claim_p3_30": {
+          "claimId": "claim_p3_30",
+          "text": "educational background and formal literacy levels exert substantial confounding effects."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 30,
+        "prompt": "Which TWO confounding variables did dissenting researchers emphasize?",
+        "answers": [
+          "A",
+          "C"
+        ],
+        "options": [
+          "A. Educational background",
+          "B. Dietary nutrition",
+          "C. Formal literacy levels",
+          "D. Handedness preferences"
+        ],
+        "evidenceQuote": "educational background and formal literacy levels exert substantial confounding effects.",
+        "explanation": "The passage identifies educational background and formal literacy levels as confounding factors."
+      }
+    },
+    {
+      "questionType": "MATCHING_ENDINGS",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 31,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_31",
+      "claimsMap": {
+        "claim_p3_31": {
+          "claimId": "claim_p3_31",
+          "text": "The finalized data conclusively established that language switching exercises distinct executive control networks."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 31,
+        "prompt": "Frequent language switching among bilingual speakers",
+        "answer": "C",
+        "options": [
+          "A. diminishes structural hippocampus density over time.",
+          "B. relies exclusively on auditory cortex stimulation.",
+          "C. exercises specialized executive control networks independently.",
+          "D. correlates negatively with standardized test outcomes."
+        ],
+        "evidenceQuote": "language switching exercises distinct executive control networks independent of educational attainment.",
+        "explanation": "The passage establishes that language switching exercises distinct executive control networks."
+      }
+    },
+    {
+      "questionType": "CHOOSING_TITLE",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 40,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_40",
+      "claimsMap": {
+        "claim_p3_40": {
+          "claimId": "claim_p3_40",
+          "text": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 40,
+        "prompt": "Which title best summarizes the main discussion of the reading passage?",
+        "answer": "B",
+        "correctOption": "B",
+        "options": [
+          "A. The Demographics of Monolingual Education",
+          "B. Multilingual Cognitive Architecture and Neural Connectivity",
+          "C. Historical Literacy Tests in Northern Europe",
+          "D. Limitations of Functional Magnetic Resonance Scans"
+        ],
+        "evidenceQuote": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation.",
+        "explanation": "The passage focuses on multilingual memory representation, executive control networks, and neural connectivity."
+      }
+    }
+  ]
+}
