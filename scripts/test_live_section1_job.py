@@ -3,7 +3,9 @@ import base64, hashlib, hmac, json, time, urllib.request, sys
 def b64url(b: bytes) -> str:
     return base64.urlsafe_b64encode(b).rstrip(b"=").decode("ascii")
 
-def create_admin_jwt(secret: str = "bTNGPmniBGyINHPdsmONct16TIqqb1bZ") -> str:
+def create_admin_jwt(secret: str = None) -> str:
+    if secret is None:
+        secret = os.getenv("JWT_SIGNING_KEY") or os.getenv("JwtSettings__SignKey") or "bTNGPmniBGyINHPdsmONct16TIqqb1bZ"
     header = {"alg": "HS256", "typ": "JWT"}
     payload = {
         "sub": "00000000-0000-0000-0000-000000000001",

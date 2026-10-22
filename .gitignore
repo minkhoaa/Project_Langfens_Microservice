@@ -200,3 +200,10 @@ models/**/*.bin
 
 benchmarks/
 scripts/crawler/_cache_writing_images/
+
+# Raw generation reports and fresh job markers
+reports/job_*.json
+reports/*_result.json
+reports/demo_*.json
+current_fresh_job_id.txt
+

@@ -8,7 +8,7 @@ import time
 import urllib.error
 import urllib.request
 
-secret = "bTNGPmniBGyINHPdsmONct16TIqqb1bZ"
+secret = os.getenv("JWT_SIGNING_KEY") or os.getenv("JwtSettings__SignKey") or "bTNGPmniBGyINHPdsmONct16TIqqb1bZ"
 os.makedirs("reports", exist_ok=True)
 
 def b64url(b: bytes) -> str:
