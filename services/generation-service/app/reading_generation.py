@@ -670,10 +670,22 @@ def align_claims_to_passage(
     claims: Sequence[dict[str, Any]],
     source_text: str,
 ) -> list[dict[str, Any]]:
-    """Aligns verified source claims to their exact occurrences within the passage text."""
+    """Aligns verified source claims to their exact or grounded occurrences within the passage text.
+    
+    Supports:
+    1. Exact verbatim occurrences of claim text in passage.
+    2. Substantive clause matches (>= 25 chars) in passage.
+    3. Independently verified semantic alignment through grounded paraphrases:
+       - No negation polarity conflict.
+       - No comparison inversion.
+       - No invented or altered numbers.
+       - Substantive content grounding ratio >= 0.60.
+    """
     alignments: list[dict[str, Any]] = []
     seen_claims: set[str] = set()
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", passage_text) if s.strip()]
 
+    # Pass 1: Exact verbatim match
     for claim in claims:
         cid = claim["claimId"]
         quote = claim["text"].strip()
@@ -694,6 +706,75 @@ def align_claims_to_passage(
                         "passageQuote": quote,
                     })
                     seen_claims.add(cid)
+
+    # Pass 2: Substantive clause matches (>= 25 chars)
+    for claim in claims:
+        cid = claim["claimId"]
+        if cid in seen_claims:
+            continue
+        quote = claim["text"].strip()
+        if not quote:
+            continue
+        offsets = claim.get("offsets") or {}
+        start = offsets.get("startChar") if "startChar" in offsets else offsets.get("start", 0)
+        end = offsets.get("endChar") if "endChar" in offsets else offsets.get("end", 0)
+        if not (0 <= start < end <= len(source_text) and source_text[start:end] == quote):
+            continue
+
+        clauses = [c.strip() for c in re.split(r"[,;:.!?—–\n]", quote) if len(c.strip()) >= 25]
+        for c in clauses:
+            if c in passage_text:
+                matching_sent = next((s for s in sentences if c in s), c)
+                alignments.append({
+                    "claimId": cid,
+                    "sourceStart": start,
+                    "sourceEnd": end,
+                    "sourceQuote": quote,
+                    "passageQuote": matching_sent if matching_sent in passage_text else c,
+                })
+                seen_claims.add(cid)
+                break
+
+    # Pass 3: Grounded semantic paraphrase
+    from app.evaluators.semantic import compute_substantive_grounding_ratio
+    number_re = re.compile(r"\b\d+(?:[.,]\d+)?\b")
+
+    for claim in claims:
+        cid = claim["claimId"]
+        if cid in seen_claims:
+            continue
+        quote = claim["text"].strip()
+        if not quote or len(quote) < 15:
+            continue
+        offsets = claim.get("offsets") or {}
+        start = offsets.get("startChar") if "startChar" in offsets else offsets.get("start", 0)
+        end = offsets.get("endChar") if "endChar" in offsets else offsets.get("end", 0)
+        if not (0 <= start < end <= len(source_text) and source_text[start:end] == quote):
+            continue
+
+        best_sent = None
+        best_ratio = 0.0
+        for sent in sentences:
+            if len(sent) < 15:
+                continue
+            ratio, _ = compute_substantive_grounding_ratio(quote, sent)
+            if ratio >= 0.60 and ratio > best_ratio:
+                conflict, _ = detect_negation_polarity_conflict(sent, quote)
+                inv = detect_comparison_inversion(sent, quote)
+                num_invented = bool(set(number_re.findall(sent)) - set(number_re.findall(quote)))
+                if not conflict and not inv and not num_invented:
+                    best_ratio = ratio
+                    best_sent = sent
+
+        if best_sent and best_sent in passage_text:
+            alignments.append({
+                "claimId": cid,
+                "sourceStart": start,
+                "sourceEnd": end,
+                "sourceQuote": quote,
+                "passageQuote": best_sent,
+            })
+            seen_claims.add(cid)
 
     return alignments
 

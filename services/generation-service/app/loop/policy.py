@@ -73,6 +73,7 @@ class LoopPolicy(CanonicalBaseModel):
             IssueCode.CAUSAL_OVERSTATEMENT,
             IssueCode.UNMEASURED_OUTCOME,
             IssueCode.ANSWER_LEAKAGE,
+            IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT,
         },
         description="Issue codes that can be targeted for surgical repair",
     )

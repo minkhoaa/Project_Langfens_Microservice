@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Sequence
+from enum import Enum
 from typing import Any, Optional
 from uuid import UUID
 
@@ -17,6 +18,7 @@ from app.config import settings
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType, canonical_json_dump_prep
 from app.contracts.evidence import AbsenceAssessment
 from app.contracts.evaluation import EvaluationResult
+from app.contracts.issue import Issue, IssueCode
 from app.contracts.policies import calculate_shingle_overlap, count_words, match_verbatim_in_passage, validate_answer_length
 from app.evaluators.solver import BlindSolverEvaluator
 from app.generators.passage.prompts import PassageStyleProfile, build_passage_generation_prompt
@@ -66,6 +68,25 @@ def _get_instructions_for_type(q_type: str) -> str:
         return "Match each item with the correct statement from the list below."
     return "Answer the questions below. Choose NO MORE THAN THREE WORDS from the passage for each answer."
 
+class CandidateRejectionReason(str, Enum):
+    CLAIM_NOT_SUPPORTED_IN_PASSAGE = "CLAIM_NOT_SUPPORTED_IN_PASSAGE"
+    QUOTE_NOT_VERBATIM = "QUOTE_NOT_VERBATIM"
+    CANDIDATE_DUPLICATE = "CANDIDATE_DUPLICATE"
+    CANDIDATE_SCHEMA_INVALID = "CANDIDATE_SCHEMA_INVALID"
+
+
+class CandidateRejectionError(ValueError):
+    """Structured candidate extraction failure preserving diagnostic classification.
+    
+    Subclasses ValueError so existing catch sites remain 100% backward-compatible.
+    """
+
+    def __init__(self, reason: CandidateRejectionReason, message: str):
+        super().__init__(f"[{reason.value}] {message}")
+        self.reason = reason
+        self.message = message
+
+
 def _parse_single_candidate(
     cand: dict[str, Any],
     raw_payload: dict[str, Any],
@@ -81,12 +102,18 @@ def _parse_single_candidate(
     matched_claim = claims_map.get(claim_id)
     explanation = str(cand.get("explanation") or "").strip()
     if len(explanation) < 25:
-        raise ValueError(f"Question {q_num} explanation is missing or too short (< 25 characters)")
+        raise CandidateRejectionError(
+            CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+            f"Question {q_num} explanation is missing or too short (< 25 characters)",
+        )
     if q_type in ("TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"):
         statement = str(cand.get("statement") or cand.get("prompt") or "").strip()
         raw_ans = str(cand.get("answer") or "").strip().replace(" ", "_").upper()
         if not raw_ans:
-            raise ValueError(f"Question {q_num} answer is missing")
+            raise CandidateRejectionError(
+                CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                f"Question {q_num} answer is missing",
+            )
         if q_type == "TRUE_FALSE_NOT_GIVEN":
             if raw_ans in ("TRUE", "T"):
                 answer = "TRUE"
@@ -95,7 +122,10 @@ def _parse_single_candidate(
             elif raw_ans in ("NOT_GIVEN", "NG"):
                 answer = "NOT_GIVEN"
             else:
-                raise ValueError(f"Invalid answer '{raw_ans}' for TRUE_FALSE_NOT_GIVEN in question {q_num}")
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                    f"Invalid answer '{raw_ans}' for TRUE_FALSE_NOT_GIVEN in question {q_num}",
+                )
         else:
             if raw_ans in ("YES", "Y"):
                 answer = "YES"
@@ -104,22 +134,35 @@ def _parse_single_candidate(
             elif raw_ans in ("NOT_GIVEN", "NG"):
                 answer = "NOT_GIVEN"
             else:
-                raise ValueError(f"Invalid answer '{raw_ans}' for YES_NO_NOT_GIVEN in question {q_num}")
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                    f"Invalid answer '{raw_ans}' for YES_NO_NOT_GIVEN in question {q_num}",
+                )
 
         if answer == "NOT_GIVEN":
             raw_absence = cand.get("absenceAssessment") or cand.get("absence_assessment")
             if not raw_absence or not isinstance(raw_absence, (dict, AbsenceAssessment)):
-                raise ValueError(
-                    f"Question {q_num} candidate is NOT_GIVEN but lacks required absenceAssessment object"
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                    f"Question {q_num} candidate is NOT_GIVEN but lacks required absenceAssessment object",
                 )
 
             if isinstance(raw_absence, AbsenceAssessment):
                 if not raw_absence.absence_confirmed:
-                    raise ValueError(f"Question {q_num} absenceAssessment.absenceConfirmed must be True")
+                    raise CandidateRejectionError(
+                        CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                        f"Question {q_num} absenceAssessment.absenceConfirmed must be True",
+                    )
                 if not raw_absence.absence_reason:
-                    raise ValueError(f"Question {q_num} absenceAssessment is missing absenceReason")
+                    raise CandidateRejectionError(
+                        CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                        f"Question {q_num} absenceAssessment is missing absenceReason",
+                    )
                 if not raw_absence.claim_or_topic:
-                    raise ValueError(f"Question {q_num} absenceAssessment is missing claimOrTopic")
+                    raise CandidateRejectionError(
+                        CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                        f"Question {q_num} absenceAssessment is missing claimOrTopic",
+                    )
                 assessment_id = raw_absence.assessment_id or f"abs_q{q_num}"
                 claim_or_topic = raw_absence.claim_or_topic
                 absence_reason = raw_absence.absence_reason
@@ -127,17 +170,26 @@ def _parse_single_candidate(
             else:
                 claim_or_topic = str(raw_absence.get("claimOrTopic") or raw_absence.get("claim_or_topic") or "").strip()
                 if not claim_or_topic:
-                    raise ValueError(f"Question {q_num} absenceAssessment is missing claimOrTopic")
+                    raise CandidateRejectionError(
+                        CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                        f"Question {q_num} absenceAssessment is missing claimOrTopic",
+                    )
                 absence_reason = str(raw_absence.get("absenceReason") or raw_absence.get("absence_reason") or "").strip()
                 if not absence_reason:
-                    raise ValueError(f"Question {q_num} absenceAssessment is missing absenceReason")
+                    raise CandidateRejectionError(
+                        CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                        f"Question {q_num} absenceAssessment is missing absenceReason",
+                    )
                 absence_confirmed = (
                     raw_absence.get("absenceConfirmed")
                     if "absenceConfirmed" in raw_absence
                     else raw_absence.get("absence_confirmed")
                 )
                 if absence_confirmed is not True:
-                    raise ValueError(f"Question {q_num} absenceAssessment.absenceConfirmed must be True (got {absence_confirmed})")
+                    raise CandidateRejectionError(
+                        CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                        f"Question {q_num} absenceAssessment.absenceConfirmed must be True (got {absence_confirmed})",
+                    )
                 assessment_id = str(raw_absence.get("assessmentId") or raw_absence.get("assessment_id") or f"abs_q{q_num}").strip()
                 topical_span = raw_absence.get("topicalContextSpan") or raw_absence.get("topical_context_span")
 
@@ -158,14 +210,20 @@ def _parse_single_candidate(
                     if p_start >= 0:
                         topical_span = clean_topical
                 if p_start < 0:
-                    raise ValueError(f"Question {q_num} topicalContextSpan '{topical_span[:40]}' is not found in passage text")
+                    raise CandidateRejectionError(
+                        CandidateRejectionReason.QUOTE_NOT_VERBATIM,
+                        f"Question {q_num} topicalContextSpan '{topical_span[:40]}' is not found in passage text",
+                    )
                 p_end = p_start + len(topical_span)
             elif target_focus and target_focus in passage_text:
                 topical_span = target_focus
                 p_start = passage_text.find(topical_span)
                 p_end = p_start + len(topical_span)
             else:
-                raise ValueError(f"Question {q_num} NOT_GIVEN lacks verifiable topical context in passage")
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CLAIM_NOT_SUPPORTED_IN_PASSAGE,
+                    f"Question {q_num} NOT_GIVEN lacks verifiable topical context in passage",
+                )
 
             absence_dict = {
                 "assessmentId": assessment_id,
@@ -187,10 +245,16 @@ def _parse_single_candidate(
             }
         else:
             if cand.get("absenceAssessment") or cand.get("absence_assessment"):
-                raise ValueError(f"Question {q_num} candidate is {answer} but contains prohibited absenceAssessment")
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                    f"Question {q_num} candidate is {answer} but contains prohibited absenceAssessment",
+                )
             quote = str(cand.get("evidenceQuote") or "").strip()
             if not quote or len(quote) < 10:
-                raise ValueError(f"Question {q_num} candidate is {answer} but missing valid evidenceQuote")
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                    f"Question {q_num} candidate is {answer} but missing valid evidenceQuote",
+                )
             p_start = passage_text.find(quote) if quote else -1
             if p_start < 0 and quote:
                 clean_q = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", quote)
@@ -206,7 +270,10 @@ def _parse_single_candidate(
                         quote = c
                         break
             if p_start < 0:
-                raise ValueError(f"Question {q_num} evidence quote '{quote[:40]}' is not found in passage")
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.QUOTE_NOT_VERBATIM,
+                    f"Question {q_num} evidence quote is not found in passage: '{quote[:40]}'",
+                )
             p_end = p_start + len(quote)
             return {
                 "questionNumber": q_num,
@@ -254,9 +321,11 @@ def _parse_single_candidate(
                     p_start = pos
                     quote = c
                     break
-        if p_start < 0 and target_focus and target_focus in passage_text:
-            quote = target_focus
-            p_start = passage_text.find(quote)
+        if p_start < 0:
+            raise CandidateRejectionError(
+                CandidateRejectionReason.QUOTE_NOT_VERBATIM,
+                f"Question {q_num} evidence quote is not found in passage: '{quote[:40]}'",
+            )
         p_end = p_start + len(quote) if p_start >= 0 else -1
         return {
             "questionNumber": q_num,
@@ -334,9 +403,11 @@ def _parse_single_candidate(
                     p_start = pos
                     quote = c
                     break
-        if p_start < 0 and target_focus and target_focus in passage_text:
-            quote = target_focus
-            p_start = passage_text.find(quote)
+        if p_start < 0:
+            raise CandidateRejectionError(
+                CandidateRejectionReason.QUOTE_NOT_VERBATIM,
+                f"Question {q_num} evidence quote is not found in passage: '{quote[:40]}'",
+            )
         p_end = p_start + len(quote) if p_start >= 0 else -1
         answer = str(cand.get("answer") or "").strip()
 
@@ -558,9 +629,11 @@ def _parse_single_candidate(
                     p_start = pos
                     quote = c
                     break
-        if p_start < 0 and target_focus and target_focus in passage_text:
-            quote = target_focus
-            p_start = passage_text.find(quote)
+        if p_start < 0:
+            raise CandidateRejectionError(
+                CandidateRejectionReason.QUOTE_NOT_VERBATIM,
+                f"Question {q_num} evidence quote is not found in passage: '{quote[:40]}'",
+            )
         p_end = p_start + len(quote) if p_start >= 0 else -1
         answer = str(cand.get("answer") or cand.get("correctOption") or "").strip()
 
@@ -605,13 +678,19 @@ def _parse_candidate_payload(
     - Preserves evidence provenance (evidenceClaimRef).
     """
     if not isinstance(raw_payload, dict):
-        raise ValueError(f"Expected dict from provider for question {q_num}, got {type(raw_payload).__name__}")
+        raise CandidateRejectionError(
+            CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+            f"Expected dict from provider for question {q_num}, got {type(raw_payload).__name__}",
+        )
 
     # Check for grouped blanks (e.g. SUMMARY_COMPLETION)
     if "blanks" in raw_payload and isinstance(raw_payload["blanks"], list) and raw_payload["blanks"]:
         blanks = [b for b in raw_payload["blanks"] if isinstance(b, dict)]
         if not blanks:
-            raise ValueError(f"Malformed candidate payload for question {q_num}: 'blanks' list is empty")
+            raise CandidateRejectionError(
+                CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                f"Malformed candidate payload for question {q_num}: 'blanks' list is empty",
+            )
         cand = next((b for b in blanks if b.get("number") == q_num or b.get("questionNumber") == q_num), None)
         if cand is None:
             cand = next((b for b in blanks if b.get("placeholder") == f"[{q_num}]"), None)
@@ -627,14 +706,20 @@ def _parse_candidate_payload(
     elif "candidates" in raw_payload and isinstance(raw_payload["candidates"], list) and raw_payload["candidates"]:
         candidate_items = [c for c in raw_payload["candidates"] if isinstance(c, dict)]
         if not candidate_items:
-            raise ValueError(f"Malformed candidate payload for question {q_num}: missing candidates/blanks")
+            raise CandidateRejectionError(
+                CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                f"Malformed candidate payload for question {q_num}: missing candidates/blanks",
+            )
     elif "statement" in raw_payload or "prompt" in raw_payload:
         candidate_items = [raw_payload]
     else:
-        raise ValueError(f"Malformed candidate payload for question {q_num}: missing candidates/blanks")
+        raise CandidateRejectionError(
+            CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+            f"Malformed candidate payload for question {q_num}: missing candidates/blanks",
+        )
 
     valid_candidates: list[dict[str, Any]] = []
-    rejection_errors: list[str] = []
+    rejection_errors: list[CandidateRejectionError] = []
 
     for idx, cand_item in enumerate(candidate_items):
         try:
@@ -649,15 +734,24 @@ def _parse_candidate_payload(
                 difficulty=difficulty,
                 target_focus=target_focus,
             )
+        except CandidateRejectionError as parse_err:
+            rejection_errors.append(parse_err)
+            continue
         except ValueError as parse_err:
-            rejection_errors.append(str(parse_err))
+            rejection_errors.append(CandidateRejectionError(
+                CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                str(parse_err),
+            ))
             continue
 
         # Passage grounding check: ensure evidence quote or topical context exists in passage
         pe = parsed.get("passageEvidence", {})
         p_start = pe.get("startChar", -1)
         if p_start < 0:
-            rejection_errors.append(f"Question {q_num} candidate {idx} passage offsets are invalid or ungrounded")
+            rejection_errors.append(CandidateRejectionError(
+                CandidateRejectionReason.QUOTE_NOT_VERBATIM,
+                f"Question {q_num} candidate {idx} passage offsets are invalid or ungrounded",
+            ))
             continue
 
         # Duplicate & overlap check against already accepted questions
@@ -695,7 +789,7 @@ def _parse_candidate_payload(
                     break
 
         if is_dup:
-            rejection_errors.append(dup_msg)
+            rejection_errors.append(CandidateRejectionError(CandidateRejectionReason.CANDIDATE_DUPLICATE, dup_msg))
             continue
 
         valid_candidates.append({
@@ -714,11 +808,21 @@ def _parse_candidate_payload(
 
     # All candidates rejected: fail closed with informative error
     if rejection_errors:
-        dup_err = next((e for e in rejection_errors if "duplicates an already accepted question" in e), None)
-        if dup_err:
-            raise ValueError(dup_err)
-        raise ValueError(rejection_errors[0])
-    raise ValueError(f"No valid candidates found for question {q_num}")
+        priority = [
+            CandidateRejectionReason.CLAIM_NOT_SUPPORTED_IN_PASSAGE,
+            CandidateRejectionReason.QUOTE_NOT_VERBATIM,
+            CandidateRejectionReason.CANDIDATE_DUPLICATE,
+            CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+        ]
+        for reason in priority:
+            err = next((e for e in rejection_errors if isinstance(e, CandidateRejectionError) and e.reason == reason), None)
+            if err:
+                raise err
+        raise rejection_errors[0]
+    raise CandidateRejectionError(
+        CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+        f"No valid candidates found for question {q_num}",
+    )
 
 
 class SectionRunner:
@@ -847,22 +951,42 @@ class SectionRunner:
             paragraphs = [p.strip() for p in re.split(r"\n\s*\n", passage_text) if p.strip()]
             alignments = align_claims_to_passage(passage_text, claims, source_text)
             has_unaligned_para = any(not any(a["passageQuote"] in para for a in alignments if a.get("passageQuote")) for para in paragraphs)
-            if not alignments or count_words(passage_text) < config.min_words or has_unaligned_para:
-                # Ground claim alignments in verified source evidence
+            aligned_claim_ids = {a["claimId"] for a in alignments if a.get("claimId")}
+            required_claim_ids = [
+                s["claimRefIds"][0]
+                for s in slots
+                if s.get("claimRefIds") and s["claimRefIds"][0] in claims_map
+            ]
+            missing_slot_claims = [
+                claims_map[cid] for cid in required_claim_ids
+                if cid not in aligned_claim_ids
+            ]
+            if not alignments or count_words(passage_text) < config.min_words or has_unaligned_para or missing_slot_claims:
+                # Ground claim alignments in verified source evidence, prioritizing blueprint-bound claims
                 enhanced_paragraphs = []
+                pool_to_ground = list(missing_slot_claims) + [c for c in claims if c["claimId"] not in required_claim_ids]
                 for i, para in enumerate(paragraphs):
                     para_alignments = [a for a in alignments if a.get("passageQuote") and a["passageQuote"] in para]
-                    if not para_alignments and claims:
-                        claim_quote = claims[i % len(claims)]["text"].strip()
+                    if not para_alignments and pool_to_ground:
+                        claim_quote = pool_to_ground[i % len(pool_to_ground)]["text"].strip()
                         if claim_quote and claim_quote not in para:
                             para = claim_quote + " " + para
                     enhanced_paragraphs.append(para)
 
                 enhanced_passage = "\n\n".join(enhanced_paragraphs)
                 cur_words = count_words(enhanced_passage)
+
+                # Append remaining missing blueprint claims if they fit within word budget
+                for missing_c in missing_slot_claims:
+                    m_quote = missing_c["text"].strip()
+                    if m_quote and m_quote not in enhanced_passage:
+                        if cur_words + count_words(m_quote) <= config.max_words:
+                            enhanced_passage = enhanced_passage + "\n\n" + m_quote
+                            cur_words = count_words(enhanced_passage)
+
                 claim_idx = len(paragraphs)
-                while cur_words < config.min_words and claims and claim_idx < 100:
-                    additional_claim = claims[claim_idx % len(claims)]["text"].strip()
+                while cur_words < config.min_words and pool_to_ground and claim_idx < 100:
+                    additional_claim = pool_to_ground[claim_idx % len(pool_to_ground)]["text"].strip()
                     if additional_claim and additional_claim not in enhanced_passage:
                         enhanced_passage = enhanced_passage + " " + additional_claim
                         cur_words = count_words(enhanced_passage)
@@ -884,7 +1008,46 @@ class SectionRunner:
             }
 
         async def evaluate_passage_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
-            return evaluate_passage(art, source_text, claims_map, config)
+            return evaluate_passage(art, source_text, claims_map, config, slots=slots)
+
+        async def repair_passage_stage(
+            art: ArtifactEnvelope,
+            issues: Sequence[Issue],
+            ver: int,
+            intent_id: Optional[str] = None,
+        ) -> dict[str, Any]:
+            from app.repair.passage import PassageSentenceRepairer
+            p_rep = PassageSentenceRepairer()
+            repaired_art = await p_rep._repair_impl(context, art, issues, intent_id or f"op_repair_p_{ver}", ver)
+            res_payload = dict(repaired_art.payload)
+            curr_pass = str(res_payload.get("passage", ""))
+            curr_words = count_words(curr_pass)
+
+            # Check if any PASSAGE_BLUEPRINT_ALIGNMENT issues need claim grounding
+            alignment_issues = [i for i in issues if getattr(i, "code", None) == IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT]
+            if alignment_issues:
+                aligned_ids = {a["claimId"] for a in res_payload.get("claimAlignments", []) if a.get("claimId")}
+                for s in slots:
+                    cids = s.get("claimRefIds") or ()
+                    if cids and cids[0] in claims_map and cids[0] not in aligned_ids:
+                        c_text = claims_map[cids[0]]["text"].strip()
+                        c_words = count_words(c_text)
+                        if c_text not in curr_pass:
+                            if curr_words + c_words <= config.max_words:
+                                curr_pass = curr_pass + "\n\n" + c_text
+                                curr_words += c_words
+                            else:
+                                from app.repair.base import RepairExecutionError
+                                raise RepairExecutionError(
+                                    f"Cannot ground missing blueprint claim '{cids[0]}' without exceeding "
+                                    f"max word limit ({config.max_words} words; would be {curr_words + c_words})"
+                                )
+
+                res_payload["passage"] = curr_pass
+                res_payload["wordCount"] = curr_words
+                res_payload["claimAlignments"] = align_claims_to_passage(curr_pass, claims, source_text)
+
+            return res_payload
 
         passage_envelope = await executor.execute(
             passage_art_id,
@@ -893,6 +1056,7 @@ class SectionRunner:
             generate_passage,
             evaluate_passage_stage,
             section_id=config.index,
+            repair=repair_passage_stage,
         )
 
         passage_text = str(passage_envelope.payload.get("passage", ""))
@@ -919,20 +1083,30 @@ class SectionRunner:
             q_art_id = f"question:{context.run_id}:{q_num}"
             claim_ref_ids = slot.get("claimRefIds") or ()
             if not claim_ref_ids:
-                raise ValueError(
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CLAIM_NOT_SUPPORTED_IN_PASSAGE,
                     f"Question slot {q_num} has no bound verified claim reference. "
-                    "Fail-closed: ungrounded slots are prohibited."
+                    "Fail-closed: ungrounded slots are prohibited.",
                 )
             claim_id = claim_ref_ids[0]
             if claim_id not in claims_map:
-                raise ValueError(
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CLAIM_NOT_SUPPORTED_IN_PASSAGE,
                     f"Question slot {q_num} references claim '{claim_id}' not found in verified claims map. "
-                    "Fail-closed: ungrounded claims are prohibited."
+                    "Fail-closed: ungrounded claims are prohibited.",
+                )
+            is_ng_slot = bool(slot.get("isNotGivenTarget"))
+            # Preflight check: Ensure positive-evidence slots have verified alignment in accepted passage
+            if claim_id not in aligned_claim_map and not is_ng_slot:
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.CLAIM_NOT_SUPPORTED_IN_PASSAGE,
+                    f"Question slot {q_num} bound claim '{claim_id}' has no verified alignment in the accepted passage. "
+                    "Fail-closed: question generation cannot target claims absent from the passage.",
                 )
             target_focus_quote = (
                 aligned_claim_map[claim_id]["passageQuote"]
                 if claim_id in aligned_claim_map
-                else claims_map[claim_id]["text"].strip()
+                else None
             )
             async def generate_question(
                 version: int,
@@ -948,11 +1122,18 @@ class SectionRunner:
                 call_seconds = actual_policy.provider_call_wall_seconds(config.index)
 
                 last_parse_error = ""
+                last_parse_reason = None
                 cur_claim_id = target_claim_id
+                if cur_claim_id not in aligned_claim_map and not is_ng_slot:
+                    raise CandidateRejectionError(
+                        CandidateRejectionReason.CLAIM_NOT_SUPPORTED_IN_PASSAGE,
+                        f"Question slot {target_q_num} bound claim '{cur_claim_id}' is not aligned in the accepted passage. "
+                        "Preflight check prohibits ungrounded question generation.",
+                    )
                 target_focus = (
                     aligned_claim_map[cur_claim_id]["passageQuote"]
                     if cur_claim_id in aligned_claim_map
-                    else (claims_map[cur_claim_id]["text"].strip() if cur_claim_id in claims_map else target_focus_quote)
+                    else target_focus_quote
                 )
                 for gen_attempt in range(2):
                     if target_q_type == "SUMMARY_COMPLETION":
@@ -1006,16 +1187,26 @@ class SectionRunner:
                         if target_q_type == "MULTIPLE_CHOICE_SINGLE":
                             user_prompt += "\n\nCRITICAL MCQ DISTRACTOR INVARIANT:\nEnsure the 3 incorrect options (distractors) are CLEARLY AND UNEQUIVOCALLY FALSE or contradicted by the passage, and cannot be defended as partially true."
                         if gen_attempt > 0 and last_parse_error:
-                            exhausted_targets = rejected_prompts.get(target_q_num, [])
-                            exhausted_str = "; ".join(f"'{p[:80]}'" for p in exhausted_targets) if exhausted_targets else last_parse_error
-                            user_prompt += (
-                                f"\n\nPREVIOUS ATTEMPT DEFECT: {last_parse_error}\n"
-                                "CRITICAL CANDIDATE DIVERSITY AND UNIQUENESS INVARIANT:\n"
-                                "Your previous candidate(s) duplicated already accepted questions or exceeded overlap thresholds.\n"
-                                f"EXHAUSTED FACTUAL TARGETS: {exhausted_str}\n"
-                                "You MUST NOT ask about any of these facts, and superficial paraphrases (such as adding 'The passage suggests that...', 'According to...', or changing voice) will be strictly rejected.\n"
-                                "You MUST select a COMPLETELY DISTINCT factual assertion from the passage grounded in the target claim."
-                            )
+                            if last_parse_reason == CandidateRejectionReason.QUOTE_NOT_VERBATIM:
+                                user_prompt += (
+                                    f"\n\nPREVIOUS ATTEMPT DEFECT: {last_parse_error}\n"
+                                    "CRITICAL EVIDENCE VERBATIM INVARIANT:\n"
+                                    "Your previous candidate's evidenceQuote was not found verbatim in the passage text.\n"
+                                    f"Target Focus Span: '{target_focus}'\n"
+                                    "You MUST extract evidenceQuote as an EXACT, UNALTERED, VERBATIM substring from the passage text above.\n"
+                                    "Do NOT paraphrase the evidenceQuote and do NOT quote text not in the passage."
+                                )
+                            else:
+                                exhausted_targets = rejected_prompts.get(target_q_num, [])
+                                exhausted_str = "; ".join(f"'{p[:80]}'" for p in exhausted_targets) if exhausted_targets else last_parse_error
+                                user_prompt += (
+                                    f"\n\nPREVIOUS ATTEMPT DEFECT: {last_parse_error}\n"
+                                    "CRITICAL CANDIDATE DIVERSITY AND UNIQUENESS INVARIANT:\n"
+                                    "Your previous candidate(s) duplicated already accepted questions or exceeded overlap thresholds.\n"
+                                    f"EXHAUSTED FACTUAL TARGETS: {exhausted_str}\n"
+                                    "You MUST NOT ask about any of these facts, and superficial paraphrases (such as adding 'The passage suggests that...', 'According to...', or changing voice) will be strictly rejected.\n"
+                                    "You MUST select a COMPLETELY DISTINCT factual assertion from the passage grounded in the target claim."
+                                )
 
                         passage_ver = passage_envelope.version
                         op_id = f"op:{context.run_id}:question:{target_q_num}:{passage_ver}_{version}" if gen_attempt == 0 else f"op:{context.run_id}:question:{target_q_num}:{passage_ver}_{version}_att2"
@@ -1061,8 +1252,9 @@ class SectionRunner:
                             )
                         cand_stmt = str(parsed.get("statement") or parsed.get("prompt") or "").strip()
                         return parsed
-                    except ValueError as parse_err:
+                    except (CandidateRejectionError, ValueError) as parse_err:
                         last_parse_error = str(parse_err)
+                        last_parse_reason = getattr(parse_err, "reason", None)
                         if isinstance(raw_candidate, dict):
                             raw_cands = raw_candidate.get("candidates") or []
                             for rc in raw_cands:

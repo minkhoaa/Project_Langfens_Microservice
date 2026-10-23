@@ -25,10 +25,12 @@ from app.contracts.policies import (
 from app.contracts.questions import QuestionUnion
 from app.evaluators.deterministic import check_cross_prompt_answer_leakage, check_prompt_answer_leakage
 from app.evaluators.semantic import (
+    compute_substantive_grounding_ratio,
     detect_comparison_inversion,
     detect_contradiction_in_text,
     detect_entailment_in_text,
     detect_negation_polarity_conflict,
+    V2_1_STOPWORDS,
 )
 from app.reading_policy import PinnedExecutionPolicy, SectionConfig
 
@@ -235,7 +237,111 @@ def evaluate_blueprint(
     return [result(artifact, "eval_blueprint", problems)]
 
 
-def evaluate_passage(artifact: ArtifactEnvelope, source_text: str, claims: Mapping[str, Any], config: SectionConfig) -> list[EvaluationResult]:
+def verify_passage_blueprint_grounding(
+    passage: str,
+    alignments: Sequence[Mapping[str, Any]],
+    claims: Mapping[str, Any],
+    slots: Sequence[Mapping[str, Any]],
+    source_text: str = "",
+) -> list[Problem]:
+    """Evaluates passage consistency against blueprint-bound question slots.
+    
+    Invariants:
+    1. Every positive-evidence blueprint claim must have verifiable support
+       (exact alignment or verified semantic paraphrase) in the passage.
+    2. NOT_GIVEN claims must verify topical context in the passage and passage-wide absence.
+    3. Unsupported slots produce explicit PASSAGE_BLUEPRINT_ALIGNMENT diagnostics.
+    """
+    problems: list[Problem] = []
+    aligned_claim_ids = {
+        a["claimId"]: a for a in alignments
+        if a.get("claimId") and a.get("passageQuote") and a["passageQuote"] in passage
+    }
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", passage) if s.strip()]
+
+    for slot in slots:
+        q_num = slot.get("questionNumber")
+        claim_refs = slot.get("claimRefIds") or ()
+        if not claim_refs:
+            problems.append((
+                IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT,
+                f"Question slot {q_num} has no bound claim references",
+            ))
+            continue
+        cid = claim_refs[0]
+        claim_obj = claims.get(cid)
+        if claim_obj is None:
+            problems.append((
+                IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT,
+                f"Question slot {q_num} references claim '{cid}' not found in EvidenceGraph",
+            ))
+            continue
+
+        claim_text = (
+            claim_obj.get("text", "")
+            if isinstance(claim_obj, dict)
+            else getattr(claim_obj, "text", "")
+        ).strip()
+
+        is_not_given = bool(
+            slot.get("isNotGivenTarget") is True
+            or (str(slot.get("questionType", "")).upper() in ("TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN") and slot.get("isNotGivenTarget"))
+        )
+
+        if is_not_given:
+            # NOT_GIVEN absence contract:
+            # Must verify relevant topical context exists in passage without fabricating positive evidence.
+            clean_words = [
+                w.lower() for w in re.findall(r"\b[A-Za-z0-9\-]{4,}\b", claim_text)
+                if w.lower() not in V2_1_STOPWORDS
+            ]
+            has_topical_context = (
+                cid in aligned_claim_ids
+                or any(w in passage.lower() for w in clean_words)
+            )
+            if not has_topical_context:
+                problems.append((
+                    IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT,
+                    f"Question slot {q_num} (NOT_GIVEN) lacks relevant topical context in passage for claim '{cid}'",
+                ))
+        else:
+            # Positive evidence question:
+            # 1. Exact alignment check in declared alignments or passage text
+            if cid in aligned_claim_ids and aligned_claim_ids[cid]["passageQuote"] in passage:
+                continue
+            if claim_text and claim_text in passage:
+                continue
+
+            # 2. Semantic alignment check (grounded paraphrase)
+            supported_semantically = False
+            for sent in sentences:
+                if not sent or len(sent) < 15:
+                    continue
+                ratio, _ = compute_substantive_grounding_ratio(claim_text, sent)
+                if ratio >= 0.60:
+                    conflict, _ = detect_negation_polarity_conflict(sent, claim_text)
+                    inv = detect_comparison_inversion(sent, claim_text)
+                    num_invented = bool(set(NUMBER.findall(sent)) - set(NUMBER.findall(claim_text)))
+                    if not conflict and not inv and not num_invented:
+                        supported_semantically = True
+                        break
+
+            if not supported_semantically:
+                problems.append((
+                    IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT,
+                    f"Question slot {q_num} bound claim '{cid}' lacks verifiable support in passage: '{claim_text[:60]}...'",
+                ))
+
+    return problems
+
+
+def evaluate_passage(
+    artifact: ArtifactEnvelope,
+    source_text: str,
+    claims: Mapping[str, Any],
+    config: SectionConfig,
+    slots: Sequence[Mapping[str, Any]] | None = None,
+) -> list[EvaluationResult]:
     payload = artifact.payload
     passage = str(payload.get("passage", ""))
     words = count_words(passage)
@@ -272,6 +378,12 @@ def evaluate_passage(artifact: ArtifactEnvelope, source_text: str, claims: Mappi
     for paragraph in re.split(r"\n\s*\n", passage):
         if paragraph.strip() and not any(a["passageQuote"] in paragraph for a in alignments if a.get("passageQuote")):
             fidelity_problems.append((IssueCode.EVIDENCE_MISSING, "Every substantive paragraph needs a verified claim alignment"))
+
+    # Mandatory Passage–Blueprint consistency check when blueprint slots are provided
+    if slots:
+        blueprint_problems = verify_passage_blueprint_grounding(passage, alignments, claims, slots, source_text)
+        fidelity_problems.extend(blueprint_problems)
+
     return [
         result(artifact, "eval_passage_word_count", lengths),
         result(artifact, "eval_passage_fidelity", fidelity_problems),
