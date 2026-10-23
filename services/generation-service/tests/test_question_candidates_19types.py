@@ -113,6 +113,26 @@ def test_completion_evaluators_verbatim_and_offsets():
         res_bad_o = asyncio.run(offset_evaluator.evaluate(None, bad_offset_art, "intent_test"))
         assert not res_bad_o.is_pass(), f"{ctype} must reject negative offsets [-1:-1] in EvidenceOffsetEvaluator"
 
+def test_all_21_families_templates_contain_explanation_and_evidence():
+    """Verify all 21 QuestionPromptFamily templates and system instructions include explanation and evidenceQuote."""
+    from app.generators.question.prompts import PROMPT_TEMPLATES, SYSTEM_PROMPTS
+    assert len(QuestionPromptFamily) == 21
+
+    for family in QuestionPromptFamily:
+        template = PROMPT_TEMPLATES[family]
+        sys_prompt = SYSTEM_PROMPTS[family]
+
+        # 1. Template JSON schema must contain "explanation"
+        assert '"explanation":' in template, f"{family.name} template is missing 'explanation' in JSON schema"
+
+        # 2. Template must require minimum 25 characters for explanation
+        assert "25" in template or "25" in sys_prompt, f"{family.name} must specify >= 25 characters for explanation"
+
+        # 3. Template JSON schema must contain "evidenceQuote"
+        assert '"evidenceQuote":' in template, f"{family.name} template is missing 'evidenceQuote' in JSON schema"
+
+
+def test_render_question_prompt_all_19_families():
     """Verify render_question_prompt generates robust prompts for all 19 IELTS question families."""
     for family in QuestionPromptFamily:
         # MAP_LABEL and MULTIPLE_CHOICE_SINGLE_IMAGE are optional compatibility aliases
@@ -138,6 +158,7 @@ def test_completion_evaluators_verbatim_and_offsets():
         elif family == QuestionPromptFamily.DIAGRAM_LABEL:
             assert "label" in prompt_data.lower() or "callout" in prompt_data.lower()
             assert "part" in prompt_data.lower() or "diagram" in prompt_data.lower()
+
 
 def test_matching_and_classification_prompt_schemas_include_options_and_headings():
     """Verify prompt templates for matching and classification include options or headings in JSON schema."""
