@@ -739,6 +739,13 @@ def align_claims_to_passage(
     from app.evaluators.semantic import compute_substantive_grounding_ratio
     number_re = re.compile(r"\b\d+(?:[.,]\d+)?\b")
 
+    # Build candidate spans: individual sentences and intra-paragraph adjacent pairs
+    candidate_spans = list(sentences)
+    for i in range(len(sentences) - 1):
+        pair = sentences[i] + " " + sentences[i + 1]
+        if pair in passage_text:
+            candidate_spans.append(pair)
+
     for claim in claims:
         cid = claim["claimId"]
         if cid in seen_claims:
@@ -752,27 +759,27 @@ def align_claims_to_passage(
         if not (0 <= start < end <= len(source_text) and source_text[start:end] == quote):
             continue
 
-        best_sent = None
+        best_span = None
         best_ratio = 0.0
-        for sent in sentences:
-            if len(sent) < 15:
+        for span in candidate_spans:
+            if len(span) < 15:
                 continue
-            ratio, _ = compute_substantive_grounding_ratio(quote, sent)
+            ratio, _ = compute_substantive_grounding_ratio(quote, span)
             if ratio >= 0.60 and ratio > best_ratio:
-                conflict, _ = detect_negation_polarity_conflict(sent, quote)
-                inv = detect_comparison_inversion(sent, quote)
-                num_invented = bool(set(number_re.findall(sent)) - set(number_re.findall(quote)))
+                conflict, _ = detect_negation_polarity_conflict(span, quote)
+                inv = detect_comparison_inversion(span, quote)
+                num_invented = bool(set(number_re.findall(span)) - set(number_re.findall(quote)))
                 if not conflict and not inv and not num_invented:
                     best_ratio = ratio
-                    best_sent = sent
+                    best_span = span
 
-        if best_sent and best_sent in passage_text:
+        if best_span and best_span in passage_text:
             alignments.append({
                 "claimId": cid,
                 "sourceStart": start,
                 "sourceEnd": end,
                 "sourceQuote": quote,
-                "passageQuote": best_sent,
+                "passageQuote": best_span,
             })
             seen_claims.add(cid)
 

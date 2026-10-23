@@ -258,6 +258,11 @@ def verify_passage_blueprint_grounding(
         if a.get("claimId") and a.get("passageQuote") and a["passageQuote"] in passage
     }
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", passage) if s.strip()]
+    candidate_spans = list(sentences)
+    for i in range(len(sentences) - 1):
+        pair = sentences[i] + " " + sentences[i + 1]
+        if pair in passage:
+            candidate_spans.append(pair)
 
     for slot in slots:
         q_num = slot.get("questionNumber")
@@ -314,14 +319,14 @@ def verify_passage_blueprint_grounding(
 
             # 2. Semantic alignment check (grounded paraphrase)
             supported_semantically = False
-            for sent in sentences:
-                if not sent or len(sent) < 15:
+            for span in candidate_spans:
+                if not span or len(span) < 15:
                     continue
-                ratio, _ = compute_substantive_grounding_ratio(claim_text, sent)
+                ratio, _ = compute_substantive_grounding_ratio(claim_text, span)
                 if ratio >= 0.60:
-                    conflict, _ = detect_negation_polarity_conflict(sent, claim_text)
-                    inv = detect_comparison_inversion(sent, claim_text)
-                    num_invented = bool(set(NUMBER.findall(sent)) - set(NUMBER.findall(claim_text)))
+                    conflict, _ = detect_negation_polarity_conflict(span, claim_text)
+                    inv = detect_comparison_inversion(span, claim_text)
+                    num_invented = bool(set(NUMBER.findall(span)) - set(NUMBER.findall(claim_text)))
                     if not conflict and not inv and not num_invented:
                         supported_semantically = True
                         break
