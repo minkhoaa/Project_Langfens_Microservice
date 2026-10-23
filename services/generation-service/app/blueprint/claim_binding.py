@@ -245,6 +245,7 @@ def bind_claims_to_slots(
 
     updated_slots: List[QuestionSlot] = []
     group_claim_usage: Dict[int, Dict[str, int]] = {}
+    section_claim_usage: Dict[str, int] = {}
 
     for slot in slots:
         grp_idx = slot.group_index
@@ -266,26 +267,33 @@ def bind_claims_to_slots(
                 f"(slot {slot.question_number}). Fail-closed: cannot force unsuitable evidence binding."
             )
 
-        # 2. Score eligible candidates
-        scored_candidates: List[Tuple[float, str, Dict[str, Any]]] = []
+        # 2. Score eligible candidates with strict diversity-first ordering
+        # Prioritize:
+        #   a) group_usage: strictly prefer claims not yet used in this question group
+        #   b) section_usage: prefer claims with lower usage across the section
+        #   c) -quality_score: maximize semantic suitability with deterministic tie-breaker
+        #   d) cid: lexicographical tie-breaker for 100% deterministic reproducibility
+        scored_candidates: List[Tuple[int, int, float, str, Dict[str, Any]]] = []
         for c in eligible_candidates:
             cid = c["claimId"]
             semantic_score = score_claim_suitability_for_family(c, type_str, section_id)
-            usage_penalty = 1.5 * group_claim_usage[grp_idx].get(cid, 0)
+            grp_usage = group_claim_usage[grp_idx].get(cid, 0)
+            sec_usage = section_claim_usage.get(cid, 0)
 
             # Deterministic, reproducible pseudo-random tie-breaker
             tie_seed = f"{graph_id}:{slot.question_number}:{type_str}:{cid}"
             tie_hash = int(hashlib.sha256(tie_seed.encode("utf-8")).hexdigest()[:6], 16)
             tie_breaker = (tie_hash % 1000) / 10000.0
 
-            final_score = semantic_score - usage_penalty + tie_breaker
-            scored_candidates.append((final_score, cid, c))
+            quality_score = semantic_score + tie_breaker
+            scored_candidates.append((grp_usage, sec_usage, quality_score, cid, c))
 
-        scored_candidates.sort(key=lambda x: x[0], reverse=True)
-        best_score, best_cid, best_claim = scored_candidates[0]
+        scored_candidates.sort(key=lambda x: (x[0], x[1], -x[2], x[3]))
+        best_grp_u, best_sec_u, best_score, best_cid, best_claim = scored_candidates[0]
 
         # Record usage
         group_claim_usage[grp_idx][best_cid] = group_claim_usage[grp_idx].get(best_cid, 0) + 1
+        section_claim_usage[best_cid] = section_claim_usage.get(best_cid, 0) + 1
 
         updated_slot = slot.model_copy(update={"claim_ref_ids": [best_cid]})
         updated_slots.append(updated_slot)

@@ -64,8 +64,9 @@ def _get_instructions_for_type(q_type: str) -> str:
         return "Match each item with the correct statement from the list below."
     return "Answer the questions below. Choose NO MORE THAN THREE WORDS from the passage for each answer."
 
-def _parse_candidate_payload(
-    raw_payload: Any,
+def _parse_single_candidate(
+    cand: dict[str, Any],
+    raw_payload: dict[str, Any],
     q_num: int,
     q_type: str,
     passage_text: str,
@@ -74,22 +75,7 @@ def _parse_candidate_payload(
     difficulty: str,
     target_focus: Optional[str] = None,
 ) -> dict[str, Any]:
-    """Parses raw provider candidate payload into a validated canonical question payload."""
-    if not isinstance(raw_payload, dict):
-        raise ValueError(f"Expected dict from provider for question {q_num}, got {type(raw_payload).__name__}")
-
-    cand: dict[str, Any] = {}
-    if "candidates" in raw_payload and isinstance(raw_payload["candidates"], list) and raw_payload["candidates"]:
-        cands = [c for c in raw_payload["candidates"] if isinstance(c, dict)]
-        cand = next((c for c in cands if c.get("questionNumber") == q_num or c.get("number") == q_num), cands[0])
-    elif "blanks" in raw_payload and isinstance(raw_payload["blanks"], list) and raw_payload["blanks"]:
-        blanks = [b for b in raw_payload["blanks"] if isinstance(b, dict)]
-        cand = next((b for b in blanks if b.get("number") == q_num or b.get("questionNumber") == q_num), blanks[0])
-    elif "statement" in raw_payload or "prompt" in raw_payload:
-        cand = raw_payload
-    else:
-        raise ValueError(f"Malformed candidate payload for question {q_num}: missing candidates/blanks")
-
+    """Parses a single candidate item into a validated canonical question payload."""
     matched_claim = claims_map.get(claim_id)
     explanation = str(cand.get("explanation") or "").strip()
     if len(explanation) < 25:
@@ -529,6 +515,147 @@ def _parse_candidate_payload(
             f"Unsupported question type '{q_type}' for question {q_num}. Silent fallback to SHORT_ANSWER is prohibited."
         )
 
+
+def _parse_candidate_payload(
+    raw_payload: Any,
+    q_num: int,
+    q_type: str,
+    passage_text: str,
+    claims_map: dict[str, Any],
+    claim_id: str,
+    difficulty: str,
+    target_focus: Optional[str] = None,
+    prior_questions: Sequence[Any] = (),
+    rejected_prompts: Sequence[str] = (),
+    slot_index_in_group: Optional[int] = None,
+) -> dict[str, Any]:
+    """Parses and evaluates candidate pool into a validated canonical question payload.
+
+    Evaluates all returned candidates:
+    - Parses candidates across question formats, preserving grouped handling (blanks).
+    - Rejects invalid candidates (missing explanation, invalid answer format, ungrounded quotes).
+    - Rejects duplicate and substantially overlapping candidates (shingle overlap > 0.70).
+    - Selects a valid, novel, passage-grounded candidate deterministically.
+    - Preserves evidence provenance (evidenceClaimRef).
+    """
+    if not isinstance(raw_payload, dict):
+        raise ValueError(f"Expected dict from provider for question {q_num}, got {type(raw_payload).__name__}")
+
+    # Check for grouped blanks (e.g. SUMMARY_COMPLETION)
+    if "blanks" in raw_payload and isinstance(raw_payload["blanks"], list) and raw_payload["blanks"]:
+        blanks = [b for b in raw_payload["blanks"] if isinstance(b, dict)]
+        if not blanks:
+            raise ValueError(f"Malformed candidate payload for question {q_num}: 'blanks' list is empty")
+        cand = next((b for b in blanks if b.get("number") == q_num or b.get("questionNumber") == q_num), None)
+        if cand is None:
+            cand = next((b for b in blanks if b.get("placeholder") == f"[{q_num}]"), None)
+        if cand is None and slot_index_in_group is not None:
+            cand = next((b for b in blanks if b.get("number") == slot_index_in_group + 1 or b.get("questionNumber") == slot_index_in_group + 1), None)
+            if cand is None:
+                cand = next((b for b in blanks if b.get("placeholder") == f"[{slot_index_in_group + 1}]"), None)
+            if cand is None and 0 <= slot_index_in_group < len(blanks):
+                cand = blanks[slot_index_in_group]
+        if cand is None:
+            cand = blanks[0]
+        candidate_items = [cand]
+    elif "candidates" in raw_payload and isinstance(raw_payload["candidates"], list) and raw_payload["candidates"]:
+        candidate_items = [c for c in raw_payload["candidates"] if isinstance(c, dict)]
+        if not candidate_items:
+            raise ValueError(f"Malformed candidate payload for question {q_num}: missing candidates/blanks")
+    elif "statement" in raw_payload or "prompt" in raw_payload:
+        candidate_items = [raw_payload]
+    else:
+        raise ValueError(f"Malformed candidate payload for question {q_num}: missing candidates/blanks")
+
+    valid_candidates: list[dict[str, Any]] = []
+    rejection_errors: list[str] = []
+
+    for idx, cand_item in enumerate(candidate_items):
+        try:
+            parsed = _parse_single_candidate(
+                cand=cand_item,
+                raw_payload=raw_payload,
+                q_num=q_num,
+                q_type=q_type,
+                passage_text=passage_text,
+                claims_map=claims_map,
+                claim_id=claim_id,
+                difficulty=difficulty,
+                target_focus=target_focus,
+            )
+        except ValueError as parse_err:
+            rejection_errors.append(str(parse_err))
+            continue
+
+        # Passage grounding check: ensure evidence quote exists in passage for non-NOT_GIVEN
+        ans = str(parsed.get("answer") or "").upper()
+        pe = parsed.get("passageEvidence", {})
+        p_start = pe.get("startChar", -1)
+        if ans != "NOT_GIVEN" and p_start < 0:
+            rejection_errors.append(f"Question {q_num} candidate {idx} evidence quote is not found in passage")
+            continue
+
+        # Duplicate & overlap check against already accepted questions
+        cand_stmt = str(parsed.get("statement") or parsed.get("prompt") or "").strip()
+        is_dup = False
+        dup_msg = ""
+        max_overlap = 0.0
+
+        for prior in prior_questions:
+            prior_payload = prior.payload if hasattr(prior, "payload") else prior
+            prior_stmt = str(prior_payload.get("statement") or prior_payload.get("prompt") or "").strip()
+            if cand_stmt and prior_stmt:
+                overlap = calculate_shingle_overlap(cand_stmt, prior_stmt)
+                if overlap > max_overlap:
+                    max_overlap = overlap
+                if cand_stmt.lower() == prior_stmt.lower():
+                    is_dup = True
+                    dup_msg = f"Question {q_num} candidate duplicates an already accepted question: '{cand_stmt[:60]}...'"
+                    break
+                if overlap > 0.70:
+                    is_dup = True
+                    dup_msg = f"Question {q_num} candidate duplicates an already accepted question (shingle overlap {overlap:.2f} > 0.70): '{cand_stmt[:60]}...'"
+                    break
+
+        if not is_dup and rejected_prompts:
+            for rej in rejected_prompts:
+                if cand_stmt.lower() == rej.lower():
+                    is_dup = True
+                    dup_msg = f"Question {q_num} candidate duplicates a previously rejected candidate: '{cand_stmt[:60]}...'"
+                    break
+                rej_ov = calculate_shingle_overlap(cand_stmt, rej)
+                if rej_ov > 0.70:
+                    is_dup = True
+                    dup_msg = f"Question {q_num} candidate duplicates a previously rejected candidate (shingle overlap {rej_ov:.2f} > 0.70): '{cand_stmt[:60]}...'"
+                    break
+
+        if is_dup:
+            rejection_errors.append(dup_msg)
+            continue
+
+        valid_candidates.append({
+            "parsed": parsed,
+            "index": idx,
+            "max_overlap": max_overlap,
+            "stmt": cand_stmt,
+        })
+
+    if valid_candidates:
+        # Deterministically select valid, novel candidate:
+        # 1. Minimal overlap with prior accepted questions
+        # 2. Candidate index as stable tie-breaker
+        valid_candidates.sort(key=lambda c: (c["max_overlap"], c["index"]))
+        return valid_candidates[0]["parsed"]
+
+    # All candidates rejected: fail closed with informative error
+    if rejection_errors:
+        dup_err = next((e for e in rejection_errors if "duplicates an already accepted question" in e), None)
+        if dup_err:
+            raise ValueError(dup_err)
+        raise ValueError(rejection_errors[0])
+    raise ValueError(f"No valid candidates found for question {q_num}")
+
+
 class SectionRunner:
     """Configurable runner executing generation stages for a single reading section.
     
@@ -757,8 +884,6 @@ class SectionRunner:
 
                 last_parse_error = ""
                 cur_claim_id = target_claim_id
-                if version > 1 and passage_alignments and len(passage_alignments) > 1:
-                    cur_claim_id = passage_alignments[(target_q_num - 1 + version - 1) % len(passage_alignments)]["claimId"]
                 target_focus = (
                     aligned_claim_map[cur_claim_id]["passageQuote"]
                     if cur_claim_id in aligned_claim_map
@@ -816,7 +941,16 @@ class SectionRunner:
                         if target_q_type == "MULTIPLE_CHOICE_SINGLE":
                             user_prompt += "\n\nCRITICAL MCQ DISTRACTOR INVARIANT:\nEnsure the 3 incorrect options (distractors) are CLEARLY AND UNEQUIVOCALLY FALSE or contradicted by the passage, and cannot be defended as partially true."
                         if gen_attempt > 0 and last_parse_error:
-                            user_prompt += f"\n\nPREVIOUS ATTEMPT DEFECT: {last_parse_error}. You MUST generate a completely distinct question fixing this defect."
+                            exhausted_targets = rejected_prompts.get(target_q_num, [])
+                            exhausted_str = "; ".join(f"'{p[:80]}'" for p in exhausted_targets) if exhausted_targets else last_parse_error
+                            user_prompt += (
+                                f"\n\nPREVIOUS ATTEMPT DEFECT: {last_parse_error}\n"
+                                "CRITICAL CANDIDATE DIVERSITY AND UNIQUENESS INVARIANT:\n"
+                                "Your previous candidate(s) duplicated already accepted questions or exceeded overlap thresholds.\n"
+                                f"EXHAUSTED FACTUAL TARGETS: {exhausted_str}\n"
+                                "You MUST NOT ask about any of these facts, and superficial paraphrases (such as adding 'The passage suggests that...', 'According to...', or changing voice) will be strictly rejected.\n"
+                                "You MUST select a COMPLETELY DISTINCT factual assertion from the passage grounded in the target claim."
+                            )
 
                         passage_ver = passage_envelope.version
                         op_id = f"op:{context.run_id}:question:{target_q_num}:{passage_ver}_{version}" if gen_attempt == 0 else f"op:{context.run_id}:question:{target_q_num}:{passage_ver}_{version}_att2"
@@ -838,6 +972,9 @@ class SectionRunner:
                         resp = await self.gateway.execute(req, epoch=context.epoch, lease_owner=context.lease_owner)
                         raw_candidate = resp.parsed_payload if resp.parsed_payload is not None else parse_defensive_json(resp.raw_text)
 
+                    grp_slots = [s for s in sorted_slots if s.get("groupIndex") == target_g_idx]
+                    slot_idx_in_grp = next((i for i, s in enumerate(grp_slots) if s.get("questionNumber") == target_q_num), None)
+
                     try:
                         parsed = _parse_candidate_payload(
                             raw_candidate,
@@ -848,18 +985,28 @@ class SectionRunner:
                             claim_id=cur_claim_id,
                             difficulty=config.difficulty.value,
                             target_focus=target_focus,
+                            prior_questions=q_envelopes,
+                            rejected_prompts=rejected_prompts.get(target_q_num, []),
+                            slot_index_in_group=slot_idx_in_grp,
                         )
+                        if parsed.get("evidenceClaimRef") != target_claim_id:
+                            raise ValueError(
+                                f"Question {target_q_num} evidenceClaimRef '{parsed.get('evidenceClaimRef')}' "
+                                f"mismatches blueprint slot claim '{target_claim_id}'. Mismatched evidence is prohibited."
+                            )
                         cand_stmt = str(parsed.get("statement") or parsed.get("prompt") or "").strip()
-                        for prior_e in q_envelopes:
-                            prior_stmt = str(prior_e.payload.get("statement") or prior_e.payload.get("prompt") or "").strip()
-                            if cand_stmt and prior_stmt:
-                                if calculate_shingle_overlap(cand_stmt, prior_stmt) > 0.7 or cand_stmt.lower() == prior_stmt.lower():
-                                    raise ValueError(f"Question {target_q_num} candidate duplicates an already accepted question: '{cand_stmt[:60]}...'")
                         if cand_stmt:
                             rejected_prompts.setdefault(target_q_num, []).append(cand_stmt)
                         return parsed
                     except ValueError as parse_err:
                         last_parse_error = str(parse_err)
+                        if isinstance(raw_candidate, dict):
+                            raw_cands = raw_candidate.get("candidates") or []
+                            for rc in raw_cands:
+                                if isinstance(rc, dict):
+                                    s = str(rc.get("statement") or rc.get("prompt") or "").strip()
+                                    if s and s not in rejected_prompts.setdefault(target_q_num, []):
+                                        rejected_prompts[target_q_num].append(s)
                         if gen_attempt == 1:
                             raise
                         logger.warning("Question %s candidate defect: %s; retrying with repair", target_q_num, parse_err)
