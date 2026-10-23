@@ -887,6 +887,9 @@ class InMemoryCheckpointClient(CheckpointClient):
     async def invalidate_dependency_async(self, request: InvalidateDependencyRequest) -> InvalidateDependencyResult:
         return self.invalidate_dependencies(request)
 
+    async def invalidate_dependencies_async(self, request: InvalidateDependencyRequest) -> InvalidateDependencyResult:
+        return self.invalidate_dependencies(request)
+
     # ── Budget Allocations ────────────────────────────────────────────────────
 
     def set_budget_allocations(self, request: SetBudgetAllocationsRequest) -> SetBudgetAllocationsResult:

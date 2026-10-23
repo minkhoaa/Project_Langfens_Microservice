@@ -393,6 +393,12 @@ class CheckpointClient:
                 self._handle_error(resp)
             return InvalidateDependencyResult.model_validate(resp.json())
 
+    async def invalidate_dependency_async(self, request: InvalidateDependencyRequest) -> InvalidateDependencyResult:
+        return await asyncio.to_thread(self.invalidate_dependencies, request)
+
+    async def invalidate_dependencies_async(self, request: InvalidateDependencyRequest) -> InvalidateDependencyResult:
+        return await asyncio.to_thread(self.invalidate_dependencies, request)
+
     def build_exam(self, request: BuildExamInternalRequest) -> BuildExamInternalResult:
         url = f"{self.base_url}/api/internal/reading-paper/checkpoints/build-exam"
         with httpx.Client(timeout=self.timeout) as client:

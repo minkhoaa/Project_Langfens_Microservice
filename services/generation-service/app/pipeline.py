@@ -38,10 +38,18 @@ from uuid import UUID
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
 from app.contracts.evaluation import EvaluationResult
 from app.persistence.client import CheckpointClient
-from app.persistence.models import BuildExamInternalRequest
+from app.persistence.models import BuildExamInternalRequest, InvalidateDependencyRequest
 from app.providers.gateway import ProviderGateway
 from app.reading_evaluation import evaluate_blueprint, evaluate_evidence, evaluate_paper, evaluate_source
-from app.reading_generation import build_blueprint, build_evidence, compose_paper_payload, prepare_source, trim_passage
+from app.reading_generation import (
+    _payload,
+    build_blueprint,
+    build_evidence,
+    compose_paper_payload,
+    prepare_source,
+    reextract_evidence_for_section,
+    trim_passage,
+)
 from app.reading_models import (
     AcceptedSectionArtifact, PipelineRequest, PipelineResult, RunContext,
     SourceInput, SourceRef,
@@ -158,6 +166,146 @@ class ReadingGenerationPipeline:
                 section_id=sec_idx,
             )
             evidence_envelopes[sec_idx] = env
+
+        # ── Stage 2.5: Autonomous Blueprint Recovery Pre-Flight ─────────────
+        async def recover_evidence_for_section(
+            sec_idx: int,
+            target_families: Optional[Sequence[Any]] = None,
+            attempt: int = 1,
+        ) -> ArtifactEnvelope:
+            src_env = source_envelopes[sec_idx]
+            art_id = f"evidence:{request.run_id}:{sec_idx}"
+
+            inval_req = InvalidateDependencyRequest(
+                runId=request.run_id,
+                epoch=context.epoch,
+                leaseOwner=context.lease_owner,
+                targetArtifactId=art_id,
+                reason=f"Blueprint recovery: re-extracting verified claims for Section {sec_idx} (attempt {attempt})",
+            )
+            if hasattr(self.client, "invalidate_dependency_async"):
+                await self.client.invalidate_dependency_async(inval_req)
+            elif hasattr(self.client, "invalidate_dependencies_async"):
+                await self.client.invalidate_dependencies_async(inval_req)
+            elif hasattr(self.client, "invalidate_dependencies"):
+                await asyncio.to_thread(self.client.invalidate_dependencies, inval_req)
+
+            async def generate_recovered_evidence(
+                version: int,
+                s_env: ArtifactEnvelope = src_env,
+                s_idx: int = sec_idx,
+            ) -> dict[str, Any]:
+                return reextract_evidence_for_section(
+                    source_envelope=s_env,
+                    run_id=request.run_id,
+                    section_id=s_idx,
+                    policy=request.policy,
+                    target_families=target_families,
+                    max_claims=16 + attempt * 12,
+                )
+
+            async def evaluate_evidence_stage(
+                art: ArtifactEnvelope,
+                s_env: ArtifactEnvelope = src_env,
+            ) -> list[EvaluationResult]:
+                text_map = {
+                    s_env.payload["sources"][0]["sourceId"]: s_env.payload["sources"][0]["document"]["text"]
+                }
+                return evaluate_evidence(art, text_map, request.policy.min_verified_claims)
+
+            recovered_env = await executor.execute(
+                art_id,
+                ArtifactType.EVIDENCE_GRAPH,
+                (src_env.to_ref(),),
+                generate_recovered_evidence,
+                evaluate_evidence_stage,
+                section_id=sec_idx,
+            )
+            evidence_envelopes[sec_idx] = recovered_env
+            return recovered_env
+
+        if getattr(request.policy, "blueprint_mode", "legacy_preset") == "dynamic":
+            max_recovery = getattr(request.policy, "max_recovery_attempts", 3)
+            seen_digests: set[str] = set()
+            recovery_attempts = 0
+
+            while recovery_attempts <= max_recovery:
+                needs_recovery_sec = None
+                target_pool = ()
+
+                # 1. Check for empty claims in any selected section
+                for s_idx in request.section_indices:
+                    ev_env = evidence_envelopes.get(s_idx)
+                    ev_payload = _payload(ev_env) if ev_env else {}
+                    ev_claims = ev_payload.get("claims", [])
+                    if not ev_claims and s_idx in source_envelopes:
+                        needs_recovery_sec = s_idx
+                        break
+
+                # 2. Check for dynamic blueprint family compatibility & claim binding
+                if needs_recovery_sec is None:
+                    from app.blueprint.generator import generate_dynamic_blueprint, InsufficientEvidenceForAllocationError
+                    ev_summary = {
+                        "run_id": request.run_id,
+                        "topics": [f"{request.topic} - Section {i}" for i in (1, 2, 3)],
+                        "section_indices": list(sorted(request.section_indices)),
+                        "section_evidence": {
+                            s_idx: _payload(evidence_envelopes[s_idx])
+                            for s_idx in request.section_indices
+                            if s_idx in evidence_envelopes
+                        },
+                    }
+                    try:
+                        test_bp = generate_dynamic_blueprint(request.policy, ev_summary)
+                        from app.blueprint.claim_binding import bind_claims_to_slots
+                        for sb in test_bp.sections:
+                            s_idx = sb.section_id
+                            if s_idx in evidence_envelopes:
+                                ev_p = _payload(evidence_envelopes[s_idx])
+                                c_list = ev_p.get("claims", [])
+                                g_id = ev_p.get("graphId", f"graph:{request.run_id}:{s_idx}")
+                                bind_claims_to_slots(sb.question_slots, c_list, s_idx, g_id, request.run_id)
+                        break
+                    except InsufficientEvidenceForAllocationError as exc:
+                        needs_recovery_sec = exc.section_id
+                        target_pool = exc.pool
+                    except ValueError:
+                        for s_idx in request.section_indices:
+                            ev_p = _payload(evidence_envelopes.get(s_idx)) if s_idx in evidence_envelopes else {}
+                            if len(ev_p.get("claims", [])) < 13:
+                                needs_recovery_sec = s_idx
+                                break
+                        if needs_recovery_sec is None and request.section_indices:
+                            needs_recovery_sec = request.section_indices[0]
+
+                if needs_recovery_sec is None:
+                    break
+
+                recovery_attempts += 1
+                if recovery_attempts > max_recovery:
+                    raise ValueError(
+                        f"Section {needs_recovery_sec} verified evidence is insufficient for IELTS question families. "
+                        f"Autonomous blueprint recovery exhausted ({recovery_attempts}/{max_recovery} attempts)."
+                    )
+
+                sec_src = source_envelopes.get(needs_recovery_sec)
+                if not sec_src:
+                    raise ValueError(f"Source for Section {needs_recovery_sec} missing for recovery")
+
+                src_payload = _payload(sec_src)
+                src_text = src_payload.get("sources", [{}])[0].get("document", {}).get("text", "")
+                reextract_digest = hashlib.sha256(f"{needs_recovery_sec}:{len(src_text)}:{recovery_attempts}".encode()).hexdigest()
+                if reextract_digest in seen_digests:
+                    raise ValueError(
+                        f"Section {needs_recovery_sec} controlled evidence re-extraction stagnated with identical source text state. Failing closed."
+                    )
+                seen_digests.add(reextract_digest)
+
+                await recover_evidence_for_section(
+                    needs_recovery_sec,
+                    target_families=target_pool,
+                    attempt=recovery_attempts,
+                )
 
         # ── Stage 3: Exam Blueprint ──────────────────────────────────────────
         bp_art_id = f"blueprint:{request.run_id}"

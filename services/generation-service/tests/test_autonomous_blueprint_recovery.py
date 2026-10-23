@@ -416,3 +416,259 @@ def test_blueprint_checkpoint_integrity_and_deterministic_hashing():
     assert bp1["contentHash"] == bp2["contentHash"]
     assert bp1["blueprintId"] == bp2["blueprintId"]
     assert bp1["sections"][0]["questionSlots"] == bp2["sections"][0]["questionSlots"]
+
+
+@pytest.mark.asyncio
+async def test_real_execution_path_evidence_recovery_durable_checkpoint_and_section_runner():
+    """Real execution path: Source -> EvidenceGraph -> Blueprint Recovery -> Durable Checkpoint -> SectionRunner.
+    
+    Verifies:
+    1. Re-extracted evidence is validated and durably accepted through StageExecutor/checkpoint authority.
+    2. Recovered EvidenceGraph has correct artifact identity, version, content hash, and parent references.
+    3. Blueprint and SectionRunner consume the exact same authoritative accepted evidence.
+    4. No in-memory-only or uncommitted evidence is accepted.
+    5. All 3 sections and 40 question allocations remain strictly valid (13, 13, 14 questions).
+    """
+    from tests.unified.mock_fixtures import create_mock_environment, create_pipeline_request
+    from app.contracts.artifact import canonical_json_dump
+    import app.pipeline as pipeline_mod
+    import app.reading_generation as rg_mod
+
+    run_id = f"run_recov_40q_{uuid4().hex[:8]}"
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="dynamic", min_verified_claims=2)
+    pipeline, client, provider, gateway = create_mock_environment(policy=policy, run_id=run_id)
+
+    req = create_pipeline_request(
+        run_id=run_id,
+        section_indices=(1, 2, 3),
+        parallel=False,
+        finalize=True,
+        policy=policy,
+        job_id=client.default_job_id,
+        lease_owner=client.default_lease_owner,
+    )
+    client.init_run(run_id=req.run_id, epoch=req.epoch, lease_owner=req.lease_owner, policy_hash=policy.hash, job_id=req.job_id)
+
+    orig_build_evidence = pipeline_mod.build_evidence
+    s1_call_count = 0
+
+    def mock_build_evidence_ineligible_section_1(*args, **kwargs):
+        nonlocal s1_call_count
+        s_idx = args[2] if len(args) > 2 else kwargs.get("section_id", 1)
+        if s_idx == 1:
+            s1_call_count += 1
+            if s1_call_count == 1:
+                # Stage 2 initial extraction: valid claims against source text, but with sectionId=2
+                # so check_claim_eligibility_for_family rejects them for Section 1 blueprint allocation
+                real_ev = orig_build_evidence(*args, **kwargs)
+                for c in real_ev["claims"]:
+                    parts = c["claimId"].split(":")
+                    if len(parts) >= 4:
+                        parts[2] = "2"
+                        c["claimId"] = ":".join(parts)
+                return real_ev
+        return orig_build_evidence(*args, **kwargs)
+
+    pipeline_mod.build_evidence = mock_build_evidence_ineligible_section_1
+    rg_mod.build_evidence = mock_build_evidence_ineligible_section_1
+    try:
+        result = await pipeline.execute(req)
+        assert result.status == "ACCEPTED"
+        assert s1_call_count == 2, "Section 1 evidence must be re-extracted during recovery"
+
+        # 1. Re-extracted evidence is validated and durably accepted as version 2
+        s1_ev_head = client.heads.get((run_id, f"evidence:{run_id}:1"))
+        assert s1_ev_head is not None
+        assert s1_ev_head.version == 2, "Recovered evidence must be durably committed as version 2"
+        assert len(s1_ev_head.payload.get("claims", [])) >= policy.min_verified_claims
+
+        # 2. Correct artifact identity, content hash, and parent references
+        assert s1_ev_head.artifact_id == f"evidence:{run_id}:1"
+        assert s1_ev_head.artifact_type == ArtifactType.EVIDENCE_GRAPH
+        assert len(s1_ev_head.parent_refs) == 1
+        assert s1_ev_head.parent_refs[0].artifact_id == f"source:{run_id}:1"
+        assert s1_ev_head.verify_integrity() is True
+
+        # 3. Blueprint and SectionRunner consume the same authoritative accepted evidence
+        bp_head = client.heads.get((run_id, f"blueprint:{run_id}"))
+        assert bp_head is not None
+        bp_sec1 = bp_head.payload["sections"][0]
+        assert bp_sec1["evidenceGraphRef"]["contentHash"] == s1_ev_head.content_hash
+
+        # All Section 1 question slots bind verified claims from the recovered evidence
+        s1_claim_ids = {c["claimId"] for c in s1_ev_head.payload["claims"]}
+        for slot in bp_sec1["questionSlots"]:
+            assert len(slot["claimRefIds"]) == 1
+            assert slot["claimRefIds"][0] in s1_claim_ids
+
+        # 4. No in-memory-only or uncommitted evidence accepted
+        state = client.resume_state(run_id)
+        ev1_state = next(a for a in state.artifacts if a.artifactId == f"evidence:{run_id}:1")
+        assert ev1_state.acceptedHash == s1_ev_head.content_hash
+        assert ev1_state.acceptedVersion == 2
+
+        # 5. All 3 sections and 40 question allocations remain valid
+        assert len(result.sections) == 3
+        assert result.paper is not None
+        assert result.paper.payload["totalQuestions"] == 40
+        all_questions = [
+            q for sec in result.paper.payload["sections"] for grp in sec.get("groups", []) for q in grp.get("questions", [])
+        ]
+        assert len(all_questions) == 40
+        assert [q["questionNumber"] for q in all_questions] == list(range(1, 41))
+
+        s1_numbers = [q["questionNumber"] for grp in result.paper.payload["sections"][0]["groups"] for q in grp["questions"]]
+        s2_numbers = [q["questionNumber"] for grp in result.paper.payload["sections"][1]["groups"] for q in grp["questions"]]
+        s3_numbers = [q["questionNumber"] for grp in result.paper.payload["sections"][2]["groups"] for q in grp["questions"]]
+        assert s1_numbers == list(range(1, 14))
+        assert s2_numbers == list(range(14, 27))
+        assert s3_numbers == list(range(27, 41))
+        assert result.exam_id is not None
+    finally:
+        pipeline_mod.build_evidence = orig_build_evidence
+        rg_mod.build_evidence = orig_build_evidence
+
+
+@pytest.mark.asyncio
+async def test_recovery_across_restart_resume_without_stale_dependencies():
+    """Recovery works across restart/resume without stale dependencies.
+    
+    Verifies that a pipeline resumed after evidence recovery seamlessly reuses
+    the authoritative accepted evidence and blueprint without DependencyStaleError.
+    """
+    from tests.unified.mock_fixtures import create_mock_environment, create_pipeline_request
+    import app.pipeline as pipeline_mod
+    import app.reading_generation as rg_mod
+
+    run_id = f"run_recov_resume_{uuid4().hex[:8]}"
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="dynamic", min_verified_claims=2)
+    pipeline, client, provider, gateway = create_mock_environment(policy=policy, run_id=run_id)
+
+    req = create_pipeline_request(
+        run_id=run_id,
+        section_indices=(1,),
+        parallel=False,
+        finalize=False,
+        policy=policy,
+        job_id=client.default_job_id,
+        lease_owner=client.default_lease_owner,
+    )
+    client.init_run(run_id=req.run_id, epoch=req.epoch, lease_owner=req.lease_owner, policy_hash=policy.hash, job_id=req.job_id)
+
+    orig_build_evidence = pipeline_mod.build_evidence
+    s1_call_count = 0
+
+    def mock_build_evidence_ineligible_once(*args, **kwargs):
+        nonlocal s1_call_count
+        s1_call_count += 1
+        if s1_call_count == 1:
+            real_ev = orig_build_evidence(*args, **kwargs)
+            for c in real_ev["claims"]:
+                parts = c["claimId"].split(":")
+                if len(parts) >= 4:
+                    parts[2] = "2"
+                    c["claimId"] = ":".join(parts)
+            return real_ev
+        return orig_build_evidence(*args, **kwargs)
+
+    pipeline_mod.build_evidence = mock_build_evidence_ineligible_once
+    rg_mod.build_evidence = mock_build_evidence_ineligible_once
+    try:
+        # Run 1: Completes recovery and accepts all artifacts
+        res1 = await pipeline.execute(req)
+        assert res1.status == "ACCEPTED"
+
+        # Run 2 (Simulate crash / restart with fresh pipeline instance):
+        # Must resume cleanly from durable checkpoints with 0 new build_evidence calls
+        pipeline2, _, _, _ = create_mock_environment(policy=policy, run_id=run_id)
+        pipeline2.client = client
+        pipeline2.gateway = gateway
+
+        res2 = await pipeline2.execute(req)
+        assert res2.status == "ACCEPTED"
+        assert s1_call_count == 2, "Resume must reuse accepted checkpoints without regenerating"
+        assert res2.sections[0].content_hash == res1.sections[0].content_hash
+    finally:
+        pipeline_mod.build_evidence = orig_build_evidence
+        rg_mod.build_evidence = orig_build_evidence
+
+
+@pytest.mark.asyncio
+async def test_recovery_invalid_evidence_fails_closed():
+    """Invalid re-extracted evidence fails closed and does not commit corrupt checkpoints."""
+    from tests.unified.mock_fixtures import create_mock_environment, create_pipeline_request
+    import app.pipeline as pipeline_mod
+    import app.reading_generation as rg_mod
+    from app.stage_executor import StageFailedError, EvaluationRejectedError
+
+    run_id = f"run_recov_failclosed_{uuid4().hex[:8]}"
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="dynamic", min_verified_claims=2, max_recovery_attempts=1)
+    pipeline, client, provider, gateway = create_mock_environment(policy=policy, run_id=run_id)
+
+    req = create_pipeline_request(
+        run_id=run_id,
+        section_indices=(1,),
+        parallel=False,
+        finalize=False,
+        policy=policy,
+        job_id=client.default_job_id,
+        lease_owner=client.default_lease_owner,
+    )
+    client.init_run(run_id=req.run_id, epoch=req.epoch, lease_owner=req.lease_owner, policy_hash=policy.hash, job_id=req.job_id)
+
+    orig_build_evidence = pipeline_mod.build_evidence
+    call_count = 0
+
+    def mock_build_evidence_corrupt_reextraction(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            # Stage 2 initial: claims marked with sectionId=2 to trigger recovery
+            real_ev = orig_build_evidence(*args, **kwargs)
+            for c in real_ev["claims"]:
+                parts = c["claimId"].split(":")
+                if len(parts) >= 4:
+                    parts[2] = "2"
+                    c["claimId"] = ":".join(parts)
+            return real_ev
+        else:
+            # Stage 2.5 re-extraction: return invalid claims with corrupt offsets that fail evaluate_evidence
+            return {
+                "graphId": f"graph:{run_id}:1",
+                "sourcePackId": f"source:{run_id}:1",
+                "status": "ACCEPTED",
+                "contentHash": "corrupt_hash",
+                "claims": [
+                    {
+                        "claimId": f"claim:{run_id}:1:1",
+                        "text": "Fabricated claim that does not exist in source text.",
+                        "sourceId": "PMC12804876",
+                        "offsets": {"sourceId": "PMC12804876", "startChar": 0, "endChar": 10},
+                        "confidence": 1.0,
+                        "entailment": "ENTAILS",
+                    },
+                    {
+                        "claimId": f"claim:{run_id}:1:2",
+                        "text": "Another fake claim.",
+                        "sourceId": "PMC12804876",
+                        "offsets": {"sourceId": "PMC12804876", "startChar": 10, "endChar": 20},
+                        "confidence": 1.0,
+                        "entailment": "ENTAILS",
+                    },
+                ],
+            }
+
+    pipeline_mod.build_evidence = mock_build_evidence_corrupt_reextraction
+    rg_mod.build_evidence = mock_build_evidence_corrupt_reextraction
+    try:
+        with pytest.raises((StageFailedError, EvaluationRejectedError, ValueError)):
+            await pipeline.execute(req)
+
+        # Corrupt evidence must NEVER be accepted as head in the checkpoint store
+        state = client.resume_state(run_id)
+        assert not any(a.acceptedHash == "corrupt_hash" for a in state.artifacts)
+    finally:
+        pipeline_mod.build_evidence = orig_build_evidence
+        rg_mod.build_evidence = orig_build_evidence
+
+

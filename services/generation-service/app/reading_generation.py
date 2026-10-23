@@ -342,6 +342,16 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                 )
                 from app.reading_evaluation import evaluate_evidence
                 src_payload = _payload(sec_src)
+                src_doc = src_payload.get("sources", [{}])[0]
+                src_ref = sec_src.to_ref() if hasattr(sec_src, "to_ref") else ArtifactRef(
+                    artifact_id=f"source:{run_id}:{sec_idx}",
+                    artifact_type=ArtifactType.SOURCE_PACK,
+                    version=1,
+                    content_hash=src_payload.get("contentHash") or hashlib.sha256(src_doc.get("document", {}).get("text", "").encode()).hexdigest(),
+                )
+                prev_ev = evidence_map.get(sec_idx)
+                prev_ver = getattr(prev_ev, "version", 1) if prev_ev else 1
+                new_ver = (prev_ver if isinstance(prev_ver, int) else 1) + 1
                 text_map = {
                     src_payload["sources"][0]["sourceId"]: src_payload["sources"][0]["document"]["text"]
                 }
@@ -351,6 +361,9 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                     run_id,
                     reextracted_ev,
                     "1.0.0",
+                    version=new_ver,
+                    parent_refs=(src_ref,),
+                    section_id=sec_idx,
                 )
                 eval_results = evaluate_evidence(ev_env, text_map, policy.min_verified_claims)
                 if any(not e.is_pass() for e in eval_results):
@@ -397,12 +410,25 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                 text_map = {
                     src_payload["sources"][0]["sourceId"]: src_payload["sources"][0]["document"]["text"]
                 }
+                src_doc = src_payload.get("sources", [{}])[0]
+                src_ref = sec_src.to_ref() if hasattr(sec_src, "to_ref") else ArtifactRef(
+                    artifact_id=f"source:{run_id}:{sec_to_recover}",
+                    artifact_type=ArtifactType.SOURCE_PACK,
+                    version=1,
+                    content_hash=src_payload.get("contentHash") or hashlib.sha256(src_doc.get("document", {}).get("text", "").encode()).hexdigest(),
+                )
+                prev_ev = evidence_map.get(sec_to_recover)
+                prev_ver = getattr(prev_ev, "version", 1) if prev_ev else 1
+                new_ver = (prev_ver if isinstance(prev_ver, int) else 1) + 1
                 ev_env = ArtifactEnvelope.create(
                     f"evidence:{run_id}:{sec_to_recover}",
                     ArtifactType.EVIDENCE_GRAPH,
                     run_id,
                     reextracted_ev,
                     "1.0.0",
+                    version=new_ver,
+                    parent_refs=(src_ref,),
+                    section_id=sec_to_recover,
                 )
                 eval_results = evaluate_evidence(ev_env, text_map, policy.min_verified_claims)
                 if any(not e.is_pass() for e in eval_results):
@@ -427,10 +453,16 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
             claims = ev_payload.get("claims", []) if ev_item else []
             graph_id = ev_payload.get("graphId", f"graph:{run_id}:{sec_idx}")
             source_pack_id = ev_payload.get("sourcePackId", f"src:{run_id}:{sec_idx}")
+            ev_content_hash = (
+                getattr(ev_item, "content_hash", None)
+                or getattr(ev_item, "contentHash", None)
+                or ev_payload.get("contentHash")
+                or hashlib.sha256(graph_id.encode()).hexdigest()
+            )
             eg_ref = EvidenceGraphRef(
                 graphId=graph_id,
                 sourcePackId=source_pack_id,
-                contentHash=ev_payload.get("contentHash") or hashlib.sha256(graph_id.encode()).hexdigest(),
+                contentHash=ev_content_hash,
                 claimCount=len(claims),
             )
             if claims:
@@ -449,6 +481,28 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                             max_claims=36,
                         )
                         claims = reextracted_ev.get("claims", [])
+                        src_payload = _payload(sec_src)
+                        src_doc = src_payload.get("sources", [{}])[0]
+                        src_ref = sec_src.to_ref() if hasattr(sec_src, "to_ref") else ArtifactRef(
+                            artifact_id=f"source:{run_id}:{sec_idx}",
+                            artifact_type=ArtifactType.SOURCE_PACK,
+                            version=1,
+                            content_hash=src_payload.get("contentHash") or hashlib.sha256(src_doc.get("document", {}).get("text", "").encode()).hexdigest(),
+                        )
+                        prev_ev = evidence_map.get(sec_idx)
+                        prev_ver = getattr(prev_ev, "version", 1) if prev_ev else 1
+                        new_ver = (prev_ver if isinstance(prev_ver, int) else 1) + 1
+                        ev_env = ArtifactEnvelope.create(
+                            f"evidence:{run_id}:{sec_idx}",
+                            ArtifactType.EVIDENCE_GRAPH,
+                            run_id,
+                            reextracted_ev,
+                            "1.0.0",
+                            version=new_ver,
+                            parent_refs=(src_ref,),
+                            section_id=sec_idx,
+                        )
+                        evidence_map[sec_idx] = ev_env
                         updated_slots = bind_claims_to_slots(sb.question_slots, claims, sec_idx, graph_id, run_id)
                     else:
                         raise
@@ -568,6 +622,12 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
             )
         ]
 
+        ev_content_hash = (
+            getattr(ev_item, "content_hash", None)
+            or getattr(ev_item, "contentHash", None)
+            or ev_payload.get("contentHash")
+            or hashlib.sha256(graph_id.encode()).hexdigest()
+        )
         section_blueprints.append(
             SectionBlueprint(
                 sectionId=sec_idx,
@@ -576,7 +636,7 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                 evidenceGraphRef=EvidenceGraphRef(
                     graphId=graph_id,
                     sourcePackId=source_pack_id,
-                    contentHash=ev_payload.get("contentHash") or hashlib.sha256(graph_id.encode()).hexdigest(),
+                    contentHash=ev_content_hash,
                     claimCount=len(claims),
                 ),
                 passageObjectives=objectives,
