@@ -669,3 +669,69 @@ def test_negative_invalid_offsets_and_truncated_evidence():
     assert not offset_eval.is_pass()
     assert any(i.code == IssueCode.EVIDENCE_MISSING for i in offset_eval.issues)
 
+
+def test_map_label_supported_and_strict_fail_closed_explanation():
+    """Verifies MAP_LABEL is supported and strict fail-closed explanation checks reject short explanations."""
+    passage_text = "The ancient harbour featured an inner basin and an outer breakwater protecting the main pier."
+    claims_map = {"claim_1": {"claimId": "claim_1", "text": "The ancient harbour featured an inner basin."}}
+
+    # 1. Valid MAP_LABEL candidate
+    valid_map_cand = {
+        "prompt": "Map location label for [1] with blank '______'",
+        "calloutLabel": "Location 1",
+        "partDescription": "Inner harbour docking basin",
+        "answer": "inner basin",
+        "evidenceQuote": "featured an inner basin",
+        "explanation": "The passage confirms the harbour featured an inner basin protecting ships.",
+    }
+    parsed = _parse_candidate_payload(
+        valid_map_cand,
+        q_num=1,
+        q_type="MAP_LABEL",
+        passage_text=passage_text,
+        claims_map=claims_map,
+        claim_id="claim_1",
+        difficulty="FOUNDATION",
+    )
+    assert parsed["questionType"] == "MAP_LABEL"
+    assert parsed["answer"] == "inner basin"
+    assert parsed["calloutLabel"] == "Location 1"
+    assert len(parsed["explanation"]) >= 25
+
+    # 2. Short explanation (< 25 chars) fails closed without fake synthesis
+    short_exp_cand = {
+        "prompt": "Map location label for [1] with blank '______'",
+        "answer": "inner basin",
+        "evidenceQuote": "featured an inner basin",
+        "explanation": "Too short.",
+    }
+    with pytest.raises(ValueError, match="explanation is missing or too short"):
+        _parse_candidate_payload(
+            short_exp_cand,
+            q_num=1,
+            q_type="MAP_LABEL",
+            passage_text=passage_text,
+            claims_map=claims_map,
+            claim_id="claim_1",
+            difficulty="FOUNDATION",
+        )
+
+    # 3. SENTENCE_COMPLETION with short explanation strictly fails closed
+    sc_short_exp = {
+        "prompt": "The harbour had an ______ basin.",
+        "answer": "inner",
+        "evidenceQuote": "featured an inner basin",
+        "explanation": "Short exp",
+    }
+    with pytest.raises(ValueError, match="explanation is missing or too short"):
+        _parse_candidate_payload(
+            sc_short_exp,
+            q_num=2,
+            q_type="SENTENCE_COMPLETION",
+            passage_text=passage_text,
+            claims_map=claims_map,
+            claim_id="claim_1",
+            difficulty="FOUNDATION",
+        )
+
+

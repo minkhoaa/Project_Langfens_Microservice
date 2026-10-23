@@ -287,8 +287,6 @@ def _parse_candidate_payload(
             p_start = passage_text.find(quote)
         p_end = p_start + len(quote) if p_start >= 0 else -1
         answer = str(cand.get("answer") or "").strip()
-        if len(explanation) < 25 and quote:
-            explanation = f"The passage states that '{quote[:50]}...', providing verifiable evidence for item {q_num}."
 
         return {
             "questionNumber": q_num,
@@ -439,7 +437,7 @@ def _parse_candidate_payload(
             "evidenceClaimRef": claim_id,
         }
 
-    elif q_type == "DIAGRAM_LABEL":
+    elif q_type in ("DIAGRAM_LABEL", "MAP_LABEL"):
         prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
         if f"[{q_num}]" not in prompt and "______" in prompt:
             prompt = prompt.replace("______", f"[{q_num}]")
