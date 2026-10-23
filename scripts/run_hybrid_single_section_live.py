@@ -34,7 +34,7 @@ AI_ENV_PATH = os.path.join(REPO_ROOT, "deploy", "envs", "ai.env")
 COMPOSE_FILE = os.path.join(REPO_ROOT, "deploy", "compose.benchmark-text.yaml")
 REPORTS_DIR = os.path.join(REPO_ROOT, "reports")
 os.makedirs(REPORTS_DIR, exist_ok=True)
-SNAPSHOT_PATH = os.path.join(REPORTS_DIR, "hybrid_single_section_answer_grounding_rerun_snapshot.json")
+SNAPSHOT_PATH = os.path.join(REPORTS_DIR, "hybrid_single_section_13q_live_snapshot.json")
 
 # MiniMax Pricing (USD per 1,000,000 tokens)
 PRICING = {
