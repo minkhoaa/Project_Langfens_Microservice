@@ -18,6 +18,7 @@ class Capability(str, Enum):
     EXTRACT_EVIDENCE = "extract_evidence"
     EVALUATE_ITEM = "evaluate_item"
     SOLVE_ITEM = "solve_item"
+    PLAN_REPAIR = "plan_repair"
 
 
 class FinishReason(str, Enum):
@@ -62,6 +63,7 @@ class ProviderRequest(CanonicalBaseModel):
     model_size: str = "large"
     preferred_provider: Optional[str] = None
     pinned_provider: Optional[str] = None
+    pinned_model: Optional[str] = Field(default=None, description="Operation-scoped explicit model override (e.g. MiniMax-M3)")
     deadline_unix_seconds: Optional[float] = None
     remaining_tokens: Optional[int] = None
     temperature: float = 0.3

@@ -164,6 +164,7 @@ class ProviderGateway:
                 "messages": [{"role": message.role, "content": message.content} for message in request.messages],
                 "capability": request.capability.value,
                 "modelSize": request.model_size,
+                "pinnedModel": request.pinned_model,
                 "preferredProvider": request.preferred_provider,
                 "modelConfigVersion": request.model_config_version,
                 "temperature": request.temperature,
@@ -267,7 +268,7 @@ class ProviderGateway:
                 last_error = DeadlineExceededError("No remaining time for a provider attempt", operation_id=request.operation_id)
                 break
 
-            model_name = provider.get_model_name(request.model_size)
+            model_name = provider.get_model_name(request.model_size, pinned_model=request.pinned_model)
             attempt_hash = hashlib.sha256(json.dumps(
                 {
                     "request": logical_hash,

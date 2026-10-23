@@ -83,13 +83,14 @@ class OpenAICompatibleProvider(BaseProvider):
             "temperature": request.temperature,
             "max_tokens": request.max_tokens,
         }
-        if request.capability == Capability.GENERATE_JSON and self.supports_response_format:
+        if request.capability in (Capability.GENERATE_JSON, Capability.PLAN_REPAIR) and self.supports_response_format:
             kwargs["response_format"] = {"type": "json_object"}
         return kwargs
 
     def completion_token_limit(self, request: ProviderRequest) -> int:
         """Use the exact wire completion cap; reasoning is included by these adapters."""
-        kwargs = self._build_create_kwargs(request, self.get_model_name(request.model_size))
+        model_name = self.get_model_name(request.model_size, pinned_model=request.pinned_model)
+        kwargs = self._build_create_kwargs(request, model_name)
         return max(int(kwargs.get("max_tokens", 0)), int(kwargs.get("max_completion_tokens", 0)))
 
     async def call(self, request: ProviderRequest, api_key: str, deadline: float) -> ProviderResponse:
@@ -104,7 +105,7 @@ class OpenAICompatibleProvider(BaseProvider):
             )
 
         timeout_for_call = min(float(request.timeout_seconds), remaining)
-        model_name = self.get_model_name(request.model_size)
+        model_name = self.get_model_name(request.model_size, pinned_model=request.pinned_model)
         client = self._get_client(api_key)
         kwargs = self._build_create_kwargs(request, model_name)
 
@@ -189,14 +190,6 @@ class OpenAICompatibleProvider(BaseProvider):
             else:
                 finish_reason = FinishReason.UNKNOWN
 
-            if finish_reason == FinishReason.LENGTH:
-                raise TruncatedOutputError(
-                    f"Provider {self.name} cut off output (finish_reason=length)",
-                    raw_text=raw_text,
-                    provider_name=self.name,
-                    operation_id=request.operation_id,
-                )
-
             # Clean reasoning tags: <think> tags must NEVER leak into business payload or logs
             cleaned_text = clean_reasoning_tags(raw_text)
 
@@ -216,8 +209,24 @@ class OpenAICompatibleProvider(BaseProvider):
                     reasoning_tokens=r_tokens,
                     accounting_type=UsageAccountingType.REPORTED if t_tokens is not None else UsageAccountingType.UNKNOWN,
                 )
+            elif request.stream_callback is not None and sanitizer.reasoning_tokens_count > 0:
+                usage = UsageReport(
+                    total_tokens=sanitizer.reasoning_tokens_count,
+                    reasoning_tokens=sanitizer.reasoning_tokens_count,
+                    accounting_type=UsageAccountingType.ESTIMATED,
+                )
             else:
                 usage = UsageReport(total_tokens=0, accounting_type=UsageAccountingType.UNKNOWN)
+
+            if finish_reason == FinishReason.LENGTH:
+                trunc_err = TruncatedOutputError(
+                    f"Provider {self.name} cut off output (finish_reason=length)",
+                    raw_text=raw_text,
+                    provider_name=self.name,
+                    operation_id=request.operation_id,
+                )
+                trunc_err.usage = usage
+                raise trunc_err
 
             # Defensive parsing if JSON is expected
             parsed_payload = None
