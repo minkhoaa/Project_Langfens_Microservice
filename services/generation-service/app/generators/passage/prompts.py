@@ -120,7 +120,8 @@ def build_passage_generation_prompt(
             ctxt = c.get("text") if isinstance(c, dict) else getattr(c, "text", "")
             if ctxt:
                 sanitized_c = sanitize_source_for_envelope(str(ctxt).strip())
-                claims_entries.append(f"  * Claim [{cid}]: {sanitized_c}")
+                clean_c = re.sub(r"^[,\s;:]+", "", sanitized_c)
+                claims_entries.append(f"  * Claim [{cid}]: {clean_c}")
         if claims_entries:
             coverage_plan_str = (
                 "REQUIRED FACTUAL COVERAGE PLAN:\n"
@@ -128,7 +129,7 @@ def build_passage_generation_prompt(
                 "verified factual claims from the source material across its paragraphs. Subsequent reading\n"
                 "comprehension questions strictly depend on these facts being present in the passage text.\n"
                 "Weave them smoothly and contextually into the academic prose within the target word budget\n"
-                "(strictly 720-915 words, target 780-840 words). Do NOT copy claim IDs into the passage text:\n"
+                "(strictly 720-915 words, target 740-770 words; do NOT exceed 800 words). Do NOT copy claim IDs into the passage text:\n"
                 + "\n".join(claims_entries) + "\n\n"
             )
 
@@ -139,16 +140,16 @@ def build_passage_generation_prompt(
         f"Section: {section_index} of 3\n"
         f"Style Profile: {style_profile.value}\n"
         f"Style Guidance: {style_desc}\n"
-        f"Target Length: strictly between {target_min_words} and {target_max_words} words (target: 750-780 words; do NOT exceed 820 words).\n\n"
+        f"Target Length: strictly between {target_min_words} and {target_max_words} words (target: 740-770 words; do NOT exceed 800 words).\n\n"
         f"{coverage_plan_str}"
-        "PARAGRAPH CONTENT PLAN & WORD BUDGETS (Target: 750-780 words total):\n"
-        "- Structure into 5 concise, substantial academic paragraphs (each ~150 words):\n"
+        "PARAGRAPH CONTENT PLAN & WORD BUDGETS (Target: 740-770 words total):\n"
+        "- Structure into exactly 5 concise, substantial academic paragraphs (each ~150 words):\n"
         "  * Paragraph 1: Conceptual foundation, historical context, and empirical problem definition (~150 words).\n"
         "  * Paragraph 2: Methodological framework, measurement principles, and core mechanisms (~150 words).\n"
         "  * Paragraph 3: Detailed experimental observations, data distributions, and empirical findings (~150 words).\n"
         "  * Paragraph 4: Operational constraints, systemic limitations, anomalies, and uncertainties (~150 words).\n"
         "  * Paragraph 5: Comparative evaluation, technological interventions, and broader implications (~150 words).\n"
-        "- MANDATORY LENGTH INVARIANT: Total word count MUST be strictly between 720 and 915 words. Any passage under 720 words is invalid and will be rejected. Keep total length around 750-780 words with ample headroom below the 915-word ceiling.\n\n"
+        "- MANDATORY LENGTH INVARIANT: Total word count MUST be strictly between 720 and 915 words. Any passage under 720 words is invalid and will be rejected. Keep total length around 740-770 words with ample headroom below the 915-word ceiling.\n\n"
         "Here is the verified source evidence in the secure data envelope:\n"
         "<source_material>\n"
         f"{sanitized_source}\n"
@@ -157,7 +158,7 @@ def build_passage_generation_prompt(
         "Respond with a JSON object conforming exactly to this schema:\n"
         "{\n"
         '  "title": "Passage Title",\n'
-        '  "passage": "Full passage text across 5-6 substantial academic paragraphs with blank lines between paragraphs",\n'
+        '  "passage": "Full passage text across exactly 5 substantial academic paragraphs with blank lines between paragraphs",\n'
         '  "styleProfile": "' + style_profile.value + '"\n'
         "}"
     )
