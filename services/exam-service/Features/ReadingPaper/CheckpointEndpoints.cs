@@ -19,8 +19,13 @@ public static class CheckpointEndpoints
                 return Results.Json(new { error = "Missing internal service authentication key" }, statusCode: 401);
             }
 
-            var expectedKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")
+            var config = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+            var expectedKey = ReadingPaperAiClientConfiguration.ResolveInternalApiKey(config);
+            if (string.IsNullOrWhiteSpace(expectedKey))
+            {
+                expectedKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")
                               ?? Environment.GetEnvironmentVariable("InternalApiKey");
+            }
 
             if (string.IsNullOrWhiteSpace(expectedKey))
             {

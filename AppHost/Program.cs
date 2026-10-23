@@ -70,6 +70,16 @@ var aiService = builder.AddDockerfile("ai-service", "../", "services/ai-service/
     .WaitFor(redis)
     .WaitFor(qdrant)
     .WaitForCompletion(ollamaInit);
+// Internal service authentication key shared between exam-service, generation-service,
+// and attempt-service. Declared as a secret parameter so it can be provided securely
+// from Aspire parameters / user secrets / environment without hardcoding credentials in repo.
+var internalApiKey = builder.AddParameter(
+    "internal-api-key",
+    builder.Configuration["EXAMSERVICE:INTERNAL:API:KEY"]
+        ?? builder.Configuration["INTERNAL_API_KEY"]
+        ?? "dev-internal-key-not-for-prod",
+    secret: true);
+
 // ── Generation Service (Python reading paper generator) ────────────────────
 var generationService = builder.AddDockerfile("generation-service", "../", "services/generation-service/Dockerfile")
     .WithHttpEndpoint(targetPort: 8080, name: "http")
@@ -77,6 +87,7 @@ var generationService = builder.AddDockerfile("generation-service", "../", "serv
     .WithEntrypoint("uvicorn")
     .WithArgs("app.main:app", "--host", "0.0.0.0", "--port", "8080",
               "--reload", "--reload-dir", "/app/app")
+    .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", internalApiKey)
     .WithComposeEnvFile("ai")
     .WithComposeEnvFile("loop-caps");
 
@@ -139,7 +150,7 @@ var exam = builder.AddProject("exam-service", "../services/exam-service/exam-ser
     .WithComposeEnvFile("exam")
     .WithComposeEnvFile("loop-caps")
     .WaitFor(examDb);
-exam.WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod");
+exam.WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", internalApiKey);
 exam.WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"));
 exam.WithEnvironment("GENERATION_SERVICE_URL", generationService.GetEndpoint("http"));
 exam.WaitFor(generationService);
@@ -231,7 +242,7 @@ var attempt = builder.AddProject("attempt-service", "../services/attempt-service
     .WithRabbitMqEnv(rabbitmq, rabbitUser, rabbitPass)
     .WithEnvironment("EXAMSERVICE__EXAM__ADDRESS", exam.GetEndpoint("http"))
     .WithEnvironment("ExamService__GrpcAddress", exam.GetEndpoint("grpc"))
-    .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod")
+    .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", internalApiKey)
     .WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"))
     .WaitFor(aiService)
     .WaitFor(attemptDb)

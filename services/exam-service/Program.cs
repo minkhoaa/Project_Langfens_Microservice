@@ -72,7 +72,13 @@ builder.Services.AddHttpClient<ReadingPaperAiClient>(client =>
     options.AttemptTimeout.Timeout = TimeSpan.FromMinutes(45);
     options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(90);
 });
-builder.Services.AddHostedService<ReadingPaperWorker>();
+var workerEnabled = builder.Configuration.GetValue<bool>("ReadingPaper:WorkerEnabled", true)
+    && Environment.GetEnvironmentVariable("READING_PAPER_WORKER_ENABLED") != "false";
+
+if (workerEnabled)
+{
+    builder.Services.AddHostedService<ReadingPaperWorker>();
+}
 
 // ── gRPC + HTTP ports ───────────────────────────────────────────────────
 // Under Aspire, ASPNETCORE_URLS is injected and Kestrel binds to those endpoints

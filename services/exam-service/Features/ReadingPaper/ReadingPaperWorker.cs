@@ -12,6 +12,11 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var generationUrl = Environment.GetEnvironmentVariable("GENERATION_SERVICE_URL")
+            ?? Environment.GetEnvironmentVariable("AI_SERVICE_URL")
+            ?? "http://generation-service:8080";
+        logger.LogInformation("ReadingPaperWorker started [Target: {GenerationUrl}, Caps: {CapsVersion}]", generationUrl, caps.Version);
+
         while (!stoppingToken.IsCancellationRequested)
         {
             try
