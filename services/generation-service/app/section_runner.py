@@ -908,6 +908,17 @@ class SectionRunner:
                 raise ValueError("ProviderGateway must be provided to generate passage")
 
             call_seconds = actual_policy.provider_call_wall_seconds(config.index)
+
+            # 1. Extract unique verified claims required by Blueprint question slots
+            required_claim_ids = []
+            seen_cids = set()
+            for s in slots:
+                for cid in s.get("claimRefIds") or ():
+                    if cid in claims_map and cid not in seen_cids:
+                        seen_cids.add(cid)
+                        required_claim_ids.append(cid)
+            required_claims_list = [claims_map[cid] for cid in required_claim_ids]
+
             prompt_data = build_passage_generation_prompt(
                 topic=topic,
                 section_index=config.index,
@@ -915,6 +926,7 @@ class SectionRunner:
                 source_text=source_text,
                 target_min_words=config.min_words,
                 target_max_words=config.max_words,
+                required_claims=required_claims_list,
             )
             req = ProviderRequest(
                 capability=Capability.GENERATE_JSON,
@@ -952,16 +964,11 @@ class SectionRunner:
             alignments = align_claims_to_passage(passage_text, claims, source_text)
             has_unaligned_para = any(not any(a["passageQuote"] in para for a in alignments if a.get("passageQuote")) for para in paragraphs)
             aligned_claim_ids = {a["claimId"] for a in alignments if a.get("claimId")}
-            required_claim_ids = [
-                s["claimRefIds"][0]
-                for s in slots
-                if s.get("claimRefIds") and s["claimRefIds"][0] in claims_map
-            ]
             missing_slot_claims = [
                 claims_map[cid] for cid in required_claim_ids
                 if cid not in aligned_claim_ids
             ]
-            if not alignments or count_words(passage_text) < config.min_words or has_unaligned_para or missing_slot_claims:
+            if (not alignments or count_words(passage_text) < config.min_words or has_unaligned_para) and missing_slot_claims:
                 # Ground claim alignments in verified source evidence, prioritizing blueprint-bound claims
                 enhanced_paragraphs = []
                 pool_to_ground = list(missing_slot_claims) + [c for c in claims if c["claimId"] not in required_claim_ids]
@@ -1005,6 +1012,12 @@ class SectionRunner:
                 "passage": passage_text,
                 "wordCount": word_count,
                 "claimAlignments": alignments,
+                "paragraphs": [p.strip() for p in re.split(r"\n\s*\n", passage_text) if p.strip()],
+                "sentences": [
+                    {"sentenceId": f"s_{i}", "text": sent, "wordCount": len(sent.split())}
+                    for i, sent in enumerate(re.split(r"(?<=[.!?])\s+", passage_text) if passage_text else [])
+                    if sent.strip()
+                ],
             }
 
         async def evaluate_passage_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
@@ -1018,15 +1031,33 @@ class SectionRunner:
         ) -> dict[str, Any]:
             from app.repair.passage import PassageSentenceRepairer
             p_rep = PassageSentenceRepairer()
-            repaired_art = await p_rep._repair_impl(context, art, issues, intent_id or f"op_repair_p_{ver}", ver)
-            res_payload = dict(repaired_art.payload)
+            generic_supported_codes = set(p_rep.metadata.handled_codes) | {IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM}
+            generic_issues = [i for i in issues if getattr(i, "code", None) in generic_supported_codes]
+            alignment_issues = [i for i in issues if getattr(i, "code", None) == IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT]
+            unsupported = [
+                i for i in issues
+                if getattr(i, "code", None) not in generic_supported_codes
+                and getattr(i, "code", None) != IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT
+            ]
+
+            if unsupported:
+                from app.repair.base import RepairExecutionError
+                raise RepairExecutionError(
+                    f"Cannot repair unsupported passage issue codes: {[i.code for i in unsupported]}"
+                )
+
+            res_payload = dict(art.payload)
+            if generic_issues:
+                repaired_art = await p_rep._repair_impl(context, art, generic_issues, intent_id or f"op_repair_p_{ver}", ver)
+                res_payload = dict(repaired_art.payload)
+
             curr_pass = str(res_payload.get("passage", ""))
             curr_words = count_words(curr_pass)
 
             # Check if any PASSAGE_BLUEPRINT_ALIGNMENT issues need claim grounding
-            alignment_issues = [i for i in issues if getattr(i, "code", None) == IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT]
             if alignment_issues:
                 aligned_ids = {a["claimId"] for a in res_payload.get("claimAlignments", []) if a.get("claimId")}
+                repaired_any = False
                 for s in slots:
                     cids = s.get("claimRefIds") or ()
                     if cids and cids[0] in claims_map and cids[0] not in aligned_ids:
@@ -1036,6 +1067,7 @@ class SectionRunner:
                             if curr_words + c_words <= config.max_words:
                                 curr_pass = curr_pass + "\n\n" + c_text
                                 curr_words += c_words
+                                repaired_any = True
                             else:
                                 from app.repair.base import RepairExecutionError
                                 raise RepairExecutionError(
@@ -1043,9 +1075,29 @@ class SectionRunner:
                                     f"max word limit ({config.max_words} words; would be {curr_words + c_words})"
                                 )
 
+                if not repaired_any and alignment_issues:
+                    from app.repair.base import RepairExecutionError
+                    raise RepairExecutionError(
+                        "Cannot resolve PASSAGE_BLUEPRINT_ALIGNMENT issues through evidence-backed repair"
+                    )
+
+                paragraphs = [p.strip() for p in curr_pass.split("\n\n") if p.strip()]
+                sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", curr_pass) if s.strip()]
                 res_payload["passage"] = curr_pass
+                res_payload["passageText"] = curr_pass
+                if "text" in res_payload:
+                    res_payload["text"] = curr_pass
                 res_payload["wordCount"] = curr_words
+                res_payload["paragraphs"] = paragraphs
+                res_payload["sentences"] = [
+                    {"sentenceId": f"s_{i}", "text": sent, "wordCount": len(sent.split())}
+                    for i, sent in enumerate(sentences)
+                ]
                 res_payload["claimAlignments"] = align_claims_to_passage(curr_pass, claims, source_text)
+
+            if res_payload.get("passage") == art.payload.get("passage") and not generic_issues:
+                from app.repair.base import RepairExecutionError
+                raise RepairExecutionError("No evidence-backed transformation could be applied to passage")
 
             return res_payload
 

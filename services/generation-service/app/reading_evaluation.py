@@ -373,8 +373,10 @@ def evaluate_passage(
             conflict, reason = detect_negation_polarity_conflict(quote, source_quote)
             if conflict or detect_comparison_inversion(quote, source_quote):
                 semantic_problems.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, reason or "Scientific comparison inverted"))
-        if re.search(r"\b(proves?|always|certainly|causes?)\b", quote, re.I) and re.search(r"\b(may|might|associated|suggests?|correlat\w*)\b", source_quote, re.I):
-            semantic_problems.append((IssueCode.CAUSAL_OVERSTATEMENT, "Passage inflates source certainty or causation"))
+        if re.search(r"\b(proves?|always|certainly)\b", quote, re.I) and re.search(r"\b(may|might|associated|suggests?|correlat\w*)\b", source_quote, re.I):
+            semantic_problems.append((IssueCode.OVERSTATED_CERTAINTY, "Passage inflates source certainty"))
+        elif re.search(r"\b(causes?|leads?\s+to|results?\s+in)\b", quote, re.I) and re.search(r"\b(may|might|associated|suggests?|correlat\w*)\b", source_quote, re.I):
+            semantic_problems.append((IssueCode.CAUSAL_OVERSTATEMENT, "Passage inflates source causation"))
     for paragraph in re.split(r"\n\s*\n", passage):
         if paragraph.strip() and not any(a["passageQuote"] in paragraph for a in alignments if a.get("passageQuote")):
             fidelity_problems.append((IssueCode.EVIDENCE_MISSING, "Every substantive paragraph needs a verified claim alignment"))

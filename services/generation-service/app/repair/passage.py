@@ -45,6 +45,7 @@ class PassageSentenceRepairer(BaseRepairer):
                     IssueCode.CAUSAL_OVERSTATEMENT,
                     IssueCode.UNMEASURED_OUTCOME,
                     IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS,
+                    IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM,
                 },
                 timeout_seconds=t_sec,
                 estimated_tokens=tok,
@@ -101,6 +102,7 @@ class PassageSentenceRepairer(BaseRepairer):
                                         claims_modified = True
             elif iss.code == IssueCode.CAUSAL_OVERSTATEMENT:
                 repaired_text = _soften_causality(repaired_text)
+                repaired_text = _soften_certainty(repaired_text)
                 if isinstance(payload.get("claims"), list):
                     for clm in payload["claims"]:
                         if isinstance(clm, dict):
