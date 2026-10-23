@@ -134,6 +134,7 @@ class Settings(BaseSettings):
     evaluator_max_tokens_per_evaluation: int = 4000
     repair_timeout_seconds: int = 30
     repair_max_tokens_per_attempt: int = 3000
+    enable_hybrid_repair: bool = True
     evaluation_cache_enabled: bool = True
     evaluation_cache_max_entries: int = 1000
 

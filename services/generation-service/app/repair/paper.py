@@ -398,13 +398,12 @@ class PaperSurgicalRepairer(BaseRepairer):
         blueprint_ref = (
             ArtifactRef.model_validate(payload.get("blueprintRef"))
             if payload.get("blueprintRef")
-            else ArtifactRef(
-                artifactId="art_blueprint_01",
-                artifactType=ArtifactType.EXAM_BLUEPRINT,
-                version=1,
-                contentHash="0" * 64,
-            )
+            else None
         )
+        if blueprint_ref is None:
+            raise RepairExecutionError(
+                "Paper artifact lacks required blueprintRef. Fallback parent synthesis is strictly prohibited."
+            )
 
         target_sec_id = directive.target_section_id
         target_q_num = directive.target_question_number
@@ -456,20 +455,14 @@ class PaperSurgicalRepairer(BaseRepairer):
                     preserved_refs.append(ArtifactRef.model_validate(qr_raw))
                 continue
 
-            sec_passage_ref = (
-                ArtifactRef.model_validate(sec_dict["passageRef"])
-                if sec_dict.get("passageRef")
-                else (
-                    existing_passage_refs[idx]
-                    if idx < len(existing_passage_refs)
-                    else ArtifactRef(
-                        artifactId=f"art_passage_s{sec_id}",
-                        artifactType=ArtifactType.PASSAGE,
-                        version=1,
-                        contentHash="0" * 64,
-                    )
+            if sec_dict.get("passageRef"):
+                sec_passage_ref = ArtifactRef.model_validate(sec_dict["passageRef"])
+            elif idx < len(existing_passage_refs):
+                sec_passage_ref = existing_passage_refs[idx]
+            else:
+                raise RepairExecutionError(
+                    f"Section {sec_id} lacks required passageRef. Fallback parent synthesis is strictly prohibited."
                 )
-            )
             sec_bp_ref = (
                 ArtifactRef.model_validate(sec_dict["blueprintRef"])
                 if sec_dict.get("blueprintRef")

@@ -213,6 +213,7 @@ class LoopContext(CanonicalBaseModel):
     is_cancelled_func: Optional[Callable[[], bool]] = Field(default=None, exclude=True)
     open_issues: Tuple[Issue, ...] = Field(default_factory=tuple, alias="openIssues")
     parent_operation_id: Optional[str] = Field(default=None, alias="parentOperationId")
+    enable_hybrid_repair: bool = Field(default=True, alias="enableHybridRepair")
     def is_cancelled(self) -> bool:
         """Checks if a cancellation signal has been raised."""
         if self.is_cancelled_func is not None:

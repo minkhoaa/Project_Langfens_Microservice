@@ -13,6 +13,7 @@ from collections.abc import Sequence
 from typing import Any, Optional
 from uuid import UUID
 
+from app.config import settings
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType, canonical_json_dump_prep
 from app.contracts.evidence import AbsenceAssessment
 from app.contracts.evaluation import EvaluationResult
@@ -1122,7 +1123,8 @@ class SectionRunner:
                 from app.solvers.cache import solver_cache
                 solver_cache.invalidate()
                 from app.repair.question import QuestionItemRepairer
-                item_rep = QuestionItemRepairer(gateway=self.gateway)
+                enable_hybrid = getattr(context, "enable_hybrid_repair", getattr(settings, "enable_hybrid_repair", True))
+                item_rep = QuestionItemRepairer(gateway=self.gateway, enable_hybrid=enable_hybrid)
                 pl = dict(art.payload)
                 if "passage" not in pl and "passageText" not in pl:
                     pl["passage"] = passage_text

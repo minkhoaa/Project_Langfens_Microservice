@@ -247,12 +247,22 @@ class QuestionItemRepairer(BaseRepairer):
                 from app.generators.question.generator import QuestionCandidateGenerator
                 p_ref = next(
                     (r for r in artifact.parent_refs if r.artifact_type == ArtifactType.PASSAGE),
-                    ArtifactRef(artifactId="art_passage_s1", artifactType=ArtifactType.PASSAGE, version=1, contentHash="0" * 64),
+                    None,
                 )
+                if p_ref is None:
+                    raise RepairJustificationError(
+                        f"Question artifact {artifact.artifact_id} lacks required passage parent reference. "
+                        "Fallback parent synthesis is strictly prohibited."
+                    )
                 bp_ref = next(
                     (r for r in artifact.parent_refs if r.artifact_type == ArtifactType.EXAM_BLUEPRINT),
-                    ArtifactRef(artifactId="art_blueprint_01", artifactType=ArtifactType.EXAM_BLUEPRINT, version=1, contentHash="0" * 64),
+                    None,
                 )
+                if bp_ref is None:
+                    raise RepairJustificationError(
+                        f"Question artifact {artifact.artifact_id} lacks required blueprint parent reference. "
+                        "Fallback parent synthesis is strictly prohibited."
+                    )
                 q_gen = QuestionCandidateGenerator(gateway=gw)
                 sec_id_str = str(artifact.section_id or getattr(context, "section_id", None) or 1)
                 for try_q_type in ([q_type, "SentenceCompletion"] if q_type_norm == "summarycompletion" else [q_type]):
@@ -308,7 +318,7 @@ class QuestionItemRepairer(BaseRepairer):
                 elif iss.code in (IssueCode.AMBIGUOUS_ANSWER, IssueCode.DUPLICATE_PROMPT, IssueCode.DUPLICATE_CONTENT):
                     q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
                     gw = self.gateway or getattr(context, "gateway", None)
-                    use_hybrid = self.enable_hybrid and getattr(context, "enable_hybrid_repair", True) and (gw is not None)
+                    use_hybrid = self.enable_hybrid and getattr(context, "enable_hybrid_repair", getattr(settings, "enable_hybrid_repair", True)) and (gw is not None)
                     if use_hybrid:
                         # Invoke M3 for diagnostic repair plan
                         from app.repair.diagnostic_planner import RepairPlanningCapability

@@ -34,6 +34,7 @@ class PipelineRequest(CanonicalBaseModel):
     parallel: bool = False
     policy: PinnedExecutionPolicy
     finalize: bool = True
+    enable_hybrid_repair: bool = Field(default=True, alias="enableHybridRepair")
 
     @model_validator(mode="after")
     def _validate_selected_sections(self) -> "PipelineRequest":
@@ -52,14 +53,23 @@ class RunContext(CanonicalBaseModel):
     epoch: int = Field(..., ge=1)
     lease_owner: UUID = Field(..., alias="leaseOwner")
     policy_hash: str = Field(..., pattern=r"^[0-9a-f]{64}$", alias="policyHash")
+    enable_hybrid_repair: bool = Field(default=True, alias="enableHybridRepair")
     client: Any = Field(default=None, exclude=True, repr=False)
     gateway: Any = Field(default=None, exclude=True, repr=False)
 
     @classmethod
     def from_request(cls, request: PipelineRequest, *, client: Any = None, gateway: Any = None) -> "RunContext":
-        return cls(run_id=request.run_id, job_id=request.job_id, epoch=request.epoch,
-                   lease_owner=request.lease_owner, policy_hash=request.policy.hash,
-                   client=client, gateway=gateway)
+        enable_hybrid = getattr(request, "enable_hybrid_repair", True)
+        return cls(
+            run_id=request.run_id,
+            job_id=request.job_id,
+            epoch=request.epoch,
+            lease_owner=request.lease_owner,
+            policy_hash=request.policy.hash,
+            enable_hybrid_repair=enable_hybrid,
+            client=client,
+            gateway=gateway,
+        )
 
     @property
     def authority(self) -> AuthorityGrant:

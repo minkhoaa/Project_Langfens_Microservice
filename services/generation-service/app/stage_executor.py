@@ -15,6 +15,7 @@ from enum import Enum
 from typing import Any, Protocol
 from uuid import UUID, uuid4
 
+from app.config import settings
 from app.contracts.artifact import (
     ArtifactEnvelope, ArtifactRef, ArtifactType, canonical_json_dump,
 )
@@ -536,6 +537,7 @@ class StageExecutor:
         parent_workflow_op = getattr(self.context, "parent_operation_id", None)
         if parent_workflow_op and (not state.operations or not any(o.operationId == parent_workflow_op for o in state.operations)):
             parent_workflow_op = None
+        enable_hybrid = getattr(self.context, "enable_hybrid_repair", getattr(settings, "enable_hybrid_repair", True))
         loop_ctx = LoopContext(
             runId=self.context.run_id,
             targetArtifactId=artifact_id,
@@ -547,6 +549,7 @@ class StageExecutor:
             policyVersion=getattr(self.policy, "version", "v2"),
             current_artifact=prior_artifact,
             parent_operation_id=parent_workflow_op,
+            enable_hybrid_repair=enable_hybrid,
         )
         if prior_artifact is not None:
             loop_ctx.cursor.current_state = LoopState.DRAFTING
@@ -653,7 +656,10 @@ class StageExecutor:
                 return res
         eval_adapters = [StageEvalSingleAdapter(ev_id) for ev_id in required_evals]
         # 6. Repairer capability
-        fallback_rep = QuestionItemRepairer(gateway=getattr(self.context, "gateway", None)) if artifact_type == ArtifactType.QUESTION else None
+        fallback_rep = QuestionItemRepairer(
+            gateway=getattr(self.context, "gateway", None),
+            enable_hybrid=enable_hybrid,
+        ) if artifact_type == ArtifactType.QUESTION else None
         class StageRepAdapter(RepairerCapability):
             @property
             def repairer_id(self) -> str:
@@ -662,6 +668,14 @@ class StageExecutor:
             def repairer_version(self) -> str:
                 return "1.0.0"
             async def repair(inner_self, ctx: LoopContext, art: ArtifactEnvelope, issues: Sequence[Issue], intent_id: str, ver: int) -> ArtifactEnvelope:
+                if artifact_type == ArtifactType.QUESTION:
+                    parent_types = {p.artifact_type for p in art.parent_refs}
+                    if ArtifactType.PASSAGE not in parent_types or ArtifactType.EXAM_BLUEPRINT not in parent_types:
+                        from app.repair.base import RepairJustificationError
+                        raise RepairJustificationError(
+                            f"Question artifact {art.artifact_id} lacks required passage or blueprint parent reference. "
+                            "Fallback parent synthesis is strictly prohibited."
+                        )
                 if repair is not None:
                     try:
                         res = await repair(art, issues, ver, intent_id=intent_id)

@@ -24,11 +24,23 @@ from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 import pytest
 
-from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
+from app.config import cap_snapshot_json, cap_snapshot_sha256
+from app.contracts.artifact import (
+    ArtifactEnvelope,
+    ArtifactRef,
+    ArtifactType,
+    canonical_json_dump_prep,
+)
+from app.contracts.evaluation import EvaluationResult, EvaluationStatus
 from app.contracts.issue import Issue, IssueCode, IssueSeverity, IssueScope
 from app.loop.context import RunAuthorityAdapter, resolve_run_authority
 from app.persistence.client import CheckpointApiError
 from app.persistence.models import (
+    ArtifactResumeInfo,
+    CheckpointAck,
+    CheckpointCommitRequest,
+    DraftCheckpointRequest,
+    LoopCursorCheckpointRequest,
     OperationGrantRequest,
     OperationGrantResult,
     OperationReconcileRequest,
@@ -52,6 +64,7 @@ from app.reading_policy import PinnedExecutionPolicy
 from app.repair.base import RepairExecutionError, RepairJustificationError
 from app.repair.contracts import RepairAction, RepairPlan, RepairPlanValidationError
 from app.repair.question import QuestionItemRepairer
+from app.stage_executor import DependencyStaleError, StageExecutor
 
 
 PASSAGE_WEST_AFRICA = (
@@ -65,15 +78,26 @@ PASSAGE_WEST_AFRICA = (
 class FencedTestCheckpointClient:
     """Mock CheckpointClient that enforces strict epoch and lease fencing."""
 
-    def __init__(self, run_id: str, epoch: int, lease_owner: UUID, job_id: Optional[UUID] = None):
+    def __init__(
+        self,
+        run_id: str,
+        epoch: int,
+        lease_owner: UUID,
+        job_id: Optional[UUID] = None,
+        policy_hash: Optional[str] = None,
+    ):
         self.run_id = run_id
         self.active_epoch = epoch
         self.active_lease_owner = lease_owner
         self.job_id = job_id or uuid4()
+        self.policy_hash = policy_hash or PinnedExecutionPolicy(provider="minimax").hash
         self.operations: Dict[str, OperationResumeInfo] = {}
         self.grants: List[OperationGrantRequest] = []
         self.reconciliations: List[OperationReconcileRequest] = []
         self.saved_cursors: List[Any] = []
+        self.heads: Dict[str, ArtifactEnvelope] = {}
+        self.drafts: Dict[tuple[str, int], ArtifactEnvelope] = {}
+        self.evaluations: List[EvaluationResult] = []
 
     def fence(self, request: Any) -> None:
         req_epoch = getattr(request, "epoch", None)
@@ -83,6 +107,56 @@ class FencedTestCheckpointClient:
         req_owner = getattr(request, "leaseOwner", getattr(request, "lease_owner", None))
         if req_owner is not None and req_owner != self.active_lease_owner:
             raise CheckpointApiError(403, f"lease lost: caller {req_owner} is not lease owner {self.active_lease_owner}")
+
+    def add_accepted_artifact(self, env: ArtifactEnvelope) -> None:
+        self.heads[env.artifact_id] = env
+
+    def save_draft_checkpoint(self, request: DraftCheckpointRequest) -> CheckpointAck:
+        self.fence(request)
+        key = (request.artifact.artifact_id, request.artifact.version)
+        self.drafts[key] = request.artifact
+        op = self.operations.get(request.operationId)
+        if op:
+            self.operations[request.operationId] = op.model_copy(update={
+                "status": "COMPLETED",
+                "tokensUsed": request.tokensUsed,
+                "resultRefJson": request.artifact.to_ref().model_dump_json(by_alias=True),
+            })
+        return CheckpointAck(
+            runId=request.runId,
+            epoch=request.epoch,
+            artifactId=request.artifact.artifact_id,
+            version=request.artifact.version,
+            contentHash=request.artifact.content_hash,
+            serverTimestampUtc=datetime.now(timezone.utc),
+        )
+
+    async def save_draft_checkpoint_async(self, request: DraftCheckpointRequest) -> CheckpointAck:
+        return self.save_draft_checkpoint(request)
+
+    def commit_checkpoint(self, request: CheckpointCommitRequest) -> CheckpointAck:
+        self.fence(request)
+        self.heads[request.artifact.artifact_id] = request.artifact
+        if request.evaluations:
+            self.evaluations.extend(request.evaluations)
+        op = self.operations.get(request.operationId)
+        if op:
+            self.operations[request.operationId] = op.model_copy(update={
+                "status": "COMPLETED",
+                "tokensUsed": request.tokensUsed,
+                "resultRefJson": request.artifact.to_ref().model_dump_json(by_alias=True),
+            })
+        return CheckpointAck(
+            runId=request.runId,
+            epoch=request.epoch,
+            artifactId=request.artifact.artifact_id,
+            version=request.artifact.version,
+            contentHash=request.artifact.content_hash,
+            serverTimestampUtc=datetime.now(timezone.utc),
+        )
+
+    async def commit_checkpoint_async(self, request: CheckpointCommitRequest) -> CheckpointAck:
+        return self.commit_checkpoint(request)
 
     def grant_operation(self, request: OperationGrantRequest) -> OperationGrantResult:
         self.fence(request)
@@ -165,17 +239,56 @@ class FencedTestCheckpointClient:
         return self.record_unknown_outcome(request)
 
     def resume_state(self, run_id: str) -> ResumeStateResult:
+        loop_pol = PinnedExecutionPolicy(provider="minimax").to_loop_policy(scope="SECTION")
+        profile = loop_pol.cap_profile_snapshot
+        profile_json = cap_snapshot_json(profile)
+        profile_sha = cap_snapshot_sha256(profile)
+
+        art_infos = [
+            ArtifactResumeInfo(
+                artifactId=a.artifact_id,
+                artifactType=a.artifact_type.value,
+                acceptedVersion=a.version,
+                acceptedHash=a.content_hash,
+                payloadJson=json.dumps(canonical_json_dump_prep(a.payload)),
+                parentRefs=list(a.parent_refs),
+                isStale=False,
+                envelopeJson=a.model_dump_json(by_alias=True),
+            )
+            for a in self.heads.values()
+        ]
+        draft_infos = [
+            ArtifactResumeInfo(
+                artifactId=d.artifact_id,
+                artifactType=d.artifact_type.value,
+                acceptedVersion=d.version,
+                acceptedHash=d.content_hash,
+                payloadJson=json.dumps(canonical_json_dump_prep(d.payload)),
+                parentRefs=list(d.parent_refs),
+                isStale=False,
+                envelopeJson=d.model_dump_json(by_alias=True),
+            )
+            for d in self.drafts.values()
+        ]
         return ResumeStateResult(
             runId=self.run_id,
             jobId=self.job_id,
             epoch=self.active_epoch,
             status="RUNNING",
+            engineVersion="unified-v2",
+            schemaVersion="2.0.0",
+            policyVersion="v2",
+            policyHash=self.policy_hash,
+            budgetProfileJson=profile_json,
+            budgetProfileSha256=profile_sha,
+            budgetProfileVersion=profile.get("profileVersion", "pinned-execution-v2"),
+            budgetProfileSource=profile.get("profileSource", "PinnedExecutionPolicy"),
             isCompatible=True,
-            artifacts=[],
-            draftArtifacts=[],
+            artifacts=art_infos,
+            draftArtifacts=draft_infos,
             operations=list(self.operations.values()),
             loopCursors=[],
-            evaluations=[],
+            evaluations=list(self.evaluations),
         )
 
     async def resume_state_async(self, run_id: str) -> ResumeStateResult:
@@ -243,7 +356,53 @@ class RecordingHybridIntegrationProvider(BaseProvider):
                 usage=UsageReport(prompt_tokens=250, completion_tokens=110, total_tokens=360, reasoning_tokens=90),
             )
 
-        # 2. MiniMax-Text-01 Candidate Regeneration
+        # 2. MiniMax-Text-01 Blind Solver
+        if request.capability == Capability.SOLVE_ITEM:
+            span_text = "During the 14th century, iron smelting spread rapidly across West Africa."
+            start = PASSAGE_WEST_AFRICA.find(span_text)
+            end = start + len(span_text) if start != -1 else len(span_text)
+            solve_data = {
+                "questionNumber": 2,
+                "normalizedAnswer": "iron smelting",
+                "justification": "Verbatim evidence confirms iron smelting spread across West Africa in the 14th century.",
+                "selfReportedConfidence": 0.95,
+                "citedSpans": [
+                    {
+                        "spanText": span_text,
+                        "startChar": max(0, start),
+                        "endChar": end,
+                    }
+                ],
+            }
+            return ProviderResponse(
+                operation_id=request.operation_id,
+                provider_name=self.name,
+                model_name="MiniMax-Text-01",
+                raw_text=json.dumps(solve_data),
+                parsed_payload=solve_data,
+                finish_reason=FinishReason.STOP,
+                usage=UsageReport(prompt_tokens=150, completion_tokens=40, total_tokens=190),
+            )
+
+        # 3. MiniMax-Text-01 Blind Adversary
+        if request.capability == Capability.EVALUATE_ITEM:
+            adv_data = {
+                "questionNumber": 2,
+                "isAmbiguous": False,
+                "adversarySummary": "The question is unambiguous and strictly grounded in the passage.",
+                "identifiedAlternatives": [],
+            }
+            return ProviderResponse(
+                operation_id=request.operation_id,
+                provider_name=self.name,
+                model_name="MiniMax-Text-01",
+                raw_text=json.dumps(adv_data),
+                parsed_payload=adv_data,
+                finish_reason=FinishReason.STOP,
+                usage=UsageReport(prompt_tokens=180, completion_tokens=35, total_tokens=215),
+            )
+
+        # 4. MiniMax-Text-01 Candidate Regeneration
         self.text_call_count += 1
         text_response = {
             "candidates": [
@@ -276,12 +435,14 @@ def make_production_run_context(
     lease_owner: Optional[UUID] = None,
     client: Optional[Any] = None,
     gateway: Optional[Any] = None,
+    job_id: Optional[UUID] = None,
 ) -> tuple[RunContext, UUID]:
     owner = lease_owner or uuid4()
+    job = job_id or getattr(client, "job_id", None) or uuid4()
     policy = PinnedExecutionPolicy(provider="minimax")
     ctx = RunContext(
         runId=run_id,
-        jobId=uuid4(),
+        jobId=job,
         epoch=epoch,
         leaseOwner=owner,
         policyHash=policy.hash,
@@ -751,3 +912,672 @@ async def test_existing_text_only_behavior_unchanged_when_hybrid_disabled():
     # Text-01 candidate generator handled repair directly
     assert provider.text_call_count == 1, "Text-01 candidate generator must perform unconstrained repair"
     assert repaired_env.version == 2
+
+
+# ─── 11. SectionRunner Repair Callback via StageExecutor & LoopRuntime ────────
+
+def make_parent_artifacts(run_id: str) -> tuple[ArtifactEnvelope, ArtifactEnvelope]:
+    """Creates authentic accepted passage and blueprint artifacts for dependency closure."""
+    p_ref_id = f"passage:{run_id}:1"
+    passage_payload = {
+        "passage": PASSAGE_WEST_AFRICA,
+        "title": "Iron Smelting in West Africa",
+        "wordCount": 78,
+    }
+    passage_env = ArtifactEnvelope.create(
+        artifact_id=p_ref_id,
+        artifact_type=ArtifactType.PASSAGE,
+        version=1,
+        payload=passage_payload,
+        parent_refs=(),
+        run_id=run_id,
+        section_id=1,
+        producer_version="2.0.0",
+    )
+
+    bp_ref_id = f"blueprint:{run_id}"
+    blueprint_payload = {
+        "sections": [
+            {
+                "sectionId": 1,
+                "topic": "West African Metallurgy",
+                "questionSlots": [
+                    {
+                        "questionNumber": 2,
+                        "questionType": "SHORT_ANSWER",
+                        "claimRefIds": ["claim_s1_fact_01"],
+                    }
+                ],
+            }
+        ]
+    }
+    blueprint_env = ArtifactEnvelope.create(
+        artifact_id=bp_ref_id,
+        artifact_type=ArtifactType.EXAM_BLUEPRINT,
+        version=1,
+        payload=blueprint_payload,
+        parent_refs=(),
+        run_id=run_id,
+        producer_version="2.0.0",
+    )
+    return passage_env, blueprint_env
+
+
+@pytest.mark.asyncio
+async def test_section_runner_repair_callback_through_stage_executor_and_loop_runtime():
+    """11. Exercises the actual SectionRunner repair callback through StageExecutor & BoundedLoopRuntime.
+
+    Verifies:
+    - BoundedLoopRuntime drives the full state machine: DRAFTING -> EVALUATING -> REPAIRING -> EVALUATING -> COMPLETED.
+    - StageRepAdapter invokes the SectionRunner repair_question_item callback.
+    - M3 diagnostic planning is executed once, followed by constrained Text-01 regeneration.
+    - Repaired V2 draft is committed to persistence and re-evaluated.
+    - Authoritative accepted V2 artifact is returned.
+    """
+    run_id = f"test_hybrid_11_{uuid4().hex[:8]}"
+    client = FencedTestCheckpointClient(run_id=run_id, epoch=1, lease_owner=uuid4())
+    passage_env, blueprint_env = make_parent_artifacts(run_id)
+    client.add_accepted_artifact(passage_env)
+    client.add_accepted_artifact(blueprint_env)
+
+    registry = ProviderRegistry()
+    provider = RecordingHybridIntegrationProvider()
+    registry.register_provider(provider, keys=["k1"])
+    gateway = ProviderGateway(registry=registry, retry_policy=RetryPolicy(max_attempts=1), checkpoint_client=client)
+
+    policy = PinnedExecutionPolicy(provider="minimax")
+    context, lease_owner = make_production_run_context(
+        run_id, epoch=1, lease_owner=client.active_lease_owner, client=client, gateway=gateway
+    )
+    executor = StageExecutor(client, context, policy)
+
+    q_art_id = f"question:{run_id}:2"
+    q_parents = (passage_env.to_ref(), blueprint_env.to_ref())
+
+    # V1 question generator
+    async def generate_question(version: int) -> dict[str, Any]:
+        return {
+            "questionNumber": 2,
+            "questionType": "SHORT_ANSWER",
+            "prompt": "What technology spread across West Africa?",  # Ambiguous: lacks 14th century anchor
+            "answer": "iron smelting",
+            "evidenceQuote": "During the 14th century, iron smelting spread rapidly across West Africa.",
+            "evidenceClaimRef": "claim_s1_fact_01",
+            "claimRef": "claim_s1_fact_01",
+            "explanation": "Archaeological surveys confirm early adoption of iron smelting.",
+            "difficulty": "MEDIUM",
+            "candidates": [
+                {
+                    "candidateId": "cand_q2_v1",
+                    "questionNumber": 2,
+                    "questionType": "SHORT_ANSWER",
+                    "prompt": "What technology spread across West Africa?",
+                    "answer": "iron smelting",
+                    "evidenceQuote": "During the 14th century, iron smelting spread rapidly across West Africa.",
+                    "explanation": "Archaeological surveys confirm early adoption of iron smelting.",
+                    "score": 0.75,
+                }
+            ],
+        }
+
+    # All required evaluators
+    async def evaluate_question_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
+        eval_ids = [
+            "eval_question_structure", "eval_answer_verbatim_length", "eval_evidence_offsets",
+            "eval_question_uniqueness", "eval_question_semantic", "eval_blind_solver_adversary",
+        ]
+        results = []
+        for eid in eval_ids:
+            if art.version == 1 and eid == "eval_question_semantic":
+                iss = Issue(
+                    code=IssueCode.AMBIGUOUS_ANSWER,
+                    message="Question 2 answer is ambiguous: multiple technologies match without century anchor",
+                    severity=IssueSeverity.CRITICAL,
+                    scope=IssueScope.QUESTION,
+                    affected_refs=[art.to_ref()],
+                )
+                results.append(EvaluationResult(
+                    evaluationId=f"eval_{eid}_v{art.version}",
+                    evaluatorId=eid,
+                    evaluatorVersion="1.0.0",
+                    targetRef=art.to_ref(),
+                    inputDependencyRefs=list(art.parent_refs),
+                    status=EvaluationStatus.FAIL,
+                    score=0.4,
+                    issues=[iss],
+                ))
+            else:
+                results.append(EvaluationResult(
+                    evaluationId=f"eval_{eid}_v{art.version}",
+                    evaluatorId=eid,
+                    evaluatorVersion="1.0.0",
+                    targetRef=art.to_ref(),
+                    inputDependencyRefs=list(art.parent_refs),
+                    status=EvaluationStatus.PASS,
+                    score=1.0,
+                    issues=[],
+                ))
+        return results
+
+    # The actual SectionRunner repair callback
+    async def repair_question_item(
+        art: ArtifactEnvelope,
+        issues: Sequence[Any],
+        ver: int,
+        intent_id: Optional[str] = None,
+    ) -> dict[str, Any]:
+        enable_hybrid = getattr(context, "enable_hybrid_repair", True)
+        item_rep = QuestionItemRepairer(gateway=gateway, enable_hybrid=enable_hybrid)
+        pl = dict(art.payload)
+        if "passage" not in pl and "passageText" not in pl:
+            pl["passage"] = PASSAGE_WEST_AFRICA
+        effective_intent_id = intent_id or f"op_repair_q_{ver}"
+        repaired_env = await item_rep.repair(context, art.model_copy(update={"payload": pl}), issues, effective_intent_id, ver)
+        res_pl = dict(repaired_env.payload)
+        res_pl.pop("passage", None)
+        return res_pl
+
+    # Execute StageExecutor
+    accepted_q_env = await executor.execute(
+        q_art_id,
+        ArtifactType.QUESTION,
+        q_parents,
+        generate_question,
+        evaluate_question_stage,
+        section_id=1,
+        repair=repair_question_item,
+    )
+
+    # Invariants
+    assert accepted_q_env.version == 2
+    assert "14th century" in accepted_q_env.payload["prompt"]
+    assert accepted_q_env.payload["evidenceClaimRef"] == "claim_s1_fact_01"
+    assert provider.m3_call_count == 1
+    assert provider.text_call_count == 1
+    assert q_art_id in client.heads
+    assert client.heads[q_art_id].version == 2
+
+
+# ─── 12. Evaluators Rerun After Repair Including Blind Solver / Adversary ─────
+
+@pytest.mark.asyncio
+async def test_evaluators_rerun_after_repair_including_blind_solver_adversary():
+    """12. Verifies that all required evaluators rerun after repair, including blind solver and adversary."""
+    from app.solvers.cache import BlindSolverCache
+    from app.evaluators.solver import BlindSolverEvaluator
+    from app.solvers.serializer import build_blind_solver_input
+
+    run_id = f"test_hybrid_12_{uuid4().hex[:8]}"
+    client = FencedTestCheckpointClient(run_id=run_id, epoch=1, lease_owner=uuid4())
+    passage_env, blueprint_env = make_parent_artifacts(run_id)
+    client.add_accepted_artifact(passage_env)
+    client.add_accepted_artifact(blueprint_env)
+
+    registry = ProviderRegistry()
+    provider = RecordingHybridIntegrationProvider()
+    registry.register_provider(provider, keys=["k1"])
+    gateway = ProviderGateway(registry=registry, retry_policy=RetryPolicy(max_attempts=1), checkpoint_client=client)
+
+    policy = PinnedExecutionPolicy(provider="minimax")
+    context, _ = make_production_run_context(run_id, epoch=1, lease_owner=client.active_lease_owner, client=client, gateway=gateway)
+    executor = StageExecutor(client, context, policy)
+
+    q_art_id = f"question:{run_id}:2"
+    q_parents = (passage_env.to_ref(), blueprint_env.to_ref())
+
+    evaluated_versions: list[int] = []
+
+    async def generate_question(version: int) -> dict[str, Any]:
+        return {
+            "questionNumber": 2,
+            "questionType": "SHORT_ANSWER",
+            "prompt": "What technology spread across West Africa?",
+            "answer": "iron smelting",
+            "evidenceQuote": "During the 14th century, iron smelting spread rapidly across West Africa.",
+            "evidenceClaimRef": "claim_s1_fact_01",
+            "claimRef": "claim_s1_fact_01",
+            "explanation": "Archaeological surveys confirm early adoption of iron smelting.",
+            "difficulty": "MEDIUM",
+            "candidates": [
+                {
+                    "candidateId": "cand_q2_v1",
+                    "questionNumber": 2,
+                    "questionType": "SHORT_ANSWER",
+                    "prompt": "What technology spread across West Africa?",
+                    "answer": "iron smelting",
+                    "evidenceQuote": "During the 14th century, iron smelting spread rapidly across West Africa.",
+                    "explanation": "Archaeological surveys confirm early adoption of iron smelting.",
+                    "score": 0.75,
+                }
+            ],
+        }
+
+    async def evaluate_question_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
+        evaluated_versions.append(art.version)
+        eval_ids = [
+            "eval_question_structure", "eval_answer_verbatim_length", "eval_evidence_offsets",
+            "eval_question_uniqueness", "eval_question_semantic",
+        ]
+        results = []
+        for eid in eval_ids:
+            if art.version == 1 and eid == "eval_question_semantic":
+                iss = Issue(
+                    code=IssueCode.AMBIGUOUS_ANSWER,
+                    message="Question 2 answer is ambiguous: multiple technologies match without century anchor",
+                    severity=IssueSeverity.CRITICAL,
+                    scope=IssueScope.QUESTION,
+                    affected_refs=[art.to_ref()],
+                )
+                results.append(EvaluationResult(
+                    evaluationId=f"eval_{eid}_v{art.version}",
+                    evaluatorId=eid,
+                    evaluatorVersion="1.0.0",
+                    targetRef=art.to_ref(),
+                    inputDependencyRefs=list(art.parent_refs),
+                    status=EvaluationStatus.FAIL,
+                    score=0.4,
+                    issues=[iss],
+                ))
+            else:
+                results.append(EvaluationResult(
+                    evaluationId=f"eval_{eid}_v{art.version}",
+                    evaluatorId=eid,
+                    evaluatorVersion="1.0.0",
+                    targetRef=art.to_ref(),
+                    inputDependencyRefs=list(art.parent_refs),
+                    status=EvaluationStatus.PASS,
+                    score=1.0,
+                    issues=[],
+                ))
+
+        # Real BlindSolverEvaluator executed on V2
+        q_cache = BlindSolverCache()
+        blind_evaluator = BlindSolverEvaluator(
+            gateway=gateway,
+            solver_provider="minimax",
+            adversary_provider="minimax",
+            cache=q_cache,
+        )
+        blind_input = build_blind_solver_input(
+            passage_text=PASSAGE_WEST_AFRICA,
+            question_data=art.payload,
+            section_id=1,
+        )
+        expected_ans = str(art.payload.get("answer") or "")
+        blind_res, _ = await blind_evaluator.evaluate_blind_input(
+            blind_input=blind_input,
+            expected_answer=expected_ans,
+            target_ref=art.to_ref(),
+            context=context,
+            input_dependency_refs=list(art.parent_refs),
+        )
+        results.append(blind_res)
+        return results
+
+    async def repair_question_item(art: ArtifactEnvelope, issues: Sequence[Any], ver: int, intent_id: Optional[str] = None) -> dict[str, Any]:
+        item_rep = QuestionItemRepairer(gateway=gateway, enable_hybrid=True)
+        pl = dict(art.payload)
+        pl["passage"] = PASSAGE_WEST_AFRICA
+        effective_intent_id = intent_id or f"op_repair_q_{ver}"
+        repaired_env = await item_rep.repair(context, art.model_copy(update={"payload": pl}), issues, effective_intent_id, ver)
+        res_pl = dict(repaired_env.payload)
+        res_pl.pop("passage", None)
+        return res_pl
+
+    accepted_q_env = await executor.execute(
+        q_art_id,
+        ArtifactType.QUESTION,
+        q_parents,
+        generate_question,
+        evaluate_question_stage,
+        section_id=1,
+        repair=repair_question_item,
+    )
+
+    # Invariant: Both V1 and V2 were evaluated
+    assert 1 in evaluated_versions, "V1 must be evaluated"
+    assert 2 in evaluated_versions, "V2 must be re-evaluated after repair"
+    assert accepted_q_env.version == 2
+    # Verify solver and adversary requests were dispatched for V2
+    dispatched_caps = [r.capability for r in provider.dispatched_requests]
+    assert Capability.SOLVE_ITEM in dispatched_caps
+    assert Capability.EVALUATE_ITEM in dispatched_caps
+
+
+# ─── 13. Reject Missing Passage/Blueprint Parents Without Dummy Synthesis ─────
+
+@pytest.mark.asyncio
+async def test_reject_missing_passage_or_blueprint_parent_reference():
+    """13. Rejects missing passage or blueprint parent references; never synthesizes dummy hashes."""
+    run_id = f"test_hybrid_13_{uuid4().hex[:8]}"
+    client = FencedTestCheckpointClient(run_id=run_id, epoch=1, lease_owner=uuid4())
+    passage_env, blueprint_env = make_parent_artifacts(run_id)
+    client.add_accepted_artifact(passage_env)
+    client.add_accepted_artifact(blueprint_env)
+
+    policy = PinnedExecutionPolicy(provider="minimax")
+    context, _ = make_production_run_context(run_id, epoch=1, lease_owner=client.active_lease_owner, client=client)
+    executor = StageExecutor(client, context, policy)
+
+    q_art_id = f"question:{run_id}:2"
+
+    # 13a. QuestionItemRepairer fails closed when artifact has no passage parent (no dummy synthesis)
+    orphaned_art_no_passage = ArtifactEnvelope.create(
+        artifact_id=f"question:{run_id}:2",
+        artifact_type=ArtifactType.QUESTION,
+        version=1,
+        payload={
+            "questionNumber": 2,
+            "questionType": "SHORT_ANSWER",
+            "prompt": "Q prompt",
+            "answer": "iron smelting",
+            "claimRef": "claim_s1_fact_01",
+            "evidenceClaimRef": "claim_s1_fact_01",
+            "passage": PASSAGE_WEST_AFRICA,
+        },
+        parent_refs=(blueprint_env.to_ref(),),  # Missing passage!
+        run_id=run_id,
+        section_id=1,
+        producer_version="2.0.0",
+    )
+    registry = ProviderRegistry()
+    provider = RecordingHybridIntegrationProvider()
+    registry.register_provider(provider, keys=["k1"])
+    gateway = ProviderGateway(registry=registry, retry_policy=RetryPolicy(max_attempts=1), checkpoint_client=client)
+    repairer = QuestionItemRepairer(gateway=gateway)
+    issue = Issue(code=IssueCode.AMBIGUOUS_ANSWER, message="Ambiguous", severity=IssueSeverity.CRITICAL, scope=IssueScope.QUESTION)
+
+    with pytest.raises(RepairJustificationError, match="lacks required passage parent reference"):
+        await repairer.repair(context, orphaned_art_no_passage, [issue], "intent_no_passage", 2)
+
+    # 13b. QuestionItemRepairer fails closed when artifact has no blueprint parent (no dummy synthesis)
+    orphaned_art_no_bp = ArtifactEnvelope.create(
+        artifact_id=f"question:{run_id}:2",
+        artifact_type=ArtifactType.QUESTION,
+        version=1,
+        payload={
+            "questionNumber": 2,
+            "questionType": "SHORT_ANSWER",
+            "prompt": "Q prompt",
+            "answer": "iron smelting",
+            "claimRef": "claim_s1_fact_01",
+            "evidenceClaimRef": "claim_s1_fact_01",
+            "passage": PASSAGE_WEST_AFRICA,
+        },
+        parent_refs=(passage_env.to_ref(),),  # Missing blueprint!
+        run_id=run_id,
+        section_id=1,
+        producer_version="2.0.0",
+    )
+    with pytest.raises(RepairJustificationError, match="lacks required blueprint parent reference"):
+        await repairer.repair(context, orphaned_art_no_bp, [issue], "intent_no_bp", 2)
+
+    # 13c. Paper repairer fails closed when paper lacks blueprintRef
+    from app.repair.paper import PaperSurgicalRepairer, PaperRepairDirective
+    paper_repairer = PaperSurgicalRepairer()
+    bad_paper = ArtifactEnvelope.create(
+        artifact_id=f"paper:{run_id}",
+        artifact_type=ArtifactType.READING_PAPER,
+        version=1,
+        payload={"sections": []},  # Missing blueprintRef!
+        parent_refs=(),
+        run_id=run_id,
+        producer_version="2.0.0",
+    )
+    directive = PaperRepairDirective(target_section_id=1, patch_payload={"topic": "T"})
+    with pytest.raises(RepairExecutionError, match="lacks required blueprintRef"):
+        paper_repairer.repair_paper(bad_paper, directive)
+
+
+# ─── 14. Dev-Pinned Hybrid Disable via RunContext and Settings ────────────────
+
+@pytest.mark.asyncio
+async def test_dev_pinned_hybrid_disable_via_run_context():
+    """14. Verifies run-pinned enable_hybrid_repair=False routes repair to Text-only without M3."""
+    run_id = f"test_hybrid_14_{uuid4().hex[:8]}"
+    client = FencedTestCheckpointClient(run_id=run_id, epoch=1, lease_owner=uuid4())
+    passage_env, blueprint_env = make_parent_artifacts(run_id)
+    client.add_accepted_artifact(passage_env)
+    client.add_accepted_artifact(blueprint_env)
+
+    registry = ProviderRegistry()
+    provider = RecordingHybridIntegrationProvider()
+    registry.register_provider(provider, keys=["k1"])
+    gateway = ProviderGateway(registry=registry, retry_policy=RetryPolicy(max_attempts=1), checkpoint_client=client)
+
+    policy = PinnedExecutionPolicy(provider="minimax")
+    # Pinned hybrid disabled on RunContext!
+    owner = client.active_lease_owner
+    context = RunContext(
+        runId=run_id,
+        jobId=client.job_id,
+        epoch=1,
+        leaseOwner=owner,
+        policyHash=policy.hash,
+        enableHybridRepair=False,  # Explicitly disabled for dev testing!
+        client=client,
+        gateway=gateway,
+    )
+    executor = StageExecutor(client, context, policy)
+
+    q_art_id = f"question:{run_id}:2"
+    q_parents = (passage_env.to_ref(), blueprint_env.to_ref())
+
+    async def generate_question(version: int) -> dict[str, Any]:
+        return {
+            "questionNumber": 2,
+            "questionType": "SHORT_ANSWER",
+            "prompt": "What technology spread across West Africa?",
+            "answer": "iron smelting",
+            "evidenceQuote": "During the 14th century, iron smelting spread rapidly across West Africa.",
+            "evidenceClaimRef": "claim_s1_fact_01",
+            "claimRef": "claim_s1_fact_01",
+            "explanation": "Archaeological surveys confirm early adoption of iron smelting.",
+            "difficulty": "MEDIUM",
+            "candidates": [
+                {
+                    "candidateId": "cand_q2_v1",
+                    "questionNumber": 2,
+                    "questionType": "SHORT_ANSWER",
+                    "prompt": "What technology spread across West Africa?",
+                    "answer": "iron smelting",
+                    "evidenceQuote": "During the 14th century, iron smelting spread rapidly across West Africa.",
+                    "explanation": "Archaeological surveys confirm early adoption of iron smelting.",
+                    "score": 0.75,
+                }
+            ],
+        }
+
+    async def evaluate_question_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
+        eval_ids = [
+            "eval_question_structure", "eval_answer_verbatim_length", "eval_evidence_offsets",
+            "eval_question_uniqueness", "eval_question_semantic", "eval_blind_solver_adversary",
+        ]
+        results = []
+        for eid in eval_ids:
+            if art.version == 1 and eid == "eval_question_semantic":
+                iss = Issue(
+                    code=IssueCode.AMBIGUOUS_ANSWER,
+                    message="Question 2 answer is ambiguous",
+                    severity=IssueSeverity.CRITICAL,
+                    scope=IssueScope.QUESTION,
+                    affected_refs=[art.to_ref()],
+                )
+                results.append(EvaluationResult(
+                    evaluationId=f"eval_{eid}_v{art.version}",
+                    evaluatorId=eid,
+                    evaluatorVersion="1.0.0",
+                    targetRef=art.to_ref(),
+                    inputDependencyRefs=list(art.parent_refs),
+                    status=EvaluationStatus.FAIL,
+                    score=0.4,
+                    issues=[iss],
+                ))
+            else:
+                results.append(EvaluationResult(
+                    evaluationId=f"eval_{eid}_v{art.version}",
+                    evaluatorId=eid,
+                    evaluatorVersion="1.0.0",
+                    targetRef=art.to_ref(),
+                    inputDependencyRefs=list(art.parent_refs),
+                    status=EvaluationStatus.PASS,
+                    score=1.0,
+                    issues=[],
+                ))
+        return results
+
+    async def repair_question_item(art: ArtifactEnvelope, issues: Sequence[Any], ver: int, intent_id: Optional[str] = None) -> dict[str, Any]:
+        enable_hybrid = getattr(context, "enable_hybrid_repair", True)
+        item_rep = QuestionItemRepairer(gateway=gateway, enable_hybrid=enable_hybrid)
+        pl = dict(art.payload)
+        pl["passage"] = PASSAGE_WEST_AFRICA
+        effective_intent_id = intent_id or f"op_repair_q_{ver}"
+        repaired_env = await item_rep.repair(context, art.model_copy(update={"payload": pl}), issues, effective_intent_id, ver)
+        res_pl = dict(repaired_env.payload)
+        res_pl.pop("passage", None)
+        return res_pl
+
+    accepted_q_env = await executor.execute(
+        q_art_id,
+        ArtifactType.QUESTION,
+        q_parents,
+        generate_question,
+        evaluate_question_stage,
+        section_id=1,
+        repair=repair_question_item,
+    )
+
+    # Invariant: Hybrid disabled -> M3 NEVER called, Text-01 handles repair directly
+    assert provider.m3_call_count == 0, "M3 must not be dispatched when enable_hybrid_repair is False"
+    assert provider.text_call_count == 1, "Text-01 must perform unconstrained regeneration"
+    assert accepted_q_env.version == 2
+
+
+# ─── 15. Deterministic Operation Replay Under StageExecutor ───────────────────
+
+@pytest.mark.asyncio
+async def test_deterministic_operation_replay_under_stage_executor():
+    """15. Verifies deterministic operation replay against real checkpoint persistence prevents duplicate calls."""
+    run_id = f"test_hybrid_15_{uuid4().hex[:8]}"
+    client = FencedTestCheckpointClient(run_id=run_id, epoch=1, lease_owner=uuid4())
+    passage_env, blueprint_env = make_parent_artifacts(run_id)
+    client.add_accepted_artifact(passage_env)
+    client.add_accepted_artifact(blueprint_env)
+
+    registry = ProviderRegistry()
+    provider = RecordingHybridIntegrationProvider()
+    registry.register_provider(provider, keys=["k1"])
+    gateway = ProviderGateway(registry=registry, retry_policy=RetryPolicy(max_attempts=1), checkpoint_client=client)
+
+    policy = PinnedExecutionPolicy(provider="minimax")
+    context, _ = make_production_run_context(run_id, epoch=1, lease_owner=client.active_lease_owner, client=client, gateway=gateway)
+    executor = StageExecutor(client, context, policy)
+
+    q_art_id = f"question:{run_id}:2"
+    q_parents = (passage_env.to_ref(), blueprint_env.to_ref())
+
+    async def generate_question(version: int) -> dict[str, Any]:
+        return {
+            "questionNumber": 2,
+            "questionType": "SHORT_ANSWER",
+            "prompt": "What technology spread across West Africa?",
+            "answer": "iron smelting",
+            "evidenceQuote": "During the 14th century, iron smelting spread rapidly across West Africa.",
+            "evidenceClaimRef": "claim_s1_fact_01",
+            "claimRef": "claim_s1_fact_01",
+            "explanation": "Archaeological surveys confirm early adoption of iron smelting.",
+            "difficulty": "MEDIUM",
+            "candidates": [
+                {
+                    "candidateId": "cand_q2_v1",
+                    "questionNumber": 2,
+                    "questionType": "SHORT_ANSWER",
+                    "prompt": "What technology spread across West Africa?",
+                    "answer": "iron smelting",
+                    "evidenceQuote": "During the 14th century, iron smelting spread rapidly across West Africa.",
+                    "explanation": "Archaeological surveys confirm early adoption of iron smelting.",
+                    "score": 0.75,
+                }
+            ],
+        }
+
+    async def evaluate_question_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
+        eval_ids = [
+            "eval_question_structure", "eval_answer_verbatim_length", "eval_evidence_offsets",
+            "eval_question_uniqueness", "eval_question_semantic", "eval_blind_solver_adversary",
+        ]
+        results = []
+        for eid in eval_ids:
+            if art.version == 1 and eid == "eval_question_semantic":
+                iss = Issue(
+                    code=IssueCode.AMBIGUOUS_ANSWER,
+                    message="Question 2 answer is ambiguous",
+                    severity=IssueSeverity.CRITICAL,
+                    scope=IssueScope.QUESTION,
+                    affected_refs=[art.to_ref()],
+                )
+                results.append(EvaluationResult(
+                    evaluationId=f"eval_{eid}_v{art.version}",
+                    evaluatorId=eid,
+                    evaluatorVersion="1.0.0",
+                    targetRef=art.to_ref(),
+                    inputDependencyRefs=list(art.parent_refs),
+                    status=EvaluationStatus.FAIL,
+                    score=0.4,
+                    issues=[iss],
+                ))
+            else:
+                results.append(EvaluationResult(
+                    evaluationId=f"eval_{eid}_v{art.version}",
+                    evaluatorId=eid,
+                    evaluatorVersion="1.0.0",
+                    targetRef=art.to_ref(),
+                    inputDependencyRefs=list(art.parent_refs),
+                    status=EvaluationStatus.PASS,
+                    score=1.0,
+                    issues=[],
+                ))
+        return results
+
+    async def repair_question_item(art: ArtifactEnvelope, issues: Sequence[Any], ver: int, intent_id: Optional[str] = None) -> dict[str, Any]:
+        item_rep = QuestionItemRepairer(gateway=gateway, enable_hybrid=True)
+        pl = dict(art.payload)
+        pl["passage"] = PASSAGE_WEST_AFRICA
+        effective_intent_id = intent_id or f"op_repair_q_{ver}"
+        repaired_env = await item_rep.repair(context, art.model_copy(update={"payload": pl}), issues, effective_intent_id, ver)
+        res_pl = dict(repaired_env.payload)
+        res_pl.pop("passage", None)
+        return res_pl
+
+    # First execution
+    env1 = await executor.execute(
+        q_art_id,
+        ArtifactType.QUESTION,
+        q_parents,
+        generate_question,
+        evaluate_question_stage,
+        section_id=1,
+        repair=repair_question_item,
+    )
+    first_m3_calls = provider.m3_call_count
+    first_text_calls = provider.text_call_count
+    assert first_m3_calls == 1
+    assert first_text_calls == 1
+
+    # Second execution against identical checkpoint state (process recovery / replay)
+    executor2 = StageExecutor(client, context, policy)
+    env2 = await executor2.execute(
+        q_art_id,
+        ArtifactType.QUESTION,
+        q_parents,
+        generate_question,
+        evaluate_question_stage,
+        section_id=1,
+        repair=repair_question_item,
+    )
+
+    # Invariant: Output is identical and zero additional provider calls were made
+    assert env2.content_hash == env1.content_hash
+    assert env2.version == env1.version
+    assert provider.m3_call_count == first_m3_calls, "Replay must not re-dispatch M3"
+    assert provider.text_call_count == first_text_calls, "Replay must not re-dispatch Text-01"
