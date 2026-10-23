@@ -228,7 +228,7 @@ def test_a6_stale_or_fabricated_claim_prefix_is_prohibited():
     )
     bp = build_blueprint(ev_env, "run_a6", policy.sections, policy=policy, topic="Marine Biology")
     bp_fab = copy.deepcopy(bp)
-    bp_fab["sections"][0]["questionSlots"][0]["claimRefIds"] = ["claim:run_a6:1:1"]
+    bp_fab["sections"][0]["questionSlots"][0]["claimRefIds"] = ["claim:fake_a6:1:1"]
     bp_fab["sections"][0]["questionSlots"][1]["claimRefIds"] = ["claim:None:1:2"]
     bp_fab["sections"][0]["questionSlots"][2]["claimRefIds"] = ["claim:synthetic:1:3"]
 
@@ -282,13 +282,15 @@ def test_a8_valid_full_blueprint_covers_3_sections_and_40_numbered_slots():
     all_q_nums = [slot.question_number for sec in exam_bp.sections for slot in sec.question_slots]
     assert all_q_nums == list(range(1, 41))
 
-    # All slots have non-empty, non-synthetic claim references
+    # All slots have non-empty, non-synthetic claim references matching verified evidence
     for sec in exam_bp.sections:
         for slot in sec.question_slots:
             assert len(slot.claim_ref_ids) > 0
             for cid in slot.claim_ref_ids:
-                assert not cid.startswith("claim:run_")
+                assert not cid.startswith("claim:synthetic:")
+                assert not cid.startswith("claim:fake:")
                 assert not cid.startswith("claim:None:")
+                assert any(c["claimId"] == cid for c in claims), f"Claim {cid} not in verified evidence"
 
 
 def test_a9_explicit_legacy_preset_no_regression():

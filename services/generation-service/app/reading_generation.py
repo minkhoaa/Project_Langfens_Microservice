@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from typing import Any, Union
 from urllib.parse import urlparse
 
-from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, canonical_json_dump_prep
+from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType, canonical_json_dump_prep
 from app.contracts.blueprint import (
     BudgetAllocation, DifficultyLevel, EvidenceGraphRef, ExamBlueprint,
     PassageObjective, QuestionSlot, QuestionType, QuestionTypeAllocation,
@@ -166,6 +166,10 @@ def build_evidence(
     run_id: str,
     section_id: int,
     policy: PinnedExecutionPolicy,
+    max_claims: Optional[int] = None,
+    min_word_len: int = 8,
+    max_word_len: int = 45,
+    target_families: Optional[Sequence[Any]] = None,
 ) -> dict[str, Any]:
     """Extracts atomic, non-contradictory claims with verified exact source offsets."""
     payload = _payload(source_envelope)
@@ -180,10 +184,11 @@ def build_evidence(
     spans = extract_spans(text, source_id)
     claims: list[VerifiedClaim] = []
     seen_texts: set[str] = set()
+    claim_limit = max_claims if max_claims is not None else max(policy.min_verified_claims, 16)
 
     for idx, span in enumerate(spans):
         # Select factual descriptive sentences of appropriate length
-        if span.word_count < 8 or span.word_count > 45:
+        if span.word_count < min_word_len or span.word_count > max_word_len:
             continue
         trimmed = span.text.strip()
         if trimmed in seen_texts:
@@ -221,7 +226,7 @@ def build_evidence(
             )
         )
         seen_texts.add(trimmed)
-        if len(claims) >= max(policy.min_verified_claims, 16):
+        if len(claims) >= claim_limit:
             break
 
     if len(claims) < policy.min_verified_claims:
@@ -257,6 +262,27 @@ def build_evidence(
     return graph.model_dump(mode="json", by_alias=True)
 
 
+def reextract_evidence_for_section(
+    source_envelope: Union[ArtifactEnvelope, dict[str, Any]],
+    run_id: str,
+    section_id: int,
+    policy: PinnedExecutionPolicy,
+    target_families: Optional[Sequence[Any]] = None,
+    max_claims: int = 36,
+) -> dict[str, Any]:
+    """Controlled evidence re-extraction from verified source text for blueprint self-recovery."""
+    return build_evidence(
+        source_envelope=source_envelope,
+        run_id=run_id,
+        section_id=section_id,
+        policy=policy,
+        max_claims=max_claims,
+        min_word_len=6,
+        max_word_len=55,
+        target_families=target_families,
+    )
+
+
 def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
     """Builds an authoritative ExamBlueprint covering all selected sections.
 
@@ -287,14 +313,110 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
             f"Run token budget ({policy.run_token_cap}) is insufficient for selected sections"
         )
     if getattr(policy, "blueprint_mode", "legacy_preset") == "dynamic":
-        from app.blueprint.generator import generate_dynamic_blueprint
+        from app.blueprint.generator import generate_dynamic_blueprint, InsufficientEvidenceForAllocationError
         evidence_summary = {
             "run_id": run_id,
             "topics": [f"{topic} - Section {i}" for i in (1, 2, 3)],
             "section_indices": list(sorted(section_indices)),
             "section_evidence": {sec_idx: _payload(evidence_map.get(sec_idx)) for sec_idx in section_indices if evidence_map.get(sec_idx)},
         }
-        dyn_bp = generate_dynamic_blueprint(policy, evidence_summary)
+
+        # Bounded blueprint self-recovery loop
+        max_recovery = getattr(policy, "max_recovery_attempts", 3)
+        recovery_attempts = 0
+        seen_digests: set[str] = set()
+        dyn_bp = None
+
+        # If any selected section has empty claims while source text is available, trigger controlled re-extraction
+        for sec_idx in section_indices:
+            ev_data = evidence_summary["section_evidence"].get(sec_idx, {})
+            if "claims" in ev_data and not ev_data["claims"] and sources_map.get(sec_idx):
+                recovery_attempts += 1
+                sec_src = sources_map[sec_idx]
+                reextracted_ev = reextract_evidence_for_section(
+                    source_envelope=sec_src,
+                    run_id=run_id,
+                    section_id=sec_idx,
+                    policy=policy,
+                    max_claims=16 + recovery_attempts * 12,
+                )
+                from app.reading_evaluation import evaluate_evidence
+                src_payload = _payload(sec_src)
+                text_map = {
+                    src_payload["sources"][0]["sourceId"]: src_payload["sources"][0]["document"]["text"]
+                }
+                ev_env = ArtifactEnvelope.create(
+                    f"evidence:{run_id}:{sec_idx}",
+                    ArtifactType.EVIDENCE_GRAPH,
+                    run_id,
+                    reextracted_ev,
+                    "1.0.0",
+                )
+                eval_results = evaluate_evidence(ev_env, text_map, policy.min_verified_claims)
+                if any(not e.is_pass() for e in eval_results):
+                    raise ValueError(
+                        f"Controlled evidence re-extraction for Section {sec_idx} failed evaluation: "
+                        f"{[i.message for e in eval_results for i in e.issues]}"
+                    )
+                evidence_map[sec_idx] = ev_env
+                evidence_summary["section_evidence"][sec_idx] = reextracted_ev
+
+        while recovery_attempts <= max_recovery:
+            try:
+                dyn_bp = generate_dynamic_blueprint(policy, evidence_summary)
+                break
+            except InsufficientEvidenceForAllocationError as exc:
+                recovery_attempts += 1
+                sec_to_recover = exc.section_id
+                sec_src = sources_map.get(sec_to_recover)
+                if not sec_src or recovery_attempts > max_recovery:
+                    raise ValueError(
+                        f"Section {sec_to_recover} verified evidence is insufficient for any allowed IELTS question family. "
+                        f"Bounded blueprint recovery exhausted ({recovery_attempts}/{max_recovery} attempts)."
+                    ) from exc
+
+                src_payload = _payload(sec_src)
+                src_text = src_payload.get("sources", [{}])[0].get("document", {}).get("text", "")
+                reextract_digest = hashlib.sha256(f"{sec_to_recover}:{len(src_text)}:{recovery_attempts}".encode()).hexdigest()
+                if reextract_digest in seen_digests:
+                    raise ValueError(
+                        f"Section {sec_to_recover} controlled evidence re-extraction stagnated with identical source text state. Failing closed."
+                    )
+                seen_digests.add(reextract_digest)
+
+                reextracted_ev = reextract_evidence_for_section(
+                    source_envelope=sec_src,
+                    run_id=run_id,
+                    section_id=sec_to_recover,
+                    policy=policy,
+                    target_families=exc.pool,
+                    max_claims=16 + recovery_attempts * 12,
+                )
+
+                from app.reading_evaluation import evaluate_evidence
+                text_map = {
+                    src_payload["sources"][0]["sourceId"]: src_payload["sources"][0]["document"]["text"]
+                }
+                ev_env = ArtifactEnvelope.create(
+                    f"evidence:{run_id}:{sec_to_recover}",
+                    ArtifactType.EVIDENCE_GRAPH,
+                    run_id,
+                    reextracted_ev,
+                    "1.0.0",
+                )
+                eval_results = evaluate_evidence(ev_env, text_map, policy.min_verified_claims)
+                if any(not e.is_pass() for e in eval_results):
+                    raise ValueError(
+                        f"Controlled evidence re-extraction for Section {sec_to_recover} failed evaluation: "
+                        f"{[i.message for e in eval_results for i in e.issues]}"
+                    )
+
+                evidence_map[sec_to_recover] = ev_env
+                evidence_summary["section_evidence"][sec_to_recover] = reextracted_ev
+
+        if dyn_bp is None:
+            raise ValueError("Failed to generate dynamic blueprint within bounded recovery attempts.")
+
         updated_sections = []
         for sb in dyn_bp.sections:
             sec_idx = sb.section_id
@@ -313,7 +435,23 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
             )
             if claims:
                 from app.blueprint.claim_binding import bind_claims_to_slots
-                updated_slots = bind_claims_to_slots(sb.question_slots, claims, sec_idx, graph_id, run_id)
+                try:
+                    updated_slots = bind_claims_to_slots(sb.question_slots, claims, sec_idx, graph_id, run_id)
+                except ValueError:
+                    sec_src = sources_map.get(sec_idx)
+                    if sec_src and recovery_attempts < max_recovery:
+                        recovery_attempts += 1
+                        reextracted_ev = reextract_evidence_for_section(
+                            source_envelope=sec_src,
+                            run_id=run_id,
+                            section_id=sec_idx,
+                            policy=policy,
+                            max_claims=36,
+                        )
+                        claims = reextracted_ev.get("claims", [])
+                        updated_slots = bind_claims_to_slots(sb.question_slots, claims, sec_idx, graph_id, run_id)
+                    else:
+                        raise
             else:
                 updated_slots = [q.model_copy(update={"claim_ref_ids": []}) for q in sb.question_slots]
 

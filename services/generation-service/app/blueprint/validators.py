@@ -320,7 +320,7 @@ def validate_blueprint(
                         )
                     )
                 for cid in slot.claim_ref_ids:
-                    if cid.startswith("claim:run_") or cid.startswith("claim:None:") or cid.startswith("claim:synthetic:") or cid.startswith("claim:placeholder:"):
+                    if not cid or cid.startswith("claim:synthetic:") or cid.startswith("claim:placeholder:") or cid.startswith("claim:None:") or cid.startswith("claim:fake:") or cid.startswith("claim:fake_"):
                         issues.append(
                             BlueprintIssue(
                                 code="BLUEPRINT_FABRICATED_CLAIM_PROHIBITED",
@@ -329,6 +329,21 @@ def validate_blueprint(
                                 field=f"sections[{sec_id}].questionSlots[{slot.question_number}].claimRefIds",
                             )
                         )
+                    else:
+                        parts = cid.split(":")
+                        if len(parts) >= 4 and parts[0] == "claim":
+                            try:
+                                if int(parts[2]) != sec_id:
+                                    issues.append(
+                                        BlueprintIssue(
+                                            code="BLUEPRINT_CROSS_SECTION_CLAIM_PROHIBITED",
+                                            severity=IssueSeverity.CRITICAL,
+                                            message=f"Question {slot.question_number} references cross-section claim '{cid}' from section {parts[2]} in section {sec_id}.",
+                                            field=f"sections[{sec_id}].questionSlots[{slot.question_number}].claimRefIds",
+                                        )
+                                    )
+                            except ValueError:
+                                pass
                 if evidence_map and sec_id in evidence_map:
                     ev_data = evidence_map[sec_id]
                     ev_payload = getattr(ev_data, "payload", ev_data) if hasattr(ev_data, "payload") else ev_data

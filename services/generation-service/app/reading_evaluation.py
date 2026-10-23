@@ -198,24 +198,34 @@ def evaluate_blueprint(
             q_num = slot.get("questionNumber")
             q_type = slot.get("questionType", "")
             for cid in slot.get("claimRefIds", ()):
-                if cid.startswith("claim:synthetic:") or cid.startswith("claim:run_") or cid.startswith("claim:placeholder:") or cid.startswith("claim:None:"):
+                if not cid or cid.startswith("claim:synthetic:") or cid.startswith("claim:placeholder:") or cid.startswith("claim:None:") or cid.startswith("claim:fake:") or cid.startswith("claim:fake_"):
                     problems.append((IssueCode.EVIDENCE_MISSING, f"Question {q_num} has fabricated synthetic claim ID '{cid}'"))
-                elif evidence_map and sec_id in evidence_map:
-                    if cid not in claims_by_id:
-                        problems.append((IssueCode.EVIDENCE_MISSING, f"Question {q_num} references claim '{cid}' which is not in Section {sec_id}'s verified EvidenceGraph"))
-                    else:
-                        claim_obj = claims_by_id[cid]
-                        claim_dict = (
-                            claim_obj.model_dump(by_alias=True)
-                            if hasattr(claim_obj, "model_dump")
-                            else (claim_obj if hasattr(claim_obj, "get") else {"claimId": cid, "text": getattr(claim_obj, "text", "")})
-                        )
-                        from app.blueprint.claim_binding import check_claim_eligibility_for_family
-                        if not check_claim_eligibility_for_family(claim_dict, str(q_type), sec_id):
-                            problems.append((
-                                IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM,
-                                f"Question {q_num} references claim '{cid}' which is semantically ineligible for question family '{q_type}'"
-                            ))
+                else:
+                    parts = cid.split(":")
+                    if len(parts) >= 4 and parts[0] == "claim":
+                        try:
+                            if int(parts[2]) != sec_id:
+                                problems.append((IssueCode.EVIDENCE_MISSING, f"Question {q_num} references cross-section claim '{cid}' from section {parts[2]} in section {sec_id}"))
+                                continue
+                        except ValueError:
+                            pass
+
+                    if evidence_map and sec_id in evidence_map:
+                        if cid not in claims_by_id:
+                            problems.append((IssueCode.EVIDENCE_MISSING, f"Question {q_num} references claim '{cid}' which is not in Section {sec_id}'s verified EvidenceGraph"))
+                        else:
+                            claim_obj = claims_by_id[cid]
+                            claim_dict = (
+                                claim_obj.model_dump(by_alias=True)
+                                if hasattr(claim_obj, "model_dump")
+                                else (claim_obj if hasattr(claim_obj, "get") else {"claimId": cid, "text": getattr(claim_obj, "text", "")})
+                            )
+                            from app.blueprint.claim_binding import check_claim_eligibility_for_family
+                            if not check_claim_eligibility_for_family(claim_dict, str(q_type), sec_id):
+                                problems.append((
+                                    IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM,
+                                    f"Question {q_num} references claim '{cid}' which is semantically ineligible for question family '{q_type}'"
+                                ))
 
     return [result(artifact, "eval_blueprint", problems)]
 

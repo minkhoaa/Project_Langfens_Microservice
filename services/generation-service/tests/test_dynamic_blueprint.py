@@ -235,7 +235,7 @@ def test_build_blueprint_production_reproducibility_and_evidence_awareness():
         for slot in sec["questionSlots"]:
             assert len(slot["claimRefIds"]) > 0
             for cid in slot["claimRefIds"]:
-                assert not cid.startswith("claim:run_repro_1:"), f"Found synthetic fabricated claim {cid}"
+                assert not cid.startswith("claim:fake_"), f"Found synthetic fabricated claim {cid}"
                 assert any(c["claimId"] == cid for c in verified_claims), f"Claim {cid} not in verified evidence"
 
     # 4. Missing claims cannot produce accepted claim refs (never fabricate synthetic claims)
@@ -268,7 +268,7 @@ def test_build_blueprint_production_reproducibility_and_evidence_awareness():
     from app.blueprint.validators import validate_blueprint
     from app.contracts.blueprint import ExamBlueprint
     tampered_bp_dict = dict(bp1)
-    tampered_bp_dict["sections"][0]["questionSlots"][0]["claimRefIds"] = ["claim:run_repro_1:1:1"]
+    tampered_bp_dict["sections"][0]["questionSlots"][0]["claimRefIds"] = ["claim:fake_repro_1:1:1"]
     tampered_bp = ExamBlueprint.model_validate(tampered_bp_dict)
     issues = validate_blueprint(tampered_bp, mode="dynamic")
     assert any(i.code == "BLUEPRINT_FABRICATED_CLAIM_PROHIBITED" for i in issues), (

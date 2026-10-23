@@ -76,6 +76,31 @@ public class ReadingPaperChunkStreamTests
     }
 
     [Fact]
+    public async Task ExecutePipelineAsync_ThrowsReadingPipelineExecutionException_OnBlueprintFailure_422()
+    {
+        var errorJson = "{\"detail\": \"blueprint:run_d6a23408bff741a78e5dd67c94a497e3: INVALID_OUTPUT: capability failed\"}";
+        var http = new HttpClient(new MockHttpHandler(errorJson, HttpStatusCode.UnprocessableEntity)) { BaseAddress = new Uri("http://localhost:8080/") };
+        var client = new ReadingPaperAiClient(http);
+
+        var request = new PipelineRequest(
+            RunId: "run_test_bp_fail",
+            JobId: Guid.NewGuid(),
+            Epoch: 1,
+            LeaseOwner: Guid.NewGuid(),
+            Topic: "Paleontology",
+            Sources: new List<SourceInput> { new(1, "PMC123", "Title", "https://url", "CC-BY") },
+            SectionIndices: new List<int> { 1 },
+            Parallel: false,
+            Policy: PinnedExecutionPolicy.CreateDefault("minimax")
+        );
+
+        var ex = await Assert.ThrowsAsync<ReadingPipelineExecutionException>(() =>
+            client.ExecutePipelineAsync(request, CancellationToken.None));
+        Assert.Contains("blueprint:run_d6a2", ex.Message);
+        Assert.IsNotType<ReadingSourceUnavailableException>(ex);
+    }
+
+    [Fact]
     public async Task ExecutePipelineAsync_ThrowsHttpRequestException_On502()
     {
         var errorJson = "{\"detail\": \"Provider gateway failed\"}";

@@ -8,6 +8,7 @@ using exam_service.Features.ReadingPaper.Contracts;
 namespace exam_service.Features.ReadingPaper;
 
 public sealed class ReadingSourceUnavailableException(string message) : Exception(message);
+public sealed class ReadingPipelineExecutionException(string message) : Exception(message);
 
 public sealed class ReadingPaperAiClient(HttpClient http)
 {
@@ -21,32 +22,55 @@ public sealed class ReadingPaperAiClient(HttpClient http)
         => await PostAsync<ReadingSource>("api/v1/autogen/reading-paper/source/ingest", request, ct);
 
     public async Task<PipelineResult> ExecutePipelineAsync(PipelineRequest request, CancellationToken ct)
-        => await PostAsync<PipelineResult>("api/v1/autogen/reading-paper/execute", request, ct);
+        => await PostAsync<PipelineResult>("api/v1/autogen/reading-paper/execute", request, ct, isPipeline: true);
 
     private async Task<T> GetAsync<T>(string path, CancellationToken ct)
     {
         using var response = await http.GetAsync(path, ct);
-        return await ReadAsync<T>(response, ct);
+        return await ReadAsync<T>(response, ct, isPipeline: false);
     }
 
-    private async Task<T> PostAsync<T>(string path, object body, CancellationToken ct)
+    private async Task<T> PostAsync<T>(string path, object body, CancellationToken ct, bool isPipeline = false)
     {
         using var response = await http.PostAsJsonAsync(path, body, ReadingPaperRules.Json, ct);
-        return await ReadAsync<T>(response, ct);
+        return await ReadAsync<T>(response, ct, isPipeline);
     }
 
-    private static async Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken ct)
+    private static async Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken ct, bool isPipeline = false)
     {
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(ct);
             var message = body.Length > 500 ? body[..500] : body;
             if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
+            {
+                if (isPipeline && !IsSourceAcquisitionError(message))
+                    throw new ReadingPipelineExecutionException(message);
                 throw new ReadingSourceUnavailableException(message);
+            }
             throw new HttpRequestException($"AI service returned {(int)response.StatusCode}: {message}");
         }
         return await response.Content.ReadFromJsonAsync<T>(ReadingPaperRules.Json, ct)
                ?? throw new JsonException("AI service returned an empty response");
+    }
+
+    private static bool IsSourceAcquisitionError(string message)
+    {
+        if (message.Contains("Source content", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (message.Contains("Select one to three distinct verified sources", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (message.Contains("source license", StringComparison.OrdinalIgnoreCase) || message.Contains("licenseCleared", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (message.Contains("source:", StringComparison.OrdinalIgnoreCase) &&
+            !message.Contains("blueprint:", StringComparison.OrdinalIgnoreCase) &&
+            !message.Contains("evidence:", StringComparison.OrdinalIgnoreCase) &&
+            !message.Contains("passage:", StringComparison.OrdinalIgnoreCase) &&
+            !message.Contains("question:", StringComparison.OrdinalIgnoreCase) &&
+            !message.Contains("section:", StringComparison.OrdinalIgnoreCase) &&
+            !message.Contains("paper:", StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
     }
 }
 

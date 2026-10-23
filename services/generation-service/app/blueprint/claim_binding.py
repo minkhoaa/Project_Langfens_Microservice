@@ -166,14 +166,28 @@ def check_claim_eligibility_for_family(
 ) -> bool:
     """Explicitly checks whether a claim satisfies semantic eligibility criteria for a question family."""
     cid = claim_dict.get("claimId") or ""
-    # Reject synthetic or fabricated claim IDs
-    if cid.startswith("claim:synthetic:") or cid.startswith("claim:run_") or cid.startswith("claim:placeholder:") or cid.startswith("claim:None:"):
+    # Reject empty, synthetic, placeholder, or explicitly fake claim IDs
+    if not cid or cid.startswith("claim:synthetic:") or cid.startswith("claim:placeholder:") or cid.startswith("claim:None:") or cid.startswith("claim:fake:") or cid.startswith("claim:fake_"):
+        return False
+
+    # Grounding check: claim must have non-empty text
+    text = str(claim_dict.get("text") or "").strip()
+    if not text:
         return False
 
     # Reject cross-section mismatch if section ID is explicitly recorded
     claim_sec = claim_dict.get("sectionId") or claim_dict.get("section_id")
-    if claim_sec is not None and claim_sec != section_id:
+    if claim_sec is not None and int(claim_sec) != section_id:
         return False
+
+    # Reject cross-section mismatch if encoded in canonical claim:{run_id}:{sec_id}:{idx} format
+    parts = cid.split(":")
+    if len(parts) >= 4 and parts[0] == "claim":
+        try:
+            if int(parts[2]) != section_id:
+                return False
+        except ValueError:
+            pass
 
     score = score_claim_suitability_for_family(claim_dict, question_family, section_id)
     return score > 0.0
@@ -205,12 +219,22 @@ def bind_claims_to_slots(
     if not claim_id_set:
         raise ValueError(f"Section {section_id} EvidenceGraph '{graph_id}' has no valid claim IDs.")
 
-    # Strict check: reject cross-section claims
+    # Strict check: reject cross-section claims and fabricated claim IDs
     valid_section_claims = []
     for c in norm_claims:
-        c_sec = c.get("sectionId") or c.get("section_id")
-        if c_sec is not None and c_sec != section_id:
+        cid = c.get("claimId") or ""
+        if not cid or cid.startswith("claim:synthetic:") or cid.startswith("claim:placeholder:") or cid.startswith("claim:None:") or cid.startswith("claim:fake:") or cid.startswith("claim:fake_"):
             continue
+        c_sec = c.get("sectionId") or c.get("section_id")
+        if c_sec is not None and int(c_sec) != section_id:
+            continue
+        parts = cid.split(":")
+        if len(parts) >= 4 and parts[0] == "claim":
+            try:
+                if int(parts[2]) != section_id:
+                    continue
+            except ValueError:
+                pass
         valid_section_claims.append(c)
 
     if not valid_section_claims:

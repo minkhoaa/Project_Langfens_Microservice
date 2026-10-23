@@ -20,6 +20,7 @@ from app.blueprint.validators import (
 )
 from app.blueprint.generator import (
     generate_dynamic_blueprint,
+    InsufficientEvidenceForAllocationError,
 )
 from app.blueprint.planner import (
     BlueprintPlanner,
@@ -41,6 +42,7 @@ __all__ = [
     "evaluate_source_suitability",
     "validate_blueprint",
     "generate_dynamic_blueprint",
+    "InsufficientEvidenceForAllocationError",
     "BlueprintPlanner",
     "SectionPlanInput",
     "BlueprintPlanResult",

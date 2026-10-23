@@ -64,6 +64,14 @@ SECTION_3_FAMILIES = [
 ]
 
 
+class InsufficientEvidenceForAllocationError(ValueError):
+    """Raised when available verified evidence is insufficient for any allowed question family in a section."""
+    def __init__(self, section_id: int, message: str, pool: Sequence[Any] = ()):
+        super().__init__(message)
+        self.section_id = section_id
+        self.pool = list(pool)
+
+
 def _build_legacy_preset_blueprint(policy: PinnedExecutionPolicy, run_id: str, blueprint_id: str) -> ExamBlueprint:
     """Builds standard 6-type preset blueprint matching SECTION_CONFIGURATIONS."""
     sections: List[SectionBlueprint] = []
@@ -278,12 +286,40 @@ def generate_dynamic_blueprint(
         # Evidence-driven group distribution (summing to total_sec_q)
         group_counts = _determine_section_group_counts(sec_id, sec_ev, seed_val)
 
+        claims_in_ev = sec_ev.get("claims", [])
+        section_claims = [
+            c for c in claims_in_ev
+            if not ((c.get("sectionId") or c.get("section_id")) and int(c.get("sectionId") or c.get("section_id")) != sec_id)
+        ]
+
+        if section_claims:
+            from app.blueprint.claim_binding import check_claim_eligibility_for_family
+            compatible_pool = [
+                fam for fam in pool
+                if any(check_claim_eligibility_for_family(c, fam.value, sec_id) for c in section_claims)
+            ]
+            if not compatible_pool:
+                raise InsufficientEvidenceForAllocationError(
+                    section_id=sec_id,
+                    message=f"Section {sec_id} EvidenceGraph has no verified claims eligible for any allowed IELTS family in pool {[f.value for f in pool]}.",
+                    pool=pool,
+                )
+        else:
+            compatible_pool = pool
+
         # Evidence-driven family scoring & selection enforcing paper-wide diversity
         scored_families = sorted(
-            pool,
+            compatible_pool,
             key=lambda f: _score_family_suitability(f, sec_id, sec_ev, topic_str, seed_val),
             reverse=True,
         )
+
+        # Reallocate group counts if available compatible families are fewer than planned groups
+        if len(scored_families) < len(group_counts):
+            if len(scored_families) == 2:
+                group_counts = [7, 6] if total_sec_q == 13 else [7, 7]
+            elif len(scored_families) == 1:
+                group_counts = [total_sec_q]
 
         selected_families: List[QuestionPromptFamily] = []
         for fam in scored_families:
@@ -299,6 +335,9 @@ def generate_dynamic_blueprint(
                     selected_families.append(fam)
                     if len(selected_families) == len(group_counts):
                         break
+
+        while len(selected_families) < len(group_counts):
+            selected_families.append(scored_families[len(selected_families) % len(scored_families)])
 
         slots: List[QuestionSlot] = []
         allocations: List[QuestionTypeAllocation] = []
