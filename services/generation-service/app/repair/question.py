@@ -220,7 +220,11 @@ class QuestionItemRepairer(BaseRepairer):
                     q["candidates"] = [updated_cand] + [c for c in existing_cands if c is not cand]
                 return True
 
-            async def _try_gateway_regeneration(q_num_val: int) -> bool:
+            async def _try_gateway_regeneration(
+                q_num_val: int,
+                repair_constraints: Optional[List[str]] = None,
+                diagnosis: Optional[str] = None,
+            ) -> bool:
                 gw = self.gateway or getattr(context, "gateway", None)
                 if gw is None or not passage_text:
                     return False
@@ -248,6 +252,9 @@ class QuestionItemRepairer(BaseRepairer):
                             section_id=sec_id_str,
                             context=context,
                             parent_operation_id=intent_id,
+                            repair_constraints=repair_constraints,
+                            diagnosis=diagnosis,
+                            pinned_model="MiniMax-Text-01",
                         )
                     except Exception:
                         continue
@@ -255,7 +262,7 @@ class QuestionItemRepairer(BaseRepairer):
                         dumped_cands = [c.model_dump(mode="json", by_alias=True) for c in regen_pool.candidates]
                         q["candidates"] = dumped_cands
                         for c_dict in dumped_cands:
-                            if _try_apply_candidate(c_dict):
+                            if _try_apply_candidate(c_dict, require_distinct=True):
                                 return True
                 return False
 
@@ -279,8 +286,48 @@ class QuestionItemRepairer(BaseRepairer):
                             f"Question {q.get('questionNumber')} cannot repair schema violation: no valid candidate available in pool "
                             "and no passage-grounded span found; slot generation must regenerate via gateway"
                         )
-                elif iss.code == IssueCode.AMBIGUOUS_ANSWER:
-                    if iss.proposed_repair:
+                elif iss.code in (IssueCode.AMBIGUOUS_ANSWER, IssueCode.DUPLICATE_PROMPT, IssueCode.DUPLICATE_CONTENT):
+                    q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
+                    gw = self.gateway or getattr(context, "gateway", None)
+                    if gw is not None:
+                        # Invoke M3 for diagnostic repair plan
+                        from app.repair.diagnostic_planner import RepairPlanningCapability
+                        planner = RepairPlanningCapability(gateway=gw, model_id="MiniMax-M3")
+                        auth_grant = getattr(context, "authority", None)
+                        lease_owner = getattr(auth_grant, "lease_owner", uuid4())
+                        epoch = getattr(auth_grant, "epoch", 1)
+                        sec_id_raw = str(artifact.section_id or getattr(context, "section_id", None) or 1)
+                        sec_id_str = sec_id_raw if str(sec_id_raw).startswith("section_") else f"section_{sec_id_raw}"
+                        art_id_str = f"questions_{sec_id_str}"
+                        auth_claim_ref = (
+                            q.get("claimRef")
+                            or q.get("evidenceClaimRef")
+                            or (artifact.payload.get("claimRef") if isinstance(artifact.payload, dict) else None)
+                            or f"claim_s{sec_id_str}_q{q_num_val}"
+                        )
+                        plan = await planner.plan_repair(
+                            question_payload=q,
+                            passage_text=passage_text,
+                            authoritative_claim_ref=auth_claim_ref,
+                            issues=[iss],
+                            run_id=artifact.run_id,
+                            section_id=sec_id_str,
+                            artifact_id=art_id_str,
+                            lease_owner=lease_owner,
+                            epoch=epoch,
+                            parent_operation_id=intent_id,
+                        )
+                        # Feed approved M3 constraints to Text-01 for bounded regeneration
+                        replaced = await _try_gateway_regeneration(
+                            q_num_val,
+                            repair_constraints=plan.repair_constraints,
+                            diagnosis=plan.diagnosis,
+                        )
+                        if not replaced:
+                            raise RepairJustificationError(
+                                f"Question {q_num_val} M3-assisted repair regeneration failed to produce compliant candidate"
+                            )
+                    elif iss.proposed_repair:
                         if not iss.evidence or len(iss.evidence.strip()) < 5 or (passage_text and iss.evidence.strip() not in passage_text):
                             raise RepairJustificationError(
                                 f"Ambiguous answer repair for Question {q.get('questionNumber')} rejected: missing or unsupported passage evidence justification"
@@ -295,12 +342,27 @@ class QuestionItemRepairer(BaseRepairer):
                         cand_list = q.get("candidates") or []
                         replaced = any(_try_apply_candidate(cand, require_distinct=True) for cand in (cand_list if isinstance(cand_list, list) else []))
                         if not replaced:
-                            q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
                             replaced = await _try_gateway_regeneration(q_num_val)
                         if not replaced:
                             raise RepairJustificationError(
                                 f"Ambiguous answer repair for Question {q.get('questionNumber')} rejected: requires passage evidence justification or valid alternative candidate"
                             )
+                elif iss.code == IssueCode.QUOTE_TRUNCATION:
+                    # Purely mechanical: expand truncated quote to full sentence from passage
+                    cur_quote = str(q.get("evidenceQuote") or "").strip()
+                    if passage_text and cur_quote:
+                        sentences = re.split(r"(?<=[.!?])\s+", passage_text)
+                        matched_sent = next((s for s in sentences if cur_quote in s), None)
+                        if matched_sent:
+                            q["evidenceQuote"] = matched_sent.strip()
+                        else:
+                            idx = passage_text.find(cur_quote)
+                            if idx != -1:
+                                end_idx = passage_text.find(".", idx)
+                                if end_idx != -1:
+                                    q["evidenceQuote"] = passage_text[idx:end_idx + 1].strip()
+                                else:
+                                    q["evidenceQuote"] = passage_text[idx:].strip()
                 elif iss.code == IssueCode.ANSWER_LEAKAGE:
                     cand_list = q.get("candidates") or []
                     replaced = False

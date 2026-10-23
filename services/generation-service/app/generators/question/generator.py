@@ -272,6 +272,9 @@ class QuestionCandidateGenerator:
         group_start_number: Optional[int] = None,
         blank_count: Optional[int] = None,
         max_wall_time_seconds: Optional[float] = None,
+        repair_constraints: Optional[List[str]] = None,
+        diagnosis: Optional[str] = None,
+        pinned_model: Optional[str] = None,
     ) -> QuestionCandidatePool:
         pool_limit = custom_pool_limit or get_pool_limit_for_type(question_type)
         slot_id = f"slot_q{question_number}_{question_type}"
@@ -317,6 +320,15 @@ class QuestionCandidateGenerator:
             user_prompt = user_prompt + (
                 f"\n\nIMPORTANT: Generate {pool_limit} COMPLETELY DISTINCT question candidates covering different sentences and paragraphs across the entire passage. Every candidate must test a different fact with a distinct evidenceQuote copied verbatim from the passage, and for completion/short-answer types every answer MUST be 1, 2, or 3 words maximum (NEVER 4+ words) occurring verbatim in the passage."
             )
+        if repair_constraints or diagnosis:
+            repair_instructions = []
+            if diagnosis:
+                repair_instructions.append(f"DIAGNOSTIC ISSUE TO RESOLVE: {diagnosis}")
+            if repair_constraints:
+                repair_instructions.append("MANDATORY SURGICAL REPAIR CONSTRAINTS (YOU MUST STRICTLY FOLLOW):")
+                for c in repair_constraints:
+                    repair_instructions.append(f"- {c}")
+            user_prompt = user_prompt + "\n\n" + "\n".join(repair_instructions)
         eff_wall = float(max_wall_time_seconds) if max_wall_time_seconds is not None else float(settings.loop_operation_wall_reservation_seconds)
         req = ProviderRequest(
             operation_id=op_id,
@@ -327,6 +339,7 @@ class QuestionCandidateGenerator:
             capability=Capability.GENERATE_JSON,
             preferred_provider="minimax",
             allowed_providers=["minimax"],
+            pinned_model=pinned_model or "MiniMax-Text-01",
             allow_fallback=False,
             messages=[
                 ChatMessage(role="system", content=prompt_data["system_instruction"]),
