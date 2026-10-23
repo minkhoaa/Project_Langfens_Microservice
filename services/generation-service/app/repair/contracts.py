@@ -46,6 +46,11 @@ class RepairPlan(CanonicalBaseModel):
 
 # Strict compatibility matrix between detected failure IssueCode and permitted RepairAction
 ALLOWED_ACTIONS_FOR_ISSUE: Dict[IssueCode, Set[RepairAction]] = {
+    IssueCode.TFNG_BOUNDARY_CONFLICT: {
+        RepairAction.CLARIFY_NOT_GIVEN_BOUNDARY,
+        RepairAction.REPHRASE_STEM,
+        RepairAction.REGENERATE_DISTINCT_CANDIDATE,
+    },
     IssueCode.AMBIGUOUS_ANSWER: {
         RepairAction.REPHRASE_STEM,
         RepairAction.SWAP_DISTRACTOR,

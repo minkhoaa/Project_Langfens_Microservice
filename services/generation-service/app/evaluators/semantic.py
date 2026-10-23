@@ -132,6 +132,16 @@ ANTONYM_PAIRS = [
     ("harmful", "beneficial"),
     ("absorb", "emit"),
     ("absorbs", "emits"),
+    ("significant number", "limited subset"),
+    ("significant number", "limited"),
+    ("significant", "limited"),
+    ("significant", "limited subset"),
+    ("numerous", "limited"),
+    ("large number", "limited"),
+    ("large number", "small number"),
+    ("easily", "challenge"),
+    ("easily", "challenges"),
+    ("easily reconstructed", "challenges of reconstructing"),
 ]
 
 def normalize_written_numbers(text: str) -> str:
@@ -142,10 +152,25 @@ def normalize_written_numbers(text: str) -> str:
 
 
 def stem_token(word: str) -> str:
-    for suffix in ("ing", "ion", "ed", "es", "s"):
-        if word.endswith(suffix) and len(word) > len(suffix) + 3:
+    for suffix in ("ence", "ance", "ment", "ing", "ion", "ive", "ed", "es", "al", "s"):
+        if word.endswith(suffix) and len(word) >= len(suffix) + 3:
             return word[:-len(suffix)]
     return word
+
+
+META_FRAMING_TERMS = {
+    "passage", "author", "article", "text", "study", "research", "paper",
+    "states", "mentions", "shows", "notes", "according", "discusses",
+    "indicates", "suggests", "demonstrates", "reveals", "describes", "explains",
+    "found", "finds", "argues", "believes", "claims", "provides", "focuses",
+}
+
+DISCOURSE_PREDICATE_NOUNS = {
+    "challenge", "challenges", "reason", "reasons", "cause", "causes",
+    "consequence", "consequences", "impact", "impacts", "benefit", "benefits",
+    "origin", "origins", "purpose", "purposes", "method", "methods",
+    "technique", "techniques", "difficulty", "difficulties", "problem", "problems",
+}
 
 
 def detect_contradiction_in_text(statement: str, reference_text: str, enable_contrastive_exclusion: bool = False, enable_refined_contrastive_clause: bool = False) -> bool:
@@ -268,12 +293,31 @@ def detect_entailment_in_text(statement: str, reference_text: str, enable_contra
             continue
         r_words = [w for w in re.findall(r"\b\w+\b", r_clean) if len(w) > 3]
         r_stems = [stem_token(w) for w in r_words]
-        matched_words = sum(1 for w in s_words if stem_token(w) in r_stems or matches_exact_token_bound(w, r_clean))
-        overlap_ratio = matched_words / len(s_words)
+        matched_words = [w for w in s_words if stem_token(w) in r_stems or matches_exact_token_bound(w, r_clean)]
+        overlap_ratio = len(matched_words) / len(s_words)
         if overlap_ratio >= 0.60:
             s_neg = any(re.search(rf"\b{re.escape(neg)}\b", s_clean) for neg in NEGATION_TERMS)
             r_neg = any(re.search(rf"\b{re.escape(neg)}\b", r_clean) for neg in NEGATION_TERMS)
             if s_neg == r_neg:
+                # Scope-sensitive entailment checks: do not equate raw lexical overlap with entailment
+                unmatched = [w for w in s_words if w not in matched_words]
+                substantive_unmatched = [w for w in unmatched if w not in META_FRAMING_TERMS]
+                # If substantive propositional predicates like 'challenges', 'reasons', 'impact' are ungrounded:
+                if any(stem_token(w) in DISCOURSE_PREDICATE_NOUNS or w in DISCOURSE_PREDICATE_NOUNS for w in substantive_unmatched):
+                    continue
+                # If there are 2 or more substantive ungrounded words and overlap is not overwhelming (>= 0.85):
+                if len(substantive_unmatched) >= 2 and overlap_ratio < 0.85:
+                    continue
+                # Universal quantifier mismatch: universal statement cannot be entailed by partial/qualifying context
+                has_universal = bool(re.search(r"\b(all|every|always|entirely|exclusively)\b", s_clean))
+                has_partial = bool(re.search(r"\b(some|several|rare|rarer|limited|often|many|few)\b", r_clean))
+                if has_universal and has_partial:
+                    continue
+                # Numeric tokens check: any specific year or count in statement must be verified in r_clean or reference_text
+                s_nums = re.findall(r"\b\d+\b", s_clean)
+                r_nums = set(re.findall(r"\b\d+\b", r_clean)) | set(re.findall(r"\b\d+\b", reference_text.lower()))
+                if any(n not in r_nums for n in s_nums):
+                    continue
                 return True
     return False
 
@@ -298,11 +342,41 @@ def detect_comparison_inversion(statement: str, reference_text: str) -> bool:
 
 
 def detect_negation_polarity_conflict(statement: str, reference_text: str) -> tuple[bool, str]:
-    """Checks for negation polarity mismatches between statement and reference text."""
+    """Checks for negation polarity mismatches between statement and reference text.
+    Scope-sensitive: ensures negation scopes match the head entity/predicate rather than incidental overlap."""
     s_clean = normalize_text_nfkc(statement).lower()
     r_clean = normalize_text_nfkc(reference_text).lower()
     s_neg = bool(re.search(r"\b(never|not|cannot|no|neither|barely|scarcely|hardly|did not|does not|was not|were not)\b", s_clean))
 
+    # 1. Scope-sensitive existence negation check:
+    # Pattern: 'there are no X', 'no X exist/were found/identified/in ...'
+    m_no_exist = re.search(r"\b(?:there\s+(?:are|were|is|was)\s+no|no)\s+([a-z\s-]+?)(?:\s+(?:in|at|across|with|that|exist|exists|were|have)\b|$)", s_clean)
+    if m_no_exist:
+        neg_entity = m_no_exist.group(1).strip()
+        neg_words = set(re.findall(r"\b\w{4,}\b", neg_entity)) - {"that", "with", "from", "this", "they", "have", "were", "than", "more", "less"}
+        if neg_words:
+            sentences = [s.strip() for s in re.split(r"[.!?]\s+", r_clean) if s.strip()]
+            for sent in sentences:
+                sent_words = set(re.findall(r"\b\w{4,}\b", sent))
+                overlap = neg_words & sent_words
+                if len(overlap) >= 2 or (len(neg_words) == 1 and overlap):
+                    has_sent_neg = bool(re.search(r"\b(did not|does not|was not|were not|cannot|failed to|never|not|no|neither)\b", sent))
+                    if not has_sent_neg:
+                        # Check whether pre-nominal modifiers conflict (e.g. 'bronze' vs 'iron')
+                        mod_conflict = False
+                        for w in overlap:
+                            s_mod_m = re.search(rf"\b(\w+)\s+{re.escape(w)}\b", s_clean)
+                            r_mod_m = re.search(rf"\b(\w+)\s+{re.escape(w)}\b", sent)
+                            if s_mod_m and r_mod_m:
+                                sm = s_mod_m.group(1).lower()
+                                rm = r_mod_m.group(1).lower()
+                                if sm not in {"the", "a", "an", "no", "not", "any"} and rm not in {"the", "a", "an", "no", "not", "any"} and sm != rm:
+                                    mod_conflict = True
+                                    break
+                        if not mod_conflict:
+                            return True, f"Statement asserts non-existence of '{neg_entity}' which is affirmed in source text"
+
+    # 2. Sentence-level predicate negation check
     sentences = [s.strip() for s in re.split(r"[.!?]\s+", r_clean) if s.strip()]
     for sent in sentences:
         sent_neg = bool(re.search(r"\b(did not|does not|was not|were not|cannot|failed to|never|not|no|neither)\b", sent))
@@ -311,10 +385,21 @@ def detect_negation_polarity_conflict(statement: str, reference_text: str) -> tu
         overlap = s_words & sent_words
         if len(overlap) >= 2 and s_neg != sent_neg:
             for w in overlap:
+                # Ensure modifier consistency
+                s_mod_m = re.search(rf"\b(\w+)\s+{re.escape(w)}\b", s_clean)
+                r_mod_m = re.search(rf"\b(\w+)\s+{re.escape(w)}\b", sent)
+                if s_mod_m and r_mod_m:
+                    sm = s_mod_m.group(1).lower()
+                    rm = r_mod_m.group(1).lower()
+                    if sm not in {"the", "a", "an", "no", "not", "any"} and rm not in {"the", "a", "an", "no", "not", "any"} and sm != rm:
+                        continue  # Different modified entities (e.g. bronze artifacts vs iron artifacts); not a polarity conflict!
+
                 if re.search(rf"\b(never|not|cannot|no|barely)\s+(?:\w+\s+){{0,2}}{w}\b", s_clean) and not re.search(rf"\b(never|not|cannot|no|did not|does not)\s+(?:\w+\s+){{0,2}}{w}\b", sent):
-                    return True, f"Statement negates predicate '{w}' which is affirmed in source text"
+                    desc = f"Statement negates '{w}' which is affirmed in source text"
+                    return True, desc
                 if re.search(rf"\b(did not|does not|was not|were not|never|not|no|cannot|failed to)\s+(?:\w+\s+){{0,2}}{w}\b", sent) and not re.search(rf"\b(never|not|no|cannot)\s+(?:\w+\s+){{0,2}}{w}\b", s_clean):
-                    return True, f"Source text negates predicate '{w}' which is affirmed in statement"
+                    desc = f"Source text negates '{w}' which is affirmed in statement"
+                    return True, desc
     return False, ""
 
 

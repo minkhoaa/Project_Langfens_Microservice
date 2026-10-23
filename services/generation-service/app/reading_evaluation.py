@@ -502,15 +502,15 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
         if len(prompt.strip()) >= 10 and prompt.lower().strip(". ") in passage.lower():
             semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "NOT GIVEN statement is directly present in passage text"))
         elif detect_entailment_in_text(prompt, passage):
-            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Passage entails NOT GIVEN statement (should be TRUE/YES)"))
+            semantic.append((IssueCode.TFNG_BOUNDARY_CONFLICT, "TFNG boundary conflict: passage entails NOT GIVEN statement (should be TRUE/YES)"))
         elif detect_contradiction_in_text(prompt, passage):
-            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Passage contradicts NOT GIVEN statement (should be FALSE/NO)"))
+            semantic.append((IssueCode.TFNG_BOUNDARY_CONFLICT, "TFNG boundary conflict: passage contradicts NOT GIVEN statement (should be FALSE/NO)"))
         elif detect_comparison_inversion(prompt, passage):
-            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Passage contradicts NOT GIVEN statement via inverted comparison"))
+            semantic.append((IssueCode.TFNG_BOUNDARY_CONFLICT, "TFNG boundary conflict: passage contradicts NOT GIVEN statement via inverted comparison"))
         else:
             conflict, reason = detect_negation_polarity_conflict(prompt, passage)
             if conflict:
-                semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, f"Passage contradicts NOT GIVEN statement: {reason}"))
+                semantic.append((IssueCode.TFNG_BOUNDARY_CONFLICT, f"TFNG boundary conflict: passage contradicts NOT GIVEN statement: {reason}"))
     elif question_type in {"TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"}:
         if payload.get("absenceAssessment") is not None:
             semantic.append((IssueCode.SCHEMA_VIOLATION, f"{answer} question must not contain an absence assessment"))
@@ -518,12 +518,12 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
         if answer in ("TRUE", "YES"):
             conflict, reason = detect_negation_polarity_conflict(prompt, quote)
             if conflict or detect_comparison_inversion(prompt, quote):
-                semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, reason or "Statement contradicts evidence quote"))
+                semantic.append((IssueCode.TFNG_BOUNDARY_CONFLICT, reason or "TFNG boundary conflict: statement contradicts evidence quote"))
         elif answer in ("FALSE", "NO"):
             conflict, _ = detect_negation_polarity_conflict(prompt, quote)
             inverted = detect_comparison_inversion(prompt, quote)
             if not conflict and not inverted and prompt.strip().lower() == quote.strip().lower():
-                semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "FALSE/NO statement verbatim matches evidence quote without contradiction"))
+                semantic.append((IssueCode.TFNG_BOUNDARY_CONFLICT, "TFNG boundary conflict: FALSE/NO statement verbatim matches evidence quote without contradiction"))
     elif question_type == "MULTIPLE_CHOICE_SINGLE":
         correct_opt = str(payload.get("correctOption", "")).strip().upper()
         if correct_opt not in ("A", "B", "C", "D"):

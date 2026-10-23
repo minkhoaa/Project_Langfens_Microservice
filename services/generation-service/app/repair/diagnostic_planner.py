@@ -130,7 +130,7 @@ class RepairPlanningCapability:
             pinned_model=self.model_id,
             model_size="large",
             temperature=0.1,
-            max_tokens=2048,
+            max_tokens=4096,
             timeout_seconds=min(timeout_seconds, 60.0),
             wall_time_reservation_seconds=min(timeout_seconds, 60.0),
             remaining_tokens=remaining_tokens,

@@ -1,0 +1,36 @@
+{
+  "status": "SUCCESS",
+  "model": "MiniMax-M3",
+  "runId": "run_pilot_m3_64679f01",
+  "elapsedSeconds": 19.028,
+  "targetQuestion": 4,
+  "authoritativeClaimRef": "claim:run_6fc3be9e30fc46c28a4bd49e23b236a7:1:9",
+  "diagnosedIssue": {
+    "code": "TFNG_BOUNDARY_CONFLICT",
+    "message": "TFNG boundary conflict: passage contradicts NOT GIVEN statement: Statement asserts non-existence of 'early smelting sites' which is affirmed in source text"
+  },
+  "repairPlan": {
+    "issueCode": "TFNG_BOUNDARY_CONFLICT",
+    "targetQuestion": 4,
+    "repairAction": "CLARIFY_NOT_GIVEN_BOUNDARY",
+    "diagnosis": "The statement can be read as denying the existence of early smelting sites in West Africa, or as denying that any sites have established chronologies. Both readings conflict with the passage, which explicitly identifies early iron-smelting sites and says that the number of sites with firmly established chronologies is small rather than zero. The passage does not establish whether long-term use and a well-established chronology occurred together at any one site. The answer NOT_GIVEN is supportable only if the target is clearly framed as this unresolved conjunction.",
+    "repairConstraints": [
+      "Preserve the answer as NOT_GIVEN.",
+      "Frame the statement around whether at least one early smelting site in West Africa met both conditions simultaneously: long-term use and a well-established chronological sequence.",
+      "Do not state or imply that West Africa had no early smelting sites.",
+      "Do not state or imply that no West African smelting sites have established chronologies; the passage says only that the number of such sites is relatively small.",
+      "Keep the long-term-use condition within the boundary of what the passage leaves unaddressed and do not add facts about site duration.",
+      "Use wording that clearly asks whether the two conditions coincide at the same site, eliminating the current ambiguous nonexistence reading."
+    ],
+    "preserveEvidenceClaimRef": "claim:run_6fc3be9e30fc46c28a4bd49e23b236a7:1:9",
+    "expectedCorrection": "It is not stated whether any early smelting site in West Africa was used over a long period while also having a well-established chronological sequence."
+  },
+  "usage": {
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "reasoningTokens": 0,
+    "totalTokens": 0,
+    "costUsd": 0.0
+  },
+  "planValidity": "PASS"
+}

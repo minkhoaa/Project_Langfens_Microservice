@@ -857,6 +857,7 @@ def _parse_candidate_payload(
     rejected_prompts: Sequence[str] = (),
     slot_index_in_group: Optional[int] = None,
     is_mock: bool = False,
+    is_not_given_target: Optional[bool] = None,
 ) -> dict[str, Any]:
     """Parses and evaluates candidate pool into a validated canonical question payload.
 
@@ -992,9 +993,19 @@ def _parse_candidate_payload(
 
     if valid_candidates:
         # Deterministically select valid, novel candidate:
-        # 1. Minimal overlap with prior accepted questions
-        # 2. Candidate index as stable tie-breaker
-        valid_candidates.sort(key=lambda c: (c["max_overlap"], c["index"]))
+        # 1. Advisory target preference (if specified)
+        # 2. Minimal overlap with prior accepted questions
+        # 3. Candidate index as stable tie-breaker
+        def _candidate_sort_key(c: dict[str, Any]) -> tuple:
+            ans = str(c["parsed"].get("answer", "")).upper()
+            target_penalty = 0
+            if is_not_given_target is True and ans not in ("NOT_GIVEN", "NG"):
+                target_penalty = 1
+            elif is_not_given_target is False and ans in ("NOT_GIVEN", "NG"):
+                target_penalty = 1
+            return (target_penalty, c["max_overlap"], c["index"])
+
+        valid_candidates.sort(key=_candidate_sort_key)
         return valid_candidates[0]["parsed"]
 
     # All candidates rejected: fail closed with informative error
@@ -1446,6 +1457,7 @@ class SectionRunner:
                             question_number=target_q_num,
                             candidate_count=2,
                             target_focus=target_focus,
+                            is_not_given_target=is_ng_slot,
                         )
                         user_prompt = prompt_data["user_prompt"]
                         prior_statements = [str(e.payload.get("statement") or e.payload.get("prompt") or "").strip() for e in q_envelopes if e.payload.get("statement") or e.payload.get("prompt")]
@@ -1577,6 +1589,7 @@ class SectionRunner:
                             rejected_prompts=rejected_prompts.get(target_q_num, []),
                             slot_index_in_group=slot_idx_in_grp,
                             is_mock=("mock" in actual_policy.provider.lower()),
+                            is_not_given_target=is_ng_slot,
                         )
                         if parsed.get("evidenceClaimRef") != target_claim_id:
                             raise ValueError(

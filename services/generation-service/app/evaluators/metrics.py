@@ -41,6 +41,7 @@ CANONICAL_SEMANTIC_ISSUE_CODES: Set[str] = {
     IssueCode.SECTION_WORD_COUNT_OUT_OF_BOUNDS.value,
     IssueCode.QUESTION_NUMBERING_INVALID.value,
     IssueCode.QUESTION_COUNT_MISMATCH.value,
+    IssueCode.TFNG_BOUNDARY_CONFLICT.value,
 }
 
 # 2. Operational / System Failure Codes (MUST NEVER be counted as semantic detection TP)

@@ -74,6 +74,7 @@ class LoopPolicy(CanonicalBaseModel):
             IssueCode.UNMEASURED_OUTCOME,
             IssueCode.ANSWER_LEAKAGE,
             IssueCode.PASSAGE_BLUEPRINT_ALIGNMENT,
+            IssueCode.TFNG_BOUNDARY_CONFLICT,
         },
         description="Issue codes that can be targeted for surgical repair",
     )

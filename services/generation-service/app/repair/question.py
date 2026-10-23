@@ -64,6 +64,7 @@ class QuestionItemRepairer(BaseRepairer):
                     IssueCode.AMBIGUOUS_ANSWER,
                     IssueCode.SCHEMA_VIOLATION,
                     IssueCode.ANSWER_LEAKAGE,
+                    IssueCode.TFNG_BOUNDARY_CONFLICT,
                 },
                 timeout_seconds=t_sec,
                 estimated_tokens=tok,
@@ -173,7 +174,7 @@ class QuestionItemRepairer(BaseRepairer):
                 cand_quote = str(cand.get("evidenceQuote") or cand.get("evidence_quote") or "").strip()
                 if cand_quote and passage_text and cand_quote.casefold() not in passage_text.casefold():
                     return False
-                if cand_ans.strip().casefold() != orig_ans.strip().casefold() and orig_ans.strip():
+                if is_completion_or_short and cand_ans.strip().casefold() != orig_ans.strip().casefold() and orig_ans.strip():
                     eff_quote = cand_quote or str(q.get("evidenceQuote") or "").strip()
                     if passage_text and not match_verbatim_in_passage(cand_ans, passage_text) and (not eff_quote or eff_quote.casefold() not in passage_text.casefold()):
                         return False
@@ -211,7 +212,18 @@ class QuestionItemRepairer(BaseRepairer):
                 if is_mcq and isinstance(cand_options, list) and len(cand_options) >= 4:
                     q["options"] = list(cand_options)[:4]
                 cand_quote = cand.get("evidenceQuote") or cand.get("evidence_quote")
-                if cand_quote:
+                if cand_ans.upper() in ("NOT_GIVEN", "NOT GIVEN", "NG"):
+                    q["answer"] = "NOT_GIVEN"
+                    raw_abs = cand.get("absenceAssessment") or cand.get("absence_assessment")
+                    if raw_abs:
+                        q["absenceAssessment"] = raw_abs if isinstance(raw_abs, dict) else (raw_abs.model_dump(mode="json", by_alias=True) if hasattr(raw_abs, "model_dump") else dict(raw_abs))
+                    q.pop("evidenceQuote", None)
+                    top_span = (raw_abs.get("topicalContextSpan") if isinstance(raw_abs, dict) else getattr(raw_abs, "topical_context_span", None)) if raw_abs else None
+                    if top_span and passage_text and str(top_span) in passage_text:
+                        s_idx = passage_text.find(str(top_span))
+                        q["passageEvidence"] = {"startChar": s_idx, "endChar": s_idx + len(str(top_span)), "text": str(top_span)}
+                elif cand_quote:
+                    q.pop("absenceAssessment", None)
                     q["evidenceQuote"] = str(cand_quote)
                     cand_ev = cand.get("passageEvidence")
                     if isinstance(cand_ev, dict):
@@ -315,7 +327,12 @@ class QuestionItemRepairer(BaseRepairer):
                             f"Question {q.get('questionNumber')} cannot repair schema violation: no valid candidate available in pool "
                             "and no passage-grounded span found; slot generation must regenerate via gateway"
                         )
-                elif iss.code in (IssueCode.AMBIGUOUS_ANSWER, IssueCode.DUPLICATE_PROMPT, IssueCode.DUPLICATE_CONTENT):
+                elif iss.code in (
+                    IssueCode.AMBIGUOUS_ANSWER,
+                    IssueCode.DUPLICATE_PROMPT,
+                    IssueCode.DUPLICATE_CONTENT,
+                    IssueCode.TFNG_BOUNDARY_CONFLICT,
+                ):
                     q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
                     gw = self.gateway or getattr(context, "gateway", None)
                     use_hybrid = self.enable_hybrid and getattr(context, "enable_hybrid_repair", getattr(settings, "enable_hybrid_repair", True)) and (gw is not None)

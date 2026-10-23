@@ -790,6 +790,7 @@ def build_question_prompt(
     candidate_count: int = 3,
     blank_count: int = 4,
     target_focus: Optional[str] = None,
+    is_not_given_target: Optional[bool] = None,
 ) -> Dict[str, str]:
     """Builds sanitized prompt data payload for the requested question family."""
     # Sanitize passage text to avoid envelope injection
@@ -804,6 +805,19 @@ def build_question_prompt(
     )
     if target_focus and target_focus.strip():
         user_prompt += f"\n\nFOCUS PARAGRAPH FOR QUESTION #{question_number}:\n\"\"\"\n{target_focus.strip()}\n\"\"\"\nFocus candidate questions on facts and details from this paragraph section to ensure broad coverage across the passage."
+    if is_not_given_target is True and family in (QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN, QuestionPromptFamily.YES_NO_NOT_GIVEN):
+        user_prompt += (
+            f"\n\nBLUEPRINT ADVISORY TARGET FOR QUESTION #{question_number}:\n"
+            "The blueprint targets an absence assessment (NOT GIVEN) for this slot. "
+            "Focus candidate questions on unmentioned claims or absence assessments within the topical context."
+        )
+    elif is_not_given_target is False and family in (QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN, QuestionPromptFamily.YES_NO_NOT_GIVEN):
+        ans_target = "TRUE or FALSE" if family == QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN else "YES or NO"
+        user_prompt += (
+            f"\n\nBLUEPRINT ADVISORY TARGET FOR QUESTION #{question_number}:\n"
+            f"The blueprint targets a positive-evidence question ({ans_target}) for this slot, grounded in the verified bound evidence. "
+            f"Prefer generating strong {ans_target} candidate statements supported or contradicted by the passage, rather than NOT GIVEN."
+        )
     return {
         "prompt_id": f"prompt_{family.value.lower()}_{QUESTION_PROMPT_VERSION}",
         "prompt_version": QUESTION_PROMPT_VERSION,
@@ -821,6 +835,7 @@ def render_question_prompt(
     blank_count: int = 4,
     total_questions: Optional[int] = None,
     target_focus: Optional[str] = None,
+    is_not_given_target: Optional[bool] = None,
 ) -> str:
     """Renders a complete prompt string for question generation for any IELTS question family.
 
@@ -835,6 +850,7 @@ def render_question_prompt(
         candidate_count=candidate_count,
         blank_count=blank_count,
         target_focus=target_focus,
+        is_not_given_target=is_not_given_target,
     )
     system_inst = prompt_payload.get("system_instruction", "")
     user_prompt = prompt_payload.get("user_prompt", "")

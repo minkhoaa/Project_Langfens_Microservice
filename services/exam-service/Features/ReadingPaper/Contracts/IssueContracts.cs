@@ -70,7 +70,8 @@ public enum IssueCode
     MONOTONOUS_ANSWER_DISTRIBUTION,
     CROSS_SECTION_DUPLICATE_CONTENT,
     CROSS_SECTION_LEAKAGE,
-    PASSAGE_BLUEPRINT_ALIGNMENT
+    PASSAGE_BLUEPRINT_ALIGNMENT,
+    TFNG_BOUNDARY_CONFLICT
 }
 public sealed record Issue(
     [property: JsonPropertyName("issueId")] string IssueId,
