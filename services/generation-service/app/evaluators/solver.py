@@ -498,12 +498,20 @@ class BlindSolverEvaluator(BaseEvaluator):
         # Build ProviderRequest with SDK retry=0
         chat_msgs = [ChatMessage(role=m["role"], content=m["content"]) for m in messages]
         run_id = getattr(context, "run_id", None) or f"run_eval_{uuid4().hex[:8]}"
-        if context and getattr(context, "authority", None):
-            lease_owner = context.authority.lease_owner
-            epoch = context.authority.epoch
+        if context:
+            from app.loop.context import resolve_run_authority
+            try:
+                auth = resolve_run_authority(context)
+                lease_owner = auth.lease_owner
+                epoch = auth.epoch
+            except Exception:
+                lease_owner = getattr(context, "lease_owner", None) or getattr(getattr(context, "authority", None), "lease_owner", None)
+                epoch = getattr(context, "epoch", None) or getattr(getattr(context, "authority", None), "epoch", 1)
+                if lease_owner is None:
+                    lease_owner = uuid4()
         else:
-            lease_owner = getattr(context, "lease_owner", None) or uuid4()
-            epoch = getattr(context, "epoch", 1)
+            lease_owner = uuid4()
+            epoch = 1
 
         parent_op = getattr(context, "parent_operation_id", None) or getattr(context, "operation_id", None)
         sec_id = str(blind_input.section_id or getattr(target_ref, "section_id", None) or "")
@@ -597,12 +605,20 @@ class BlindSolverEvaluator(BaseEvaluator):
             return simulated, None
         chat_msgs = [ChatMessage(role=m["role"], content=m["content"]) for m in messages]
         run_id = getattr(context, "run_id", None) or f"run_eval_{uuid4().hex[:8]}"
-        if context and getattr(context, "authority", None):
-            lease_owner = context.authority.lease_owner
-            epoch = context.authority.epoch
+        if context:
+            from app.loop.context import resolve_run_authority
+            try:
+                auth = resolve_run_authority(context)
+                lease_owner = auth.lease_owner
+                epoch = auth.epoch
+            except Exception:
+                lease_owner = getattr(context, "lease_owner", None) or getattr(getattr(context, "authority", None), "lease_owner", None)
+                epoch = getattr(context, "epoch", None) or getattr(getattr(context, "authority", None), "epoch", 1)
+                if lease_owner is None:
+                    lease_owner = uuid4()
         else:
-            lease_owner = getattr(context, "lease_owner", None) or uuid4()
-            epoch = getattr(context, "epoch", 1)
+            lease_owner = uuid4()
+            epoch = 1
 
         parent_op = getattr(context, "parent_operation_id", None) or getattr(context, "operation_id", None)
         sec_id = str(blind_input.section_id or getattr(target_ref, "section_id", None) or "")

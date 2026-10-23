@@ -653,7 +653,7 @@ class StageExecutor:
                 return res
         eval_adapters = [StageEvalSingleAdapter(ev_id) for ev_id in required_evals]
         # 6. Repairer capability
-        fallback_rep = QuestionItemRepairer() if artifact_type == ArtifactType.QUESTION else None
+        fallback_rep = QuestionItemRepairer(gateway=getattr(self.context, "gateway", None)) if artifact_type == ArtifactType.QUESTION else None
         class StageRepAdapter(RepairerCapability):
             @property
             def repairer_id(self) -> str:
@@ -663,7 +663,10 @@ class StageExecutor:
                 return "1.0.0"
             async def repair(inner_self, ctx: LoopContext, art: ArtifactEnvelope, issues: Sequence[Issue], intent_id: str, ver: int) -> ArtifactEnvelope:
                 if repair is not None:
-                    res = await repair(art, issues, ver)
+                    try:
+                        res = await repair(art, issues, ver, intent_id=intent_id)
+                    except TypeError:
+                        res = await repair(art, issues, ver)
                     if isinstance(res, ArtifactEnvelope):
                         return res
                     return art.create_next_version(new_payload=res, producer_version=PRODUCER_VERSION)

@@ -1117,15 +1117,17 @@ class SectionRunner:
                 art: ArtifactEnvelope,
                 issues: Sequence[Any],
                 ver: int,
+                intent_id: Optional[str] = None,
             ) -> dict[str, Any]:
                 from app.solvers.cache import solver_cache
                 solver_cache.invalidate()
                 from app.repair.question import QuestionItemRepairer
-                item_rep = QuestionItemRepairer()
+                item_rep = QuestionItemRepairer(gateway=self.gateway)
                 pl = dict(art.payload)
                 if "passage" not in pl and "passageText" not in pl:
                     pl["passage"] = passage_text
-                repaired_env = await item_rep.repair(context, art.model_copy(update={"payload": pl}), issues, f"op_repair_q_{ver}", ver)
+                effective_intent_id = intent_id or f"op_repair_q_{ver}"
+                repaired_env = await item_rep.repair(context, art.model_copy(update={"payload": pl}), issues, effective_intent_id, ver)
                 res_pl = dict(repaired_env.payload)
                 res_pl.pop("passage", None)
                 return res_pl

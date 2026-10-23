@@ -8,6 +8,7 @@ from pydantic import ConfigDict, Field, model_validator
 
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
 from app.contracts.base import CanonicalBaseModel
+from app.loop.context import AuthorityGrant
 from app.reading_policy import PinnedExecutionPolicy
 
 
@@ -59,6 +60,10 @@ class RunContext(CanonicalBaseModel):
         return cls(run_id=request.run_id, job_id=request.job_id, epoch=request.epoch,
                    lease_owner=request.lease_owner, policy_hash=request.policy.hash,
                    client=client, gateway=gateway)
+
+    @property
+    def authority(self) -> AuthorityGrant:
+        return AuthorityGrant(leaseOwner=self.lease_owner, epoch=self.epoch)
 
 
 class SourceRef(CanonicalBaseModel):

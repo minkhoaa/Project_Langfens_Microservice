@@ -32,6 +32,75 @@ class AuthorityGrant(CanonicalBaseModel):
         return True
 
 
+class RunAuthorityAdapter(CanonicalBaseModel):
+    """Validated authority adapter compatible with both RunContext and LoopContext."""
+
+    lease_owner: UUID = Field(..., alias="leaseOwner")
+    epoch: int = Field(..., ge=1)
+    run_id: Optional[str] = Field(default=None, alias="runId")
+
+    @property
+    def authority(self) -> AuthorityGrant:
+        return AuthorityGrant(leaseOwner=self.lease_owner, epoch=self.epoch)
+
+    def check_authority(self, current_lease_owner: Optional[UUID] = None, current_epoch: Optional[int] = None) -> bool:
+        return self.authority.is_authority_active(current_lease_owner, current_epoch)
+
+
+def resolve_run_authority(context: Any) -> RunAuthorityAdapter:
+    """Extracts, validates, and fences execution authority from RunContext, LoopContext, or adapter.
+
+    Rejects missing or inconsistent authority fail-closed before provider dispatch.
+    Never fabricates a lease_owner with uuid4().
+    Never silently defaults epoch to 1.
+    """
+    if context is None:
+        raise ValueError("Missing execution context: authority cannot be resolved")
+
+    # 1. Resolve and validate epoch
+    direct_epoch = getattr(context, "epoch", None)
+    auth_obj = getattr(context, "authority", None)
+    nested_epoch = getattr(auth_obj, "epoch", None) if auth_obj is not None else None
+
+    if direct_epoch is not None and nested_epoch is not None:
+        if direct_epoch != nested_epoch:
+            raise ValueError(f"Inconsistent authority epoch: direct {direct_epoch} != authority {nested_epoch}")
+        epoch = direct_epoch
+    elif direct_epoch is not None:
+        epoch = direct_epoch
+    elif nested_epoch is not None:
+        epoch = nested_epoch
+    else:
+        raise ValueError("Missing authority epoch: cannot default to epoch 1")
+
+    if not isinstance(epoch, int) or epoch < 1:
+        raise ValueError(f"Invalid authority epoch {epoch}: must be an integer >= 1")
+
+    # 2. Resolve and validate lease_owner
+    direct_owner = getattr(context, "lease_owner", None)
+    nested_owner = getattr(auth_obj, "lease_owner", None) if auth_obj is not None else None
+
+    if direct_owner is not None and nested_owner is not None:
+        if direct_owner != nested_owner:
+            raise ValueError(f"Inconsistent authority lease_owner: direct {direct_owner} != authority {nested_owner}")
+        owner = direct_owner
+    elif direct_owner is not None:
+        owner = direct_owner
+    elif nested_owner is not None:
+        owner = nested_owner
+    else:
+        raise ValueError("Missing authority lease_owner: fabrication with uuid4 is prohibited")
+
+    if not isinstance(owner, UUID):
+        try:
+            owner = UUID(str(owner))
+        except Exception as e:
+            raise ValueError(f"Invalid authority lease_owner: {owner}") from e
+
+    run_id = getattr(context, "run_id", None)
+    return RunAuthorityAdapter(leaseOwner=owner, epoch=epoch, runId=run_id)
+
+
 class BudgetTracker(CanonicalBaseModel):
     """Tracks cumulative usage and enforces bounded caps."""
 
@@ -158,3 +227,11 @@ class LoopContext(CanonicalBaseModel):
         if self.is_cancelled():
             return False
         return self.authority.is_authority_active(current_lease_owner, current_epoch)
+
+    @property
+    def epoch(self) -> int:
+        return self.authority.epoch
+
+    @property
+    def lease_owner(self) -> UUID:
+        return self.authority.lease_owner

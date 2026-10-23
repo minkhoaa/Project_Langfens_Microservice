@@ -43,10 +43,12 @@ class QuestionItemRepairer(BaseRepairer):
         timeout_seconds: Optional[float] = None,
         estimated_tokens: Optional[int] = None,
         gateway: Optional[Any] = None,
+        enable_hybrid: bool = True,
     ):
         t_sec = timeout_seconds if timeout_seconds is not None else getattr(settings, "repair_timeout_seconds", 30.0)
         tok = estimated_tokens if estimated_tokens is not None else getattr(settings, "repair_max_tokens_per_attempt", 1500)
         self.gateway = gateway
+        self.enable_hybrid = enable_hybrid
         super().__init__(
             RepairCapabilityMetadata(
                 repairer_id="rep_question_item",
@@ -168,6 +170,13 @@ class QuestionItemRepairer(BaseRepairer):
                         return False
                     if passage_text and not match_verbatim_in_passage(cand_ans, passage_text):
                         return False
+                cand_quote = str(cand.get("evidenceQuote") or cand.get("evidence_quote") or "").strip()
+                if cand_quote and passage_text and cand_quote.casefold() not in passage_text.casefold():
+                    return False
+                if cand_ans.strip().casefold() != orig_ans.strip().casefold() and orig_ans.strip():
+                    eff_quote = cand_quote or str(q.get("evidenceQuote") or "").strip()
+                    if passage_text and not match_verbatim_in_passage(cand_ans, passage_text) and (not eff_quote or eff_quote.casefold() not in passage_text.casefold()):
+                        return False
                 # P15: salvaging a pooled candidate must satisfy EVERY invariant the
                 # generator satisfies before a candidate is usable, not just grounding
                 # and length. Two gates were missing, and each one let a *rejected*
@@ -204,6 +213,12 @@ class QuestionItemRepairer(BaseRepairer):
                 cand_quote = cand.get("evidenceQuote") or cand.get("evidence_quote")
                 if cand_quote:
                     q["evidenceQuote"] = str(cand_quote)
+                    cand_ev = cand.get("passageEvidence")
+                    if isinstance(cand_ev, dict):
+                        q["passageEvidence"] = cand_ev
+                    elif passage_text and str(cand_quote) in passage_text:
+                        s_idx = passage_text.find(str(cand_quote))
+                        q["passageEvidence"] = {"startChar": s_idx, "endChar": s_idx + len(str(cand_quote)), "text": str(cand_quote)}
                 cand_expl = cand.get("explanation")
                 if cand_expl:
                     q["explanation"] = str(cand_expl)
@@ -256,6 +271,10 @@ class QuestionItemRepairer(BaseRepairer):
                             diagnosis=diagnosis,
                             pinned_model="MiniMax-Text-01",
                         )
+                    except (ValueError, RepairExecutionError) as auth_err:
+                        if any(term in str(auth_err).lower() for term in ("authority", "epoch", "lease")):
+                            raise
+                        continue
                     except Exception:
                         continue
                     if regen_pool and regen_pool.candidates:
@@ -289,22 +308,30 @@ class QuestionItemRepairer(BaseRepairer):
                 elif iss.code in (IssueCode.AMBIGUOUS_ANSWER, IssueCode.DUPLICATE_PROMPT, IssueCode.DUPLICATE_CONTENT):
                     q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
                     gw = self.gateway or getattr(context, "gateway", None)
-                    if gw is not None:
+                    use_hybrid = self.enable_hybrid and getattr(context, "enable_hybrid_repair", True) and (gw is not None)
+                    if use_hybrid:
                         # Invoke M3 for diagnostic repair plan
                         from app.repair.diagnostic_planner import RepairPlanningCapability
+                        from app.loop.context import resolve_run_authority
+                        auth = resolve_run_authority(context)
                         planner = RepairPlanningCapability(gateway=gw, model_id="MiniMax-M3")
-                        auth_grant = getattr(context, "authority", None)
-                        lease_owner = getattr(auth_grant, "lease_owner", uuid4())
-                        epoch = getattr(auth_grant, "epoch", 1)
+                        lease_owner = auth.lease_owner
+                        epoch = auth.epoch
                         sec_id_raw = str(artifact.section_id or getattr(context, "section_id", None) or 1)
                         sec_id_str = sec_id_raw if str(sec_id_raw).startswith("section_") else f"section_{sec_id_raw}"
                         art_id_str = f"questions_{sec_id_str}"
                         auth_claim_ref = (
-                            q.get("claimRef")
-                            or q.get("evidenceClaimRef")
+                            q.get("evidenceClaimRef")
+                            or q.get("claimRef")
+                            or (artifact.payload.get("evidenceClaimRef") if isinstance(artifact.payload, dict) else None)
                             or (artifact.payload.get("claimRef") if isinstance(artifact.payload, dict) else None)
-                            or f"claim_s{sec_id_str}_q{q_num_val}"
                         )
+                        if not auth_claim_ref or not str(auth_claim_ref).strip():
+                            raise RepairJustificationError(
+                                f"Question {q_num_val} has no verified blueprint-bound claim reference. "
+                                "Fallback claim fabrication is strictly prohibited."
+                            )
+                        auth_claim_ref = str(auth_claim_ref).strip()
                         plan = await planner.plan_repair(
                             question_payload=q,
                             passage_text=passage_text,

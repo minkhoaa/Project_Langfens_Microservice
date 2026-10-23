@@ -32,7 +32,7 @@ from app.generators.question.prompts import (
     QuestionPromptFamily,
     build_question_prompt,
 )
-from app.loop.context import LoopContext
+from app.loop.context import LoopContext, resolve_run_authority
 from app.providers.gateway import ProviderGateway
 from app.providers.models import Capability, ChatMessage, ProviderRequest
 from app.providers.parser import parse_defensive_json
@@ -313,7 +313,12 @@ class QuestionCandidateGenerator:
                 group_id=group_id,
             )
 
-        op_id = f"gen_qpool_{question_number}_{uuid4().hex[:8]}"
+        auth = resolve_run_authority(context)
+        eff_parent_op = parent_operation_id or (getattr(context, "parent_operation_id", None) if context else None)
+        if eff_parent_op:
+            op_id = f"{eff_parent_op}:text_regen:q{question_number}"
+        else:
+            op_id = f"op:{run_id}:qpool:q{question_number}"
         max_toks = 4096 if pool_limit > 3 else 1800
         user_prompt = prompt_data["user_prompt"]
         if pool_limit > 3 and family != QuestionPromptFamily.SUMMARY_COMPLETION:
@@ -351,8 +356,8 @@ class QuestionCandidateGenerator:
         )
         resp = await self._gateway.execute(
             req,
-            epoch=context.authority.epoch,
-            lease_owner=context.authority.lease_owner,
+            epoch=auth.epoch,
+            lease_owner=auth.lease_owner,
         )
         tokens_used = int(resp.usage.total_tokens) if resp.usage and resp.usage.total_tokens else 0
         wall_time_used = float(resp.duration_seconds) if hasattr(resp, "duration_seconds") and resp.duration_seconds is not None else 0.0
@@ -841,7 +846,12 @@ class QuestionCandidateGenerator:
             )
             return variants
 
-        op_id = f"gen_summary_grp_{start_number}_{uuid4().hex[:8]}"
+        auth = resolve_run_authority(context)
+        eff_parent_op = getattr(context, "parent_operation_id", None) if context else None
+        if eff_parent_op:
+            op_id = f"{eff_parent_op}:summary_grp:s{start_number}"
+        else:
+            op_id = f"op:{run_id}:summary_grp:s{start_number}"
         req = ProviderRequest(
             operation_id=op_id,
             run_id=run_id,
@@ -862,8 +872,8 @@ class QuestionCandidateGenerator:
 
         resp = await self._gateway.execute(
             req,
-            epoch=context.authority.epoch,
-            lease_owner=context.authority.lease_owner,
+            epoch=auth.epoch,
+            lease_owner=auth.lease_owner,
         )
         parsed = resp.parsed_payload if resp.parsed_payload is not None else parse_defensive_json(resp.raw_text)
 

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID, uuid4
 
 from app.contracts.issue import Issue, IssueCode
-from app.providers.errors import ProviderError, TimeoutError as ProviderTimeoutError, TruncatedOutputError
+from app.providers.errors import DeadlineExceededError, ProviderError, TimeoutError as ProviderTimeoutError, TruncatedOutputError
 from app.providers.gateway import ProviderGateway
 from app.providers.models import Capability, ChatMessage, ProviderRequest
 from app.providers.parser import parse_defensive_json
@@ -65,7 +65,7 @@ class RepairPlanningCapability:
         section_id: str,
         artifact_id: str,
         lease_owner: UUID,
-        epoch: int = 1,
+        epoch: int,
         parent_operation_id: Optional[str] = None,
         adversary_feedback: Optional[str] = None,
         previous_attempts: Optional[Sequence[Dict[str, Any]]] = None,
@@ -73,6 +73,11 @@ class RepairPlanningCapability:
         timeout_seconds: float = 30.0,
     ) -> RepairPlan:
         """Executes a single, bounded M3 planning invocation and validates the returned RepairPlan."""
+        if lease_owner is None:
+            raise ValueError("Missing authority lease_owner: fabrication with uuid4 is prohibited")
+        if epoch is None or not isinstance(epoch, int) or epoch < 1:
+            raise ValueError(f"Invalid authority epoch {epoch}: must be an integer >= 1")
+
         target_q_num = int(question_payload.get("questionNumber") or question_payload.get("number") or 1)
         primary_issue = issues[0] if issues else Issue(
             code=IssueCode.AMBIGUOUS_ANSWER,
@@ -105,7 +110,10 @@ class RepairPlanningCapability:
             indent=2,
         )
 
-        op_id = f"op_m3_plan_q{target_q_num}_{uuid4().hex[:8]}"
+        if parent_operation_id:
+            op_id = f"{parent_operation_id}:m3_plan:q{target_q_num}"
+        else:
+            op_id = f"op:{run_id}:repair_plan:q{target_q_num}"
         req = ProviderRequest(
             capability=Capability.PLAN_REPAIR,
             messages=[
@@ -136,6 +144,9 @@ class RepairPlanningCapability:
         except TruncatedOutputError as trunc_err:
             logger.warning("MiniMax-M3 planning truncated (length cutoff): %s", trunc_err)
             raise RepairJustificationError(f"M3 repair planning truncated (output cut off): {trunc_err}") from trunc_err
+        except (ProviderTimeoutError, DeadlineExceededError) as timeout_err:
+            logger.warning("MiniMax-M3 planning timed out: %s", timeout_err)
+            raise RepairJustificationError(f"M3 repair planning provider timed out: {timeout_err}") from timeout_err
         except Exception as prov_err:
             logger.warning("MiniMax-M3 planning failed fail-closed: %s", prov_err)
             raise RepairJustificationError(f"M3 repair planning provider dispatch failed: {prov_err}") from prov_err
@@ -148,7 +159,12 @@ class RepairPlanningCapability:
                 raw = resp.raw_text or ""
                 parsed = parse_defensive_json(raw, target_model=RepairPlan, allow_repair=True)
                 plan = RepairPlan.model_validate(parsed)
-            validate_repair_plan_compatibility(plan, authoritative_claim_ref=authoritative_claim_ref)
+            validate_repair_plan_compatibility(
+                plan,
+                authoritative_claim_ref=authoritative_claim_ref,
+                target_question=target_q_num,
+                eligible_issues=issues,
+            )
             return plan
         except RepairPlanValidationError as val_err:
             logger.warning("M3 repair plan violated safety contract: %s", val_err)
