@@ -10,6 +10,12 @@ from app.repair.base import (
 )
 from app.repair.passage import PassageSentenceRepairer
 from app.repair.planner import RepairPlan, RepairPlanner
+from app.repair.contracts import (
+    RepairAction,
+    RepairPlan as M3RepairPlan,
+    validate_repair_plan_compatibility,
+)
+from app.repair.diagnostic_planner import RepairPlanningCapability
 from app.repair.question import QuestionItemRepairer, SummaryGroupRepairer
 from app.repair.registry import RepairRegistry
 from app.repair.section import (
