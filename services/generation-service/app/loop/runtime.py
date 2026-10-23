@@ -854,6 +854,16 @@ class BoundedLoopRuntime:
                 # regeneration without a record made every repair-infeasible defect look
                 # like a generic MAX_VERSIONS version-cap exhaustion.
                 self._record_capability_failure(error, repair=repair, version=version)
+                if self.persistence_client is not None:
+                    try:
+                        draft_wall_time = round(time.perf_counter() - t_draft_start, 4)
+                        self.persistence_client.reconcile_operation(OperationReconcileRequest(
+                            runId=self.context.run_id, epoch=self.context.authority.epoch,
+                            leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
+                            tokensUsed=0, accountingType="REPORTED", wallTimeUsedSeconds=draft_wall_time,
+                        ))
+                    except Exception as rec_ex:
+                        logger.warning("Could not reconcile failed %s operation %s: %s", intent.operation_type, intent.operation_id, rec_ex)
                 if repair and self._generated_versions < self.policy.max_generated_versions:
                     self.context.cursor.advance(LoopState.DRAFTING)
                     self._checkpoint()
@@ -888,6 +898,16 @@ class BoundedLoopRuntime:
                     tuple(getattr(art, "parent_refs", ())) == tuple(self.context.input_dependencies),
                     len(getattr(art, "parent_refs", ())), len(self.context.input_dependencies),
                 )
+                if self.persistence_client is not None:
+                    try:
+                        draft_wall_time = round(time.perf_counter() - t_draft_start, 4)
+                        self.persistence_client.reconcile_operation(OperationReconcileRequest(
+                            runId=self.context.run_id, epoch=self.context.authority.epoch,
+                            leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
+                            tokensUsed=0, accountingType="REPORTED", wallTimeUsedSeconds=draft_wall_time,
+                        ))
+                    except Exception:
+                        pass
                 self._finish(LoopReason.INVALID_OUTPUT, "capability returned wrong target/version/hash/parents")
                 return
             draft_wall_time = round(time.perf_counter() - t_draft_start, 4)

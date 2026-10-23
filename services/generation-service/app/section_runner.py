@@ -20,6 +20,7 @@ from app.contracts.evidence import AbsenceAssessment
 from app.contracts.evaluation import EvaluationResult
 from app.contracts.issue import Issue, IssueCode
 from app.contracts.policies import calculate_shingle_overlap, count_words, match_verbatim_in_passage, validate_answer_length
+from app.evaluators.deterministic import check_prompt_answer_leakage
 from app.evaluators.solver import BlindSolverEvaluator
 from app.generators.passage.prompts import PassageStyleProfile, build_passage_generation_prompt
 from app.generators.question.prompts import QuestionPromptFamily, build_question_prompt
@@ -73,6 +74,150 @@ class CandidateRejectionReason(str, Enum):
     QUOTE_NOT_VERBATIM = "QUOTE_NOT_VERBATIM"
     CANDIDATE_DUPLICATE = "CANDIDATE_DUPLICATE"
     CANDIDATE_SCHEMA_INVALID = "CANDIDATE_SCHEMA_INVALID"
+    ANSWER_NOT_GROUNDED_IN_EVIDENCE = "ANSWER_NOT_GROUNDED_IN_EVIDENCE"
+
+
+def match_boundary_aware(needle: str, haystack: str) -> bool:
+    """Matches a word or phrase in haystack ensuring token/word boundary awareness."""
+    needle = needle.strip()
+    haystack = haystack.strip()
+    if not needle or not haystack:
+        return False
+    tokens = [re.escape(t) for t in needle.split()]
+    if not tokens:
+        return False
+    inner = r"\s+".join(tokens)
+    prefix = r"\b" if re.match(r"^\w", needle, flags=re.UNICODE) else r"(?:\s|^)"
+    suffix = r"\b" if re.search(r"\w$", needle, flags=re.UNICODE) else r"(?:\s|$)"
+    pattern = prefix + inner + suffix
+    return bool(re.search(pattern, haystack, flags=re.IGNORECASE))
+
+
+GROUNDED_COMPLETION_TYPES = {
+    "TABLE_COMPLETION",
+    "SENTENCE_COMPLETION",
+    "SUMMARY_COMPLETION",
+    "NOTE_COMPLETION",
+    "FORM_COMPLETION",
+    "SHORT_ANSWER",
+}
+
+
+def _validate_completion_candidate_grounding(
+    cand_payload: dict[str, Any],
+    q_num: int,
+    q_type: str,
+    passage_text: str,
+    claims_map: dict[str, Any],
+    claim_id: str,
+    target_focus: Optional[str] = None,
+    is_mock: bool = False,
+) -> None:
+    """Enforces rigorous candidate-level answer grounding for completion question types.
+
+    1. The answer is a complete, valid word or numerical span occurring verbatim
+       in the candidate's own evidenceQuote using boundary-aware matching.
+    2. The evidenceQuote matches the accepted passage at exact offsets.
+    3. The evidence span is consistent with the immutable Blueprint-bound claim.
+    4. The candidate does not borrow a quantity, date or answer from an unrelated passage fact.
+    5. The completion stem does not expose the answer or require an unsupported inference.
+    """
+    answer = str(cand_payload.get("answer") or "").strip()
+    if not answer:
+        raise CandidateRejectionError(
+            CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+            f"Question {q_num} completion answer is empty",
+        )
+
+    ans_words = answer.split()
+    if len(ans_words) > 3:
+        raise CandidateRejectionError(
+            CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
+            f"Question {q_num} completion answer '{answer}' exceeds maximum 3 words ({len(ans_words)} words)",
+        )
+
+    quote = str(cand_payload.get("evidenceQuote") or "").strip()
+    if not quote:
+        raise CandidateRejectionError(
+            CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
+            f"Question {q_num} completion missing evidenceQuote",
+        )
+
+    # Rule 1: Answer occurs verbatim in candidate's own evidenceQuote via boundary-aware matching
+    if not match_boundary_aware(answer, quote):
+        raise CandidateRejectionError(
+            CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
+            f"Question {q_num} completion answer '{answer}' does not occur verbatim in candidate's evidenceQuote: '{quote}'",
+        )
+
+    # Rule 2: evidenceQuote matches accepted passage at exact offsets
+    p_start = passage_text.find(quote)
+    if p_start < 0:
+        clean_q = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", quote)
+        p_start = passage_text.find(clean_q)
+        if p_start >= 0:
+            quote = clean_q
+            cand_payload["evidenceQuote"] = clean_q
+    if p_start < 0:
+        raise CandidateRejectionError(
+            CandidateRejectionReason.QUOTE_NOT_VERBATIM,
+            f"Question {q_num} evidence quote not found in passage text: '{quote[:60]}'",
+        )
+    p_end = p_start + len(quote)
+    cand_payload["passageEvidence"] = {"startChar": p_start, "endChar": p_end, "text": quote}
+
+    # Rule 3: Evidence span is consistent with the immutable Blueprint-bound claim
+    bound_claim_text = claims_map.get(claim_id, {}).get("text", "").strip() if claims_map else ""
+    effective_focus = (target_focus or bound_claim_text or "").strip()
+    if effective_focus:
+        in_focus = (quote in effective_focus) or (effective_focus in quote)
+        shingle_ov = calculate_shingle_overlap(quote, effective_focus) if not in_focus else 1.0
+        q_tokens = set(re.findall(r"\w+", quote.lower()))
+        f_tokens = set(re.findall(r"\w+", effective_focus.lower()))
+        token_ov = len(q_tokens & f_tokens) / max(1, len(q_tokens)) if q_tokens else 0.0
+        focus_pos = passage_text.find(effective_focus)
+        passage_consistent = in_focus or shingle_ov >= 0.20 or token_ov >= 0.50
+        if not passage_consistent and focus_pos >= 0:
+            focus_start = focus_pos
+            focus_end = focus_pos + len(effective_focus)
+            if max(p_start, focus_start) <= min(p_end, focus_end):
+                passage_consistent = True
+            elif abs(p_start - focus_end) <= 120 and "\n\n" not in passage_text[min(p_end, focus_start):max(p_start, focus_end)]:
+                passage_consistent = True
+
+        if not passage_consistent and not is_mock:
+            raise CandidateRejectionError(
+                CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
+                f"Question {q_num} evidence quote '{quote[:50]}...' is not consistent with bound claim '{claim_id}' (overlap: {shingle_ov:.2f})",
+            )
+
+    # Rule 4: Candidate does not borrow a quantity, date or answer from an unrelated passage fact
+    num_matches = re.findall(r"\b\d+(?:st|nd|rd|th)?\b", answer)
+    for num in num_matches:
+        if effective_focus and not match_boundary_aware(num, effective_focus):
+            raise CandidateRejectionError(
+                CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
+                f"Question {q_num} answer contains quantity/date '{num}' not present in bound claim '{claim_id}' evidence span",
+            )
+
+    # Rule 5: Completion stem does not expose the answer or require unsupported inference
+    prompt = str(cand_payload.get("prompt") or cand_payload.get("statement") or "").strip()
+    if prompt:
+        clean_prompt = prompt.replace(f"[{q_num}]", "").replace("______", "")
+        if check_prompt_answer_leakage(clean_prompt, answer):
+            raise CandidateRejectionError(
+                CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
+                f"Question {q_num} stem exposes its own answer: '{answer}'",
+            )
+        # Check for unit duplication (e.g. prompt has "[9] BCE" and answer has "BCE")
+        m_unit = re.search(r"\[" + str(q_num) + r"\]\s*([A-Za-z%°]+)", prompt)
+        if m_unit:
+            unit_str = m_unit.group(1).strip()
+            if re.search(r"\b" + re.escape(unit_str) + r"\b", answer, re.IGNORECASE):
+                raise CandidateRejectionError(
+                    CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
+                    f"Question {q_num} answer '{answer}' duplicates stem unit '{unit_str}'",
+                )
 
 
 class CandidateRejectionError(ValueError):
@@ -97,6 +242,7 @@ def _parse_single_candidate(
     claim_id: str,
     difficulty: str,
     target_focus: Optional[str] = None,
+    is_mock: bool = False,
 ) -> dict[str, Any]:
     """Parses a single candidate item into a validated canonical question payload."""
     matched_claim = claims_map.get(claim_id)
@@ -411,7 +557,7 @@ def _parse_single_candidate(
         p_end = p_start + len(quote) if p_start >= 0 else -1
         answer = str(cand.get("answer") or "").strip()
 
-        return {
+        res_payload = {
             "questionNumber": q_num,
             "questionType": q_type,
             "prompt": prompt,
@@ -422,6 +568,17 @@ def _parse_single_candidate(
             "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
             "evidenceClaimRef": claim_id,
         }
+        _validate_completion_candidate_grounding(
+            res_payload,
+            q_num=q_num,
+            q_type=q_type,
+            passage_text=passage_text,
+            claims_map=claims_map,
+            claim_id=claim_id,
+            target_focus=target_focus,
+            is_mock=is_mock,
+        )
+        return res_payload
 
     elif q_type == "SUMMARY_COMPLETION_BOX":
         prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
@@ -520,7 +677,7 @@ def _parse_single_candidate(
         quote = str(cand.get("evidenceQuote") or "").strip()
         p_start = passage_text.find(quote) if quote else -1
         p_end = p_start + len(quote) if p_start >= 0 else -1
-        return {
+        res_payload = {
             "questionNumber": q_num,
             "questionType": q_type,
             "prompt": prompt,
@@ -534,6 +691,17 @@ def _parse_single_candidate(
             "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
             "evidenceClaimRef": claim_id,
         }
+        _validate_completion_candidate_grounding(
+            res_payload,
+            q_num=q_num,
+            q_type=q_type,
+            passage_text=passage_text,
+            claims_map=claims_map,
+            claim_id=claim_id,
+            target_focus=target_focus,
+            is_mock=is_mock,
+        )
+        return res_payload
 
     elif q_type == "FLOW_CHART":
         prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
@@ -610,6 +778,16 @@ def _parse_single_candidate(
             res_payload["bulletPrefix"] = str(cand.get("bulletPrefix") or "").strip() or None
         elif q_type == "FORM_COMPLETION":
             res_payload["fieldLabel"] = str(cand.get("fieldLabel") or "").strip() or None
+        _validate_completion_candidate_grounding(
+            res_payload,
+            q_num=q_num,
+            q_type=q_type,
+            passage_text=passage_text,
+            claims_map=claims_map,
+            claim_id=claim_id,
+            target_focus=target_focus,
+            is_mock=is_mock,
+        )
         return res_payload
 
     elif q_type == "SHORT_ANSWER":
@@ -637,7 +815,7 @@ def _parse_single_candidate(
         p_end = p_start + len(quote) if p_start >= 0 else -1
         answer = str(cand.get("answer") or cand.get("correctOption") or "").strip()
 
-        return {
+        res_payload = {
             "questionNumber": q_num,
             "questionType": q_type,
             "prompt": prompt,
@@ -648,6 +826,17 @@ def _parse_single_candidate(
             "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
             "evidenceClaimRef": claim_id,
         }
+        _validate_completion_candidate_grounding(
+            res_payload,
+            q_num=q_num,
+            q_type=q_type,
+            passage_text=passage_text,
+            claims_map=claims_map,
+            claim_id=claim_id,
+            target_focus=target_focus,
+            is_mock=is_mock,
+        )
+        return res_payload
 
     else:
         raise ValueError(
@@ -667,6 +856,7 @@ def _parse_candidate_payload(
     prior_questions: Sequence[Any] = (),
     rejected_prompts: Sequence[str] = (),
     slot_index_in_group: Optional[int] = None,
+    is_mock: bool = False,
 ) -> dict[str, Any]:
     """Parses and evaluates candidate pool into a validated canonical question payload.
 
@@ -733,6 +923,7 @@ def _parse_candidate_payload(
                 claim_id=claim_id,
                 difficulty=difficulty,
                 target_focus=target_focus,
+                is_mock=is_mock,
             )
         except CandidateRejectionError as parse_err:
             rejection_errors.append(parse_err)
@@ -810,6 +1001,7 @@ def _parse_candidate_payload(
     if rejection_errors:
         priority = [
             CandidateRejectionReason.CLAIM_NOT_SUPPORTED_IN_PASSAGE,
+            CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
             CandidateRejectionReason.QUOTE_NOT_VERBATIM,
             CandidateRejectionReason.CANDIDATE_DUPLICATE,
             CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
@@ -1135,6 +1327,8 @@ class SectionRunner:
         passage_alignments = passage_envelope.payload.get("claimAlignments", [])
         aligned_claim_map = {a["claimId"]: a for a in passage_alignments}
         rejected_prompts: dict[int, list[str]] = {}
+        rejected_answers: dict[int, set[str]] = {}
+        rejected_combos: dict[int, list[dict[str, Any]]] = {}
         sorted_slots = sorted(slots, key=lambda s: s.get("questionNumber", 0))
 
         for slot in sorted_slots:
@@ -1212,14 +1406,23 @@ class SectionRunner:
                                 question_number=target_q_num,
                                 candidate_count=2,
                                 blank_count=len(grp_slots),
+                                target_focus=target_focus,
                             )
+                            summary_user_prompt = prompt_data["user_prompt"]
+                            slot_claim_annotations = ", ".join(
+                                f"[{s['questionNumber']} -> {s['claimRefIds'][0]}]"
+                                for s in grp_slots
+                                if s.get("claimRefIds")
+                            )
+                            if slot_claim_annotations:
+                                summary_user_prompt += f"\n\nBLUEPRINT SLOT CLAIM BINDINGS:\n{slot_claim_annotations}"
                             passage_ver = passage_envelope.version
                             op_id = f"op:{context.run_id}:summary_group:{target_g_idx}:{passage_ver}_{version}" if gen_attempt == 0 else f"op:{context.run_id}:summary_group:{target_g_idx}:{passage_ver}_{version}_att2"
                             req = ProviderRequest(
                                 capability=Capability.GENERATE_JSON,
                                 messages=[
                                     ChatMessage(role="system", content=prompt_data["system_instruction"]),
-                                    ChatMessage(role="user", content=prompt_data["user_prompt"]),
+                                    ChatMessage(role="user", content=summary_user_prompt),
                                 ],
                                 operation_id=op_id,
                                 run_id=context.run_id,
@@ -1249,12 +1452,74 @@ class SectionRunner:
                         if prior_statements:
                             last_few = prior_statements[-4:]
                             user_prompt += "\n\nCRITICAL UNIQUENESS INVARIANT:\nYour question MUST NOT repeat or paraphrase any of these already accepted questions:\n" + "\n".join(f"- {s}" for s in last_few)
-                        if version > 1 and target_q_num in rejected_prompts:
+                        if (
+                            version > 1
+                            and target_q_num in rejected_answers
+                            and target_q_type in GROUNDED_COMPLETION_TYPES
+                        ):
+                            rej_ans_list = sorted(list(rejected_answers.get(target_q_num, set())))
+                            rej_ans_str = ", ".join(f"'{a}'" for a in rej_ans_list) if rej_ans_list else "previously proposed answer"
+                            combos = rejected_combos.get(target_q_num, [])[-3:]
+                            combos_str = (
+                                "\n".join(
+                                    f"- Prompt: '{c.get('prompt', '')[:70]}...', Answer: '{c.get('answer', '')}' (Reason: {c.get('reason', '')})"
+                                    for c in combos
+                                )
+                                if combos
+                                else ""
+                            )
+                            claim_text_content = claims_map.get(cur_claim_id, {}).get("text", "")
+                            user_prompt += (
+                                f"\n\nCRITICAL RETRY INVARIANT (Attempt #{version}):\n"
+                                "Previous question candidate was REJECTED for factual grounding mismatch. The proposed answer did NOT occur in the permissible evidence quote.\n\n"
+                                f"IMMUTABLE BOUND CLAIM:\nClaim ID: {cur_claim_id}\nClaim Content: \"{claim_text_content}\"\n\n"
+                                f"EXACT PERMISSIBLE EVIDENCE SPAN:\n\"{target_focus}\"\n\n"
+                                f"REJECTED UNSUPPORTED ANSWERS (DO NOT REUSE):\n{rej_ans_str}\n"
+                                "These answers do NOT appear in the permissible evidence span. You MUST NOT use them or borrow numbers/dates from elsewhere.\n\n"
+                                f"REJECTED CANDIDATES TO EXCLUDE:\n{combos_str}\n\n"
+                                "MANDATORY RULES FOR THIS ATTEMPT:\n"
+                                "1. The answer MUST be an exact, complete word or short phrase (1 to 3 words) occurring VERBATIM inside the EXACT PERMISSIBLE EVIDENCE SPAN quoted above.\n"
+                                "2. The evidenceQuote MUST be an exact verbatim substring of the PERMISSIBLE EVIDENCE SPAN.\n"
+                                "3. You MUST NOT borrow quantities, dates, or facts from other parts of the passage.\n"
+                                f"4. Construct the question prompt to test a fact that IS present in the permissible evidence span (e.g. key terms, names, or phrases from '{target_focus[:50]}...')."
+                            )
+                        elif version > 1 and target_q_num in rejected_prompts:
                             user_prompt += f"\n\nCRITICAL RETRY INVARIANT (Attempt #{version}):\nPrevious question candidate was rejected for ambiguity or factual overlap. You MUST NOT ask about: " + "; ".join(f"'{p[:80]}...'" for p in rejected_prompts[target_q_num]) + "\nYou MUST ask about a COMPLETELY DIFFERENT factual detail or sentence from the passage."
                         if target_q_type == "MULTIPLE_CHOICE_SINGLE":
                             user_prompt += "\n\nCRITICAL MCQ DISTRACTOR INVARIANT:\nEnsure the 3 incorrect options (distractors) are CLEARLY AND UNEQUIVOCALLY FALSE or contradicted by the passage, and cannot be defended as partially true."
                         if gen_attempt > 0 and last_parse_error:
-                            if last_parse_reason == CandidateRejectionReason.QUOTE_NOT_VERBATIM:
+                            if (
+                                last_parse_reason == CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE
+                                or (target_q_num in rejected_answers and target_q_type in GROUNDED_COMPLETION_TYPES)
+                            ):
+                                rej_ans_list = sorted(list(rejected_answers.get(target_q_num, set())))
+                                rej_ans_str = ", ".join(f"'{a}'" for a in rej_ans_list) if rej_ans_list else "previously proposed answer"
+                                combos = rejected_combos.get(target_q_num, [])[-3:]
+                                combos_str = (
+                                    "\n".join(
+                                        f"- Prompt: '{c.get('prompt', '')[:70]}...', Answer: '{c.get('answer', '')}' (Reason: {c.get('reason', '')})"
+                                        for c in combos
+                                    )
+                                    if combos
+                                    else ""
+                                )
+                                claim_text_content = claims_map.get(cur_claim_id, {}).get("text", "")
+                                user_prompt += (
+                                    f"\n\nPREVIOUS ATTEMPT DEFECT: {last_parse_error}\n"
+                                    "CRITICAL ANSWER GROUNDING & FACTUAL ALIGNMENT INVARIANT:\n"
+                                    "Your previous question candidate was REJECTED because the proposed answer was NOT grounded in the cited evidence quote or borrowed an unsupported fact.\n\n"
+                                    f"IMMUTABLE BOUND CLAIM:\nClaim ID: {cur_claim_id}\nClaim Content: \"{claim_text_content}\"\n\n"
+                                    f"EXACT PERMISSIBLE EVIDENCE SPAN:\n\"{target_focus}\"\n\n"
+                                    f"REJECTED UNSUPPORTED ANSWERS (DO NOT REUSE):\n{rej_ans_str}\n"
+                                    "These answers do NOT appear in the permissible evidence span. You MUST NOT use them.\n\n"
+                                    f"REJECTED CANDIDATES TO EXCLUDE:\n{combos_str}\n\n"
+                                    "MANDATORY RULES FOR THIS ATTEMPT:\n"
+                                    "1. The answer MUST be an exact, complete word or short phrase (1 to 3 words) occurring VERBATIM inside the EXACT PERMISSIBLE EVIDENCE SPAN quoted above.\n"
+                                    "2. The evidenceQuote MUST be an exact verbatim substring of the PERMISSIBLE EVIDENCE SPAN.\n"
+                                    "3. You MUST NOT borrow quantities, dates, or facts from other parts of the passage.\n"
+                                    f"4. Construct the question prompt to test a fact that IS present in the permissible evidence span."
+                                )
+                            elif last_parse_reason == CandidateRejectionReason.QUOTE_NOT_VERBATIM:
                                 user_prompt += (
                                     f"\n\nPREVIOUS ATTEMPT DEFECT: {last_parse_error}\n"
                                     "CRITICAL EVIDENCE VERBATIM INVARIANT:\n"
@@ -1311,6 +1576,7 @@ class SectionRunner:
                             prior_questions=q_envelopes,
                             rejected_prompts=rejected_prompts.get(target_q_num, []),
                             slot_index_in_group=slot_idx_in_grp,
+                            is_mock=("mock" in actual_policy.provider.lower()),
                         )
                         if parsed.get("evidenceClaimRef") != target_claim_id:
                             raise ValueError(
@@ -1327,9 +1593,25 @@ class SectionRunner:
                             for rc in raw_cands:
                                 if isinstance(rc, dict):
                                     s = str(rc.get("statement") or rc.get("prompt") or "").strip()
+                                    ans_str = str(rc.get("answer") or rc.get("correctOption") or "").strip()
+                                    q_str = str(rc.get("evidenceQuote") or "").strip()
                                     if s and s not in rejected_prompts.setdefault(target_q_num, []):
                                         rejected_prompts[target_q_num].append(s)
+                                    if ans_str:
+                                        rejected_answers.setdefault(target_q_num, set()).add(ans_str)
+                                    rejected_combos.setdefault(target_q_num, []).append({
+                                        "prompt": s,
+                                        "answer": ans_str,
+                                        "evidenceQuote": q_str,
+                                        "reason": str(last_parse_reason or "INVALID_CANDIDATE"),
+                                    })
                         if gen_attempt == 1:
+                            if last_parse_reason == CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE:
+                                raise CandidateRejectionError(
+                                    CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
+                                    f"Blueprint slot {target_q_num} compatibility failure: immutable bound claim '{cur_claim_id}' "
+                                    f"cannot support a grounded {target_q_type} completion answer without ungrounded extrapolation.",
+                                )
                             raise
                         logger.warning("Question %s candidate defect: %s; retrying with repair", target_q_num, parse_err)
                         if target_q_type == "SUMMARY_COMPLETION":
@@ -1345,6 +1627,49 @@ class SectionRunner:
                     config.difficulty.value,
                     [e.payload for e in prior],
                 ))
+
+                # Phase 4: Reject deterministically invalid candidates before expensive independent solver/adversary calls
+                deterministic_failures = [e for e in evals if not e.is_pass()]
+                if deterministic_failures:
+                    from app.contracts.evaluation import EvaluationStatus
+                    from app.contracts.issue import IssueSeverity, IssueScope
+                    fail_reasons = "; ".join(f"{e.evaluator_id}: {[i.message for i in e.issues]}" for e in deterministic_failures)
+                    blind_res = EvaluationResult(
+                        evaluationId=f"eval_bsa_shortcircuit_{art.artifact_id}_v{art.version}",
+                        evaluatorId="eval_blind_solver_adversary",
+                        evaluatorVersion="1.0.0",
+                        targetRef=art.to_ref(),
+                        inputDependencyRefs=list(art.parent_refs),
+                        status=EvaluationStatus.FAIL,
+                        score=0.0,
+                        issues=[
+                            Issue.create(
+                                issue_id=f"iss_bsa_skip_{art.artifact_id}_v{art.version}",
+                                code=IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM,
+                                severity=IssueSeverity.CRITICAL,
+                                scope=IssueScope.QUESTION,
+                                message=f"Blind solver/adversary skipped: candidate failed prerequisite deterministic verification ({fail_reasons[:120]})",
+                                affected_refs=[art.to_ref()],
+                                evaluator_id="eval_blind_solver_adversary",
+                            )
+                        ],
+                    )
+                    evals.append(blind_res)
+                    # Record failed candidate payload for subsequent bounded generation feedback
+                    pl = art.payload if isinstance(art.payload, dict) else {}
+                    qn = int(pl.get("questionNumber") or 0)
+                    ans = str(pl.get("answer") or "").strip()
+                    pr = str(pl.get("prompt") or pl.get("statement") or "").strip()
+                    eq = str(pl.get("evidenceQuote") or "").strip()
+                    if qn and ans:
+                        rejected_answers.setdefault(qn, set()).add(ans)
+                        rejected_combos.setdefault(qn, []).append({
+                            "prompt": pr,
+                            "answer": ans,
+                            "evidenceQuote": eq,
+                            "reason": "FAILED_DETERMINISTIC_EVALUATION",
+                        })
+                    return evals
 
                 # 2. Independent Blind Solver & Adversarial evaluations
                 # When evaluating a repaired question (version > 1), provide a fresh cache

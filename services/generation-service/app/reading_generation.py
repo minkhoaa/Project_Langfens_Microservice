@@ -959,9 +959,17 @@ def compose_questions(
             )
             effective_type = slot_q_type
             if effective_type in ("TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"):
-                keys_tf = ["TRUE", "FALSE", "TRUE", "NOT_GIVEN", "TRUE", "FALSE", "NOT_GIVEN", "FALSE"]
-                keys_yn = ["YES", "NO", "YES", "NOT_GIVEN", "YES", "NO", "NOT_GIVEN", "NO"]
-                ans = keys_tf[(q_num - 1) % len(keys_tf)] if effective_type == "TRUE_FALSE_NOT_GIVEN" else keys_yn[(q_num - 1) % len(keys_yn)]
+                if "isNotGivenTarget" in slot:
+                    if slot["isNotGivenTarget"]:
+                        ans = "NOT_GIVEN"
+                    else:
+                        keys_tf_non_ng = ["TRUE", "FALSE", "TRUE", "FALSE"]
+                        keys_yn_non_ng = ["YES", "NO", "YES", "NO"]
+                        ans = keys_tf_non_ng[(q_num - 1) % len(keys_tf_non_ng)] if effective_type == "TRUE_FALSE_NOT_GIVEN" else keys_yn_non_ng[(q_num - 1) % len(keys_yn_non_ng)]
+                else:
+                    keys_tf = ["TRUE", "FALSE", "TRUE", "NOT_GIVEN", "TRUE", "FALSE", "NOT_GIVEN", "FALSE"]
+                    keys_yn = ["YES", "NO", "YES", "NOT_GIVEN", "YES", "NO", "NOT_GIVEN", "NO"]
+                    ans = keys_tf[(q_num - 1) % len(keys_tf)] if effective_type == "TRUE_FALSE_NOT_GIVEN" else keys_yn[(q_num - 1) % len(keys_yn)]
                 clean_snippet = re.sub(r"[.!?]+$", "", quote[:60]).strip()
                 templates_tf = [
                     f"Item {q_num} confirms that {clean_snippet}.",

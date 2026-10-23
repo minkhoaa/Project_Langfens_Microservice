@@ -289,7 +289,7 @@ async def test_section_standalone_deterministic_reproducibility() -> None:
     config = policy.section(2)
 
     # First run
-    run_id_1 = "det-run-1"
+    run_id_1 = "det-run"
     _, client_1, _, gw_1 = create_mock_environment(policy=policy, run_id=run_id_1)
     ctx_1 = RunContext(
         runId=run_id_1,
@@ -304,7 +304,7 @@ async def test_section_standalone_deterministic_reproducibility() -> None:
     res_1 = await SectionRunner(client_1, gw_1).run(ctx_1, config, s_ref_1, bp_1.to_ref(), policy)
 
     # Second run
-    run_id_2 = "det-run-2"
+    run_id_2 = "det-run"
     _, client_2, _, gw_2 = create_mock_environment(policy=policy, run_id=run_id_2)
     ctx_2 = RunContext(
         runId=run_id_2,

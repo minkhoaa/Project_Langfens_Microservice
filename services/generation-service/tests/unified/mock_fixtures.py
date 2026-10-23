@@ -335,7 +335,19 @@ class MockProvider(BaseProvider):
             m_count = re.search(r'with (\d+) blanks', user_content)
             b_count = int(m_count.group(1)) if m_count else 7
 
-            slots = [{"groupIndex": 1, "questionNumber": n, "claimRefIds": [claims[(n - start_q) % len(claims)]["claimId"]]} for n in range(start_q, start_q + b_count)]
+            slot_claim_matches = re.findall(r'\[(\d+)\s*->\s*(claim:[^\]]+)\]', user_content)
+            if slot_claim_matches:
+                claim_by_id = {c["claimId"]: c for c in claims}
+                slots = [
+                    {
+                        "groupIndex": 1,
+                        "questionNumber": int(qn),
+                        "claimRefIds": [cid if cid in claim_by_id else claims[(int(qn) - start_q) % len(claims)]["claimId"]],
+                    }
+                    for qn, cid in slot_claim_matches
+                ]
+            else:
+                slots = [{"groupIndex": 1, "questionNumber": n, "claimRefIds": [claims[(n - start_q) % len(claims)]["claimId"]]} for n in range(start_q, start_q + b_count)]
             all_q, groups = compose_questions(sec_idx, passage, claims, slots, config)
             for q in all_q:
                 self._last_questions[q["questionNumber"]] = q
@@ -413,7 +425,18 @@ class MockProvider(BaseProvider):
                             break
             g_idx = 0 if (q_num <= 7 or (14 <= q_num <= 19) or (27 <= q_num <= 33)) else 1
             from app.blueprint.claim_binding import score_claim_suitability_for_family
-            best_c = sorted(claims, key=lambda c: score_claim_suitability_for_family(c, q_type, sec_idx), reverse=True)[0]
+            fallback_c = sorted(claims, key=lambda c: score_claim_suitability_for_family(c, q_type, sec_idx), reverse=True)[0]
+            target_c = None
+            norm_q = q_type.upper().replace("_", "") if q_type else ""
+            is_comp = any(t in norm_q for t in ("COMPLETION", "SHORTANSWER", "FLOWCHART"))
+            if is_comp:
+                user_text = request.messages[-1].content if request.messages else ""
+                focus_m = re.search(r'FOCUS PARAGRAPH FOR QUESTION #?\d*:\s*"""(.*?)"""', user_text, re.DOTALL)
+                if focus_m:
+                    f_raw = focus_m.group(1).strip()
+                    f_words = set(f_raw.lower().split())
+                    target_c = max(claims, key=lambda c: len(set(c.get("text", "").lower().split()) & f_words))
+            best_c = target_c if target_c is not None else fallback_c
             slots = [{"groupIndex": g_idx, "questionNumber": q_num, "questionType": q_type, "claimRefIds": [best_c["claimId"]]}]
             all_q, _ = compose_questions(sec_idx, passage, claims, slots, config)
             q_payload = all_q[0]

@@ -284,13 +284,10 @@ def main():
         GROUP BY e."Id", e."Title", e."Slug", e."DurationMin"
     """) or []
 
-    # Compute Token & Cost Metrics
-    text_ops = [o for o in ops if "MiniMax-Text-01" in str(o.get("ResultRefJson") or "")]
-    m3_ops = [o for o in ops if "MiniMax-M3" in str(o.get("ResultRefJson") or "") or "m3_plan" in str(o.get("OperationId") or "")]
-    # If model_name wasn't serialized in ResultRefJson, differentiate by operation type/id
-    if not text_ops and not m3_ops:
-        m3_ops = [o for o in ops if "m3_plan" in str(o.get("OperationId") or "")]
-        text_ops = [o for o in ops if o not in m3_ops]
+    # Compute Token & Cost Metrics (PROVIDER_CALL operations only)
+    provider_ops = [o for o in ops if o.get("OperationType") == "PROVIDER_CALL"]
+    m3_ops = [o for o in provider_ops if "MiniMax-M3" in str(o.get("ResultRefJson") or "") or "m3_plan" in str(o.get("OperationId") or "")]
+    text_ops = [o for o in provider_ops if o not in m3_ops]
 
     total_prompt_tokens = sum(o.get("PromptTokensUsed") or 0 for o in ops)
     total_completion_tokens = sum(o.get("CompletionTokensUsed") or 0 for o in ops)
