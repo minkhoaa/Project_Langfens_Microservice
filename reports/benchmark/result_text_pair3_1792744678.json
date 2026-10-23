@@ -1,0 +1,61 @@
+{
+  "run_id": "run_673a41487faf4f6bba47194225f2c996",
+  "observed_model": "MiniMax-Text-01",
+  "completed_calls": 19,
+  "total_tokens_used": 43774,
+  "prompt_tokens_used": 36920,
+  "completion_tokens_used": 6854,
+  "reasoning_tokens_used": 0,
+  "avg_call_latency_seconds": 12.874,
+  "evaluations_summary": {
+    "eval_answer_verbatim_length": {
+      "PASS": 5
+    },
+    "eval_blind_solver_adversary": {
+      "FAIL": 1,
+      "PASS": 4
+    },
+    "eval_blueprint": {
+      "PASS": 1
+    },
+    "eval_evidence_graph": {
+      "PASS": 3
+    },
+    "eval_evidence_offsets": {
+      "PASS": 5
+    },
+    "eval_passage_fidelity": {
+      "PASS": 1
+    },
+    "eval_passage_semantic": {
+      "PASS": 1
+    },
+    "eval_passage_word_count": {
+      "PASS": 1
+    },
+    "eval_question_semantic": {
+      "PASS": 5
+    },
+    "eval_question_structure": {
+      "PASS": 5
+    },
+    "eval_question_uniqueness": {
+      "PASS": 5
+    },
+    "eval_source": {
+      "PASS": 3
+    }
+  },
+  "exam_id": null,
+  "persisted_questions": 0,
+  "arm": "text",
+  "model": "MiniMax-Text-01",
+  "pair_id": 3,
+  "pair_name": "HTML",
+  "job_id": "673a4148-7faf-4f6b-ba47-194225f2c996",
+  "status": "Failed",
+  "wall_time_seconds": 270.13,
+  "completed_sections": 0,
+  "error": "{\"detail\":\"question:run_673a41487faf4f6bba47194225f2c996:5: INVALID_OUTPUT: capability failed: ValueError: Question 5 candidate duplicates an already accepted question: 'The passage mentions that the Human Population and Paleoenvi...'\"}",
+  "billable_cost_usd": 0.04377
+}

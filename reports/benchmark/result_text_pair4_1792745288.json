@@ -1,0 +1,61 @@
+{
+  "run_id": "run_d7433d0e4e834500b11977c06b1c1ead",
+  "observed_model": "MiniMax-Text-01",
+  "completed_calls": 41,
+  "total_tokens_used": 81939,
+  "prompt_tokens_used": 72233,
+  "completion_tokens_used": 9706,
+  "reasoning_tokens_used": 0,
+  "avg_call_latency_seconds": 9.217,
+  "evaluations_summary": {
+    "eval_evidence_graph": {
+      "PASS": 3
+    },
+    "eval_passage_fidelity": {
+      "PASS": 1
+    },
+    "eval_blind_solver_adversary": {
+      "PASS": 9,
+      "FAIL": 4
+    },
+    "eval_evidence_offsets": {
+      "PASS": 13
+    },
+    "eval_question_structure": {
+      "PASS": 13
+    },
+    "eval_source": {
+      "PASS": 3
+    },
+    "eval_answer_verbatim_length": {
+      "PASS": 13
+    },
+    "eval_passage_semantic": {
+      "PASS": 1
+    },
+    "eval_blueprint": {
+      "PASS": 1
+    },
+    "eval_question_uniqueness": {
+      "PASS": 13
+    },
+    "eval_question_semantic": {
+      "PASS": 13
+    },
+    "eval_passage_word_count": {
+      "PASS": 1
+    }
+  },
+  "exam_id": null,
+  "persisted_questions": 0,
+  "arm": "text",
+  "model": "MiniMax-Text-01",
+  "pair_id": 4,
+  "pair_name": "Markdown",
+  "job_id": "d7433d0e-4e83-4500-b119-77c06b1c1ead",
+  "status": "Failed",
+  "wall_time_seconds": 405.18,
+  "completed_sections": 0,
+  "error": "{\"detail\":\"question:run_d7433d0e4e834500b11977c06b1c1ead:10: MAX_VERSIONS: 3 unresolved blockers or repair cap; immutable version cap reached\"}",
+  "billable_cost_usd": 0.08194
+}

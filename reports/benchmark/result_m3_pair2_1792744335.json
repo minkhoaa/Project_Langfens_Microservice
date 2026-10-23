@@ -1,0 +1,33 @@
+{
+  "run_id": "run_2b1c98afbb8f4e6487bcd8fa23a622dd",
+  "observed_model": null,
+  "completed_calls": 0,
+  "total_tokens_used": 0,
+  "prompt_tokens_used": 0,
+  "completion_tokens_used": 0,
+  "reasoning_tokens_used": 0,
+  "avg_call_latency_seconds": 0.0,
+  "evaluations_summary": {
+    "eval_blueprint": {
+      "PASS": 1
+    },
+    "eval_evidence_graph": {
+      "PASS": 3
+    },
+    "eval_source": {
+      "PASS": 3
+    }
+  },
+  "exam_id": null,
+  "persisted_questions": 0,
+  "arm": "m3",
+  "model": "MiniMax-M3",
+  "pair_id": 2,
+  "pair_name": "HTTPS URL",
+  "job_id": "2b1c98af-bb8f-4e64-87bc-d8fa23a622dd",
+  "status": "Failed",
+  "wall_time_seconds": 135.14,
+  "completed_sections": 0,
+  "error": "{\"detail\":\"passage:run_2b1c98afbb8f4e6487bcd8fa23a622dd:1: INVALID_OUTPUT: capability failed: TruncatedOutputError: Provider minimax cut off output (finish_reason=length)\"}",
+  "billable_cost_usd": 0.0
+}
