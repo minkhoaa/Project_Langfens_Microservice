@@ -883,19 +883,21 @@ def compose_questions(
                 ]
                 statement = templates_tf[(q_num - 1) % len(templates_tf)]
                 if ans == "NOT_GIVEN":
+                    ng_statement = f"Future regional excavations in query {q_num} will discover older strata regarding {clean_snippet}."
                     q_payload = {
                         "questionNumber": q_num,
                         "questionType": effective_type,
-                        "statement": statement,
+                        "statement": ng_statement,
                         "answer": ans,
-                        "explanation": explanation,
+                        "explanation": f"The passage discusses {clean_snippet} but makes no mention of future excavation projections.",
                         "difficulty": config.difficulty.value,
                         "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
                         "evidenceClaimRef": claim["claimId"],
                         "absenceAssessment": {
                             "assessmentId": f"abs:{section_index}:{q_num}",
-                            "claimOrTopic": statement,
-                            "absenceReason": "The passage provides no conclusive factual statement regarding this specific factor.",
+                            "claimOrTopic": f"Future excavation findings for item {q_num}",
+                            "absenceReason": "The passage discusses historical findings but provides no statement regarding future excavation projections.",
+                            "topicalContextSpan": quote,
                             "absenceConfirmed": True,
                         },
                     }

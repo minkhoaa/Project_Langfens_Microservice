@@ -304,7 +304,7 @@ async def test_gate_4_incorrect_mcq_keys_and_unsupported_tfng_rejected() -> None
     provider.script_response(f"question:{run_id}:1", bad_tfng_candidate)
 
     runner = SectionRunner(client, gateway)
-    with pytest.raises(EvaluationRejectedError) as exc_info:
+    with pytest.raises((EvaluationRejectedError, StageFailedError)) as exc_info:
         await runner.run(
             context,
             config,

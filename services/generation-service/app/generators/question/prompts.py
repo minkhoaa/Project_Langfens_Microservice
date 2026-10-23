@@ -255,13 +255,17 @@ def compute_prompt_hash(family: QuestionPromptFamily, template: str) -> str:
 PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
     QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN: (
         "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
-        "Generate {candidate_count} distinct True/False/Not Given question candidates with diverse answers (include TRUE, FALSE, and NOT GIVEN across the candidates).\n"
+        "Generate {candidate_count} distinct True/False/Not Given question candidates with diverse answers across the candidates (select among TRUE, FALSE, or NOT GIVEN).\n"
         "Target slot: question #{question_number}. Target distinct factual evidence across different paragraphs for question #{question_number}.\n\n"
         "RULES:\n"
-        "- TRUE: statement agrees with information in the passage.\n"
-        "- FALSE: statement contradicts information in the passage.\n"
-        "- NOT GIVEN: no information on this in the passage.\n"
-        "- evidenceQuote: verbatim passage quote for TRUE/FALSE (or relevant context anchor for NOT GIVEN).\n"
+        "- TRUE: statement agrees with information in the passage. Must provide exact verbatim evidenceQuote from the passage. Do NOT provide absenceAssessment.\n"
+        "- FALSE: statement contradicts information in the passage. Must provide exact verbatim evidenceQuote from the passage. Do NOT provide absenceAssessment.\n"
+        "- NOT GIVEN: information is omitted or not mentioned in the passage. Must NOT provide evidenceQuote (set to null or omit). MUST provide absenceAssessment with:\n"
+        "  * assessmentId: \"abs_q{question_number}\"\n"
+        "  * claimOrTopic: concise topic or omitted claim\n"
+        "  * absenceReason: detailed explanation of why this information is completely missing/unmentioned in the passage (minimum 25 characters)\n"
+        "  * topicalContextSpan: exact verbatim sentence from the passage providing the adjacent topical context\n"
+        "  * absenceConfirmed: true\n"
         "- explanation: detailed passage-grounded justification (minimum 25 characters).\n\n"
         "Output JSON format:\n"
         "{{\n"
@@ -270,20 +274,36 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
         '      "prompt": "Factual statement evaluated against passage facts",\n'
         '      "answer": "TRUE",\n'
         '      "evidenceQuote": "exact verbatim sentence from the passage",\n'
-        '      "explanation": "Detailed passage-grounded explanation (minimum 25 characters) showing why the statement is true, false, or not given."\n'
+        '      "explanation": "Detailed passage-grounded explanation (minimum 25 characters) showing why the statement is true."\n'
+        "    }},\n"
+        "    {{\n"
+        '      "prompt": "Factual statement regarding information omitted from the passage",\n'
+        '      "answer": "NOT_GIVEN",\n'
+        '      "absenceAssessment": {{\n'
+        '        "assessmentId": "abs_q{question_number}",\n'
+        '        "claimOrTopic": "Specific claim or topic omitted from the passage",\n'
+        '        "absenceReason": "The passage discusses the general topic but never mentions this specific claim or detail.",\n'
+        '        "topicalContextSpan": "exact verbatim sentence from the passage providing adjacent topical context",\n'
+        '        "absenceConfirmed": true\n'
+        '      }},\n'
+        '      "explanation": "Detailed passage-grounded explanation (minimum 25 characters) showing why the statement is not given in the passage."\n'
         "    }}\n"
         "  ]\n"
         "}}"
     ),
     QuestionPromptFamily.YES_NO_NOT_GIVEN: (
         "PASSAGE EXCERPT:\n<passage_material>\n{passage_text}\n</passage_material>\n\n"
-        "Generate {candidate_count} distinct Yes/No/Not Given question candidates with diverse answers (include YES, NO, and NOT GIVEN across the candidates).\n"
+        "Generate {candidate_count} distinct Yes/No/Not Given question candidates with diverse answers across the candidates (select among YES, NO, or NOT GIVEN).\n"
         "Target slot: question #{question_number}.\n\n"
         "RULES:\n"
-        "- YES: statement agrees with author's claim or opinion.\n"
-        "- NO: statement contradicts author's claim or opinion.\n"
-        "- NOT GIVEN: impossible to say what the author thinks.\n"
-        "- evidenceQuote: verbatim passage quote for YES/NO (or context anchor for NOT GIVEN).\n"
+        "- YES: statement agrees with author's claim or opinion. Must provide exact verbatim evidenceQuote from the passage. Do NOT provide absenceAssessment.\n"
+        "- NO: statement contradicts author's claim or opinion. Must provide exact verbatim evidenceQuote from the passage. Do NOT provide absenceAssessment.\n"
+        "- NOT GIVEN: impossible to say what the author thinks. Must NOT provide evidenceQuote (set to null or omit). MUST provide absenceAssessment with:\n"
+        "  * assessmentId: \"abs_q{question_number}\"\n"
+        "  * claimOrTopic: concise topic or omitted view\n"
+        "  * absenceReason: detailed explanation of why the writer's view on this is completely omitted (minimum 25 characters)\n"
+        "  * topicalContextSpan: exact verbatim sentence from the passage providing the adjacent topical context\n"
+        "  * absenceConfirmed: true\n"
         "- explanation: detailed passage-grounded justification (minimum 25 characters).\n\n"
         "Output JSON format:\n"
         "{{\n"
@@ -292,7 +312,19 @@ PROMPT_TEMPLATES: Dict[QuestionPromptFamily, str] = {
         '      "prompt": "Statement reflecting or challenging an author claim or opinion",\n'
         '      "answer": "YES",\n'
         '      "evidenceQuote": "exact verbatim sentence from the passage reflecting the writer\'s claim",\n'
-        '      "explanation": "Detailed passage-grounded explanation (minimum 25 characters) proving why the statement agrees with, contradicts, or is not mentioned by the writer."\n'
+        '      "explanation": "Detailed passage-grounded explanation (minimum 25 characters) proving why the statement agrees with the writer."\n'
+        "    }},\n"
+        "    {{\n"
+        '      "prompt": "Statement regarding an author opinion not given in the passage",\n'
+        '      "answer": "NOT_GIVEN",\n'
+        '      "absenceAssessment": {{\n'
+        '        "assessmentId": "abs_q{question_number}",\n'
+        '        "claimOrTopic": "Specific author opinion or view omitted from the passage",\n'
+        '        "absenceReason": "The writer discusses the subject but expresses no opinion on this specific proposition.",\n'
+        '        "topicalContextSpan": "exact verbatim sentence from the passage providing adjacent topical context",\n'
+        '        "absenceConfirmed": true\n'
+        '      }},\n'
+        '      "explanation": "Detailed passage-grounded explanation (minimum 25 characters) proving why this view is not given by the writer."\n'
         "    }}\n"
         "  ]\n"
         "}}"

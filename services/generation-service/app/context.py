@@ -60,6 +60,7 @@ def validate_candidate_slot(
     answer = str(_extract_field(candidate, "answer", "correct_answer", default="") or "").strip()
     options_raw = _extract_field(candidate, "options", "headings", "features", "endings", "categories", default=None)
     absence_raw = _extract_field(candidate, "absence_assessment", "absenceAssessment", default=None)
+    quote_raw = str(_extract_field(candidate, "evidence_quote", "evidenceQuote", default="") or "").strip()
 
     # 1. Basic field presence
     if not prompt:
@@ -93,16 +94,47 @@ def validate_candidate_slot(
                 )
             )
         elif norm_ans == "NOT GIVEN":
-            is_absent = (
-                absence_raw.get("is_absent", False)
-                if isinstance(absence_raw, dict)
-                else getattr(absence_raw, "is_absent", getattr(absence_raw, "absence_confirmed", False))
-            )
-            if not is_absent:
+            if absence_raw is None:
                 issues.append(
                     ContextValidationIssue(
                         "ERR_NOT_GIVEN_ABSENCE_MISSING",
                         "NOT GIVEN candidate must provide a valid absence assessment confirming omission from passage",
+                        "absence_assessment",
+                    )
+                )
+            else:
+                is_absent = (
+                    absence_raw.get("absenceConfirmed", absence_raw.get("absence_confirmed", absence_raw.get("is_absent", False)))
+                    if isinstance(absence_raw, dict)
+                    else getattr(absence_raw, "absence_confirmed", getattr(absence_raw, "is_absent", False))
+                )
+                absence_reason = (
+                    str(absence_raw.get("absenceReason", absence_raw.get("absence_reason", absence_raw.get("divergence_reason", ""))) or "").strip()
+                    if isinstance(absence_raw, dict)
+                    else str(getattr(absence_raw, "absence_reason", getattr(absence_raw, "absenceReason", getattr(absence_raw, "divergence_reason", ""))) or "").strip()
+                )
+                if not is_absent or not absence_reason:
+                    issues.append(
+                        ContextValidationIssue(
+                            "ERR_NOT_GIVEN_ABSENCE_MISSING",
+                            "NOT GIVEN candidate must provide a valid absence assessment confirming omission from passage",
+                            "absence_assessment",
+                        )
+                    )
+                if quote_raw:
+                    issues.append(
+                        ContextValidationIssue(
+                            "ERR_NOT_GIVEN_SPURIOUS_QUOTE",
+                            "NOT GIVEN candidate must not provide positive evidenceQuote",
+                            "evidence_quote",
+                        )
+                    )
+        else:
+            if absence_raw is not None:
+                issues.append(
+                    ContextValidationIssue(
+                        "ERR_SPURIOUS_ABSENCE_ASSESSMENT",
+                        f"{norm_ans} candidate must not provide an absence assessment",
                         "absence_assessment",
                     )
                 )
@@ -116,16 +148,47 @@ def validate_candidate_slot(
                 )
             )
         elif norm_ans == "NOT GIVEN":
-            is_absent = (
-                absence_raw.get("is_absent", False)
-                if isinstance(absence_raw, dict)
-                else getattr(absence_raw, "is_absent", getattr(absence_raw, "absence_confirmed", False))
-            )
-            if not is_absent:
+            if absence_raw is None:
                 issues.append(
                     ContextValidationIssue(
                         "ERR_NOT_GIVEN_ABSENCE_MISSING",
                         "NOT GIVEN candidate must provide a valid absence assessment confirming omission from passage",
+                        "absence_assessment",
+                    )
+                )
+            else:
+                is_absent = (
+                    absence_raw.get("absenceConfirmed", absence_raw.get("absence_confirmed", absence_raw.get("is_absent", False)))
+                    if isinstance(absence_raw, dict)
+                    else getattr(absence_raw, "absence_confirmed", getattr(absence_raw, "is_absent", False))
+                )
+                absence_reason = (
+                    str(absence_raw.get("absenceReason", absence_raw.get("absence_reason", absence_raw.get("divergence_reason", ""))) or "").strip()
+                    if isinstance(absence_raw, dict)
+                    else str(getattr(absence_raw, "absence_reason", getattr(absence_raw, "absenceReason", getattr(absence_raw, "divergence_reason", ""))) or "").strip()
+                )
+                if not is_absent or not absence_reason:
+                    issues.append(
+                        ContextValidationIssue(
+                            "ERR_NOT_GIVEN_ABSENCE_MISSING",
+                            "NOT GIVEN candidate must provide a valid absence assessment confirming omission from passage",
+                            "absence_assessment",
+                        )
+                    )
+                if quote_raw:
+                    issues.append(
+                        ContextValidationIssue(
+                            "ERR_NOT_GIVEN_SPURIOUS_QUOTE",
+                            "NOT GIVEN candidate must not provide positive evidenceQuote",
+                            "evidence_quote",
+                        )
+                    )
+        else:
+            if absence_raw is not None:
+                issues.append(
+                    ContextValidationIssue(
+                        "ERR_SPURIOUS_ABSENCE_ASSESSMENT",
+                        f"{norm_ans} candidate must not provide an absence assessment",
                         "absence_assessment",
                     )
                 )

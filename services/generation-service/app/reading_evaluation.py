@@ -24,7 +24,12 @@ from app.contracts.policies import (
 )
 from app.contracts.questions import QuestionUnion
 from app.evaluators.deterministic import check_cross_prompt_answer_leakage, check_prompt_answer_leakage
-from app.evaluators.semantic import detect_comparison_inversion, detect_negation_polarity_conflict
+from app.evaluators.semantic import (
+    detect_comparison_inversion,
+    detect_contradiction_in_text,
+    detect_entailment_in_text,
+    detect_negation_polarity_conflict,
+)
 from app.reading_policy import PinnedExecutionPolicy, SectionConfig
 
 PAPER_EVALUATORS = {
@@ -333,7 +338,14 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
         assessment = payload.get("absenceAssessment") or {}
         if payload.get("evidenceQuote") is not None or not assessment.get("absenceConfirmed") or not assessment.get("absenceReason"):
             evidence.append((IssueCode.EVIDENCE_MISSING, "NOT GIVEN requires an absence assessment, never fabricated positive evidence"))
+        topical = assessment.get("topicalContextSpan")
+        if topical is not None:
+            topical_str = str(topical).strip()
+            if not topical_str or topical_str not in passage or span.get("text") != topical_str or passage[start:end] != topical_str:
+                evidence.append((IssueCode.EVIDENCE_MISSING, "NOT GIVEN topicalContextSpan must match verified passageEvidence offsets"))
     else:
+        if payload.get("absenceAssessment") is not None:
+            evidence.append((IssueCode.SCHEMA_VIOLATION, "Positive evidence question must not contain an absence assessment"))
         quote = str(payload.get("evidenceQuote", ""))
         if len(quote) < 15 or quote not in passage or span.get("text") != quote:
             evidence.append((IssueCode.EVIDENCE_MISSING, "Evidence quote must be the exact identified passage span"))
@@ -370,7 +382,19 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
             semantic.append((IssueCode.EVIDENCE_MISSING, "NOT GIVEN requires an explicit absenceReason"))
         if len(prompt.strip()) >= 10 and prompt.lower().strip(". ") in passage.lower():
             semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "NOT GIVEN statement is directly present in passage text"))
+        elif detect_entailment_in_text(prompt, passage):
+            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Passage entails NOT GIVEN statement (should be TRUE/YES)"))
+        elif detect_contradiction_in_text(prompt, passage):
+            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Passage contradicts NOT GIVEN statement (should be FALSE/NO)"))
+        elif detect_comparison_inversion(prompt, passage):
+            semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Passage contradicts NOT GIVEN statement via inverted comparison"))
+        else:
+            conflict, reason = detect_negation_polarity_conflict(prompt, passage)
+            if conflict:
+                semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, f"Passage contradicts NOT GIVEN statement: {reason}"))
     elif question_type in {"TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"}:
+        if payload.get("absenceAssessment") is not None:
+            semantic.append((IssueCode.SCHEMA_VIOLATION, f"{answer} question must not contain an absence assessment"))
         quote = str(payload.get("evidenceQuote", ""))
         if answer in ("TRUE", "YES"):
             conflict, reason = detect_negation_polarity_conflict(prompt, quote)

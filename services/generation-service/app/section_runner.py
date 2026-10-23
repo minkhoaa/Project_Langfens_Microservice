@@ -14,6 +14,7 @@ from typing import Any, Optional
 from uuid import UUID
 
 from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType, canonical_json_dump_prep
+from app.contracts.evidence import AbsenceAssessment
 from app.contracts.evaluation import EvaluationResult
 from app.contracts.policies import calculate_shingle_overlap, count_words, match_verbatim_in_passage, validate_answer_length
 from app.evaluators.solver import BlindSolverEvaluator
@@ -105,12 +106,73 @@ def _parse_single_candidate(
                 raise ValueError(f"Invalid answer '{raw_ans}' for YES_NO_NOT_GIVEN in question {q_num}")
 
         if answer == "NOT_GIVEN":
-            absence = cand.get("absenceAssessment")
-            anchor = str(cand.get("evidenceQuote") or (matched_claim["text"].strip() if matched_claim else "")).strip()
-            p_start = passage_text.find(anchor) if anchor else -1
-            if p_start < 0 and anchor:
-                p_start = 0
-            p_end = p_start + len(anchor) if p_start >= 0 else -1
+            raw_absence = cand.get("absenceAssessment") or cand.get("absence_assessment")
+            if not raw_absence or not isinstance(raw_absence, (dict, AbsenceAssessment)):
+                raise ValueError(
+                    f"Question {q_num} candidate is NOT_GIVEN but lacks required absenceAssessment object"
+                )
+
+            if isinstance(raw_absence, AbsenceAssessment):
+                if not raw_absence.absence_confirmed:
+                    raise ValueError(f"Question {q_num} absenceAssessment.absenceConfirmed must be True")
+                if not raw_absence.absence_reason:
+                    raise ValueError(f"Question {q_num} absenceAssessment is missing absenceReason")
+                if not raw_absence.claim_or_topic:
+                    raise ValueError(f"Question {q_num} absenceAssessment is missing claimOrTopic")
+                assessment_id = raw_absence.assessment_id or f"abs_q{q_num}"
+                claim_or_topic = raw_absence.claim_or_topic
+                absence_reason = raw_absence.absence_reason
+                topical_span = raw_absence.topical_context_span
+            else:
+                claim_or_topic = str(raw_absence.get("claimOrTopic") or raw_absence.get("claim_or_topic") or "").strip()
+                if not claim_or_topic:
+                    raise ValueError(f"Question {q_num} absenceAssessment is missing claimOrTopic")
+                absence_reason = str(raw_absence.get("absenceReason") or raw_absence.get("absence_reason") or "").strip()
+                if not absence_reason:
+                    raise ValueError(f"Question {q_num} absenceAssessment is missing absenceReason")
+                absence_confirmed = (
+                    raw_absence.get("absenceConfirmed")
+                    if "absenceConfirmed" in raw_absence
+                    else raw_absence.get("absence_confirmed")
+                )
+                if absence_confirmed is not True:
+                    raise ValueError(f"Question {q_num} absenceAssessment.absenceConfirmed must be True (got {absence_confirmed})")
+                assessment_id = str(raw_absence.get("assessmentId") or raw_absence.get("assessment_id") or f"abs_q{q_num}").strip()
+                topical_span = raw_absence.get("topicalContextSpan") or raw_absence.get("topical_context_span")
+
+            if topical_span is not None:
+                topical_span = str(topical_span).strip() or None
+            if not topical_span:
+                raw_pe = cand.get("passageEvidence") or cand.get("passage_evidence")
+                if isinstance(raw_pe, dict) and raw_pe.get("text"):
+                    topical_span = str(raw_pe["text"]).strip() or None
+                elif cand.get("evidenceQuote"):
+                    topical_span = str(cand["evidenceQuote"]).strip() or None
+
+            if topical_span:
+                p_start = passage_text.find(topical_span)
+                if p_start < 0:
+                    clean_topical = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", topical_span)
+                    p_start = passage_text.find(clean_topical)
+                    if p_start >= 0:
+                        topical_span = clean_topical
+                if p_start < 0:
+                    raise ValueError(f"Question {q_num} topicalContextSpan '{topical_span[:40]}' is not found in passage text")
+                p_end = p_start + len(topical_span)
+            elif target_focus and target_focus in passage_text:
+                topical_span = target_focus
+                p_start = passage_text.find(topical_span)
+                p_end = p_start + len(topical_span)
+            else:
+                raise ValueError(f"Question {q_num} NOT_GIVEN lacks verifiable topical context in passage")
+
+            absence_dict = {
+                "assessmentId": assessment_id,
+                "claimOrTopic": claim_or_topic,
+                "absenceReason": absence_reason,
+                "topicalContextSpan": topical_span,
+                "absenceConfirmed": True,
+            }
             return {
                 "questionNumber": q_num,
                 "questionType": q_type,
@@ -118,12 +180,16 @@ def _parse_single_candidate(
                 "answer": answer,
                 "explanation": explanation,
                 "difficulty": difficulty,
-                "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": anchor},
+                "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": topical_span},
                 "evidenceClaimRef": claim_id,
-                "absenceAssessment": absence,
+                "absenceAssessment": absence_dict,
             }
         else:
+            if cand.get("absenceAssessment") or cand.get("absence_assessment"):
+                raise ValueError(f"Question {q_num} candidate is {answer} but contains prohibited absenceAssessment")
             quote = str(cand.get("evidenceQuote") or "").strip()
+            if not quote or len(quote) < 10:
+                raise ValueError(f"Question {q_num} candidate is {answer} but missing valid evidenceQuote")
             p_start = passage_text.find(quote) if quote else -1
             if p_start < 0 and quote:
                 clean_q = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", quote)
@@ -138,10 +204,9 @@ def _parse_single_candidate(
                         p_start = pos
                         quote = c
                         break
-            if p_start < 0 and target_focus and target_focus in passage_text:
-                quote = target_focus
-                p_start = passage_text.find(quote)
-            p_end = p_start + len(quote) if p_start >= 0 else -1
+            if p_start < 0:
+                raise ValueError(f"Question {q_num} evidence quote '{quote[:40]}' is not found in passage")
+            p_end = p_start + len(quote)
             return {
                 "questionNumber": q_num,
                 "questionType": q_type,
@@ -587,12 +652,11 @@ def _parse_candidate_payload(
             rejection_errors.append(str(parse_err))
             continue
 
-        # Passage grounding check: ensure evidence quote exists in passage for non-NOT_GIVEN
-        ans = str(parsed.get("answer") or "").upper()
+        # Passage grounding check: ensure evidence quote or topical context exists in passage
         pe = parsed.get("passageEvidence", {})
         p_start = pe.get("startChar", -1)
-        if ans != "NOT_GIVEN" and p_start < 0:
-            rejection_errors.append(f"Question {q_num} candidate {idx} evidence quote is not found in passage")
+        if p_start < 0:
+            rejection_errors.append(f"Question {q_num} candidate {idx} passage offsets are invalid or ungrounded")
             continue
 
         # Duplicate & overlap check against already accepted questions
@@ -995,8 +1059,6 @@ class SectionRunner:
                                 f"mismatches blueprint slot claim '{target_claim_id}'. Mismatched evidence is prohibited."
                             )
                         cand_stmt = str(parsed.get("statement") or parsed.get("prompt") or "").strip()
-                        if cand_stmt:
-                            rejected_prompts.setdefault(target_q_num, []).append(cand_stmt)
                         return parsed
                     except ValueError as parse_err:
                         last_parse_error = str(parse_err)

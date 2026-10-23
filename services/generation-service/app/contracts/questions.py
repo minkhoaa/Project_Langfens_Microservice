@@ -44,7 +44,7 @@ class BaseCandidate(CanonicalBaseModel):
 
     prompt: str = Field(..., min_length=3, description="Question stem or statement")
     answer: str = Field(..., min_length=1, description="Correct answer string or key")
-    evidence_quote: str = Field(default="", alias="evidenceQuote", description="Direct verbatim quote from passage")
+    evidence_quote: Optional[str] = Field(default="", alias="evidenceQuote", description="Direct verbatim quote from passage")
     evidence_span: Optional[Tuple[int, int]] = Field(default=None, alias="evidenceSpan")
     explanation: Optional[str] = Field(default=None, description="Detailed pedagogical explanation")
     question_number: Optional[int] = Field(default=None, alias="questionNumber", ge=1, le=40)
@@ -72,6 +72,23 @@ class TrueFalseCandidate(BaseCandidate):
     )
     absence_assessment: Optional[AbsenceAssessment] = Field(default=None, alias="absenceAssessment")
 
+    @model_validator(mode="after")
+    def validate_candidate_absence_consistency(self) -> Self:
+        norm_ans = self.answer.upper().replace(" ", "_").strip()
+        if norm_ans == "NOT_GIVEN":
+            if self.absence_assessment is None:
+                raise ValueError("absenceAssessment is strictly required for NOT_GIVEN candidates")
+            if not self.absence_assessment.absence_confirmed:
+                raise ValueError("absenceAssessment.absenceConfirmed must be True for NOT_GIVEN candidates")
+            if self.evidence_quote:
+                raise ValueError("evidenceQuote must not be present for NOT_GIVEN candidates")
+        elif norm_ans in ("TRUE", "FALSE"):
+            if not self.evidence_quote or len(self.evidence_quote.strip()) < 10:
+                raise ValueError(f"evidenceQuote is required for {norm_ans} candidates")
+            if self.absence_assessment is not None:
+                raise ValueError(f"absenceAssessment must not be present for {norm_ans} candidates")
+        return self
+
 
 class YesNoCandidate(BaseCandidate):
     """Family 2: Yes / No / Not Given candidate."""
@@ -81,6 +98,23 @@ class YesNoCandidate(BaseCandidate):
         alias="questionType",
     )
     absence_assessment: Optional[AbsenceAssessment] = Field(default=None, alias="absenceAssessment")
+
+    @model_validator(mode="after")
+    def validate_candidate_absence_consistency(self) -> Self:
+        norm_ans = self.answer.upper().replace(" ", "_").strip()
+        if norm_ans == "NOT_GIVEN":
+            if self.absence_assessment is None:
+                raise ValueError("absenceAssessment is strictly required for NOT_GIVEN candidates")
+            if not self.absence_assessment.absence_confirmed:
+                raise ValueError("absenceAssessment.absenceConfirmed must be True for NOT_GIVEN candidates")
+            if self.evidence_quote:
+                raise ValueError("evidenceQuote must not be present for NOT_GIVEN candidates")
+        elif norm_ans in ("YES", "NO"):
+            if not self.evidence_quote or len(self.evidence_quote.strip()) < 10:
+                raise ValueError(f"evidenceQuote is required for {norm_ans} candidates")
+            if self.absence_assessment is not None:
+                raise ValueError(f"absenceAssessment must not be present for {norm_ans} candidates")
+        return self
 
 
 class SentenceCompletionCandidate(BaseCandidate):

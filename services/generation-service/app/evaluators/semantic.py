@@ -311,9 +311,9 @@ def detect_negation_polarity_conflict(statement: str, reference_text: str) -> tu
         overlap = s_words & sent_words
         if len(overlap) >= 2 and s_neg != sent_neg:
             for w in overlap:
-                if re.search(rf"\b(never|not|cannot|no|barely)\s+(?:\w+\s+)?{w}\b", s_clean) and not re.search(rf"\b(never|not|cannot|no|did not|does not)\s+(?:\w+\s+)?{w}\b", sent):
+                if re.search(rf"\b(never|not|cannot|no|barely)\s+(?:\w+\s+){{0,2}}{w}\b", s_clean) and not re.search(rf"\b(never|not|cannot|no|did not|does not)\s+(?:\w+\s+){{0,2}}{w}\b", sent):
                     return True, f"Statement negates predicate '{w}' which is affirmed in source text"
-                if re.search(rf"\b(did not|does not|was not|were not|never|not)\s+(?:\w+\s+)?{w}\b", sent) and not re.search(rf"\b(never|not|no)\s+(?:\w+\s+)?{w}\b", s_clean):
+                if re.search(rf"\b(did not|does not|was not|were not|never|not|no|cannot|failed to)\s+(?:\w+\s+){{0,2}}{w}\b", sent) and not re.search(rf"\b(never|not|no|cannot)\s+(?:\w+\s+){{0,2}}{w}\b", s_clean):
                     return True, f"Source text negates predicate '{w}' which is affirmed in statement"
     return False, ""
 
