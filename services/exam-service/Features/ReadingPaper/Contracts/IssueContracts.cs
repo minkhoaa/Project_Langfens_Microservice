@@ -69,7 +69,8 @@ public enum IssueCode
     FRESH_EVALUATION_MISSING,
     MONOTONOUS_ANSWER_DISTRIBUTION,
     CROSS_SECTION_DUPLICATE_CONTENT,
-    CROSS_SECTION_LEAKAGE
+    CROSS_SECTION_LEAKAGE,
+    PASSAGE_BLUEPRINT_ALIGNMENT
 }
 public sealed record Issue(
     [property: JsonPropertyName("issueId")] string IssueId,

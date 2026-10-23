@@ -259,8 +259,8 @@ def main():
 
     # Decisions
     decisions = query_db_json(f"""
-        SELECT "DecisionId", "Decision", "CurrentState", "NextState", "Reason", "ReasonCode",
-               "TargetArtifactId", "ExpectedVersion"
+        SELECT "DecisionId", "Decision", "CurrentState", "NextState", "Reason", "TargetScope",
+               "ExpectedVersion"
         FROM reading_paper_decisions
         WHERE "RunId" = '{run_id}'
         ORDER BY "CreatedAt" ASC
@@ -279,7 +279,7 @@ def main():
     exams = query_db_json(f"""
         SELECT e."Id", e."Title", e."Slug", e."DurationMin", COUNT(q."Id") as question_count
         FROM exams e
-        LEFT JOIN questions q ON q."ExamId" = e."Id"
+        LEFT JOIN exam_questions q ON q."ExamId" = e."Id"
         WHERE e."Slug" LIKE 'reading-%'
         GROUP BY e."Id", e."Title", e."Slug", e."DurationMin"
     """) or []
