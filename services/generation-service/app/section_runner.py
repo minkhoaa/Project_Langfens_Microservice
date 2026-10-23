@@ -1056,22 +1056,37 @@ class SectionRunner:
 
             # Check if any PASSAGE_BLUEPRINT_ALIGNMENT issues need claim grounding
             if alignment_issues:
+                # Extract specific claim IDs flagged in PASSAGE_BLUEPRINT_ALIGNMENT issues
+                unsupported_claim_ids = set()
+                for iss in alignment_issues:
+                    m = re.search(r"bound claim '([^']+)'", getattr(iss, "message", "") or "")
+                    if m:
+                        unsupported_claim_ids.add(m.group(1))
+
                 aligned_ids = {a["claimId"] for a in res_payload.get("claimAlignments", []) if a.get("claimId")}
                 repaired_any = False
                 for s in slots:
+                    if s.get("isNotGivenTarget"):
+                        continue
                     cids = s.get("claimRefIds") or ()
-                    if cids and cids[0] in claims_map and cids[0] not in aligned_ids:
-                        c_text = claims_map[cids[0]]["text"].strip()
+                    if cids and cids[0] in claims_map:
+                        cid = cids[0]
+                        if unsupported_claim_ids and cid not in unsupported_claim_ids:
+                            continue
+                        if cid in aligned_ids:
+                            continue
+                        c_text = claims_map[cid]["text"].strip()
                         c_words = count_words(c_text)
                         if c_text not in curr_pass:
                             if curr_words + c_words <= config.max_words:
                                 curr_pass = curr_pass + "\n\n" + c_text
                                 curr_words += c_words
                                 repaired_any = True
+                                aligned_ids.add(cid)
                             else:
                                 from app.repair.base import RepairExecutionError
                                 raise RepairExecutionError(
-                                    f"Cannot ground missing blueprint claim '{cids[0]}' without exceeding "
+                                    f"Cannot ground missing blueprint claim '{cid}' without exceeding "
                                     f"max word limit ({config.max_words} words; would be {curr_words + c_words})"
                                 )
 
