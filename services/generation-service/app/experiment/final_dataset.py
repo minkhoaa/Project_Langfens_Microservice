@@ -1,8 +1,7 @@
 """Frozen paired FINAL dataset and task management (RG09-S01).
 
 Implements normative research obligations from:
-- generation_baseline/research/DATA_GOVERNANCE.md (Disjoint use-categories, source-family isolation)
-- generation_baseline/research/FINAL_BATCH_RULES.md (Frozen 25-40 items per domain, max 5 items per batch)
+- Disjoint use-categories, source-family isolation, frozen 25-40 items/domain and max 5 items/batch
 - generation_baseline/contracts/JSON_SCHEMAS.json ($defs/ReadingTask, $defs/GrammarTask, $defs/PairedTaskFixture)
 
 Invariants:
@@ -516,7 +515,7 @@ class FinalDatasetRegistry:
     def partition_into_batches(
         self, max_items_per_batch: int = 5
     ) -> List[List[PairedTaskFixture]]:
-        """Partitions tasks into batches of at most 5 items per FINAL_BATCH_RULES.md."""
+        """Partitions tasks into batches of at most 5 frozen items."""
         all_tasks = self._reading_tasks + self._grammar_tasks
         batches: List[List[PairedTaskFixture]] = []
         for i in range(0, len(all_tasks), max_items_per_batch):

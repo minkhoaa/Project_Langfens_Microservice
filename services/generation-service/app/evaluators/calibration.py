@@ -1,9 +1,7 @@
 """Calibration, Holdout Disjointness, and Reliability Measurement Harness (RG04).
 
-Implements normative research obligations from:
-- generation_baseline/research/DATA_GOVERNANCE.md (CALIBRATION vs JUDGE_HOLDOUT disjointness)
-- generation_baseline/research/ANALYSIS_PLAN.md (FAR, FRR, coverage, confusion by type, transparent denominators)
-- generation_baseline/research/RUBRIC.md (Three-tier rubric verification)
+Implements CALIBRATION/JUDGE_HOLDOUT disjointness, three-tier rubric verification,
+and FAR/FRR/coverage/confusion metrics with transparent denominators.
 
 Core Invariants:
 1. No holdout reuse for tuning; calibration queries cannot read holdout gold.
@@ -692,7 +690,7 @@ EVALUATOR_V2_5_CALIBRATION_CORPUS: List[CalibrationItem] = list(EVALUATOR_V2_3_C
 
 # ── Historical Judge Holdout Corpus (RETIRED 2026-10-16 PRETUNING) ───────────
 # Invariant disclosure: This split was read and evaluated pre-tuning on 2026-10-16
-# during v2.1 baseline audit. In accordance with DATA_GOVERNANCE.md, it is retired
+# during v2.1 baseline audit. To preserve holdout disjointness, it is retired
 # and cannot serve as clean holdout evidence for Evaluator v2.2 freeze.
 JUDGE_HOLDOUT_CORPUS: List[CalibrationItem] = [
     # 1. Stratum: VALID (Reading - TFNG)
@@ -799,7 +797,7 @@ JUDGE_HOLDOUT_CORPUS: List[CalibrationItem] = [
 
 # ── Historical Judge Holdout Corpus V2 (STATUS: INSPECTED_EXPLORATORY) ──────
 # Invariant disclosure: This 5-item proposed holdout split was opened and inspected
-# during DEV calibration on 2026-10-16. Per Requirement 6 and DATA_GOVERNANCE.md,
+# during DEV calibration on 2026-10-16. To preserve holdout disjointness,
 # results on previously inspected tasks must be labeled exploratory and cannot serve
 # as sealed confirmatory holdout evidence. Confirmatory research requires an
 # uninspected, independently curated holdout corpus sealed in a separate module.
@@ -1104,7 +1102,7 @@ def generate_evaluator_freeze_manifest(
         "reliability_on_holdout": holdout_metrics.model_dump(),
         "human_adjudication_panel": {
             "status": "BLOCKED_PENDING_EXTERNAL_PANEL",
-            "reason": "Live human expert panel is an unapproved external resource in autonomous offline environment per AGENT_PIPELINE.md:41; offline curated benchmarks verified.",
+            "reason": "Live human expert panel is an unapproved external resource in this offline environment; offline curated benchmarks verified.",
         },
         "production_gate_decision": "FROZEN_FOR_RESEARCH",
     }

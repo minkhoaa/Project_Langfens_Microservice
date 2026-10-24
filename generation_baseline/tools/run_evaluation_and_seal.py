@@ -165,7 +165,7 @@ def run_evaluation_and_sealing():
         "sealed_vault_hash": vault_hash,
         "human_adjudication_status": "PENDING_EXTERNAL",
         "human_adjudication_notes": (
-            "Qualified external human reviewer panel not present in local workspace environment per AGENT_PIPELINE.md:41. "
+            "Qualified external human reviewer panel not present in the local workspace; independent human review remains required. "
             "Generated questions have no expert gold labels. Sealed vault isolates true arm identities."
         ),
     }
@@ -215,7 +215,7 @@ def run_evaluation_and_sealing():
                 "verdict PASS across any arm."
             ),
         },
-        "sealing_policy": "FINAL_BATCH_RULES.md",
+        "sealing_policy": "generation_baseline/AGENTS.md",
         "campaign_total_assignments": len(manifest.assignments),
         "campaign_total_attempts": len(ledger.get_all_attempts()),
         "campaign_total_calls": sum(a.usage_call_count or 0 for a in ledger.get_all_attempts()),

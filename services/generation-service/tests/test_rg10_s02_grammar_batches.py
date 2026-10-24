@@ -1,6 +1,5 @@
 """Unit tests for RG10-S02: Grammar final paired assignment batches.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-10-02.md
 Objective: Frozen 25-40 Grammar items x A/B/C executed with same scoring contract.
 Decisive acceptance condition: Failure/timeout/partial output, tokens and trace persisted for each slot.
 """

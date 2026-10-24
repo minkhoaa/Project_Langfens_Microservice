@@ -1,6 +1,5 @@
 """Phase-level integration test suite for RG10: Final paired research campaign.
 
-Parent: generation_baseline/prompts/prompt-phase-10.md
 Objective: Complete Reading and Grammar A/B/C assignments, external scoring and blinded human subset.
 Decisive acceptance condition: Counts match frozen assignments exactly and retries/failures remain visible.
 

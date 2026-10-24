@@ -50,8 +50,7 @@ public class ExamQuestion
     /// types):
     /// <code>{ "&lt;promptKey&gt;": ["&lt;gradingKey&gt;", "&lt;displayText&gt;"] }</code>
     /// — index 0 is the value compared against the user's answer, index 1 is
-    /// the human-readable label shown in the result review. Per the standard
-    /// in docs/standards/question-data.md.
+    /// the human-readable label shown in the result review.
     /// </summary>
     [Column(TypeName = "jsonb")]
     public Dictionary<string, string[]?>? MatchPairs { get; set; }

@@ -1,11 +1,8 @@
 # Course service
-Owns courses, lessons, enrollments and user learning progress.
+Owns courses, lessons, enrollments and learner progress in `Infrastructure/CourseDbContext.cs`.
 
-- `Features/{Admin,Public,User}Endpoint/` separate management, public reads and learner operations.
-- Extend the corresponding endpoint service/interface and map it in `Program.cs`; retain tier-specific authorization.
-- `Infrastructure/CourseDbContext.cs` owns course/enrollment data; migrations live in `Migrations/`.
-- `AddCourseAuthorization()` defines local role/scope policies.
-- MassTransit is configured for publishing; there are no registered consumers. Preserve existing event contracts for downstream progress/XP workflows.
-- Do not add a consumer or second queue convention merely because the broker is configured.
-- Build from root: `dotnet build services/course-service/course-service.csproj`.
-- No dedicated test project exists; verify enrollment/progress authorization and downstream event behavior when changing these paths.
+- `Features/{Admin,Public,User}Endpoint/` separates management, discovery and learner operations; extend the matching handler/service.
+- Preserve `AddCourseAuthorization()` tier policies and enrollment/progress access checks.
+- MassTransit is publisher-only here; broker configuration is not evidence of a consumer/queue convention.
+- Keep progress/lesson events compatible with gamification; this service does not award XP directly.
+- No dedicated tests; verify enrollment authorization and progress events with isolated persistence/broker.

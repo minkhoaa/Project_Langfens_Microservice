@@ -1,6 +1,5 @@
 """Unit tests for RG10-S03: Independent scoring and blinded human subset.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-10-03.md
 Objective: External frozen evaluator, qualified human blind subset and adjudication without config labels.
 Decisive acceptance condition: Evaluations bound to identical final content hashes and rubric version; gold isolated.
 """

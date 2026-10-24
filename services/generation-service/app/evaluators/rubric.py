@@ -1,6 +1,6 @@
 """Versioned Three-Tier Evaluation Rubric for IELTS Reading Generation (RG03-S01).
 
-Implements normative research rubric definitions from generation_baseline/research/RUBRIC.md:
+Implements the three-tier research rubric:
 - Tier 1: Deterministic hard checks (schema, cardinality, boundaries, duplicate IDs).
 - Tier 2: QGEval-inspired dimensions (clarity, fluency, relevance, grounding, answerability) with 1-5 anchors.
 - Tier 3: Type-specific task validity (TFNG entailment/contradiction/absence, MCQ single-answer, verbatim checks).

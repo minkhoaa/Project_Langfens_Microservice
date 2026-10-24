@@ -51,7 +51,7 @@ def generate_markdown_report(report: CampaignReadinessReport) -> str:
 | **2. Version Pinning** | **`{ver.status}`** | Pinned Evaluator: `{ver.evaluator_version}` (`{ver.evaluator_candidate_class}`). Rubric: `{ver.rubric_version}`. Model: `{ver.foundation_model_id}`. Arms: {ver.experimental_arms}. Prompts: A={ver.prompt_versions.get('A', 'UNKNOWN')}, B={ver.prompt_versions.get('B', 'UNKNOWN')}, C={ver.prompt_versions.get('C', 'UNKNOWN')}. Resolved from: {ver.source_of_truth}. |
 | **3. Roster & Denominators** | **`{rost.status}`** | Frozen assignment count: $N = {rost.total_assignments}$ ({rost.reading_assignments} Reading, {rost.grammar_assignments} Grammar; 56/arm). Task canonical fingerprints verified: {rost.fingerprint_mismatches == 0}. Judge Holdout denominator: $N = {rost.judge_holdout_denominator}$ ({rost.judge_holdout_reading_stratum} Reading, {rost.judge_holdout_grammar_stratum} Grammar), strictly separate from campaign. |
 | **4. Provider Quota Status** | **`{quota.status}`** | **Zero network calls made** (`live_network_calls_made = {quota.live_network_calls_made}`). Prior verified status: `{quota.prior_verified_status}` (`HTTP {quota.prior_verified_code}: {quota.prior_verified_message}`). Availability not asserted in dry run. |
-| **5. Human Panel Readiness** | **`{panel.status}`** | Status: `{panel.panel_status}`. Blind review forms and curator instructions available. Panel ratings not yet submitted (synthetic scores: UNVERIFIED). |
+| **5. Human Panel Readiness** | **`{panel.status}`** | Status: `{panel.panel_status}`. Forms available: {panel.blind_forms_available}; curator instructions: {panel.curator_instructions_available}; adjudication workflow: {panel.adjudication_workflow_available}. Panel ratings not yet submitted (synthetic scores: UNVERIFIED). |
 | **6. Raw Response Preservation** | **`{report.raw_response_preservation.status}`** | {report.raw_response_preservation.valid_records_count}/{report.raw_response_preservation.total_raw_responses_on_disk} valid records verified across {len(report.raw_response_preservation.raw_response_directories_found)} dirs (invalid: {report.raw_response_preservation.invalid_records_count}, unverifiable: {report.raw_response_preservation.unverifiable_records_count}, missing: {report.raw_response_preservation.missing_records_count}). Telemetry verified: {report.raw_response_preservation.telemetry_fields_verified}. |
 | **7. Failure Accounting** | **`{report.failure_and_uncertainty_accounting.status}`** | Fail-closed on UNCERTAIN, timeout, rate-limit, missing output verified by executable tests. Zero silent drops. Evaluator UNCERTAIN supported. |
 | **8. Statistical Analysis Plan** | **`{stat.status}`** | Preregistered primary endpoint: `{stat.primary_endpoint}`. Resampling unit: `{stat.resampling_unit}`. Paired contrasts: {stat.paired_contrasts} (95% CI). Methods verified on disk: {stat.corrections_verified}. |
@@ -88,8 +88,8 @@ def main() -> int:
     parser.add_argument(
         "--md-out",
         type=Path,
-        default=REPO_ROOT / "generation_baseline" / "verification" / "CAMPAIGN_READINESS_REPORT.md",
-        help="Path for output Markdown report.",
+        default=None,
+        help="Optional generated Markdown report path (not repository documentation).",
     )
     parser.add_argument(
         "--commit-sha",
@@ -103,13 +103,13 @@ def main() -> int:
     report = auditor.run_readiness_audit(software_commit_sha=args.commit_sha)
     # Ensure output directories exist
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
-    args.md_out.parent.mkdir(parents=True, exist_ok=True)
 
     json_content = json.dumps(report.model_dump(), indent=2)
     args.json_out.write_text(json_content, encoding="utf-8")
 
-    md_content = generate_markdown_report(report)
-    args.md_out.write_text(md_content, encoding="utf-8")
+    if args.md_out:
+        args.md_out.parent.mkdir(parents=True, exist_ok=True)
+        args.md_out.write_text(generate_markdown_report(report), encoding="utf-8")
 
     print(f"[SUCCESS] Dry-run campaign readiness audit completed.")
     print(f"  Overall Software Readiness : {report.overall_software_readiness}")
@@ -121,7 +121,8 @@ def main() -> int:
     print(f"  Raw Responses Verified     : {report.raw_response_preservation.valid_records_count}/{report.raw_response_preservation.total_raw_responses_on_disk}")
     print(f"  Live Network Calls Made    : {report.provider_quota_status.live_network_calls_made}")
     print(f"  JSON Report Written To     : {args.json_out}")
-    print(f"  Markdown Report Written To : {args.md_out}")
+    if args.md_out:
+        print(f"  Markdown Report Written To : {args.md_out}")
 
     return 0
 

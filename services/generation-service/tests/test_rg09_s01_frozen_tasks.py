@@ -1,6 +1,5 @@
 """Unit tests for RG09-S01: Frozen paired FINAL tasks.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-09-01.md
 Objective: 25-40 Reading passage/group and 25-40 Grammar requests with balanced difficulty/type strata.
 Decisive acceptance condition: Family-disjoint task IDs, hashes, licenses and full A/B/C assignment grid.
 """
@@ -90,7 +89,7 @@ def test_pos_rg09_s01_frozen_tasks_and_grid():
         for a in arm_asgs:
             assert a.assignment_id == f"{task.dataset_item_id}__arm_{a.configuration_id}__att1"
 
-    # 6. Verify batch partitioning (FINAL_BATCH_RULES.md: max 5 items per batch)
+    # 6. Verify frozen batch partitioning (max 5 items per batch)
     batches = registry.partition_into_batches(max_items_per_batch=5)
     assert len(batches) == 12  # 56 items // 5 = 11 batches of 5 + 1 batch of 1
     for b in batches:

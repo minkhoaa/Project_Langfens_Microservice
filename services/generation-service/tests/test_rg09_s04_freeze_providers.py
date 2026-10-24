@@ -1,6 +1,5 @@
 """Unit tests for RG09-S04: Freeze providers, prompts, resources and safety.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-09-04.md
 Objective: Model revisions if available, sampling params, prompt hashes, budgets/timeouts and fallback policies versioned.
 Decisive acceptance condition: Same task/model family and declared limits; unknown provider quotas noted; UNLIMITED cap does not imply no timeouts or free tokens.
 """

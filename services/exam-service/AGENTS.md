@@ -1,15 +1,14 @@
 # Exam service
-Owns exam content/delivery/publication and authoritative Reading jobs, runs, artifacts, checkpoints and accepted heads in PostgreSQL.
+PostgreSQL authority for exams/publication and Reading jobs, runs, artifacts, operations, checkpoints and accepted heads.
 
-- `Features/Exams/`: admin/public/internal APIs and delivery; `Features/ReadingPaper/`: worker, generation client, caps, checkpoint/state transitions.
-- `Infrastructure/Persistence/ExamDbContext.cs` and `Migrations/` own schema; startup migrates and seeds via `Data/ReadingSeeder.cs`.
-- `ExamInternalGrpcService` serves attempt-service from the shared proto; `AllowAnonymous()` mapping does not remove internal API-key checks.
-- Internal HTTP policies/keys are endpoint-specific; checkpoint/generation uses `X-Internal-Service-Key`, not the exam lookup header everywhere.
-- Generation calls go through `ReadingPaperAiClient` to generation-service, not ai-service; Python cannot directly mutate authoritative exam tables.
-- Preserve lease/epoch fencing, cancellation, idempotency, optimistic concurrency and EF transaction atomicity across retries/resumes.
-- Acceptance needs fresh content-hash-bound evaluations and dependency closure; research outputs must remain unpublishable on every publication route.
-- Admin publication and student payloads must preserve ACLs and answer/private-evidence redaction; attempts bind a published version.
-- Resource caps/saved-run compatibility: read `../../docs/standards/reading-runtime-caps.md` before changing profiles or resume logic.
-- Question-type changes span `Shared.PublicContracts` and attempt graders; migrate only actual persisted schema changes.
-- Build from root: `dotnet build services/exam-service/exam-service.csproj`.
-- Tests: first read `../exam-service.Tests/AGENTS.md`; never run the full project against development/shared databases.
+- `Features/Exams/` owns APIs/delivery; `Features/ReadingPaper/` owns worker/state; `Infrastructure/Persistence/ExamDbContext.cs` and `Migrations/` own schema.
+- Startup migrates and runs `Data/ReadingSeeder.cs`; service startup is not a side-effect-free check.
+- `ExamInternalGrpcService` requires its internal API key despite anonymous route mapping. HTTP checkpoint/generation uses `X-Internal-Service-Key`, not the lookup header universally.
+- `ReadingPaperAiClient` calls generation-service, not ai-service; preserve transactional lease/epoch fences, CAS, cancellation and idempotent retries/lost-ACK recovery.
+- Acceptance requires fresh hash-bound evaluations and reference closure; strict-paper persistence is atomic, never a partial exam graph.
+- Every publication route rejects research output; authorized admin approval creates immutable published snapshots. Learner ACLs/version binding and answer/private-evidence redaction must hold.
+- `ReadingPaperCapsProfile.cs` validates shared `loop-caps.env`: production requires explicit profile/source/version and positive 32-bit integers with consistent parent/child allocations.
+- New runs persist full canonical sorted-key UTF-8 profile JSON/SHA-256 and ceilings. Resume keeps original policy/cumulative counters; corrupt/missing snapshots require pause/migration.
+- Cap changes also require `../generation-service/AGENTS.md` and both runtimes' cap tests; never substitute child budgets for paper budgets.
+- Question types/1-based paper indices span shared DTOs and attempt graders; only persisted schema changes warrant migrations.
+- Before `dotnet test`, read `../exam-service.Tests/AGENTS.md`; use build-only verification when database isolation is unproven.

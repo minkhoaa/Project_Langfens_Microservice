@@ -1,14 +1,9 @@
 # AppHost
-Aspire's primary local-dev resource graph; frontend runs separately in the sibling checkout.
+`Program.cs` owns Aspire's local resource graph; the frontend runs in a separate checkout.
 
-- `Program.cs` defines services, infra, credentials, startup dependencies and `AppHostExtensions`.
-- Build from root: `dotnet build AppHost/AppHost.csproj`; run with the root guide's stack command.
-- `WithComposeEnvFile(name)` loads `deploy/envs/<name>.env`, skipping graph-owned values; preserve its exclusion list when adding configuration.
-- Use `WithReference` for databases; map legacy connection-string keys explicitly with `ConnectionStringExpression`.
-- Use `WithRabbitMqEnv` as well as broker references: consumers require discrete host/port/credential variables.
-- Declare reusable credentials as parameters; passwords use `secret: true`.
-- Wire dependencies with `WaitFor`; use named `http`/`grpc` endpoints and matching YARP destination overrides.
-- Exam's gRPC endpoint uses `KESTREL_GRPC_PORT`; attempt needs both `ExamService__GrpcAddress` and internal HTTP configuration.
-- Exam and generation share the internal service key and `WithComposeEnvFile("loop-caps")`; see `../docs/standards/reading-runtime-caps.md` before changing caps.
-- Persistent infra volumes survive restarts; restarting AppHost is not database isolation for tests.
-- Obtain live endpoints from Aspire; point frontend `NEXT_PUBLIC_GATEWAY_URL` at the gateway endpoint.
+- `WithComposeEnvFile(name)` loads `deploy/envs/<name>.env`; preserve exclusions for graph-owned values.
+- Database references need explicit legacy connection-key mappings via `ConnectionStringExpression`; auth Redis is named `auth-redis`.
+- Use `WithRabbitMqEnv` alongside broker references, secret credential parameters and `WaitFor` dependencies.
+- Named `http`/`grpc` endpoints and YARP cluster/destination overrides must agree; exam uses `KESTREL_GRPC_PORT`, attempt needs gRPC and internal HTTP.
+- Exam/generation share the internal key and `WithComposeEnvFile("loop-caps")`; cap changes require both service guides and regression suites.
+- Persistent volumes survive restarts: restarting Aspire does not isolate tests. Discover live URLs from Aspire, including frontend `NEXT_PUBLIC_GATEWAY_URL`.

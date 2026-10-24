@@ -1,7 +1,0 @@
-# Final campaign batch and retry contract
-
-Final assignments are frozen in RG09: 25–40 Reading items + 25–40 Grammar items each × three configs. Delivery is partitioned into **at most 5 frozen dataset items per batch**, each item covering its three A/B/C assignments (thus at most 15 arm assignments per batch), independent of calendar/shell timeouts; no sprint may silently substitute a different item or alter a frozen config to get a better result. Batch manifests are deterministic partitions of existing assignment IDs, not newly sampled items. Backend provider activity is NOT implied by possession of this document.
-
-Every assignment has exactly one logical final outcome and a linked attempt lineage; retries follow preregistered, bounded transport/application policy and must retain original failure events. Replaying after lost ACK cannot create duplicate assignment result or double-count usage; duplicate commits are rejected/normalized per authoritative idempotency. Campaign closure reconciles assigned, started, terminal, evaluable, independently scored, human-reviewed and missing categories exactly.
-
-Source-family leakage, stale evaluator revision, changed prompt/model/analysis plan, untracked provider fallback, missing gold ACL or mismatched hashes render affected results ineligible for the original frozen comparison; discrepancy must be reported, not repaired by silently editing the frozen manifest.

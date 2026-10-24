@@ -1,6 +1,5 @@
 """Unit tests for RG10-S04: Campaign completeness and accounting reconciliation.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-10-04.md
 Objective: Assignment ledger, attempts, retries, status distribution, token estimates and cost confidence reconciled.
 Decisive acceptance condition: Counts/totals match frozen grid; no phantom successes or zero unknown; malformed outputs cannot disappear.
 """

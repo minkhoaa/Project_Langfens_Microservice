@@ -1,13 +1,9 @@
 # Attempt service
-Owns attempts, deterministic Reading/Listening scoring, placement and analytics; consumes AI grading responses.
+Owns attempts, deterministic Reading/Listening grading, placement and analytics.
 
-- `Features/Attempt/`: workflow, exam gateway and user context; `Features/Helpers/`: grader factory/registrations, with Reading/Listening strategies.
-- `IQuestionGrader.Grade(AttemptAnswer, QuestionKey)` returns `GradeResult`; reuse this contract and existing normalizers.
-- Register concrete graders and `IQuestionGraderRegistration` as singletons in `Program.cs`; registrations expose `SupportedTypes` and `Create()`.
-- Scoring is all-or-nothing: `AwardedPoints` is `0` or `QuestionPoints`, including multi-blank answers. Preserve manual-review/error semantics and answer ordering.
-- Question types are shared strings; do not broaden accepted variants or scoring policy as incidental cleanup.
-- Fetch answer keys through `ExamInternalClient` (`ExamService__GrpcAddress`); internal HTTP uses `EXAMSERVICE__EXAM__ADDRESS` plus its configured key.
-- `Features/RabbitMq/` receives writing/speaking results on explicit response queues; preserve message correlation and existing queue names.
-- `Infrastructure/Persistence/AttemptDbContext.cs` owns attempt data; Azure OpenAI insights are optional (`AZURE_OPENAI__*`).
-- From root: `dotnet test services/attempt-service.Tests/attempt-service.Tests.csproj` (unit tests; no live DB/LLM required).
-- Cover exact/incorrect/malformed/missing input, multi-blank ordering and deterministic repeat grading; contract changes also require exam verification.
+- `Features/Helpers/` owns `IQuestionGrader.Grade(AttemptAnswer, QuestionKey)`; register graders and `IQuestionGraderRegistration` as singletons in `Program.cs`.
+- Preserve per-grader scoring: completion/multi-blank is all-or-nothing; multi-target choice/matching has explicit partial-credit paths. Keep ordering, normalizers and manual-review semantics.
+- Keys come through `ExamInternalClient` (`ExamService__GrpcAddress`); HTTP lookup uses `EXAMSERVICE__EXAM__ADDRESS` and its configured key.
+- Keep response correlation and explicit queues `writing-graded-response` / `speaking-graded-response`; Azure insights (`AZURE_OPENAI__*`) are optional.
+- From root: `dotnet test services/attempt-service.Tests/attempt-service.Tests.csproj` (unit tests, no live DB/LLM).
+- Grading regressions must cover malformed/missing answers, multi-blank order, partial-credit groups and repeat determinism.

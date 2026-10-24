@@ -1,6 +1,5 @@
 """Unit tests for RG09-S05: Final immutable manifest and access separation.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-09-05.md
 Objective: Sealed manifest hash, assignment roster, checkable evidence references and reviewer access partitions.
 Decisive acceptance condition: Hash detects any in-place mutation; owner approve before final campaign; no mixed DEV/FINAL refs.
 """

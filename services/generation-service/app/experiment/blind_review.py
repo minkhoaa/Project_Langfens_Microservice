@@ -1,8 +1,6 @@
 """Sealed gold vault and blind review export manager (RG09-S02).
 
-Implements normative research obligations from:
-- generation_baseline/research/DATA_GOVERNANCE.md (Gold isolation, blind reviewer partitions)
-- generation_baseline/research/ANALYSIS_PLAN.md (Neutral reviewer exports, adjudication policy)
+Implements gold isolation, blind reviewer partitions, neutral exports and adjudication.
 - generation_baseline/contracts/JSON_SCHEMAS.json ($defs/NeutralOutput, $defs/GenerationResult)
 
 Invariants:

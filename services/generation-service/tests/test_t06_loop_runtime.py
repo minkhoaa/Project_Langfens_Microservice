@@ -60,7 +60,7 @@ def simulated_run_profile(policy):
     constructed directly instead of via `from_settings`).
     """
     # `from_cap_snapshot` requires exact positive 32-bit integers, matching .NET's
-    # `ReadingPaperCapsProfile` `RequiredInt` admission (see docs/standards/reading-runtime-caps.md). A sub-second
+    # `ReadingPaperCapsProfile.RequiredInt` admission in exam-service. A sub-second
     # wall reservation is not expressible in that contract, so clamp up to the smallest
     # admissible value instead of truncating to 0, which would fail closed on a
     # profile that is not corrupt. Sub-second evaluator bounds are carried by the

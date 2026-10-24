@@ -1,8 +1,7 @@
 """Final immutable campaign manifest and access separation manager (RG09-S05).
 
 Implements normative research obligations from:
-- generation_baseline/research/FINAL_BATCH_RULES.md (Campaign closure, immutable manifest)
-- generation_baseline/research/DATA_GOVERNANCE.md (Reviewer access partitions, audit trails)
+- Campaign closure, immutable manifests, reviewer access partitions and audit trails
 - generation_baseline/templates/CAMPAIGN_MANIFEST_TEMPLATE.json (Campaign manifest structure)
 - generation_baseline/contracts/JSON_SCHEMAS.json ($defs/ExperimentManifest)
 
@@ -86,7 +85,7 @@ class SealedCampaignReport(CanonicalBaseModel):
     human_adjudication_panel: Dict[str, str] = Field(
         default_factory=lambda: {
             "status": "BLOCKED_PENDING_EXTERNAL_PANEL",
-            "reason": "Expert external panel not present in local workspace per AGENT_PIPELINE.md:41",
+            "reason": "Expert external panel not present in local workspace; independent human review remains required",
         }
     )
 

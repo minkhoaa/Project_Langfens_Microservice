@@ -1,7 +1,7 @@
 """Provider, prompt, resource budget, and safety freeze manager (RG09-S04).
 
 Implements normative research obligations from:
-- generation_baseline/research/ANALYSIS_PLAN.md (Prompt versions, model families, budget tracking)
+- Frozen prompt versions, model families and budget tracking
 - generation_baseline/contracts/JSON_SCHEMAS.json ($defs/ExperimentManifest)
 - deploy/envs/loop-caps.env (Approved runtime caps, timeouts, and token ceilings)
 

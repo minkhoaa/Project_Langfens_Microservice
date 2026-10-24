@@ -1,7 +1,7 @@
 """Primary endpoints, abstention policy, and statistical preregistration (RG09-S03).
 
 Implements normative research obligations from:
-- generation_baseline/research/ANALYSIS_PLAN.md (Primary endpoint, paired contrasts, resampling unit)
+- Preregistered primary endpoint, paired contrasts and resampling unit
 - generation_baseline/contracts/JSON_SCHEMAS.json ($defs/ExperimentManifest.primary_endpoint)
 
 Invariants:
@@ -143,7 +143,7 @@ class PreregisteredAnalysisPlan(CanonicalBaseModel):
         """Forbidden operation: Switching endpoint post-hoc fails closed."""
         raise PostHocEndpointSwitchingForbiddenError(
             f"Cannot switch primary endpoint from '{self.primary_endpoint}' to '{new_endpoint}'. "
-            "Post-hoc endpoint selection is strictly forbidden by research protocol (prompt-sprint-09-03:26)."
+            "Post-hoc endpoint selection is strictly forbidden by the frozen research protocol."
         )
 
     def evaluate_item_pass(

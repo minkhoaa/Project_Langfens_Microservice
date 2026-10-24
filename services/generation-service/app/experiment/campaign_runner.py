@@ -1,9 +1,7 @@
 """Final research campaign batch executor and orchestrator (RG10-S01, S02, S04).
 
-Implements normative research obligations from:
-- generation_baseline/research/FINAL_BATCH_RULES.md (<=5 items/batch, bounded retries, no cherry-picking)
-- generation_baseline/research/RQ2_PROTOCOL.md (A/B/C execution, attempt lineage, usage accounting)
-- generation_baseline/contracts/CONTRACT_REGISTRY.md (C4 ExperimentContract, C2 ExecutionContract)
+Implements <=5 items/batch, bounded retries, no cherry-picking, paired A/B/C execution,
+attempt lineage and usage accounting under the research execution contracts.
 
 Invariants:
 1. Batch cardinality: no individual research execution batch contains more than five frozen dataset items (up to 15 A/B/C arm assignments).
@@ -208,10 +206,10 @@ class CampaignBatchExecutor:
         fixtures: List[PairedTaskFixture],
         max_items_per_batch: int = 5,
     ) -> List[List[PairedTaskFixture]]:
-        """Partitions fixtures into bounded batches of at most 5 items per FINAL_BATCH_RULES.md."""
+        """Partitions fixtures into bounded batches of at most 5 frozen items."""
         if max_items_per_batch > 5 or max_items_per_batch < 1:
             raise BatchCardinalityExceededError(
-                f"Batch cardinality ({max_items_per_batch}) cannot exceed 5 items per FINAL_BATCH_RULES.md"
+                f"Batch cardinality ({max_items_per_batch}) cannot exceed 5 frozen items"
             )
 
         if not fixtures:
@@ -259,7 +257,7 @@ class CampaignBatchExecutor:
         """Enforces that grammar rules in FINAL inputs cannot be silently mutated or repaired."""
         if original_rule != executed_rule:
             raise GrammarRuleAmbiguityFixedForbiddenError(
-                "Grammar rule ambiguity cannot be silently repaired or mutated in FINAL inputs per RQ2_PROTOCOL.md."
+                "Grammar rule ambiguity cannot be silently repaired or mutated in frozen FINAL inputs."
             )
     def _extract_cost_usd(self, usage: Dict[str, Any]) -> Optional[float]:
         """Preserve supplied cost, including known zero; never invent a price."""
@@ -731,7 +729,7 @@ class FinalResearchSnapshotSealer:
             snapshot_root_sha256="0" * 64,
             reproducibility_metadata=reproducibility_metadata or {
                 "environment": "offline_research_campaign",
-                "sealing_policy": "FINAL_BATCH_RULES.md",
+                "sealing_policy": "generation_baseline/AGENTS.md",
             },
         )
         root_hash = self.compute_snapshot_root_hash(preliminary)

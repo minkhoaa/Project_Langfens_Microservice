@@ -236,6 +236,9 @@ def test_campaign_readiness_dry_run_covers_all_nine_areas():
     # 5. Human panel readiness
     assert report.human_panel_readiness.panel_status == "AWAITING_HUMAN_PANEL"
     assert report.human_panel_readiness.synthetic_human_scores_present is None
+    assert report.human_panel_readiness.blind_forms_available is False
+    assert report.human_panel_readiness.curator_instructions_available is False
+    assert report.human_panel_readiness.adjudication_workflow_available is False
 
     # 6. Raw response preservation
     assert len(report.raw_response_preservation.raw_response_directories_found) > 0
@@ -251,7 +254,9 @@ def test_campaign_readiness_dry_run_covers_all_nine_areas():
     assert report.statistical_analysis_plan.resampling_unit == "dataset_item_id"
 
     # 9. Overall readiness
-    assert report.overall_software_readiness == "READY"
+    assert report.statistical_analysis_plan.status == "HOLD"
+    assert report.statistical_analysis_plan.analysis_plan_md_exists is False
+    assert report.overall_software_readiness == "HOLD"
     assert report.overall_campaign_readiness == "HOLD"
-    assert len(report.blockers) == 3
-    assert len(report.actionable_resume_criteria) == 4
+    assert len(report.blockers) == 4
+    assert len(report.actionable_resume_criteria) == 5

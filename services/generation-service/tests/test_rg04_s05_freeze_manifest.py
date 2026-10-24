@@ -40,10 +40,10 @@ def test_pos_rg04_s05_generate_evaluator_freeze_manifest():
     assert manifest["dataset_splits"]["calibration_item_count"] == len(CALIBRATION_CORPUS)
     assert manifest["dataset_splits"]["holdout_item_count"] == len(JUDGE_HOLDOUT_CORPUS)
 
-    # Human expert panel status explicitly recorded as BLOCKED per AGENT_PIPELINE.md:41
+    # Human expert panel status remains explicitly BLOCKED without independent review
     panel = manifest["human_adjudication_panel"]
     assert panel["status"] == "BLOCKED_PENDING_EXTERNAL_PANEL"
-    assert "AGENT_PIPELINE.md:41" in panel["reason"]
+    assert "unapproved external resource" in panel["reason"]
 
 
 def test_neg_rg04_s05_tampered_threshold_detected():

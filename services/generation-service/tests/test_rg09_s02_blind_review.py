@@ -1,6 +1,5 @@
 """Unit tests for RG09-S02: Sealed gold and blind review export.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-09-02.md
 Objective: Verified grammar rules and item references, secure gold mapping, random reviewer IDs and adjudication policy.
 Decisive acceptance condition: Reviewers cannot infer A/B/C from IDs or metadata; gold cannot be embedded in Generator or Solver input.
 """

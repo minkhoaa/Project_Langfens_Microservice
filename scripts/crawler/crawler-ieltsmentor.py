@@ -15,7 +15,7 @@ STANDARDIZED QUESTION FORMATS (v9.0) - LOCKED
 ⚠️ DO NOT MODIFY BACKEND OR FRONTEND - ONLY DATA/SCRIPT CHANGES ALLOWED
 
 Follows same output format as crawler-ieltswriting.py.
-See .agent/workflows/ielts-data-format.md for complete rules.
+Validate exported shapes against services/exam-service/Domains/Entities/ExamQuestion.cs.
 
 IELTS-MENTOR SPECIFIC:
 ======================

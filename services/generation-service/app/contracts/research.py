@@ -74,7 +74,7 @@ class GrammarTask(CanonicalBaseModel):
 
 
 class ReferenceAnswerEvidence(CanonicalBaseModel):
-    """Candidate-produced proposed answer evidence (CONTRACT_REGISTRY.md C1).
+    """Candidate-produced proposed answer evidence (not independent gold).
 
     Invariants:
     - Candidate-produced proposed answer with variants/context/rule ID.

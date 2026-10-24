@@ -1,6 +1,5 @@
 """Unit tests for RG10-S05: Seal final research snapshot.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-10-05.md
 Objective: Immutable hashes for results, evals, human labels, code/config/model/source and reproducibility metadata.
 Decisive acceptance condition: Any changed content requires explicit new version/campaign, not overwritten hash; provenance honest.
 """

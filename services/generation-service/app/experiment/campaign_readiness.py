@@ -6,10 +6,10 @@ Covers all 9 mandatory research dimensions:
 3. Frozen task assignment roster (verified 1-to-1 against campaign_ledger.json).
 4. Experimental denominators (verified against 168-assignment ledger and 30-item holdout quota).
 5. Provider quota availability status (strictly zero network calls; evidence grounded).
-6. Human panel readiness (verified from review packets and handoff forms).
+6. Human panel readiness (review packet inspected; retired handoff approval remains HOLD).
 7. Raw response preservation (verified from actual disk telemetry across 600+ raw response files).
 8. Failure and uncertainty accounting (verified from evaluator and analysis plan invariants).
-9. Paired comparison and statistical analysis plan (verified from PreregisteredAnalysisPlan and ANALYSIS_PLAN.md).
+9. Paired comparison and statistical analysis plan (runtime hash checked; retired documentary approval remains HOLD).
 
 Invariants:
 - STRICTLY DRY-RUN: Never initiates network dispatches or live provider API calls.
@@ -953,31 +953,17 @@ class CampaignReadinessAuditor:
         )
 
     def audit_statistical_plan(self) -> StatisticalPlanCheck:
-        """Audits PreregisteredAnalysisPlan and markdown documentation on disk."""
+        """Check runtime plan integrity without inventing replacement campaign approval."""
         plan = PreregisteredAnalysisPlan()
         plan_hash_ok = (plan.compute_plan_hash() == plan.plan_sha256)
 
-        md_path = self.repo_root / "generation_baseline" / "research" / "ANALYSIS_PLAN.md"
-        md_exists = md_path.exists()
-        verified_methods: List[str] = []
-        if md_exists:
-            text = md_path.read_text(encoding="utf-8").lower()
-            if "independent_final_pass / all_assigned" in text:
-                verified_methods.append("primary_endpoint: independent_final_PASS / all_assigned")
-            if "dataset_item_id" in text:
-                verified_methods.append("resampling_unit: dataset_item_id")
-            if "paired contrasts" in text or "c−a" in text or "c-a" in text:
-                verified_methods.append("paired_contrasts: C-A and C-B")
-            if "paired bootstrap" in text or "95% confidence intervals" in text:
-                verified_methods.append("bootstrap_95ci: paired bootstrap")
-            if "uncertain" in text and "non-pass" in text:
-                verified_methods.append("fail_closed: UNCERTAIN/timeout as non-PASS")
-
-        status: VerificationStatus = "VERIFIED" if (plan_hash_ok and md_exists and len(verified_methods) >= 4) else "HOLD"
+        # Repository documentation was retired. A self-consistent runtime hash or
+        # agent guide cannot replace independently approved analysis evidence.
+        # Keep the legacy report fields for serialization compatibility, fail closed.
         notes = (
             f"Plan '{plan.plan_id}' computed SHA256 matches: {plan_hash_ok} ({plan.plan_sha256[:16]}...). "
             f"Primary endpoint: '{plan.primary_endpoint}'. "
-            f"ANALYSIS_PLAN.md verified on disk with methods: {verified_methods}."
+            "Legacy analysis documentation is retired; approved analysis evidence is required before campaign readiness."
         )
 
         return StatisticalPlanCheck(
@@ -988,10 +974,10 @@ class CampaignReadinessAuditor:
             resampling_unit=plan.resampling_unit,
             paired_contrasts=plan.paired_contrasts,
             confidence_level=plan.confidence_level,
-            analysis_plan_md_exists=md_exists,
-            corrections_verified=verified_methods,
+            analysis_plan_md_exists=False,
+            corrections_verified=[],
             evidence_notes=notes,
-            status=status,
+            status="HOLD",
         )
 
     def run_readiness_audit(
@@ -1069,9 +1055,6 @@ class CampaignReadinessAuditor:
 
         # Human panel check
         panel_packet_path = self.repo_root / "generation_baseline" / "research" / "HUMAN_REVIEW_PACKET.json"
-        blind_forms_path = self.repo_root / "generation_baseline" / "handoff" / "BLIND_ANNOTATION_FORMS.md"
-        curator_inst_path = self.repo_root / "generation_baseline" / "handoff" / "CURATOR_INSTRUCTIONS_AND_ITEM_TEMPLATE.md"
-        adj_wf_path = self.repo_root / "generation_baseline" / "handoff" / "ADJUDICATION_WORKFLOW.md"
 
         panel_status = "AWAITING_HUMAN_PANEL"
         if panel_packet_path.exists():
@@ -1084,16 +1067,15 @@ class CampaignReadinessAuditor:
 
         panel_notes = (
             f"Human panel status: {panel_status}. "
-            f"Handoff documents verified: forms={blind_forms_path.exists()}, "
-            f"curator_instructions={curator_inst_path.exists()}, adjudication_workflow={adj_wf_path.exists()}. "
+            "Legacy handoff documentation is retired; approved forms, curator instructions and adjudication evidence are unavailable. "
             "Human panel ratings not yet submitted (synthetic score presence: UNVERIFIED / PENDING_PANEL_SUBMISSION)."
         )
 
         panel_check = HumanPanelReadinessCheck(
             panel_status=panel_status,
-            blind_forms_available=blind_forms_path.exists(),
-            curator_instructions_available=curator_inst_path.exists(),
-            adjudication_workflow_available=adj_wf_path.exists(),
+            blind_forms_available=False,
+            curator_instructions_available=False,
+            adjudication_workflow_available=False,
             synthetic_human_scores_present=None,
             human_adjudication_completed=False,
             evidence_notes=panel_notes,
@@ -1121,6 +1103,7 @@ class CampaignReadinessAuditor:
             overall_software = "UNKNOWN"
 
         blockers = [
+            "Legacy documentary approval is retired; approved analysis and human-panel evidence must be supplied before readiness.",
             "Provider API quota returned HTTP 429 Token Plan usage limit reached (status: BLOCKED_EXTERNAL_QUOTA).",
             "Confirmatory holdout corpus (N=30) remains SPECIFICATION_PENDING_INDEPENDENT_CURATION with null cryptographic seals.",
             "Qualified human review panel is uncontracted/unpopulated (status: AWAITING_HUMAN_PANEL; zero synthetic scores).",
@@ -1135,6 +1118,7 @@ class CampaignReadinessAuditor:
             "2. Independent human panel delivers 30-item holdout passing check_corpus_disjointness.py.",
             "3. Cryptographic SHA-256 seals generated and signed by panel lead into CONFIRMATORY_HOLDOUT_MANIFEST.json.",
             "4. Human review panel onboarded to score blinded evaluation package.",
+            "5. Approve and integrate replacement analysis/handoff evidence without treating agent instructions as campaign approval.",
         ]
 
         return CampaignReadinessReport(

@@ -5,8 +5,7 @@ namespace Shared.ExamDto.Contracts.Exam.InternalExamDto;
 
 /// <summary>
 /// Paper-wide index normalizer for the shared init-property DTO and a
-/// <see cref="JsonElement"/> snapshot. Implements the contract from
-/// <c>docs/be-paper-data-shape.md</c>: every <c>Q.idx</c> becomes a
+/// <see cref="JsonElement"/> snapshot. Every <c>Q.idx</c> becomes a
 /// paper-wide 1-based integer, and each <c>Group.startIdx/endIdx</c> points
 /// at the first/last question of that group.
 ///

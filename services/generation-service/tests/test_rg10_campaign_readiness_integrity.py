@@ -313,6 +313,39 @@ def test_provenance_timestamps_and_sha_tracking(auditor: CampaignReadinessAudito
     assert report.software_commit_sha == report.report_generated_from_sha
 
 
+def test_retired_documentary_approval_stays_hold(tmp_path: Path):
+    """A valid runtime plan hash cannot replace retired approval evidence."""
+    check = CampaignReadinessAuditor(tmp_path).audit_statistical_plan()
+    assert check.plan_hash_verified is True
+    assert check.analysis_plan_md_exists is False
+    assert check.corrections_verified == []
+    assert check.status == "HOLD"
+    assert "approved analysis evidence is required" in check.evidence_notes
+    assert not list(tmp_path.iterdir())
+
+
+def test_retired_handoff_and_optional_report_output(tmp_path: Path, monkeypatch):
+    """Dry-run reporting must not claim retired forms exist or recreate default docs."""
+    from generation_baseline.tools import check_campaign_readiness as cli
+
+    output = tmp_path / "readiness.json"
+    monkeypatch.setattr(sys, "argv", ["check_campaign_readiness", "--json-out", str(output)])
+    assert cli.main() == 0
+    report = json.loads(output.read_text())
+    panel = report["human_panel_readiness"]
+    assert panel["status"] == "HOLD"
+    assert panel["blind_forms_available"] is False
+    assert panel["curator_instructions_available"] is False
+    assert panel["adjudication_workflow_available"] is False
+    assert report["statistical_analysis_plan"]["status"] == "HOLD"
+    assert report["overall_software_readiness"] != "READY"
+    assert report["provider_quota_status"]["live_network_calls_made"] == 0
+    assert list(tmp_path.iterdir()) == [output]
+    summary = cli.generate_markdown_report(CampaignReadinessReport.model_validate(report))
+    assert "Forms available: False" in summary
+    assert "curator instructions: False" in summary
+
+
 def test_git_unavailable_reports_unknown_without_fabricated_fallback(tmp_path: Path):
     """When git state is unavailable, auditor reports UNKNOWN, never a fabricated fallback SHA."""
     auditor_no_git = CampaignReadinessAuditor(tmp_path)

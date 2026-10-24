@@ -1,6 +1,5 @@
 """Phase-level integration test suite for RG09: Final dataset and preregistration freeze.
 
-Parent: generation_baseline/prompts/prompt-phase-09.md
 Objective: 25-40 Reading and 25-40 Grammar paired input items; gold isolation and immutable campaign manifest.
 Decisive acceptance condition: Family-disjoint datasets; evaluator, endpoints, analysis, exclusions and resource policies frozen.
 
@@ -78,7 +77,7 @@ def test_phase_rg09_01_full_paired_dataset_freeze():
     assert len(assignments) == 56 * 3  # Exactly 168 assignments
     assert registry.is_frozen is True
 
-    # Validate batch partition rule (FINAL_BATCH_RULES.md: max 5 items per batch)
+    # Validate frozen batch partition rule (max 5 items per batch)
     batches = registry.partition_into_batches(max_items_per_batch=5)
     assert len(batches) == 12
     for b in batches:

@@ -1,6 +1,5 @@
 """Unit tests for RG10-S01: Reading final paired assignment batches.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-10-01.md
 Objective: Frozen 25-40 Reading items x A/B/C executed in resumable bounded batches.
 Decisive acceptance condition: Counts match frozen assignments exactly and retries/failures remain visible.
 """

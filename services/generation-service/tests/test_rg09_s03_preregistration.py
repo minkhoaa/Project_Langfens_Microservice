@@ -1,6 +1,5 @@
 """Unit tests for RG09-S03: Primary endpoints and statistical preregistration.
 
-Parent: generation_baseline/prompts/sprints/prompt-sprint-09-03.md
 Objective: End-to-end pass definition, abstention rule, paired contrasts, resampling unit and CIs fixed.
 Decisive acceptance condition: Statistical plan is human-readable, executable and pinned; no endpoint picked post-hoc.
 """
