@@ -997,22 +997,21 @@ def _parse_candidate_payload(
 
         # Duplicate & overlap check against already accepted questions
         # Enforce candidate-level question-claim provenance verification
-        if not is_mock:
-            from app.reading_evaluation import verify_question_claim_provenance
-            slot_obj = {"questionNumber": q_num, "claimRefIds": [claim_id], "isNotGivenTarget": is_not_given_target}
-            prov_issues = verify_question_claim_provenance(
-                question_payload=parsed,
-                blueprint_slot=slot_obj,
-                claims=claims_map,
-                passage=passage_text,
-                passage_alignments=None,
-            )
-            if prov_issues:
-                rejection_errors.append(CandidateRejectionError(
-                    CandidateRejectionReason.CLAIM_PROVENANCE_MISMATCH,
-                    prov_issues[0][1],
-                ))
-                continue
+        from app.reading_evaluation import verify_question_claim_provenance
+        slot_obj = {"questionNumber": q_num, "claimRefIds": [claim_id], "isNotGivenTarget": is_not_given_target}
+        prov_issues = verify_question_claim_provenance(
+            question_payload=parsed,
+            blueprint_slot=slot_obj,
+            claims=claims_map,
+            passage=passage_text,
+            passage_alignments=None,
+        )
+        if prov_issues:
+            rejection_errors.append(CandidateRejectionError(
+                CandidateRejectionReason.CLAIM_PROVENANCE_MISMATCH,
+                prov_issues[0][1],
+            ))
+            continue
 
         cand_stmt = str(parsed.get("statement") or parsed.get("prompt") or "").strip()
         is_dup = False
@@ -1704,14 +1703,13 @@ class SectionRunner:
                 prior: tuple[ArtifactEnvelope, ...] = tuple(q_envelopes),
             ) -> list[EvaluationResult]:
                 # 1. Structural, verbatim length, evidence offset, and uniqueness evaluations
-                is_mock_env = "mock" in actual_policy.provider.lower()
                 evals = list(evaluate_question(
                     art,
                     passage_text,
                     config.difficulty.value,
                     [e.payload for e in prior],
                     blueprint_slot=slot,
-                    claims=claims_map if not is_mock_env else None,
+                    claims=claims_map,
                     passage_alignments=passage_alignments,
                 ))
 

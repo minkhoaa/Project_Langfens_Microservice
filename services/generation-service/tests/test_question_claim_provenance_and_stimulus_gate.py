@@ -194,7 +194,71 @@ def test_02_reject_mismatched_claim_provenance_despite_passing_syntax_offsets_so
         assert any(i.code == IssueCode.CLAIM_PROVENANCE_MISMATCH for i in sem_res.issues)
 
 
-def test_03_accept_legitimate_paraphrased_evidence_from_correctly_bound_claim(live_snapshot_data):
+def test_03_blueprint_bound_provenance_fails_closed_without_authoritative_graph(live_snapshot_data):
+    """Production-shaped mock execution must not skip provenance when graph data is absent."""
+    questions = live_snapshot_data["questions"]
+    art, payload = next(item for key, item in questions.items() if key[0].endswith(":2") and key[1] == 1)
+    env = ArtifactEnvelope(
+        artifact_id=art["ArtifactId"],
+        artifact_type=ArtifactType.QUESTION,
+        version=1,
+        content_hash=art["ContentHash"],
+        payload=payload,
+        run_id="run_offline_test",
+        created_at=datetime.now(timezone.utc),
+        producer_version="1.0.0",
+    )
+    results = evaluate_question(
+        env,
+        live_snapshot_data["passage"],
+        "FOUNDATION",
+        [],
+        blueprint_slot=live_snapshot_data["slots"][2],
+        claims=None,
+        passage_alignments=live_snapshot_data["alignments"],
+    )
+    semantic = next(result for result in results if result.evaluator_id == "eval_question_semantic")
+    assert not semantic.is_pass()
+    assert any(
+        issue.code == IssueCode.CLAIM_PROVENANCE_MISMATCH
+        and "requires the authoritative EvidenceGraph" in issue.message
+        for issue in semantic.issues
+    )
+
+
+@pytest.mark.parametrize(
+    ("bound_claim", "competing_claim"),
+    [
+        ("Several sites in Lake Kivu were dated to 600 BCE.", "Several sites in Lake Kivu were dated to 700 BCE."),
+        ("Only a few sites in Lake Kivu showed sustained production.", "Most sites in Lake Kivu showed sustained production."),
+        ("Researchers in Senegal reported iron production at Site A.", "Researchers in Nigeria reported iron production at Site A."),
+        ("The study recorded exactly 12 sites in Lake Kivu.", "The study recorded exactly 21 sites in Lake Kivu."),
+    ],
+)
+def test_04_overlapping_vocabulary_does_not_hide_factual_claim_drift(bound_claim, competing_claim):
+    """Reject competing evidence distinguished by qualifiers, entities, or numerical facts."""
+    bound_id, other_id = "claim:run_test:1:1", "claim:run_test:1:2"
+    payload = {
+        "questionNumber": 1,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The passage reports this factual detail.",
+        "answer": "TRUE",
+        "evidenceClaimRef": bound_id,
+        "evidenceQuote": competing_claim,
+        "passageEvidence": {"startChar": 0, "endChar": len(competing_claim), "text": competing_claim},
+    }
+    problems = verify_question_claim_provenance(
+        payload,
+        {"questionNumber": 1, "claimRefIds": [bound_id]},
+        {bound_id: {"text": bound_claim}, other_id: {"text": competing_claim}},
+        competing_claim,
+    )
+    assert problems
+    assert problems[0][0] == IssueCode.CLAIM_PROVENANCE_MISMATCH
+    assert other_id in problems[0][1]
+
+
+def test_05_accept_legitimate_paraphrased_evidence_from_correctly_bound_claim(live_snapshot_data):
     """Proves that a legitimate paraphrased question grounded in the bound claim PASSES
     without requiring a rigid verbatim match of the claim text.
     """
@@ -487,7 +551,7 @@ def test_08_missing_graphical_stimuli_fail_closed():
     }
     with pytest.raises(ValueError) as exc:
         project_to_student_visible(bad_diagram)
-    assert "requires a student-visible description or supported asset reference" in str(exc.value)
+    assert "requires an accessible student-visible text description" in str(exc.value)
 
     # 2. MAP_LABEL missing description and asset
     bad_map = {
@@ -498,9 +562,21 @@ def test_08_missing_graphical_stimuli_fail_closed():
     }
     with pytest.raises(ValueError) as exc_map:
         project_to_student_visible(bad_map)
-    assert "requires a student-visible description or supported asset reference" in str(exc_map.value)
+    assert "requires an accessible student-visible text description" in str(exc_map.value)
 
-    # 3. With visual description or svgAssetId -> project_to_student_visible PASSES
+    # 3. Opaque asset references alone are not accessible visual evidence to a blind solver.
+    asset_only = {
+        "questionNumber": 11,
+        "questionType": "DIAGRAM_LABEL",
+        "prompt": "Label the diagram below: [11]",
+        "svgAssetId": "svg:furnace:01",
+        "imageUrl": "https://assets.invalid/furnace.svg",
+        "svgXml": "<svg><text>unavailable</text></svg>",
+    }
+    with pytest.raises(ValueError, match="accessible student-visible text description"):
+        project_to_student_visible(asset_only)
+
+    # 4. With accessible text description, projection passes; asset references remain ancillary.
     valid_diagram = {
         "questionNumber": 11,
         "questionType": "DIAGRAM_LABEL",

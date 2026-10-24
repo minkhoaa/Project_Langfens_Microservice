@@ -71,7 +71,8 @@ def adjudicate_item(
                 },
             )
         if q_type_upper in ("DIAGRAMLABEL", "MAPLABEL"):
-            has_vis = bool(student_question.part_description or student_question.shared_context or student_question.svg_asset_id or student_question.image_url)
+            # Blind solver receives textual fields only; asset IDs and image URLs are opaque references.
+            has_vis = bool(student_question.part_description or student_question.shared_context)
             if not has_vis:
                 return AdjudicationResult(
                     question_number=q_num,

@@ -201,9 +201,11 @@ def project_to_student_visible(question_data: Any) -> StudentVisibleQuestion:
     # Visual stimulus validation (Phase 4): fail closed if required graphical stimulus is missing
     q_type_upper = q_type.upper().replace("_", "")
     if q_type_upper in ("DIAGRAMLABEL", "MAPLABEL"):
-        has_visual_stimulus = bool(part_dsc or shared_context or svg_asset or svg_xml or img_url)
-        if not has_visual_stimulus:
-            raise ValueError(f"{q_type} requires a student-visible description or supported asset reference (fail-closed)")
+        # Asset identifiers, SVG markup, and URLs are not rendered by the blind
+        # solver and therefore cannot substitute for accessible student-facing text.
+        has_accessible_stimulus = bool(part_dsc or shared_context)
+        if not has_accessible_stimulus:
+            raise ValueError(f"{q_type} requires an accessible student-visible text description (fail-closed)")
 
     return StudentVisibleQuestion(
         question_number=q_num,

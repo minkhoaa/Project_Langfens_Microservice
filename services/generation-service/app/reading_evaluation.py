@@ -65,6 +65,27 @@ QUESTION_FIELDS = {
 }
 NUMBER = re.compile(r"(?<![\w])\d+(?:[.,]\d+)*(?:%|)(?![\w])")
 POPULATIONS = re.compile(r"\b(humans?|mice|rats|patients?|children|adults?|cells?|animals?)\b", re.I)
+FACT_QUALIFIERS = re.compile(
+    r"\b(?:only|few|several|many|most|all|some|at least|up to|approximately|around|"
+    r"limited|sparse|abundant|sustained|increased|decreased|higher|lower|more|less)\b",
+    re.I,
+)
+PROPER_ENTITY = re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b")
+
+
+def claim_discriminators(text: str) -> set[str]:
+    """Extract high-risk factual markers omitted by broad lexical similarity scores."""
+    markers = {f"number:{value.casefold()}" for value in NUMBER.findall(text)}
+    markers.update(f"qualifier:{value.casefold()}" for value in FACT_QUALIFIERS.findall(text))
+    entities = PROPER_ENTITY.findall(text)
+    # Exclude sentence-initial capitalization; retained multi-token entities and
+    # later capitalized names catch place/person/site drift without generic nouns.
+    for entity in entities:
+        if text.find(entity) > 0 or len(entity.split()) > 1:
+            markers.add(f"entity:{entity.casefold()}")
+    return markers
+
+
 SCOPES = {
     ArtifactType.SOURCE_PACK: IssueScope.SOURCE,
     ArtifactType.EVIDENCE_GRAPH: IssueScope.EVIDENCE,
@@ -451,10 +472,12 @@ def verify_question_claim_provenance(
        - Quote must substantively support the bound claim (grounded paraphrase or alignment).
        - Anti-Wrong-Claim Gate: quotes primarily supporting another claim are rejected with CLAIM_PROVENANCE_MISMATCH.
     """
-    if not claims:
-        return []
-
     q_num = question_payload.get("questionNumber") or question_payload.get("number") or "?"
+    if claims is None:
+        if blueprint_slot is not None:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH,
+                     f"Question {q_num} requires the authoritative EvidenceGraph for Blueprint-bound provenance validation")]
+        return []
     stated_claim_ref = question_payload.get("evidenceClaimRef") or question_payload.get("claimRef")
 
     if blueprint_slot:
@@ -531,13 +554,33 @@ def verify_question_claim_provenance(
             if not other_text:
                 continue
             r_other, _ = compute_substantive_grounding_ratio(other_text, quote)
-            if r_other >= 0.40 and (r_other > ratio_bound + 0.15 or ratio_bound < 0.25):
+            bound_markers = claim_discriminators(bound_text)
+            quote_markers = claim_discriminators(quote)
+            other_markers = claim_discriminators(other_text)
+            marker_conflict = bool(
+                (bound_markers - quote_markers)
+                and (quote_markers & other_markers)
+                and (bound_markers - other_markers)
+            )
+            if r_other >= 0.40 and (
+                r_other > ratio_bound + 0.15 or ratio_bound < 0.25 or marker_conflict
+            ):
                 better_claims.append((other_id, r_other, other_text))
 
         if better_claims:
             better_claims.sort(key=lambda x: x[1], reverse=True)
             top_other_id, top_other_r, top_other_text = better_claims[0]
-            if not direct_contained and (ratio_bound < 0.40 or top_other_r >= ratio_bound + 0.20):
+            bound_markers = claim_discriminators(bound_text)
+            quote_markers = claim_discriminators(quote)
+            other_markers = claim_discriminators(top_other_text)
+            conflicting_fact_markers = bool(
+                (bound_markers - quote_markers)
+                and (quote_markers & other_markers)
+                and (bound_markers - other_markers)
+            )
+            if conflicting_fact_markers or (
+                not direct_contained and (ratio_bound < 0.40 or top_other_r >= ratio_bound + 0.20)
+            ):
                 return [(
                     IssueCode.CLAIM_PROVENANCE_MISMATCH,
                     f"Question {q_num} evidence quote primarily supports claim '{top_other_id}' (overlap: {top_other_r:.2f}) rather than bound claim '{bound_claim_id}' (overlap: {ratio_bound:.2f}): '{quote[:60]}...'",
@@ -648,12 +691,6 @@ def evaluate_question(
                 or payload.get("part_description")
                 or payload.get("sharedContext")
                 or payload.get("shared_context")
-                or payload.get("svgAssetId")
-                or payload.get("svg_asset_id")
-                or payload.get("svgXml")
-                or payload.get("svg_xml")
-                or payload.get("imageUrl")
-                or payload.get("image_url")
                 or (len(clean_p) >= 10)
             )
             if not has_vis:
@@ -733,8 +770,9 @@ def evaluate_question(
         if quote and not match_boundary_aware(answer, quote):
             semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Completion answer is not contained in the evidence quote"))
 
-    # Question–Claim Provenance verification when claims are provided
-    if claims:
+    # Blueprint-bound production evaluations must verify provenance even when the
+    # EvidenceGraph input is missing; absence of authority is a hard failure.
+    if claims is not None or blueprint_slot is not None or blueprint is not None:
         slot_to_verify = blueprint_slot
         if slot_to_verify is None and blueprint:
             q_num = payload.get("questionNumber") or payload.get("number")
