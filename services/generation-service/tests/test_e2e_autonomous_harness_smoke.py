@@ -36,7 +36,7 @@ from tests.unified.mock_fixtures import (
 async def test_end_to_end_autonomous_generation_with_q23_defect_recovery() -> None:
     """End-to-end smoke test verifying 40-question paper generation and Question 23 autonomous recovery."""
     run_id = f"smoke-e2e-{uuid4().hex[:8]}"
-    policy = PinnedExecutionPolicy(provider="mock")
+    policy = PinnedExecutionPolicy(provider="mock", blueprint_mode="legacy_preset")
     pipeline, client, provider, gateway = create_mock_environment(policy=policy, run_id=run_id)
 
     request = create_pipeline_request(
@@ -66,33 +66,43 @@ async def test_end_to_end_autonomous_generation_with_q23_defect_recovery() -> No
         op_id = req.operation_id or ""
         resp = await original_call(req, api_key, deadline)
 
-        # Intercept summary_group generation where blank 23 lives
-        if req.capability.value == "generate_json" and ("summary_group" in op_id or "summary_group" in art_id):
+        # Intercept question 23 generation to inject defect (4 words) within its legitimate bound evidence
+        if req.capability.value == "generate_json" and (":23" in op_id or ":23" in art_id or "summary_group" in op_id or "summary_group" in art_id):
             if isinstance(resp.parsed_payload, dict):
                 blanks = resp.parsed_payload.get("blanks")
                 if isinstance(blanks, list):
                     for b in blanks:
                         if b.get("number") == 23 or b.get("questionNumber") == 23:
-                            b["answer"] = "marine biogeochemical cycles in"
-                            b["evidenceQuote"] = "Marine biogeochemical cycles in oligotrophic oceanic gyres are governed by stoichiometric ratios"
-                    resp.raw_text = json.dumps(resp.parsed_payload, ensure_ascii=False)
+                            q_text = b.get("evidenceQuote") or "Marine biogeochemical cycles in oligotrophic oceanic gyres"
+                            words = q_text.split()[:4]
+                            b["answer"] = " ".join(words).lower()
+                cands = resp.parsed_payload.get("candidates")
+                if isinstance(cands, list):
+                    for c in cands:
+                        if c.get("questionNumber") == 23 or c.get("number") == 23:
+                            q_text = c.get("evidenceQuote") or "Marine biogeochemical cycles in oligotrophic oceanic gyres"
+                            words = q_text.split()[:4]
+                            c["answer"] = " ".join(words).lower()
+                resp.raw_text = json.dumps(resp.parsed_payload, ensure_ascii=False)
 
         # Hook blind solver for question 23:
-        # Call 1 (evaluating v1 candidate): solver agrees with candidate answer "marine biogeochemical cycles in"
-        # so blind solver confirms key, isolating the failure strictly to eval_answer_verbatim_length!
-        # Call 2 (evaluating v2 repaired candidate): solver agrees with repaired answer "biogeochemical cycles in".
+        # On v1 candidate (4 words), deterministic evaluation fails and blind solver is short-circuited.
+        # On v2 repaired candidate (3 words), blind solver confirms the repaired answer.
         if req.capability.value == "solve_item":
             user_msg = req.messages[-1].content if req.messages else ""
             q_num_match = re.search(r'(?:question_number="|<question_number>)(\d+)', user_msg)
             q_num = int(q_num_match.group(1)) if q_num_match else 1
             if q_num == 23:
                 solve_q23_count += 1
-                solv_ans = "marine biogeochemical cycles in" if solve_q23_count == 1 else "biogeochemical cycles in"
+                q_last = provider._last_questions.get(23, {})
+                quote_target = str(q_last.get("evidenceQuote") or "Natural iron fertilization experiments")
+                words = [w for w in re.findall(r"\b[A-Za-z0-9\-]+\b", quote_target)][:4]
+                solv_ans = " ".join(words[-3:]) if len(words) >= 3 else " ".join(words)
                 resp.parsed_payload = {
                     "questionNumber": 23,
                     "normalizedAnswer": solv_ans,
                     "justification": f"Verified by passage evidence: {solv_ans}",
-                    "citedSpans": [{"spanText": "Marine biogeochemical cycles in oligotrophic oceanic gyres"}],
+                    "citedSpans": [{"spanText": quote_target[:80]}],
                     "selfReportedConfidence": 0.95,
                 }
                 resp.raw_text = json.dumps(resp.parsed_payload, ensure_ascii=False)

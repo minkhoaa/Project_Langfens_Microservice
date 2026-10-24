@@ -715,7 +715,7 @@
               "questionNumber": 15,
               "questionType": "DIAGRAM_LABEL",
               "prompt": "Label [15] on the raindrop collection mechanism",
-              "answer": "tilting container",
+              "answer": "container",
               "evidenceQuote": "The container periodically tilts upon accumulating a critical water threshold, releasing stored fluid",
               "explanation": "Callout 15 identifies the self-tilting water collection container.",
               "difficulty": "MODERATE",

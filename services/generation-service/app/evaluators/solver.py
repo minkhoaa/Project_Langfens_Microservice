@@ -194,6 +194,7 @@ class BlindSolverEvaluator(BaseEvaluator):
             target_ref=target_ref,
             context=context,
             input_dependency_refs=artifact.parent_refs,
+            expected_evidence_quote=str(payload.get("evidenceQuote") or ""),
         )
 
         # 4. Objective check for completion answer length (IELTS constraint: max 3 words)
@@ -243,6 +244,7 @@ class BlindSolverEvaluator(BaseEvaluator):
         target_ref: ArtifactRef,
         context: Optional[LoopContext] = None,
         input_dependency_refs: Sequence[ArtifactRef] = (),
+        expected_evidence_quote: Optional[str] = None,
     ) -> Tuple[EvaluationResult, AdjudicationResult]:
         """Core execution pipeline for blind solver and adversary.
 
@@ -402,6 +404,8 @@ class BlindSolverEvaluator(BaseEvaluator):
             adversary_output=adversary_output,
             passage_text=blind_input.passage_text,
             solver_output=solver_output,
+            student_question=blind_input.question,
+            evidence_quote=expected_evidence_quote,
         )
 
         elapsed_ms = (time.perf_counter() - start_t) * 1000.0
@@ -426,7 +430,11 @@ class BlindSolverEvaluator(BaseEvaluator):
             return result, adjudication
 
         # Non-pass outcome: create appropriate CRITICAL blocker issue backed by evidence
-        if adjudication.verdict == AdjudicationVerdict.AMBIGUOUS_DEFECTIVE:
+        err_type = adjudication.details.get("errorType")
+        if err_type == "MALFORMED_STIMULUS":
+            issue_code = IssueCode.SCHEMA_VIOLATION
+            msg = adjudication.details.get("message", "Missing or malformed student-visible stimulus.")
+        elif adjudication.verdict == AdjudicationVerdict.AMBIGUOUS_DEFECTIVE:
             if q_type in ("MultipleChoiceSingle", "MCQ"):
                 issue_code = IssueCode.BAD_DISTRACTOR
                 msg = adjudication.details.get("message", "Adversary identified multiple valid options / bad distractor.")

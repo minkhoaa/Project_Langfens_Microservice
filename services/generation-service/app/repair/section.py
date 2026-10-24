@@ -140,6 +140,8 @@ class SectionRepairRouter:
                 IssueCode.WORD_LIMIT_EXCEEDED,
                 IssueCode.BAD_DISTRACTOR,
                 IssueCode.AMBIGUOUS_ANSWER,
+                IssueCode.TFNG_BOUNDARY_CONFLICT,
+                IssueCode.CLAIM_PROVENANCE_MISMATCH,
             }
             or iss.scope == IssueScope.QUESTION
             for iss in issues

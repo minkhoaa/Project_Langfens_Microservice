@@ -972,14 +972,14 @@ def compose_questions(
                     ans = keys_tf[(q_num - 1) % len(keys_tf)] if effective_type == "TRUE_FALSE_NOT_GIVEN" else keys_yn[(q_num - 1) % len(keys_yn)]
                 clean_snippet = re.sub(r"[.!?]+$", "", quote[:60]).strip()
                 templates_tf = [
-                    f"Item {q_num} confirms that {clean_snippet}.",
-                    f"Regarding question {q_num}, researchers observed that {clean_snippet}.",
-                    f"The analysis in item {q_num} established that {clean_snippet}.",
-                    f"Field measurements for query {q_num} indicated that {clean_snippet}.",
+                    f"Empirical findings confirm that {clean_snippet}.",
+                    f"Archaeological researchers observed that {clean_snippet}.",
+                    f"Recent scientific analysis established that {clean_snippet}.",
+                    f"Field measurements indicated that {clean_snippet}.",
                 ]
                 statement = templates_tf[(q_num - 1) % len(templates_tf)]
                 if ans == "NOT_GIVEN":
-                    ng_statement = f"Future regional excavations in query {q_num} will discover older strata regarding {clean_snippet}."
+                    ng_statement = f"Future regional excavations will discover older strata regarding {clean_snippet}."
                     q_payload = {
                         "questionNumber": q_num,
                         "questionType": effective_type,
@@ -1104,6 +1104,25 @@ def compose_questions(
                     q_payload["options"] = ["A. Option 1", "B. Option 2", "C. Option 3", "D. Option 4", "E. Option 5"]
                     q_payload["answers"] = ["A", "C"]
                     q_payload["answer"] = "A, C"
+                elif effective_type == "FLOW_CHART":
+                    q_payload["flowSteps"] = [
+                        "Stage 1: initial environmental screening",
+                        f"Stage 2: operational analysis of [{q_num}]",
+                        "Stage 3: subsequent diagnostic verification",
+                    ]
+                    q_payload["prompt"] = f"Complete the flow chart below. Step {q_num}: [{q_num}]"
+                elif effective_type in ("DIAGRAM_LABEL", "MAP_LABEL"):
+                    q_payload["calloutLabel"] = f"[{q_num}]"
+                    q_payload["partDescription"] = f"Diagnostic component {q_num} in regional layout"
+                    q_payload["prompt"] = f"Label {q_num}: [{q_num}]"
+                elif effective_type == "TABLE_COMPLETION":
+                    q_payload["tableContext"] = "Table: Experimental Parameters and Findings"
+                    q_payload["rowHeader"] = "Regional analysis"
+                    q_payload["colHeader"] = "Documented indicator"
+                    q_payload["prompt"] = f"Documented parameter for [{q_num}]"
+                elif effective_type in ("NOTE_COMPLETION", "FORM_COMPLETION"):
+                    q_payload["headingContext"] = "Observational Summary"
+                    q_payload["prompt"] = f"Observed indicator: [{q_num}]"
 
             grp_questions.append(q_payload)
             all_questions.append(q_payload)

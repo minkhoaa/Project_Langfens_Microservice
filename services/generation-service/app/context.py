@@ -367,15 +367,18 @@ def validate_candidate_slot(
                     "prompt",
                 )
             )
-    # Diagram Label
-    elif resolved_family == QuestionPromptFamily.DIAGRAM_LABEL:
+    # Diagram Label & Map Label
+    elif resolved_family in (QuestionPromptFamily.DIAGRAM_LABEL, QuestionPromptFamily.MAP_LABEL):
         callout = _extract_field(candidate, "callout_label", "calloutLabel", default=None)
         part_desc = _extract_field(candidate, "part_description", "partDescription", default=None)
-        if not callout and not part_desc:
+        svg_asset = _extract_field(candidate, "svg_asset_id", "svgAssetId", default=None)
+        svg_xml = _extract_field(candidate, "svg_xml", "svgXml", default=None)
+        img_url = _extract_field(candidate, "image_url", "imageUrl", default=None)
+        if not callout and not part_desc and not svg_asset and not svg_xml and not img_url:
             issues.append(
                 ContextValidationIssue(
                     "ERR_DIAGRAM_LABEL_MISSING",
-                    "DIAGRAM_LABEL requires callout_label or part_description for layout clarity",
+                    f"{resolved_family.value} requires callout_label, part_description, or graphical asset reference for layout clarity",
                     "callout_label",
                 )
             )

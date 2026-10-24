@@ -71,7 +71,8 @@ public enum IssueCode
     CROSS_SECTION_DUPLICATE_CONTENT,
     CROSS_SECTION_LEAKAGE,
     PASSAGE_BLUEPRINT_ALIGNMENT,
-    TFNG_BOUNDARY_CONFLICT
+    TFNG_BOUNDARY_CONFLICT,
+    CLAIM_PROVENANCE_MISMATCH
 }
 public sealed record Issue(
     [property: JsonPropertyName("issueId")] string IssueId,

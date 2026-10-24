@@ -272,9 +272,10 @@ class MockProvider(BaseProvider):
             latency_seconds=0.01,
         )
 
-    def _get_claims_for_section(self, sec_idx: int) -> list[dict[str, Any]]:
-        if sec_idx in self._cached_claims:
-            return self._cached_claims[sec_idx]
+    def _get_claims_for_section(self, sec_idx: int, run_id: str = "run_mock_claims") -> list[dict[str, Any]]:
+        cache_key = (run_id, sec_idx)
+        if cache_key in self._cached_claims:
+            return self._cached_claims[cache_key]
         src_map = {1: SECTION_1_SOURCE_TEXT, 2: SECTION_2_SOURCE_TEXT, 3: SECTION_3_SOURCE_TEXT}
         text = src_map.get(sec_idx, SECTION_1_SOURCE_TEXT)
         source_env = {
@@ -289,15 +290,16 @@ class MockProvider(BaseProvider):
             "chunks": [{"sourceId": f"src_sec_{sec_idx}", "start_char": 0, "end_char": len(text), "text": text}],
         }
         policy = PinnedExecutionPolicy(provider="mock")
-        ev_graph = build_evidence(source_env, "run_mock_claims", sec_idx, policy)
+        ev_graph = build_evidence(source_env, run_id, sec_idx, policy)
         claims = ev_graph.get("claims", [])
-        self._cached_claims[sec_idx] = claims
+        self._cached_claims[cache_key] = claims
         return claims
 
     def _generate_default_response(self, request: ProviderRequest) -> Any:
         cap = request.capability
         art_id = request.artifact_id or ""
         op_id = request.operation_id or ""
+        req_run_id = request.run_id or "run_mock_claims"
 
         # 1. Passage generation request
         if cap == Capability.GENERATE_JSON and ("passage:" in art_id or "passage:" in op_id):
@@ -305,7 +307,7 @@ class MockProvider(BaseProvider):
                 sec_idx = int(art_id.split(":")[-1])
             except (ValueError, IndexError):
                 sec_idx = 1
-            claims = self._get_claims_for_section(sec_idx)
+            claims = self._get_claims_for_section(sec_idx, run_id=req_run_id)
             config = demo_sections()[sec_idx - 1]
             src_map = {1: SECTION_1_SOURCE_TEXT, 2: SECTION_2_SOURCE_TEXT, 3: SECTION_3_SOURCE_TEXT}
             text = src_map.get(sec_idx, SECTION_1_SOURCE_TEXT)
@@ -321,7 +323,7 @@ class MockProvider(BaseProvider):
         # 2. Summary completion group generation request
         if cap == Capability.GENERATE_JSON and ("summary_group" in op_id or "summary_group" in art_id):
             sec_idx = 2
-            claims = self._get_claims_for_section(sec_idx)
+            claims = self._get_claims_for_section(sec_idx, run_id=req_run_id)
             config = demo_sections()[sec_idx - 1]
             passage = self._passages.get(sec_idx)
             if not passage:
@@ -374,7 +376,7 @@ class MockProvider(BaseProvider):
             except (ValueError, IndexError):
                 q_num = 1
             sec_idx = 1 if q_num <= 13 else (2 if q_num <= 26 else 3)
-            claims = self._get_claims_for_section(sec_idx)
+            claims = self._get_claims_for_section(sec_idx, run_id=req_run_id)
             config = demo_sections()[sec_idx - 1]
             passage = self._passages.get(sec_idx)
             if not passage:
@@ -427,10 +429,17 @@ class MockProvider(BaseProvider):
             from app.blueprint.claim_binding import score_claim_suitability_for_family
             fallback_c = sorted(claims, key=lambda c: score_claim_suitability_for_family(c, q_type, sec_idx), reverse=True)[0]
             target_c = None
-            norm_q = q_type.upper().replace("_", "") if q_type else ""
-            is_comp = any(t in norm_q for t in ("COMPLETION", "SHORTANSWER", "FLOWCHART"))
-            if is_comp:
-                user_text = request.messages[-1].content if request.messages else ""
+            user_text = request.messages[-1].content if request.messages else ""
+            m_cid = re.search(r"IMMUTABLE BOUND CLAIM:\s*Claim ID:\s*([^\s\n]+)", user_text)
+            if m_cid and claims:
+                target_cid = m_cid.group(1).strip()
+                target_c = next((c for c in claims if c["claimId"] == target_cid), None)
+            if target_c is None and claims:
+                for c in claims:
+                    if re.search(rf"\b{re.escape(c['claimId'])}\b", user_text):
+                        target_c = c
+                        break
+            if target_c is None:
                 focus_m = re.search(r'FOCUS PARAGRAPH FOR QUESTION #?\d*:\s*"""(.*?)"""', user_text, re.DOTALL)
                 if focus_m:
                     f_raw = focus_m.group(1).strip()

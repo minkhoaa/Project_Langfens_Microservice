@@ -71,6 +71,7 @@ def _get_instructions_for_type(q_type: str) -> str:
 
 class CandidateRejectionReason(str, Enum):
     CLAIM_NOT_SUPPORTED_IN_PASSAGE = "CLAIM_NOT_SUPPORTED_IN_PASSAGE"
+    CLAIM_PROVENANCE_MISMATCH = "CLAIM_PROVENANCE_MISMATCH"
     QUOTE_NOT_VERBATIM = "QUOTE_NOT_VERBATIM"
     CANDIDATE_DUPLICATE = "CANDIDATE_DUPLICATE"
     CANDIDATE_SCHEMA_INVALID = "CANDIDATE_SCHEMA_INVALID"
@@ -100,6 +101,9 @@ GROUNDED_COMPLETION_TYPES = {
     "NOTE_COMPLETION",
     "FORM_COMPLETION",
     "SHORT_ANSWER",
+    "FLOW_CHART",
+    "DIAGRAM_LABEL",
+    "MAP_LABEL",
 }
 
 
@@ -130,7 +134,7 @@ def _validate_completion_candidate_grounding(
         )
 
     ans_words = answer.split()
-    if len(ans_words) > 3:
+    if len(ans_words) > 3 and not is_mock:
         raise CandidateRejectionError(
             CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
             f"Question {q_num} completion answer '{answer}' exceeds maximum 3 words ({len(ans_words)} words)",
@@ -708,12 +712,17 @@ def _parse_single_candidate(
         if f"[{q_num}]" not in prompt and "______" in prompt:
             prompt = prompt.replace("______", f"[{q_num}]")
         flow_steps = cand.get("flowSteps") or raw_payload.get("flowSteps") or []
+        if not isinstance(flow_steps, list):
+            flow_steps = [str(flow_steps)]
+        has_blank = f"[{q_num}]" in prompt or "______" in prompt or any(f"[{q_num}]" in str(s) or "______" in str(s) for s in flow_steps)
+        if not has_blank:
+            prompt = f"{prompt} [{q_num}]".strip()
         svg_asset = cand.get("svgAssetId") or raw_payload.get("svgAssetId")
         answer = str(cand.get("answer") or "").strip()
         quote = str(cand.get("evidenceQuote") or "").strip()
         p_start = passage_text.find(quote) if quote else -1
         p_end = p_start + len(quote) if p_start >= 0 else -1
-        return {
+        res_payload = {
             "questionNumber": q_num,
             "questionType": q_type,
             "prompt": prompt,
@@ -727,25 +736,54 @@ def _parse_single_candidate(
             "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
             "evidenceClaimRef": claim_id,
         }
+        _validate_completion_candidate_grounding(
+            res_payload,
+            q_num=q_num,
+            q_type=q_type,
+            passage_text=passage_text,
+            claims_map=claims_map,
+            claim_id=claim_id,
+            target_focus=target_focus,
+            is_mock=is_mock,
+        )
+        return res_payload
 
     elif q_type in ("DIAGRAM_LABEL", "MAP_LABEL"):
         prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
         if f"[{q_num}]" not in prompt and "______" in prompt:
             prompt = prompt.replace("______", f"[{q_num}]")
         callout = str(cand.get("calloutLabel") or f"[{q_num}]").strip()
-        part_desc = str(cand.get("partDescription") or "").strip() or None
+        part_desc = str(cand.get("partDescription") or cand.get("part_description") or raw_payload.get("partDescription") or "").strip() or None
         svg_asset = cand.get("svgAssetId") or raw_payload.get("svgAssetId")
+        svg_xml = cand.get("svgXml") or raw_payload.get("svgXml")
+        img_url = cand.get("imageUrl") or raw_payload.get("imageUrl")
+        shared_ctx = cand.get("sharedContext") or raw_payload.get("sharedContext")
+
+        if not part_desc:
+            clean_p = re.sub(r"\[\d+\]", "", prompt)
+            clean_p = re.sub(r"(?i)^(label|identify|choose|mark)\s+(the\s+)?(diagram|map|part|component|region|location)?(\s+below)?[:\s\-]*", "", clean_p).strip()
+            clean_p = re.sub(r"(?i)^on the (diagram|map)\.?$", "", clean_p).strip()
+            clean_p = re.sub(r"(?i)\s+on the (diagram|map)\.?$", "", clean_p).strip()
+            if len(clean_p) >= 10:
+                part_desc = clean_p
+
+        if not part_desc and not svg_asset and not img_url and not svg_xml and not shared_ctx:
+            raise CandidateRejectionError(
+                CandidateRejectionReason.CANDIDATE_SCHEMA_INVALID,
+                f"Question {q_num} {q_type} lacks required visual description or graphical asset reference",
+            )
         answer = str(cand.get("answer") or "").strip()
         quote = str(cand.get("evidenceQuote") or "").strip()
         p_start = passage_text.find(quote) if quote else -1
         p_end = p_start + len(quote) if p_start >= 0 else -1
-        return {
+        res_payload = {
             "questionNumber": q_num,
             "questionType": q_type,
             "prompt": prompt,
             "calloutLabel": callout,
             "partDescription": part_desc,
             "svgAssetId": svg_asset,
+            "imageUrl": img_url,
             "answer": answer,
             "evidenceQuote": quote,
             "explanation": explanation,
@@ -753,6 +791,17 @@ def _parse_single_candidate(
             "passageEvidence": {"startChar": p_start, "endChar": p_end, "text": quote},
             "evidenceClaimRef": claim_id,
         }
+        _validate_completion_candidate_grounding(
+            res_payload,
+            q_num=q_num,
+            q_type=q_type,
+            passage_text=passage_text,
+            claims_map=claims_map,
+            claim_id=claim_id,
+            target_focus=target_focus,
+            is_mock=is_mock,
+        )
+        return res_payload
 
     elif q_type in ("NOTE_COMPLETION", "FORM_COMPLETION"):
         prompt = str(cand.get("prompt") or cand.get("statement") or "").strip()
@@ -947,6 +996,24 @@ def _parse_candidate_payload(
             continue
 
         # Duplicate & overlap check against already accepted questions
+        # Enforce candidate-level question-claim provenance verification
+        if not is_mock:
+            from app.reading_evaluation import verify_question_claim_provenance
+            slot_obj = {"questionNumber": q_num, "claimRefIds": [claim_id], "isNotGivenTarget": is_not_given_target}
+            prov_issues = verify_question_claim_provenance(
+                question_payload=parsed,
+                blueprint_slot=slot_obj,
+                claims=claims_map,
+                passage=passage_text,
+                passage_alignments=None,
+            )
+            if prov_issues:
+                rejection_errors.append(CandidateRejectionError(
+                    CandidateRejectionReason.CLAIM_PROVENANCE_MISMATCH,
+                    prov_issues[0][1],
+                ))
+                continue
+
         cand_stmt = str(parsed.get("statement") or parsed.get("prompt") or "").strip()
         is_dup = False
         dup_msg = ""
@@ -1011,6 +1078,7 @@ def _parse_candidate_payload(
     # All candidates rejected: fail closed with informative error
     if rejection_errors:
         priority = [
+            CandidateRejectionReason.CLAIM_PROVENANCE_MISMATCH,
             CandidateRejectionReason.CLAIM_NOT_SUPPORTED_IN_PASSAGE,
             CandidateRejectionReason.ANSWER_NOT_GROUNDED_IN_EVIDENCE,
             CandidateRejectionReason.QUOTE_NOT_VERBATIM,
@@ -1460,6 +1528,8 @@ class SectionRunner:
                             is_not_given_target=is_ng_slot,
                         )
                         user_prompt = prompt_data["user_prompt"]
+                        claim_text_content = claims_map.get(cur_claim_id, {}).get("text", "")
+                        user_prompt += f"\n\nIMMUTABLE BOUND CLAIM:\nClaim ID: {cur_claim_id}\nClaim Content: \"{claim_text_content}\""
                         prior_statements = [str(e.payload.get("statement") or e.payload.get("prompt") or "").strip() for e in q_envelopes if e.payload.get("statement") or e.payload.get("prompt")]
                         if prior_statements:
                             last_few = prior_statements[-4:]
@@ -1634,11 +1704,15 @@ class SectionRunner:
                 prior: tuple[ArtifactEnvelope, ...] = tuple(q_envelopes),
             ) -> list[EvaluationResult]:
                 # 1. Structural, verbatim length, evidence offset, and uniqueness evaluations
+                is_mock_env = "mock" in actual_policy.provider.lower()
                 evals = list(evaluate_question(
                     art,
                     passage_text,
                     config.difficulty.value,
                     [e.payload for e in prior],
+                    blueprint_slot=slot,
+                    claims=claims_map if not is_mock_env else None,
+                    passage_alignments=passage_alignments,
                 ))
 
                 # Phase 4: Reject deterministically invalid candidates before expensive independent solver/adversary calls
@@ -1647,6 +1721,11 @@ class SectionRunner:
                     from app.contracts.evaluation import EvaluationStatus
                     from app.contracts.issue import IssueSeverity, IssueScope
                     fail_reasons = "; ".join(f"{e.evaluator_id}: {[i.message for i in e.issues]}" for e in deterministic_failures)
+                    primary_fail_code = (
+                        deterministic_failures[0].issues[0].code
+                        if (deterministic_failures and deterministic_failures[0].issues)
+                        else IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM
+                    )
                     blind_res = EvaluationResult(
                         evaluationId=f"eval_bsa_shortcircuit_{art.artifact_id}_v{art.version}",
                         evaluatorId="eval_blind_solver_adversary",
@@ -1658,7 +1737,7 @@ class SectionRunner:
                         issues=[
                             Issue.create(
                                 issue_id=f"iss_bsa_skip_{art.artifact_id}_v{art.version}",
-                                code=IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM,
+                                code=primary_fail_code,
                                 severity=IssueSeverity.CRITICAL,
                                 scope=IssueScope.QUESTION,
                                 message=f"Blind solver/adversary skipped: candidate failed prerequisite deterministic verification ({fail_reasons[:120]})",

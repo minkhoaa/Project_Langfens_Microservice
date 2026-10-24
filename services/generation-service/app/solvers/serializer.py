@@ -128,6 +128,83 @@ def project_to_student_visible(question_data: Any) -> StudentVisibleQuestion:
                 clean_t = str(t).strip()
                 clean_k = str(k).strip()
                 student_options.append(StudentVisibleOption(key=clean_k, text=clean_t))
+
+    raw_flow_steps = data.get("flowSteps") or data.get("flow_steps")
+    clean_flow_steps: Optional[List[str]] = None
+    if raw_flow_steps and isinstance(raw_flow_steps, (list, tuple, Sequence)):
+        clean_flow_steps = []
+        for s in raw_flow_steps:
+            s_str = str(s).strip()
+            scan_text_for_security_leaks(s_str)
+            clean_flow_steps.append(s_str)
+
+    table_ctx = data.get("tableContext") or data.get("table_context")
+    if table_ctx:
+        table_ctx = str(table_ctx).strip()
+        scan_text_for_security_leaks(table_ctx)
+
+    row_h = data.get("rowHeader") or data.get("row_header")
+    if row_h:
+        row_h = str(row_h).strip()
+        scan_text_for_security_leaks(row_h)
+
+    col_h = data.get("colHeader") or data.get("col_header")
+    if col_h:
+        col_h = str(col_h).strip()
+        scan_text_for_security_leaks(col_h)
+
+    callout_lbl = data.get("calloutLabel") or data.get("callout_label")
+    if callout_lbl:
+        callout_lbl = str(callout_lbl).strip()
+        scan_text_for_security_leaks(callout_lbl)
+
+    part_dsc = data.get("partDescription") or data.get("part_description")
+    if part_dsc:
+        part_dsc = str(part_dsc).strip()
+        scan_text_for_security_leaks(part_dsc)
+
+    heading_ctx = data.get("headingContext") or data.get("heading_context")
+    if heading_ctx:
+        heading_ctx = str(heading_ctx).strip()
+        scan_text_for_security_leaks(heading_ctx)
+
+    bullet_pfx = data.get("bulletPrefix") or data.get("bullet_prefix")
+    if bullet_pfx:
+        bullet_pfx = str(bullet_pfx).strip()
+        scan_text_for_security_leaks(bullet_pfx)
+
+    field_lbl = data.get("fieldLabel") or data.get("field_label")
+    if field_lbl:
+        field_lbl = str(field_lbl).strip()
+        scan_text_for_security_leaks(field_lbl)
+
+    svg_asset = data.get("svgAssetId") or data.get("svg_asset_id")
+    if svg_asset:
+        svg_asset = str(svg_asset).strip()
+
+    svg_xml = data.get("svgXml") or data.get("svg_xml")
+    if svg_xml:
+        svg_xml = str(svg_xml).strip()
+
+    img_url = data.get("imageUrl") or data.get("image_url")
+    if img_url:
+        img_url = str(img_url).strip()
+
+    if not part_dsc:
+        clean_p = re.sub(r"\[\d+\]", "", prompt)
+        clean_p = re.sub(r"(?i)^(label|identify|choose|mark)\s+(the\s+)?(diagram|map|part|component|region|location)?(\s+below)?[:\s\-]*", "", clean_p).strip()
+        clean_p = re.sub(r"(?i)^on the (diagram|map)\.?$", "", clean_p).strip()
+        clean_p = re.sub(r"(?i)\s+on the (diagram|map)\.?$", "", clean_p).strip()
+        if len(clean_p) >= 10:
+            part_dsc = clean_p
+
+    # Visual stimulus validation (Phase 4): fail closed if required graphical stimulus is missing
+    q_type_upper = q_type.upper().replace("_", "")
+    if q_type_upper in ("DIAGRAMLABEL", "MAPLABEL"):
+        has_visual_stimulus = bool(part_dsc or shared_context or svg_asset or svg_xml or img_url)
+        if not has_visual_stimulus:
+            raise ValueError(f"{q_type} requires a student-visible description or supported asset reference (fail-closed)")
+
     return StudentVisibleQuestion(
         question_number=q_num,
         question_type=q_type,
@@ -135,6 +212,17 @@ def project_to_student_visible(question_data: Any) -> StudentVisibleQuestion:
         instructions=instructions,
         options=student_options,
         shared_context=shared_context,
+        flow_steps=clean_flow_steps,
+        table_context=table_ctx,
+        row_header=row_h,
+        col_header=col_h,
+        callout_label=callout_lbl,
+        part_description=part_dsc,
+        heading_context=heading_ctx,
+        bullet_prefix=bullet_pfx,
+        field_label=field_lbl,
+        svg_asset_id=svg_asset,
+        image_url=img_url,
     )
 
 
@@ -185,12 +273,52 @@ def build_secure_envelope(
     if question.instructions:
         instructions_block = f"\n<instructions>\n{html.escape(question.instructions.strip())}\n</instructions>"
 
+    flow_chart_block = ""
+    if question.flow_steps:
+        step_lines = [f'  <step index="{idx}">{html.escape(s)}</step>' for idx, s in enumerate(question.flow_steps, start=1)]
+        flow_chart_block = "\n<flow_chart>\n" + "\n".join(step_lines) + "\n</flow_chart>"
+
+    table_block = ""
+    if question.table_context or question.row_header or question.col_header:
+        t_parts = []
+        if question.table_context:
+            t_parts.append(f"  <context>{html.escape(question.table_context)}</context>")
+        if question.row_header:
+            t_parts.append(f"  <row_header>{html.escape(question.row_header)}</row_header>")
+        if question.col_header:
+            t_parts.append(f"  <col_header>{html.escape(question.col_header)}</col_header>")
+        table_block = "\n<table_stimulus>\n" + "\n".join(t_parts) + "\n</table_stimulus>"
+
+    diagram_block = ""
+    if question.callout_label or question.part_description or question.svg_asset_id or question.image_url:
+        d_parts = []
+        if question.callout_label:
+            d_parts.append(f"  <callout>{html.escape(question.callout_label)}</callout>")
+        if question.part_description:
+            d_parts.append(f"  <description>{html.escape(question.part_description)}</description>")
+        if question.svg_asset_id:
+            d_parts.append(f"  <asset_id>{html.escape(question.svg_asset_id)}</asset_id>")
+        if question.image_url:
+            d_parts.append(f"  <image_url>{html.escape(question.image_url)}</image_url>")
+        diagram_block = "\n<diagram_stimulus>\n" + "\n".join(d_parts) + "\n</diagram_stimulus>"
+
+    note_block = ""
+    if question.heading_context or question.bullet_prefix or question.field_label:
+        n_parts = []
+        if question.heading_context:
+            n_parts.append(f"  <heading>{html.escape(question.heading_context)}</heading>")
+        if question.bullet_prefix:
+            n_parts.append(f"  <prefix>{html.escape(question.bullet_prefix)}</prefix>")
+        if question.field_label:
+            n_parts.append(f"  <label>{html.escape(question.field_label)}</label>")
+        note_block = "\n<note_stimulus>\n" + "\n".join(n_parts) + "\n</note_stimulus>"
+
     envelope = f"""<untrusted_content>
 <approved_passage>
 {safe_passage}
 </approved_passage>
 <student_question question_number="{safe_q_num}" question_type="{safe_q_type}">
-{instructions_block}{shared_ctx_block}
+{instructions_block}{shared_ctx_block}{flow_chart_block}{table_block}{diagram_block}{note_block}
 <prompt>
 {safe_prompt}
 </prompt>{options_block}

@@ -86,6 +86,17 @@ class StudentVisibleQuestion(CanonicalBaseModel):
     instructions: Optional[str] = None
     options: Optional[List[StudentVisibleOption]] = None
     shared_context: Optional[str] = Field(default=None, alias="sharedContext")
+    flow_steps: Optional[List[str]] = Field(default=None, alias="flowSteps")
+    table_context: Optional[str] = Field(default=None, alias="tableContext")
+    row_header: Optional[str] = Field(default=None, alias="rowHeader")
+    col_header: Optional[str] = Field(default=None, alias="colHeader")
+    callout_label: Optional[str] = Field(default=None, alias="calloutLabel")
+    part_description: Optional[str] = Field(default=None, alias="partDescription")
+    heading_context: Optional[str] = Field(default=None, alias="headingContext")
+    bullet_prefix: Optional[str] = Field(default=None, alias="bulletPrefix")
+    field_label: Optional[str] = Field(default=None, alias="fieldLabel")
+    svg_asset_id: Optional[str] = Field(default=None, alias="svgAssetId")
+    image_url: Optional[str] = Field(default=None, alias="imageUrl")
 
 
 class BlindSolverInput(CanonicalBaseModel):
@@ -107,16 +118,40 @@ class BlindSolverInput(CanonicalBaseModel):
             if self.question.options
             else None
         )
+        q_dict: Dict[str, Any] = {
+            "questionNumber": self.question.question_number,
+            "questionType": self.question.question_type,
+            "prompt": self.question.prompt,
+            "instructions": self.question.instructions,
+            "options": options_data,
+            "sharedContext": self.question.shared_context,
+        }
+        if self.question.flow_steps is not None:
+            q_dict["flowSteps"] = list(self.question.flow_steps)
+        if self.question.table_context is not None:
+            q_dict["tableContext"] = self.question.table_context
+        if self.question.row_header is not None:
+            q_dict["rowHeader"] = self.question.row_header
+        if self.question.col_header is not None:
+            q_dict["colHeader"] = self.question.col_header
+        if self.question.callout_label is not None:
+            q_dict["calloutLabel"] = self.question.callout_label
+        if self.question.part_description is not None:
+            q_dict["partDescription"] = self.question.part_description
+        if self.question.heading_context is not None:
+            q_dict["headingContext"] = self.question.heading_context
+        if self.question.bullet_prefix is not None:
+            q_dict["bulletPrefix"] = self.question.bullet_prefix
+        if self.question.field_label is not None:
+            q_dict["fieldLabel"] = self.question.field_label
+        if self.question.svg_asset_id is not None:
+            q_dict["svgAssetId"] = self.question.svg_asset_id
+        if self.question.image_url is not None:
+            q_dict["imageUrl"] = self.question.image_url
+
         payload: Dict[str, Any] = {
             "passageText": self.passage_text,
-            "question": {
-                "questionNumber": self.question.question_number,
-                "questionType": self.question.question_type,
-                "prompt": self.question.prompt,
-                "instructions": self.question.instructions,
-                "options": options_data,
-                "sharedContext": self.question.shared_context,
-            },
+            "question": q_dict,
         }
         if self.section_id is not None:
             payload["sectionId"] = self.section_id

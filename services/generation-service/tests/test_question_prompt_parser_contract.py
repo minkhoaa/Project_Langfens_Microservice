@@ -42,6 +42,7 @@ SAMPLE_PASSAGE = (
 )
 
 CLAIMS_MAP = {
+    "c_emerged": {"claimId": "c_emerged", "text": "Artificial Light at Night (ALAN) has emerged as a pervasive and escalating form of pollution."},
     "c_alan": {"claimId": "c_alan", "text": "Studies indicate that at least 22% of coastal regions are exposed to ALAN."},
     "c_depth": {"claimId": "c_depth", "text": "In Southeast Asian seas, ALAN penetrates to approximately 20 meters."},
     "c_hydro": {"claimId": "c_hydro", "text": "Chemosynthetic bacteria convert hydrogen sulfide into cellular energy at hydrothermal vents."},
@@ -160,7 +161,7 @@ DETERMINISTIC_PROVIDER_PAYLOADS: Dict[QuestionPromptFamily, Dict[str, Any]] = {
     QuestionPromptFamily.MAP_LABEL: {
         "candidates": [{
             "questionNumber": 1,
-            "prompt": "Map location label for [1] identifying the central conduit zone",
+            "prompt": "Map location label for [1] identifying the inner hydrothermal fissure",
             "calloutLabel": "Location 1",
             "partDescription": "Central hydrothermal conduit fissure",
             "answer": "central conduit",
@@ -350,7 +351,30 @@ def test_prompt_template_renders_valid_json_structure(family: QuestionPromptFami
 def test_parse_realistic_candidate_payload(family: QuestionPromptFamily):
     """Test 2: Parse realistic deterministic provider response using real candidate parser."""
     payload = DETERMINISTIC_PROVIDER_PAYLOADS[family]
-    claim_id = "c_hydro" if family in (QuestionPromptFamily.SUMMARY_COMPLETION, QuestionPromptFamily.SHORT_ANSWER) else "c_alan"
+    family_claim_binding = {
+        QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN: "c_alan",
+        QuestionPromptFamily.YES_NO_NOT_GIVEN: "c_emerged",
+        QuestionPromptFamily.SENTENCE_COMPLETION: "c_depth",
+        QuestionPromptFamily.SUMMARY_COMPLETION: "c_hydro",
+        QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE: "c_hydro",
+        QuestionPromptFamily.SHORT_ANSWER: "c_hydro",
+        QuestionPromptFamily.TABLE_COMPLETION: "c_heat",
+        QuestionPromptFamily.NOTE_COMPLETION: "c_hydro",
+        QuestionPromptFamily.FORM_COMPLETION: "c_depth",
+        QuestionPromptFamily.DIAGRAM_LABEL: "c_mineral",
+        QuestionPromptFamily.MAP_LABEL: "c_mineral",
+        QuestionPromptFamily.MULTIPLE_CHOICE_MULTIPLE: "c_hydro",
+        QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE_IMAGE: "c_mineral",
+        QuestionPromptFamily.MATCHING_HEADING: "c_hydro",
+        QuestionPromptFamily.MATCHING_INFORMATION: "c_alan",
+        QuestionPromptFamily.MATCHING_FEATURES: "c_class",
+        QuestionPromptFamily.MATCHING_ENDINGS: "c_heat",
+        QuestionPromptFamily.CLASSIFICATION: "c_alan",
+        QuestionPromptFamily.FLOW_CHART: "c_heat",
+        QuestionPromptFamily.SUMMARY_COMPLETION_BOX: "c_mineral",
+        QuestionPromptFamily.CHOOSING_TITLE: "c_emerged",
+    }
+    claim_id = family_claim_binding.get(family, "c_alan")
 
     parsed = _parse_candidate_payload(
         raw_payload=payload,

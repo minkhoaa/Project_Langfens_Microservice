@@ -19,7 +19,7 @@ from app.contracts.evaluation import EvaluationResult, EvaluationStatus
 from app.contracts.evidence import EvidenceGraph
 from app.contracts.issue import Issue, IssueCode, IssueScope, IssueSeverity
 from app.contracts.policies import (
-    calculate_shingle_overlap, count_words, match_verbatim_in_passage,
+    calculate_shingle_overlap, count_words, match_boundary_aware, match_verbatim_in_passage,
     normalize_prompt, validate_answer_length,
 )
 from app.contracts.questions import QuestionUnion
@@ -433,7 +433,141 @@ def question_digest(question: Mapping[str, Any]) -> str:
     return hashlib.sha256(canonical_json_dump(question_core(question)).encode()).hexdigest()
 
 
-def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str, siblings: Sequence[Mapping[str, Any]]) -> list[EvaluationResult]:
+def verify_question_claim_provenance(
+    question_payload: Mapping[str, Any],
+    blueprint_slot: Optional[Mapping[str, Any]],
+    claims: Optional[Mapping[str, Any]],
+    passage: str,
+    passage_alignments: Optional[Sequence[Mapping[str, Any]]] = None,
+) -> list[Problem]:
+    """Validates that a question's cited evidence is legitimately connected to its immutable Blueprint-bound claim.
+
+    Invariants:
+    1. Exact Slot Binding Match: question evidenceClaimRef must match blueprint slot claimRefIds[0].
+    2. Verified Claim Existence: referenced claim must exist in verified EvidenceGraph.
+    3. Passage Evidence Exactness: passageEvidence offsets and quote match accepted passage text.
+    4. NOT_GIVEN contract: forbids positive evidenceQuote, requires absenceConfirmed=True, and verifies topical grounding.
+    5. Positive Evidence Grounding:
+       - Quote must substantively support the bound claim (grounded paraphrase or alignment).
+       - Anti-Wrong-Claim Gate: quotes primarily supporting another claim are rejected with CLAIM_PROVENANCE_MISMATCH.
+    """
+    if not claims:
+        return []
+
+    q_num = question_payload.get("questionNumber") or question_payload.get("number") or "?"
+    stated_claim_ref = question_payload.get("evidenceClaimRef") or question_payload.get("claimRef")
+
+    if blueprint_slot:
+        slot_claim_ids = blueprint_slot.get("claimRefIds") or ()
+        bound_claim_id = slot_claim_ids[0] if slot_claim_ids else None
+        if not bound_claim_id:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question slot {q_num} has no bound claim references in blueprint")]
+        if not stated_claim_ref or stated_claim_ref != bound_claim_id:
+            return [(
+                IssueCode.CLAIM_PROVENANCE_MISMATCH,
+                f"Question {q_num} claim reference '{stated_claim_ref}' does not match immutable blueprint slot binding '{bound_claim_id}'",
+            )]
+    else:
+        bound_claim_id = stated_claim_ref
+
+    if not bound_claim_id:
+        return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} has no bound claim reference")]
+
+    claim_obj = claims.get(bound_claim_id)
+    if not claim_obj:
+        return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} references claim '{bound_claim_id}' not found in EvidenceGraph")]
+
+    bound_text = (claim_obj.get("text") if isinstance(claim_obj, dict) else getattr(claim_obj, "text", "")).strip()
+    if not bound_text:
+        return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} bound claim '{bound_claim_id}' has empty text in EvidenceGraph")]
+
+    ans = str(question_payload.get("answer") or question_payload.get("correctOption") or "").strip().upper()
+    is_ng = (ans == "NOT_GIVEN")
+
+    if is_ng:
+        quote = question_payload.get("evidenceQuote")
+        if quote is not None:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} is NOT_GIVEN but provides positive evidenceQuote")]
+        absence = question_payload.get("absenceAssessment") or {}
+        topical_span = str(absence.get("topicalContextSpan") or "").strip()
+        if not topical_span:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} (NOT_GIVEN) lacks required topicalContextSpan")]
+        if topical_span not in passage:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} (NOT_GIVEN) topicalContextSpan not found in passage")]
+        claim_keywords = [w.lower() for w in re.findall(r"\b[A-Za-z0-9\-]{4,}\b", bound_text) if w.lower() not in V2_1_STOPWORDS]
+        topical_words = set(re.findall(r"\b[A-Za-z0-9\-]{4,}\b", topical_span.lower()))
+        topical_match = bool(set(claim_keywords) & topical_words)
+        if not topical_match and passage_alignments:
+            aligned_q = next((a.get("passageQuote") for a in passage_alignments if a.get("claimId") == bound_claim_id), None)
+            if aligned_q and (topical_span in aligned_q or aligned_q in topical_span or calculate_shingle_overlap(topical_span, aligned_q) >= 0.20):
+                topical_match = True
+        if not topical_match:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} (NOT_GIVEN) topicalContextSpan lacks topical grounding in bound claim '{bound_claim_id}'")]
+    else:
+        quote = str(question_payload.get("evidenceQuote") or "").strip()
+        if not quote or len(quote) < 10:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} lacks valid evidenceQuote for positive claim grounding")]
+        if quote not in passage:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} evidenceQuote not found in passage text")]
+        pe = question_payload.get("passageEvidence") or {}
+        start = pe.get("startChar", -1)
+        end = pe.get("endChar", -1)
+        if start < 0 or end <= start or passage[start:end] != quote:
+            return [(IssueCode.CLAIM_PROVENANCE_MISMATCH, f"Question {q_num} passageEvidence offsets do not match evidenceQuote")]
+
+        ratio_bound, _ = compute_substantive_grounding_ratio(bound_text, quote)
+        shingle_bound = calculate_shingle_overlap(quote, bound_text)
+        direct_contained = (bound_text in quote or quote in bound_text)
+
+        # Anti-Wrong-Claim Gate:
+        # Check against all other claims in EvidenceGraph. If another claim has substantial overlap
+        # (>= 0.40) and exceeds the bound claim's overlap by >= 0.15 (or bound claim overlap < 0.25),
+        # fail closed because the quote primarily belongs to another claim!
+        better_claims = []
+        for other_id, other_claim in claims.items():
+            if other_id == bound_claim_id:
+                continue
+            other_text = (other_claim.get("text") if isinstance(other_claim, dict) else getattr(other_claim, "text", "")).strip()
+            if not other_text:
+                continue
+            r_other, _ = compute_substantive_grounding_ratio(other_text, quote)
+            if r_other >= 0.40 and (r_other > ratio_bound + 0.15 or ratio_bound < 0.25):
+                better_claims.append((other_id, r_other, other_text))
+
+        if better_claims:
+            better_claims.sort(key=lambda x: x[1], reverse=True)
+            top_other_id, top_other_r, top_other_text = better_claims[0]
+            if not direct_contained and (ratio_bound < 0.40 or top_other_r >= ratio_bound + 0.20):
+                return [(
+                    IssueCode.CLAIM_PROVENANCE_MISMATCH,
+                    f"Question {q_num} evidence quote primarily supports claim '{top_other_id}' (overlap: {top_other_r:.2f}) rather than bound claim '{bound_claim_id}' (overlap: {ratio_bound:.2f}): '{quote[:60]}...'",
+                )]
+
+        # Check alignment match
+        aligned_quote = None
+        if passage_alignments:
+            aligned_quote = next((a.get("passageQuote") for a in passage_alignments if a.get("claimId") == bound_claim_id and a.get("passageQuote")), None)
+        aligned_quote_match = bool(aligned_quote and (quote in aligned_quote or aligned_quote in quote or calculate_shingle_overlap(quote, aligned_quote) >= 0.25))
+
+        if not direct_contained and not aligned_quote_match and ratio_bound < 0.25 and shingle_bound < 0.20:
+            return [(
+                IssueCode.CLAIM_PROVENANCE_MISMATCH,
+                f"Question {q_num} evidence quote lacks substantive semantic support for bound claim '{bound_claim_id}' (overlap: {ratio_bound:.2f}): '{quote[:60]}...'",
+            )]
+
+    return []
+
+
+def evaluate_question(
+    artifact: ArtifactEnvelope,
+    passage: str,
+    difficulty: str,
+    siblings: Sequence[Mapping[str, Any]],
+    blueprint_slot: Optional[Mapping[str, Any]] = None,
+    claims: Optional[Mapping[str, Any]] = None,
+    passage_alignments: Optional[Sequence[Mapping[str, Any]]] = None,
+    blueprint: Optional[Any] = None,
+) -> list[EvaluationResult]:
     payload = artifact.payload
     structure: list[Problem] = []
     evidence: list[Problem] = []
@@ -470,15 +604,60 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
             evidence.append((IssueCode.EVIDENCE_MISSING, "Evidence quote must be the exact identified passage span"))
     if question_type in {
         "SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SHORT_ANSWER",
-        "NOTE_COMPLETION", "TABLE_COMPLETION", "FORM_COMPLETION"
+        "NOTE_COMPLETION", "TABLE_COMPLETION", "FORM_COMPLETION",
+        "FLOW_CHART", "DIAGRAM_LABEL", "MAP_LABEL",
     }:
         if not validate_answer_length(answer) or not match_verbatim_in_passage(answer, passage):
             q_num_label = payload.get("questionNumber") or payload.get("number") or ""
             answer_problems.append((IssueCode.WORD_LIMIT_EXCEEDED, f"Question {q_num_label}: Answer '{answer}' is not a full-token source phrase within IELTS word/number limits"))
-        if question_type != "SHORT_ANSWER" and f"[{payload.get('questionNumber')}]" not in prompt:
+
+        has_blank = False
+        if question_type == "SHORT_ANSWER":
+            has_blank = True
+        elif question_type == "FLOW_CHART":
+            has_blank = (
+                f"[{payload.get('questionNumber')}]" in prompt
+                or "______" in prompt
+                or any(
+                    f"[{payload.get('questionNumber')}]" in str(s) or "______" in str(s)
+                    for s in (payload.get("flowSteps") or payload.get("flow_steps") or [])
+                )
+            )
+        elif question_type in ("DIAGRAM_LABEL", "MAP_LABEL"):
+            has_blank = (
+                f"[{payload.get('questionNumber')}]" in prompt
+                or "______" in prompt
+                or f"[{payload.get('questionNumber')}]" in str(payload.get("calloutLabel") or payload.get("callout_label") or "")
+                or bool(payload.get("partDescription") or payload.get("part_description"))
+            )
+        else:
+            has_blank = f"[{payload.get('questionNumber')}]" in prompt or "______" in prompt
+
+        if not has_blank:
             structure.append((IssueCode.SCHEMA_VIOLATION, "Completion item lacks its numbered blank"))
         if check_prompt_answer_leakage(prompt, answer):
             answer_problems.append((IssueCode.ANSWER_LEAKAGE, "Question prompt exposes its own answer"))
+
+        if question_type in ("DIAGRAM_LABEL", "MAP_LABEL"):
+            clean_p = re.sub(r"\[\d+\]", "", prompt)
+            clean_p = re.sub(r"(?i)^(label|identify|choose|mark)\s+(the\s+)?(diagram|map|part|component|region|location)?(\s+below)?[:\s\-]*", "", clean_p).strip()
+            clean_p = re.sub(r"(?i)^on the (diagram|map)\.?$", "", clean_p).strip()
+            clean_p = re.sub(r"(?i)\s+on the (diagram|map)\.?$", "", clean_p).strip()
+            has_vis = bool(
+                payload.get("partDescription")
+                or payload.get("part_description")
+                or payload.get("sharedContext")
+                or payload.get("shared_context")
+                or payload.get("svgAssetId")
+                or payload.get("svg_asset_id")
+                or payload.get("svgXml")
+                or payload.get("svg_xml")
+                or payload.get("imageUrl")
+                or payload.get("image_url")
+                or (len(clean_p) >= 10)
+            )
+            if not has_vis:
+                structure.append((IssueCode.SCHEMA_VIOLATION, f"{question_type} requires a student-visible description or graphical asset"))
     if question_type == "MULTIPLE_CHOICE_SINGLE":
         options = tuple(payload.get("options", ()))
         if len(options) != 4 or any(not option.startswith(f"{chr(65 + i)}.") for i, option in enumerate(options)):
@@ -544,14 +723,38 @@ def evaluate_question(artifact: ArtifactEnvelope, passage: str, difficulty: str,
                         semantic.append((IssueCode.BAD_DISTRACTOR, f"MCQ distractor {chr(65 + d_idx)} is directly supported by evidence quote"))
     if question_type in {
         "SENTENCE_COMPLETION", "SUMMARY_COMPLETION", "SHORT_ANSWER",
-        "NOTE_COMPLETION", "TABLE_COMPLETION", "FORM_COMPLETION"
+        "NOTE_COMPLETION", "TABLE_COMPLETION", "FORM_COMPLETION",
+        "FLOW_CHART", "DIAGRAM_LABEL", "MAP_LABEL",
     }:
         clean_prompt = prompt.replace(f"[{payload.get('questionNumber')}]", "")
         if check_prompt_answer_leakage(clean_prompt, answer):
             semantic.append((IssueCode.ANSWER_LEAKAGE, "Question prompt exposes its own answer"))
         quote = str(payload.get("evidenceQuote", ""))
-        if quote and answer.lower() not in quote.lower():
+        if quote and not match_boundary_aware(answer, quote):
             semantic.append((IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM, "Completion answer is not contained in the evidence quote"))
+
+    # Question–Claim Provenance verification when claims are provided
+    if claims:
+        slot_to_verify = blueprint_slot
+        if slot_to_verify is None and blueprint:
+            q_num = payload.get("questionNumber") or payload.get("number")
+            all_slots = []
+            if isinstance(blueprint, dict):
+                for sec in blueprint.get("sections", []):
+                    all_slots.extend(sec.get("questionSlots", []))
+            elif hasattr(blueprint, "sections"):
+                for sec in blueprint.sections:
+                    all_slots.extend(getattr(sec, "question_slots", []) or getattr(sec, "questionSlots", []))
+            slot_to_verify = next((s for s in all_slots if (s.get("questionNumber") if isinstance(s, dict) else getattr(s, "question_number", None)) == q_num), None)
+
+        prov_problems = verify_question_claim_provenance(
+            question_payload=payload,
+            blueprint_slot=slot_to_verify,
+            claims=claims,
+            passage=passage,
+            passage_alignments=passage_alignments,
+        )
+        semantic.extend(prov_problems)
     return [result(artifact, "eval_question_structure", structure),
             result(artifact, "eval_answer_verbatim_length", answer_problems),
             result(artifact, "eval_evidence_offsets", evidence),

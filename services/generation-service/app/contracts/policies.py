@@ -133,6 +133,22 @@ def match_verbatim_in_passage(answer: str, passage: str) -> bool:
     return bool(re.search(leading + body + trailing, passage, re.IGNORECASE))
 
 
+def match_boundary_aware(needle: str, haystack: str) -> bool:
+    """Matches a word or phrase in haystack ensuring token/word boundary awareness."""
+    needle = needle.strip()
+    haystack = haystack.strip()
+    if not needle or not haystack:
+        return False
+    tokens = [re.escape(t) for t in needle.split()]
+    if not tokens:
+        return False
+    inner = r"\s+".join(tokens)
+    prefix = r"\b" if re.match(r"^\w", needle, flags=re.UNICODE) else r"(?:\s|^)"
+    suffix = r"\b" if re.search(r"\w$", needle, flags=re.UNICODE) else r"(?:\s|$)"
+    pattern = prefix + inner + suffix
+    return bool(re.search(pattern, haystack, flags=re.IGNORECASE))
+
+
 def validate_reading_section_policies(
     section: ReadingSection,
     section_index: int,

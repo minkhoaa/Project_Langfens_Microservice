@@ -645,7 +645,8 @@ class AnswerVerbatimAndLengthEvaluator(BaseEvaluator):
             # Completion and ShortAnswer require max 3 words and verbatim passage presence
             if q_type_norm in (
                 "SENTENCECOMPLETION", "SUMMARYCOMPLETION", "SHORTANSWER",
-                "NOTECOMPLETION", "TABLECOMPLETION", "FORMCOMPLETION"
+                "NOTECOMPLETION", "TABLECOMPLETION", "FORMCOMPLETION",
+                "FLOWCHART", "DIAGRAMLABEL", "MAPLABEL"
             ) and ans and str(ans).strip():
                 if not validate_answer_length(ans):
                     issues.append(
