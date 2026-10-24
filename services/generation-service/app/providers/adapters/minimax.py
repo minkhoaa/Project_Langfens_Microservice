@@ -34,7 +34,7 @@ class MiniMaxProvider(OpenAICompatibleProvider):
     def _build_create_kwargs(self, request: ProviderRequest, model_name: str) -> Dict[str, Any]:
         kwargs = super()._build_create_kwargs(request, model_name)
         kwargs["extra_body"] = {"reasoning_split": True, "reasoning_effort": "low"}
-        if "m3" in model_name.lower():
-            kwargs["max_tokens"] = max(request.max_tokens, 8192)
-            kwargs["max_completion_tokens"] = max(request.max_tokens, 8192)
+        effective_max = request.max_tokens if request.max_tokens > 0 else 4096
+        kwargs["max_tokens"] = effective_max
+        kwargs["max_completion_tokens"] = effective_max
         return kwargs

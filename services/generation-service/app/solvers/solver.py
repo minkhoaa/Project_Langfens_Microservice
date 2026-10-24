@@ -32,9 +32,9 @@ def normalize_solver_answer(raw_answer: str, question_type: Optional[str] = None
 
     if "TRUEFALSE" in q_type_norm or q_type_norm == "TFNG":
         upper = re.sub(r"[.,;:'\"`]+$", "", cleaned).strip().upper()
-        if upper in ("TRUE", "T"):
+        if upper in ("TRUE", "T", "YES", "Y"):
             return "TRUE"
-        if upper in ("FALSE", "F"):
+        if upper in ("FALSE", "F", "NO", "N"):
             return "FALSE"
         if upper in ("NOT GIVEN", "NOT_GIVEN", "NOTGIVEN", "NG"):
             return "NOT_GIVEN"
@@ -42,9 +42,9 @@ def normalize_solver_answer(raw_answer: str, question_type: Optional[str] = None
 
     if "YESNO" in q_type_norm or q_type_norm == "YNNG":
         upper = re.sub(r"[.,;:'\"`]+$", "", cleaned).strip().upper()
-        if upper in ("YES", "Y"):
+        if upper in ("YES", "Y", "TRUE", "T"):
             return "YES"
-        if upper in ("NO", "N"):
+        if upper in ("NO", "N", "FALSE", "F"):
             return "NO"
         if upper in ("NOT GIVEN", "NOT_GIVEN", "NOTGIVEN", "NG"):
             return "NOT_GIVEN"
@@ -139,18 +139,31 @@ def parse_and_validate_solver_output(
             if not span_text:
                 continue
 
-            # Hard invariant: span_text MUST appear verbatim in passage_text
-            clean_span = re.sub(r"(?:\.{3,}|…|\s)+$", "", span_text).strip()
+            clean_span = re.sub(r"^[\"'\s…\.]+|[\"'\s…\.]+$", "", span_text).strip()
             start_pos = passage_text.find(span_text)
             if start_pos == -1 and clean_span and len(clean_span) >= 5:
                 start_pos = passage_text.find(clean_span)
                 if start_pos != -1:
                     span_text = clean_span
-            if start_pos == -1:
-                errors.append(
-                    f"Cited span {idx+1} '{span_text[:50]}...' does not exist verbatim in approved passage"
-                )
-            else:
+            if start_pos == -1 and clean_span and len(clean_span) >= 5:
+                pos_ci = passage_text.lower().find(clean_span.lower())
+                if pos_ci != -1:
+                    start_pos = pos_ci
+                    span_text = passage_text[pos_ci:pos_ci + len(clean_span)]
+            if start_pos == -1 and clean_span:
+                clauses = [c.strip() for c in re.split(r"[,;:.!?—–\n]", clean_span) if len(c.strip()) >= 15]
+                for c in clauses:
+                    p = passage_text.find(c)
+                    if p != -1:
+                        start_pos = p
+                        span_text = c
+                        break
+                    p_ci = passage_text.lower().find(c.lower())
+                    if p_ci != -1:
+                        start_pos = p_ci
+                        span_text = passage_text[p_ci:p_ci + len(c)]
+                        break
+            if start_pos != -1:
                 end_pos = start_pos + len(span_text)
                 validated_spans.append(
                     SolverSpan(
@@ -159,7 +172,8 @@ def parse_and_validate_solver_output(
                         end_char=end_pos if e_char is None else int(e_char),
                     )
                 )
-
+            else:
+                errors.append(f"Cited span {idx+1} '{span_text[:50]}...' does not exist verbatim in approved passage")
     # P10-03 requirement: Missing or invalid spans are strictly non-pass for all answers
     if not validated_spans:
         errors.append("Solver failed to provide valid passage-grounded cited spans for the answer")

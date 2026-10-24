@@ -1,0 +1,925 @@
+{
+  "campaign_id": "RG10_HISTORICAL_FORENSIC_REPLAY",
+  "experiment_type": "HISTORICAL_FORENSIC_REPLAY",
+  "split": "DEV",
+  "replay_timestamp": "2026-10-16T09:32:20Z",
+  "evaluator_version": "neutral-eval-v2.3",
+  "foundation_model_id": "minimax/MiniMax-Text-01",
+  "total_dispatches": 22,
+  "dispatches_consumed": 22,
+  "unconsumed_records": [],
+  "total_tokens": 23886,
+  "calculated_spend_usd": 0.0358,
+  "dispatch_ledger": [
+    {
+      "call_index": 1,
+      "filename": "research-DIRECT_GENERATION_A-1_DIRECT_GENERATION_A_1792132951678558827.json",
+      "operation_id": "research-DIRECT_GENERATION_A-1",
+      "stage": "DIRECT_GENERATION_A",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fa447227729d338ff0f5f768f746",
+      "prompt_sha256": "17809dbe76dccd708ec2262415bdc7afdcd94d97498d97d4cfda46f3984e530d",
+      "response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+      "tokens": {
+        "prompt": 1038,
+        "completion": 398,
+        "total": 1436
+      },
+      "latency_ms": 20550.707991002128,
+      "recorded_at_ns": 1792132951678558827
+    },
+    {
+      "call_index": 2,
+      "filename": "research-DRAFT_GENERATION-2_DRAFT_GENERATION_1792132967240632601.json",
+      "operation_id": "research-DRAFT_GENERATION-2",
+      "stage": "DRAFT_GENERATION",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fa57a285c1862b2fac0c9d10e5cb",
+      "prompt_sha256": "a839d8c09203921d1ca0a9212e658db257ffff6f6a6feee2b55bf96146ec648c",
+      "response_sha256": "fd5246d624bf15ec2e114bf69bcf43f9600a9d850e0579a85161dae7e97718a3",
+      "tokens": {
+        "prompt": 1038,
+        "completion": 404,
+        "total": 1442
+      },
+      "latency_ms": 15556.881526994403,
+      "recorded_at_ns": 1792132967240632601
+    },
+    {
+      "call_index": 3,
+      "filename": "research-SELF_CRITIQUE-3_SELF_CRITIQUE_1792132980437397866.json",
+      "operation_id": "research-SELF_CRITIQUE-3",
+      "stage": "SELF_CRITIQUE",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fa67526833820bb68fd43fbe61f4",
+      "prompt_sha256": "125ce4a1166bb11e979582bd32deb252f372049fdb24852459c539059bbba6cf",
+      "response_sha256": "52cb7b86ea52fddf2218af6091f7ba5113f1e318abe503850638ec9bd453478b",
+      "tokens": {
+        "prompt": 483,
+        "completion": 319,
+        "total": 802
+      },
+      "latency_ms": 13195.57253899984,
+      "recorded_at_ns": 1792132980437397866
+    },
+    {
+      "call_index": 4,
+      "filename": "research-BOUNDED_REVISION-4_BOUNDED_REVISION_1792132995370339083.json",
+      "operation_id": "research-BOUNDED_REVISION-4",
+      "stage": "BOUNDED_REVISION",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fa74ae79f12924b1ac25c0f76a1b",
+      "prompt_sha256": "47ad02f232fcc5ae08f20e9502c630348a981eeb5c37db0e8cd595f80d1c9ea2",
+      "response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+      "tokens": {
+        "prompt": 1285,
+        "completion": 398,
+        "total": 1683
+      },
+      "latency_ms": 14930.720661010128,
+      "recorded_at_ns": 1792132995370339083
+    },
+    {
+      "call_index": 5,
+      "filename": "research-GENERATOR-5_GENERATOR_1792133011735789209.json",
+      "operation_id": "research-GENERATOR-5",
+      "stage": "GENERATOR",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fa8354f22ef21611b03225f0a929",
+      "prompt_sha256": "f048a7e15e8446518e03dbd6e6317e72bb7ba8b880aeef555d2866820e8ed8d4",
+      "response_sha256": "fd5246d624bf15ec2e114bf69bcf43f9600a9d850e0579a85161dae7e97718a3",
+      "tokens": {
+        "prompt": 1036,
+        "completion": 404,
+        "total": 1440
+      },
+      "latency_ms": 16361.658567999257,
+      "recorded_at_ns": 1792133011735789209
+    },
+    {
+      "call_index": 6,
+      "filename": "research-REVIEWER-6_REVIEWER_1792133018605090708.json",
+      "operation_id": "research-REVIEWER-6",
+      "stage": "REVIEWER",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fa937cb10586d901cccdbd0f6075",
+      "prompt_sha256": "afcdcf65982d77b39ef960b3e97bad0368d6d7afae780c6a63d3291387f47322",
+      "response_sha256": "6f574e875a0e561fb6c1616b8ccf057f7813a5d4a8027d36dc916fe702854266",
+      "tokens": {
+        "prompt": 539,
+        "completion": 159,
+        "total": 698
+      },
+      "latency_ms": 6868.267765006749,
+      "recorded_at_ns": 1792133018605090708
+    },
+    {
+      "call_index": 7,
+      "filename": "research-REPAIR-7_REPAIR_1792133032694430126.json",
+      "operation_id": "research-REPAIR-7",
+      "stage": "REPAIR",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fa9a9c11ad6ed52840c812b0201b",
+      "prompt_sha256": "5d859849c6002a3d88535d20b8de9ad7f9870609cd897657f4e0673c3dfd6aac",
+      "response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+      "tokens": {
+        "prompt": 1392,
+        "completion": 400,
+        "total": 1792
+      },
+      "latency_ms": 14086.974217003444,
+      "recorded_at_ns": 1792133032694430126
+    },
+    {
+      "call_index": 8,
+      "filename": "research-REVIEWER-8_REVIEWER_1792133038741024377.json",
+      "operation_id": "research-REVIEWER-8",
+      "stage": "REVIEWER",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720faa8b5d6f5b1a360aca33ee8e542",
+      "prompt_sha256": "bbf997a812cf6d311370858118d62ba3f80c3b37d4fa2a49b80ed267f31be325",
+      "response_sha256": "37d0e293d2f63c1e7a33f9b5bb9c8080ac8d0027ae9e677d1d0ec087cbd35731",
+      "tokens": {
+        "prompt": 541,
+        "completion": 154,
+        "total": 695
+      },
+      "latency_ms": 6045.103315002052,
+      "recorded_at_ns": 1792133038741024377
+    },
+    {
+      "call_index": 9,
+      "filename": "research-DIRECT_GENERATION_A-9_DIRECT_GENERATION_A_1792133055737261478.json",
+      "operation_id": "research-DIRECT_GENERATION_A-9",
+      "stage": "DIRECT_GENERATION_A",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720faae07798477250d3b3e3dd5cc5f",
+      "prompt_sha256": "3aaf21f6d621f208602177a9278d7da57a70f1c560e152b701a68387ade2f8b8",
+      "response_sha256": "2bdff67ada459c79072a6114745420dd283bc07c6acbdc3f76bc1a93f8f60cbd",
+      "tokens": {
+        "prompt": 1124,
+        "completion": 367,
+        "total": 1491
+      },
+      "latency_ms": 16991.83789899689,
+      "recorded_at_ns": 1792133055737261478
+    },
+    {
+      "call_index": 10,
+      "filename": "research-DRAFT_GENERATION-10_DRAFT_GENERATION_1792133076129498439.json",
+      "operation_id": "research-DRAFT_GENERATION-10",
+      "stage": "DRAFT_GENERATION",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fabf1b255fc1b04767976403ee7e",
+      "prompt_sha256": "7bd1957c657ef92ebfb7784942eed9864894eaf5e23d8ad0b4b812104963df22",
+      "response_sha256": "14f4843a605fedab3740528c3de33b662cf92da4aa6b2c18146a1c0dacce927b",
+      "tokens": {
+        "prompt": 1124,
+        "completion": 477,
+        "total": 1601
+      },
+      "latency_ms": 20387.829494997277,
+      "recorded_at_ns": 1792133076129498439
+    },
+    {
+      "call_index": 11,
+      "filename": "research-SELF_CRITIQUE-11_SELF_CRITIQUE_1792133079007820739.json",
+      "operation_id": "research-SELF_CRITIQUE-11",
+      "stage": "SELF_CRITIQUE",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fad458f24a4b69f711b95e60b54c",
+      "prompt_sha256": "12301c733644aa4b31d86dceabdaa783d6beff6efd6a0641af20b2ddd599f891",
+      "response_sha256": "800b85a25a2c53cbcd2edad26ca0b87da77c5dd71b678b93ae3c59d0b64ece05",
+      "tokens": {
+        "prompt": 637,
+        "completion": 62,
+        "total": 699
+      },
+      "latency_ms": 2876.7590770003153,
+      "recorded_at_ns": 1792133079007820739
+    },
+    {
+      "call_index": 12,
+      "filename": "research-BOUNDED_REVISION-12_BOUNDED_REVISION_1792133096140868102.json",
+      "operation_id": "research-BOUNDED_REVISION-12",
+      "stage": "BOUNDED_REVISION",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fad71c2fba82e60e0f7ddbb97b24",
+      "prompt_sha256": "823d98124c8b08a3f0c3a9854d14e2482747320a99fde695c057740acc88f728",
+      "response_sha256": "abc9c30169b56f194b55b9f49a9fd1f8a5cd0096f1a5dc9e11651e9a8900beb7",
+      "tokens": {
+        "prompt": 1454,
+        "completion": 416,
+        "total": 1870
+      },
+      "latency_ms": 17130.8775350044,
+      "recorded_at_ns": 1792133096140868102
+    },
+    {
+      "call_index": 13,
+      "filename": "research-GENERATOR-13_GENERATOR_1792133114682746586.json",
+      "operation_id": "research-GENERATOR-13",
+      "stage": "GENERATOR",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fae81798aeabc9b6e071be261559",
+      "prompt_sha256": "ed02177ba3bebc10ebdd32e379524e226306dc0da3b38003b4b400c1df577539",
+      "response_sha256": "d2b98aaedc5e59c037ba11d694ce655a6319dde9f2c37426aeb3eb4f7ca12e41",
+      "tokens": {
+        "prompt": 1122,
+        "completion": 479,
+        "total": 1601
+      },
+      "latency_ms": 18538.109247005195,
+      "recorded_at_ns": 1792133114682746586
+    },
+    {
+      "call_index": 14,
+      "filename": "research-REVIEWER-14_REVIEWER_1792133116038806255.json",
+      "operation_id": "research-REVIEWER-14",
+      "stage": "REVIEWER",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fafa13923429215ed3267e6de8db",
+      "prompt_sha256": "a1b2b37ef37a7890d02ccada46a1754aac850b00210fc5b206d5d95a6b0b797e",
+      "response_sha256": "c600b810c4b2297bd176ef87b9b3677cbeb8576ea20897d3267b316d645b9e80",
+      "tokens": {
+        "prompt": 679,
+        "completion": 16,
+        "total": 695
+      },
+      "latency_ms": 1354.3826460081618,
+      "recorded_at_ns": 1792133116038806255
+    },
+    {
+      "call_index": 15,
+      "filename": "research-BLIND_SOLVER-15_BLIND_SOLVER_1792133118953492357.json",
+      "operation_id": "research-BLIND_SOLVER-15",
+      "stage": "BLIND_SOLVER",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fafcb056df70b6c5b9cafd8a7ca3",
+      "prompt_sha256": "af6c8beaa837dd34dca695896a64bdc7b6258c1713f3153743ce140d12551e62",
+      "response_sha256": "5bf6c2f5ec74ac1bbf5d8d4e73efc0812103ec5a182b517a65f329cf2aaed0c8",
+      "tokens": {
+        "prompt": 662,
+        "completion": 60,
+        "total": 722
+      },
+      "latency_ms": 2913.8974730012706,
+      "recorded_at_ns": 1792133118953492357
+    },
+    {
+      "call_index": 16,
+      "filename": "research-VALIDATOR-16_VALIDATOR_1792133119979540648.json",
+      "operation_id": "research-VALIDATOR-16",
+      "stage": "VALIDATOR",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720faff5a93aadeaea1b0dd7019f556",
+      "prompt_sha256": "8ef2eff80f1705df75817bef422dfefefdfc44e0d9f38fe45b4a5bd78a6093d6",
+      "response_sha256": "796e4ebe9f38fb0c0ce3641743f6db9fdc8eb0d507c77c85a80e235031e42799",
+      "tokens": {
+        "prompt": 737,
+        "completion": 8,
+        "total": 745
+      },
+      "latency_ms": 1024.7717750025913,
+      "recorded_at_ns": 1792133119979540648
+    },
+    {
+      "call_index": 17,
+      "filename": "research-GENERATOR-17_GENERATOR_1792133128957376399.json",
+      "operation_id": "research-GENERATOR-17",
+      "stage": "GENERATOR",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fb008315c04faa23e3b4634df316",
+      "prompt_sha256": "89718568ef8617fb664a5090011da27c00dc2de915e0e4351a650b49fd7c9d2f",
+      "response_sha256": "3b2c0b43e0aeb03c0b77942d11360ac09b5cc6e9d91ca9b235b39a69beac7cba",
+      "tokens": {
+        "prompt": 1036,
+        "completion": 251,
+        "total": 1287
+      },
+      "latency_ms": 8974.328872005572,
+      "recorded_at_ns": 1792133128957376399
+    },
+    {
+      "call_index": 18,
+      "filename": "research-REVIEWER-18_REVIEWER_1792133132177216143.json",
+      "operation_id": "research-REVIEWER-18",
+      "stage": "REVIEWER",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fb0917bcc1502013ccde74503d64",
+      "prompt_sha256": "f5c9406552d085da08d622b37fc0c037faf91bed45d939d91b56abd3f691a833",
+      "response_sha256": "50e03ba1e6c1d536544e335728a39543c21b966318aaab395e5b823eff098eea",
+      "tokens": {
+        "prompt": 422,
+        "completion": 57,
+        "total": 479
+      },
+      "latency_ms": 3218.8252250052756,
+      "recorded_at_ns": 1792133132177216143
+    },
+    {
+      "call_index": 19,
+      "filename": "research-REPAIR-19_REPAIR_1792133142516814701.json",
+      "operation_id": "research-REPAIR-19",
+      "stage": "REPAIR",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fb0c09fb4da15f3daf82c3f7a530",
+      "prompt_sha256": "85596cf883ab9aad8f8051becccad19f3b1e12a8af9d3cdf274118c87f351a90",
+      "response_sha256": "1292509b8d2250111ea26335f2002eec9c1e86b527e0f6bc6d8071a12bbcb69c",
+      "tokens": {
+        "prompt": 1177,
+        "completion": 252,
+        "total": 1429
+      },
+      "latency_ms": 10337.215491003008,
+      "recorded_at_ns": 1792133142516814701
+    },
+    {
+      "call_index": 20,
+      "filename": "research-REVIEWER-20_REVIEWER_1792133144052596889.json",
+      "operation_id": "research-REVIEWER-20",
+      "stage": "REVIEWER",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fb1615537b3f7c910218fd304e02",
+      "prompt_sha256": "f5c9406552d085da08d622b37fc0c037faf91bed45d939d91b56abd3f691a833",
+      "response_sha256": "c600b810c4b2297bd176ef87b9b3677cbeb8576ea20897d3267b316d645b9e80",
+      "tokens": {
+        "prompt": 422,
+        "completion": 16,
+        "total": 438
+      },
+      "latency_ms": 1534.8802989901742,
+      "recorded_at_ns": 1792133144052596889
+    },
+    {
+      "call_index": 21,
+      "filename": "research-BLIND_SOLVER-21_BLIND_SOLVER_1792133145447384898.json",
+      "operation_id": "research-BLIND_SOLVER-21",
+      "stage": "BLIND_SOLVER",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fb18a5f7682d296e02865dd40b51",
+      "prompt_sha256": "c224fcf9fac99f46d1b3a81b2d13399809265cc7b5e3e4ef5e6d3bde3f64b2ab",
+      "response_sha256": "b4db9172a7085a1ba685e73f50403f537ab75914ade8dbeba3acabf98aaa01c8",
+      "tokens": {
+        "prompt": 405,
+        "completion": 19,
+        "total": 424
+      },
+      "latency_ms": 1394.1337610012852,
+      "recorded_at_ns": 1792133145447384898
+    },
+    {
+      "call_index": 22,
+      "filename": "research-VALIDATOR-22_VALIDATOR_1792133146480550621.json",
+      "operation_id": "research-VALIDATOR-22",
+      "stage": "VALIDATOR",
+      "model_id": "minimax/MiniMax-Text-01",
+      "provider_request_id": "0720fb19ea8b522799e36a69510abfa9",
+      "prompt_sha256": "172d9c94b35eb43086695cbe1463b5455ea0fd5320885d8dc53f80a830491354",
+      "response_sha256": "796e4ebe9f38fb0c0ce3641743f6db9fdc8eb0d507c77c85a80e235031e42799",
+      "tokens": {
+        "prompt": 409,
+        "completion": 8,
+        "total": 417
+      },
+      "latency_ms": 1029.3214460107265,
+      "recorded_at_ns": 1792133146480550621
+    }
+  ],
+  "question_evaluations": [
+    {
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "prompt": "CAM plants assimilate atmospheric carbon dioxide during the night.",
+      "options": [],
+      "proposed_answer": "TRUE",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-a",
+        "stage": "DIRECT_GENERATION_A",
+        "question_id": "1",
+        "question_text": "CAM plants assimilate atmospheric carbon dioxide during the night.",
+        "question_content_hash": "7750eecb3324215317a2ae5d7a5476de0f07d8490dfbd431f904fdab6aafa8c7",
+        "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 1.0,
+      "answerability_score": 1.0,
+      "abstention_reason": "Entailment contradiction: passage contradicts TRUE statement; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "evidence_refs": [
+        "assimilate atmospheric carbon dioxide"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": false
+      }
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "prompt": "CAM plants open their stomata during the day to absorb carbon dioxide.",
+      "options": [],
+      "proposed_answer": "FALSE",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-a",
+        "stage": "DIRECT_GENERATION_A",
+        "question_id": "2",
+        "question_text": "CAM plants open their stomata during the day to absorb carbon dioxide.",
+        "question_content_hash": "1e3c452586047651ee71a1de43e9b5e2f417bfb35d62c015ee9a5ec633e3c410",
+        "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "PASS",
+      "grounding_score": 4.0,
+      "answerability_score": 4.0,
+      "abstention_reason": null,
+      "evidence_refs": [
+        "stomata during"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "prompt": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles until daybreak.",
+      "options": [],
+      "proposed_answer": "TRUE",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-a",
+        "stage": "DIRECT_GENERATION_A",
+        "question_id": "3",
+        "question_text": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles until daybreak.",
+        "question_content_hash": "fdfd2358d6e1438759126b7c27d4f8261480bc975493bf0204344e7a4098e17b",
+        "output_response_sha256": "32e1ada8c0d541f09ecc2e25e2da47b7f4a2f6e49dbe84f67963a314d6c9f593",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 1.0,
+      "answerability_score": 1.0,
+      "abstention_reason": "Entailment contradiction: passage contradicts TRUE statement; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "evidence_refs": [
+        "central vacuoles until daybreak"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": false
+      }
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "prompt": "CAM plants open their stomata during the day to take in carbon dioxide.",
+      "options": [],
+      "proposed_answer": null,
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-b",
+        "stage": "BOUNDED_REVISION",
+        "question_id": "1",
+        "question_text": "CAM plants open their stomata during the day to take in carbon dioxide.",
+        "question_content_hash": "42502c07baa6e480b069e27993e94676eb505f22db226450691363909eca621e",
+        "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+        "status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 1.0,
+      "answerability_score": 1.0,
+      "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "evidence_refs": [
+        "stomata during"
+      ],
+      "task_validity": {
+        "has_proposed_answer": false,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "prompt": "Malate is the primary four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+      "options": [],
+      "proposed_answer": null,
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-b",
+        "stage": "BOUNDED_REVISION",
+        "question_id": "2",
+        "question_text": "Malate is the primary four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+        "question_content_hash": "944c7485234313f3e6a674bd658d1520ff3d602d7993b33b8da66eb4abf28d60",
+        "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+        "status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 1.0,
+      "answerability_score": 1.0,
+      "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "evidence_refs": [
+        "dicarboxylic acid"
+      ],
+      "task_validity": {
+        "has_proposed_answer": false,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "prompt": "CAM plants use ribulose-1,5-bisphosphate carboxylase-oxygenase during the night.",
+      "options": [],
+      "proposed_answer": null,
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-b",
+        "stage": "BOUNDED_REVISION",
+        "question_id": "3",
+        "question_text": "CAM plants use ribulose-1,5-bisphosphate carboxylase-oxygenase during the night.",
+        "question_content_hash": "ed582ef3eddb8bc22f419951ddee71c73e9d28d71e8ce138b00873919b84f6ce",
+        "output_response_sha256": "e71012d6d93c3b3d08fa3538d4b92fa6ae16863dac13d92e848b277399949094",
+        "status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 1.0,
+      "answerability_score": 1.0,
+      "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "evidence_refs": [
+        "plants during"
+      ],
+      "task_validity": {
+        "has_proposed_answer": false,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "prompt": "CAM plants open their stomata during the day to take in carbon dioxide.",
+      "options": [],
+      "proposed_answer": null,
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-c",
+        "stage": "REPAIR",
+        "question_id": "1",
+        "question_text": "CAM plants open their stomata during the day to take in carbon dioxide.",
+        "question_content_hash": "42502c07baa6e480b069e27993e94676eb505f22db226450691363909eca621e",
+        "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+        "status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 1.0,
+      "answerability_score": 1.0,
+      "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "evidence_refs": [
+        "stomata during"
+      ],
+      "task_validity": {
+        "has_proposed_answer": false,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "prompt": "Malate is the only four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+      "options": [],
+      "proposed_answer": null,
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-c",
+        "stage": "REPAIR",
+        "question_id": "2",
+        "question_text": "Malate is the only four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+        "question_content_hash": "2abf1705d260805dab77a9d53fa57fca42ce88abcabaf55344d7b011e0ef0e07",
+        "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+        "status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 1.0,
+      "answerability_score": 1.0,
+      "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "evidence_refs": [
+        "dicarboxylic acid"
+      ],
+      "task_validity": {
+        "has_proposed_answer": false,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "prompt": "Ribulose-1,5-bisphosphate carboxylase-oxygenase is active during the night in CAM plants.",
+      "options": [],
+      "proposed_answer": null,
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-reading-c",
+        "stage": "REPAIR",
+        "question_id": "3",
+        "question_text": "Ribulose-1,5-bisphosphate carboxylase-oxygenase is active during the night in CAM plants.",
+        "question_content_hash": "48189c3e83064bb1a7b9c166df2c48c13f64f8c77291f2ea8d228baa8028b149",
+        "output_response_sha256": "c69a93857219ca138cc87bf1f800477702ff785cc91fcc5c32ce77fddde4556d",
+        "status": "UNSCORABLE_MISSING_ANSWER"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 1.0,
+      "answerability_score": 1.0,
+      "abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "evidence_refs": [
+        "during plants"
+      ],
+      "task_validity": {
+        "has_proposed_answer": false,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "A",
+      "question_id": "1",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Which of the following sentences correctly uses an it-cleft structure?",
+      "options": [
+        "A) It is the unusual weather patterns are causing the crop failures.",
+        "B) It was the unusual weather patterns that caused the crop failures.",
+        "C) The unusual weather patterns, it was them that caused the crop failures.",
+        "D) It is causing the crop failures, the unusual weather patterns."
+      ],
+      "proposed_answer": "B",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-grammar-a",
+        "stage": "DIRECT_GENERATION_A",
+        "question_id": "1",
+        "question_text": "Which of the following sentences correctly uses an it-cleft structure?",
+        "question_content_hash": "664bb0a116fbabdfec8e62b8489d8d0fcb39c21ea76c489ba6ed5261c79cb899",
+        "output_response_sha256": "2bdff67ada459c79072a6114745420dd283bc07c6acbdc3f76bc1a93f8f60cbd",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "PASS",
+      "grounding_score": 4.0,
+      "answerability_score": 4.0,
+      "abstention_reason": null,
+      "evidence_refs": [
+        "rule_pack:pack-cleft-dev-03"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "unique_correct_answer": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "A",
+      "question_id": "2",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "What is the correct way to emphasize 'photosynthesis' using an it-cleft structure?",
+      "options": [
+        "A) It is photosynthesis that is the process of converting light energy into chemical energy.",
+        "B) It was photosynthesis is the process of converting light energy into chemical energy.",
+        "C) Photosynthesis, it is the process of converting light energy into chemical energy.",
+        "D) It is the process of converting light energy into chemical energy that photosynthesis."
+      ],
+      "proposed_answer": "A",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-grammar-a",
+        "stage": "DIRECT_GENERATION_A",
+        "question_id": "2",
+        "question_text": "What is the correct way to emphasize 'photosynthesis' using an it-cleft structure?",
+        "question_content_hash": "3462bcb02709e5bce79cc782610612eee9cd544000aa8cd89fe6d6a737d04e82",
+        "output_response_sha256": "2bdff67ada459c79072a6114745420dd283bc07c6acbdc3f76bc1a93f8f60cbd",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 2.0,
+      "answerability_score": 2.0,
+      "abstention_reason": "Ambiguous MCQ: multiple options [1, 4] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "evidence_refs": [
+        "rule_pack:pack-cleft-dev-03"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "unique_correct_answer": false,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "B",
+      "question_id": "q1",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the new methodology'?",
+      "options": [
+        "A) It is the new methodology that has revolutionized our approach to data analysis.",
+        "B) It was the new methodology that has revolutionized our approach to data analysis.",
+        "C) The new methodology is what has revolutionized our approach to data analysis.",
+        "D) The new methodology, it has revolutionized our approach to data analysis."
+      ],
+      "proposed_answer": "A",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-grammar-b",
+        "stage": "BOUNDED_REVISION",
+        "question_id": "q1",
+        "question_text": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the new methodology'?",
+        "question_content_hash": "2c233f035218d25841410912ac2302ee09c53825c9990546c981c202412c72fe",
+        "output_response_sha256": "abc9c30169b56f194b55b9f49a9fd1f8a5cd0096f1a5dc9e11651e9a8900beb7",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "PASS",
+      "grounding_score": 4.0,
+      "answerability_score": 4.0,
+      "abstention_reason": null,
+      "evidence_refs": [
+        "rule_pack:pack-cleft-dev-03"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "unique_correct_answer": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "B",
+      "question_id": "q2",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Which sentence correctly uses an it-cleft structure with the emphasized element 'the research team'?",
+      "options": [
+        "A) It is the research team who developed the innovative solution.",
+        "B) It was the research team that developed the innovative solution.",
+        "C) The research team is who developed the innovative solution.",
+        "D) The research team, they developed the innovative solution."
+      ],
+      "proposed_answer": "B",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-grammar-b",
+        "stage": "BOUNDED_REVISION",
+        "question_id": "q2",
+        "question_text": "Which sentence correctly uses an it-cleft structure with the emphasized element 'the research team'?",
+        "question_content_hash": "2d431ba39cd09b244b4b1b711a6234ecf54605e460f39320039f34d3adcdb521",
+        "output_response_sha256": "abc9c30169b56f194b55b9f49a9fd1f8a5cd0096f1a5dc9e11651e9a8900beb7",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "PASS",
+      "grounding_score": 4.0,
+      "answerability_score": 4.0,
+      "abstention_reason": null,
+      "evidence_refs": [
+        "rule_pack:pack-cleft-dev-03"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "unique_correct_answer": true,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "C",
+      "question_id": "GRAMMAR_MCQ_1",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Choose the correct sentence that uses an it-cleft structure appropriately.",
+      "options": [
+        "It is the new findings that has surprised the scientific community.",
+        "It was the new findings that surprised the scientific community.",
+        "It is the new findings that surprise the scientific community.",
+        "It were the new findings that surprised the scientific community."
+      ],
+      "proposed_answer": "It was the new findings that surprised the scientific community.",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-grammar-c",
+        "stage": "GENERATOR",
+        "question_id": "GRAMMAR_MCQ_1",
+        "question_text": "Choose the correct sentence that uses an it-cleft structure appropriately.",
+        "question_content_hash": "ff3b8e0fc7989abe2f4f1360e269ad5742f33e3f4309e6819ca6ce673503f7d1",
+        "output_response_sha256": "d2b98aaedc5e59c037ba11d694ce655a6319dde9f2c37426aeb3eb4f7ca12e41",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 2.0,
+      "answerability_score": 2.0,
+      "abstention_reason": "Ambiguous MCQ: multiple options [1, 2, 3] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "evidence_refs": [
+        "rule_pack:pack-cleft-dev-03"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "unique_correct_answer": false,
+        "no_contradiction": true
+      }
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "C",
+      "question_id": "GRAMMAR_MCQ_2",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Which sentence correctly uses an it-cleft to emphasize 'the research methodology'?",
+      "options": [
+        "It is the research methodology that the team has developed.",
+        "It was the research methodology that the team developed.",
+        "It is the research methodology that the team develops.",
+        "It was the research methodology that the team has developed."
+      ],
+      "proposed_answer": "It was the research methodology that the team developed.",
+      "answer_provenance": {
+        "campaign_id": "RG10_DEV_HARDENING_V2",
+        "assignment_id": "dev-grammar-c",
+        "stage": "GENERATOR",
+        "question_id": "GRAMMAR_MCQ_2",
+        "question_text": "Which sentence correctly uses an it-cleft to emphasize 'the research methodology'?",
+        "question_content_hash": "bbf231af74e767c126306145b3d27906ff77c6334fe07aef7e00288d3301d933",
+        "output_response_sha256": "d2b98aaedc5e59c037ba11d694ce655a6319dde9f2c37426aeb3eb4f7ca12e41",
+        "status": "AVAILABLE"
+      },
+      "schema_valid": true,
+      "verdict": "FAIL",
+      "grounding_score": 2.0,
+      "answerability_score": 2.0,
+      "abstention_reason": "Ambiguous MCQ: multiple options [1, 2, 3, 4] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "evidence_refs": [
+        "rule_pack:pack-cleft-dev-03"
+      ],
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "unique_correct_answer": false,
+        "no_contradiction": true
+      }
+    }
+  ],
+  "pass_count": 4,
+  "fail_count": 11,
+  "uncertain_count": 0
+}

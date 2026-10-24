@@ -95,10 +95,31 @@ def parse_and_validate_adversary_output(
                 if not stext:
                     continue
 
+                clean_s = re.sub(r"^[\"'\s…\.]+|[\"'\s…\.]+$", "", stext).strip()
                 pos = passage_text.find(stext)
-                if pos == -1:
-                    has_invalid_span = True
-                else:
+                if pos == -1 and clean_s and len(clean_s) >= 5:
+                    pos = passage_text.find(clean_s)
+                    if pos != -1:
+                        stext = clean_s
+                if pos == -1 and clean_s and len(clean_s) >= 5:
+                    pos_ci = passage_text.lower().find(clean_s.lower())
+                    if pos_ci != -1:
+                        pos = pos_ci
+                        stext = passage_text[pos_ci:pos_ci + len(clean_s)]
+                if pos == -1 and clean_s:
+                    clauses = [c.strip() for c in re.split(r"[,;:.!?—–\n]", clean_s) if len(c.strip()) >= 15]
+                    for c in clauses:
+                        p = passage_text.find(c)
+                        if p != -1:
+                            pos = p
+                            stext = c
+                            break
+                        p_ci = passage_text.lower().find(c.lower())
+                        if p_ci != -1:
+                            pos = p_ci
+                            stext = passage_text[p_ci:p_ci + len(c)]
+                            break
+                if pos != -1:
                     valid_spans.append(
                         SolverSpan(
                             span_text=stext,
@@ -106,7 +127,8 @@ def parse_and_validate_adversary_output(
                             end_char=pos + len(stext),
                         )
                     )
-
+                else:
+                    has_invalid_span = True
             # Check if this allegation relies on outside knowledge rather than passage
             outside_knowledge_detected = (
                 not is_grounded_flag

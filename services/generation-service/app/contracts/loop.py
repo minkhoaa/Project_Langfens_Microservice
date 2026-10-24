@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Set, Tuple, Union
 from pydantic import Field
 
 from .base import CanonicalBaseModel
@@ -120,11 +120,12 @@ class LoopDecision(CanonicalBaseModel):
 
     decision_id: str = Field(..., alias="decisionId")
     run_id: str = Field(..., alias="runId")
-    decision: DecisionType
+    decision: DecisionType = Field(..., alias="decision")
+    decision_type: Optional[DecisionType] = Field(default=None, alias="decisionType")
     current_state: LoopState = Field(..., alias="currentState")
     next_state: LoopState = Field(..., alias="nextState")
     reason: str
-    target_scope: IssueScope = Field(..., alias="targetScope")
+    target_scope: Union[IssueScope, str] = Field(..., alias="targetScope")
     target_artifact_id: Optional[str] = Field(default=None, alias="targetArtifactId")
     reason_code: Optional[LoopReason] = Field(default=None, alias="reasonCode")
     budget_reservation_id: Optional[str] = Field(default=None, alias="budgetReservationId")
@@ -134,6 +135,10 @@ class LoopDecision(CanonicalBaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         alias="createdAt",
     )
+
+    def model_post_init(self, __context: object) -> None:
+        if self.decision_type is None:
+            object.__setattr__(self, "decision_type", self.decision)
 
     def is_legal_transition(self) -> bool:
         """Validates that current_state -> next_state is valid according to the state machine."""

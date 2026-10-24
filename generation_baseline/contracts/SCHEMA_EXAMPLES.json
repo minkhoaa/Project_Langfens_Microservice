@@ -1,0 +1,56 @@
+{
+  "generation_result_valid": {
+    "run_id": "run-A-001",
+    "dataset_item_id": "reading-final-001",
+    "configuration_id": "A",
+    "task_type": "READING_SINGLE_PASSAGE",
+    "execution_status": "FAILED_VALIDATION",
+    "output_availability": "PARSEABLE",
+    "generated_content": {
+      "context_text": "A verified passage placeholder with enough content only for schema checking.",
+      "question_groups": [
+        {
+          "group_id": "g1",
+          "question_ids": [
+            "q1"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "question_id": "q1",
+          "question_type": "TFNG",
+          "text": "Is the statement supported?",
+          "options": [],
+          "instructions": "Select True, False or Not Given."
+        }
+      ]
+    },
+    "private_answer_ref": "secure://answers/run-A-001",
+    "trace_ref": "secure://traces/run-A-001",
+    "usage_ref": "secure://usage/run-A-001",
+    "failure_code": "AMBIGUOUS_ANSWER",
+    "output_schema_version": "v3"
+  },
+  "solver_view_valid": {
+    "context_text": "A short reference passage.",
+    "question": {
+      "question_id": "q1",
+      "question_type": "TFNG",
+      "text": "What does the passage imply?",
+      "options": [],
+      "instructions": "Answer using passage only."
+    },
+    "allowed_reference_text": "A short reference passage."
+  },
+  "usage_unknown_valid": {
+    "run_id": "run-A-001",
+    "llm_calls": 1,
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "cost_usd": null,
+    "usage_confidence": "UNKNOWN",
+    "pricing_version": null,
+    "failure_usage_reason": "Provider did not report usage."
+  }
+}

@@ -102,14 +102,14 @@ public static class LineageService
                 a.ArtifactId.Equals($"art_section_{secIdx}", StringComparison.OrdinalIgnoreCase) ||
                 a.ArtifactId.Equals($"section_{secIdx}", StringComparison.OrdinalIgnoreCase) ||
                 a.ArtifactId.Equals($"art_section_s{secIdx}", StringComparison.OrdinalIgnoreCase) ||
-                System.Text.RegularExpressions.Regex.IsMatch(a.ArtifactId, $@"(?:^|[_\-s]){secIdx}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                System.Text.RegularExpressions.Regex.IsMatch(a.ArtifactId, $@"(?:^|[_\-s:]){secIdx}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
                 ?? (i < sectionArtifacts.Count ? sectionArtifacts[i] : null);
 
             var pasArtifact = passageArtifacts.FirstOrDefault(a =>
                 a.ArtifactId.Equals($"art_passage_s{secIdx}", StringComparison.OrdinalIgnoreCase) ||
                 a.ArtifactId.Equals($"art_passage_{secIdx}", StringComparison.OrdinalIgnoreCase) ||
                 a.ArtifactId.Equals($"passage_{secIdx}", StringComparison.OrdinalIgnoreCase) ||
-                System.Text.RegularExpressions.Regex.IsMatch(a.ArtifactId, $@"(?:^|[_\-s]){secIdx}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                System.Text.RegularExpressions.Regex.IsMatch(a.ArtifactId, $@"(?:^|[_\-s:]){secIdx}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
                 ?? (i < passageArtifacts.Count ? passageArtifacts[i] : null);
 
             var secPayload = new
@@ -186,7 +186,7 @@ public static class LineageService
                     a.ArtifactId.Equals($"art_q_{q.Idx}", StringComparison.OrdinalIgnoreCase) ||
                     a.ArtifactId.Equals($"question_{q.Idx}", StringComparison.OrdinalIgnoreCase) ||
                     a.ArtifactId.Equals($"q_{q.Idx}", StringComparison.OrdinalIgnoreCase) ||
-                    System.Text.RegularExpressions.Regex.IsMatch(a.ArtifactId, $@"(?:^|[_\-q]){q.Idx}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
+                System.Text.RegularExpressions.Regex.IsMatch(a.ArtifactId, $@"(?:^|[_\-q:]){q.Idx}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
                 var qPayload = new
                 {
                     idx = q.Idx,

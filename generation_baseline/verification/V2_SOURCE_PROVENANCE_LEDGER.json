@@ -1,0 +1,1371 @@
+{
+  "ledger_id": "V2_SOURCE_PROVENANCE_LEDGER",
+  "version": "2.1.0",
+  "description": "Authoritative cryptographic provenance ledger for candidate Reading sources in RQ2_DATASET_V2.",
+  "governing_document": "generation_baseline/plans/2026-10-19-v2-s02-pmc-verification-segmentation-plan.md",
+  "total_sources_evaluated": 7,
+  "total_sources_admitted": 7,
+  "all_sources_verified": true,
+  "statistical_clustering_notice": "Source-family clustering: All four passages from any single article share common authorial style, syntactic profile, and vocabulary. Downstream analyses must not treat multiple passages from the same source as statistically independent. Cluster-robust variance estimation or mixed-effects models are required.",
+  "sources": [
+    {
+      "family_id": "fam-v2-pmc-13621526",
+      "pmcid": "PMC13621526",
+      "classification": "INHERITED_CANDIDATE",
+      "domain": "Controlled-Environment Plant Biology",
+      "article_title": "Controlled-Environment Plant Biology",
+      "journal": "BMC Plant Biol",
+      "publication_year": "2026",
+      "doi": "10.none/placeholder",
+      "replaces": null,
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Open Access This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the C..."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "66f72f15f3ad08ab34d0322d1a581912649a29d0174d21ec215ac7eb1aacb0ab",
+        "extracted_body_sha256": "df5cd436aaf45b48865e82b6ded9fea11d30fb33288eef29f78a2f361eca921c",
+        "canonical_clean_text_sha256": "1d6e86acc9f5c5912579620594a11183c49e9fff9ca056d0abb31dc5c535854b",
+        "fixture_sha256": "1d6e86acc9f5c5912579620594a11183c49e9fff9ca056d0abb31dc5c535854b",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13621526.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13621526.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 6100,
+        "clean_body_chars": 44910,
+        "paragraph_count": 56
+      },
+      "deterministic_correspondence": {
+        "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
+        "is_faithful_substring": true,
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 1.0,
+        "raw_fixture_token_count": 795,
+        "raw_body_token_count": 6100,
+        "clean_fixture_token_count": 756,
+        "start_token_index": 0,
+        "matched_token_count": 756,
+        "authorized_transformations_count": 24,
+        "authorized_transformations_log": [
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[1\u20136]",
+            "char_offset": 806,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[6\u20138]",
+            "char_offset": 1068,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[9\u201311]",
+            "char_offset": 1237,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[12]",
+            "char_offset": 1367,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[13, 14]",
+            "char_offset": 1472,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[12]",
+            "char_offset": 1648,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[15, 16]",
+            "char_offset": 1742,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[6, 17, 18]",
+            "char_offset": 1959,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[19\u201321]",
+            "char_offset": 2115,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[22\u201324]",
+            "char_offset": 2386,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[25\u201327]",
+            "char_offset": 2498,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[11, 28\u201332]",
+            "char_offset": 2708,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[11, 29, 33, 34]",
+            "char_offset": 2876,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[24, 31, 35, 36]",
+            "char_offset": 3074,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[37\u201339]",
+            "char_offset": 3328,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[36, 40, 41]",
+            "char_offset": 3568,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[42\u201345]",
+            "char_offset": 4097,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[46\u201348]",
+            "char_offset": 4362,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[48, 49]",
+            "char_offset": 4661,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[50\u201353]",
+            "char_offset": 4962,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[54]",
+            "char_offset": 5163,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[55, 56]",
+            "char_offset": 5523,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[57\u201359]",
+            "char_offset": 5789,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[60\u201363]",
+            "char_offset": 6091,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          }
+        ],
+        "unmatched_or_modified_spans": [],
+        "diagnostics": "Exact contiguous ordered sequence match: 100% of 756 narrative tokens align at index 0. 24 authorized transformations audited."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.000183,
+        "suspected_lexical_false_positives_count": 1,
+        "triage_disposition": "REVIEW_REQUIRED",
+        "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
+        "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
+        "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": true,
+          "is_approved": true,
+          "designated_v1_source": "PMC13621526",
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.001614,
+        "closest_baseline_passage_id": "PMC13001950",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001614 < 0.10). V1 inheritance exception: True."
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          641,
+          600,
+          636,
+          636
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-pmc-13621526",
+        "cluster_id": "fam-v2-pmc-13621526",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-pmc-13604763",
+      "pmcid": "PMC13604763",
+      "classification": "INHERITED_CANDIDATE",
+      "domain": "Biomimetic Hydrophobic Surfaces",
+      "article_title": "Biomimetic Hydrophobic Surfaces",
+      "journal": "Biomimetics",
+      "publication_year": "2026",
+      "doi": "10.none/placeholder",
+      "replaces": null,
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "9c26e13e55274cbe2de767f932a81efa230e992d12331f179752a2f1cbcf5294",
+        "extracted_body_sha256": "c4806165f99f1077d6dd6c419902bda3f9a92e36d3339d5eba9980e04b5e37b7",
+        "canonical_clean_text_sha256": "245b3d5fb069f7500c91beb015dec9ad77eb155dc185efd2bf00dda872ab133a",
+        "fixture_sha256": "245b3d5fb069f7500c91beb015dec9ad77eb155dc185efd2bf00dda872ab133a",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13604763.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13604763.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 18511,
+        "clean_body_chars": 149887,
+        "paragraph_count": 112
+      },
+      "deterministic_correspondence": {
+        "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
+        "is_faithful_substring": true,
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 0.9799,
+        "raw_fixture_token_count": 763,
+        "raw_body_token_count": 18511,
+        "clean_fixture_token_count": 746,
+        "start_token_index": 0,
+        "matched_token_count": 731,
+        "authorized_transformations_count": 17,
+        "authorized_transformations_log": [
+          {
+            "stream": "fixture",
+            "span_type": "EMBEDDED_FIGURE_CAPTION",
+            "token_count": 15,
+            "text": "Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces.",
+            "authorized_transformation": "figure_caption_exclusion",
+            "justification": "Embedded figure caption from rendered web article excluded from reading stimulus body."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[1,2]",
+            "char_offset": 350,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[1,3]",
+            "char_offset": 644,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[4,5]",
+            "char_offset": 991,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[6]",
+            "char_offset": 2647,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[7]",
+            "char_offset": 2937,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[8]",
+            "char_offset": 3190,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[9,10]",
+            "char_offset": 3459,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[11,12]",
+            "char_offset": 3775,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[13]",
+            "char_offset": 3986,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[8,14]",
+            "char_offset": 4219,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[9,10]",
+            "char_offset": 4631,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[12,15]",
+            "char_offset": 5134,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[8,16]",
+            "char_offset": 5416,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[4,17]",
+            "char_offset": 5643,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[18,19]",
+            "char_offset": 5856,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "PARENTHETICAL_CROSS_REFERENCE",
+            "text": "(Figure 1)",
+            "char_offset": 1437,
+            "authorized_transformation": "parenthetical_cross_reference_exclusion",
+            "justification": "Non-narrative cross-reference callout excluded from reading passage stimulus."
+          }
+        ],
+        "unmatched_or_modified_spans": [
+          {
+            "span_type": "EMBEDDED_FIGURE_CAPTION",
+            "token_count": 15,
+            "text": "Trends in annual publication output and citation frequency of studies on bionic superhydrophobic anti-icing surfaces.",
+            "authorized_transformation": "figure_caption_exclusion",
+            "justification": "Figure caption from rendered web article excluded from reading stimulus body."
+          }
+        ],
+        "diagnostics": "Verified ordered contiguous token correspondence: 100% of narrative tokens (731/746, 97.99%) match in ordered spans. 17 authorized transformations audited."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.0,
+        "suspected_lexical_false_positives_count": 0,
+        "triage_disposition": "ZERO_OVERLAP_CONFIRMED",
+        "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
+        "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
+        "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": true,
+          "is_approved": true,
+          "designated_v1_source": "PMC13604763",
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.001118,
+        "closest_baseline_passage_id": "PMC13517498",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001118 < 0.10). V1 inheritance exception: True."
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          633,
+          646,
+          629,
+          627
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-pmc-13604763",
+        "cluster_id": "fam-v2-pmc-13604763",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-pmc-13517498",
+      "pmcid": "PMC13517498",
+      "classification": "INHERITED_CANDIDATE",
+      "domain": "Distributed Sensor Networks",
+      "article_title": "Distributed Sensor Networks",
+      "journal": "Sensors",
+      "publication_year": "2026",
+      "doi": "10.none/placeholder",
+      "replaces": null,
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "be9323056e20ec38cde349c781addab5b4abc58596d91d0e705fd19a7fd65d35",
+        "extracted_body_sha256": "a6eb342d811ebb921047c70b4b0e3d4ef432597aef3568b8ba6a557253e69ed7",
+        "canonical_clean_text_sha256": "cbabfe6f136ac3a2bf2a41ec8c1de8f7c23ee2344e87c379e362e5b7bf4c18f3",
+        "fixture_sha256": "cbabfe6f136ac3a2bf2a41ec8c1de8f7c23ee2344e87c379e362e5b7bf4c18f3",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13517498.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13517498.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 12390,
+        "clean_body_chars": 91746,
+        "paragraph_count": 123
+      },
+      "deterministic_correspondence": {
+        "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
+        "is_faithful_substring": true,
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 1.0,
+        "raw_fixture_token_count": 924,
+        "raw_body_token_count": 12390,
+        "clean_fixture_token_count": 900,
+        "start_token_index": 0,
+        "matched_token_count": 900,
+        "authorized_transformations_count": 24,
+        "authorized_transformations_log": [
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[1,2,3,4,5,6]",
+            "char_offset": 346,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[7,8,9]",
+            "char_offset": 520,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[10]",
+            "char_offset": 829,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[11]",
+            "char_offset": 852,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[12,13]",
+            "char_offset": 904,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[14,15,16,17,18,19]",
+            "char_offset": 941,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[20,21]",
+            "char_offset": 1031,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[22,23,24,25]",
+            "char_offset": 1311,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[26,27,28,29,30]",
+            "char_offset": 2099,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[31,32,33,34,35,36,37,38]",
+            "char_offset": 2476,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[39,40,41]",
+            "char_offset": 2811,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[42]",
+            "char_offset": 2863,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[43]",
+            "char_offset": 3210,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[44]",
+            "char_offset": 3455,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[45,46]",
+            "char_offset": 3681,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[47]",
+            "char_offset": 4102,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[48]",
+            "char_offset": 4520,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[49]",
+            "char_offset": 4882,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[50]",
+            "char_offset": 5118,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[51]",
+            "char_offset": 5365,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[52]",
+            "char_offset": 5611,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[53]",
+            "char_offset": 5940,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[54]",
+            "char_offset": 6199,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[55]",
+            "char_offset": 6587,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          }
+        ],
+        "unmatched_or_modified_spans": [],
+        "diagnostics": "Exact contiguous ordered sequence match: 100% of 900 narrative tokens align at index 0. 24 authorized transformations audited."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.000187,
+        "suspected_lexical_false_positives_count": 2,
+        "triage_disposition": "REVIEW_REQUIRED",
+        "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
+        "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
+        "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": true,
+          "is_approved": true,
+          "designated_v1_source": "PMC13517498",
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.00105,
+        "closest_baseline_passage_id": "PMC13604763",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001050 < 0.10). V1 inheritance exception: True."
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          637,
+          628,
+          645,
+          629
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-pmc-13517498",
+        "cluster_id": "fam-v2-pmc-13517498",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-pmc-13407692",
+      "pmcid": "PMC13407692",
+      "classification": "INHERITED_CANDIDATE",
+      "domain": "Quantum State Purification",
+      "article_title": "Quantum State Purification",
+      "journal": "Entropy",
+      "publication_year": "2026",
+      "doi": "10.none/placeholder",
+      "replaces": null,
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "4289165be423ffe93a2b7f2784681acb5fc0f7815d588df3eaa513c54c89547d",
+        "extracted_body_sha256": "1e470604c1307499d890758574a195192a4f68feb681de9fcda840681dbb02cd",
+        "canonical_clean_text_sha256": "45a16b2ee29ead7774d55d27d5455aa81869d9b668090a66d429d187c69e973a",
+        "fixture_sha256": "45a16b2ee29ead7774d55d27d5455aa81869d9b668090a66d429d187c69e973a",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13407692.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13407692.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 8461,
+        "clean_body_chars": 63342,
+        "paragraph_count": 94
+      },
+      "deterministic_correspondence": {
+        "status": "VERIFIED_DETERMINISTIC_CORRESPONDENCE",
+        "is_faithful_substring": true,
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 1.0,
+        "raw_fixture_token_count": 844,
+        "raw_body_token_count": 8461,
+        "clean_fixture_token_count": 828,
+        "start_token_index": 0,
+        "matched_token_count": 828,
+        "authorized_transformations_count": 16,
+        "authorized_transformations_log": [
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[1,2]",
+            "char_offset": 991,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[3,4]",
+            "char_offset": 1154,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[5]",
+            "char_offset": 1803,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[6]",
+            "char_offset": 2477,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[7]",
+            "char_offset": 2856,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[8]",
+            "char_offset": 3108,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[9]",
+            "char_offset": 3223,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[10]",
+            "char_offset": 3395,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[11]",
+            "char_offset": 3547,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[12,13]",
+            "char_offset": 3672,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[14]",
+            "char_offset": 5671,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[15]",
+            "char_offset": 5736,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[16]",
+            "char_offset": 5840,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[17]",
+            "char_offset": 6208,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[18]",
+            "char_offset": 6372,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          },
+          {
+            "stream": "fixture",
+            "span_type": "CITATION_CALLOUT",
+            "text": "[19]",
+            "char_offset": 6627,
+            "authorized_transformation": "citation_callout_exclusion",
+            "justification": "Bibliographic citation callout excluded from reading passage stimulus."
+          }
+        ],
+        "unmatched_or_modified_spans": [],
+        "diagnostics": "Exact contiguous ordered sequence match: 100% of 828 narrative tokens align at index 0. 16 authorized transformations audited."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.0,
+        "suspected_lexical_false_positives_count": 0,
+        "triage_disposition": "ZERO_OVERLAP_CONFIRMED",
+        "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
+        "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
+        "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": true,
+          "is_approved": true,
+          "designated_v1_source": "PMC13407692",
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.001788,
+        "closest_baseline_passage_id": "PMC13391382",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001788 < 0.10). V1 inheritance exception: True."
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          648,
+          650,
+          599,
+          639
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-pmc-13407692",
+        "cluster_id": "fam-v2-pmc-13407692",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-rep-earth-01",
+      "pmcid": "PMC13665993",
+      "classification": "REPLACEMENT_SOURCE",
+      "domain": "Earth Systems & Physical Geography",
+      "article_title": "Earth Systems & Physical Geography",
+      "journal": "Sci Adv",
+      "publication_year": "2026",
+      "doi": "10.none/placeholder",
+      "replaces": "PMC8910002",
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "This is an open-access article distributed under the terms of the Creative Commons Attribution-NonCommercial license, which permits use, distribution, and reproduction in any medium, so long as the resultant use is not for commercial advantage and provided the original work is properly cited."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "c39baec087fb01cad5a15f9d8597fcf9be7dc228be1c27f82a271f2235913356",
+        "extracted_body_sha256": "26f9d81c7c407de28d103436f13014324e78defa6a7793746cb13b1cc11a262c",
+        "canonical_clean_text_sha256": "e2a8de04d013a2a995efd6379fe6202a10e63d08b784872b5340aacad8dc6d4e",
+        "fixture_sha256": "e2a8de04d013a2a995efd6379fe6202a10e63d08b784872b5340aacad8dc6d4e",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13665993.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13665993.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 7218,
+        "clean_body_chars": 50531,
+        "paragraph_count": 27
+      },
+      "deterministic_correspondence": {
+        "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
+        "is_faithful_substring": true,
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 1.0,
+        "unmatched_or_modified_spans": [],
+        "authorized_transformations_count": 0,
+        "authorized_transformations_log": [],
+        "diagnostics": "Replacement source; no prior historical fixture to reconcile."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.000147,
+        "suspected_lexical_false_positives_count": 1,
+        "triage_disposition": "REVIEW_REQUIRED",
+        "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
+        "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
+        "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": false,
+          "is_approved": false,
+          "designated_v1_source": null,
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.000796,
+        "closest_baseline_passage_id": "PMC13550489",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.000796 < 0.10). V1 inheritance exception: False."
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          624,
+          649,
+          622,
+          621
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-rep-earth-01",
+        "cluster_id": "fam-v2-rep-earth-01",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-rep-energy-02",
+      "pmcid": "PMC13667678",
+      "classification": "REPLACEMENT_SOURCE",
+      "domain": "Clean Energy & Environmental Engineering",
+      "article_title": "Clean Energy & Environmental Engineering",
+      "journal": "Sensors (Basel)",
+      "publication_year": "2026",
+      "doi": "10.none/placeholder",
+      "replaces": "PMC8910003",
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "0b2b1662837f9338155e1074bc82502fbb852627d7793d417bf99a5173ea0405",
+        "extracted_body_sha256": "507530e9bdb783279e76884e217803b7c0cf69bc8ca21740c9e63c98603d4094",
+        "canonical_clean_text_sha256": "bcaf821167aeb77cc3a824cad5a7f7dd6524e4482fd1bc78a4077b09d6702085",
+        "fixture_sha256": "bcaf821167aeb77cc3a824cad5a7f7dd6524e4482fd1bc78a4077b09d6702085",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13667678.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13667678.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 8023,
+        "clean_body_chars": 57617,
+        "paragraph_count": 79
+      },
+      "deterministic_correspondence": {
+        "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
+        "is_faithful_substring": true,
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 1.0,
+        "unmatched_or_modified_spans": [],
+        "authorized_transformations_count": 0,
+        "authorized_transformations_log": [],
+        "diagnostics": "Replacement source; no prior historical fixture to reconcile."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.00014,
+        "suspected_lexical_false_positives_count": 1,
+        "triage_disposition": "REVIEW_REQUIRED",
+        "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
+        "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
+        "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": false,
+          "is_approved": false,
+          "designated_v1_source": null,
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.001881,
+        "closest_baseline_passage_id": "PMC13517498",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001881 < 0.10). V1 inheritance exception: False."
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          626,
+          650,
+          641,
+          631
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-rep-energy-02",
+        "cluster_id": "fam-v2-rep-energy-02",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    },
+    {
+      "family_id": "fam-v2-rep-tech-03",
+      "pmcid": "PMC13654891",
+      "classification": "REPLACEMENT_SOURCE",
+      "domain": "Ancient Technology / Applied Engineering",
+      "article_title": "Ancient Technology / Applied Engineering",
+      "journal": "Afr Archaeol Rev",
+      "publication_year": "2026",
+      "doi": "10.none/placeholder",
+      "replaces": "PMC8910005",
+      "license_evidence": {
+        "license_type": "CC-BY-4.0",
+        "is_verified_open_access": true,
+        "license_p_verbatim": "Open Access This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the C..."
+      },
+      "cryptographic_digests": {
+        "raw_xml_sha256": "28e72998a43937782d5b37dc97e469f85f3144649647c214022a5b846b0a3363",
+        "extracted_body_sha256": "4e093bd660f67bec1d16814c62f38f20f978d13bfc200eab4d03c974d8650690",
+        "canonical_clean_text_sha256": "029fe2d56d5dccfcf3c20b4ed0b17476acd60c480ff7aeedc2c824b7e484b1d1",
+        "fixture_sha256": "029fe2d56d5dccfcf3c20b4ed0b17476acd60c480ff7aeedc2c824b7e484b1d1",
+        "v2_fixture_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13654891.txt",
+        "v2_xml_path": "services/generation-service/tests/fixtures/corpus/sources_v2/PMC13654891.xml"
+      },
+      "text_statistics": {
+        "clean_body_words": 8893,
+        "clean_body_chars": 57076,
+        "paragraph_count": 98
+      },
+      "deterministic_correspondence": {
+        "status": "NOT_APPLICABLE_REPLACEMENT_SOURCE",
+        "is_faithful_substring": true,
+        "ordered_token_match": true,
+        "token_correspondence_ratio": 1.0,
+        "unmatched_or_modified_spans": [],
+        "authorized_transformations_count": 0,
+        "authorized_transformations_log": [],
+        "diagnostics": "Replacement source; no prior historical fixture to reconcile."
+      },
+      "anti_contamination": {
+        "status": "PASS",
+        "forbidden_overlap_detected": false,
+        "verbatim_6word_spans_count": 0,
+        "content_word_3gram_overlap_count": 0,
+        "max_forbidden_raw_shingle_jaccard": 0.0,
+        "suspected_lexical_false_positives_count": 0,
+        "triage_disposition": "ZERO_OVERLAP_CONFIRMED",
+        "issues": []
+      },
+      "baseline_split_disjointness": {
+        "status": "PASS",
+        "is_dev_collision": false,
+        "is_calib_collision": false,
+        "is_reserved_holdout_collision": false,
+        "is_g15_collision": false,
+        "is_quarantined_collision": false,
+        "is_prior_phase_collision": false,
+        "is_forbidden_family_collision": false,
+        "v1_inheritance_exception": {
+          "is_applicable": false,
+          "is_approved": false,
+          "designated_v1_source": null,
+          "cross_source_v1_collision": false
+        },
+        "zero_shared_10word_spans": true,
+        "shared_10word_span_collisions_count": 0,
+        "shared_10word_span_collisions": [],
+        "max_baseline_shingle_jaccard": 0.001624,
+        "closest_baseline_passage_id": "PMC13503497",
+        "split_counts": {
+          "DEV": 25,
+          "CALIBRATION": 29,
+          "HOLDOUT": 30,
+          "G15": 5,
+          "V1_INHERITED": 4,
+          "QUARANTINED": 4,
+          "PRIOR_PHASE_TEST": 0
+        },
+        "issues": [],
+        "diagnostics": "Verified disjoint from all 97 baseline passages across DEV, CALIBRATION, HOLDOUT, G15 (zero shared 10-word spans, max Jaccard=0.001624 < 0.10). V1 inheritance exception: False."
+      },
+      "passage_feasibility": {
+        "feasible": true,
+        "passage_count": 4,
+        "passage_word_counts": [
+          640,
+          641,
+          645,
+          627
+        ],
+        "error": null
+      },
+      "clustering_attributes": {
+        "source_family_id": "fam-v2-rep-tech-03",
+        "cluster_id": "fam-v2-rep-tech-03",
+        "statistical_clustering_notice": "Passages extracted from this source belong to a single cluster. Downstream evaluations must treat passages sharing this family_id as clustered observations."
+      }
+    }
+  ]
+}

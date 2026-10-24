@@ -1,0 +1,1045 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://langfens.example/spec/research/v3",
+  "title": "Langfens Research target schemas (not audited source wire contracts)",
+  "$defs": {
+    "SourceRef": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance_uri": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "source_id",
+        "source_family",
+        "source_version",
+        "source_sha256",
+        "license",
+        "provenance_uri"
+      ],
+      "additionalProperties": false
+    },
+    "GrammarRulePack": {
+      "type": "object",
+      "properties": {
+        "rule_pack_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        },
+        "topic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "applicability": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "examples": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "rule_pack_id",
+        "source",
+        "topic",
+        "level",
+        "rule_ids",
+        "applicability",
+        "exceptions",
+        "examples"
+      ],
+      "additionalProperties": false
+    },
+    "ReadingTask": {
+      "type": "object",
+      "properties": {
+        "task_type": {
+          "const": "READING_SINGLE_PASSAGE"
+        },
+        "requested_groups": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": {
+            "type": "string",
+            "enum": [
+              "TFNG",
+              "SENTENCE_COMPLETION",
+              "MCQ_SINGLE",
+              "SUMMARY_COMPLETION",
+              "YNNG",
+              "SHORT_ANSWER"
+            ]
+          }
+        },
+        "requested_question_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "difficulty": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_type",
+        "requested_groups",
+        "requested_question_count",
+        "difficulty"
+      ],
+      "additionalProperties": false
+    },
+    "FullReadingTask": {
+      "type": "object",
+      "properties": {
+        "task_type": {
+          "const": "READING_FULL_PAPER"
+        },
+        "sections": {
+          "const": 3
+        },
+        "question_count": {
+          "const": 40
+        },
+        "difficulty": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_type",
+        "sections",
+        "question_count",
+        "difficulty"
+      ],
+      "additionalProperties": false
+    },
+    "GrammarTask": {
+      "type": "object",
+      "properties": {
+        "task_type": {
+          "const": "GRAMMAR_EXERCISE"
+        },
+        "grammar_rule_pack_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exercise_type": {
+          "type": "string",
+          "enum": [
+            "MCQ_SINGLE",
+            "GAP_FILL",
+            "ERROR_CORRECTION"
+          ]
+        },
+        "requested_question_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "difficulty": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_type",
+        "grammar_rule_pack_ref",
+        "exercise_type",
+        "requested_question_count",
+        "difficulty"
+      ],
+      "additionalProperties": false
+    },
+    "GenerationRequest": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_item_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "task": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ReadingTask"
+            },
+            {
+              "$ref": "#/$defs/FullReadingTask"
+            },
+            {
+              "$ref": "#/$defs/GrammarTask"
+            }
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        },
+        "model_pin": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy": {
+          "type": "string",
+          "enum": [
+            "STRICT_PRODUCTION_V2",
+            "RESEARCH_STANDARD",
+            "RESEARCH_ABLATION"
+          ]
+        }
+      },
+      "required": [
+        "request_id",
+        "dataset_item_id",
+        "task",
+        "source",
+        "model_pin",
+        "prompt_version",
+        "policy"
+      ],
+      "additionalProperties": false
+    },
+    "Question": {
+      "type": "object",
+      "properties": {
+        "question_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question_type": {
+          "type": "string",
+          "enum": [
+            "TFNG",
+            "SENTENCE_COMPLETION",
+            "MCQ_SINGLE",
+            "SUMMARY_COMPLETION",
+            "YNNG",
+            "SHORT_ANSWER",
+            "GRAMMAR_MCQ",
+            "GRAMMAR_GAP",
+            "GRAMMAR_CORRECTION"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "instructions": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "question_id",
+        "question_type",
+        "text",
+        "options",
+        "instructions"
+      ],
+      "additionalProperties": false
+    },
+    "NeutralOutput": {
+      "type": "object",
+      "properties": {
+        "context_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question_groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "question_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": [
+              "group_id",
+              "question_ids"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Question"
+          }
+        }
+      },
+      "required": [
+        "context_text",
+        "question_groups",
+        "questions"
+      ],
+      "additionalProperties": false
+    },
+    "GenerationResult": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "configuration_id": {
+          "type": "string",
+          "enum": [
+            "A",
+            "B",
+            "C"
+          ]
+        },
+        "task_type": {
+          "type": "string",
+          "enum": [
+            "READING_SINGLE_PASSAGE",
+            "READING_FULL_PAPER",
+            "GRAMMAR_EXERCISE"
+          ]
+        },
+        "execution_status": {
+          "type": "string",
+          "enum": [
+            "COMPLETED",
+            "FAILED_VALIDATION",
+            "FAILED_RUNTIME",
+            "TIMED_OUT",
+            "CANCELLED"
+          ]
+        },
+        "output_availability": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "RAW_ONLY",
+            "PARSEABLE",
+            "NORMALIZED"
+          ]
+        },
+        "generated_content": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NeutralOutput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "private_answer_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trace_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "usage_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "failure_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output_schema_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "run_id",
+        "dataset_item_id",
+        "configuration_id",
+        "task_type",
+        "execution_status",
+        "output_availability",
+        "generated_content",
+        "private_answer_ref",
+        "trace_ref",
+        "usage_ref",
+        "failure_code",
+        "output_schema_version"
+      ],
+      "additionalProperties": false
+    },
+    "SolverView": {
+      "type": "object",
+      "properties": {
+        "context_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "$ref": "#/$defs/Question"
+        },
+        "allowed_reference_text": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "context_text",
+        "question",
+        "allowed_reference_text"
+      ],
+      "additionalProperties": false
+    },
+    "BlindSolverResult": {
+      "type": "object",
+      "properties": {
+        "question_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proposed_solution": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reasoning_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "question_id",
+        "proposed_solution",
+        "reasoning_evidence",
+        "confidence"
+      ],
+      "additionalProperties": false
+    },
+    "AnswerVerificationView": {
+      "type": "object",
+      "properties": {
+        "blind_result": {
+          "$ref": "#/$defs/BlindSolverResult"
+        },
+        "generator_proposed_answer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "acceptable_variants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "blind_result",
+        "generator_proposed_answer",
+        "source_evidence_ref",
+        "acceptable_variants"
+      ],
+      "additionalProperties": false
+    },
+    "GoldReferenceView": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expert_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adjudicator_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "item_id",
+        "expert_label",
+        "adjudicator_id",
+        "label_version"
+      ],
+      "additionalProperties": false
+    },
+    "UsageRecord": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "llm_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "prompt_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "completion_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cost_usd": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "usage_confidence": {
+          "type": "string",
+          "enum": [
+            "EXACT",
+            "ESTIMATED",
+            "UNKNOWN"
+          ]
+        },
+        "pricing_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "failure_usage_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "run_id",
+        "llm_calls",
+        "prompt_tokens",
+        "completion_tokens",
+        "cost_usd",
+        "usage_confidence",
+        "pricing_version",
+        "failure_usage_reason"
+      ],
+      "additionalProperties": false
+    },
+    "AgentTraceEvent": {
+      "type": "object",
+      "properties": {
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent_role": {
+          "type": "string",
+          "enum": [
+            "COORDINATOR",
+            "GENERATOR",
+            "REVIEWER",
+            "VALIDATOR"
+          ]
+        },
+        "capability_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "output_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_status": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "trace_id",
+        "run_id",
+        "agent_role",
+        "capability_name",
+        "input_sha256",
+        "output_sha256",
+        "started_at",
+        "ended_at",
+        "event_status"
+      ],
+      "additionalProperties": false
+    },
+    "EvaluationResult": {
+      "type": "object",
+      "properties": {
+        "evaluation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "output_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rubric_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluator_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluable": {
+          "type": "boolean"
+        },
+        "hard_checks": {
+          "type": "object"
+        },
+        "semantic_scores": {
+          "type": "object"
+        },
+        "task_validity": {
+          "type": "object"
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNCERTAIN",
+            "NOT_RUN"
+          ]
+        },
+        "abstention_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "evaluation_id",
+        "dataset_item_id",
+        "output_sha256",
+        "rubric_version",
+        "evaluator_version",
+        "evaluable",
+        "hard_checks",
+        "semantic_scores",
+        "task_validity",
+        "verdict",
+        "abstention_reason",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "ExperimentAssignment": {
+      "type": "object",
+      "properties": {
+        "assignment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "configuration_id": {
+          "type": "string",
+          "enum": [
+            "A",
+            "B",
+            "C"
+          ]
+        },
+        "attempt_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "assignment_id",
+        "dataset_item_id",
+        "configuration_id",
+        "attempt_number",
+        "run_id",
+        "result_ref"
+      ],
+      "additionalProperties": false
+    },
+    "ExperimentManifest": {
+      "type": "object",
+      "properties": {
+        "experiment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "split": {
+          "const": "FINAL_EVAL"
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "code_commit_sha": {
+          "type": "string",
+          "minLength": 1
+        },
+        "foundation_model_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt_versions": {
+          "type": "object",
+          "properties": {
+            "A": {
+              "type": "string",
+              "minLength": 1
+            },
+            "B": {
+              "type": "string",
+              "minLength": 1
+            },
+            "C": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "A",
+            "B",
+            "C"
+          ],
+          "additionalProperties": false
+        },
+        "rubric_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assignments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ExperimentAssignment"
+          }
+        },
+        "primary_endpoint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "analysis_plan_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "experiment_id",
+        "dataset_version",
+        "split",
+        "source_sha256",
+        "code_commit_sha",
+        "foundation_model_id",
+        "prompt_versions",
+        "rubric_version",
+        "assignments",
+        "primary_endpoint",
+        "analysis_plan_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "PublishedSnapshot": {
+      "type": "object",
+      "properties": {
+        "published_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_draft_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "approved_by_admin_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "research_derived": {
+          "const": false
+        },
+        "student_payload_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "private_answer_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "published_version_id",
+        "source_draft_id",
+        "content_sha256",
+        "approved_by_admin_id",
+        "research_derived",
+        "student_payload_ref",
+        "private_answer_ref"
+      ],
+      "additionalProperties": false
+    },
+    "StudentAttempt": {
+      "type": "object",
+      "properties": {
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "student_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "published_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "response_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "grading_result_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "attempt_id",
+        "student_id",
+        "published_version_id",
+        "submitted_at",
+        "response_ref",
+        "grading_result_ref"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

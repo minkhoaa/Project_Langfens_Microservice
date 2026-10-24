@@ -1,0 +1,202 @@
+{
+  "kind": "verification_report",
+  "phase_id": "RG00",
+  "report_id": "RG00-VERIFICATION-2026-10-14",
+  "freeze_digest": "cc4f458236d32bc001f748669ad8b8d1dc5b89015586805b464b6a555f1a6ac4",
+  "base_source_commit": "0b3ffa375275425a5918380b7aa1b82146d41459",
+  "phase_status": "PASS",
+  "decisive_acceptance_criterion": "Requirement conflicts are resolved explicitly or marked BLOCKED; RQ1 remains separate.",
+  "decisive_acceptance_verdict": "MET",
+  "sprint_checks": {
+    "RG00-S01": {
+      "status": "PASS",
+      "cases": [
+        {
+          "test_id": "POS-RG00-S01",
+          "expected": "All claims map to 2.2.e/3.b/4.e/4.g and distinguish RQ1",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/MASTER_PROPOSAL.md').read(); assert all(x in text for x in ['2.2.e', '3.b', '4.e', '4.g', 'RQ1', 'Passage-grounded Reading', 'Grammar exercises']) and 'Claiming RQ1 completion from RQ2 evidence is strictly forbidden' in text\""
+        },
+        {
+          "test_id": "NEG-RG00-S01",
+          "expected": "Claiming RQ1 pronunciation accuracy from RQ2 evidence is forbidden",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/MASTER_PROPOSAL.md').read(); assert 'Claiming RQ1 completion from RQ2 evidence is strictly forbidden' in text\""
+        },
+        {
+          "test_id": "EDGE-RG00-S01",
+          "expected": "Explicit handling for malformed/missing/duplicate/partial input",
+          "status": "PASS",
+          "command": "python3 -c \"import re; text = open('generation_baseline/MASTER_PROPOSAL.md').read(); secs = set(re.findall(r'-\\s*\\*\\*Section\\s+([^:*]+):\\*\\*', text)); assert {'2.2.e', '2.2.f', '3.b', '4.e', '4.g'}.issubset(secs) and '99.z' not in secs and 'NOT_RUN' in text and 'user-confirmed' in text\""
+        },
+        {
+          "test_id": "REG-RG00-S01",
+          "expected": "Preserve related service, security and V2 behaviors",
+          "status": "PASS",
+          "command": "python3 generation_baseline/tools/verify_baseline.py"
+        }
+      ]
+    },
+    "RG00-S02": {
+      "status": "PASS",
+      "cases": [
+        {
+          "test_id": "POS-RG00-S02",
+          "expected": "Every requirement references an evidence class and owner",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/SOURCE_OF_TRUTH.md').read(); assert 'Approved requirement' in text and 'Verified current source/execution' in text and 'Frozen experiment' in text and 'Independent human gold' in text and 'Reported V2 history' in text and 'Hypothesis' in text\""
+        },
+        {
+          "test_id": "NEG-RG00-S02",
+          "expected": "Historical unverified acceptance cannot be converted to source PASS",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/SOURCE_OF_TRUTH.md').read(); assert 'Unverified historical acceptance cannot be silently converted into current source PASS' in text\""
+        },
+        {
+          "test_id": "EDGE-RG00-S02",
+          "expected": "Unknown or unexecuted tests remain UNKNOWN/NOT_RUN",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/SOURCE_OF_TRUTH.md').read(); assert 'Unknowns stay UNKNOWN' in text\""
+        },
+        {
+          "test_id": "REG-RG00-S02",
+          "expected": "Preserve related service, security and V2 behaviors",
+          "status": "PASS",
+          "command": "python3 generation_baseline/tools/verify_baseline.py"
+        }
+      ]
+    },
+    "RG00-S03": {
+      "status": "PASS",
+      "cases": [
+        {
+          "test_id": "POS-RG00-S03",
+          "expected": "All invariants have unique IDs (INV-01..INV-15) and explicit failure behavior",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/architecture/STATE_AND_AUTHORITY.md').read(); assert all(f'INV-{i:02d}' in text for i in range(1, 16))\""
+        },
+        {
+          "test_id": "NEG-RG00-S03",
+          "expected": "Research policy cannot weaken durability or publish experimental artifacts",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/architecture/STATE_AND_AUTHORITY.md').read(); assert 'No research policy weakens durability' in text and 'No research artifact publication' in text\""
+        },
+        {
+          "test_id": "EDGE-RG00-S03",
+          "expected": "Fail-closed default for missing or conflicting invariant metadata",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/architecture/STATE_AND_AUTHORITY.md').read(); assert 'Fail-closed default' in text\""
+        },
+        {
+          "test_id": "REG-RG00-S03",
+          "expected": "Preserve related service, security and V2 behaviors",
+          "status": "PASS",
+          "command": "python3 generation_baseline/tools/verify_baseline.py"
+        }
+      ]
+    },
+    "RG00-S04": {
+      "status": "PASS",
+      "cases": [
+        {
+          "test_id": "POS-RG00-S04",
+          "expected": "All 14 phase prerequisites exist, all decisions RG00-D01..D07 registered, and DAG is acyclic",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/CHANGE_CONTROL.md').read(); assert all(f'RG{i:02d}' in text for i in range(14)) and all(f'RG00-D0{i}' in text for i in range(1, 8))\""
+        },
+        {
+          "test_id": "NEG-RG00-S04",
+          "expected": "Cyclical dependencies or unconfirmed invented API contracts are rejected",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/CHANGE_CONTROL.md').read(); assert 'cannot be invented as confirmed contract' in text\""
+        },
+        {
+          "test_id": "EDGE-RG00-S04",
+          "expected": "Unresolved assumptions explicitly marked NOT_RUN and factual limitations disclosed",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/CHANGE_CONTROL.md').read(); assert 'NOT_RUN' in text and 'cannot be invented as confirmed contract' in text\""
+        },
+        {
+          "test_id": "REG-RG00-S04",
+          "expected": "Preserve related service, security and V2 behaviors",
+          "status": "PASS",
+          "command": "python3 generation_baseline/tools/verify_baseline.py"
+        }
+      ]
+    },
+    "RG00-S05": {
+      "status": "PASS",
+      "cases": [
+        {
+          "test_id": "POS-RG00-S05",
+          "expected": "No must-have RQ2 requirement lacks a gate and evidence type",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/REQUIREMENTS_TRACEABILITY.md').read(); assert all(f'RQ2-{i:02d}' in text for i in range(1, 12)) and all(x in text for x in ['PROD-01', 'PROD-02', 'SEC-01', 'SEC-02', 'DUR-01', 'OPS-01', 'RQ1-01']) and 'Section 3.b' in text and 'Passage-grounded Reading' in text and 'Grammar exercises' in text and 'requirement conflicts are zero (0)' in text\""
+        },
+        {
+          "test_id": "NEG-RG00-S05",
+          "expected": "Requirement conflicts or missing ownership block freeze",
+          "status": "PASS",
+          "command": "python3 -c \"text = open('generation_baseline/REQUIREMENTS_TRACEABILITY.md').read(); assert 'missing ownership is zero' in text and 'requirement conflicts are zero (0)' in text\""
+        },
+        {
+          "test_id": "EDGE-RG00-S05",
+          "expected": "Explicit handling for malformed/missing/duplicate/partial input",
+          "status": "PASS",
+          "command": "python3 -c \"import re; lines = open('generation_baseline/REQUIREMENTS_TRACEABILITY.md').readlines(); rows = [m.groups() for line in lines for m in [re.match(r'\\|\\s*([^|]+)\\|\\s*\\x60([^\\x60]+)\\x60\\s*\\|\\s*([^|]+)\\|\\s*([^|]+)\\|\\s*([^|]+)\\|\\s*([^|]+)\\|\\s*([^|]+)\\|', line)] if m and m.group(2).startswith(('RQ2-', 'PROD-', 'SEC-', 'DUR-', 'OPS-', 'RQ1-'))]; req_ids = [r[1].strip() for r in rows]; assert len(rows) == 18 and len(req_ids) == len(set(req_ids)) and all(r[3].strip() != 'UNKNOWN' and r[4].strip() != 'UNKNOWN' for r in rows) and {r[1].strip() for r in rows if '3.b' in r[0]} == {'RQ2-02', 'RQ2-03'}\""
+        },
+        {
+          "test_id": "REG-RG00-S05",
+          "expected": "Preserve related service, security and V2 behaviors",
+          "status": "PASS",
+          "command": "python3 generation_baseline/tools/verify_baseline.py"
+        }
+      ]
+    }
+  },
+  "phase_integration_tests": [
+    {
+      "test_id": "PHASE-RG00-01",
+      "description": "Thesis alignment and unchanged title verification",
+      "command": "python3 -c \"p = open('generation_baseline/MASTER_PROPOSAL.md').read(); assert 'Phát triển hệ thống học tiếng Anh' in p and 'Developing an English Learning System' in p\"",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "test_id": "PHASE-RG00-02",
+      "description": "Decisive acceptance criterion: conflicts resolved explicitly or marked BLOCKED; RQ1 separate",
+      "command": "python3 -c \"t = open('generation_baseline/REQUIREMENTS_TRACEABILITY.md').read(); assert 'requirement conflicts are zero (0)' in t and 'Section 3.b' in t; m = open('generation_baseline/MASTER_PROPOSAL.md').read(); assert 'Claiming RQ1 completion from RQ2 evidence is strictly forbidden' in m\"",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "test_id": "PHASE-RG00-03",
+      "description": "14-phase DAG acyclicity verification via topological cycle detection",
+      "command": "python3 -c \"import re; from generation_baseline.tools.verify_rg00_sprints import topo_sort, BASE; c = (BASE/'CHANGE_CONTROL.md').read_text(); deps = {m.group(1): ([] if m.group(3).strip().lower()=='none' else [p.strip() for p in m.group(3).split(',') if p.strip()]) for line in c.splitlines() for m in [re.match(r'\\|\\s*\\*\\*?(RG\\d\\d)\\*\\*?\\s*\\|\\s*([^|]+)\\|\\s*([^|]+)\\|\\s*([^|]+)\\|', line)] if m}; order = topo_sort(deps); assert len(order) == 14\"",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "test_id": "PHASE-RG00-04",
+      "description": "Strict Reading V2 and durable state invariants verification",
+      "command": "python3 -c \"s = open('generation_baseline/architecture/STATE_AND_AUTHORITY.md').read(); assert all(f'INV-{i:02d}' in s for i in range(1, 16)) and 'No research policy weakens durability' in s\"",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "test_id": "PHASE-RG00-05",
+      "description": "Baseline package integrity and link verification",
+      "command": "python3 generation_baseline/tools/verify_baseline.py",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "test_id": "PHASE-RG00-06",
+      "description": "Integrated sprint test suite verification across all 5 sprints",
+      "command": "python3 generation_baseline/tools/verify_rg00_sprints.py",
+      "exit_code": 0,
+      "status": "PASS"
+    }
+  ],
+  "unresolved_blockers": []
+}

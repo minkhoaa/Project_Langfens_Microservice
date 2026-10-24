@@ -71,6 +71,8 @@ services:
     env_file:
       - path: ./envs/exam.env
         required: false
+      - path: ./envs/loop-caps.env
+        required: false
     expose:
       - "8081"
     ports:

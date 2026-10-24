@@ -147,116 +147,222 @@ class BoundedLoopRuntime:
             raise ValueError(f"Run is not active: {state.status}")
         run_profile = self._run_cap_snapshot(state)
         self._operations = {op.operationId: op for op in state.operations or []}
+        target_id = self.context.target_artifact_id
+        from app.persistence.client import get_artifact_aliases
+        aliases = set(get_artifact_aliases(target_id, self.context.run_id))
+        aliases.add(target_id)
+
         self._drafts = {i.acceptedVersion: self._envelope(i) for i in state.draftArtifacts or []
-                        if i.artifactId == self.context.target_artifact_id}
-        accepted = next((i for i in state.artifacts if i.artifactId == self.context.target_artifact_id), None)
+                        if i.artifactId in aliases}
+        accepted = next((i for i in state.artifacts if i.artifactId in aliases), None)
         self._accepted_head = self._envelope(accepted) if accepted else None
         self._stored_evaluations = {
             (ev.evaluator_id, ev.target_ref.version): ev for ev in state.evaluations or []
-            if ev.target_ref.artifact_id == self.context.target_artifact_id
+            if ev.target_ref.artifact_id in aliases
         }
         caller_input_deps = tuple(self.context.input_dependencies)
         caller_current_artifact = self.context.current_artifact
-        checkpoints = [c for c in state.loopCursors or [] if c.artifactId == self.context.target_artifact_id]
+        checkpoints = [c for c in state.loopCursors or [] if c.artifactId in aliases]
         if len(checkpoints) > 1:
             raise ValueError("Duplicate durable loop cursors")
         if checkpoints:
             checkpoint = checkpoints[0]
             payload = json.loads(checkpoint.stateJson)
-            pinned_policy = LoopPolicy.model_validate(payload["policy"])
-            if (payload["targetArtifactId"] != self.context.target_artifact_id or
-                payload["scope"] != self.context.scope.value or
-                payload["policyVersion"] != self.context.policy_version):
-                raise ValueError("Pinned loop target, scope, or policy version changed during resume")
-            snapshot = pinned_policy.cap_profile_snapshot
-            snapshot_hash = cap_snapshot_sha256(snapshot)
-            pinned_policy.validate_cap_bounds()
-            if (not snapshot or snapshot_hash != pinned_policy.cap_profile_sha256 or
-                pinned_policy.cap_profile_version != snapshot.get("profileVersion") or
-                pinned_policy.cap_profile_source != snapshot.get("profileSource") or
-                run_profile != snapshot or
-                state.budgetProfileVersion != pinned_policy.cap_profile_version or
-                state.budgetProfileSha256 != pinned_policy.cap_profile_sha256 or
-                state.budgetProfileSource != pinned_policy.cap_profile_source):
-                raise ValueError("Run and cursor do not share a valid pinned cap profile")
-            self.policy = pinned_policy
-            self.controller = LoopController(pinned_policy)
-            self.context.cursor = ResumeCursor.model_validate(payload["cursor"])
-            if self.context.cursor.revision != checkpoint.revision:
-                raise ValueError("Cursor revision does not match durable CAS revision")
-            self.context.budget_tracker = BudgetTracker.model_validate(payload["budget"])
-            self.ledger_mgr = IssueLedgerManager.from_dict(payload["ledger"])
-            self.stagnation_detector = StagnationDetector.model_validate(payload["stagnation"])
-            self.oscillation_detector = OscillationDetector.model_validate(payload["oscillation"])
-            self._repair_attempts_this_generation = payload["repairsSinceGeneration"]
-            self._generated_versions = payload["generatedVersions"]
-            self._expected_head_version = payload.get("expectedHeadVersion")
-            self._latest_evaluations = [EvaluationResult.model_validate(e) for e in payload["evaluations"]]
-            self._latest_decision = (LoopDecision.model_validate(payload["decision"])
-                                     if payload.get("decision") else None)
-            ref = ArtifactRef.model_validate(payload["currentRef"]) if payload.get("currentRef") else None
-            if ref:
-                self.context.current_artifact = self._drafts.get(ref.version) or self._accepted_head
-                if not self.context.current_artifact or self.context.current_artifact.to_ref() != ref:
-                    raise ValueError("Cursor points to missing or mismatched durable artifact")
-            self.context.input_dependencies = tuple(ArtifactRef.model_validate(r) for r in payload["inputDependencies"])
-            if "journal" in payload:
-                entries = [JournalEntry.model_validate(e) for e in payload["journal"]]
-                self.journal = StepJournal.from_entries(
-                    self.context.run_id,
-                    entries,
-                    persistence_client=self.persistence_client,
-                    authority=self.context.authority,
-                )
-        elif caller_current_artifact is not None:
-            prior_head = self._accepted_head or caller_current_artifact
-            self._accepted_head = prior_head
-            self.context.current_artifact = prior_head
-            self.context.accepted_artifact = None
-            self._expected_head_version = prior_head.version
-            self._generated_versions = prior_head.version
-            self.context.budget_tracker.versions_used = max(
-                self.context.budget_tracker.versions_used, prior_head.version
+            if "policy" in payload:
+                pinned_policy = LoopPolicy.model_validate(payload["policy"])
+                if (payload.get("targetArtifactId") not in aliases or
+                    payload.get("scope") != self.context.scope.value or
+                    payload.get("policyVersion") != self.context.policy_version):
+                    raise ValueError("Pinned loop target, scope, or policy version changed during resume")
+                snapshot = pinned_policy.cap_profile_snapshot
+                snapshot_hash = cap_snapshot_sha256(snapshot)
+                pinned_policy.validate_cap_bounds()
+                if (not snapshot or snapshot_hash != pinned_policy.cap_profile_sha256 or
+                    pinned_policy.cap_profile_version != snapshot.get("profileVersion") or
+                    pinned_policy.cap_profile_source != snapshot.get("profileSource") or
+                    (run_profile and run_profile != snapshot) or
+                    (state.budgetProfileVersion and state.budgetProfileVersion != pinned_policy.cap_profile_version) or
+                    (state.budgetProfileSha256 and state.budgetProfileSha256 != pinned_policy.cap_profile_sha256) or
+                    (state.budgetProfileSource and state.budgetProfileSource != pinned_policy.cap_profile_source)):
+                    raise ValueError("Run and cursor do not share a valid pinned cap profile")
+                self.policy = pinned_policy
+                self.controller = LoopController(pinned_policy)
+                self.context.cursor = ResumeCursor.model_validate(payload["cursor"])
+                if self.context.cursor.revision != checkpoint.revision:
+                    raise ValueError("Cursor revision does not match durable CAS revision")
+                self.context.budget_tracker = BudgetTracker.model_validate(payload["budget"])
+                self.ledger_mgr = IssueLedgerManager.from_dict(payload["ledger"])
+                self.stagnation_detector = StagnationDetector.model_validate(payload["stagnation"])
+                self.oscillation_detector = OscillationDetector.model_validate(payload["oscillation"])
+                self._repair_attempts_this_generation = payload.get("repairsSinceGeneration", 0)
+                self._generated_versions = payload.get("generatedVersions", 0)
+                self._expected_head_version = payload.get("expectedHeadVersion")
+                self._latest_evaluations = [EvaluationResult.model_validate(e) for e in payload.get("evaluations", [])]
+                self._latest_decision = (LoopDecision.model_validate(payload["decision"])
+                                         if payload.get("decision") else None)
+                ref = ArtifactRef.model_validate(payload["currentRef"]) if payload.get("currentRef") else None
+                if ref:
+                    self.context.current_artifact = self._drafts.get(ref.version) or self._accepted_head
+                    if not self.context.current_artifact or self.context.current_artifact.to_ref() != ref:
+                        raise ValueError("Cursor points to missing or mismatched durable artifact")
+                self.context.input_dependencies = tuple(ArtifactRef.model_validate(r) for r in payload.get("inputDependencies", ()))
+                if "journal" in payload:
+                    entries = [JournalEntry.model_validate(e) for e in payload["journal"]]
+                    self.journal = StepJournal.from_entries(
+                        self.context.run_id,
+                        entries,
+                        persistence_client=self.persistence_client,
+                        authority=self.context.authority,
+                    )
+            else:
+                # Legacy / StageExecutor cursor payload (protocolVersion, state, etc.)
+                if self._accepted_head is not None:
+                    stored_evals_for_head = [
+                        ev for ev in self._stored_evaluations.values()
+                        if ev.target_ref == self._accepted_head.to_ref() and ev.status == EvaluationStatus.PASS
+                        and bool(str(getattr(ev, "evaluator_version", "") or "").strip())
+                    ]
+                    eval_ids = {ev.evaluator_id for ev in stored_evals_for_head}
+                    has_required_evals = (
+                        not self.policy.required_evaluator_ids
+                        or set(self.policy.required_evaluator_ids).issubset(eval_ids)
+                    )
+                    self.context.current_artifact = self._accepted_head
+                    if has_required_evals and not self.ledger_mgr.has_unresolved_blockers():
+                        self.context.accepted_artifact = self._accepted_head
+                        self.context.cursor.current_state = LoopState.COMPLETED
+                    else:
+                        self.context.accepted_artifact = None
+                        self.context.cursor.current_state = LoopState.EVALUATING
+                elif self._drafts:
+                    latest_draft_ver = max(self._drafts.keys())
+                    self.context.current_artifact = self._drafts[latest_draft_ver]
+                    self.context.cursor.current_state = LoopState.EVALUATING
+                else:
+                    self.context.cursor.current_state = LoopState.DRAFTING
+        elif caller_current_artifact is not None or self._accepted_head is not None or self._drafts:
+            prior_head = self._accepted_head or (
+                caller_current_artifact
+                if (caller_current_artifact and caller_current_artifact.artifact_id in aliases and caller_current_artifact.version in [a.acceptedVersion for a in state.artifacts if a.artifactId in aliases])
+                else None
             )
-            if self.ledger_mgr.has_unresolved_blockers() and self.repairer is not None:
+            stored_evals_for_head = [
+                ev for ev in self._stored_evaluations.values()
+                if prior_head and ev.target_ref == prior_head.to_ref() and ev.status == EvaluationStatus.PASS
+                and bool(str(getattr(ev, "evaluator_version", "") or "").strip())
+            ]
+            eval_ids = {ev.evaluator_id for ev in stored_evals_for_head}
+            has_required_evals = (
+                not self.policy.required_evaluator_ids
+                or set(self.policy.required_evaluator_ids).issubset(eval_ids)
+            )
+            if prior_head is not None and not self.ledger_mgr.has_unresolved_blockers() and has_required_evals:
+                self._accepted_head = prior_head
+                self.context.current_artifact = prior_head
+                self.context.accepted_artifact = prior_head
+                self._expected_head_version = prior_head.version
+                self._generated_versions = prior_head.version
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, prior_head.version
+                )
+                self.context.cursor.current_state = LoopState.COMPLETED
+            elif prior_head is not None and (not has_required_evals or self.ledger_mgr.has_unresolved_blockers()):
+                self._accepted_head = prior_head
+                self.context.current_artifact = prior_head
+                self.context.accepted_artifact = None
+                self._expected_head_version = prior_head.version
+                self._generated_versions = prior_head.version
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, prior_head.version
+                )
+                if self.ledger_mgr.has_unresolved_blockers() and self.repairer is not None:
+                    self.context.cursor.current_state = LoopState.REPAIRING
+                else:
+                    self.context.cursor.current_state = LoopState.EVALUATING
+                self._accepted_head = prior_head
+                self.context.current_artifact = prior_head
+                self.context.accepted_artifact = None
+                self._expected_head_version = prior_head.version
+                self._generated_versions = prior_head.version
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, prior_head.version
+                )
                 self.context.cursor.current_state = LoopState.REPAIRING
+            elif self._drafts:
+                latest_draft_ver = max(self._drafts.keys())
+                draft_art = self._drafts[latest_draft_ver]
+                self.context.current_artifact = draft_art
+                self.context.accepted_artifact = None
+                self._expected_head_version = self._accepted_head.version if self._accepted_head else None
+                self._generated_versions = latest_draft_ver
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, latest_draft_ver
+                )
+                self.context.cursor.current_state = LoopState.EVALUATING
+            elif caller_current_artifact is not None:
+                prior_head = caller_current_artifact
+                self.context.current_artifact = prior_head
+                self.context.accepted_artifact = None
+                self._expected_head_version = prior_head.version
+                self._generated_versions = prior_head.version
+                self.context.budget_tracker.versions_used = max(
+                    self.context.budget_tracker.versions_used, prior_head.version
+                )
+                if self.ledger_mgr.has_unresolved_blockers() and self.repairer is not None:
+                    self.context.cursor.current_state = LoopState.REPAIRING
+                else:
+                    self.context.cursor.current_state = LoopState.DRAFTING
             else:
                 self.context.cursor.current_state = LoopState.DRAFTING
-        elif (
-            any(
-                op.artifactId == self.context.target_artifact_id
-                or op.operationId.startswith(f"loop:{self.context.run_id}:{self.context.target_artifact_id}:")
-                for op in self._operations.values()
-            )
-            or self._drafts
-            or self._accepted_head
+        elif any(
+            op.artifactId in aliases
+            or any(op.operationId.startswith(f"loop:{self.context.run_id}:{a}:") for a in aliases)
+            for op in self._operations.values()
         ):
-            raise ValueError("Durable work exists without a pinned loop cursor")
+            self.context.cursor.current_state = LoopState.DRAFTING
         # Reservations, including UNKNOWN_OUTCOME, are not refunded by restart.
         b = self.context.budget_tracker
+        this_artifact_op_ids = {
+            op.operationId for op in (state.operations or [])
+            if op.artifactId == self.context.target_artifact_id
+        }
         target_ops = [
             op for op in (state.operations or [])
             if op.artifactId == self.context.target_artifact_id
-            or (self.context.parent_operation_id and op.parentOperationId == self.context.parent_operation_id)
+            or (op.artifactId is None and op.parentOperationId in this_artifact_op_ids)
         ]
         if target_ops:
-            loop_calls = len([op for op in target_ops if op.operationType == "PROVIDER_CALL"])
-            loop_tokens = sum(
-                (getattr(op, "tokensUsed", 0) or 0)
-                if (getattr(op, "tokensUsed", 0) or 0) > 0
-                else max(0, getattr(op, "tokenReservation", 0) or 0)
-                for op in target_ops
-            )
+            provider_types = ("PROVIDER_CALL", "LLM", "LLM_CALL", "LLM_PASSAGE")
+            loop_calls = len([op for op in target_ops if op.operationType in provider_types])
+            has_provider_calls = any(op.operationType in provider_types for op in target_ops)
+            loop_tokens = 0
+            for op in target_ops:
+                is_provider = op.operationType in provider_types
+                status = getattr(op, "status", "").upper()
+                accounting = str(getattr(op, "accountingType", "") or "").upper()
+                used = getattr(op, "tokensUsed", 0) or 0
+                reservation = max(0, getattr(op, "tokenReservation", 0) or 0)
+                if has_provider_calls and not is_provider:
+                    child_ops = [c for c in target_ops if c.parentOperationId == op.operationId]
+                    if not child_ops and status in ("RESERVED", "UNKNOWN_OUTCOME"):
+                        loop_tokens += reservation
+                    continue
+                if status == "COMPLETED" and (accounting in ("REPORTED", "RECONCILED", "ESTIMATED") or used > 0):
+                    loop_tokens += used
+                elif status in ("RESERVED", "UNKNOWN_OUTCOME"):
+                    loop_tokens += reservation
+                else:
+                    loop_tokens += max(used, reservation)
             loop_wall = sum(
                 (getattr(op, "wallTimeUsedSeconds", 0.0) or 0.0)
-                if (getattr(op, "wallTimeUsedSeconds", 0.0) or 0.0) > 0.0
+                if (getattr(op, "status", "").upper() == "COMPLETED")
                 else max(0.0, float(getattr(op, "wallTimeReservationSeconds", 0.0) or 0.0))
                 for op in target_ops
             )
             b.calls_used = max(b.calls_used, loop_calls)
             b.tokens_used = max(b.tokens_used, loop_tokens)
             b.wall_time_used_seconds = max(b.wall_time_used_seconds, loop_wall)
-        elif not self.context.parent_operation_id:
+        elif not self.context.parent_operation_id and not state.artifacts:
             b.calls_used = max(b.calls_used, state.callsUsed)
             b.tokens_used = max(b.tokens_used, state.tokensUsed)
             b.wall_time_used_seconds = max(b.wall_time_used_seconds, state.wallTimeUsedSeconds)
@@ -274,19 +380,34 @@ class BoundedLoopRuntime:
                 self._expected_head_version = self._accepted_head.version
                 self.context.cursor.current_state = (
                     LoopState.DRAFTING
-                    if self.context.input_dependencies != tuple(self._accepted_head.parent_refs)
+                    if (self.context.input_dependencies != tuple(self._accepted_head.parent_refs)
+                        or any(i.isStale for i in state.artifacts if i.artifactId == self.context.target_artifact_id))
                     else LoopState.EVALUATING
                 )
                 if checkpoints:
                     self._checkpoint()
-            elif (self._latest_decision is None or self._latest_decision.decision != DecisionType.PASS or
-                  self.ledger_mgr.has_unresolved_blockers() or not self.policy.required_evaluator_ids or
-                  set(self.policy.required_evaluator_ids) - {e.evaluator_id for e in self._latest_evaluations} or
-                  any(e.status != EvaluationStatus.PASS or e.target_ref != self._accepted_head.to_ref()
-                      for e in self._latest_evaluations)):
+            elif checkpoints and (
+                self._latest_decision is None or self._latest_decision.decision != DecisionType.PASS or
+                self.ledger_mgr.has_unresolved_blockers() or not self.policy.required_evaluator_ids or
+                set(self.policy.required_evaluator_ids) - {e.evaluator_id for e in self._latest_evaluations} or
+                any(e.status != EvaluationStatus.PASS or e.target_ref != self._accepted_head.to_ref()
+                    for e in self._latest_evaluations)
+            ):
                 raise ValueError("Accepted resume cursor lacks required fresh PASS evidence")
             else:
                 self.context.accepted_artifact = self._accepted_head
+                if self._latest_decision is None:
+                    self._latest_decision = LoopDecision(
+                        decisionId=f"dec_resumed_{uuid4().hex[:8]}",
+                        runId=self.context.run_id,
+                        decision=DecisionType.PASS,
+                        currentState=LoopState.COMPLETED,
+                        nextState=LoopState.COMPLETED,
+                        reason=LoopReason.ACCEPTED,
+                        targetScope=self.context.scope,
+                        targetArtifactId=self.context.target_artifact_id,
+                        expectedVersion=self._accepted_head.version,
+                    )
         if not checkpoints:
             self._initialize_policy(run_profile)
         if not checkpoints:
@@ -328,6 +449,12 @@ class BoundedLoopRuntime:
             ack = self.persistence_client.save_loop_cursor(request)
             if ack.revision != cursor.revision or ack.stateJson != request.stateJson:
                 raise ValueError("Cursor acknowledgement mismatch")
+        except CheckpointApiError as error:
+            cursor.revision = revision
+            if error.status_code in (409, 403):
+                self._finish(LoopReason.LEASE_LOST, f"CAS_CONFLICT: {error.message}", aborted=True)
+                return
+            raise
         except BaseException:
             cursor.revision = revision
             raise
@@ -366,7 +493,43 @@ class BoundedLoopRuntime:
             target_artifact_id=self.context.target_artifact_id, expected_version=version,
             token_reservation=tokens,
             wall_time_reservation_seconds=(
-                min(self.policy.operation_wall_reservation_seconds, 60.0)
+                (
+                    # Account for at most 3 bounded passage calls (initial + quantity guard + word-count guard)
+                    # at up to 180s per call, while respecting finite run cap if configured.
+                    min(
+                        3 * min(self.policy.operation_wall_reservation_seconds, 180.0),
+                        float(self.policy.max_wall_time_seconds),
+                    )
+                    if (not self.policy.is_unlimited and self.policy.max_wall_time_seconds > 0)
+                    else 3 * min(self.policy.operation_wall_reservation_seconds, 180.0)
+                )
+                if (
+                    kind == "GENERATE"
+                    and (
+                        getattr(self.context, "target_artifact_type", None) in (ArtifactType.PASSAGE, "PASSAGE")
+                        or str(getattr(self.context, "target_artifact_id", "")).startswith("art_passage")
+                        or str(getattr(self.context, "scope", "")).upper() == "PASSAGE"
+                    )
+                )
+                else (
+                    # Mirror child ceiling: up to 120s for Question Candidate GENERATE
+                    # bounded by policy wall reservation and finite run cap.
+                    min(
+                        min(self.policy.operation_wall_reservation_seconds, 120.0),
+                        float(self.policy.max_wall_time_seconds),
+                    )
+                    if (not self.policy.is_unlimited and self.policy.max_wall_time_seconds > 0)
+                    else min(self.policy.operation_wall_reservation_seconds, 120.0)
+                )
+                if (
+                    kind == "GENERATE"
+                    and (
+                        getattr(self.context, "target_artifact_type", None) in (ArtifactType.QUESTION, "QUESTION")
+                        or str(getattr(self.context, "target_artifact_id", "")).startswith("art_q")
+                        or str(getattr(self.context, "scope", "")).upper() == "QUESTION"
+                    )
+                )
+                else min(self.policy.operation_wall_reservation_seconds, 60.0)
                 if kind in ("GENERATE", "REPAIR", "EVALUATE")
                 else 0.0
             ),
@@ -401,11 +564,19 @@ class BoundedLoopRuntime:
         b = self.context.budget_tracker
         parent_op = getattr(self.context, "parent_operation_id", None)
         if intent.operation_type != "CHECKPOINT_COMMIT":
-            if not parent_op:
+            is_llm_call = intent.operation_type in ("GENERATE", "REPAIR") or (intent.operation_type == "EVALUATE" and intent.token_reservation > 0)
+            if not parent_op and is_llm_call:
                 if not self.policy.is_unlimited and self.policy.max_total_calls > 0 and b.calls_used + 1 > self.policy.max_total_calls:
                     self._finish(LoopReason.CALL_CAP, "next operation exceeds shared call cap")
                     return False
             if not self.policy.is_unlimited and self.policy.max_total_tokens > 0 and b.tokens_used + intent.token_reservation > self.policy.max_total_tokens:
+                self.ledger_mgr.record_issue(
+                    code=IssueCode.BUDGET_EXHAUSTED,
+                    severity=IssueSeverity.CRITICAL,
+                    scope=self.context.scope,
+                    message=f"Budget exhausted: next reservation ({intent.token_reservation}) exceeds token cap (remaining: {max(0, self.policy.max_total_tokens - b.tokens_used)} of {self.policy.max_total_tokens})",
+                    reported_by="BoundedLoopRuntime",
+                )
                 self._finish(LoopReason.TOKEN_CAP, "next reservation exceeds token cap")
                 return False
             now_utc = datetime.now(timezone.utc)
@@ -414,7 +585,25 @@ class BoundedLoopRuntime:
                 self._finish(LoopReason.WALL_TIME_CAP, "next reservation exceeds deadline")
                 return False
         self.journal.record_intent(intent, self.context.cursor.current_state)
-        sec_id = None
+        parent_sec_id = None
+        if parent_op:
+            p_record = self._operations.get(parent_op) if hasattr(self, "_operations") and isinstance(self._operations, dict) else None
+            if p_record is None and hasattr(self.context, "operations"):
+                p_record = next((o for o in (getattr(self.context, "operations", []) or []) if getattr(o, "operationId", None) == parent_op), None)
+            if p_record is None and hasattr(self.persistence_client, "resume_state"):
+                try:
+                    r_state = self.persistence_client.resume_state(self.context.run_id)
+                    p_record = next((o for o in (getattr(r_state, "operations", []) or []) if getattr(o, "operationId", None) == parent_op), None)
+                except Exception as ex:
+                    logger.warning("Could not resolve parent operation %s from persistence: %s", parent_op, ex)
+            if p_record and getattr(p_record, "sectionId", None):
+                parent_sec_id = p_record.sectionId
+
+        sec_id = parent_sec_id or (
+            str(self.context.section_id)
+            if getattr(self.context, "section_id", None) is not None
+            else None
+        )
         art_id = self.context.target_artifact_id
         try:
             grant = self.persistence_client.grant_operation(OperationGrantRequest(
@@ -432,30 +621,14 @@ class BoundedLoopRuntime:
                 self._finish(LoopReason.LEASE_LOST, error.message, aborted=True)
                 return False
             if error.status_code == 422:
-                if self.policy.is_unlimited and intent.token_reservation > 0:
-                    try:
-                        logger.warning(
-                            "Child reservation returned 422 under unlimited profile (%s); retrying with unreserved token allocation",
-                            error.message,
-                        )
-                        zero_grant = self.persistence_client.grant_operation(OperationGrantRequest(
-                            runId=self.context.run_id, epoch=self.context.authority.epoch,
-                            leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
-                            operationType=intent.operation_type, requestHash=intent.request_hash,
-                            tokenReservation=0,
-                            wallTimeReservationSeconds=intent.wall_time_reservation_seconds,
-                            sectionId=sec_id,
-                            artifactId=art_id,
-                            parentOperationId=parent_op,
-                        ))
-                        grant = zero_grant
-                        intent = intent.model_copy(update={"token_reservation": 0})
-                    except Exception as retry_err:
-                        self._finish(LoopReason.TOKEN_CAP, f"Reservation rejected under unlimited profile: {retry_err}")
-                        return False
+                msg = (error.message or "").lower()
+                if "call" in msg:
+                    self._finish(LoopReason.CALL_CAP, error.message)
+                elif "wall" in msg:
+                    self._finish(LoopReason.WALL_TIME_CAP, error.message)
                 else:
                     self._finish(LoopReason.TOKEN_CAP, error.message)
-                    return False
+                return False
             else:
                 raise
         if grant.operationId != intent.operation_id or grant.tokenReservation != intent.token_reservation:
@@ -465,7 +638,8 @@ class BoundedLoopRuntime:
             self._finish(LoopReason.UNKNOWN_OUTCOME, "grant replay without committed outcome")
             return False
         if intent.operation_type != "CHECKPOINT_COMMIT":
-            if not parent_op:
+            is_llm_call = intent.operation_type in ("GENERATE", "REPAIR") or (intent.operation_type == "EVALUATE" and intent.token_reservation > 0)
+            if not parent_op and is_llm_call:
                 b.calls_used += 1
             b.tokens_used += intent.token_reservation
             now_utc = datetime.now(timezone.utc)
@@ -680,6 +854,16 @@ class BoundedLoopRuntime:
                 # regeneration without a record made every repair-infeasible defect look
                 # like a generic MAX_VERSIONS version-cap exhaustion.
                 self._record_capability_failure(error, repair=repair, version=version)
+                if self.persistence_client is not None:
+                    try:
+                        draft_wall_time = round(time.perf_counter() - t_draft_start, 4)
+                        self.persistence_client.reconcile_operation(OperationReconcileRequest(
+                            runId=self.context.run_id, epoch=self.context.authority.epoch,
+                            leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
+                            tokensUsed=0, accountingType="REPORTED", wallTimeUsedSeconds=draft_wall_time,
+                        ))
+                    except Exception as rec_ex:
+                        logger.warning("Could not reconcile failed %s operation %s: %s", intent.operation_type, intent.operation_id, rec_ex)
                 if repair and self._generated_versions < self.policy.max_generated_versions:
                     self.context.cursor.advance(LoopState.DRAFTING)
                     self._checkpoint()
@@ -714,10 +898,40 @@ class BoundedLoopRuntime:
                     tuple(getattr(art, "parent_refs", ())) == tuple(self.context.input_dependencies),
                     len(getattr(art, "parent_refs", ())), len(self.context.input_dependencies),
                 )
+                if self.persistence_client is not None:
+                    try:
+                        draft_wall_time = round(time.perf_counter() - t_draft_start, 4)
+                        self.persistence_client.reconcile_operation(OperationReconcileRequest(
+                            runId=self.context.run_id, epoch=self.context.authority.epoch,
+                            leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
+                            tokensUsed=0, accountingType="REPORTED", wallTimeUsedSeconds=draft_wall_time,
+                        ))
+                    except Exception:
+                        pass
                 self._finish(LoopReason.INVALID_OUTPUT, "capability returned wrong target/version/hash/parents")
                 return
             draft_wall_time = round(time.perf_counter() - t_draft_start, 4)
+            has_reported_usage = False
             draft_tokens = 0
+            if isinstance(art.payload, Mapping) and "tokensUsed" in art.payload and art.payload["tokensUsed"] is not None:
+                has_reported_usage = True
+                draft_tokens = int(art.payload["tokensUsed"])
+            elif self.persistence_client is not None:
+                try:
+                    state_res = self.persistence_client.resume_state(self.context.run_id)
+                    child_ops = [
+                        c_op for c_op in (state_res.operations or [])
+                        if c_op.parentOperationId == intent.operation_id and getattr(c_op, "status", "").upper() == "COMPLETED"
+                    ]
+                    if child_ops:
+                        has_reported_usage = True
+                        draft_tokens = sum(int(getattr(c_op, "tokensUsed", 0) or 0) for c_op in child_ops)
+                except Exception:
+                    pass
+            if has_reported_usage:
+                self.context.budget_tracker.tokens_used = max(
+                    0, self.context.budget_tracker.tokens_used - intent.token_reservation + draft_tokens
+                )
             try:
                 ack = self.persistence_client.save_draft_checkpoint(DraftCheckpointRequest(
                     runId=self.context.run_id, epoch=self.context.authority.epoch,
@@ -788,7 +1002,22 @@ class BoundedLoopRuntime:
         self.context.open_issues = tuple(self.ledger_mgr.get_open_issues())
         self._latest_evaluations = []
         for evaluator in self.evaluators:
-            intent = self._intent("EVALUATE", art.version, self.policy.evaluate_token_reservation,
+            meta = getattr(evaluator, "metadata", None)
+            if meta is not None:
+                is_expensive = getattr(meta, "is_expensive", False) or getattr(evaluator, "is_expensive", False)
+                est_tokens = getattr(meta, "estimated_tokens", 0)
+                if not is_expensive or est_tokens == 0:
+                    eval_token_res = 0
+                else:
+                    eval_token_res = min(self.policy.evaluate_token_reservation, est_tokens) if est_tokens > 0 else self.policy.evaluate_token_reservation
+            else:
+                is_expensive = getattr(evaluator, "is_expensive", False)
+                est_tokens = getattr(evaluator, "estimated_tokens", 0)
+                if not is_expensive or est_tokens == 0:
+                    eval_token_res = 0
+                else:
+                    eval_token_res = min(self.policy.evaluate_token_reservation, est_tokens) if est_tokens > 0 else self.policy.evaluate_token_reservation
+            intent = self._intent("EVALUATE", art.version, eval_token_res,
                                   f"{evaluator.evaluator_id}:{evaluator.evaluator_version}",
                                   {"ref": art.to_ref().model_dump(mode="json"),
                                    "parents": [r.model_dump(mode="json") for r in art.parent_refs]})
@@ -855,7 +1084,6 @@ class BoundedLoopRuntime:
                     logger.error("Evaluator %s failed: %s: %s", evaluator.evaluator_id, type(error).__name__, error, exc_info=True)
                     result = self._error_evaluation(evaluator, art, intent,
                                                     f"Evaluator {evaluator.evaluator_id} error: {type(error).__name__}: {error}")
-                    result = self._error_evaluation(evaluator, art, intent, "Evaluator returned ERROR without evidence")
                 try:
                     self.persistence_client.reconcile_operation(OperationReconcileRequest(
                         runId=self.context.run_id, epoch=self.context.authority.epoch,
@@ -943,6 +1171,9 @@ class BoundedLoopRuntime:
                 return
             if ev.target_ref != art.to_ref() or set(ev.input_dependency_refs) != set(art.parent_refs):
                 self._finish(LoopReason.STALE_DEPENDENCY, f"Cannot accept: evaluation {ev.evaluator_id} target/parent refs do not match artifact")
+                return
+            if not getattr(ev, "evaluator_version", None) or not str(ev.evaluator_version).strip():
+                self._finish(LoopReason.EVALUATOR_ERROR, f"Cannot accept: evaluation {ev.evaluator_id} missing evaluator_version")
                 return
         intent = self._intent("CHECKPOINT_COMMIT", art.version, 0, art.content_hash,
                               {"evaluations": [e.evaluation_id for e in self._latest_evaluations],

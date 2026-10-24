@@ -352,6 +352,7 @@ public class AnswerValidator : IAnswerValidator
         return t is QuestionType.MultipleChoiceSingle
             or QuestionType.TrueFalseNotGiven
             or QuestionType.YesNoNotGiven
-            or QuestionType.MultipleChoiceSingleImage;
+            or QuestionType.MultipleChoiceSingleImage
+            or QuestionType.ChoosingTitle;
     }
 }

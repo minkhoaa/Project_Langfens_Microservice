@@ -5,8 +5,9 @@ from __future__ import annotations
 import hashlib
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional
-from pydantic import Field
+from typing import Any, List, Optional, Sequence, Union
+from uuid import uuid4
+from pydantic import Field, model_validator
 
 from .artifact import ArtifactRef
 from .base import CanonicalBaseModel
@@ -51,6 +52,9 @@ class IssueCode(str, Enum):
     BAD_DISTRACTOR = "BAD_DISTRACTOR"
     WORD_LIMIT_EXCEEDED = "WORD_LIMIT_EXCEEDED"
     DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
+    DUPLICATE_ITEMS = "DUPLICATE_CONTENT"
+    DUPLICATE_PROMPT = "DUPLICATE_PROMPT"
+    QUOTE_TRUNCATION = "QUOTE_TRUNCATION"
     EVALUATOR_UNAVAILABLE = "EVALUATOR_UNAVAILABLE"
     STALE_DEPENDENCY = "STALE_DEPENDENCY"
     BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
@@ -67,35 +71,80 @@ class IssueCode(str, Enum):
     EDITORIAL_STYLE_DEFECT = "EDITORIAL_STYLE_DEFECT"
     EDITORIAL_SKILL_DIVERSITY_DEFECT = "EDITORIAL_SKILL_DIVERSITY_DEFECT"
     FRESH_EVALUATION_MISSING = "FRESH_EVALUATION_MISSING"
+    PASSAGE_BLUEPRINT_ALIGNMENT = "PASSAGE_BLUEPRINT_ALIGNMENT"
+    TFNG_BOUNDARY_CONFLICT = "TFNG_BOUNDARY_CONFLICT"
 
 
 def compute_issue_fingerprint(
     code: IssueCode,
     scope: IssueScope,
-    affected_refs: List[ArtifactRef],
+    affected_refs: Sequence[Union[ArtifactRef, dict[str, Any], Any]],
     message: str,
 ) -> str:
     """Computes a deterministic hash fingerprint to prevent duplicate error thrashing."""
-    ref_keys = sorted(f"{r.artifact_type}:{r.artifact_id}:{r.version}" for r in affected_refs)
+    ref_keys = []
+    for r in affected_refs:
+        if isinstance(r, dict):
+            a_type = r.get("artifact_type") or r.get("artifactType") or ""
+            a_id = r.get("artifact_id") or r.get("artifactId") or ""
+            ver = r.get("version", "")
+        else:
+            a_type = getattr(r, "artifact_type", None) or getattr(r, "artifactType", "")
+            a_id = getattr(r, "artifact_id", None) or getattr(r, "artifactId", "")
+            ver = getattr(r, "version", "")
+        a_type_str = getattr(a_type, "value", str(a_type))
+        ref_keys.append(f"{a_type_str}:{a_id}:{ver}")
+    ref_keys.sort()
     normalized_msg = " ".join(message.strip().lower().split())
-    raw = f"{code.value}|{scope.value}|{','.join(ref_keys)}|{normalized_msg}"
+    code_val = getattr(code, "value", str(code))
+    scope_val = getattr(scope, "value", str(scope))
+    raw = f"{code_val}|{scope_val}|{','.join(ref_keys)}|{normalized_msg}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 class Issue(CanonicalBaseModel):
     """Specific error or defect detected by an evaluator or policy validator."""
 
-    issue_id: str = Field(..., alias="issueId")
+    issue_id: str = Field(default_factory=lambda: f"iss_{uuid4().hex[:12]}", alias="issueId")
     code: IssueCode
     severity: IssueSeverity
     scope: IssueScope
     affected_refs: List[ArtifactRef] = Field(default_factory=list, alias="affectedRefs")
-    message: str
+    message: str = ""
     evidence: Optional[str] = None
     proposed_repair: Optional[str] = Field(default=None, alias="proposedRepair")
     status: IssueStatus = IssueStatus.OPEN
-    fingerprint: str
+    fingerprint: str = ""
     evaluator_id: Optional[str] = Field(default=None, alias="evaluatorId")
+    artifact_ref: Optional[str] = Field(default=None, alias="artifactRef")
+    location: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _ensure_fingerprint(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            fp = data.get("fingerprint")
+            if not fp:
+                code = data.get("code")
+                scope = data.get("scope")
+                refs = data.get("affected_refs") or data.get("affectedRefs") or []
+                msg = data.get("message") or ""
+                if code and scope:
+                    data["fingerprint"] = compute_issue_fingerprint(code, scope, refs, msg)
+        elif hasattr(data, "__dict__") or hasattr(data, "code"):
+            fp = getattr(data, "fingerprint", None)
+            if not fp:
+                code = getattr(data, "code", None)
+                scope = getattr(data, "scope", None)
+                refs = getattr(data, "affected_refs", None) or getattr(data, "affectedRefs", None) or []
+                msg = getattr(data, "message", None) or ""
+                if code and scope:
+                    computed_fp = compute_issue_fingerprint(code, scope, refs, msg)
+                    try:
+                        setattr(data, "fingerprint", computed_fp)
+                    except Exception:
+                        pass
+        return data
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         alias="createdAt",
@@ -132,6 +181,9 @@ class Issue(CanonicalBaseModel):
             evaluatorId=evaluator_id,
             createdAt=created_at or datetime.now(timezone.utc),
         )
+
+# Alias for academic defects diagnosed during evaluation and autonomous recovery
+AcademicIssue = Issue
 
 
 class IssueLedger(CanonicalBaseModel):

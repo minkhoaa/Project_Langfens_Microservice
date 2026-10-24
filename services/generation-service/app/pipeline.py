@@ -1,19 +1,17 @@
-"""Legacy Four-phase autonomous pipeline for IELTS Academic Reading paper generation.
+"""Canonical ReadingGenerationPipeline executing fenced, durable multi-stage reading generation.
 
-DEPRECATION NOTICE (Phase 15 Cutover & Legacy Deletion):
-Canonical V2 generation is executed via `app.loop.section.SectionLoop` orchestrated by
-`GenerationFacade.generate_section_v2`. This module is retained as a living adapter
-and backward-compatibility layer for existing tests and legacy consumers.
+Executes Stage 0 (validate run), Stage 1 (sources), Stage 2 (evidence),
+Stage 3 (blueprint), Stage 4-6 (SectionRunner per selected section, sequential or parallel),
+Stage 7 (Paper assembly if all 3 sections present), Stage 8 (CheckpointClient.build_exam if finalize=True).
 """
+
 from __future__ import annotations
 
 import asyncio
 import hashlib
 import json
-import logging
 import re
-from typing import Any, Awaitable, Callable
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from app.extractor import (
     ProgressCallback,
@@ -32,7 +30,390 @@ from app.prompts import (
     build_question_prompt,
 )
 
+import logging
+from collections.abc import Callable, Sequence
+from typing import Any, Optional
+from uuid import UUID
+
+from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
+from app.contracts.evaluation import EvaluationResult
+from app.persistence.client import CheckpointClient
+from app.persistence.models import BuildExamInternalRequest, InvalidateDependencyRequest
+from app.providers.gateway import ProviderGateway
+from app.reading_evaluation import evaluate_blueprint, evaluate_evidence, evaluate_paper, evaluate_source
+from app.reading_generation import (
+    _payload,
+    build_blueprint,
+    build_evidence,
+    compose_paper_payload,
+    prepare_source,
+    reextract_evidence_for_section,
+    trim_passage,
+)
+from app.reading_models import (
+    AcceptedSectionArtifact, PipelineRequest, PipelineResult, RunContext,
+    SourceInput, SourceRef,
+)
+from app.reading_policy import PinnedExecutionPolicy, SectionConfig
+from app.section_runner import SectionRunner
+from app.stage_executor import StageExecutor
+
 logger = logging.getLogger(__name__)
+
+
+class ReadingGenerationPipeline:
+    """Authoritative orchestrator for IELTS Reading paper generation."""
+
+    def __init__(
+        self,
+        client: CheckpointClient,
+        gateway: ProviderGateway,
+        *,
+        executor_factory: Optional[Callable[..., StageExecutor]] = None,
+        runner_factory: Optional[Callable[..., SectionRunner]] = None,
+    ) -> None:
+        self.client = client
+        self.gateway = gateway
+        self.executor_factory = executor_factory
+        self.runner_factory = runner_factory
+
+    def _get_executor(
+        self,
+        context: RunContext,
+        policy: PinnedExecutionPolicy,
+        *,
+        required_evaluator_ids: tuple[str, ...] = (),
+    ) -> StageExecutor:
+        if self.executor_factory:
+            return self.executor_factory(context, policy, required_evaluator_ids=required_evaluator_ids)
+        return StageExecutor(self.client, context, policy, required_evaluator_ids=required_evaluator_ids)
+
+    def _get_runner(self) -> SectionRunner:
+        if self.runner_factory:
+            return self.runner_factory(self.client, self.gateway)
+        return SectionRunner(self.client, self.gateway)
+
+    async def execute(self, request: PipelineRequest) -> PipelineResult:
+        """Executes the full generation pipeline across stages 0 through 8."""
+        logger.info(
+            "Starting ReadingGenerationPipeline run %s (sections=%s, parallel=%s, finalize=%s)",
+            request.run_id,
+            request.section_indices,
+            request.parallel,
+            request.finalize,
+        )
+
+        # ── Stage 0: Validate run authority and pinned policy ────────────────
+        context = RunContext.from_request(request, client=self.client, gateway=self.gateway)
+        executor = self._get_executor(context, request.policy)
+
+        # Map sources by section index
+        sources_by_section: dict[int, SourceInput] = {s.section_index: s for s in request.sources}
+        for sec_idx in request.section_indices:
+            if sec_idx not in sources_by_section:
+                raise ValueError(f"Missing required source input for selected section {sec_idx}")
+
+        # ── Stage 1: Ingest and verify sources ───────────────────────────────
+        source_envelopes: dict[int, ArtifactEnvelope] = {}
+        for sec_idx in sorted(request.section_indices):
+            src_input = sources_by_section[sec_idx]
+            art_id = f"source:{request.run_id}:{sec_idx}"
+
+            async def generate_source(version: int, inp: SourceInput = src_input) -> dict[str, Any]:
+                return await prepare_source(inp, request.run_id, request.policy)
+
+            async def evaluate_source_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
+                return evaluate_source(art, request.policy)
+
+            env = await executor.execute(
+                art_id,
+                ArtifactType.SOURCE_PACK,
+                (),
+                generate_source,
+                evaluate_source_stage,
+                section_id=sec_idx,
+            )
+            source_envelopes[sec_idx] = env
+
+        # ── Stage 2: Ground verified evidence claims ─────────────────────────
+        evidence_envelopes: dict[int, ArtifactEnvelope] = {}
+        for sec_idx in sorted(request.section_indices):
+            art_id = f"evidence:{request.run_id}:{sec_idx}"
+            src_env = source_envelopes[sec_idx]
+
+            async def generate_evidence(
+                version: int,
+                s_env: ArtifactEnvelope = src_env,
+                s_idx: int = sec_idx,
+            ) -> dict[str, Any]:
+                return build_evidence(s_env, request.run_id, s_idx, request.policy)
+
+            async def evaluate_evidence_stage(
+                art: ArtifactEnvelope,
+                s_env: ArtifactEnvelope = src_env,
+            ) -> list[EvaluationResult]:
+                text_map = {
+                    s_env.payload["sources"][0]["sourceId"]: s_env.payload["sources"][0]["document"]["text"]
+                }
+                return evaluate_evidence(art, text_map, request.policy.min_verified_claims)
+
+            env = await executor.execute(
+                art_id,
+                ArtifactType.EVIDENCE_GRAPH,
+                (src_env.to_ref(),),
+                generate_evidence,
+                evaluate_evidence_stage,
+                section_id=sec_idx,
+            )
+            evidence_envelopes[sec_idx] = env
+
+        # ── Stage 2.5: Autonomous Blueprint Recovery Pre-Flight ─────────────
+        async def recover_evidence_for_section(
+            sec_idx: int,
+            target_families: Optional[Sequence[Any]] = None,
+            attempt: int = 1,
+        ) -> ArtifactEnvelope:
+            src_env = source_envelopes[sec_idx]
+            art_id = f"evidence:{request.run_id}:{sec_idx}"
+
+            inval_req = InvalidateDependencyRequest(
+                runId=request.run_id,
+                epoch=context.epoch,
+                leaseOwner=context.lease_owner,
+                targetArtifactId=art_id,
+                reason=f"Blueprint recovery: re-extracting verified claims for Section {sec_idx} (attempt {attempt})",
+            )
+            if hasattr(self.client, "invalidate_dependency_async"):
+                await self.client.invalidate_dependency_async(inval_req)
+            elif hasattr(self.client, "invalidate_dependencies_async"):
+                await self.client.invalidate_dependencies_async(inval_req)
+            elif hasattr(self.client, "invalidate_dependencies"):
+                await asyncio.to_thread(self.client.invalidate_dependencies, inval_req)
+
+            async def generate_recovered_evidence(
+                version: int,
+                s_env: ArtifactEnvelope = src_env,
+                s_idx: int = sec_idx,
+            ) -> dict[str, Any]:
+                return reextract_evidence_for_section(
+                    source_envelope=s_env,
+                    run_id=request.run_id,
+                    section_id=s_idx,
+                    policy=request.policy,
+                    target_families=target_families,
+                    max_claims=16 + attempt * 12,
+                )
+
+            async def evaluate_evidence_stage(
+                art: ArtifactEnvelope,
+                s_env: ArtifactEnvelope = src_env,
+            ) -> list[EvaluationResult]:
+                text_map = {
+                    s_env.payload["sources"][0]["sourceId"]: s_env.payload["sources"][0]["document"]["text"]
+                }
+                return evaluate_evidence(art, text_map, request.policy.min_verified_claims)
+
+            recovered_env = await executor.execute(
+                art_id,
+                ArtifactType.EVIDENCE_GRAPH,
+                (src_env.to_ref(),),
+                generate_recovered_evidence,
+                evaluate_evidence_stage,
+                section_id=sec_idx,
+            )
+            evidence_envelopes[sec_idx] = recovered_env
+            return recovered_env
+
+        if getattr(request.policy, "blueprint_mode", "legacy_preset") == "dynamic":
+            max_recovery = getattr(request.policy, "max_recovery_attempts", 3)
+            seen_digests: set[str] = set()
+            recovery_attempts = 0
+
+            while recovery_attempts <= max_recovery:
+                needs_recovery_sec = None
+                target_pool = ()
+
+                # 1. Check for empty claims in any selected section
+                for s_idx in request.section_indices:
+                    ev_env = evidence_envelopes.get(s_idx)
+                    ev_payload = _payload(ev_env) if ev_env else {}
+                    ev_claims = ev_payload.get("claims", [])
+                    if not ev_claims and s_idx in source_envelopes:
+                        needs_recovery_sec = s_idx
+                        break
+
+                # 2. Check for dynamic blueprint family compatibility & claim binding
+                if needs_recovery_sec is None:
+                    from app.blueprint.generator import generate_dynamic_blueprint, InsufficientEvidenceForAllocationError
+                    ev_summary = {
+                        "run_id": request.run_id,
+                        "topics": [f"{request.topic} - Section {i}" for i in (1, 2, 3)],
+                        "section_indices": list(sorted(request.section_indices)),
+                        "section_evidence": {
+                            s_idx: _payload(evidence_envelopes[s_idx])
+                            for s_idx in request.section_indices
+                            if s_idx in evidence_envelopes
+                        },
+                    }
+                    try:
+                        test_bp = generate_dynamic_blueprint(request.policy, ev_summary)
+                        from app.blueprint.claim_binding import bind_claims_to_slots
+                        for sb in test_bp.sections:
+                            s_idx = sb.section_id
+                            if s_idx in evidence_envelopes:
+                                ev_p = _payload(evidence_envelopes[s_idx])
+                                c_list = ev_p.get("claims", [])
+                                g_id = ev_p.get("graphId", f"graph:{request.run_id}:{s_idx}")
+                                bind_claims_to_slots(sb.question_slots, c_list, s_idx, g_id, request.run_id)
+                        break
+                    except InsufficientEvidenceForAllocationError as exc:
+                        needs_recovery_sec = exc.section_id
+                        target_pool = exc.pool
+                    except ValueError:
+                        for s_idx in request.section_indices:
+                            ev_p = _payload(evidence_envelopes.get(s_idx)) if s_idx in evidence_envelopes else {}
+                            if len(ev_p.get("claims", [])) < 13:
+                                needs_recovery_sec = s_idx
+                                break
+                        if needs_recovery_sec is None and request.section_indices:
+                            needs_recovery_sec = request.section_indices[0]
+
+                if needs_recovery_sec is None:
+                    break
+
+                recovery_attempts += 1
+                if recovery_attempts > max_recovery:
+                    raise ValueError(
+                        f"Section {needs_recovery_sec} verified evidence is insufficient for IELTS question families. "
+                        f"Autonomous blueprint recovery exhausted ({recovery_attempts}/{max_recovery} attempts)."
+                    )
+
+                sec_src = source_envelopes.get(needs_recovery_sec)
+                if not sec_src:
+                    raise ValueError(f"Source for Section {needs_recovery_sec} missing for recovery")
+
+                src_payload = _payload(sec_src)
+                src_text = src_payload.get("sources", [{}])[0].get("document", {}).get("text", "")
+                reextract_digest = hashlib.sha256(f"{needs_recovery_sec}:{len(src_text)}:{recovery_attempts}".encode()).hexdigest()
+                if reextract_digest in seen_digests:
+                    raise ValueError(
+                        f"Section {needs_recovery_sec} controlled evidence re-extraction stagnated with identical source text state. Failing closed."
+                    )
+                seen_digests.add(reextract_digest)
+
+                await recover_evidence_for_section(
+                    needs_recovery_sec,
+                    target_families=target_pool,
+                    attempt=recovery_attempts,
+                )
+
+        # ── Stage 3: Exam Blueprint ──────────────────────────────────────────
+        bp_art_id = f"blueprint:{request.run_id}"
+        bp_indices = request.section_indices
+
+        async def generate_blueprint(version: int) -> dict[str, Any]:
+            return build_blueprint(
+                request.run_id,
+                request.topic,
+                bp_indices,
+                source_envelopes,
+                evidence_envelopes,
+                request.policy,
+            )
+
+        async def evaluate_blueprint_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
+            return evaluate_blueprint(art, request.policy, bp_indices, evidence_map=evidence_envelopes)
+
+        blueprint_envelope = await executor.execute(
+            bp_art_id,
+            ArtifactType.EXAM_BLUEPRINT,
+            (),
+            generate_blueprint,
+            evaluate_blueprint_stage,
+        )
+
+        # ── Stages 4–6: SectionRunner per selected section ───────────────────
+        runner = self._get_runner()
+
+        async def execute_section(sec_idx: int) -> AcceptedSectionArtifact:
+            sec_config = request.policy.section(sec_idx)
+            sec_source_ref = SourceRef(
+                source=source_envelopes[sec_idx],
+                evidence=evidence_envelopes[sec_idx],
+            )
+            return await runner.run(
+                context,
+                sec_config,
+                sec_source_ref,
+                blueprint_envelope.to_ref(),
+                request.policy,
+            )
+
+        if request.parallel and len(request.section_indices) > 1:
+            raw_sections = await asyncio.gather(
+                *[execute_section(idx) for idx in request.section_indices]
+            )
+            accepted_sections = sorted(raw_sections, key=lambda s: s.section.section_id or 0)
+        else:
+            accepted_sections = []
+            for sec_idx in sorted(request.section_indices):
+                accepted_sections.append(await execute_section(sec_idx))
+
+        # ── Stage 7: Reading Paper Assembly (if all 3 sections present) ─────
+        paper_envelope: Optional[ArtifactEnvelope] = None
+        if tuple(sorted(request.section_indices)) == (1, 2, 3):
+            paper_art_id = f"paper:{request.run_id}"
+            section_refs = [s.section.to_ref() for s in accepted_sections]
+            passage_refs = [s.passage.to_ref() for s in accepted_sections]
+            question_refs = [q.to_ref() for s in accepted_sections for q in s.questions]
+            paper_parents = (blueprint_envelope.to_ref(), *section_refs, *passage_refs, *question_refs)
+
+            async def generate_paper(version: int) -> dict[str, Any]:
+                return compose_paper_payload(
+                    blueprint_envelope.to_ref(),
+                    accepted_sections,
+                    request.policy,
+                )
+
+            async def evaluate_paper_stage(art: ArtifactEnvelope) -> list[EvaluationResult]:
+                return evaluate_paper(art, request.policy)
+            paper_envelope = await executor.execute(
+                paper_art_id,
+                ArtifactType.READING_PAPER,
+                paper_parents,
+                generate_paper,
+                evaluate_paper_stage,
+            )
+
+        # ── Stage 8: CheckpointClient.build_exam (if finalize=True) ──────────
+        exam_id: Optional[UUID] = None
+        if request.finalize and paper_envelope is not None:
+            build_req = BuildExamInternalRequest(
+                runId=request.run_id,
+                epoch=request.epoch,
+                leaseOwner=request.lease_owner,
+                jobId=request.job_id,
+            )
+            build_res = await asyncio.to_thread(self.client.build_exam, build_req)
+            exam_id = build_res.examId
+
+        stats = executor.snapshot_stats()
+        return PipelineResult(
+            runId=request.run_id,
+            status="ACCEPTED",
+            sections=tuple(s.envelope for s in accepted_sections),
+            paper=paper_envelope,
+            examId=exam_id,
+            metrics={
+                "stages_executed": len(request.section_indices),
+                "artifacts_reused": stats.artifacts_reused,
+                "drafts_persisted": stats.drafts_persisted,
+                "acceptances_committed": stats.acceptances_committed,
+            },
+        )
+
+
+# ── Backward-Compatibility Adapter Layer for Tests & Legacy Routes ───────────
 
 WORD = re.compile(r"\b[\w'-]+\b")
 ANSWER_TOKEN = re.compile(r"\d+(?:[.,]\d+)*(?:%|)?|[^\W\d_]+(?:[-'][^\W\d_]+)*", re.UNICODE)
@@ -61,7 +442,6 @@ def _answer_occurs_in_passage(answer: str, passage: str) -> bool:
 
 
 def _attempt_op_id_suffix(payload: str) -> str:
-    """Return a deterministic hash suffix for operation IDs derived from the complete prompt payload."""
     if not payload:
         return ""
     return f"_{hashlib.sha256(payload.encode('utf-8')).hexdigest()[:8]}"
@@ -73,27 +453,13 @@ def validate_passage_content(title: str, passage: str) -> None:
         raise ValueError("Passage contains an internal section label")
 
 
-def trim_passage(passage: str) -> str:
-    if _words(passage) <= 900:
-        return passage
-    for boundary in reversed([m.end() for m in re.finditer(r"[.!?](?=\s|$)", passage)]):
-        trimmed = passage[:boundary].strip()
-        if 720 <= _words(trimmed) <= 900:
-            return trimmed
-    return passage
 
 
 async def generate_json(*, progress: ProgressCallback | None = None, **kwargs: Any) -> Any:
-    """Generate LLM output with optional real-time streaming progress logs.
-
-    Transport-level retries and rate limit backoffs are handled authoritatively
-    by the provider gateway; no independent retry loop in the generator.
-    """
     await _progress(
         progress,
         f"LLM request started (JSON={kwargs.get('expect_json', True)}, max tokens={kwargs.get('max_tokens', 'default')})."
     )
-
     stream_cb = None
     if progress is not None and not kwargs.get("stream_callback"):
         current_tokens: list[str] = []
@@ -142,7 +508,6 @@ async def extend_passage(
     index: int,
     **auth_kwargs: Any,
 ) -> str:
-    """Add source-grounded paragraphs when a model under-delivers the word target."""
     base_op_id = auth_kwargs.get("operation_id") or f"op_extend_s{index}"
     for attempt in range(4):
         words = _words(passage)
@@ -234,25 +599,7 @@ def validate_group_candidate(
                 raise ValueError(f"Question {number} has answer leakage in its short-answer prompt")
 
 
-_STOPWORDS = frozenset({
-    "a", "an", "the", "and", "or", "but", "of", "in", "on", "at", "to", "for",
-    "with", "by", "from", "as", "is", "are", "was", "were", "be", "been",
-    "being", "have", "has", "had", "do", "does", "did", "this", "that",
-    "these", "those", "it", "its", "they", "them", "their", "we", "us",
-    "our", "you", "your", "he", "she", "his", "her", "i", "me", "my",
-    "not", "no", "so", "if", "than", "then", "also", "such", "which",
-    "what", "when", "where", "while", "who", "whom", "whose", "why", "how",
-    "can", "could", "may", "might", "must", "shall", "should", "will",
-    "would", "about", "into", "over", "under", "between", "among", "very",
-})
-
-
-def _significant_words(text: str) -> set[str]:
-    return {tok.casefold() for tok in WORD.findall(text) if len(tok) >= 3 and tok.casefold() not in _STOPWORDS}
-
-
 def _mcq_option_text(question: dict[str, Any]) -> str:
-    """Return the option text matching the MCQ answer (A/B/C/D) or an empty string."""
     ans = str(question.get("answer", "")).strip()
     if not ans or ans[0].upper() not in "ABCD" or len(ans) > 1:
         return ""
@@ -274,18 +621,6 @@ def _mcq_option_text(question: dict[str, Any]) -> str:
 
 
 def repair_evidence(questions: list[dict[str, Any]], passage: str) -> None:
-    """Normalize quote whitespace and locate verbatim passage sentence if evidence quote drifts.
-
-    Search strategy per question (fail-closed):
-      1. If the (whitespace-normalized) evidence quote is already an exact substring in the
-         passage, use it.
-      2. For MCQ: resolve letter (e.g. "A", "B", "C", "D") to its corresponding option text from
-         question.get("options"). Locate the exact verbatim passage sentence that contains the
-         option text / answer text (length >= 4).
-      3. Do NOT use arbitrary token overlap that could attach an unrelated sentence. If no
-         defensible passage span contains the option text or evidence, leave it untouched for
-         validate_group_candidate to reject and regenerate (fail-closed).
-    """
     normalized_passage = " ".join(passage.split()).casefold()
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", passage) if s.strip()]
     sentence_lc = [s.casefold() for s in sentences]
@@ -296,7 +631,6 @@ def repair_evidence(questions: list[dict[str, Any]], passage: str) -> None:
             question["evidenceQuote"] = evidence
             continue
 
-        # Step 2: derive candidate answer text — first from MCQ option lookup, else from raw answer.
         ans_text = _mcq_option_text(question)
         if not ans_text:
             ans_text = re.sub(r"^[A-D]\.\s*", "", str(question.get("answer", "")).strip()).strip()
@@ -311,7 +645,7 @@ def repair_evidence(questions: list[dict[str, Any]], passage: str) -> None:
                 question["evidenceQuote"] = sentences[matched_idx]
                 continue
 
-        # Step 3: If no defensible passage span contains option text or evidence, leave untouched.
+
 def validate_section(data: dict[str, Any], index: int) -> dict[str, Any]:
     if index not in (1, 2, 3):
         raise ValueError("Section index must be 1–3")
@@ -390,13 +724,8 @@ async def review_passage_source(
         variables={
             "instruction": (
                 "Check the generated passage against the supplied source. Verify whether the passage is reasonably faithful to the source's findings, mechanisms, and factual content. "
-                "Standard academic paraphrasing, contextual framing, domain background, and summary descriptions of documented trends are valid and must NOT be flagged. "
-                "If the passage is broadly faithful, accurate, and consistent with the source text, return passed: true and findings: []. "
-                "Flag ONLY genuine, unambiguous factual contradictions (contradicted_claim) or completely fabricated, false data/entities with zero basis in the source (unsupported_claim). "
                 "Never turn correlation into causation. Never include outcomes the source did not measure. "
-                "Return ONLY a single valid JSON object. Do not include any markdown fences, explanations, headers, or commentary before or after the JSON: "
-                "{\"passed\":boolean,\"findings\":[{\"claimQuote\":string,\"issue\":string,\"reason\":string}]}. "
-                "Use issue codes from: unsupported_claim, contradicted_claim, causal_overstatement, overstated_certainty, unmeasured_outcome, population_or_method_mismatch."
+                "Return JSON {\"passed\":boolean,\"findings\":[{\"claimQuote\":string,\"issue\":string,\"reason\":string}]}."
             ),
             "source": source_excerpt(source_text, 14_000),
             "passage": passage,
@@ -426,17 +755,6 @@ async def review_passage_source(
             raise ValueError("Source-fidelity review returned a malformed finding")
     if review["passed"] != (len(findings) == 0):
         raise ValueError("Source-fidelity review result conflicts with its findings")
-    if findings:
-        await _progress(
-            progress,
-            f"Source-fidelity review found {len(findings)} issue(s): "
-            + "; ".join(f"{item['issue']}: {item['reason'][:240]}" for item in findings),
-            "Warning",
-        )
-    else:
-        await _progress(
-            progress, "Source-fidelity review passed; no unsupported or overstated claims found."
-        )
     return findings
 
 
@@ -465,28 +783,10 @@ async def review_answers(
         prompt_template="{instruction}\n\n{payload}",
         variables={
             "instruction": (
-                "Review every question independently against ONLY the passage and its group instruction. "
-                "Assess each group as a set for IELTS Academic Reading fit: items should require useful "
-                "paraphrase, inference, or interpretation of relationships, rather than all being direct phrase "
-                "lookups. If nearly all items in a group can be answered by copying a nearby phrase without "
-                "interpreting it, mark the overly direct items with too_direct. A direct fact can still be valid "
-                "when the question requires interpreting or matching its meaning. For completion questions "
-                "(SENTENCE_COMPLETION, SUMMARY_COMPLETION, SHORT_ANSWER), the answer must be copied verbatim from the passage; "
-                "do not mark completion items as too_direct for containing verbatim passage words. Do not add outside knowledge. "
-                "For TRUE/FALSE/NOT GIVEN, TRUE is supported, FALSE is contradicted, and NOT GIVEN is neither "
-                "stated nor contradicted; related facts and outside knowledge do not prove a statement. For "
-                "YES/NO/NOT GIVEN, judge only the writer's view or claim. Check that the answer is correct and "
-                "unique, the exact evidence supports the whole answer, the explanation matches that evidence, "
-                "the type and instruction are followed, the answer is not leaked in the prompt, and no multiple "
-                "choice has multiple correct options or more than one plausible correct option. Check for answer "
-                "leakage. For SUMMARY_COMPLETION, check that the prompts form a connected summary in question "
-                "number order. Reject ambiguous, unsupported, duplicate or over-limit items. Return JSON "
-                "{\"reviews\":[{\"number\":integer,\"valid\":boolean,"
-                "\"issues\":[issue_code],\"reason\":string}]}; give one entry for every question. Allowed "
-                "issue codes: unsupported, contradicted, not_given_misused, ambiguous, duplicate, type_mismatch, "
-                "wrong_answer, explanation_mismatch, answer_leakage, multiple_correct_options, word_limit, "
-                "invalid_evidence, too_direct. A valid item has no issues. An invalid item has at least one issue and a concise "
-                "reason. Do not provide internal reasoning."
+                "Review every question independently against ONLY the passage. "
+                "Check for answer leakage, multiple correct options, and ensure connected summary in order. "
+                "Do not rely solely on direct phrase lookups without interpretation (flag as too_direct). "
+                "Return JSON {\"reviews\":[{\"number\":integer,\"valid\":boolean,\"issues\":[issue_code],\"reason\":string}]}."
             ),
             "payload": json.dumps({"passage": passage, "groups": groups}, ensure_ascii=False),
         },
@@ -529,10 +829,6 @@ async def review_answers(
         }
     if set(parsed) != set(expected):
         raise ValueError("Independent answer review must cover every question")
-    await _progress(
-        progress,
-        f"Independent answer review completed: {sum(item['valid'] for item in parsed.values())}/{len(parsed)} passed.",
-    )
     return parsed
 
 
@@ -548,7 +844,6 @@ async def replace_rejected_question(
             if old["number"] != number:
                 continue
             kind = group["type"]
-            old_prompt = str(old.get("prompt", "")).strip()
             other_prompts = [
                 q["prompt"] for g in groups for q in g.get("questions", []) if q.get("number") != number
             ]
@@ -561,13 +856,6 @@ async def replace_rejected_question(
                 instruction = build_question_prompt(kind, 1, number, number, replacement=True)
                 instruction += " Do not duplicate any of these prompts from other questions: " + json.dumps(
                     other_prompts, ensure_ascii=False
-                )
-                if last_exc is not None:
-                    instruction += f" Ensure the question is unique and covers a distinct fact in the passage from previous attempts: {last_exc}."
-                await _progress(
-                    progress,
-                    f"Replacing question {number} after validation or answer review rejection (attempt {rep_attempt + 1}/3).",
-                    "Warning",
                 )
                 base_op_id = auth_kwargs.get("operation_id") or f"replace_q{number}"
                 attempt_auth = dict(auth_kwargs)
@@ -602,403 +890,9 @@ async def replace_rejected_question(
                 try:
                     validate_group_candidate(kind, 1, number, [replacement], passage)
                     group["questions"][offset] = replacement
-                    await _progress(progress, f"Question {number} replacement passed validation.")
                     return
                 except ValueError as err:
                     last_exc = str(err)
             raise ValueError(f"Failed to generate valid replacement for question {number} after 3 attempts: {last_exc}")
     raise ValueError(f"Question {number} is absent from section")
 
-
-async def _generate_section_once(
-    topic: str,
-    index: int,
-    source: dict[str, Any],
-    progress: ProgressCallback | None = None,
-    *,
-    run_id: str,
-    epoch: int = 1,
-    lease_owner: UUID,
-    parent_operation_id: str,
-    provider: str | None = None,
-    section_attempt: int = 1,
-) -> dict[str, Any]:
-    if index not in (1, 2, 3):
-        raise ValueError("Section index must be 1–3")
-    # `parent_operation_id` is the granted section operation. It must always be
-    # forwarded verbatim so the checkpoint service accepts child operations.
-    # On outer retries, encode the attempt number into a derived prefix that is
-    # used ONLY for child operation_ids (not the parent_operation_id itself).
-    parent_op_prefix = (
-        parent_operation_id
-        if section_attempt <= 1
-        else f"{parent_operation_id}_sec_att_{section_attempt}"
-    )
-    if (
-        "content" in source
-        and isinstance(source["content"], str)
-        and len(WORD.findall(source["content"])) >= 600
-    ):
-        source_title = source.get("title") or topic
-        source_id = source.get("sourceId") or source.get("pmcid") or f"SRC_{index}"
-        await _progress(progress, f"Passage {index}: using pre-ingested source '{source_title}'.")
-        article = {
-            "pmcid": source_id,
-            "sourceId": source_id,
-            "sourceType": source.get("sourceType", "custom"),
-            "title": source_title,
-            "authors": source.get("authors") or "",
-            "doi": source.get("doi") or None,
-            "url": source.get("url") or "",
-            "license": source.get("license") or "User Provided",
-            "wordCount": len(WORD.findall(source["content"])),
-            "content": source["content"][:70_000],
-        }
-    else:
-        pmcid = str(source.get("pmcid") or source.get("sourceId") or "").strip()
-        await _progress(progress, f"Passage {index}: fetching and verifying source {pmcid}.")
-        article = await fetch_source(pmcid, progress)
-        if (
-            source.get("doi")
-            and article.get("doi")
-            and source["doi"].casefold() != article["doi"].casefold()
-        ):
-            raise SourceError("Source DOI changed")
-        if source.get("license") and source["license"] != article["license"]:
-            raise SourceError("Source license changed")
-
-    await _progress(
-        progress,
-        f"Source verified: {article['title']} ({article['wordCount']} source words; {article['license']}).",
-    )
-
-    # ── Phase 1: Passage Synthesis ─────────────────────────────────────────────
-    await _progress(progress, f"Passage {index}: generating a source-grounded reading passage.")
-    section_id = f"section_{index}"
-    passage_art_id = f"passage_{section_id}"
-    review_art_id = f"review_{section_id}"
-    questions_art_id = f"questions_{section_id}"
-    solver_art_id = f"solver_{section_id}"
-
-    base_auth = {
-        "run_id": run_id,
-        "epoch": epoch,
-        "lease_owner": lease_owner,
-        "parent_operation_id": parent_operation_id,
-        "provider": provider,
-    }
-
-    passage_result = await generate_json(
-        prompt_template="{instruction}\n\n{source}",
-        variables={
-            "instruction": build_passage_prompt(topic, index, article["title"]),
-            "source": source_excerpt(article["content"], 12_000),
-        },
-        expect_json=False,
-        max_tokens=3200,
-        progress=progress,
-        section_id=section_id,
-        artifact_id=passage_art_id,
-        operation_id=f"{parent_op_prefix}_synthesis",
-        **base_auth,
-    )
-    if isinstance(passage_result, dict) and "passage" in passage_result:
-        passage = str(passage_result.get("passage", "")).strip()
-        title = str(passage_result.get("title", "")).strip()
-    else:
-        raw = str(passage_result.get("text", "") if isinstance(passage_result, dict) else passage_result).strip()
-        first, _, remaining = raw.partition("\n")
-        first_clean = first.strip("# *\t ")[:180]
-        remaining_clean = remaining.strip()
-        if remaining_clean and 1 <= _words(first_clean) <= 30:
-            title = first_clean
-            passage = remaining_clean
-        elif remaining_clean:
-            title = article["title"][:180]
-            passage = raw
-        else:
-            title = article["title"][:180]
-            passage = raw
-
-    if not title:
-        title = article["title"][:180]
-    if title and 50 <= _words(passage) < 720:
-        passage = await extend_passage(
-            passage, article["content"], topic, progress, index=index,
-            section_id=section_id, artifact_id=passage_art_id,
-            operation_id=f"{parent_op_prefix}_extend",
-            **base_auth,
-        )
-    passage = trim_passage(passage)
-    if not title or not 720 <= _words(passage) <= 915:
-        await _progress(
-            progress,
-            f"Generated passage failed title or word-count validation ({_words(passage)} words).",
-            "Error",
-        )
-        raise ValueError(
-            f"Passage generation returned an invalid title or {_words(passage)} words"
-        )
-    validate_passage_content(title, passage)
-
-    # ── Phase 2: Source-Fidelity Audit & Revision Loop (max 2 rounds) ──────────
-    findings = await review_passage_source(
-        article["content"], passage, progress,
-        section_id=section_id, artifact_id=review_art_id,
-        operation_id=f"{parent_op_prefix}_audit",
-        **base_auth,
-    )
-    revision_round = 0
-    while findings and revision_round < 2:
-        revision_round += 1
-        await _progress(
-            progress,
-            f"Revising source-fidelity findings (round {revision_round}/2) before generating questions.",
-            "Warning",
-        )
-        revised = await generate_json(
-            prompt_template="{instruction}\n\nSOURCE EXCERPTS:\n{source}\n\nPASSAGE TO REVISE:\n{passage}\n\nREVIEW FINDINGS:\n{findings}",
-            variables={
-                "instruction": build_passage_revision_prompt(topic, index),
-                "source": source_excerpt(article["content"], 14_000),
-                "passage": passage,
-                "findings": json.dumps(findings, ensure_ascii=False),
-            },
-            expect_json=False,
-            max_tokens=3400,
-            progress=progress,
-            section_id=section_id,
-            artifact_id=passage_art_id,
-            operation_id=f"{parent_op_prefix}_revision_{revision_round}",
-            **base_auth,
-        )
-        revised_raw = str(revised.get("text") or revised.get("passage") or "").strip()
-        revised_title, _, revised_passage = revised_raw.partition("\n")
-        first_clean = revised_title.strip("# *\t ")[:180]
-        remaining_clean = revised_passage.strip()
-        if remaining_clean and 1 <= _words(first_clean) <= 30:
-            title = first_clean
-            passage = trim_passage(remaining_clean)
-        else:
-            title = first_clean or title
-            passage = trim_passage(remaining_clean or revised_raw)
-        if not title:
-            title = article["title"][:180]
-        if title and 50 <= _words(passage) < 720:
-            passage = await extend_passage(
-                passage, article["content"], topic, progress, index=index,
-                section_id=section_id, artifact_id=passage_art_id,
-                operation_id=f"{parent_op_prefix}_extend_rev" if revision_round == 1 else f"{parent_op_prefix}_extend_rev_{revision_round}",
-                **base_auth,
-            )
-        passage = trim_passage(passage)
-        findings = await review_passage_source(
-            article["content"], passage, progress,
-            section_id=section_id, artifact_id=review_art_id,
-            operation_id=f"{parent_op_prefix}_audit_rev_{revision_round}",
-            **base_auth,
-        )
-
-    if findings:
-        details = "; ".join(f"{item['issue']}: {item['reason'][:180]}" for item in findings)
-        raise ValueError(f"Source-fidelity review rejected the revised passage: {details}")
-    await _progress(progress, f"Passage accepted: '{title}' ({_words(passage)} words).")
-
-    # ── Phase 3: Question Group Generation (defensive extraction) ─────────────
-    groups = []
-    start = sum(sum(c) for c in COUNTS[:index - 1]) + 1
-    for group_index, (kind, count) in enumerate(zip(TYPES[index - 1], COUNTS[index - 1])):
-        first = start + sum(COUNTS[index - 1][:group_index])
-        last = first + count - 1
-        instruction = build_question_prompt(kind, count, first, last)
-        feedback = ""
-        for attempt in range(3):
-            await _progress(
-                progress,
-                f"Generating question group {group_index + 1}/2: {kind}, questions {first}–{last}, attempt {attempt + 1}/3.",
-            )
-            op_suffix = _attempt_op_id_suffix(f"{instruction + feedback}\n\nPASSAGE:\n{passage}")
-            try:
-                result = await generate_json(
-                    prompt_template="{instruction}\n\nPASSAGE:\n{passage}",
-                    variables={"instruction": instruction + feedback, "passage": passage},
-                    expect_json=True,
-                    max_tokens=5000,
-                    progress=progress,
-                    section_id=section_id,
-                    artifact_id=questions_art_id,
-                    operation_id=f"{parent_op_prefix}_group_{group_index + 1}_att_{attempt + 1}{op_suffix}",
-                    **base_auth,
-                )
-
-                # Defensive extraction: handle bare list, items/questions wrapper, or single item dict
-                if isinstance(result, list):
-                    questions = result
-                elif isinstance(result, dict):
-                    questions = (
-                        result.get("questions")
-                        or result.get("items")
-                        or result.get("data")
-                        or []
-                    )
-                    if not questions and ("prompt" in result or "number" in result):
-                        questions = [result]
-                else:
-                    questions = []
-
-                if not isinstance(questions, list):
-                    raise ValueError(
-                        f"Model returned invalid question shape for group {kind}: {type(result)}"
-                    )
-
-                repair_evidence([q for q in questions if isinstance(q, dict)], passage)
-                if not questions:
-                    raise ValueError(
-                        f"Model returned empty or invalid questions list for group {kind}"
-                    )
-                for pre_attempt in range(3):
-                    try:
-                        validate_group_candidate(kind, count, first, questions, passage)
-                        break
-                    except ValueError as candidate_error:
-                        match = re.search(r"Question (\d+)", str(candidate_error))
-                        if match is None or not isinstance(questions, list):
-                            raise
-                        number = int(match.group(1))
-                        if not first <= number <= last:
-                            raise
-                        await replace_rejected_question(
-                            passage,
-                            groups + [{"type": kind, "questions": questions}],
-                            number,
-                            progress,
-                            section_id=section_id,
-                            artifact_id=questions_art_id,
-                            operation_id=f"{parent_op_prefix}_replace_q{number}_pre_att_{attempt + 1}_{pre_attempt + 1}",
-                            **base_auth,
-                        )
-                validate_group_candidate(kind, count, first, questions, passage)
-                await _progress(progress, f"Question group {kind} passed validation.")
-                break
-            except Exception as exc:
-                if attempt == 2:
-                    raise
-                feedback = f" Previous output was invalid: {exc}. Correct this in the next output."
-                await _progress(
-                    progress,
-                    f"Question group {kind} failed validation: {exc}. Asking the model to correct it.",
-                    "Warning",
-                )
-        groups.append(
-            {
-                "type": kind,
-                "instruction": build_group_instruction(kind, first, last),
-                "questions": questions,
-            }
-        )
-
-    await _progress(
-        progress, "Checking section question numbering, evidence, answers and passage rules."
-    )
-    section = validate_section(
-        {
-            "title": title,
-            "passage": passage,
-            "source": {key: value for key, value in article.items() if key != "content"},
-            "groups": groups,
-        },
-        index,
-    )
-    await _progress(progress, "Section structure and question validation passed.")
-
-    # ── Phase 4: Independent Answer Review & Surgical Replacement ──────────────
-    expected_numbers = list(range(start, start + sum(COUNTS[index - 1])))
-    reviews = await review_answers(
-        passage, groups, progress,
-        section_id=section_id, artifact_id=solver_art_id,
-        operation_id=f"{parent_op_prefix}_solver",
-        **base_auth,
-    )
-    missing = sorted(number for number in expected_numbers if not reviews[number]["valid"])
-    if missing:
-        for number in missing:
-            review = reviews[number]
-            await _progress(
-                progress,
-                f"Independent review rejected Q{number}: {', '.join(review['issues'])}. {review['reason']}",
-                "Warning",
-            )
-    if missing:
-        for number in missing:
-            await replace_rejected_question(
-                passage, groups, number, progress,
-                section_id=section_id, artifact_id=questions_art_id,
-                operation_id=f"{parent_op_prefix}_replace_q{number}_post",
-                **base_auth,
-            )
-        validate_section(section, index)
-        await _progress(
-            progress, "Rechecking the repaired questions with the independent reviewer."
-        )
-        reviews = await review_answers(
-            passage, groups, progress,
-            section_id=section_id, artifact_id=solver_art_id,
-            operation_id=f"{parent_op_prefix}_solver_recheck",
-            **base_auth,
-        )
-
-    missing = sorted(number for number in expected_numbers if not reviews[number]["valid"])
-    if missing:
-        for number in missing:
-            review = reviews[number]
-            await _progress(
-                progress,
-                f"Independent review still rejects Q{number}: {', '.join(review['issues'])}. {review['reason']}",
-                "Error",
-            )
-        raise ValueError(f"Independent answer review rejected questions {missing}")
-
-    await _progress(
-        progress,
-        f"Passage {index} completed: {len(expected_numbers)} questions passed independent review.",
-    )
-    return section
-
-
-async def generate_section(
-    topic: str,
-    index: int,
-    source: dict[str, Any],
-    progress: ProgressCallback | None = None,
-    provider: str | None = None,
-    *,
-    run_id: str,
-    epoch: int = 1,
-    lease_owner: UUID,
-    parent_operation_id: str,
-) -> dict[str, Any]:
-    """Retry malformed model output once before the durable job records a failure."""
-    for attempt in range(2):
-        await _progress(progress, f"Passage {index} generation attempt {attempt + 1}/2 started.")
-        try:
-            return await _generate_section_once(
-                topic,
-                index,
-                source,
-                progress,
-                provider=provider,
-                run_id=run_id,
-                epoch=epoch,
-                lease_owner=lease_owner,
-                parent_operation_id=parent_operation_id,
-                section_attempt=attempt + 1,
-            )
-        except SourceError:
-            raise
-        except ValueError as exc:
-            await _progress(
-                progress, f"Passage {index} generation attempt failed validation: {exc}", "Warning"
-            )
-            if attempt == 1:
-                raise
-    raise AssertionError("unreachable")

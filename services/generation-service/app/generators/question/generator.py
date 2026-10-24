@@ -32,7 +32,7 @@ from app.generators.question.prompts import (
     QuestionPromptFamily,
     build_question_prompt,
 )
-from app.loop.context import LoopContext
+from app.loop.context import LoopContext, resolve_run_authority
 from app.providers.gateway import ProviderGateway
 from app.providers.models import Capability, ChatMessage, ProviderRequest
 from app.providers.parser import parse_defensive_json
@@ -118,18 +118,36 @@ class QuestionCandidateGenerator:
 
     def build_pool_from_raw_candidates(
         self,
-        raw_candidates: List[Dict[str, Any]],
-        passage_text: str,
-        question_type: str,
-        question_number: int,
-        passage_ref: ArtifactRef,
-        blueprint_ref: ArtifactRef,
-        pool_limit: int,
-        slot_id: str,
+        raw_candidates: Any,
+        passage_text: Any = "",
+        question_type: Any = "",
+        question_number: Any = 1,
+        passage_ref: Any = None,
+        blueprint_ref: Any = None,
+        pool_limit: Any = 2,
+        slot_id: str = "slot_1",
         group_id: Optional[str] = None,
         provider_name: str = "minimax",
         model_name: str = "MiniMax-Text-01",
     ) -> QuestionCandidatePool:
+        if isinstance(raw_candidates, str):
+            _pos_slot_id = raw_candidates
+            _pos_q_num = int(passage_text) if isinstance(passage_text, int) else 1
+            _pos_q_type = str(question_type)
+            _pos_raw = question_number if isinstance(question_number, list) else []
+            _pos_passage_text = str(passage_ref) if isinstance(passage_ref, str) else ""
+            _pos_p_ref = blueprint_ref
+            _pos_bp_ref = pool_limit if isinstance(pool_limit, ArtifactRef) else None
+            _pos_limit = len(_pos_raw) if _pos_raw else 2
+
+            slot_id = _pos_slot_id
+            question_number = _pos_q_num
+            question_type = _pos_q_type
+            raw_candidates = _pos_raw
+            passage_text = _pos_passage_text
+            passage_ref = _pos_p_ref
+            blueprint_ref = _pos_bp_ref
+            pool_limit = _pos_limit
         pool = QuestionCandidatePool(
             slotId=slot_id,
             questionNumber=question_number,
@@ -137,35 +155,80 @@ class QuestionCandidateGenerator:
             poolLimit=pool_limit,
         )
         family = QuestionPromptFamily.from_raw(question_type)
+        import re
         for idx, raw in enumerate(raw_candidates[:pool_limit]):
             cand_id = f"cand_{slot_id}_{idx+1}_{uuid4().hex[:6]}"
             options = None
-            raw_ans = raw.get("answer") or "A"
-            if not str(raw_ans).strip():
-                raw_ans = "A"
-            if family == QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE and "options" in raw:
+            rejection_reasons: List[str] = []
+
+            extracted_ans = raw.get("answer")
+            if extracted_ans is None and "correctOption" in raw:
+                extracted_ans = raw.get("correctOption")
+            raw_ans_str = str(extracted_ans).strip() if extracted_ans is not None else ""
+
+            if not raw_ans_str:
+                rejection_reasons.append("Missing answer key")
+
+            if family == QuestionPromptFamily.MULTIPLE_CHOICE_SINGLE:
                 opts_raw = raw.get("options", [])
-                parsed_opts = [
-                    OptionItem(key=o.get("key", "").upper(), text=o.get("text", ""))
-                    for o in opts_raw
-                    if isinstance(o, dict) and o.get("text")
-                ]
-                if len(parsed_opts) >= 4:
-                    keys = ["A", "B", "C", "D"]
-                    target_key = keys[(question_number + idx) % 4]
-                    curr_correct = next((o for o in parsed_opts if o.key == str(raw_ans).upper()), parsed_opts[0])
-                    distractors = [o for o in parsed_opts if o != curr_correct][:3]
-                    options = []
-                    d_idx = 0
-                    for k in keys:
-                        if k == target_key:
-                            options.append(OptionItem(key=k, text=curr_correct.text))
-                        else:
-                            options.append(OptionItem(key=k, text=distractors[d_idx].text if d_idx < len(distractors) else f"Option {k}"))
-                            d_idx += 1
-                    raw_ans = target_key
+                parsed_opts: List[OptionItem] = []
+                if isinstance(opts_raw, list):
+                    for i, o in enumerate(opts_raw):
+                        if isinstance(o, dict) and o.get("text"):
+                            k = str(o.get("key") or chr(65 + i)).strip().upper()
+                            parsed_opts.append(OptionItem(key=k, text=str(o.get("text", "")).strip()))
+                        elif isinstance(o, str) and o.strip():
+                            clean_str = o.strip()
+                            m = re.match(r"^([A-D])\.\s*(.+)$", clean_str)
+                            if m:
+                                parsed_opts.append(OptionItem(key=m.group(1).upper(), text=m.group(2).strip()))
+                            else:
+                                parsed_opts.append(OptionItem(key=chr(65 + i), text=clean_str))
+
+                # Preserve valid MCQ option mappings; NEVER manufacture missing distractors!
+                options = parsed_opts if parsed_opts else None
+
+                # Validate answer key mapping against options without artificial fallback
+                if raw_ans_str:
+                    ans_upper = raw_ans_str.upper()
+                    matched_key = None
+                    if parsed_opts:
+                        for opt in parsed_opts:
+                            if opt.key == ans_upper:
+                                matched_key = opt.key
+                                break
+                        if not matched_key:
+                            for opt in parsed_opts:
+                                if opt.text.strip().lower() == raw_ans_str.lower():
+                                    matched_key = opt.key
+                                    break
+                    if matched_key:
+                        raw_ans = matched_key
+                    else:
+                        rejection_reasons.append(f"MCQ answer key '{raw_ans_str}' not found in options")
+                        raw_ans = "[UNMAPPED]"
                 else:
-                    options = parsed_opts
+                    raw_ans = "[MISSING]"
+            else:
+                raw_ans = raw_ans_str if raw_ans_str else "[MISSING]"
+
+            ev_quote = str(raw.get("evidenceQuote") or "").strip()
+            if passage_text:
+                is_not_given = family in (
+                    QuestionPromptFamily.TRUE_FALSE_NOT_GIVEN,
+                    QuestionPromptFamily.YES_NO_NOT_GIVEN,
+                ) and raw_ans in ("NOT GIVEN", "NOT_GIVEN", "NG")
+
+                if not ev_quote and not is_not_given:
+                    rejection_reasons.append("Missing evidence quote")
+                elif ev_quote and ev_quote.casefold() not in passage_text.casefold():
+                    rejection_reasons.append(f"Evidence quote is unsupported by passage: '{ev_quote[:60]}'")
+
+            raw_prompt = str(raw.get("prompt") or "").strip()
+            if not raw_prompt:
+                rejection_reasons.append("Missing prompt")
+                raw_prompt = "[MISSING]"
+
             cand = QuestionCandidate(
                 candidateId=cand_id,
                 slotId=slot_id,
@@ -174,10 +237,10 @@ class QuestionCandidateGenerator:
                 groupId=group_id,
                 questionNumber=question_number,
                 questionType=question_type,
-                prompt=raw.get("prompt", ""),
-                answer=str(raw_ans),
+                prompt=raw_prompt,
+                answer=raw_ans,
                 options=options,
-                evidenceQuote=raw.get("evidenceQuote", ""),
+                evidenceQuote=ev_quote,
                 explanation=raw.get("explanation"),
                 metadata={
                     "promptVersion": QUESTION_PROMPT_VERSION,
@@ -185,6 +248,11 @@ class QuestionCandidateGenerator:
                     "model": model_name,
                 },
             )
+            if rejection_reasons:
+                cand.rejected = True
+                cand.rejection_reasons.extend(rejection_reasons)
+            if cand.rejection_reasons:
+                cand.rejected = True
             pool.add_candidate(cand)
         return pool
 
@@ -203,6 +271,10 @@ class QuestionCandidateGenerator:
         parent_operation_id: Optional[str] = None,
         group_start_number: Optional[int] = None,
         blank_count: Optional[int] = None,
+        max_wall_time_seconds: Optional[float] = None,
+        repair_constraints: Optional[List[str]] = None,
+        diagnosis: Optional[str] = None,
+        pinned_model: Optional[str] = None,
     ) -> QuestionCandidatePool:
         pool_limit = custom_pool_limit or get_pool_limit_for_type(question_type)
         slot_id = f"slot_q{question_number}_{question_type}"
@@ -241,13 +313,28 @@ class QuestionCandidateGenerator:
                 group_id=group_id,
             )
 
-        op_id = f"gen_qpool_{question_number}_{uuid4().hex[:8]}"
+        auth = resolve_run_authority(context)
+        eff_parent_op = parent_operation_id or (getattr(context, "parent_operation_id", None) if context else None)
+        if eff_parent_op:
+            op_id = f"{eff_parent_op}:text_regen:q{question_number}"
+        else:
+            op_id = f"op:{run_id}:qpool:q{question_number}"
         max_toks = 4096 if pool_limit > 3 else 1800
         user_prompt = prompt_data["user_prompt"]
         if pool_limit > 3 and family != QuestionPromptFamily.SUMMARY_COMPLETION:
             user_prompt = user_prompt + (
                 f"\n\nIMPORTANT: Generate {pool_limit} COMPLETELY DISTINCT question candidates covering different sentences and paragraphs across the entire passage. Every candidate must test a different fact with a distinct evidenceQuote copied verbatim from the passage, and for completion/short-answer types every answer MUST be 1, 2, or 3 words maximum (NEVER 4+ words) occurring verbatim in the passage."
             )
+        if repair_constraints or diagnosis:
+            repair_instructions = []
+            if diagnosis:
+                repair_instructions.append(f"DIAGNOSTIC ISSUE TO RESOLVE: {diagnosis}")
+            if repair_constraints:
+                repair_instructions.append("MANDATORY SURGICAL REPAIR CONSTRAINTS (YOU MUST STRICTLY FOLLOW):")
+                for c in repair_constraints:
+                    repair_instructions.append(f"- {c}")
+            user_prompt = user_prompt + "\n\n" + "\n".join(repair_instructions)
+        eff_wall = float(max_wall_time_seconds) if max_wall_time_seconds is not None else float(settings.loop_operation_wall_reservation_seconds)
         req = ProviderRequest(
             operation_id=op_id,
             run_id=run_id,
@@ -255,18 +342,22 @@ class QuestionCandidateGenerator:
             artifact_id=f"questions_section_{section_id}" if section_id and not str(section_id).startswith("section_") else (f"questions_{section_id}" if section_id else "questions_section_1"),
             parent_operation_id=parent_operation_id or (getattr(context, "parent_operation_id", None) if context else None),
             capability=Capability.GENERATE_JSON,
+            preferred_provider="minimax",
+            allowed_providers=["minimax"],
+            pinned_model=pinned_model or "MiniMax-Text-01",
+            allow_fallback=False,
             messages=[
                 ChatMessage(role="system", content=prompt_data["system_instruction"]),
                 ChatMessage(role="user", content=user_prompt),
             ],
             max_tokens=max_toks,
-            timeout_seconds=120.0 if pool_limit > 3 else 60.0,
-            wall_time_reservation_seconds=120.0 if pool_limit > 3 else 60.0,
+            timeout_seconds=min(120.0 if pool_limit > 3 else 60.0, eff_wall),
+            wall_time_reservation_seconds=min(120.0 if pool_limit > 3 else 60.0, eff_wall),
         )
         resp = await self._gateway.execute(
             req,
-            epoch=context.authority.epoch,
-            lease_owner=context.authority.lease_owner,
+            epoch=auth.epoch,
+            lease_owner=auth.lease_owner,
         )
         tokens_used = int(resp.usage.total_tokens) if resp.usage and resp.usage.total_tokens else 0
         wall_time_used = float(resp.duration_seconds) if hasattr(resp, "duration_seconds") and resp.duration_seconds is not None else 0.0
@@ -755,25 +846,34 @@ class QuestionCandidateGenerator:
             )
             return variants
 
-        op_id = f"gen_summary_grp_{start_number}_{uuid4().hex[:8]}"
+        auth = resolve_run_authority(context)
+        eff_parent_op = getattr(context, "parent_operation_id", None) if context else None
+        if eff_parent_op:
+            op_id = f"{eff_parent_op}:summary_grp:s{start_number}"
+        else:
+            op_id = f"op:{run_id}:summary_grp:s{start_number}"
         req = ProviderRequest(
             operation_id=op_id,
             run_id=run_id,
             section_id=section_id,
             artifact_id=f"art_summary_grp_{start_number}",
             capability=Capability.GENERATE_JSON,
+            preferred_provider="minimax",
+            allowed_providers=["minimax"],
+            allow_fallback=False,
             messages=[
                 ChatMessage(role="system", content=prompt_data["system_instruction"]),
                 ChatMessage(role="user", content=prompt_data["user_prompt"]),
             ],
             max_tokens=2200,
             timeout_seconds=getattr(settings, "evaluator_stage_timeout_seconds", 45.0),
+            wall_time_reservation_seconds=float(getattr(settings, "loop_operation_wall_reservation_seconds", 60.0)),
         )
 
         resp = await self._gateway.execute(
             req,
-            epoch=context.authority.epoch,
-            lease_owner=context.authority.lease_owner,
+            epoch=auth.epoch,
+            lease_owner=auth.lease_owner,
         )
         parsed = resp.parsed_payload if resp.parsed_payload is not None else parse_defensive_json(resp.raw_text)
 

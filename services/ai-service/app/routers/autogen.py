@@ -13,7 +13,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.prompts.autogen import build_system_prompt, build_user_prompt
 from app.prompts.autogen_data import get_constraints, get_json_shape
 from app.schemas.autogen import AutogenQuestionsRequest, AutogenQuestionsResponse
-from app.services.groq_service import groq_generate
+from app.services.groq_service import minimax_generate
+from app.services.autogen_validation import validate_question
+
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +78,7 @@ async def autogen_questions(
         req.type, req.passage, req.count, req.difficulty, req.extra_context or ""
     )
 
-    result: dict[str, Any] = await groq_generate(
+    result: dict[str, Any] = await minimax_generate(
         prompt_template="{system}\n\n{user}",
         variables={"system": system_prompt, "user": user_prompt},
         expect_json=True,
@@ -96,4 +98,35 @@ async def autogen_questions(
             detail="LLM output is not a list of questions",
         )
 
+    # Enforce canonical structural, semantic, and language integrity at generation boundary
+    validation_failures: list[dict[str, Any]] = []
+    for idx, q in enumerate(questions_raw):
+        issues = validate_question(
+            q,
+            expected_type=req.type,
+            expected_skill=req.skill,
+            expected_difficulty=req.difficulty,
+            passage=req.passage,
+        )
+        if issues:
+            validation_failures.append({
+                "question_index": idx + 1,
+                "issues": issues,
+            })
+
+    if validation_failures:
+        logger.warning(
+            "Generated question failed validation: type=%s errors=%s",
+            req.type,
+            validation_failures,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": "Generated question(s) failed canonical schema or integrity validation",
+                "failures": validation_failures,
+            },
+        )
+
     return AutogenQuestionsResponse(questions=questions_raw)
+

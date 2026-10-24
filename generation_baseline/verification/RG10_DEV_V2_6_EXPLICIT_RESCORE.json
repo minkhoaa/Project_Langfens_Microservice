@@ -1,0 +1,211 @@
+{
+  "report_title": "RG10 Historical Grammar Pilot Offline Re-Evaluation (v2.6)",
+  "source_campaign_id": "RG10_DEV_UNSEEN_PILOT_V4",
+  "evaluated_at": "2026-10-16T11:20:00Z",
+  "evaluator_version": "neutral-eval-v2.6",
+  "rubric_version": "rubric-qgeval-v2.6",
+  "code_reference": "NeutralEvaluatorV2_6 + validate_negative_inversion_grammaticality",
+  "evidence_source_commit_sha": "f578caaeb0686a780b0a005d1712094e447ae1b3",
+  "evaluator_source_commit_sha": "9b76de1939e008bbeb3391115b3ff9e9bccbaa52",
+  "evidence_reference": "generation_baseline/.execution/RG10_DEV_UNSEEN_PILOT_V4/unseen_live_dev_results.json",
+  "methodology_note": "Original verdicts in UNSEEN_LIVE_DEV_REPORT.json are strictly preserved and unmutated. This report publishes independent forensic linguistic classifications and side-by-side comparison with NeutralEvaluatorV2_6. An evaluator's own output is explicitly not called independent human gold.",
+  "summary_metrics": {
+    "total_grammar_slots": 6,
+    "unique_mcqs": 5,
+    "v25_original_pass_rate": "1/6 (16.7%)",
+    "v26_corrected_pass_rate": "5/6 (83.3%)",
+    "verified_linguistic_validity_rate": "5/6 (83.3%)",
+    "evaluator_false_rejections_corrected": 5,
+    "evaluator_false_acceptances_corrected": 1,
+    "carrier_novelty_rate_content_aware": "6/6 (100.0%)",
+    "prefix_heuristic_false_copies_corrected": 3
+  },
+  "question_evaluations": [
+    {
+      "item_index": 1,
+      "assignment_id": "dev-grammar-inversion-05__arm_A__att1",
+      "arm": "A",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "options": [
+        "A) Not only did she win the race, but she also broke the record.",
+        "B) Not only she won the race, but she also broke the record.",
+        "C) Not only she did win the race, but she also broke the record.",
+        "D) Not only she wins the race, but she also broke the record."
+      ],
+      "proposed_answer": "A",
+      "original_v25_verdict": "FAIL",
+      "original_v25_rationale": "Defective MCQ: no options exhibit valid negative inversion (Not only cue missing from cue list)",
+      "original_prefix_novelty": 1.0,
+      "verified_linguistic_classification": "GRAMMATICAL_MCQ_VALID",
+      "linguistic_defect_category": "EVALUATOR_FALSE_REJECT",
+      "option_grammaticality": {
+        "A": "VALID (correct negative inversion: Not only did she win...)",
+        "B": "INVALID (uninverted word order: Not only she won...)",
+        "C": "INVALID (uninverted emphatic do-support: Not only she did win...)",
+        "D": "INVALID (uninverted word order + tense discord: Not only she wins...)"
+      },
+      "new_v26_verdict": "PASS",
+      "new_v26_rationale": "Verified consistent with rubric (precisely ONE defensible option).",
+      "content_aware_novelty_score": 1.0,
+      "content_aware_novelty_status": "NOVEL",
+      "verdict_change_reason": "v2.5 detect_negative_inversion_syntax omitted 'Not only' from regex triggers, falsely declaring zero valid options.",
+      "code_reference": "NeutralEvaluatorV2_6 + validate_negative_inversion_grammaticality"
+    },
+    {
+      "item_index": 2,
+      "assignment_id": "dev-grammar-inversion-05__arm_A__att1",
+      "arm": "A",
+      "question_id": "2",
+      "question_text": "What is the correct way to rewrite the sentence 'Under no circumstances we should open the door' to follow the rule of subject-auxiliary inversion?",
+      "options": [
+        "A) Under no circumstances should we open the door.",
+        "B) Under no circumstances we should open the door.",
+        "C) Under no circumstances do we should open the door.",
+        "D) Under no circumstances we do should open the door."
+      ],
+      "proposed_answer": "A",
+      "original_v25_verdict": "FAIL",
+      "original_v25_rationale": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)",
+      "original_prefix_novelty": 0.0,
+      "verified_linguistic_classification": "GRAMMATICAL_MCQ_VALID",
+      "linguistic_defect_category": "EVALUATOR_FALSE_REJECT",
+      "option_grammaticality": {
+        "A": "VALID (correct negative inversion: Under no circumstances should we open...)",
+        "B": "INVALID (uninverted word order: Under no circumstances we should open...)",
+        "C": "INVALID (double auxiliary: Under no circumstances do we should open...)",
+        "D": "INVALID (uninverted double auxiliary: Under no circumstances we do should open...)"
+      },
+      "new_v26_verdict": "PASS",
+      "new_v26_rationale": "Verified consistent with rubric (precisely ONE defensible option).",
+      "content_aware_novelty_score": 1.0,
+      "content_aware_novelty_status": "NOVEL",
+      "verdict_change_reason": "v2.5 regex matched 'do we' without validating following verb phrase, falsely accepting ungrammatical distractor C ('do we should') as valid inversion, creating false distractor ambiguity [1, 3].",
+      "code_reference": "NeutralEvaluatorV2_6 + validate_negative_inversion_grammaticality"
+    },
+    {
+      "item_index": 3,
+      "assignment_id": "dev-grammar-inversion-05__arm_B__att1",
+      "arm": "B",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses negative inversion?",
+      "options": [
+        "A) Not only did she win the award, but she also broke the record.",
+        "B) Not only she won the award, but she also broke the record.",
+        "C) Not only she did win the award, but she also broke the record.",
+        "D) Not only won she the award, but she also broke the record."
+      ],
+      "proposed_answer": "A",
+      "original_v25_verdict": "FAIL",
+      "original_v25_rationale": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)",
+      "original_prefix_novelty": 1.0,
+      "verified_linguistic_classification": "GRAMMATICAL_MCQ_VALID",
+      "linguistic_defect_category": "EVALUATOR_FALSE_REJECT",
+      "option_grammaticality": {
+        "A": "VALID (correct negative inversion: Not only did she win...)",
+        "B": "INVALID (uninverted word order: Not only she won...)",
+        "C": "INVALID (uninverted emphatic do: Not only she did win...)",
+        "D": "INVALID (lexical verb inversion: Not only won she...)"
+      },
+      "new_v26_verdict": "PASS",
+      "new_v26_rationale": "Verified consistent with rubric (precisely ONE defensible option).",
+      "content_aware_novelty_score": 1.0,
+      "content_aware_novelty_status": "NOVEL",
+      "verdict_change_reason": "v2.5 regex lacked 'Not only' trigger and full verb phrase validation.",
+      "code_reference": "NeutralEvaluatorV2_6 + validate_negative_inversion_grammaticality"
+    },
+    {
+      "item_index": 4,
+      "assignment_id": "dev-grammar-inversion-05__arm_B__att1",
+      "arm": "B",
+      "question_id": "2",
+      "question_text": "What is the correct way to rewrite the sentence 'Under no circumstances we should leave the building' using proper inversion?",
+      "options": [
+        "A) Under no circumstances should we leave the building.",
+        "B) Under no circumstances we should leave the building.",
+        "C) Under no circumstances did we should leave the building.",
+        "D) Under no circumstances we should not leave the building."
+      ],
+      "proposed_answer": "A",
+      "original_v25_verdict": "FAIL",
+      "original_v25_rationale": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)",
+      "original_prefix_novelty": 0.0,
+      "verified_linguistic_classification": "GRAMMATICAL_MCQ_VALID",
+      "linguistic_defect_category": "EVALUATOR_FALSE_REJECT",
+      "option_grammaticality": {
+        "A": "VALID (correct negative inversion: Under no circumstances should we leave...)",
+        "B": "INVALID (uninverted word order: Under no circumstances we should leave...)",
+        "C": "INVALID (double auxiliary: Under no circumstances did we should leave...)",
+        "D": "INVALID (uninverted double negative: Under no circumstances we should not leave...)"
+      },
+      "new_v26_verdict": "PASS",
+      "new_v26_rationale": "Verified consistent with rubric (precisely ONE defensible option).",
+      "content_aware_novelty_score": 1.0,
+      "content_aware_novelty_status": "NOVEL",
+      "verdict_change_reason": "v2.5 regex matched 'did we' in distractor C without validating following modal 'should', falsely treating Option C as valid inversion [1, 3].",
+      "code_reference": "NeutralEvaluatorV2_6 + validate_negative_inversion_grammaticality"
+    },
+    {
+      "item_index": 5,
+      "assignment_id": "dev-grammar-inversion-05__arm_C__att1",
+      "arm": "C",
+      "question_id": "Q1",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "options": [
+        "A) Not only did she win the race, but she also broke the record.",
+        "B) Not only she won the race, but she also broke the record.",
+        "C) Not only she did win the race, but she also broke the record.",
+        "D) Not only she wins the race, but she also broke the record."
+      ],
+      "proposed_answer": "A",
+      "original_v25_verdict": "FAIL",
+      "original_v25_rationale": "Defective MCQ: no options exhibit valid negative inversion (Not only cue missing from cue list)",
+      "original_prefix_novelty": 1.0,
+      "verified_linguistic_classification": "GRAMMATICAL_MCQ_VALID",
+      "linguistic_defect_category": "EVALUATOR_FALSE_REJECT",
+      "option_grammaticality": {
+        "A": "VALID (correct negative inversion: Not only did she win...)",
+        "B": "INVALID (uninverted word order: Not only she won...)",
+        "C": "INVALID (uninverted emphatic do-support: Not only she did win...)",
+        "D": "INVALID (uninverted word order + tense discord: Not only she wins...)"
+      },
+      "new_v26_verdict": "PASS",
+      "new_v26_rationale": "Verified consistent with rubric (precisely ONE defensible option).",
+      "content_aware_novelty_score": 1.0,
+      "content_aware_novelty_status": "NOVEL",
+      "verdict_change_reason": "Identical prompt/options to Question 1 (cross-arm convergence Arm C = Arm A). v2.5 falsely rejected due to missing 'Not only' trigger.",
+      "code_reference": "NeutralEvaluatorV2_6 + validate_negative_inversion_grammaticality"
+    },
+    {
+      "item_index": 6,
+      "assignment_id": "dev-grammar-inversion-05__arm_C__att1",
+      "arm": "C",
+      "question_id": "Q2",
+      "question_text": "Which sentence correctly uses 'do' to form subject-auxiliary inversion when there is no auxiliary verb?",
+      "options": [
+        "A) Under no circumstances open the door before checking the credentials.",
+        "B) Under no circumstances you should open the door before checking the credentials.",
+        "C) Under no circumstances should you open the door before checking the credentials.",
+        "D) Under no circumstances should open the door before checking the credentials."
+      ],
+      "proposed_answer": "C",
+      "original_v25_verdict": "PASS",
+      "original_v25_rationale": "Verified consistent with rubric.",
+      "original_prefix_novelty": 0.0,
+      "verified_linguistic_classification": "GENERATOR_DEFECT_STEM_MISMATCH",
+      "linguistic_defect_category": "EVALUATOR_FALSE_ACCEPT",
+      "option_grammaticality": {
+        "A": "INVALID (imperative without auxiliary or inversion)",
+        "B": "INVALID (uninverted order: you should)",
+        "C": "VALID_SENTENCE_BUT_CONFLICTS_STEM (valid negative inversion with 'should', but stem explicitly requests 'do')",
+        "D": "INVALID (missing subject: should open)"
+      },
+      "new_v26_verdict": "FAIL",
+      "new_v26_rationale": "Stem-answer constraint conflict: question stem specifically requests 'do' inversion, but unique valid option uses auxiliary 'should'; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "content_aware_novelty_score": 1.0,
+      "content_aware_novelty_status": "NOVEL",
+      "verdict_change_reason": "v2.5 evaluated Option C as valid negative inversion in isolation without verifying question stem constraint ('Which sentence correctly uses do to form inversion when there is no auxiliary verb'). Option C uses 'should', violating the stem instruction.",
+      "code_reference": "NeutralEvaluatorV2_6 + validate_negative_inversion_grammaticality"
+    }
+  ]
+}

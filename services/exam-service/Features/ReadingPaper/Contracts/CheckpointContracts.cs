@@ -89,6 +89,8 @@ public sealed record CheckpointCommitRequest(
     [property: JsonPropertyName("evaluations")] List<EvaluationResult>? Evaluations = null,
     [property: JsonPropertyName("decision")] LoopDecision? Decision = null,
     [property: JsonPropertyName("expectedHeadVersion")] int? ExpectedHeadVersion = null,
+    [property: JsonPropertyName("expectedHeadHash")] string? ExpectedHeadHash = null,
+    [property: JsonPropertyName("expectedCursorRevision")] int? ExpectedCursorRevision = null,
     [property: JsonPropertyName("events")] List<DomainEvent>? Events = null,
     [property: JsonPropertyName("tokensUsed")] int TokensUsed = 0,
     [property: JsonPropertyName("costUsedUsd")] decimal CostUsedUsd = 0m,
@@ -109,7 +111,9 @@ public sealed record DraftCheckpointRequest(
     [property: JsonPropertyName("costUsedUsd")] decimal CostUsedUsd = 0m,
     [property: JsonPropertyName("wallTimeUsedSeconds")] double WallTimeUsedSeconds = 0.0,
     [property: JsonPropertyName("resolvedFingerprints")] List<string>? ResolvedFingerprints = null,
-    [property: JsonPropertyName("supersededFingerprints")] List<string>? SupersededFingerprints = null
+    [property: JsonPropertyName("supersededFingerprints")] List<string>? SupersededFingerprints = null,
+    [property: JsonPropertyName("expectedHeadHash")] string? ExpectedHeadHash = null,
+    [property: JsonPropertyName("expectedCursorRevision")] int? ExpectedCursorRevision = null
 );
 public sealed record CheckpointAck(
     [property: JsonPropertyName("runId")] string RunId,
@@ -209,7 +213,8 @@ public sealed record ResumeStateResult(
     [property: JsonPropertyName("budgetProfileSha256")] string? BudgetProfileSha256 = null,
     [property: JsonPropertyName("budgetProfileSource")] string? BudgetProfileSource = null,
     [property: JsonPropertyName("budgetProfileJson")] string? BudgetProfileJson = null,
-    [property: JsonPropertyName("budgetBreachDetected")] bool BudgetBreachDetected = false
+    [property: JsonPropertyName("budgetBreachDetected")] bool BudgetBreachDetected = false,
+    [property: JsonPropertyName("policyHash")] string? PolicyHash = null
 );
 
 public sealed record InvalidateDependencyRequest(
@@ -298,4 +303,12 @@ public sealed record OutboxEventDto(
     [property: JsonPropertyName("status")] string Status,
     [property: JsonPropertyName("createdAt")] DateTime CreatedAt,
     [property: JsonPropertyName("sequence")] long Sequence = 0
+);
+
+public sealed record CheckpointImportRequest(
+    [property: JsonPropertyName("runId")] string RunId,
+    [property: JsonPropertyName("epoch")] int Epoch,
+    [property: JsonPropertyName("leaseOwner")] Guid LeaseOwner,
+    [property: JsonPropertyName("artifact")] ArtifactEnvelope Artifact,
+    [property: JsonPropertyName("sourceRunId")] string? SourceRunId = null
 );

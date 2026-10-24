@@ -152,7 +152,8 @@ class BaseEvaluator(ABC, EvaluatorCapability):
             updates: Dict[str, Any] = {}
             if raw_result.elapsed_ms is None:
                 updates["elapsed_ms"] = elapsed_ms
-            updates["input_dependency_refs"] = list(artifact.parent_refs)
+            if not raw_result.input_dependency_refs:
+                updates["input_dependency_refs"] = list(artifact.parent_refs)
             if raw_result.status == EvaluationStatus.PASS and not raw_result.issues and context and getattr(context, "open_issues", None):
                 checked_codes = set(self._metadata.hard_checks) | set(self._metadata.soft_checks)
                 resolved_fps = list(raw_result.resolved_issue_fingerprints or [])

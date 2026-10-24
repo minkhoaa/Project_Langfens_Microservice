@@ -60,7 +60,7 @@ def simulated_run_profile(policy):
     constructed directly instead of via `from_settings`).
     """
     # `from_cap_snapshot` requires exact positive 32-bit integers, matching .NET's
-    # `ReadingPaperCapsProfile` `RequiredInt` admission (see CLAUDE.md). A sub-second
+    # `ReadingPaperCapsProfile.RequiredInt` admission in exam-service. A sub-second
     # wall reservation is not expressible in that contract, so clamp up to the smallest
     # admissible value instead of truncating to 0, which would fail closed on a
     # profile that is not corrupt. Sub-second evaluator bounds are carried by the
@@ -234,10 +234,12 @@ class DurableStore:
             return type("Grant", (), {"operationId": req.operationId,
                                       "tokenReservation": req.tokenReservation, "isReplay": True})()
         work = [x for x in state["ops"].values() if x["operationType"] != "CHECKPOINT_COMMIT"]
-        if req.operationType != "CHECKPOINT_COMMIT" and (len(work) + 1 > self.cap_calls or
+        if req.operationType != "CHECKPOINT_COMMIT" and len(work) + 1 > self.cap_calls:
+            raise CheckpointApiError(422, "Budget exhausted: maximum calls exceeded")
+        if req.operationType != "CHECKPOINT_COMMIT" and (
             sum(x["tokensUsed"] if x["status"] == "COMPLETED" else x["tokenReservation"] for x in work)
             + req.tokenReservation > self.cap_tokens):
-            raise CheckpointApiError(422, "budget reservation cap")
+            raise CheckpointApiError(422, "Budget exhausted: token cap exceeded")
         state["ops"][req.operationId] = dict(
             operationId=req.operationId, operationType=req.operationType, status="RESERVED",
             artifactId=req.artifactId, requestHash=req.requestHash,

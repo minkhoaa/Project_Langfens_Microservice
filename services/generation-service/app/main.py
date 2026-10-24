@@ -38,7 +38,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount router with and without /api prefix for maximum compatibility
+# Internal source/editorial operations and the single Reading execution route.
 app.include_router(reading_paper_router, prefix="/api")
 app.include_router(reading_paper_router)
 

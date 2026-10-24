@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional
+import hashlib
+import json
+from typing import Any, List, Optional
 from pydantic import Field
 
 from .base import CanonicalBaseModel
@@ -12,11 +14,26 @@ from .base import CanonicalBaseModel
 
 class QuestionType(str, Enum):
     TRUE_FALSE_NOT_GIVEN = "TRUE_FALSE_NOT_GIVEN"
-    SENTENCE_COMPLETION = "SENTENCE_COMPLETION"
-    MULTIPLE_CHOICE_SINGLE = "MULTIPLE_CHOICE_SINGLE"
-    SUMMARY_COMPLETION = "SUMMARY_COMPLETION"
     YES_NO_NOT_GIVEN = "YES_NO_NOT_GIVEN"
+    SENTENCE_COMPLETION = "SENTENCE_COMPLETION"
+    SUMMARY_COMPLETION = "SUMMARY_COMPLETION"
+    SUMMARY_COMPLETION_BOX = "SUMMARY_COMPLETION_BOX"
+    MULTIPLE_CHOICE_SINGLE = "MULTIPLE_CHOICE_SINGLE"
+    MULTIPLE_CHOICE_MULTIPLE = "MULTIPLE_CHOICE_MULTIPLE"
+    MATCHING_HEADING = "MATCHING_HEADING"
+    MATCHING_INFORMATION = "MATCHING_INFORMATION"
+    MATCHING_FEATURES = "MATCHING_FEATURES"
+    MATCHING_ENDINGS = "MATCHING_ENDINGS"
+    TABLE_COMPLETION = "TABLE_COMPLETION"
+    FLOW_CHART = "FLOW_CHART"
+    DIAGRAM_LABEL = "DIAGRAM_LABEL"
     SHORT_ANSWER = "SHORT_ANSWER"
+    NOTE_COMPLETION = "NOTE_COMPLETION"
+    FORM_COMPLETION = "FORM_COMPLETION"
+    CLASSIFICATION = "CLASSIFICATION"
+    CHOOSING_TITLE = "CHOOSING_TITLE"
+    MULTIPLE_CHOICE_SINGLE_IMAGE = "MULTIPLE_CHOICE_SINGLE_IMAGE"
+    MAP_LABEL = "MAP_LABEL"
 class DifficultyLevel(str, Enum):
     FOUNDATION = "FOUNDATION"
     MODERATE = "MODERATE"
@@ -47,7 +64,7 @@ class QuestionSlot(CanonicalBaseModel):
 
     question_number: int = Field(..., ge=1, le=40, alias="questionNumber")
     section_id: int = Field(..., ge=1, le=3, alias="sectionId")
-    group_index: int = Field(..., ge=0, le=1, alias="groupIndex")
+    group_index: int = Field(..., ge=0, le=10, alias="groupIndex")
     question_type: QuestionType = Field(..., alias="questionType")
     target_skill: str = Field(..., alias="targetSkill")
     target_difficulty: TargetDifficulty = Field(..., alias="targetDifficulty")
@@ -131,3 +148,18 @@ class ExamBlueprint(CanonicalBaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         alias="createdAt",
     )
+    metadata: Optional[dict] = Field(default_factory=dict)
+
+    def compute_canonical_hash(self) -> str:
+        return compute_canonical_blueprint_hash(self)
+
+
+def compute_canonical_blueprint_hash(bp: ExamBlueprint) -> str:
+    """Computes a stable, canonical content hash for an ExamBlueprint, stripping volatile fields."""
+    canonical_dict = bp.model_dump(mode="json", by_alias=True)
+    canonical_dict.pop("createdAt", None)
+    canonical_dict.pop("contentHash", None)
+    canonical_dict.pop("invalidatedDescendants", None)
+    canonical_json = json.dumps(canonical_dict, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+

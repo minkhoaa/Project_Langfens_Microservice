@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "sourceExamId": "11111111-1111-1111-1111-111111111111",
   "sourceQuestionCount": 25,
   "sourceTypeCount": 18,
@@ -7,10 +7,14 @@
     "SUMMARY_COMPLETION"
   ],
   "globalConstraints": [
+    "All question content, instructions, prompts, options, headings, explanations, and answers MUST be strictly in English only. Do NOT output Vietnamese or any other language.",
     "Use the requested type, skill and integer difficulty. Question type does not imply LISTENING; all source exam examples are READING.",
     "Create original questions grounded only in the supplied passage. Examples show the wire format, not content to copy.",
     "Use only answer fields relevant to the question type; omit unrelated answer families.",
-    "Options use positive indices; booleans are JSON true/false, never strings."
+    "Options use positive indices; booleans are JSON true/false, never strings.",
+    "Every question MUST have a valid, non-empty, assessable answer key. Generic placeholders such as 'Item 1', 'Option A', 'TBD', 'N/A', 'placeholder' are strictly forbidden as answer keys.",
+    "Every choice-based answer must reference a valid option in options[].",
+    "Explanation and evidence must ground the correct answer in the source passage."
   ],
   "constraints": {
     "CLASSIFICATION": [
@@ -215,9 +219,9 @@
         "promptMd": "Complete the table below.\nWrite ONE OR TWO WORDS from the passage for each answer.\n\n| Period | Region | Raw Material Used | Quality Issues |\n|--------|--------|-------------------|----------------|\n| 8th–12th century | Arab world and Europe | [6] | Lower quality than Chinese |\n| Early 19th century | Europe | Wood pulp | [7] |",
         "blankAcceptTexts": {
           "6": [
-            "linen and cotton rags",
-            "cotton",
-            "linen and cotton"
+            "cotton rags",
+            "linen rags",
+            "cotton"
           ],
           "7": [
             "acidic",
@@ -226,6 +230,7 @@
             "faster degradation"
           ]
         }
+
       }
     },
     {

@@ -1,0 +1,443 @@
+{
+  "totalQuestions": 19,
+  "questions": [
+    {
+      "questionType": "TRUE_FALSE_NOT_GIVEN",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 1,
+      "passageText": "Artificial Light at Night (ALAN) has emerged as a pervasive and escalating form of pollution, recognized as a significant global change issue in the 21st century. While terrestrial ecosystems have been the primary focus of ALAN research, recent years have witnessed a substantial expansion in our understanding of its impacts on marine environments. Studies indicate that at least 22% of coastal regions are exposed to ALAN, with light from urban areas eliciting biological responses in seafloor-dwelling organisms in adjacent habitats. Globally, approximately 1.9 million km² of coastal seas are affected by ALAN at a depth of 1 meter, with 840,000 km² experiencing such impacts at 20 meters. The Mediterranean, Red Sea, Persian Gulf, and seas of Southeast Asia are among the most exposed regions. Notably, 20% of the world's Marine Protected Areas are exposed to ALAN across their entire range, underscoring the widespread nature of this phenomenon.\n\nThe depth to which biologically important ALAN penetrates marine environments varies significantly around the world. In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters, while in the Black Sea, Red Sea, and Persian Gulf, it reaches around 30 meters. In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters. These findings are derived from a combination of data on artificial night sky brightness, sea surface irradiances, and inherent optical water properties, validated against in situ measurements from the Persian Gulf. The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migration in marine organisms, such as female Calanus copepods. This data provides a critical foundation for understanding the extent to which marine ecosystems are exposed to artificial light.\n\nThe implications of ALAN for marine organisms and ecosystems are profound and multifaceted. ALAN has the potential to disrupt a wide array of biological processes and habitats that rely on natural light cycles. These include diel vertical migrations, which constitute the largest migration of biomass on the planet, as well as coral spawning and symbiotic relationships crucial for coral reef health. Consumer-resource interactions, which are fundamental to the structure of marine food webs, are also affected. Furthermore, the migrations and orientation of marine organisms, essential for their survival, are compromised by ALAN. The recruitment of sessile invertebrate larvae into marine habitats is another process impacted by artificial light, with significant consequences for biodiversity and ecosystem resilience.\n\nResearch has shown that ALAN affects various marine environments differently. Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustaceans, polychaetes, and bivalves. Many of these species exhibit dynamic day/night activity rhythms governed by natural light cycles and moonlight. The encroachment of ALAN into these ecosystems is expected to have a substantial negative impact on their biodiversity. Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods, with some species showing immediate recovery once the light is removed. However, the long-term effects of such disruptions on feeding rates, absorption efficiency, and growth rates remain less clear and warrant further investigation.\n\nIn rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a variety of sessile and mobile animals. In the Mediterranean, lit areas at night have been found to increase the biomass and photosynthetic efficiency of cyanobacteria-dominated MPB. The effects of ALAN on sessile species are complex, with some taxa showing positive or negative responses depending on the light intensity and species-specific light optima. For mobile organisms, such as the ecologically important abalone Concholepas concholepas, ALAN has been shown to increase metabolic rates and alter foraging behaviors, highlighting the potential for broader ecological impacts.\n\nThe challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, making it difficult to compare study results. There is no globally recognized standard for monitoring biologically active light, and the tools commonly used, such as lux meters, often fail to account for the full spectrum of light wavelengths that are biologically relevant. This limitation underscores the need for more sophisticated and standardized approaches to measuring light in ecological studies.\n\nIn conclusion, while ALAN is a well-documented threat to marine turtles, its effects on other marine organisms and ecosystems are only beginning to be understood. The ongoing expansion of ALAN presents a critical challenge for conservation practitioners and researchers alike. Addressing this challenge requires a concerted effort to fill existing knowledge gaps, develop effective management strategies, and implement site-specific interventions to mitigate the impacts of artificial light on marine biodiversity and ecosystem health.",
+      "claimId": "claim_live_1",
+      "claimsMap": {
+        "claim_live_1": {
+          "claimId": "claim_live_1",
+          "text": "There is no globally recognized standard for monitoring biologically active light, and the tools commonly used, such as lux meters, often fail to account for the full spectrum of light wavelengths that are biologically relevant."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 1,
+        "statement": "Lux meters are considered a globally recognized standard for monitoring biologically active light.",
+        "answer": "FALSE",
+        "evidenceQuote": "There is no globally recognized standard for monitoring biologically active light, and the tools commonly used, such as lux meters, often fail to account for the full spectrum of light wavelengths that are biologically relevant.",
+        "explanation": "The passage explicitly states there is no globally recognized standard for monitoring biologically active light, and tools like lux meters fail to account for biologically relevant light wavelengths, directly contradicting the statement."
+      }
+    },
+    {
+      "questionType": "SENTENCE_COMPLETION",
+      "provenance": "minimax_live_accepted",
+      "questionNumber": 8,
+      "passageText": "Artificial Light at Night (ALAN) has emerged as a pervasive and escalating form of pollution, recognized as a significant global change issue in the 21st century. While terrestrial ecosystems have been the primary focus of ALAN research, recent years have witnessed a substantial expansion in our understanding of its impacts on marine environments. Studies indicate that at least 22% of coastal regions are exposed to ALAN, with light from urban areas eliciting biological responses in seafloor-dwelling organisms in adjacent habitats. Globally, approximately 1.9 million km² of coastal seas are affected by ALAN at a depth of 1 meter, with 840,000 km² experiencing such impacts at 20 meters. The Mediterranean, Red Sea, Persian Gulf, and seas of Southeast Asia are among the most exposed regions. Notably, 20% of the world's Marine Protected Areas are exposed to ALAN across their entire range, underscoring the widespread nature of this phenomenon.\n\nThe depth to which biologically important ALAN penetrates marine environments varies significantly around the world. In the Mediterranean and Northeast Atlantic, ALAN can affect depths of up to 50 meters, while in the Black Sea, Red Sea, and Persian Gulf, it reaches around 30 meters. In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters. These findings are derived from a combination of data on artificial night sky brightness, sea surface irradiances, and inherent optical water properties, validated against in situ measurements from the Persian Gulf. The term 'biologically important ALAN' refers to the minimum irradiances of white light that trigger diel vertical migration in marine organisms, such as female Calanus copepods. This data provides a critical foundation for understanding the extent to which marine ecosystems are exposed to artificial light.\n\nThe implications of ALAN for marine organisms and ecosystems are profound and multifaceted. ALAN has the potential to disrupt a wide array of biological processes and habitats that rely on natural light cycles. These include diel vertical migrations, which constitute the largest migration of biomass on the planet, as well as coral spawning and symbiotic relationships crucial for coral reef health. Consumer-resource interactions, which are fundamental to the structure of marine food webs, are also affected. Furthermore, the migrations and orientation of marine organisms, essential for their survival, are compromised by ALAN. The recruitment of sessile invertebrate larvae into marine habitats is another process impacted by artificial light, with significant consequences for biodiversity and ecosystem resilience.\n\nResearch has shown that ALAN affects various marine environments differently. Sandy beaches, which constitute over 80% of ice-free coastlines, support a rich diversity of fauna, including crustaceans, polychaetes, and bivalves. Many of these species exhibit dynamic day/night activity rhythms governed by natural light cycles and moonlight. The encroachment of ALAN into these ecosystems is expected to have a substantial negative impact on their biodiversity. Laboratory studies have demonstrated that ALAN can significantly reduce the locomotor activity of amphipods and isopods, with some species showing immediate recovery once the light is removed. However, the long-term effects of such disruptions on feeding rates, absorption efficiency, and growth rates remain less clear and warrant further investigation.\n\nIn rocky intertidal shores, ALAN influences both primary producers, such as microphytobenthos and macroalgae, and a variety of sessile and mobile animals. In the Mediterranean, lit areas at night have been found to increase the biomass and photosynthetic efficiency of cyanobacteria-dominated MPB. The effects of ALAN on sessile species are complex, with some taxa showing positive or negative responses depending on the light intensity and species-specific light optima. For mobile organisms, such as the ecologically important abalone Concholepas concholepas, ALAN has been shown to increase metabolic rates and alter foraging behaviors, highlighting the potential for broader ecological impacts.\n\nThe challenges of measuring ecological light are significant, as current methodologies and instruments vary widely, making it difficult to compare study results. There is no globally recognized standard for monitoring biologically active light, and the tools commonly used, such as lux meters, often fail to account for the full spectrum of light wavelengths that are biologically relevant. This limitation underscores the need for more sophisticated and standardized approaches to measuring light in ecological studies.\n\nIn conclusion, while ALAN is a well-documented threat to marine turtles, its effects on other marine organisms and ecosystems are only beginning to be understood. The ongoing expansion of ALAN presents a critical challenge for conservation practitioners and researchers alike. Addressing this challenge requires a concerted effort to fill existing knowledge gaps, develop effective management strategies, and implement site-specific interventions to mitigate the impacts of artificial light on marine biodiversity and ecosystem health.",
+      "claimId": "claim_live_8",
+      "claimsMap": {
+        "claim_live_8": {
+          "claimId": "claim_live_8",
+          "text": "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 8,
+        "prompt": "In Southeast Asian seas, ALAN penetrates to approximately [8] meters.",
+        "answer": "20",
+        "evidenceQuote": "In Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters.",
+        "explanation": "The passage confirms that in Southeast Asian seas, such as the Gulf of Thailand and the South China Sea, ALAN penetrates to approximately 20 meters."
+      }
+    },
+    {
+      "questionType": "NOTE_COMPLETION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 2,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_2",
+      "claimsMap": {
+        "claim_p2_2": {
+          "claimId": "claim_p2_2",
+          "text": "Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 2,
+        "prompt": "Primary food source: chemosynthetic bacteria convert hydrogen sulfide into [2].",
+        "answer": "cellular energy",
+        "evidenceQuote": "converting hydrogen sulfide into cellular energy.",
+        "explanation": "The text directly confirms that bacteria convert hydrogen sulfide into cellular energy."
+      }
+    },
+    {
+      "questionType": "TABLE_COMPLETION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 3,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_3",
+      "claimsMap": {
+        "claim_p2_3": {
+          "claimId": "claim_p2_3",
+          "text": "Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 3,
+        "prompt": "Environmental condition: organisms tolerate extreme [3] and high thermal gradients.",
+        "answer": "hydrostatic pressures",
+        "evidenceQuote": "thrive in extreme hydrostatic pressures and high thermal gradients.",
+        "explanation": "The text identifies extreme hydrostatic pressures as the environmental condition withstood by vent fauna."
+      }
+    },
+    {
+      "questionType": "FORM_COMPLETION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 4,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_4",
+      "claimsMap": {
+        "claim_p2_4": {
+          "claimId": "claim_p2_4",
+          "text": "Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 4,
+        "prompt": "Sampling apparatus: robotic arms equipped with suction samplers and [4].",
+        "answer": "hyperspectral cameras",
+        "evidenceQuote": "equipped with hyperspectral cameras and suction samplers to document biodiversity.",
+        "explanation": "The passage states robotic arms are equipped with hyperspectral cameras and suction samplers."
+      }
+    },
+    {
+      "questionType": "SHORT_ANSWER",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 5,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_5",
+      "claimsMap": {
+        "claim_p2_5": {
+          "claimId": "claim_p2_5",
+          "text": "Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 5,
+        "prompt": "What molecular adaptations assist organisms with metal toxicity in vent habitats?",
+        "answer": "metallothioneins",
+        "evidenceQuote": "Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins.",
+        "explanation": "The text names metal-binding metallothioneins as the protective molecular adaptation."
+      }
+    },
+    {
+      "questionType": "SUMMARY_COMPLETION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 9,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_9",
+      "claimsMap": {
+        "claim_p2_9": {
+          "claimId": "claim_p2_9",
+          "text": "Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 9,
+        "prompt": "Volcanic vents release geochemical plumes containing methane and [9] into the water column.",
+        "answer": "hydrogen sulfide",
+        "evidenceQuote": "Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents",
+        "explanation": "The passage explicitly notes that volcanic vents cycle hydrogen sulfide and methane."
+      }
+    },
+    {
+      "questionType": "SUMMARY_COMPLETION_BOX",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 10,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_10",
+      "claimsMap": {
+        "claim_p2_10": {
+          "claimId": "claim_p2_10",
+          "text": "Biological adaptations include novel heat-shock proteins."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 10,
+        "prompt": "Organisms survive intense thermal gradients through the production of [10].",
+        "answer": "heat-shock proteins",
+        "options": [
+          "A. heat-shock proteins",
+          "B. calcareous shells",
+          "C. visual photophores",
+          "D. gas bladders"
+        ],
+        "evidenceQuote": "Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins.",
+        "explanation": "The passage highlights novel heat-shock proteins as key thermal adaptations."
+      }
+    },
+    {
+      "questionType": "FLOW_CHART",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 12,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "svgXml": "<svg viewBox=\"0 0 800.0 400.0\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\">\n  <title>Subterranean Geothermal Energy Cycle</title>\n  <desc>Flowchart illustrating the cyclic circulation of mineral fluids through abyssal hydrothermal chimneys.</desc>\n  <style>\n    .diagram-bg { fill: #ffffff; }\n    .shape { stroke-linejoin: round; stroke-linecap: round; }\n    .label { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; fill: #1e293b; text-anchor: middle; dominant-baseline: middle; }\n    .step-box { rx: 8px; ry: 8px; fill: #f8fafc; stroke: #3b82f6; stroke-width: 2px; }\n    .step-title { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 14px; font-weight: 600; fill: #0f172a; text-anchor: middle; }\n    .step-desc { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 12px; fill: #64748b; text-anchor: middle; }\n    .connector { stroke: #64748b; stroke-width: 2px; fill: none; }\n    .callout-badge circle { fill: #ef4444; stroke: #ffffff; stroke-width: 2px; }\n    .callout-badge text { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 13px; font-weight: bold; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }\n  </style>\n  <defs>\n    <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\">\n      <path d=\"M 0 1 L 10 5 L 0 9 z\" fill=\"#64748b\" />\n    </marker>\n  </defs>\n  <rect width=\"800.0\" height=\"400.0\" class=\"diagram-bg\" />\n  <line x1=\"230.0\" y1=\"200.0\" x2=\"310.0\" y2=\"200.0\" class=\"connector\" marker-end=\"url(#arrow)\" />\n  <line x1=\"490.0\" y1=\"200.0\" x2=\"570.0\" y2=\"200.0\" class=\"connector\" marker-end=\"url(#arrow)\" />\n  <g id=\"s1\" class=\"flowchart-step\">\n    <rect class=\"step-box\" x=\"50.0\" y=\"160.0\" width=\"180.0\" height=\"80.0\" />\n    <text class=\"step-title\" x=\"140.0\" y=\"190.0\">Oceanic Infiltration</text>\n    <text class=\"step-desc\" x=\"140.0\" y=\"212.0\">Cold sea water penetrates basalt fissures</text>\n  </g>\n  <g id=\"s2\" class=\"flowchart-step\">\n    <rect class=\"step-box\" x=\"310.0\" y=\"160.0\" width=\"180.0\" height=\"80.0\" />\n    <text class=\"step-title\" x=\"400.0\" y=\"205.0\">Magmatic Heating</text>\n  </g>\n  <g id=\"s3\" class=\"flowchart-step\">\n    <rect class=\"step-box\" x=\"570.0\" y=\"160.0\" width=\"180.0\" height=\"80.0\" />\n    <text class=\"step-title\" x=\"660.0\" y=\"190.0\">Chimney Ejection</text>\n    <text class=\"step-desc\" x=\"660.0\" y=\"212.0\">Superheated hydrothermal plumes expel minerals</text>\n  </g>\n  <g class=\"callout-badge\" data-callout-id=\"12\">\n    <circle cx=\"400.0\" cy=\"130.0\" r=\"16\" />\n    <text x=\"400.0\" y=\"130.0\">12</text>\n    <title>Magmatic heating zone</title>\n  </g>\n</svg>",
+      "claimId": "claim_p2_12",
+      "claimsMap": {
+        "claim_p2_12": {
+          "claimId": "claim_p2_12",
+          "text": "The subterranean circulation involves magmatic heating of infiltrated seawater."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 12,
+        "prompt": "Infiltration -> [12] -> Chimney Ejection",
+        "answer": "magmatic heating",
+        "evidenceQuote": "subterranean circulation involves magmatic heating of infiltrated seawater",
+        "explanation": "The flow chart step corresponds to magmatic heating of infiltrated seawater."
+      }
+    },
+    {
+      "questionType": "DIAGRAM_LABEL",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 13,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "svgXml": "<svg viewBox=\"0 0 800.0 600.0\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\">\n  <title>Hydrothermal Vent Chimney Anatomy</title>\n  <desc>Cross-section architecture of deep seafloor black smoker chimney with labeled mineral layers.</desc>\n  <style>\n    .diagram-bg { fill: #ffffff; }\n    .shape { stroke-linejoin: round; stroke-linecap: round; }\n    .label { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; fill: #1e293b; text-anchor: middle; dominant-baseline: middle; }\n    .step-box { rx: 8px; ry: 8px; fill: #f8fafc; stroke: #3b82f6; stroke-width: 2px; }\n    .step-title { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 14px; font-weight: 600; fill: #0f172a; text-anchor: middle; }\n    .step-desc { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 12px; fill: #64748b; text-anchor: middle; }\n    .connector { stroke: #64748b; stroke-width: 2px; fill: none; }\n    .callout-badge circle { fill: #ef4444; stroke: #ffffff; stroke-width: 2px; }\n    .callout-badge text { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 13px; font-weight: bold; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }\n  </style>\n  <defs>\n    <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\">\n      <path d=\"M 0 1 L 10 5 L 0 9 z\" fill=\"#64748b\" />\n    </marker>\n  </defs>\n  <rect width=\"800.0\" height=\"600.0\" class=\"diagram-bg\" />\n  <rect id=\"outer\" class=\"shape\" x=\"100.0\" y=\"100.0\" width=\"250.0\" height=\"350.0\" fill=\"#f8fafc\" stroke=\"#0f172a\" stroke-width=\"2.0\" />\n  <text class=\"label\" x=\"225.0\" y=\"275.0\">Anhydrite Crust</text>\n  <circle id=\"core\" class=\"shape\" cx=\"225.0\" cy=\"275.0\" r=\"50.0\" fill=\"#e2e8f0\" stroke=\"#334155\" stroke-width=\"2.0\" />\n  <text class=\"label\" x=\"225.0\" y=\"275.0\">Central Conduit</text>\n  <g class=\"callout-badge\" data-callout-id=\"13\">\n    <circle cx=\"225.0\" cy=\"275.0\" r=\"16\" />\n    <text x=\"225.0\" y=\"275.0\">13</text>\n    <title>Central mineral conduit</title>\n  </g>\n</svg>",
+      "claimId": "claim_p2_13",
+      "claimsMap": {
+        "claim_p2_13": {
+          "claimId": "claim_p2_13",
+          "text": "chalcopyrite lines the central conduit."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 13,
+        "prompt": "Label [13] on the central mineral conduit of the hydrothermal chimney",
+        "answer": "central conduit",
+        "evidenceQuote": "chalcopyrite lines the central conduit.",
+        "explanation": "The diagram callout indicates the central conduit lined with chalcopyrite."
+      }
+    },
+    {
+      "questionType": "MATCHING_INFORMATION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 14,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_14",
+      "claimsMap": {
+        "claim_p2_14": {
+          "claimId": "claim_p2_14",
+          "text": "Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 14,
+        "prompt": "A description of mineral deposition patterns across chimney structures",
+        "answer": "B",
+        "options": [
+          "A. Paragraph 1",
+          "B. Paragraph 2",
+          "C. Paragraph 3"
+        ],
+        "evidenceQuote": "Mineral precipitates deposit crystalline anhydrite on chimney outer walls",
+        "explanation": "Paragraph 2 describes how mineral precipitates deposit anhydrite and chalcopyrite."
+      }
+    },
+    {
+      "questionType": "MATCHING_FEATURES",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 15,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_15",
+      "claimsMap": {
+        "claim_p2_15": {
+          "claimId": "claim_p2_15",
+          "text": "Biological adaptations include novel heat-shock proteins."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 15,
+        "prompt": "Identified novel heat-shock proteins aiding hydrothermal fauna",
+        "answer": "A",
+        "options": [
+          "A. Cambridge Biologists",
+          "B. Woods Hole Oceanographers",
+          "C. Tokyo Geochemists"
+        ],
+        "evidenceQuote": "Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins.",
+        "explanation": "The research group is associated with documenting the novel heat-shock adaptations."
+      }
+    },
+    {
+      "questionType": "CLASSIFICATION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 16,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_16",
+      "claimsMap": {
+        "claim_p2_16": {
+          "claimId": "claim_p2_16",
+          "text": "Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 16,
+        "prompt": "Classify the following adaptation: converts hydrogen sulfide into chemical energy",
+        "answer": "A",
+        "options": [
+          "A. Primary chemotrophs",
+          "B. Mobile predators",
+          "C. Detrital scavengers"
+        ],
+        "evidenceQuote": "Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy.",
+        "explanation": "Primary chemotrophs are classified by their conversion of hydrogen sulfide into energy."
+      }
+    },
+    {
+      "questionType": "MATCHING_HEADING",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 27,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_27",
+      "claimsMap": {
+        "claim_p3_27": {
+          "claimId": "claim_p3_27",
+          "text": "Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 27,
+        "prompt": "Paragraph A",
+        "answer": "ii",
+        "options": [
+          "i. Socioeconomic biases in testing",
+          "ii. Long-term neuroimaging cohort findings",
+          "iii. Curricula reforms in schools",
+          "iv. Early acoustic reflexes"
+        ],
+        "evidenceQuote": "Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects.",
+        "explanation": "Paragraph A summarizes the seven-year longitudinal cohort investigation and neuroimaging findings."
+      }
+    },
+    {
+      "questionType": "YES_NO_NOT_GIVEN",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 28,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_28",
+      "claimsMap": {
+        "claim_p3_28": {
+          "claimId": "claim_p3_28",
+          "text": "early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 28,
+        "statement": "Acquiring a second language in early childhood strengthens neural prefrontal connectivity.",
+        "answer": "YES",
+        "evidenceQuote": "early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity.",
+        "explanation": "The author reports that early second language acquisition reinforces prefrontal cortical connectivity."
+      }
+    },
+    {
+      "questionType": "MULTIPLE_CHOICE_SINGLE",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 29,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_29",
+      "claimsMap": {
+        "claim_p3_29": {
+          "claimId": "claim_p3_29",
+          "text": "cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 29,
+        "prompt": "What magnitude of cognitive flexibility advantage was observed in proficient bilinguals?",
+        "answer": "B",
+        "correctOption": "B",
+        "options": [
+          "A. Ten percent",
+          "B. Twenty-four percent",
+          "C. Fifty percent",
+          "D. Seventy-five percent"
+        ],
+        "evidenceQuote": "cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals.",
+        "explanation": "The text explicitly records an advantage of approximately twenty-four percent."
+      }
+    },
+    {
+      "questionType": "MULTIPLE_CHOICE_MULTIPLE",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 30,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_30",
+      "claimsMap": {
+        "claim_p3_30": {
+          "claimId": "claim_p3_30",
+          "text": "educational background and formal literacy levels exert substantial confounding effects."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 30,
+        "prompt": "Which TWO confounding variables did dissenting researchers emphasize?",
+        "answers": [
+          "A",
+          "C"
+        ],
+        "options": [
+          "A. Educational background",
+          "B. Dietary nutrition",
+          "C. Formal literacy levels",
+          "D. Handedness preferences"
+        ],
+        "evidenceQuote": "educational background and formal literacy levels exert substantial confounding effects.",
+        "explanation": "The passage identifies educational background and formal literacy levels as confounding factors."
+      }
+    },
+    {
+      "questionType": "MATCHING_ENDINGS",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 31,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_31",
+      "claimsMap": {
+        "claim_p3_31": {
+          "claimId": "claim_p3_31",
+          "text": "The finalized data conclusively established that language switching exercises distinct executive control networks."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 31,
+        "prompt": "Frequent language switching among bilingual speakers",
+        "answer": "C",
+        "options": [
+          "A. diminishes structural hippocampus density over time.",
+          "B. relies exclusively on auditory cortex stimulation.",
+          "C. exercises specialized executive control networks independently.",
+          "D. correlates negatively with standardized test outcomes."
+        ],
+        "evidenceQuote": "language switching exercises distinct executive control networks independent of educational attainment.",
+        "explanation": "The passage establishes that language switching exercises distinct executive control networks."
+      }
+    },
+    {
+      "questionType": "CHOOSING_TITLE",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 40,
+      "passageText": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation. Researchers at Cambridge University conducted a comprehensive seven-year longitudinal cohort study involving more than eight hundred bilingual subjects. Primary analytical findings revealed that early acquisition of a secondary language significantly reinforces prefrontal cortical connectivity. Subsequent statistical modeling demonstrated that cognitive flexibility scores were approximately twenty-four percent higher among proficient bilingual individuals. Nevertheless, some dissenting academic researchers have cautioned that socioeconomic confounding variables must be rigorously controlled in subsequent experimental trials. In particular, cross-cultural observational datasets indicate that educational background and formal literacy levels exert substantial confounding effects. The finalized data conclusively established that language switching exercises distinct executive control networks independent of educational attainment. These seminal discoveries hold profound implications for designing innovative pedagogical curricula.",
+      "claimId": "claim_p3_40",
+      "claimsMap": {
+        "claim_p3_40": {
+          "claimId": "claim_p3_40",
+          "text": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 40,
+        "prompt": "Which title best summarizes the main discussion of the reading passage?",
+        "answer": "B",
+        "correctOption": "B",
+        "options": [
+          "A. The Demographics of Monolingual Education",
+          "B. Multilingual Cognitive Architecture and Neural Connectivity",
+          "C. Historical Literacy Tests in Northern Europe",
+          "D. Limitations of Functional Magnetic Resonance Scans"
+        ],
+        "evidenceQuote": "Recent empirical investigations in cognitive linguistics and neuroscience have uncovered remarkable insights into multilingual memory representation.",
+        "explanation": "The passage focuses on multilingual memory representation, executive control networks, and neural connectivity."
+      }
+    }
+  ]
+}

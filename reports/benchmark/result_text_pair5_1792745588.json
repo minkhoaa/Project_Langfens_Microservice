@@ -1,0 +1,61 @@
+{
+  "run_id": "run_102d049fc1ff4f4e9a5597b4a8e84ee6",
+  "observed_model": "MiniMax-Text-01",
+  "completed_calls": 6,
+  "total_tokens_used": 14842,
+  "prompt_tokens_used": 12582,
+  "completion_tokens_used": 2260,
+  "reasoning_tokens_used": 0,
+  "avg_call_latency_seconds": 14.843,
+  "evaluations_summary": {
+    "eval_answer_verbatim_length": {
+      "PASS": 2
+    },
+    "eval_blind_solver_adversary": {
+      "ERROR": 1,
+      "PASS": 1
+    },
+    "eval_blueprint": {
+      "PASS": 1
+    },
+    "eval_evidence_graph": {
+      "PASS": 3
+    },
+    "eval_evidence_offsets": {
+      "PASS": 2
+    },
+    "eval_passage_fidelity": {
+      "PASS": 1
+    },
+    "eval_passage_semantic": {
+      "PASS": 1
+    },
+    "eval_passage_word_count": {
+      "PASS": 1
+    },
+    "eval_question_semantic": {
+      "PASS": 2
+    },
+    "eval_question_structure": {
+      "PASS": 2
+    },
+    "eval_question_uniqueness": {
+      "PASS": 2
+    },
+    "eval_source": {
+      "PASS": 3
+    }
+  },
+  "exam_id": null,
+  "persisted_questions": 0,
+  "arm": "text",
+  "model": "MiniMax-Text-01",
+  "pair_id": 5,
+  "pair_name": "Plain Text",
+  "job_id": "102d049f-c1ff-4f4e-9a55-97b4a8e84ee6",
+  "status": "Failed",
+  "wall_time_seconds": 120.12,
+  "completed_sections": 0,
+  "error": "{\"detail\":\"question:run_102d049fc1ff4f4e9a5597b4a8e84ee6:2: EVALUATOR_ERROR: evaluator error, timeout or incomplete result\"}",
+  "billable_cost_usd": 0.01484
+}

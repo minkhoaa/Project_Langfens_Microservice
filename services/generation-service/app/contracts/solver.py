@@ -59,7 +59,7 @@ class StudentVisibleOption(CanonicalBaseModel):
     Contains ONLY the letter key and the visible text. Strictly forbids correctOption,
     explanation, or distractor annotations.
     """
-    key: str = Field(..., pattern=r"^[A-D]$", description="Option letter: A, B, C, or D")
+    key: str = Field(..., pattern=r"^[A-Za-z0-9ivxlcdmIVXLCDM\-_]+$", description="Option key: e.g. A-H, Roman numeral i-x, or identifier")
     text: str = Field(..., min_length=1, description="Option text as visible to the student")
 
 
@@ -253,3 +253,153 @@ class DiversityProfile(CanonicalBaseModel):
     is_independent_model: bool = Field(..., alias="isIndependentModel")
     correlated_review: bool = Field(..., alias="correlatedReview")
     limitation_note: Optional[str] = Field(default=None, alias="limitationNote")
+
+
+FORBIDDEN_SERIALIZED_ALIASES = frozenset({
+    "answer",
+    "correct_option",
+    "correctoption",
+    "generator_proposed_answer",
+    "evidence_quote",
+    "evidencequote",
+    "evidence_span",
+    "evidencespan",
+    "explanation",
+    "absence_assessment",
+    "absenceassessment",
+    "canary",
+    "canary_secret",
+    "hidden_canary",
+    "rejected",
+    "rejection_reasons",
+    "rejectionreasons",
+    "generation_prompt",
+    "generationprompt",
+    "expert_label",
+    "hidden_rationale",
+    "metadata",
+    "score",
+})
+
+MULTIWORD_CANARY_TOKENS = (
+    "generator_proposed_answer",
+    "correct_option",
+    "correctoption",
+    "evidence_quote",
+    "evidencequote",
+    "evidence_span",
+    "evidencespan",
+    "canary_secret",
+    "hidden_canary",
+    "hidden_rationale",
+    "absence_assessment",
+    "absenceassessment",
+    "rejection_reasons",
+    "rejectionreasons",
+    "generation_prompt",
+    "generationprompt",
+    "expert_label",
+)
+
+
+def scan_text_for_security_leaks(text: str) -> None:
+    """Scans text for serialized aliases or canary tokens that could leak private answers."""
+    if not text:
+        return
+    text_lower = text.lower()
+    for token in MULTIWORD_CANARY_TOKENS:
+        if token in text_lower:
+            raise SecurityLeakageError(
+                f"Prohibited alias or canary '{token}' detected in view text"
+            )
+
+    trimmed = text.strip()
+    if (trimmed.startswith("{") and trimmed.endswith("}")) or (
+        trimmed.startswith("[") and trimmed.endswith("]")
+    ):
+        try:
+            parsed = json.loads(trimmed)
+        except Exception:
+            parsed = None
+
+        if parsed is not None:
+            def _check_obj(obj: Any) -> None:
+                if isinstance(obj, dict):
+                    for k, v in obj.items():
+                        k_clean = str(k).lower().replace("-", "_").replace(" ", "")
+                        if k_clean in FORBIDDEN_SERIALIZED_ALIASES:
+                            raise SecurityLeakageError(
+                                f"Serialized alias key '{k}' detected in view text"
+                            )
+                        _check_obj(v)
+                elif isinstance(obj, list):
+                    for item in obj:
+                        _check_obj(item)
+
+            _check_obj(parsed)
+
+class CanonicalQuestion(CanonicalBaseModel):
+    """Canonical Question schema corresponding to JSON_SCHEMAS.json Question."""
+    question_id: str = Field(..., min_length=1, alias="question_id")
+    question_type: str = Field(..., alias="question_type")
+    text: str = Field(..., min_length=1)
+    options: List[str] = Field(default_factory=list)
+    instructions: str = Field(..., min_length=1)
+
+
+class SolverView(CanonicalBaseModel):
+    """Isolated view for blind solvers and adversaries (JSON_SCHEMAS.json SolverView).
+
+    Strictly excludes generator_proposed_answer, correct_option, explanation, canaries,
+    and private rationales. Scans context_text and allowed_reference_text for any
+    serialized alias or canary leakage.
+    """
+    context_text: str = Field(..., min_length=1, alias="context_text")
+    question: CanonicalQuestion
+    allowed_reference_text: str = Field(..., min_length=1, alias="allowed_reference_text")
+
+    @model_validator(mode="after")
+    def validate_no_leakage(self) -> Self:
+        for field_name, text in [
+            ("context_text", self.context_text),
+            ("allowed_reference_text", self.allowed_reference_text),
+            ("question_text", getattr(self.question, "text", "") or getattr(self.question, "prompt", "")),
+            ("question_instructions", getattr(self.question, "instructions", "")),
+            ("shared_context", getattr(self.question, "shared_context", "")),
+        ]:
+            if text and isinstance(text, str):
+                scan_text_for_security_leaks(text)
+        for opt in getattr(self.question, "options", []) or []:
+            opt_text = opt.text if hasattr(opt, "text") else (opt.get("text") if isinstance(opt, dict) else str(opt))
+            if opt_text and isinstance(opt_text, str):
+                scan_text_for_security_leaks(opt_text)
+        return self
+
+
+class BlindSolverResult(CanonicalBaseModel):
+    """Result of blind solver execution matching JSON_SCHEMAS.json."""
+    question_id: str = Field(..., min_length=1, alias="question_id")
+    proposed_solution: str = Field(..., min_length=1, alias="proposed_solution")
+    reasoning_evidence: str = Field(..., min_length=1, alias="reasoning_evidence")
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+
+
+class AnswerVerificationView(CanonicalBaseModel):
+    """Post-solve verification view (JSON_SCHEMAS.json AnswerVerificationView).
+
+    Constructed ONLY after the blind solve has completed.
+    """
+    blind_result: BlindSolverResult = Field(..., alias="blind_result")
+    generator_proposed_answer: str = Field(..., min_length=1, alias="generator_proposed_answer")
+    source_evidence_ref: str = Field(..., min_length=1, alias="source_evidence_ref")
+    acceptable_variants: List[str] = Field(default_factory=list, alias="acceptable_variants")
+
+class GoldReferenceView(CanonicalBaseModel):
+    """Restricted gold reference view for external adjudication and research scoring.
+
+    Never accessible to generator or blind solver views.
+    """
+    item_id: str = Field(..., min_length=1, alias="item_id")
+    expert_label: str = Field(..., min_length=1, alias="expert_label")
+    label_version: str = Field(..., min_length=1, alias="label_version")
+    adjudicator_id: str = Field(..., min_length=1, alias="adjudicator_id")

@@ -1,0 +1,251 @@
+{
+  "report_id": "rg10_independent_acceptance_report_v2_7",
+  "generated_at": "2026-10-16T13:45:00Z",
+  "evaluator_version": "neutral-eval-v2.7",
+  "historical_evaluator_version": "neutral-eval-v2.6",
+  "rubric_version": "rubric-qgeval-v2.7",
+  "governing_protocol": "generation_baseline/research/RQ2_PROTOCOL.md",
+  "runtime_environment": {
+    "local_python_version": "Python 3.10.12",
+    "production_container_target": "Python 3.12",
+    "dotnet_sdk_version": ".NET 10.0"
+  },
+  "gate_status": {
+    "software_ready": "PASS",
+    "quality_ready": "HOLD_CALIBRATION_ONLY_HOLDOUT_PENDING",
+    "research_ready": "HOLD",
+    "overall_gate_verdict": "HOLD"
+  },
+  "test_execution_disclosure": {
+    "passed_tests_full_suite": 374,
+    "core_regression_tests_passed": 205,
+    "evaluator_tests_passed": 79,
+    "dotnet_attempt_service_tests_passed": 73,
+    "v2_6_acceptance_tests_passed": 26,
+    "v2_7_remediation_tests_passed": 13,
+    "version_isolation_verified": true,
+    "historical_regressions": 0
+  },
+  "accounting_and_provider_status": {
+    "live_dispatches_executed": 28,
+    "tokens_consumed": 40279,
+    "estimated_spend_usd": 0.0604,
+    "subsequent_quota_status": "BLOCKED_EXTERNAL_QUOTA",
+    "provider_response_code": "HTTP 429: Token Plan usage limit reached (2056)",
+    "offline_verification_policy": "STRICT_OFFLINE_NO_UNAUTHORIZED_LIVE_CALLS"
+  },
+  "historical_grammar_audit": {
+    "source_campaign": "RG10_DEV_UNSEEN_PILOT_V4",
+    "audit_type": "ANALYTICAL_LINGUISTIC_AUDIT_NON_HUMAN_GOLD",
+    "total_items": 6,
+    "unique_items": 5,
+    "v2_5_prediction_pass_count": 1,
+    "v2_5_prediction_pass_rate": 0.1667,
+    "analytical_linguistic_valid_count": 5,
+    "analytical_linguistic_valid_rate": 0.8333,
+    "v2_6_prediction_pass_count": 5,
+    "v2_6_prediction_pass_rate": 0.8333,
+    "evaluator_false_rejections_v2_5": 5,
+    "evaluator_false_acceptances_v2_5": 1,
+    "evaluator_false_rejections_v2_6": 0,
+    "evaluator_false_acceptances_v2_6": 0
+  },
+  "fresh_grammar_audit": {
+    "source_campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+    "audit_type": "MODEL_RESCORE_PREDICTIONS",
+    "total_items": 12,
+    "inversion_items": 6,
+    "subjunctive_items": 6,
+    "v2_6_predicted_pass_count": 12,
+    "v2_6_predicted_pass_rate": 1.0,
+    "content_aware_novelty_rate": 1.0,
+    "zero_scenario_copying": true
+  },
+  "dev_acceptance_suite_v2_6_baseline": {
+    "description": "25 internal exploratory DEV acceptance cases evaluated under historical Evaluator v2.6",
+    "total_items": 25,
+    "denominators": {
+      "analytical_valid_denominator": 15,
+      "analytical_invalid_denominator": 10,
+      "total_items_denominator": 25
+    },
+    "confusion_matrix": {
+      "true_positives": 13,
+      "false_rejections": 2,
+      "true_negatives": 8,
+      "false_acceptances": 2,
+      "abstentions": 0
+    },
+    "metrics": {
+      "false_rejection_rate": 0.1333,
+      "false_acceptance_rate": 0.2000,
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "accuracy": 0.8400
+    },
+    "epistemic_qualification": "Historical baseline error envelope of Evaluator v2.6 before v2.7 linguistic remediation",
+    "discrepancies": [
+      {
+        "id": "INV-DEV-02",
+        "family": "Inversion",
+        "analytical_label": "VALID",
+        "prediction": "FAIL",
+        "discrepancy_type": "FALSE_REJECTION",
+        "cause": "Naive '-s' inflection heuristic treated base verb 'bypass' (ending in '-ss') as 3rd-person inflected verb"
+      },
+      {
+        "id": "CND-DEV-01",
+        "family": "Conditionals",
+        "analytical_label": "VALID",
+        "prediction": "FAIL",
+        "discrepancy_type": "FALSE_REJECTION",
+        "cause": "Evaluator conditional regex accepted non-inverted 'If' distractor as valid, declaring distractor ambiguity"
+      },
+      {
+        "id": "SUB-DEV-04",
+        "family": "Subjunctive",
+        "analytical_label": "INVALID",
+        "prediction": "PASS",
+        "discrepancy_type": "FALSE_ACCEPTANCE",
+        "cause": "Evaluator failed to detect multi-option base form ambiguity when carrier clauses diverged in subject noun phrasing"
+      },
+      {
+        "id": "SUB-DEV-05",
+        "family": "Subjunctive",
+        "analytical_label": "INVALID",
+        "prediction": "PASS",
+        "discrepancy_type": "FALSE_ACCEPTANCE",
+        "cause": "Prompt used adjective 'mandative' without base trigger 'mandate', bypassing mandative validator"
+      }
+    ]
+  },
+  "evaluator_v2_7_remediation": {
+    "evaluator_version": "neutral-eval-v2.7",
+    "rubric_version": "rubric-qgeval-v2.7",
+    "description": "Remediated evaluator v2.7 tested against the 25 diagnostic DEV acceptance cases",
+    "total_items": 25,
+    "denominators": {
+      "analytical_valid_denominator": 15,
+      "analytical_invalid_denominator": 10,
+      "total_items_denominator": 25
+    },
+    "confusion_matrix": {
+      "true_positives": 15,
+      "false_rejections": 0,
+      "true_negatives": 10,
+      "false_acceptances": 0,
+      "abstentions": 0
+    },
+    "metrics": {
+      "false_rejection_rate": 0.0,
+      "false_acceptance_rate": 0.0,
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "accuracy": 1.0
+    },
+    "resolved_defects": [
+      {
+        "id": "INV-DEV-02",
+        "family": "Inversion",
+        "analytical_label": "VALID",
+        "v2_6_prediction": "FAIL",
+        "v2_7_prediction": "PASS",
+        "remediation": "Verb-inflection filter updated to recognize base verbs ending in -ss (bypass, cross, discuss, assess, dismiss) and -eed as valid bare infinitives"
+      },
+      {
+        "id": "CND-DEV-01",
+        "family": "Conditionals",
+        "analytical_label": "VALID",
+        "v2_6_prediction": "FAIL",
+        "v2_7_prediction": "PASS",
+        "remediation": "Conditional validator updated with stem inversion constraint: non-inverted 'if' options disqualified as distractors when prompt specifies inverted conditional"
+      },
+      {
+        "id": "SUB-DEV-04",
+        "family": "Subjunctive",
+        "analytical_label": "INVALID",
+        "v2_6_prediction": "PASS",
+        "v2_7_prediction": "FAIL",
+        "remediation": "Robust subjunctive subordinate clause parsing extracts base forms (pay, appear) across diverse carrier and subject structures, correctly detecting multi-option ambiguity"
+      },
+      {
+        "id": "SUB-DEV-05",
+        "family": "Subjunctive",
+        "analytical_label": "INVALID",
+        "v2_6_prediction": "PASS",
+        "v2_7_prediction": "FAIL",
+        "remediation": "Mandative triggers expanded to include grammatical terms (mandative, subjunctive) and carrier verbs, detecting defective MCQs with zero base forms"
+      }
+    ],
+    "inconclusive_handling": "Genuinely inconclusive grammar cases yield EvaluationVerdict.UNCERTAIN rather than unsupported PASS or FAIL",
+    "epistemic_qualification": "While Evaluator v2.7 achieves 100% concordance on the 25 diagnostic DEV cases, in-sample calibration does not prove generalizability; confirmatory quality acceptance remains pending the independent, uninspected human holdout"
+  },
+  "reading_reconciliation": {
+    "source_campaign": "RG10_DEV_GRAMMAR_FIX_V5",
+    "total_reading_slots": 9,
+    "arm_breakdown": {
+      "arm_a_slots": 3,
+      "arm_b_slots": 3,
+      "arm_c_slots": 3
+    },
+    "original_evaluator_pass_count": 6,
+    "original_evaluator_fail_count": 3,
+    "failures": [
+      {
+        "item": "dev-rd-06__arm_A__att1 (Q3)",
+        "stem": "Pyroclastic fragmentation occurs in deep benthic environments due to high hydrostatic pressure.",
+        "proposed_answer": "FALSE",
+        "original_verdict": "FAIL",
+        "original_abstention_reason": "FALSE contradiction: passage affirms proposition without contradiction",
+        "forensic_finding": "EVALUATOR_DEFECT",
+        "linguistic_rationale": "Passage states hydrostatic pressure suppresses volatile exsolution, thereby preventing pyroclastic fragmentation. Statement asserts it occurs due to pressure. Generator proposed FALSE, which is contextually and factually correct. Evaluator contradiction regex failed on 'preventing'.",
+        "corrected_derived_verdict": "PASS"
+      },
+      {
+        "item": "dev-rd-06__arm_B__att1 (Q3)",
+        "stem": "Pyroclastic fragmentation is common in deep benthic environments.",
+        "proposed_answer": "FALSE",
+        "original_verdict": "FAIL",
+        "original_abstention_reason": "FALSE contradiction: passage affirms proposition without contradiction",
+        "forensic_finding": "EVALUATOR_DEFECT",
+        "linguistic_rationale": "Passage states fragmentation is prevented. A phenomenon prevented cannot be common. Generator proposed FALSE, which is correct.",
+        "corrected_derived_verdict": "PASS"
+      },
+      {
+        "item": "dev-rd-06__arm_C__att1 (Q2)",
+        "stem": "TRUE, FALSE or NOT GIVEN: Pillow lava forms when basaltic magma erupts into seawater at depths exceeding 200 atmospheres.",
+        "proposed_answer": "TRUE",
+        "original_verdict": "FAIL",
+        "original_abstention_reason": "Entailment contradiction: passage contradicts TRUE statement",
+        "forensic_finding": "GENERATOR_DEFECT_AND_INSUFFICIENT_SUPPORT",
+        "linguistic_rationale": "Conflates physical pressure (atmospheres) with ocean depth (meters). Sentence 1 mentions abyssal depths; Sentence 5 mentions pressure exceeding 200 atmospheres. Passage does not support that pillow lava erupts 'at depths exceeding 200 atmospheres'. Proposed answer TRUE is factually defective.",
+        "corrected_derived_verdict": "FAIL"
+      }
+    ]
+  },
+  "confirmatory_holdout": {
+    "manifest_path": "generation_baseline/research/CONFIRMATORY_HOLDOUT_MANIFEST.json",
+    "specification_path": "generation_baseline/research/CONFIRMATORY_HOLDOUT_SPECIFICATION.md",
+    "checklist_path": "generation_baseline/research/INDEPENDENT_CURATOR_CHECKLIST_AND_SEALING_PROCEDURE.md",
+    "status": "SPECIFICATION_PENDING_INDEPENDENT_CURATION",
+    "holdout_type": "JUDGE_HOLDOUT",
+    "target_item_count": 30,
+    "reading_items_quota": 18,
+    "grammar_items_quota": 12,
+    "quarantined_families": [
+      "fam-astrophysics-pulsar-08",
+      "fam-paleontology-cambrian-09",
+      "fam-mood-subjunctive-08",
+      "fam-aspect-participle-09"
+    ],
+    "seals_status": "NULL_PENDING_INDEPENDENT_EXTERNAL_CURATION",
+    "rq2_paired_tasks_separation": "The 30-item judge holdout is strictly separate from the 25-40 paired tasks per domain (150-240 arm assignments) required for RQ2",
+    "synthetic_data_policy": "STRICTLY_PROHIBITED: Synthetic holdout data must NEVER be generated and labeled as independently curated"
+  },
+  "human_review_readiness": {
+    "packet_path": "generation_baseline/research/HUMAN_REVIEW_PACKET.json",
+    "protocol_path": "generation_baseline/research/HUMAN_REVIEW_PROTOCOL_AND_RUBRIC.md",
+    "status": "AWAITING_HUMAN_PANEL",
+    "synthetic_scores_fabricated": false
+  }
+}

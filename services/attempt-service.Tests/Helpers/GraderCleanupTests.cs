@@ -55,7 +55,7 @@ public class GraderCleanupTests
     }
 
     [Fact]
-    public void MatchingHeading_json_with_one_wrong_pair_returns_zero_with_feedback()
+    public void MatchingHeading_json_with_partial_matches_awards_partial_points()
     {
         var pairs = new Dictionary<string, string[]?>(StringComparer.OrdinalIgnoreCase)
         {
@@ -73,9 +73,45 @@ public class GraderCleanupTests
 
         var result = new MatchingHeadingGrader().Grade(MakeAnswer(raw), key);
 
+        // 2 out of 3 matched with 2.0 total points -> 1.33m
+        Assert.Equal(1.33m, result.AwardedPoints);
+        Assert.False(result.IsCorrect);
+        Assert.Equal("2/3 pairs matched", result.Feedback);
+    }
+
+    [Fact]
+    public void MatchingHeading_display_label_is_rejected_as_answer_key()
+    {
+        var pairs = new Dictionary<string, string[]?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["1"] = new[] { "iv", "The economic impact of tourism" },
+        };
+        var key = MatchingKey(pairs);
+
+        // Submitting the display label rather than the canonical key "iv" must be rejected
+        var result = new MatchingHeadingGrader().Grade(MakeAnswer("The economic impact of tourism"), key);
+
         Assert.Equal(0m, result.AwardedPoints);
         Assert.False(result.IsCorrect);
         Assert.Equal("One or more pairs do not match", result.Feedback);
+    }
+
+    [Fact]
+    public void MatchingHeading_single_pair_with_mismatched_target_key_resolves_and_scores()
+    {
+        var pairs = new Dictionary<string, string[]?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["2"] = new[] { "ii", "Government's safeguard in the West" },
+        };
+        var key = MatchingKey(pairs);
+        // Client sent JSON with key "1" for a single-item question whose pair key is "2"
+        var raw = JsonSerializer.Serialize(new Dictionary<string, string> { ["1"] = "ii" });
+
+        var result = new MatchingHeadingGrader().Grade(MakeAnswer(raw), key);
+
+        Assert.Equal(2m, result.AwardedPoints);
+        Assert.True(result.IsCorrect);
+        Assert.Null(result.Feedback);
     }
 
     [Fact]

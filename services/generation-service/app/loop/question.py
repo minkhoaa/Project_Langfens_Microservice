@@ -26,6 +26,7 @@ from app.contracts.issue import IssueScope, IssueSeverity
 from app.contracts.loop import DecisionType, LoopDecision, LoopReason, LoopState
 from app.evaluators.deterministic import (
     AnswerVerbatimAndLengthEvaluator,
+    EvidenceOffsetEvaluator,
     QuestionStructureEvaluator,
 )
 from app.evaluators.solver import BlindSolverEvaluator
@@ -54,6 +55,9 @@ from app.persistence.models import (
 from app.selection.selector import CandidateSelector, SelectionInfeasibleError
 
 logger = logging.getLogger(__name__)
+SECTION_MAX_TOKENS = 100_000
+SECTION_MAX_WALL_TIME_SECONDS = 900.0
+
 
 class QuestionCandidateLoop:
     """Bounded loop orchestrator for question candidate generation, evaluation, and selection."""
@@ -72,17 +76,36 @@ class QuestionCandidateLoop:
             reg = EvaluatorRegistry()
             reg.register(QuestionStructureEvaluator())
             reg.register(AnswerVerbatimAndLengthEvaluator())
+            reg.register(EvidenceOffsetEvaluator())
             evaluator_registry = reg
         self.evaluator_registry = evaluator_registry
         self.selector = selector or CandidateSelector()
 
+        base_required = ["eval_question_structure", "eval_answer_verbatim_length", "eval_evidence_offsets"]
+        if evaluator_registry.get("eval_blind_solver_adversary") is not None:
+            base_required.append("eval_blind_solver_adversary")
+        if evaluator_registry.get("eval_grounding_fidelity") is not None:
+            base_required.append("eval_grounding_fidelity")
+        default_required_ids = tuple(base_required)
+
         if policy is None:
             policy = LoopPolicy.from_settings(
-                required_evaluator_ids=("eval_question_structure", "eval_answer_verbatim_length"),
+                required_evaluator_ids=default_required_ids,
             )
         elif not policy.required_evaluator_ids:
-            policy = policy.model_copy(update={"required_evaluator_ids": ("eval_question_structure", "eval_answer_verbatim_length")})
+            policy = policy.model_copy(update={"required_evaluator_ids": default_required_ids})
         self.policy = policy
+
+    @staticmethod
+    def _select_reserved_workflow_operation(stored_state: Any, section_index: int, run_id: str) -> Optional[Any]:
+        expected_workflow_op_id = f"op_workflow_qcand_s{section_index}_{run_id[:8]}"
+        matching = [
+            o for o in (getattr(stored_state, "operations", []) or [])
+            if getattr(o, "operationType", None) == "WORKFLOW"
+            and getattr(o, "status", None) == "RESERVED"
+            and getattr(o, "operationId", None) == expected_workflow_op_id
+        ]
+        return matching[0] if matching else None
 
     async def run(
         self,
@@ -129,6 +152,25 @@ class QuestionCandidateLoop:
             budget_tracker.calls_used = int(stored_state.callsUsed)
         if hasattr(stored_state, "tokensUsed") and stored_state.tokensUsed:
             budget_tracker.tokens_used = int(stored_state.tokensUsed)
+        if hasattr(stored_state, "wallTimeUsedSeconds") and stored_state.wallTimeUsedSeconds:
+            budget_tracker.wall_time_used_seconds = float(stored_state.wallTimeUsedSeconds)
+
+        SECTION_MAX_TOKENS = 100_000
+        SECTION_MAX_WALL_TIME_SECONDS = 900.0
+
+        if not self.policy.is_unlimited:
+            if budget_tracker.tokens_used >= SECTION_MAX_TOKENS:
+                raise SelectionInfeasibleError(
+                    f"Cumulative section token budget exhausted before question loop: {budget_tracker.tokens_used} >= {SECTION_MAX_TOKENS}",
+                    step_count=1,
+                    reason="TOKEN_CAP",
+                )
+            if budget_tracker.get_elapsed_seconds() >= SECTION_MAX_WALL_TIME_SECONDS:
+                raise SelectionInfeasibleError(
+                    f"Cumulative section wall time budget exhausted before question loop: {budget_tracker.get_elapsed_seconds():.1f}s >= {SECTION_MAX_WALL_TIME_SECONDS}s",
+                    step_count=1,
+                    reason="WALL_TIME_CAP",
+                )
         # 3. Transactional Step Journal projection
         step_journal = StepJournal(
             run_id=run_id,
@@ -148,80 +190,67 @@ class QuestionCandidateLoop:
         else:
             sec_start = 1 if section_index == 1 else (14 if section_index == 2 else 27)
             sec_end = 13 if section_index == 1 else (26 if section_index == 2 else 40)
-        for art in stored_state.artifacts:
-            art_type = getattr(art, "artifact_type", None) or getattr(art, "artifactType", None)
-            # Rehydrate ArtifactResumeInfo (and other non-envelope) objects into a real ArtifactEnvelope
-            # so downstream code (e.g. assemble_immutable_section) that reads .payload does not crash.
-            if not isinstance(art, ArtifactEnvelope):
-                if getattr(art, "envelopeJson", None):
-                    try:
-                        env_obj: ArtifactEnvelope = ArtifactEnvelope.model_validate_json(art.envelopeJson)
-                    except Exception:
-                        env_obj = None  # fall through to envelope-less reconstruction below
-                    if env_obj is not None:
-                        art = env_obj
-                else:
-                    payload_fallback = getattr(art, "payload", None)
-                    if not payload_fallback and hasattr(art, "payloadJson"):
-                        import json
-                        try:
-                            payload_fallback = json.loads(art.payloadJson)
-                        except Exception:
-                            payload_fallback = {}
-                    elif not payload_fallback and hasattr(art, "contentJson"):
-                        import json
-                        try:
-                            payload_fallback = json.loads(art.contentJson)
-                        except Exception:
-                            payload_fallback = {}
-                    type_for_create = ArtifactType(art_type) if isinstance(art_type, str) else art_type
-                    art = ArtifactEnvelope.create(
-                        artifact_id=getattr(art, "artifactId", None) or getattr(art, "artifact_id", ""),
-                        artifact_type=type_for_create or ArtifactType.QUESTION,
-                        run_id=run_id,
-                        payload=payload_fallback or {},
-                        producer_version="2.0.0",
-                        version=getattr(art, "acceptedVersion", 1) or 1,
-                        section_id=section_index,
+        store_accepted_heads: Dict[str, ArtifactRef] = {}
+        for art_info in stored_state.artifacts:
+            if not getattr(art_info, "isStale", False):
+                try:
+                    store_accepted_heads[art_info.artifactId] = ArtifactRef(
+                        artifactId=art_info.artifactId,
+                        artifactType=ArtifactType(art_info.artifactType),
+                        version=art_info.acceptedVersion,
+                        contentHash=art_info.acceptedHash,
                     )
-            if art_type in (ArtifactType.QUESTION, "Question"):
-                payload = getattr(art, "payload", None)
-                if not payload and hasattr(art, "payloadJson"):
-                    import json
-                    try:
-                        payload = json.loads(art.payloadJson)
-                    except Exception:
-                        payload = {}
-                elif not payload and hasattr(art, "contentJson"):
-                    import json
-                    try:
-                        payload = json.loads(art.contentJson)
-                    except Exception:
-                        payload = {}
-                if isinstance(payload, (Mapping, dict)):
-                    q_num = payload.get("questionNumber")
-                    if q_num is not None and sec_start <= int(q_num) <= sec_end:
-                        committed_questions[int(q_num)] = art
-            elif art_type in (ArtifactType.QUESTION_GROUP, "QuestionGroup"):
-                payload = getattr(art, "payload", None)
-                if not payload and hasattr(art, "payloadJson"):
-                    import json
-                    try:
-                        payload = json.loads(art.payloadJson)
-                    except Exception:
-                        payload = {}
-                elif not payload and hasattr(art, "contentJson"):
-                    import json
-                    try:
-                        payload = json.loads(art.contentJson)
-                    except Exception:
-                        payload = {}
-                if isinstance(payload, (Mapping, dict)):
-                    for q in (payload.get("questions") or []):
-                        if isinstance(q, (Mapping, dict)):
-                            q_num = q.get("questionNumber")
-                            if q_num is not None and sec_start <= int(q_num) <= sec_end:
-                                committed_questions[int(q_num)] = art
+                except Exception:
+                    pass
+
+        for art in stored_state.artifacts:
+            if getattr(art, "isStale", False):
+                continue
+            art_type = getattr(art, "artifact_type", None) or getattr(art, "artifactType", None)
+            if art_type in (ArtifactType.QUESTION, "Question", ArtifactType.QUESTION_GROUP, "QuestionGroup"):
+                env_json = getattr(art, "envelopeJson", None)
+                if not env_json:
+                    raise ValueError(f"Corrupt question artifact checkpoint {getattr(art, 'artifactId', '')}: missing envelopeJson")
+                try:
+                    env_obj = ArtifactEnvelope.model_validate_json(env_json)
+                except Exception as e:
+                    raise ValueError(f"Corrupt question artifact envelope for {getattr(art, 'artifactId', '')}: {e}") from e
+
+                if env_obj.run_id != run_id:
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: runId mismatch")
+                if env_obj.artifact_id != getattr(art, "artifactId", None):
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: artifactId mismatch")
+                acc_v = getattr(art, "acceptedVersion", None)
+                if acc_v is not None and env_obj.version != acc_v:
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: version mismatch")
+                acc_h = getattr(art, "acceptedHash", None)
+                if acc_h and env_obj.content_hash != acc_h:
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: contentHash mismatch")
+                if not env_obj.verify_integrity():
+                    raise ValueError(f"Corrupt checkpoint for {env_obj.artifact_id}: integrity verification failed")
+
+                parents_accepted = bool(env_obj.parent_refs) and all(
+                    p.artifact_id in store_accepted_heads
+                    and store_accepted_heads[p.artifact_id] == p
+                    for p in env_obj.parent_refs
+                )
+                if not parents_accepted:
+                    continue
+
+                if art_type in (ArtifactType.QUESTION, "Question"):
+                    payload = env_obj.payload
+                    if isinstance(payload, (Mapping, dict)):
+                        q_num = payload.get("questionNumber")
+                        if q_num is not None and sec_start <= int(q_num) <= sec_end:
+                            committed_questions[int(q_num)] = env_obj
+                elif art_type in (ArtifactType.QUESTION_GROUP, "QuestionGroup"):
+                    payload = env_obj.payload
+                    if isinstance(payload, (Mapping, dict)):
+                        for q in (payload.get("questions") or []):
+                            if isinstance(q, (Mapping, dict)):
+                                q_num = q.get("questionNumber")
+                                if q_num is not None and sec_start <= int(q_num) <= sec_end:
+                                    committed_questions[int(q_num)] = env_obj
         pools: List[QuestionCandidatePool] = []
         newly_selected_candidates: List[QuestionCandidate] = []
         candidate_artifacts: Dict[str, ArtifactEnvelope] = {}
@@ -246,26 +275,29 @@ class QuestionCandidateLoop:
                 "resumedCount": len(question_slots),
                 "generatedCount": 0,
             }
+        expected_workflow_op_id = f"op_workflow_qcand_s{section_index}_{run_id[:8]}"
         existing_reserved = [
             o for o in (stored_state.operations or [])
-            if o.operationType == "WORKFLOW" and o.status == "RESERVED"
+            if o.operationType == "WORKFLOW" and o.status == "RESERVED" and o.operationId == expected_workflow_op_id
         ]
         if existing_reserved:
             workflow_op_id = existing_reserved[0].operationId
         else:
-            workflow_op_id = f"op_workflow_qcand_s{section_index}_{uuid4().hex[:8]}"
-            token_res = -1 if self.policy.is_unlimited else 60_000
-            wall_res = -1.0 if self.policy.is_unlimited else 300.0
+            workflow_op_id = expected_workflow_op_id
+            remaining_tokens = max(0, SECTION_MAX_TOKENS - budget_tracker.tokens_used)
+            remaining_wall = max(0.0, SECTION_MAX_WALL_TIME_SECONDS - budget_tracker.get_elapsed_seconds())
+            token_res = -1 if self.policy.is_unlimited else min(self.policy.max_total_tokens if self.policy.max_total_tokens > 0 else remaining_tokens, remaining_tokens)
+            wall_res = -1.0 if self.policy.is_unlimited else min(float(self.policy.max_wall_time_seconds) if self.policy.max_wall_time_seconds > 0 else remaining_wall, remaining_wall)
             workflow_grant = self.persistence_client.grant_operation(OperationGrantRequest(
                 runId=run_id,
                 epoch=epoch,
                 leaseOwner=lease_owner,
                 operationId=workflow_op_id,
                 operationType="WORKFLOW",
-                requestHash=f"workflow:questions:s{section_index}:{run_id}:{workflow_op_id}",
+                requestHash=f"workflow:questions:s{section_index}:{run_id}:v1",
                 tokenReservation=token_res,
                 wallTimeReservationSeconds=wall_res,
-                sectionId=None,
+                sectionId=str(section_index),
                 artifactId=None,
                 parentOperationId=parent_operation_id,
             ))
@@ -323,7 +355,7 @@ class QuestionCandidateLoop:
 
         # 1. Candidate Generation for uncommitted slots via generic BoundedLoopRuntime
         class SlotCandidateGeneratorAdapter(GeneratorCapability):
-            def __init__(self, slot_generator, q_num, q_type, passage_text, p_ref, bp_ref, group_start_num=None, group_cache=None, blank_count=None, group_id=None):
+            def __init__(self, slot_generator, q_num, q_type, passage_text, p_ref, bp_ref, group_start_num=None, group_cache=None, blank_count=None, group_id=None, policy=None):
                 self._generator = slot_generator
                 self._q_num = q_num
                 self._q_type = q_type
@@ -334,6 +366,7 @@ class QuestionCandidateLoop:
                 self._group_cache = group_cache if group_cache is not None else {}
                 self._blank_count = blank_count
                 self._group_id = group_id
+                self._policy = policy
                 self.pool: Optional[QuestionCandidatePool] = None
 
             @property
@@ -364,6 +397,8 @@ class QuestionCandidateLoop:
             async def _call_generate_pool(self, **kwargs):
                 import inspect
                 fn = self._generator.generate_candidate_pool
+                if "max_wall_time_seconds" not in kwargs and self._policy is not None:
+                    kwargs["max_wall_time_seconds"] = self._policy.operation_wall_reservation_seconds
                 try:
                     sig = inspect.signature(fn)
                     accepts_var_kw = any(
@@ -582,6 +617,7 @@ class QuestionCandidateLoop:
                     "answer": best_cand.answer if best_cand else "",
                     "options": [o.model_dump(mode="json", by_alias=True) for o in best_cand.options] if best_cand and best_cand.options else None,
                     "evidenceQuote": best_cand.evidence_quote if best_cand else "",
+                    "explanation": best_cand.explanation if best_cand and best_cand.explanation else "",
                     "score": best_cand.score if best_cand else 0.0,
                     "passage": self._passage_text,
                     "candidates": [c.model_dump(mode="json", by_alias=True) for c in (self.pool.candidates if self.pool else [])],
@@ -612,6 +648,20 @@ class QuestionCandidateLoop:
                 q_num = slot.get("questionNumber") or slot.get("slotNumber") or slot.get("number") or 1
                 q_type = slot.get("questionType") or slot.get("type") or "TrueFalseNotGiven"
 
+                if not self.policy.is_unlimited:
+                    if budget_tracker.tokens_used >= SECTION_MAX_TOKENS:
+                        raise SelectionInfeasibleError(
+                            f"Cumulative section token budget exceeded: {budget_tracker.tokens_used} >= {SECTION_MAX_TOKENS}",
+                            step_count=1,
+                            reason="TOKEN_CAP",
+                        )
+                    if budget_tracker.get_elapsed_seconds() >= SECTION_MAX_WALL_TIME_SECONDS:
+                        raise SelectionInfeasibleError(
+                            f"Cumulative section wall time budget exceeded: {budget_tracker.get_elapsed_seconds():.1f}s >= {SECTION_MAX_WALL_TIME_SECONDS}s",
+                            step_count=1,
+                            reason="WALL_TIME_CAP",
+                        )
+
                 grp_start_num = grp_slots[0].get("questionNumber") or grp_slots[0].get("slotNumber") or grp_slots[0].get("number") or 1
                 adapter = SlotCandidateGeneratorAdapter(
                     slot_generator=self.generator,
@@ -624,6 +674,7 @@ class QuestionCandidateLoop:
                     group_cache=grp_cache,
                     blank_count=len(grp_slots),
                     group_id=str(gid),
+                    policy=self.policy,
                 )
 
                 slot_ctx = LoopContext(
@@ -634,7 +685,11 @@ class QuestionCandidateLoop:
                     sectionId=section_index,
                     authority=AuthorityGrant(leaseOwner=lease_owner, epoch=epoch),
                     inputDependencies=(passage_artifact.to_ref(), blueprint_ref),
-                    budgetTracker=BudgetTracker(),
+                    budgetTracker=BudgetTracker(
+                        tokensUsed=budget_tracker.tokens_used,
+                        wallTimeUsedSeconds=budget_tracker.get_elapsed_seconds(),
+                        callsUsed=budget_tracker.calls_used,
+                    ),
                     parent_operation_id=workflow_op_id,
                 )
 
@@ -664,6 +719,9 @@ class QuestionCandidateLoop:
                         step_count=1,
                         reason="SLOT_RUNTIME_FAILED",
                     )
+                new_slot_tokens = max(0, slot_runtime.context.budget_tracker.tokens_used - budget_tracker.tokens_used)
+                new_slot_calls = max(0, slot_runtime.context.budget_tracker.calls_used - budget_tracker.calls_used)
+                budget_tracker.record_usage(tokens=new_slot_tokens, calls=new_slot_calls)
 
                 slot_art = slot_res.accepted_artifact or slot_runtime.context.current_artifact
                 if slot_art and slot_art.payload and "candidates" in slot_art.payload:
@@ -723,6 +781,7 @@ class QuestionCandidateLoop:
                                 "answer": self._candidate.answer,
                                 "options": [o.model_dump(mode="json", by_alias=True) for o in self._candidate.options] if self._candidate.options else None,
                                 "evidenceQuote": self._candidate.evidence_quote,
+                                "explanation": self._candidate.explanation,
                                 "score": self._candidate.score,
                                 "candidateId": self._candidate.candidate_id,
                             },
@@ -758,6 +817,7 @@ class QuestionCandidateLoop:
                                 "answer": cand.answer,
                                 "options": [o.model_dump(mode="json", by_alias=True) for o in cand.options] if cand.options else None,
                                 "evidenceQuote": cand.evidence_quote,
+                                "explanation": cand.explanation,
                                 "score": cand.score,
                                 "candidateId": cand.candidate_id,
                             },
@@ -903,6 +963,7 @@ class QuestionCandidateLoop:
                                         "answer": cand.answer,
                                         "options": [o.model_dump(mode="json", by_alias=True) for o in cand.options] if cand.options else None,
                                         "evidenceQuote": cand.evidence_quote,
+                                        "explanation": cand.explanation,
                                         "score": cand.score,
                                         "candidateId": cand.candidate_id,
                                     },
@@ -945,6 +1006,7 @@ class QuestionCandidateLoop:
                             "answer": c.answer,
                             "options": [o.model_dump(mode="json", by_alias=True) for o in c.options] if c.options else None,
                             "evidenceQuote": c.evidence_quote,
+                            "explanation": c.explanation,
                             "score": c.score,
                             "candidateId": c.candidate_id,
                         }

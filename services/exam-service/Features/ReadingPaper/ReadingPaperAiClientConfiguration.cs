@@ -9,7 +9,10 @@ internal static class ReadingPaperAiClientConfiguration
         ArgumentNullException.ThrowIfNull(configuration);
 
         return configuration["EXAMSERVICE:INTERNAL:API:KEY"]
+               ?? configuration["EXAMSERVICE__INTERNAL__API__KEY"]
                ?? configuration["INTERNAL_API_KEY"]
+               ?? configuration["InternalApiKey"]
+               ?? configuration["Parameters:internal-api-key"]
                ?? string.Empty;
     }
 }

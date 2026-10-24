@@ -13,6 +13,10 @@ OPTIONAL_MODULES = [
     "langchain_ollama",
     "langchain_google_genai",
     "sentence_transformers",
+    "langchain_core",
+    "langchain_core.output_parsers",
+    "langchain_core.prompts",
+    "langchain_groq",
 ]
 
 for mod in OPTIONAL_MODULES:

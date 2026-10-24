@@ -165,6 +165,42 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     await db.Database.MigrateAsync();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+
+    if (!await roleManager.RoleExistsAsync(Roles.Admin))
+    {
+        await roleManager.CreateAsync(new Role { Name = Roles.Admin });
+    }
+
+    var adminEmail = Environment.GetEnvironmentVariable("ADMIN_SEED_EMAIL") ?? "admin@langfens.com";
+    var adminPassword = Environment.GetEnvironmentVariable("ADMIN_SEED_PASSWORD");
+    if (!string.IsNullOrWhiteSpace(adminPassword))
+    {
+        var admin = await userManager.FindByEmailAsync(adminEmail);
+        if (admin is null)
+        {
+            admin = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = adminEmail,
+                NormalizedEmail = adminEmail.ToUpperInvariant(),
+                UserName = adminEmail,
+                NormalizedUserName = adminEmail.ToUpperInvariant(),
+                EmailConfirmed = true,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+            admin.PasswordHash = hasher.HashPassword(admin, adminPassword);
+            await userManager.CreateAsync(admin);
+        }
+
+        if (!await userManager.IsInRoleAsync(admin, Roles.Admin))
+        {
+            await userManager.AddToRoleAsync(admin, Roles.Admin);
+        }
+    }
 }
 
 app.UseSwagger();

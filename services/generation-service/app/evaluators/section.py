@@ -145,77 +145,95 @@ class SectionStructureEvaluator(BaseEvaluator):
                 )
             )
 
-        # 2. Question Groups Count Check (Must be exactly 2 groups)
-        groups = list(payload.get("groups", []))
-        if len(groups) != 2:
-            issues.append(
-                Issue.create(
-                    issue_id=f"iss_sec_{sec_id}_grpcnt_{uuid4().hex[:8]}",
-                    code=IssueCode.SECTION_GROUP_COUNT_MISMATCH,
-                    severity=IssueSeverity.CRITICAL,
-                    scope=IssueScope.SECTION,
-                    message=f"Section {sec_id} has {len(groups)} question group(s), strictly expected 2",
-                    affected_refs=[artifact.to_ref()],
-                    evaluator_id=self.evaluator_id,
-                )
-            )
-
-        # 3. Expected Section Specifications
+        # 2. Expected Section Specifications
         expected_total_q = SECTION_QUESTION_COUNTS.get(sec_id, 13)
         expected_sizes = SECTION_GROUP_SIZES.get(sec_id, [7, 6])
         expected_types = SECTION_GROUP_TYPES.get(sec_id, [QuestionType.TRUE_FALSE_NOT_GIVEN, QuestionType.SENTENCE_COMPLETION])
+        groups = list(payload.get("groups", []))
 
-        start_num = 1 if sec_id == 1 else (14 if sec_id == 2 else 27)
-        expected_q_numbers = list(range(start_num, start_num + expected_total_q))
+        is_legacy_preset = len(groups) == 2 and all(
+            g_idx < len(expected_types) and (
+                _extract_group_type_str(grp) in (expected_types[g_idx].value.replace("_", "").lower(), expected_types[g_idx].name.replace("_", "").lower())
+            )
+            for g_idx, grp in enumerate(groups)
+        )
 
-        all_q_numbers: List[int] = []
-        for g_idx, grp in enumerate(groups):
-            g_questions = _extract_group_questions(grp)
-            type_str = _extract_group_type_str(grp)
-
-            if g_idx < len(expected_types):
-                exp_t = expected_types[g_idx]
-                exp_t_str = exp_t.value.replace("_", "").lower()
-                if type_str != exp_t_str and type_str != exp_t.name.replace("_", "").lower():
-                    issues.append(
-                        Issue.create(
-                            issue_id=f"iss_sec_{sec_id}_grptype_{g_idx}_{uuid4().hex[:8]}",
-                            code=IssueCode.SECTION_GROUP_TYPE_MISMATCH,
-                            severity=IssueSeverity.CRITICAL,
-                            scope=IssueScope.QUESTION_GROUP,
-                            message=(
-                                f"Section {sec_id} group {g_idx+1} question type '{type_str}' "
-                                f"does not match expected blueprint type '{exp_t.value}'"
-                            ),
-                            affected_refs=[artifact.to_ref()],
-                            evaluator_id=self.evaluator_id,
+        if is_legacy_preset:
+            for g_idx, grp in enumerate(groups):
+                g_questions = _extract_group_questions(grp)
+                type_str = _extract_group_type_str(grp)
+                if g_idx < len(expected_types):
+                    exp_t = expected_types[g_idx]
+                    exp_t_str = exp_t.value.replace("_", "").lower()
+                    if type_str != exp_t_str and type_str != exp_t.name.replace("_", "").lower():
+                        issues.append(
+                            Issue.create(
+                                issue_id=f"iss_sec_{sec_id}_grptype_{g_idx}_{uuid4().hex[:8]}",
+                                code=IssueCode.SECTION_GROUP_TYPE_MISMATCH,
+                                severity=IssueSeverity.CRITICAL,
+                                scope=IssueScope.QUESTION_GROUP,
+                                message=(
+                                    f"Section {sec_id} group {g_idx+1} question type '{type_str}' "
+                                    f"does not match expected blueprint type '{exp_t.value}'"
+                                ),
+                                affected_refs=[artifact.to_ref()],
+                                evaluator_id=self.evaluator_id,
+                            )
                         )
+                if g_idx < len(expected_sizes):
+                    exp_size = expected_sizes[g_idx]
+                    if len(g_questions) != exp_size:
+                        issues.append(
+                            Issue.create(
+                                issue_id=f"iss_sec_{sec_id}_grpsize_{g_idx}_{uuid4().hex[:8]}",
+                                code=IssueCode.SECTION_GROUP_SIZE_MISMATCH,
+                                severity=IssueSeverity.CRITICAL,
+                                scope=IssueScope.QUESTION_GROUP,
+                                message=(
+                                    f"Section {sec_id} group {g_idx+1} has {len(g_questions)} questions, "
+                                    f"expected {exp_size}"
+                                ),
+                                affected_refs=[artifact.to_ref()],
+                                evaluator_id=self.evaluator_id,
+                            )
+                        )
+        else:
+            if not (2 <= len(groups) <= 4):
+                issues.append(
+                    Issue.create(
+                        issue_id=f"iss_sec_{sec_id}_grpcnt_{uuid4().hex[:8]}",
+                        code=IssueCode.SECTION_GROUP_COUNT_MISMATCH,
+                        severity=IssueSeverity.CRITICAL,
+                        scope=IssueScope.SECTION,
+                        message=f"Section {sec_id} has {len(groups)} question group(s), expected 2-4",
+                        affected_refs=[artifact.to_ref()],
+                        evaluator_id=self.evaluator_id,
                     )
-
-            if g_idx < len(expected_sizes):
-                exp_size = expected_sizes[g_idx]
-                if len(g_questions) != exp_size:
+                )
+            for g_idx, grp in enumerate(groups):
+                g_questions = _extract_group_questions(grp)
+                if not g_questions:
                     issues.append(
                         Issue.create(
                             issue_id=f"iss_sec_{sec_id}_grpsize_{g_idx}_{uuid4().hex[:8]}",
                             code=IssueCode.SECTION_GROUP_SIZE_MISMATCH,
                             severity=IssueSeverity.CRITICAL,
                             scope=IssueScope.QUESTION_GROUP,
-                            message=(
-                                f"Section {sec_id} group {g_idx+1} has {len(g_questions)} questions, "
-                                f"expected {exp_size}"
-                            ),
+                            message=f"Section {sec_id} group {g_idx+1} has 0 questions",
                             affected_refs=[artifact.to_ref()],
                             evaluator_id=self.evaluator_id,
                         )
                     )
 
-            for q in g_questions:
+        start_num = 1 if sec_id == 1 else (14 if sec_id == 2 else 27)
+        expected_q_numbers = list(range(start_num, start_num + expected_total_q))
+        all_q_numbers: List[int] = []
+        for grp in groups:
+            for q in _extract_group_questions(grp):
                 q_dict = _extract_question_dict(q)
                 q_num = q_dict.get("questionNumber") or q_dict.get("question_number") or q_dict.get("number")
                 if q_num is not None:
                     all_q_numbers.append(int(q_num))
-
         # 4. Total Question Count and Contiguous Numbering Check
         if len(all_q_numbers) != expected_total_q:
             issues.append(

@@ -16,6 +16,8 @@
 
 ## Overview
 
+Coding agents: start with [AGENTS.md](AGENTS.md), then read only the relevant directory's guide. Runtime contracts are established by source/configuration; benchmark and historical reports describe their recorded environment, not universal guarantees.
+
 Traditional IELTS preparation suffers from expensive and delayed manual grading, unrealistic practice environments, and low vocabulary retention. Targeting students and English centers, Langfens reduces grading costs by 80% while providing instant, high-quality feedback. It addresses these bottlenecks by providing a unified, production-oriented ecosystem:
 
 - **Instant, granular AI grading** for Writing and Speaking (via fine-tuned local LLMs and acoustic models).
@@ -31,9 +33,9 @@ Traditional IELTS preparation suffers from expensive and delayed manual grading,
 - **Model Orchestration**: Intelligently routes between local inference (Qwen/Ollama) and external APIs (Groq) with fallback mechanisms.
 
 ### Engineering & Architecture
-- **Distributed Microservices**: 11 distinct services (10 ASP.NET Core, 1 FastAPI Python) mapped via YARP Reverse Proxy.
+- **Distributed Microservices**: 12 domain services (10 ASP.NET Core, 2 FastAPI Python: inference and Reading generation) behind YARP Reverse Proxy.
 - **Event-Driven Workflows**: RabbitMQ (via MassTransit) decouples heavy AI inference and gamification from synchronous user request paths.
-- **Domain-Driven Data**: 10 isolated PostgreSQL databases enforce strict boundaries. `pg_trgm` GIN indexes handle rapid dictionary lookups without needing external search engines.
+- **Domain-Driven Data**: Nine service-owned PostgreSQL databases enforce strict boundaries. `pg_trgm` GIN indexes handle rapid dictionary lookups without needing external search engines.
 - **Resilience**: Implements Circuit Breaker patterns for AI HTTP clients and isolated worker scaling.
 
 ## System Architecture
@@ -187,6 +189,10 @@ Project_Langfens_Microservice/
 │   ├── ai-service/            # Python 3.12, FastAPI, Qdrant, LoRA adapters, Whisper
 │   ├── attempt-service/       # .NET 10, Auto-graders, MassTransit Consumers
 │   ├── auth-service/          # .NET 10, Identity, Redis OTP
+│   ├── course-service/        # .NET 10, courses, lessons, enrollments
+│   ├── email-service/         # .NET 10, stateless SMTP delivery
+│   ├── exam-service/          # .NET 10, content, publication, durable generation state
+│   ├── generation-service/    # Python 3.12, autonomous Reading pipeline
 │   ├── dictionary-service/    # .NET 10, PostgreSQL pg_trgm fuzzy text search
 │   ├── gamification-service/  # .NET 10, XP/Achievements event consumer
 │   ├── speaking-service/      # .NET 10, Cloudinary STT orchestration
@@ -205,18 +211,17 @@ The project uses **.NET Aspire** to orchestrate 20+ containers effortlessly in d
    ```bash
    git clone <repo-url>
    cd Project_Langfens_Microservice
-   cp deploy/envs/*.env .env # Add necessary secrets or placeholders
    ```
+   Configure the relevant per-service files in `deploy/envs/` with local secrets/placeholders; AppHost loads them directly. Do not combine them into one root `.env` or commit credentials.
 
 2. **Run via AppHost:**
    ```bash
    dotnet run --project AppHost/AppHost.csproj
    ```
-   *Aspire automatically pulls required models (like `bge-m3` into Ollama), starts 10 Postgres databases on unique host ports, boots Redis, RabbitMQ, and Qdrant, and wires up connection strings dynamically.*
+   *Aspire automatically pulls required models (like `bge-m3` into Ollama), starts nine Postgres databases on unique host ports, boots Redis, RabbitMQ, and Qdrant, and wires up connection strings dynamically.*
 
 3. **Access:**
-   - Gateway API: `http://localhost:5000`
-   - Aspire Telemetry Dashboard: `http://localhost:18888`
+   - Read the gateway and dashboard endpoints from Aspire's startup output; use the actual allocated endpoints rather than assuming fixed ports.
 
 ## Deployment
 

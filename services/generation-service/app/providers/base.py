@@ -47,8 +47,10 @@ class BaseProvider(ABC):
         """Checks provider reachability and credentials."""
         pass
 
-    def get_model_name(self, model_size: str) -> str:
-        """Resolves model size alias to provider model name."""
+    def get_model_name(self, model_size: str, pinned_model: Optional[str] = None) -> str:
+        """Resolves model size alias to provider model name or returns explicit pinned model."""
+        if pinned_model and pinned_model.strip():
+            return pinned_model.strip()
         return self.models.get(model_size, self.models.get("large", next(iter(self.models.values()))))
 
     def estimate_tokens(self, text: str) -> int:
@@ -64,11 +66,11 @@ class BaseProvider(ABC):
     def conservative_token_reservation(self, request: ProviderRequest) -> int:
         """Upper-bound prompt bytes plus the adapter's full completion allowance."""
         prompt = {
-            "model": self.get_model_name(request.model_size),
+            "model": self.get_model_name(request.model_size, pinned_model=request.pinned_model),
             "messages": [{"role": m.role, "content": m.content} for m in request.messages],
             "response_schema": request.response_schema,
         }
         prompt_bytes = len(json.dumps(prompt, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode("ascii"))
-        prompt_bound = prompt_bytes + 128 + 64 * len(request.messages)
+        prompt_bound = (prompt_bytes + 2) // 3 + 128 + 64 * len(request.messages)
         completion_bound = max(request.max_tokens, self.completion_token_limit(request))
         return prompt_bound + completion_bound

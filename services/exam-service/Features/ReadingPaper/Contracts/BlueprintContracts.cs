@@ -83,7 +83,8 @@ public sealed record ExamBlueprint(
     [property: JsonPropertyName("parentBudgetCapTokens")] int? ParentBudgetCapTokens,
     [property: JsonPropertyName("contentHash")] string? ContentHash,
     [property: JsonPropertyName("invalidatedDescendants")] bool InvalidatedDescendants,
-    [property: JsonPropertyName("createdAt")] DateTime CreatedAt
+    [property: JsonPropertyName("createdAt")] DateTime CreatedAt,
+    [property: JsonPropertyName("metadata")] Dictionary<string, object>? Metadata = null
 );
 
 public sealed record BlueprintIssue(
@@ -221,23 +222,61 @@ public static class BlueprintValidator
             }
 
             var slots = sec.QuestionSlots ?? new List<QuestionSlot>();
-            // Group checks
-            if (sec.SectionId == 1)
+            var isDynamic = (blueprint.Metadata != null &&
+                             blueprint.Metadata.TryGetValue("blueprint_mode", out var mode) &&
+                             mode?.ToString() == "dynamic") ||
+                            (sec.QuestionAllocations != null && sec.QuestionAllocations.Count > 0 &&
+                             (sec.QuestionAllocations.Count != 2 ||
+                              (sec.SectionId == 1 && sec.QuestionAllocations[0].QuestionType != QuestionType.TRUE_FALSE_NOT_GIVEN)));
+            if (isDynamic)
             {
-                ValidateGroup(sec.SectionId, slots, 0, QuestionType.TRUE_FALSE_NOT_GIVEN, 7, 1, 7, issues);
-                ValidateGroup(sec.SectionId, slots, 1, QuestionType.SENTENCE_COMPLETION, 6, 8, 13, issues);
+                if (sec.QuestionAllocations != null && sec.QuestionAllocations.Count > 0)
+                {
+                    var allocTotal = sec.QuestionAllocations.Sum(a => a.Count);
+                    var expectedSecTotal = sec.SectionId == 3 ? 14 : 13;
+                    if (allocTotal != expectedSecTotal)
+                    {
+                        issues.Add(new BlueprintIssue(
+                            "BLUEPRINT_ALLOCATION_COUNT_MISMATCH",
+                            "BLOCKING",
+                            $"Section {sec.SectionId} allocations sum to {allocTotal}, expected {expectedSecTotal}.",
+                            $"sections[{sec.SectionId}].questionAllocations"
+                        ));
+                    }
+                    foreach (var alloc in sec.QuestionAllocations)
+                    {
+                        var allocSlots = slots.Where(s => s.QuestionNumber >= alloc.StartQuestionNumber && s.QuestionNumber <= alloc.EndQuestionNumber).ToList();
+                        if (allocSlots.Count != alloc.Count)
+                        {
+                            issues.Add(new BlueprintIssue(
+                                "BLUEPRINT_SLOT_COUNT_MISMATCH",
+                                "BLOCKING",
+                                $"Allocation for {alloc.QuestionType} expected {alloc.Count} slots, found {allocSlots.Count}.",
+                                $"sections[{sec.SectionId}].questionSlots"
+                            ));
+                        }
+                    }
+                }
             }
-            else if (sec.SectionId == 2)
+            else
             {
-                ValidateGroup(sec.SectionId, slots, 0, QuestionType.MULTIPLE_CHOICE_SINGLE, 6, 14, 19, issues);
-                ValidateGroup(sec.SectionId, slots, 1, QuestionType.SUMMARY_COMPLETION, 7, 20, 26, issues);
+                // Group checks for legacy preset
+                if (sec.SectionId == 1)
+                {
+                    ValidateGroup(sec.SectionId, slots, 0, QuestionType.TRUE_FALSE_NOT_GIVEN, 7, 1, 7, issues);
+                    ValidateGroup(sec.SectionId, slots, 1, QuestionType.SENTENCE_COMPLETION, 6, 8, 13, issues);
+                }
+                else if (sec.SectionId == 2)
+                {
+                    ValidateGroup(sec.SectionId, slots, 0, QuestionType.MULTIPLE_CHOICE_SINGLE, 6, 14, 19, issues);
+                    ValidateGroup(sec.SectionId, slots, 1, QuestionType.SUMMARY_COMPLETION, 7, 20, 26, issues);
+                }
+                else if (sec.SectionId == 3)
+                {
+                    ValidateGroup(sec.SectionId, slots, 0, QuestionType.YES_NO_NOT_GIVEN, 7, 27, 33, issues);
+                    ValidateGroup(sec.SectionId, slots, 1, QuestionType.SHORT_ANSWER, 7, 34, 40, issues);
+                }
             }
-            else if (sec.SectionId == 3)
-            {
-                ValidateGroup(sec.SectionId, slots, 0, QuestionType.YES_NO_NOT_GIVEN, 7, 27, 33, issues);
-                ValidateGroup(sec.SectionId, slots, 1, QuestionType.SHORT_ANSWER, 7, 34, 40, issues);
-            }
-
             if (sec.BudgetAllocation != null)
             {
                 totalPlannedTokens += sec.BudgetAllocation.MaxTokensAllocated;

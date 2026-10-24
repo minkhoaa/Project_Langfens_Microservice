@@ -1,0 +1,197 @@
+{
+  "packet_id": "human_review_packet_rg10_v1",
+  "status": "AWAITING_HUMAN_PANEL",
+  "generated_at": "2026-10-16T12:30:00Z",
+  "governing_document": "generation_baseline/research/HUMAN_REVIEW_PROTOCOL_AND_RUBRIC.md",
+  "epistemic_attestation": {
+    "zero_synthetic_human_scores": true,
+    "unpopulated_verdicts": true,
+    "blinded_configurations": true,
+    "stripped_proposed_answers": true,
+    "stripped_model_provenance": true
+  },
+  "rubric_scales": {
+    "dimension_1_grounding_or_rule_conformance": {
+      "scale": "1-5",
+      "labels": {
+        "1": "Defective (Direct hallucination or rule violation)",
+        "3": "Acceptable (Entailed/contradicted with minor inference)",
+        "5": "Exemplary (Direct explicit passage/rule support)"
+      }
+    },
+    "dimension_2_key_uniqueness_and_defensibility": {
+      "scale": "1-5",
+      "labels": {
+        "1": "Defective (Multiple valid keys or key unsupported)",
+        "3": "Borderline (Single key but minor stylistic ambiguity)",
+        "5": "Exemplary (Exactly one defensible key)"
+      }
+    },
+    "dimension_3_distractor_quality": {
+      "scale": "1-5",
+      "labels": {
+        "1": "Defective (Nonsensical, gibberish, or irrelevant)",
+        "3": "Acceptable (Clearly incorrect but artificial)",
+        "5": "Exemplary (Plausible natural English with precise syntactic defect)"
+      }
+    },
+    "dimension_4_linguistic_register": {
+      "scale": "1-5",
+      "labels": {
+        "1": "Defective (Severe mechanical artifacts or inappropriate register)",
+        "3": "Acceptable (Minor stylistic awkwardness)",
+        "5": "Exemplary (Flawless academic IELTS register)"
+      }
+    }
+  },
+  "blinded_review_tasks": [
+    {
+      "task_id": "task_hrev_9b814a012c41",
+      "domain": "READING",
+      "context_text": "Submarine volcanism accounts for approximately seventy percent of Earth's total annual magma output, predominantly occurring along mid-ocean ridge spreading centers and intraplate volcanic hotspots. When basaltic magma erupts directly into seawater at abyssal depths, the extreme ambient hydrostatic pressure and rapid thermal quenching produce distinctive volcanic morphology known as pillow lava. The outer skin of the extruding lava lobe rapidly vitrifies into basaltic glass as it contacts cold seawater at approximately two degrees Celsius. Continued magma injection from the volcanic feeder system increases internal pressure within the quenched lobe until the vitreous carapace ruptures. A new lobe of molten basalt subsequently buds through the fracture, repeating the cycle and constructing imbricated stacks of bulbous volcanic structures. In contrast to subaerial explosive eruptions, abyssal hydrostatic pressure exceeding two hundred atmospheres suppresses volatile exsolution, thereby preventing pyroclastic fragmentation in deep benthic environments. Geochemical analysis of fresh pillow basalts demonstrates minimal subaerial weathering, although low-temperature hydrothermal circulation progressively alters glass rims into smectite clays and palagonite over geological timescales. Marine geophysical surveys utilizing high-resolution autonomous underwater vehicles indicate that pillow lava fields provide critical structural substrates for benthic fauna, including bathyal hexactinellid sponges and cold-water gorgonian corals. Recent radiometric dating of pillow margins along the Juan de Fuca Ridge confirms that individual eruption episodes can span several weeks to months, producing contiguous volcanic flow fields covering hundreds of square kilometers.",
+      "question_text": "Submarine volcanism accounts for about seventy percent of Earth's total annual magma output.",
+      "question_type": "TFNG",
+      "human_review_fields": {
+        "annotator_1": {
+          "annotator_id": null,
+          "grounding_score": null,
+          "key_uniqueness_score": null,
+          "distractor_quality_score": null,
+          "register_score": null,
+          "independent_answer_key": null,
+          "binary_acceptability": null,
+          "notes": null
+        },
+        "annotator_2": {
+          "annotator_id": null,
+          "grounding_score": null,
+          "key_uniqueness_score": null,
+          "distractor_quality_score": null,
+          "register_score": null,
+          "independent_answer_key": null,
+          "binary_acceptability": null,
+          "notes": null
+        },
+        "adjudication": {
+          "adjudicator_id": null,
+          "final_verdict": null,
+          "rationale": null
+        }
+      }
+    },
+    {
+      "task_id": "task_hrev_1847c0b29d11",
+      "domain": "READING",
+      "context_text": "In contrast to subaerial explosive eruptions, abyssal hydrostatic pressure exceeding two hundred atmospheres suppresses volatile exsolution, thereby preventing pyroclastic fragmentation in deep benthic environments.",
+      "question_text": "Pyroclastic fragmentation occurs in deep benthic environments due to high hydrostatic pressure.",
+      "question_type": "TFNG",
+      "human_review_fields": {
+        "annotator_1": {
+          "annotator_id": null,
+          "grounding_score": null,
+          "key_uniqueness_score": null,
+          "distractor_quality_score": null,
+          "register_score": null,
+          "independent_answer_key": null,
+          "binary_acceptability": null,
+          "notes": null
+        },
+        "annotator_2": {
+          "annotator_id": null,
+          "grounding_score": null,
+          "key_uniqueness_score": null,
+          "distractor_quality_score": null,
+          "register_score": null,
+          "independent_answer_key": null,
+          "binary_acceptability": null,
+          "notes": null
+        },
+        "adjudication": {
+          "adjudicator_id": null,
+          "final_verdict": null,
+          "rationale": null
+        }
+      }
+    },
+    {
+      "task_id": "task_hrev_47a02c84e1b3",
+      "domain": "GRAMMAR",
+      "context_text": "Rule pack topic: Negative and Restrictive Adverbial Inversion.",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "options": [
+        "A) Not only did she win the race, but she also broke the record.",
+        "B) Not only she won the race, but she also broke the record.",
+        "C) Not only she did win the race, but she also broke the record.",
+        "D) Not only she wins the race, but she also broke the record."
+      ],
+      "question_type": "GRAMMAR_MCQ",
+      "human_review_fields": {
+        "annotator_1": {
+          "annotator_id": null,
+          "grounding_score": null,
+          "key_uniqueness_score": null,
+          "distractor_quality_score": null,
+          "register_score": null,
+          "independent_answer_key": null,
+          "binary_acceptability": null,
+          "notes": null
+        },
+        "annotator_2": {
+          "annotator_id": null,
+          "grounding_score": null,
+          "key_uniqueness_score": null,
+          "distractor_quality_score": null,
+          "register_score": null,
+          "independent_answer_key": null,
+          "binary_acceptability": null,
+          "notes": null
+        },
+        "adjudication": {
+          "adjudicator_id": null,
+          "final_verdict": null,
+          "rationale": null
+        }
+      }
+    },
+    {
+      "task_id": "task_hrev_82d901f4c391",
+      "domain": "GRAMMAR",
+      "context_text": "Rule pack topic: Mandative and Formulaic Subjunctive Clauses.",
+      "question_text": "Which of the following sentences correctly uses the mandative subjunctive?",
+      "options": [
+        "A) The contract stipulates that the supplier provides a detailed invoice.",
+        "B) The contract stipulates that the supplier provide a detailed invoice.",
+        "C) The contract stipulates that the supplier will provide a detailed invoice.",
+        "D) The contract stipulates that the supplier has to provide a detailed invoice."
+      ],
+      "question_type": "GRAMMAR_MCQ",
+      "human_review_fields": {
+        "annotator_1": {
+          "annotator_id": null,
+          "grounding_score": null,
+          "key_uniqueness_score": null,
+          "distractor_quality_score": null,
+          "register_score": null,
+          "independent_answer_key": null,
+          "binary_acceptability": null,
+          "notes": null
+        },
+        "annotator_2": {
+          "annotator_id": null,
+          "grounding_score": null,
+          "key_uniqueness_score": null,
+          "distractor_quality_score": null,
+          "register_score": null,
+          "independent_answer_key": null,
+          "binary_acceptability": null,
+          "notes": null
+        },
+        "adjudication": {
+          "adjudicator_id": null,
+          "final_verdict": null,
+          "rationale": null
+        }
+      }
+    }
+  ]
+}

@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using exam_service.Domains.Entities;
 using exam_service.Infrastructure.Persistence;
+using exam_service.Features.ReadingPaper.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Shared.Security.Roles;
 namespace exam_service.Features.ReadingPaper;
@@ -27,6 +28,7 @@ public static class ReadingPaperEndpoints
         routes.MapPut("/jobs/{id:guid}/sources", ReplaceSources);
         routes.MapPost("/jobs/{id:guid}/retry", Retry);
         routes.MapPost("/jobs/{id:guid}/cancel", Cancel);
+        routes.MapPost("/demo-run", InitDemoRun);
 
         // Canary & Rollout Controls
         var canaryRoutes = routes.MapGroup("/canary");
@@ -277,20 +279,30 @@ public static class ReadingPaperEndpoints
         var raw = $"{s.Pmcid}|{s.Title}|{s.Doi}|{s.License}|{s.Authors}|{s.WordCount}|{s.Url}|{s.OpenAlexId}|{s.TopicId}|{s.SourceType}|{metaStr}|{s.Content}|{s.ContentPreview}";
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw)));
     }
-    private static async Task<IResult> Retry(Guid id, ExamDbContext db, CancellationToken ct)
+    internal static async Task<IResult> Retry(Guid id, ExamDbContext db, CancellationToken ct)
     {
-        var job = await db.ReadingPaperJobs.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (job is null) return Results.NotFound();
-        if (job.Status != "Failed" || job.ExamId is not null)
+        var now = DateTime.UtcNow;
+        var retryLog = SerializeLog("Information", "Retry requested; the worker will resume from the last saved passage.");
+        var rows = await db.ReadingPaperJobs
+            .Where(x => x.Id == id && x.Status == "Failed" && x.ExamId == null)
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(j => j.Status, "Pending")
+                .SetProperty(j => j.Error, (string?)null)
+                .SetProperty(j => j.LeaseUntil, (DateTime?)null)
+                .SetProperty(j => j.LeaseOwner, (Guid?)null)
+                .SetProperty(j => j.UpdatedAt, now)
+                .SetProperty(j => j.Logs, j => j.Logs + "\n" + retryLog),
+                ct);
+
+        if (rows == 0)
+        {
+            var existing = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+            if (existing is null) return Results.NotFound();
             return Results.Conflict(new { error = "Only a failed, unsaved job can be retried" });
-        job.Status = "Pending";
-        job.Error = null;
-        job.LeaseUntil = null;
-        job.LeaseOwner = null;
-        job.UpdatedAt = DateTime.UtcNow;
-        job.Logs += SerializeLog("Information", "Retry requested; the worker will resume from the last saved passage.");
-        await db.SaveChangesAsync(ct);
-        return Results.Ok(View(job));
+        }
+
+        var updatedJob = await db.ReadingPaperJobs.AsNoTracking().FirstAsync(x => x.Id == id, ct);
+        return Results.Ok(View(updatedJob));
     }
 
     private static async Task<IResult> Cancel(Guid id, ExamDbContext db, CancellationToken ct)
@@ -418,5 +430,148 @@ public static class ReadingPaperEndpoints
 
     private static string SerializeLog(string level, string message)
         => JsonSerializer.Serialize(new ReadingPaperLog(DateTime.UtcNow, level, message), ReadingPaperRules.Json) + "\n";
+
+    public record DemoRunRequest(string Topic, int Index, string? Pmcid = null, ReadingSource? Source = null, string? Provider = null);
+
+    public static async Task<IResult> InitDemoRun(DemoRunRequest request, ExamDbContext db,
+        ReadingPaperAiClient ai, ReadingPaperCapsProfile caps, CancellationToken ct)
+    {
+        if (request.Topic?.Trim().Length is not (>= 3 and <= 120))
+            return Results.BadRequest(new { error = "Topic must contain 3–120 characters" });
+        if (request.Index is < 1 or > 3)
+            return Results.BadRequest(new { error = "Index must be 1, 2, or 3" });
+
+        ReadingSource source;
+        if (request.Source != null)
+        {
+            var (validSources, err) = ValidateSources([request.Source]);
+            if (err != null || validSources.Count == 0)
+                return Results.BadRequest(new { error = err ?? "Invalid source" });
+            source = validSources[0];
+        }
+        else if (!string.IsNullOrWhiteSpace(request.Pmcid))
+        {
+            var (sources, err) = await VerifySources([request.Pmcid], ai, ct);
+            if (err != null || sources.Count == 0)
+                return Results.BadRequest(new { error = err ?? "Source verification failed" });
+            source = sources[0];
+        }
+        else
+        {
+            return Results.BadRequest(new { error = "Either Pmcid or Source is required" });
+        }
+
+        var provider = !string.IsNullOrWhiteSpace(request.Provider) ? request.Provider.Trim().ToLowerInvariant() : "minimax";
+        var meta = new Dictionary<string, string>(source.Metadata ?? new Dictionary<string, string>(), StringComparer.OrdinalIgnoreCase)
+        {
+            ["provider"] = provider,
+            ["sectionIndex"] = request.Index.ToString()
+        };
+        source = source with { Metadata = meta };
+
+        var jobId = Guid.NewGuid();
+        var runId = $"run_{jobId:N}";
+        var owner = Guid.NewGuid();
+        var leaseUntil = DateTime.UtcNow.AddMinutes(45);
+        var now = DateTime.UtcNow;
+
+        var job = new ReadingPaperJob
+        {
+            Id = jobId,
+            Topic = request.Topic.Trim(),
+            SourcesJson = JsonSerializer.Serialize(new List<ReadingSource> { source }, ReadingPaperRules.Json),
+            SectionsJson = "[]",
+            Status = "Running",
+            Epoch = 1,
+            LeaseOwner = owner,
+            LeaseUntil = leaseUntil,
+            ActiveRunId = runId,
+            EngineVersion = "2.0.0",
+            SchemaVersion = "2.0.0",
+            PolicyVersion = "2.0.0",
+            Logs = SerializeLog("Information", $"Authorized demo run initialized for section {request.Index} ({source.Pmcid})."),
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        var run = new ReadingPaperRun
+        {
+            Id = Guid.NewGuid(),
+            JobId = job.Id,
+            RunId = runId,
+            Epoch = 1,
+            Status = "RUNNING",
+            LeaseOwner = owner,
+            LeaseUntil = leaseUntil,
+            EngineVersion = "2.0.0",
+            SchemaVersion = "2.0.0",
+            PolicyVersion = "2.0.0",
+            SourceRevisionsJson = job.SourcesJson,
+            BudgetCapCalls = caps.RunBudgetCapCalls > 0 ? caps.RunBudgetCapCalls : 50,
+            BudgetCapTokens = caps.RunBudgetCapTokens > 0 ? caps.RunBudgetCapTokens : 300000,
+            BudgetCapWallTimeSeconds = caps.RunBudgetCapWallTimeSeconds > 0 ? caps.RunBudgetCapWallTimeSeconds : 1800,
+            BudgetProfileVersion = caps.Version,
+            BudgetProfileSha256 = caps.Sha256,
+            BudgetProfileSource = caps.Source,
+            BudgetProfileJson = caps.SnapshotJson,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        db.ReadingPaperJobs.Add(job);
+        db.ReadingPaperRuns.Add(run);
+        await db.SaveChangesAsync(ct);
+        var secId = $"section_{request.Index}";
+        var sourceHash = ComputeSourceHash(source);
+        var rawReq = $"{runId}:{request.Index}:{source.Pmcid}:{sourceHash}";
+        var reqHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawReq)));
+        var opId = $"op_{runId}_sec_{request.Index}_{sourceHash[..Math.Min(12, sourceHash.Length)]}";
+
+        var secTokens = caps.Caps.TryGetValue("legacySectionTokenCap", out var st) && st > 0 ? st : 380000;
+        var secCalls = caps.Caps.TryGetValue("legacySectionCallCap", out var sc) && sc > 0 ? sc : 25;
+        var secWall = caps.Caps.TryGetValue("legacySectionWallTimeCapSeconds", out var sw) && sw > 0 ? sw : 600;
+
+        var passTokens = caps.Caps.TryGetValue("legacyArtifactPassageTokenCap", out var pt) && pt > 0 ? pt : 80000;
+        var passCalls = caps.Caps.TryGetValue("legacyArtifactPassageCallCap", out var pc) && pc > 0 ? pc : 10;
+        var passWall = caps.Caps.TryGetValue("legacyArtifactPassageWallTimeCapSeconds", out var pw) && pw > 0 ? pw : 200;
+
+        var qTokens = caps.Caps.TryGetValue("legacyArtifactQuestionsTokenCap", out var qt) && qt > 0 ? qt : 200000;
+        var qCalls = caps.Caps.TryGetValue("legacyArtifactQuestionsCallCap", out var qc) && qc > 0 ? qc : 50;
+        var qWall = caps.Caps.TryGetValue("legacyArtifactQuestionsWallTimeCapSeconds", out var qw) && qw > 0 ? qw : 400;
+
+        var allocs = new List<BudgetAllocationItem>
+        {
+            new("SECTION", secId, null, secTokens, secCalls, secWall),
+            new("ARTIFACT", $"art_passage_s{request.Index}", secId, passTokens, passCalls, passWall),
+            new("ARTIFACT", $"questions_{secId}", secId, qTokens, qCalls, qWall)
+        };
+
+        await CheckpointService.SetBudgetAllocationsAsync(db, new SetBudgetAllocationsRequest(
+            runId, job.Epoch, owner, allocs
+        ), ct);
+
+        var grant = await CheckpointService.GrantOperationAsync(db, new OperationGrantRequest(
+            runId, job.Epoch, owner, opId, "GENERATE_SECTION", reqHash,
+            TokenReservation: secTokens,
+            CostReservationUsd: 0m,
+            WallTimeReservationSeconds: (double)secWall,
+            SectionId: secId,
+            ArtifactId: null
+        ), ct);
+
+        return Results.Ok(new
+        {
+            jobId = job.Id,
+            runId = run.RunId,
+            epoch = run.Epoch,
+            leaseOwner = run.LeaseOwner,
+            leaseUntil = run.LeaseUntil,
+            index = request.Index,
+            parentOperationId = grant.OperationId,
+            source = source,
+            topic = job.Topic,
+            provider = provider
+        });
+    }
 
 }

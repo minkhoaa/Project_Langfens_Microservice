@@ -1,0 +1,82 @@
+{
+  "kind": "freeze_record",
+  "freeze_id": "RG00-FREEZE-2026-10-14",
+  "phase_id": "RG00",
+  "title": "RG00 Requirements and Invariants Freeze",
+  "freeze_status": "PASS",
+  "written_spec_approval": "NOT_REQUIRED",
+  "base_source_commit": "0b3ffa375275425a5918380b7aa1b82146d41459",
+  "frozen_at": "2026-10-14T19:00:00Z",
+  "decision_authority": "User-confirmed KLTN proposal scope and normative baseline contracts",
+  "scope_boundary": {
+    "vietnamese_title": "Phát triển hệ thống học tiếng Anh tích hợp trợ lý AI hội thoại và tự động tạo nội dung bằng đa tác nhân.",
+    "english_title": "Developing an English Learning System Integrated with Conversational AI Assistant and Multi-Agent Automated Test Generation.",
+    "research_question": "RQ2 (task decomposition across specialized agents for generation, review, validation, bounded repair vs single LLM and self-review)",
+    "exercise_families": [
+      "Reading (1 evidence-grounded passage + 1 or 2 question groups)",
+      "Grammar (contextual exercises tied to eligible versioned rule pack with reference answers)"
+    ],
+    "rq1_boundary": "Speaking / acoustic phoneme pronunciation (GOP/forced alignment) is strictly separate RQ1"
+  },
+  "canonical_artifacts": {
+    "MASTER_PROPOSAL.md": {
+      "path": "generation_baseline/MASTER_PROPOSAL.md",
+      "sha256": "5e6585cbfa3d96ae7b8ac6bf81281fe2554791f8a940439b87c9f2faf384ae79"
+    },
+    "SOURCE_OF_TRUTH.md": {
+      "path": "generation_baseline/SOURCE_OF_TRUTH.md",
+      "sha256": "e21929ea6914bbb836f40c6a2b5b17529ab445187f544f3562d255a29faad463"
+    },
+    "architecture/STATE_AND_AUTHORITY.md": {
+      "path": "generation_baseline/architecture/STATE_AND_AUTHORITY.md",
+      "sha256": "07a6e038629e1911ea16a0c1b59fe59d114b75aa61f73ea4e98b0098d4269120"
+    },
+    "CHANGE_CONTROL.md": {
+      "path": "generation_baseline/CHANGE_CONTROL.md",
+      "sha256": "bdbba4f017df75c8092b5ee153396bbdc89d24efb74c616a19852f9bcb59b411"
+    },
+    "REQUIREMENTS_TRACEABILITY.md": {
+      "path": "generation_baseline/REQUIREMENTS_TRACEABILITY.md",
+      "sha256": "1ce83b7c8671d58ebd6ee90f90b7b85929ac32c6be478eb60380c1a0eaec99ec"
+    }
+  },
+  "governing_references": {
+    "specs/2026-10-14-rg00-freeze-design.md": {
+      "path": "generation_baseline/specs/2026-10-14-rg00-freeze-design.md",
+      "sha256": "7a7ed95c3bc78d11e6cbc56e0c6a46fa078016b52b876da7a92b3f7926d7d2de"
+    },
+    "references/HISTORICAL_AND_PROPOSAL_CONTEXT.md": {
+      "path": "generation_baseline/references/HISTORICAL_AND_PROPOSAL_CONTEXT.md",
+      "sha256": "9f837dac6127344c53f8d008a2170b0aa99b509583ba0d28efe12e1a4bb5cd3d"
+    },
+    "research/RQ1_BOUNDARY.md": {
+      "path": "generation_baseline/research/RQ1_BOUNDARY.md",
+      "sha256": "d019b62ae3d50478e04bedaa4601c396e47236e08222fb12f3f757d90690f34c"
+    },
+    "research/RQ2_PROTOCOL.md": {
+      "path": "generation_baseline/research/RQ2_PROTOCOL.md",
+      "sha256": "0c19cd12231467fd716028a75e1498fed8b040452645448056367c88c2bd5077"
+    }
+  },
+  "requirements_inventory": [
+    "RQ2-01", "RQ2-02", "RQ2-03", "RQ2-04", "RQ2-05", "RQ2-06",
+    "RQ2-07", "RQ2-08", "RQ2-09", "RQ2-10", "RQ2-11",
+    "PROD-01", "PROD-02", "SEC-01", "SEC-02", "DUR-01", "OPS-01", "RQ1-01"
+  ],
+  "invariants_inventory": [
+    "INV-01", "INV-02", "INV-03", "INV-04", "INV-05", "INV-06", "INV-07",
+    "INV-08", "INV-09", "INV-10", "INV-11", "INV-12", "INV-13", "INV-14", "INV-15"
+  ],
+  "decisions_register": [
+    "RG00-D01", "RG00-D02", "RG00-D03", "RG00-D04", "RG00-D05", "RG00-D06", "RG00-D07"
+  ],
+  "phase_sprint_inventory": {
+    "total_phases": 14,
+    "total_sprints": 70,
+    "dag_status": "acyclic"
+  },
+  "open_limitations_and_blockers": [
+    "Original submitted KLTN proposal document is unavailable in repository; original-source verification remains NOT_RUN; Section 3.b mapping is recorded as user-confirmed",
+    "Concrete source paths, API names, and DTOs remain UNKNOWN until RG01 source audit"
+  ]
+}

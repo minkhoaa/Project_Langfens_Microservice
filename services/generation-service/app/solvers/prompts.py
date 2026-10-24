@@ -140,7 +140,7 @@ def build_adversary_messages(blind_input: BlindSolverInput) -> List[Dict[str, st
 {envelope}
 
 CRITICAL ADVERSARIAL RULES:
-1. For Multiple Choice items: carefully check whether ANY two options (e.g. A and B) are paraphrases, synonyms, or both factually supported by the text. If more than one option is defensible from the passage, you MUST set "isAmbiguous": true, "ambiguityType": "MULTIPLE_VALID_OPTIONS", and cite the passage text for the alternative. Only options explicitly listed in the <options> block may be evaluated.
+1. For Multiple Choice items: carefully check whether ANY two options (e.g. A and B) are paraphrases, synonyms, or both factually supported by the text. If more than one option is defensible from the passage, you MUST set "isAmbiguous": true, "ambiguityType": "MULTIPLE_VALID_OPTIONS", and cite the passage text for the alternative. Do NOT list incorrect distractors that are contradicted or unsupported by the text as alternative answers.
 2. For completion or short answer items: do NOT flag minor grammatical variants, determiners, or substrings of the same target entity as MULTIPLE_VALID_OPTIONS if they refer to the exact same passage concept. Flag ambiguity only if genuinely distinct factual answers from the passage can fill the blank.
 3. Return ONLY a valid JSON object matching the required schema."""
     return [

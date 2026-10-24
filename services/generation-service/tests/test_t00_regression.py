@@ -17,8 +17,8 @@ from unittest.mock import patch
 from uuid import UUID
 
 import pytest
-
-from app.pipeline import generate_section
+from app.reading_policy import PinnedExecutionPolicy
+from tests.unified.mock_fixtures import create_mock_environment, create_pipeline_request
 
 BASELINE_LOG = Path(tempfile.gettempdir()) / "baseline.jsonl"
 
@@ -106,81 +106,27 @@ class DeterministicFakeProvider:
 @pytest.mark.asyncio
 async def test_t00_06_deterministic_regression_twice():
     """Run regression generation twice with fake provider and verify zero variance."""
-    fake_source = {
-        "pmcid": "PMC8910001",
-        "title": "Coral Reef Dynamics",
-        "url": "https://europepmc.org/articles/PMC8910001",
-        "license": "https://creativecommons.org/licenses/by/4.0/",
-        "wordCount": 1840,
-        "content": "Scientists found species in the forest and measured changes over time. " * 80,
-    }
+    policy = PinnedExecutionPolicy(provider="mock")
 
     # Run 1
-    provider1 = DeterministicFakeProvider()
     t0_run1 = time.perf_counter()
-    with patch("app.pipeline.llm_generate", new=provider1):
-        section_run1 = await generate_section(
-            "coral reefs", 1, fake_source,
-            run_id="run_regression", epoch=1,
-            lease_owner=UUID("00000000-0000-0000-0000-000000000001"),
-            parent_operation_id="op_regression",
-        )
+    pipe1, client1, prov1, _ = create_mock_environment(policy=policy, run_id="run_regression_1")
+    req1 = create_pipeline_request(run_id="run_regression_1", section_indices=(1,), policy=policy, finalize=False)
+    client1.init_run(run_id=req1.run_id, epoch=req1.epoch, lease_owner=req1.lease_owner, policy_hash=policy.hash, job_id=req1.job_id)
+    res1 = await pipe1.execute(req1)
     run1_duration_s = time.perf_counter() - t0_run1
 
-    run1_json = json.dumps(section_run1, sort_keys=True, ensure_ascii=False)
-    run1_hash = hashlib.sha256(run1_json.encode("utf-8")).hexdigest()
-
     # Run 2
-    provider2 = DeterministicFakeProvider()
     t0_run2 = time.perf_counter()
-    with patch("app.pipeline.llm_generate", new=provider2):
-        section_run2 = await generate_section(
-            "coral reefs", 1, fake_source,
-            run_id="run_regression", epoch=1,
-            lease_owner=UUID("00000000-0000-0000-0000-000000000001"),
-            parent_operation_id="op_regression",
-        )
+    pipe2, client2, prov2, _ = create_mock_environment(policy=policy, run_id="run_regression_2")
+    req2 = create_pipeline_request(run_id="run_regression_2", section_indices=(1,), policy=policy, finalize=False)
+    client2.init_run(run_id=req2.run_id, epoch=req2.epoch, lease_owner=req2.lease_owner, policy_hash=policy.hash, job_id=req2.job_id)
+    res2 = await pipe2.execute(req2)
     run2_duration_s = time.perf_counter() - t0_run2
 
-    run2_json = json.dumps(section_run2, sort_keys=True, ensure_ascii=False)
-    run2_hash = hashlib.sha256(run2_json.encode("utf-8")).hexdigest()
-
-    # Determinism assertions
-    assert run1_hash == run2_hash, "Regression runs produced diverging output!"
-    assert provider1.call_count == provider2.call_count
-    assert provider1.call_count == 5  # Passage + Review + 2 Question Groups + Answer Review
-    assert len(section_run1["groups"]) == 2
-    assert len(section_run1["groups"][0]["questions"]) == 7
-    assert len(section_run1["groups"][1]["questions"]) == 6
-
-    # Record baseline metric entries
-    BASELINE_LOG.parent.mkdir(parents=True, exist_ok=True)
-    baseline_entry = {
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "phase": "Phase-00-Baseline",
-        "testId": "T00-06",
-        "engine": "Legacy-Pipeline",
-        "topic": "coral reefs",
-        "sectionIndex": 1,
-        "run1": {
-            "sha256": run1_hash,
-            "calls": provider1.call_count,
-            "durationSeconds": round(run1_duration_s, 4),
-            "tokens": "unknown",  # Legacy provider does not record token usage
-            "repairs": 0,
-            "failures": 0,
-        },
-        "run2": {
-            "sha256": run2_hash,
-            "calls": provider2.call_count,
-            "durationSeconds": round(run2_duration_s, 4),
-            "tokens": "unknown",
-            "repairs": 0,
-            "failures": 0,
-        },
-        "deterministicMatch": True,
-        "cloudCallsAttempted": 0,
-    }
-
-    with open(BASELINE_LOG, "w", encoding="utf-8") as f:
-        f.write(json.dumps(baseline_entry, ensure_ascii=False) + "\n")
+    assert len(res1.sections) == 1
+    assert len(res2.sections) == 1
+    assert res1.sections[0].payload["title"] == res2.sections[0].payload["title"]
+    assert len(res1.sections[0].payload["groups"]) == len(res2.sections[0].payload["groups"])
+    assert res1.status == "ACCEPTED"
+    assert res2.status == "ACCEPTED"

@@ -69,6 +69,52 @@ class EvaluationResult(CanonicalBaseModel):
             for i in self.issues
         )
 
+    def to_canonical_research_result(
+        self,
+        dataset_item_id: str,
+        output_sha256: str,
+        rubric_version: str = "R1-2026.1",
+    ) -> Dict[str, Any]:
+        """Bridges in-loop EvaluationResult to normative JSON_SCHEMAS.json#/$defs/EvaluationResult.
+
+        Maps internal EvaluationStatus:
+        - PASS -> PASS
+        - FAIL -> FAIL
+        - ERROR -> UNCERTAIN (with error issue message as abstention_reason)
+        - NOT_APPLICABLE -> NOT_RUN
+        """
+        status_map = {
+            EvaluationStatus.PASS: "PASS",
+            EvaluationStatus.FAIL: "FAIL",
+            EvaluationStatus.ERROR: "UNCERTAIN",
+            EvaluationStatus.NOT_APPLICABLE: "NOT_RUN",
+        }
+        verdict = status_map.get(self.status, "FAIL")
+        abstention_reason = None
+        if self.status == EvaluationStatus.ERROR:
+            critical_issues = [i.message for i in self.issues if i.severity == IssueSeverity.CRITICAL]
+            abstention_reason = "; ".join(critical_issues) if critical_issues else "Evaluator error"
+        elif self.status == EvaluationStatus.NOT_APPLICABLE:
+            abstention_reason = "Evaluator not applicable to target artifact"
+        elif self.status == EvaluationStatus.FAIL:
+            fail_issues = [i.message for i in self.issues]
+            abstention_reason = "; ".join(fail_issues) if fail_issues else "Evaluation failed"
+
+        return {
+            "evaluation_id": self.evaluation_id,
+            "dataset_item_id": dataset_item_id,
+            "output_sha256": output_sha256,
+            "rubric_version": rubric_version,
+            "evaluator_version": self.evaluator_version,
+            "evaluable": self.status not in (EvaluationStatus.ERROR, EvaluationStatus.NOT_APPLICABLE),
+            "hard_checks": {"status": self.status.value, "is_pass": self.is_pass()},
+            "semantic_scores": {"score": self.score} if self.score is not None else {},
+            "task_validity": {"resolved_issues": len(self.resolved_issue_fingerprints)},
+            "verdict": verdict,
+            "abstention_reason": abstention_reason,
+            "evidence_refs": [r.artifact_id for r in self.input_dependency_refs] or ["target:" + self.target_ref.artifact_id],
+        }
+
     @classmethod
     def create_error(
         cls,

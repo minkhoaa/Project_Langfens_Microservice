@@ -1,0 +1,2246 @@
+{
+  "catalog_version": "4.0",
+  "execution_status": "NOT_RUN",
+  "cases": [
+    {
+      "test_id": "POS-RG00-S01",
+      "phase": "RG00",
+      "sprint": "RG00-S01",
+      "test_class": "positive",
+      "expected": "All claims map to 2.2.e/3.b/4.e/4.g and distinguish RQ1",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG00-S01",
+      "phase": "RG00",
+      "sprint": "RG00-S01",
+      "test_class": "negative",
+      "expected": "Claiming RQ1 pronunciation accuracy from RQ2 evidence is forbidden",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG00-S01",
+      "phase": "RG00",
+      "sprint": "RG00-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Research scope and unchanged thesis title",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG00-S01",
+      "phase": "RG00",
+      "sprint": "RG00-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Research scope and unchanged thesis title",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG00-S02",
+      "phase": "RG00",
+      "sprint": "RG00-S02",
+      "test_class": "positive",
+      "expected": "Every requirement references an evidence class and owner",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG00-S02",
+      "phase": "RG00",
+      "sprint": "RG00-S02",
+      "test_class": "negative",
+      "expected": "Unverified historical acceptance is not silently converted into source PASS",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG00-S02",
+      "phase": "RG00",
+      "sprint": "RG00-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Authoritative evidence hierarchy",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG00-S02",
+      "phase": "RG00",
+      "sprint": "RG00-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Authoritative evidence hierarchy",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG00-S03",
+      "phase": "RG00",
+      "sprint": "RG00-S03",
+      "test_class": "positive",
+      "expected": "All invariants have unique IDs and explicit failure behavior",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG00-S03",
+      "phase": "RG00",
+      "sprint": "RG00-S03",
+      "test_class": "negative",
+      "expected": "No research policy weakens durability or lets experimental artifacts publish",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG00-S03",
+      "phase": "RG00",
+      "sprint": "RG00-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Production and research invariants",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG00-S03",
+      "phase": "RG00",
+      "sprint": "RG00-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Production and research invariants",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG00-S04",
+      "phase": "RG00",
+      "sprint": "RG00-S04",
+      "test_class": "positive",
+      "expected": "All phase prerequisites exist and DAG is acyclic",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG00-S04",
+      "phase": "RG00",
+      "sprint": "RG00-S04",
+      "test_class": "negative",
+      "expected": "Unresolved source API names cannot be invented as confirmed contract",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG00-S04",
+      "phase": "RG00",
+      "sprint": "RG00-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Dependencies and change decisions",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG00-S04",
+      "phase": "RG00",
+      "sprint": "RG00-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Dependencies and change decisions",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG00-S05",
+      "phase": "RG00",
+      "sprint": "RG00-S05",
+      "test_class": "positive",
+      "expected": "No must-have RQ2 requirement lacks a gate and evidence type",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG00-S05",
+      "phase": "RG00",
+      "sprint": "RG00-S05",
+      "test_class": "negative",
+      "expected": "Requirement conflicts or missing ownership block freeze",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG00-S05",
+      "phase": "RG00",
+      "sprint": "RG00-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Proposal coverage and design review",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG00-S05",
+      "phase": "RG00",
+      "sprint": "RG00-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Proposal coverage and design review",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG01-S01",
+      "phase": "RG01",
+      "sprint": "RG01-S01",
+      "test_class": "positive",
+      "expected": "Every inspected checkout reported with exact path, SHA and preservation note",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG01-S01",
+      "phase": "RG01",
+      "sprint": "RG01-S01",
+      "test_class": "negative",
+      "expected": "No reset/clean/stash mutation or silent creation of code modifications",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG01-S01",
+      "phase": "RG01",
+      "sprint": "RG01-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Git and repository snapshot",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG01-S01",
+      "phase": "RG01",
+      "sprint": "RG01-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Git and repository snapshot",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG01-S02",
+      "phase": "RG01",
+      "sprint": "RG01-S02",
+      "test_class": "positive",
+      "expected": "All known boundaries have observed routes/DTO or UNKNOWN",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG01-S02",
+      "phase": "RG01",
+      "sprint": "RG01-S02",
+      "test_class": "negative",
+      "expected": "Do not assume previous port numbers or paths in new checkout",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG01-S02",
+      "phase": "RG01",
+      "sprint": "RG01-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Service topology and persistence ownership",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG01-S02",
+      "phase": "RG01",
+      "sprint": "RG01-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Service topology and persistence ownership",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG01-S03",
+      "phase": "RG01",
+      "sprint": "RG01-S03",
+      "test_class": "positive",
+      "expected": "Each transition tied to code/test/config and observed hash/lease handling",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG01-S03",
+      "phase": "RG01",
+      "sprint": "RG01-S03",
+      "test_class": "negative",
+      "expected": "Prior report descriptions alone do not satisfy implementation evidence",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG01-S03",
+      "phase": "RG01",
+      "sprint": "RG01-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Reading loops and runtime policies",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG01-S03",
+      "phase": "RG01",
+      "sprint": "RG01-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Reading loops and runtime policies",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG01-S04",
+      "phase": "RG01",
+      "sprint": "RG01-S04",
+      "test_class": "positive",
+      "expected": "Per-feature status is VERIFIED/PARTIAL/MISSING/UNKNOWN with evidence",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG01-S04",
+      "phase": "RG01",
+      "sprint": "RG01-S04",
+      "test_class": "negative",
+      "expected": "Unknown service/table is not labeled missing after a superficial search",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG01-S04",
+      "phase": "RG01",
+      "sprint": "RG01-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Retrieval, grammar and learner inventory",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG01-S04",
+      "phase": "RG01",
+      "sprint": "RG01-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Retrieval, grammar and learner inventory",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG01-S05",
+      "phase": "RG01",
+      "sprint": "RG01-S05",
+      "test_class": "positive",
+      "expected": "Critical gaps have specific file:symbol evidence or explicit unknowns",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG01-S05",
+      "phase": "RG01",
+      "sprint": "RG01-S05",
+      "test_class": "negative",
+      "expected": "No code cleanup or implementation occurs in read-only audit",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG01-S05",
+      "phase": "RG01",
+      "sprint": "RG01-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Evidence-backed implementation gap map",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG01-S05",
+      "phase": "RG01",
+      "sprint": "RG01-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Evidence-backed implementation gap map",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG02-S01",
+      "phase": "RG02",
+      "sprint": "RG02-S01",
+      "test_class": "positive",
+      "expected": "Positive/negative schema vectors and legacy REST/NDJSON compatibility pass",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG02-S01",
+      "phase": "RG02",
+      "sprint": "RG02-S01",
+      "test_class": "negative",
+      "expected": "Wrong enum casing, unknown major schema and invalid nullable fields reject safely",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG02-S01",
+      "phase": "RG02",
+      "sprint": "RG02-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Schema mapping and version negotiation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG02-S01",
+      "phase": "RG02",
+      "sprint": "RG02-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Schema mapping and version negotiation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG02-S02",
+      "phase": "RG02",
+      "sprint": "RG02-S02",
+      "test_class": "positive",
+      "expected": "Forbidden keys cannot reach solver, generation or external reviewer",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG02-S02",
+      "phase": "RG02",
+      "sprint": "RG02-S02",
+      "test_class": "negative",
+      "expected": "Injection via nested metadata, trace or serialized alias is rejected",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG02-S02",
+      "phase": "RG02",
+      "sprint": "RG02-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Three isolated evidence views",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG02-S02",
+      "phase": "RG02",
+      "sprint": "RG02-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Three isolated evidence views",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG02-S03",
+      "phase": "RG02",
+      "sprint": "RG02-S03",
+      "test_class": "positive",
+      "expected": "Stale revision, lost ACK and duplicate commit verified with real DB harness",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG02-S03",
+      "phase": "RG02",
+      "sprint": "RG02-S03",
+      "test_class": "negative",
+      "expected": "No Reviewer/Validator directly writes ACCEPTED or alters exam graph",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG02-S03",
+      "phase": "RG02",
+      "sprint": "RG02-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Authoritative acceptance protocol",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG02-S03",
+      "phase": "RG02",
+      "sprint": "RG02-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Authoritative acceptance protocol",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG02-S04",
+      "phase": "RG02",
+      "sprint": "RG02-S04",
+      "test_class": "positive",
+      "expected": "All modes preserve integrity/security; research publish is denied at service boundary",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG02-S04",
+      "phase": "RG02",
+      "sprint": "RG02-S04",
+      "test_class": "negative",
+      "expected": "Disabled checks become NOT_RUN, not fabricated PASS; no bypass via alternate API",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG02-S04",
+      "phase": "RG02",
+      "sprint": "RG02-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Research policy and publish protection",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG02-S04",
+      "phase": "RG02",
+      "sprint": "RG02-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Research policy and publish protection",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG02-S05",
+      "phase": "RG02",
+      "sprint": "RG02-S05",
+      "test_class": "positive",
+      "expected": "EXACT/ESTIMATED/UNKNOWN remain distinct across failure/retry/resume",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG02-S05",
+      "phase": "RG02",
+      "sprint": "RG02-S05",
+      "test_class": "negative",
+      "expected": "Provider error and unknown usage never become zero/cost-free by default",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG02-S05",
+      "phase": "RG02",
+      "sprint": "RG02-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Agent traces, usage and compatibility",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG02-S05",
+      "phase": "RG02",
+      "sprint": "RG02-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Agent traces, usage and compatibility",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG03-S01",
+      "phase": "RG03",
+      "sprint": "RG03-S01",
+      "test_class": "positive",
+      "expected": "Dimension anchors, applicability, threshold source and evidence fields are fixed",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG03-S01",
+      "phase": "RG03",
+      "sprint": "RG03-S01",
+      "test_class": "negative",
+      "expected": "Beautiful fluent but wrong/ungrounded content cannot PASS",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG03-S01",
+      "phase": "RG03",
+      "sprint": "RG03-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Versioned evaluation rubric",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG03-S01",
+      "phase": "RG03",
+      "sprint": "RG03-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Versioned evaluation rubric",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG03-S02",
+      "phase": "RG03",
+      "sprint": "RG03-S02",
+      "test_class": "positive",
+      "expected": "Config-label permutation leaves identical scoring input and result unchanged",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG03-S02",
+      "phase": "RG03",
+      "sprint": "RG03-S02",
+      "test_class": "negative",
+      "expected": "No scoring shortcut from C internal accepted flag",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG03-S02",
+      "phase": "RG03",
+      "sprint": "RG03-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Neutral post-generation evaluator",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG03-S02",
+      "phase": "RG03",
+      "sprint": "RG03-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Neutral post-generation evaluator",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG03-S03",
+      "phase": "RG03",
+      "sprint": "RG03-S03",
+      "test_class": "positive",
+      "expected": "Leakage canaries and TFNG/NOT GIVEN contradictions detected",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG03-S03",
+      "phase": "RG03",
+      "sprint": "RG03-S03",
+      "test_class": "negative",
+      "expected": "Gold/proposed answer never enters SolverView through options or metadata",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG03-S03",
+      "phase": "RG03",
+      "sprint": "RG03-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Blind solve and answer verification",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG03-S03",
+      "phase": "RG03",
+      "sprint": "RG03-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Blind solve and answer verification",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG03-S04",
+      "phase": "RG03",
+      "sprint": "RG03-S04",
+      "test_class": "positive",
+      "expected": "Completed/raw-only/parseable/none scenarios have deterministic accounting",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG03-S04",
+      "phase": "RG03",
+      "sprint": "RG03-S04",
+      "test_class": "negative",
+      "expected": "No-output requests cannot receive invented semantic scores",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG03-S04",
+      "phase": "RG03",
+      "sprint": "RG03-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Partial and uncertain evaluation results",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG03-S04",
+      "phase": "RG03",
+      "sprint": "RG03-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Partial and uncertain evaluation results",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG03-S05",
+      "phase": "RG03",
+      "sprint": "RG03-S05",
+      "test_class": "positive",
+      "expected": "Perturbations expose judge bias and leave audit trail",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG03-S05",
+      "phase": "RG03",
+      "sprint": "RG03-S05",
+      "test_class": "negative",
+      "expected": "Judge does not peek at internal trace or unfrozen gold labels",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG03-S05",
+      "phase": "RG03",
+      "sprint": "RG03-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Independence and robustness suite",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG03-S05",
+      "phase": "RG03",
+      "sprint": "RG03-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Independence and robustness suite",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG04-S01",
+      "phase": "RG04",
+      "sprint": "RG04-S01",
+      "test_class": "positive",
+      "expected": "Valid/invalid and ambiguity/grounding/distractor/word-limit strata covered",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG04-S01",
+      "phase": "RG04",
+      "sprint": "RG04-S01",
+      "test_class": "negative",
+      "expected": "No labels produced solely by the evaluator under calibration",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG04-S01",
+      "phase": "RG04",
+      "sprint": "RG04-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Labeled calibration corpus",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG04-S01",
+      "phase": "RG04",
+      "sprint": "RG04-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Labeled calibration corpus",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG04-S02",
+      "phase": "RG04",
+      "sprint": "RG04-S02",
+      "test_class": "positive",
+      "expected": "No subject/family overlap and label access controls tested",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG04-S02",
+      "phase": "RG04",
+      "sprint": "RG04-S02",
+      "test_class": "negative",
+      "expected": "Calibration queries cannot read judge-holdout gold",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG04-S02",
+      "phase": "RG04",
+      "sprint": "RG04-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Sealed judge holdout and human guidelines",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG04-S02",
+      "phase": "RG04",
+      "sprint": "RG04-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Sealed judge holdout and human guidelines",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG04-S03",
+      "phase": "RG04",
+      "sprint": "RG04-S03",
+      "test_class": "positive",
+      "expected": "Frozen candidate chosen with documented error tradeoffs",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG04-S03",
+      "phase": "RG04",
+      "sprint": "RG04-S03",
+      "test_class": "negative",
+      "expected": "No iterative tuning based on FINAL_EVAL or holdout outcomes",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG04-S03",
+      "phase": "RG04",
+      "sprint": "RG04-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Calibrate judge on allowed data",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG04-S03",
+      "phase": "RG04",
+      "sprint": "RG04-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Calibrate judge on allowed data",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG04-S04",
+      "phase": "RG04",
+      "sprint": "RG04-S04",
+      "test_class": "positive",
+      "expected": "Confidence estimates and uncertainty stratified across types",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG04-S04",
+      "phase": "RG04",
+      "sprint": "RG04-S04",
+      "test_class": "negative",
+      "expected": "UNCERTAIN not silently counted as correct or discarded",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG04-S04",
+      "phase": "RG04",
+      "sprint": "RG04-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to One-time holdout reliability",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG04-S04",
+      "phase": "RG04",
+      "sprint": "RG04-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting One-time holdout reliability",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG04-S05",
+      "phase": "RG04",
+      "sprint": "RG04-S05",
+      "test_class": "positive",
+      "expected": "Holdout passes preregistered thresholds or gate marks not ready",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG04-S05",
+      "phase": "RG04",
+      "sprint": "RG04-S05",
+      "test_class": "negative",
+      "expected": "No judge revision after freeze without a new documented campaign/version",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG04-S05",
+      "phase": "RG04",
+      "sprint": "RG04-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Freeze judge and reliability decision",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG04-S05",
+      "phase": "RG04",
+      "sprint": "RG04-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Freeze judge and reliability decision",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG05-S01",
+      "phase": "RG05",
+      "sprint": "RG05-S01",
+      "test_class": "positive",
+      "expected": "Malformed/unauthorized and full-paper requests differentiated",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG05-S01",
+      "phase": "RG05",
+      "sprint": "RG05-S01",
+      "test_class": "negative",
+      "expected": "Research unit cannot impersonate completed 40-question Exam",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG05-S01",
+      "phase": "RG05",
+      "sprint": "RG05-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Standalone Reading request contract",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG05-S01",
+      "phase": "RG05",
+      "sprint": "RG05-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Standalone Reading request contract",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG05-S02",
+      "phase": "RG05",
+      "sprint": "RG05-S02",
+      "test_class": "positive",
+      "expected": "Timeout and crash resume reach same content/artifact head without duplicates",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG05-S02",
+      "phase": "RG05",
+      "sprint": "RG05-S02",
+      "test_class": "negative",
+      "expected": "Python cannot bypass authoritative APIs or accept unsupported source",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG05-S02",
+      "phase": "RG05",
+      "sprint": "RG05-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Resumable Passage Loop research adapter",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG05-S02",
+      "phase": "RG05",
+      "sprint": "RG05-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Resumable Passage Loop research adapter",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG05-S03",
+      "phase": "RG05",
+      "sprint": "RG05-S03",
+      "test_class": "positive",
+      "expected": "Question answer uniqueness, TFNG/YNNG, MCQ and completion case tests",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG05-S03",
+      "phase": "RG05",
+      "sprint": "RG05-S03",
+      "test_class": "negative",
+      "expected": "Shared summary dependencies and question IDs cannot silently drift",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG05-S03",
+      "phase": "RG05",
+      "sprint": "RG05-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Candidate groups and local verification",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG05-S03",
+      "phase": "RG05",
+      "sprint": "RG05-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Candidate groups and local verification",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG05-S04",
+      "phase": "RG05",
+      "sprint": "RG05-S04",
+      "test_class": "positive",
+      "expected": "Parseable failed output retained for fair external evaluation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG05-S04",
+      "phase": "RG05",
+      "sprint": "RG05-S04",
+      "test_class": "negative",
+      "expected": "UNKNOWN provider tokens not coerced to zero; no double-count replay",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG05-S04",
+      "phase": "RG05",
+      "sprint": "RG05-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Neutral output, partials and usage",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG05-S04",
+      "phase": "RG05",
+      "sprint": "RG05-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Neutral output, partials and usage",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG05-S05",
+      "phase": "RG05",
+      "sprint": "RG05-S05",
+      "test_class": "positive",
+      "expected": "Existing real regression and new research-mode coexistence tests pass",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG05-S05",
+      "phase": "RG05",
+      "sprint": "RG05-S05",
+      "test_class": "negative",
+      "expected": "Single-passage run cannot create partial production Draft Exam",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG05-S05",
+      "phase": "RG05",
+      "sprint": "RG05-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Full-paper regression boundary",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG05-S05",
+      "phase": "RG05",
+      "sprint": "RG05-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Full-paper regression boundary",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG06-S01",
+      "phase": "RG06",
+      "sprint": "RG06-S01",
+      "test_class": "positive",
+      "expected": "Every generated unit pins rule version, license and difficulty target",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG06-S01",
+      "phase": "RG06",
+      "sprint": "RG06-S01",
+      "test_class": "negative",
+      "expected": "No assumption that a retrieved rule validates generated answer",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG06-S01",
+      "phase": "RG06",
+      "sprint": "RG06-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Grammar exercise blueprint and rule pack",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG06-S01",
+      "phase": "RG06",
+      "sprint": "RG06-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Grammar exercise blueprint and rule pack",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG06-S02",
+      "phase": "RG06",
+      "sprint": "RG06-S02",
+      "test_class": "positive",
+      "expected": "Hits have citations/hash, relevance and authorized source scope",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG06-S02",
+      "phase": "RG06",
+      "sprint": "RG06-S02",
+      "test_class": "negative",
+      "expected": "Prompt injection, cross-tenant retrieval and absent rule yield safe failure",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG06-S02",
+      "phase": "RG06",
+      "sprint": "RG06-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Knowledge retrieval abstraction",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG06-S02",
+      "phase": "RG06",
+      "sprint": "RG06-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Knowledge retrieval abstraction",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG06-S03",
+      "phase": "RG06",
+      "sprint": "RG06-S03",
+      "test_class": "positive",
+      "expected": "Both generation and private answer are schema-valid and traceable",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG06-S03",
+      "phase": "RG06",
+      "sprint": "RG06-S03",
+      "test_class": "negative",
+      "expected": "Generator answer is not labeled verified gold",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG06-S03",
+      "phase": "RG06",
+      "sprint": "RG06-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Candidate and reference evidence generation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG06-S03",
+      "phase": "RG06",
+      "sprint": "RG06-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Candidate and reference evidence generation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG06-S04",
+      "phase": "RG06",
+      "sprint": "RG06-S04",
+      "test_class": "positive",
+      "expected": "Ambiguous MCQ and multiple-correct answers rejected or repaired then reevaluated",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG06-S04",
+      "phase": "RG06",
+      "sprint": "RG06-S04",
+      "test_class": "negative",
+      "expected": "Old verdict invalidated on patched content; bounded no-progress termination",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG06-S04",
+      "phase": "RG06",
+      "sprint": "RG06-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Grammar blind/reviewer/validator and repair",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG06-S04",
+      "phase": "RG06",
+      "sprint": "RG06-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Grammar blind/reviewer/validator and repair",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG06-S05",
+      "phase": "RG06",
+      "sprint": "RG06-S05",
+      "test_class": "positive",
+      "expected": "Failed/partial/replayed grammar cases are durable and access controlled",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG06-S05",
+      "phase": "RG06",
+      "sprint": "RG06-S05",
+      "test_class": "negative",
+      "expected": "Research grammar item cannot publish directly or leak private answers",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG06-S05",
+      "phase": "RG06",
+      "sprint": "RG06-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Grammar research persistence and surface",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG06-S05",
+      "phase": "RG06",
+      "sprint": "RG06-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Grammar research persistence and surface",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG07-S01",
+      "phase": "RG07",
+      "sprint": "RG07-S01",
+      "test_class": "positive",
+      "expected": "All three configs receive same task/spec and comparable constraints",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG07-S01",
+      "phase": "RG07",
+      "sprint": "RG07-S01",
+      "test_class": "negative",
+      "expected": "Duplicate assignment or provider fallback cannot alter a frozen row",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG07-S01",
+      "phase": "RG07",
+      "sprint": "RG07-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Paired assignments and common task fixture",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG07-S01",
+      "phase": "RG07",
+      "sprint": "RG07-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Paired assignments and common task fixture",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG07-S02",
+      "phase": "RG07",
+      "sprint": "RG07-S02",
+      "test_class": "positive",
+      "expected": "A stays free of generation-time self review while scored externally",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG07-S02",
+      "phase": "RG07",
+      "sprint": "RG07-S02",
+      "test_class": "negative",
+      "expected": "No hidden validator/retry repair performed and reported as single call",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG07-S02",
+      "phase": "RG07",
+      "sprint": "RG07-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Configuration A direct generator",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG07-S02",
+      "phase": "RG07",
+      "sprint": "RG07-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Configuration A direct generator",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG07-S03",
+      "phase": "RG07",
+      "sprint": "RG07-S03",
+      "test_class": "positive",
+      "expected": "B calls/repairs/cost and internal verdict preserved separately",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG07-S03",
+      "phase": "RG07",
+      "sprint": "RG07-S03",
+      "test_class": "negative",
+      "expected": "B self-score not accepted as external rubric verdict",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG07-S03",
+      "phase": "RG07",
+      "sprint": "RG07-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Configuration B sequential self-review",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG07-S03",
+      "phase": "RG07",
+      "sprint": "RG07-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Configuration B sequential self-review",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG07-S04",
+      "phase": "RG07",
+      "sprint": "RG07-S04",
+      "test_class": "positive",
+      "expected": "Blind solver/reviewer/validator recorded without inflating scoring privilege",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG07-S04",
+      "phase": "RG07",
+      "sprint": "RG07-S04",
+      "test_class": "negative",
+      "expected": "No C-only accepted-head predicate used as A/B/C quality metric",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG07-S04",
+      "phase": "RG07",
+      "sprint": "RG07-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Configuration C production-derived research runner",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG07-S04",
+      "phase": "RG07",
+      "sprint": "RG07-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Configuration C production-derived research runner",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG07-S05",
+      "phase": "RG07",
+      "sprint": "RG07-S05",
+      "test_class": "positive",
+      "expected": "E2E denominator equals frozen assignments; retry linkage explicit",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG07-S05",
+      "phase": "RG07",
+      "sprint": "RG07-S05",
+      "test_class": "negative",
+      "expected": "Failed outputs not filtered or billed as zero by missing telemetry",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG07-S05",
+      "phase": "RG07",
+      "sprint": "RG07-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Failure, usage, denominators and replay ledger",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG07-S05",
+      "phase": "RG07",
+      "sprint": "RG07-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Failure, usage, denominators and replay ledger",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG08-S01",
+      "phase": "RG08",
+      "sprint": "RG08-S01",
+      "test_class": "positive",
+      "expected": "Per-config expected counts, costs, quality and failure records reconcile",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG08-S01",
+      "phase": "RG08",
+      "sprint": "RG08-S01",
+      "test_class": "negative",
+      "expected": "Pilot cannot touch/peek at final sealed dataset",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG08-S01",
+      "phase": "RG08",
+      "sprint": "RG08-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Small DEV paired pilot",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG08-S01",
+      "phase": "RG08",
+      "sprint": "RG08-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Small DEV paired pilot",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG08-S02",
+      "phase": "RG08",
+      "sprint": "RG08-S02",
+      "test_class": "positive",
+      "expected": "No partial exam graph, duplicate run charge or stale checkpoint promotion",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG08-S02",
+      "phase": "RG08",
+      "sprint": "RG08-S02",
+      "test_class": "negative",
+      "expected": "Mock-only transaction tests insufficient for DB-required assertions",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG08-S02",
+      "phase": "RG08",
+      "sprint": "RG08-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Crash/resume/idempotency fault scenarios",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG08-S02",
+      "phase": "RG08",
+      "sprint": "RG08-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Crash/resume/idempotency fault scenarios",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG08-S03",
+      "phase": "RG08",
+      "sprint": "RG08-S03",
+      "test_class": "positive",
+      "expected": "All forbidden cases denied with security event and no data exposure",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG08-S03",
+      "phase": "RG08",
+      "sprint": "RG08-S03",
+      "test_class": "negative",
+      "expected": "Metadata false is not the only publication guard",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG08-S03",
+      "phase": "RG08",
+      "sprint": "RG08-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Auth, evidence-view and publication negative cases",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG08-S03",
+      "phase": "RG08",
+      "sprint": "RG08-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Auth, evidence-view and publication negative cases",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG08-S04",
+      "phase": "RG08",
+      "sprint": "RG08-S04",
+      "test_class": "positive",
+      "expected": "Drift measured and pre-final adjustments confined to DEV",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG08-S04",
+      "phase": "RG08",
+      "sprint": "RG08-S04",
+      "test_class": "negative",
+      "expected": "No post-hoc judge changes using sealed benchmark performance",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG08-S04",
+      "phase": "RG08",
+      "sprint": "RG08-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Evaluator robustness and resource drift",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG08-S04",
+      "phase": "RG08",
+      "sprint": "RG08-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Evaluator robustness and resource drift",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG08-S05",
+      "phase": "RG08",
+      "sprint": "RG08-S05",
+      "test_class": "positive",
+      "expected": "All critical findings resolved or final freeze BLOCKED",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG08-S05",
+      "phase": "RG08",
+      "sprint": "RG08-S05",
+      "test_class": "negative",
+      "expected": "Unresolved determinism/data leak not downgraded to warning",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG08-S05",
+      "phase": "RG08",
+      "sprint": "RG08-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Pilot exit decision and freeze prerequisites",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG08-S05",
+      "phase": "RG08",
+      "sprint": "RG08-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Pilot exit decision and freeze prerequisites",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG09-S01",
+      "phase": "RG09",
+      "sprint": "RG09-S01",
+      "test_class": "positive",
+      "expected": "Family-disjoint task IDs, hashes, licenses and full A/B/C assignment grid",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG09-S01",
+      "phase": "RG09",
+      "sprint": "RG09-S01",
+      "test_class": "negative",
+      "expected": "No leaked DEV/CALIBRATION/holdout source into FINAL",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG09-S01",
+      "phase": "RG09",
+      "sprint": "RG09-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Frozen paired FINAL tasks",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG09-S01",
+      "phase": "RG09",
+      "sprint": "RG09-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Frozen paired FINAL tasks",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG09-S02",
+      "phase": "RG09",
+      "sprint": "RG09-S02",
+      "test_class": "positive",
+      "expected": "Reviewers cannot infer A/B/C from IDs or metadata",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG09-S02",
+      "phase": "RG09",
+      "sprint": "RG09-S02",
+      "test_class": "negative",
+      "expected": "Gold cannot be embedded in Generator or Solver input",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG09-S02",
+      "phase": "RG09",
+      "sprint": "RG09-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Sealed gold and blind review export",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG09-S02",
+      "phase": "RG09",
+      "sprint": "RG09-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Sealed gold and blind review export",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG09-S03",
+      "phase": "RG09",
+      "sprint": "RG09-S03",
+      "test_class": "positive",
+      "expected": "Statistical plan is human-readable, executable and pinned",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG09-S03",
+      "phase": "RG09",
+      "sprint": "RG09-S03",
+      "test_class": "negative",
+      "expected": "No primary endpoint picked after seeing C performance",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG09-S03",
+      "phase": "RG09",
+      "sprint": "RG09-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Primary endpoints and statistical preregistration",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG09-S03",
+      "phase": "RG09",
+      "sprint": "RG09-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Primary endpoints and statistical preregistration",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG09-S04",
+      "phase": "RG09",
+      "sprint": "RG09-S04",
+      "test_class": "positive",
+      "expected": "Same task/model family and declared limits; unknown provider quotas noted",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG09-S04",
+      "phase": "RG09",
+      "sprint": "RG09-S04",
+      "test_class": "negative",
+      "expected": "UNLIMITED application cap does not imply no timeouts or free tokens",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG09-S04",
+      "phase": "RG09",
+      "sprint": "RG09-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Freeze providers, prompts, resources and safety",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG09-S04",
+      "phase": "RG09",
+      "sprint": "RG09-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Freeze providers, prompts, resources and safety",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG09-S05",
+      "phase": "RG09",
+      "sprint": "RG09-S05",
+      "test_class": "positive",
+      "expected": "Hash detects any in-place mutation; owner approve before final campaign",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG09-S05",
+      "phase": "RG09",
+      "sprint": "RG09-S05",
+      "test_class": "negative",
+      "expected": "No mixed/mutable DEV and FINAL experiment references",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG09-S05",
+      "phase": "RG09",
+      "sprint": "RG09-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Final immutable manifest and access separation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG09-S05",
+      "phase": "RG09",
+      "sprint": "RG09-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Final immutable manifest and access separation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG10-S01",
+      "phase": "RG10",
+      "sprint": "RG10-S01",
+      "test_class": "positive",
+      "expected": "Exactly one authoritative outcome per assignment with linked retries",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG10-S01",
+      "phase": "RG10",
+      "sprint": "RG10-S01",
+      "test_class": "negative",
+      "expected": "No cherry-pick successful batches or refill failed assignment with replacement",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG10-S01",
+      "phase": "RG10",
+      "sprint": "RG10-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Reading final paired assignment batches",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG10-S01",
+      "phase": "RG10",
+      "sprint": "RG10-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Reading final paired assignment batches",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG10-S02",
+      "phase": "RG10",
+      "sprint": "RG10-S02",
+      "test_class": "positive",
+      "expected": "Failure/timeout/partial output, tokens and trace persisted for each slot",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG10-S02",
+      "phase": "RG10",
+      "sprint": "RG10-S02",
+      "test_class": "negative",
+      "expected": "Grammar rule ambiguity cannot be silently fixed in FINAL inputs",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG10-S02",
+      "phase": "RG10",
+      "sprint": "RG10-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Grammar final paired assignment batches",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG10-S02",
+      "phase": "RG10",
+      "sprint": "RG10-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Grammar final paired assignment batches",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG10-S03",
+      "phase": "RG10",
+      "sprint": "RG10-S03",
+      "test_class": "positive",
+      "expected": "Evaluations bound to identical final content hashes and rubric version",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG10-S03",
+      "phase": "RG10",
+      "sprint": "RG10-S03",
+      "test_class": "negative",
+      "expected": "Generator proposal/gold cannot reach blind solve; missing score remains missing",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG10-S03",
+      "phase": "RG10",
+      "sprint": "RG10-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Independent scoring and blinded human subset",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG10-S03",
+      "phase": "RG10",
+      "sprint": "RG10-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Independent scoring and blinded human subset",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG10-S04",
+      "phase": "RG10",
+      "sprint": "RG10-S04",
+      "test_class": "positive",
+      "expected": "Counts/totals match frozen grid; no phantom successes or zero unknown",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG10-S04",
+      "phase": "RG10",
+      "sprint": "RG10-S04",
+      "test_class": "negative",
+      "expected": "One malformed output cannot silently disappear from denominators",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG10-S04",
+      "phase": "RG10",
+      "sprint": "RG10-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Campaign completeness and accounting reconciliation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG10-S04",
+      "phase": "RG10",
+      "sprint": "RG10-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Campaign completeness and accounting reconciliation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG10-S05",
+      "phase": "RG10",
+      "sprint": "RG10-S05",
+      "test_class": "positive",
+      "expected": "Any changed content requires explicit new version/campaign, not overwritten hash",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG10-S05",
+      "phase": "RG10",
+      "sprint": "RG10-S05",
+      "test_class": "negative",
+      "expected": "Do not edit frozen manifest to conceal partial/missing rows",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG10-S05",
+      "phase": "RG10",
+      "sprint": "RG10-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Seal final research snapshot",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG10-S05",
+      "phase": "RG10",
+      "sprint": "RG10-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Seal final research snapshot",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG11-S01",
+      "phase": "RG11",
+      "sprint": "RG11-S01",
+      "test_class": "positive",
+      "expected": "Metric script recalculates from sealed ledger with all statuses counted",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG11-S01",
+      "phase": "RG11",
+      "sprint": "RG11-S01",
+      "test_class": "negative",
+      "expected": "A metric must not have different denominators by configuration",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG11-S01",
+      "phase": "RG11",
+      "sprint": "RG11-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Primary/secondary metric computation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG11-S01",
+      "phase": "RG11",
+      "sprint": "RG11-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Primary/secondary metric computation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG11-S02",
+      "phase": "RG11",
+      "sprint": "RG11-S02",
+      "test_class": "positive",
+      "expected": "No question-level pseudo-independent N or selective pairing",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG11-S02",
+      "phase": "RG11",
+      "sprint": "RG11-S02",
+      "test_class": "negative",
+      "expected": "Do not call insignificant difference proof of equivalence",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG11-S02",
+      "phase": "RG11",
+      "sprint": "RG11-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Paired inference and uncertainty",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG11-S02",
+      "phase": "RG11",
+      "sprint": "RG11-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Paired inference and uncertainty",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG11-S03",
+      "phase": "RG11",
+      "sprint": "RG11-S03",
+      "test_class": "positive",
+      "expected": "Failed costs counted; undefined denominators represented as N/A",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG11-S03",
+      "phase": "RG11",
+      "sprint": "RG11-S03",
+      "test_class": "negative",
+      "expected": "UNKNOWN price/tokens not replaced with artificially low zero",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG11-S03",
+      "phase": "RG11",
+      "sprint": "RG11-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Quality-latency-cost tradeoff",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG11-S03",
+      "phase": "RG11",
+      "sprint": "RG11-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Quality-latency-cost tradeoff",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG11-S04",
+      "phase": "RG11",
+      "sprint": "RG11-S04",
+      "test_class": "positive",
+      "expected": "Cases cite sealed anonymized evidence; optional results separated",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG11-S04",
+      "phase": "RG11",
+      "sprint": "RG11-S04",
+      "test_class": "negative",
+      "expected": "No reinterpretation of DEV failures as final scientific success",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG11-S04",
+      "phase": "RG11",
+      "sprint": "RG11-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Error taxonomy, interpretation and optional ablation design",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG11-S04",
+      "phase": "RG11",
+      "sprint": "RG11-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Error taxonomy, interpretation and optional ablation design",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG11-S05",
+      "phase": "RG11",
+      "sprint": "RG11-S05",
+      "test_class": "positive",
+      "expected": "Every number links to script, source manifest and artifact set",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG11-S05",
+      "phase": "RG11",
+      "sprint": "RG11-S05",
+      "test_class": "negative",
+      "expected": "No claim C always wins unless data substantiate",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG11-S05",
+      "phase": "RG11",
+      "sprint": "RG11-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to RQ2 thesis-ready report and reproducibility",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG11-S05",
+      "phase": "RG11",
+      "sprint": "RG11-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting RQ2 thesis-ready report and reproducibility",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG12-S01",
+      "phase": "RG12",
+      "sprint": "RG12-S01",
+      "test_class": "positive",
+      "expected": "Reuse existing modules, preserve tenant/privacy boundaries",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG12-S01",
+      "phase": "RG12",
+      "sprint": "RG12-S01",
+      "test_class": "negative",
+      "expected": "No blanket schema rewrite or history deletion",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG12-S01",
+      "phase": "RG12",
+      "sprint": "RG12-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Learner product baseline and scope",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG12-S01",
+      "phase": "RG12",
+      "sprint": "RG12-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Learner product baseline and scope",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG12-S02",
+      "phase": "RG12",
+      "sprint": "RG12-S02",
+      "test_class": "positive",
+      "expected": "Research artifacts always denied and student payload answer-free",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG12-S02",
+      "phase": "RG12",
+      "sprint": "RG12-S02",
+      "test_class": "negative",
+      "expected": "No draft mutation retroactively changes published snapshot",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG12-S02",
+      "phase": "RG12",
+      "sprint": "RG12-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Immutable human publication and student DTO",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG12-S02",
+      "phase": "RG12",
+      "sprint": "RG12-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Immutable human publication and student DTO",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG12-S03",
+      "phase": "RG12",
+      "sprint": "RG12-S03",
+      "test_class": "positive",
+      "expected": "Same historical attempt graded against immutable correct version",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG12-S03",
+      "phase": "RG12",
+      "sprint": "RG12-S03",
+      "test_class": "negative",
+      "expected": "No other-learner attempt reads or premature answer exposure",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG12-S03",
+      "phase": "RG12",
+      "sprint": "RG12-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Version-pinned attempts and grading",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG12-S03",
+      "phase": "RG12",
+      "sprint": "RG12-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Version-pinned attempts and grading",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG12-S04",
+      "phase": "RG12",
+      "sprint": "RG12-S04",
+      "test_class": "positive",
+      "expected": "Counts/accuracy recompute from attempt source, missing types labeled",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG12-S04",
+      "phase": "RG12",
+      "sprint": "RG12-S04",
+      "test_class": "negative",
+      "expected": "No personal data/attempt logs become experiment gold",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG12-S04",
+      "phase": "RG12",
+      "sprint": "RG12-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Learning history and progress reports",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG12-S04",
+      "phase": "RG12",
+      "sprint": "RG12-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Learning history and progress reports",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG12-S05",
+      "phase": "RG12",
+      "sprint": "RG12-S05",
+      "test_class": "positive",
+      "expected": "Disabled evaluations NOT_RUN; integrity preserved; original V2 unaffected",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG12-S05",
+      "phase": "RG12",
+      "sprint": "RG12-S05",
+      "test_class": "negative",
+      "expected": "Optional ablation absence must not block mandatory product gate",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG12-S05",
+      "phase": "RG12",
+      "sprint": "RG12-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Product regression and optional isolated ablation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG12-S05",
+      "phase": "RG12",
+      "sprint": "RG12-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Product regression and optional isolated ablation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG13-S01",
+      "phase": "RG13",
+      "sprint": "RG13-S01",
+      "test_class": "positive",
+      "expected": "No target spec stamped VERIFIED without genuine executed proof",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG13-S01",
+      "phase": "RG13",
+      "sprint": "RG13-S01",
+      "test_class": "negative",
+      "expected": "Missing evidence reported precisely, never fabricated",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG13-S01",
+      "phase": "RG13",
+      "sprint": "RG13-S01",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Cross-gate versioned evidence audit",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG13-S01",
+      "phase": "RG13",
+      "sprint": "RG13-S01",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Cross-gate versioned evidence audit",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG13-S02",
+      "phase": "RG13",
+      "sprint": "RG13-S02",
+      "test_class": "positive",
+      "expected": "Checkpoints, forbidden publish, ACL and source isolation remain intact",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG13-S02",
+      "phase": "RG13",
+      "sprint": "RG13-S02",
+      "test_class": "negative",
+      "expected": "No regression hidden by skipping live required tests",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG13-S02",
+      "phase": "RG13",
+      "sprint": "RG13-S02",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to End-to-end functional/security regression",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG13-S02",
+      "phase": "RG13",
+      "sprint": "RG13-S02",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting End-to-end functional/security regression",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG13-S03",
+      "phase": "RG13",
+      "sprint": "RG13-S03",
+      "test_class": "positive",
+      "expected": "Independent recomputation matches published counts/tables within declared tolerance",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG13-S03",
+      "phase": "RG13",
+      "sprint": "RG13-S03",
+      "test_class": "negative",
+      "expected": "Graphs manually redrawn without source data do not suffice",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG13-S03",
+      "phase": "RG13",
+      "sprint": "RG13-S03",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Independent reproduction of reported RQ2 metrics",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG13-S03",
+      "phase": "RG13",
+      "sprint": "RG13-S03",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Independent reproduction of reported RQ2 metrics",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG13-S04",
+      "phase": "RG13",
+      "sprint": "RG13-S04",
+      "test_class": "positive",
+      "expected": "No false operational or Speaking completion claim",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG13-S04",
+      "phase": "RG13",
+      "sprint": "RG13-S04",
+      "test_class": "negative",
+      "expected": "Historical production rollback status cannot be overwritten PASS",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG13-S04",
+      "phase": "RG13",
+      "sprint": "RG13-S04",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Operational limitations and boundary statement",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG13-S04",
+      "phase": "RG13",
+      "sprint": "RG13-S04",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Operational limitations and boundary statement",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "POS-RG13-S05",
+      "phase": "RG13",
+      "sprint": "RG13-S05",
+      "test_class": "positive",
+      "expected": "All must-have RQ2 and product gates verified or exact BLOCKED list delivered",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "NEG-RG13-S05",
+      "phase": "RG13",
+      "sprint": "RG13-S05",
+      "test_class": "negative",
+      "expected": "No auto push/deploy or learner publication from final documentation",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "EDGE-RG13-S05",
+      "phase": "RG13",
+      "sprint": "RG13-S05",
+      "test_class": "edge",
+      "expected": "Explicit handling for malformed/missing/duplicate/partial or interrupted input relevant to Final traceable release and handoff package",
+      "status": "NOT_RUN"
+    },
+    {
+      "test_id": "REG-RG13-S05",
+      "phase": "RG13",
+      "sprint": "RG13-S05",
+      "test_class": "regression",
+      "expected": "Preserve related service, security and V2 behaviors while meeting Final traceable release and handoff package",
+      "status": "NOT_RUN"
+    }
+  ]
+}

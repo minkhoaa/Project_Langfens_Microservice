@@ -629,10 +629,12 @@ async def test_t03_08_live_provider_smoke_or_not_run_external():
         timeout_seconds=15.0,
     )
 
-    resp = await provider.call(req, api_key, deadline=time.time() + 15.0)
-    assert resp.raw_text.strip()
-    assert resp.usage.total_tokens > 0
-
+    try:
+        resp = await provider.call(req, api_key, deadline=time.time() + 15.0)
+        assert resp.raw_text.strip()
+        assert resp.usage.total_tokens > 0
+    except RateLimitedError as e:
+        pytest.skip(f"NOT_RUN_EXTERNAL: Provider quota/rate limit encountered ({e})")
 # ── AUDIT-NESTED-RETRIES: Real SDK with Fake Transport Attempts Bounds ──────
 
 @pytest.mark.asyncio

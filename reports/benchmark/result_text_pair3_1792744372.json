@@ -1,0 +1,23 @@
+{
+  "run_id": "run_993f0175792942b283b8a5ad426b0ca3",
+  "observed_model": null,
+  "completed_calls": 0,
+  "total_tokens_used": 0,
+  "prompt_tokens_used": 0,
+  "completion_tokens_used": 0,
+  "reasoning_tokens_used": 0,
+  "avg_call_latency_seconds": 0.0,
+  "evaluations_summary": {},
+  "exam_id": null,
+  "persisted_questions": 0,
+  "arm": "text",
+  "model": "MiniMax-Text-01",
+  "pair_id": 3,
+  "pair_name": "HTML",
+  "job_id": "993f0175-7929-42b2-83b8-a5ad426b0ca3",
+  "status": "Failed",
+  "wall_time_seconds": 15.08,
+  "completed_sections": 0,
+  "error": "{\"detail\":[{\"type\":\"string_too_short\",\"loc\":[\"body\",\"sources\",0,\"url\"],\"msg\":\"String should have at least 1 character\",\"input\":\"\",\"ctx\":{\"min_length\":1}},{\"type\":\"string_too_short\",\"loc\":[\"body\",\"sources\",1,\"url\"],\"msg\":\"String should have at least 1 character\",\"input\":\"\",\"ctx\":{\"min_length\":1}},{\"type\":\"string_too_short\",\"loc\":[\"body\",\"sources\",2,\"url\"],\"msg\":\"String should have at least 1 character\",\"input\":\"\",\"ctx\":{\"min_length\":1}},{\"type\":\"too_short\",\"loc\":[\"body\",\"sources\"],\"msg\":\"Tuple sh",
+  "billable_cost_usd": 0.0
+}

@@ -1,0 +1,84 @@
+{
+  "manifest_id": "confirmatory_holdout_manifest_v1_0",
+  "status": "SPECIFICATION_PENDING_INDEPENDENT_CURATION",
+  "prepared_at": "2026-10-16T12:30:00Z",
+  "governing_document": "generation_baseline/research/CONFIRMATORY_HOLDOUT_SPECIFICATION.md",
+  "protocol": "RQ2_FROZEN_CONCURRENT_EVALUATION",
+  "holdout_type": "JUDGE_HOLDOUT",
+  "specification_notes": "Defines holdout quotas and disjoint source families for post-freeze judge reliability assessment (measuring post-freeze FRR, FAR, and abstention rate; strictly forbidden for additional threshold tuning, parameter optimization, or heuristic calibration). Item-level curation, packaging, and cryptographic hashing must be performed independently by an external human panel prior to unsealing. Seals and attestations remain null/PENDING until real curated content is hashed to prevent fabricating holdout integrity.",
+  "security_attestations": {
+    "zero_developer_inspection_of_curated_content": null,
+    "zero_prompt_tuning_leakage": null,
+    "zero_evaluator_calibration_leakage": null,
+    "quarantined_disjoint_source_families": "PENDING_INDEPENDENT_AUDIT",
+    "independent_curator_attestation": null,
+    "status": "PENDING_INDEPENDENT_CURATOR_ATTESTATION",
+    "unsealing_condition": "MANDATORY_EXTERNAL_EVIDENCE_READY_AND_HUMAN_PANEL_ONBOARDED"
+  },
+  "synthetic_data_policy": "STRICTLY_PROHIBITED: Synthetic holdout data must NEVER be generated and labeled as independently curated. Curated holdout items must originate exclusively from verified external human panel sources with documented provenance.",
+  "rq2_experimental_corpus_distinction": {
+    "judge_holdout_scope": "30-item post-freeze evaluator reliability check (18 reading, 12 grammar questions)",
+    "rq2_final_eval_scope": "25-40 paired benchmark tasks per domain (25-40 Reading tasks, 25-40 Grammar tasks across Arms A, B, C; 150-240 total assigned slots)",
+    "relationship": "DISJOINT: The 30-item judge holdout measures post-freeze evaluator reliability (post-freeze reliability assessment, not additional threshold tuning); it cannot substitute for, overlap with, or fulfill the 25-40 paired tasks per domain required for RQ2 hypothesis testing."
+  },
+  "curation_prerequisites_for_sealing": {
+    "curated_item_ids_present": false,
+    "canonical_content_hashes_verified": false,
+    "source_provenance_documented": false,
+    "independent_curator_attestation_signed": false,
+    "synthetic_data_prohibition_verified": false
+  },
+  "curated_items": null,
+  "source_families": [
+    {
+      "source_family_id": "fam-astrophysics-pulsar-08",
+      "domain": "READING",
+      "topic": "Millisecond Pulsar Magnetospheres & Relativistic Plasma",
+      "target_items_count": 9,
+      "quarantine_status": "RESERVED_QUARANTINED"
+    },
+    {
+      "source_family_id": "fam-paleontology-cambrian-09",
+      "domain": "READING",
+      "topic": "Burgess Shale Arthropod Radiation & Taphonomy",
+      "target_items_count": 9,
+      "quarantine_status": "RESERVED_QUARANTINED"
+    },
+    {
+      "source_family_id": "fam-mood-subjunctive-08",
+      "domain": "GRAMMAR",
+      "topic": "Mandative Subjunctive in Formal/Legal Registers",
+      "target_items_count": 6,
+      "quarantine_status": "RESERVED_QUARANTINED"
+    },
+    {
+      "source_family_id": "fam-aspect-participle-09",
+      "domain": "GRAMMAR",
+      "topic": "Reduced Participle Clauses and Adverbial Qualification",
+      "target_items_count": 6,
+      "quarantine_status": "RESERVED_QUARANTINED"
+    }
+  ],
+  "target_item_count": 30,
+  "reading_stratum": {
+    "target_questions": 18,
+    "planned_distribution": {
+      "TRUE": 6,
+      "FALSE": 6,
+      "NOT GIVEN": 6
+    }
+  },
+  "grammar_stratum": {
+    "target_questions": 12,
+    "planned_distribution": {
+      "mandative_subjunctive": 6,
+      "reduced_participle_clauses": 6
+    }
+  },
+  "cryptographic_seals": {
+    "reading_corpus_sha256": null,
+    "grammar_rule_packs_sha256": null,
+    "manifest_integrity_sha256": null,
+    "status": "PENDING_INDEPENDENT_EXTERNAL_CURATION"
+  }
+}

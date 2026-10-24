@@ -69,7 +69,9 @@ public enum IssueCode
     FRESH_EVALUATION_MISSING,
     MONOTONOUS_ANSWER_DISTRIBUTION,
     CROSS_SECTION_DUPLICATE_CONTENT,
-    CROSS_SECTION_LEAKAGE
+    CROSS_SECTION_LEAKAGE,
+    PASSAGE_BLUEPRINT_ALIGNMENT,
+    TFNG_BOUNDARY_CONFLICT
 }
 public sealed record Issue(
     [property: JsonPropertyName("issueId")] string IssueId,
@@ -84,7 +86,9 @@ public sealed record Issue(
     [property: JsonPropertyName("fingerprint")] string Fingerprint,
     [property: JsonPropertyName("createdAt")] DateTime CreatedAt,
     [property: JsonPropertyName("resolvedAt")] DateTime? ResolvedAt,
-    [property: JsonPropertyName("evaluatorId")] string? EvaluatorId = null
+    [property: JsonPropertyName("evaluatorId")] string? EvaluatorId = null,
+    [property: JsonPropertyName("artifactRef")] string? ArtifactRef = null,
+    [property: JsonPropertyName("location")] string? Location = null
 )
 {
     public static string ComputeFingerprint(

@@ -29,7 +29,9 @@ WATCHDOG.yml
 *.pem
 *.key
 *.cert
-!/docs/standards/
+*.dump
+*.dmp
+backups/
 # ------------------------------
 # Node / JS / TS
 # ------------------------------
@@ -182,7 +184,6 @@ scripts/pipeline/
 
 # Playwright MCP cache
 .playwright-mcp/
-.gsd/MK-GAPS-CLOSURE-PLAN.md
 models/**/*.pt
 models/**/*.pth
 # ------------------------------
@@ -197,3 +198,13 @@ models/**/*.bin
 
 benchmarks/
 scripts/crawler/_cache_writing_images/
+
+# Raw generation reports and fresh job markers
+reports/job_*.json
+reports/*_result.json
+reports/demo_*.json
+reports/reading_generation_*.json
+services/generation-service/reports/
+.superpowers/
+current_fresh_job_id.txt
+

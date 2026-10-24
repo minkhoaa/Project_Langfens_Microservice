@@ -122,7 +122,7 @@ class DurableStoreFake:
         if op:
             if op["requestHash"] != req.requestHash:
                 raise CheckpointApiError(409, "operation hash conflict")
-            return type("Grant", (), {"operationId": req.operationId, "tokenReservation": req.tokenReservation, "isReplay": True})()
+            return type("Grant", (), {"operationId": req.operationId, "tokenReservation": req.tokenReservation, "isReplay": True, "status": op["status"], "reservationBreached": False, "budgetBreachDetected": False, "resultRefJson": op.get("resultRefJson")})()
         state["ops"][req.operationId] = dict(
             operationId=req.operationId, operationType=req.operationType, status="RESERVED",
             artifactId=req.artifactId, requestHash=req.requestHash,
@@ -133,7 +133,7 @@ class DurableStoreFake:
             _runId=getattr(req, "runId", getattr(req, "run_id", "")),
         )
         self._save(state)
-        return type("Grant", (), {"operationId": req.operationId, "tokenReservation": req.tokenReservation, "isReplay": False})()
+        return type("Grant", (), {"operationId": req.operationId, "tokenReservation": req.tokenReservation, "isReplay": False, "status": "RESERVED", "reservationBreached": False, "budgetBreachDetected": False, "resultRefJson": None})()
 
     def reconcile_operation(self, req: Any) -> Any:
         self._fence(req)
@@ -166,11 +166,16 @@ class DurableStoreFake:
         self._fence(req)
         state = self._state()
         state["heads"][req.artifact.artifact_id] = req.artifact.model_dump(by_alias=True, mode="json")
+        op_id = getattr(req, "operationId", None)
+        if op_id and op_id in state["ops"]:
+            state["ops"][op_id]["status"] = "COMPLETED"
+            state["ops"][op_id]["tokensUsed"] = getattr(req, "tokensUsed", 0)
+            state["ops"][op_id]["wallTimeUsedSeconds"] = getattr(req, "wallTimeUsedSeconds", 0.0)
         # `CheckpointCommitRequest.evaluations` is declared Optional (default None),
         # so a commit that carries no evaluations is valid. Treat an absent list as
         # empty rather than iterating None.
         for ev in (req.evaluations or []):
-            state["evaluations"][f"{ev.evaluator_id}_{req.artifact.version}"] = ev.model_dump_json(by_alias=True)
+            state["evaluations"][f"{req.artifact.artifact_id}_{ev.evaluator_id}_{req.artifact.version}"] = ev.model_dump_json(by_alias=True)
         self._save(state)
         return CheckpointAck(
             runId=req.artifact.run_id,
@@ -185,6 +190,11 @@ class DurableStoreFake:
         self._fence(req)
         state = self._state()
         state["drafts"][f"{req.artifact.artifact_id}_v{req.artifact.version}"] = req.artifact.model_dump(by_alias=True, mode="json")
+        op_id = getattr(req, "operationId", None)
+        if op_id and op_id in state["ops"]:
+            state["ops"][op_id]["status"] = "COMPLETED"
+            state["ops"][op_id]["tokensUsed"] = getattr(req, "tokensUsed", 0)
+            state["ops"][op_id]["wallTimeUsedSeconds"] = getattr(req, "wallTimeUsedSeconds", 0.0)
         self._save(state)
         return CheckpointAck(
             runId=req.artifact.run_id,
@@ -290,8 +300,8 @@ SQLiteCheckpointSimulation = DurableStoreFake
 class FakePassageProvider(BaseProvider):
     """Predictable provider returning structured IELTS passage responses."""
 
-    def __init__(self, passage_text: str, title: str = "Marine Biology"):
-        super().__init__(name="fake_passage_provider", base_url="http://fake.test", models={"large": "fake-model", "small": "fake-model"})
+    def __init__(self, passage_text: str, title: str = "Marine Biology", name: str = "minimax"):
+        super().__init__(name=name, base_url="http://fake.test", models={"large": "fake-model", "small": "fake-model"})
         self.passage_text = passage_text
         self.title = title
         self.call_count = 0
@@ -313,7 +323,7 @@ class FakePassageProvider(BaseProvider):
         })
         return ProviderResponse(
             operation_id=request.operation_id,
-            provider_name="fake_passage_provider",
+            provider_name=self.name,
             model_name="fake-model",
             raw_text=response_json,
             usage=UsageReport(prompt_tokens=300, completion_tokens=850, total_tokens=1150),
@@ -665,12 +675,25 @@ async def test_t08_06_crash_resumption_and_fencing_invariants(tmp_path: Path):
         producer_version="2.0.0",
         parent_refs=(bp_ref, eg_ref),
     )
+    evals = [
+        EvaluationResult(
+            evaluationId=f"eval_{ev_id}_{run_id[:6]}",
+            evaluatorId=ev_id,
+            evaluatorVersion="2.0.0" if ev_id == "eval_grounding_fidelity" else "1.0.0",
+            targetRef=accepted_art.to_ref(),
+            inputDependencyRefs=[bp_ref, eg_ref],
+            status=EvaluationStatus.PASS,
+            issues=[],
+            score=1.0,
+        )
+        for ev_id in ("eval_passage_word_count", "eval_passage_style", "eval_grounding_fidelity")
+    ]
     commit_ack = store.commit_checkpoint(
         type("CommitReq", (), {
             "epoch": 1,
             "leaseOwner": owner_id,
             "artifact": accepted_art,
-            "evaluations": [],
+            "evaluations": evals,
         })()
     )
     assert commit_ack.artifactId == "art_passage_s1"

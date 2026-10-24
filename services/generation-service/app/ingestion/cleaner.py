@@ -265,6 +265,12 @@ def clean_xml_full_text(xml_bytes: bytes, pmcid: str) -> dict[str, Any]:
             authors.append(name)
 
     if not authors:
+        for contributor in root.findall(".//contrib-group[@content-type='author']/contrib") or root.findall(".//contrib"):
+            name = _text(contributor.find("./name")) or _text(contributor.find("./collab"))
+            if name and name not in authors:
+                authors.append(name)
+
+    if not authors:
         raise CleanerError("Author attribution unavailable in full text")
 
     doi_node = root.find(".//article-id[@pub-id-type='doi']")

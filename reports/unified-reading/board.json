@@ -1,0 +1,18 @@
+{
+  "integrationOwner": "primary",
+  "branch": "autonomous-generation",
+  "executionMode": "shared checkout with exclusive file ownership; primary integrates and commits",
+  "liveProviderDispatch": "PROHIBITED until complete mock E2E gate and explicit approval",
+  "cards": [
+    {"id":"audit-python","title":"Map Python execution graph","owner":"PythonExecutionAudit","state":"merged","harness":"scout","branch":"autonomous-generation","worktree":".","lastHeartbeat":"2026-10-20","acceptance":["Map production and legacy paths, rules, tests and preservation"],"merge_gate":"Evidence-backed dependency graph","handoff":"local://python-execution-audit.md"},
+    {"id":"audit-authority","title":"Map authoritative persistence graph","owner":"AuthorityExecutionAudit","state":"merged","harness":"scout","branch":"autonomous-generation","worktree":".","lastHeartbeat":"2026-10-20","acceptance":["Map worker, leases, operations, accounting and finalization"],"merge_gate":"Safe persistence cutover and isolated test strategy","handoff":"local://authority-execution-audit.md"},
+    {"id":"policy-provider","title":"Unify policy and provider dispatch","owner":"PolicyProvider","state":"merged","harness":"task","branch":"autonomous-generation","worktree":".","acceptance":["One validated pinned policy","Finite 180s/900s/100k limits","Replay-safe provider operations"],"merge_gate":"Focused policy/provider tests and security review","handoff":"local://policy-provider-handoff.md"},
+    {"id":"durable-stages","title":"Unify stage checkpoints and recovery","owner":"StagePersistence","state":"merged","harness":"task","branch":"autonomous-generation","worktree":".","acceptance":["One stage state machine","CAS and dependency-valid reuse","Explicit unknown outcome"],"merge_gate":"Resume, crash, fencing and immutable revision tests","handoff":"local://stage-persistence-handoff.md"},
+    {"id":"pipeline","title":"Implement one pipeline and section runner","owner":"UnifiedPipeline","state":"merged","harness":"task","branch":"autonomous-generation","worktree":".","acceptance":["One pipeline entrypoint","One runner for S1/S2/S3","Complete accepted 40-question paper"],"merge_gate":"All deterministic E2E modes and content evaluation tests","handoff":"local://unified-pipeline-handoff.md"},
+    {"id":"authority","title":"Cut over exam-service ownership","owner":"ExamAuthority","state":"merged","harness":"task","branch":"autonomous-generation","worktree":".","acceptance":["Thin worker invokes one Python pipeline","Durable authority and accounting","Idempotent finalization and validated import"],"merge_gate":"Build and isolated PostgreSQL integration tests","handoff":"local://exam-authority-handoff.md"},
+    {"id":"acceptance","title":"Verify complete deterministic workflows","owner":"MockAcceptance","state":"merged","harness":"task","branch":"autonomous-generation","worktree":".","acceptance":["Individual sections and complete paper","Resume and selective regeneration","Concurrency and provider uncertainty"],"merge_gate":"Mock E2E suite passes before live calls","handoff":"local://mock-acceptance-handoff.md"},
+    {"id":"integration","title":"Integrate routes, preserve artifacts and remove obsolete paths","owner":"primary","state":"merged","branch":"autonomous-generation","worktree":".","lastHeartbeat":"2026-10-20","acceptance":["All affected clients migrated","Original 799/748-word passages preserved","No competing Reading engines","Complete inventory and commits"],"merge_gate":"Integrated tests, application smoke, reviews and committed milestones","handoff":"reports/unified-reading/architecture.md"}
+  ],
+  "blockers": [],
+  "reusableWorkflowCandidates": []
+}

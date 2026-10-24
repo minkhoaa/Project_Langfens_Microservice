@@ -1,0 +1,170 @@
+{
+  "sectionId": 2,
+  "title": "Hydrothermal Vent Ecology and Geochemical Cycles",
+  "passage": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+  "questions": [
+    {
+      "questionType": "SUMMARY_COMPLETION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 9,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_9",
+      "claimsMap": {
+        "claim_p2_9": {
+          "claimId": "claim_p2_9",
+          "text": "Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 9,
+        "prompt": "Volcanic vents release geochemical plumes containing methane and [9] into the water column.",
+        "answer": "hydrogen sulfide",
+        "evidenceQuote": "Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents",
+        "explanation": "The passage explicitly notes that volcanic vents cycle hydrogen sulfide and methane."
+      }
+    },
+    {
+      "questionType": "SUMMARY_COMPLETION_BOX",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 10,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_10",
+      "claimsMap": {
+        "claim_p2_10": {
+          "claimId": "claim_p2_10",
+          "text": "Biological adaptations include novel heat-shock proteins."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 10,
+        "prompt": "Organisms survive intense thermal gradients through the production of [10].",
+        "answer": "heat-shock proteins",
+        "options": [
+          "A. heat-shock proteins",
+          "B. calcareous shells",
+          "C. visual photophores",
+          "D. gas bladders"
+        ],
+        "evidenceQuote": "Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins.",
+        "explanation": "The passage highlights novel heat-shock proteins as key thermal adaptations."
+      }
+    },
+    {
+      "questionType": "FLOW_CHART",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 12,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "svgXml": "<svg viewBox=\"0 0 800.0 400.0\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\">\n  <title>Subterranean Geothermal Energy Cycle</title>\n  <desc>Flowchart illustrating the cyclic circulation of mineral fluids through abyssal hydrothermal chimneys.</desc>\n  <style>\n    .diagram-bg { fill: #ffffff; }\n    .shape { stroke-linejoin: round; stroke-linecap: round; }\n    .label { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; fill: #1e293b; text-anchor: middle; dominant-baseline: middle; }\n    .step-box { rx: 8px; ry: 8px; fill: #f8fafc; stroke: #3b82f6; stroke-width: 2px; }\n    .step-title { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 14px; font-weight: 600; fill: #0f172a; text-anchor: middle; }\n    .step-desc { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 12px; fill: #64748b; text-anchor: middle; }\n    .connector { stroke: #64748b; stroke-width: 2px; fill: none; }\n    .callout-badge circle { fill: #ef4444; stroke: #ffffff; stroke-width: 2px; }\n    .callout-badge text { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 13px; font-weight: bold; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }\n  </style>\n  <defs>\n    <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\">\n      <path d=\"M 0 1 L 10 5 L 0 9 z\" fill=\"#64748b\" />\n    </marker>\n  </defs>\n  <rect width=\"800.0\" height=\"400.0\" class=\"diagram-bg\" />\n  <line x1=\"230.0\" y1=\"200.0\" x2=\"310.0\" y2=\"200.0\" class=\"connector\" marker-end=\"url(#arrow)\" />\n  <line x1=\"490.0\" y1=\"200.0\" x2=\"570.0\" y2=\"200.0\" class=\"connector\" marker-end=\"url(#arrow)\" />\n  <g id=\"s1\" class=\"flowchart-step\">\n    <rect class=\"step-box\" x=\"50.0\" y=\"160.0\" width=\"180.0\" height=\"80.0\" />\n    <text class=\"step-title\" x=\"140.0\" y=\"190.0\">Oceanic Infiltration</text>\n    <text class=\"step-desc\" x=\"140.0\" y=\"212.0\">Cold sea water penetrates basalt fissures</text>\n  </g>\n  <g id=\"s2\" class=\"flowchart-step\">\n    <rect class=\"step-box\" x=\"310.0\" y=\"160.0\" width=\"180.0\" height=\"80.0\" />\n    <text class=\"step-title\" x=\"400.0\" y=\"205.0\">Magmatic Heating</text>\n  </g>\n  <g id=\"s3\" class=\"flowchart-step\">\n    <rect class=\"step-box\" x=\"570.0\" y=\"160.0\" width=\"180.0\" height=\"80.0\" />\n    <text class=\"step-title\" x=\"660.0\" y=\"190.0\">Chimney Ejection</text>\n    <text class=\"step-desc\" x=\"660.0\" y=\"212.0\">Superheated hydrothermal plumes expel minerals</text>\n  </g>\n</svg>",
+      "claimId": "claim_p2_12",
+      "claimsMap": {
+        "claim_p2_12": {
+          "claimId": "claim_p2_12",
+          "text": "The subterranean circulation involves magmatic heating of infiltrated seawater."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 12,
+        "prompt": "Infiltration -> [12] -> Chimney Ejection",
+        "answer": "magmatic heating",
+        "evidenceQuote": "subterranean circulation involves magmatic heating of infiltrated seawater",
+        "explanation": "The flow chart step corresponds to magmatic heating of infiltrated seawater."
+      }
+    },
+    {
+      "questionType": "DIAGRAM_LABEL",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 13,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "svgXml": "<svg viewBox=\"0 0 800.0 600.0\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\">\n  <title>Hydrothermal Vent Chimney Anatomy</title>\n  <desc>Cross-section architecture of deep seafloor black smoker chimney with labeled mineral layers.</desc>\n  <style>\n    .diagram-bg { fill: #ffffff; }\n    .shape { stroke-linejoin: round; stroke-linecap: round; }\n    .label { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; fill: #1e293b; text-anchor: middle; dominant-baseline: middle; }\n    .step-box { rx: 8px; ry: 8px; fill: #f8fafc; stroke: #3b82f6; stroke-width: 2px; }\n    .step-title { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 14px; font-weight: 600; fill: #0f172a; text-anchor: middle; }\n    .step-desc { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 12px; fill: #64748b; text-anchor: middle; }\n    .connector { stroke: #64748b; stroke-width: 2px; fill: none; }\n    .callout-badge circle { fill: #ef4444; stroke: #ffffff; stroke-width: 2px; }\n    .callout-badge text { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; font-size: 13px; font-weight: bold; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }\n  </style>\n  <defs>\n    <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\">\n      <path d=\"M 0 1 L 10 5 L 0 9 z\" fill=\"#64748b\" />\n    </marker>\n  </defs>\n  <rect width=\"800.0\" height=\"600.0\" class=\"diagram-bg\" />\n  <rect id=\"outer\" class=\"shape\" x=\"100.0\" y=\"100.0\" width=\"250.0\" height=\"350.0\" fill=\"#f8fafc\" stroke=\"#0f172a\" stroke-width=\"2.0\" />\n  <text class=\"label\" x=\"225.0\" y=\"275.0\">Anhydrite Crust</text>\n  <circle id=\"core\" class=\"shape\" cx=\"225.0\" cy=\"275.0\" r=\"50.0\" fill=\"#e2e8f0\" stroke=\"#334155\" stroke-width=\"2.0\" />\n  <text class=\"label\" x=\"225.0\" y=\"275.0\">Central Conduit</text>\n  <g class=\"callout-badge\" data-callout-id=\"13\">\n    <circle cx=\"225.0\" cy=\"275.0\" r=\"16\" />\n    <text x=\"225.0\" y=\"275.0\">13</text>\n    <title>Central mineral conduit</title>\n  </g>\n</svg>",
+      "claimId": "claim_p2_13",
+      "claimsMap": {
+        "claim_p2_13": {
+          "claimId": "claim_p2_13",
+          "text": "chalcopyrite lines the central conduit."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 13,
+        "prompt": "Label [13] on the central mineral conduit of the hydrothermal chimney",
+        "answer": "central conduit",
+        "evidenceQuote": "chalcopyrite lines the central conduit.",
+        "explanation": "The diagram callout indicates the central conduit lined with chalcopyrite."
+      }
+    },
+    {
+      "questionType": "MATCHING_INFORMATION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 14,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_14",
+      "claimsMap": {
+        "claim_p2_14": {
+          "claimId": "claim_p2_14",
+          "text": "Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 14,
+        "prompt": "A description of mineral deposition patterns across chimney structures",
+        "answer": "B",
+        "options": [
+          "A. Paragraph 1",
+          "B. Paragraph 2",
+          "C. Paragraph 3"
+        ],
+        "evidenceQuote": "Mineral precipitates deposit crystalline anhydrite on chimney outer walls",
+        "explanation": "Paragraph 2 describes how mineral precipitates deposit anhydrite and chalcopyrite."
+      }
+    },
+    {
+      "questionType": "MATCHING_FEATURES",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 15,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_15",
+      "claimsMap": {
+        "claim_p2_15": {
+          "claimId": "claim_p2_15",
+          "text": "Biological adaptations include novel heat-shock proteins."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 15,
+        "prompt": "Identified novel heat-shock proteins aiding hydrothermal fauna",
+        "answer": "A",
+        "options": [
+          "A. Cambridge Biologists",
+          "B. Woods Hole Oceanographers",
+          "C. Tokyo Geochemists"
+        ],
+        "evidenceQuote": "Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins.",
+        "explanation": "The research group is associated with documenting the novel heat-shock adaptations."
+      }
+    },
+    {
+      "questionType": "CLASSIFICATION",
+      "provenance": "academically_grounded_golden_fixture",
+      "questionNumber": 16,
+      "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+      "claimId": "claim_p2_16",
+      "claimsMap": {
+        "claim_p2_16": {
+          "claimId": "claim_p2_16",
+          "text": "Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy."
+        }
+      },
+      "rawCandidate": {
+        "questionNumber": 16,
+        "prompt": "Classify the following adaptation: converts hydrogen sulfide into chemical energy",
+        "answer": "A",
+        "options": [
+          "A. Primary chemotrophs",
+          "B. Mobile predators",
+          "C. Detrital scavengers"
+        ],
+        "evidenceQuote": "Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy.",
+        "explanation": "Primary chemotrophs are classified by their conversion of hydrogen sulfide into energy."
+      }
+    }
+  ]
+}

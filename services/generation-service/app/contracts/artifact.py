@@ -42,7 +42,9 @@ def canonical_json_dump_prep(obj: Any) -> Any:
     if isinstance(obj, (tuple, list)):
         return [canonical_json_dump_prep(x) for x in obj]
     if isinstance(obj, CanonicalBaseModel):
-        return obj.model_dump(mode="json", exclude_none=False)
+        return canonical_json_dump_prep(obj.model_dump(mode="json", exclude_none=False))
+    if isinstance(obj, float) and obj.is_integer():
+        return int(obj)
     if hasattr(obj, "isoformat"):
         return obj.isoformat()
     if hasattr(obj, "hex") and isinstance(getattr(obj, "hex", None), str):

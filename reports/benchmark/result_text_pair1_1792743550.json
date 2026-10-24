@@ -1,0 +1,60 @@
+{
+  "run_id": "run_ee7b4d9027b84718b6102a92bcbd8999",
+  "observed_model": "MiniMax-Text-01",
+  "completed_calls": 6,
+  "total_tokens_used": 18673,
+  "prompt_tokens_used": 16577,
+  "completion_tokens_used": 2096,
+  "reasoning_tokens_used": 0,
+  "avg_call_latency_seconds": 10.451,
+  "evaluations_summary": {
+    "eval_answer_verbatim_length": {
+      "PASS": 1
+    },
+    "eval_blind_solver_adversary": {
+      "PASS": 1
+    },
+    "eval_blueprint": {
+      "PASS": 1
+    },
+    "eval_evidence_graph": {
+      "PASS": 3
+    },
+    "eval_evidence_offsets": {
+      "PASS": 1
+    },
+    "eval_passage_fidelity": {
+      "PASS": 1
+    },
+    "eval_passage_semantic": {
+      "PASS": 1
+    },
+    "eval_passage_word_count": {
+      "PASS": 1
+    },
+    "eval_question_semantic": {
+      "PASS": 1
+    },
+    "eval_question_structure": {
+      "PASS": 1
+    },
+    "eval_question_uniqueness": {
+      "PASS": 1
+    },
+    "eval_source": {
+      "PASS": 3
+    }
+  },
+  "exam_id": null,
+  "persisted_questions": 0,
+  "arm": "text",
+  "model": "MiniMax-Text-01",
+  "pair_id": 1,
+  "pair_name": "Europe PMC",
+  "job_id": "ee7b4d90-27b8-4718-b610-2a92bcbd8999",
+  "status": "Failed",
+  "wall_time_seconds": 99.19,
+  "completed_sections": 0,
+  "error": "{\"detail\":\"question:run_ee7b4d9027b84718b6102a92bcbd8999:2: INVALID_OUTPUT: capability failed: ValueError: Question 2 evidence quote 'Sites on the Jos Plateau, dated to aroun' is not found in passage\"}",
+  "billable_cost_usd": 0.01867
+}

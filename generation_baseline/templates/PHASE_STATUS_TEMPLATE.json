@@ -1,0 +1,17 @@
+{
+  "kind": "phase_status",
+  "phase_id": "RGXX",
+  "status": "NOT_RUN",
+  "source_sha": null,
+  "sprints": {
+    "S01": "NOT_RUN",
+    "S02": "NOT_RUN",
+    "S03": "NOT_RUN",
+    "S04": "NOT_RUN",
+    "S05": "NOT_RUN"
+  },
+  "phase_tests": [],
+  "evidence_refs": [],
+  "blockers": [],
+  "closed_at": null
+}

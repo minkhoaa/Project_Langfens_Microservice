@@ -1,0 +1,61 @@
+{
+  "run_id": "run_7c360f5913c04b0fab066e10dd84f328",
+  "observed_model": "MiniMax-Text-01",
+  "completed_calls": 21,
+  "total_tokens_used": 47476,
+  "prompt_tokens_used": 42880,
+  "completion_tokens_used": 4596,
+  "reasoning_tokens_used": 0,
+  "avg_call_latency_seconds": 7.452,
+  "evaluations_summary": {
+    "eval_answer_verbatim_length": {
+      "FAIL": 1,
+      "PASS": 5
+    },
+    "eval_blind_solver_adversary": {
+      "PASS": 6
+    },
+    "eval_blueprint": {
+      "PASS": 1
+    },
+    "eval_evidence_graph": {
+      "PASS": 3
+    },
+    "eval_evidence_offsets": {
+      "PASS": 6
+    },
+    "eval_passage_fidelity": {
+      "PASS": 1
+    },
+    "eval_passage_semantic": {
+      "PASS": 1
+    },
+    "eval_passage_word_count": {
+      "PASS": 1
+    },
+    "eval_question_semantic": {
+      "PASS": 6
+    },
+    "eval_question_structure": {
+      "PASS": 6
+    },
+    "eval_question_uniqueness": {
+      "PASS": 6
+    },
+    "eval_source": {
+      "PASS": 3
+    }
+  },
+  "exam_id": null,
+  "persisted_questions": 0,
+  "arm": "text",
+  "model": "MiniMax-Text-01",
+  "pair_id": 2,
+  "pair_name": "HTTPS URL",
+  "job_id": "7c360f59-13c0-4b0f-ab06-6e10dd84f328",
+  "status": "Failed",
+  "wall_time_seconds": 240.2,
+  "completed_sections": 0,
+  "error": "AI service returned 502: {\"detail\":\"question:run_7c360f5913c04b0fab066e10dd84f328:6: unresolved provider operations: ('loop:run_7c360f5913c04b0fab066e10dd84f328:question:run_7c360f5913c04b0fab066e10dd84f328:6:EVALUATE:2:eval_answer_verbatim_length:1.0.0',)\"}",
+  "billable_cost_usd": 0.04748
+}

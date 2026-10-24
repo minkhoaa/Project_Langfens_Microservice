@@ -25,11 +25,11 @@ public static class Extensions
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
-            http.AddStandardResilienceHandler(options => 
+            http.AddStandardResilienceHandler(options =>
             {
-                options.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(5);
-                options.AttemptTimeout.Timeout = TimeSpan.FromMinutes(5);
-                options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(10);
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(45);
+                options.AttemptTimeout.Timeout = TimeSpan.FromMinutes(45);
+                options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(90);
             });
             http.AddServiceDiscovery();
         });

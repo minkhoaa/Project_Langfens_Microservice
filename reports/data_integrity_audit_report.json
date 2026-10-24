@@ -1,0 +1,1900 @@
+{
+  "status": "DEFECTS_DETECTED",
+  "provenance": {
+    "execution_timestamp": "2026-10-20T02:21:44.114765+00:00",
+    "target_environment": "docker:pg-0416bceb postgres (exam-db, attempt-db)",
+    "command": "python3 scripts/audit_existing_exam_data.py",
+    "scope": "Read-only audit: 49 exams, 686 questions, 91 historical attempts; zero mutations",
+    "sanitized": true
+  },
+  "total_exams_audited": 49,
+  "total_questions_audited": 686,
+  "total_attempts_audited": 91,
+  "defect_counts": {
+    "missing_answer_keys": 15,
+    "keys_not_in_options": 0,
+    "invalid_matching_pairs": 0,
+    "group_scoring_multi_target_items": 7,
+    "ambiguous_choice_answers": 0,
+    "wrong_language_items": 202,
+    "schema_delivery_mismatches": 0
+  },
+  "affected_exam_ids": [
+    "059b3933-008b-5971-a3d5-2ce082254d7e",
+    "0ff384b4-e5cb-4f7e-8c7d-79c5eba87807",
+    "13452153-b72f-4cfe-9641-58cf1f53b992",
+    "178e85ec-d0f5-46aa-be3a-fad86f7e3f0a",
+    "1c15943a-1d9c-4ddf-b7e1-daed3b2cae46",
+    "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+    "2eb01490-db38-45f5-b347-ad52434b1dfc",
+    "4158c2c7-c68e-489f-b78d-f57e1b182411",
+    "4b405ce8-0f24-5181-a4a8-6f7e8bcfe805",
+    "5890a237-5d25-52ea-9525-41cbd939e7b0",
+    "6aa44aef-e816-43da-9f05-12d8e3c4d458",
+    "8d33960e-cb05-4e6a-a37b-7dee0521efce",
+    "92362e08-1731-4f1f-8934-9fd5dcfe1f37",
+    "a0bb39ed-19c6-455b-9d7a-7dac5c64e373",
+    "c4d0d5fd-201d-4d35-a5d7-3c45e45c649d",
+    "e291c0c8-0761-467d-b083-5883ca8f2b9e",
+    "e6e3021b-7264-4cd2-a548-361e08fffaee",
+    "e7b53117-9aec-5dc2-9eef-b147dde32879",
+    "ea9cc216-5182-5b04-8631-a3ad34646e5c"
+  ],
+  "affected_exams": [
+    {
+      "exam_id": "059b3933-008b-5971-a3d5-2ce082254d7e",
+      "title": "IELTS Reading: The Impact of the Potato",
+      "defect_count": 13,
+      "defects": [
+        {
+          "question_id": "7f74061d-f6d0-5c36-aab7-1c01267f9ab4",
+          "question_idx": 1,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nNgười Tây Ban Nha thời kỳ đầu gọi khoai tây bằng tên của...'"
+        },
+        {
+          "question_id": "47b5c190-dbe5-5a2e-b244-af6437bb3571",
+          "question_idx": 2,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nMục đích của người Tây Ban Nha đến Peru là để tìm ra kho...'"
+        },
+        {
+          "question_id": "959f3bd6-0969-5006-8412-b6cb566ce5c9",
+          "question_idx": 3,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nNgười Tây Ban Nha tin rằng khoai tây có các chất dinh dư...'"
+        },
+        {
+          "question_id": "c08684a7-7dd9-50f9-b80f-c4bc008e5587",
+          "question_idx": 4,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nNông dân thời đó không thích ăn khoai tây vì chúng xấu x...'"
+        },
+        {
+          "question_id": "992e533d-a966-561f-9d20-c14753605703",
+          "question_idx": 5,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nSự phổ biến của khoai tây ở Vương quốc Anh là do thiếu h...'"
+        },
+        {
+          "question_id": "a5897381-55cf-5c08-b44d-137d2673284d",
+          "question_idx": 6,
+          "question_type": "SENTENCE_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nỞ Pháp, mọi người bắt đầu vượt qu...'"
+        },
+        {
+          "question_id": "d21915f3-98b8-5fdd-8639-fb15a5ea1f51",
+          "question_idx": 7,
+          "question_type": "SENTENCE_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nFrederick nhận ra tiềm năng của k...'"
+        },
+        {
+          "question_id": "00a19365-432f-5c70-932c-c5e024ef1146",
+          "question_idx": 8,
+          "question_type": "SENTENCE_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nVua nước Phổ đã áp dụng một chút ...'"
+        },
+        {
+          "question_id": "041e4376-6bf8-5282-9892-79d9a780e304",
+          "question_idx": 9,
+          "question_type": "SENTENCE_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nTrước năm 1800, người Anh thích ă...'"
+        },
+        {
+          "question_id": "9b85191f-cfb6-5856-95fb-a2fa25ecdb50",
+          "question_idx": 10,
+          "question_type": "SENTENCE_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nCách rõ ràng để giải quyết các vấ...'"
+        },
+        {
+          "question_id": "3f8d1cec-f865-56ec-90f3-3d1a1c8cb76f",
+          "question_idx": 11,
+          "question_type": "SENTENCE_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\n____ và khí hậu của Ireland rất p...'"
+        },
+        {
+          "question_id": "6252b5f7-4ddb-580e-ae11-e620727896f4",
+          "question_idx": 12,
+          "question_type": "SENTENCE_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nGiữa năm 1780 và 1841, dựa trên s...'"
+        },
+        {
+          "question_id": "787c64dc-7833-5e3f-bb26-53ac36800917",
+          "question_idx": 13,
+          "question_type": "SENTENCE_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nNăng suất cao của khoai tây giúp ...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "0ff384b4-e5cb-4f7e-8c7d-79c5eba87807",
+      "title": "Talk to new kitchen assistants",
+      "defect_count": 2,
+      "defects": [
+        {
+          "question_id": "1a62547d-edbc-4978-9316-b92e0910bae1",
+          "question_idx": 5,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "Expected >= 2 correct options, found 1"
+        },
+        {
+          "question_id": "b7a5a490-cf83-4e3c-af72-625bb697c00a",
+          "question_idx": 6,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "Expected >= 2 correct options, found 1"
+        }
+      ]
+    },
+    {
+      "exam_id": "13452153-b72f-4cfe-9641-58cf1f53b992",
+      "title": "Non-driving vehicle competition (Driverless vehicle competition)",
+      "defect_count": 10,
+      "defects": [
+        {
+          "question_id": "de999898-1c9b-4959-ae75-91284a7d8ba5",
+          "question_idx": 1,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: COMPUTER SCIENCE**\n\n> \"...the engineering school will be collaborating...'"
+        },
+        {
+          "question_id": "b9a7bc3a-6959-4389-877d-50b41a16b981",
+          "question_idx": 2,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: ROCKS**\n\n> \"...avoid unexpected hazards. Things like **rocks**, for ex...'"
+        },
+        {
+          "question_id": "5d046ae2-ace0-461b-877c-7d7e783094f4",
+          "question_idx": 3,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: VIDEO CAMERAS**\n\n> \"...built a three-dimensional picture of its surrou...'"
+        },
+        {
+          "question_id": "1dd9da6e-ab99-45fd-8b57-f8d0276edc96",
+          "question_idx": 4,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: C**\n\n> \"The sponsors are hoping to see **innovative design ideas** tha...'"
+        },
+        {
+          "question_id": "c7d6d4ef-3996-4855-8b87-58b68d2168f5",
+          "question_idx": 5,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: A**\n\n> \"Its strength was in its **onboard technology**... analyze the ...'"
+        },
+        {
+          "question_id": "25ee2027-137a-43e7-aef6-d971e992aa2c",
+          "question_idx": 6,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: B**\n\n> \"...they were **pleased they got as far as they did**.\"\n\n(Đoạn ...'"
+        },
+        {
+          "question_id": "9840a80d-c4a5-40ff-b958-7a6d78090af9",
+          "question_idx": 7,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SEMINAR**\n\n> \"...we'll be scheduling a **seminar** to introduce the pr...'"
+        },
+        {
+          "question_id": "131a368d-4324-4430-89af-137ef7972376",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SKILLS**\n\n> \"You'll need to tell us about any particular **skills** th...'"
+        },
+        {
+          "question_id": "29b38f7e-ff3d-4924-a17c-280e5afa7b5e",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: IDEAS**\n\n> \"...hold a weekend workshop to share **ideas**...\"\n\n(Đoạn 5...'"
+        },
+        {
+          "question_id": "7fa569d8-b9f3-4158-b554-7bf44e67cd76",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TEAM**\n\n> \"...following month will choose the **team**...\"\n\n(Đoạn 5) S...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "178e85ec-d0f5-46aa-be3a-fad86f7e3f0a",
+      "title": "Detection of a meteorite Lake",
+      "defect_count": 14,
+      "defects": [
+        {
+          "question_id": "18935e0c-2316-469b-86b0-e6931b833725",
+          "question_idx": 1,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TRUE**\n\n> \"...the lake holds an untapped reservoir of information that...'"
+        },
+        {
+          "question_id": "48832eff-f070-46c6-bb5f-e78319464d54",
+          "question_idx": 2,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: NOT GIVEN**\n\n> \"The resulting crater is one of the largest and most we...'"
+        },
+        {
+          "question_id": "4b116174-3960-463c-ac3d-4e4e4c6305fe",
+          "question_idx": 3,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: FALSE**\n\n> \"...the water leaves only by evaporation.\"\n\n(Đoạn C) Bài đọ...'"
+        },
+        {
+          "question_id": "16fe4747-9f51-4588-ab8b-a3c01352f6e3",
+          "question_idx": 4,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TRUE**\n\n> \"...looking at evidence from the past...\"\n\n(Đoạn A) Việc phâ...'"
+        },
+        {
+          "question_id": "9e00e7a7-6c69-44f7-a333-aba58a222584",
+          "question_idx": 5,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: FALSE**\n\n> \"With the permission of the local chief...\"\n\n(Các đoạn sau)...'"
+        },
+        {
+          "question_id": "93f5e406-63aa-4449-a43b-a4818f1c46d1",
+          "question_idx": 6,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: AIR GUN**\n\n> \"...generated by a compressed **air gun**...\"\n\n(Đoạn mô t...'"
+        },
+        {
+          "question_id": "b6e21684-bd55-4b6c-9fb4-0b8ce7f126e0",
+          "question_idx": 7,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SOUND ENERGY/ SOUND WAVE**\n\n> \"...bursts of **sound energy**...\"\n\n(Đoạ...'"
+        },
+        {
+          "question_id": "30709828-f67e-4a39-a91e-0a52aebdb33f",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: CABLE**\n\n> \"...towed behind the boat on a single long **cable**...\"\n\n(...'"
+        },
+        {
+          "question_id": "5bdb2414-89b1-42a8-ba78-ebc666a4d70f",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: HYDROPHONES/ UNDERWATER MICROPHONES**\n\n> \"...series of sensors called ...'"
+        },
+        {
+          "question_id": "42408ce7-5989-4d8e-a7dd-b8905ae57aa4",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SHIPPING CONTAINER**\n\n> \"...shipped... in a **shipping container**.\"\n\n...'"
+        },
+        {
+          "question_id": "72275b08-0b7b-4366-be1b-14c4ceacc06d",
+          "question_idx": 11,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SEISMIC REFLECTION PROFILING**\n\n> \"...technique... called **seismic re...'"
+        },
+        {
+          "question_id": "1cb076f6-90e7-4e76-9be5-da0376038fba",
+          "question_idx": 12,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: LABORATORY**\n\n> \"...processed at the **laboratory**...\"\n\n(Đoạn kết quả...'"
+        },
+        {
+          "question_id": "c0e58e15-4765-44ee-9243-25efd99d27f6",
+          "question_idx": 13,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: THREE-DIMENSIONAL**\n\n> \"...building a **three-dimensional** view...\"\n\n...'"
+        },
+        {
+          "question_id": "e7a801e5-26dd-462b-837a-674ce5dfc47b",
+          "question_idx": 14,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: FISHING NETS**\n\n> \"...avoid... tree stumps or **fishing nets**.\"\n\n(Đoạ...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "1c15943a-1d9c-4ddf-b7e1-daed3b2cae46",
+      "title": "Spider silk 2",
+      "defect_count": 13,
+      "defects": [
+        {
+          "question_id": "afd0cbea-a186-400d-8829-a645681356fd",
+          "question_idx": 1,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: E**\n\n> \"They inserted the genes into **bacteria**... They also tried *...'"
+        },
+        {
+          "question_id": "76b624c4-b726-44ea-abba-d9335da4ea66",
+          "question_idx": 2,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: H**\n\n> \"DuPont... hopes to have the material **available** in the mark...'"
+        },
+        {
+          "question_id": "1e7bbf8b-bda0-4bd0-ab27-e3a90da57c6e",
+          "question_idx": 3,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: I**\n\n> \"...researchers... are **looking into other natural materials**...'"
+        },
+        {
+          "question_id": "80ec9e5d-a387-45f0-b442-1d145c5bd61b",
+          "question_idx": 4,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: D**\n\n> \"biochemists have been trying to **synthesise the drag-line sil...'"
+        },
+        {
+          "question_id": "ae86b658-7f27-4f2b-aa58-ef27b480402c",
+          "question_idx": 5,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: G**\n\n> \"...used to make lighter and stronger **bridge cables**... eart...'"
+        },
+        {
+          "question_id": "2931eb21-4c16-4866-aa42-287dec9363bb",
+          "question_idx": 6,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: YEAST**\n\n> \"They also tried **yeast**...\"\n\n(Đoạn E) Gen tổng hợp được ...'"
+        },
+        {
+          "question_id": "f5d78dc4-9e0a-4229-93b9-11a7bf4a9add",
+          "question_idx": 7,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: BACTERIA**\n\n> \"They inserted the genes into **bacteria**...\"\n\n(Đoạn E)...'"
+        },
+        {
+          "question_id": "c50ed84c-e0c8-4628-8db5-2651f6b0c44c",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: PROTEIN**\n\n> \"The bacteria reproduced... forming an insoluble **protei...'"
+        },
+        {
+          "question_id": "d5bb3347-a76f-4e91-a910-7f21144b5c56",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: CHEMICAL**\n\n> \"...dissolved in a harsh **chemical**...\"\n\n(Đoạn E) Prot...'"
+        },
+        {
+          "question_id": "ce2107cf-b8f2-454f-b0e3-dd4d50c06880",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: HOLES**\n\n> \"...carefully squirted through tiny **holes**...\"\n\n(Đoạn E)...'"
+        },
+        {
+          "question_id": "23631707-c375-446a-acfe-7db00378a5f8",
+          "question_idx": 11,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: FALSE**\n\n> \"Army scientists are already **looking at the possibilities...'"
+        },
+        {
+          "question_id": "34e2718d-67e7-443d-ab5d-261ab5bfc8ad",
+          "question_idx": 12,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TRUE**\n\n> \"The drag-line silk... is **stronger than the other parts** ...'"
+        },
+        {
+          "question_id": "88d5b993-16e6-4d30-8df0-c165cf33fe25",
+          "question_idx": 13,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: NOT GIVEN**\n\nBài đọc có nhắc đến các nghiên cứu và nhà khoa học khác n...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+      "title": "IELTS Academic Reading Test 119",
+      "defect_count": 15,
+      "defects": [
+        {
+          "question_id": "7a5be7aa-2e6e-4ef3-ac4c-ce774cb2af1a",
+          "question_idx": 14,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: C**\n\n> \"At present, the average car spends more than 90 percent of its...'"
+        },
+        {
+          "question_id": "6ae8d85c-58fd-412e-9c82-05cf758dea48",
+          "question_idx": 15,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: B**\n\n> \"...free the time people spend driving for other purposes... be...'"
+        },
+        {
+          "question_id": "47b34f85-8c00-40e0-b22a-809a16a40b26",
+          "question_idx": 16,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: E**\n\n> \"Travellers could simply order... a vehicle... best suited to t...'"
+        },
+        {
+          "question_id": "e6bc8e68-6db9-4d8d-b322-4ec67c8e038b",
+          "question_idx": 17,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: G**\n\n> \"...these can most probably be conquered within the next 10 yea...'"
+        },
+        {
+          "question_id": "bbbb2f6c-a32a-4241-be66-bc96b39c942b",
+          "question_idx": 18,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: D**\n\n> \"...vehicle production will not necessarily decrease.\"\n\n(Đoạn D...'"
+        },
+        {
+          "question_id": "a1d9280f-c48e-422e-8f89-463893c137e4",
+          "question_idx": 19,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: HUMAN ERROR**\n\n> \"...research... has demonstrated that more than 90 pe...'"
+        },
+        {
+          "question_id": "d970207b-4772-4758-b727-314502711b89",
+          "question_idx": 20,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: CARSHARING / CAR-SHARING**\n\n> \"Schemes for car-sharing will be more wo...'"
+        },
+        {
+          "question_id": "c46fd6e9-5f5e-4723-b18b-a4b812bfdd1c",
+          "question_idx": 21,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: OWNERSHIP**\n\n> \"...reduce the need for individual ownership of cars.\"\n...'"
+        },
+        {
+          "question_id": "17530ea4-79e5-4718-bca0-a0eeb8fb40da",
+          "question_idx": 22,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MILEAGE**\n\n> \"...the yearly mileage of each car would, on average, be ...'"
+        },
+        {
+          "question_id": "2e5ff134-4b16-45ac-9c80-808f5cdd4053",
+          "question_idx": 27,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "No option marked isCorrect=true"
+        },
+        {
+          "question_id": "24c5e65d-5606-4032-a5d4-a238e6b5eda1",
+          "question_idx": 28,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "No option marked isCorrect=true"
+        },
+        {
+          "question_id": "467db7be-504d-4de7-b295-60e6dba61bdd",
+          "question_idx": 29,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "No option marked isCorrect=true"
+        },
+        {
+          "question_id": "be5ae089-e46b-42aa-822a-b9b306f38565",
+          "question_idx": 30,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "No option marked isCorrect=true"
+        },
+        {
+          "question_id": "4f5852ce-f62e-4677-bfe2-f2f21279ccf5",
+          "question_idx": 31,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "No option marked isCorrect=true"
+        },
+        {
+          "question_id": "f8add3f3-5399-44a8-9473-3754f79b2b39",
+          "question_idx": 32,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "No option marked isCorrect=true"
+        }
+      ]
+    },
+    {
+      "exam_id": "2eb01490-db38-45f5-b347-ad52434b1dfc",
+      "title": "Radio Automation",
+      "defect_count": 13,
+      "defects": [
+        {
+          "question_id": "192df497-6e9b-46c8-b65b-4ba1be3f55fc",
+          "question_idx": 1,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: CHIP**\n\n> \"His solution was to dispense with most of the fiddly bits b...'"
+        },
+        {
+          "question_id": "6ccdb83a-ae8a-4c21-9349-d39cb273bdf3",
+          "question_idx": 2,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: GRIT**\n\n> \"First stop was the sandblaster... then cleaned to remove an...'"
+        },
+        {
+          "question_id": "53bcc9c9-e4b5-4b0c-8576-aaa1b1241162",
+          "question_idx": 3,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MOLTEN ZINC**\n\n> \"Eight nozzles rotated into position and sprayed **mo...'"
+        },
+        {
+          "question_id": "ac901517-6d91-434f-b86c-41b8b69c9c2d",
+          "question_idx": 4,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MILLING MACHINE**\n\n> \"The next stop was the **milling machine** which ...'"
+        },
+        {
+          "question_id": "ccc9b444-f8ee-43b9-9435-b976a04663a9",
+          "question_idx": 5,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SOCKETS**\n\n> \"Robot hands fitted it with **sockets** to attach other c...'"
+        },
+        {
+          "question_id": "1a16c9a6-0139-4ebc-b32c-6837dac95596",
+          "question_idx": 6,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: LOUDSPEAKERS**\n\n> \"Human hands were only required to... fit **loudspea...'"
+        },
+        {
+          "question_id": "dc82355f-e944-4ee3-a153-9e98923eb749",
+          "question_idx": 7,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: VALVES**\n\n> \"The other type of component fitted to the radio was **val...'"
+        },
+        {
+          "question_id": "22df44cd-4a98-48e9-a68c-855fed54d4c1",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: CHEAPER**\n\n> \"Sargrove had been trying to figure out how to make **che...'"
+        },
+        {
+          "question_id": "f144c92a-2427-4f39-a14f-ace62f3d9f8a",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: COMPONENTS**\n\n> \"Even a simple receiver might have 30 separate **compo...'"
+        },
+        {
+          "question_id": "93e7b94f-d8f3-4e6c-aa9c-d32dc8dbf645",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: LIGHTER**\n\n> \"The absence of wires also made the radios **lighter**......'"
+        },
+        {
+          "question_id": "6772de9a-af01-4390-9d65-a8772e2bd699",
+          "question_idx": 11,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: COST**\n\n> \"...it reduced the **cost** of manual work.\"\n\n(Đoạn E) Lợi í...'"
+        },
+        {
+          "question_id": "f29334c9-8f08-4ce4-8a68-c07836c29b17",
+          "question_idx": 12,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: A**\n\n> \"The workers viewed the new machine with a mixture of awe and *...'"
+        },
+        {
+          "question_id": "7ce964f8-8cea-4172-b2b3-ed5f18106274",
+          "question_idx": 13,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: C**\n\n> \"In the mid-1940s, the workerless factory was still the stuff o...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "4158c2c7-c68e-489f-b78d-f57e1b182411",
+      "title": "Space: The Final Archaeological Frontier",
+      "defect_count": 15,
+      "defects": [
+        {
+          "question_id": "b5564cc2-0ced-4dff-aa46-98fa5aef13bd",
+          "question_idx": 1,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: E**\n\n> \"...studied the technology once used by Polynesians to colonize...'"
+        },
+        {
+          "question_id": "2151df20-f504-4bdc-81b4-9c7dc432a8d7",
+          "question_idx": 2,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: B**\n\n> \"...he was convinced that one day such work would be done.\"\n\n(Đ...'"
+        },
+        {
+          "question_id": "6159dfd9-59c6-46a2-a627-72a7f6365fbe",
+          "question_idx": 3,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: H**\n\n> \"There is a growing awareness... that it won’t be long before b...'"
+        },
+        {
+          "question_id": "86c8eeb5-6226-4da5-a8ae-98ac0ca69b9d",
+          "question_idx": 4,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: A**\n\n> \"...unmonitored scientific sampling, as has already occurred in...'"
+        },
+        {
+          "question_id": "7df038e2-0844-4cd4-9332-ce5679101530",
+          "question_idx": 5,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: F**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Hiệp ước LHQ năm 1...'"
+        },
+        {
+          "question_id": "2f976a2a-8d7c-4378-ba23-04f17e66f9c0",
+          "question_idx": 6,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: D**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Các thỏa thuận phá...'"
+        },
+        {
+          "question_id": "1d1ae49c-9ac4-42ea-815e-a4c585b1929c",
+          "question_idx": 7,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SNEEZED**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Trong quá tr...'"
+        },
+        {
+          "question_id": "c873e7c1-7efd-4f1b-bae4-7606a2c319ef",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TWO**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Tàu Surveyor 3 v...'"
+        },
+        {
+          "question_id": "73105887-cec0-4109-b090-74221b592cec",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: REMOVED**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Các phi hành...'"
+        },
+        {
+          "question_id": "a5f4245f-742b-4edc-9b24-c19bc674e0e9",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: ANALYSIS**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Chiếc camer...'"
+        },
+        {
+          "question_id": "d5b85b71-445f-41bf-b27b-f5857bdf517e",
+          "question_idx": 11,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: LIFE**\n\n(Thông tin nằm ngoài đoạn trích được cung cấp) Ban đầu có giả ...'"
+        },
+        {
+          "question_id": "d5397197-44f4-4c02-8caf-02cec137f400",
+          "question_idx": 12,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: C**\n\n(Không đủ dữ liệu câu hỏi) Dựa trên đáp án được cung cấp là C. Cầ...'"
+        },
+        {
+          "question_id": "d5397197-44f4-4c02-8caf-02cec137f400",
+          "question_idx": 12,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "Expected >= 2 correct options, found 0"
+        },
+        {
+          "question_id": "acca225b-c597-4d10-9f4d-b4869a518d01",
+          "question_idx": 13,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: C**\n\n(Không đủ dữ liệu câu hỏi) Dựa trên đáp án được cung cấp là C. Đâ...'"
+        },
+        {
+          "question_id": "acca225b-c597-4d10-9f4d-b4869a518d01",
+          "question_idx": 13,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "Expected >= 2 correct options, found 0"
+        }
+      ]
+    },
+    {
+      "exam_id": "4b405ce8-0f24-5181-a4a8-6f7e8bcfe805",
+      "title": "IELTS Reading: Caral: An Ancient South American City",
+      "defect_count": 13,
+      "defects": [
+        {
+          "question_id": "9f1affa4-7294-5e31-a08a-808c5611f923",
+          "question_idx": 1,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\nCaral được xây dựng cùng thời điểm với việc xây dựng các k...'"
+        },
+        {
+          "question_id": "78decdbb-6c93-5d24-b6c5-1cfcc07859c8",
+          "question_idx": 2,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\nSự vắng mặt của đồ gốm tại cuộc khai quật khảo cổ đã cho S...'"
+        },
+        {
+          "question_id": "26991a54-8d10-55a2-ba4f-b91b1c02756f",
+          "question_idx": 3,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\nNhững viên đá được sử dụng để xây dựng Piramide Mayor đến ...'"
+        },
+        {
+          "question_id": "8b8e577f-91f2-56d2-87fa-96c435651c98",
+          "question_idx": 4,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\nCác cấu trúc khổng lồ và phức tạp của Piramide Mayor cho t...'"
+        },
+        {
+          "question_id": "26280f2f-3112-5dc4-a38e-147176b8941e",
+          "question_idx": 5,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\nBằng chứng khảo cổ cho thấy cư dân Caral là những nhạc sĩ ...'"
+        },
+        {
+          "question_id": "b8c54fb2-5ad5-52c0-aaca-1f97c7b934dc",
+          "question_idx": 6,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\nTàn tích của các khu nhà ở tại Caral cho thấy không có sự ...'"
+        },
+        {
+          "question_id": "b6b7bdeb-3925-584e-aa93-075390d39027",
+          "question_idx": 7,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp:\nCần tìm một danh từ chỉ bộ phận của...'"
+        },
+        {
+          "question_id": "a38d73e5-d211-5960-a69e-f7ac0481acac",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp:\nCần tìm một danh từ chỉ vật liệu đư...'"
+        },
+        {
+          "question_id": "ea33692a-2aa0-5a5d-bfff-eb669187421c",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp:\nCần tìm một danh từ chỉ loại thực p...'"
+        },
+        {
+          "question_id": "9902bb1e-b9f2-5947-869b-a1ee8c8ceb8a",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp:\nCần tìm một danh từ chỉ công trình ...'"
+        },
+        {
+          "question_id": "909004cd-19d1-5c60-8ea1-e16765f61129",
+          "question_idx": 11,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp:\nCần tìm danh từ chỉ loại cây trồng ...'"
+        },
+        {
+          "question_id": "31a68b40-7f8c-5b93-aafb-cbdd1f6bd028",
+          "question_idx": 12,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp:\nCần tìm danh từ chỉ vật phẩm mà nôn...'"
+        },
+        {
+          "question_id": "c873efd4-f635-5f9e-ad12-5676f28f3f78",
+          "question_idx": 13,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp:\nBí khô có thể đã được sử dụng để hỗ...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "5890a237-5d25-52ea-9525-41cbd939e7b0",
+      "title": "IELTS Reading: The Legend of Tea",
+      "defect_count": 14,
+      "defects": [
+        {
+          "question_id": "6b16e63e-f980-5e0e-afcc-81baa589c45c",
+          "question_idx": 1,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nTìm đoạn văn nói rằng cà phê (hoặc các thức uống khác) đ...'"
+        },
+        {
+          "question_id": "890955ca-6cc2-5911-8d23-efc942e6e3db",
+          "question_idx": 2,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nTìm đoạn văn nói rằng các ý nghĩa/hàm ý (implications) tô...'"
+        },
+        {
+          "question_id": "025e52ed-e645-5167-b8b2-0fc27c010c16",
+          "question_idx": 3,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nTìm đoạn văn nói trà gây ra tranh cãi (controversies) ở c...'"
+        },
+        {
+          "question_id": "2181e7ac-242a-5eae-9ad1-38b312c6476d",
+          "question_idx": 4,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nTìm đoạn văn nói trà là biểu tượng của sự giàu có (symbol...'"
+        },
+        {
+          "question_id": "cf48e017-f125-5b75-85db-8b0cfa92cf51",
+          "question_idx": 5,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nTìm đoạn văn nói một nghệ thuật nghi lễ (ceremonial art) ...'"
+        },
+        {
+          "question_id": "9a1d1b32-133d-5eba-a3f5-42aa8b09d6e5",
+          "question_idx": 6,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nViệc giới thiệu trà đến Nhật Bản hoàng gia (imperial Japa...'"
+        },
+        {
+          "question_id": "5412e15b-63e9-5536-9913-d158b6acb5f5",
+          "question_idx": 7,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nTrà đã lan rộng đến mọi tầng lớp (all sections) trong xã ...'"
+        },
+        {
+          "question_id": "20a4496f-fa97-5b4a-b384-f90bd0d6177e",
+          "question_idx": 8,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nUống trà có lợi ích sức khỏe đáng kể (significant health ...'"
+        },
+        {
+          "question_id": "d0a688bc-ee5f-58d1-b5a0-7dcf26739426",
+          "question_idx": 9,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nNgười Hà Lan (Dutchmen) thích (preferred) thêm sữa vào tr...'"
+        },
+        {
+          "question_id": "5ae00aa6-975a-5324-b3f1-ffa2469e2829",
+          "question_idx": 10,
+          "question_type": "MATCHING_FEATURES",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nĐề hỏi Jasper de Cruz đã làm gì hoặc có ý kiến gì?\n\n \n\nBư...'"
+        },
+        {
+          "question_id": "d1829707-b4df-504b-8b0a-3e7c3a035a56",
+          "question_idx": 11,
+          "question_type": "MATCHING_FEATURES",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nĐề hỏi Peter Stuyvesant đã làm gì hoặc có ý kiến gì?\n\n \n\n...'"
+        },
+        {
+          "question_id": "1786bfec-246e-547f-bf7b-c1b4cec3a77e",
+          "question_idx": 12,
+          "question_type": "MATCHING_FEATURES",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nĐề hỏi Lu Yu đã làm gì hoặc có ý kiến gì?\n\n \n\nBước 2: Tìm...'"
+        },
+        {
+          "question_id": "ed4f9326-3aec-5971-aef6-a8c49aca558c",
+          "question_idx": 13,
+          "question_type": "MATCHING_FEATURES",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nĐề hỏi Lafcadio Hearn đã làm gì hoặc có ý kiến gì?\n\n \n\nBư...'"
+        },
+        {
+          "question_id": "4e4d1070-95a2-5f5f-b256-5f2a4f18e220",
+          "question_idx": 14,
+          "question_type": "MATCHING_FEATURES",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi:\n\nĐề hỏi Shen Nung đã làm gì hoặc có ý kiến gì?\n\n \n\nBước 2:...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "6aa44aef-e816-43da-9f05-12d8e3c4d458",
+      "title": "Reading Test 119: Passage 1 - Nutmeg - a valuable spice",
+      "defect_count": 13,
+      "defects": [
+        {
+          "question_id": "193453ad-7532-46ab-af62-8a57b775489a",
+          "question_idx": 1,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: OVAL**\n\n> \"The tree is thickly branched with dense foliage of tough, d...'"
+        },
+        {
+          "question_id": "16903d84-1897-4cc4-84ff-657303188e69",
+          "question_idx": 2,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: HUSK**\n\n> \"The fruit is encased in a flesh **husk**. When the fruit is...'"
+        },
+        {
+          "question_id": "438a1c8a-ec8a-4c76-a4ec-ded8fb64e899",
+          "question_idx": 3,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SEED**\n\n> \"...sources of the two spices nutmeg and mace, the former be...'"
+        },
+        {
+          "question_id": "3042d99e-3fc0-4a79-84c5-0f146340dbf5",
+          "question_idx": 4,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MACE**\n\n> \"...sources of the two spices nutmeg and mace, ... and the l...'"
+        },
+        {
+          "question_id": "28556f96-3871-4de1-98e1-db33d4092e2d",
+          "question_idx": 5,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: FALSE**\n\n> \"...they [the Arabs] never revealed the exact location of t...'"
+        },
+        {
+          "question_id": "84255d10-ba80-4fd0-81de-a68a33a1fd9c",
+          "question_idx": 6,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: NOT GIVEN**\n\n(Toàn bài) Bài đọc có đề cập đến công ty VOC (Dutch East ...'"
+        },
+        {
+          "question_id": "4cb486da-5221-4821-a166-86e8dffce27b",
+          "question_idx": 7,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TRUE**\n\n> \"...giving the Dutch full control of the Banda Islands.\"\n\n(Đ...'"
+        },
+        {
+          "question_id": "9fa6995e-6b44-4f77-b5af-5e8a94612e18",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: ARABS**\n\n> \"Throughout this period, the **Arabs** were the exclusive i...'"
+        },
+        {
+          "question_id": "08000112-5b7c-4e69-8200-38a8af66c14e",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: PLAGUE**\n\n> \"Doctors believed nutmeg could cure the **plague**.\"\n\n(Đoạ...'"
+        },
+        {
+          "question_id": "f198dbd7-d94d-4b61-b8d3-8a8afcfe220c",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: LIME**\n\n> \"...all exported nutmeg was covered with **lime** to make su...'"
+        },
+        {
+          "question_id": "b0491341-0e54-4c83-a9e2-ddb7516ae287",
+          "question_idx": 11,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: RUN**\n\n> \"...in return for the British giving the island of **Run** to...'"
+        },
+        {
+          "question_id": "d509e26c-5980-4659-a131-ebf3ae1dcb32",
+          "question_idx": 12,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MAURITIUS**\n\n> \"...smuggled nutmeg plants to safety in **Mauritius**.\"...'"
+        },
+        {
+          "question_id": "0c23a7ef-c16c-4784-93ed-6be739a88476",
+          "question_idx": 13,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TSUNAMI**\n\n> \"...half the nutmeg groves were torn up by a **tsunami**....'"
+        }
+      ]
+    },
+    {
+      "exam_id": "8d33960e-cb05-4e6a-a37b-7dee0521efce",
+      "title": "Mrs. Carlill and the Carbolic Smoke Ball",
+      "defect_count": 1,
+      "defects": [
+        {
+          "question_id": "3305156e-466c-44dc-8c10-dd8c38b97fe6",
+          "question_idx": 13,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "No option marked isCorrect=true"
+        }
+      ]
+    },
+    {
+      "exam_id": "92362e08-1731-4f1f-8934-9fd5dcfe1f37",
+      "title": "Termite Mounds",
+      "defect_count": 14,
+      "defects": [
+        {
+          "question_id": "0fdd71d9-fd96-428e-a4fd-2eb459557e8b",
+          "question_idx": 1,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: iii (reconsidering the termite’s reputation)**\n\n> \"To most of us, term...'"
+        },
+        {
+          "question_id": "7b9a92dc-d559-4345-a095-b7d0e0998369",
+          "question_idx": 2,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: vii**\n\n> \"The mound itself is formed of an intricate lattice of tunnel...'"
+        },
+        {
+          "question_id": "68a31299-1253-4a29-b8f6-45859f3ce7f3",
+          "question_idx": 3,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: iv (principal functions of the termite mound)**\n\n> \"This complex syste...'"
+        },
+        {
+          "question_id": "25edeec4-ce2d-41c2-8b03-432865600dc9",
+          "question_idx": 4,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: ix**\n\n> \"...scanning the mound...\"\n\n(Đoạn D) Đoạn này (dựa trên ngữ cả...'"
+        },
+        {
+          "question_id": "cc0e32bc-87fe-4fba-bb7f-e5b74ef154f7",
+          "question_idx": 5,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: ii (challenging our assumptions about the nature of life)**\n\n> \"...hom...'"
+        },
+        {
+          "question_id": "acd75450-9f8f-41cd-a851-8a474a6617c0",
+          "question_idx": 6,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: i (methods used to investigate termite mound formation)**\n\n> \"...const...'"
+        },
+        {
+          "question_id": "1a48f598-1688-45a3-a251-caa469bc8709",
+          "question_idx": 7,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: vi**\n\n> \"...future architecture...\"\n\n(Đoạn G) Đoạn cuối thường liên hệ...'"
+        },
+        {
+          "question_id": "022c4e3d-28f1-4af6-ac13-4282f723bec3",
+          "question_idx": 8,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TUNNELS**\n\n> \"The mound itself is formed of an intricate lattice of tu...'"
+        },
+        {
+          "question_id": "3b1c8258-ecd3-462e-8a95-49ea32cdb9e4",
+          "question_idx": 9,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: AIR**\n\n> \"ensuring them a continuous provision of fresh, breathable ai...'"
+        },
+        {
+          "question_id": "d4d42dd3-92df-460e-8c86-8eb371cca57c",
+          "question_idx": 10,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MOISTURE**\n\n> \"...control of moisture...\"\n\n(Đoạn D/E - suy luận từ ngữ...'"
+        },
+        {
+          "question_id": "1d63e363-465b-48cd-933d-fb14e5ca4a53",
+          "question_idx": 11,
+          "question_type": "DIAGRAM_LABEL",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: EVAPORATION**\n\n> \"...permits evaporation...\"\n\n(Đoạn E/F - suy luận từ ...'"
+        },
+        {
+          "question_id": "5338430b-827b-42cb-8a68-c3b3fd2e10a9",
+          "question_idx": 12,
+          "question_type": "YES_NO_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: YES**\n\n> \"...recycle...\"\n\n(Đoạn D/E) Gò mối có cơ chế xử lý chất thải ...'"
+        },
+        {
+          "question_id": "b71e2e85-b8a3-4715-b649-54a5f5573150",
+          "question_idx": 13,
+          "question_type": "YES_NO_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: NO**\n\n> \"...slices... thousands of images...\"\n\n(Đoạn D) Phương pháp củ...'"
+        },
+        {
+          "question_id": "6cd4f75b-83cb-476f-acbd-a3a7f8f5f0cc",
+          "question_idx": 14,
+          "question_type": "YES_NO_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: NOT GIVEN**\n\n(Toàn bài) Bài đọc có thể đề cập đến kiến trúc tiết kiệm ...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "a0bb39ed-19c6-455b-9d7a-7dac5c64e373",
+      "title": "IELTS Academic Reading Test 119",
+      "defect_count": 13,
+      "defects": [
+        {
+          "question_id": "b2a12bc2-5ba0-4e47-a5f5-84088c04cf05",
+          "question_idx": 1,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: OVAL**\n\n> \"The tree is thickly branched with dense foliage of tough, d...'"
+        },
+        {
+          "question_id": "545e9b69-54eb-45d7-9cd1-342dfc935880",
+          "question_idx": 2,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: HUSK**\n\n> \"The fruit is encased in a flesh **husk**. When the fruit is...'"
+        },
+        {
+          "question_id": "e7f5b84a-cf57-4c15-a374-1a68ecfa7eb7",
+          "question_idx": 3,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: SEED**\n\n> \"the former [nutmeg] being produced from the dried **seed**\"...'"
+        },
+        {
+          "question_id": "8b123af3-ca47-4c9f-bd7a-9c738a1d2f16",
+          "question_idx": 4,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MACE**\n\n> \"These are the sources of the two spices nutmeg and **mace**...'"
+        },
+        {
+          "question_id": "830ee4f5-a5e4-46c2-af6d-3de8e71f50c3",
+          "question_idx": 5,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: FALSE**\n\n> \"Arabs... never revealed the exact location of the source o...'"
+        },
+        {
+          "question_id": "a6fabd09-758e-4d66-a58d-4bc579e2bfd9",
+          "question_idx": 6,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: NOT GIVEN**\n\n> \"In 1602, Dutch merchants founded the VOC... By 1617, t...'"
+        },
+        {
+          "question_id": "feaf16b6-8b0c-49cf-9207-5af40caf3560",
+          "question_idx": 7,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TRUE**\n\n> \"After decades of fighting for control of this tiny island.....'"
+        },
+        {
+          "question_id": "7f1a6cf9-b0b8-4d10-8fe3-ea7d36358080",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: ARABS**\n\n> \"Throughout this period, the **Arabs** were the exclusive i...'"
+        },
+        {
+          "question_id": "d861784e-cfb2-4bc2-9d0d-d656c0cd0e32",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: PLAGUE**\n\n> \"thousands of people across Europe were dying of the **pla...'"
+        },
+        {
+          "question_id": "ddedb3fa-deca-4044-9d1e-65548a46b4bd",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: LIME**\n\n> \"all exported nutmeg was covered with **lime** to make sure ...'"
+        },
+        {
+          "question_id": "43d2ccfd-87b1-4947-aba6-ff5fbbff714e",
+          "question_idx": 11,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: RUN**\n\n> \"One of the Banda Islands, a sliver of land called **Run**......'"
+        },
+        {
+          "question_id": "220d432e-3098-47fe-8236-ee5573e892a7",
+          "question_idx": 12,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MAURITIUS**\n\n> \"Pierre Poivre... successfully smuggled nutmeg plants t...'"
+        },
+        {
+          "question_id": "a9f49cff-f329-4a98-af48-13accfc9af1a",
+          "question_idx": 13,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TSUNAMI**\n\n> \"a volcanic eruption in the Banda region caused a **tsuna...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "c4d0d5fd-201d-4d35-a5d7-3c45e45c649d",
+      "title": "Reading Test 119: Passage 2 - Driverless Cars",
+      "defect_count": 4,
+      "defects": [
+        {
+          "question_id": "1b4caac0-987b-4294-bd40-111096731d08",
+          "question_idx": 23,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "Expected >= 2 correct options, found 0"
+        },
+        {
+          "question_id": "ab72fd65-a221-44b1-bc49-6ce1428d7d42",
+          "question_idx": 24,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "Expected >= 2 correct options, found 0"
+        },
+        {
+          "question_id": "baa89021-f09b-4fbc-b418-883911ed7e15",
+          "question_idx": 25,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "Expected >= 2 correct options, found 0"
+        },
+        {
+          "question_id": "c90a43de-9dcf-4823-a602-418f1eba6b4d",
+          "question_idx": 26,
+          "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+          "defect_category": "MISSING_ANSWER_KEY",
+          "reason": "Expected >= 2 correct options, found 0"
+        }
+      ]
+    },
+    {
+      "exam_id": "e291c0c8-0761-467d-b083-5883ca8f2b9e",
+      "title": "IELTS Academic Reading Test 119",
+      "defect_count": 9,
+      "defects": [
+        {
+          "question_id": "ab5aa941-2d12-42ec-9789-24abf5e3e5a9",
+          "question_idx": 14,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: C**\n\n> \"At present, the average car spends more than 90 percent of its...'"
+        },
+        {
+          "question_id": "daf7337e-0278-471d-8a84-588cfd47fa39",
+          "question_idx": 15,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: B**\n\n> \"...free the time people spend driving for other purposes... be...'"
+        },
+        {
+          "question_id": "564c9a1c-18fa-4520-b4bc-5b3529940368",
+          "question_idx": 16,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: E**\n\n> \"Travellers could simply order... a vehicle... best suited to t...'"
+        },
+        {
+          "question_id": "416f00b5-3526-4a5d-8033-dd8594e9b298",
+          "question_idx": 17,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: G**\n\n> \"...these can most probably be conquered within the next 10 yea...'"
+        },
+        {
+          "question_id": "f6285b04-c82e-4094-bb8e-0495bc2a05da",
+          "question_idx": 18,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: D**\n\n> \"...vehicle production will not necessarily decrease.\"\n\n(Đoạn D...'"
+        },
+        {
+          "question_id": "0265aaee-33ef-4155-ae77-3d09dc547c30",
+          "question_idx": 19,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: HUMAN ERROR**\n\n> \"...research... has demonstrated that more than 90 pe...'"
+        },
+        {
+          "question_id": "b70b1459-303f-46c5-9d5d-9d55385603e9",
+          "question_idx": 20,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: CARSHARING / CAR-SHARING**\n\n> \"Schemes for car-sharing will be more wo...'"
+        },
+        {
+          "question_id": "09af62d7-2bfc-4b90-87ea-d80afe0bd8ee",
+          "question_idx": 21,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: OWNERSHIP**\n\n> \"...reduce the need for individual ownership of cars.\"\n...'"
+        },
+        {
+          "question_id": "f2900406-a136-4a1e-8516-336b45c4b237",
+          "question_idx": 22,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: MILEAGE**\n\n> \"...the yearly mileage of each car would, on average, be ...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "e6e3021b-7264-4cd2-a548-361e08fffaee",
+      "title": "Recent research on humour",
+      "defect_count": 14,
+      "defects": [
+        {
+          "question_id": "b6bdfcd9-3798-42f2-b79c-87cfde3160c1",
+          "question_idx": 1,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: FALSE**\n\n> \"Arthur Koestler dubbed it the luxury reflex: ‘unique in th...'"
+        },
+        {
+          "question_id": "9f19280f-3c43-4d61-948f-ec203eb9ab57",
+          "question_idx": 2,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: NOT GIVEN**\n\n> \"Plato expressed the idea that humour is simply a delig...'"
+        },
+        {
+          "question_id": "94ec536d-283c-4a28-8fa2-5c0ec2375ba9",
+          "question_idx": 3,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TRUE**\n\n> \"Kant and Freud felt that joke-telling relies on building up...'"
+        },
+        {
+          "question_id": "a02c5dc4-aef7-4b12-847f-e99c67c78180",
+          "question_idx": 4,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: FALSE**\n\n> \"But most modern humour theorists have settled on some vers...'"
+        },
+        {
+          "question_id": "1f54ef90-69db-4345-bbeb-b942635e89a2",
+          "question_idx": 5,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TRUE**\n\n> \"Graeme Ritchie... studies the linguistic structure of jokes...'"
+        },
+        {
+          "question_id": "f4e9fe2e-be38-4a40-9a30-e35583e71197",
+          "question_idx": 6,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: NOT GIVEN**\n\n> \"A comedian will present a situation followed by an une...'"
+        },
+        {
+          "question_id": "12fbe1d5-3afa-428e-ae75-e5616043a564",
+          "question_idx": 7,
+          "question_type": "TRUE_FALSE_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TRUE**\n\n> \"Chimpanzees have a 'play-face' a gaping expression accompan...'"
+        },
+        {
+          "question_id": "c87a5414-59fd-4a35-8f93-b2a6778b424b",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: PROBLEM SOLVING**\n\n> \"He suggests that comedy... usually involves **pr...'"
+        },
+        {
+          "question_id": "ea883f12-263a-4b29-9fa8-439c0da075a5",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: TEMPORAL LOBES**\n\n> \"...activity in the **temporal lobes**...\"\n\n(Đoạn ...'"
+        },
+        {
+          "question_id": "e24924cc-0428-4e6a-9212-6651168b31c9",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: EVALUATING INFORMATION**\n\n> \"...orbital prefrontal cortex... involved ...'"
+        },
+        {
+          "question_id": "1e6ef350-cf1a-451c-a64d-67aa9e1c6d6e",
+          "question_idx": 11,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: C**\n\n> \"making a rapid emotional assessment of the events of the momen...'"
+        },
+        {
+          "question_id": "100dd2ab-f4c2-4d71-be6b-620dc77dd460",
+          "question_idx": 12,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: A**\n\n> \"Human beings, who have developed a much more complicated lingu...'"
+        },
+        {
+          "question_id": "137e8eb6-7bf7-4ff7-a808-747ac4cd3112",
+          "question_idx": 13,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: F**\n\n> \"But his research also suggests that a person’s outlook on life...'"
+        },
+        {
+          "question_id": "946b2c69-e280-472a-bf53-7b68d1c3d596",
+          "question_idx": 14,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: '**Đáp án: D**\n\n> \"Peter Derks... suggests that humour works like a mental fitnes...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "e7b53117-9aec-5dc2-9eef-b147dde32879",
+      "title": "IELTS Reading: Reading in a whole new way",
+      "defect_count": 14,
+      "defects": [
+        {
+          "question_id": "4249a0d3-81f3-5b18-aaa5-fad76ba049bf",
+          "question_idx": 1,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu và tìm keywords trong câu hỏi: \n\nTác giả nói gì về việc đọc chính t...'"
+        },
+        {
+          "question_id": "52683ad8-e1b2-54a2-a0fb-1acf89ed2086",
+          "question_idx": 2,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu và tìm keywords trong câu hỏi: \n\nTheo tác giả, điều gì thay đổi sau...'"
+        },
+        {
+          "question_id": "ae0e02cb-7826-5179-a21b-7c9f411904d1",
+          "question_idx": 3,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu và tìm keywords trong câu hỏi: \n\nỞ đoạn thứ ba, tác giả tập trung v...'"
+        },
+        {
+          "question_id": "ed8888ec-ff48-567a-8199-9525bbd94db7",
+          "question_idx": 4,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu và tìm keywords trong câu hỏi: \n\nTác giả nói gì về màn hình trong đ...'"
+        },
+        {
+          "question_id": "5cae239d-cb99-5e9e-ac23-1a79ab844904",
+          "question_idx": 5,
+          "question_type": "MULTIPLE_CHOICE_SINGLE",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu và tìm keywords trong câu hỏi: \n\nTheo tác giả, máy tính khác với tr...'"
+        },
+        {
+          "question_id": "4130a91e-65e7-5bbc-9801-b96a062817eb",
+          "question_idx": 6,
+          "question_type": "YES_NO_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nViệc đọc trên màn hình đã làm giảm số lượng sách và báo ...'"
+        },
+        {
+          "question_id": "3c7eac93-d939-57f4-a78f-bd5a671af243",
+          "question_idx": 7,
+          "question_type": "YES_NO_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nKhả năng đọc màn hình đòi hỏi nhiều kỹ năng thị giác hơn...'"
+        },
+        {
+          "question_id": "56698db8-24ae-565f-ac14-0791f2b903b3",
+          "question_idx": 8,
+          "question_type": "YES_NO_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nĐọc trên màn hình tích cực hơn so với đọc sách.\n\n \n\nBước...'"
+        },
+        {
+          "question_id": "1dc3be82-43cf-573c-8efd-2a60ed13e3ff",
+          "question_idx": 9,
+          "question_type": "YES_NO_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nMàn hình và sách tạo ra các kiểu tư duy tương tự ở người...'"
+        },
+        {
+          "question_id": "7ed9e3c7-ede3-5cec-9e76-2e3836bc9230",
+          "question_idx": 10,
+          "question_type": "YES_NO_NOT_GIVEN",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nMọi người dễ dàng bị thuyết phục tin vào những điều sai ...'"
+        },
+        {
+          "question_id": "f0fb15cf-005a-5f1f-aafd-b5b509e6c522",
+          "question_idx": 11,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nBộ phim Minority Report minh họa điều gì?\n\n \n\nBước 2: Tì...'"
+        },
+        {
+          "question_id": "de56d6c4-a027-5cc7-a91b-6d60204b2f03",
+          "question_idx": 12,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nHành vi của chúng ta khi xem phim cho thấy điều gì?\n\n \n\n...'"
+        },
+        {
+          "question_id": "9eb0a2b0-af5e-5fbf-b01d-f44a63933c63",
+          "question_idx": 13,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nSự thành công của Wikipedia dựa vào điều gì?\n\n \n\nBước 2:...'"
+        },
+        {
+          "question_id": "6c384fa7-0df1-5453-83b1-b6d9f252068a",
+          "question_idx": 14,
+          "question_type": "MATCHING_INFORMATION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi: \n\nWebkinz là ví dụ về điều gì?\n\n \n\nBước 2: Tìm các keyword...'"
+        }
+      ]
+    },
+    {
+      "exam_id": "ea9cc216-5182-5b04-8631-a3ad34646e5c",
+      "title": "IELTS Reading: Western Immigration of Canada",
+      "defect_count": 13,
+      "defects": [
+        {
+          "question_id": "87e28f66-2d90-5cb4-a1eb-cbde2d1df19f",
+          "question_idx": 1,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Đọc và hiểu đoạn 1: \n\nVào giữa thập niên 1870, Canada muốn có dân số nhậ...'"
+        },
+        {
+          "question_id": "fd282a5c-bf6b-5143-a99f-92e1f16ddd04",
+          "question_idx": 2,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Đọc và hiểu đoạn 2: \n\nChính phủ liên bang thực hiện các bước để bảo vệ l...'"
+        },
+        {
+          "question_id": "86099b7b-2baa-5d41-9e51-a520f499fb8c",
+          "question_idx": 3,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Đọc và hiểu đoạn 3: \n\nCách chắc chắn nhất để bảo vệ lãnh thổ Canada và k...'"
+        },
+        {
+          "question_id": "a5ba780a-09ac-52dc-8643-fb9b526936ba",
+          "question_idx": 4,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Đọc và hiểu đoạn 4: \n\nWinnipeg trở thành đô thị lớn nhất miền Tây trong ...'"
+        },
+        {
+          "question_id": "f83f0dab-8dc8-574e-a395-833b2b451095",
+          "question_idx": 5,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Đọc và hiểu đoạn 5: \n\nPhần lớn người định cư ban đầu đến Winnipeg là ngư...'"
+        },
+        {
+          "question_id": "46949aed-2a1f-5979-94f1-c4ef9531f3d4",
+          "question_idx": 6,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Đọc và hiểu đoạn 6: \n\nKhông phải tất cả người định cư đến miền Tây đều m...'"
+        },
+        {
+          "question_id": "e087aa08-e54f-5288-a66d-dbbccd0f186f",
+          "question_idx": 7,
+          "question_type": "MATCHING_HEADING",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Đọc và hiểu đoạn 7: \n\nĐến năm 1891, miền Đông Canada có các đô thị lớn n...'"
+        },
+        {
+          "question_id": "316e9319-b44e-5025-a9bf-3131a9d1aab1",
+          "question_idx": 8,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nViệc định cư nông thôn miền Tây đ...'"
+        },
+        {
+          "question_id": "e7a88776-7187-520d-90da-a8be3819919f",
+          "question_idx": 9,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nCác nông dân và chính trị gia miề...'"
+        },
+        {
+          "question_id": "a360497b-048c-5123-92bd-06d34bea34cf",
+          "question_idx": 10,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nĐặc biệt về sản xuất ______.\n\n \n\n...'"
+        },
+        {
+          "question_id": "e606f001-75ee-551e-b4f6-bdfe06b28c19",
+          "question_idx": 11,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nDominion of Canada mua vùng đất R...'"
+        },
+        {
+          "question_id": "83cdaae9-c188-5dad-81dd-283e2b85a7a7",
+          "question_idx": 12,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nChính phủ Canada thành lập một Mo...'"
+        },
+        {
+          "question_id": "e5a484e7-8807-5adc-917f-ae115c238355",
+          "question_idx": 13,
+          "question_type": "SUMMARY_COMPLETION",
+          "defect_category": "WRONG_LANGUAGE",
+          "reason": "Vietnamese text in explanationMd: 'Bước 1: Hiểu câu hỏi và Giải thích ngữ pháp: \n\nChính phủ Canada thành lập một Mo...'"
+        }
+      ]
+    }
+  ],
+  "missing_answer_keys": [
+    {
+      "exam_id": "0ff384b4-e5cb-4f7e-8c7d-79c5eba87807",
+      "exam_title": "Talk to new kitchen assistants",
+      "question_id": "1a62547d-edbc-4978-9316-b92e0910bae1",
+      "question_idx": 5,
+      "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "Expected >= 2 correct options, found 1",
+      "ref": "Exam 'Talk to new kitchen assistants' (0ff384b4-e5cb-4f7e-8c7d-79c5eba87807) -> Q5 (1a62547d-edbc-4978-9316-b92e0910bae1) [MULTIPLE_CHOICE_MULTIPLE]"
+    },
+    {
+      "exam_id": "0ff384b4-e5cb-4f7e-8c7d-79c5eba87807",
+      "exam_title": "Talk to new kitchen assistants",
+      "question_id": "b7a5a490-cf83-4e3c-af72-625bb697c00a",
+      "question_idx": 6,
+      "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "Expected >= 2 correct options, found 1",
+      "ref": "Exam 'Talk to new kitchen assistants' (0ff384b4-e5cb-4f7e-8c7d-79c5eba87807) -> Q6 (b7a5a490-cf83-4e3c-af72-625bb697c00a) [MULTIPLE_CHOICE_MULTIPLE]"
+    },
+    {
+      "exam_id": "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+      "exam_title": "IELTS Academic Reading Test 119",
+      "question_id": "2e5ff134-4b16-45ac-9c80-808f5cdd4053",
+      "question_idx": 27,
+      "question_type": "MULTIPLE_CHOICE_SINGLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "No option marked isCorrect=true",
+      "ref": "Exam 'IELTS Academic Reading Test 119' (1ef1f4b2-441f-453a-aeb6-c3029445e5d0) -> Q27 (2e5ff134-4b16-45ac-9c80-808f5cdd4053) [MULTIPLE_CHOICE_SINGLE]"
+    },
+    {
+      "exam_id": "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+      "exam_title": "IELTS Academic Reading Test 119",
+      "question_id": "24c5e65d-5606-4032-a5d4-a238e6b5eda1",
+      "question_idx": 28,
+      "question_type": "MULTIPLE_CHOICE_SINGLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "No option marked isCorrect=true",
+      "ref": "Exam 'IELTS Academic Reading Test 119' (1ef1f4b2-441f-453a-aeb6-c3029445e5d0) -> Q28 (24c5e65d-5606-4032-a5d4-a238e6b5eda1) [MULTIPLE_CHOICE_SINGLE]"
+    },
+    {
+      "exam_id": "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+      "exam_title": "IELTS Academic Reading Test 119",
+      "question_id": "467db7be-504d-4de7-b295-60e6dba61bdd",
+      "question_idx": 29,
+      "question_type": "MULTIPLE_CHOICE_SINGLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "No option marked isCorrect=true",
+      "ref": "Exam 'IELTS Academic Reading Test 119' (1ef1f4b2-441f-453a-aeb6-c3029445e5d0) -> Q29 (467db7be-504d-4de7-b295-60e6dba61bdd) [MULTIPLE_CHOICE_SINGLE]"
+    },
+    {
+      "exam_id": "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+      "exam_title": "IELTS Academic Reading Test 119",
+      "question_id": "be5ae089-e46b-42aa-822a-b9b306f38565",
+      "question_idx": 30,
+      "question_type": "MULTIPLE_CHOICE_SINGLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "No option marked isCorrect=true",
+      "ref": "Exam 'IELTS Academic Reading Test 119' (1ef1f4b2-441f-453a-aeb6-c3029445e5d0) -> Q30 (be5ae089-e46b-42aa-822a-b9b306f38565) [MULTIPLE_CHOICE_SINGLE]"
+    },
+    {
+      "exam_id": "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+      "exam_title": "IELTS Academic Reading Test 119",
+      "question_id": "4f5852ce-f62e-4677-bfe2-f2f21279ccf5",
+      "question_idx": 31,
+      "question_type": "MULTIPLE_CHOICE_SINGLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "No option marked isCorrect=true",
+      "ref": "Exam 'IELTS Academic Reading Test 119' (1ef1f4b2-441f-453a-aeb6-c3029445e5d0) -> Q31 (4f5852ce-f62e-4677-bfe2-f2f21279ccf5) [MULTIPLE_CHOICE_SINGLE]"
+    },
+    {
+      "exam_id": "1ef1f4b2-441f-453a-aeb6-c3029445e5d0",
+      "exam_title": "IELTS Academic Reading Test 119",
+      "question_id": "f8add3f3-5399-44a8-9473-3754f79b2b39",
+      "question_idx": 32,
+      "question_type": "MULTIPLE_CHOICE_SINGLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "No option marked isCorrect=true",
+      "ref": "Exam 'IELTS Academic Reading Test 119' (1ef1f4b2-441f-453a-aeb6-c3029445e5d0) -> Q32 (f8add3f3-5399-44a8-9473-3754f79b2b39) [MULTIPLE_CHOICE_SINGLE]"
+    },
+    {
+      "exam_id": "4158c2c7-c68e-489f-b78d-f57e1b182411",
+      "exam_title": "Space: The Final Archaeological Frontier",
+      "question_id": "d5397197-44f4-4c02-8caf-02cec137f400",
+      "question_idx": 12,
+      "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "Expected >= 2 correct options, found 0",
+      "ref": "Exam 'Space: The Final Archaeological Frontier' (4158c2c7-c68e-489f-b78d-f57e1b182411) -> Q12 (d5397197-44f4-4c02-8caf-02cec137f400) [MULTIPLE_CHOICE_MULTIPLE]"
+    },
+    {
+      "exam_id": "4158c2c7-c68e-489f-b78d-f57e1b182411",
+      "exam_title": "Space: The Final Archaeological Frontier",
+      "question_id": "acca225b-c597-4d10-9f4d-b4869a518d01",
+      "question_idx": 13,
+      "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "Expected >= 2 correct options, found 0",
+      "ref": "Exam 'Space: The Final Archaeological Frontier' (4158c2c7-c68e-489f-b78d-f57e1b182411) -> Q13 (acca225b-c597-4d10-9f4d-b4869a518d01) [MULTIPLE_CHOICE_MULTIPLE]"
+    },
+    {
+      "exam_id": "8d33960e-cb05-4e6a-a37b-7dee0521efce",
+      "exam_title": "Mrs. Carlill and the Carbolic Smoke Ball",
+      "question_id": "3305156e-466c-44dc-8c10-dd8c38b97fe6",
+      "question_idx": 13,
+      "question_type": "MULTIPLE_CHOICE_SINGLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "No option marked isCorrect=true",
+      "ref": "Exam 'Mrs. Carlill and the Carbolic Smoke Ball' (8d33960e-cb05-4e6a-a37b-7dee0521efce) -> Q13 (3305156e-466c-44dc-8c10-dd8c38b97fe6) [MULTIPLE_CHOICE_SINGLE]"
+    },
+    {
+      "exam_id": "c4d0d5fd-201d-4d35-a5d7-3c45e45c649d",
+      "exam_title": "Reading Test 119: Passage 2 - Driverless Cars",
+      "question_id": "1b4caac0-987b-4294-bd40-111096731d08",
+      "question_idx": 23,
+      "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "Expected >= 2 correct options, found 0",
+      "ref": "Exam 'Reading Test 119: Passage 2 - Driverless Cars' (c4d0d5fd-201d-4d35-a5d7-3c45e45c649d) -> Q23 (1b4caac0-987b-4294-bd40-111096731d08) [MULTIPLE_CHOICE_MULTIPLE]"
+    },
+    {
+      "exam_id": "c4d0d5fd-201d-4d35-a5d7-3c45e45c649d",
+      "exam_title": "Reading Test 119: Passage 2 - Driverless Cars",
+      "question_id": "ab72fd65-a221-44b1-bc49-6ce1428d7d42",
+      "question_idx": 24,
+      "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "Expected >= 2 correct options, found 0",
+      "ref": "Exam 'Reading Test 119: Passage 2 - Driverless Cars' (c4d0d5fd-201d-4d35-a5d7-3c45e45c649d) -> Q24 (ab72fd65-a221-44b1-bc49-6ce1428d7d42) [MULTIPLE_CHOICE_MULTIPLE]"
+    },
+    {
+      "exam_id": "c4d0d5fd-201d-4d35-a5d7-3c45e45c649d",
+      "exam_title": "Reading Test 119: Passage 2 - Driverless Cars",
+      "question_id": "baa89021-f09b-4fbc-b418-883911ed7e15",
+      "question_idx": 25,
+      "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "Expected >= 2 correct options, found 0",
+      "ref": "Exam 'Reading Test 119: Passage 2 - Driverless Cars' (c4d0d5fd-201d-4d35-a5d7-3c45e45c649d) -> Q25 (baa89021-f09b-4fbc-b418-883911ed7e15) [MULTIPLE_CHOICE_MULTIPLE]"
+    },
+    {
+      "exam_id": "c4d0d5fd-201d-4d35-a5d7-3c45e45c649d",
+      "exam_title": "Reading Test 119: Passage 2 - Driverless Cars",
+      "question_id": "c90a43de-9dcf-4823-a602-418f1eba6b4d",
+      "question_idx": 26,
+      "question_type": "MULTIPLE_CHOICE_MULTIPLE",
+      "defect_category": "MISSING_ANSWER_KEY",
+      "reason": "Expected >= 2 correct options, found 0",
+      "ref": "Exam 'Reading Test 119: Passage 2 - Driverless Cars' (c4d0d5fd-201d-4d35-a5d7-3c45e45c649d) -> Q26 (c90a43de-9dcf-4823-a602-418f1eba6b4d) [MULTIPLE_CHOICE_MULTIPLE]"
+    }
+  ],
+  "group_scoring_issues": [
+    {
+      "exam_id": "11111111-1111-1111-1111-111111111111",
+      "question_id": "6796a5c5-0d2c-c5fc-46d2-60c6a3aa889b",
+      "pair_count": 5,
+      "ref": "Exam 'IELTS Academic Reading — Standard Test (19 Types)' (11111111-1111-1111-1111-111111111111) -> Q1 (6796a5c5-0d2c-c5fc-46d2-60c6a3aa889b) [MATCHING_HEADING]",
+      "note": "Multi-target matching item (5 pairs) in single ExamQuestion row"
+    },
+    {
+      "exam_id": "11111111-1111-1111-1111-111111111111",
+      "question_id": "79c4c6bf-5ecb-98b6-034a-7532316b5490",
+      "pair_count": 4,
+      "ref": "Exam 'IELTS Academic Reading — Standard Test (19 Types)' (11111111-1111-1111-1111-111111111111) -> Q2 (79c4c6bf-5ecb-98b6-034a-7532316b5490) [MATCHING_ENDINGS]",
+      "note": "Multi-target matching item (4 pairs) in single ExamQuestion row"
+    },
+    {
+      "exam_id": "11111111-1111-1111-1111-111111111111",
+      "question_id": "af96a3ed-8c2d-c588-74d7-c6609229f669",
+      "pair_count": 4,
+      "ref": "Exam 'IELTS Academic Reading — Standard Test (19 Types)' (11111111-1111-1111-1111-111111111111) -> Q2 (af96a3ed-8c2d-c588-74d7-c6609229f669) [MATCHING_INFORMATION]",
+      "note": "Multi-target matching item (4 pairs) in single ExamQuestion row"
+    },
+    {
+      "exam_id": "11111111-1111-1111-1111-111111111111",
+      "question_id": "22025098-7be3-4b67-f29a-d6aa5a294274",
+      "pair_count": 3,
+      "ref": "Exam 'IELTS Academic Reading — Standard Test (19 Types)' (11111111-1111-1111-1111-111111111111) -> Q3 (22025098-7be3-4b67-f29a-d6aa5a294274) [CLASSIFICATION]",
+      "note": "Multi-target matching item (3 pairs) in single ExamQuestion row"
+    },
+    {
+      "exam_id": "11111111-1111-1111-1111-111111111111",
+      "question_id": "b00444bd-f5d8-23cb-4c7d-6363e1b484ab",
+      "pair_count": 4,
+      "ref": "Exam 'IELTS Academic Reading — Standard Test (19 Types)' (11111111-1111-1111-1111-111111111111) -> Q4 (b00444bd-f5d8-23cb-4c7d-6363e1b484ab) [MATCHING_FEATURES]",
+      "note": "Multi-target matching item (4 pairs) in single ExamQuestion row"
+    },
+    {
+      "exam_id": "11111111-1111-1111-1111-111111111111",
+      "question_id": "61f926de-8313-ee76-6fe9-1124d1422fa3",
+      "pair_count": 3,
+      "ref": "Exam 'IELTS Academic Reading — Standard Test (19 Types)' (11111111-1111-1111-1111-111111111111) -> Q4 (61f926de-8313-ee76-6fe9-1124d1422fa3) [MATCHING_FEATURES]",
+      "note": "Multi-target matching item (3 pairs) in single ExamQuestion row"
+    },
+    {
+      "exam_id": "11111111-1111-1111-1111-111111111111",
+      "question_id": "4750650d-b673-6419-e030-a03c3f03cf0f",
+      "pair_count": 4,
+      "ref": "Exam 'IELTS Academic Reading — Standard Test (19 Types)' (11111111-1111-1111-1111-111111111111) -> Q5 (4750650d-b673-6419-e030-a03c3f03cf0f) [MATCHING_ENDINGS]",
+      "note": "Multi-target matching item (4 pairs) in single ExamQuestion row"
+    }
+  ]
+}

@@ -53,7 +53,6 @@ from app.offline_eval.runner import OfflineEvalRunner
 from app.promotion.promotion import VersionPromotionManager
 from app.promotion.registry import PromptVersionRegistry
 from app.loop.passage import PassageLoop
-from app.loop.section import SectionLoop
 from app.repair.section import SectionSurgicalRepairer
 from app.repair.paper import (
     PaperRepairActionType,
@@ -217,7 +216,7 @@ class GenerationFacade:
         client = persistence_client or self.get_persistence_client()
         benchmark_mode = (
             is_benchmark is True
-            or (is_benchmark is None and (run_id.lower().startswith("bench_") or "benchmark" in run_id.lower() or "test" in run_id.lower()))
+            or (is_benchmark is None and run_id.lower().startswith("bench_"))
         )
         if not benchmark_mode and client is not None:
             try:
@@ -294,7 +293,7 @@ class GenerationFacade:
         client = persistence_client or self.get_persistence_client()
         benchmark_mode = (
             is_benchmark is True
-            or (is_benchmark is None and (run_id.lower().startswith("bench_") or "benchmark" in run_id.lower() or "test" in run_id.lower()))
+            or (is_benchmark is None and run_id.lower().startswith("bench_"))
         )
         if not benchmark_mode and client is not None:
             try:
@@ -317,6 +316,7 @@ class GenerationFacade:
         reg = EvaluatorRegistry()
         reg.register(QuestionStructureEvaluator(timeout_seconds=resolved_policy.evaluator_deterministic_timeout_seconds))
         reg.register(AnswerVerbatimAndLengthEvaluator(timeout_seconds=resolved_policy.evaluator_deterministic_timeout_seconds))
+        reg.register(EvidenceOffsetEvaluator(timeout_seconds=resolved_policy.evaluator_deterministic_timeout_seconds))
         reg.register(AmbiguityAndDistractorEvaluator(timeout_seconds=resolved_policy.evaluator_semantic_timeout_seconds, estimated_tokens=resolved_policy.evaluator_max_tokens_per_evaluation))
         reg.register(NotGivenSemanticsEvaluator(timeout_seconds=resolved_policy.evaluator_semantic_timeout_seconds, estimated_tokens=resolved_policy.evaluator_max_tokens_per_evaluation))
 
@@ -352,93 +352,6 @@ class GenerationFacade:
             )
             raise
 
-    async def generate_section_v2(
-        self,
-        section_index: int,
-        title: str,
-        passage_artifact: ArtifactEnvelope,
-        blueprint_ref: ArtifactRef,
-        question_artifacts: List[ArtifactEnvelope],
-        run_id: str,
-        lease_owner: UUID,
-        epoch: int = 1,
-        source_info: Optional[Any] = None,
-        persistence_client: Optional[CheckpointClient] = None,
-        policy: Optional[LoopPolicy] = None,
-        is_benchmark: Optional[bool] = None,
-    ) -> LoopResult:
-        """Executes V2 SectionLoop through configured DI composition."""
-        client = persistence_client or self.get_persistence_client()
-        benchmark_mode = (
-            is_benchmark is True
-            or (is_benchmark is None and (run_id.lower().startswith("bench_") or "benchmark" in run_id.lower() or "test" in run_id.lower()))
-        )
-        if not benchmark_mode and client is not None:
-            try:
-                state = client.resume_state(run_id)
-                if state and state.budgetProfileJson:
-                    import json
-                    prof = json.loads(state.budgetProfileJson) if isinstance(state.budgetProfileJson, str) else state.budgetProfileJson
-                    if prof.get("benchmarkMode") == "UNLIMITED" and prof.get("benchmarkMonetaryCapMode") == "UNLIMITED":
-                        benchmark_mode = True
-            except Exception:
-                pass
-        resolved_policy = policy or LoopPolicy.from_settings(
-            is_benchmark=benchmark_mode,
-            generate_reservation_cap="generateTokenReservation",
-        )
-        client = persistence_client or self.get_persistence_client()
-        if self._gateway.checkpoint_client is None:
-            self._gateway.checkpoint_client = client
-
-        # Create per-request evaluators carrying the resolved policy's timeouts
-        evaluators = [
-            SectionStructureEvaluator(required=True, timeout_seconds=resolved_policy.evaluator_stage_timeout_seconds),
-            SectionDuplicateAndConcentrationEvaluator(required=True, timeout_seconds=resolved_policy.evaluator_stage_timeout_seconds),
-            SectionEditorialEvaluator(required=False, timeout_seconds=resolved_policy.evaluator_semantic_timeout_seconds),
-        ]
-        sec_loop = SectionLoop(
-            persistence_client=client,
-            evaluators=evaluators,
-            repairer=SectionSurgicalRepairer(),
-            policy=resolved_policy,
-            is_benchmark=benchmark_mode,
-        )
-        t0 = time.perf_counter()
-        try:
-            res = await sec_loop.run(
-                section_index=section_index,
-                title=title,
-                passage_artifact=passage_artifact,
-                blueprint_ref=blueprint_ref,
-                question_artifacts=question_artifacts,
-                run_id=run_id,
-                lease_owner=lease_owner,
-                epoch=epoch,
-                source_info=source_info,
-            )
-            get_metrics_recorder().record_operation_latency(
-                time.perf_counter() - t0,
-                OperationKind.SYNTHESIS,
-                StatusKind.COMPLETED if res.decision.value == "PASS" else StatusKind.FAILED,
-            )
-            seq = getattr(res, "total_iterations", 1) or 1
-            get_decision_lineage().record_decision(
-                decision_id=f"dec_section_{run_id}_{seq}",
-                run_id=run_id,
-                sequence=seq,
-                decision_type=res.decision.value,
-                reason=res.terminal_reason,
-            )
-            return res
-        except Exception:
-            get_metrics_recorder().record_operation_latency(
-                time.perf_counter() - t0,
-                OperationKind.SYNTHESIS,
-                StatusKind.FAILED,
-            )
-            raise
-
     # ----- Source / ingestion pass-throughs (Phase 15 Canonical Ingestion Delegation) -----
     async def search_sources(self, topic: str) -> Dict[str, Any]:
         """Canonical delegator to app.ingestion.fetcher.search_sources."""
@@ -447,11 +360,10 @@ class GenerationFacade:
         return await _search_sources(topic)
 
     async def fetch_source(self, pmcid: str) -> Dict[str, Any]:
-        """Canonical delegator to app.ingestion.fetcher.fetch_source with content set to None."""
+        """Canonical delegator to app.ingestion.fetcher.fetch_source."""
         from app.ingestion.fetcher import fetch_source as _fetch_source
 
-        res = await _fetch_source(pmcid)
-        return {**res, "content": None}
+        return await _fetch_source(pmcid)
 
     async def ingest_source(
         self,
@@ -473,386 +385,6 @@ class GenerationFacade:
             url=url,
             authors=authors,
             license_str=license_str,
-        )
-
-    async def generate_section(
-        self,
-        topic: str,
-        index: int,
-        source: Dict[str, Any],
-        progress: Optional[Any] = None,
-        provider: Optional[str] = None,
-        *,
-        run_id: str,
-        epoch: int = 1,
-        lease_owner: UUID,
-        parent_operation_id: str,
-    ) -> Dict[str, Any]:
-        """Canonical V2 section generation entrypoint delegating to SectionLoop.
-
-        Maintains full backward-compatible dictionary return signature for legacy callers:
-        {"title": str, "passage": str, "groups": list[dict]}.
-        """
-        from app.blueprint.planner import BlueprintPlanner, SectionPlanInput
-        from app.contracts.artifact import ArtifactEnvelope, ArtifactRef, ArtifactType
-        from app.contracts.blueprint import ExamBlueprint
-        from app.evidence.extractor import extract_atomic_claims
-        from app.evidence.graph import (
-            EvidenceGraphBuilder,
-            EvidenceGraphStatus,
-            MIN_VERIFIED_CLAIMS_FOR_PASSAGE,
-        )
-        from app.generators.passage.context import PassageGenerationContext
-        from app.ingestion.chunker import extract_spans
-        from app.ingestion.source_pack import SourcePackBuilder
-
-        # Strict fail-closed source validation
-        source_text_content = source.get("content", "") if isinstance(source, dict) else str(source)
-        if not source_text_content or len(source_text_content.strip()) < 50:
-            raise ValueError("Source content must contain at least 50 characters of verified text for section generation")
-
-        source_id = source.get("pmcid") if isinstance(source, dict) and source.get("pmcid") else f"SRC_{uuid4().hex[:8]}"
-        source_title = source.get("title", f"Source for {topic}") if isinstance(source, dict) else f"Source for {topic}"
-        source_url = source.get("url", "https://europepmc.org") if isinstance(source, dict) else "https://europepmc.org"
-
-        # Step 1: Ingestion — Build canonical SourcePack artifact
-        spans = extract_spans(source_text_content, source_id)
-        source_item = SourcePackBuilder.build_source_item(
-            source_id=source_id,
-            raw_content=source_text_content,
-            normalized_text=source_text_content,
-            title=source_title,
-            source_url=source_url,
-            pmcid=source.get("pmcid") if isinstance(source, dict) else None,
-        )
-        sec_det_suffix = hashlib.sha256(f"{run_id}:sec_{index}:{source_id}".encode("utf-8")).hexdigest()[:8]
-        source_pack = SourcePackBuilder.build_source_pack(
-            pack_id=f"sp_sec_{index}_{sec_det_suffix}",
-            run_id=run_id,
-            sources=[source_item],
-            section_id=index,
-        )
-        sp_env = SourcePackBuilder.to_artifact_envelope(source_pack)
-
-        # Step 2: Evidence — Extract atomic claims and build verified EvidenceGraph
-        candidate_claims = extract_atomic_claims(source_text_content, source_id, spans)
-        build_res = EvidenceGraphBuilder.build_evidence_graph(
-            graph_id=f"eg_sec_{index}_{sec_det_suffix}",
-            run_id=run_id,
-            candidate_claims=candidate_claims,
-            source_text=source_text_content,
-            source_pack=source_pack,
-            section_id=index,
-            fail_closed_on_any_invalid=False,
-        )
-
-        if (
-            build_res.status != EvidenceGraphStatus.ACCEPTED
-            or not build_res.graph
-            or len(build_res.graph.claims) < MIN_VERIFIED_CLAIMS_FOR_PASSAGE
-        ):
-            raise ValueError(
-                f"Source evidence verification failed: {build_res.blocking_reason or 'Insufficient verified claims in source text'}"
-            )
-
-        eg_env = EvidenceGraphBuilder.to_artifact_envelope(build_res.graph, source_pack_ref=sp_env.to_ref())
-        canonical_graph = build_res.graph.model_copy(
-            update={
-                "content_hash": eg_env.content_hash,
-                "source_pack_id": source_pack.pack_id,
-            }
-        )
-
-        # Step 3: Blueprint — Plan deterministic SectionBlueprint and ExamBlueprint
-        planner = BlueprintPlanner()
-        sec_plan_input = SectionPlanInput(
-            sectionId=index,
-            topic=topic,
-            evidenceGraph=canonical_graph,
-        )
-        sec_bp = planner._plan_section(sec_plan_input)
-        bp = ExamBlueprint(
-            blueprintId=f"bp_sec_{index}_{sec_det_suffix}",
-            runId=run_id,
-            sections=[sec_bp],
-        )
-        bp_env = ArtifactEnvelope.create(
-            artifact_id=bp.blueprint_id,
-            artifact_type=ArtifactType.EXAM_BLUEPRINT,
-            run_id=run_id,
-            version=1,
-            producer_version="BlueprintPlanner:2.0.0",
-            payload=bp.model_dump(mode="json", by_alias=True),
-            parent_refs=[eg_env.to_ref()],
-        )
-
-        q_slots_dicts = [
-            {
-                "questionNumber": s.question_number,
-                "slotNumber": s.question_number,
-                "number": s.question_number,
-                "questionType": s.question_type.value if hasattr(s.question_type, "value") else str(s.question_type),
-                "type": s.question_type.value if hasattr(s.question_type, "value") else str(s.question_type),
-                "groupId": f"group_{index}_{s.group_index + 1}",
-                "group_id": f"group_{index}_{s.group_index + 1}",
-                "claimRefIds": s.claim_ref_ids,
-            }
-            for s in sec_bp.question_slots
-        ]
-
-        # Step 4: Durably commit upstream artifacts (SourcePack, EvidenceGraph, ExamBlueprint) as accepted heads (fail-closed)
-        try:
-            client = self.get_persistence_client()
-        except ValueError:
-            client = None
-
-        if client is not None:
-            persisted_map = {}
-            try:
-                state = client.resume_state(run_id)
-                for art in getattr(state, "artifacts", []):
-                    aid = getattr(art, "artifactId", None) or getattr(art, "artifact_id", None)
-                    if aid:
-                        persisted_map[aid] = art
-            except Exception:
-                pass
-
-            if sp_env.artifact_id in persisted_map and eg_env.artifact_id in persisted_map and bp_env.artifact_id in persisted_map:
-                sp_stored = persisted_map[sp_env.artifact_id]
-                eg_stored = persisted_map[eg_env.artifact_id]
-                bp_stored = persisted_map[bp_env.artifact_id]
-                try:
-                    if getattr(sp_stored, "envelopeJson", None):
-                        sp_env = ArtifactEnvelope.model_validate_json(sp_stored.envelopeJson)
-                    if getattr(eg_stored, "envelopeJson", None):
-                        eg_env = ArtifactEnvelope.model_validate_json(eg_stored.envelopeJson)
-                    if getattr(bp_stored, "envelopeJson", None):
-                        bp_env = ArtifactEnvelope.model_validate_json(bp_stored.envelopeJson)
-                except Exception:
-                    pass
-            else:
-                for upstream_env in [sp_env, eg_env, bp_env]:
-                    if upstream_env.artifact_id in persisted_map:
-                        continue
-                    op_id = f"init:{run_id}:{upstream_env.artifact_id}:{upstream_env.version}"
-                    grant = client.grant_operation(OperationGrantRequest(
-                        runId=run_id,
-                        epoch=epoch,
-                        leaseOwner=lease_owner,
-                        operationId=op_id,
-                        operationType="CHECKPOINT_COMMIT",
-                        requestHash=upstream_env.content_hash,
-                        tokenReservation=0,
-                        wallTimeReservationSeconds=10.0,
-                        artifactId=upstream_env.artifact_id,
-                    ))
-                    if grant.status not in ("RESERVED", "GRANTED") and not getattr(grant, "is_replay", getattr(grant, "isReplay", False)):
-                        raise ValueError(f"Failed to grant bootstrap commit for {upstream_env.artifact_id}: status={grant.status}")
-
-                    ack = client.commit_checkpoint(CheckpointCommitRequest(
-                        runId=run_id,
-                        epoch=epoch,
-                        leaseOwner=lease_owner,
-                        operationId=op_id,
-                        requestHash=upstream_env.content_hash,
-                        artifact=upstream_env,
-                        expectedHeadVersion=None,
-                        decision=None,
-                        evaluations=None,
-                        tokensUsed=0,
-                        costUsedUsd=0.0,
-                        wallTimeUsedSeconds=0.1,
-                    ))
-                    ack_art_id = getattr(ack, "artifact_id", getattr(ack, "artifactId", ""))
-                    ack_version = getattr(ack, "version", None)
-                    if ack_art_id != upstream_env.artifact_id or ack_version != upstream_env.version:
-                        raise ValueError(f"Bootstrap commit ack mismatch for {upstream_env.artifact_id}: expected v{upstream_env.version}, got ack {ack}")
-        # Step 5: Run V2 PassageLoop with real artifact references and accepted upstream dependencies
-        passage_ctx = PassageGenerationContext(
-            blueprintRef=bp_env.to_ref(),
-            evidenceGraphRef=eg_env.to_ref(),
-            sourcePackRef=sp_env.to_ref(),
-            sectionIndex=index,
-            topic=topic,
-            sourceText=source_text_content,
-        )
-        upstream_deps = {
-            sp_env.artifact_id: sp_env.to_ref(),
-            eg_env.artifact_id: eg_env.to_ref(),
-            bp_env.artifact_id: bp_env.to_ref(),
-        }
-        # Determine benchmark/unlimited mode
-        is_bench = (
-            (provider and provider.strip().lower() == "minimax")
-            or run_id.lower().startswith("bench_")
-            or "benchmark" in run_id.lower()
-            or "test" in run_id.lower()
-            or (isinstance(source, dict) and str(source.get("metadata", {}).get("provider", "")).lower() == "minimax")
-        )
-        if not is_bench and client is not None:
-            try:
-                state = client.resume_state(run_id)
-                if state and state.budgetProfileJson:
-                    import json
-                    prof = json.loads(state.budgetProfileJson) if isinstance(state.budgetProfileJson, str) else state.budgetProfileJson
-                    if prof.get("benchmarkMode") == "UNLIMITED" and prof.get("benchmarkMonetaryCapMode") == "UNLIMITED":
-                        is_bench = True
-            except Exception:
-                pass
-
-        passage_res = await self.generate_passage_v2(
-            passage_context=passage_ctx,
-            run_id=run_id,
-            lease_owner=lease_owner,
-            epoch=epoch,
-            accepted_dependencies=upstream_deps,
-            is_benchmark=is_bench,
-            parent_operation_id=parent_operation_id,
-        )
-        passage_env = passage_res.accepted_artifact
-        if passage_env is None:
-            raise ValueError(f"Passage generation failed in section {index}: {passage_res.terminal_reason or 'No accepted passage produced'}")
-        # Step 5: Run V2 Question Candidate Loop with canonical question slots
-        q_res = await self.generate_questions_v2(
-            passage_artifact=passage_env,
-            blueprint_ref=bp_env.to_ref(),
-            question_slots=q_slots_dicts,
-            run_id=run_id,
-            lease_owner=lease_owner,
-            epoch=epoch,
-            section_index=index,
-            is_benchmark=is_bench,
-            parent_operation_id=parent_operation_id,
-        )
-        sec_start = 1 if index == 1 else (14 if index == 2 else 27)
-        sec_end = 13 if index == 1 else (26 if index == 2 else 40)
-
-        def _belongs_to_section(art_obj: Any) -> bool:
-            if not art_obj:
-                return False
-            aid = str(getattr(art_obj, "artifact_id", None) or getattr(art_obj, "artifactId", "") or "")
-            if f"_s{index}_" in aid or aid.startswith(f"art_grp_s{index}_") or aid.startswith(f"art_q_s{index}_"):
-                return True
-            p = getattr(art_obj, "payload", None)
-            if isinstance(p, dict):
-                qn = p.get("questionNumber") or p.get("number")
-                if qn is not None and sec_start <= int(qn) <= sec_end:
-                    return True
-                qs = p.get("questions")
-                if isinstance(qs, (list, tuple)):
-                    for sub_q in qs:
-                        if isinstance(sub_q, dict):
-                            sub_qn = sub_q.get("questionNumber") or sub_q.get("number")
-                            if sub_qn is not None and sec_start <= int(sub_qn) <= sec_end:
-                                return True
-            if aid.startswith("art_q_slot_"):
-                slot_str = aid.replace("art_q_slot_", "")
-                if slot_str.isdigit() and sec_start <= int(slot_str) <= sec_end:
-                    return True
-            return False
-
-        if isinstance(q_res, dict):
-            if "question_envelopes" in q_res and q_res["question_envelopes"]:
-                q_envelopes = [e for e in q_res["question_envelopes"] if _belongs_to_section(e)]
-            elif "questions" in q_res and q_res["questions"]:
-                questions_map = q_res["questions"]
-                if isinstance(questions_map, dict):
-                    seen_art_ids = set()
-                    q_envelopes = []
-                    for art in questions_map.values():
-                        if art and not hasattr(art, "payload") and getattr(art, "envelopeJson", None):
-                            try:
-                                art = ArtifactEnvelope.model_validate_json(art.envelopeJson)
-                            except Exception:
-                                pass
-                        art_id = getattr(art, "artifact_id", getattr(art, "artifactId", None))
-                        if art and art_id and art_id not in seen_art_ids and _belongs_to_section(art):
-                            seen_art_ids.add(art_id)
-                            q_envelopes.append(art)
-                elif isinstance(questions_map, list):
-                    q_envelopes = []
-                    for art in questions_map:
-                        if art and not hasattr(art, "payload") and getattr(art, "envelopeJson", None):
-                            try:
-                                art = ArtifactEnvelope.model_validate_json(art.envelopeJson)
-                            except Exception:
-                                pass
-                        if art and _belongs_to_section(art):
-                            q_envelopes.append(art)
-            else:
-                q_envelopes = []
-        else:
-            q_envelopes = []
-        # Step 6: Run V2 SectionLoop with verified artifacts
-        sec_res = await self.generate_section_v2(
-            section_index=index,
-            title=getattr(passage_env.payload, "title", topic) if passage_env and hasattr(passage_env, "payload") else topic,
-            passage_artifact=passage_env,
-            blueprint_ref=bp_env.to_ref(),
-            question_artifacts=q_envelopes,
-            run_id=run_id,
-            lease_owner=lease_owner,
-            epoch=epoch,
-            source_info=source,
-            is_benchmark=is_bench,
-        )
-        # Step 5: Format backward-compatible dictionary output
-        final_art = sec_res.accepted_artifact
-        if final_art and hasattr(final_art, "payload"):
-            payload = final_art.payload
-            groups = []
-            raw_groups = None
-            if hasattr(payload, "groups"):
-                raw_groups = payload.groups
-            elif hasattr(payload, "get"):
-                raw_groups = payload.get("groups")
-
-            if raw_groups:
-                for grp in raw_groups:
-                    grp_dict = grp.model_dump(by_alias=True) if hasattr(grp, "model_dump") else grp.dict(by_alias=True) if hasattr(grp, "dict") else dict(grp)
-                    groups.append(grp_dict)
-
-            title_val = getattr(payload, "title", None) or (payload.get("title") if hasattr(payload, "get") else None) or topic
-            passage_val = getattr(payload, "passage", None) or (payload.get("passage") if hasattr(payload, "get") else None) or ""
-
-            return {
-                "title": title_val,
-                "passage": passage_val,
-                "source": source,
-                "groups": groups,
-            }
-
-        return {
-            "title": topic,
-            "passage": getattr(passage_env.payload, "text", None) or (passage_env.payload.get("text") if passage_env and hasattr(passage_env.payload, "get") else "") if passage_env else "",
-            "source": source,
-            "groups": [],
-        }
-
-    async def generate_section_legacy(
-        self,
-        *,
-        topic: str,
-        index: int,
-        source: Dict[str, Any],
-        provider: Optional[str] = None,
-        run_id: str,
-        epoch: int = 1,
-        lease_owner: UUID,
-        parent_operation_id: str,
-    ) -> Dict[str, Any]:
-        """Legacy execution alias routing to pipeline.generate_section."""
-        from app.pipeline import generate_section as _generate_section
-
-        return await _generate_section(
-            topic,
-            index,
-            source,
-            provider=provider,
-            run_id=run_id,
-            epoch=epoch,
-            lease_owner=lease_owner,
-            parent_operation_id=parent_operation_id,
         )
 
     def default_question_policy(self):

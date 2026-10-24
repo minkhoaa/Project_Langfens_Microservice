@@ -330,9 +330,36 @@ class QuestionStructureEvaluator(BaseEvaluator):
                         evaluator_id=self.evaluator_id,
                     )
                 )
+            from app.validation.common import is_placeholder, validate_english_text
+            if ans is not None and is_placeholder(str(ans)):
+                issues.append(
+                    Issue.create(
+                        issue_id=f"iss_place_{uuid4().hex[:8]}",
+                        code=IssueCode.SCHEMA_VIOLATION,
+                        severity=IssueSeverity.CRITICAL,
+                        scope=IssueScope.QUESTION,
+                        message=f"Question {q_num} answer '{ans}' cannot be a placeholder",
+                        affected_refs=[artifact.to_ref()],
+                        evaluator_id=self.evaluator_id,
+                    )
+                )
+
+            prompt_text = payload.get("prompt", "") or payload.get("questionText", "")
+            lang_issues = validate_english_text(prompt_text, "prompt")
+            for li in lang_issues:
+                issues.append(
+                    Issue.create(
+                        issue_id=f"iss_lang_{uuid4().hex[:8]}",
+                        code=IssueCode.SCHEMA_VIOLATION,
+                        severity=IssueSeverity.CRITICAL,
+                        scope=IssueScope.QUESTION,
+                        message=li.message,
+                        affected_refs=[artifact.to_ref()],
+                        evaluator_id=self.evaluator_id,
+                    )
+                )
 
             # Check for summary group blank mismatch in prompt
-            prompt_text = payload.get("prompt", "") or payload.get("questionText", "")
             if q_type == "SummaryCompletion" and ("blanks for" in prompt_text.lower() or "blank count mismatch" in prompt_text.lower()):
                 issues.append(
                     Issue.create(
@@ -616,7 +643,10 @@ class AnswerVerbatimAndLengthEvaluator(BaseEvaluator):
                 )
 
             # Completion and ShortAnswer require max 3 words and verbatim passage presence
-            if q_type_norm in ("SENTENCECOMPLETION", "SUMMARYCOMPLETION", "SHORTANSWER") and ans and str(ans).strip():
+            if q_type_norm in (
+                "SENTENCECOMPLETION", "SUMMARYCOMPLETION", "SHORTANSWER",
+                "NOTECOMPLETION", "TABLECOMPLETION", "FORMCOMPLETION"
+            ) and ans and str(ans).strip():
                 if not validate_answer_length(ans):
                     issues.append(
                         Issue.create(
@@ -703,9 +733,18 @@ class EvidenceOffsetEvaluator(BaseEvaluator):
 
         def check_evidence(q: Dict[str, Any], pass_text: str):
             q_num = q.get("questionNumber", "?")
-            quote = q.get("evidenceQuote") or q.get("evidence_quote") or ""
+            passage_ev = q.get("passageEvidence") or q.get("passage_evidence") or {}
+            quote = q.get("evidenceQuote") or q.get("evidence_quote") or passage_ev.get("text") or ""
             start = q.get("evidenceStart") or q.get("evidence_start")
+            if start is None and "startChar" in passage_ev:
+                start = passage_ev["startChar"]
+            elif start is None and "start_char" in passage_ev:
+                start = passage_ev["start_char"]
             end = q.get("evidenceEnd") or q.get("evidence_end")
+            if end is None and "endChar" in passage_ev:
+                end = passage_ev["endChar"]
+            elif end is None and "end_char" in passage_ev:
+                end = passage_ev["end_char"]
 
             # Non-empty quote check (except for verified NOT_GIVEN questions where quote is optional anchor)
             ans = q.get("answer", "")
@@ -722,7 +761,6 @@ class EvidenceOffsetEvaluator(BaseEvaluator):
                     )
                 )
 
-
             # Verify that quote actually occurs in passage text
             if pass_text and quote and len(quote.strip()) >= 10:
                 if quote.strip() not in pass_text:
@@ -738,20 +776,20 @@ class EvidenceOffsetEvaluator(BaseEvaluator):
                         )
                     )
             # Offset verification if offsets are supplied
-            if start is not None and end is not None and pass_text:
-                if start < 0 or end > len(pass_text) or start >= end:
+            if start is not None and end is not None:
+                if start < 0 or (pass_text and end > len(pass_text)) or start >= end:
                     issues.append(
                         Issue.create(
                             issue_id=f"iss_ev_bound_{uuid4().hex[:8]}",
                             code=IssueCode.SCHEMA_VIOLATION,
                             severity=IssueSeverity.CRITICAL,
                             scope=IssueScope.QUESTION,
-                            message=f"Question {q_num} evidence offsets [{start}:{end}] are out of bounds (len={len(pass_text)})",
+                            message=f"Question {q_num} evidence offsets [{start}:{end}] are out of bounds (len={len(pass_text) if pass_text else 'unknown'})",
                             affected_refs=[artifact.to_ref()],
                             evaluator_id=self.evaluator_id,
                         )
                     )
-                else:
+                elif pass_text:
                     span_in_passage = pass_text[start:end]
                     if quote and quote.strip() != span_in_passage.strip():
                         issues.append(

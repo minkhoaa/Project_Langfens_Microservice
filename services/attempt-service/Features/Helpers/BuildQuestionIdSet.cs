@@ -175,7 +175,7 @@ public class AnswerKeyBuilder(IAnswerValidator answerValidator) : IAnswerKeyBuil
                 var shortTexts = question.ShortAnswerAcceptTexts?.ToList() ?? new List<string>();
                 var shortRegex = question.ShortAnswerAcceptRegex?.ToList() ?? new List<string>();
 
-                var points = 1;
+                var points = matchPairs.Count > 1 ? matchPairs.Count : 1;
                 total += points;
                 var qid = Guid.Parse(question.Id);
                 map[qid] = new QuestionKey(
@@ -225,7 +225,7 @@ public class AnswerKeyBuilder(IAnswerValidator answerValidator) : IAnswerKeyBuil
                     .Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
                 var shortRegex = (question.ShortAnswerAcceptRegex ?? Array.Empty<string>())
                     .Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-                var points = 1m;
+                var points = matchPairs.Count > 1 ? (decimal)matchPairs.Count : 1m;
                 total += points;
                 keys[question.Id] = new QuestionKey(
                     question.Id,

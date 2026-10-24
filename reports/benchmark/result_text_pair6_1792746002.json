@@ -1,0 +1,60 @@
+{
+  "run_id": "run_543f3dee00ee48ed9d19947b52ccc95f",
+  "observed_model": "MiniMax-Text-01",
+  "completed_calls": 16,
+  "total_tokens_used": 40974,
+  "prompt_tokens_used": 35837,
+  "completion_tokens_used": 5137,
+  "reasoning_tokens_used": 0,
+  "avg_call_latency_seconds": 12.152,
+  "evaluations_summary": {
+    "eval_answer_verbatim_length": {
+      "PASS": 4
+    },
+    "eval_blind_solver_adversary": {
+      "PASS": 4
+    },
+    "eval_blueprint": {
+      "PASS": 1
+    },
+    "eval_evidence_graph": {
+      "PASS": 3
+    },
+    "eval_evidence_offsets": {
+      "PASS": 4
+    },
+    "eval_passage_fidelity": {
+      "PASS": 1
+    },
+    "eval_passage_semantic": {
+      "PASS": 1
+    },
+    "eval_passage_word_count": {
+      "PASS": 1
+    },
+    "eval_question_semantic": {
+      "PASS": 4
+    },
+    "eval_question_structure": {
+      "PASS": 4
+    },
+    "eval_question_uniqueness": {
+      "PASS": 4
+    },
+    "eval_source": {
+      "PASS": 3
+    }
+  },
+  "exam_id": null,
+  "persisted_questions": 0,
+  "arm": "text",
+  "model": "MiniMax-Text-01",
+  "pair_id": 6,
+  "pair_name": "Mixed Sources",
+  "job_id": "543f3dee-00ee-48ed-9d19-947b52ccc95f",
+  "status": "Failed",
+  "wall_time_seconds": 210.2,
+  "completed_sections": 0,
+  "error": "{\"detail\":\"question:run_543f3dee00ee48ed9d19947b52ccc95f:5: INVALID_OUTPUT: capability failed: ValueError: Question 5 evidence quote 'Further west, early iron smelting is att' is not found in passage\"}",
+  "billable_cost_usd": 0.04097
+}

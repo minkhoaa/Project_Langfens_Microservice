@@ -1,0 +1,14 @@
+{
+  "package": "generation_baseline",
+  "version": "4.0",
+  "scope": "OFFLINE_ONLY",
+  "checks": 2015,
+  "passed": 2015,
+  "failed": 0,
+  "failures": [],
+  "source_repo_verified": false,
+  "live_provider_tests": "NOT_RUN",
+  "db_integration_tests": "NOT_RUN",
+  "scientific_campaign": "NOT_RUN",
+  "all_implementation_gates": "NOT_RUN"
+}

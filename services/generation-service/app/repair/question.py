@@ -43,10 +43,12 @@ class QuestionItemRepairer(BaseRepairer):
         timeout_seconds: Optional[float] = None,
         estimated_tokens: Optional[int] = None,
         gateway: Optional[Any] = None,
+        enable_hybrid: bool = True,
     ):
         t_sec = timeout_seconds if timeout_seconds is not None else getattr(settings, "repair_timeout_seconds", 30.0)
         tok = estimated_tokens if estimated_tokens is not None else getattr(settings, "repair_max_tokens_per_attempt", 1500)
         self.gateway = gateway
+        self.enable_hybrid = enable_hybrid
         super().__init__(
             RepairCapabilityMetadata(
                 repairer_id="rep_question_item",
@@ -62,6 +64,7 @@ class QuestionItemRepairer(BaseRepairer):
                     IssueCode.AMBIGUOUS_ANSWER,
                     IssueCode.SCHEMA_VIOLATION,
                     IssueCode.ANSWER_LEAKAGE,
+                    IssueCode.TFNG_BOUNDARY_CONFLICT,
                 },
                 timeout_seconds=t_sec,
                 estimated_tokens=tok,
@@ -168,6 +171,13 @@ class QuestionItemRepairer(BaseRepairer):
                         return False
                     if passage_text and not match_verbatim_in_passage(cand_ans, passage_text):
                         return False
+                cand_quote = str(cand.get("evidenceQuote") or cand.get("evidence_quote") or "").strip()
+                if cand_quote and passage_text and cand_quote.casefold() not in passage_text.casefold():
+                    return False
+                if is_completion_or_short and cand_ans.strip().casefold() != orig_ans.strip().casefold() and orig_ans.strip():
+                    eff_quote = cand_quote or str(q.get("evidenceQuote") or "").strip()
+                    if passage_text and not match_verbatim_in_passage(cand_ans, passage_text) and (not eff_quote or eff_quote.casefold() not in passage_text.casefold()):
+                        return False
                 # P15: salvaging a pooled candidate must satisfy EVERY invariant the
                 # generator satisfies before a candidate is usable, not just grounding
                 # and length. Two gates were missing, and each one let a *rejected*
@@ -202,8 +212,25 @@ class QuestionItemRepairer(BaseRepairer):
                 if is_mcq and isinstance(cand_options, list) and len(cand_options) >= 4:
                     q["options"] = list(cand_options)[:4]
                 cand_quote = cand.get("evidenceQuote") or cand.get("evidence_quote")
-                if cand_quote:
+                if cand_ans.upper() in ("NOT_GIVEN", "NOT GIVEN", "NG"):
+                    q["answer"] = "NOT_GIVEN"
+                    raw_abs = cand.get("absenceAssessment") or cand.get("absence_assessment")
+                    if raw_abs:
+                        q["absenceAssessment"] = raw_abs if isinstance(raw_abs, dict) else (raw_abs.model_dump(mode="json", by_alias=True) if hasattr(raw_abs, "model_dump") else dict(raw_abs))
+                    q.pop("evidenceQuote", None)
+                    top_span = (raw_abs.get("topicalContextSpan") if isinstance(raw_abs, dict) else getattr(raw_abs, "topical_context_span", None)) if raw_abs else None
+                    if top_span and passage_text and str(top_span) in passage_text:
+                        s_idx = passage_text.find(str(top_span))
+                        q["passageEvidence"] = {"startChar": s_idx, "endChar": s_idx + len(str(top_span)), "text": str(top_span)}
+                elif cand_quote:
+                    q.pop("absenceAssessment", None)
                     q["evidenceQuote"] = str(cand_quote)
+                    cand_ev = cand.get("passageEvidence")
+                    if isinstance(cand_ev, dict):
+                        q["passageEvidence"] = cand_ev
+                    elif passage_text and str(cand_quote) in passage_text:
+                        s_idx = passage_text.find(str(cand_quote))
+                        q["passageEvidence"] = {"startChar": s_idx, "endChar": s_idx + len(str(cand_quote)), "text": str(cand_quote)}
                 cand_expl = cand.get("explanation")
                 if cand_expl:
                     q["explanation"] = str(cand_expl)
@@ -220,7 +247,11 @@ class QuestionItemRepairer(BaseRepairer):
                     q["candidates"] = [updated_cand] + [c for c in existing_cands if c is not cand]
                 return True
 
-            async def _try_gateway_regeneration(q_num_val: int) -> bool:
+            async def _try_gateway_regeneration(
+                q_num_val: int,
+                repair_constraints: Optional[List[str]] = None,
+                diagnosis: Optional[str] = None,
+            ) -> bool:
                 gw = self.gateway or getattr(context, "gateway", None)
                 if gw is None or not passage_text:
                     return False
@@ -228,12 +259,22 @@ class QuestionItemRepairer(BaseRepairer):
                 from app.generators.question.generator import QuestionCandidateGenerator
                 p_ref = next(
                     (r for r in artifact.parent_refs if r.artifact_type == ArtifactType.PASSAGE),
-                    ArtifactRef(artifactId="art_passage_s1", artifactType=ArtifactType.PASSAGE, version=1, contentHash="0" * 64),
+                    None,
                 )
+                if p_ref is None:
+                    raise RepairJustificationError(
+                        f"Question artifact {artifact.artifact_id} lacks required passage parent reference. "
+                        "Fallback parent synthesis is strictly prohibited."
+                    )
                 bp_ref = next(
                     (r for r in artifact.parent_refs if r.artifact_type == ArtifactType.EXAM_BLUEPRINT),
-                    ArtifactRef(artifactId="art_blueprint_01", artifactType=ArtifactType.EXAM_BLUEPRINT, version=1, contentHash="0" * 64),
+                    None,
                 )
+                if bp_ref is None:
+                    raise RepairJustificationError(
+                        f"Question artifact {artifact.artifact_id} lacks required blueprint parent reference. "
+                        "Fallback parent synthesis is strictly prohibited."
+                    )
                 q_gen = QuestionCandidateGenerator(gateway=gw)
                 sec_id_str = str(artifact.section_id or getattr(context, "section_id", None) or 1)
                 for try_q_type in ([q_type, "SentenceCompletion"] if q_type_norm == "summarycompletion" else [q_type]):
@@ -248,14 +289,21 @@ class QuestionItemRepairer(BaseRepairer):
                             section_id=sec_id_str,
                             context=context,
                             parent_operation_id=intent_id,
+                            repair_constraints=repair_constraints,
+                            diagnosis=diagnosis,
+                            pinned_model="MiniMax-Text-01",
                         )
+                    except (ValueError, RepairExecutionError) as auth_err:
+                        if any(term in str(auth_err).lower() for term in ("authority", "epoch", "lease")):
+                            raise
+                        continue
                     except Exception:
                         continue
                     if regen_pool and regen_pool.candidates:
                         dumped_cands = [c.model_dump(mode="json", by_alias=True) for c in regen_pool.candidates]
                         q["candidates"] = dumped_cands
                         for c_dict in dumped_cands:
-                            if _try_apply_candidate(c_dict):
+                            if _try_apply_candidate(c_dict, require_distinct=True):
                                 return True
                 return False
 
@@ -279,8 +327,61 @@ class QuestionItemRepairer(BaseRepairer):
                             f"Question {q.get('questionNumber')} cannot repair schema violation: no valid candidate available in pool "
                             "and no passage-grounded span found; slot generation must regenerate via gateway"
                         )
-                elif iss.code == IssueCode.AMBIGUOUS_ANSWER:
-                    if iss.proposed_repair:
+                elif iss.code in (
+                    IssueCode.AMBIGUOUS_ANSWER,
+                    IssueCode.DUPLICATE_PROMPT,
+                    IssueCode.DUPLICATE_CONTENT,
+                    IssueCode.TFNG_BOUNDARY_CONFLICT,
+                ):
+                    q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
+                    gw = self.gateway or getattr(context, "gateway", None)
+                    use_hybrid = self.enable_hybrid and getattr(context, "enable_hybrid_repair", getattr(settings, "enable_hybrid_repair", True)) and (gw is not None)
+                    if use_hybrid:
+                        # Invoke M3 for diagnostic repair plan
+                        from app.repair.diagnostic_planner import RepairPlanningCapability
+                        from app.loop.context import resolve_run_authority
+                        auth = resolve_run_authority(context)
+                        planner = RepairPlanningCapability(gateway=gw, model_id="MiniMax-M3")
+                        lease_owner = auth.lease_owner
+                        epoch = auth.epoch
+                        sec_id_raw = str(artifact.section_id or getattr(context, "section_id", None) or 1)
+                        sec_id_str = sec_id_raw if str(sec_id_raw).startswith("section_") else f"section_{sec_id_raw}"
+                        art_id_str = f"questions_{sec_id_str}"
+                        auth_claim_ref = (
+                            q.get("evidenceClaimRef")
+                            or q.get("claimRef")
+                            or (artifact.payload.get("evidenceClaimRef") if isinstance(artifact.payload, dict) else None)
+                            or (artifact.payload.get("claimRef") if isinstance(artifact.payload, dict) else None)
+                        )
+                        if not auth_claim_ref or not str(auth_claim_ref).strip():
+                            raise RepairJustificationError(
+                                f"Question {q_num_val} has no verified blueprint-bound claim reference. "
+                                "Fallback claim fabrication is strictly prohibited."
+                            )
+                        auth_claim_ref = str(auth_claim_ref).strip()
+                        plan = await planner.plan_repair(
+                            question_payload=q,
+                            passage_text=passage_text,
+                            authoritative_claim_ref=auth_claim_ref,
+                            issues=[iss],
+                            run_id=artifact.run_id,
+                            section_id=sec_id_str,
+                            artifact_id=art_id_str,
+                            lease_owner=lease_owner,
+                            epoch=epoch,
+                            parent_operation_id=intent_id,
+                        )
+                        # Feed approved M3 constraints to Text-01 for bounded regeneration
+                        replaced = await _try_gateway_regeneration(
+                            q_num_val,
+                            repair_constraints=plan.repair_constraints,
+                            diagnosis=plan.diagnosis,
+                        )
+                        if not replaced:
+                            raise RepairJustificationError(
+                                f"Question {q_num_val} M3-assisted repair regeneration failed to produce compliant candidate"
+                            )
+                    elif iss.proposed_repair:
                         if not iss.evidence or len(iss.evidence.strip()) < 5 or (passage_text and iss.evidence.strip() not in passage_text):
                             raise RepairJustificationError(
                                 f"Ambiguous answer repair for Question {q.get('questionNumber')} rejected: missing or unsupported passage evidence justification"
@@ -295,12 +396,27 @@ class QuestionItemRepairer(BaseRepairer):
                         cand_list = q.get("candidates") or []
                         replaced = any(_try_apply_candidate(cand, require_distinct=True) for cand in (cand_list if isinstance(cand_list, list) else []))
                         if not replaced:
-                            q_num_val = int(q.get("questionNumber") or q.get("number") or 1)
                             replaced = await _try_gateway_regeneration(q_num_val)
                         if not replaced:
                             raise RepairJustificationError(
                                 f"Ambiguous answer repair for Question {q.get('questionNumber')} rejected: requires passage evidence justification or valid alternative candidate"
                             )
+                elif iss.code == IssueCode.QUOTE_TRUNCATION:
+                    # Purely mechanical: expand truncated quote to full sentence from passage
+                    cur_quote = str(q.get("evidenceQuote") or "").strip()
+                    if passage_text and cur_quote:
+                        sentences = re.split(r"(?<=[.!?])\s+", passage_text)
+                        matched_sent = next((s for s in sentences if cur_quote in s), None)
+                        if matched_sent:
+                            q["evidenceQuote"] = matched_sent.strip()
+                        else:
+                            idx = passage_text.find(cur_quote)
+                            if idx != -1:
+                                end_idx = passage_text.find(".", idx)
+                                if end_idx != -1:
+                                    q["evidenceQuote"] = passage_text[idx:end_idx + 1].strip()
+                                else:
+                                    q["evidenceQuote"] = passage_text[idx:].strip()
                 elif iss.code == IssueCode.ANSWER_LEAKAGE:
                     cand_list = q.get("candidates") or []
                     replaced = False
@@ -638,3 +754,48 @@ class SummaryGroupRepairer(BaseRepairer):
             )
 
         return artifact.create_next_version(new_payload=payload, producer_version="2.0.0")
+
+
+def format_diagnostic_feedback(
+    issue: object,
+    adversary_claim: Optional[str] = None,
+    conflicting_span: Optional[str] = None,
+    question_text: Optional[str] = None,
+    suggested_fix: Optional[str] = None,
+) -> str:
+    """Formats structured diagnostic feedback for surgical LLM question item repair.
+
+    Supplies the repair prompt with adversary counter-claims, conflicting spans,
+    and exact ambiguity context so the model can resolve the defect with high precision.
+    """
+    lines: list[str] = []
+    code = getattr(issue, "code", "")
+    code_val = getattr(code, "value", str(code))
+    msg = getattr(issue, "message", "")
+    target = getattr(issue, "artifact_ref", None) or getattr(issue, "location", None) or "question"
+
+    lines.append(f"## Diagnostic Defect Report: {code_val}")
+    lines.append(f"- **Target Artifact**: {target}")
+    lines.append(f"- **Issue Code**: {code_val}")
+    lines.append(f"- **Diagnostic Message**: {msg}")
+
+    if question_text:
+        lines.append(f"\n### Defective Question Under Repair\n{question_text.strip()}")
+
+    if adversary_claim:
+        lines.append(f"\n### Adversary Counter-Claim\n{adversary_claim.strip()}")
+
+    if conflicting_span:
+        lines.append(f"\n### Conflicting Text Span in Passage\n\"{conflicting_span.strip()}\"")
+
+    if suggested_fix:
+        lines.append(f"\n### Recommended Surgical Correction\n{suggested_fix.strip()}")
+
+    lines.append(
+        "\n### Repair Instructions\n"
+        "1. Surgically modify ONLY the defective question prompt, options, or answer key.\n"
+        "2. Ensure the correct answer is strictly and unambiguously grounded in the passage text.\n"
+        "3. Eliminate any second defensible interpretation or misleading distractor."
+    )
+
+    return "\n".join(lines)

@@ -1,0 +1,262 @@
+{
+  "artifact_identity": "RG10_DEV_V2_4_EXPLICIT_RESCORE_V1",
+  "timestamp": "2026-10-16T16:15:00Z",
+  "purpose": "Explicit Versioned Rescore of Replayed DEV Items under NeutralEvaluatorV2_4",
+  "provenance": {
+    "artifact_published_at_commit": "9f1647dfdc0b0d5caf92eaabfd83e23802a7fed5",
+    "method": "v2.4 re-scored the authentic v2.3-replayed question_evaluations (pipeline not re-run)",
+    "input_artifact_path": "generation_baseline/verification/RG10_DEV_QUESTION_LEVEL_DISCREPANCY_REPORT.json",
+    "grammar_rule_pack_id": "pack-cleft-dev-03",
+    "grammar_rule_ids": ["rule-cleft-02"]
+  },
+  "evaluator_baseline": {
+    "evaluator_version": "neutral-eval-v2.3",
+    "rubric_version": "rubric-qgeval-v2.3",
+    "total_pass": 4,
+    "total_fail": 11
+  },
+  "evaluator_rescore": {
+    "evaluator_version": "neutral-eval-v2.4",
+    "rubric_version": "rubric-qgeval-v2.4",
+    "total_pass": 5,
+    "total_fail": 10
+  },
+  "behavioral_delta_summary": {
+    "delta_pass_count": 1,
+    "recovered_items": [
+      {
+        "item": "READING Arm A Q3",
+        "prompt": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles until daybreak.",
+        "v2_3_verdict": "FAIL",
+        "v2_4_verdict": "PASS",
+        "mechanism": "Bounded 'unlike' clause boundary parsing prevented false contradiction on the main clause containing CAM plant vacuole storage."
+      }
+    ],
+    "persistent_failures": [
+      {
+        "item": "READING Arm A Q1",
+        "prompt": "CAM plants assimilate atmospheric carbon dioxide during the night.",
+        "v2_3_verdict": "FAIL",
+        "v2_4_verdict": "FAIL",
+        "mechanism": "Stems 'plant' and 'during' overlap with the excluded clause 'standard C3 plants that open stomata during daylight hours', triggering contrastive exclusion in v2.4 as well."
+      },
+      {
+        "category": "UNSCORABLE_MISSING_ANSWER",
+        "count": 6,
+        "items": [
+          "Reading Arm B Q1-Q3",
+          "Reading Arm C Q1-Q3"
+        ],
+        "mechanism": "Preserved: terminal candidate stages emitted no proposed answer keys. Draft borrowing remains strictly prohibited in both v2.3 and v2.4."
+      },
+      {
+        "category": "DISTRACTOR_AMBIGUITY",
+        "count": 3,
+        "items": [
+          "Grammar Arm A Q2",
+          "Grammar Arm C Q1",
+          "Grammar Arm C Q2"
+        ],
+        "mechanism": "Preserved: multiple options exhibit grammatically valid cleft syntax, violating single-correct-answer constraint in both v2.3 and v2.4."
+      }
+    ]
+  },
+  "items": [
+    {
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "prompt": "CAM plants assimilate atmospheric carbon dioxide during the night.",
+      "proposed_answer": "TRUE",
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 1.0,
+      "v2_4_abstention_reason": "Entailment contradiction: passage contradicts TRUE statement; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "verdict_changed": false
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "prompt": "CAM plants open their stomata during the day to absorb carbon dioxide.",
+      "proposed_answer": "FALSE",
+      "v2_3_verdict": "PASS",
+      "v2_4_verdict": "PASS",
+      "v2_4_grounding_score": 4.0,
+      "v2_4_abstention_reason": null,
+      "verdict_changed": false
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "prompt": "The four-carbon dicarboxylic acid produced in CAM plants is stored in central vacuoles until daybreak.",
+      "proposed_answer": "TRUE",
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "PASS",
+      "v2_4_grounding_score": 4.0,
+      "v2_4_abstention_reason": null,
+      "verdict_changed": true
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "prompt": "CAM plants open their stomata during the day to take in carbon dioxide.",
+      "proposed_answer": null,
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 1.0,
+      "v2_4_abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "verdict_changed": false
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "prompt": "Malate is the primary four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+      "proposed_answer": null,
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 1.0,
+      "v2_4_abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "verdict_changed": false
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "prompt": "CAM plants use ribulose-1,5-bisphosphate carboxylase-oxygenase during the night.",
+      "proposed_answer": null,
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 1.0,
+      "v2_4_abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "verdict_changed": false
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "1",
+      "question_type": "TFNG",
+      "prompt": "CAM plants open their stomata during the day to take in carbon dioxide.",
+      "proposed_answer": null,
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 1.0,
+      "v2_4_abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "verdict_changed": false
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "2",
+      "question_type": "TFNG",
+      "prompt": "Malate is the only four-carbon dicarboxylic acid produced in CAM photosynthesis.",
+      "proposed_answer": null,
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 1.0,
+      "v2_4_abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "verdict_changed": false
+    },
+    {
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "3",
+      "question_type": "TFNG",
+      "prompt": "Ribulose-1,5-bisphosphate carboxylase-oxygenase is active during the night in CAM plants.",
+      "proposed_answer": null,
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 1.0,
+      "v2_4_abstention_reason": "UNSCORABLE_MISSING_ANSWER: Question provides no proposed answer key",
+      "verdict_changed": false
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "A",
+      "question_id": "1",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Which of the following sentences correctly uses an it-cleft structure?",
+      "proposed_answer": "B",
+      "v2_3_verdict": "PASS",
+      "v2_4_verdict": "PASS",
+      "v2_4_grounding_score": 4.0,
+      "v2_4_abstention_reason": null,
+      "verdict_changed": false
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "A",
+      "question_id": "2",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "What is the correct way to emphasize 'photosynthesis' using an it-cleft structure?",
+      "proposed_answer": "A",
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 2.0,
+      "v2_4_abstention_reason": "Ambiguous MCQ: multiple options [1, 4] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "verdict_changed": false
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "B",
+      "question_id": "q1",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Which of the following sentences correctly uses an it-cleft structure to emphasize 'the new methodology'?",
+      "proposed_answer": "A",
+      "v2_3_verdict": "PASS",
+      "v2_4_verdict": "PASS",
+      "v2_4_grounding_score": 4.0,
+      "v2_4_abstention_reason": null,
+      "verdict_changed": false
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "B",
+      "question_id": "q2",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Which sentence correctly uses an it-cleft structure with the emphasized element 'the research team'?",
+      "proposed_answer": "B",
+      "v2_3_verdict": "PASS",
+      "v2_4_verdict": "PASS",
+      "v2_4_grounding_score": 4.0,
+      "v2_4_abstention_reason": null,
+      "verdict_changed": false
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "C",
+      "question_id": "GRAMMAR_MCQ_1",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Choose the correct sentence that uses an it-cleft structure appropriately.",
+      "proposed_answer": "It was the new findings that surprised the scientific community.",
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 2.0,
+      "v2_4_abstention_reason": "Ambiguous MCQ: multiple options [1, 2, 3] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "verdict_changed": false
+    },
+    {
+      "domain": "GRAMMAR",
+      "configuration_id": "C",
+      "question_id": "GRAMMAR_MCQ_2",
+      "question_type": "GRAMMAR_MCQ",
+      "prompt": "Which sentence correctly uses an it-cleft to emphasize 'the research methodology'?",
+      "proposed_answer": "It was the research methodology that the team developed.",
+      "v2_3_verdict": "FAIL",
+      "v2_4_verdict": "FAIL",
+      "v2_4_grounding_score": 2.0,
+      "v2_4_abstention_reason": "Ambiguous MCQ: multiple options [1, 2, 3, 4] exhibit grammatically valid it-cleft syntax; Grounding score 2.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS.",
+      "verdict_changed": false
+    }
+  ],
+  "replay_source_commit_sha": "7b33b827aec8e1de3525ce6d09dff0830beb37e0"
+}

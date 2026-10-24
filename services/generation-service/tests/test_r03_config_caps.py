@@ -181,11 +181,6 @@ async def test_facade_path_routes_benchmark_isolated_timeouts():
         orig_passage_init(self, *args, **kwargs)
         captured_loops.append(self)
 
-    orig_section_init = SectionLoop.__init__
-    def spy_section_init(self, *args, **kwargs):
-        orig_section_init(self, *args, **kwargs)
-        captured_loops.append(self)
-
     orig_paper_init = PaperLoop.__init__
     def spy_paper_init(self, *args, **kwargs):
         orig_paper_init(self, *args, **kwargs)
@@ -193,8 +188,6 @@ async def test_facade_path_routes_benchmark_isolated_timeouts():
 
     with patch.object(PassageLoop, "__init__", spy_passage_init), \
          patch.object(PassageLoop, "run", new_callable=AsyncMock), \
-         patch.object(SectionLoop, "__init__", spy_section_init), \
-         patch.object(SectionLoop, "run", new_callable=AsyncMock), \
          patch.object(PaperLoop, "__init__", spy_paper_init), \
          patch.object(PaperLoop, "run", new_callable=AsyncMock):
 
@@ -209,11 +202,6 @@ async def test_facade_path_routes_benchmark_isolated_timeouts():
         assert prod_gf.metadata.timeout_seconds == 30.0
         assert prod_passage.repairer.metadata.timeout_seconds == 30.0
 
-        await facade.generate_section_v2(section_index=1, title="T", passage_artifact=mock_env, blueprint_ref=mock_ref, question_artifacts=[], run_id="run_prod_01", lease_owner=uuid4(), is_benchmark=False)
-        prod_sec = captured_loops[-1]
-        assert prod_sec.evaluators[0].metadata.timeout_seconds == 60.0
-        assert prod_sec.evaluators[2].metadata.timeout_seconds == 30.0
-
         await facade.generate_paper_v2(blueprint_ref=mock_ref, section_artifacts=[mock_env], run_id="run_prod_01", lease_owner=uuid4(), is_benchmark=False)
         prod_paper = captured_loops[-1]
         assert prod_paper.evaluator_registry.get("eval_paper_structure").metadata.timeout_seconds == 60.0
@@ -224,11 +212,6 @@ async def test_facade_path_routes_benchmark_isolated_timeouts():
         bench_gf = next(ev for ev in bench_passage.evaluators if isinstance(ev, GroundingFidelityEvaluator))
         assert bench_gf.metadata.timeout_seconds == 300.0
         assert bench_passage.repairer.metadata.timeout_seconds == 120.0
-
-        await facade.generate_section_v2(section_index=1, title="T", passage_artifact=mock_env, blueprint_ref=mock_ref, question_artifacts=[], run_id="bench_case_01", lease_owner=uuid4())
-        bench_sec = captured_loops[-1]
-        assert bench_sec.evaluators[0].metadata.timeout_seconds == 300.0
-        assert bench_sec.evaluators[2].metadata.timeout_seconds == 300.0
 
         await facade.generate_paper_v2(blueprint_ref=mock_ref, section_artifacts=[mock_env], run_id="bench_case_01", lease_owner=uuid4())
         bench_paper = captured_loops[-1]

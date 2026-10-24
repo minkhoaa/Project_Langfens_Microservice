@@ -1,0 +1,479 @@
+{
+  "campaign_id": "RG10_DEV_UNSEEN_PILOT_V4",
+  "split": "DEV_UNSEEN",
+  "executed_at": "2026-10-16T09:55:36Z",
+  "foundation_model_id": "minimax/MiniMax-Text-01",
+  "credential_source": "deploy/envs/ai.env (MINIMAX_API_KEY present, unlogged)",
+  "source_families": [
+    "fam-oceanography-abyssal-05",
+    "fam-syntax-inversion-05"
+  ],
+  "telemetry": {
+    "total_dispatches": 19,
+    "total_tokens": 22299,
+    "spent_usd_estimated": 0.033448,
+    "cost_source": "LOCAL_RATE_ESTIMATE_NOT_BILLED",
+    "wall_time_seconds": 153.67
+  },
+  "assignment_completion": {
+    "assigned": 6,
+    "completed": 6,
+    "completion_rate": 1.0
+  },
+  "answer_availability": {
+    "total_questions": 15,
+    "available_answers": 15,
+    "missing_answers": 0,
+    "availability_rate": 1.0
+  },
+  "reading_polarity_coverage": {
+    "total_slots": 9,
+    "unique_questions": 7,
+    "unique_distribution": {
+      "FALSE": 4,
+      "TRUE": 2,
+      "NOT GIVEN": 1
+    },
+    "has_true": true,
+    "has_false": true,
+    "has_not_given": true
+  },
+  "grammar_mcq_uniqueness": {
+    "total_mcqs": 6,
+    "unambiguous_unique_keys": 1,
+    "uniqueness_rate": 0.1667,
+    "example_copy_rate": 0.0
+  },
+  "evaluator_verdicts": {
+    "total_slots": {
+      "PASS": 9,
+      "FAIL": 6
+    },
+    "unique_items": {
+      "PASS": 7,
+      "FAIL": 5
+    },
+    "blind_judge": {
+      "PASS": 9,
+      "FAIL": 6,
+      "UNCERTAIN": 0
+    },
+    "abstention_rate": 0.0
+  },
+  "question_evaluations": [
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_A__att1",
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "1",
+      "question_text": "Hydrothermal vent ecosystems depend on solar radiation for energy.",
+      "question_content_hash": "013e696162ba3f5e74a51379042e07b8b75f2b23f081db525f6fe3e32fe81a7b",
+      "options": [],
+      "proposed_answer": "FALSE",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "62167eedde6d360b6c303da4e20b5cbacc7fad7f5e8a6afa30b08bbd3d240477",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Verified consistent with rubric."
+    },
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_A__att1",
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "2",
+      "question_text": "Riftia pachyptila has endosymbiotic bacteria in its trophosome.",
+      "question_content_hash": "5f280b462c0c630f3d373286f00d8159508385ecd924a5597cc69a57c3a91cdc",
+      "options": [],
+      "proposed_answer": "TRUE",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "62167eedde6d360b6c303da4e20b5cbacc7fad7f5e8a6afa30b08bbd3d240477",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Verified consistent with rubric."
+    },
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_A__att1",
+      "domain": "READING",
+      "configuration_id": "A",
+      "question_id": "3",
+      "question_text": "The blood hemoglobin in Riftia pachyptila can bind oxygen but not hydrogen sulfide.",
+      "question_content_hash": "0bb526e2bd36f92e5fdc9dd3ff3bfbee25f32a4c10ab7cb64d698e30813dec9c",
+      "options": [],
+      "proposed_answer": "FALSE",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "62167eedde6d360b6c303da4e20b5cbacc7fad7f5e8a6afa30b08bbd3d240477",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Verified consistent with rubric."
+    },
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_B__att1",
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "1",
+      "question_text": "Hydrothermal vent ecosystems are completely independent of sunlight.",
+      "question_content_hash": "829eeccee69f2c8b5512221a60aae9ba8d67fa05412fe0e35cf34ecdd0ce7a68",
+      "options": [],
+      "proposed_answer": "TRUE",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "a5ebb997a91f34f6797bc6e3e826a139db53b298e6dd9237991761166b1df82f",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Verified consistent with rubric."
+    },
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_B__att1",
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "2",
+      "question_text": "Riftia pachyptila obtains nutrients through a conventional digestive system.",
+      "question_content_hash": "157cfe41d1b4c9df19b52222a550f26b41bedb38aa09480cfdce12b888046472",
+      "options": [],
+      "proposed_answer": "FALSE",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "a5ebb997a91f34f6797bc6e3e826a139db53b298e6dd9237991761166b1df82f",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Verified consistent with rubric."
+    },
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_B__att1",
+      "domain": "READING",
+      "configuration_id": "B",
+      "question_id": "3",
+      "question_text": "The trophosome is responsible for binding oxygen and hydrogen sulfide in Riftia pachyptila.",
+      "question_content_hash": "dc964b4fba8a8d7740347a7aad7ba55f26f8e90ce92ffa3aefe6332b4b1664cd",
+      "options": [],
+      "proposed_answer": "FALSE",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "a5ebb997a91f34f6797bc6e3e826a139db53b298e6dd9237991761166b1df82f",
+      "verdict_v25": "FAIL",
+      "blind_judge_verdict": "FAIL",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 1.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": false
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "FALSE contradiction: passage affirms proposition without contradiction; Grounding score 1.0 is below threshold 3.0. Beautiful but ungrounded content cannot PASS."
+    },
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_C__att1",
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "1",
+      "question_text": "Hydrothermal vent ecosystems depend on solar radiation for energy.",
+      "question_content_hash": "7198194ec7abcfca5c132a80ce2fd067207186bdea982f747f4db1f740ed3772",
+      "options": [],
+      "proposed_answer": "FALSE",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "ac3c0272a1811f5f56b0389792d05de1bb23add0856c365128111ce7c205e8fa",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Verified consistent with rubric."
+    },
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_C__att1",
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "2",
+      "question_text": "Riftia pachyptila has endosymbiotic bacteria in its trophosome.",
+      "question_content_hash": "d6d234c33b12dfab74a594e0db2fa27d51ffae068ac7bb833af6ee8933d81d8d",
+      "options": [],
+      "proposed_answer": "TRUE",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "ac3c0272a1811f5f56b0389792d05de1bb23add0856c365128111ce7c205e8fa",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Verified consistent with rubric."
+    },
+    {
+      "assignment_id": "dev-reading-hydrothermal-05__arm_C__att1",
+      "domain": "READING",
+      "configuration_id": "C",
+      "question_id": "3",
+      "question_text": "The blood hemoglobin in Riftia pachyptila can bind carbon dioxide.",
+      "question_content_hash": "71f9cc3f8d7d92753a25c0d67213f2759ffdb47030df9853745723cb78187ab9",
+      "options": [],
+      "proposed_answer": "NOT GIVEN",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "ac3c0272a1811f5f56b0389792d05de1bb23add0856c365128111ce7c205e8fa",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Verified consistent with rubric."
+    },
+    {
+      "assignment_id": "dev-grammar-inversion-05__arm_A__att1",
+      "domain": "GRAMMAR",
+      "configuration_id": "A",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "question_content_hash": "49372d38a0ae13bb5e612ebdb2ceecbaec2d2377db04e866e0bf5589764304fa",
+      "options": [
+        "A) Not only did she win the race, but she also broke the record.",
+        "B) Not only she won the race, but she also broke the record.",
+        "C) Not only she did win the race, but she also broke the record.",
+        "D) Not only she wins the race, but she also broke the record."
+      ],
+      "proposed_answer": "A",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "5fc9653b30ffb6dc0a969ac2640e038048e2944b12c77c41f6b27d4e03ad0eed",
+      "verdict_v25": "FAIL",
+      "blind_judge_verdict": "FAIL",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Defective MCQ: no options exhibit valid negative inversion (Not only cue missing from cue list)"
+    },
+    {
+      "assignment_id": "dev-grammar-inversion-05__arm_A__att1",
+      "domain": "GRAMMAR",
+      "configuration_id": "A",
+      "question_id": "2",
+      "question_text": "What is the correct way to rewrite the sentence 'Under no circumstances we should open the door' to follow the rule of subject-auxiliary inversion?",
+      "question_content_hash": "c25ea45c9e0442ee807aae1b427318f1863d206a67926597e2393cdc92f621c1",
+      "options": [
+        "A) Under no circumstances should we open the door.",
+        "B) Under no circumstances we should open the door.",
+        "C) Under no circumstances do we should open the door.",
+        "D) Under no circumstances we do should open the door."
+      ],
+      "proposed_answer": "A",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "5fc9653b30ffb6dc0a969ac2640e038048e2944b12c77c41f6b27d4e03ad0eed",
+      "verdict_v25": "FAIL",
+      "blind_judge_verdict": "FAIL",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 0.0,
+      "abstention_reason": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)"
+    },
+    {
+      "assignment_id": "dev-grammar-inversion-05__arm_B__att1",
+      "domain": "GRAMMAR",
+      "configuration_id": "B",
+      "question_id": "1",
+      "question_text": "Which of the following sentences correctly uses negative inversion?",
+      "question_content_hash": "c350f50002d7b00043e72333d1623437b9b86f944a7e73209cbfd4b0d58faa18",
+      "options": [
+        "A) Not only did she win the award, but she also broke the record.",
+        "B) Not only she won the award, but she also broke the record.",
+        "C) Not only she did win the award, but she also broke the record.",
+        "D) Not only won she the award, but she also broke the record."
+      ],
+      "proposed_answer": "A",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "ded623da0a14a56a6d79cb2ac99956788a4397f8eec5ea756e0e15255738bf57",
+      "verdict_v25": "FAIL",
+      "blind_judge_verdict": "FAIL",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)"
+    },
+    {
+      "assignment_id": "dev-grammar-inversion-05__arm_B__att1",
+      "domain": "GRAMMAR",
+      "configuration_id": "B",
+      "question_id": "2",
+      "question_text": "What is the correct way to rewrite the sentence 'Under no circumstances we should leave the building' using proper inversion?",
+      "question_content_hash": "ba15fc338ad3c48e347e200f7bb348202a25f9a637f453a5626d200677118e65",
+      "options": [
+        "A) Under no circumstances should we leave the building.",
+        "B) Under no circumstances we should leave the building.",
+        "C) Under no circumstances did we should leave the building.",
+        "D) Under no circumstances we should not leave the building."
+      ],
+      "proposed_answer": "A",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "ded623da0a14a56a6d79cb2ac99956788a4397f8eec5ea756e0e15255738bf57",
+      "verdict_v25": "FAIL",
+      "blind_judge_verdict": "FAIL",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 0.0,
+      "abstention_reason": "Ambiguous MCQ: multiple options [1, 3] exhibit valid negative inversion (distractor validity failure)"
+    },
+    {
+      "assignment_id": "dev-grammar-inversion-05__arm_C__att1",
+      "domain": "GRAMMAR",
+      "configuration_id": "C",
+      "question_id": "Q1",
+      "question_text": "Which of the following sentences correctly uses subject-auxiliary inversion with a negative adverbial?",
+      "question_content_hash": "da5716fa34e5d6e60d4ed37dccaaac1cf3e1b7fd66d3734d8e7b19e3dc3333eb",
+      "options": [
+        "A) Not only did she win the race, but she also broke the record.",
+        "B) Not only she won the race, but she also broke the record.",
+        "C) Not only she did win the race, but she also broke the record.",
+        "D) Not only she wins the race, but she also broke the record."
+      ],
+      "proposed_answer": "A",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "2bcc08cd97852c46987b1e6c15e459568e2f9cd29eecbe9a24993171b6e07ec1",
+      "verdict_v25": "FAIL",
+      "blind_judge_verdict": "FAIL",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 1.0,
+      "abstention_reason": "Defective MCQ: no options exhibit valid negative inversion (Not only cue missing from cue list)"
+    },
+    {
+      "assignment_id": "dev-grammar-inversion-05__arm_C__att1",
+      "domain": "GRAMMAR",
+      "configuration_id": "C",
+      "question_id": "Q2",
+      "question_text": "Which sentence correctly uses 'do' to form subject-auxiliary inversion when there is no auxiliary verb?",
+      "question_content_hash": "975b852de5a07e4fc7efd77f71ba8c83f62f92d840b3bc3400557b08ac893616",
+      "options": [
+        "A) Under no circumstances open the door before checking the credentials.",
+        "B) Under no circumstances you should open the door before checking the credentials.",
+        "C) Under no circumstances should you open the door before checking the credentials.",
+        "D) Under no circumstances should open the door before checking the credentials."
+      ],
+      "proposed_answer": "C",
+      "answer_status": "AVAILABLE",
+      "output_response_sha256": "2bcc08cd97852c46987b1e6c15e459568e2f9cd29eecbe9a24993171b6e07ec1",
+      "verdict_v25": "PASS",
+      "blind_judge_verdict": "PASS",
+      "blind_judge_is_uncertain": false,
+      "blind_judge_code": null,
+      "grounding_score": 4.0,
+      "task_validity": {
+        "has_proposed_answer": true,
+        "solver_view_leak_free": true,
+        "evidence_in_passage": true,
+        "no_contradiction": true
+      },
+      "novelty_score": 0.0,
+      "abstention_reason": "Verified consistent with rubric."
+    }
+  ],
+  "grammar_mcq_quality": {
+    "total_slots": 6,
+    "unique_mcqs": 5,
+    "unique_valid_mcqs": 1,
+    "valid_mcq_rate": 0.2,
+    "rule_pack_example_copies": 3,
+    "example_copy_rate": 0.5,
+    "carrier_novelty_rate": 0.5
+  }
+}

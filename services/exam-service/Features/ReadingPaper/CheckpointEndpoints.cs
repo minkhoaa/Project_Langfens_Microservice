@@ -19,8 +19,13 @@ public static class CheckpointEndpoints
                 return Results.Json(new { error = "Missing internal service authentication key" }, statusCode: 401);
             }
 
-            var expectedKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")
+            var config = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+            var expectedKey = ReadingPaperAiClientConfiguration.ResolveInternalApiKey(config);
+            if (string.IsNullOrWhiteSpace(expectedKey))
+            {
+                expectedKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")
                               ?? Environment.GetEnvironmentVariable("InternalApiKey");
+            }
 
             if (string.IsNullOrWhiteSpace(expectedKey))
             {
@@ -92,6 +97,22 @@ public static class CheckpointEndpoints
             try
             {
                 var result = await CheckpointService.CommitCheckpointAsync(db, request, ct);
+                return Results.Ok(result);
+            }
+            catch (CheckpointValidationException ex)
+            {
+                return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode);
+            }
+        });
+
+        group.MapPost("/import", async (
+            [FromBody] CheckpointImportRequest request,
+            ExamDbContext db,
+            CancellationToken ct) =>
+        {
+            try
+            {
+                var result = await CheckpointService.ImportCheckpointAsync(db, request, ct);
                 return Results.Ok(result);
             }
             catch (CheckpointValidationException ex)
@@ -205,8 +226,10 @@ public static class CheckpointEndpoints
         group.MapPost("/build-exam", async (
             [FromBody] BuildExamInternalRequest request,
             ExamDbContext db,
+            ILoggerFactory loggerFactory,
             CancellationToken ct) =>
         {
+            var logger = loggerFactory.CreateLogger("CheckpointEndpoints");
             try
             {
                 var result = await CheckpointService.BuildExamIdempotentAsync(db, request, ct);
@@ -214,15 +237,18 @@ public static class CheckpointEndpoints
             }
             catch (CheckpointValidationException ex)
             {
+                logger.LogWarning("build-exam validation failed for run {RunId}, status {StatusCode}: {Message}", request.RunId, ex.StatusCode, ex.Message);
                 return Results.Json(new { error = ex.Message }, statusCode: ex.StatusCode);
             }
             catch (InvalidOperationException ex)
             {
+                logger.LogWarning(ex, "build-exam unprocessable for run {RunId}: {Message}", request.RunId, ex.Message);
                 return Results.Json(new { error = ex.Message }, statusCode: StatusCodes.Status422UnprocessableEntity);
             }
             catch (Exception ex)
             {
-                return Results.Json(new { error = ex.Message }, statusCode: StatusCodes.Status500InternalServerError);
+                logger.LogError(ex, "build-exam unexpected error for run {RunId}: {Message}", request.RunId, ex.Message);
+                return Results.Json(new { error = ex.Message, details = ex.ToString() }, statusCode: StatusCodes.Status500InternalServerError);
             }
         });
 

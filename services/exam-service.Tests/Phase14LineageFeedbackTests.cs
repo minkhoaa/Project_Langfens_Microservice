@@ -1163,10 +1163,18 @@ public class Phase14LineageFeedbackTests
         var resOpt = await client.PostAsJsonAsync("/api/admin/option/add", createOptDto);
         Assert.Equal(HttpStatusCode.OK, resOpt.StatusCode);
 
+        var createOptDto2 = new DtoAdmin.AdminOptionUpsert(
+            QuestionId: questionId,
+            Idx: 2,
+            ContentMd: "Steel and Glass",
+            IsCorrect: false
+        );
+        var resOpt2 = await client.PostAsJsonAsync("/api/admin/option/add", createOptDto2);
+        Assert.Equal(HttpStatusCode.OK, resOpt2.StatusCode);
         using (var scope = factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ExamDbContext>();
-            var option = await db.ExamOptions.AsNoTracking().SingleAsync(o => o.QuestionId == questionId);
+            var option = await db.ExamOptions.AsNoTracking().FirstAsync(o => o.QuestionId == questionId && o.Idx == 1);
             optionId = option.Id;
         }
 
