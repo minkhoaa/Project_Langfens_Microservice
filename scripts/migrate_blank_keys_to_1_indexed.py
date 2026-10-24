@@ -3,7 +3,7 @@
 Sprint 3 — Shift 0-indexed numeric jsonb keys +1 in completion-family rows.
 
 Connection parameters (all overridable via env var; defaults shown match
-the Docker Compose ports documented in repo root CLAUDE.md):
+the Docker Compose ports configured in deploy/compose.yaml):
 
   exam-db (postgres):
     host     = DB_HOST              (default: localhost)
