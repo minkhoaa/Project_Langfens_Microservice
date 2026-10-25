@@ -236,6 +236,128 @@ class CandidateRejectionError(ValueError):
         self.message = message
 
 
+def extract_candidate_spans(quote: str, passage: str) -> list[str]:
+    """Extracts candidate sentence and clause spans from quote that exist in passage."""
+    spans = [quote]
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", quote) if len(s.strip()) >= 20]
+    if len(sentences) > 1:
+        spans.extend(sentences)
+    raw_clauses = [c.strip() for c in re.split(r"(?<=[,;:.!?—–\n])\s+", quote) if len(c.strip()) >= 20]
+    for c in raw_clauses:
+        clean = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", c)
+        if len(clean) >= 20:
+            spans.append(clean)
+            if clean + "." in passage:
+                spans.append(clean + ".")
+    if len(raw_clauses) > 2:
+        for i in range(len(raw_clauses) - 1):
+            pair = raw_clauses[i] + " " + raw_clauses[i + 1]
+            clean_pair = re.sub(r"^[\s,;:\"'\(\)]+|[\s,;:\"'\(\)]+$", "", pair)
+            if len(clean_pair) >= 20:
+                spans.append(clean_pair)
+    valid_spans = []
+    seen = set()
+    for s in spans:
+        if s in passage and s not in seen and len(s) >= 15:
+            seen.add(s)
+            valid_spans.append(s)
+    return valid_spans
+
+
+def select_claim_local_evidence(
+    quote: str,
+    statement: str,
+    passage_text: str,
+    bound_claim_text: str,
+    bound_claim_id: str,
+    claims_map: Mapping[str, Any],
+    answer: Optional[str] = None,
+    q_type: Optional[str] = None,
+    target_focus: Optional[str] = None,
+) -> tuple[str, int, int]:
+    """Selects the smallest sufficiently contextual, exact passage span supporting the tested proposition.
+
+    If a candidate cites an overly broad quote that incorporates unrelated material from
+    adjacent claims, this selects the claim-local span that directly supports the tested statement
+    and bound claim without competing claim dominance.
+    """
+    if not quote or quote not in passage_text:
+        pos = passage_text.find(quote) if quote else -1
+        return (quote, pos, pos + len(quote) if pos >= 0 else -1)
+
+    p_start = passage_text.find(quote)
+    p_end = p_start + len(quote)
+
+    if not bound_claim_text or not claims_map:
+        return (quote, p_start, p_end)
+
+    from app.reading_evaluation import claim_discriminators, compute_substantive_grounding_ratio
+
+    r_bound_full, _ = compute_substantive_grounding_ratio(bound_claim_text, quote)
+
+    top_comp_full = 0.0
+    for cid, c in claims_map.items():
+        if cid == bound_claim_id:
+            continue
+        ctext = (c.get("text") if isinstance(c, dict) else getattr(c, "text", "")).strip()
+        if not ctext:
+            continue
+        r_other, _ = compute_substantive_grounding_ratio(ctext, quote)
+        if r_other > top_comp_full:
+            top_comp_full = r_other
+
+    # Clean quote already belongs to bound claim without competing interference
+    if r_bound_full >= 0.25 and (top_comp_full < 0.35 and top_comp_full <= r_bound_full):
+        return (quote, p_start, p_end)
+
+    spans = extract_candidate_spans(quote, passage_text)
+    if len(spans) <= 1:
+        return (quote, p_start, p_end)
+
+    stmt_markers = claim_discriminators(statement)
+    essential_markers = {m for m in stmt_markers if m.startswith(("qualifier:", "number:"))}
+
+    best_span = quote
+    best_pos = p_start
+    best_metric = (-1.0, -1.0, 0.0)
+
+    for span in spans:
+        pos = passage_text.find(span)
+        if pos < 0:
+            continue
+        if q_type in GROUNDED_COMPLETION_TYPES and answer:
+            if not match_boundary_aware(answer, span):
+                continue
+        r_b, _ = compute_substantive_grounding_ratio(bound_claim_text, span)
+        r_s, _ = compute_substantive_grounding_ratio(statement, span)
+
+        if essential_markers:
+            span_markers = claim_discriminators(span)
+            if not (essential_markers <= span_markers):
+                continue
+
+        top_comp = 0.0
+        for cid, c in claims_map.items():
+            if cid == bound_claim_id:
+                continue
+            ctext = (c.get("text") if isinstance(c, dict) else getattr(c, "text", "")).strip()
+            if not ctext:
+                continue
+            r_o, _ = compute_substantive_grounding_ratio(ctext, span)
+            if r_o > top_comp:
+                top_comp = r_o
+
+        if r_s >= 0.20 and r_b >= 0.20 and r_b >= top_comp:
+            focus_boost = 0.1 if (target_focus and span in target_focus) else 0.0
+            metric = (r_b + r_s - top_comp + focus_boost, -top_comp, -len(span))
+            if metric > best_metric:
+                best_metric = metric
+                best_span = span
+                best_pos = pos
+
+    return (best_span, best_pos, best_pos + len(best_span))
+
+
 def _parse_single_candidate(
     cand: dict[str, Any],
     raw_payload: dict[str, Any],
@@ -424,7 +546,18 @@ def _parse_single_candidate(
                     CandidateRejectionReason.QUOTE_NOT_VERBATIM,
                     f"Question {q_num} evidence quote is not found in passage: '{quote[:40]}'",
                 )
-            p_end = p_start + len(quote)
+            bound_text = (matched_claim.get("text") if isinstance(matched_claim, dict) else getattr(matched_claim, "text", "")) if matched_claim else ""
+            quote, p_start, p_end = select_claim_local_evidence(
+                quote=quote,
+                statement=statement,
+                passage_text=passage_text,
+                bound_claim_text=bound_text,
+                bound_claim_id=claim_id,
+                claims_map=claims_map,
+                answer=answer,
+                q_type=q_type,
+                target_focus=target_focus,
+            )
             return {
                 "questionNumber": q_num,
                 "questionType": q_type,

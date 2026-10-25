@@ -86,6 +86,25 @@ def claim_discriminators(text: str) -> set[str]:
     return markers
 
 
+def _has_category_marker_conflict(
+    bound_markers: set[str],
+    quote_markers: set[str],
+    other_markers: set[str],
+) -> bool:
+    """Detects factual discriminator conflicts within specific semantic categories.
+
+    Ensures that a missing qualifier in bound text is not falsely 'conflicted'
+    by an unrelated geographic entity in other text when the categories are disjoint.
+    """
+    for prefix in ("number:", "qualifier:", "entity:"):
+        b_c = {m for m in bound_markers if m.startswith(prefix)}
+        q_c = {m for m in quote_markers if m.startswith(prefix)}
+        o_c = {m for m in other_markers if m.startswith(prefix)}
+        if (b_c - q_c) and (q_c & o_c) and (b_c - o_c):
+            return True
+    return False
+
+
 SCOPES = {
     ArtifactType.SOURCE_PACK: IssueScope.SOURCE,
     ArtifactType.EVIDENCE_GRAPH: IssueScope.EVIDENCE,
@@ -557,11 +576,7 @@ def verify_question_claim_provenance(
             bound_markers = claim_discriminators(bound_text)
             quote_markers = claim_discriminators(quote)
             other_markers = claim_discriminators(other_text)
-            marker_conflict = bool(
-                (bound_markers - quote_markers)
-                and (quote_markers & other_markers)
-                and (bound_markers - other_markers)
-            )
+            marker_conflict = _has_category_marker_conflict(bound_markers, quote_markers, other_markers)
             if r_other >= 0.40 and (
                 r_other > ratio_bound + 0.15 or ratio_bound < 0.25 or marker_conflict
             ):
@@ -573,11 +588,7 @@ def verify_question_claim_provenance(
             bound_markers = claim_discriminators(bound_text)
             quote_markers = claim_discriminators(quote)
             other_markers = claim_discriminators(top_other_text)
-            conflicting_fact_markers = bool(
-                (bound_markers - quote_markers)
-                and (quote_markers & other_markers)
-                and (bound_markers - other_markers)
-            )
+            conflicting_fact_markers = _has_category_marker_conflict(bound_markers, quote_markers, other_markers)
             if conflicting_fact_markers or (
                 not direct_contained and (ratio_bound < 0.40 or top_other_r >= ratio_bound + 0.20)
             ):
