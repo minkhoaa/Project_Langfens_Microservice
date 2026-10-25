@@ -8,6 +8,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
+from app.persistence.models import OperationGrantRequest
 from app.providers.base import BaseProvider
 from app.providers.errors import DeadlineExceededError, ProviderError, ProviderUnavailableError, RateLimitedError
 from app.providers.gateway import ProviderGateway
@@ -28,14 +29,16 @@ class Authority:
         prior = self.operations.get(request.operationId)
         if prior:
             return SimpleNamespace(**prior, isReplay=True)
-        row = dict(status="RESERVED", resultRefJson=None, reservationBreached=False, budgetBreachDetected=False)
+        row = dict(status="RESERVED", resultRefJson=None, reservationBreached=False, budgetBreachDetected=False,
+                   parentOperationId=request.parentOperationId,
+                   wallTimeReservationSeconds=request.wallTimeReservationSeconds, wallTimeUsedSeconds=0.0)
         self.operations[request.operationId] = row
         return SimpleNamespace(**row, isReplay=False)
 
     async def reconcile_operation_async(self, request):
         self.reconciles.append(request)
-        self.operations[request.operationId] = dict(status="COMPLETED", resultRefJson=request.resultRefJson,
-            reservationBreached=False, budgetBreachDetected=False)
+        self.operations[request.operationId].update(status="COMPLETED", resultRefJson=request.resultRefJson,
+            wallTimeUsedSeconds=request.wallTimeUsedSeconds)
         return SimpleNamespace(reservationBreached=False, budgetBreachDetected=False)
 
     async def record_unknown_outcome_async(self, request):
@@ -88,12 +91,17 @@ def request(**changes):
 @pytest.mark.asyncio
 async def test_completed_replay_has_no_dispatch_or_reconciliation_charge():
     gateway, provider, authority, _ = setup()
-    first = await gateway.execute(request(parent_operation_id="parent"), lease_owner=uuid4())
-    second = await gateway.execute(request(parent_operation_id="parent"), lease_owner=uuid4())
+    owner = uuid4()
+    # A parent reference must identify a granted operation, never an invented ID.
+    await authority.grant_operation_async(OperationGrantRequest(runId="run", epoch=1, leaseOwner=owner,
+        operationId="parent", operationType="GENERATE", requestHash="a" * 64,
+        tokenReservation=10000, wallTimeReservationSeconds=1))
+    first = await gateway.execute(request(parent_operation_id="parent"), lease_owner=owner)
+    second = await gateway.execute(request(parent_operation_id="parent"), lease_owner=owner)
     assert first == second
     assert len(provider.calls) == len(authority.reconciles) == 1
-    assert authority.grants[0].parentOperationId == "parent"
-    assert authority.grants[0].tokenReservation > authority.reconciles[0].tokensUsed == 7
+    assert authority.grants[1].parentOperationId == "parent"
+    assert authority.grants[1].tokenReservation > authority.reconciles[0].tokensUsed == 7
     assert all(item.operationId != "parent" for item in authority.reconciles)
 
 

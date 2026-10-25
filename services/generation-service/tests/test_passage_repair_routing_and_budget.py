@@ -56,6 +56,7 @@ from tests.test_hybrid_production_integration import (
     RecordingHybridIntegrationProvider,
     make_production_question_artifact,
     make_production_run_context,
+    repair_with_granted_parent,
 )
 from app.providers.gateway import ProviderGateway, RetryPolicy
 from app.providers.registry import ProviderRegistry
@@ -1045,7 +1046,7 @@ async def test_12_existing_text01_and_m3_question_repair_remains_functional():
     )
 
     repairer = QuestionItemRepairer(gateway=gateway, enable_hybrid=True)
-    repaired_art = await repairer.repair(context, art, [issue], "intent_q_repair", 2)
+    repaired_art = await repair_with_granted_parent(repairer, client, context, art, [issue], "intent_q_repair", 2)
 
     assert repaired_art.version == 2
     assert provider.m3_call_count == 1

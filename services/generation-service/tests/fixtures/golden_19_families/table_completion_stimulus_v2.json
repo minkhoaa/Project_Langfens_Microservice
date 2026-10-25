@@ -1,0 +1,26 @@
+{
+  "fixtureVersion": 2,
+  "supersedes": "all_19_families_manifest.json TABLE_COMPLETION item; original retained unchanged",
+  "reason": "The historical candidate omitted all table stimulus. Add a student-visible table without changing its evidence or key.",
+  "questionType": "TABLE_COMPLETION",
+  "provenance": "academically_grounded_golden_fixture",
+  "questionNumber": 3,
+  "passageText": "Deep ocean hydrothermal vents release rich mineral fluids supporting unique ecological communities. Chemosynthetic bacteria form the primary trophic foundation converting hydrogen sulfide into cellular energy. Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients. Biological adaptations include novel heat-shock proteins and metal-binding metallothioneins. Autonomous submersibles deploy robotic arms equipped with hyperspectral cameras and suction samplers to document biodiversity. Geochemical cycles cycle hydrogen sulfide and methane through volcanic vents into surrounding water. The subterranean circulation involves magmatic heating of infiltrated seawater deep within basaltic bedrock. Mineral precipitates deposit crystalline anhydrite on chimney outer walls while chalcopyrite lines the central conduit. Researchers classify benthic fauna into distinct physiological groupings based on thermal tolerance and symbiotic dependencies.",
+  "claimId": "claim_p2_3",
+  "claimsMap": {
+    "claim_p2_3": {
+      "claimId": "claim_p2_3",
+      "text": "Tube worms and specialized crustaceans thrive in extreme hydrostatic pressures and high thermal gradients."
+    }
+  },
+  "rawCandidate": {
+    "questionNumber": 3,
+    "prompt": "Environmental condition: organisms tolerate extreme [3] and high thermal gradients.",
+    "tableContext": "Hydrothermal vent fauna | Environmental conditions tolerated\nTube worms and specialized crustaceans | Extreme [3] and high thermal gradients",
+    "rowHeader": "Tube worms and specialized crustaceans",
+    "colHeader": "Environmental conditions tolerated",
+    "answer": "hydrostatic pressures",
+    "evidenceQuote": "thrive in extreme hydrostatic pressures and high thermal gradients.",
+    "explanation": "The text identifies extreme hydrostatic pressures as the environmental condition withstood by vent fauna."
+  }
+}

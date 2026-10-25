@@ -205,6 +205,12 @@ class QuestionItemRepairer(BaseRepairer):
                     return False
                 if cand_ans.casefold() in _sibling_answers_for(q):
                     return False
+                # A replacement candidate owns its supplied student stimulus.
+                # Omitted/None fields preserve the immutable prior version's context;
+                # explicit empty fields are retained so validators can reject them.
+                for field in ("tableContext", "rowHeader", "colHeader", "flowSteps", "stepIndex"):
+                    if field in cand and cand[field] is not None:
+                        q[field] = copy.deepcopy(unwrap_payload(cand[field]))
                 q["answer"] = cand_ans
                 q["prompt"] = cand_prompt
                 if "statement" in q:

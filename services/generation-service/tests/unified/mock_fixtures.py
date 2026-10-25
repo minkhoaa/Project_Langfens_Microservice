@@ -389,6 +389,11 @@ class MockProvider(BaseProvider):
             q_type = None
             if request.messages:
                 full_content = " ".join(m.content for m in request.messages).lower()
+                # Route the fixture by the explicit family directive, not words
+                # inside JSON examples (e.g. a table's "row summary statement").
+                directive = re.search(r"generate\s+\d+\s+(.+?)\s+candidates\s+for", full_content)
+                if directive:
+                    full_content = directive.group(1)
                 if "true/false" in full_content or "true, false" in full_content or "true false" in full_content:
                     q_type = "TRUE_FALSE_NOT_GIVEN"
                 elif "yes/no" in full_content or "yes, no" in full_content or "yes no" in full_content:

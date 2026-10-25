@@ -7,6 +7,19 @@ from app.reading_evaluation import evaluate_question
 from app.section_runner import _parse_candidate_payload
 from app.visual.evaluator import SvgVisualEvaluator
 
+def test_historical_table_without_any_stimulus_is_rejected():
+    fixture_dir = Path(__file__).resolve().parents[1] / "fixtures/golden_19_families"
+    manifest = json.loads((fixture_dir / "all_19_families_manifest.json").read_text(encoding="utf-8"))
+    item = next(q for q in manifest["questions"] if q["questionType"] == "TABLE_COMPLETION")
+    parsed = _parse_candidate_payload(item["rawCandidate"], q_num=item["questionNumber"], q_type=item["questionType"],
+        passage_text=item["passageText"], claims_map=item["claimsMap"], claim_id=item["claimId"], difficulty="FOUNDATION")
+    envelope = ArtifactEnvelope.create("historical_table", ArtifactType.QUESTION, "offline", parsed, "1.0.0")
+    evaluations = evaluate_question(envelope, item["passageText"], "FOUNDATION", siblings=[])
+    structure = next(e for e in evaluations if e.evaluator_id == "eval_question_structure")
+    assert not structure.is_pass()
+    assert any("student-visible table" in i.message for i in structure.issues)
+
+
 def test_golden_fixtures_cover_all_19_families():
     fixture_dir = Path(__file__).resolve().parents[1] / "fixtures/golden_19_families"
     manifest_file = fixture_dir / "all_19_families_manifest.json"
@@ -21,6 +34,10 @@ def test_golden_fixtures_cover_all_19_families():
 
     for item in questions:
         q_type = item["questionType"]
+        if q_type == "TABLE_COMPLETION":
+            # The original snapshot is retained; v2 adds the previously missing
+            # student table, without changing the passage, evidence or answer.
+            item = json.loads((fixture_dir / "table_completion_stimulus_v2.json").read_text(encoding="utf-8"))
         covered_types.add(q_type)
         provenance = item.get("provenance")
         assert provenance in ("minimax_live_accepted", "academically_grounded_golden_fixture"), (

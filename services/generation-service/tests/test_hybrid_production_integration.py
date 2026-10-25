@@ -304,6 +304,18 @@ class FencedTestCheckpointClient:
         })()
 
 
+async def repair_with_granted_parent(repairer, client, context, artifact, issues, intent_id, version):
+    """Standalone repair tests need the same parent authority as StageExecutor."""
+    if intent_id not in client.operations:
+        client.grant_operation(OperationGrantRequest(
+            runId=client.run_id, epoch=client.active_epoch, leaseOwner=client.active_lease_owner,
+            operationId=intent_id, operationType="REPAIR", requestHash=f"hash_{intent_id}",
+            tokenReservation=15000, wallTimeReservationSeconds=60,
+            sectionId=str(artifact.section_id or 1), artifactId=artifact.artifact_id,
+        ))
+    return await repairer.repair(context, artifact, issues, intent_id, version)
+
+
 class RecordingHybridIntegrationProvider(BaseProvider):
     """Test transport provider recording dispatches and supporting controlled M3/Text-01 behaviors."""
 
@@ -530,7 +542,7 @@ async def test_successful_m3_plan_followed_by_text01_regeneration():
 
     # Instantiate repairer with gateway and invoke via repair callback
     repairer = QuestionItemRepairer(gateway=gateway)
-    repaired_env = await repairer.repair(
+    repaired_env = await repair_with_granted_parent(repairer, client,
         context=context,
         artifact=art,
         issues=[issue],
@@ -629,7 +641,7 @@ async def test_correct_epoch_and_lease_owner_propagated_to_both_providers():
     issue = Issue(code=IssueCode.AMBIGUOUS_ANSWER, message="Ambiguous question", severity=IssueSeverity.CRITICAL, scope=IssueScope.QUESTION)
 
     repairer = QuestionItemRepairer(gateway=gateway)
-    await repairer.repair(context, art, [issue], f"intent_op_epoch_{test_epoch}", 2)
+    await repair_with_granted_parent(repairer, client, context, art, [issue], f"intent_op_epoch_{test_epoch}", 2)
 
     # Verify checkpoint client recorded operations with exact epoch and lease owner
     assert len(client.grants) >= 2, "Expected at least 2 operation grants"
@@ -671,7 +683,7 @@ async def test_invalid_repair_action_or_mismatched_question_rejected():
         "preserveEvidenceClaimRef": "claim_s1_fact_01",
     }
     with pytest.raises(RepairJustificationError, match="Target question mismatch"):
-        await repairer.repair(context, art, [issue], "intent_q_mismatch", 2)
+        await repair_with_granted_parent(repairer, client, context, art, [issue], "intent_q_mismatch", 2)
     assert provider.text_call_count == 0, "Text-01 must not be dispatched when question number mismatches"
 
     # 4b. Incompatible action (SWAP_DISTRACTOR for DUPLICATE_CONTENT)
@@ -685,7 +697,7 @@ async def test_invalid_repair_action_or_mismatched_question_rejected():
     }
     dup_issue = Issue(code=IssueCode.DUPLICATE_CONTENT, message="Duplicate content", severity=IssueSeverity.CRITICAL, scope=IssueScope.QUESTION)
     with pytest.raises(RepairJustificationError, match="Incompatible repairAction"):
-        await repairer.repair(context, art, [dup_issue], "intent_action_incompat", 2)
+        await repair_with_granted_parent(repairer, client, context, art, [dup_issue], "intent_action_incompat", 2)
     assert provider.text_call_count == 0, "Text-01 must not be dispatched when repair action is incompatible"
 
 
@@ -716,7 +728,7 @@ async def test_unknown_issue_action_combination_rejected():
     }
     detected_issue = Issue(code=IssueCode.AMBIGUOUS_ANSWER, message="Ambiguous question", severity=IssueSeverity.CRITICAL, scope=IssueScope.QUESTION)
     with pytest.raises(RepairJustificationError, match="Issue code mismatch"):
-        await repairer.repair(context, art, [detected_issue], "intent_mismatched_issue", 2)
+        await repair_with_granted_parent(repairer, client, context, art, [detected_issue], "intent_mismatched_issue", 2)
     assert provider.text_call_count == 0, "Text-01 must not be dispatched on mismatched issue"
 
     # 5b. Direct plan contract validation fails closed for issue code not in ALLOWED_ACTIONS_FOR_ISSUE
@@ -760,7 +772,7 @@ async def test_evidence_claim_remains_immutable_and_no_fallback_fabrication():
         "preserveEvidenceClaimRef": "unverified_external_claim_99",
     }
     with pytest.raises(RepairJustificationError, match="Claim preservation violated"):
-        await repairer.repair(context, art, [issue], "intent_claim_tamper", 2)
+        await repair_with_granted_parent(repairer, client, context, art, [issue], "intent_claim_tamper", 2)
     assert provider.text_call_count == 0, "Text-01 must not be dispatched when claim is mutated"
 
     # 6b. Artifact lacking bound claim reference must NOT fabricate fallback claim ID
@@ -772,7 +784,7 @@ async def test_evidence_claim_remains_immutable_and_no_fallback_fabrication():
     unbound_art = art_no_claim.model_copy(update={"payload": pl})
 
     with pytest.raises(RepairJustificationError, match="Fallback claim fabrication is strictly prohibited"):
-        await repairer.repair(context, unbound_art, [issue], "intent_unbound", 2)
+        await repair_with_granted_parent(repairer, client, context, unbound_art, [issue], "intent_unbound", 2)
     assert provider.m3_call_count == m3_calls_before_6b, "M3 must not be dispatched when question has no bound claim"
 
 
@@ -792,7 +804,7 @@ async def test_repaired_question_passes_required_evaluations():
     issue = Issue(code=IssueCode.AMBIGUOUS_ANSWER, message="Ambiguous question", severity=IssueSeverity.CRITICAL, scope=IssueScope.QUESTION)
 
     repairer = QuestionItemRepairer(gateway=gateway)
-    repaired_env = await repairer.repair(context, art, [issue], "intent_eval_pass", 2)
+    repaired_env = await repair_with_granted_parent(repairer, client, context, art, [issue], "intent_eval_pass", 2)
 
     # Evaluate repaired envelope with deterministic evaluators
     from app.reading_evaluation import evaluate_question
@@ -833,7 +845,7 @@ async def test_m3_truncation_and_timeout_handled_fail_closed():
         usage=UsageReport(prompt_tokens=200, completion_tokens=2048, total_tokens=2248),
     )
     with pytest.raises(RepairJustificationError, match="truncated"):
-        await repairer.repair(context, art, [issue], "intent_trunc", 2)
+        await repair_with_granted_parent(repairer, client, context, art, [issue], "intent_trunc", 2)
     assert provider.text_call_count == 0, "Text-01 must not be dispatched when M3 truncates"
 
     # 8b. Timeout failure
@@ -843,7 +855,7 @@ async def test_m3_truncation_and_timeout_handled_fail_closed():
         operation_id="op_timeout",
     )
     with pytest.raises(RepairJustificationError, match="timed out"):
-        await repairer.repair(context, art, [issue], "intent_timeout", 2)
+        await repair_with_granted_parent(repairer, client, context, art, [issue], "intent_timeout", 2)
     assert provider.text_call_count == 0, "Text-01 must not be dispatched when M3 times out"
 
 
@@ -866,7 +878,7 @@ async def test_crash_restart_preserves_durable_operation_identity_without_duplic
     fixed_intent_id = f"intent_stable_{run_id}_v2"
 
     # Initial execution
-    await repairer.repair(context, art, [issue], fixed_intent_id, 2)
+    await repair_with_granted_parent(repairer, client, context, art, [issue], fixed_intent_id, 2)
     initial_m3_calls = provider.m3_call_count
     initial_text_calls = provider.text_call_count
     assert initial_m3_calls == 1
@@ -881,7 +893,7 @@ async def test_crash_restart_preserves_durable_operation_identity_without_duplic
     assert client.operations[expected_text_op].status == "COMPLETED"
 
     # Simulate process restart and replay of the exact same intent
-    await repairer.repair(context, art, [issue], fixed_intent_id, 2)
+    await repair_with_granted_parent(repairer, client, context, art, [issue], fixed_intent_id, 2)
 
     # Invariant: Underlying provider call() was NOT called again; results replayed from persistence
     assert provider.m3_call_count == 1, "M3 must not be re-billed on restart"
@@ -905,7 +917,7 @@ async def test_existing_text_only_behavior_unchanged_when_hybrid_disabled():
 
     # Explicitly disable hybrid repair on repairer
     text_only_repairer = QuestionItemRepairer(gateway=gateway, enable_hybrid=False)
-    repaired_env = await text_only_repairer.repair(context, art, [issue], "intent_text_only", 2)
+    repaired_env = await repair_with_granted_parent(text_only_repairer, client, context, art, [issue], "intent_text_only", 2)
 
     # Invariant: M3 was NEVER invoked
     assert provider.m3_call_count == 0, "M3 must not be invoked when Hybrid is disabled"
@@ -1288,7 +1300,7 @@ async def test_reject_missing_passage_or_blueprint_parent_reference():
     issue = Issue(code=IssueCode.AMBIGUOUS_ANSWER, message="Ambiguous", severity=IssueSeverity.CRITICAL, scope=IssueScope.QUESTION)
 
     with pytest.raises(RepairJustificationError, match="lacks required passage parent reference"):
-        await repairer.repair(context, orphaned_art_no_passage, [issue], "intent_no_passage", 2)
+        await repair_with_granted_parent(repairer, client, context, orphaned_art_no_passage, [issue], "intent_no_passage", 2)
 
     # 13b. QuestionItemRepairer fails closed when artifact has no blueprint parent (no dummy synthesis)
     orphaned_art_no_bp = ArtifactEnvelope.create(
@@ -1310,7 +1322,7 @@ async def test_reject_missing_passage_or_blueprint_parent_reference():
         producer_version="2.0.0",
     )
     with pytest.raises(RepairJustificationError, match="lacks required blueprint parent reference"):
-        await repairer.repair(context, orphaned_art_no_bp, [issue], "intent_no_bp", 2)
+        await repair_with_granted_parent(repairer, client, context, orphaned_art_no_bp, [issue], "intent_no_bp", 2)
 
     # 13c. Paper repairer fails closed when paper lacks blueprintRef
     from app.repair.paper import PaperSurgicalRepairer, PaperRepairDirective

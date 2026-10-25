@@ -242,6 +242,11 @@ class QuestionCandidateGenerator:
                 options=options,
                 evidenceQuote=ev_quote,
                 explanation=raw.get("explanation"),
+                tableContext=raw.get("tableContext"),
+                rowHeader=raw.get("rowHeader"),
+                colHeader=raw.get("colHeader"),
+                flowSteps=raw.get("flowSteps"),
+                stepIndex=raw.get("stepIndex"),
                 metadata={
                     "promptVersion": QUESTION_PROMPT_VERSION,
                     "provider": provider_name,

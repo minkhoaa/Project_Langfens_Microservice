@@ -82,6 +82,26 @@ def _claim_to_dict(claim: Union[VerifiedClaim, Dict[str, Any]]) -> Dict[str, Any
     }
 
 
+def _substantive_claim_text(text: str) -> str:
+    """Exclude citation fragments and editorial navigation before family scoring.
+
+    Publication years and author names are provenance, not quantitative facts.
+    This is a conservative syntax gate, not a claim of semantic verification.
+    """
+    text = re.sub(
+        r"\b[A-Z][\w-]*(?:\s+(?:&|and)\s+[A-Z][\w-]*)?\s*,\s*(?:19|20)\d{2}[a-z]?",
+        "", text,
+    )
+    text = re.sub(
+        r"\b(?:which\s+)?we\s+(?:will\s+)?(?:not\s+)?(?:revisit|discuss|review|consider)\b[^.!?]*[.!?]?",
+        "", text, flags=re.IGNORECASE,
+    )
+    text = text.strip(" ,;().:-\n\t")
+    if text.casefold() in {"references", "bibliography", "further reading", "works cited"}:
+        return ""
+    return text
+
+
 def score_claim_suitability_for_family(
     claim_dict: Dict[str, Any],
     question_family: str,
@@ -92,7 +112,10 @@ def score_claim_suitability_for_family(
     Returns a suitability score. Positive scores indicate valid suitability;
     scores <= 0.0 indicate semantic unsuitability.
     """
-    text = claim_dict.get("text", "").lower()
+    substantive_text = _substantive_claim_text(str(claim_dict.get("text") or ""))
+    if not substantive_text:
+        return 0.0
+    text = substantive_text.lower()
     keywords = set(k.lower() for k in claim_dict.get("keywords", []))
     words = set(re.findall(r"\b[a-z]{3,}\b", text)) | keywords
 
@@ -110,7 +133,7 @@ def score_claim_suitability_for_family(
     # Categorization / Matching features / Classification families
     elif any(p in fam_norm for p in ("MATCHING_FEATURES", "CLASSIFICATION", "MATCHING_INFORMATION")):
         entity_overlap = len(words & ENTITY_DISTINCTION_KEYWORDS)
-        orig_text = claim_dict.get("text", "")
+        orig_text = substantive_text
         cap_entities = len(re.findall(r"\b[A-Z][a-z]{2,}\b", orig_text))
         if entity_overlap > 0 or cap_entities > 0:
             base_score += min(10.0, 2.0 * entity_overlap + 1.5 * cap_entities)

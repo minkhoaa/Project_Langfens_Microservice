@@ -60,7 +60,7 @@ QUESTION_FIELDS = {
     "questionNumber", "questionType", "explanation", "statement", "answer",
     "evidenceQuote", "absenceAssessment", "prompt", "options", "correctOption",
     "answers", "headings", "features", "endings", "categories", "summaryText",
-    "tableContext", "flowSteps", "calloutLabel", "partDescription", "headingContext",
+    "tableContext", "rowHeader", "colHeader", "flowSteps", "stepIndex", "calloutLabel", "partDescription", "headingContext",
     "fieldLabel", "svgAssetId",
 }
 NUMBER = re.compile(r"(?<![\w])\d+(?:[.,]\d+)*(?:%|)(?![\w])")
@@ -643,6 +643,13 @@ def evaluate_question(
         structure.append((IssueCode.SCHEMA_VIOLATION, str(error)))
     prompt, answer = question_prompt(payload), question_answer(payload)
     question_type = payload.get("questionType")
+    if question_type == "TABLE_COMPLETION":
+        # A numbered gap alone is a sentence-completion task, not a table.
+        # Accept a complete textual table or explicit row/column coordinates.
+        has_table = bool(str(payload.get("tableContext") or "").strip())
+        has_coordinates = all(str(payload.get(key) or "").strip() for key in ("rowHeader", "colHeader"))
+        if not (has_table or has_coordinates):
+            structure.append((IssueCode.SCHEMA_VIOLATION, "TABLE_COMPLETION requires student-visible table context or row and column headers"))
     if len(str(payload.get("explanation", ""))) < 25:
         structure.append((IssueCode.SCHEMA_VIOLATION, "Explanation must explain the actual passage inference"))
     if not prompt.strip() or payload.get("difficulty", difficulty) != difficulty:

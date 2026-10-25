@@ -583,7 +583,10 @@ class StageExecutor:
             def version(self) -> str:
                 return "1.0.0"
             async def generate(inner_self, ctx: LoopContext, intent_id: str, ver: int) -> ArtifactEnvelope:
-                res = await generate(ver)
+                kwargs = {}
+                if "operation_context" in inspect.signature(generate).parameters:
+                    kwargs["operation_context"] = ctx.model_copy(update={"parent_operation_id": intent_id})
+                res = await generate(ver, **kwargs)
                 if isinstance(res, ArtifactEnvelope):
                     return res
                 return ArtifactEnvelope.create(
@@ -601,12 +604,15 @@ class StageExecutor:
         eval_cache: dict[str, list[EvaluationResult]] = {}
         last_eval_rejected_error: list[EvaluationRejectedError] = []
         selective_evaluation = "evaluator_id" in inspect.signature(evaluate).parameters
-        async def run_all_evaluations(art: ArtifactEnvelope, evaluator_id: str) -> list[EvaluationResult]:
+        async def run_all_evaluations(art: ArtifactEnvelope, evaluator_id: str, ctx: LoopContext, intent_id: str) -> list[EvaluationResult]:
             cache_key = f"{art.artifact_id}:{art.version}:{art.content_hash}"
             if selective_evaluation:
                 cache_key += f":{evaluator_id}"
             if cache_key not in eval_cache:
-                raw = await evaluate(art, evaluator_id=evaluator_id) if selective_evaluation else await evaluate(art)
+                kwargs = {"evaluator_id": evaluator_id} if selective_evaluation else {}
+                if "operation_context" in inspect.signature(evaluate).parameters:
+                    kwargs["operation_context"] = ctx.model_copy(update={"parent_operation_id": intent_id})
+                raw = await evaluate(art, **kwargs)
                 eval_cache[cache_key] = list(raw) if isinstance(raw, (list, tuple)) else [raw]
             return eval_cache[cache_key]
 
@@ -617,7 +623,7 @@ class StageExecutor:
                 inner_self._ev_id = ev_id
                 inner_self._ev_version = EVALUATION_CATALOG.get(ev_id, "1.0.0")
                 inner_self.is_expensive = ev_id in EXPENSIVE_EVALUATORS
-                inner_self.estimated_tokens = 4000 if inner_self.is_expensive else 0
+                inner_self.estimated_tokens = loop_policy.evaluate_token_reservation if inner_self.is_expensive else 0
             @property
             def evaluator_id(inner_self) -> str:
                 return inner_self._ev_id
@@ -625,7 +631,7 @@ class StageExecutor:
             def evaluator_version(inner_self) -> str:
                 return inner_self._ev_version
             async def evaluate(inner_self, ctx: LoopContext, art: ArtifactEnvelope, intent_id: str) -> EvaluationResult:
-                results = await run_all_evaluations(art, inner_self._ev_id)
+                results = await run_all_evaluations(art, inner_self._ev_id, ctx, intent_id)
                 matched = next((e for e in results if e.evaluator_id == inner_self._ev_id), None)
                 if matched is None:
                     missing = [inner_self._ev_id]
@@ -686,13 +692,13 @@ class StageExecutor:
                     # Bind before invocation: a TypeError raised *inside* repair
                     # may follow paid dispatch and must never trigger a second call.
                     signature = inspect.signature(repair)
-                    try:
-                        signature.bind(art, issues, ver, intent_id=intent_id)
-                    except TypeError:
-                        signature.bind(art, issues, ver)
-                        res = await repair(art, issues, ver)
-                    else:
-                        res = await repair(art, issues, ver, intent_id=intent_id)
+                    kwargs = {}
+                    if "intent_id" in signature.parameters:
+                        kwargs["intent_id"] = intent_id
+                    if "operation_context" in signature.parameters:
+                        kwargs["operation_context"] = ctx.model_copy(update={"parent_operation_id": intent_id})
+                    signature.bind(art, issues, ver, **kwargs)
+                    res = await repair(art, issues, ver, **kwargs)
                     if isinstance(res, ArtifactEnvelope):
                         return res
                     return art.create_next_version(new_payload=res, producer_version=PRODUCER_VERSION)

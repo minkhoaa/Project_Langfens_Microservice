@@ -1306,7 +1306,7 @@ class SectionRunner:
         passage_art_id = f"passage:{context.run_id}:{config.index}"
         passage_parents = (actual_blueprint, actual_source.evidence.to_ref())
 
-        async def generate_passage(version: int) -> dict[str, Any]:
+        async def generate_passage(version: int, *, operation_context=None) -> dict[str, Any]:
             if not self.gateway:
                 raise ValueError("ProviderGateway must be provided to generate passage")
 
@@ -1341,6 +1341,7 @@ class SectionRunner:
                 run_id=context.run_id,
                 section_id=str(config.index),
                 artifact_id=passage_art_id,
+                parent_operation_id=getattr(operation_context, "parent_operation_id", None),
                 preferred_provider=actual_policy.provider,
                 timeout_seconds=call_seconds,
                 wall_time_reservation_seconds=call_seconds,
@@ -1587,6 +1588,8 @@ class SectionRunner:
                 target_q_type: str = q_type,
                 target_claim_id: str = claim_id,
                 target_art_id: str = q_art_id,
+                *,
+                operation_context=None,
             ) -> dict[str, Any]:
                 if not self.gateway:
                     raise ValueError("ProviderGateway must be provided to generate questions")
@@ -1638,7 +1641,10 @@ class SectionRunner:
                                 operation_id=op_id,
                                 run_id=context.run_id,
                                 section_id=str(config.index),
-                                artifact_id=f"summary_group:{context.run_id}:{target_g_idx}",
+                                # The first requesting question owns the physical
+                                # shared-summary call for admission and reconstruction.
+                                artifact_id=target_art_id,
+                                parent_operation_id=getattr(operation_context, "parent_operation_id", None),
                                 preferred_provider=actual_policy.provider,
                                 timeout_seconds=call_seconds,
                                 wall_time_reservation_seconds=call_seconds,
@@ -1766,6 +1772,7 @@ class SectionRunner:
                             run_id=context.run_id,
                             section_id=str(config.index),
                             artifact_id=target_art_id,
+                            parent_operation_id=getattr(operation_context, "parent_operation_id", None),
                             preferred_provider=actual_policy.provider,
                             timeout_seconds=call_seconds,
                             wall_time_reservation_seconds=call_seconds,
@@ -1836,6 +1843,7 @@ class SectionRunner:
                 prior: tuple[ArtifactEnvelope, ...] = tuple(q_envelopes),
                 *,
                 evaluator_id: Optional[str] = None,
+                operation_context=None,
             ) -> list[EvaluationResult]:
                 # 1. Structural, verbatim length, evidence offset, and uniqueness evaluations
                 evals = list(evaluate_question(
@@ -1925,7 +1933,7 @@ class SectionRunner:
                     blind_input=blind_input,
                     expected_answer=expected_ans,
                     target_ref=art.to_ref(),
-                    context=context,
+                    context=operation_context or context,
                     input_dependency_refs=list(art.parent_refs),
                 )
                 evals.append(blind_res)
@@ -1936,6 +1944,7 @@ class SectionRunner:
                 issues: Sequence[Any],
                 ver: int,
                 intent_id: Optional[str] = None,
+                operation_context=None,
             ) -> dict[str, Any]:
                 from app.solvers.cache import solver_cache
                 solver_cache.invalidate()
@@ -1946,7 +1955,7 @@ class SectionRunner:
                 if "passage" not in pl and "passageText" not in pl:
                     pl["passage"] = passage_text
                 effective_intent_id = intent_id or f"op_repair_q_{ver}"
-                repaired_env = await item_rep.repair(context, art.model_copy(update={"payload": pl}), issues, effective_intent_id, ver)
+                repaired_env = await item_rep.repair(operation_context or context, art.model_copy(update={"payload": pl}), issues, effective_intent_id, ver)
                 res_pl = dict(repaired_env.payload)
                 res_pl.pop("passage", None)
                 return res_pl

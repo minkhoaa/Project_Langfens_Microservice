@@ -257,8 +257,32 @@ class ProviderGateway:
                     operation_id=request.operation_id,
                 )
 
-            elapsed_gateway_wall = time.time() - (deadline - timeout)
+            elapsed_gateway_wall = time.time() - now
             remaining_parent_wall = max(0.0, float(request.wall_time_reservation_seconds) - max(0.0, elapsed_gateway_wall))
+            if request.parent_operation_id:
+                # Sequential children share one durable parent, not a fresh wall
+                # allowance per logical request. The grant remains authoritative
+                # (and serializes concurrent contenders); this read only bounds
+                # the requested window, never creates authority or refunds usage.
+                if hasattr(self.checkpoint_client, "resume_state_async"):
+                    state = await self.checkpoint_client.resume_state_async(request.run_id)
+                else:
+                    state = self.checkpoint_client.resume_state(request.run_id)
+                operations = {op.operationId: op for op in (state.operations or [])}
+                if attempt_operation_id not in operations:  # terminal replay uses its original grant
+                    parent = operations.get(request.parent_operation_id)
+                    if parent is None or parent.status.upper() != "RESERVED":
+                        raise BudgetExhaustedError("Parent operation must be RESERVED", operation_id=attempt_operation_id)
+                    children = [op for op in operations.values() if op.parentOperationId == parent.operationId]
+                    allocated_wall = sum(
+                        op.wallTimeUsedSeconds if op.status.upper() == "COMPLETED"
+                        else op.wallTimeReservationSeconds
+                        for op in children
+                    )
+                    remaining_parent_wall = min(
+                        remaining_parent_wall,
+                        max(0.0, parent.wallTimeReservationSeconds - allocated_wall),
+                    )
             wall_reservation = min(
                 float(request.wall_time_reservation_seconds),
                 remaining_parent_wall,
@@ -365,6 +389,9 @@ class ProviderGateway:
                     operation_id=attempt_operation_id,
                 )
 
+            # The transport/queue deadline cannot exceed the wall actually
+            # granted, even when the caller supplied a longer request timeout.
+            deadline = min(deadline, time.time() + wall_reservation)
             if time.time() >= deadline:
                 last_error = DeadlineExceededError(
                     "Deadline elapsed after durable reservation and before queue wait",

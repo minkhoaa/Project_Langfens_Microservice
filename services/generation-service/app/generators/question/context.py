@@ -45,6 +45,11 @@ class QuestionCandidate(CanonicalBaseModel):
     evidence_quote: str = Field(default="", alias="evidenceQuote")
     evidence_span: Optional[Tuple[int, int]] = Field(default=None, alias="evidenceSpan")
     explanation: Optional[str] = None
+    table_context: Optional[str] = Field(default=None, alias="tableContext")
+    row_header: Optional[str] = Field(default=None, alias="rowHeader")
+    col_header: Optional[str] = Field(default=None, alias="colHeader")
+    flow_steps: Optional[List[str]] = Field(default=None, alias="flowSteps")
+    step_index: Optional[int] = Field(default=None, alias="stepIndex")
     score: float = 1.0
     rejected: bool = False
     rejection_reasons: List[str] = Field(default_factory=list, alias="rejectionReasons")

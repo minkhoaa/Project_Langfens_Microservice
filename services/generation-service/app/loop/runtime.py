@@ -363,8 +363,8 @@ class BoundedLoopRuntime:
             b.tokens_used = max(b.tokens_used, loop_tokens)
             # Rebuild provider-backed scopes from durable outcomes, rather than
             # retaining a cursor's stale parent reservations forever.
-            self._refresh_provider_token_accounting(state)
-            b.wall_time_used_seconds = max(b.wall_time_used_seconds, loop_wall)
+            if not self._refresh_provider_token_accounting(state):
+                b.wall_time_used_seconds = max(b.wall_time_used_seconds, loop_wall)
         elif not self.context.parent_operation_id and not state.artifacts:
             b.calls_used = max(b.calls_used, state.callsUsed)
             b.tokens_used = max(b.tokens_used, state.tokensUsed)
@@ -456,8 +456,22 @@ class BoundedLoopRuntime:
             own = used if known else max(used, reservation)
             child_total = sum(charge(cid, path | {oid}) for cid in children.get(oid, []))
             return max(own, child_total)
+        def wall_charge(oid: str, path: frozenset[str] = frozenset()) -> float:
+            if oid in path:
+                raise ValueError("Durable operation accounting cycle")
+            op = all_ops[oid]
+            own = max(0.0, op.wallTimeUsedSeconds if op.status.upper() == "COMPLETED"
+                      else op.wallTimeReservationSeconds)
+            return max(own, sum(wall_charge(cid, path | {oid}) for cid in children.get(oid, [])))
         roots = [oid for oid in selected if all_ops[oid].parentOperationId not in selected]
+        self.context.budget_tracker.wall_time_used_seconds = max(
+            sum(wall_charge(oid) for oid in roots),
+            (datetime.now(timezone.utc) - self.context.budget_tracker.started_at).total_seconds(),
+        )
         self.context.budget_tracker.tokens_used = sum(charge(oid) for oid in roots)
+        self.context.budget_tracker.calls_used = sum(
+            all_ops[oid].operationType in provider_types for oid in selected
+        )
         return True
 
     def _block_unresolved_provider_operations(self) -> bool:
@@ -906,6 +920,23 @@ class BoundedLoopRuntime:
             return
         op = self._operations.get(intent.operation_id)
         if op:
+            outcome = json.loads(op.resultRefJson) if op.resultRefJson else None
+            if isinstance(outcome, dict) and outcome.get("kind") == "CAPABILITY_FAILURE_V1":
+                if (outcome.get("operationId") != intent.operation_id
+                        or outcome.get("requestHash") != intent.request_hash
+                        or outcome.get("targetVersion") != version
+                        or outcome.get("artifactId") != self.context.target_artifact_id
+                        or not isinstance(outcome.get("reason"), str) or not outcome["reason"]):
+                    raise ValueError("Completed failure outcome does not bind exact operation")
+                self._capability_failures.append(outcome["reason"])
+                self.journal.record_intent(intent, self.context.cursor.current_state)
+                self.journal.record_ack(intent.operation_id, "CAPABILITY_FAILURE_V1")
+                if repair and self._generated_versions < self.policy.max_generated_versions:
+                    self.context.cursor.advance(LoopState.DRAFTING)
+                    self._checkpoint()
+                else:
+                    self._finish(LoopReason.INVALID_OUTPUT, outcome["reason"])
+                return
             art = self._drafts.get(version)
             if art is None or not self._artifact_valid(art, version):
                 raise ValueError("Completed draft operation lacks exact durable artifact")
@@ -930,7 +961,7 @@ class BoundedLoopRuntime:
                 # the ledger keeps the terminal attribution truthful: falling back to
                 # regeneration without a record made every repair-infeasible defect look
                 # like a generic MAX_VERSIONS version-cap exhaustion.
-                self._record_capability_failure(error, repair=repair, version=version)
+                failure_reason = self._record_capability_failure(error, repair=repair, version=version)
                 if self._block_unresolved_provider_operations():
                     return
                 if self.persistence_client is not None:
@@ -940,6 +971,11 @@ class BoundedLoopRuntime:
                             runId=self.context.run_id, epoch=self.context.authority.epoch,
                             leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
                             tokensUsed=0, accountingType="REPORTED", wallTimeUsedSeconds=draft_wall_time,
+                            resultRefJson=json.dumps({
+                                "kind": "CAPABILITY_FAILURE_V1", "operationId": intent.operation_id,
+                                "requestHash": intent.request_hash, "targetVersion": version,
+                                "artifactId": self.context.target_artifact_id, "reason": failure_reason,
+                            }, sort_keys=True),
                         ))
                         if not self._refresh_provider_token_accounting():
                             self.context.budget_tracker.tokens_used = max(
