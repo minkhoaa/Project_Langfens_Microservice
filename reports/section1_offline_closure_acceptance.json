@@ -1,0 +1,421 @@
+{
+  "mode": "SCRIPTED_TRANSPORT_REAL_ORCHESTRATION_IN_MEMORY_PERSISTENCE",
+  "run_id": "run_offline_target_section1",
+  "accepted_questions": 13,
+  "section_ref": {
+    "artifactId": "section:run_offline_target_section1:1",
+    "artifactType": "Section",
+    "version": 1,
+    "contentHash": "13f3818c3f56beed74fe4c249dd04f017bdc3988fcfca3cb51e9904d9d6a932b"
+  },
+  "section_status": "ACCEPTED_IN_MEMORY_NOT_PUBLISHED",
+  "physical_calls": 40,
+  "physical_reservation_sum_over_time_not_concurrent": 273975,
+  "physical_reported_tokens": 68366,
+  "unresolved_operations": [],
+  "question_heads": [
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:1",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "a5f461859c3172e21aa3aff1363cb7555004f532afdf79d32403bf350ae73a49"
+      },
+      "family": "TRUE_FALSE_NOT_GIVEN",
+      "answer": "TRUE",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:13.158530Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.062149
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {}
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:2",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "b1483aaa5aa03fdd752f65deabb357c76e4ce625b7addc245f4bea13dda01bdc"
+      },
+      "family": "TRUE_FALSE_NOT_GIVEN",
+      "answer": "FALSE",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:13.228520Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.0612
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {}
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:3",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "b19c61a2cc48775494875d5e687a638676c2dd5793583dad2e22f5e15cd88ee4"
+      },
+      "family": "TRUE_FALSE_NOT_GIVEN",
+      "answer": "NOT_GIVEN",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:13.297652Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.230395
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {}
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:4",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "08eb014cadfe05c67f282296883628ed1d2c493139d0e3c9d2b37b75e1e0c0d7"
+      },
+      "family": "TRUE_FALSE_NOT_GIVEN",
+      "answer": "TRUE",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:13.536072Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.070321
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {}
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:5",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "7a355b3333ab7475b41047943ec8d026dd067c58a87ccbbb72a86c05f85833bc"
+      },
+      "family": "TRUE_FALSE_NOT_GIVEN",
+      "answer": "TRUE",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:13.614659Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.103956
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {}
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:6",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "d51a7a9fe18c4c65c073fb260d921d5d75846610ca7ca2caccbaad13e3997b3b"
+      },
+      "family": "TABLE_COMPLETION",
+      "answer": "organic silt",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:13.726836Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.293478
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {
+        "tableContext": "Wetland research: samples and findings",
+        "rowHeader": "Fine deposits",
+        "colHeader": "Composition"
+      }
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:7",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "abfe46d5fc8e2ce68a174b061fb574bc678b4befb5777fcaca2995632276c9a0"
+      },
+      "family": "TABLE_COMPLETION",
+      "answer": "soil salinization",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:14.028307Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.294345
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {
+        "tableContext": "Wetland research: samples and findings",
+        "rowHeader": "Water-sluicing",
+        "colHeader": "Purpose"
+      }
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:8",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "1926dd20ba0271656b83d3199069e3588d631a03b90e97bcaeb430d5dac55f9d"
+      },
+      "family": "TABLE_COMPLETION",
+      "answer": "peat cores",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:14.331091Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.294509
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {
+        "tableContext": "Wetland research: samples and findings",
+        "rowHeader": "Pollen sampling",
+        "colHeader": "Location"
+      }
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:9",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "d6570485af987bb49aee664c0e80c20f7e8028cda585c22b3d784bc4a4b0458d"
+      },
+      "family": "TABLE_COMPLETION",
+      "answer": "dairy products",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:14.634399Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.293611
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {
+        "tableContext": "Wetland research: samples and findings",
+        "rowHeader": "Lipid residues",
+        "colHeader": "Product"
+      }
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:10",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "bc4b477cf995454fed9a8b2fc196e65229b78fe520d9b0ce731a4bf8a421800a"
+      },
+      "family": "FLOW_CHART",
+      "answer": "oak",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:14.936980Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.292823
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {
+        "flowSteps": [
+          "Collect the relevant archaeological sample",
+          "Take wood samples from [10] piles supporting trackways.",
+          "Record the resulting measurement"
+        ],
+        "stepIndex": 1
+      }
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:11",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "d4f64bc568e5887c68bd5640c698721f5d159a9072d51fb4a5e43f34763d67b4"
+      },
+      "family": "FLOW_CHART",
+      "answer": "deciduous",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:15.238884Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.293378
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {
+        "flowSteps": [
+          "Collect the relevant archaeological sample",
+          "Extract timber from mature upland [11] woodlands.",
+          "Record the resulting measurement"
+        ],
+        "stepIndex": 1
+      }
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:12",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "a40185a51ec59c0c95e94ac239ab603452ff9080b374ac83731147f050d40ceb"
+      },
+      "family": "FLOW_CHART",
+      "answer": "oxygen",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:15.544200Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.290734
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {
+        "flowSteps": [
+          "Collect the relevant archaeological sample",
+          "Measure heavy [12] isotope ratios in subfossil cellulose.",
+          "Record the resulting measurement"
+        ],
+        "stepIndex": 1
+      }
+    },
+    {
+      "ref": {
+        "artifactId": "question:run_offline_target_section1:13",
+        "artifactType": "Question",
+        "version": 1,
+        "contentHash": "057da890e1b729913fc26e5a02cad937064d860e967c367e36b6f647731e531d"
+      },
+      "family": "FLOW_CHART",
+      "answer": "X-ray",
+      "budget": {
+        "callsUsed": 3,
+        "repairsUsed": 0,
+        "startedAt": "2026-10-25T17:25:15.845371Z",
+        "tokensUsed": 5182,
+        "versionsUsed": 1,
+        "wallTimeUsedSeconds": 0.292758
+      },
+      "evaluators": {
+        "eval_question_structure": "PASS",
+        "eval_answer_verbatim_length": "PASS",
+        "eval_evidence_offsets": "PASS",
+        "eval_question_uniqueness": "PASS",
+        "eval_question_semantic": "PASS",
+        "eval_blind_solver_adversary": "PASS"
+      },
+      "stimulus": {
+        "flowSteps": [
+          "Collect the relevant archaeological sample",
+          "Analyze hearth clays using portable [13] fluorescence.",
+          "Record the resulting measurement"
+        ],
+        "stepIndex": 1
+      }
+    }
+  ],
+  "no_live_calls": true,
+  "scope_limitations": [
+    "Persistence is in-memory, not a 13-question PostgreSQL commit test.",
+    "Deterministic responses are not independent model-quality evidence.",
+    "Positive path does not require a semantic M3 repair; dedicated integration tests cover that path."
+  ],
+  "source_sha": "63886d8341d396ed539709f8b1a6dea44dc125bf",
+  "mandatory_production_equivalent_postgres_13q_gate": "NOT_SATISFIED: in-memory heads only; PostgreSQL grant/reconciliation contracts are separate"
+}

@@ -1,0 +1,1875 @@
+{
+  "verdict": "BLOCKED",
+  "release_label": "NOT_RELEASE_READY",
+  "source_sha": "63886d8341d396ed539709f8b1a6dea44dc125bf",
+  "base_sha": "666cf72452d4bc3ea75a0a4a489ae7411a281000",
+  "app_git_tree": "c910122fca9551c3682860b55fd401a166d4198f",
+  "source_file_sha256": {
+    "services/exam-service.Tests/Section1OperationAuthorityTests.cs": "a497a083ebfda84b601f488af498fc67fd0b7b6f30bda4aa250f037979dcd3cb",
+    "services/generation-service/app/blueprint/claim_binding.py": "a1746f56bbd20d8d1a3688a2c33c2859a3c641a13211960b3a29d18348a74664",
+    "services/generation-service/app/generators/question/context.py": "81fb4a327582f26f208e067792ca917b80dc59a50ed0cf69234e1750c3dd5e51",
+    "services/generation-service/app/generators/question/generator.py": "2378d84cbab701ff22a7cf2874124e50482706b421a13756359cee2c657f8cec",
+    "services/generation-service/app/loop/runtime.py": "438f77de34c7da2452ab1e6a1b8bcb7121a8626ed03b5c8eb6a3bd4e7960d97d",
+    "services/generation-service/app/providers/gateway.py": "d67405af856275c0e1feebdd38db22f788f1ae0aedb422d15ccedf746856c60e",
+    "services/generation-service/app/reading_evaluation.py": "e8f7115c5ce70703a7cfba1dad94d0ff4274778dc7f49ac386000364c87ed313",
+    "services/generation-service/app/repair/question.py": "0161eef71c4e5f386d466200d835fe26fa4867fd56a28f2f94e823b67fa649c9",
+    "services/generation-service/app/section_runner.py": "c1cb3698e32a32f743c80fa8f50a33a31ac51cb9f846487ede082231256f8a69",
+    "services/generation-service/app/stage_executor.py": "2b15d5d287f091488e34888caa2eadd7cf1bf098a95d2aa718333a27c0cb05d8",
+    "services/generation-service/tests/fixtures/golden_19_families/table_completion_stimulus_v2.json": "905877e702af916071d552a8a058e46bf87a02b1de6fd94f20c45b76f0edf531",
+    "services/generation-service/tests/offline_support/run_identity.py": "dc45cb153586d9223b6f0b9fe1627f09834a39e45ff92e857047fdc7a314393c",
+    "services/generation-service/tests/offline_support/sitecustomize.py": "54114ddf44af2280e6f47ae7b8efde2179c99af0512ea1106204db4b434ea200",
+    "services/generation-service/tests/test_hybrid_production_integration.py": "408588e8dcf217b505b147c5577833ccc63a43029016879c5fc81759514fb444",
+    "services/generation-service/tests/test_operation_parent_authority.py": "647eec211365f80ac17900611b95ef58efbd1ce89e23baa47eec00a104f6ce8e",
+    "services/generation-service/tests/test_passage_repair_routing_and_budget.py": "c14833a0409e19ddbd62929c7dfa6c7a7705040bc75c598778bdf818d4ad05e3",
+    "services/generation-service/tests/test_reading_gateway_finite.py": "5bf3d9661d9a5663c4ad0e6f4fbe757b7859170110ebbbe8bbd67696bc090690",
+    "services/generation-service/tests/test_section1_blocker_closure.py": "f57151e81ed4e733dc9fae8ced0edb9f09abcbeee7cdf4107fb95adae0b4d30c",
+    "services/generation-service/tests/test_section1_target_offline.py": "d7f7d43233792755849a126f2594606ec92e21ae0f1f3bfc72b11f13ca4b558d",
+    "services/generation-service/tests/unified/mock_fixtures.py": "fbda01752f1a6f457a7955871caf38fecb47bf539eb230d1a5ce24081eb2a6a5",
+    "services/generation-service/tests/unified/test_golden_19_families_fixtures.py": "8af1d1577d9b068717c07aebc91a40886c95b01eb335d336047eb7227a988321"
+  },
+  "environments": {
+    "host_python": "3.14.8",
+    "target_python": "3.12.15",
+    "target_container_image_id": "eea0685d6d99 (cached generation-service image; --pull=never --network none)",
+    "target_test_dependencies": "Existing image runtime packages plus local pure-Python pytest 9.1.1 / pytest-asyncio 1.4.0 extras; no downloads",
+    "python312_full": "12 collection errors: jsonschema and its native rpds dependency unavailable offline. No skipped/deleted modules used to manufacture full PASS.",
+    "guard": "services/generation-service/tests/offline_support/sitecustomize.py",
+    "run_identity": "services/generation-service/tests/offline_support/run_identity.py; identical SHA256(nodeid)-seeded UUID stream",
+    "config_file_sha256": {
+      "deploy/envs/loop-caps.env": "da9f7fc617fc704157e2da649f02f28e82975f583d59d9e6834efd95353030c7",
+      "deploy/envs/ai.env": "8f2727caa05c959da9ca54826bebe73eabfd74e6761c056941ebaf89a66e7d53"
+    },
+    "database": "Only container langfens-closure-postgres, label purpose=section1-offline-closure, database section1_closure on 127.0.0.1:55449. No shared databases queried/reset."
+  },
+  "suites": {
+    "python314_baseline": {
+      "name": "clean 666cf724 baseline, Python 3.14.8",
+      "counts": {
+        "passed": 1861,
+        "failed": 98,
+        "errors": 0,
+        "skipped": 24
+      },
+      "failed_tests": [
+        {
+          "nodeid": "tests.test_hybrid_offline_replays::test_replay_ambiguous_answer_repaired_via_m3_plan",
+          "category": "outdated test contract",
+          "classification_evidence": "fixture lacks production allocation/parent preconditions; not waived",
+          "error": "E   app.persistence.client.CheckpointApiError: HTTP 422: Artifact budget allocation 'art_q_slot_2' not found\nE   app.providers.errors.BudgetExhaustedError: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found"
+        },
+        {
+          "nodeid": "tests.test_hybrid_offline_replays::test_replay_duplicate_prompt_repaired_via_regenerate_distinct",
+          "category": "outdated test contract",
+          "classification_evidence": "fixture lacks production allocation/parent preconditions; not waived",
+          "error": "E   app.persistence.client.CheckpointApiError: HTTP 422: Artifact budget allocation 'art_q_slot_5' not found\nE   app.providers.errors.BudgetExhaustedError: Budget cap exceeded: Artifact budget allocation 'art_q_slot_5' not found\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: Budget cap exceeded: Artifact budget allocation 'art_q_slot_5' not found"
+        },
+        {
+          "nodeid": "tests.test_hybrid_offline_replays::test_replay_not_given_semantic_disagreement_repaired_via_m3",
+          "category": "outdated test contract",
+          "classification_evidence": "fixture lacks production allocation/parent preconditions; not waived",
+          "error": "E   app.persistence.client.CheckpointApiError: HTTP 422: Artifact budget allocation 'art_q_slot_4' not found\nE   app.providers.errors.BudgetExhaustedError: Budget cap exceeded: Artifact budget allocation 'art_q_slot_4' not found\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: Budget cap exceeded: Artifact budget allocation 'art_q_slot_4' not found"
+        },
+        {
+          "nodeid": "tests.test_hybrid_offline_replays::test_comparative_baseline_blind_repair_vs_m3_assisted_repair",
+          "category": "outdated test contract",
+          "classification_evidence": "fixture lacks production allocation/parent preconditions; not waived",
+          "error": "E   app.persistence.client.CheckpointApiError: HTTP 422: Artifact budget allocation 'art_q_slot_2' not found\nE   app.providers.errors.BudgetExhaustedError: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found"
+        },
+        {
+          "nodeid": "tests.test_hybrid_question_repair_integration::test_semantic_adversary_issue_invokes_m3_and_regenerates_with_text01",
+          "category": "outdated test contract",
+          "classification_evidence": "fixture lacks production allocation/parent preconditions; not waived",
+          "error": "E   app.persistence.client.CheckpointApiError: HTTP 422: Artifact budget allocation 'art_q_slot_2' not found\nE   app.providers.errors.BudgetExhaustedError: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found"
+        },
+        {
+          "nodeid": "tests.test_hybrid_question_repair_integration::test_m3_planning_failure_fails_closed_without_uncontrolled_retries",
+          "category": "outdated test contract",
+          "classification_evidence": "fixture lacks production allocation/parent preconditions; not waived",
+          "error": "E   AssertionError: Regex pattern did not match.\nE     Expected regex: 'Claim preservation violated'\nE     Actual message: \"M3 repair planning provider dispatch failed: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found\""
+        },
+        {
+          "nodeid": "tests.test_minimax_provider_routing::test_minimax_only_request_blocks_groq_when_minimax_server_error_503",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 1 == 2\nE    +  where 1 = len([{'operation_id': 'op_minimax_503_test', 'api_key': 'mm_key_1'}])\nE    +    where [{'operation_id': 'op_minimax_503_test', 'api_key': 'mm_key_1'}] = <tests.test_minimax_provider_routing.RecordingTransportProvider object at 0x7f8bdd83a3f0>.recorded_calls"
+        },
+        {
+          "nodeid": "tests.test_minimax_provider_routing::test_selecting_minimax_never_enables_unlimited_budget",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   pydantic_core._pydantic_core.ValidationError: 1 validation error for ProviderRequest\nE   wall_time_reservation_seconds\nE     Value error, wall_time_reservation_seconds must be finite and > 0 [type=value_error, input_value=0.0, input_type=float]\nE       For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+        },
+        {
+          "nodeid": "tests.test_passage_blueprint_grounding_gate::test_11_existing_hybrid_m3_repair_path_continues_for_genuine_semantic_failures",
+          "category": "outdated test contract",
+          "classification_evidence": "fixture lacks production allocation/parent preconditions; not waived",
+          "error": "E   app.persistence.client.CheckpointApiError: HTTP 422: Artifact budget allocation 'art_q_slot_2' not found\nE   app.providers.errors.BudgetExhaustedError: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: Budget cap exceeded: Artifact budget allocation 'art_q_slot_2' not found"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_passage_generate_parent_reservation_sized_for_up_to_three_calls",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 180.0 == 540.0\nE    +  where 180.0 = OperationIntent(operation_id='loop:run_test_passage_wall:art_passage_s2:GENERATE:1:2.0.0', operation_type='GENERATE', ...c0c2999091290ed86d1107a', created_at=datetime.datetime(2026, 10, 25, 17, 15, 26, 490545, tzinfo=datetime.timezone.utc)).wall_time_reservation_seconds"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_question_generate_parent_reservation_sized_for_candidate_loop",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 60.0 == 120.0\nE    +  where 60.0 = OperationIntent(operation_id='loop:run_test_q_wall:art_q_slot_14:GENERATE:1:1.0.0', operation_type='GENERATE', run_id=...0a630d2e47da19acd93ab08', created_at=datetime.datetime(2026, 10, 25, 17, 15, 26, 500855, tzinfo=datetime.timezone.utc)).wall_time_reservation_seconds"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_passage_generate_reservation_respects_finite_caps",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 180.0 == 540.0\nE    +  where 180.0 = OperationIntent(operation_id='loop:run_test_passage_wall:art_passage_s2:GENERATE:1:2.0.0', operation_type='GENERATE', ...c0c2999091290ed86d1107a', created_at=datetime.datetime(2026, 10, 25, 17, 15, 26, 509659, tzinfo=datetime.timezone.utc)).wall_time_reservation_seconds"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_two_sequential_provider_calls_fit_inside_generate_when_permitted_by_caps",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 180.0 == 540.0\nE    +  where 180.0 = OperationGrantResult(operationId='loop:run_test_passage_wall:art_passage_s2:GENERATE:1:2.0.0', runId='run_demo', statu...info=datetime.timezone.utc), isReplay=False, resultRefJson=None, reservationBreached=False, budgetBreachDetected=False).wallTimeReservationSeconds"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_question_candidate_child_call_fits_inside_parent_reservation",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 60.0 == 120.0\nE    +  where 60.0 = OperationIntent(operation_id='loop:run_q_demo:art_q_slot_14:GENERATE:1:2.0.0', operation_type='GENERATE', run_id='run_...73fba52b6200b4b8ab5635b', created_at=datetime.datetime(2026, 10, 25, 17, 15, 26, 523181, tzinfo=datetime.timezone.utc)).wall_time_reservation_seconds"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[retry-memory]",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   openai.InternalServerError: Error code: 503 - {'error': {'message': 'local transport failure'}}\nE   app.providers.errors.ProviderUnavailableError: Error code: 503 - {'error': {'message': 'local transport failure'}}"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[three-attempts-memory]",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 1 == 3\nE    +  where 1 = len([<Request('POST', 'https://r01.invalid/v1/chat/completions')>])"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[reasoning-memory]",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   openai.InternalServerError: Error code: 503 - {'error': {'message': 'local transport failure'}}\nE   app.providers.errors.ProviderUnavailableError: Error code: 503 - {'error': {'message': 'local transport failure'}}"
+        },
+        {
+          "nodeid": "tests.test_r03_runtime_caps::test_r03_configured_token_cap_bounds_admission",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <LoopReason.M...MAX_VERSIONS'> == <LoopReason.T...: 'TOKEN_CAP'>\nE     \nE     - TOKEN_CAP\nE     + MAX_VERSIONS"
+        },
+        {
+          "nodeid": "tests.test_r03_runtime_caps::test_r03_call_cap_admission_uses_run_profile",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <LoopReason.A...D: 'ACCEPTED'> == <LoopReason.C...P: 'CALL_CAP'>\nE     \nE     - CALL_CAP\nE     + ACCEPTED"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_accepts_draft_and_charges_no_provider_tokens_for_stage_operations",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_empty_or_malformed_evaluations_never_pass[None]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_empty_or_malformed_evaluations_never_pass[results1]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_empty_or_malformed_evaluations_never_pass[]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_empty_or_malformed_evaluations_never_pass[fail]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_rejected_evaluation_is_durable_and_retry_increments_all_draft_revisions",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_accepted_reuse_requires_prior_exact_pass_and_performs_no_writes",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_authoritative_invalidation_allows_new_revision_without_mutating_old_draft",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_crash_after_draft_resumes_evaluation_without_regeneration[crash_after_draft]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_crash_after_draft_resumes_evaluation_without_regeneration[crash_commit]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_same_stage_writer_conflicts_before_generate",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_different_scopes_do_not_contend",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_epoch_change_during_generation_fences_draft",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_lease_loss_during_generation_fences_draft",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_unknown_provider_operation_never_replays_and_can_resume_after_reconciliation",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_accepted_cursor_hash_corruption_is_not_reused",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_repair_planning_capability::test_repair_planning_capability_dispatches_to_m3_with_pinned_model",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 4096 <= 2048\nE    +  where 4096 = ProviderRequest(capability=<Capability.PLAN_REPAIR: 'plan_repair'>, messages=[ChatMessage(role='system', content='You ...ct'}, max_response_bytes=500000, allow_repair=True, allowed_providers=None, allow_fallback=False, stream_callback=None).max_tokens"
+        },
+        {
+          "nodeid": "tests.test_rg10_blinded_semantic_judge::test_blinded_judge_flags_high_variation_paraphrase_as_uncertain",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....FAIL: 'FAIL'> == <EvaluationVe...: 'UNCERTAIN'>\nE     \nE     - UNCERTAIN\nE     + FAIL"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_roster_count_mismatch_fails_closed",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/langfens-final-closure/baseline/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_assignment_field_mismatch_fails_closed",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/langfens-final-closure/baseline/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_task_canonical_fingerprint_mismatch_fails_closed",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/langfens-final-closure/baseline/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_executable_fail_closed_evaluations",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 'FAIL' == 'VERIFIED'\nE     \nE     - VERIFIED\nE     + FAIL"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_software_pillar_blocked_produces_serializable_blocked_report",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 'FAIL' == 'BLOCKED'\nE     \nE     - BLOCKED\nE     + FAIL"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_attempt_lacking_documented_terminal_failure_code_reports_unresolved",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/langfens-final-closure/baseline/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_attempt_missing_expected_output_reference_reports_unresolved",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/langfens-final-closure/baseline/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_attempt_missing_expected_evaluation_reference_reports_unresolved",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/langfens-final-closure/baseline/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_assignment_missing_terminal_attempt_reports_unresolved",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/langfens-final-closure/baseline/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_corpus_disjointness_and_readiness::test_campaign_readiness_dry_run_covers_all_nine_areas",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   assert 0 > 0\nE    +  where 0 = len([])\nE    +    where [] = RawResponsePreservationCheck(raw_response_directories_found=[], total_raw_responses_on_disk=0, sample_file_verified=''...ted for parseability, required fields, SHA256 hashes, and telemetry. Verified fields in sample '': [].\", status='HOLD').raw_response_directories_found\nE    +      where RawResponsePreservationCheck(raw_response_directories_found=[], total_raw_responses_on_disk=0, sample_file_verified=''...ted for parseability, required fields, SHA256 hashes, and telemetry. Verified fields in sample '': [].\", status='HOLD') = CampaignReadinessReport(report_id='rg10-campaign-readiness-dryrun-v1.0', evaluated_at='2026-10-25T17:15:32Z', software...pprove and integrate replacement analysis/handoff evidence without treating agent instructions as campaign approval.']).raw_response_preservation"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_2_calibration::test_v2_2_reading_negation_polarity_conflict_detected",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....PASS: 'PASS'> == <EvaluationVe....FAIL: 'FAIL'>\nE     \nE     - FAIL\nE     + PASS"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_2_calibration::test_v2_3_reading_false_when_cited_evidence_affirms_fails",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....PASS: 'PASS'> == <EvaluationVe....FAIL: 'FAIL'>\nE     \nE     - FAIL\nE     + PASS"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_3_calibration::test_v2_3_adversarial_calibration_reliability",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 1 == 0\nE    +  where 1 = ReliabilityMetrics(dataset_name='EVALUATOR_V2_3_CALIBRATION_CORPUS', total_count=17, evaluable_count=17, abstention_co...Q': {'TP': 3, 'FP': 0, 'TN': 3, 'FN': 0, 'UNCERTAIN': 0}, 'MCQ': {'TP': 0, 'FP': 0, 'TN': 0, 'FN': 1, 'UNCERTAIN': 0}}).false_positive_count"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_3_calibration::test_v2_3_tfng_contradictions_caught",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....PASS: 'PASS'> == <EvaluationVe....FAIL: 'FAIL'>\nE     \nE     - FAIL\nE     + PASS"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_5_calibration::test_v2_5_resolves_all_three_v2_3_false_rejections",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....PASS: 'PASS'> == <EvaluationVe....FAIL: 'FAIL'>\nE     \nE     - FAIL\nE     + PASS"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_5_calibration::test_v2_5_calibration_on_dev_split",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 9 == 10\nE    +  where 9 = ReliabilityMetrics(dataset_name='EVALUATOR_V2_3_CALIBRATION_CORPUS', total_count=17, evaluable_count=17, abstention_co...Q': {'TP': 3, 'FP': 0, 'TN': 3, 'FN': 0, 'UNCERTAIN': 0}, 'MCQ': {'TP': 1, 'FP': 0, 'TN': 0, 'FN': 0, 'UNCERTAIN': 0}}).true_negative_count"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_5_calibration::test_v2_5_extended_corpus_with_independent_controls",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 10 == 11\nE    +  where 10 = ReliabilityMetrics(dataset_name='EVALUATOR_V2_5_CALIBRATION_CORPUS', total_count=23, evaluable_count=23, abstention_co...Q': {'TP': 3, 'FP': 1, 'TN': 3, 'FN': 0, 'UNCERTAIN': 0}, 'MCQ': {'TP': 1, 'FP': 0, 'TN': 0, 'FN': 0, 'UNCERTAIN': 0}}).true_negative_count"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_5_calibration::test_v2_3_historical_calibration_remains_strictly_frozen",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 1 == 0\nE    +  where 1 = ReliabilityMetrics(dataset_name='EVALUATOR_V2_3_CALIBRATION_CORPUS', total_count=17, evaluable_count=17, abstention_co...Q': {'TP': 3, 'FP': 0, 'TN': 3, 'FN': 0, 'UNCERTAIN': 0}, 'MCQ': {'TP': 0, 'FP': 0, 'TN': 0, 'FN': 1, 'UNCERTAIN': 0}}).false_positive_count"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_t03_02_transient_retried_up_to_cap_and_counted",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.providers.errors.ProviderUnavailableError: Server error 503"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_t03_04_cancellation_during_backoff",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.providers.errors.ProviderUnavailableError: Unavailable"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_t03_08_live_provider_smoke_or_not_run_external",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   app.providers.errors.ProviderError: Unexpected provider error: unhandled errors in a TaskGroup (2 sub-exceptions)"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_audit_nested_retries_server_error_bounded_under_gateway",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: Expected exactly 3 transport calls, got 1\nE   assert 1 == 3"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_audit_nested_retries_unknown_outcome_accounting",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: both retry attempts must hold their own reservation\nE   assert 1 == 2\nE    +  where 1 = len([{'operationId': 'op_unk_86c65b89', 'requestHash': '7eb971d8242e9b5387c368885fddfc7fec2bfafbc02fdf986e17ecfa681eaf32', 'status': 'UNKNOWN_OUTCOME', 'tokenReservation': 273, ...}])"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_api_prefix_routing",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_authentication_valid_header_200",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_get_sources_success",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_get_sources_validation_and_errors",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_source_success_nulls_content",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_source_errors",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_source_ingest_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 422 == 200\nE    +  where 422 = <Response [422 Unprocessable Entity]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_source_ingest_errors",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 422 == 503\nE    +  where 422 = <Response [422 Unprocessable Entity]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v1_json",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: <class 'app.facade.GenerationFacade'> does not have the attribute 'generate_section'"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v1_errors",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: <class 'app.facade.GenerationFacade'> does not have the attribute 'generate_section'"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_json_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_insufficient_source",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_ndjson_streaming_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_ndjson_streaming_insufficient_source_error",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_questions_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: <class 'app.facade.GenerationFacade'> does not have the attribute 'generate_section_v2'"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_evaluate_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_evaluate_validation_error",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 422\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_repair_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_v2_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_v2_missing_sections_error",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 422\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t14_harness_integration::test_full_phase14_lifecycle_e2e",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   AssertionError: Dotnet test failed: \nE     OFFLINE_GUARD: external service tools disabled\nE   assert 1 == 0\nE    +  where 1 = CompletedProcess(args=['dotnet', 'test', '/tmp/langfens-final-closure/baseline/services/exam-service.Tests/exam-servic...resExactLineageDiffHashesAndOutbox'], returncode=1, stdout='', stderr='OFFLINE_GUARD: external service tools disabled').returncode"
+        },
+        {
+          "nodeid": "tests.test_tfng_semantic_contract_and_m3_repair::test_01_reproduce_q4_v1_v2_v3_lineage_and_calibration",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: 'reports/hybrid_single_section_answer_grounding_rerun_snapshot.json'"
+        },
+        {
+          "nodeid": "tests.test_tfng_semantic_contract_and_m3_repair::test_02_blueprint_answer_target_advisory_contract_and_consistency",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: 'reports/hybrid_single_section_answer_grounding_rerun_snapshot.json'"
+        },
+        {
+          "nodeid": "tests.test_tfng_semantic_contract_and_m3_repair::test_13_offline_replay_of_m3_plan_achieves_clean_pass",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: 'reports/hybrid_single_section_answer_grounding_rerun_snapshot.json'"
+        },
+        {
+          "nodeid": "tests.test_unified_pipeline_execution::test_question_item_repair_and_stagnation_ladder",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.EvaluationRejectedError: question:test-ladder-96c68037:5: NO_PROGRESS: identical repair output"
+        },
+        {
+          "nodeid": "tests.unified.test_admin_job_cli::test_regression_d_monitor_get_only",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   subprocess.TimeoutExpired: Command '['/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/generation-service/.venv/bin/python', '/tmp/langfens-final-closure/baseline/run_e2e_admin_job.py', '--mode', 'monitor', '--job-id', '00000000-0000-0000-0000-000000000001', '--base-url=http://127.0.0.1:37201']' timed out after 5 seconds"
+        },
+        {
+          "nodeid": "tests.unified.test_admin_job_cli::test_regression_e_completed_no_retry",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   assert 1 == 0\nE    +  where 1 = CompletedProcess(args=['/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/generation-service/.venv/b...se RuntimeError(\"OFFLINE_GUARD: TCP connections forbidden\")\\nRuntimeError: OFFLINE_GUARD: TCP connections forbidden\\n').returncode"
+        },
+        {
+          "nodeid": "tests.unified.test_content_generation_correctness_gates::test_gate_3_generated_questions_originate_from_parsed_provider_candidates",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:gate3-cand-origin-d85cc5d5:1: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 1 evidence quote primarily supports claim 'claim:gate3-cand-origin-d85cc5d5:1:3' (overlap: 1.00) rather than bound claim 'claim:gate3-cand-origin-d85cc5d5:1:10' (overlap: 0.00): 'Excavations at lakeside settlements revealed complex network...'"
+        },
+        {
+          "nodeid": "tests.unified.test_content_generation_correctness_gates::test_gate_4b_mcq_duplicate_options_rejected",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:gate4b-mcq-dup-fc212f4b:14: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 14 evidence quote primarily supports claim 'claim:gate4b-mcq-dup-fc212f4b:2:1' (overlap: 1.00) rather than bound claim 'claim:gate4b-mcq-dup-fc212f4b:2:4' (overlap: 0.04): 'Marine biogeochemical cycles in oligotrophic oceanic gyres a...'"
+        },
+        {
+          "nodeid": "tests.unified.test_content_generation_correctness_gates::test_gate_5a_blind_solver_disagreement_blocks_acceptance",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:gate5a-blind-block-aa736f9e:1: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 1 evidence quote primarily supports claim 'claim:gate5a-blind-block-aa736f9e:1:1' (overlap: 1.00) rather than bound claim 'claim:gate5a-blind-block-aa736f9e:1:10' (overlap: 0.00): 'Archaeological and paleoecological investigations across tem...'"
+        },
+        {
+          "nodeid": "tests.unified.test_content_generation_correctness_gates::test_gate_5b_adversary_ambiguity_blocks_acceptance",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:gate5b-adv-block-c41febd3:1: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 1 evidence quote primarily supports claim 'claim:gate5b-adv-block-c41febd3:1:1' (overlap: 1.00) rather than bound claim 'claim:gate5b-adv-block-c41febd3:1:10' (overlap: 0.00): 'Archaeological and paleoecological investigations across tem...'"
+        },
+        {
+          "nodeid": "tests.unified.test_duplicate_candidate_diversity_offline::test_duplicate_candidate_0_rejected_and_valid_candidate_1_selected",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.section_runner.CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 2 evidence quote lacks substantive semantic support for bound claim 'claim:run_test:1:2' (overlap: 0.12): 'Archaeological excavations at Did\u00e9 West 1 identified extensi...'"
+        },
+        {
+          "nodeid": "tests.unified.test_duplicate_candidate_diversity_offline::test_section_runner_selects_candidate_1_when_candidate_0_is_duplicate",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 'Empirical fi...ng trackways.' == 'The majority...l documented.'\nE     \nE     - The majority of iron production sites in West Africa are well preserved and well documented.\nE     + Empirical findings confirm that Dendrochronological dating of oak piles supporting trackways."
+        },
+        {
+          "nodeid": "tests.unified.test_duplicate_candidate_diversity_offline::test_section_runner_all_candidates_duplicate_triggers_bounded_recovery",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:sr-recovery-5b6bada3:2: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 2 evidence quote lacks substantive semantic support for bound claim 'claim:sr-recovery-5b6bada3:1:7' (overlap: 0.00): 'Subsequent empirical analyses reinforced this documented met...'"
+        },
+        {
+          "nodeid": "tests.unified.test_negative_correctness_suite::test_negative_crash_during_blind_solver_adversary_execution",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:neg-solver-crash-6fa48094:1: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 1 evidence quote primarily supports claim 'claim:neg-solver-crash-6fa48094:1:1' (overlap: 1.00) rather than bound claim 'claim:neg-solver-crash-6fa48094:1:10' (overlap: 0.00): 'Archaeological and paleoecological investigations across tem...'"
+        },
+        {
+          "nodeid": "tests.unified.test_not_given_autonomous_generation::test_08_not_given_contradicted_by_passage_is_rejected",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert not True\nE    +  where True = is_pass()\nE    +    where is_pass = EvaluationResult(evaluation_id='evaluation_972cda575ac97e2cd3b5', evaluator_id='eval_question_semantic', evaluator_ver...ed_ms=None, usage=None, evaluated_at=datetime.datetime(2026, 10, 25, 17, 16, 58, 276268, tzinfo=datetime.timezone.utc)).is_pass"
+        },
+        {
+          "nodeid": "tests.unified.test_not_given_autonomous_generation::test_12_section_runner_execution_with_not_given_question",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 'TRUE' == 'NOT_GIVEN'\nE     \nE     - NOT_GIVEN\nE     + TRUE"
+        }
+      ],
+      "skipped_tests": [
+        "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[prompt-postgres]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[retry-postgres]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[three-attempts-postgres]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[reasoning-postgres]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[campaign]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[run]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[parent]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[section]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[artifact]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_completed_attempt_replay",
+        "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[REPORTED]",
+        "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[ESTIMATED]",
+        "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[REPORTED-100-100]",
+        "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[ESTIMATED-100-500]",
+        "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[UNKNOWN-0-500]",
+        "tests.test_r02_reconciliation::test_r02_unresolved_reservation_survives_restart_and_replay",
+        "tests.test_r04_passage_checkpoint::test_r04_exact_accepted_references_and_stale_dependency_rejection",
+        "tests.test_r04_passage_checkpoint::test_r04_real_cas_conflict_rejection",
+        "tests.test_r04_passage_checkpoint::test_r04_stale_epoch_fencing_rejection",
+        "tests.test_r04_passage_checkpoint::test_r04_cancelled_job_run_rejection",
+        "tests.test_r04_passage_checkpoint::test_r04_crash_before_commit_draft_only_no_accepted_head",
+        "tests.test_r04_passage_checkpoint::test_r04_crash_after_commit_lost_ack_and_idempotent_replay",
+        "tests.test_r04_passage_checkpoint::test_r04_accepted_passage_resume_zero_regeneration",
+        "tests.test_rg10_provider_record_integrity::test_historical_forensic_vs_behavioral_reexecution_workflow_separation"
+      ],
+      "log_sha256": "53e90471e6404c583dd09cc908bca818fc31a6ec18713bae686fdbf1e4fbef67",
+      "junit_sha256": "021e4739f85ee9d7f9062c1ed958e5120f5c2b9c10de8cdb543fd12c5c970297",
+      "session_log": "/tmp/langfens-final-closure/baseline-matched-final.log",
+      "seconds": 238.403
+    },
+    "python314_candidate": {
+      "name": "63886d8 candidate, Python 3.14.8",
+      "counts": {
+        "passed": 1905,
+        "failed": 98,
+        "errors": 0,
+        "skipped": 24
+      },
+      "failed_tests": [
+        {
+          "nodeid": "tests.test_hybrid_offline_replays::test_replay_ambiguous_answer_repaired_via_m3_plan",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AttributeError: 'MockCheckpointClient' object has no attribute '_base_url'. Did you mean: 'base_url'?\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: 'MockCheckpointClient' object has no attribute '_base_url'"
+        },
+        {
+          "nodeid": "tests.test_hybrid_offline_replays::test_replay_duplicate_prompt_repaired_via_regenerate_distinct",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AttributeError: 'MockCheckpointClient' object has no attribute '_base_url'. Did you mean: 'base_url'?\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: 'MockCheckpointClient' object has no attribute '_base_url'"
+        },
+        {
+          "nodeid": "tests.test_hybrid_offline_replays::test_replay_not_given_semantic_disagreement_repaired_via_m3",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AttributeError: 'MockCheckpointClient' object has no attribute '_base_url'. Did you mean: 'base_url'?\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: 'MockCheckpointClient' object has no attribute '_base_url'"
+        },
+        {
+          "nodeid": "tests.test_hybrid_offline_replays::test_comparative_baseline_blind_repair_vs_m3_assisted_repair",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AttributeError: 'MockCheckpointClient' object has no attribute '_base_url'. Did you mean: 'base_url'?\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: 'MockCheckpointClient' object has no attribute '_base_url'"
+        },
+        {
+          "nodeid": "tests.test_hybrid_question_repair_integration::test_semantic_adversary_issue_invokes_m3_and_regenerates_with_text01",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AttributeError: 'MockCheckpointClient' object has no attribute '_base_url'. Did you mean: 'base_url'?\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: 'MockCheckpointClient' object has no attribute '_base_url'"
+        },
+        {
+          "nodeid": "tests.test_hybrid_question_repair_integration::test_m3_planning_failure_fails_closed_without_uncontrolled_retries",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: Regex pattern did not match.\nE     Expected regex: 'Claim preservation violated'\nE     Actual message: \"M3 repair planning provider dispatch failed: 'MockCheckpointClient' object has no attribute '_base_url'\""
+        },
+        {
+          "nodeid": "tests.test_minimax_provider_routing::test_minimax_only_request_blocks_groq_when_minimax_server_error_503",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 1 == 2\nE    +  where 1 = len([{'operation_id': 'op_minimax_503_test', 'api_key': 'mm_key_1'}])\nE    +    where [{'operation_id': 'op_minimax_503_test', 'api_key': 'mm_key_1'}] = <tests.test_minimax_provider_routing.RecordingTransportProvider object at 0x7f62acdfafd0>.recorded_calls"
+        },
+        {
+          "nodeid": "tests.test_minimax_provider_routing::test_selecting_minimax_never_enables_unlimited_budget",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   pydantic_core._pydantic_core.ValidationError: 1 validation error for ProviderRequest\nE   wall_time_reservation_seconds\nE     Value error, wall_time_reservation_seconds must be finite and > 0 [type=value_error, input_value=0.0, input_type=float]\nE       For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+        },
+        {
+          "nodeid": "tests.test_passage_blueprint_grounding_gate::test_11_existing_hybrid_m3_repair_path_continues_for_genuine_semantic_failures",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AttributeError: 'MockCheckpointClient' object has no attribute '_base_url'. Did you mean: 'base_url'?\nE   app.repair.base.RepairJustificationError: M3 repair planning provider dispatch failed: 'MockCheckpointClient' object has no attribute '_base_url'"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_passage_generate_parent_reservation_sized_for_up_to_three_calls",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 180.0 == 540.0\nE    +  where 180.0 = OperationIntent(operation_id='loop:run_test_passage_wall:art_passage_s2:GENERATE:1:2.0.0', operation_type='GENERATE', ...c0c2999091290ed86d1107a', created_at=datetime.datetime(2026, 10, 25, 17, 20, 56, 542733, tzinfo=datetime.timezone.utc)).wall_time_reservation_seconds"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_question_generate_parent_reservation_sized_for_candidate_loop",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 60.0 == 120.0\nE    +  where 60.0 = OperationIntent(operation_id='loop:run_test_q_wall:art_q_slot_14:GENERATE:1:1.0.0', operation_type='GENERATE', run_id=...0a630d2e47da19acd93ab08', created_at=datetime.datetime(2026, 10, 25, 17, 20, 56, 550985, tzinfo=datetime.timezone.utc)).wall_time_reservation_seconds"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_passage_generate_reservation_respects_finite_caps",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 180.0 == 540.0\nE    +  where 180.0 = OperationIntent(operation_id='loop:run_test_passage_wall:art_passage_s2:GENERATE:1:2.0.0', operation_type='GENERATE', ...c0c2999091290ed86d1107a', created_at=datetime.datetime(2026, 10, 25, 17, 20, 56, 557879, tzinfo=datetime.timezone.utc)).wall_time_reservation_seconds"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_two_sequential_provider_calls_fit_inside_generate_when_permitted_by_caps",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 180.0 == 540.0\nE    +  where 180.0 = OperationGrantResult(operationId='loop:run_test_passage_wall:art_passage_s2:GENERATE:1:2.0.0', runId='run_demo', statu...info=datetime.timezone.utc), isReplay=False, resultRefJson=None, reservationBreached=False, budgetBreachDetected=False).wallTimeReservationSeconds"
+        },
+        {
+          "nodeid": "tests.test_passage_parent_wall_reservation::test_question_candidate_child_call_fits_inside_parent_reservation",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AssertionError: assert 60.0 == 120.0\nE    +  where 60.0 = OperationIntent(operation_id='loop:run_q_demo:art_q_slot_14:GENERATE:1:2.0.0', operation_type='GENERATE', run_id='run_...73fba52b6200b4b8ab5635b', created_at=datetime.datetime(2026, 10, 25, 17, 20, 56, 571014, tzinfo=datetime.timezone.utc)).wall_time_reservation_seconds"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[retry-memory]",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   openai.InternalServerError: Error code: 503 - {'error': {'message': 'local transport failure'}}\nE   app.providers.errors.ProviderUnavailableError: Error code: 503 - {'error': {'message': 'local transport failure'}}"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[three-attempts-memory]",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 1 == 3\nE    +  where 1 = len([<Request('POST', 'https://r01.invalid/v1/chat/completions')>])"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[reasoning-memory]",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   openai.InternalServerError: Error code: 503 - {'error': {'message': 'local transport failure'}}\nE   app.providers.errors.ProviderUnavailableError: Error code: 503 - {'error': {'message': 'local transport failure'}}"
+        },
+        {
+          "nodeid": "tests.test_r03_runtime_caps::test_r03_configured_token_cap_bounds_admission",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <LoopReason.M...MAX_VERSIONS'> == <LoopReason.T...: 'TOKEN_CAP'>\nE     \nE     - TOKEN_CAP\nE     + MAX_VERSIONS"
+        },
+        {
+          "nodeid": "tests.test_r03_runtime_caps::test_r03_call_cap_admission_uses_run_profile",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <LoopReason.A...D: 'ACCEPTED'> == <LoopReason.C...P: 'CALL_CAP'>\nE     \nE     - CALL_CAP\nE     + ACCEPTED"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_accepts_draft_and_charges_no_provider_tokens_for_stage_operations",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_empty_or_malformed_evaluations_never_pass[None]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_empty_or_malformed_evaluations_never_pass[results1]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_empty_or_malformed_evaluations_never_pass[]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_empty_or_malformed_evaluations_never_pass[fail]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_rejected_evaluation_is_durable_and_retry_increments_all_draft_revisions",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_accepted_reuse_requires_prior_exact_pass_and_performs_no_writes",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_authoritative_invalidation_allows_new_revision_without_mutating_old_draft",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_crash_after_draft_resumes_evaluation_without_regeneration[crash_after_draft]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_crash_after_draft_resumes_evaluation_without_regeneration[crash_commit]",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_same_stage_writer_conflicts_before_generate",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_different_scopes_do_not_contend",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_epoch_change_during_generation_fences_draft",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_lease_loss_during_generation_fences_draft",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_unknown_provider_operation_never_replays_and_can_resume_after_reconciliation",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_reading_stage_executor::test_accepted_cursor_hash_corruption_is_not_reused",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: 'Authority' object has no attribute 'resume_state'"
+        },
+        {
+          "nodeid": "tests.test_repair_planning_capability::test_repair_planning_capability_dispatches_to_m3_with_pinned_model",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 4096 <= 2048\nE    +  where 4096 = ProviderRequest(capability=<Capability.PLAN_REPAIR: 'plan_repair'>, messages=[ChatMessage(role='system', content='You ...ct'}, max_response_bytes=500000, allow_repair=True, allowed_providers=None, allow_fallback=False, stream_callback=None).max_tokens"
+        },
+        {
+          "nodeid": "tests.test_rg10_blinded_semantic_judge::test_blinded_judge_flags_high_variation_paraphrase_as_uncertain",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....FAIL: 'FAIL'> == <EvaluationVe...: 'UNCERTAIN'>\nE     \nE     - UNCERTAIN\nE     + FAIL"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_roster_count_mismatch_fails_closed",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/home/khoa/Projects/langfens/Project_Langfens_Microservice/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_assignment_field_mismatch_fails_closed",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/home/khoa/Projects/langfens/Project_Langfens_Microservice/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_task_canonical_fingerprint_mismatch_fails_closed",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/home/khoa/Projects/langfens/Project_Langfens_Microservice/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_executable_fail_closed_evaluations",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 'FAIL' == 'VERIFIED'\nE     \nE     - VERIFIED\nE     + FAIL"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_software_pillar_blocked_produces_serializable_blocked_report",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 'FAIL' == 'BLOCKED'\nE     \nE     - BLOCKED\nE     + FAIL"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_attempt_lacking_documented_terminal_failure_code_reports_unresolved",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/home/khoa/Projects/langfens/Project_Langfens_Microservice/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_attempt_missing_expected_output_reference_reports_unresolved",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/home/khoa/Projects/langfens/Project_Langfens_Microservice/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_attempt_missing_expected_evaluation_reference_reports_unresolved",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/home/khoa/Projects/langfens/Project_Langfens_Microservice/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_campaign_readiness_integrity::test_assignment_missing_terminal_attempt_reports_unresolved",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: '/home/khoa/Projects/langfens/Project_Langfens_Microservice/generation_baseline/.execution/RG10/campaign_ledger.json'"
+        },
+        {
+          "nodeid": "tests.test_rg10_corpus_disjointness_and_readiness::test_campaign_readiness_dry_run_covers_all_nine_areas",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   assert 0 > 0\nE    +  where 0 = len([])\nE    +    where [] = RawResponsePreservationCheck(raw_response_directories_found=[], total_raw_responses_on_disk=0, sample_file_verified=''...ted for parseability, required fields, SHA256 hashes, and telemetry. Verified fields in sample '': [].\", status='HOLD').raw_response_directories_found\nE    +      where RawResponsePreservationCheck(raw_response_directories_found=[], total_raw_responses_on_disk=0, sample_file_verified=''...ted for parseability, required fields, SHA256 hashes, and telemetry. Verified fields in sample '': [].\", status='HOLD') = CampaignReadinessReport(report_id='rg10-campaign-readiness-dryrun-v1.0', evaluated_at='2026-10-25T17:21:02Z', software...pprove and integrate replacement analysis/handoff evidence without treating agent instructions as campaign approval.']).raw_response_preservation"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_2_calibration::test_v2_2_reading_negation_polarity_conflict_detected",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....PASS: 'PASS'> == <EvaluationVe....FAIL: 'FAIL'>\nE     \nE     - FAIL\nE     + PASS"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_2_calibration::test_v2_3_reading_false_when_cited_evidence_affirms_fails",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....PASS: 'PASS'> == <EvaluationVe....FAIL: 'FAIL'>\nE     \nE     - FAIL\nE     + PASS"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_3_calibration::test_v2_3_adversarial_calibration_reliability",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 1 == 0\nE    +  where 1 = ReliabilityMetrics(dataset_name='EVALUATOR_V2_3_CALIBRATION_CORPUS', total_count=17, evaluable_count=17, abstention_co...Q': {'TP': 3, 'FP': 0, 'TN': 3, 'FN': 0, 'UNCERTAIN': 0}, 'MCQ': {'TP': 0, 'FP': 0, 'TN': 0, 'FN': 1, 'UNCERTAIN': 0}}).false_positive_count"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_3_calibration::test_v2_3_tfng_contradictions_caught",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....PASS: 'PASS'> == <EvaluationVe....FAIL: 'FAIL'>\nE     \nE     - FAIL\nE     + PASS"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_5_calibration::test_v2_5_resolves_all_three_v2_3_false_rejections",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert <EvaluationVe....PASS: 'PASS'> == <EvaluationVe....FAIL: 'FAIL'>\nE     \nE     - FAIL\nE     + PASS"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_5_calibration::test_v2_5_calibration_on_dev_split",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 9 == 10\nE    +  where 9 = ReliabilityMetrics(dataset_name='EVALUATOR_V2_3_CALIBRATION_CORPUS', total_count=17, evaluable_count=17, abstention_co...Q': {'TP': 3, 'FP': 0, 'TN': 3, 'FN': 0, 'UNCERTAIN': 0}, 'MCQ': {'TP': 1, 'FP': 0, 'TN': 0, 'FN': 0, 'UNCERTAIN': 0}}).true_negative_count"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_5_calibration::test_v2_5_extended_corpus_with_independent_controls",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 10 == 11\nE    +  where 10 = ReliabilityMetrics(dataset_name='EVALUATOR_V2_5_CALIBRATION_CORPUS', total_count=23, evaluable_count=23, abstention_co...Q': {'TP': 3, 'FP': 1, 'TN': 3, 'FN': 0, 'UNCERTAIN': 0}, 'MCQ': {'TP': 1, 'FP': 0, 'TN': 0, 'FN': 0, 'UNCERTAIN': 0}}).true_negative_count"
+        },
+        {
+          "nodeid": "tests.test_rg10_evaluator_v2_5_calibration::test_v2_3_historical_calibration_remains_strictly_frozen",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 1 == 0\nE    +  where 1 = ReliabilityMetrics(dataset_name='EVALUATOR_V2_3_CALIBRATION_CORPUS', total_count=17, evaluable_count=17, abstention_co...Q': {'TP': 3, 'FP': 0, 'TN': 3, 'FN': 0, 'UNCERTAIN': 0}, 'MCQ': {'TP': 0, 'FP': 0, 'TN': 0, 'FN': 1, 'UNCERTAIN': 0}}).false_positive_count"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_t03_02_transient_retried_up_to_cap_and_counted",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.providers.errors.ProviderUnavailableError: Server error 503"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_t03_04_cancellation_during_backoff",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.providers.errors.ProviderUnavailableError: Unavailable"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_t03_08_live_provider_smoke_or_not_run_external",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   app.providers.errors.ProviderError: Unexpected provider error: unhandled errors in a TaskGroup (2 sub-exceptions)"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_audit_nested_retries_server_error_bounded_under_gateway",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: Expected exactly 3 transport calls, got 1\nE   assert 1 == 3"
+        },
+        {
+          "nodeid": "tests.test_t03_providers::test_audit_nested_retries_unknown_outcome_accounting",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: both retry attempts must hold their own reservation\nE   assert 1 == 2\nE    +  where 1 = len([{'operationId': 'op_unk_86c65b89', 'requestHash': '7eb971d8242e9b5387c368885fddfc7fec2bfafbc02fdf986e17ecfa681eaf32', 'status': 'UNKNOWN_OUTCOME', 'tokenReservation': 273, ...}])"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_api_prefix_routing",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_authentication_valid_header_200",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_get_sources_success",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_get_sources_validation_and_errors",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_source_success_nulls_content",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_source_errors",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": ""
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_source_ingest_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 422 == 200\nE    +  where 422 = <Response [422 Unprocessable Entity]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_source_ingest_errors",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 422 == 503\nE    +  where 422 = <Response [422 Unprocessable Entity]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v1_json",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: <class 'app.facade.GenerationFacade'> does not have the attribute 'generate_section'"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v1_errors",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: <class 'app.facade.GenerationFacade'> does not have the attribute 'generate_section'"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_json_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_insufficient_source",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_ndjson_streaming_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_ndjson_streaming_insufficient_source_error",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_questions_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_section_v2_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   AttributeError: <class 'app.facade.GenerationFacade'> does not have the attribute 'generate_section_v2'"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_evaluate_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_evaluate_validation_error",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 422\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_repair_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_v2_success",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 200\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t13_endpoints::test_t13_post_paper_v2_missing_sections_error",
+          "category": "outdated test contract",
+          "classification_evidence": "source-reviewed retired routes, incomplete persistence doubles, old wall reservations or uncertain-retry expectations; not waived",
+          "error": "E   assert 404 == 422\nE    +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "nodeid": "tests.test_t14_harness_integration::test_full_phase14_lifecycle_e2e",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   AssertionError: Dotnet test failed: \nE     OFFLINE_GUARD: external service tools disabled\nE   assert 1 == 0\nE    +  where 1 = CompletedProcess(args=['dotnet', 'test', '/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-ser...resExactLineageDiffHashesAndOutbox'], returncode=1, stdout='', stderr='OFFLINE_GUARD: external service tools disabled').returncode"
+        },
+        {
+          "nodeid": "tests.test_tfng_semantic_contract_and_m3_repair::test_01_reproduce_q4_v1_v2_v3_lineage_and_calibration",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: 'reports/hybrid_single_section_answer_grounding_rerun_snapshot.json'"
+        },
+        {
+          "nodeid": "tests.test_tfng_semantic_contract_and_m3_repair::test_02_blueprint_answer_target_advisory_contract_and_consistency",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: 'reports/hybrid_single_section_answer_grounding_rerun_snapshot.json'"
+        },
+        {
+          "nodeid": "tests.test_tfng_semantic_contract_and_m3_repair::test_13_offline_replay_of_m3_plan_achieves_clean_pass",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   FileNotFoundError: [Errno 2] No such file or directory: 'reports/hybrid_single_section_answer_grounding_rerun_snapshot.json'"
+        },
+        {
+          "nodeid": "tests.test_unified_pipeline_execution::test_question_item_repair_and_stagnation_ladder",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.EvaluationRejectedError: question:test-ladder-96c68037:5: NO_PROGRESS: identical repair output"
+        },
+        {
+          "nodeid": "tests.unified.test_admin_job_cli::test_regression_d_monitor_get_only",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   subprocess.TimeoutExpired: Command '['/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/generation-service/.venv/bin/python', '/home/khoa/Projects/langfens/Project_Langfens_Microservice/run_e2e_admin_job.py', '--mode', 'monitor', '--job-id', '00000000-0000-0000-0000-000000000001', '--base-url=http://127.0.0.1:37963']' timed out after 5 seconds"
+        },
+        {
+          "nodeid": "tests.unified.test_admin_job_cli::test_regression_e_completed_no_retry",
+          "category": "environment limitation",
+          "classification_evidence": "demonstrated by exception",
+          "error": "E   assert 1 == 0\nE    +  where 1 = CompletedProcess(args=['/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/generation-service/.venv/b...se RuntimeError(\"OFFLINE_GUARD: TCP connections forbidden\")\\nRuntimeError: OFFLINE_GUARD: TCP connections forbidden\\n').returncode"
+        },
+        {
+          "nodeid": "tests.unified.test_content_generation_correctness_gates::test_gate_3_generated_questions_originate_from_parsed_provider_candidates",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:gate3-cand-origin-d85cc5d5:1: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 1 evidence quote primarily supports claim 'claim:gate3-cand-origin-d85cc5d5:1:3' (overlap: 1.00) rather than bound claim 'claim:gate3-cand-origin-d85cc5d5:1:10' (overlap: 0.00): 'Excavations at lakeside settlements revealed complex network...'"
+        },
+        {
+          "nodeid": "tests.unified.test_content_generation_correctness_gates::test_gate_4b_mcq_duplicate_options_rejected",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:gate4b-mcq-dup-fc212f4b:14: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 14 evidence quote primarily supports claim 'claim:gate4b-mcq-dup-fc212f4b:2:1' (overlap: 1.00) rather than bound claim 'claim:gate4b-mcq-dup-fc212f4b:2:4' (overlap: 0.04): 'Marine biogeochemical cycles in oligotrophic oceanic gyres a...'"
+        },
+        {
+          "nodeid": "tests.unified.test_content_generation_correctness_gates::test_gate_5a_blind_solver_disagreement_blocks_acceptance",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:gate5a-blind-block-aa736f9e:1: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 1 evidence quote primarily supports claim 'claim:gate5a-blind-block-aa736f9e:1:1' (overlap: 1.00) rather than bound claim 'claim:gate5a-blind-block-aa736f9e:1:10' (overlap: 0.00): 'Archaeological and paleoecological investigations across tem...'"
+        },
+        {
+          "nodeid": "tests.unified.test_content_generation_correctness_gates::test_gate_5b_adversary_ambiguity_blocks_acceptance",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:gate5b-adv-block-c41febd3:1: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 1 evidence quote primarily supports claim 'claim:gate5b-adv-block-c41febd3:1:1' (overlap: 1.00) rather than bound claim 'claim:gate5b-adv-block-c41febd3:1:10' (overlap: 0.00): 'Archaeological and paleoecological investigations across tem...'"
+        },
+        {
+          "nodeid": "tests.unified.test_duplicate_candidate_diversity_offline::test_duplicate_candidate_0_rejected_and_valid_candidate_1_selected",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.section_runner.CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 2 evidence quote lacks substantive semantic support for bound claim 'claim:run_test:1:2' (overlap: 0.12): 'Archaeological excavations at Did\u00e9 West 1 identified extensi...'"
+        },
+        {
+          "nodeid": "tests.unified.test_duplicate_candidate_diversity_offline::test_section_runner_selects_candidate_1_when_candidate_0_is_duplicate",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 'Empirical fi...ng trackways.' == 'The majority...l documented.'\nE     \nE     - The majority of iron production sites in West Africa are well preserved and well documented.\nE     + Empirical findings confirm that Dendrochronological dating of oak piles supporting trackways."
+        },
+        {
+          "nodeid": "tests.unified.test_duplicate_candidate_diversity_offline::test_section_runner_all_candidates_duplicate_triggers_bounded_recovery",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:sr-recovery-5b6bada3:2: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 2 evidence quote lacks substantive semantic support for bound claim 'claim:sr-recovery-5b6bada3:1:7' (overlap: 0.00): 'Subsequent empirical analyses reinforced this documented met...'"
+        },
+        {
+          "nodeid": "tests.unified.test_negative_correctness_suite::test_negative_crash_during_blind_solver_adversary_execution",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   app.stage_executor.StageFailedError: question:neg-solver-crash-6fa48094:1: INVALID_OUTPUT: capability failed: CandidateRejectionError: [CLAIM_PROVENANCE_MISMATCH] Question 1 evidence quote primarily supports claim 'claim:neg-solver-crash-6fa48094:1:1' (overlap: 1.00) rather than bound claim 'claim:neg-solver-crash-6fa48094:1:10' (overlap: 0.00): 'Archaeological and paleoecological investigations across tem...'"
+        },
+        {
+          "nodeid": "tests.unified.test_not_given_autonomous_generation::test_08_not_given_contradicted_by_passage_is_rejected",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert not True\nE    +  where True = is_pass()\nE    +    where is_pass = EvaluationResult(evaluation_id='evaluation_972cda575ac97e2cd3b5', evaluator_id='eval_question_semantic', evaluator_ver...ed_ms=None, usage=None, evaluated_at=datetime.datetime(2026, 10, 25, 17, 22, 33, 876923, tzinfo=datetime.timezone.utc)).is_pass"
+        },
+        {
+          "nodeid": "tests.unified.test_not_given_autonomous_generation::test_12_section_runner_execution_with_not_given_question",
+          "category": "pre-existing failure: product defect versus outdated contract not fully adjudicated",
+          "classification_evidence": "baseline reproduction only; remaining mandatory triage blocker",
+          "error": "E   AssertionError: assert 'TRUE' == 'NOT_GIVEN'\nE     \nE     - NOT_GIVEN\nE     + TRUE"
+        }
+      ],
+      "skipped_tests": [
+        "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[prompt-postgres]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[retry-postgres]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[three-attempts-postgres]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[reasoning-postgres]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[campaign]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[run]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[parent]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[section]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[artifact]",
+        "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_completed_attempt_replay",
+        "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[REPORTED]",
+        "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[ESTIMATED]",
+        "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[REPORTED-100-100]",
+        "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[ESTIMATED-100-500]",
+        "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[UNKNOWN-0-500]",
+        "tests.test_r02_reconciliation::test_r02_unresolved_reservation_survives_restart_and_replay",
+        "tests.test_r04_passage_checkpoint::test_r04_exact_accepted_references_and_stale_dependency_rejection",
+        "tests.test_r04_passage_checkpoint::test_r04_real_cas_conflict_rejection",
+        "tests.test_r04_passage_checkpoint::test_r04_stale_epoch_fencing_rejection",
+        "tests.test_r04_passage_checkpoint::test_r04_cancelled_job_run_rejection",
+        "tests.test_r04_passage_checkpoint::test_r04_crash_before_commit_draft_only_no_accepted_head",
+        "tests.test_r04_passage_checkpoint::test_r04_crash_after_commit_lost_ack_and_idempotent_replay",
+        "tests.test_r04_passage_checkpoint::test_r04_accepted_passage_resume_zero_regeneration",
+        "tests.test_rg10_provider_record_integrity::test_historical_forensic_vs_behavioral_reexecution_workflow_separation"
+      ],
+      "log_sha256": "450a21def7b61c9040cac5e41f07bf6b8c13a3da087cc1e0fa8eaa8fb8241dd9",
+      "junit_sha256": "8f14941f0ba4b231e9010019766c856c3aff12414c457f646f222e0332233e39",
+      "session_log": "/tmp/langfens-final-closure/current-release-candidate.log",
+      "seconds": 243.563
+    },
+    "python312_targeted": {
+      "name": "Python 3.12.15 targeted production/offline gates",
+      "counts": {
+        "passed": 293,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [],
+      "skipped_tests": [],
+      "log_sha256": "6dd0ca0297e0911c464b272d10f6b5e6f5060b802779439ea55ce03852df5689",
+      "junit_sha256": "e8a981980363ccfd1f02d6310af48f337f74e1b819fb63b7c41a2c44b92f89f2",
+      "session_log": "/tmp/langfens-final-closure/python312-release-candidate.log",
+      "seconds": 13.374
+    },
+    "python312_q9_supplement": {
+      "name": "Python 3.12 historical Q9/local-answer-span regressions",
+      "counts": {
+        "passed": 13,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [],
+      "skipped_tests": [],
+      "log_sha256": "7c52b3324517c8ba62be3b83ef6d47ade249e4d61ed79f7b5354729b60895391",
+      "junit_sha256": "2b821ffad90ada68238c721dad1e27eed5924e1300ae4e264c8560e799198a95",
+      "session_log": "/tmp/langfens-final-closure/python312-q9.log",
+      "seconds": 0.655
+    },
+    "dotnet_selected": {
+      "counts": {
+        "total": "48",
+        "executed": "48",
+        "passed": "48",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "postgres_contract_cases": 7,
+      "caps_profile_cases": 41,
+      "trx_sha256": "9880ee40f3d0acef7cb7a227620dec24ba047a9b76382c289771a37b5a403e9d",
+      "log_sha256": "59420ea0289cca99acf4948a94e2720d2553a8214de103e6233d3a6f2ec9e283"
+    },
+    "python312_full_collection": {
+      "errors": 12,
+      "log_sha256": "fc8afe833d1fac6d89331b90cb7dad7aedce28b8a1f379a2e16cd2f6fa62efb6",
+      "junit_sha256": "ee86bd057f8955c7690fc52b9d1ff7466216cd33a0f571fb541a57bcc88188e7"
+    }
+  },
+  "comparison": {
+    "new_failing_shared_tests": [],
+    "fixed_failing_shared_tests": [],
+    "baseline_failures": 98,
+    "candidate_failures": 98,
+    "added_tests": 44,
+    "matched_settings_fixtures_uuid_stream": true,
+    "baseline_git_metadata": "GIT_DIR points to repository object history; GIT_WORK_TREE points to isolated clean baseline. Preliminary archive without git metadata had one additional environment-only failure.",
+    "historical_manifest_reproduction": "Historical 122 failed / 1837 passed / 24 skipped was not reproduced exactly. Fresh matched baseline is 98/1861/24. This comparison fixes UUIDs and current configuration, but cannot reconstruct all historical environmental/asset conditions. Exact causes of the historical count difference are not certified. No historical snapshot was rewritten."
+  },
+  "failure_category_counts": {
+    "pre-existing failure: product defect versus outdated contract not fully adjudicated": 41,
+    "outdated test contract": 38,
+    "environment limitation": 19
+  },
+  "acceptance": {
+    "mode": "SCRIPTED_TRANSPORT_REAL_ORCHESTRATION_IN_MEMORY_PERSISTENCE",
+    "run_id": "run_offline_target_section1",
+    "accepted_questions": 13,
+    "section_ref": {
+      "artifactId": "section:run_offline_target_section1:1",
+      "artifactType": "Section",
+      "version": 1,
+      "contentHash": "13f3818c3f56beed74fe4c249dd04f017bdc3988fcfca3cb51e9904d9d6a932b"
+    },
+    "section_status": "ACCEPTED_IN_MEMORY_NOT_PUBLISHED",
+    "physical_calls": 40,
+    "physical_reservation_sum_over_time_not_concurrent": 273975,
+    "physical_reported_tokens": 68366,
+    "unresolved_operations": [],
+    "question_heads": [
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:1",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "a5f461859c3172e21aa3aff1363cb7555004f532afdf79d32403bf350ae73a49"
+        },
+        "family": "TRUE_FALSE_NOT_GIVEN",
+        "answer": "TRUE",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:13.158530Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.062149
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {}
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:2",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "b1483aaa5aa03fdd752f65deabb357c76e4ce625b7addc245f4bea13dda01bdc"
+        },
+        "family": "TRUE_FALSE_NOT_GIVEN",
+        "answer": "FALSE",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:13.228520Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.0612
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {}
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:3",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "b19c61a2cc48775494875d5e687a638676c2dd5793583dad2e22f5e15cd88ee4"
+        },
+        "family": "TRUE_FALSE_NOT_GIVEN",
+        "answer": "NOT_GIVEN",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:13.297652Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.230395
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {}
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:4",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "08eb014cadfe05c67f282296883628ed1d2c493139d0e3c9d2b37b75e1e0c0d7"
+        },
+        "family": "TRUE_FALSE_NOT_GIVEN",
+        "answer": "TRUE",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:13.536072Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.070321
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {}
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:5",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "7a355b3333ab7475b41047943ec8d026dd067c58a87ccbbb72a86c05f85833bc"
+        },
+        "family": "TRUE_FALSE_NOT_GIVEN",
+        "answer": "TRUE",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:13.614659Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.103956
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {}
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:6",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "d51a7a9fe18c4c65c073fb260d921d5d75846610ca7ca2caccbaad13e3997b3b"
+        },
+        "family": "TABLE_COMPLETION",
+        "answer": "organic silt",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:13.726836Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.293478
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {
+          "tableContext": "Wetland research: samples and findings",
+          "rowHeader": "Fine deposits",
+          "colHeader": "Composition"
+        }
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:7",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "abfe46d5fc8e2ce68a174b061fb574bc678b4befb5777fcaca2995632276c9a0"
+        },
+        "family": "TABLE_COMPLETION",
+        "answer": "soil salinization",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:14.028307Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.294345
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {
+          "tableContext": "Wetland research: samples and findings",
+          "rowHeader": "Water-sluicing",
+          "colHeader": "Purpose"
+        }
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:8",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "1926dd20ba0271656b83d3199069e3588d631a03b90e97bcaeb430d5dac55f9d"
+        },
+        "family": "TABLE_COMPLETION",
+        "answer": "peat cores",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:14.331091Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.294509
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {
+          "tableContext": "Wetland research: samples and findings",
+          "rowHeader": "Pollen sampling",
+          "colHeader": "Location"
+        }
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:9",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "d6570485af987bb49aee664c0e80c20f7e8028cda585c22b3d784bc4a4b0458d"
+        },
+        "family": "TABLE_COMPLETION",
+        "answer": "dairy products",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:14.634399Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.293611
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {
+          "tableContext": "Wetland research: samples and findings",
+          "rowHeader": "Lipid residues",
+          "colHeader": "Product"
+        }
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:10",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "bc4b477cf995454fed9a8b2fc196e65229b78fe520d9b0ce731a4bf8a421800a"
+        },
+        "family": "FLOW_CHART",
+        "answer": "oak",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:14.936980Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.292823
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {
+          "flowSteps": [
+            "Collect the relevant archaeological sample",
+            "Take wood samples from [10] piles supporting trackways.",
+            "Record the resulting measurement"
+          ],
+          "stepIndex": 1
+        }
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:11",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "d4f64bc568e5887c68bd5640c698721f5d159a9072d51fb4a5e43f34763d67b4"
+        },
+        "family": "FLOW_CHART",
+        "answer": "deciduous",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:15.238884Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.293378
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {
+          "flowSteps": [
+            "Collect the relevant archaeological sample",
+            "Extract timber from mature upland [11] woodlands.",
+            "Record the resulting measurement"
+          ],
+          "stepIndex": 1
+        }
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:12",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "a40185a51ec59c0c95e94ac239ab603452ff9080b374ac83731147f050d40ceb"
+        },
+        "family": "FLOW_CHART",
+        "answer": "oxygen",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:15.544200Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.290734
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {
+          "flowSteps": [
+            "Collect the relevant archaeological sample",
+            "Measure heavy [12] isotope ratios in subfossil cellulose.",
+            "Record the resulting measurement"
+          ],
+          "stepIndex": 1
+        }
+      },
+      {
+        "ref": {
+          "artifactId": "question:run_offline_target_section1:13",
+          "artifactType": "Question",
+          "version": 1,
+          "contentHash": "057da890e1b729913fc26e5a02cad937064d860e967c367e36b6f647731e531d"
+        },
+        "family": "FLOW_CHART",
+        "answer": "X-ray",
+        "budget": {
+          "callsUsed": 3,
+          "repairsUsed": 0,
+          "startedAt": "2026-10-25T17:25:15.845371Z",
+          "tokensUsed": 5182,
+          "versionsUsed": 1,
+          "wallTimeUsedSeconds": 0.292758
+        },
+        "evaluators": {
+          "eval_question_structure": "PASS",
+          "eval_answer_verbatim_length": "PASS",
+          "eval_evidence_offsets": "PASS",
+          "eval_question_uniqueness": "PASS",
+          "eval_question_semantic": "PASS",
+          "eval_blind_solver_adversary": "PASS"
+        },
+        "stimulus": {
+          "flowSteps": [
+            "Collect the relevant archaeological sample",
+            "Analyze hearth clays using portable [13] fluorescence.",
+            "Record the resulting measurement"
+          ],
+          "stepIndex": 1
+        }
+      }
+    ],
+    "no_live_calls": true,
+    "scope_limitations": [
+      "Persistence is in-memory, not a 13-question PostgreSQL commit test.",
+      "Deterministic responses are not independent model-quality evidence.",
+      "Positive path does not require a semantic M3 repair; dedicated integration tests cover that path."
+    ],
+    "source_sha": "63886d8341d396ed539709f8b1a6dea44dc125bf",
+    "mandatory_production_equivalent_postgres_13q_gate": "NOT_SATISFIED: in-memory heads only; PostgreSQL grant/reconciliation contracts are separate"
+  },
+  "budget_contract": {
+    "historical_q5": "60000 local wrapper charges vs 19973 actual tokens; 4000 evaluation parent could not admit 7369 solver.",
+    "selected_existing_evaluate_authority": 10000,
+    "solver": {
+      "reserved": 7369,
+      "reported": 1923,
+      "unused_refund": 5446
+    },
+    "next_adversary": {
+      "reserved": 7504,
+      "prior_reported_plus_next_reserved": 9427,
+      "parent_headroom_on_admission": 573,
+      "reported": 2259
+    },
+    "completed_evaluation": {
+      "physical_calls": 2,
+      "tokens": 4182,
+      "wrapper_additional_token_charge": 0,
+      "wall_seconds": 11,
+      "parent_wall_seconds": 60
+    },
+    "repair_wall": "M3 reservation 30, actual 5; Text-01 60 rejected 422, remaining 55 admitted; reported wall 11 and tokens 865 in PostgreSQL.",
+    "uncertain_usage": "ESTIMATED/UNKNOWN do not fund next child. RESERVED/UNKNOWN_OUTCOME never blindly replay. Reported and reconciled terminal repeats are idempotent; conflicting terminal usage rejected 409.",
+    "caps_changed": false
+  },
+  "root_causes_closed": [
+    "StageExecutor lost actual GENERATE/EVALUATE/REPAIR callback authority; SectionRunner used outer context.",
+    "Expensive evaluator selected stale 4000 instead of existing profile 10000.",
+    "Sequential children independently requested full parent wall; gateway now reads outstanding durable allocation and bounds transport deadline.",
+    "Deadline clamping changed the derived start clock for retries; a known format failure could falsely exhaust a short wall grant. Fixed using original start timestamp.",
+    "Local reconstruction counted wrappers differently than physical descendants; shared summary call lacked requesting-question owner.",
+    "Known repair failure completed without typed result; crash before fallback checkpoint could not resume without artifact. Typed hash/operation/artifact/version-bound failure replay added.",
+    "Candidate pool and repair discarded table/flow stimulus; canonical question projection also omitted row/column headers and step index.",
+    "Table candidates without any table stimulus could pass; mandatory structural gate now rejects.",
+    "Citation-only Claim 6 gained suitability from publication years; excluded before new Blueprint binding."
+  ],
+  "remaining_mandatory_blockers": [
+    "98 deterministic full-suite baseline failures remain; product/test-contract adjudication is incomplete. All names and evidence retained above; none waived.",
+    "Python 3.12 full suite cannot collect without offline jsonschema/rpds dependencies; targeted 293 PASS plus 13 Q9 PASS (306 distinct tests) is not full compatibility certification.",
+    "13Q target acceptance uses in-memory persistence. A complete PostgreSQL-backed 13Q orchestration/finalization gate has not run.",
+    "UNKNOWN_OUTCOME child fencing is safe but automatic typed wrapper recovery/manual disposition remains incomplete. Do not reset cursors or replay uncertain paid operations.",
+    "Typed known-repair failure recovery is covered in Python doubles; full PostgreSQL wrapper crash matrix is not covered by seven grant/reconciliation contracts.",
+    "Remaining-parent wall tests establish durable allocation sharing; all real provider/queue/overhead timing combinations are not certified.",
+    "Pinned routing/M3 tests use deterministic transport; no evidence of actual provider reliability or fresh independent review of historical discarded Q5 positives.",
+    "General bibliographic/non-factual semantic eligibility beyond conservative syntax controls remains a limitation.",
+    "Build emits existing NuGet security advisory warnings; no dependency remediation or deployment authorized."
+  ],
+  "red_green_evidence": {
+    "new-regressions-baseline.log": {
+      "sha256": "9840c870e6555076e12ad8e51299fd5907b090ea692fd56aca6a58a37a16baf6"
+    },
+    "stimulus-final-red.log": {
+      "sha256": "ce1fc8803463b7efd3406bcab1d89ca4aa5c343ff01efdd12a1a4f2eead2d837"
+    },
+    "retry-clock-red.log": {
+      "sha256": "fd10e2e4680c3a8765149e2a65df1774d6928e79354d8e3a323f1ba9dde5770f"
+    },
+    "target13-accounting.log": {
+      "sha256": "4034d657d64e8e327062c967a845bd33081dafec48158ca34f62c46e372be9b3"
+    }
+  },
+  "live": {
+    "new_submissions": 0,
+    "real_provider_calls": 0,
+    "real_provider_tokens": 0,
+    "cost_usd": 0,
+    "historical_accepted_questions": 4,
+    "historical_section_committed": false,
+    "marker_sha256": "d5c402709df3ca84714717c65dd50922b5d39e222080ad520b80bb3b7ecaa532",
+    "marker_changed": false
+  },
+  "reproduction": {
+    "full_python314": "cd services/generation-service; PYTHONPATH=$PWD/tests/offline_support:$PWD .venv/bin/python -m pytest -p run_identity tests/ --ignore=tests/test_t09_real_postgres_durability.py -q --tb=short --junitxml=<output>",
+    "postgres": "dotnet test services/exam-service.Tests/exam-service.Tests.csproj --no-restore --filter \"FullyQualifiedName~Section1OperationAuthorityTests|FullyQualifiedName~R03CapsProfileTests\"; explicitly supply READING_CLOSURE_TEST_POSTGRES for isolated localhost:55449/section1_closure only.",
+    "target_python312": "Same source mounted into cached Python 3.12.15 image at /workspace/repo; --network none --pull=never; pytest/asyncio extras mounted read-only. Fifteen modules listed by tests in python312_targeted; no production providers registered."
+  }
+}
