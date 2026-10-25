@@ -1,0 +1,14 @@
+{
+  "status": "TERMINAL",
+  "job_id": "cba0c609-f9c0-4294-b687-362a7413519a",
+  "topic": "Evolution of an Early and Long-Lasting Iron Smelting Technique at Did\u00e9 West 1, Fal\u00e9m\u00e9 Valley, Eastern Senegal",
+  "pmcids": [
+    "PMC13654891"
+  ],
+  "provider": "minimax",
+  "timestamp": 1792930358.6188734,
+  "timestamp_iso": "2026-10-25T12:12:38Z",
+  "error": null,
+  "terminal_status": "Failed",
+  "elapsed_seconds": 125.14
+}
