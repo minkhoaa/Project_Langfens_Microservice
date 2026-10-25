@@ -20,6 +20,7 @@ from app.contracts.solver import (
     AdversaryAmbiguityType,
     AdversaryOutput,
     SolverSpan,
+    StudentVisibleQuestion,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,12 +30,15 @@ def parse_and_validate_adversary_output(
     raw_output: Any,
     passage_text: str,
     expected_question_number: int,
+    student_question: Optional[StudentVisibleQuestion] = None,
 ) -> Tuple[Optional[AdversaryOutput], List[str], List[Dict[str, Any]]]:
     """Parses raw adversary response, validates grounding, and rejects outside-knowledge claims.
 
     Returns:
         (AdversaryOutput, parsing_errors, rejected_unsupported_allegations)
     """
+    q_type = re.sub(r"[^A-Z]", "", student_question.question_type.upper()) if student_question else ""
+    is_tfng = q_type in {"TRUEFALSENOTGIVEN", "YESNONOTGIVEN", "TFNG", "YNNG"}
     errors: List[str] = []
     unsupported_allegations: List[Dict[str, Any]] = []
 
@@ -106,7 +110,7 @@ def parse_and_validate_adversary_output(
                     if pos_ci != -1:
                         pos = pos_ci
                         stext = passage_text[pos_ci:pos_ci + len(clean_s)]
-                if pos == -1 and clean_s:
+                if pos == -1 and clean_s and not is_tfng:
                     clauses = [c.strip() for c in re.split(r"[,;:.!?—–\n]", clean_s) if len(c.strip()) >= 15]
                     for c in clauses:
                         p = passage_text.find(c)
@@ -129,6 +133,17 @@ def parse_and_validate_adversary_output(
                     )
                 else:
                     has_invalid_span = True
+            if is_tfng:
+                from app.solvers.tfng import alternative_has_tfng_evidence
+                if (not is_grounded_flag or has_invalid_span or not alternative_has_tfng_evidence(
+                    alt_ans, student_question.prompt, [s.span_text for s in valid_spans]
+                )):
+                    unsupported_allegations.append({
+                        "alternative_answer": alt_ans,
+                        "reasoning": reasoning,
+                        "rejection_reason": "TFNG alternative lacks exact proposition-level entailment/contradiction evidence or a valid answer label",
+                    })
+                    continue
             # Check if this allegation relies on outside knowledge rather than passage
             outside_knowledge_detected = (
                 not is_grounded_flag

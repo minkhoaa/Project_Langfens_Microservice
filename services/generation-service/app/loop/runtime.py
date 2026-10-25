@@ -361,6 +361,9 @@ class BoundedLoopRuntime:
             )
             b.calls_used = max(b.calls_used, loop_calls)
             b.tokens_used = max(b.tokens_used, loop_tokens)
+            # Rebuild provider-backed scopes from durable outcomes, rather than
+            # retaining a cursor's stale parent reservations forever.
+            self._refresh_provider_token_accounting(state)
             b.wall_time_used_seconds = max(b.wall_time_used_seconds, loop_wall)
         elif not self.context.parent_operation_id and not state.artifacts:
             b.calls_used = max(b.calls_used, state.callsUsed)
@@ -412,6 +415,48 @@ class BoundedLoopRuntime:
             self._initialize_policy(run_profile)
         if not checkpoints:
             self._checkpoint()
+
+    def _refresh_provider_token_accounting(self, state: ResumeStateResult | None = None) -> bool:
+        """Rebuild this artifact's charge from durable operations, once per tree.
+
+        SectionRunner callbacks can dispatch standalone provider operations. Their
+        usage is authoritative even without parentOperationId; completed loop
+        reservations are not additional paid work. Unknown/unreconciled provider
+        outcomes always retain their full reservation. No durable grant is changed.
+        """
+        state = state or self.persistence_client.resume_state(self.context.run_id)
+        all_ops = {op.operationId: op for op in (state.operations or [])}
+        selected = {op.operationId for op in all_ops.values()
+                    if op.artifactId == self.context.target_artifact_id}
+        while True:
+            descendants = {op.operationId for op in all_ops.values() if op.parentOperationId in selected}
+            if descendants <= selected:
+                break
+            selected |= descendants
+        provider_types = {"PROVIDER_CALL", "LLM", "LLM_CALL", "LLM_PASSAGE"}
+        if not any(all_ops[oid].operationType in provider_types for oid in selected):
+            return False
+        children: dict[str, list[str]] = {}
+        for oid in selected:
+            parent = all_ops[oid].parentOperationId
+            if parent in selected:
+                children.setdefault(parent, []).append(oid)
+        def charge(oid: str, path: frozenset[str] = frozenset()) -> int:
+            if oid in path:
+                raise ValueError("Durable operation accounting cycle")
+            op = all_ops[oid]
+            used = max(0, op.tokensUsed or 0)
+            reservation = max(0, op.tokenReservation or 0)
+            accounting = str(op.accountingType or "").upper()
+            known = (op.status.upper() == "COMPLETED" and accounting != "UNKNOWN" and
+                     (accounting in {"REPORTED", "RECONCILED", "ESTIMATED"}
+                      or used > 0 or op.operationType not in provider_types))
+            own = used if known else max(used, reservation)
+            child_total = sum(charge(cid, path | {oid}) for cid in children.get(oid, []))
+            return max(own, child_total)
+        roots = [oid for oid in selected if all_ops[oid].parentOperationId not in selected]
+        self.context.budget_tracker.tokens_used = sum(charge(oid) for oid in roots)
+        return True
 
     def _checkpoint(self, last_operation_id: str | None = None) -> None:
         cursor = self.context.cursor
@@ -862,6 +907,10 @@ class BoundedLoopRuntime:
                             leaseOwner=self.context.authority.lease_owner, operationId=intent.operation_id,
                             tokensUsed=0, accountingType="REPORTED", wallTimeUsedSeconds=draft_wall_time,
                         ))
+                        if not self._refresh_provider_token_accounting():
+                            self.context.budget_tracker.tokens_used = max(
+                                0, self.context.budget_tracker.tokens_used - intent.token_reservation
+                            )
                     except Exception as rec_ex:
                         logger.warning("Could not reconcile failed %s operation %s: %s", intent.operation_type, intent.operation_id, rec_ex)
                 if repair and self._generated_versions < self.policy.max_generated_versions:
@@ -947,6 +996,7 @@ class BoundedLoopRuntime:
                 raise
             if (ack.artifactId, ack.version, ack.contentHash) != (art.artifact_id, art.version, art.content_hash):
                 raise ValueError("Durable draft acknowledgement mismatch")
+            self._refresh_provider_token_accounting()
         self.journal.record_ack(intent.operation_id, art.content_hash)
         self._drafts[version] = art
         self.context.current_artifact = art
@@ -1101,6 +1151,7 @@ class BoundedLoopRuntime:
                     raise
                 actual_eval_tokens = result.usage.total_tokens if (result.usage and result.usage.total_tokens is not None) else 0
                 self.context.budget_tracker.tokens_used = max(0, self.context.budget_tracker.tokens_used - intent.token_reservation + actual_eval_tokens)
+                self._refresh_provider_token_accounting()
                 self._stored_evaluations[(evaluator.evaluator_id, art.version)] = result
             self.journal.record_ack(intent.operation_id, result.evaluation_id)
             self.ledger_mgr.reconcile_evaluation(result)

@@ -168,8 +168,11 @@ def parse_and_validate_solver_output(
                 validated_spans.append(
                     SolverSpan(
                         span_text=span_text,
-                        start_char=start_pos if s_char is None else int(s_char),
-                        end_char=end_pos if e_char is None else int(e_char),
+                        # The quote may have been localized from a provider's
+                        # inaccurate citation. Its canonical offsets must describe
+                        # the actual retained substring, never the original guess.
+                        start_char=start_pos,
+                        end_char=end_pos,
                     )
                 )
             else:

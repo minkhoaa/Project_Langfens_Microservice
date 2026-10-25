@@ -1,0 +1,275 @@
+{
+  "jobs": [
+    {
+      "id": "2250820f-0ed9-42cb-80e8-70bcc38f2a7e",
+      "status": "Failed",
+      "run_id": "run_2250820f0ed942cb80e870bcc38f2a7e",
+      "created_at": "2026-10-25T13:38:09.731939+00:00",
+      "updated_at": "2026-10-25T13:42:44.329657+00:00"
+    },
+    {
+      "id": "8b291275-3e39-4ec0-96fc-899f8dd43d54",
+      "status": "Failed",
+      "run_id": "run_8b2912753e394ec096fc899f8dd43d54",
+      "created_at": "2026-10-25T13:25:23.976382+00:00",
+      "updated_at": "2026-10-25T13:26:43.39492+00:00"
+    }
+  ],
+  "active_jobs": 0,
+  "allocations": [
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "questions_section_3",
+      "parent": "section_3",
+      "token_cap": 200000,
+      "call_cap": 50,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "solver_section_3",
+      "parent": "section_3",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "review_section_1",
+      "parent": "section_1",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "SECTION",
+      "scope_id": "2",
+      "parent": null,
+      "token_cap": 380000,
+      "call_cap": 75,
+      "wall_cap": 900
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "review_3",
+      "parent": "3",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "review_1",
+      "parent": "1",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "passage_section_3",
+      "parent": "section_3",
+      "token_cap": 80000,
+      "call_cap": 10,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "questions_2",
+      "parent": "2",
+      "token_cap": 200000,
+      "call_cap": 50,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "SECTION",
+      "scope_id": "1",
+      "parent": null,
+      "token_cap": 380000,
+      "call_cap": 75,
+      "wall_cap": 900
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "questions_section_2",
+      "parent": "section_2",
+      "token_cap": 200000,
+      "call_cap": 50,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "solver_1",
+      "parent": "1",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "passage_2",
+      "parent": "2",
+      "token_cap": 80000,
+      "call_cap": 10,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "solver_3",
+      "parent": "3",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "passage_section_1",
+      "parent": "section_1",
+      "token_cap": 80000,
+      "call_cap": 10,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "review_2",
+      "parent": "2",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "passage_section_2",
+      "parent": "section_2",
+      "token_cap": 80000,
+      "call_cap": 10,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "SECTION",
+      "scope_id": "section_1",
+      "parent": null,
+      "token_cap": 380000,
+      "call_cap": 75,
+      "wall_cap": 900
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "review_section_2",
+      "parent": "section_2",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "questions_3",
+      "parent": "3",
+      "token_cap": 200000,
+      "call_cap": 50,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "passage_3",
+      "parent": "3",
+      "token_cap": 80000,
+      "call_cap": 10,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "SECTION",
+      "scope_id": "3",
+      "parent": null,
+      "token_cap": 380000,
+      "call_cap": 75,
+      "wall_cap": 900
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "questions_1",
+      "parent": "1",
+      "token_cap": 200000,
+      "call_cap": 50,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "passage_1",
+      "parent": "1",
+      "token_cap": 80000,
+      "call_cap": 10,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "review_section_3",
+      "parent": "section_3",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "SECTION",
+      "scope_id": "section_3",
+      "parent": null,
+      "token_cap": 380000,
+      "call_cap": 75,
+      "wall_cap": 900
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "questions_section_1",
+      "parent": "section_1",
+      "token_cap": 200000,
+      "call_cap": 50,
+      "wall_cap": 400
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "solver_section_1",
+      "parent": "section_1",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "solver_section_2",
+      "parent": "section_2",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "ARTIFACT",
+      "scope_id": "solver_2",
+      "parent": "2",
+      "token_cap": 50000,
+      "call_cap": 6,
+      "wall_cap": 150
+    },
+    {
+      "scope_type": "SECTION",
+      "scope_id": "section_2",
+      "parent": null,
+      "token_cap": 380000,
+      "call_cap": 75,
+      "wall_cap": 900
+    }
+  ],
+  "submission_marker": {
+    "status": "TERMINAL",
+    "job_id": "2250820f-0ed9-42cb-80e8-70bcc38f2a7e",
+    "topic": "Evolution of an Early and Long-Lasting Iron Smelting Technique at Did\u00e9 West 1, Fal\u00e9m\u00e9 Valley, Eastern Senegal",
+    "pmcids": [
+      "PMC13654891"
+    ],
+    "provider": "minimax",
+    "timestamp": 1792935764.9365418,
+    "timestamp_iso": "2026-10-25T13:42:44Z",
+    "error": null,
+    "terminal_status": "Failed",
+    "elapsed_seconds": 275.19
+  }
+}

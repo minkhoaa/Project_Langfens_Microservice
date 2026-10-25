@@ -1,0 +1,1225 @@
+{
+  "snapshot": "reports/hybrid_13q_post_hardening_2250820f-0ed9-42cb-80e8-70bcc38f2a7e.json",
+  "slot": {
+    "questionNumber": 5,
+    "sectionId": 1,
+    "groupIndex": 0,
+    "questionType": "TRUE_FALSE_NOT_GIVEN",
+    "targetSkill": "Evaluates comprehension of TRUE_FALSE_NOT_GIVEN in Section 1",
+    "targetDifficulty": {
+      "level": "FOUNDATION",
+      "rationale": "Editorial heuristic difficulty for Section 1 Question 5.",
+      "isCalibrated": false
+    },
+    "claimRefIds": [
+      "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11"
+    ],
+    "isNotGivenTarget": false,
+    "maxConcentrationPerParagraph": 2
+  },
+  "rows": [
+    {
+      "version": 1,
+      "candidate": 0,
+      "raw": {
+        "prompt": "The Nsukka region in Nigeria is widely recognized as a major center for early ironworking with abundant direct evidence of sustained production.",
+        "answer": "FALSE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage explicitly states that while the Nsukka region is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited, which directly contradicts the statement."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 0,
+      "selected": false,
+      "historically_selected": false,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The Nsukka region in Nigeria is widely recognized as a major center for early ironworking with abundant direct evidence of sustained production.",
+        "answer": "FALSE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage explicitly states that while the Nsukka region is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited, which directly contradicts the statement.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11"
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [
+        [
+          "CLAIM_PROVENANCE_MISMATCH",
+          "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'"
+        ]
+      ],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "FAIL",
+          "issues": [
+            {
+              "issueId": "iss_018b5473b84cccd2daf5_0",
+              "code": "CLAIM_PROVENANCE_MISMATCH",
+              "severity": "CRITICAL",
+              "scope": "QUESTION",
+              "affectedRefs": [
+                {
+                  "artifactId": "question:replay:5",
+                  "artifactType": "Question",
+                  "version": 1,
+                  "contentHash": "7735d74a4c1311c777e17f7df4a2e47bacafdfc2e844e6b3779154a2c3d6f14b"
+                }
+              ],
+              "message": "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'",
+              "evidence": null,
+              "proposedRepair": null,
+              "status": "OPEN",
+              "fingerprint": "b43a5edd7695757068fb037cae8eea4cc4045de694f41bd0a92763a042243103",
+              "evaluatorId": "eval_question_semantic",
+              "artifactRef": null,
+              "location": null,
+              "createdAt": "2026-10-25T14:03:51.396277Z",
+              "resolvedAt": null
+            }
+          ]
+        }
+      ],
+      "blind_replay": "NOT_RUN: no historical solver/adversary payload for this proposition; cannot reuse another candidate's answers"
+    },
+    {
+      "version": 1,
+      "candidate": 1,
+      "raw": {
+        "prompt": "The passage mentions that the Nsukka region in Nigeria has limited direct evidence for sustained iron production.",
+        "answer": "TRUE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage directly states that the Nsukka region is frequently cited as a major center for early ironworking but has limited direct evidence for sustained production, which aligns with the statement."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 0,
+      "selected": false,
+      "historically_selected": false,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The passage mentions that the Nsukka region in Nigeria has limited direct evidence for sustained iron production.",
+        "answer": "TRUE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage directly states that the Nsukka region is frequently cited as a major center for early ironworking but has limited direct evidence for sustained production, which aligns with the statement.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11"
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [
+        [
+          "CLAIM_PROVENANCE_MISMATCH",
+          "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'"
+        ]
+      ],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "FAIL",
+          "issues": [
+            {
+              "issueId": "iss_ffecfb1d2ddaf176e7f0_0",
+              "code": "CLAIM_PROVENANCE_MISMATCH",
+              "severity": "CRITICAL",
+              "scope": "QUESTION",
+              "affectedRefs": [
+                {
+                  "artifactId": "question:replay:5",
+                  "artifactType": "Question",
+                  "version": 1,
+                  "contentHash": "29f8d8139523595a19f8b3ac65d456d9e37bddc0a0847703a9960e751803039c"
+                }
+              ],
+              "message": "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'",
+              "evidence": null,
+              "proposedRepair": null,
+              "status": "OPEN",
+              "fingerprint": "b43a5edd7695757068fb037cae8eea4cc4045de694f41bd0a92763a042243103",
+              "evaluatorId": "eval_question_semantic",
+              "artifactRef": null,
+              "location": null,
+              "createdAt": "2026-10-25T14:03:51.401008Z",
+              "resolvedAt": null
+            }
+          ]
+        }
+      ],
+      "blind_replay": "NOT_RUN: no historical solver/adversary payload for this proposition; cannot reuse another candidate's answers"
+    },
+    {
+      "version": 1,
+      "candidate": 2,
+      "raw": {
+        "prompt": "The passage discusses the specific techniques used in iron smelting in the Nsukka region of Nigeria.",
+        "answer": "NOT_GIVEN",
+        "absenceAssessment": {
+          "assessmentId": "abs_q5",
+          "claimOrTopic": "Specific iron smelting techniques in the Nsukka region",
+          "absenceReason": "The passage only mentions the Nsukka region as a major center for early ironworking but does not discuss any specific techniques used there.",
+          "topicalContextSpan": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+          "absenceConfirmed": true
+        },
+        "explanation": "The passage does not provide any information about the specific techniques used in iron smelting in the Nsukka region, making this statement not given."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 1,
+      "selected": true,
+      "historically_selected": true,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The passage discusses the specific techniques used in iron smelting in the Nsukka region of Nigeria.",
+        "answer": "NOT_GIVEN",
+        "explanation": "The passage does not provide any information about the specific techniques used in iron smelting in the Nsukka region, making this statement not given.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11",
+        "absenceAssessment": {
+          "assessmentId": "abs_q5",
+          "claimOrTopic": "Specific iron smelting techniques in the Nsukka region",
+          "absenceReason": "The passage only mentions the Nsukka region as a major center for early ironworking but does not discuss any specific techniques used there.",
+          "topicalContextSpan": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+          "absenceConfirmed": true
+        }
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "PASS",
+          "issues": []
+        }
+      ],
+      "blind_replay": {
+        "solver_raw": "```json\n{\n  \"questionNumber\": 5,\n  \"normalizedAnswer\": \"NOT GIVEN\",\n  \"citedSpans\": [\n    {\n      \"spanText\": \"The Nsukka region in Nigeria is frequently cited as a major center for early ironworking, but direct evidence for sustained production there remains limited.\",\n      \"startChar\": 220,\n      \"endChar\": 340\n    }\n  ],\n  \"justification\": \"The passage mentions the Nsukka region as a major center for early ironworking but does not discuss specific techniques used in iron smelting there.\",\n  \"selfReportedConfidence\": 0.95\n}\n```",
+        "solver": {
+          "questionNumber": 5,
+          "normalizedAnswer": "NOT_GIVEN",
+          "citedSpans": [
+            {
+              "spanText": "the Nsukka region in Nigeria is frequently cited as a major center for early ironworking",
+              "startChar": 220,
+              "endChar": 340
+            }
+          ],
+          "justification": "The passage mentions the Nsukka region as a major center for early ironworking but does not discuss specific techniques used in iron smelting there.",
+          "selfReportedConfidence": 0.95,
+          "isConfidenceCalibrated": false,
+          "executionTimeMs": null
+        },
+        "solver_errors": [],
+        "adversary_raw": "```json\n{\n  \"questionNumber\": 5,\n  \"isAmbiguous\": true,\n  \"adversarySummary\": \"The passage does not provide specific details about the techniques used in iron smelting in the Nsukka region of Nigeria, making the question ambiguous as it suggests a focus on specific techniques that are not clearly detailed in the text.\",\n  \"identifiedAlternatives\": [\n    {\n      \"alternativeAnswer\": \"FALSE\",\n      \"ambiguityType\": \"MULTIPLE_VALID_OPTIONS\",\n      \"plausibilityScore\": 0.8,\n      \"citedSpans\": [\n        {\n          \"spanText\": \"While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.\",\n          \"startChar\": 285,\n          \"endChar\": 389\n        }\n      ],\n      \"reasoning\": \"The passage states that the Nsukka region is cited as a major center for early ironworking but lacks direct evidence for sustained production, implying a lack of specific details about smelting techniques.\",\n      \"isGroundedInPassage\": true\n    },\n    {\n      \"alternativeAnswer\": \"NOT GIVEN\",\n      \"ambiguityType\": \"MULTIPLE_VALID_OPTIONS\",\n      \"plausibilityScore\": 0.6,\n      \"citedSpans\": [\n        {\n          \"spanText\": \"The passage discusses the specific techniques used in iron smelting in the Nsukka region of Nigeria.\",\n          \"startChar\": null,\n          \"endChar\": null\n        }\n      ],\n      \"reasoning\": \"The passage does not provide specific details about the techniques used in iron smelting in the Nsukka region, making it plausible to argue that the information is not given.\",\n      \"isGroundedInPassage\": true\n    }\n  ]\n}\n```",
+        "adversary": {
+          "questionNumber": 5,
+          "isAmbiguous": true,
+          "identifiedAlternatives": [
+            {
+              "alternativeAnswer": "FALSE",
+              "ambiguityType": "MULTIPLE_VALID_OPTIONS",
+              "plausibilityScore": 0.8,
+              "citedSpans": [
+                {
+                  "spanText": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+                  "startChar": 1020,
+                  "endChar": 1179
+                }
+              ],
+              "reasoning": "The passage states that the Nsukka region is cited as a major center for early ironworking but lacks direct evidence for sustained production, implying a lack of specific details about smelting techniques.",
+              "isGroundedInPassage": true
+            }
+          ],
+          "adversarySummary": "The passage does not provide specific details about the techniques used in iron smelting in the Nsukka region of Nigeria, making the question ambiguous as it suggests a focus on specific techniques that are not clearly detailed in the text.",
+          "executionTimeMs": null
+        },
+        "adversary_errors": [],
+        "rejected_alternatives": [
+          {
+            "alternative_answer": "NOT GIVEN",
+            "ambiguity_type": "MULTIPLE_VALID_OPTIONS",
+            "reasoning": "The passage does not provide specific details about the techniques used in iron smelting in the Nsukka region, making it plausible to argue that the information is not given.",
+            "rejection_reason": "Allegation relies on outside knowledge or missing passage text citation."
+          }
+        ],
+        "adjudication": {
+          "questionNumber": 5,
+          "verdict": "AMBIGUOUS_DEFECTIVE",
+          "severity": "HIGH",
+          "resolutionAction": "REPAIR_OPTIONS_OR_REGENERATE_ITEM",
+          "solverMatch": true,
+          "adversaryAmbiguityFound": true,
+          "details": {
+            "errorType": "GENUINE_AMBIGUITY",
+            "message": "Adversary identified 1 grounded alternative(s) or ambiguous interpretation in the question.",
+            "summary": "The passage does not provide specific details about the techniques used in iron smelting in the Nsukka region of Nigeria, making the question ambiguous as it suggests a focus on specific techniques that are not clearly detailed in the text.",
+            "alternatives": [
+              {
+                "alternative_answer": "FALSE",
+                "ambiguity_type": "MULTIPLE_VALID_OPTIONS",
+                "plausibility_score": 0.8,
+                "cited_spans": [
+                  {
+                    "span_text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+                    "start_char": 1020,
+                    "end_char": 1179
+                  }
+                ],
+                "reasoning": "The passage states that the Nsukka region is cited as a major center for early ironworking but lacks direct evidence for sustained production, implying a lack of specific details about smelting techniques.",
+                "is_grounded_in_passage": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "version": 2,
+      "candidate": 0,
+      "raw": {
+        "prompt": "The Nsukka region in Nigeria is frequently cited as a major center for early ironworking, with abundant direct evidence for sustained production.",
+        "answer": "FALSE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage explicitly states that while the Nsukka region is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited, which directly contradicts the statement."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 0,
+      "selected": false,
+      "historically_selected": false,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The Nsukka region in Nigeria is frequently cited as a major center for early ironworking, with abundant direct evidence for sustained production.",
+        "answer": "FALSE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage explicitly states that while the Nsukka region is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited, which directly contradicts the statement.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11"
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [
+        [
+          "CLAIM_PROVENANCE_MISMATCH",
+          "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'"
+        ]
+      ],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "FAIL",
+          "issues": [
+            {
+              "issueId": "iss_f5df7718734cdf4dd2fe_0",
+              "code": "CLAIM_PROVENANCE_MISMATCH",
+              "severity": "CRITICAL",
+              "scope": "QUESTION",
+              "affectedRefs": [
+                {
+                  "artifactId": "question:replay:5",
+                  "artifactType": "Question",
+                  "version": 2,
+                  "contentHash": "608253adb451a608c9c1ab5ef0a5c23a09a28ebf22058a951f7a9a425ab50358"
+                }
+              ],
+              "message": "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'",
+              "evidence": null,
+              "proposedRepair": null,
+              "status": "OPEN",
+              "fingerprint": "3ee29e767989055ef941a37fc6fcd92c6e978829b58be56691d6bc372cd39b5a",
+              "evaluatorId": "eval_question_semantic",
+              "artifactRef": null,
+              "location": null,
+              "createdAt": "2026-10-25T14:03:51.456424Z",
+              "resolvedAt": null
+            }
+          ]
+        }
+      ],
+      "blind_replay": "NOT_RUN: no historical solver/adversary payload for this proposition; cannot reuse another candidate's answers"
+    },
+    {
+      "version": 2,
+      "candidate": 1,
+      "raw": {
+        "prompt": "The passage mentions that the Nsukka region in Nigeria has limited direct evidence for sustained iron production.",
+        "answer": "TRUE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage directly states that the Nsukka region is frequently cited as a major center for early ironworking but has limited direct evidence for sustained production, which aligns with the statement."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 0,
+      "selected": false,
+      "historically_selected": false,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The passage mentions that the Nsukka region in Nigeria has limited direct evidence for sustained iron production.",
+        "answer": "TRUE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage directly states that the Nsukka region is frequently cited as a major center for early ironworking but has limited direct evidence for sustained production, which aligns with the statement.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11"
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [
+        [
+          "CLAIM_PROVENANCE_MISMATCH",
+          "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'"
+        ]
+      ],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "FAIL",
+          "issues": [
+            {
+              "issueId": "iss_ffecfb1d2ddaf176e7f0_0",
+              "code": "CLAIM_PROVENANCE_MISMATCH",
+              "severity": "CRITICAL",
+              "scope": "QUESTION",
+              "affectedRefs": [
+                {
+                  "artifactId": "question:replay:5",
+                  "artifactType": "Question",
+                  "version": 2,
+                  "contentHash": "29f8d8139523595a19f8b3ac65d456d9e37bddc0a0847703a9960e751803039c"
+                }
+              ],
+              "message": "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'",
+              "evidence": null,
+              "proposedRepair": null,
+              "status": "OPEN",
+              "fingerprint": "3ee29e767989055ef941a37fc6fcd92c6e978829b58be56691d6bc372cd39b5a",
+              "evaluatorId": "eval_question_semantic",
+              "artifactRef": null,
+              "location": null,
+              "createdAt": "2026-10-25T14:03:51.461285Z",
+              "resolvedAt": null
+            }
+          ]
+        }
+      ],
+      "blind_replay": "NOT_RUN: no historical solver/adversary payload for this proposition; cannot reuse another candidate's answers"
+    },
+    {
+      "version": 2,
+      "candidate": 2,
+      "raw": {
+        "prompt": "The passage provides information on the specific types of iron smelting techniques used in the Nsukka region.",
+        "answer": "NOT_GIVEN",
+        "absenceAssessment": {
+          "assessmentId": "abs_q5",
+          "claimOrTopic": "Specific iron smelting techniques in the Nsukka region",
+          "absenceReason": "The passage discusses the Nsukka region as a major center for early ironworking but does not mention the specific types of iron smelting techniques used there.",
+          "topicalContextSpan": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+          "absenceConfirmed": true
+        },
+        "explanation": "The passage does not provide any information on the specific types of iron smelting techniques used in the Nsukka region, making this statement not given."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 1,
+      "selected": true,
+      "historically_selected": true,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The passage provides information on the specific types of iron smelting techniques used in the Nsukka region.",
+        "answer": "NOT_GIVEN",
+        "explanation": "The passage does not provide any information on the specific types of iron smelting techniques used in the Nsukka region, making this statement not given.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11",
+        "absenceAssessment": {
+          "assessmentId": "abs_q5",
+          "claimOrTopic": "Specific iron smelting techniques in the Nsukka region",
+          "absenceReason": "The passage discusses the Nsukka region as a major center for early ironworking but does not mention the specific types of iron smelting techniques used there.",
+          "topicalContextSpan": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+          "absenceConfirmed": true
+        }
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "PASS",
+          "issues": []
+        }
+      ],
+      "blind_replay": {
+        "solver_raw": "```json\n{\n  \"questionNumber\": 5,\n  \"normalizedAnswer\": \"NOT GIVEN\",\n  \"citedSpans\": [\n    {\n      \"spanText\": \"The Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.\",\n      \"startChar\": 283,\n      \"endChar\": 347\n    }\n  ],\n  \"justification\": \"The passage mentions the Nsukka region as a major center for early ironworking but does not provide specific details about the types of iron smelting techniques used there.\",\n  \"selfReportedConfidence\": 0.95\n}\n```",
+        "solver": {
+          "questionNumber": 5,
+          "normalizedAnswer": "NOT_GIVEN",
+          "citedSpans": [
+            {
+              "spanText": "the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa",
+              "startChar": 283,
+              "endChar": 347
+            }
+          ],
+          "justification": "The passage mentions the Nsukka region as a major center for early ironworking but does not provide specific details about the types of iron smelting techniques used there.",
+          "selfReportedConfidence": 0.95,
+          "isConfidenceCalibrated": false,
+          "executionTimeMs": null
+        },
+        "solver_errors": [],
+        "adversary_raw": "```json\n{\n  \"questionNumber\": 5,\n  \"isAmbiguous\": true,\n  \"adversarySummary\": \"The passage does not provide specific details about the types of iron smelting techniques used in the Nsukka region, making the question's premise ambiguous as it suggests the presence of such information.\",\n  \"identifiedAlternatives\": [\n    {\n      \"alternativeAnswer\": \"FALSE\",\n      \"ambiguityType\": \"MULTIPLE_VALID_OPTIONS\",\n      \"plausibilityScore\": 0.8,\n      \"citedSpans\": [\n        {\n          \"spanText\": \"The Nsukka region in Nigeria is frequently cited as a major center for early ironworking, but direct evidence for sustained production there remains limited.\",\n          \"startChar\": 307,\n          \"endChar\": 404\n        }\n      ],\n      \"reasoning\": \"The passage explicitly states that while the Nsukka region is cited as a major center for early ironworking, direct evidence for sustained production is limited, implying a lack of specific information on smelting techniques.\",\n      \"isGroundedInPassage\": true\n    },\n    {\n      \"alternativeAnswer\": \"NOT GIVEN\",\n      \"ambiguityType\": \"MULTIPLE_VALID_OPTIONS\",\n      \"plausibilityScore\": 0.6,\n      \"citedSpans\": [\n        {\n          \"spanText\": \"The passage provides information on the specific types of iron smelting techniques used in the Nsukka region.\",\n          \"startChar\": null,\n          \"endChar\": null\n        }\n      ],\n      \"reasoning\": \"The passage does not provide specific details about the types of smelting techniques used in the Nsukka region, making it plausible to interpret the statement as 'NOT GIVEN'.\",\n      \"isGroundedInPassage\": true\n    }\n  ]\n}\n```",
+        "adversary": {
+          "questionNumber": 5,
+          "isAmbiguous": true,
+          "identifiedAlternatives": [
+            {
+              "alternativeAnswer": "FALSE",
+              "ambiguityType": "MULTIPLE_VALID_OPTIONS",
+              "plausibilityScore": 0.8,
+              "citedSpans": [
+                {
+                  "spanText": "the Nsukka region in Nigeria is frequently cited as a major center for early ironworking",
+                  "startChar": 1026,
+                  "endChar": 1114
+                }
+              ],
+              "reasoning": "The passage explicitly states that while the Nsukka region is cited as a major center for early ironworking, direct evidence for sustained production is limited, implying a lack of specific information on smelting techniques.",
+              "isGroundedInPassage": true
+            }
+          ],
+          "adversarySummary": "The passage does not provide specific details about the types of iron smelting techniques used in the Nsukka region, making the question's premise ambiguous as it suggests the presence of such information.",
+          "executionTimeMs": null
+        },
+        "adversary_errors": [],
+        "rejected_alternatives": [
+          {
+            "alternative_answer": "NOT GIVEN",
+            "ambiguity_type": "MULTIPLE_VALID_OPTIONS",
+            "reasoning": "The passage does not provide specific details about the types of smelting techniques used in the Nsukka region, making it plausible to interpret the statement as 'NOT GIVEN'.",
+            "rejection_reason": "Allegation relies on outside knowledge or missing passage text citation."
+          }
+        ],
+        "adjudication": {
+          "questionNumber": 5,
+          "verdict": "AMBIGUOUS_DEFECTIVE",
+          "severity": "HIGH",
+          "resolutionAction": "REPAIR_OPTIONS_OR_REGENERATE_ITEM",
+          "solverMatch": true,
+          "adversaryAmbiguityFound": true,
+          "details": {
+            "errorType": "GENUINE_AMBIGUITY",
+            "message": "Adversary identified 1 grounded alternative(s) or ambiguous interpretation in the question.",
+            "summary": "The passage does not provide specific details about the types of iron smelting techniques used in the Nsukka region, making the question's premise ambiguous as it suggests the presence of such information.",
+            "alternatives": [
+              {
+                "alternative_answer": "FALSE",
+                "ambiguity_type": "MULTIPLE_VALID_OPTIONS",
+                "plausibility_score": 0.8,
+                "cited_spans": [
+                  {
+                    "span_text": "the Nsukka region in Nigeria is frequently cited as a major center for early ironworking",
+                    "start_char": 1026,
+                    "end_char": 1114
+                  }
+                ],
+                "reasoning": "The passage explicitly states that while the Nsukka region is cited as a major center for early ironworking, direct evidence for sustained production is limited, implying a lack of specific information on smelting techniques.",
+                "is_grounded_in_passage": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "version": 3,
+      "candidate": 0,
+      "raw": {
+        "prompt": "The Nsukka region in Nigeria is frequently cited as a major center for early ironworking, with abundant direct evidence for sustained production.",
+        "answer": "FALSE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage explicitly states that despite the Nsukka region being frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited, which directly contradicts the statement."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 0,
+      "selected": false,
+      "historically_selected": false,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The Nsukka region in Nigeria is frequently cited as a major center for early ironworking, with abundant direct evidence for sustained production.",
+        "answer": "FALSE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage explicitly states that despite the Nsukka region being frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited, which directly contradicts the statement.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11"
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [
+        [
+          "CLAIM_PROVENANCE_MISMATCH",
+          "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'"
+        ]
+      ],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "FAIL",
+          "issues": [
+            {
+              "issueId": "iss_66c563ad78b48f6aa68f_0",
+              "code": "CLAIM_PROVENANCE_MISMATCH",
+              "severity": "CRITICAL",
+              "scope": "QUESTION",
+              "affectedRefs": [
+                {
+                  "artifactId": "question:replay:5",
+                  "artifactType": "Question",
+                  "version": 3,
+                  "contentHash": "b53d3deed6f3720ae542bb0ab3126604c18a7436a7fd5698133153778de5d4a2"
+                }
+              ],
+              "message": "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'",
+              "evidence": null,
+              "proposedRepair": null,
+              "status": "OPEN",
+              "fingerprint": "bffce2eb5d9c307b5b93cb1070da83cb8ef60d23b1efcc9ec2badd07d38b15a4",
+              "evaluatorId": "eval_question_semantic",
+              "artifactRef": null,
+              "location": null,
+              "createdAt": "2026-10-25T14:03:51.513612Z",
+              "resolvedAt": null
+            }
+          ]
+        }
+      ],
+      "blind_replay": "NOT_RUN: no historical solver/adversary payload for this proposition; cannot reuse another candidate's answers"
+    },
+    {
+      "version": 3,
+      "candidate": 1,
+      "raw": {
+        "prompt": "The passage mentions that the Nsukka region in Nigeria has limited direct evidence for sustained iron production.",
+        "answer": "TRUE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage clearly states that the Nsukka region is frequently cited as a major center for early ironworking but has limited direct evidence for sustained production, making this statement true."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 0,
+      "selected": false,
+      "historically_selected": false,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The passage mentions that the Nsukka region in Nigeria has limited direct evidence for sustained iron production.",
+        "answer": "TRUE",
+        "evidenceQuote": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+        "explanation": "The passage clearly states that the Nsukka region is frequently cited as a major center for early ironworking but has limited direct evidence for sustained production, making this statement true.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11"
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [
+        [
+          "CLAIM_PROVENANCE_MISMATCH",
+          "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'"
+        ]
+      ],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "FAIL",
+          "issues": [
+            {
+              "issueId": "iss_bad427e31d14c92efc30_0",
+              "code": "CLAIM_PROVENANCE_MISMATCH",
+              "severity": "CRITICAL",
+              "scope": "QUESTION",
+              "affectedRefs": [
+                {
+                  "artifactId": "question:replay:5",
+                  "artifactType": "Question",
+                  "version": 3,
+                  "contentHash": "dbca763ba385306a87502df657bb2a4259f465664dde87e966be46026f35c753"
+                }
+              ],
+              "message": "Question 5 evidence quote primarily supports claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10' (overlap: 0.54) rather than bound claim 'claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11' (overlap: 0.64): 'While the Nsukka region in Nigeria is frequently cited as a ...'",
+              "evidence": null,
+              "proposedRepair": null,
+              "status": "OPEN",
+              "fingerprint": "bffce2eb5d9c307b5b93cb1070da83cb8ef60d23b1efcc9ec2badd07d38b15a4",
+              "evaluatorId": "eval_question_semantic",
+              "artifactRef": null,
+              "location": null,
+              "createdAt": "2026-10-25T14:03:51.518262Z",
+              "resolvedAt": null
+            }
+          ]
+        }
+      ],
+      "blind_replay": "NOT_RUN: no historical solver/adversary payload for this proposition; cannot reuse another candidate's answers"
+    },
+    {
+      "version": 3,
+      "candidate": 2,
+      "raw": {
+        "prompt": "The passage discusses the specific dates when iron smelting began in the Nsukka region of Nigeria.",
+        "answer": "NOT_GIVEN",
+        "absenceAssessment": {
+          "assessmentId": "abs_q5",
+          "claimOrTopic": "Specific dates of iron smelting in the Nsukka region",
+          "absenceReason": "The passage only mentions that the Nsukka region is frequently cited as a major center for early ironworking but lacks direct evidence for sustained production, without providing specific dates for when iron smelting began there.",
+          "topicalContextSpan": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+          "absenceConfirmed": true
+        },
+        "explanation": "The passage does not provide any specific dates for when iron smelting began in the Nsukka region, despite mentioning it as a frequently cited center, so this information is not given."
+      },
+      "bound_claim": "However, direct evidence for sustained iron production there remains limited (Okafor, 2002 ; Okafor & Phillips, 1992 ).",
+      "advisory_target_penalty": 1,
+      "selected": true,
+      "historically_selected": true,
+      "parsed": {
+        "questionNumber": 5,
+        "questionType": "TRUE_FALSE_NOT_GIVEN",
+        "statement": "The passage discusses the specific dates when iron smelting began in the Nsukka region of Nigeria.",
+        "answer": "NOT_GIVEN",
+        "explanation": "The passage does not provide any specific dates for when iron smelting began in the Nsukka region, despite mentioning it as a frequently cited center, so this information is not given.",
+        "difficulty": "FOUNDATION",
+        "passageEvidence": {
+          "startChar": 1020,
+          "endChar": 1179,
+          "text": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited."
+        },
+        "evidenceClaimRef": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:11",
+        "absenceAssessment": {
+          "assessmentId": "abs_q5",
+          "claimOrTopic": "Specific dates of iron smelting in the Nsukka region",
+          "absenceReason": "The passage only mentions that the Nsukka region is frequently cited as a major center for early ironworking but lacks direct evidence for sustained production, without providing specific dates for when iron smelting began there.",
+          "topicalContextSpan": "While the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+          "absenceConfirmed": true
+        }
+      },
+      "bound_ratio": 0.6363636363636364,
+      "bound_markers": [
+        "entity:okafor",
+        "entity:phillips",
+        "number:1992",
+        "number:2002",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "quote_markers": [
+        "entity:nigeria",
+        "entity:nsukka",
+        "qualifier:limited",
+        "qualifier:sustained"
+      ],
+      "competing_claims": [
+        {
+          "id": "claim:run_2250820f0ed942cb80e870bcc38f2a7e:1:10",
+          "text": "From east to west, the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.",
+          "ratio": 0.5384615384615384,
+          "marker_conflict": true
+        }
+      ],
+      "parser_rejection": [],
+      "evaluations": [
+        {
+          "id": "eval_question_structure",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_answer_verbatim_length",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_evidence_offsets",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_uniqueness",
+          "status": "PASS",
+          "issues": []
+        },
+        {
+          "id": "eval_question_semantic",
+          "status": "PASS",
+          "issues": []
+        }
+      ],
+      "blind_replay": {
+        "solver_raw": "```json\n{\n  \"questionNumber\": 5,\n  \"normalizedAnswer\": \"NOT GIVEN\",\n  \"citedSpans\": [\n    {\n      \"spanText\": \"The Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa.\",\n      \"startChar\": 366,\n      \"endChar\": 434\n    }\n  ],\n  \"justification\": \"The passage mentions the Nsukka region as a major center for early ironworking but does not provide specific dates for when iron smelting began there.\",\n  \"selfReportedConfidence\": 0.95\n}\n```",
+        "solver": {
+          "questionNumber": 5,
+          "normalizedAnswer": "NOT_GIVEN",
+          "citedSpans": [
+            {
+              "spanText": "the Nsukka region in Nigeria has long been considered a major center for early ironworking in sub-Saharan Africa",
+              "startChar": 366,
+              "endChar": 434
+            }
+          ],
+          "justification": "The passage mentions the Nsukka region as a major center for early ironworking but does not provide specific dates for when iron smelting began there.",
+          "selfReportedConfidence": 0.95,
+          "isConfidenceCalibrated": false,
+          "executionTimeMs": null
+        },
+        "solver_errors": [],
+        "adversary_raw": "```json\n{\n  \"questionNumber\": 5,\n  \"isAmbiguous\": true,\n  \"adversarySummary\": \"The passage does not provide specific dates for when iron smelting began in the Nsukka region of Nigeria, but it mentions the Nsukka region as a major center for early ironworking and implies early activity without providing exact dates. This creates ambiguity as the question asks for specific dates that are not provided.\",\n  \"identifiedAlternatives\": [\n    {\n      \"alternativeAnswer\": \"The passage does not provide specific dates for the beginning of iron smelting in the Nsukka region.\",\n      \"ambiguityType\": \"UNSUPPORTED_KEY\",\n      \"plausibilityScore\": 0.8,\n      \"citedSpans\": [\n        {\n          \"spanText\": \"the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.\",\n          \"startChar\": 354,\n          \"endChar\": 462\n        }\n      ],\n      \"reasoning\": \"While the passage mentions the Nsukka region as a major center for early ironworking, it does not provide specific dates for when iron smelting began there. The lack of explicit dates makes the question unanswerable based on the passage.\",\n      \"isGroundedInPassage\": true\n    },\n    {\n      \"alternativeAnswer\": \"The passage implies early ironworking in the Nsukka region without specifying exact dates.\",\n      \"ambiguityType\": \"MULTIPLE_VALID_OPTIONS\",\n      \"plausibilityScore\": 0.9,\n      \"citedSpans\": [\n        {\n          \"spanText\": \"the Nsukka region in Nigeria is frequently cited as a major center for early ironworking\",\n          \"startChar\": 354,\n          \"endChar\": 419\n        }\n      ],\n      \"reasoning\": \"The passage suggests that the Nsukka region was a major center for early ironworking, which implies activity in the early period. However, it does not provide specific dates, making it possible to interpret the question in multiple valid ways.\",\n      \"isGroundedInPassage\": true\n    }\n  ]\n}\n```",
+        "adversary": {
+          "questionNumber": 5,
+          "isAmbiguous": true,
+          "identifiedAlternatives": [
+            {
+              "alternativeAnswer": "The passage does not provide specific dates for the beginning of iron smelting in the Nsukka region.",
+              "ambiguityType": "UNSUPPORTED_KEY",
+              "plausibilityScore": 0.8,
+              "citedSpans": [
+                {
+                  "spanText": "the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+                  "startChar": 1026,
+                  "endChar": 1179
+                }
+              ],
+              "reasoning": "While the passage mentions the Nsukka region as a major center for early ironworking, it does not provide specific dates for when iron smelting began there. The lack of explicit dates makes the question unanswerable based on the passage.",
+              "isGroundedInPassage": true
+            },
+            {
+              "alternativeAnswer": "The passage implies early ironworking in the Nsukka region without specifying exact dates.",
+              "ambiguityType": "MULTIPLE_VALID_OPTIONS",
+              "plausibilityScore": 0.9,
+              "citedSpans": [
+                {
+                  "spanText": "the Nsukka region in Nigeria is frequently cited as a major center for early ironworking",
+                  "startChar": 1026,
+                  "endChar": 1114
+                }
+              ],
+              "reasoning": "The passage suggests that the Nsukka region was a major center for early ironworking, which implies activity in the early period. However, it does not provide specific dates, making it possible to interpret the question in multiple valid ways.",
+              "isGroundedInPassage": true
+            }
+          ],
+          "adversarySummary": "The passage does not provide specific dates for when iron smelting began in the Nsukka region of Nigeria, but it mentions the Nsukka region as a major center for early ironworking and implies early activity without providing exact dates. This creates ambiguity as the question asks for specific dates that are not provided.",
+          "executionTimeMs": null
+        },
+        "adversary_errors": [],
+        "rejected_alternatives": [],
+        "adjudication": {
+          "questionNumber": 5,
+          "verdict": "AMBIGUOUS_DEFECTIVE",
+          "severity": "HIGH",
+          "resolutionAction": "REPAIR_OPTIONS_OR_REGENERATE_ITEM",
+          "solverMatch": true,
+          "adversaryAmbiguityFound": true,
+          "details": {
+            "errorType": "GENUINE_AMBIGUITY",
+            "message": "Adversary identified 2 grounded alternative(s) or ambiguous interpretation in the question.",
+            "summary": "The passage does not provide specific dates for when iron smelting began in the Nsukka region of Nigeria, but it mentions the Nsukka region as a major center for early ironworking and implies early activity without providing exact dates. This creates ambiguity as the question asks for specific dates that are not provided.",
+            "alternatives": [
+              {
+                "alternative_answer": "The passage does not provide specific dates for the beginning of iron smelting in the Nsukka region.",
+                "ambiguity_type": "UNSUPPORTED_KEY",
+                "plausibility_score": 0.8,
+                "cited_spans": [
+                  {
+                    "span_text": "the Nsukka region in Nigeria is frequently cited as a major center for early ironworking, direct evidence for sustained production there remains limited.",
+                    "start_char": 1026,
+                    "end_char": 1179
+                  }
+                ],
+                "reasoning": "While the passage mentions the Nsukka region as a major center for early ironworking, it does not provide specific dates for when iron smelting began there. The lack of explicit dates makes the question unanswerable based on the passage.",
+                "is_grounded_in_passage": true
+              },
+              {
+                "alternative_answer": "The passage implies early ironworking in the Nsukka region without specifying exact dates.",
+                "ambiguity_type": "MULTIPLE_VALID_OPTIONS",
+                "plausibility_score": 0.9,
+                "cited_spans": [
+                  {
+                    "span_text": "the Nsukka region in Nigeria is frequently cited as a major center for early ironworking",
+                    "start_char": 1026,
+                    "end_char": 1114
+                  }
+                ],
+                "reasoning": "The passage suggests that the Nsukka region was a major center for early ironworking, which implies activity in the early period. However, it does not provide specific dates, making it possible to interpret the question in multiple valid ways.",
+                "is_grounded_in_passage": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

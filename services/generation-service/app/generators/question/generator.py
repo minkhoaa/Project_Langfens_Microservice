@@ -338,7 +338,7 @@ class QuestionCandidateGenerator:
         req = ProviderRequest(
             operation_id=op_id,
             run_id=run_id,
-            section_id=f"section_{section_id}" if section_id and not str(section_id).startswith("section_") else (str(section_id) if section_id else "section_1"),
+            section_id=str(section_id) if section_id else "1",
             artifact_id=f"questions_section_{section_id}" if section_id and not str(section_id).startswith("section_") else (f"questions_{section_id}" if section_id else "questions_section_1"),
             parent_operation_id=parent_operation_id or (getattr(context, "parent_operation_id", None) if context else None),
             capability=Capability.GENERATE_JSON,

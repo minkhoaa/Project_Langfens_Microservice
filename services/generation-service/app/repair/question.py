@@ -345,8 +345,10 @@ class QuestionItemRepairer(BaseRepairer):
                         lease_owner = auth.lease_owner
                         epoch = auth.epoch
                         sec_id_raw = str(artifact.section_id or getattr(context, "section_id", None) or 1)
-                        sec_id_str = sec_id_raw if str(sec_id_raw).startswith("section_") else f"section_{sec_id_raw}"
-                        art_id_str = f"questions_{sec_id_str}"
+                        # The durable parent uses this exact section identity.
+                        # Allocation aliases are not interchangeable grant scopes.
+                        sec_id_str = sec_id_raw
+                        art_id_str = artifact.artifact_id
                         auth_claim_ref = (
                             q.get("evidenceClaimRef")
                             or q.get("claimRef")

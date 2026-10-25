@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import inspect
 import json
 import logging
 from collections.abc import Awaitable, Callable, Sequence
@@ -599,10 +600,13 @@ class StageExecutor:
         # 5. Multi-evaluator adapter caching evaluation output per draft
         eval_cache: dict[str, list[EvaluationResult]] = {}
         last_eval_rejected_error: list[EvaluationRejectedError] = []
-        async def run_all_evaluations(art: ArtifactEnvelope) -> list[EvaluationResult]:
+        selective_evaluation = "evaluator_id" in inspect.signature(evaluate).parameters
+        async def run_all_evaluations(art: ArtifactEnvelope, evaluator_id: str) -> list[EvaluationResult]:
             cache_key = f"{art.artifact_id}:{art.version}:{art.content_hash}"
+            if selective_evaluation:
+                cache_key += f":{evaluator_id}"
             if cache_key not in eval_cache:
-                raw = await evaluate(art)
+                raw = await evaluate(art, evaluator_id=evaluator_id) if selective_evaluation else await evaluate(art)
                 eval_cache[cache_key] = list(raw) if isinstance(raw, (list, tuple)) else [raw]
             return eval_cache[cache_key]
 
@@ -621,7 +625,7 @@ class StageExecutor:
             def evaluator_version(inner_self) -> str:
                 return inner_self._ev_version
             async def evaluate(inner_self, ctx: LoopContext, art: ArtifactEnvelope, intent_id: str) -> EvaluationResult:
-                results = await run_all_evaluations(art)
+                results = await run_all_evaluations(art, inner_self._ev_id)
                 matched = next((e for e in results if e.evaluator_id == inner_self._ev_id), None)
                 if matched is None:
                     missing = [inner_self._ev_id]

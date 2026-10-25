@@ -75,6 +75,10 @@ PROPER_ENTITY = re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b")
 
 def claim_discriminators(text: str) -> set[str]:
     """Extract high-risk factual markers omitted by broad lexical similarity scores."""
+    # Author/year citations are provenance, not factual people/places or dates.
+    # Retain ordinary parenthetical facts (e.g. a site's date), stripping only
+    # bibliographic groups containing an author and a publication year.
+    text = re.sub(r"\([^()]*[A-Z][a-z]+[^()]*\b(?:19|20)\d{2}[a-z]?[^()]*\)", "", text)
     markers = {f"number:{value.casefold()}" for value in NUMBER.findall(text)}
     markers.update(f"qualifier:{value.casefold()}" for value in FACT_QUALIFIERS.findall(text))
     entities = PROPER_ENTITY.findall(text)
@@ -718,6 +722,11 @@ def evaluate_question(
                 or calculate_shingle_overlap(prompt, question_prompt(other)) > 0.7):
             unique.append((IssueCode.DUPLICATE_CONTENT, "Candidate duplicates an already accepted question"))
     semantic: list[Problem] = []
+    if question_type in {"TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN"}:
+        from app.solvers.tfng import is_meta_presence_statement
+        if is_meta_presence_statement(prompt):
+            semantic.append((IssueCode.TFNG_BOUNDARY_CONFLICT,
+                             "TFNG must test a factual proposition, not whether the passage discusses/provides information about a topic; regenerate the statement, never relabel its key"))
     if answer == "NOT_GIVEN":
         assessment = payload.get("absenceAssessment") or {}
         if payload.get("evidenceQuote") is not None:

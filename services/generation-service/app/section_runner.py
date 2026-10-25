@@ -1834,6 +1834,8 @@ class SectionRunner:
             async def evaluate_question_stage(
                 art: ArtifactEnvelope,
                 prior: tuple[ArtifactEnvelope, ...] = tuple(q_envelopes),
+                *,
+                evaluator_id: Optional[str] = None,
             ) -> list[EvaluationResult]:
                 # 1. Structural, verbatim length, evidence offset, and uniqueness evaluations
                 evals = list(evaluate_question(
@@ -1892,6 +1894,11 @@ class SectionRunner:
                             "evidenceQuote": eq,
                             "reason": "FAILED_DETERMINISTIC_EVALUATION",
                         })
+                    return evals
+
+                # StageExecutor reserves each evaluator separately. Do not dispatch
+                # paid solving while serving the zero-token structure adapter.
+                if evaluator_id is not None and evaluator_id != "eval_blind_solver_adversary":
                     return evals
 
                 # 2. Independent Blind Solver & Adversarial evaluations

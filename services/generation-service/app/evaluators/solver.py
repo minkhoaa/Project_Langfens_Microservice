@@ -354,6 +354,7 @@ class BlindSolverEvaluator(BaseEvaluator):
             raw_output=adv_raw,
             passage_text=blind_input.passage_text,
             expected_question_number=q_num,
+            student_question=blind_input.question,
         )
         if adv_errors and adversary_output is None:
             eval_id = f"eval_err_{uuid4().hex[:12]}"
