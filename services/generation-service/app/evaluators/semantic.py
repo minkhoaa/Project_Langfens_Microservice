@@ -264,10 +264,52 @@ def detect_contradiction_in_text(statement: str, reference_text: str, enable_con
                     if len(s_stems & excl_words) >= 2:
                         return True
 
+def _over_half_supported_by_percentage(statement: str, reference_text: str) -> bool:
+    """Recognize a clear 'over half' claim when the same proposition gives >50%."""
+    normalized_statement = normalize_text_nfkc(statement).lower()
+    if not re.search(r"\b(?:over|more\s+than|greater\s+than)\s+(?:one\s+)?half\b", normalized_statement):
+        return False
+
+    topic_stopwords = {
+        "over", "more", "greater", "than", "one", "half", "the", "and", "for", "from",
+        "with", "that", "this", "contains", "contain", "percent", "roughly", "about", "all",
+    }
+    statement_topics = {
+        stem_token(word)
+        for word in re.findall(r"\b[a-z]{4,}\b", normalized_statement)
+        if word not in topic_stopwords
+    }
+    if not statement_topics:
+        return False
+
+    sentences = [part.strip() for part in re.split(r"[.!?]\s+", reference_text) if part.strip()] or [reference_text]
+    for sentence in sentences:
+        normalized_sentence = normalize_text_nfkc(sentence).lower()
+        # Be conservative: do not derive a positive entailment from a negated sentence.
+        if re.search(r"\b(?:not|never|no|neither|nor|cannot|failed\s+to)\b", normalized_sentence):
+            continue
+        sentence_topics = {
+            stem_token(word)
+            for word in re.findall(r"\b[a-z]{4,}\b", normalized_sentence)
+            if word not in topic_stopwords
+        }
+        if len(statement_topics & sentence_topics) < 2:
+            continue
+        percentages = [
+            float(match.group(1))
+            for match in re.finditer(r"\b(\d+(?:\.\d+)?)\s*(?:%|\bpercent\b)", normalized_sentence)
+        ]
+        if any(value > 50 for value in percentages):
+            return True
+    return False
+
+
 def detect_entailment_in_text(statement: str, reference_text: str, enable_contrastive_exclusion: bool = False, enable_refined_contrastive_clause: bool = False, enable_contrastive_entailment: bool = False) -> bool:
     """Checks if statement is entailed by any sentence in reference_text with compatible polarity."""
     if detect_contradiction_in_text(statement, reference_text, enable_contrastive_exclusion=enable_contrastive_exclusion, enable_refined_contrastive_clause=enable_refined_contrastive_clause):
         return False
+    if _over_half_supported_by_percentage(statement, reference_text):
+        return True
     s_clean = normalize_written_numbers(normalize_text_nfkc(statement)).lower()
     sentences = [s.strip() for s in re.split(r"[.!?]\s+", reference_text) if s.strip()]
     if not sentences:
@@ -411,8 +453,15 @@ def detect_negation_polarity_conflict(statement: str, reference_text: str) -> tu
                 if s_mod_m and r_mod_m:
                     sm = s_mod_m.group(1).lower()
                     rm = r_mod_m.group(1).lower()
-                    if sm not in {"the", "a", "an", "no", "not", "any"} and rm not in {"the", "a", "an", "no", "not", "any"} and sm != rm:
-                        continue  # Different modified entities (e.g. bronze artifacts vs iron artifacts); not a polarity conflict!
+                    same_predicate_modifier = (
+                        sm == rm or sm == rm.removesuffix("ing") or rm == sm.removesuffix("ing")
+                    )
+                    if (
+                        sm not in {"the", "a", "an", "no", "not", "any"}
+                        and rm not in {"the", "a", "an", "no", "not", "any"}
+                        and not same_predicate_modifier
+                    ):
+                        continue  # Different modified entities are not a polarity conflict.
 
                 if re.search(rf"\b(never|not|cannot|no|barely)\s+(?:\w+\s+){{0,2}}{w}\b", s_clean) and not re.search(rf"\b(never|not|cannot|no|did not|does not)\s+(?:\w+\s+){{0,2}}{w}\b", sent):
                     desc = f"Statement negates '{w}' which is affirmed in source text"

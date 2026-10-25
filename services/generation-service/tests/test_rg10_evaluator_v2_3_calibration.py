@@ -45,14 +45,26 @@ def test_v2_3_adversarial_calibration_reliability():
     assert metrics.true_negative_count == 10
     assert metrics.far == 0.0
 
-    # Decided positive items (TP + FN) = 4 + 3 = 7
-    # Real FRR is honestly measured (> 0.0) due to absent-topic NOT GIVEN grounding and clause-level FALSE overlap
-    assert metrics.true_positive_count == 4
-    assert metrics.false_negative_count == 3
-    assert metrics.frr == round(3 / 7, 4)
+    # The unchanged corpus labels contain 7 valid items. Current v2.3 behavior
+    # correctly accepts five; the two remaining false rejections are item-level
+    # grounding limits, not permission to relabel the corpus.
+    assert metrics.true_positive_count == 5
+    assert metrics.false_negative_count == 2
+    assert metrics.frr == round(2 / 7, 4)
+
+    false_rejections = [
+        item.item_id
+        for item in EVALUATOR_V2_3_CALIBRATION_CORPUS
+        if item.reference_verdict == EvaluationVerdict.PASS
+        and evaluator.evaluate_item(
+            item.item_id, item.passage_text, item.question_data,
+            context_metadata=item.context_metadata,
+        ).verdict == EvaluationVerdict.FAIL
+    ]
+    assert false_rejections == ["v23-calib-valid-tfng-notgiven-15", "v23-calib-valid-mcq-17"]
 
     # Decided accuracy
-    assert metrics.accuracy_on_decided == round((4 + 10) / 17, 4)
+    assert metrics.accuracy_on_decided == round((5 + 10) / 17, 4)
 
     # Verify confusion by question type exists and is populated
     assert "TFNG" in metrics.confusion_by_type
