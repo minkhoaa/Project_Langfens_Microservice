@@ -211,14 +211,34 @@ def detect_contradiction_in_text(statement: str, reference_text: str, enable_con
                 }
                 if len(shared_vocab) >= 3:
                     return True
-        # 3. Explicit contradiction phrases in matching sentence
+        # 3. Explicit absence-of-evidence claims contradict affirmative existence
+        # statements about the same proposition (e.g. "no evidence of X" vs
+        # "X was discovered"). Keep this scoped to a positive assertion verb
+        # and substantive overlap so unrelated absence clauses do not conflict.
+        absence = re.search(r"\bno evidence (?:of|for)\s+(.+?)(?:[,;:]|$)", r_clean)
+        positive_assertion = re.search(
+            r"\b(discover(?:ed|y)?|find|found|exist(?:s|ed)?|occur(?:red)?|"
+            r"present|attest(?:ed)?|document(?:ed)?|produced|predat(?:e|ed|es))\b",
+            s_clean,
+        )
+        if absence and positive_assertion:
+            absent_words = {
+                stem_token(w) for w in re.findall(r"\b[a-z]{4,}\b", absence.group(1))
+            } - {"evidence", "there", "their", "which", "about", "before", "after", "region"}
+            statement_words = {
+                stem_token(w) for w in re.findall(r"\b[a-z]{4,}\b", s_clean)
+            } - {"archaeologist", "discover", "find", "there", "their", "which", "about", "before", "after", "region"}
+            if len(absent_words & statement_words) >= 2:
+                return True
+
+        # 4. Explicit contradiction phrases in matching sentence
         for neg in ["did not", "does not", "was not", "were not", "failed to", "contrary to", "cannot currently"]:
             if neg in r_clean:
                 pos = neg.replace("not ", "").replace("failed to", "").replace("cannot currently", "can")
                 if pos and pos in s_clean:
                     return True
 
-        # 4. Conflicting time durations (e.g. 6 weeks vs 10 weeks)
+        # 5. Conflicting time durations (e.g. 6 weeks vs 10 weeks)
         s_durations = re.findall(r"\b(\d+)\s*(weeks?|days?|months?|years?|hours?)\b", s_clean)
         r_durations = re.findall(r"\b(\d+)\s*(weeks?|days?|months?|years?|hours?)\b", r_clean)
         if s_durations and r_durations:
@@ -230,7 +250,7 @@ def detect_contradiction_in_text(statement: str, reference_text: str, enable_con
                         if len(s_words & r_words) >= 1:
                             return True
 
-        # 5. Contrastive exclusion markers (e.g. 'X rather than Y', 'instead of Y') - v2.3 feature gate
+        # 6. Contrastive exclusion markers (e.g. 'X rather than Y', 'instead of Y') - v2.3 feature gate
         if enable_contrastive_exclusion:
             for marker in ["rather than", "instead of", "as opposed to", "unlike"]:
                 if marker in r_clean and marker not in s_clean:
