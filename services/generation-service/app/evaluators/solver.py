@@ -123,9 +123,15 @@ class BlindSolverEvaluator(BaseEvaluator):
         # Diversity configuration
         default_pairs = resolve_model_diversity_config()
         self.solver_provider = solver_provider or default_pairs[0][0]
-        self.solver_model = solver_model or default_pairs[0][1]
+        self.solver_model = solver_model or (
+            default_pairs[0][1] if not solver_provider or solver_provider == default_pairs[0][0]
+            else getattr(settings, f"{self.solver_provider}_model", "MiniMax-Text-01")
+        )
         self.adversary_provider = adversary_provider or default_pairs[1][0]
-        self.adversary_model = adversary_model or default_pairs[1][1]
+        self.adversary_model = adversary_model or (
+            default_pairs[1][1] if not adversary_provider or adversary_provider == default_pairs[1][0]
+            else getattr(settings, f"{self.adversary_provider}_model", self.solver_model)
+        )
 
         self.diversity_profile = build_diversity_profile(
             solver_provider=self.solver_provider,
@@ -272,7 +278,7 @@ class BlindSolverEvaluator(BaseEvaluator):
 
         # 2. Solver dispatch if cache miss
         if solver_output is None:
-            solver_raw, err_result = await self._dispatch_solver(blind_input, target_ref, context)
+            solver_raw, err_result = await self._dispatch_solver(blind_input, target_ref, context, input_dependency_refs=input_dependency_refs)
             if err_result is not None:
                 dummy_adj = AdjudicationResult(
                     question_number=q_num,
@@ -331,7 +337,7 @@ class BlindSolverEvaluator(BaseEvaluator):
             self.cache.put_solver_output(cache_key, solver_output)
 
         # 3. Adversary dispatch
-        adv_raw, adv_err_result = await self._dispatch_adversary(blind_input, target_ref, context)
+        adv_raw, adv_err_result = await self._dispatch_adversary(blind_input, target_ref, context, input_dependency_refs=input_dependency_refs)
         if adv_err_result is not None:
             dummy_adj = AdjudicationResult(
                 question_number=q_num,
@@ -356,6 +362,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                 evaluatorId=self.evaluator_id,
                 evaluatorVersion=self.evaluator_version,
                 targetRef=target_ref,
+                inputDependencyRefs=list(input_dependency_refs),
                 status=EvaluationStatus.FAIL,
                 issues=[Issue.create(
                     issue_id=f"iss_{eval_id}",
@@ -485,6 +492,7 @@ class BlindSolverEvaluator(BaseEvaluator):
         blind_input: BlindSolverInput,
         target_ref: ArtifactRef,
         context: Optional[LoopContext],
+        input_dependency_refs: Sequence[ArtifactRef] = (),
     ) -> Tuple[Optional[Any], Optional[EvaluationResult]]:
         """Dispatches solver prompt through ProviderGateway or simulation with SDK retry=0."""
         messages = build_solver_messages(blind_input)
@@ -500,6 +508,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                     error_message="ProviderGateway is required for blind solver evaluation (fail-closed)",
                     code=IssueCode.EVALUATOR_UNAVAILABLE,
                     scope=IssueScope.QUESTION,
+                    input_dependency_refs=input_dependency_refs,
                 )
             simulated = self._simulate_solver_response(blind_input)
             return simulated, None
@@ -564,6 +573,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                 error_message=f"Solver provider call timed out (fail-closed non-pass): {tex}",
                 code=IssueCode.EVALUATOR_UNAVAILABLE,
                 scope=IssueScope.QUESTION,
+                input_dependency_refs=input_dependency_refs,
             )
         except BudgetExhaustedError as bex:
             eval_id = f"eval_err_{uuid4().hex[:12]}"
@@ -575,6 +585,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                 error_message=f"Budget exhausted during solver execution: {bex}",
                 code=IssueCode.BUDGET_EXHAUSTED,
                 scope=IssueScope.QUESTION,
+                input_dependency_refs=input_dependency_refs,
             )
         except Exception as ex:
             eval_id = f"eval_err_{uuid4().hex[:12]}"
@@ -586,6 +597,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                 error_message=f"Solver execution error: {ex}",
                 code=IssueCode.EVALUATOR_UNAVAILABLE,
                 scope=IssueScope.QUESTION,
+                input_dependency_refs=input_dependency_refs,
             )
 
     async def _dispatch_adversary(
@@ -593,6 +605,7 @@ class BlindSolverEvaluator(BaseEvaluator):
         blind_input: BlindSolverInput,
         target_ref: ArtifactRef,
         context: Optional[LoopContext],
+        input_dependency_refs: Sequence[ArtifactRef] = (),
     ) -> Tuple[Optional[Any], Optional[EvaluationResult]]:
         """Dispatches adversary prompt through ProviderGateway or simulation with SDK retry=0."""
         messages = build_adversary_messages(blind_input)
@@ -608,6 +621,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                     error_message="ProviderGateway is required for adversary evaluation (fail-closed)",
                     code=IssueCode.EVALUATOR_UNAVAILABLE,
                     scope=IssueScope.QUESTION,
+                    input_dependency_refs=input_dependency_refs,
                 )
             simulated = self._simulate_adversary_response(blind_input)
             return simulated, None
@@ -671,6 +685,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                 error_message=f"Adversary provider call timed out: {tex}",
                 code=IssueCode.EVALUATOR_UNAVAILABLE,
                 scope=IssueScope.QUESTION,
+                input_dependency_refs=input_dependency_refs,
             )
         except BudgetExhaustedError as bex:
             eval_id = f"eval_err_{uuid4().hex[:12]}"
@@ -682,6 +697,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                 error_message=f"Budget exhausted during adversary execution: {bex}",
                 code=IssueCode.BUDGET_EXHAUSTED,
                 scope=IssueScope.QUESTION,
+                input_dependency_refs=input_dependency_refs,
             )
         except Exception as ex:
             eval_id = f"eval_err_{uuid4().hex[:12]}"
@@ -693,6 +709,7 @@ class BlindSolverEvaluator(BaseEvaluator):
                 error_message=f"Adversary execution error: {ex}",
                 code=IssueCode.EVALUATOR_UNAVAILABLE,
                 scope=IssueScope.QUESTION,
+                input_dependency_refs=input_dependency_refs,
             )
 
     def _simulate_solver_response(self, blind_input: BlindSolverInput) -> Dict[str, Any]:

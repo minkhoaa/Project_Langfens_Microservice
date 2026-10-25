@@ -126,6 +126,7 @@ class EvaluationResult(CanonicalBaseModel):
         code: IssueCode = IssueCode.EVALUATOR_UNAVAILABLE,
         elapsed_ms: Optional[float] = None,
         scope: Optional[IssueScope] = None,
+        input_dependency_refs: Sequence[ArtifactRef] = (),
     ) -> EvaluationResult:
         """Constructs an explicit ERROR evaluation result with an attached critical issue."""
         if scope is None:
@@ -154,6 +155,7 @@ class EvaluationResult(CanonicalBaseModel):
             evaluatorId=evaluator_id,
             evaluatorVersion=evaluator_version,
             targetRef=target_ref,
+            inputDependencyRefs=list(input_dependency_refs),
             status=EvaluationStatus.ERROR,
             issues=[issue],
             score=0.0,

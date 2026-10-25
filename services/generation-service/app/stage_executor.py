@@ -641,6 +641,8 @@ class StageExecutor:
                     raise ValueError(f"Evaluator {inner_self._ev_id} returned empty evaluatorVersion")
                 if matched.target_ref != art.to_ref():
                     raise ValueError(f"Evaluator {inner_self._ev_id} target_ref mismatch: expected {art.to_ref()}, got {matched.target_ref}")
+                if not matched.input_dependency_refs and art.parent_refs:
+                    matched = matched.model_copy(update={"input_dependency_refs": list(art.parent_refs)})
                 if set(matched.input_dependency_refs) != set(art.parent_refs):
                     raise ValueError(f"Evaluator {inner_self._ev_id} input_dependency_refs mismatch: expected {art.parent_refs}, got {matched.input_dependency_refs}")
                 res = matched

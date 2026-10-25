@@ -1899,10 +1899,13 @@ class SectionRunner:
                 # to guarantee blind solving re-runs fresh without hitting stale V1 entries.
                 from app.solvers.cache import BlindSolverCache
                 q_cache = BlindSolverCache() if art.version > 1 else self._solver_cache
+                prov_model = getattr(settings, f"{actual_policy.provider}_model", "MiniMax-Text-01")
                 blind_evaluator = BlindSolverEvaluator(
                     gateway=self.gateway,
                     solver_provider=actual_policy.provider,
+                    solver_model=prov_model,
                     adversary_provider=actual_policy.provider,
+                    adversary_model=prov_model,
                     cache=q_cache,
                 )
                 blind_input = build_blind_solver_input(
