@@ -48,10 +48,14 @@ class TestLiveRunnerOffline(unittest.TestCase):
         runner.SUBMISSION_MARKER_PATH = self.test_marker
         if os.path.exists(self.test_marker):
             os.remove(self.test_marker)
+        if os.path.exists(self.test_marker + ".lock"):
+            os.remove(self.test_marker + ".lock")
 
     def tearDown(self):
         if os.path.exists(self.test_marker):
             os.remove(self.test_marker)
+        if os.path.exists(self.test_marker + ".lock"):
+            os.remove(self.test_marker + ".lock")
         runner.SUBMISSION_MARKER_PATH = self.orig_marker
 
     # --------------------------------------------------------------------------
@@ -151,6 +155,7 @@ class TestLiveRunnerOffline(unittest.TestCase):
                 MagicMock(returncode=0, stdout="1\n"),  # SELECT 1
                 MagicMock(returncode=0, stdout="/var/lib/postgresql/exam-data/pgdata\n"),  # SHOW data_directory
                 MagicMock(returncode=0, stdout="5\n"),  # table count
+                MagicMock(returncode=0, stdout="4\n"),  # lease columns count
             ]
             mock_sub.return_value = MagicMock(
                 returncode=0,
@@ -327,6 +332,13 @@ class TestLiveRunnerOffline(unittest.TestCase):
                 "Status": "PASS", "IsPass": True, "PayloadJson": "{}"
             }
         ]
+        # Include mandatory passing evaluations for question:1 v2
+        for eid in runner.MANDATORY_QUESTION_EVALUATORS:
+            sample_evals.append({
+                "EvaluationId": f"ev-{eid}", "EvaluatorId": eid, "EvaluatorVersion": "1.0.0",
+                "TargetArtifactId": "question:1", "TargetVersion": 2, "TargetContentHash": "qhash123",
+                "Status": "PASS", "IsPass": True, "PayloadJson": "{}"
+            })
         sample_outbox = [
             {"EventId": "ev-1", "IdempotencyKey": "key-1", "Sequence": 1, "Status": "Published", "EventType": "RunCreated"}
         ]
@@ -369,6 +381,239 @@ class TestLiveRunnerOffline(unittest.TestCase):
                 self.assertIn("Q1", snapshot["questions"]["blueprint_bound_claim_references"])
                 self.assertEqual(snapshot["questions"]["repaired_count"], 1)
 
+        finally:
+            if os.path.exists(expected_snapshot):
+                os.remove(expected_snapshot)
+
+    # --------------------------------------------------------------------------
+    # 10. Correctness Fixes Verification (Phase 1 A, B, C, D)
+    # --------------------------------------------------------------------------
+
+    def test_preflight_blocks_when_active_reading_jobs_exist(self):
+        """Preflight fails closed (BLOCKER) when pre-existing active reading jobs exist."""
+        active_mock = {
+            "active_jobs_present": True,
+            "active_jobs": [{"Id": "job-running-1", "Status": "Running", "Topic": "test"}],
+            "active_runs": [],
+            "details": "Detected 1 active job(s) and 0 active run(s) in PostgreSQL.",
+        }
+        with patch("scripts.run_hybrid_single_section_live.check_git_revision", return_value={"head_sha": "abc", "matches_baseline_head": True}), \
+             patch("scripts.run_hybrid_single_section_live.check_docker_available", return_value=(True, "Docker OK")), \
+             patch("scripts.run_hybrid_single_section_live.check_benchmark_images", return_value={"postgres:16-alpine": True, "langfens-generation:benchmark": True, "langfens-exam:benchmark": True}), \
+             patch("scripts.run_hybrid_single_section_live.load_minimax_key", return_value="sk-real-key-12345"), \
+             patch("scripts.run_hybrid_single_section_live.load_jwt_settings", return_value=("key", "iss", "aud")), \
+             patch("scripts.run_hybrid_single_section_live.load_internal_api_key", return_value="internal-key"), \
+             patch("scripts.run_hybrid_single_section_live.check_db_readiness", return_value={"container_running": True, "pg_isready": True, "authenticated_query": True, "volume_backed": True, "schema_ready": True, "fencing_schema_ready": True}), \
+             patch("scripts.run_hybrid_single_section_live.check_active_reading_jobs", return_value=active_mock), \
+             patch("scripts.run_hybrid_single_section_live.verify_worker_topology", return_value={"single_worker_instance": True, "authoritative_worker_enabled": True, "exam_provider": "minimax", "generation_provider": "minimax", "minimax_key_in_generation": True, "minimax_key_masked": "sk-r...2345"}), \
+             patch("urllib.request.urlopen") as mock_url:
+
+            health_resp = MagicMock(status=200)
+            mock_url.return_value.__enter__.return_value = health_resp
+
+            passed = runner.run_preflight(start_stack_if_needed=False, keep_stack=False)
+            self.assertFalse(passed, "Preflight must fail closed when active reading jobs are detected")
+
+    def test_forensics_does_not_invent_fallback_run_id(self):
+        """When reading_paper_runs has no matching row, collect_forensics does not invent a fallback run ID."""
+        job_id = "job-no-run-record"
+        expected_snapshot = os.path.join(runner.REPORTS_DIR, f"hybrid_13q_post_hardening_{job_id}.json")
+
+        def query_mock(sql: str) -> list:
+            if "reading_paper_runs" in sql:
+                return []  # No run found
+            return []
+
+        try:
+            with patch("scripts.run_hybrid_single_section_live.query_db_json", side_effect=query_mock):
+                snapshot = runner.collect_forensics(
+                    job_id=job_id,
+                    final_job_data={"status": "Failed"},
+                    wall_time_total=5.0,
+                    impl_sha=runner.IMPLEMENTATION_COMMIT,
+                )
+                self.assertIsNone(snapshot["run_id"], "Fallback RunId must NEVER be invented")
+        finally:
+            if os.path.exists(expected_snapshot):
+                os.remove(expected_snapshot)
+
+    def test_forensics_does_not_count_historical_exams(self):
+        """When reading_paper_jobs.ExamId is null, exam_persisted is False even if historical exams exist."""
+        job_id = "job-no-committed-exam"
+        expected_snapshot = os.path.join(runner.REPORTS_DIR, f"hybrid_13q_post_hardening_{job_id}.json")
+
+        def query_mock(sql: str) -> list:
+            if "reading_paper_runs" in sql:
+                return [{"RunId": "run_test_123", "JobId": job_id, "Epoch": 1, "LeaseOwner": "owner-1"}]
+            if "reading_paper_jobs" in sql:
+                return [{"ExamId": None, "Status": "Completed", "CompletedSections": 1}]
+            if "exams" in sql:
+                # If queried, this historical exam must not be associated
+                return [{"Id": "hist-exam-1", "Title": "Historical Exam", "Slug": "reading-old"}]
+            return []
+
+        try:
+            with patch("scripts.run_hybrid_single_section_live.query_db_json", side_effect=query_mock):
+                snapshot = runner.collect_forensics(
+                    job_id=job_id,
+                    final_job_data={"status": "Completed", "completedSections": 1},
+                    wall_time_total=10.0,
+                    impl_sha=runner.IMPLEMENTATION_COMMIT,
+                )
+                self.assertFalse(snapshot["section_checkpoint_status"]["exam_persisted"])
+                self.assertEqual(len(snapshot["section_checkpoint_status"]["exams"]), 0)
+        finally:
+            if os.path.exists(expected_snapshot):
+                os.remove(expected_snapshot)
+
+    def test_forensics_rejects_question_without_explicit_provenance(self):
+        """A question head whose eval_question_semantic failed with CLAIM_PROVENANCE_MISMATCH is REJECTED."""
+        job_id = "job-prov-fail"
+        run_id = "run-prov-fail"
+        expected_snapshot = os.path.join(runner.REPORTS_DIR, f"hybrid_13q_post_hardening_{job_id}.json")
+
+        sample_heads = [{
+            "ArtifactId": "question:1", "ArtifactType": "Question", "AcceptedVersion": 1,
+            "AcceptedHash": "h1", "PayloadJson": json.dumps({"questionNumber": 1, "prompt": "P", "answer": "A", "evidenceClaimRef": "claim:1"})
+        }]
+        # All mandatory evaluations pass EXCEPT eval_question_semantic which has CLAIM_PROVENANCE_MISMATCH
+        sample_evals = []
+        for eid in runner.MANDATORY_QUESTION_EVALUATORS:
+            is_sem = (eid == "eval_question_semantic")
+            sample_evals.append({
+                "EvaluationId": f"ev-{eid}", "EvaluatorId": eid, "EvaluatorVersion": "1.0.0",
+                "TargetArtifactId": "question:1", "TargetVersion": 1, "TargetContentHash": "h1",
+                "Status": "FAIL" if is_sem else "PASS",
+                "IsPass": not is_sem,
+                "PayloadJson": json.dumps({"issues": [{"code": "CLAIM_PROVENANCE_MISMATCH"}]}) if is_sem else "{}",
+            })
+
+        def query_mock(sql: str) -> list:
+            if "reading_paper_runs" in sql:
+                return [{"RunId": run_id, "JobId": job_id, "Epoch": 1, "LeaseOwner": "owner-1"}]
+            if "reading_paper_artifact_heads" in sql:
+                return sample_heads
+            if "reading_paper_evaluations" in sql:
+                return sample_evals
+            return []
+
+        try:
+            with patch("scripts.run_hybrid_single_section_live.query_db_json", side_effect=query_mock):
+                snapshot = runner.collect_forensics(
+                    job_id=job_id,
+                    final_job_data={"status": "Completed"},
+                    wall_time_total=10.0,
+                    impl_sha=runner.IMPLEMENTATION_COMMIT,
+                )
+                q1 = next(q for q in snapshot["questions"]["scorecard"] if q["questionNumber"] == 1)
+                self.assertEqual(q1["status"], "REJECTED")
+                self.assertEqual(q1["provenance_outcome"], "FAIL_PROVENANCE")
+                self.assertEqual(snapshot["questions"]["accepted_count"], 0)
+        finally:
+            if os.path.exists(expected_snapshot):
+                os.remove(expected_snapshot)
+
+    def test_forensics_rejects_unevaluated_question(self):
+        """A question head with NO evaluations is REJECTED rather than assumed accepted."""
+        job_id = "job-uneval"
+        run_id = "run-uneval"
+        expected_snapshot = os.path.join(runner.REPORTS_DIR, f"hybrid_13q_post_hardening_{job_id}.json")
+
+        sample_heads = [{
+            "ArtifactId": "question:1", "ArtifactType": "Question", "AcceptedVersion": 1,
+            "AcceptedHash": "h1", "PayloadJson": json.dumps({"questionNumber": 1, "prompt": "P", "answer": "A", "evidenceClaimRef": "claim:1"})
+        }]
+
+        def query_mock(sql: str) -> list:
+            if "reading_paper_runs" in sql:
+                return [{"RunId": run_id, "JobId": job_id, "Epoch": 1, "LeaseOwner": "owner-1"}]
+            if "reading_paper_artifact_heads" in sql:
+                return sample_heads
+            if "reading_paper_evaluations" in sql:
+                return []  # No evaluations!
+            return []
+
+        try:
+            with patch("scripts.run_hybrid_single_section_live.query_db_json", side_effect=query_mock):
+                snapshot = runner.collect_forensics(
+                    job_id=job_id,
+                    final_job_data={"status": "Completed"},
+                    wall_time_total=10.0,
+                    impl_sha=runner.IMPLEMENTATION_COMMIT,
+                )
+                q1 = next(q for q in snapshot["questions"]["scorecard"] if q["questionNumber"] == 1)
+                self.assertEqual(q1["status"], "REJECTED")
+                self.assertIn("Missing mandatory evaluations", q1["failure_reason"])
+                self.assertEqual(snapshot["questions"]["accepted_count"], 0)
+        finally:
+            if os.path.exists(expected_snapshot):
+                os.remove(expected_snapshot)
+
+    def test_submission_fails_closed_with_uncertain_submission_on_ambiguous_correlation(self):
+        """When POST times out and multiple jobs match the topic, recovery halts with UNCERTAIN_SUBMISSION."""
+        auth_headers = {"Authorization": "Bearer test"}
+        post_err = TimeoutError("Network connection dropped")
+
+        get_resp = MagicMock()
+        # Two jobs matching topic -> ambiguous!
+        get_resp.read.return_value = json.dumps([
+            {"id": "candidate-job-1", "topic": runner.TOPIC, "status": "Pending"},
+            {"id": "candidate-job-2", "topic": runner.TOPIC, "status": "Running"},
+        ]).encode("utf-8")
+        get_resp.__enter__.return_value = get_resp
+
+        with patch("urllib.request.urlopen") as mock_url:
+            mock_url.side_effect = [post_err, get_resp]
+
+            with self.assertRaises(RuntimeError) as cm:
+                runner.submit_single_job("http://127.0.0.1:8087", auth_headers)
+            self.assertIn("UNCERTAIN_SUBMISSION", str(cm.exception))
+            self.assertIn("Ambiguous job recovery", str(cm.exception))
+
+            marker = runner.SubmissionMarker.get_existing()
+            self.assertEqual(marker.get("status"), "UNCERTAIN_SUBMISSION")
+
+    def test_accounting_distinguishes_partial_and_unknown_usage(self):
+        """When token usage telemetry is missing from an operation, status is PARTIAL and total is not assumed 0."""
+        job_id = "job-partial-tokens"
+        run_id = "run-partial-tokens"
+        expected_snapshot = os.path.join(runner.REPORTS_DIR, f"hybrid_13q_post_hardening_{job_id}.json")
+
+        sample_ops = [
+            {
+                "OperationId": "op:text:1", "OperationType": "PROVIDER_CALL", "Status": "COMPLETED",
+                "TokensUsed": 4000, "PromptTokensUsed": 3000, "CompletionTokensUsed": 1000, "ReasoningTokensUsed": None,
+                "WallTimeUsedSeconds": 10.0, "ResultRefJson": '{"model_name": "MiniMax-Text-01"}',
+            },
+            {
+                # Missing all token telemetry
+                "OperationId": "op:text:2", "OperationType": "PROVIDER_CALL", "Status": "COMPLETED",
+                "TokensUsed": None, "PromptTokensUsed": None, "CompletionTokensUsed": None, "ReasoningTokensUsed": None,
+                "WallTimeUsedSeconds": 8.0, "ResultRefJson": '{"model_name": "MiniMax-Text-01"}',
+            }
+        ]
+
+        def query_mock(sql: str) -> list:
+            if "reading_paper_runs" in sql:
+                return [{"RunId": run_id, "JobId": job_id, "Epoch": 1, "LeaseOwner": "owner-1"}]
+            if "reading_paper_operations" in sql:
+                return sample_ops
+            return []
+
+        try:
+            with patch("scripts.run_hybrid_single_section_live.query_db_json", side_effect=query_mock):
+                snapshot = runner.collect_forensics(
+                    job_id=job_id,
+                    final_job_data={"status": "Completed"},
+                    wall_time_total=18.0,
+                    impl_sha=runner.IMPLEMENTATION_COMMIT,
+                )
+                tok_info = snapshot["operations"]["tokens"]
+                self.assertEqual(snapshot["operations"]["telemetry_status"], "PARTIAL")
+                self.assertTrue(tok_info["unknown_total_usage"])
+                self.assertIsNone(tok_info["complete_reported_usage"])
+                self.assertEqual(tok_info["partial_known_tokens_subtotal"], 4000)
+                self.assertIn("PARTIAL", str(tok_info["total_tokens"]))
         finally:
             if os.path.exists(expected_snapshot):
                 os.remove(expected_snapshot)
