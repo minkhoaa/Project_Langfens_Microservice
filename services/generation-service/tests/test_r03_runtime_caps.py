@@ -80,7 +80,9 @@ async def test_r03_configured_token_cap_bounds_admission(tmp_path):
     """
     from app.config import settings
 
-    budget = 3_000
+    # Keep the cap below the work needed to consume all three versions so the
+    # token-admission terminal reason, rather than MAX_VERSIONS, is observable.
+    budget = 2_500
     policy = LoopPolicy.from_settings(
         max_total_tokens=budget,
         generate_token_reservation=1_000,
@@ -360,7 +362,7 @@ async def test_r03_call_cap_admission_uses_run_profile(tmp_path):
     store = DurableStore(tmp_path / "r03_admission.db", owner, run_profile=run_profile)
     generator = Generator()
     runtime = BoundedLoopRuntime(
-        context(owner), pinned, generator, [Evaluator()], persistence_client=store,
+        context(owner), pinned, generator, [Evaluator([EvaluationStatus.FAIL] * 20)], persistence_client=store,
     )
     result = await runtime.run()
 
