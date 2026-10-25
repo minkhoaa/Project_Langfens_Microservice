@@ -77,6 +77,46 @@ async def test_paid_evaluation_is_not_dispatched_before_its_loop_reservation():
     assert paid_reservations_at_dispatch == [True]
 
 
+@pytest.mark.parametrize("accounting,status,used,expected", [
+    ("REPORTED", "COMPLETED", 2000, 2000),
+    ("RECONCILED", "COMPLETED", 2000, 2000),
+    ("ESTIMATED", "COMPLETED", 2000, 7500),
+    ("ESTIMATED", "COMPLETED", 0, 7500),
+    ("UNKNOWN", "COMPLETED", 2000, 7500),
+    ("", "COMPLETED", 2000, 7500),
+    ("REPORTED", "UNKNOWN_OUTCOME", 2000, 7500),
+    ("REPORTED", "COMPLETED", 0, 0),
+    ("ESTIMATED", "COMPLETED", 8000, 8000),
+])
+def test_provider_charge_matches_durable_refund_authority(accounting, status, used, expected):
+    """Estimated usage cannot create headroom that PostgreSQL does not refund."""
+    from app.loop.runtime import BoundedLoopRuntime
+    from app.loop.context import LoopContext, AuthorityGrant
+    from app.loop.policy import LoopPolicy
+    from app.contracts.issue import IssueScope
+    client = FencedTestCheckpointClient("run_conservative_usage", 1, uuid4())
+    art_id = f"question:{client.run_id}:5"
+    client.operations["provider"] = OperationResumeInfo(
+        operationId="provider", operationType="PROVIDER_CALL", status=status,
+        artifactId=art_id, requestHash="a" * 64, tokenReservation=7500,
+        tokensUsed=used, accountingType=accounting, wallTimeReservationSeconds=60,
+        wallTimeUsedSeconds=1,
+    )
+    context = LoopContext(runId=client.run_id, targetArtifactId=art_id,
+                          targetArtifactType=ArtifactType.QUESTION, scope=IssueScope.QUESTION,
+                          authority=AuthorityGrant(leaseOwner=client.active_lease_owner, epoch=1))
+    runtime = BoundedLoopRuntime(context=context, policy=LoopPolicy(), generator=None,
+                                 evaluators=[], persistence_client=client)
+    assert runtime._refresh_provider_token_accounting()
+    assert context.budget_tracker.tokens_used == expected
+    # Rebuilding in a fresh runtime must yield the same conservative headroom.
+    context.budget_tracker.tokens_used = 0
+    restarted = BoundedLoopRuntime(context=context, policy=LoopPolicy(), generator=None,
+                                   evaluators=[], persistence_client=client)
+    restarted._refresh_provider_token_accounting()
+    assert context.budget_tracker.tokens_used == expected
+
+
 def test_saved_q5_local_counter_rebuilds_from_durable_operations_without_refunding_unknown():
     """A restart must not preserve the old 60k phantom counter or double-charge parents."""
     from app.loop.runtime import BoundedLoopRuntime

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from enum import Enum
 
 
 def is_meta_presence_statement(statement: str) -> bool:
@@ -18,23 +19,52 @@ def is_meta_presence_statement(statement: str) -> bool:
     ))
 
 
-def alternative_has_tfng_evidence(answer: str, statement: str, spans: list[str]) -> bool:
-    """Require proposition-level support, not an adversary's grounding flag.
+class TFNGEvidenceRelation(str, Enum):
+    SUPPORTED = "SUPPORTED"
+    UNSUPPORTED = "UNSUPPORTED"
+    UNRESOLVED = "UNRESOLVED"
 
-    A FALSE/NO allegation must cite contradiction, never mere absence of detail.
-    These existing bounded semantic checks do not replace independent solving or
-    the author-key semantic evaluator. Unsupported alternatives are diagnostic
-    rejections, not permission to accept an otherwise invalid key.
+
+def tfng_alternative_relation(
+    answer: str, statement: str, spans: list[str], passage_text: str = "",
+) -> TFNGEvidenceRelation:
+    """Separate invalid evidence from an incomplete deterministic assessment.
+
+    Lexical checks are not a complete semantic decision procedure. Failure to
+    recognize a paraphrase or negation must retain an independent adversary's
+    blocker, never become clean key confirmation. Coverage-framed statements
+    remain invalid under the mandatory question semantic evaluator.
     """
     from app.evaluators.semantic import detect_contradiction_in_text, detect_entailment_in_text
 
     label = answer.strip().upper().replace(" ", "_")
-    if label not in {"TRUE", "FALSE", "YES", "NO", "NOT_GIVEN"}:
-        return False
+    if label not in {"TRUE", "FALSE", "YES", "NO", "NOT_GIVEN"} or not spans:
+        return TFNGEvidenceRelation.UNSUPPORTED
+    if is_meta_presence_statement(statement):
+        # These are not factual TFNG propositions; topic citations cannot repair
+        # their invalid answer boundary. The semantic evaluator blocks the item.
+        return TFNGEvidenceRelation.UNSUPPORTED
     if label in {"FALSE", "NO"}:
-        return any(detect_contradiction_in_text(statement, span) for span in spans)
+        if any(detect_contradiction_in_text(statement, span) for span in spans):
+            return TFNGEvidenceRelation.SUPPORTED
+        return TFNGEvidenceRelation.UNRESOLVED
     if label in {"TRUE", "YES"}:
-        return any(detect_entailment_in_text(statement, span) for span in spans)
-    # A NOT_GIVEN review still needs topical context. Whole-passage absence and
-    # independent solving remain mandatory in the evaluator, outside this helper.
-    return bool(spans)
+        if any(detect_entailment_in_text(statement, span) for span in spans):
+            return TFNGEvidenceRelation.SUPPORTED
+        return TFNGEvidenceRelation.UNRESOLVED
+    # A topical quote alone does not establish absence. Only literal presence
+    # can refute NG here: approximate overlap can mistake 'uses wood' for 'uses
+    # charcoal'. Nonliteral entailment/contradiction needs independent review.
+    normalize = lambda text: re.sub(r"\s+", " ", text).strip(" .!?").casefold()
+    if passage_text and normalize(statement) in {
+        normalize(sentence) for sentence in re.split(r"(?<=[.!?])\s+", passage_text)
+    }:
+        return TFNGEvidenceRelation.UNSUPPORTED
+    return TFNGEvidenceRelation.UNRESOLVED
+
+
+def alternative_has_tfng_evidence(
+    answer: str, statement: str, spans: list[str], passage_text: str = "",
+) -> bool:
+    """Compatibility predicate: unresolved evidence must remain blocking."""
+    return tfng_alternative_relation(answer, statement, spans, passage_text) != TFNGEvidenceRelation.UNSUPPORTED

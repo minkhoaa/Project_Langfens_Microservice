@@ -71,6 +71,12 @@ FACT_QUALIFIERS = re.compile(
     re.I,
 )
 PROPER_ENTITY = re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b")
+_CITATION_AUTHOR = r"[A-Z][A-Za-z'’\-]+(?:\s+[A-Z][A-Za-z'’\-]+)*"
+_CITATION_ENTRY = (
+    rf"{_CITATION_AUTHOR}(?:(?:\s*&\s*|\s+and\s+){_CITATION_AUTHOR})?"
+    r"(?:\s+et\s+al\.)?\s*,\s*(?:19|20)\d{2}[a-z]?"
+)
+_AUTHOR_YEAR_GROUP = re.compile(rf"\(\s*{_CITATION_ENTRY}(?:\s*;\s*{_CITATION_ENTRY})*\s*\)")
 
 
 def claim_discriminators(text: str) -> set[str]:
@@ -78,7 +84,7 @@ def claim_discriminators(text: str) -> set[str]:
     # Author/year citations are provenance, not factual people/places or dates.
     # Retain ordinary parenthetical facts (e.g. a site's date), stripping only
     # bibliographic groups containing an author and a publication year.
-    text = re.sub(r"\([^()]*[A-Z][a-z]+[^()]*\b(?:19|20)\d{2}[a-z]?[^()]*\)", "", text)
+    text = _AUTHOR_YEAR_GROUP.sub("", text)
     markers = {f"number:{value.casefold()}" for value in NUMBER.findall(text)}
     markers.update(f"qualifier:{value.casefold()}" for value in FACT_QUALIFIERS.findall(text))
     entities = PROPER_ENTITY.findall(text)

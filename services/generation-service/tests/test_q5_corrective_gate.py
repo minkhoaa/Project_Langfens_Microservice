@@ -101,7 +101,8 @@ def test_q5_solver_spans_are_exact_after_localization(history, version):
 @pytest.mark.parametrize(
     ("statement", "answer", "passage", "ambiguous"),
     [
-        ("Nsukka furnaces used charcoal.", "FALSE", "Nsukka was a centre for early ironworking.", False),
+        # A lexical non-match is unresolved, not proof an independent review is invalid.
+        ("Nsukka furnaces used charcoal.", "FALSE", "Nsukka was a centre for early ironworking.", True),
         ("The furnace dates to 600 BCE.", "FALSE", "The furnace dates to 700 BCE.", True),
         ("The furnace dates to 600 BCE.", "TRUE", "The furnace dates to 600 BCE.", True),
         ("The furnace dates to 600 BCE.", "a topic description", "The furnace dates to 600 BCE.", False),

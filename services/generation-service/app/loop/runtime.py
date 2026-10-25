@@ -448,14 +448,44 @@ class BoundedLoopRuntime:
             used = max(0, op.tokensUsed or 0)
             reservation = max(0, op.tokenReservation or 0)
             accounting = str(op.accountingType or "").upper()
+            # Match PostgreSQL refund authority: an estimate (even nonzero)
+            # cannot release the unused portion of a provider reservation.
             known = (op.status.upper() == "COMPLETED" and accounting != "UNKNOWN" and
-                     (accounting in {"REPORTED", "RECONCILED", "ESTIMATED"}
-                      or used > 0 or op.operationType not in provider_types))
+                     (accounting in {"REPORTED", "RECONCILED"}
+                      or op.operationType not in provider_types))
             own = used if known else max(used, reservation)
             child_total = sum(charge(cid, path | {oid}) for cid in children.get(oid, []))
             return max(own, child_total)
         roots = [oid for oid in selected if all_ops[oid].parentOperationId not in selected]
         self.context.budget_tracker.tokens_used = sum(charge(oid) for oid in roots)
+        return True
+
+    def _block_unresolved_provider_operations(self) -> bool:
+        """Recheck durable outcomes at callback boundaries, not only on restart.
+
+        A callback can return or raise after an unknown transport outcome. Neither
+        a returned artifact nor a caught exception authorizes another paid attempt
+        or acceptance while that provider reservation is unresolved.
+        """
+        state = self.persistence_client.resume_state(self.context.run_id)
+        from app.persistence.client import get_artifact_aliases
+        aliases = set(get_artifact_aliases(self.context.target_artifact_id, self.context.run_id))
+        aliases.add(self.context.target_artifact_id)
+        operations = {op.operationId: op for op in (state.operations or [])}
+        selected = {oid for oid, op in operations.items() if op.artifactId in aliases}
+        while True:
+            descendants = {oid for oid, op in operations.items() if op.parentOperationId in selected}
+            if descendants <= selected:
+                break
+            selected |= descendants
+        unknown = sorted(oid for oid in selected
+                         if operations[oid].operationType in {"PROVIDER_CALL", "LLM", "LLM_CALL", "LLM_PASSAGE"}
+                         and operations[oid].status.upper() != "COMPLETED")
+        if not unknown:
+            return False
+        self._refresh_provider_token_accounting(state)
+        self._finish(LoopReason.UNKNOWN_OUTCOME,
+                     f"unresolved provider operations require reconciliation: {unknown}")
         return True
 
     def _checkpoint(self, last_operation_id: str | None = None) -> None:
@@ -582,6 +612,8 @@ class BoundedLoopRuntime:
         )
 
     def _reserve(self, intent: OperationIntent) -> bool:
+        if self._block_unresolved_provider_operations():
+            return False
         op = self._operations.get(intent.operation_id)
         if op:
             if op.requestHash != intent.request_hash or op.artifactId != intent.target_artifact_id:
@@ -899,6 +931,8 @@ class BoundedLoopRuntime:
                 # regeneration without a record made every repair-infeasible defect look
                 # like a generic MAX_VERSIONS version-cap exhaustion.
                 self._record_capability_failure(error, repair=repair, version=version)
+                if self._block_unresolved_provider_operations():
+                    return
                 if self.persistence_client is not None:
                     try:
                         draft_wall_time = round(time.perf_counter() - t_draft_start, 4)
@@ -918,6 +952,8 @@ class BoundedLoopRuntime:
                     self._checkpoint()
                     return
                 self._finish(LoopReason.INVALID_OUTPUT, f"capability failed: {type(error).__name__}: {error}")
+                return
+            if self._block_unresolved_provider_operations():
                 return
             if not self._artifact_valid(art, version) and not (
                 # P15 case-14: a repair may have accepted NEW versions of this
@@ -1134,6 +1170,8 @@ class BoundedLoopRuntime:
                     logger.error("Evaluator %s failed: %s: %s", evaluator.evaluator_id, type(error).__name__, error, exc_info=True)
                     result = self._error_evaluation(evaluator, art, intent,
                                                     f"Evaluator {evaluator.evaluator_id} error: {type(error).__name__}: {error}")
+                if self._block_unresolved_provider_operations():
+                    return
                 try:
                     self.persistence_client.reconcile_operation(OperationReconcileRequest(
                         runId=self.context.run_id, epoch=self.context.authority.epoch,

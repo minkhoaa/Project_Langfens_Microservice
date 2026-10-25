@@ -1,0 +1,59 @@
+{
+  "mode": "OFFLINE_BLOCKER_REPRODUCTION_NOT_LIVE",
+  "q7_claim": ", Alpern, 2005 ; Holl, 2009 ; Killick, 2004 ; Robion-Brunner, 2018 ), which we will not revisit here.",
+  "q7_completion_eligible": true,
+  "q7_suitability": 4.0,
+  "stimulus_roundtrip": [
+    {
+      "question_type": "FLOW_CHART",
+      "input": {
+        "flowSteps": [
+          "Collect ore",
+          "Heat ore using [10]"
+        ],
+        "stepIndex": 1
+      },
+      "retained": {},
+      "dropped_fields": [
+        "flowSteps",
+        "stepIndex"
+      ]
+    },
+    {
+      "question_type": "TABLE_COMPLETION",
+      "input": {
+        "tableContext": "Furnace input materials",
+        "rowHeader": "Fuel",
+        "colHeader": "Material"
+      },
+      "retained": {},
+      "dropped_fields": [
+        "tableContext",
+        "rowHeader",
+        "colHeader"
+      ]
+    }
+  ],
+  "parent_grants": [
+    {
+      "scenario": "blind_evaluation",
+      "authority": "offline double modeling CheckpointService parent token/wall predicates; not PostgreSQL",
+      "parent_tokens": 4000,
+      "parent_wall": 60,
+      "prior_child_wall_used": 0,
+      "requested_tokens": 7369,
+      "requested_wall": 60,
+      "outcome": "REJECTED 422: Parent operation reservation exceeded: parent 'parent' token reservation (4000) would be exceeded by child reservation 7369 (current child allocated: 0)"
+    },
+    {
+      "scenario": "hybrid_after_m3",
+      "authority": "offline double modeling CheckpointService parent token/wall predicates; not PostgreSQL",
+      "parent_tokens": 15000,
+      "parent_wall": 60,
+      "prior_child_wall_used": 5,
+      "requested_tokens": 5759,
+      "requested_wall": 60,
+      "outcome": "REJECTED 422: Parent operation reservation exceeded: parent 'parent' wall-time reservation (60.0s) would be exceeded by child reservation 60.0s (current child allocated: 5.0s)"
+    }
+  ]
+}

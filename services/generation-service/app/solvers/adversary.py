@@ -134,16 +134,20 @@ def parse_and_validate_adversary_output(
                 else:
                     has_invalid_span = True
             if is_tfng:
-                from app.solvers.tfng import alternative_has_tfng_evidence
-                if (not is_grounded_flag or has_invalid_span or not alternative_has_tfng_evidence(
-                    alt_ans, student_question.prompt, [s.span_text for s in valid_spans]
-                )):
+                from app.solvers.tfng import TFNGEvidenceRelation, tfng_alternative_relation
+                relation = tfng_alternative_relation(
+                    alt_ans, student_question.prompt, [s.span_text for s in valid_spans], passage_text,
+                )
+                if (not is_grounded_flag or has_invalid_span
+                        or relation == TFNGEvidenceRelation.UNSUPPORTED):
                     unsupported_allegations.append({
                         "alternative_answer": alt_ans,
                         "reasoning": reasoning,
                         "rejection_reason": "TFNG alternative lacks exact proposition-level entailment/contradiction evidence or a valid answer label",
                     })
                     continue
+                if relation == TFNGEvidenceRelation.UNRESOLVED:
+                    reasoning += " [Deterministic evidence relation unresolved; independent review remains blocking.]"
             # Check if this allegation relies on outside knowledge rather than passage
             outside_knowledge_detected = (
                 not is_grounded_flag

@@ -683,10 +683,16 @@ class StageExecutor:
                             "Fallback parent synthesis is strictly prohibited."
                         )
                 if repair is not None:
+                    # Bind before invocation: a TypeError raised *inside* repair
+                    # may follow paid dispatch and must never trigger a second call.
+                    signature = inspect.signature(repair)
                     try:
-                        res = await repair(art, issues, ver, intent_id=intent_id)
+                        signature.bind(art, issues, ver, intent_id=intent_id)
                     except TypeError:
+                        signature.bind(art, issues, ver)
                         res = await repair(art, issues, ver)
+                    else:
+                        res = await repair(art, issues, ver, intent_id=intent_id)
                     if isinstance(res, ArtifactEnvelope):
                         return res
                     return art.create_next_version(new_payload=res, producer_version=PRODUCER_VERSION)
