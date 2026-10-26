@@ -1,0 +1,19 @@
+# Final offline gates at `387625a`
+
+**Tested tree:** `387625acbb8b542ff84fa32ad455a711ba173594` (`autonomous-generation`, equal to `origin/autonomous-generation` at inspection). No provider/LIVE calls, deploys or publication. No production source defect reproduced. No LIVE acceptance was attempted.
+
+## Current-tree verification
+
+- **Python 3.14.8:** 2,157 passed, 0 failed, 24 existing skips; deterministic/offline mode. JUnit: [`full314-final-387625a.xml`](../../reports/section1_autonomous_resolution/full314-final-387625a.xml), SHA-256 `08e3f6a834f583c58d1f83240c537fa0cf6d7cf7f18c2e7a59295b0624173cdb`.
+- **.NET 10:** exam test project build passed (0 errors; existing warnings). Against the session-owned, internal-only PostgreSQL resource, the current tree passed the Section 1 pipeline integration (13 accepted questions, 78/78 mandatory evaluator PASS, 40 scripted physical calls, zero unresolved operations) and 12 policy/operation-authority tests. The resource container, network and volume were preserved.
+- **Python 3.12:** still blocked, not a full-suite PASS. The latest recorded offline run collected 2,101 passes and 24 skips but had 12 collection errors. They share the exact root: `jsonschema 4.26.0` → `referencing 0.37.0` imports `rpds.rpds`, which is absent for CPython 3.12. The only inspected native extension is CPython 3.14. The required offline prerequisite is a genuine CPython 3.12-compatible Linux x86_64 `rpds-py` wheel/native extension satisfying `rpds-py>=0.25.0`, or rpds-py source with the complete Rust/PyO3 offline build closure. Host caches and cached Python 3.12 images had no compatible artifact. No downloads or substitutes were used.
+
+## Durable acceptance and remaining gates
+
+The historical five-boundary crash/recovery matrix in [`SECTION1_AUTONOMOUS_RESOLUTION.md`](SECTION1_AUTONOMOUS_RESOLUTION.md) and [`postgres_acceptance.json`](../../reports/section1_autonomous_resolution/postgres_acceptance.json) was run at implementation SHA `12f17862cf6fccc106c8d3d82ee03458dfb8f3fe`: each boundary had 13 accepted questions and 78/78 PASS; accepted/repair boundaries additionally proved fresh-process restart. Do not relabel that matrix as a full five-boundary run at this SHA. The later `387625a` changes only the canonical 40Q acceptance fixture and reports, not generation/exam implementation. The current SHA additionally has the positive PostgreSQL result described above, but not a repeated full crash matrix/restart campaign.
+
+The newer HEAD commit `387625a` refreshes only `services/generation-service/tests/fixtures/canonical_40_question_acceptance_bundle.json`; fixture SHA-256 is `13dce91d2dd56d085bb76cdb936d2acd1f23e50c9ad487dc8fdbac8fb1603c76`. Python tests mutate evaluation timestamps in this fixture; the test-generated diff was restored to the exact committed bytes. The repository is clean apart from this report/evidence addition.
+
+Security remains unresolved: NuGet audit reports Microsoft.OpenApi 2.4.1 (high, GHSA-v5pm-xwqc-g5wc), OpenTelemetry.Exporter.OpenTelemetryProtocol 1.13.0 (moderate, GHSA-4625-4j76-fww9), and OpenTelemetry.Api 1.13.1 (moderate, GHSA-g94r-2vxg-569j). These appear in the exam/shared bootstrap/service-defaults/attempt dependency graphs. No upgrade was guessed: newer cached package versions alone do not prove a patched version or compatible graph. Verify advisories' fixed ranges and call-site exposure against trusted security data, then update from approved offline packages and retest.
+
+**Decision: BLOCKED.** Supply the compatible CPython 3.12 rpds artifact/build closure and resolve/accept the documented NuGet advisory risk, then rerun the final gates against one frozen SHA. Do not start separately authorized 13Q LIVE acceptance based on this report. Machine-readable details: [`final_offline_gates_387625a.json`](../../reports/section1_autonomous_resolution/final_offline_gates_387625a.json).

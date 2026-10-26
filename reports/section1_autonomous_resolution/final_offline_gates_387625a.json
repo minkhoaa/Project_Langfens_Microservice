@@ -1,0 +1,66 @@
+{
+  "tested_source_sha": "387625acbb8b542ff84fa32ad455a711ba173594",
+  "branch": "autonomous-generation",
+  "remote_tracking_ref": "origin/autonomous-generation",
+  "head_and_remote_match": true,
+  "offline_only": true,
+  "live_provider_calls": 0,
+  "deployments": 0,
+  "publications": 0,
+  "python314": {
+    "version": "3.14.8",
+    "passed": 2157,
+    "failed": 0,
+    "skipped": 24,
+    "duration_seconds": 322.73,
+    "command_scope": "tests/ excluding only tests/test_t09_real_postgres_durability.py; RUN_LIVE_PROVIDER_SMOKE=0",
+    "junit": "full314-final-387625a.xml",
+    "junit_sha256": "08e3f6a834f583c58d1f83240c537fa0cf6d7cf7f18c2e7a59295b0624173cdb"
+  },
+  "python312": {
+    "status": "BLOCKED",
+    "version": "3.12.15",
+    "most_recent_recorded_run": {
+      "source_sha": "2524ef5fc5aaaf25bb77e5ce34a511cbc7159137",
+      "passed": 2101,
+      "failed": 0,
+      "collection_errors": 12,
+      "skipped": 24
+    },
+    "root_cause": "jsonschema 4.26.0 -> referencing 0.37.0 imports rpds.rpds; only a CPython 3.14 native extension is available. The 12 errors are collection failures, not test failures.",
+    "requirements": "A genuine CPython 3.12 x86_64 Linux-compatible rpds-py wheel/native extension satisfying rpds-py>=0.25.0, or rpds-py source plus the complete offline Rust/PyO3 build dependency closure. No compatible artifact was found in local pip/uv/cargo caches or cached Python 3.12 images. No download or substitute implementation used.",
+    "collection_error_source": "reports/section1_autonomous_resolution/full312.xml"
+  },
+  "dotnet": {
+    "sdk": "10.0.302",
+    "test_project_build": "PASS",
+    "build_errors": 0,
+    "build_warnings": 29,
+    "section1_postgres_pipeline_tests_current_head": "1 passed, 0 failed; 13 accepted questions, 78/78 mandatory evaluator PASS, 40 scripted physical calls, 68,366 reported mock tokens, 0 unresolved operations",
+    "policy_and_operation_authority_tests_current_head": "12 passed, 0 failed",
+    "database": "section1_pipeline on verified internal-only session-owned resource section1-pipeline-postgres-5dd0367d; existing container, network and volume preserved",
+    "current_positive_run_id": "section1_fixture_15e49634f3fb407981bb94c9b97a8b8b",
+    "matrix_note": "The durable five-boundary 13/13 and 78/78 matrix/restart evidence remains reports/section1_autonomous_resolution/postgres_acceptance.json at source 12f17862cf6fccc106c8d3d82ee03458dfb8f3fe. The intervening HEAD changes the canonical 40Q test fixture and reports only; it does not change pipeline/service code. Current-HEAD targeted tests were rerun, but the entire five-boundary matrix was not rerun at this SHA."
+  },
+  "security": {
+    "status": "BLOCKING_ADVISORIES_UNREMEDIATED",
+    "microsoft_openapi": "2.4.1, high severity GHSA-v5pm-xwqc-g5wc; present in exam-service, Shared.Bootstrap and attempt-service dependency graphs.",
+    "opentelemetry": "Exporter.OpenTelemetryProtocol 1.13.0 and OpenTelemetry.Api 1.13.1, moderate severity GHSA-4625-4j76-fww9 and GHSA-g94r-2vxg-569j; present in Shared.ServiceDefaults and consumers.",
+    "remediation": "No dependency change made: advisories' exact fixed-version requirements and usage-specific exposure were not independently verified from trusted offline advisory data. Newer packages exist in the local NuGet cache, but cache presence alone does not establish a verified fix or compatible dependency set."
+  },
+  "canonical_40q_fixture": {
+    "head_commit": "387625acbb8b542ff84fa32ad455a711ba173594",
+    "commit_subject": "test: refresh canonical 40-question acceptance bundle",
+    "changed_paths": ["services/generation-service/tests/fixtures/canonical_40_question_acceptance_bundle.json"],
+    "sha256": "13dce91d2dd56d085bb76cdb936d2acd1f23e50c9ad487dc8fdbac8fb1603c76",
+    "working_tree": "clean; pytest-generated timestamp churn was restored to the exact committed fixture bytes"
+  },
+  "repository": {
+    "uncommitted_changes": [],
+    "latest_verified_implementation_commit": "12f17862cf6fccc106c8d3d82ee03458dfb8f3fe",
+    "latest_head_is_report_or_fixture_only_after_implementation": true,
+    "committed_changes_in_this_session": 1,
+    "commit": "b67e84c (report/evidence only; tested implementation unchanged)"
+  },
+  "decision": "BLOCKED; do not authorize the separately gated LIVE run"
+}
