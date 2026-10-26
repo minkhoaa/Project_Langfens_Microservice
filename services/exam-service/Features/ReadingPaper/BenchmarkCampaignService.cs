@@ -237,6 +237,8 @@ public static class BenchmarkCampaignService
                 UpdatedAt = now,
                 Job = job
             };
+            var provider = workerInput?.Sources.FirstOrDefault()?.Metadata?.GetValueOrDefault("provider") ?? "minimax";
+            ReadingPaperExecutionSnapshot.Pin(run, PinnedExecutionPolicy.CreateDefault(provider));
             db.ReadingPaperJobs.Add(job);
             db.ReadingPaperRuns.Add(run);
             try

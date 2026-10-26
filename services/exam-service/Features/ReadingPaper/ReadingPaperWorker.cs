@@ -118,6 +118,11 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
+                var selectedSources = JsonSerializer.Deserialize<List<ReadingSource>>(currentJob.SourcesJson, ReadingPaperRules.Json);
+                var selectedProvider = selectedSources?.FirstOrDefault()?.Metadata?.GetValueOrDefault("provider")
+                    ?? Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER")
+                    ?? Environment.GetEnvironmentVariable("LLM_PROVIDER") ?? "minimax";
+                ReadingPaperExecutionSnapshot.Pin(run, PinnedExecutionPolicy.CreateDefault(selectedProvider));
                 db.ReadingPaperRuns.Add(run);
             }
             else
@@ -128,18 +133,8 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                 run.LeaseUntil = currentJob.LeaseUntil;
                 run.CancelVersion = currentJob.CancelVersion;
                 run.Status = "RUNNING";
-                if (IsMiniMaxOrBenchmark(currentJob) && run.BudgetCapTokens > 0)
-                {
-                    var runProfile = caps.IsBenchmarkUnlimited ? caps : caps.ToUnlimitedBenchmarkProfile();
-                    run.BudgetCapCalls = ReadingPaperCapsProfile.UnlimitedCap;
-                    run.BudgetCapTokens = ReadingPaperCapsProfile.UnlimitedCap;
-                    run.BudgetCapWallTimeSeconds = ReadingPaperCapsProfile.UnlimitedCap;
-                    run.BudgetProfileVersion = runProfile.Version;
-                    run.BudgetProfileSha256 = runProfile.Sha256;
-                    run.BudgetProfileSource = runProfile.Source;
-                    run.BudgetProfileJson = runProfile.SnapshotJson;
-                }
-
+                // Resume retains the saved resource profile and execution policy.
+                // Current benchmark/environment settings cannot rewrite authority.
                 run.UpdatedAt = DateTime.UtcNow;
             }
 
@@ -223,30 +218,8 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             $"Generation started for {sources.Count} selected source(s); {sections.Count} section checkpoint(s) already complete.", ct);
         var runId = job.ActiveRunId ?? $"run_{job.Id:N}";
         var activeRun = await db.ReadingPaperRuns.FirstOrDefaultAsync(r => r.RunId == runId, ct);
-        var provider = sources.FirstOrDefault()?.Metadata?.GetValueOrDefault("provider")
-            ?? Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER")
-            ?? Environment.GetEnvironmentVariable("LLM_PROVIDER")
-            ?? "minimax";
-
-        var isUnlimitedRun = activeRun != null && (
-            activeRun.BudgetCapCalls == ReadingPaperCapsProfile.UnlimitedCap ||
-            activeRun.BudgetCapTokens == ReadingPaperCapsProfile.UnlimitedCap ||
-            activeRun.BudgetCapWallTimeSeconds == ReadingPaperCapsProfile.UnlimitedCap ||
-            (activeRun.BudgetProfileJson != null && activeRun.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase))
-        );
-
-        var policy = PinnedExecutionPolicy.CreateDefault(provider);
-        if (isUnlimitedRun)
-        {
-            policy = policy with
-            {
-                ProviderCallSeconds = 180.0,
-                SectionWallSeconds = 900.0,
-                SectionTokenCap = 100000,
-                RunTokenCap = 300000,
-                RunWallSeconds = 2700.0
-            };
-        }
+        var policy = ReadingPaperExecutionSnapshot.Read(activeRun
+            ?? throw new InvalidOperationException("Missing authoritative run"));
 
         var sourceInputs = sources.Select((s, idx) => new SourceInput(
             SectionIndex: idx + 1,

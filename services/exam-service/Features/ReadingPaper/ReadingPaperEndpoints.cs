@@ -518,6 +518,7 @@ public static class ReadingPaperEndpoints
             UpdatedAt = now
         };
 
+        ReadingPaperExecutionSnapshot.Pin(run, PinnedExecutionPolicy.CreateDefault(provider));
         db.ReadingPaperJobs.Add(job);
         db.ReadingPaperRuns.Add(run);
         await db.SaveChangesAsync(ct);

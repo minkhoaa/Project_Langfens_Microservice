@@ -182,7 +182,9 @@ public sealed record OperationResumeInfo(
     [property: JsonPropertyName("completionTokensUsed")] int? CompletionTokensUsed = null,
     [property: JsonPropertyName("reasoningTokensUsed")] int? ReasoningTokensUsed = null,
     [property: JsonPropertyName("accountingType")] string AccountingType = "UNKNOWN",
-    [property: JsonPropertyName("reservationBreached")] bool ReservationBreached = false
+    [property: JsonPropertyName("reservationBreached")] bool ReservationBreached = false,
+    [property: JsonPropertyName("parentOperationId")] string? ParentOperationId = null,
+    [property: JsonPropertyName("sectionId")] string? SectionId = null
 );
 
 public sealed record ResumeStateResult(

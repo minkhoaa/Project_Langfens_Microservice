@@ -19,8 +19,13 @@ public class Section1OperationAuthorityTests
         var connection = Environment.GetEnvironmentVariable("READING_CLOSURE_TEST_POSTGRES")
             ?? throw new InvalidOperationException("Explicit disposable PostgreSQL DSN required");
         var parsed = new Npgsql.NpgsqlConnectionStringBuilder(connection);
-        if (parsed.Database != "section1_closure" || parsed.Host != "127.0.0.1" || parsed.Port != 55449)
-            throw new InvalidOperationException("Only the isolated section1_closure database on 127.0.0.1:55449 is authorized");
+        var closureTarget = parsed.Database == "section1_closure" && parsed.Host == "127.0.0.1" && parsed.Port == 55449;
+        var verifiedPipelineTarget = parsed.Database == "section1_pipeline" && parsed.Port == 5432 &&
+            parsed.Host == Environment.GetEnvironmentVariable("SECTION1_PIPELINE_RESOURCE_HOST") &&
+            Environment.GetEnvironmentVariable("SECTION1_PIPELINE_RESOURCE_VERIFIED")?.StartsWith(
+                "section1-pipeline-postgres-", StringComparison.Ordinal) == true;
+        if (!closureTarget && !verifiedPipelineTarget)
+            throw new InvalidOperationException("Only the explicitly verified disposable Section1 database is authorized");
         var options = new DbContextOptionsBuilder<ExamDbContext>().UseNpgsql(connection, n =>
             n.ConfigureDataSource(source => source.EnableDynamicJson())).Options;
         return new ExamDbContext(options);

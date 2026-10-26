@@ -279,15 +279,15 @@ public static class CheckpointService
                              run.BudgetCapTokens >= 2_000_000_000 ||
                              (run.BudgetProfileJson != null &&
                               run.BudgetProfileJson.Contains("\"UNLIMITED\"", StringComparison.OrdinalIgnoreCase));
-        var sectionTokens = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionTokenCap", 60000), 60000);
-        var sectionCalls = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionCallCap", 12), 12);
-        var sectionWall = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("SectionWallTimeCapSeconds", 900), 900);
+        var sectionTokens = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("SectionTokenCap", 60000);
+        var sectionCalls = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("SectionCallCap", 12);
+        var sectionWall = isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("SectionWallTimeCapSeconds", 900);
         var artifactCaps = new[]
         {
             (Name: "passage",
              Tokens: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageTokenCap", 80000),
              Calls: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageCallCap", 10),
-             Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Math.Max(Cap("ArtifactPassageWallTimeCapSeconds", 400), 400)),
+             Wall: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactPassageWallTimeCapSeconds", 400)),
             (Name: "questions",
              Tokens: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactQuestionsTokenCap", 200000),
              Calls: isUnlimitedRun ? ReadingPaperCapsProfile.UnlimitedCap : Cap("ArtifactQuestionsCallCap", 50),
@@ -2351,72 +2351,21 @@ public static class CheckpointService
         var loopCursorsList = await db.ReadingPaperLoopCursors.Where(c => c.RunId == runId)
             .Select(c => new LoopCursorCheckpoint(c.ArtifactId, c.Revision, c.StateJson, c.LastOperationId)).ToListAsync(ct);
 
-        string? policyHash = null;
-        foreach (var cursor in loopCursorsList)
+        string policyHash;
+        try
         {
-            if (!string.IsNullOrWhiteSpace(cursor.StateJson))
-            {
-                try
-                {
-                    using var doc = JsonDocument.Parse(cursor.StateJson);
-                    if (doc.RootElement.TryGetProperty("policyHash", out var phProp) && phProp.ValueKind == JsonValueKind.String)
-                    {
-                        var candidate = phProp.GetString();
-                        if (!string.IsNullOrWhiteSpace(candidate))
-                        {
-                            policyHash = candidate;
-                            break;
-                        }
-                    }
-                }
-                catch { }
-            }
+            policyHash = ReadingPaperExecutionSnapshot.Read(run).ComputeHash();
         }
-
-        if (string.IsNullOrWhiteSpace(policyHash))
+        catch (InvalidOperationException ex)
         {
-            foreach (var op in ops)
-            {
-                if (!string.IsNullOrWhiteSpace(op.ResultRefJson) && op.ResultRefJson.Contains("policyHash", StringComparison.OrdinalIgnoreCase))
-                {
-                    try
-                    {
-                        using var doc = JsonDocument.Parse(op.ResultRefJson);
-                        if (doc.RootElement.TryGetProperty("policyHash", out var phProp) && phProp.ValueKind == JsonValueKind.String)
-                        {
-                            var candidate = phProp.GetString();
-                            if (!string.IsNullOrWhiteSpace(candidate))
-                            {
-                                policyHash = candidate;
-                                break;
-                            }
-                        }
-                    }
-                    catch { }
-                }
-            }
-        }
-
-        if (string.IsNullOrWhiteSpace(policyHash))
-        {
-            var provider = "minimax";
-            if (!string.IsNullOrWhiteSpace(run.SourceRevisionsJson))
-            {
-                try
-                {
-                    using var doc = JsonDocument.Parse(run.SourceRevisionsJson);
-                    if (doc.RootElement.ValueKind == JsonValueKind.Array && doc.RootElement.GetArrayLength() > 0)
-                    {
-                        var first = doc.RootElement[0];
-                        if (first.TryGetProperty("metadata", out var meta) && meta.TryGetProperty("provider", out var provProp))
-                        {
-                            provider = provProp.GetString() ?? provider;
-                        }
-                    }
-                }
-                catch { }
-            }
-            policyHash = PinnedExecutionPolicy.CreateDefault(provider).ComputeHash();
+            return new ResumeStateResult(
+                run.RunId, run.JobId, run.Epoch, run.Status,
+                run.EngineVersion, run.SchemaVersion, run.PolicyVersion, [],
+                IsCompatible: false, IncompatibilityReason: ex.Message,
+                BudgetProfileVersion: run.BudgetProfileVersion,
+                BudgetProfileSha256: run.BudgetProfileSha256,
+                BudgetProfileSource: run.BudgetProfileSource,
+                BudgetProfileJson: run.BudgetProfileJson);
         }
 
         return new ResumeStateResult(
@@ -2446,7 +2395,8 @@ public static class CheckpointService
             Operations: ops.Select(o => new OperationResumeInfo(o.OperationId, o.OperationType, o.Status,
                 o.ArtifactId, o.RequestHash, o.TokenReservation, o.TokensUsed,
                 o.WallTimeReservationSeconds, o.WallTimeUsedSeconds, o.ResultRefJson,
-                o.PromptTokensUsed, o.CompletionTokensUsed, o.ReasoningTokensUsed, o.AccountingType, o.ReservationBreached)).ToList(),
+                o.PromptTokensUsed, o.CompletionTokensUsed, o.ReasoningTokensUsed, o.AccountingType, o.ReservationBreached,
+                o.ParentOperationId, o.SectionId)).ToList(),
             BudgetProfileVersion: run.BudgetProfileVersion,
             BudgetProfileSha256: run.BudgetProfileSha256,
             BudgetProfileSource: run.BudgetProfileSource,
