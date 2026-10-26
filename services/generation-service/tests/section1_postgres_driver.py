@@ -361,6 +361,35 @@ def negative_authority(request):
     print("NEGATIVE_OK durable_unknown_reservation legitimate_takeover stale_grant_reconcile_unknown", flush=True)
 
 
+def competing_parent_grants(request):
+    """Independent HTTP clients contend under one saved allocation, not a mock lock."""
+    from concurrent.futures import ThreadPoolExecutor
+    run = request.run_id
+    endpoint = "/api/internal/reading-paper/checkpoints/grant-operation"
+    base = {"runId": run, "epoch": 1, "leaseOwner": str(request.lease_owner),
+        "operationId": "contended-parent", "operationType": "EVALUATE", "requestHash": "contended-parent",
+        "tokenReservation": 10000, "wallTimeReservationSeconds": 60, "sectionId": "1", "artifactId": f"question:{run}:1"}
+    fixture(endpoint, base)
+    def contender(index):
+        try:
+            result = fixture(endpoint, dict(base, operationId=f"contender-{index}", operationType="PROVIDER_CALL",
+                requestHash=f"contender-{index}", parentOperationId="contended-parent", tokenReservation=7369,
+                wallTimeReservationSeconds=1))
+            return 200, result
+        except httpx.HTTPStatusError as error:
+            return error.response.status_code, None
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        results = list(workers.map(contender, (1, 2)))
+    assert sorted(status for status, _ in results) == [200, 422]
+    saved = fixture(f"/fixture/snapshot/{run}")
+    assert saved["run"]["budgetUsedTokens"] == 7369
+    assert saved["run"]["budgetUsedCalls"] == 1
+    children = [op for op in saved["operations"] if op["parentOperationId"] == "contended-parent"]
+    assert len(children) == 1 and children[0]["tokenReservation"] == 7369
+    assert saved["heads"] == []
+    print("CONCURRENCY_OK exactly one near-cap grant; no acceptance or transport", flush=True)
+
+
 def run_section1_postgres_pipeline():
     # This driver is executed by the isolated .NET integration gate, not collected
     # as an optional pytest case whose missing prerequisites could look green.
@@ -411,6 +440,7 @@ def run_section1_postgres_pipeline():
         "mandatory_evaluator_passes": 78, "physical_calls": expected_calls, "crash_boundary": boundary,
         "mode": "SCRIPTED_TRANSPORT_POSTGRES_HTTP_REAL_PIPELINE"}, indent=2))
     negative_authority(provision())
+    competing_parent_grants(provision())
     for scenario in ("budget", "unknown"):
         bad = provision()
         child(bad.run_id, scenario)
