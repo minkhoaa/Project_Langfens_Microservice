@@ -222,6 +222,14 @@ def evaluate_blueprint(
     payload = artifact.payload
     sections = payload.get("sections", ())
     problems = []
+    if policy.blueprint_mode == "acceptance_5_4_4_v1":
+        from app.contracts.blueprint import ExamBlueprint, compute_canonical_blueprint_hash
+        try:
+            blueprint = ExamBlueprint.model_validate(payload)
+            if blueprint.content_hash != compute_canonical_blueprint_hash(blueprint) or (blueprint.metadata or {}).get("policyHash") != policy.hash:
+                problems.append((IssueCode.SCHEMA_VIOLATION, "Acceptance blueprint policy/content hash mismatch"))
+        except ValueError:
+            problems.append((IssueCode.SCHEMA_VIOLATION, "Invalid acceptance blueprint schema"))
     if tuple(item["sectionId"] for item in sections) != tuple(sorted(indices)):
         problems.append((IssueCode.SCHEMA_VIOLATION, "Blueprint does not cover exactly the requested sections"))
     for item in sections:
@@ -230,6 +238,13 @@ def evaluate_blueprint(
         slots = item.get("questionSlots", ())
         if tuple(slot["questionNumber"] for slot in slots) != config.question_numbers():
             problems.append((IssueCode.QUESTION_NUMBERING_INVALID, "Blueprint question numbers diverge from pinned allocation"))
+        if policy.blueprint_mode == "acceptance_5_4_4_v1":
+            expected_types = [g.question_type.value for g in config.groups for _ in range(g.count)]
+            if [slot.get("questionType") for slot in slots] != expected_types:
+                problems.append((IssueCode.SCHEMA_VIOLATION, "Blueprint families diverge from exact 5/4/4 acceptance policy"))
+            claim_ids = [cid for slot in slots for cid in slot.get("claimRefIds", ())]
+            if len(claim_ids) != 13 or len(set(claim_ids)) != 13:
+                problems.append((IssueCode.EVIDENCE_MISSING, "Acceptance requires thirteen distinct eligible claims"))
         if not slots or any(not slot.get("claimRefIds") for slot in slots):
             problems.append((IssueCode.EVIDENCE_MISSING, "Every blueprint slot must bind verified evidence"))
         if not item.get("passageObjectives") or not item.get("evidenceGraphRef"):

@@ -600,7 +600,10 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
                     )
                 )
 
-        if claims:
+        if policy.blueprint_mode == "acceptance_5_4_4_v1":
+            from app.blueprint.claim_binding import bind_distinct_claims_to_slots
+            question_slots = bind_distinct_claims_to_slots(question_slots, claims, sec_idx, graph_id, run_id)
+        elif claims:
             from app.blueprint.claim_binding import bind_claims_to_slots
             graph_id = _payload(ev_item).get("graphId", f"graph:{run_id}:{sec_idx}")
             question_slots = bind_claims_to_slots(question_slots, claims, sec_idx, graph_id, run_id)
@@ -659,7 +662,10 @@ def build_blueprint(*args: Any, **kwargs: Any) -> dict[str, Any]:
         targetWordCountMin=policy.paper_min_words,
         targetWordCountMax=policy.paper_max_words,
         parentBudgetCapTokens=policy.run_token_cap,
+        metadata={"blueprint_mode": policy.blueprint_mode, "policyHash": policy.hash},
     )
+    from app.contracts.blueprint import compute_canonical_blueprint_hash
+    blueprint = blueprint.model_copy(update={"content_hash": compute_canonical_blueprint_hash(blueprint)})
     return blueprint.model_dump(mode="json", by_alias=True)
 
 

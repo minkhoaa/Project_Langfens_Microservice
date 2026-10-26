@@ -17,6 +17,8 @@ logs/
 *.swo
 *.orig
 deploy/envs/**
+# Non-secret, cross-runtime cap contract must survive a clean checkout.
+!deploy/envs/loop-caps.env
 /.gsd/
 # ------------------------------
 # Env and secrets (repo-wide)

@@ -9,10 +9,12 @@ public sealed record ReadingSource(string Pmcid, string Title, string? Doi, stri
     string? Content = null, string? ContentPreview = null);
 public sealed record ReadingPaperLog(DateTime Timestamp, string Level, string Message);
 public sealed record ReadingSearchResult(List<ReadingSource> Sources, List<string> SelectedPmcids, string? Message);
-public sealed record ReadingJobRequest(string Topic, List<string>? Pmcids = null, List<ReadingSource>? Sources = null, string? Provider = null);
+public sealed record ReadingJobRequest(string Topic, List<string>? Pmcids = null, List<ReadingSource>? Sources = null, string? Provider = null, string? AcceptancePolicy = null, Guid? SubmissionAttemptId = null);
 public sealed record IngestSourceRequest(string Payload, string Type = "auto", string? Title = null, string? Url = null, string? Authors = null, string? License = null);
 public sealed record ReadingGeneratedQuestion(int Number, string Prompt, string Answer,
-    List<string> Options, string EvidenceQuote, string Explanation);
+    List<string> Options, string EvidenceQuote, string Explanation,
+    string? TableContext = null, string? RowHeader = null, string? ColHeader = null,
+    List<string>? FlowSteps = null, int? StepIndex = null);
 public sealed record ReadingGeneratedGroup(string Type, string Instruction, List<ReadingGeneratedQuestion> Questions);
 public sealed record ReadingGeneratedSection(string Title, string Passage, ReadingSource Source,
     List<ReadingGeneratedGroup> Groups);

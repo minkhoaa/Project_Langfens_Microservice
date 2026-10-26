@@ -61,6 +61,11 @@ public static class ReadingPaperExecutionSnapshot
             p.MaxRecoveryAttempts is < 0 or > 10 || p.SourceMinWords <= 0 || p.MinVerifiedClaims <= 0 ||
             p.PaperMinWords <= 0 || p.PaperMaxWords < p.PaperMinWords || p.Sections is not { Count: > 0 })
             throw new InvalidOperationException("Invalid pinned execution policy");
+        if (p.BlueprintMode == PinnedExecutionPolicy.Acceptance544 &&
+            (p.Sections.Count != 1 || p.Sections[0].Index != 1 || p.Sections[0].StartNumber != 1 ||
+             !p.Sections[0].Groups.Select(g => (g.QuestionType, g.Count)).SequenceEqual(new[] {
+                 ("TRUE_FALSE_NOT_GIVEN", 5), ("TABLE_COMPLETION", 4), ("FLOW_CHART", 4) })))
+            throw new InvalidOperationException("Acceptance policy requires exact Section 1 5/4/4 allocation");
         int? nextSection = null, nextQuestion = null;
         foreach (var s in p.Sections.OrderBy(s => s.Index))
         {

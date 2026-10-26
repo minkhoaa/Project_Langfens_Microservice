@@ -21,8 +21,7 @@ import httpx
 import pytest
 
 from app.config import Settings
-from app.contracts.artifact import ArtifactEnvelope, ArtifactType, canonical_json_dump
-from app.contracts.blueprint import ExamBlueprint, QuestionType, compute_canonical_blueprint_hash
+from app.contracts.artifact import ArtifactEnvelope, ArtifactType
 from app.contracts.policies import count_words
 from app.persistence.client import CheckpointClient
 from app.pipeline import ReadingGenerationPipeline
@@ -30,8 +29,7 @@ from app.providers.gateway import ProviderGateway
 from app.providers.models import Capability
 from app.providers.registry import ProviderRegistry
 from app.reading_models import PipelineRequest
-from app.reading_policy import GroupConfig, PinnedExecutionPolicy
-from app.stage_executor import StageExecutor
+from app.reading_policy import PinnedExecutionPolicy
 from tests.test_section1_target_offline import COMPLETIONS, TargetTransport
 from tests.unified.mock_fixtures import SECTION_1_SOURCE_TEXT, create_source_inputs
 
@@ -104,24 +102,6 @@ class CrashAfterQuestionAckClient(CheckpointClient):
                     print(f"FAULT: {required} provider outcomes committed; wrapper still RESERVED", flush=True)
                     os._exit({"GENERATE": 88, "EVALUATE": 89, "REPAIR": 91}[required])
         return ack
-
-
-class AuthoredBlueprintExecutor(StageExecutor):
-    """Only author deterministic fixture inputs, before normal validators/commit."""
-    async def execute(self, artifact_id, artifact_type, parents, generate, evaluate, **kwargs):
-        if artifact_type == ArtifactType.EXAM_BLUEPRINT:
-            original = generate
-            async def generate(version):
-                payload = await original(version)
-                state = self.client.resume_state(self.context.run_id)
-                evidence = next(ArtifactEnvelope.model_validate_json(a.envelopeJson) for a in state.artifacts
-                    if a.artifactType == ArtifactType.EVIDENCE_GRAPH)
-                for slot in payload["sections"][0]["questionSlots"]:
-                    slot["claimRefIds"] = [evidence.payload["claims"][slot["questionNumber"] - 1]["claimId"]]
-                    slot["isNotGivenTarget"] = slot["questionNumber"] == 3
-                payload["contentHash"] = compute_canonical_blueprint_hash(ExamBlueprint.model_validate(payload))
-                return payload
-        return await super().execute(artifact_id, artifact_type, parents, generate, evaluate, **kwargs)
 
 
 class DurableTargetTransport(TargetTransport):
@@ -199,8 +179,7 @@ async def generation_phase(run, mode):
     registry = ProviderRegistry()
     registry.register_provider(transport, keys=["offline-not-a-provider-key"])
     gateway = RecordingGateway(registry=registry, checkpoint_client=client)
-    pipeline = ReadingGenerationPipeline(client, gateway, executor_factory=lambda context, policy, **kw:
-        AuthoredBlueprintExecutor(client, context, policy, **kw))
+    pipeline = ReadingGenerationPipeline(client, gateway)
     try:
         result = await pipeline.execute(request)
     except Exception:
@@ -218,12 +197,10 @@ async def generation_phase(run, mode):
 
 def provision():
     run = "section1_fixture_" + uuid4().hex
-    base = PinnedExecutionPolicy(provider="minimax", blueprint_mode="legacy_preset")
-    config = base.section(1).model_copy(update={"groups": (
-        GroupConfig(questionType=QuestionType.TRUE_FALSE_NOT_GIVEN, count=5),
-        GroupConfig(questionType=QuestionType.TABLE_COMPLETION, count=4),
-        GroupConfig(questionType=QuestionType.FLOW_CHART, count=4))})
-    policy = base.model_copy(update={"sections": (config,)})
+    policy = PinnedExecutionPolicy.model_validate(fixture("/fixture/acceptance-policy"))
+    assert policy.blueprint_mode == "acceptance_5_4_4_v1"
+    assert [(g.question_type.value, g.count) for g in policy.sections[0].groups] == [
+        ("TRUE_FALSE_NOT_GIVEN", 5), ("TABLE_COMPLETION", 4), ("FLOW_CHART", 4)]
     request = PipelineRequest(runId=run, jobId=uuid4(), epoch=1, leaseOwner=uuid4(), topic="Wetland Research",
         sources=(create_source_inputs()[0].model_copy(update={"content": PROCESS_SOURCE_TEXT}),),
         sectionIndices=(1,), policy=policy, finalize=False)
@@ -263,6 +240,12 @@ def verify_completed(run):
     section = next(a for a in envelopes if a.artifact_type == ArtifactType.SECTION)
     questions = sorted((a for a in envelopes if a.artifact_type == ArtifactType.QUESTION), key=lambda a: a.payload["questionNumber"])
     assert len(questions) == 13
+    expected_families = ["TRUE_FALSE_NOT_GIVEN"] * 5 + ["TABLE_COMPLETION"] * 4 + ["FLOW_CHART"] * 4
+    blueprint = next(a for a in envelopes if a.artifact_type == ArtifactType.EXAM_BLUEPRINT)
+    slots = blueprint.payload["sections"][0]["questionSlots"]
+    assert [s["questionType"] for s in slots] == expected_families
+    assert len({c for s in slots for c in s["claimRefIds"]}) == 13
+    assert [q.payload["questionType"] for q in questions] == expected_families
     assert 720 <= count_words(passage.payload["passage"]) <= 915
     section_questions = [q for g in section.payload["groups"] for q in g["questions"]]
     assert [q["questionNumber"] for q in section_questions] == list(range(1, 14))
@@ -290,6 +273,17 @@ def verify_completed(run):
         elif number >= 6:
             assert question.payload["rowHeader"] == COMPLETIONS[number][0]
             assert question.payload["colHeader"] == COMPLETIONS[number][1]
+    projected = fixture(f"/fixture/projected-draft/{run}")
+    original_source = fixture(f"/fixture/request/{run}")["sources"][0]
+    assert projected["source"]["pmcid"] == original_source["pmcid"]
+    assert projected["source"]["url"] == original_source["url"]
+    assert [q["type"] for q in projected["questions"]] == expected_families
+    for question, display in zip(questions, projected["questions"]):
+        for key in ("tableContext", "rowHeader", "colHeader"):
+            if question.payload.get(key):
+                assert question.payload[key] in display["prompt"]
+        for step in question.payload.get("flowSteps", ()):
+            assert step in display["prompt"]
     calls = ledger(run)
     extra = 2 if os.environ.get("SECTION1_FIXTURE_CRASH_BOUNDARY") == "repair" else 0
     assert len(calls) == 40 + extra and len({c["operation"] for c in calls}) == 40 + extra
@@ -390,6 +384,53 @@ def competing_parent_grants(request):
     print("CONCURRENCY_OK exactly one near-cap grant; no acceptance or transport", flush=True)
 
 
+def successor_postgres_simulation(output):
+    """Real predecessor reconciliation + real job-create route, without workers."""
+    from concurrent.futures import ThreadPoolExecutor
+    import time
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    from scripts.submission_attempts import submit_successor_intent, digest
+    predecessor = fixture("/fixture/historical-failure", {})["job_id"]
+    attempt = str(uuid4())
+    marker = output / f"simulated-history-{attempt}.json"
+    marker.write_text(json.dumps({"status": "TERMINAL", "terminal_status": "Failed", "job_id": predecessor}))
+    before = marker.read_bytes()
+    payload = {"topic": "Benchmark successor simulation", "sources": [{"pmcid": "PMC1234567", "title": "Offline simulation",
+        "url": "https://example.invalid", "license": "CC BY 4.0", "wordCount": 800}],
+        "provider": "minimax", "acceptancePolicy": "acceptance_5_4_4_v1", "submissionAttemptId": attempt}
+    authorization = {"action": "SUBMIT_SUCCESSOR", "authorized_by": "OFFLINE_SIMULATION_ONLY", "attempt_id": attempt,
+        "expires_at": time.time() + 3600, "historical_marker_sha256": hashlib.sha256(before).hexdigest(),
+        "payload_sha256": digest(payload), "source_sha": "offline-simulation", "policy_id": "acceptance_5_4_4_v1"}
+    sends = []
+    def reconcile(job):
+        return fixture(f"/fixture/terminal-proof/{job}")
+    def send(body, identity):
+        sends.append(identity)
+        return fixture("/fixture/create-successor", body)["id"]
+    def submit():
+        return submit_successor_intent(marker, attempt, authorization, payload, "offline-simulation", reconcile, send)
+    with pytest.raises(RuntimeError, match="provably terminal"):
+        submit()
+    assert sends == []
+    assert fixture(f"/fixture/reconcile-terminal/{predecessor}", {})["reconciled"]
+    assert fixture(f"/fixture/reconcile-terminal/{predecessor}", {})["reconciled"]
+    def contender(_):
+        try:
+            return submit()
+        except RuntimeError:
+            return "blocked"
+    with ThreadPoolExecutor(max_workers=8) as workers:
+        outcomes = list(workers.map(contender, range(8)))
+    assert attempt in outcomes and sends == [attempt]
+    assert submit() == attempt and sends == [attempt]
+    assert marker.read_bytes() == before
+    assert fixture(f"/fixture/successor-count/{attempt}") == {"jobs": 1, "runs": 0}
+    (output / "successor-simulation.json").write_text(json.dumps({"predecessor": predecessor, "attempt_id": attempt,
+        "historical_marker_sha256": hashlib.sha256(before).hexdigest(), "preserved": True, "submission_intents": 1,
+        "persisted_jobs": 1, "workers_started": 0, "provider_dispatches": 0}, indent=2))
+    print("SUCCESSOR_OK durable authorized simulation; immutable marker; one job; zero worker/provider dispatches", flush=True)
+
+
 def run_section1_postgres_pipeline():
     # This driver is executed by the isolated .NET integration gate, not collected
     # as an optional pytest case whose missing prerequisites could look green.
@@ -438,6 +479,7 @@ def run_section1_postgres_pipeline():
     (output / "positive-final.json").write_text(json.dumps(final, indent=2))
     (output / "acceptance.json").write_text(json.dumps({"run_id": run, "accepted_questions": 13,
         "mandatory_evaluator_passes": 78, "physical_calls": expected_calls, "crash_boundary": boundary,
+        "policy_hash": request.policy.hash, "profile_hash": CrashAfterQuestionAckClient().resume_state(run).budgetProfileSha256,
         "mode": "SCRIPTED_TRANSPORT_POSTGRES_HTTP_REAL_PIPELINE"}, indent=2))
     negative_authority(provision())
     competing_parent_grants(provision())
@@ -452,6 +494,7 @@ def run_section1_postgres_pipeline():
             child(bad.run_id, scenario)
             assert len(ledger(bad.run_id)) == count
         (output / f"negative-{scenario}.json").write_text(json.dumps(before, indent=2))
+    successor_postgres_simulation(output)
     print(f"ACCEPTANCE_OK run={run} 13Q {expected_calls} physical calls; {boundary} crash, reentry, budget, unknown, fencing", flush=True)
 
 

@@ -51,34 +51,19 @@ def execute_and_fetch_generated_draft_edit_outbox_event() -> dict:
     # Never silently invoke a destructive fixture against its hardcoded/shared
     # fallback. The caller must explicitly select the already isolated database.
     assert os.environ.get("READING_TEST_POSTGRES"), "Explicit disposable READING_TEST_POSTGRES required"
-    host = os.environ.get("PGHOST", "localhost")
-    port = os.environ.get("PGPORT", "5433")
-    user = os.environ.get("PGUSER", "exam")
-    password = os.environ.get("PGPASSWORD", "exam")
-
-    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-    cmd_dotnet = [
-        "dotnet", "test",
-        os.path.join(repo_root, "services/exam-service.Tests/exam-service.Tests.csproj"),
-        "--no-restore",
-        "--filter", "FullyQualifiedName~T14_01_EditGeneratedExam_CapturesExactLineageDiffHashesAndOutbox",
-    ]
-    res_dotnet = subprocess.run(cmd_dotnet, capture_output=True, text=True)
-    assert res_dotnet.returncode == 0, f"Dotnet test failed: {res_dotnet.stdout}\n{res_dotnet.stderr}"
-
-    target_db = "exam_test_phase14_lineage"
-    cmd_select = [
-        "psql", "-h", host, "-p", port, "-U", user, "-d", target_db,
-        "-t", "-A", "-c",
-        'SELECT "PayloadJson", "IdempotencyKey" FROM reading_paper_event_outbox WHERE "EventType" = \'HUMAN_FEEDBACK_CAPTURED\' AND "IdempotencyKey" = \'idemp-q17-prompt-001\' LIMIT 1;',
-    ]
-    proc_sel = subprocess.run(cmd_select, env={**os.environ, "PGPASSWORD": password}, capture_output=True, text=True)
-    assert proc_sel.returncode == 0 and proc_sel.stdout.strip(), "Could not find exact committed outbox event for idemp-q17-prompt-001"
-
-    line = proc_sel.stdout.strip()
-    payload_raw, idemp_key = line.rsplit("|", 1)
-    payload = json.loads(payload_raw)
-    payload["idempotencyKey"] = idemp_key
+    resource = os.environ.get("SECTION1_PIPELINE_RESOURCE_VERIFIED", "")
+    assert resource.startswith("section1-pipeline-postgres-"), "Explicit verified disposable resource required"
+    evidence = os.environ.get("SECTION1_PIPELINE_EVIDENCE_DIR")
+    assert evidence, "Explicit disposable producer evidence directory required"
+    from pathlib import Path
+    import sys
+    command = [sys.executable, str(Path(__file__).parent / "offline_support/run_section1_postgres.py"),
+        "--resource", resource, "--evidence-dir", evidence, "--phase14-producer"]
+    result = subprocess.run(command, capture_output=True, text=True)
+    assert result.returncode == 0, f"Isolated producer failed: {result.stdout}\n{result.stderr}"
+    capture = json.loads((Path(evidence) / "phase14-outbox.json").read_text())
+    payload = capture["payload"]
+    assert hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest() == capture["payload_sha256"]
     return payload
 
 

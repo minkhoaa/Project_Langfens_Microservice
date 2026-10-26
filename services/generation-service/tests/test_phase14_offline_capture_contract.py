@@ -15,6 +15,15 @@ def test_phase14_requires_explicit_database_before_any_subprocess(monkeypatch):
         execute_and_fetch_generated_draft_edit_outbox_event()
 
 
+def test_phase14_dsn_alone_cannot_authorize_destructive_fixture(monkeypatch):
+    monkeypatch.delenv("PHASE14_OUTBOX_EVENT_FILE", raising=False)
+    monkeypatch.delenv("SECTION1_PIPELINE_RESOURCE_VERIFIED", raising=False)
+    monkeypatch.setenv("READING_TEST_POSTGRES", "Host=shared;Database=exam-db")
+    monkeypatch.setattr("subprocess.run", lambda *a, **k: pytest.fail("Unverified database must not be probed"))
+    with pytest.raises(AssertionError, match="verified disposable resource"):
+        execute_and_fetch_generated_draft_edit_outbox_event()
+
+
 @pytest.mark.parametrize("tamper", [False, True])
 def test_phase14_capture_integrity_without_subprocess(tmp_path, monkeypatch, tamper):
     payload = {"idempotencyKey": "synthetic-capture-contract-test", "targetEntityType": "QUESTION"}

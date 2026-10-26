@@ -11,14 +11,22 @@ using Xunit;
 
 namespace exam_service.Tests;
 
-public sealed class ReadingPaperConcurrentRetryCasTests
+[Collection("DatabaseTests")]
+public sealed class ReadingPaperConcurrentRetryCasTests : IAsyncLifetime
 {
-    private const string IsolatedConnection = "Host=localhost;Port=5433;Database=exam-db;Username=exam;Password=exam";
+    // No localhost/shared fallback: this fixture participates only in the
+    // explicitly inspected disposable-resource gate.
+    public async Task InitializeAsync()
+    {
+        await using var db = new ExamDbContext(CreateOptions());
+        await db.Database.MigrateAsync();
+    }
+    public Task DisposeAsync() => Task.CompletedTask;
 
     private DbContextOptions<ExamDbContext> CreateOptions()
     {
         return new DbContextOptionsBuilder<ExamDbContext>()
-            .UseNpgsql(IsolatedConnection)
+            .UseNpgsql(Section1LifecycleTests.Connection())
             .Options;
     }
 
@@ -30,7 +38,8 @@ public sealed class ReadingPaperConcurrentRetryCasTests
         var job = new ReadingPaperJob
         {
             Id = Guid.NewGuid(),
-            Topic = topic,
+            // Retained CAS rows must never be picked up by worker lifecycle fixtures.
+            Topic = "Benchmark " + topic,
             Status = status,
             ExamId = examId,
             Epoch = 1,
@@ -49,7 +58,7 @@ public sealed class ReadingPaperConcurrentRetryCasTests
     [Fact]
     public async Task B1_To_B6_GenuinelyConcurrentRetry_ExactlyOneSucceeds_AndNonWinnersGetConflict()
     {
-        // B1 & B2: Connects exclusively to isolated disposable test database at port 5433
+        // B1 & B2: Connection identity is checked against the selected disposable resource.
         // B3: Seed a Failed job with ExamId = null
         var job = await SeedJobAsync("Failed", examId: null, topic: "Concurrent Retry Race Test");
         var jobId = job.Id;

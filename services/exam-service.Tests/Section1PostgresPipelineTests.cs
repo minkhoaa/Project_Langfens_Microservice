@@ -59,9 +59,15 @@ public class Section1PostgresPipelineTests
             await next(context);
         });
         app.MapCheckpointEndpoints();
+        // Same scoped selector used by the real worker, not a Python policy override.
+        var acceptancePolicy = PinnedExecutionPolicy.CreateForSources("minimax", [new ReadingSource(
+            "PMC1234567", "offline", null, "https://example.invalid", "CC BY", 800,
+            Metadata: new() { ["acceptancePolicy"] = PinnedExecutionPolicy.Acceptance544 })]);
+        app.MapGet("/fixture/acceptance-policy", () => Results.Ok(acceptancePolicy));
         app.MapPost("/fixture/provision", async (Provision input, ExamDbContext db) => {
             var request = input.Request;
-            if (!request.RunId.StartsWith("section1_fixture_", StringComparison.Ordinal) || request.Finalize)
+            if (request.Policy.ComputeHash() != acceptancePolicy.ComputeHash() ||
+                !request.RunId.StartsWith("section1_fixture_", StringComparison.Ordinal) || request.Finalize)
                 return Results.BadRequest();
             using var profile = JsonDocument.Parse(input.CapProfileJson);
             var root = profile.RootElement;
@@ -119,6 +125,45 @@ public class Section1PostgresPipelineTests
             await db.SaveChangesAsync(); await tx.CommitAsync();
             return Results.Ok(new { epoch = run.Epoch, leaseOwner = owner });
         });
+        app.MapGet("/fixture/projected-draft/{runId}", async (string runId, ExamDbContext db) => {
+            var head = await db.ReadingPaperArtifactHeads.AsNoTracking().SingleAsync(h => h.RunId == runId && h.ArtifactId == $"section:{runId}:1");
+            var artifact = await db.ReadingPaperArtifacts.AsNoTracking().SingleAsync(a => a.RunId == runId && a.ArtifactId == head.ArtifactId &&
+                a.Version == head.AcceptedVersion && a.ContentHash == head.AcceptedHash);
+            using var payload = JsonDocument.Parse(artifact.PayloadJson);
+            var section = CheckpointService.ParseCanonicalV2Section(payload.RootElement)!;
+            var job = await db.ReadingPaperJobs.AsNoTracking().SingleAsync(j => j.ActiveRunId == runId);
+            var draft = ReadingPaperWorker.BuildExam(job, [section]); // in memory only; no publication or database write
+            return Results.Ok(new { source = section.Source, questions = draft.Sections.Single().Questions.OrderBy(q => q.Idx).Select(q => new {
+                number = q.Idx, type = q.Type, prompt = q.PromptMd }) });
+        });
+        app.MapPost("/fixture/historical-failure", async (ExamDbContext db) => {
+            var id = Guid.NewGuid();
+            var run = new ReadingPaperRun { JobId = id, RunId = $"successor_history_{id:N}", Status = "RUNNING", Epoch = 3,
+                LeaseOwner = Guid.NewGuid(), LeaseUntil = DateTime.UtcNow.AddSeconds(-5) };
+            db.ReadingPaperJobs.Add(new ReadingPaperJob { Id = id, Topic = "Benchmark historical failure simulation", Status = "Failed",
+                Epoch = 3, ActiveRunId = run.RunId });
+            db.ReadingPaperRuns.Add(run); await db.SaveChangesAsync();
+            return Results.Ok(new { job_id = id });
+        });
+        app.MapPost("/fixture/reconcile-terminal/{id:guid}", async (Guid id, ExamDbContext db) =>
+            Results.Ok(new { reconciled = await ReadingPaperLifecycle.ReconcileTerminalAsync(db, id, 3, default) }));
+        app.MapGet("/fixture/terminal-proof/{id:guid}", async (Guid id, ExamDbContext db) => {
+            var job = await db.ReadingPaperJobs.AsNoTracking().SingleAsync(j => j.Id == id);
+            var run = await db.ReadingPaperRuns.AsNoTracking().SingleAsync(r => r.JobId == id && r.RunId == job.ActiveRunId);
+            return Results.Ok(new { job_id = id, job_status = job.Status, run_status = run.Status,
+                job_epoch = job.Epoch, run_epoch = run.Epoch, job_cancel_version = job.CancelVersion, run_cancel_version = run.CancelVersion,
+                job_lease_owner = job.LeaseOwner, run_lease_owner = run.LeaseOwner,
+                job_lease_until = job.LeaseUntil is {} jl ? (long?)new DateTimeOffset(jl).ToUnixTimeSeconds() : null,
+                run_lease_until = run.LeaseUntil is {} rl ? (long?)new DateTimeOffset(rl).ToUnixTimeSeconds() : null,
+                unresolved_operations = await db.ReadingPaperOperations.CountAsync(o => o.RunId == run.RunId && o.OperationType == "PROVIDER_CALL" &&
+                    (o.Status == "RESERVED" || o.Status == "UNKNOWN_OUTCOME" || o.AccountingType == "UNKNOWN")) });
+        });
+        app.MapPost("/fixture/create-successor", (ReadingJobRequest request, ExamDbContext db) =>
+            request.Sources is { Count: 1 } && request.Topic.StartsWith("Benchmark ", StringComparison.Ordinal) && request.SubmissionAttemptId != null
+                ? ReadingPaperEndpoints.Create(request, db, new ReadingPaperAiClient(new HttpClient()), default)
+                : Task.FromResult<IResult>(Results.BadRequest()));
+        app.MapGet("/fixture/successor-count/{id:guid}", async (Guid id, ExamDbContext db) => Results.Ok(new {
+            jobs = await db.ReadingPaperJobs.CountAsync(j => j.Id == id), runs = await db.ReadingPaperRuns.CountAsync(r => r.JobId == id) }));
         await app.StartAsync();
         var url = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
         var start = new ProcessStartInfo(python) { WorkingDirectory = generation, RedirectStandardOutput = true, RedirectStandardError = true };

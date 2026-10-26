@@ -1027,6 +1027,8 @@ public static class CheckpointService
             }
         }
 
+        ReadingPaperAcceptanceContract.Validate(run, request.Artifact);
+
         // 4. Decision fail-closed admissibility
         if (request.Decision != null)
         {
@@ -2627,12 +2629,12 @@ public static class CheckpointService
             var passage = payload.TryGetProperty("passage", out var pP) ? pP.GetString() ?? "" : (payload.TryGetProperty("passageText", out var ptP) ? ptP.GetString() ?? "" : (payload.TryGetProperty("text", out var txP) ? txP.GetString() ?? "" : ""));
 
             ReadingSource source;
-            if (payload.TryGetProperty("source", out var sP) && sP.ValueKind == JsonValueKind.Object)
+            if ((payload.TryGetProperty("source", out var sP) || payload.TryGetProperty("sourceMetadata", out sP)) && sP.ValueKind == JsonValueKind.Object)
             {
                 var pmcid = sP.TryGetProperty("pmcid", out var pmP) ? pmP.GetString() ?? $"PMC{secId}000000" : $"PMC{secId}000000";
                 var sTitle = sP.TryGetProperty("title", out var stP) ? stP.GetString() ?? title : title;
                 var doi = sP.TryGetProperty("doi", out var dP) ? dP.GetString() : null;
-                var url = sP.TryGetProperty("url", out var uP) ? uP.GetString() ?? "" : "";
+                var url = sP.TryGetProperty("url", out var uP) || sP.TryGetProperty("sourceUrl", out uP) ? uP.GetString() ?? "" : "";
                 var license = sP.TryGetProperty("license", out var lP) ? lP.GetString() ?? "CC BY 4.0" : "CC BY 4.0";
                 var wc = sP.TryGetProperty("wordCount", out var wcP) ? wcP.GetInt32() : ReadingPaperRules.WordCount(passage);
                 var authors = sP.TryGetProperty("authors", out var aP) ? aP.GetString() : null;
@@ -2709,7 +2711,12 @@ public static class CheckpointService
                                 }
                             }
 
-                            questions.Add(new ReadingGeneratedQuestion(qNum, prompt, ans, options, quote, expl));
+                            string? StimulusText(string key) => qNode.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+                            var steps = qNode.TryGetProperty("flowSteps", out var fs) && fs.ValueKind == JsonValueKind.Array
+                                ? fs.Deserialize<List<string>>(ReadingPaperRules.Json) : null;
+                            int? stepIndex = qNode.TryGetProperty("stepIndex", out var si) && si.TryGetInt32(out var index) ? index : null;
+                            questions.Add(new ReadingGeneratedQuestion(qNum, prompt, ans, options, quote, expl,
+                                StimulusText("tableContext"), StimulusText("rowHeader"), StimulusText("colHeader"), steps, stepIndex));
                         }
                     }
                     groups.Add(new ReadingGeneratedGroup(gType, gInst, questions));

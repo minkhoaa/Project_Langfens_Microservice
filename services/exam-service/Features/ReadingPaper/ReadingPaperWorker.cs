@@ -90,7 +90,12 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                 var routing = canary?.RouteRun(runId, requestedEngine: userRequestedEngine, existingRun: null);
                 var engineVersion = routing?.EngineVersion ?? "2.0.0";
                 currentJob.EngineVersion = engineVersion;
-                var isMiniMaxOrBenchmark = IsMiniMaxOrBenchmark(currentJob);
+                var selectedSources = JsonSerializer.Deserialize<List<ReadingSource>>(currentJob.SourcesJson, ReadingPaperRules.Json);
+                var selectedProvider = selectedSources?.FirstOrDefault()?.Metadata?.GetValueOrDefault("provider")
+                    ?? Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER")
+                    ?? Environment.GetEnvironmentVariable("LLM_PROVIDER") ?? "minimax";
+                var executionPolicy = PinnedExecutionPolicy.CreateForSources(selectedProvider, selectedSources);
+                var isMiniMaxOrBenchmark = executionPolicy.BlueprintMode != PinnedExecutionPolicy.Acceptance544 && IsMiniMaxOrBenchmark(currentJob);
                 var runProfile = isMiniMaxOrBenchmark
                     ? (caps.IsBenchmarkUnlimited ? caps : caps.ToUnlimitedBenchmarkProfile())
                     : caps;
@@ -118,11 +123,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-                var selectedSources = JsonSerializer.Deserialize<List<ReadingSource>>(currentJob.SourcesJson, ReadingPaperRules.Json);
-                var selectedProvider = selectedSources?.FirstOrDefault()?.Metadata?.GetValueOrDefault("provider")
-                    ?? Environment.GetEnvironmentVariable("READING_PAPER_LLM_PROVIDER")
-                    ?? Environment.GetEnvironmentVariable("LLM_PROVIDER") ?? "minimax";
-                ReadingPaperExecutionSnapshot.Pin(run, PinnedExecutionPolicy.CreateDefault(selectedProvider));
+                ReadingPaperExecutionSnapshot.Pin(run, executionPolicy);
                 db.ReadingPaperRuns.Add(run);
             }
             else
@@ -171,12 +172,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
             logger.LogWarning(ex, "Reading paper job {JobId} stopped", id);
             await AppendLogAsync(id, "Error", $"Generation failed: {ex}", ct);
             var status = ex is ReadingSourceUnavailableException ? "NeedsSources" : "Failed";
-            await db.ReadingPaperJobs.Where(x => x.Id == id && x.LeaseOwner == owner && x.Epoch == job.Epoch)
-                .ExecuteUpdateAsync(x => x.SetProperty(j => j.Status, status)
-                    .SetProperty(j => j.Error, ex.Message.Length > 1000 ? ex.Message[..1000] : ex.Message)
-                    .SetProperty(j => j.LeaseUntil, (DateTime?)null)
-                    .SetProperty(j => j.LeaseOwner, (Guid?)null)
-                    .SetProperty(j => j.UpdatedAt, DateTime.UtcNow), ct);
+            await ReadingPaperLifecycle.FailAsync(db, id, owner, job.Epoch, job.CancelVersion, status, ex.Message, ct);
         }
         finally
         {
@@ -451,7 +447,8 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                         seenPrompts.Add(System.Text.RegularExpressions.Regex.Replace(prompt, @"\W+", "").ToLowerInvariant());
                     }
 
-                    normQuestions.Add(new ReadingGeneratedQuestion(qNum, prompt, answer, options, evidenceQuote, explanation));
+                    normQuestions.Add(q with { Number = qNum, Prompt = prompt, Answer = answer, Options = options,
+                        EvidenceQuote = evidenceQuote, Explanation = explanation });
                 }
 
                 normGroups.Add(new ReadingGeneratedGroup(normType, instruction, normQuestions));
@@ -549,6 +546,19 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
            job.Topic.StartsWith("Benchmark ", StringComparison.OrdinalIgnoreCase) ||
            job.Topic.Contains("Benchmark", StringComparison.OrdinalIgnoreCase));
 
+    private static string StudentPrompt(ReadingGeneratedQuestion item, string family)
+    {
+        if (family == "TABLE_COMPLETION" && !string.IsNullOrWhiteSpace(item.TableContext) &&
+            !string.IsNullOrWhiteSpace(item.RowHeader) && !string.IsNullOrWhiteSpace(item.ColHeader))
+        {
+            static string Cell(string value) => value.Replace("|", "\\|").Replace("\n", " ");
+            return $"{item.TableContext}\n\n| Row | {Cell(item.ColHeader)} |\n| --- | --- |\n| {Cell(item.RowHeader)} | {Cell(item.Prompt)} |";
+        }
+        if (family == "FLOW_CHART" && item.FlowSteps is { Count: > 0 })
+            return item.Prompt + "\n\n" + string.Join("\n", item.FlowSteps.Select((step, i) => $"{i + 1}. {step}"));
+        return item.Prompt;
+    }
+
     public static Exam BuildExam(ReadingPaperJob job, IReadOnlyList<ReadingGeneratedSection> sections)
     {
         sections = NormalizeSectionsForValidation(sections.ToList());
@@ -592,7 +602,7 @@ public sealed class ReadingPaperWorker(IServiceScopeFactory scopes, ILogger<Read
                     {
                         Id = Guid.NewGuid(), Section = section, Group = group, Idx = item.Number,
                         Type = groupData.Type, Skill = "READING", Difficulty = i + 1,
-                        PromptMd = item.Prompt, ExplanationMd = item.Explanation + "\n\nEvidence: “" + item.EvidenceQuote + "”"
+                        PromptMd = StudentPrompt(item, groupData.Type), ExplanationMd = item.Explanation + "\n\nEvidence: “" + item.EvidenceQuote + "”"
                     };
                     var type = groupData.Type;
                     if (type is "SENTENCE_COMPLETION" or "SUMMARY_COMPLETION" or "TABLE_COMPLETION"

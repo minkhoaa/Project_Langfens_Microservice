@@ -41,7 +41,6 @@ services:
       - EXAMSERVICE__EXAM__ADDRESS=http://exam-service:8080
       - EXAMSERVICE__INTERNAL__API__KEY=dev-internal-key-not-for-prod
       - INTERNAL_API_KEY=dev-internal-key-not-for-prod
-      - LOOP_OPERATION_WALL_RESERVATION_SECONDS=180
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
     restart: unless-stopped
     networks:

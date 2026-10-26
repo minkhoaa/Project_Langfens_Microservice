@@ -179,6 +179,20 @@ public sealed record PinnedExecutionPolicy(
         ]
     );
 
+    public const string Acceptance544 = "acceptance_5_4_4_v1";
+
+    public static PinnedExecutionPolicy CreateForSources(string provider, IReadOnlyList<ReadingSource>? sources)
+    {
+        var requested = sources?.Select(s => s.Metadata?.GetValueOrDefault("acceptancePolicy")).ToArray() ?? [];
+        if (requested.All(v => v == null)) return CreateDefault(provider);
+        if (requested.Length != 1 || requested[0] != Acceptance544)
+            throw new InvalidOperationException("Acceptance policy requires exactly one source and a recognized policy identity");
+        var standard = CreateDefault(provider);
+        return standard with { BlueprintMode = Acceptance544, ProviderCallSeconds = 60,
+            Sections = [standard.Sections[0] with { Groups = [
+                new("TRUE_FALSE_NOT_GIVEN", 5), new("TABLE_COMPLETION", 4), new("FLOW_CHART", 4)] }] };
+    }
+
     public string ComputeHash()
     {
         var json = JsonSerializer.Serialize(this, ReadingPaperRules.Json);

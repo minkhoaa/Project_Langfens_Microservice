@@ -119,7 +119,7 @@ public static class ReadingPaperEndpoints
         { return Results.Problem(ex.Message, statusCode: 503); }
     }
 
-    private static async Task<IResult> Create(ReadingJobRequest request, ExamDbContext db,
+    internal static async Task<IResult> Create(ReadingJobRequest request, ExamDbContext db,
         ReadingPaperAiClient ai, CancellationToken ct)
     {
         if (request.Topic?.Trim().Length is not (>= 3 and <= 120))
@@ -135,8 +135,18 @@ public static class ReadingPaperEndpoints
                 Metadata = new Dictionary<string, string>(s.Metadata ?? new Dictionary<string, string>()) { ["provider"] = provider }
             }).ToList();
         }
+        if (request.AcceptancePolicy is not null)
+        {
+            if (request.AcceptancePolicy != PinnedExecutionPolicy.Acceptance544 || sources.Count != 1)
+                return Results.BadRequest(new { error = "Acceptance policy requires one source and acceptance_5_4_4_v1" });
+            sources = sources.Select(s => s with { Metadata = new Dictionary<string, string>(s.Metadata ?? [])
+                { ["acceptancePolicy"] = request.AcceptancePolicy } }).ToList();
+        }
+        if (request.SubmissionAttemptId is not null && (request.SubmissionAttemptId == Guid.Empty || request.AcceptancePolicy != PinnedExecutionPolicy.Acceptance544))
+            return Results.BadRequest(new { error = "Explicit submission identity is scoped to acceptance_5_4_4_v1" });
         var job = new ReadingPaperJob
         {
+            Id = request.SubmissionAttemptId ?? Guid.NewGuid(),
             Topic = request.Topic.Trim(), SourcesJson = JsonSerializer.Serialize(sources, ReadingPaperRules.Json),
             Status = error is null ? "Pending" : "NeedsSources", Error = error,
             Logs = SerializeLog("Information", error is null
@@ -144,7 +154,17 @@ public static class ReadingPaperEndpoints
                 : $"Job created but source verification needs attention: {error}")
         };
         db.ReadingPaperJobs.Add(job);
-        await db.SaveChangesAsync(ct);
+        try { await db.SaveChangesAsync(ct); }
+        catch (DbUpdateException ex) when (request.SubmissionAttemptId is not null &&
+            ex.InnerException is Npgsql.PostgresException { SqlState: "23505" })
+        {
+            db.ChangeTracker.Clear();
+            var existing = await db.ReadingPaperJobs.AsNoTracking().SingleOrDefaultAsync(j => j.Id == job.Id, ct);
+            if (existing == null) throw;
+            if (existing.Topic != job.Topic || existing.SourcesJson != job.SourcesJson)
+                return Results.Conflict(new { error = "Submission identity is already bound to a different payload" });
+            return Results.Ok(View(existing));
+        }
         return Results.Created($"/api/admin/reading-paper/jobs/{job.Id}", View(job));
     }
 
@@ -279,8 +299,19 @@ public static class ReadingPaperEndpoints
         var raw = $"{s.Pmcid}|{s.Title}|{s.Doi}|{s.License}|{s.Authors}|{s.WordCount}|{s.Url}|{s.OpenAlexId}|{s.TopicId}|{s.SourceType}|{metaStr}|{s.Content}|{s.ContentPreview}";
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw)));
     }
-    internal static async Task<IResult> Retry(Guid id, ExamDbContext db, CancellationToken ct)
+    internal static Task<IResult> Retry(Guid id, ExamDbContext db, CancellationToken ct) =>
+        db.Database.CreateExecutionStrategy().ExecuteAsync<IResult>(async () =>
     {
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        // Lock the same job authority used by failure/cancel/claim before checking
+        // provider outcomes. Unknown is not permission to start a new dispatch.
+        var locked = await db.ReadingPaperJobs.Where(j => j.Id == id && j.Status == "Failed" && j.ExamId == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(j => j.Epoch, j => j.Epoch), ct);
+        var prior = await db.ReadingPaperJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == id, ct);
+        if (prior == null) return Results.NotFound();
+        if (locked != 1) return Results.Conflict(new { error = "Only a failed, unsaved job can be retried" });
+        if (prior.ActiveRunId is { } runId && await ReadingPaperLifecycle.HasUnresolvedAsync(db, runId, ct))
+            return Results.Conflict(new { error = "Provider operations require reconciliation before retry" });
         var now = DateTime.UtcNow;
         var retryLog = SerializeLog("Information", "Retry requested; the worker will resume from the last saved passage.");
         var rows = await db.ReadingPaperJobs
@@ -302,8 +333,9 @@ public static class ReadingPaperEndpoints
         }
 
         var updatedJob = await db.ReadingPaperJobs.AsNoTracking().FirstAsync(x => x.Id == id, ct);
+        await transaction.CommitAsync(ct);
         return Results.Ok(View(updatedJob));
-    }
+    });
 
     private static async Task<IResult> Cancel(Guid id, ExamDbContext db, CancellationToken ct)
     {

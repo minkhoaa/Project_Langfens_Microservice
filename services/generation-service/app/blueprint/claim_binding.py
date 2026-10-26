@@ -216,6 +216,49 @@ def check_claim_eligibility_for_family(
     return score > 0.0
 
 
+def bind_distinct_claims_to_slots(slots, claims, section_id, graph_id, run_id):
+    """Acceptance scope: a complete distinct eligible matching, or no blueprint.
+
+    Keep evidence order when several complete matchings exist; a feasibility
+    check prevents early unconstrained TFNG slots from consuming scarce process
+    claims. General dynamic ranking/reuse is intentionally unchanged.
+    """
+    candidates = []
+    for slot in slots:
+        eligible = []
+        for claim in claims:
+            try:
+                bound = bind_claims_to_slots([slot], [claim], section_id, graph_id, run_id)[0]
+                cid = bound.claim_ref_ids[0]
+                if cid not in eligible:
+                    eligible.append(cid)
+            except ValueError:
+                continue
+        candidates.append(eligible)
+
+    def feasible(start, unavailable):
+        owners = {}
+        def augment(index, seen):
+            for cid in candidates[index]:
+                if cid in unavailable or cid in seen:
+                    continue
+                seen.add(cid)
+                if cid not in owners or augment(owners[cid], seen):
+                    owners[cid] = index
+                    return True
+            return False
+        return all(augment(i, set()) for i in range(start, len(slots)))
+
+    if not feasible(0, set()):
+        raise ValueError("Insufficient distinct eligible verified claims for acceptance distribution")
+    used, result = set(), []
+    for i, slot in enumerate(slots):
+        cid = next(c for c in candidates[i] if c not in used and feasible(i + 1, used | {c}))
+        used.add(cid)
+        result.append(slot.model_copy(update={"claim_ref_ids": [cid]}))
+    return result
+
+
 def bind_claims_to_slots(
     slots: Sequence[QuestionSlot],
     claims: Sequence[Union[VerifiedClaim, Dict[str, Any]]],

@@ -7,7 +7,7 @@ Executes or preflights ONE isolated reading section run using real MiniMax netwo
 - MiniMax-Text-01 for constrained candidate regeneration
 - Existing deterministic & independent evaluation gates
 - Real PostgreSQL checkpoint persistence via exam-service
-- Exactly ONE authoritative Reading generation worker
+- Requires separately verified exclusive worker topology; container names alone are not proof
 
 Target:
 - PMC13654891 (West African metallurgy — Didé West 1)
@@ -32,6 +32,11 @@ import time
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
+
+if __package__:
+    from .submission_attempts import submit_successor_intent
+else:
+    from submission_attempts import submit_successor_intent
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMPLEMENTATION_COMMIT = subprocess.run(
@@ -435,8 +440,28 @@ def check_active_reading_jobs() -> dict[str, Any]:
     return res
 
 
+def observe_exam_processes(proc_root="/proc"):
+    """Conservative Linux host/container process inventory; no credentials read."""
+    from pathlib import Path
+    pids, unreadable = [], False
+    for entry in Path(proc_root).iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            command = (entry / "cmdline").read_bytes().decode(errors="replace").split("\x00")
+        except FileNotFoundError:  # a process exited during observation
+            continue
+        except PermissionError:
+            unreadable = True
+            continue
+        executable = os.path.basename(command[0]) if command else ""
+        if executable == "exam-service" or (executable == "dotnet" and any(os.path.basename(arg) == "exam-service.dll" for arg in command[1:])):
+            pids.append(int(entry.name))
+    return {"candidate_process_pids": sorted(pids), "complete": not unreadable}
+
+
 def verify_worker_topology() -> dict[str, Any]:
-    """Verify that exactly ONE authoritative reading worker is running and configured."""
+    """Observe candidate containers/configuration, never infer global worker uniqueness."""
     result: dict[str, Any] = {
         "authoritative_worker_enabled": False,
         "single_worker_instance": False,
@@ -451,10 +476,17 @@ def verify_worker_topology() -> dict[str, Any]:
         result["details"] = "benchmark-text-exam or benchmark-text-gen is not running"
         return result
 
-    # Check exam-service worker count on host (verify no duplicate exam containers)
+    # Container naming cannot prove process count, effective app configuration,
+    # or absence of host/Aspire workers. Report the observation, not a verdict.
     ps_res = subprocess.run(["docker", "ps", "--filter", "name=exam", "--format", "{{.Names}}"], capture_output=True, text=True)
     exam_containers = [n.strip() for n in ps_res.stdout.splitlines() if n.strip() and "benchmark" in n and "db" not in n]
-    result["single_worker_instance"] = (len(exam_containers) == 1)
+    result["candidate_exam_containers"] = exam_containers
+    observed = observe_exam_processes()
+    target = subprocess.run(["docker", "inspect", "--format", "{{.State.Pid}}", "benchmark-text-exam"], capture_output=True, text=True)
+    target_pid = int(target.stdout.strip()) if target.returncode == 0 and target.stdout.strip().isdigit() else None
+    result["worker_process_observation"] = observed
+    result["single_worker_instance"] = bool(observed["complete"] and observed["candidate_process_pids"] == [target_pid])
+    result["worker_count"] = len(observed["candidate_process_pids"]) if observed["complete"] else "UNVERIFIED"
 
     # Check exam-service environment
     exam_env_res = run_container_command("benchmark-text-exam", ["env"])
@@ -467,6 +499,13 @@ def verify_worker_topology() -> dict[str, Any]:
     gen_env_res = run_container_command("benchmark-text-gen", ["env"])
     gen_env = dict(line.split("=", 1) for line in gen_env_res.stdout.splitlines() if "=" in line)
     result["generation_provider"] = gen_env.get("LLM_PROVIDER_ORDER")
+    cap_keys = ("LOOP_CAPS_PROFILE_VERSION", "LOOP_CAPS_PROFILE_SOURCE", "LOOP_OPERATION_WALL_RESERVATION_SECONDS",
+        "LOOP_MAX_TOTAL_CALLS", "LOOP_MAX_TOTAL_TOKENS", "LOOP_MAX_WALL_TIME_SECONDS",
+        "READING_PAPER_RUN_BUDGET_MAX_CALLS", "READING_PAPER_RUN_BUDGET_MAX_TOKENS", "READING_PAPER_RUN_BUDGET_MAX_WALL_TIME_SECONDS")
+    result["configured_runtime_caps"] = {key: {"exam": exam_env.get(key), "generation": gen_env.get(key)} for key in cap_keys}
+    result["runtime_caps_aligned"] = all(exam_env.get(key) == gen_env.get(key) and exam_env.get(key) for key in cap_keys)
+    result["runtime_caps_aligned"] = bool(result["runtime_caps_aligned"] and gen_env.get("LOOP_OPERATION_WALL_RESERVATION_SECONDS") == "60")
+    result["runtime_source_sha"] = {"exam": exam_env.get("LANGFENS_SOURCE_SHA"), "generation": gen_env.get("LANGFENS_SOURCE_SHA")}
     gen_key = gen_env.get("MINIMAX_API_KEY", "").strip()
     if gen_key and len(gen_key) > 8 and not any(p in gen_key.lower() for p in ("mock", "placeholder", "xxx")):
         result["minimax_key_in_generation"] = True
@@ -537,6 +576,12 @@ class SubmissionMarker:
         with SubmissionMarker._lock_file() as lock_f:
             fcntl.flock(lock_f, fcntl.LOCK_EX)
             try:
+                if os.path.exists(SUBMISSION_MARKER_PATH):
+                    if status == "SUBMITTING":
+                        raise RuntimeError("DUPLICATE SUBMISSION BLOCKED: a durable submission intent already exists")
+                    with open(SUBMISSION_MARKER_PATH, encoding="utf-8") as previous:
+                        if json.load(previous).get("status") == "TERMINAL":
+                            raise RuntimeError("Historical terminal submission marker is immutable; use an authorized successor attempt")
                 payload = {
                     "status": status,
                     "job_id": job_id,
@@ -552,7 +597,14 @@ class SubmissionMarker:
                 tmp = SUBMISSION_MARKER_PATH + ".tmp"
                 with open(tmp, "w", encoding="utf-8") as f:
                     json.dump(payload, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
                 os.replace(tmp, SUBMISSION_MARKER_PATH)
+                directory = os.open(os.path.dirname(SUBMISSION_MARKER_PATH), os.O_RDONLY | os.O_DIRECTORY)
+                try:
+                    os.fsync(directory)
+                finally:
+                    os.close(directory)
             finally:
                 fcntl.flock(lock_f, fcntl.LOCK_UN)
 
@@ -776,14 +828,14 @@ def run_preflight(start_stack_if_needed: bool = False, keep_stack: bool = False)
     print(f"[10/10] Worker Singularity & Runtime Budget Governance:")
     topo = verify_worker_topology()
     if topo.get("single_worker_instance"):
-        print(f"        Worker Singularity: Exactly 1 exam-service instance [OK]")
+        print(f"        Process inventory: one exam-service process, matching benchmark container PID [OK]")
     else:
-        print(f"        Worker Singularity: Multiple or zero exam instances detected [BLOCKER]")
-        blockers.append("Worker singularity violation: exactly 1 exam-service container required")
+        print(f"        Process inventory missing, incomplete, duplicated, or not the selected container [BLOCKER]")
+        blockers.append("Exactly one observed exam-service process matching the selected container is required")
         passed = False
 
     if topo.get("authoritative_worker_enabled"):
-        print(f"        Authoritative Reading Generation Worker: ENABLED [OK]")
+        print(f"        Worker enable environment flag: true (active lease is not yet verified) [OK]")
     else:
         print(f"        Authoritative Reading Generation Worker: DISABLED [BLOCKER]")
         blockers.append("READING_PAPER_WORKER_ENABLED is not true in exam-service")
@@ -805,10 +857,16 @@ def run_preflight(start_stack_if_needed: bool = False, keep_stack: bool = False)
 
     # Report effective runtime caps
     print(f"        Effective Runtime Budget Profile:")
-    print(f"          - Run-Level Cap: UnlimitedCap (-1) governed by ReadingPaperWorker benchmark mode")
-    print(f"          - Bounded-Loop Iteration Caps: max_versions=3, max_repairs_per_version=2, max_consecutive_no_progress=2")
-    print(f"          - Operation Wall Reservation: 180s per provider dispatch")
-    print(f"          - Authority Invariant Distinction: Static DB constraints VERIFIED [OK]; active lease verified post-submission")
+    print(f"          - Observed container configuration: {json.dumps(topo.get('configured_runtime_caps', {}), sort_keys=True)}")
+    print(f"          - Pinned run profile/lease authority: UNVERIFIED until an authorized run exists")
+    print(f"          - Runtime source attribution: {topo.get('runtime_source_sha', 'UNVERIFIED')}")
+    if not topo.get("runtime_caps_aligned"):
+        blockers.append("Runtime cap configuration is missing, divergent, or does not enforce the approved 60s profile")
+        passed = False
+    observed_sha = topo.get("runtime_source_sha", {})
+    if not observed_sha or any(observed_sha.get(name) != git_rev["head_sha"] for name in ("exam", "generation")):
+        blockers.append("Runtime source SHA is not verified against this checkout")
+        passed = False
 
     # Single-Section Execution Target Verification
     print(f"[TARGET] Single-Section Execution Path:")
@@ -847,6 +905,39 @@ def fetch_jobs_list(base_url: str, auth_headers: dict[str, str]) -> list[dict[st
         return json.loads(r.read().decode())
 
 
+def submit_authorized_successor(base_url, auth_headers, attempt_id, authorization_file):
+    """No topic-only recovery and no historical-marker updates on this path."""
+    from pathlib import Path
+    from uuid import UUID
+    identity = str(UUID(attempt_id))
+    payload = {"topic": TOPIC, "pmcids": [TARGET_PMCID], "provider": "minimax",
+        "acceptancePolicy": "acceptance_5_4_4_v1", "submissionAttemptId": identity}
+    authorization = json.loads(Path(authorization_file).read_text())
+    def reconcile(predecessor):
+        predecessor = str(UUID(predecessor))
+        rows = query_db_json(f'''SELECT j."Id" AS job_id, j."Status" AS job_status, r."Status" AS run_status,
+            j."Epoch" AS job_epoch, r."Epoch" AS run_epoch,
+            j."CancelVersion" AS job_cancel_version, r."CancelVersion" AS run_cancel_version,
+            j."LeaseOwner" AS job_lease_owner, r."LeaseOwner" AS run_lease_owner,
+            EXTRACT(EPOCH FROM j."LeaseUntil") AS job_lease_until, EXTRACT(EPOCH FROM r."LeaseUntil") AS run_lease_until,
+            (SELECT COUNT(*) FROM reading_paper_operations o WHERE o."RunId"=r."RunId" AND o."OperationType"='PROVIDER_CALL'
+                AND (o."Status" IN ('RESERVED','UNKNOWN_OUTCOME') OR o."AccountingType"='UNKNOWN')) AS unresolved_operations
+            FROM reading_paper_jobs j JOIN reading_paper_runs r ON r."JobId"=j."Id" AND r."RunId"=j."ActiveRunId"
+            WHERE j."Id"='{predecessor}'::uuid''')
+        if not rows or len(rows) != 1:
+            raise RuntimeError("No unique authoritative predecessor run")
+        return rows[0]
+    def send(body, identity):
+        req = urllib.request.Request(f"{base_url}/api/admin/reading-paper/jobs", data=json.dumps(body).encode(),
+            headers={**auth_headers, "Content-Type": "application/json", "Idempotency-Key": identity}, method="POST")
+        with urllib.request.urlopen(req, timeout=60) as response:
+            job = json.loads(response.read().decode())
+        if job.get("id") != identity:
+            raise RuntimeError("Server did not persist the authorized attempt identity; reconcile before proceeding")
+        return identity
+    return submit_successor_intent(SUBMISSION_MARKER_PATH, identity, authorization, payload, get_git_head_sha(), reconcile, send)
+
+
 def submit_single_job(base_url: str, auth_headers: dict[str, str]) -> str:
     """Submit exactly ONE Section 1 job. Fails closed against duplicate execution."""
     # Check persistent marker
@@ -855,7 +946,8 @@ def submit_single_job(base_url: str, auth_headers: dict[str, str]) -> str:
     payload = {
         "topic": TOPIC,
         "pmcids": [TARGET_PMCID],
-        "provider": "minimax"
+        "provider": "minimax",
+        "acceptancePolicy": "acceptance_5_4_4_v1"
     }
 
     # Query prior job IDs directly from DB if available, without disturbing HTTP mock state in tests
@@ -932,7 +1024,8 @@ def submit_single_job(base_url: str, auth_headers: dict[str, str]) -> str:
 # Bounded Polling
 # ==============================================================================
 
-def poll_job(job_id: str, base_url: str, auth_headers: dict[str, str], timeout_seconds: int = 1800) -> dict[str, Any]:
+def poll_job(job_id: str, base_url: str, auth_headers: dict[str, str], timeout_seconds: int = 1800,
+    update_submission_marker: bool = True) -> dict[str, Any]:
     """Poll job until terminal status with bounded overall deadline."""
     print(f"\n[MONITOR] Monitoring job {job_id} (timeout={timeout_seconds}s)...", flush=True)
     t0 = time.time()
@@ -941,7 +1034,8 @@ def poll_job(job_id: str, base_url: str, auth_headers: dict[str, str], timeout_s
     terminal_statuses = {"Completed", "Failed", "Aborted", "Cancelled"}
     final_job_data: dict[str, Any] = {}
 
-    SubmissionMarker.write(status="RUNNING", job_id=job_id)
+    if update_submission_marker:
+        SubmissionMarker.write(status="RUNNING", job_id=job_id)
 
     while time.time() < deadline:
         try:
@@ -967,7 +1061,8 @@ def poll_job(job_id: str, base_url: str, auth_headers: dict[str, str], timeout_s
                     elapsed = time.time() - t0
                     print(f"\n---> Terminal status reached: {status} in {elapsed:.1f}s (Sections completed: {completed_sec})", flush=True)
                     final_job_data = job_state
-                    SubmissionMarker.write(status="TERMINAL", job_id=job_id, extra={"terminal_status": status, "elapsed_seconds": round(elapsed, 2)})
+                    if update_submission_marker:
+                        SubmissionMarker.write(status="TERMINAL", job_id=job_id, extra={"terminal_status": status, "elapsed_seconds": round(elapsed, 2)})
                     return final_job_data
 
         except Exception as e:
@@ -977,7 +1072,8 @@ def poll_job(job_id: str, base_url: str, auth_headers: dict[str, str], timeout_s
 
     elapsed = time.time() - t0
     print(f"\n[MONITOR TIMEOUT] Polling exceeded deadline ({timeout_seconds}s). Last status: {final_job_data.get('status', 'RUNNING')}", flush=True)
-    SubmissionMarker.write(status="TIMEOUT", job_id=job_id, extra={"elapsed_seconds": round(elapsed, 2)})
+    if update_submission_marker:
+        SubmissionMarker.write(status="TIMEOUT", job_id=job_id, extra={"elapsed_seconds": round(elapsed, 2)})
     return final_job_data or {"id": job_id, "status": "TIMEOUT", "error": "Polling deadline exceeded"}
 
 
@@ -1567,6 +1663,8 @@ Safeguards:
     parser.add_argument("--confirm-live", action="store_true", help="Required confirmation flag for live execution.")
     parser.add_argument("--keep-stack", action="store_true", help="Keep benchmark Docker stack running upon completion.")
     parser.add_argument("--timeout", type=int, default=1800, help="Maximum job polling timeout in seconds (default: 1800).")
+    parser.add_argument("--successor-attempt", default="", help="New canonical UUID; requires a separately supplied authorization file.")
+    parser.add_argument("--authorization-file", default="", help="Explicit expiring successor authorization bound to attempt/history/payload/source.")
     parser.add_argument("--poll-job", type=str, default="", help="Resume monitoring and forensic extraction for an existing Job ID without resubmitting.")
     return parser
 
@@ -1575,13 +1673,16 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
+    if bool(args.successor_attempt) != bool(args.authorization_file) or (args.successor_attempt and not args.execute):
+        parser.error("Successor submission requires --execute, --successor-attempt and --authorization-file together")
+
     # Poll existing job mode
     if args.poll_job:
         job_id = args.poll_job.strip()
         sign_key, issuer, audience = load_jwt_settings()
         auth_headers = get_auth_headers(sign_key, issuer, audience)
         base_url = "http://127.0.0.1:8087"
-        final_data = poll_job(job_id, base_url, auth_headers, timeout_seconds=args.timeout)
+        final_data = poll_job(job_id, base_url, auth_headers, timeout_seconds=args.timeout, update_submission_marker=False)
         impl_sha = get_git_head_sha()
         collect_forensics(job_id, final_data, wall_time_total=0.0, impl_sha=impl_sha)
         sys.exit(0)
@@ -1623,10 +1724,12 @@ def main() -> None:
 
         # 3. Submit Single Section Job
         t0 = time.time()
-        job_id = submit_single_job(base_url, auth_headers)
+        job_id = (submit_authorized_successor(base_url, auth_headers, args.successor_attempt, args.authorization_file)
+            if args.successor_attempt else submit_single_job(base_url, auth_headers))
 
         # 4. Monitor Job Execution
-        final_job_data = poll_job(job_id, base_url, auth_headers, timeout_seconds=args.timeout)
+        final_job_data = poll_job(job_id, base_url, auth_headers, timeout_seconds=args.timeout,
+            update_submission_marker=not bool(args.successor_attempt))
         wall_time_total = time.time() - t0
 
         # 5. Collect Forensic Snapshot

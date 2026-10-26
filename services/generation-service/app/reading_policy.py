@@ -275,6 +275,11 @@ class PinnedExecutionPolicy(CanonicalBaseModel):
             raise ValueError(
                 f"paperMinWords ({self.paper_min_words}) exceeds paperMaxWords ({self.paper_max_words})"
             )
+        if self.blueprint_mode == "acceptance_5_4_4_v1":
+            expected = [("TRUE_FALSE_NOT_GIVEN", 5), ("TABLE_COMPLETION", 4), ("FLOW_CHART", 4)]
+            if len(self.sections) != 1 or self.sections[0].index != 1 or self.sections[0].start_number != 1 or [
+                (g.question_type.value, g.count) for g in self.sections[0].groups] != expected:
+                raise ValueError("Acceptance policy requires exact Section 1 5/4/4 allocation")
         ordered = sorted(self.sections, key=lambda section: section.index)
         if [section.index for section in ordered] != list(range(
             ordered[0].index,
