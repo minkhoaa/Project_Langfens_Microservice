@@ -1,0 +1,10 @@
+{
+  "run_id": "section1_fixture_9d3ce99c0e09404cb1fecbcc8f6a07e6",
+  "accepted_questions": 13,
+  "mandatory_evaluator_passes": 78,
+  "physical_calls": 42,
+  "crash_boundary": "repair",
+  "policy_hash": "dbf3fa928cfd9a7f428f438e7f9793337a27770636a11e2ea94ab0eb0fd94f31",
+  "profile_hash": "221246ed415b05e70011acbde3e7aee009600b75c8259e23b1bd9268461db1cd",
+  "mode": "SCRIPTED_TRANSPORT_POSTGRES_HTTP_REAL_PIPELINE"
+}

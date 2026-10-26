@@ -1,0 +1,828 @@
+{
+  "decision": "READY_FOR_SEPARATELY_AUTHORIZED_LIVE",
+  "scope": "OFFLINE_CONTRACT_ALIGNMENT_ONLY_NOT_PROVIDER_QUALITY_OR_DEPLOYMENT_APPROVAL",
+  "tested_source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+  "starting_source_sha": "af48e399d431818ceb3f4addaac71f870fa93de2",
+  "remote_baseline_not_contacted": "febc6ef",
+  "generated_at": "2026-10-26T10:04:58.279605+00:00",
+  "fixes": [
+    "Atomic job/run failure synchronization under job/run owner, epoch, cancel version, active lease and status predicates; explicit idempotent terminal reconciliation rejects unresolved physical operations.",
+    "Retry rejects unresolved provider operations under the same transactional job lock; failure/cancel/shutdown/restart/expiry/competing workers tested.",
+    "Immutable historical terminal marker; SQLite FULL-synchronous auditable successor intent before dispatch; explicit expiring attempt/history/payload/source authorization; uncertain/crashed intents never redispatched.",
+    "New submission UUID is durable job identity; concurrent equivalent requests create one row and mismatched payloads conflict.",
+    "Separately scoped acceptance_5_4_4_v1 selected in the real worker; legacy 7/6 and dynamic allocation unchanged; complete distinct eligible claim matching fails closed.",
+    "Canonical policy/Blueprint hashes and exact families/counts verified; Python and PostgreSQL authority reject malformed acceptance artifacts and incomplete TABLE/FLOW stimuli.",
+    "Canonical sourceMetadata and structured table/flow stimuli survive .NET parsing/normalization and student draft rendering.",
+    "Removed Compose 180s override; both actual isolated runtimes used the identical approved finite resource snapshot and 60s operation authority.",
+    "Offline preflight remains provider/service/subprocess-free; runtime preflight reports observed configuration/source attribution, not hardcoded unlimited/worker assertions.",
+    "Safe PostgreSQL runner verifies resource labels, volume, internal network, image, no published ports and DSN identity; TCP readiness avoids the temporary init-server race.",
+    "Phase14 producer and consumer use the same verified database contract instead of split hardcoded DSN defaults; shared data and historical capture untouched.",
+    "Non-secret shared caps contract is now tracked, so clean source snapshots retain all cap tests; fixture-only migration and pending-job queue interference corrected without removing assertions."
+  ],
+  "python": {
+    "312": {
+      "version": "3.12.15",
+      "passed": 2183,
+      "failed": 0,
+      "errors": 0,
+      "existing_skips": 24,
+      "junit": "python312.xml",
+      "guard": "Python TCP/external-service-tool guard; additionally Docker --network none for 3.12",
+      "skips": [
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[prompt-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[retry-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[three-attempts-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[reasoning-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[campaign]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[run]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[parent]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[section]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[artifact]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_completed_attempt_replay",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[REPORTED]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[ESTIMATED]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[REPORTED-100-100]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[ESTIMATED-100-500]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[UNKNOWN-0-500]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_unresolved_reservation_survives_restart_and_replay",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_exact_accepted_references_and_stale_dependency_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_real_cas_conflict_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_stale_epoch_fencing_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_cancelled_job_run_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_crash_before_commit_draft_only_no_accepted_head",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_crash_after_commit_lost_ack_and_idempotent_replay",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_accepted_passage_resume_zero_regeneration",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_rg10_provider_record_integrity::test_historical_forensic_vs_behavioral_reexecution_workflow_separation",
+          "reason": "Historical raw_responses directory not present on this machine."
+        }
+      ]
+    },
+    "314": {
+      "version": "3.14.8",
+      "passed": 2183,
+      "failed": 0,
+      "errors": 0,
+      "existing_skips": 24,
+      "junit": "python314.xml",
+      "guard": "Python TCP/external-service-tool guard; additionally Docker --network none for 3.12",
+      "skips": [
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[prompt-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[retry-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[three-attempts-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[reasoning-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[campaign]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[run]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[parent]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[section]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[artifact]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_completed_attempt_replay",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[REPORTED]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[ESTIMATED]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[REPORTED-100-100]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[ESTIMATED-100-500]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[UNKNOWN-0-500]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r02_reconciliation::test_r02_unresolved_reservation_survives_restart_and_replay",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_exact_accepted_references_and_stale_dependency_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_real_cas_conflict_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_stale_epoch_fencing_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_cancelled_job_run_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_crash_before_commit_draft_only_no_accepted_head",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_crash_after_commit_lost_ack_and_idempotent_replay",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_r04_passage_checkpoint::test_r04_accepted_passage_resume_zero_regeneration",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "test": "tests.test_rg10_provider_record_integrity::test_historical_forensic_vs_behavioral_reexecution_workflow_separation",
+          "reason": "Historical raw_responses directory not present on this machine."
+        }
+      ]
+    }
+  },
+  "identical_python_cases_and_outcomes": true,
+  "python_scope": "tests/ excluding the unchanged unsafe legacy tests/test_t09_real_postgres_durability.py; isolated PostgreSQL replacements and actual local service fixtures run separately, not counted as Python skips.",
+  "source_snapshot_isolation": "Both full safe suites ran from exact git-archive snapshots of tested SHA, preserving original generated fixtures/reports; Python3.12 used cached image eea0685d6d99, genuine cached cp312 native wheels plus original installed pure-Python test dependencies. Real host Git binary/library closure mounted for attribution; no downloads.",
+  "postgres_crash_matrix": [
+    {
+      "run_id": "section1_fixture_5290a1821f9c4b2aa0e78f8575f4eb75",
+      "accepted_questions": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 40,
+      "crash_boundary": "accepted",
+      "policy_hash": "dbf3fa928cfd9a7f428f438e7f9793337a27770636a11e2ea94ab0eb0fd94f31",
+      "profile_hash": "221246ed415b05e70011acbde3e7aee009600b75c8259e23b1bd9268461db1cd",
+      "mode": "SCRIPTED_TRANSPORT_POSTGRES_HTTP_REAL_PIPELINE",
+      "integration": {
+        "total": "59",
+        "executed": "59",
+        "passed": "59",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "restart": {
+        "total": "1",
+        "executed": "1",
+        "passed": "1",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "database": {
+        "resource": "section1-pipeline-postgres-de7fd2fc",
+        "id": "4249356c7b6c419638d461d7698aa052d07bdaababe57f4a34fe5c57538787c0",
+        "labels": {
+          "purpose": "section1-scripted-pipeline",
+          "session": "de7fd2fc"
+        },
+        "network_id": "a32bcc8d7052664a0ed9926b2be2ec9e7c14ebe50a878ec0a5d50ddaf0e305c7",
+        "internal": true,
+        "volume": "section1-pipeline-data-de7fd2fc",
+        "database": "section1_pipeline",
+        "source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+        "dsn_redacted": "Host=192.168.32.2;Port=5432;Database=section1_pipeline;Username=postgres;Password=REDACTED",
+        "dsn_sha256": "1d9e3470771a345ae1b451649098ff356b1d3a0e5370e78eec4af366370f616a"
+      },
+      "blueprint_artifact_hash": "93d9d9be3bf4d9564445dd047918d52eed0bc9222dbe13f3d3e3bd34816c6784",
+      "blueprint_content_hash": "485b656e4bf46e9940b9306d7cd9337f5528d7039d5bf297c23d80908cbfbf00",
+      "section_artifact_hash": "dd30cbaa8049ed57b468804ea5b65be1d2e6b898eba06d916ccfe1ba5c41ca29"
+    },
+    {
+      "run_id": "section1_fixture_e1c3d242966444d9a40f6c1b39dfc88d",
+      "accepted_questions": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 40,
+      "crash_boundary": "generation",
+      "policy_hash": "dbf3fa928cfd9a7f428f438e7f9793337a27770636a11e2ea94ab0eb0fd94f31",
+      "profile_hash": "221246ed415b05e70011acbde3e7aee009600b75c8259e23b1bd9268461db1cd",
+      "mode": "SCRIPTED_TRANSPORT_POSTGRES_HTTP_REAL_PIPELINE",
+      "integration": {
+        "total": "59",
+        "executed": "59",
+        "passed": "59",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "restart": {
+        "total": "1",
+        "executed": "1",
+        "passed": "1",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "database": {
+        "resource": "section1-pipeline-postgres-de7fd2fc",
+        "id": "4249356c7b6c419638d461d7698aa052d07bdaababe57f4a34fe5c57538787c0",
+        "labels": {
+          "purpose": "section1-scripted-pipeline",
+          "session": "de7fd2fc"
+        },
+        "network_id": "a32bcc8d7052664a0ed9926b2be2ec9e7c14ebe50a878ec0a5d50ddaf0e305c7",
+        "internal": true,
+        "volume": "section1-pipeline-data-de7fd2fc",
+        "database": "section1_pipeline",
+        "source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+        "dsn_redacted": "Host=192.168.32.2;Port=5432;Database=section1_pipeline;Username=postgres;Password=REDACTED",
+        "dsn_sha256": "1d9e3470771a345ae1b451649098ff356b1d3a0e5370e78eec4af366370f616a"
+      },
+      "blueprint_artifact_hash": "3db005b3a10688f4d76f676be9089343d1145dc45d4185386af0a96afd2ac65c",
+      "blueprint_content_hash": "0993600505f67f81f0d579998bb6c491f716701a0feccebbd2f1e1ef71f7bbec",
+      "section_artifact_hash": "65e798fe65923cfcd2cdd6e4c7c74604eda9a2510c9dd0a53f341e5171628c03"
+    },
+    {
+      "run_id": "section1_fixture_c6e6009b112b4d76a32dcd1d7549d7bb",
+      "accepted_questions": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 40,
+      "crash_boundary": "evaluation",
+      "policy_hash": "dbf3fa928cfd9a7f428f438e7f9793337a27770636a11e2ea94ab0eb0fd94f31",
+      "profile_hash": "221246ed415b05e70011acbde3e7aee009600b75c8259e23b1bd9268461db1cd",
+      "mode": "SCRIPTED_TRANSPORT_POSTGRES_HTTP_REAL_PIPELINE",
+      "integration": {
+        "total": "59",
+        "executed": "59",
+        "passed": "59",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "restart": {
+        "total": "1",
+        "executed": "1",
+        "passed": "1",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "database": {
+        "resource": "section1-pipeline-postgres-de7fd2fc",
+        "id": "4249356c7b6c419638d461d7698aa052d07bdaababe57f4a34fe5c57538787c0",
+        "labels": {
+          "purpose": "section1-scripted-pipeline",
+          "session": "de7fd2fc"
+        },
+        "network_id": "a32bcc8d7052664a0ed9926b2be2ec9e7c14ebe50a878ec0a5d50ddaf0e305c7",
+        "internal": true,
+        "volume": "section1-pipeline-data-de7fd2fc",
+        "database": "section1_pipeline",
+        "source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+        "dsn_redacted": "Host=192.168.32.2;Port=5432;Database=section1_pipeline;Username=postgres;Password=REDACTED",
+        "dsn_sha256": "1d9e3470771a345ae1b451649098ff356b1d3a0e5370e78eec4af366370f616a"
+      },
+      "blueprint_artifact_hash": "4964ceac432c9b8717e6a9343b9df884371ad3936a46cd357fb2095092bb25e7",
+      "blueprint_content_hash": "39993f46eac5e4f00ffcaa3d5f3d5b6b2a14f8ae7ca9dd74c7082ca3e406f490",
+      "section_artifact_hash": "b341510e0818aadc9ce3992a98e4c1c65bbbbbec2c1752d968deefbd48cd10e0"
+    },
+    {
+      "run_id": "section1_fixture_9d3ce99c0e09404cb1fecbcc8f6a07e6",
+      "accepted_questions": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 42,
+      "crash_boundary": "repair",
+      "policy_hash": "dbf3fa928cfd9a7f428f438e7f9793337a27770636a11e2ea94ab0eb0fd94f31",
+      "profile_hash": "221246ed415b05e70011acbde3e7aee009600b75c8259e23b1bd9268461db1cd",
+      "mode": "SCRIPTED_TRANSPORT_POSTGRES_HTTP_REAL_PIPELINE",
+      "integration": {
+        "total": "59",
+        "executed": "59",
+        "passed": "59",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "restart": {
+        "total": "1",
+        "executed": "1",
+        "passed": "1",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "database": {
+        "resource": "section1-pipeline-postgres-de7fd2fc",
+        "id": "4249356c7b6c419638d461d7698aa052d07bdaababe57f4a34fe5c57538787c0",
+        "labels": {
+          "purpose": "section1-scripted-pipeline",
+          "session": "de7fd2fc"
+        },
+        "network_id": "a32bcc8d7052664a0ed9926b2be2ec9e7c14ebe50a878ec0a5d50ddaf0e305c7",
+        "internal": true,
+        "volume": "section1-pipeline-data-de7fd2fc",
+        "database": "section1_pipeline",
+        "source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+        "dsn_redacted": "Host=192.168.32.2;Port=5432;Database=section1_pipeline;Username=postgres;Password=REDACTED",
+        "dsn_sha256": "1d9e3470771a345ae1b451649098ff356b1d3a0e5370e78eec4af366370f616a"
+      },
+      "blueprint_artifact_hash": "789abf1ed8f7fc9f6a477052daadb5dc2e89717ef94cfe81e00b45cd83eaa168",
+      "blueprint_content_hash": "c2ef68076380ee709d198f9e81920d1146ba5cb472a7fdfcd878a939b09f5ad4",
+      "section_artifact_hash": "980ea110b649fca2634c15f9ee2dc6ffc9ffe0220bd2e0d91927aec67b10a328"
+    },
+    {
+      "run_id": "section1_fixture_a3ff0c406efe4a44b6f35c6613f8fb34",
+      "accepted_questions": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 40,
+      "crash_boundary": "finalization",
+      "policy_hash": "dbf3fa928cfd9a7f428f438e7f9793337a27770636a11e2ea94ab0eb0fd94f31",
+      "profile_hash": "221246ed415b05e70011acbde3e7aee009600b75c8259e23b1bd9268461db1cd",
+      "mode": "SCRIPTED_TRANSPORT_POSTGRES_HTTP_REAL_PIPELINE",
+      "integration": {
+        "total": "59",
+        "executed": "59",
+        "passed": "59",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "restart": {
+        "total": "1",
+        "executed": "1",
+        "passed": "1",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "database": {
+        "resource": "section1-pipeline-postgres-de7fd2fc",
+        "id": "4249356c7b6c419638d461d7698aa052d07bdaababe57f4a34fe5c57538787c0",
+        "labels": {
+          "purpose": "section1-scripted-pipeline",
+          "session": "de7fd2fc"
+        },
+        "network_id": "a32bcc8d7052664a0ed9926b2be2ec9e7c14ebe50a878ec0a5d50ddaf0e305c7",
+        "internal": true,
+        "volume": "section1-pipeline-data-de7fd2fc",
+        "database": "section1_pipeline",
+        "source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+        "dsn_redacted": "Host=192.168.32.2;Port=5432;Database=section1_pipeline;Username=postgres;Password=REDACTED",
+        "dsn_sha256": "1d9e3470771a345ae1b451649098ff356b1d3a0e5370e78eec4af366370f616a"
+      },
+      "blueprint_artifact_hash": "75644d2c3fb6fa12886e3c30214dad7e461810e3cd012d752304b6f1962beb00",
+      "blueprint_content_hash": "12bf5dd455a9251017a9234046d412694f04027aa563853763ae0d5f873ead93",
+      "section_artifact_hash": "a9065e9f962111496e373bf6f44d93aa9fea0cd5890e742a0c5eabd84ce9c305"
+    }
+  ],
+  "dotnet_relevant_regressions": {
+    "total": "33",
+    "executed": "33",
+    "passed": "33",
+    "failed": "0",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "dotnet_solution_build": {
+    "status": "PASS",
+    "command": "dotnet build Project_Langfens_Microservice.sln --no-restore",
+    "errors": 0,
+    "existing_warnings": 19
+  },
+  "phase14": {
+    "real_producer": {
+      "total": "1",
+      "executed": "1",
+      "passed": "1",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "fresh_capture_replay": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "5",
+      "time": "0.063",
+      "timestamp": "2026-10-26T17:00:28.397845+07:00",
+      "hostname": "khoa"
+    },
+    "historical_hash_checked_capture_replayed_in_both_full_suites": true,
+    "original_capture_sha256": "a8b1bca78543329b7bad98565d5225ed5498842eec27de798c09a126dee898a8"
+  },
+  "runtime": {
+    "actual_exam_and_generation_hosts": "PASS; fresh private network, read-only tested sources/build, no provider credentials or published ports; both stopped after assertions",
+    "worker_instances": 1,
+    "exam_source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+    "generation_source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+    "source_tree_clean_at_runtime_test": true,
+    "profile_version": "phase13-production-v1",
+    "profile_source": "deploy/envs/loop-caps.env",
+    "caps_file_sha256": "da9f7fc617fc704157e2da649f02f28e82975f583d59d9e6834efd95353030c7",
+    "resource_caps": {
+      "benchmarkArtifactPassageCallCap": 1,
+      "benchmarkArtifactPassageTokenCap": 8000,
+      "benchmarkArtifactPassageWallTimeCapSeconds": 35,
+      "benchmarkArtifactQuestionsCallCap": 2,
+      "benchmarkArtifactQuestionsTokenCap": 7000,
+      "benchmarkArtifactQuestionsWallTimeCapSeconds": 35,
+      "benchmarkArtifactReviewCallCap": 1,
+      "benchmarkArtifactReviewTokenCap": 2000,
+      "benchmarkArtifactReviewWallTimeCapSeconds": 15,
+      "benchmarkArtifactSolverCallCap": 1,
+      "benchmarkArtifactSolverTokenCap": 3000,
+      "benchmarkArtifactSolverWallTimeCapSeconds": 15,
+      "benchmarkChildRunCallCap": 15,
+      "benchmarkChildRunTokenCap": 60000,
+      "benchmarkChildRunWallTimeCapSeconds": 300,
+      "benchmarkSectionCallCap": 5,
+      "benchmarkSectionTokenCap": 20000,
+      "benchmarkSectionWallTimeCapSeconds": 100,
+      "candidateMaxBacktrackingSteps": 5000,
+      "candidateMaxSearchDepth": 50,
+      "candidatePoolLimitCompletion": 3,
+      "candidatePoolLimitMcq": 3,
+      "candidatePoolLimitShortAnswer": 3,
+      "candidatePoolLimitSummary": 3,
+      "candidatePoolLimitTfng": 3,
+      "evaluateTokenReservation": 10000,
+      "evaluationCacheMaxEntries": 1000,
+      "evaluatorDeterministicTimeoutSeconds": 5,
+      "evaluatorMaxTokensPerEvaluation": 4000,
+      "evaluatorSemanticTimeoutSeconds": 30,
+      "evaluatorStageTimeoutSeconds": 60,
+      "generateTokenReservation": 15000,
+      "legacyArtifactPassageCallCap": 10,
+      "legacyArtifactPassageTokenCap": 80000,
+      "legacyArtifactPassageWallTimeCapSeconds": 200,
+      "legacyArtifactQuestionsCallCap": 50,
+      "legacyArtifactQuestionsTokenCap": 200000,
+      "legacyArtifactQuestionsWallTimeCapSeconds": 400,
+      "legacyArtifactReviewCallCap": 6,
+      "legacyArtifactReviewTokenCap": 50000,
+      "legacyArtifactReviewWallTimeCapSeconds": 150,
+      "legacyArtifactSolverCallCap": 6,
+      "legacyArtifactSolverTokenCap": 50000,
+      "legacyArtifactSolverWallTimeCapSeconds": 150,
+      "legacySectionCallCap": 75,
+      "legacySectionTokenCap": 380000,
+      "legacySectionWallTimeCapSeconds": 800,
+      "loopMaxConsecutiveNoProgress": 2,
+      "loopMaxGeneratedVersions": 3,
+      "loopMaxOscillationCycles": 2,
+      "loopMaxRepairAttemptsPerVersion": 2,
+      "loopMaxResponseBytes": 500000,
+      "loopMaxTotalCalls": 15,
+      "loopMaxTotalRepairs": 5,
+      "loopMaxTotalTokens": 60000,
+      "loopMaxVersions": 3,
+      "loopMaxWallTimeSeconds": 300,
+      "loopOperationWallReservationSeconds": 60,
+      "passageGenerateMaxTokens": 2500,
+      "passageGenerateTokenReservation": 18000,
+      "repairMaxTokensPerAttempt": 3000,
+      "repairTimeoutSeconds": 30,
+      "repairTokenReservation": 15000,
+      "standaloneRunBudgetCapCalls": 250,
+      "standaloneRunBudgetCapTokens": 1200000,
+      "standaloneRunBudgetCapWallTimeSeconds": 2500
+    },
+    "execution_policy": {
+      "blueprintMode": "acceptance_5_4_4_v1",
+      "maxCandidates": 3,
+      "maxDependencyDepth": 3,
+      "maxEvaluationsPerArtifact": 8,
+      "maxRecoveryAttempts": 2,
+      "maxRepairs": 2,
+      "minVerifiedClaims": 3,
+      "paperMaxWords": 2750,
+      "paperMinWords": 2150,
+      "provider": "minimax",
+      "providerCallSeconds": 60,
+      "requireBlindSolver": true,
+      "runTokenCap": 300000,
+      "runWallSeconds": 2700,
+      "sectionTokenCap": 100000,
+      "sectionWallSeconds": 900,
+      "sections": [
+        {
+          "difficulty": "FOUNDATION",
+          "editorialObjective": "Establish a factual baseline the later sections may safely build on.",
+          "groups": [
+            {
+              "count": 5,
+              "questionType": "TRUE_FALSE_NOT_GIVEN"
+            },
+            {
+              "count": 4,
+              "questionType": "TABLE_COMPLETION"
+            },
+            {
+              "count": 4,
+              "questionType": "FLOW_CHART"
+            }
+          ],
+          "index": 1,
+          "maxWords": 915,
+          "minWords": 720,
+          "startNumber": 1
+        }
+      ],
+      "sourceMinWords": 600
+    },
+    "policy_hash": "dbf3fa928cfd9a7f428f438e7f9793337a27770636a11e2ea94ab0eb0fd94f31",
+    "pinned_profile_hash": "221246ed415b05e70011acbde3e7aee009600b75c8259e23b1bd9268461db1cd",
+    "generation_resource_profile_hash": "ecc23288055c8b9719de9942316e43021d54c7d5fa4c32e658ae6632e702fd9b",
+    "actual_runtime_job_terminal_states": [
+      "Failed",
+      "FAILED"
+    ],
+    "details": "runtime/worker-topology.json"
+  },
+  "historical_preservation": {
+    "marker_sha256_before_and_after": "d5c402709df3ca84714717c65dd50922b5d39e222080ad520b80bb3b7ecaa532",
+    "tracked_historical_reports_unchanged": true,
+    "historical_live_job_or_run_mutations": 0,
+    "shared_database_writes": 0,
+    "existing_data_volumes_deleted": 0,
+    "original_capture_preserved": true
+  },
+  "safety": {
+    "real_provider_dispatches": 0,
+    "real_provider_tokens": 0,
+    "real_live_submissions": 0,
+    "provider_connectivity_probes": 0,
+    "live_deployments": 0,
+    "publication_operations": 0,
+    "pushes": 0,
+    "isolated_runtime_test_containers_started_and_stopped": 2
+  },
+  "limitations": [
+    "Scripted provider transport validates contracts/workflow, not MiniMax/model quality.",
+    "The existing live job/run was deliberately not reconciled. A future successor must obtain explicit new-attempt authorization and current authoritative terminal/operation reconciliation; unknown states remain blocked.",
+    "This does not authorize deploying this SHA, enabling any historical campaign, provider calls, publication or mutation of historical artifacts.",
+    "Current pre-existing deployed services were not certified or restarted. Runtime attestation here applies only to the explicitly isolated tested fixtures.",
+    "24 unchanged optional Python skips and the existing record_property/JUnit warning remain; the unsafe full .NET project was not executed. Exact inspected filters and raw counts are preserved."
+  ],
+  "verification_incidents_resolved": [
+    "Initial producer hit temporary PostgreSQL init-server shutdown: readiness now probes TCP.",
+    "The first copied safe suites omitted ignored loop-caps.env, producing four failures and an empty parameter set: the exact unchanged non-secret contract is now tracked; final suites collect 2207 cases each and restore exactly 24 existing skips.",
+    "Concurrent test-only migrations and retained pending CAS fixture rows interfered with combined suites: schema setup precedes contention, CAS fixture topics stay outside the real worker queue. All original assertions retained.",
+    "Projection and unknown authority-value regressions were reproduced red before their corrections."
+  ],
+  "raw_evidence_local_directory": "/tmp/langfens-alignment",
+  "artifact_sha256": {
+    "dotnet-regressions.trx": "12b45eefc44e14ac3f1c0f9ddf30d23f39dcce3d66f852ebf98cace77bef4f33",
+    "dotnet-resource-identity.json": "e0be6d658be938811e9a58c0220fe2cbb50525f17546b0ab43f7b00e73daa697",
+    "matrix/accepted/acceptance.json": "314a93dde14f87fe3a7ce02d4fdcc2632d4e18f1258ab41ab5a40f20dd2a057c",
+    "matrix/accepted/integration.trx": "a78ecf1fd300b50e489b2884097fdb63e8a03e92a036cb3d6d42e975dc485e6b",
+    "matrix/accepted/positive-final.json": "da4bf7a4505e964a12fa57db9a7b6aa658a5f1221efea7f17cd1d250c6f00fa9",
+    "matrix/accepted/resource-identity.json": "3bffd1a0366fd53f2dadef739024ff52315a3585f207269755e96c4a99c25bf8",
+    "matrix/accepted/restart-verification.json": "88f8f9000b32df87f54e075f96e4d325fe31bb14d3238fe54fd916ed65b98acc",
+    "matrix/accepted/restart.trx": "c8bccb8333b95cd68536bf35c8b9bf4d924a863767779b571e150f2fcb367b23",
+    "matrix/accepted/successor-simulation.json": "0e1eee9c353b060bea972b4660a77291196c635ee7189377d01d9d1a9cfadd39",
+    "matrix/evaluation/acceptance.json": "9ef128cb259f764d07e1fc2ef655ba1a5308407d30a673edc5c467c13681ddd8",
+    "matrix/evaluation/integration.trx": "6d91ff4aae35b1a678eb26a55f199a64603d9b694017cd6def1ac3b53e628f48",
+    "matrix/evaluation/positive-final.json": "c6964af8df46a55a5d06057d4bbe3d85a0c129c87ce4ff9839242f0fab1c8786",
+    "matrix/evaluation/resource-identity.json": "3bffd1a0366fd53f2dadef739024ff52315a3585f207269755e96c4a99c25bf8",
+    "matrix/evaluation/restart-verification.json": "462ab86e0dcf34df61ee133995d179d00467fc8fb05af69c5ec62492779dbdc7",
+    "matrix/evaluation/restart.trx": "9834ab328c342afff313003bc3a42473e7a6e4758c73b9736408b7742cd2d734",
+    "matrix/evaluation/successor-simulation.json": "d89eb94e665ee24b5f49ecd53526d8c43e990692fc72f804c7501c940600bc2e",
+    "matrix/finalization/acceptance.json": "eb519551976d4b36363d9052758dac2d0a59b80acef8a067c73c098a71b12a38",
+    "matrix/finalization/integration.trx": "6c5060af81572287da624c762c82a65754bbb8d742860d66fca76f2cd186d74d",
+    "matrix/finalization/positive-final.json": "b234d71ada53b901166ee90c9cd959b8ca26757cd07423e2934cacc4d8ba3c83",
+    "matrix/finalization/resource-identity.json": "3bffd1a0366fd53f2dadef739024ff52315a3585f207269755e96c4a99c25bf8",
+    "matrix/finalization/restart-verification.json": "269f065d80f308109d2e854fb9c85fd6ec09aeec68fc675c12de2898fb3144bf",
+    "matrix/finalization/restart.trx": "92176423e6d897457fc43c149764cb3ecb6139ac79a102d215e13e0dae593eb0",
+    "matrix/finalization/successor-simulation.json": "af64dc2f1a23a962924044a84aae002f17f5c9fe0f1d7c4725439c15835f50ee",
+    "matrix/generation/acceptance.json": "428ecf22098bf73a7bd441d6513a56a292e407545e3e204fff85fb008da958d3",
+    "matrix/generation/integration.trx": "98639fe1e331f75bb16ebb4e30585d598948bb82009aba164a448573fd44d93a",
+    "matrix/generation/positive-final.json": "669348d06c29cbd05f826c8522c95eb274a822f3bc9a739ccb48497ce7f86a60",
+    "matrix/generation/resource-identity.json": "3bffd1a0366fd53f2dadef739024ff52315a3585f207269755e96c4a99c25bf8",
+    "matrix/generation/restart-verification.json": "a340ab8d47af3041fab08aacb41493374885714320d049f2d23fd3623c845bdf",
+    "matrix/generation/restart.trx": "98a0c6046f363ce8d57a8b222cc080c9587ef747e35f9ae717257e04b37ccb0e",
+    "matrix/generation/successor-simulation.json": "7a3c68946d00bc2c6e4397a9fb77bbc3e1449c03b20a1bc0626bfc899c6ec745",
+    "matrix/repair/acceptance.json": "029338f40254d22786333281ab33f163afb27c3ef104a2e29194c17370012c7a",
+    "matrix/repair/integration.trx": "f12dece441f8addf76aee916667b9d2b0b4d422b1a6f9630ad0fb89fc0789f8d",
+    "matrix/repair/positive-final.json": "eee2b3d614c027ba8bd3fb72d75e9b4a9dee693402de9291fc59dee924314c55",
+    "matrix/repair/resource-identity.json": "3bffd1a0366fd53f2dadef739024ff52315a3585f207269755e96c4a99c25bf8",
+    "matrix/repair/restart-verification.json": "d83361c3eba1774dbdd091d667053273b55daee1c6d6cae53c54ab299ed2f38f",
+    "matrix/repair/restart.trx": "b4e954695b273750ff250d03b8807fcb2be05faa1a928217b2b1dcfadcbd5dfd",
+    "matrix/repair/successor-simulation.json": "9987b0088a6628a10fcfe9b55ec3cd051513a9dd27d7f54f5182d29152d1fd54",
+    "persisted-contracts.json": "1d18fddda45dc413af97e256e0cb05399fbc8a0cbfa01266031f6a8942c02911",
+    "phase14/phase14-outbox.json": "58af66d273b1b277e31457e6164d1e453679909529e4a744bdf018849e4692be",
+    "phase14/producer.trx": "ddd7425b9e9389024c0c16b8b5536a9158178b089ea4fab02d6f8988e281bce5",
+    "phase14/replay.xml": "a81f27f3132d508450ebb4890813ef90a126af0f82c0cde57ecb77e24ceca07a",
+    "phase14/resource-identity.json": "2f7c882ec1e569520706776806aec9836dceedf3e095fa52c90ad712d45ec817",
+    "python312.xml": "b6e3e55f439334bd8b1aceffac7322b395f514831d50f09903a2ec0e3813d902",
+    "python314.xml": "dbc8bf23b7e71541ab709b5414dc9b05aa96a5496f6d86e8d3d6c12f803ebe89",
+    "runtime/resource-identity.json": "2fa957e9ff4e1afb296c4cb1b9147d197731c11525c929be3e4f8ee88e9a477d",
+    "runtime/worker-topology.json": "201278fd122465b4438f755dc1693b8caca8b28ff3d7ee489b46fdadcd2f4545"
+  }
+}

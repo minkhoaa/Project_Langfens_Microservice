@@ -1,0 +1,15 @@
+{
+  "resource": "section1-pipeline-postgres-b64310fd",
+  "id": "db5d763527428cd81c53685b999eaf8dbf5018e0480a8e72c3022795d964fe6a",
+  "labels": {
+    "purpose": "section1-scripted-pipeline",
+    "session": "b64310fd"
+  },
+  "network_id": "bd3e3b142f3c16ed1063014223b40999b66b2d6a69b402ea2bd81c44a9acabe0",
+  "internal": true,
+  "volume": "section1-pipeline-data-b64310fd",
+  "database": "section1_pipeline",
+  "source_sha": "af2ef90fb651bb67640cd7e85a08245b48ca8e8e",
+  "dsn_redacted": "Host=192.168.144.2;Port=5432;Database=section1_pipeline;Username=postgres;Password=REDACTED",
+  "dsn_sha256": "03acd7693a6af189541a756a358cbfc2833e3ddf2da3c513bd784829193abdd1"
+}
