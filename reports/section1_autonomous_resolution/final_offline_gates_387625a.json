@@ -60,7 +60,7 @@
     "latest_verified_implementation_commit": "12f17862cf6fccc106c8d3d82ee03458dfb8f3fe",
     "latest_head_is_report_or_fixture_only_after_implementation": true,
     "committed_changes_in_this_session": 1,
-    "commit": "b67e84c (report/evidence only; tested implementation unchanged)"
+    "commit": "809090a (report/evidence only; tested implementation unchanged)"
   },
   "decision": "BLOCKED; do not authorize the separately gated LIVE run"
 }
