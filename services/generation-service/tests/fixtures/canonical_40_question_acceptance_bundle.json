@@ -1,14 +1,14 @@
 {
   "bundleVersion": "2.0.0",
   "producer": "app.acceptance_bridge",
-  "producedAt": "2026-10-22T16:42:33.730017+00:00",
+  "producedAt": "2026-10-26T04:56:42.631950+00:00",
   "runId": "run-canonical-40q-shared",
   "paperId": "paper:canonical-40q-shared",
   "paperArtifactRef": {
     "artifactId": "paper:canonical-40q-shared",
     "artifactType": "ReadingPaper",
     "version": 1,
-    "contentHash": "0ae94da16ccfe7c0d42fbfd714d98215a4362b31cb76dfff403f4999d18878c6"
+    "contentHash": "ede07a858656ffce78f3e5e797b2919f40365ea471e263929acb91cc1fe49ae1"
   },
   "envelopes": [
     {
@@ -19,7 +19,7 @@
       "sectionId": null,
       "schemaVersion": "1.0.0",
       "contentHash": "467371ef59e0ac85a666429e51b36b9e7e5875128a0bd592cf3d4801aa803857",
-      "createdAt": "2026-10-22T16:34:33.730017Z",
+      "createdAt": "2026-10-26T04:48:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "totalQuestions": 40,
@@ -37,7 +37,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "e14c0a79f98b3e4b381b06500d0d1150470378e8ec13582c8a2e48bcedf50103",
-      "createdAt": "2026-10-22T16:36:33.730017Z",
+      "createdAt": "2026-10-26T04:50:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "text": "Archaeological investigations at Didé West 1 in the Falémé Valley of eastern Senegal have uncovered extensive metallurgical evidence spanning nearly eight centuries of continuous iron production, from the fourth century BCE to the fourth century CE. The site represents one of the longest-lasting iron-smelting traditions in West Africa, designated by researchers as the FAL02 tradition. Stratigraphic excavations revealed approximately one hundred tons of dense metallurgical slag and thirty-five preserved circular furnace bases, demonstrating that metalworking was not an occasional subsistence endeavor but a systematic, sustained seasonal craft. Radiocarbon determinations on short-lived charcoal samples confirmed continuous workshop occupation throughout the first millennium BCE and CE without major chronological interruptions. Subsequent geochemical assays established that local iron ores possessed high hematite purity, enabling remarkable smelting efficiency. Detailed spatial mapping further established that metallurgical activities were systematically coordinated with seasonal agricultural rhythms across the surrounding alluvial terraces. The sheer volume of accumulated smelting debris reflects a stable, multi-generational community of skilled artisans operating within an established regional economic network.\n\nThe architecture of the FAL02 smelting furnaces displays remarkable technical specialization. Each furnace was constructed within a circular subterranean pit approximately thirty centimeters deep, carefully lined with refractory clay to withstand extreme smelting temperatures exceeding 1200 degrees Celsius. Above this pit rested a removable cylindrical chimney fashioned from coiled clay coils and straw temper, designed to be dismantled after each reduction cycle to facilitate the extraction of the consolidated bloom. Inside the pit base, smiths placed a dense bed of palm nut seeds (Elaeis guineensis), which served as carbonaceous packing material to support the charge and prevent premature slag blockage during the initial combustion phase. Chemical assays of slag residues confirmed that the thermal decomposition of these organic seeds generated reducing carbon monoxide gas that accelerated iron ore reduction. Experimental reconstructions demonstrated that this botanical packing material significantly improved combustion efficiency across all operational stages. Furthermore, the structural design permitted rapid furnace turnaround, allowing artisans to conduct repeated smelting heats within concise seasonal windows before annual flooding inundated the low-lying workshop precincts.\n\nForced draft was delivered into the furnace through massive, multiperforated clay tuyères inserted horizontally through specialized apertures near the pit perimeter. Unlike simple single-bore pipes documented at contemporaneous European sites, these West African tuyères featured an intricate internal manifold consisting of a main central air channel connected to several perpendicular side ducts. This geometric arrangement distributed preheated combustion air uniformly across the burning charcoal bed, creating an intensely localized reduction zone while preventing localized cold spots along the furnace margins. Macroscopic and petrographic examinations of furnace linings showed minimal localized wall scouring, confirming that the multiperforated design achieved exceptional aerodynamic balance. Modern computational fluid simulations have confirmed that this geometric configuration maximized heat retention within the combustion core. Petrographic thin-section analysis revealed that the clay paste was tempered with coarse quartz grains and crushed potsherds, imparting high thermal shock resistance and preventing catastrophic wall collapse during peak firings.\n\nSpatial analysis of the workshop floor indicates a deliberate, organized layout that gradually shifted northward across successive generations. Ore processing areas with quartzite anvils and hammerstones were positioned upwind of the smelting cluster to shield workers from noxious sulfurous fumes. The smelted iron blooms were extracted while semi-molten and transferred directly to adjacent anvil platforms for immediate primary forging, yielding compact billets destined for local agricultural tool manufacture, such as hoes and sickle blades. Intriguingly, despite prolonged usage across eight centuries, the core metallurgical procedures remained exceptionally stable, with only minor adjustments to tuyère wall thickness and pit depth observed in later strata. Stratigraphic profiles confirm that workshop waste was systematically reutilized as leveling aggregate across the site. This exceptional technological conservatism indicates that apprenticeship and technical knowledge were transmitted across lineages through highly formalized ritualized instructional frameworks.\n\nComparative metallurgical analyses indicate that the persistence of the FAL02 tradition was rooted in institutional resilience and meticulous resource management. The immense timber requirements of continuous smelting necessitated sustainable harvesting of dense riparian hardwoods, notably Anogeissus leiocarpa and Pterocarpus erinaceus, implying deliberate woodland conservation rather than unmitigated deforestation. Furthermore, the absence of military weaponry among the excavated metal assemblages suggests that iron smelting at Didé West 1 was oriented toward agricultural intensification and regional exchange rather than armed conflict. Collectively, these findings illuminate the sophisticated technical competence, environmental stewardship, and enduring socioeconomic stability of ancient West African metallurgists. Detailed excavation records demonstrate that specialized metalworking communities maintained extensive trade contacts throughout the regional river network, exchanging finished iron implements for vital raw materials. Consequently, Didé West 1 provides profound empirical evidence that sub-Saharan iron metallurgy developed independently into a resilient, highly sustainable industrial tradition that supported long-term agrarian demographic stability.",
@@ -74,7 +74,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "153500e6667b50075f1fe64cf0bd5a0672ca8b41f011925791b44946b1ad18d0",
-      "createdAt": "2026-10-22T16:36:33.730017Z",
+      "createdAt": "2026-10-26T04:50:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "text": "The rapid proliferation of remote autonomous environmental monitoring nodes has created an urgent demand for reliable, self-sustaining micro-power generation systems capable of harvesting energy from intermittent ambient sources. In wetland and forest habitats, solar photovoltaic cells often suffer from dense canopy shading, while wind velocities fluctuate unpredictably. To address these operational constraints, environmental engineers have developed an integrated harvester that simultaneously captures kinetic energy from wind and gravitational potential energy from rainfall. The device couples fluid-structure excitation with piezoelectric transduction, channeling ambient mechanical energy into a coordinated electrical power output suitable for low-power wireless sensor networks. Bench-scale wind tunnel evaluations demonstrated that the dual-source mechanism maintained continuous operational capability during overcast stormy weather conditions. By combining complementary atmospheric energy flows, the system ensures uninterrupted telemetry data transmission even during severe seasonal weather anomalies that normally deplete conventional battery-powered installations.\n\nThe wind capture unit utilizes an aerodynamic snowflake bluff body mounted at the windward end of the apparatus. The aerodynamic snowflake bluff body induces intense vortex-induced vibrations across varying wind velocities. As laminar airflow encounters the multi-lobed bluff profile, alternating shear layers detach from the downstream edges, generating periodic fluctuating lift forces. When the vortex shedding frequency approaches the fundamental natural frequency of the supporting structure, the assembly enters a wide lock-in synchronization regime. This broadband resonance maintains high vibration amplitudes across airflow speeds ranging from three to eight meters per second, circumventing the narrow operational bandwidths typical of conventional circular cylinder designs. Static finite element modeling confirmed that the snowflake geometry increased aerodynamic lift coefficients by over thirty percent. Detailed particle image velocimetry revealed that secondary vortices shed from the perimeter indentations energized the wake boundary layer, effectively suppressing premature aerodynamic stall at elevated wind velocities. Wind tunnel flow visualizations demonstrated that these stable wake vortex streets persisted across substantial yaw angles up to twenty-five degrees.\n\nPrecipitation is harvested using a self-tilting container positioned directly beneath the raindrop collection funnel. The container periodically tilts upon accumulating a critical water threshold, releasing stored fluid. As falling rain accumulates within the container, its center of gravity shifts forward until gravitational torque overcomes an adjustable magnetic latching force. The container then abruptly tips downward, discharging the accumulated water mass and impacting a secondary strike cantilever. Following discharge, counterweights immediately restore the container to its upright collection stance. Mechanical strain is transduced into electrical charge through a flexible piezoelectric cantilever beam. The resulting high-frequency damped oscillations generate sustained alternating voltage spikes across bonded lead zirconate titanate patches. Dynamic strain gauge calibrations showed that the mechanical impact delivered clean, reproducible cantilever deflections without inducing micro-fracturing along the active ceramic-substrate interface. Furthermore, the repetitive water impacts produced no measurable electromechanical hysteresis during continuous cycle operations.\n\nBoth transducers feed into a unified P-SSHI circuit designed to eliminate phase cancellation. The parallel-synchronized switch harvesting on inductor interface incorporates a bidirectional electronic switch and a miniature resonant inductor connected in parallel with the piezoelectric elements. The electronic switch momentarily closes at each displacement extremum, triggering rapid voltage inversion across the inductor. This rapid phase inversion aligns the piezoelectric internal capacitance voltage with the generated mechanical displacement velocity, substantially minimizing dielectric energy losses that normally cripple standard full-bridge rectifiers. Theoretical simulations established that an optimal resonant inductance of two henries minimized total circuit dissipation during high-frequency switching cycles. Crucially, the self-powered switching architecture operates autonomously without requiring external bias power, consuming negligible standby energy between intermittent switching events. The resulting synchronized energy extraction allows connected monitoring devices to maintain continuous sleep-wake sensing schedules without experiencing brownouts during prolonged lulls in atmospheric excitation.\n\nLaboratory prototyping and oscilloscope measurements corroborated the theoretical performance model across a broad spectrum of meteorological conditions. Maximum power transfer was achieved when connecting an external load resistance of fifty kiloohms. Under concurrent wind and rain excitation, the device achieved a peak open-circuit voltage of 8.1 volts and a continuous average power output of 54.7 microwatts. The experimental configuration achieved an average output power improvement of 138.9 percent over standard full-bridge rectifiers. Furthermore, comparative tests confirmed that the hybrid harvester maintained stable power output even during abrupt micro-burst gusts and prolonged drizzle, validating its feasibility as a maintenance-free power supply for long-term ecological monitoring stations in vulnerable nature reserves. Extended endurance trials revealed no measurable mechanical fatigue or electrical degradation after ten million continuous vibration cycles, confirming that the micro-generator meets rigorous industrial reliability criteria.",
@@ -111,7 +111,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "e28c4d9c3cd1bd1b8315e17f147452f618df3e7a36699b8859a59d75814ab8fb",
-      "createdAt": "2026-10-22T16:36:33.730017Z",
+      "createdAt": "2026-10-26T04:50:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "text": "Paragraph A\nThe modulation of Earth's long-term carbon cycle by tectonic uplift and chemical weathering remains one of the central paradigms of global geodynamics. Mountain building accelerates physical denudation, exposing fresh silicate and carbonate minerals to atmospheric precipitation. In active orogenic belts, the interplay between stream incision, hillslope erodibility, and atmospheric carbon dioxide drawdown has traditionally been modeled assuming lithologic homogeneity. Classical steady-state formulations assumed that hillslope angles and river gradients directly reflect regional rock uplift rates without considering substrate variability. Modern geomorphic paradigms increasingly recognize that spatial variations in rock strength dictate how river networks incise and how topography adjusts over geological timescales. However, recent empirical investigations in the East River alpine watershed of the Colorado Rocky Mountains demonstrate that contrasting rock types within the same tectonic regime exert a first-order control on transient erosion rates, fundamentally altering inorganic weathering dynamics and regional carbon flux balances.\n\nParagraph B\nTo resolve the spatial coupling between lithology and erosion, researchers quantified catchment-wide denudation rates using in situ produced cosmogenic beryllium-10 concentrations extracted from fluvial quartz sand. The results revealed striking discrepancies across adjacent catchments under identical climatic forcing. Watersheds underlain by Cretaceous Mancos Shale denude at rates averaging three times higher than neighboring catchments composed of resistant Tertiary granodiorite intrusions. Remarkably, this threefold acceleration in shale denudation occurs across hillslopes that exhibit significantly gentler topographic gradients than the precipitous granodiorite peaks, directly challenging the conventional geomorphic assumption that steeper slopes necessarily produce higher erosion rates. High-resolution lidar hillshade models demonstrated pervasive deep-seated landsliding across gentle shale slopes. Field surveys established that frequent, shallow translational mass movements continuously disaggregate the weathered shale mantle, sustaining rapid mechanical sediment transport into valley bottoms despite moderate relief.\n\nParagraph C\nHydrochemical sampling of stream waters across seasonal discharge cycles illuminated the biogeochemical consequences of this lithologic divergence. Chemical weathering of exposed shale beds is dominated by sulfuric acid dissolution, generated by the oxidative weathering of fine-grained pyrite minerals embedded in the organic-rich sedimentary matrix. Unlike carbonic acid weathering of silicate minerals, which sequesters carbon from the atmosphere, sulfide oxidation coupled with carbonate dissolution releases gaseous carbon dioxide directly into the hydrosphere and atmosphere. Stream solute budgets demonstrate that high denudation in shale terrains actually drives a net positive efflux of inorganic carbon dioxide, turning rapidly eroding alpine fells into transient carbon sources. Isotope ratios confirmed that dissolved inorganic carbon originated primarily from marine carbonate bedrock dissolution. Consequently, high physical denudation in sedimentary orogens can paradoxically offset silicate carbon sink efficiency by accelerating mineral-mediated carbon degassing.\n\nParagraph D\nHigh-resolution airborne laser altimetry and topographic swath profiling reveal that the landscape is currently adjusting to a wave of transient knickpoint propagation initiated by base-level lowering along the Gunnison River. Numerical landscape evolution models parameterizing variable bedrock erodibility show that the response time of shale-dominated river reaches is an order of magnitude faster than that of crystalline intrusive reaches. Consequently, the softer shale terrain rapidly attains an adjusted, lower-gradient steady state, while the adjacent intrusive massifs retain steep, hanging knickzones for millions of years, prolonging the transient topographic disequilibrium. Field observations of hanging tributary valleys further corroborated this persistent morphological divergence across the drainage network. Longitudinal river profiles exhibit prominent convexities exclusively located where stream channels cross the lithologic boundary between intrusive stocks and surrounding sedimentary country rock. Quantitative knickpoint tracking over decadal timescales demonstrates that resistant crystalline knickzones migrate upstream at rates less than one-tenth of those observed in adjacent shale channels, anchoring the broader drainage network in a state of prolonged transient disequilibrium.\n\nParagraph E\nThese findings require a substantial revision of global tectonic-carbon feedback models. By demonstrating that high bedrock erodibility can mask rapid denudation beneath deceptively gentle terrain, the study proves that topographic steepness cannot serve as a universal proxy for physical weathering rates. Furthermore, because sulfuric acid-mediated carbonate weathering in erodible sedimentary rocks operates on fundamentally different chemical timescales than silicate weathering, the net climate impact of mountain uplift depends critically on the lithologic composition of the exposed strata. Regions dominated by erodible, pyrite-bearing shales may transiently accelerate global warming rather than global cooling during the early stages of orogenic exhumation. Global climate-erosion simulations incorporating lithologic erodibility matrices demonstrate that mountain exhumation can generate profound multi-million-year carbon cycle oscillations. Unraveling these coupled mechanisms is vital for refining Cenozoic climate reconstructions and predicting long-term biosphere-lithosphere feedbacks.",
@@ -148,7 +148,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "7a27346569c0fcd62c1c15dc18a0abb01e27d88d19eb28cb3b927980ef3cdec9",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 1,
@@ -188,7 +188,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "a43cd7c354af5280349fa6f32598dfd2a7226b460011a6746998bf09adbd41e3",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 2,
@@ -228,7 +228,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "ddcfbdda0af771a0bff9d76ded711a534658d541c71646b605a4e5ee9dd98ab8",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 3,
@@ -268,7 +268,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "5102a2dd3143479d6f394dd2f3da5b2ae7ef7ce39429cc4e079a492c38e3de04",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 4,
@@ -313,7 +313,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "0c83bff3ee34469bfbad8c7e577dff03ee2eefea7338564a63895a92a2e9ac69",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 5,
@@ -353,7 +353,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "b289f5966de9de1b0c239de402c203e409f451772a967383cd0d170db0e93446",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 6,
@@ -396,7 +396,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "b7109d2fa523d57119e40b538f545e2dffd92ebf8e1463d4a2cbab0771332e13",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 7,
@@ -439,7 +439,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "4f6dd1729cb704774aba06e29d79bea30c2b9787e2143d15ee6d4fa64a314515",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 8,
@@ -482,7 +482,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "b37769f2a02fed7e031722f589871fe931701c98985779c740e1b9cfbbf5933a",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 9,
@@ -525,7 +525,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "52414103ce12e1d123aa09477cc8ec58eaa66f295bb6f8d96f6a292621dc5d91",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 10,
@@ -575,7 +575,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "f2967bc812ecfe61576b5725e0b074bafe21a4240d0403369ca8e32a62f72e7c",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 11,
@@ -625,7 +625,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "052c3f17046e77a725bdeca9ca138d257138774f6d3b80a6f6c408e86ae9ea72",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 12,
@@ -675,7 +675,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "e91c811893f6ffc7d6de0f6ccdbe94668ef6cf0e33765d499bb875ffbcb0e302",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 13,
@@ -725,7 +725,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "7a046910ecc334b915284079976f5aa60c316b53d8a21fa1ac93b4d082edc023",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 14,
@@ -768,14 +768,14 @@
       "runId": "run-canonical-40q-shared",
       "sectionId": 2,
       "schemaVersion": "1.0.0",
-      "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 15,
         "questionType": "DIAGRAM_LABEL",
         "prompt": "Label [15] on the raindrop collection mechanism",
-        "answer": "tilting container",
+        "answer": "container",
         "evidenceQuote": "The container periodically tilts upon accumulating a critical water threshold, releasing stored fluid",
         "explanation": "Callout 15 identifies the self-tilting water collection container.",
         "difficulty": "MODERATE",
@@ -813,7 +813,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "753b5e0077650788b4fadbfbaeccc20ca565c00172d5ee415caad46b5f854a65",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 16,
@@ -857,7 +857,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "ab5fd9cdf03947e678a86b7baff508d809f61e0cabbf1128987c06dac1907d64",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 17,
@@ -901,7 +901,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "7572f29e2ec483ea0ed59c31666aeedae80a4bdc076ba584d93f8a7373ffd051",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 18,
@@ -941,7 +941,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "43c0887fa533fcd6a0ae5e4abcb40cac9787006db105c150a7442cf508ecaeab",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 19,
@@ -981,7 +981,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "72a2a44bc17d4b18ceecda355fc3b0416bfbe18b0fee0da643f5698d1df5a4b6",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 20,
@@ -1021,7 +1021,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "c207bb8c842c208963c83ba20c7c0b5ffd6cb8aca0f976827276ee82c638738c",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 21,
@@ -1061,7 +1061,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "50b3d2d7695c92959468b9f82e9443ef4ed80e6936757a08262784249ed2668c",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 22,
@@ -1101,7 +1101,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "45efc3157276593e34f29df9f26520dacceb7c7621cce6eef758e326eee1928d",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 23,
@@ -1151,7 +1151,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "1626325638b85e53c2ffe2781da9a78942499a03683d2ad1011470137bfb4922",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 24,
@@ -1201,7 +1201,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "79b4e0c27957f6543a946c93c1658f92cec06ffa8f6692ff8cb7d45dff45ee54",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 25,
@@ -1251,7 +1251,7 @@
       "sectionId": 2,
       "schemaVersion": "1.0.0",
       "contentHash": "f8966b3e425be2d8c96e666766f782dc2f19677801f78e4e9612f4d951f0398e",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 26,
@@ -1301,7 +1301,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "edf38612a890370c5e4aa3e4d27908ff03b05cbb3ed729411a7d3a181c16dafe",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 27,
@@ -1360,7 +1360,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "33559f539fe99858ebe963e020a7145cf4a247c714119037844337ba49307985",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 28,
@@ -1419,7 +1419,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "32031fc2ecdf2d45ca859d949711fea868487241cf06428613182b3d4d6cc184",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 29,
@@ -1478,7 +1478,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "74905ca0659f78f8993bd39b61c2a56e388f0cce2de4fa857a7d37b5d7e14020",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 30,
@@ -1537,7 +1537,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "bd861afe0ae23b5a55609454414189bbe345bc9246f934a80c3d9d0221a4101d",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 31,
@@ -1596,7 +1596,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "c941344203d7210d313ef792fd071135753f406e019247d27a7a72b15cab8137",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 32,
@@ -1655,7 +1655,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "6b87d8f144950c052db0c930b3f54621bdf7b2c18ea2e369c0330a32144fe7e9",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 33,
@@ -1714,7 +1714,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "cc816142455031109030d1680e007ed479714f72b6e024ea6ff5e3098a00c0a7",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 34,
@@ -1773,7 +1773,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "29a51bee5f1cc1adb2265d6bd9b916ac8cce6e74cd2c1e56bcbbdbcab38a8ffd",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 35,
@@ -1832,7 +1832,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "55af0fb6dfdf6964e386663aec7d7f56e7987460a186c5658f3a62e8550fc88b",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 36,
@@ -1891,7 +1891,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "3348961d0db53b9a79eec0e26b3e90d07d74262fd8ae120348e523d0a0bfa360",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 37,
@@ -1931,7 +1931,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "133ee22899b2e1851ad882ded6bc190a81ba911cd0e4b02634f403583cedbdac",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 38,
@@ -1971,7 +1971,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "cdcafde91b41f531aa20847104dca6a098eb32dc0018d552cb84c55caff01698",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 39,
@@ -2016,7 +2016,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "3a25971b7128751cf198ee7c2c70c8595eb2ed99797c4f78be5e8900e802860c",
-      "createdAt": "2026-10-22T16:38:33.730017Z",
+      "createdAt": "2026-10-26T04:52:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "questionNumber": 40,
@@ -2056,7 +2056,7 @@
       "sectionId": 1,
       "schemaVersion": "1.0.0",
       "contentHash": "0383369e407d7ed484a24b2d36f962ffb42b8148f93611226f728dde088c1237",
-      "createdAt": "2026-10-22T16:40:33.730017Z",
+      "createdAt": "2026-10-26T04:54:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "sectionId": 1,
@@ -2545,8 +2545,8 @@
       "runId": "run-canonical-40q-shared",
       "sectionId": 2,
       "schemaVersion": "1.0.0",
-      "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5",
-      "createdAt": "2026-10-22T16:40:33.730017Z",
+      "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a",
+      "createdAt": "2026-10-26T04:54:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "sectionId": 2,
@@ -2589,7 +2589,7 @@
             "artifactId": "question:canonical-40q-shared:15",
             "artifactType": "Question",
             "version": 1,
-            "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+            "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
           },
           {
             "artifactId": "question:canonical-40q-shared:16",
@@ -2687,7 +2687,7 @@
                 "questionNumber": 15,
                 "questionType": "DIAGRAM_LABEL",
                 "prompt": "Label [15] on the raindrop collection mechanism",
-                "answer": "tilting container",
+                "answer": "container",
                 "evidenceQuote": "The container periodically tilts upon accumulating a critical water threshold, releasing stored fluid",
                 "explanation": "Callout 15 identifies the self-tilting water collection container.",
                 "difficulty": "MODERATE",
@@ -2959,7 +2959,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -3037,7 +3037,7 @@
       "sectionId": 3,
       "schemaVersion": "1.0.0",
       "contentHash": "3f2fd0d033c042d5f328e8a11f2e69e1178c06fba91d886b8a7b84a1758a7e21",
-      "createdAt": "2026-10-22T16:40:33.730017Z",
+      "createdAt": "2026-10-26T04:54:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "sectionId": 3,
@@ -3690,8 +3690,8 @@
       "runId": "run-canonical-40q-shared",
       "sectionId": null,
       "schemaVersion": "1.0.0",
-      "contentHash": "0ae94da16ccfe7c0d42fbfd714d98215a4362b31cb76dfff403f4999d18878c6",
-      "createdAt": "2026-10-22T16:41:33.730017Z",
+      "contentHash": "ede07a858656ffce78f3e5e797b2919f40365ea471e263929acb91cc1fe49ae1",
+      "createdAt": "2026-10-26T04:55:42.631950Z",
       "producerVersion": "2.0.0",
       "payload": {
         "paperId": "paper:canonical-40q-shared",
@@ -3716,7 +3716,7 @@
             "artifactId": "section:canonical-40q-shared:2",
             "artifactType": "Section",
             "version": 1,
-            "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+            "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
           },
           {
             "artifactId": "section:canonical-40q-shared:3",
@@ -3834,7 +3834,7 @@
             "artifactId": "question:canonical-40q-shared:15",
             "artifactType": "Question",
             "version": 1,
-            "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+            "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
           },
           {
             "artifactId": "question:canonical-40q-shared:16",
@@ -4416,7 +4416,7 @@
                 "artifactId": "question:canonical-40q-shared:15",
                 "artifactType": "Question",
                 "version": 1,
-                "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+                "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
               },
               {
                 "artifactId": "question:canonical-40q-shared:16",
@@ -4514,7 +4514,7 @@
                     "questionNumber": 15,
                     "questionType": "DIAGRAM_LABEL",
                     "prompt": "Label [15] on the raindrop collection mechanism",
-                    "answer": "tilting container",
+                    "answer": "container",
                     "evidenceQuote": "The container periodically tilts upon accumulating a critical water threshold, releasing stored fluid",
                     "explanation": "Callout 15 identifies the self-tilting water collection container.",
                     "difficulty": "MODERATE",
@@ -5327,7 +5327,7 @@
           "artifactId": "section:canonical-40q-shared:2",
           "artifactType": "Section",
           "version": 1,
-          "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+          "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
         },
         {
           "artifactId": "section:canonical-40q-shared:3",
@@ -5441,7 +5441,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -5598,14 +5598,14 @@
   ],
   "evaluations": [
     {
-      "evaluationId": "evaluation_cde44c76de4f43e7a6cb",
+      "evaluationId": "evaluation_702d83aee6688781518f",
       "evaluatorId": "eval_paper_structure",
       "evaluatorVersion": "2.0.0",
       "targetRef": {
         "artifactId": "paper:canonical-40q-shared",
         "artifactType": "ReadingPaper",
         "version": 1,
-        "contentHash": "0ae94da16ccfe7c0d42fbfd714d98215a4362b31cb76dfff403f4999d18878c6"
+        "contentHash": "ede07a858656ffce78f3e5e797b2919f40365ea471e263929acb91cc1fe49ae1"
       },
       "status": "PASS",
       "issues": [],
@@ -5627,7 +5627,7 @@
           "artifactId": "section:canonical-40q-shared:2",
           "artifactType": "Section",
           "version": 1,
-          "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+          "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
         },
         {
           "artifactId": "section:canonical-40q-shared:3",
@@ -5741,7 +5741,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -5900,17 +5900,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.745518Z"
+      "evaluatedAt": "2026-10-26T04:56:42.728670Z"
     },
     {
-      "evaluationId": "evaluation_c1e477d4fab5b6bf928a",
+      "evaluationId": "evaluation_fafe6e425ac6b0881e40",
       "evaluatorId": "eval_paper_cross_section",
       "evaluatorVersion": "2.0.0",
       "targetRef": {
         "artifactId": "paper:canonical-40q-shared",
         "artifactType": "ReadingPaper",
         "version": 1,
-        "contentHash": "0ae94da16ccfe7c0d42fbfd714d98215a4362b31cb76dfff403f4999d18878c6"
+        "contentHash": "ede07a858656ffce78f3e5e797b2919f40365ea471e263929acb91cc1fe49ae1"
       },
       "status": "PASS",
       "issues": [],
@@ -5932,7 +5932,7 @@
           "artifactId": "section:canonical-40q-shared:2",
           "artifactType": "Section",
           "version": 1,
-          "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+          "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
         },
         {
           "artifactId": "section:canonical-40q-shared:3",
@@ -6046,7 +6046,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -6205,17 +6205,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.745526Z"
+      "evaluatedAt": "2026-10-26T04:56:42.728681Z"
     },
     {
-      "evaluationId": "evaluation_bd3bb9ec3f2a4b89f65e",
+      "evaluationId": "evaluation_c65eca636ef7be20ddf9",
       "evaluatorId": "eval_paper_leakage",
       "evaluatorVersion": "2.1.0",
       "targetRef": {
         "artifactId": "paper:canonical-40q-shared",
         "artifactType": "ReadingPaper",
         "version": 1,
-        "contentHash": "0ae94da16ccfe7c0d42fbfd714d98215a4362b31cb76dfff403f4999d18878c6"
+        "contentHash": "ede07a858656ffce78f3e5e797b2919f40365ea471e263929acb91cc1fe49ae1"
       },
       "status": "PASS",
       "issues": [],
@@ -6237,7 +6237,7 @@
           "artifactId": "section:canonical-40q-shared:2",
           "artifactType": "Section",
           "version": 1,
-          "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+          "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
         },
         {
           "artifactId": "section:canonical-40q-shared:3",
@@ -6351,7 +6351,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -6510,17 +6510,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.745532Z"
+      "evaluatedAt": "2026-10-26T04:56:42.728688Z"
     },
     {
-      "evaluationId": "evaluation_a8404538f452826ffab1",
+      "evaluationId": "evaluation_066143bd57c249cae266",
       "evaluatorId": "eval_paper_monotony",
       "evaluatorVersion": "2.0.0",
       "targetRef": {
         "artifactId": "paper:canonical-40q-shared",
         "artifactType": "ReadingPaper",
         "version": 1,
-        "contentHash": "0ae94da16ccfe7c0d42fbfd714d98215a4362b31cb76dfff403f4999d18878c6"
+        "contentHash": "ede07a858656ffce78f3e5e797b2919f40365ea471e263929acb91cc1fe49ae1"
       },
       "status": "PASS",
       "issues": [],
@@ -6542,7 +6542,7 @@
           "artifactId": "section:canonical-40q-shared:2",
           "artifactType": "Section",
           "version": 1,
-          "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+          "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
         },
         {
           "artifactId": "section:canonical-40q-shared:3",
@@ -6656,7 +6656,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -6815,17 +6815,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.745538Z"
+      "evaluatedAt": "2026-10-26T04:56:42.728695Z"
     },
     {
-      "evaluationId": "evaluation_f95030912393d2b38136",
+      "evaluationId": "evaluation_0ead0b35780573d03b9d",
       "evaluatorId": "eval_paper_closure",
       "evaluatorVersion": "1.0.0",
       "targetRef": {
         "artifactId": "paper:canonical-40q-shared",
         "artifactType": "ReadingPaper",
         "version": 1,
-        "contentHash": "0ae94da16ccfe7c0d42fbfd714d98215a4362b31cb76dfff403f4999d18878c6"
+        "contentHash": "ede07a858656ffce78f3e5e797b2919f40365ea471e263929acb91cc1fe49ae1"
       },
       "status": "PASS",
       "issues": [],
@@ -6847,7 +6847,7 @@
           "artifactId": "section:canonical-40q-shared:2",
           "artifactType": "Section",
           "version": 1,
-          "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+          "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
         },
         {
           "artifactId": "section:canonical-40q-shared:3",
@@ -6961,7 +6961,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -7120,7 +7120,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.745543Z"
+      "evaluatedAt": "2026-10-26T04:56:42.728702Z"
     }
   ],
   "sectionEvaluations": [
@@ -7235,7 +7235,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.732835Z"
+      "evaluatedAt": "2026-10-26T04:56:42.674990Z"
     },
     {
       "evaluationId": "evaluation_b1560925fef1b42168b1",
@@ -7348,17 +7348,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.732843Z"
+      "evaluatedAt": "2026-10-26T04:56:42.675017Z"
     },
     {
-      "evaluationId": "evaluation_72b02173cde752ae9e45",
+      "evaluationId": "evaluation_8cb25d0e3e20de5e3c1e",
       "evaluatorId": "eval_section_structure",
       "evaluatorVersion": "1.0.0",
       "targetRef": {
         "artifactId": "section:canonical-40q-shared:2",
         "artifactType": "Section",
         "version": 1,
-        "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+        "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
       },
       "status": "PASS",
       "issues": [],
@@ -7386,7 +7386,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -7461,17 +7461,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735677Z"
+      "evaluatedAt": "2026-10-26T04:56:42.680340Z"
     },
     {
-      "evaluationId": "evaluation_790cd543622562a31aea",
+      "evaluationId": "evaluation_1533d45c64a123f1f1a3",
       "evaluatorId": "eval_section_editorial",
       "evaluatorVersion": "1.0.0",
       "targetRef": {
         "artifactId": "section:canonical-40q-shared:2",
         "artifactType": "Section",
         "version": 1,
-        "contentHash": "b3ef771545b10e7ca0d9f0a375efaf4090e302d6d5c1116623f8303a4d1022a5"
+        "contentHash": "22f2738d0d6ccde81be3adc29f1eb60e6ef49fad3a6cad43a5101f1a2168b17a"
       },
       "status": "PASS",
       "issues": [],
@@ -7499,7 +7499,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -7574,7 +7574,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735684Z"
+      "evaluatedAt": "2026-10-26T04:56:42.680349Z"
     },
     {
       "evaluationId": "evaluation_813e15bfc38d0ec405f6",
@@ -7693,7 +7693,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.738023Z"
+      "evaluatedAt": "2026-10-26T04:56:42.719941Z"
     },
     {
       "evaluationId": "evaluation_d5cdfff027dbfe94fbe4",
@@ -7812,7 +7812,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.738029Z"
+      "evaluatedAt": "2026-10-26T04:56:42.719950Z"
     }
   ],
   "questionEvaluations": [
@@ -7849,7 +7849,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730227Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632244Z"
     },
     {
       "evaluationId": "evaluation_95cdc9fd2df1876b4afd",
@@ -7884,7 +7884,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730234Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632252Z"
     },
     {
       "evaluationId": "evaluation_0638c6de138e49940dc8",
@@ -7919,7 +7919,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730239Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632258Z"
     },
     {
       "evaluationId": "evaluation_9495d6af24527390af6a",
@@ -7954,7 +7954,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730244Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632263Z"
     },
     {
       "evaluationId": "evaluation_293f3407e550b0b23689",
@@ -7989,7 +7989,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730248Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632268Z"
     },
     {
       "evaluationId": "evaluation_393db5e930f64a300f0c",
@@ -8024,7 +8024,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730325Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632366Z"
     },
     {
       "evaluationId": "evaluation_fdc17323cf49ad929b10",
@@ -8059,7 +8059,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730331Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632378Z"
     },
     {
       "evaluationId": "evaluation_a06fbdea514d603f7c99",
@@ -8094,7 +8094,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730335Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632383Z"
     },
     {
       "evaluationId": "evaluation_f2cf25f3f5cb854d09c0",
@@ -8129,7 +8129,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730340Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632388Z"
     },
     {
       "evaluationId": "evaluation_1e82a8ce8d7486901581",
@@ -8164,7 +8164,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730344Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632393Z"
     },
     {
       "evaluationId": "evaluation_42dcfa49662b153cc5f2",
@@ -8199,7 +8199,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730412Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632476Z"
     },
     {
       "evaluationId": "evaluation_7c752393850c6e9cb288",
@@ -8234,7 +8234,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730417Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632481Z"
     },
     {
       "evaluationId": "evaluation_c4e2d23f0be549719301",
@@ -8269,7 +8269,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730421Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632487Z"
     },
     {
       "evaluationId": "evaluation_8d925ef2a04b0318a58c",
@@ -8304,7 +8304,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730426Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632492Z"
     },
     {
       "evaluationId": "evaluation_202b3cbe7be171bb87b9",
@@ -8339,7 +8339,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730431Z"
+      "evaluatedAt": "2026-10-26T04:56:42.632497Z"
     },
     {
       "evaluationId": "evaluation_dfd97f33b27a8c72b99b",
@@ -8374,7 +8374,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730500Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671205Z"
     },
     {
       "evaluationId": "evaluation_6cf5e5a64105167cdfef",
@@ -8409,7 +8409,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730505Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671218Z"
     },
     {
       "evaluationId": "evaluation_988c21d346459b78420c",
@@ -8444,7 +8444,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730509Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671225Z"
     },
     {
       "evaluationId": "evaluation_fd45e5f9c65e3dc64b97",
@@ -8479,7 +8479,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730513Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671234Z"
     },
     {
       "evaluationId": "evaluation_dfbdd767e89c2a5998f3",
@@ -8514,7 +8514,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730518Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671240Z"
     },
     {
       "evaluationId": "evaluation_a269c608f0979ad4aefd",
@@ -8549,7 +8549,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730593Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671417Z"
     },
     {
       "evaluationId": "evaluation_84d2ab55d30745786447",
@@ -8584,7 +8584,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730602Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671424Z"
     },
     {
       "evaluationId": "evaluation_d25b44523ac0c283ca6e",
@@ -8619,7 +8619,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730606Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671429Z"
     },
     {
       "evaluationId": "evaluation_2c3d368db4aea4ce8040",
@@ -8654,7 +8654,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730611Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671435Z"
     },
     {
       "evaluationId": "evaluation_2b7cdea03eb8ef531db2",
@@ -8689,7 +8689,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730615Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671441Z"
     },
     {
       "evaluationId": "evaluation_e6a59bc5948cae6ff97b",
@@ -8724,7 +8724,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730702Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671575Z"
     },
     {
       "evaluationId": "evaluation_dd44247511474bb86138",
@@ -8759,7 +8759,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730707Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671581Z"
     },
     {
       "evaluationId": "evaluation_917bfe912c8d1f3d73c5",
@@ -8794,7 +8794,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730711Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671587Z"
     },
     {
       "evaluationId": "evaluation_ce786a6e0bf0c73d68cd",
@@ -8829,7 +8829,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730716Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671592Z"
     },
     {
       "evaluationId": "evaluation_2c6c18d0f3930c1636f9",
@@ -8864,7 +8864,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730720Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671598Z"
     },
     {
       "evaluationId": "evaluation_2a2afc225122c012b51a",
@@ -8899,7 +8899,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730804Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671713Z"
     },
     {
       "evaluationId": "evaluation_402fc3cefd41f146dd2b",
@@ -8934,7 +8934,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730809Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671720Z"
     },
     {
       "evaluationId": "evaluation_e82e51978f333545fc0e",
@@ -8969,7 +8969,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730813Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671726Z"
     },
     {
       "evaluationId": "evaluation_6e235207ea01490289d1",
@@ -9004,7 +9004,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730818Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671731Z"
     },
     {
       "evaluationId": "evaluation_5a83ea77607d9817f455",
@@ -9039,7 +9039,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730822Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671737Z"
     },
     {
       "evaluationId": "evaluation_626b3d723c9796affeef",
@@ -9074,7 +9074,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730919Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671866Z"
     },
     {
       "evaluationId": "evaluation_ff7e62fca607ba52d21b",
@@ -9109,7 +9109,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730923Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671872Z"
     },
     {
       "evaluationId": "evaluation_a2046b05aadc38da1346",
@@ -9144,7 +9144,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730928Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671877Z"
     },
     {
       "evaluationId": "evaluation_7cf06c17c92586eea99b",
@@ -9179,7 +9179,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730933Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671883Z"
     },
     {
       "evaluationId": "evaluation_68433f91e8ff06703746",
@@ -9214,7 +9214,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.730937Z"
+      "evaluatedAt": "2026-10-26T04:56:42.671888Z"
     },
     {
       "evaluationId": "evaluation_2a76e773ab3982b5f250",
@@ -9249,7 +9249,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731060Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672046Z"
     },
     {
       "evaluationId": "evaluation_c5be5b8a57afcac38ee1",
@@ -9284,7 +9284,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731064Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672051Z"
     },
     {
       "evaluationId": "evaluation_f7eceaff1801453b28ab",
@@ -9319,7 +9319,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731069Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672057Z"
     },
     {
       "evaluationId": "evaluation_d98e6a097024d783f843",
@@ -9354,7 +9354,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731073Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672063Z"
     },
     {
       "evaluationId": "evaluation_9df830da46ee0688886a",
@@ -9389,7 +9389,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731078Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672068Z"
     },
     {
       "evaluationId": "evaluation_0440988a558f64ccfc91",
@@ -9424,7 +9424,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731344Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672497Z"
     },
     {
       "evaluationId": "evaluation_5b479ecf37b05968b011",
@@ -9459,7 +9459,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731349Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672504Z"
     },
     {
       "evaluationId": "evaluation_5e80f38d901df2ae3fae",
@@ -9494,7 +9494,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731353Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672509Z"
     },
     {
       "evaluationId": "evaluation_af28f7af554e14746bbe",
@@ -9529,7 +9529,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731357Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672515Z"
     },
     {
       "evaluationId": "evaluation_2064d87fc33a88e3ab68",
@@ -9564,7 +9564,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731362Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672520Z"
     },
     {
       "evaluationId": "evaluation_72c2ab27383d69ec484e",
@@ -9599,7 +9599,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731427Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672667Z"
     },
     {
       "evaluationId": "evaluation_3850309a70cdeca1a173",
@@ -9634,7 +9634,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731431Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672672Z"
     },
     {
       "evaluationId": "evaluation_b0e2ac59cc84226d0985",
@@ -9669,7 +9669,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731436Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672678Z"
     },
     {
       "evaluationId": "evaluation_49fd94267bd8e09d2e30",
@@ -9704,7 +9704,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731440Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672684Z"
     },
     {
       "evaluationId": "evaluation_7dfd08e94a13a25a1af0",
@@ -9739,7 +9739,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731444Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672689Z"
     },
     {
       "evaluationId": "evaluation_11c7d66e099fa8406b4c",
@@ -9774,7 +9774,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731508Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672821Z"
     },
     {
       "evaluationId": "evaluation_a90df700c1c92b9dff4c",
@@ -9809,7 +9809,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731512Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672827Z"
     },
     {
       "evaluationId": "evaluation_2378b313335083d327b4",
@@ -9844,7 +9844,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731516Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672832Z"
     },
     {
       "evaluationId": "evaluation_10c9c265e67b7d9b4ce5",
@@ -9879,7 +9879,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731521Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672838Z"
     },
     {
       "evaluationId": "evaluation_fd9f7f71d3816a841be6",
@@ -9914,7 +9914,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731525Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672843Z"
     },
     {
       "evaluationId": "evaluation_e15068b541b13eef55c3",
@@ -9949,7 +9949,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731587Z"
+      "evaluatedAt": "2026-10-26T04:56:42.672999Z"
     },
     {
       "evaluationId": "evaluation_edd21c05a657bf29ec0c",
@@ -9984,7 +9984,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731591Z"
+      "evaluatedAt": "2026-10-26T04:56:42.673004Z"
     },
     {
       "evaluationId": "evaluation_317c315cc7cc80ef814c",
@@ -10019,7 +10019,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731595Z"
+      "evaluatedAt": "2026-10-26T04:56:42.673009Z"
     },
     {
       "evaluationId": "evaluation_a24176717ff4e96b3df1",
@@ -10054,7 +10054,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731604Z"
+      "evaluatedAt": "2026-10-26T04:56:42.673014Z"
     },
     {
       "evaluationId": "evaluation_95c9640b5066831c4e99",
@@ -10089,7 +10089,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.731609Z"
+      "evaluatedAt": "2026-10-26T04:56:42.673019Z"
     },
     {
       "evaluationId": "evaluation_82858af29683ec4ce434",
@@ -10124,7 +10124,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733235Z"
+      "evaluatedAt": "2026-10-26T04:56:42.675988Z"
     },
     {
       "evaluationId": "evaluation_7c61ffbe5b13c6b1042e",
@@ -10159,7 +10159,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733242Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676009Z"
     },
     {
       "evaluationId": "evaluation_2e0bb6baf639b40df4df",
@@ -10194,7 +10194,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733247Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676026Z"
     },
     {
       "evaluationId": "evaluation_0b4bf511abeaa0c3f8b5",
@@ -10229,7 +10229,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733252Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676041Z"
     },
     {
       "evaluationId": "evaluation_00bec048cc009c9623e5",
@@ -10264,17 +10264,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733257Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676056Z"
     },
     {
-      "evaluationId": "evaluation_f54f8d1c4fad6f86161b",
+      "evaluationId": "evaluation_3363724e2e12992322cf",
       "evaluatorId": "eval_question_structure",
       "evaluatorVersion": "1.0.0",
       "targetRef": {
         "artifactId": "question:canonical-40q-shared:15",
         "artifactType": "Question",
         "version": 1,
-        "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+        "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
       },
       "status": "PASS",
       "issues": [],
@@ -10299,17 +10299,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733328Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676342Z"
     },
     {
-      "evaluationId": "evaluation_e7cdda555251f4d1426e",
+      "evaluationId": "evaluation_2471f0854cffab5d65a7",
       "evaluatorId": "eval_answer_verbatim_length",
       "evaluatorVersion": "1.0.0",
       "targetRef": {
         "artifactId": "question:canonical-40q-shared:15",
         "artifactType": "Question",
         "version": 1,
-        "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+        "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
       },
       "status": "PASS",
       "issues": [],
@@ -10334,17 +10334,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733333Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676360Z"
     },
     {
-      "evaluationId": "evaluation_26069428b61dbc86c254",
+      "evaluationId": "evaluation_e208028fb64bcbaf835b",
       "evaluatorId": "eval_evidence_offsets",
       "evaluatorVersion": "1.0.0",
       "targetRef": {
         "artifactId": "question:canonical-40q-shared:15",
         "artifactType": "Question",
         "version": 1,
-        "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+        "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
       },
       "status": "PASS",
       "issues": [],
@@ -10369,17 +10369,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733337Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676384Z"
     },
     {
-      "evaluationId": "evaluation_c02c8de94532ac0a9164",
+      "evaluationId": "evaluation_3484574f531825279f74",
       "evaluatorId": "eval_question_uniqueness",
       "evaluatorVersion": "1.0.0",
       "targetRef": {
         "artifactId": "question:canonical-40q-shared:15",
         "artifactType": "Question",
         "version": 1,
-        "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+        "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
       },
       "status": "PASS",
       "issues": [],
@@ -10404,17 +10404,17 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733342Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676399Z"
     },
     {
-      "evaluationId": "evaluation_c968dac361c4407e7de3",
+      "evaluationId": "evaluation_b4cb1b05b61e83e2a710",
       "evaluatorId": "eval_question_semantic",
       "evaluatorVersion": "1.0.0",
       "targetRef": {
         "artifactId": "question:canonical-40q-shared:15",
         "artifactType": "Question",
         "version": 1,
-        "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+        "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
       },
       "status": "PASS",
       "issues": [],
@@ -10439,7 +10439,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733346Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676413Z"
     },
     {
       "evaluationId": "evaluation_5a5b08893cb758c87a1d",
@@ -10474,7 +10474,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733408Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676709Z"
     },
     {
       "evaluationId": "evaluation_461a82dff6630e47d8d3",
@@ -10509,7 +10509,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733413Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676726Z"
     },
     {
       "evaluationId": "evaluation_6f3ce33c18c70e256918",
@@ -10544,7 +10544,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733418Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676742Z"
     },
     {
       "evaluationId": "evaluation_d0a94282da9f008bd6b7",
@@ -10579,7 +10579,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733422Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676757Z"
     },
     {
       "evaluationId": "evaluation_d4177c20be1ebefc0f5e",
@@ -10614,7 +10614,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733426Z"
+      "evaluatedAt": "2026-10-26T04:56:42.676771Z"
     },
     {
       "evaluationId": "evaluation_22eb91b54b70609bb1e1",
@@ -10649,7 +10649,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733485Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677054Z"
     },
     {
       "evaluationId": "evaluation_9150c691c92b3d34e168",
@@ -10684,7 +10684,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733489Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677070Z"
     },
     {
       "evaluationId": "evaluation_364c9b4a1b36f1a900a1",
@@ -10719,7 +10719,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733493Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677086Z"
     },
     {
       "evaluationId": "evaluation_837890af54b32d5aa9e3",
@@ -10754,7 +10754,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733498Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677101Z"
     },
     {
       "evaluationId": "evaluation_ee47749a7ceda29eda5a",
@@ -10789,7 +10789,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733502Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677116Z"
     },
     {
       "evaluationId": "evaluation_938e2e30ffee22a394f8",
@@ -10824,7 +10824,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733583Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677328Z"
     },
     {
       "evaluationId": "evaluation_93a2b1b60da17c066b67",
@@ -10859,7 +10859,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733588Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677345Z"
     },
     {
       "evaluationId": "evaluation_8f7f14e81c5ffc2cca92",
@@ -10894,7 +10894,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733592Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677359Z"
     },
     {
       "evaluationId": "evaluation_7b84a1f3f7f4a5916178",
@@ -10929,7 +10929,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733597Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677406Z"
     },
     {
       "evaluationId": "evaluation_cf235f1aee87ffc01a94",
@@ -10964,7 +10964,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733608Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677441Z"
     },
     {
       "evaluationId": "evaluation_84de7993aa535c485544",
@@ -10999,7 +10999,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733712Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677612Z"
     },
     {
       "evaluationId": "evaluation_db9560e6b16e576a3c4c",
@@ -11034,7 +11034,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733717Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677618Z"
     },
     {
       "evaluationId": "evaluation_85ba7ae70bdd4d943de0",
@@ -11069,7 +11069,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733722Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677624Z"
     },
     {
       "evaluationId": "evaluation_19c33a87d09fc36d777d",
@@ -11104,7 +11104,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733727Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677629Z"
     },
     {
       "evaluationId": "evaluation_be751c14f92c69dd2d94",
@@ -11139,7 +11139,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733732Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677634Z"
     },
     {
       "evaluationId": "evaluation_88ec946037efdaa366a6",
@@ -11174,7 +11174,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733850Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677771Z"
     },
     {
       "evaluationId": "evaluation_ebb9bb259c3e452c9a2a",
@@ -11209,7 +11209,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733855Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677777Z"
     },
     {
       "evaluationId": "evaluation_f56ca400f58f761a729f",
@@ -11244,7 +11244,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733860Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677782Z"
     },
     {
       "evaluationId": "evaluation_629e13f04d48462c937a",
@@ -11279,7 +11279,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733865Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677787Z"
     },
     {
       "evaluationId": "evaluation_832b0a73de28e02dfb4b",
@@ -11314,7 +11314,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733869Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677793Z"
     },
     {
       "evaluationId": "evaluation_77f4b69e88f28c614406",
@@ -11349,7 +11349,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733976Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677931Z"
     },
     {
       "evaluationId": "evaluation_45a1534e7e2414be2a64",
@@ -11384,7 +11384,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733981Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677937Z"
     },
     {
       "evaluationId": "evaluation_595231c8a0a46f915c2e",
@@ -11419,7 +11419,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733985Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677942Z"
     },
     {
       "evaluationId": "evaluation_9df49dda23ba078f0b4e",
@@ -11454,7 +11454,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733989Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677948Z"
     },
     {
       "evaluationId": "evaluation_83457c3919e91e48a58f",
@@ -11489,7 +11489,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.733993Z"
+      "evaluatedAt": "2026-10-26T04:56:42.677953Z"
     },
     {
       "evaluationId": "evaluation_7fd88f2954e5e2025c2b",
@@ -11524,7 +11524,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734109Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678117Z"
     },
     {
       "evaluationId": "evaluation_be6860d16ccd85f009d8",
@@ -11559,7 +11559,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734114Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678124Z"
     },
     {
       "evaluationId": "evaluation_a2902dbdd946b43bbc6a",
@@ -11594,7 +11594,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734119Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678130Z"
     },
     {
       "evaluationId": "evaluation_6752189ae66e5c4ed47e",
@@ -11629,7 +11629,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734123Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678136Z"
     },
     {
       "evaluationId": "evaluation_fb8be6775b6e2a08d5fc",
@@ -11664,7 +11664,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734127Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678142Z"
     },
     {
       "evaluationId": "evaluation_9de0c28c2624db2ac73e",
@@ -11699,7 +11699,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734188Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678280Z"
     },
     {
       "evaluationId": "evaluation_321f331ceb2eacc02474",
@@ -11734,7 +11734,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734192Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678292Z"
     },
     {
       "evaluationId": "evaluation_d54c80c4caf4871096a9",
@@ -11769,7 +11769,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734197Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678302Z"
     },
     {
       "evaluationId": "evaluation_ba5a056c02a03d7fc1ee",
@@ -11804,7 +11804,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734201Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678309Z"
     },
     {
       "evaluationId": "evaluation_e4e3ac523da42f9aa27b",
@@ -11839,7 +11839,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734205Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678317Z"
     },
     {
       "evaluationId": "evaluation_19f2e4bfc75bc9b3f745",
@@ -11874,7 +11874,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734259Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678433Z"
     },
     {
       "evaluationId": "evaluation_84436528fa62942e0db8",
@@ -11909,7 +11909,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734263Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678442Z"
     },
     {
       "evaluationId": "evaluation_0b2d686de36292657d72",
@@ -11944,7 +11944,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734268Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678452Z"
     },
     {
       "evaluationId": "evaluation_211dd5ab59368fbf84a4",
@@ -11979,7 +11979,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734272Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678460Z"
     },
     {
       "evaluationId": "evaluation_dc74ac022c995ef35829",
@@ -12014,7 +12014,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734277Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678467Z"
     },
     {
       "evaluationId": "evaluation_44efcda426d9410092b5",
@@ -12049,7 +12049,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734445Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678543Z"
     },
     {
       "evaluationId": "evaluation_88332f746a8516e46ba1",
@@ -12084,7 +12084,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734450Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678548Z"
     },
     {
       "evaluationId": "evaluation_63e407e98a94bac20577",
@@ -12119,7 +12119,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734455Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678554Z"
     },
     {
       "evaluationId": "evaluation_7e62611111b511401f3c",
@@ -12154,7 +12154,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734460Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678560Z"
     },
     {
       "evaluationId": "evaluation_49df90d36a167e33ea34",
@@ -12189,7 +12189,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734464Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678565Z"
     },
     {
       "evaluationId": "evaluation_4122548ec24a154cbc83",
@@ -12224,7 +12224,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734521Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678940Z"
     },
     {
       "evaluationId": "evaluation_06a2ab76154086f4588b",
@@ -12259,7 +12259,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734525Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678955Z"
     },
     {
       "evaluationId": "evaluation_91359d89ccadde529292",
@@ -12294,7 +12294,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734530Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678961Z"
     },
     {
       "evaluationId": "evaluation_edd7b6cd45ca0de08979",
@@ -12329,7 +12329,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734534Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678966Z"
     },
     {
       "evaluationId": "evaluation_b21b59eb16d0954b5cc9",
@@ -12364,7 +12364,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.734538Z"
+      "evaluatedAt": "2026-10-26T04:56:42.678971Z"
     },
     {
       "evaluationId": "evaluation_46b0aaabaf7d5e28d923",
@@ -12399,7 +12399,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735842Z"
+      "evaluatedAt": "2026-10-26T04:56:42.680734Z"
     },
     {
       "evaluationId": "evaluation_76342315006600042a09",
@@ -12434,7 +12434,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735848Z"
+      "evaluatedAt": "2026-10-26T04:56:42.680752Z"
     },
     {
       "evaluationId": "evaluation_dd058fc336f3943a0f31",
@@ -12469,7 +12469,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735853Z"
+      "evaluatedAt": "2026-10-26T04:56:42.680769Z"
     },
     {
       "evaluationId": "evaluation_d1c48902c3effe61eb99",
@@ -12504,7 +12504,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735858Z"
+      "evaluatedAt": "2026-10-26T04:56:42.680785Z"
     },
     {
       "evaluationId": "evaluation_3beacda6f29cc8a5325a",
@@ -12539,7 +12539,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735863Z"
+      "evaluatedAt": "2026-10-26T04:56:42.680800Z"
     },
     {
       "evaluationId": "evaluation_d960b97c8b43c63be6ba",
@@ -12574,7 +12574,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735934Z"
+      "evaluatedAt": "2026-10-26T04:56:42.680988Z"
     },
     {
       "evaluationId": "evaluation_852819c7d54f7452d509",
@@ -12609,7 +12609,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735939Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681006Z"
     },
     {
       "evaluationId": "evaluation_af48ccaf8a3dcab3625f",
@@ -12644,7 +12644,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735944Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681022Z"
     },
     {
       "evaluationId": "evaluation_bbadbc5483b79d9e95c3",
@@ -12679,7 +12679,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735949Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681037Z"
     },
     {
       "evaluationId": "evaluation_d572578eda0d6d2da838",
@@ -12714,7 +12714,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.735953Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681052Z"
     },
     {
       "evaluationId": "evaluation_62acfbabb7921778712e",
@@ -12749,7 +12749,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736016Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681233Z"
     },
     {
       "evaluationId": "evaluation_ccd3d07581ead87d47bb",
@@ -12784,7 +12784,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736021Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681250Z"
     },
     {
       "evaluationId": "evaluation_63a7cf6160fece1ac777",
@@ -12819,7 +12819,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736025Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681265Z"
     },
     {
       "evaluationId": "evaluation_1fdd4a4abbed32a00540",
@@ -12854,7 +12854,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736030Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681283Z"
     },
     {
       "evaluationId": "evaluation_416057b02914a73faaec",
@@ -12889,7 +12889,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736034Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681299Z"
     },
     {
       "evaluationId": "evaluation_bfdea24a38097c268214",
@@ -12924,7 +12924,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736095Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681505Z"
     },
     {
       "evaluationId": "evaluation_611d140bf7e9cfa136e0",
@@ -12959,7 +12959,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736099Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681556Z"
     },
     {
       "evaluationId": "evaluation_b41813fc3847a82c8506",
@@ -12994,7 +12994,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736104Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681565Z"
     },
     {
       "evaluationId": "evaluation_4ed54a2c03bc06b585f3",
@@ -13029,7 +13029,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736108Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681571Z"
     },
     {
       "evaluationId": "evaluation_a26e2740c79a46d70829",
@@ -13064,7 +13064,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736113Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681577Z"
     },
     {
       "evaluationId": "evaluation_c11996a7101db18ff81d",
@@ -13099,7 +13099,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736173Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681700Z"
     },
     {
       "evaluationId": "evaluation_8806dbb519145fccfedf",
@@ -13134,7 +13134,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736177Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681706Z"
     },
     {
       "evaluationId": "evaluation_502f987620e2ad22f63b",
@@ -13169,7 +13169,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736182Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681711Z"
     },
     {
       "evaluationId": "evaluation_1416615de12f5de09e6b",
@@ -13204,7 +13204,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736186Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681717Z"
     },
     {
       "evaluationId": "evaluation_fbc1192eb63da8e59339",
@@ -13239,7 +13239,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736191Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681722Z"
     },
     {
       "evaluationId": "evaluation_120ed243e33c3c7658cf",
@@ -13274,7 +13274,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736255Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681808Z"
     },
     {
       "evaluationId": "evaluation_84f1cbdc1b3144fba77b",
@@ -13309,7 +13309,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736259Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681813Z"
     },
     {
       "evaluationId": "evaluation_98b01b8be79becad680f",
@@ -13344,7 +13344,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736264Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681818Z"
     },
     {
       "evaluationId": "evaluation_4081492603d09d958c37",
@@ -13379,7 +13379,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736268Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681823Z"
     },
     {
       "evaluationId": "evaluation_c8026e5333ebf1bf71b6",
@@ -13414,7 +13414,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736272Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681828Z"
     },
     {
       "evaluationId": "evaluation_3c4ce684330e6577cceb",
@@ -13449,7 +13449,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736333Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681903Z"
     },
     {
       "evaluationId": "evaluation_15b419998360e6e718a1",
@@ -13484,7 +13484,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736337Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681908Z"
     },
     {
       "evaluationId": "evaluation_3a748e8b3ddd45aadfe5",
@@ -13519,7 +13519,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736341Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681914Z"
     },
     {
       "evaluationId": "evaluation_d739adc38b2b16ee7bd3",
@@ -13554,7 +13554,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736346Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681919Z"
     },
     {
       "evaluationId": "evaluation_230ea299482b64859b6e",
@@ -13589,7 +13589,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736350Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681924Z"
     },
     {
       "evaluationId": "evaluation_a8f6681dd852c3feb781",
@@ -13624,7 +13624,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736408Z"
+      "evaluatedAt": "2026-10-26T04:56:42.681996Z"
     },
     {
       "evaluationId": "evaluation_64679a84e1f6cad08707",
@@ -13659,7 +13659,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736412Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682001Z"
     },
     {
       "evaluationId": "evaluation_16ce0bc0c219a8d8b87d",
@@ -13694,7 +13694,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736417Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682006Z"
     },
     {
       "evaluationId": "evaluation_0465201da9c88539f376",
@@ -13729,7 +13729,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736421Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682012Z"
     },
     {
       "evaluationId": "evaluation_0674de0a0acfe76b4815",
@@ -13764,7 +13764,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736425Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682017Z"
     },
     {
       "evaluationId": "evaluation_527fd11ae2c50f614aca",
@@ -13799,7 +13799,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736485Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682091Z"
     },
     {
       "evaluationId": "evaluation_4ace01d73ae9a350501e",
@@ -13834,7 +13834,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736490Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682096Z"
     },
     {
       "evaluationId": "evaluation_a8856fef1fa464d6ac72",
@@ -13869,7 +13869,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736494Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682101Z"
     },
     {
       "evaluationId": "evaluation_e4237fc8ec8a1253347f",
@@ -13904,7 +13904,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736499Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682107Z"
     },
     {
       "evaluationId": "evaluation_0c41eb6b0e722f316b0c",
@@ -13939,7 +13939,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736503Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682112Z"
     },
     {
       "evaluationId": "evaluation_7370d57335215921b9e9",
@@ -13974,7 +13974,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736562Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682185Z"
     },
     {
       "evaluationId": "evaluation_7a02bb0f22ac3ea53ecc",
@@ -14009,7 +14009,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736567Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682190Z"
     },
     {
       "evaluationId": "evaluation_8936b7c810f43a0878b2",
@@ -14044,7 +14044,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736571Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682195Z"
     },
     {
       "evaluationId": "evaluation_4e38521393f3002f5ac8",
@@ -14079,7 +14079,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736576Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682200Z"
     },
     {
       "evaluationId": "evaluation_02b4af6cafeaaf431419",
@@ -14114,7 +14114,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736580Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682206Z"
     },
     {
       "evaluationId": "evaluation_60c51cef05845f279fa8",
@@ -14149,7 +14149,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736651Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682314Z"
     },
     {
       "evaluationId": "evaluation_346d2c974e0a1686f8ae",
@@ -14184,7 +14184,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736656Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682319Z"
     },
     {
       "evaluationId": "evaluation_cb228bc99e06c68ef9a7",
@@ -14219,7 +14219,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736660Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682325Z"
     },
     {
       "evaluationId": "evaluation_0c9d203438311767f9fc",
@@ -14254,7 +14254,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736664Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682330Z"
     },
     {
       "evaluationId": "evaluation_6d0d19effd50ef6a9fc4",
@@ -14289,7 +14289,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736669Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682335Z"
     },
     {
       "evaluationId": "evaluation_32b748e721876066d223",
@@ -14324,7 +14324,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736736Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682433Z"
     },
     {
       "evaluationId": "evaluation_a44ab232252ece934025",
@@ -14359,7 +14359,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736740Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682439Z"
     },
     {
       "evaluationId": "evaluation_b0e9b788daae4afc37a7",
@@ -14394,7 +14394,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736745Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682444Z"
     },
     {
       "evaluationId": "evaluation_5f08925c95098f1a65db",
@@ -14429,7 +14429,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736750Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682450Z"
     },
     {
       "evaluationId": "evaluation_02931c0fe6e9191895aa",
@@ -14464,7 +14464,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736754Z"
+      "evaluatedAt": "2026-10-26T04:56:42.682455Z"
     },
     {
       "evaluationId": "evaluation_d307ce3ac3ae29d4274d",
@@ -14499,7 +14499,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736811Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718282Z"
     },
     {
       "evaluationId": "evaluation_b8834a195a1038975be1",
@@ -14534,7 +14534,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736815Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718295Z"
     },
     {
       "evaluationId": "evaluation_92957087419079d6c599",
@@ -14569,7 +14569,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736820Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718302Z"
     },
     {
       "evaluationId": "evaluation_e234db9ae6686c48011e",
@@ -14604,7 +14604,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736824Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718308Z"
     },
     {
       "evaluationId": "evaluation_8db978f0a2675ffb2b22",
@@ -14639,7 +14639,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736828Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718314Z"
     },
     {
       "evaluationId": "evaluation_90f25ef2f55e4d57a509",
@@ -14674,7 +14674,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736894Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718490Z"
     },
     {
       "evaluationId": "evaluation_cdfdc4c1ec1a071b4a81",
@@ -14709,7 +14709,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736898Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718497Z"
     },
     {
       "evaluationId": "evaluation_c8659f3939641c5dace5",
@@ -14744,7 +14744,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736903Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718503Z"
     },
     {
       "evaluationId": "evaluation_ce8b67f2e5cbdca9e93b",
@@ -14779,7 +14779,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736907Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718508Z"
     },
     {
       "evaluationId": "evaluation_05d8fcf6505c0aac645e",
@@ -14814,7 +14814,7 @@
       "promptVersion": null,
       "elapsedMs": null,
       "usage": null,
-      "evaluatedAt": "2026-10-22T16:42:33.736911Z"
+      "evaluatedAt": "2026-10-26T04:56:42.718514Z"
     }
   ],
   "sources": [
@@ -15287,7 +15287,7 @@
           "artifactId": "question:canonical-40q-shared:15",
           "artifactType": "Question",
           "version": 1,
-          "contentHash": "d90ccd137b839f31e68b48d09782eed4a07d9d5bbac7175ece8a90831614e315"
+          "contentHash": "0fe1dc7ae2c8a893737ea0821b68bc7703647c083b4821abb5064e1f0572d94f"
         },
         {
           "artifactId": "question:canonical-40q-shared:16",
@@ -15385,7 +15385,7 @@
               "questionNumber": 15,
               "questionType": "DIAGRAM_LABEL",
               "prompt": "Label [15] on the raindrop collection mechanism",
-              "answer": "tilting container",
+              "answer": "container",
               "evidenceQuote": "The container periodically tilts upon accumulating a critical water threshold, releasing stored fluid",
               "explanation": "Callout 15 identifies the self-tilting water collection container.",
               "difficulty": "MODERATE",
