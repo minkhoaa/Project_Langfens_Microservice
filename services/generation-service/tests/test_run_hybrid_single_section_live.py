@@ -195,17 +195,20 @@ class TestLiveRunnerOffline(unittest.TestCase):
         runner.SubmissionMarker.write(status="SUBMITTED", job_id="job-existing-123")
 
         with self.assertRaises(RuntimeError) as cm:
-            runner.SubmissionMarker.check_safety(force_reset=False)
+            runner.SubmissionMarker.check_safety()
         self.assertIn("DUPLICATE SUBMISSION BLOCKED", str(cm.exception))
         self.assertIn("job-existing-123", str(cm.exception))
 
-    def test_submission_marker_force_reset_clears_marker(self):
-        """SubmissionMarker.check_safety(force_reset=True) clears existing marker."""
+    def test_submission_marker_cannot_be_reset_via_cli(self):
+        """The runner rejects reset requests and preserves the duplicate-submission marker."""
         runner.SubmissionMarker.write(status="SUBMITTED", job_id="job-existing-123")
         self.assertTrue(os.path.exists(self.test_marker))
 
-        runner.SubmissionMarker.check_safety(force_reset=True)
-        self.assertFalse(os.path.exists(self.test_marker))
+        with patch.object(sys, "argv", ["run_hybrid_single_section_live.py", "--reset-submission-marker"]):
+            with self.assertRaises(SystemExit) as cm:
+                runner.main()
+        self.assertEqual(cm.exception.code, 2)
+        self.assertTrue(os.path.exists(self.test_marker))
 
     # --------------------------------------------------------------------------
     # 6. Uncertain HTTP Submission & Recovery
@@ -372,7 +375,7 @@ class TestLiveRunnerOffline(unittest.TestCase):
 
                 # Check snapshot contents
                 self.assertEqual(snapshot["job_id"], job_id)
-                self.assertEqual(snapshot["implementation_sha"], runner.IMPLEMENTATION_COMMIT)
+                self.assertEqual(snapshot["implementation_sha"], runner.get_git_head_sha())
                 self.assertEqual(snapshot["operations"]["text01_calls"], 1)
                 self.assertEqual(snapshot["operations"]["m3_calls"], 1)
                 self.assertEqual(snapshot["operations"]["tokens"]["m3_reasoning_tokens"], 500)

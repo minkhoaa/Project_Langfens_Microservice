@@ -34,6 +34,9 @@ import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+IMPLEMENTATION_COMMIT = subprocess.run(
+    ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True, check=True
+).stdout.strip()
 AI_ENV_PATH = os.path.join(REPO_ROOT, "deploy", "envs", "ai.env")
 EXAM_ENV_PATH = os.path.join(REPO_ROOT, "deploy", "envs", "exam.env")
 AUTH_ENV_PATH = os.path.join(REPO_ROOT, "deploy", "envs", "auth.env")
@@ -44,7 +47,6 @@ SUBMISSION_MARKER_PATH = os.path.join(REPORTS_DIR, ".hybrid_13q_live_submission_
 HISTORICAL_SNAPSHOT_PATH = os.path.join(REPORTS_DIR, "hybrid_single_section_13q_live_snapshot.json")
 
 # Implementation references
-IMPLEMENTATION_COMMIT = "aeda8c2a379389d0c75d26e8e5c8ab6b77d57d7b"
 REPORT_BASELINE_HEAD = "674f7fbc3c6393e81d207ced36bf05a404d79a82"
 
 # MiniMax Pricing (USD per 1,000,000 tokens)
@@ -243,7 +245,7 @@ def check_git_revision() -> dict[str, Any]:
 
     return {
         "head_sha": head_sha,
-        "implementation_commit": IMPLEMENTATION_COMMIT,
+        "implementation_commit": head_sha,
         "report_baseline_head": REPORT_BASELINE_HEAD,
         "matches_baseline_head": head_sha == REPORT_BASELINE_HEAD,
         "working_tree_clean": is_clean,
@@ -501,21 +503,13 @@ class SubmissionMarker:
             return None
 
     @staticmethod
-    def check_safety(force_reset: bool = False) -> None:
-        """Raise RuntimeError if a job was already submitted or in progress."""
+    def check_safety() -> None:
+        """Raise RuntimeError if a submission marker exists; markers are never cleared here."""
         with SubmissionMarker._lock_file() as lock_f:
             fcntl.flock(lock_f, fcntl.LOCK_EX)
             try:
                 if not os.path.exists(SUBMISSION_MARKER_PATH):
                     return
-                if force_reset:
-                    try:
-                        os.remove(SUBMISSION_MARKER_PATH)
-                        print(f"[MARKER] Persistent submission marker cleared: {SUBMISSION_MARKER_PATH}", flush=True)
-                        return
-                    except OSError as e:
-                        raise RuntimeError(f"Failed to clear submission marker: {e}")
-
                 existing = {}
                 try:
                     with open(SUBMISSION_MARKER_PATH, "r", encoding="utf-8") as f:
@@ -533,7 +527,7 @@ class SubmissionMarker:
                     f"  Status: {st}\n"
                     f"  Timestamp: {ts}\n"
                     f"Automatic repeat submission is prohibited to protect provider budgets.\n"
-                    f"If you deliberately wish to execute a new job, pass --reset-submission-marker."
+                    f"Reconcile the authoritative job state; do not remove this marker to bypass the lock."
                 )
             finally:
                 fcntl.flock(lock_f, fcntl.LOCK_UN)
@@ -856,7 +850,7 @@ def fetch_jobs_list(base_url: str, auth_headers: dict[str, str]) -> list[dict[st
 def submit_single_job(base_url: str, auth_headers: dict[str, str]) -> str:
     """Submit exactly ONE Section 1 job. Fails closed against duplicate execution."""
     # Check persistent marker
-    SubmissionMarker.check_safety(force_reset=False)
+    SubmissionMarker.check_safety()
 
     payload = {
         "topic": TOPIC,
@@ -1573,7 +1567,6 @@ Safeguards:
     parser.add_argument("--confirm-live", action="store_true", help="Required confirmation flag for live execution.")
     parser.add_argument("--keep-stack", action="store_true", help="Keep benchmark Docker stack running upon completion.")
     parser.add_argument("--timeout", type=int, default=1800, help="Maximum job polling timeout in seconds (default: 1800).")
-    parser.add_argument("--reset-submission-marker", action="store_true", help="Clear persistent submission marker.")
     parser.add_argument("--poll-job", type=str, default="", help="Resume monitoring and forensic extraction for an existing Job ID without resubmitting.")
     return parser
 
@@ -1581,12 +1574,6 @@ Safeguards:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-
-    # Reset submission marker if explicitly requested
-    if args.reset_submission_marker:
-        SubmissionMarker.check_safety(force_reset=True)
-        if not (args.preflight or args.execute or args.poll_job):
-            sys.exit(0)
 
     # Poll existing job mode
     if args.poll_job:
