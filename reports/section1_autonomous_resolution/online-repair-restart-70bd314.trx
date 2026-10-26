@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="f79dd990-16e6-415b-98f7-278e349d9728" name="@khoa 2026-10-26 14:14:20" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-26T14:14:20.2249083+07:00" queuing="2026-10-26T14:14:20.2249083+07:00" start="2026-10-26T14:14:15.5859676+07:00" finish="2026-10-26T14:14:20.2282026+07:00" />
+  <TestSettings name="default" id="9dd69c3b-23d5-4fa2-8263-df0dad3409a1">
+    <Deployment runDeploymentRoot="_khoa_2026-10-26_14_14_20" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="ae3ea99f-e74d-4b29-a84e-1580f52de475" testId="c63fd551-fd05-b616-8794-64cc08732104" testName="exam_service.Tests.Section1PostgresPipelineTests.Scripted_13Q_Pipeline_Recovers_After_Lost_Ack_And_Fences_Unsafe_Work" computerName="khoa" duration="00:00:04.0632104" startTime="2026-10-26T14:14:16.0950001+07:00" endTime="2026-10-26T14:14:20.1639978+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ae3ea99f-e74d-4b29-a84e-1580f52de475" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="exam_service.Tests.Section1PostgresPipelineTests.Scripted_13Q_Pipeline_Recovers_After_Lost_Ack_And_Fences_Unsafe_Work" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="c63fd551-fd05-b616-8794-64cc08732104">
+      <Execution id="ae3ea99f-e74d-4b29-a84e-1580f52de475" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1PostgresPipelineTests" name="Scripted_13Q_Pipeline_Recovers_After_Lost_Ack_And_Fences_Unsafe_Work" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="c63fd551-fd05-b616-8794-64cc08732104" executionId="ae3ea99f-e74d-4b29-a84e-1580f52de475" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="1" executed="1" passed="1" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.0.0+e341b939fe (64-bit .NET 10.0.10)
+[xUnit.net 00:00:00.06]   Discovering: exam-service.Tests
+[xUnit.net 00:00:00.12]   Discovered:  exam-service.Tests
+[xUnit.net 00:00:00.14]   Starting:    exam-service.Tests
+[xUnit.net 00:00:04.24]   Finished:    exam-service.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

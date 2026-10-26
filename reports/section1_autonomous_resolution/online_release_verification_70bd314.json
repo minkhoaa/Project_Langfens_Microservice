@@ -1,0 +1,146 @@
+{
+  "tested_source_sha": "70bd31440f32a249c0cd0cefe31e749e2c950b39",
+  "branch": "autonomous-generation",
+  "offline_test_guard": true,
+  "online_dependency_retrieval_authorized": true,
+  "live_provider_calls": 0,
+  "live_tokens": 0,
+  "deployments": 0,
+  "publications": 0,
+  "python": {
+    "test_command_scope": "tests/ excluding only tests/test_t09_real_postgres_durability.py; deterministic seed; offline test guard enabled",
+    "python312": {
+      "version": "3.12.15",
+      "environment": "fresh isolated venv in cached generation-service image sha256:eea0685d6d9945b4a17de6f8d207310fb40275ba72d43b265cc8a923cbdbb652; installed requirements-dev.txt",
+      "passed": 2157,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 24,
+      "junit": "full312-isolated.xml",
+      "junit_sha256": "1af245f7ebc9022310a8bc8f509c9256520d6a729ad329c6d668c08694f18f69"
+    },
+    "python314": {
+      "version": "3.14.8",
+      "passed": 2157,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 24,
+      "junit": "full314-online-fix.xml",
+      "junit_sha256": "1fd26f34c06ecd6dc5cdd9bbd21a92bcc39dca940ade0e86c317862d90665bbb"
+    },
+    "runtime_comparison": {
+      "collected_cases_each": 2181,
+      "identical_test_ids": true,
+      "identical_pass_skip_outcomes_and_skip_reasons": true
+    },
+    "rpds_py": {
+      "version": "2026.9.1",
+      "wheel": "rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "sha256": "addeda51556dac7c1a2f14cda62db8b621cd12afba3091d03a96c72932387eab",
+      "local_ignored_cache_path": "services/generation-service/wheels/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "runtime_import_verified": "from rpds import HashTrieMap succeeded under CPython 3.12.15"
+    },
+    "schema_test_dependency": "jsonschema>=4.26.0 added to services/generation-service/requirements-dev.txt"
+  },
+  "dotnet": {
+    "sdk": "10.0.302",
+    "solution_build": "PASS, 0 errors",
+    "nuget_solution_audit": "PASS, no vulnerable packages reported across all 18 projects",
+    "resolved_security_packages": {
+      "Microsoft.OpenApi": "2.7.5",
+      "OpenTelemetry.Exporter.OpenTelemetryProtocol": "1.15.3",
+      "OpenTelemetry.Api": "1.15.3",
+      "System.Security.Cryptography.Pkcs": "10.0.14",
+      "MessagePack": "2.5.307",
+      "AutoMapper.Extensions.Microsoft.DependencyInjection": "removed; repository search found no usage"
+    }
+  },
+  "postgres_crash_matrix": [
+    {
+      "boundary": "accepted",
+      "run_id": "section1_fixture_cdd717fac6d747e6994dda9d3e4fa51f",
+      "dotnet_tests": "55 passed, 0 failed",
+      "accepted_heads": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 40,
+      "scripted_mock_tokens": 68366,
+      "unresolved_successful_operations": 0,
+      "integration_trx": "online-accepted-70bd314.trx",
+      "integration_trx_sha256": "4ddf4faf545b72a40c193ec108cdbf46b7f20121ad0615b5d813ba7101e8e31f",
+      "fresh_database_and_host_restart": "PASS; one restart test passed; heads unchanged; no new calls",
+      "restart_trx": "online-accepted-restart-70bd314.trx",
+      "restart_trx_sha256": "9d870e5325c5bc876d93478782ecb1f8616e6f4e03eaa6417a55c7ec2e3b9bb5"
+    },
+    {
+      "boundary": "generation",
+      "run_id": "section1_fixture_451263cfbbb44e5bb41d7e215ba6f5d1",
+      "dotnet_tests": "55 passed, 0 failed",
+      "accepted_heads": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 40,
+      "scripted_mock_tokens": 68366,
+      "unresolved_successful_operations": 0,
+      "integration_trx": "online-generation-70bd314.trx",
+      "integration_trx_sha256": "9b980ebe2e16868db3360bc959d31b0b932f1b1f6c9f988491ac35855a746a2b"
+    },
+    {
+      "boundary": "evaluation",
+      "run_id": "section1_fixture_7dbef7d5115e4b098da5fdc90cfc3228",
+      "dotnet_tests": "55 passed, 0 failed",
+      "accepted_heads": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 40,
+      "scripted_mock_tokens": 68366,
+      "unresolved_successful_operations": 0,
+      "integration_trx": "online-evaluation-70bd314.trx",
+      "integration_trx_sha256": "a810dbce0ddd509a84add886e3653ac0528eb0a3623feb1d7e613ae1d38b2463"
+    },
+    {
+      "boundary": "repair",
+      "run_id": "section1_fixture_83ab4219217240f9954db5b010bc9213",
+      "dotnet_tests": "55 passed, 0 failed",
+      "accepted_heads": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 42,
+      "scripted_mock_tokens": 70366,
+      "unresolved_successful_operations": 0,
+      "integration_trx": "online-repair-70bd314.trx",
+      "integration_trx_sha256": "20bf4de0e56f5a105c3f0cb7f2f2f247cabadc570dfdb55be21add7dde2a8d3c",
+      "fresh_database_and_host_restart": "PASS; one restart test passed; heads unchanged; no new calls",
+      "restart_trx": "online-repair-restart-70bd314.trx",
+      "restart_trx_sha256": "bda97509171f249d2963c65b47152fa1dcb9b9e892b4e0f44a4f047f4080fed0"
+    },
+    {
+      "boundary": "finalization",
+      "run_id": "section1_fixture_ea3ea9ee65df4f7094b30141c6995920",
+      "dotnet_tests": "55 passed, 0 failed",
+      "accepted_heads": 13,
+      "mandatory_evaluator_passes": 78,
+      "physical_calls": 40,
+      "scripted_mock_tokens": 68366,
+      "unresolved_successful_operations": 0,
+      "integration_trx": "online-finalization-70bd314.trx",
+      "integration_trx_sha256": "2a7f0c406afc651eb0d13a474f8ec01db004689891c60981984130383143cf4f"
+    }
+  ],
+  "negative_contracts": [
+    "budget admission",
+    "unknown outcome no redispatch",
+    "lease takeover epoch fencing",
+    "concurrent competing parent grants allow exactly one child"
+  ],
+  "database_resource": {
+    "resource": "section1-pipeline-postgres-5dd0367d",
+    "container_id": "c98f51520c0cd5a4dd94c9e96294d18ac0c230e530939630eeadb1e52dd26473",
+    "network_id": "8d52448246ead2642fd46d95facfb28a37a483f8f6dd9750016eb28d9869de23",
+    "network_internal": true,
+    "volume": "section1-pipeline-data-5dd0367d",
+    "volume_preserved": true
+  },
+  "fixture": {
+    "path": "services/generation-service/tests/fixtures/canonical_40_question_acceptance_bundle.json",
+    "sha256": "13dce91d2dd56d085bb76cdb936d2acd1f23e50c9ad487dc8fdbac8fb1603c76",
+    "test_generated_timestamp_churn_restored": true
+  },
+  "decision": "READY_FOR_SEPARATELY_AUTHORIZED_LIVE_ACCEPTANCE; no LIVE operation was performed"
+}

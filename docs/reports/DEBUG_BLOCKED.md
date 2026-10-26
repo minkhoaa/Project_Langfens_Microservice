@@ -29,6 +29,20 @@ The solution-wide audit exposed independent findings beyond the originally named
 
 Existing Swagger paths are registered via `UseSwagger`/`UseSwaggerUI`; route exposure/auth depends on each service's runtime configuration and remains an operational review item. OpenTelemetry instrumentation is registered, but the shared exporter-registration method currently does nothing; the vulnerable exporter was a dependency finding, and the package upgrade removes it from the affected range. No LIVE telemetry credentials were used.
 
-## Current decision
+## Online-authorized follow-through — resolved at `70bd314`
 
-The dependency versions above build and the targeted authority/integration tests pass, but Python 3.12 remains blocked, and the solution audit still finds Pkcs, AutoMapper and MessagePack advisory risk. Do not declare release readiness or run LIVE acceptance. The exact remediation prerequisites are: compatible offline rpds-py CPython 3.12 artifact/build closure; trusted fixed Pkcs and AutoMapper packages (and compatibility review); and trusted MessagePack advisory metadata plus an unaffected package. No network dependency downloads were performed.
+After the operator authorized online dependency retrieval, the following focused changes were made and tested:
+
+- Added `jsonschema>=4.26.0` to `requirements-dev.txt`, making the schema-test dependency explicit. Installed the genuine `rpds-py 2026.9.1` CPython 3.12 wheel from PyPI; SHA-256 `addeda51556dac7c1a2f14cda62db8b621cd12afba3091d03a96c72932387eab`. The full isolated Python 3.12.15 environment installed from `requirements-dev.txt` and passed without using host CPython 3.14 packages. The local ignored wheel cache now also has this verified wheel.
+- Updated `System.Security.Cryptography.Pkcs` to 10.0.14 (patched beyond 10.0.12); updated `MessagePack` to 2.5.307 (patched beyond 2.5.303); removed the unused AutoMapper DI package after repository-wide usage search found no source references. Microsoft.OpenApi 2.7.5 and OpenTelemetry exporter/API 1.15.3 remain on fixed versions.
+- NuGet's online advisory audit after restore reports **no vulnerable packages** in any solution project.
+
+Verification at implementation SHA `70bd31440f32a249c0cd0cefe31e749e2c950b39`:
+
+- Python 3.12.15 isolated venv: **2,157 passed, 0 failed, 0 collection errors, 24 existing skips**.
+- Python 3.14.8: **2,157 passed, 0 failed, 24 existing skips**. The same 2,181 test IDs and pass/skip outcomes occurred in both runtimes.
+- Full .NET solution build: **0 errors**. NuGet audit: no vulnerable packages.
+- Five PostgreSQL crash boundaries (accepted, generation, evaluation, repair, finalization): **55/55 .NET tests passed per boundary**; each produced 13 accepted heads, 78/78 mandatory evaluator PASS, and zero unresolved successful operations. Standard runs used 40 scripted calls/68,366 mock tokens; repair used 42/70,366. Fresh-host/database restart verification passed for accepted and repair; no redispatch occurred.
+- All Python suites exclude only the unsafe legacy `test_t09_real_postgres_durability.py` module; the isolated real PostgreSQL pipeline and recovery contracts are separately exercised above. The 24 skips are the existing optional skips, not newly added skips.
+
+The original “blocked” findings above describe the state before online authorization. The release blockers addressed here are resolved. Full manifests and JUnit/TRX evidence are in `reports/section1_autonomous_resolution/online_release_verification_70bd314.json` and adjacent `*online*70bd314*` files. No provider/LIVE calls, deployment or publication occurred. The separately authorized LIVE acceptance remains a separate operator decision.
